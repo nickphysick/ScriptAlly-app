@@ -135,28 +135,22 @@ describe("loading answers first", () => {
 });
 
 describe("the frame, rendered", () => {
-  it("head: the title, the line, and an action ROW carrying both pills — no masthead component", () => {
-    const html = frame();
-    expect(html).toMatch(/<h1 class="qcv-title" data-qcv="head-title">Query Centre<\/h1>/);
-    expect(html).toContain('data-qcv="head-line"');
-    expect(html).toMatch(/<button[^>]*class="sp-inkpill qcv-log"[^>]*data-qcv="head-cta"[^>]*><span class="sp-inkpill-l">\+ Log a query<\/span><\/button>/);
-    expect(html).toMatch(/<button[^>]*class="qcv-ghostpill"[^>]*data-qcv="head-record"[^>]*><span>Record a response<\/span><\/button>/);
-    expect(html).not.toMatch(/["\s]wsh["\s]/);
+  it("§3 · the page hands its head to the SHARED header, and draws none of its own", () => {
     /**
-     * ⚠️ BOTH PILLS INSIDE THE ONE ROW, AND THE CLAIM IS CONTAINMENT — asserting each pill on its
-     * own passes on a page that renders them three inches apart.
-     *
-     * ⚠️ AND IT IS NOT BOUNDED ON `</div>`. The first cut sliced the row as "from `head-actions` to
-     * the first `</div>` after `head-record`"; a closing tag is not a delimiter, because it matches
-     * the first NESTED close — so the slice ran straight past the row's own end and swallowed the
-     * next sibling. Proved vacuous: moving the Record pill OUT of the row left all 27 green.
-     * Bound instead on the two buttons themselves, which cannot nest: if no element closes between
-     * them, they are siblings of one parent.
+     * ⚠️ RETARGETED BY §3 (page header v1). This asserted the page's own hero — a 48px title, the
+     * facts line and a row of two pills — and every one of those is the shared header's now. The
+     * page states its CONTENT and nothing about its arrangement, which is the whole point of one
+     * header: what this suite used to guard is guarded for ten pages at once in `pageHeader` and
+     * `mastheadFormat`, and cannot drift between them.
      */
-    const between = html.slice(html.indexOf('data-qcv="head-cta"'), html.indexOf('data-qcv="head-record"'));
-    expect(between, "the Record pill is not inside the action row — something closes between the two pills").not.toContain("</div>");
-    /* and the row comes after the facts line, not beside the title */
-    expect(html.indexOf('data-qcv="head-actions"')).toBeGreaterThan(html.indexOf('data-qcv="head-line"'));
+    const html = frame();
+    expect(html, "the page draws a header of its own again").not.toContain("qcv-head");
+    expect(html).toContain('data-probe="page-header"');
+    expect(html).toContain('data-size="full"');
+    /* its words, which are still the page's */
+    expect(html).toContain(">Query Centre</h1>");
+    expect(html).toContain("+ Log a query");
+    expect(html).toContain("Record a response");
   });
   it("§2 · the page and the card are ONE group — the card is a sibling of the page, not a child", () => {
     const html = frame({ rail: React.createElement("aside", { "data-qcv": "rail" }) });
@@ -210,47 +204,29 @@ describe("the frame, rendered", () => {
    * A background could not be given a width the words also respect, could not reorder under the
    * container query, and could not be trimmed: it would need a crop, and §1.1 forbids one.
    */
-  it("§3 · the hero art is the enrolled asset, whole, and LAST in the reading order", () => {
-    const html = frame();
-    expect(html).toContain('<figure class="qcv-heroart" data-qcv="head-art" aria-hidden="true">');
-    /* the enrolled record is what renders — src and version both, so a swapped drawing cannot
-       reach the page wearing the old cache key */
-    expect(html).toContain(`src="${HERO_COURIER_MAP.src}?v=${HERO_COURIER_MAP.version}`);
-    expect(html).toContain(`width="${HERO_COURIER_MAP.width}" height="${HERO_COURIER_MAP.height}"`);
-    /* ⚠️ THE INTRINSIC SIZE IS STATED so the head does not reflow when the image lands — and it is
-       the enrolled size, not a literal, so the two cannot come apart. */
-    expect(HERO_COURIER_MAP.width / HERO_COURIER_MAP.height).toBeCloseTo(1196 / 375, 3);
-    /* last in the DOM: title → facts → actions → picture. The grid puts it at the right; a reader
-       on a screen reader, and a page with no CSS, both get the words first. */
-    expect(html.indexOf('data-qcv="head-art"')).toBeGreaterThan(html.indexOf('data-qcv="head-actions"'));
-    expect(html, "a decorative drawing must not be announced").toContain('alt=""');
-  });
-  it("§3 · the head is a grid with the art beside, and the fallback is a CONTAINER query", () => {
-    expect(rule(".qcv-head")).toMatch(/grid-template-columns: auto minmax\(0, 1fr\)/);
-    expect(rule(".qcv-head")).toMatch(/align-items: center/);
-    expect(rule(".qcv-heroart")).toMatch(/grid-column: 2; grid-row: 1 \/ 4/);
-    /* ⚠️ THE ARCHIVIST'S RESERVATION IS GONE. `padding-right: 190px` held 150 × 150 for a drawing
-       that never arrived, so every hero on this page paid for an absence. */
-    expect(rule(".qcv-head"), "the empty Archivist slot outlived the art that fills it").not.toMatch(/padding-right/);
+  it("§3 · the hero art is still the enrolled asset, and the page is what names it", () => {
     /**
-     * ⚠️ A CONTAINER QUERY ON THE PAGE COLUMN, NEVER A MEDIA QUERY — the same law §2's collapse
-     * follows. The column is the window less the card's track less the gutters, so the viewport
-     * cannot answer whether the art fits beside the words: it would have to guess at the sidebar,
-     * the card and the centring at once.
+     * ⚠️ WHAT SURVIVES HERE IS THE ASSET, not the arrangement. Which drawing the Query Centre opens
+     * with is the page's decision and nothing else knows it; where it sits is the header's, and
+     * "last in the reading order, aria-hidden" is asserted once for every page in `mastheadFormat`.
      */
-    expect(rule(".qcv-page")).toMatch(/container-type:\s*inline-size/);
-    expect(css).toMatch(/@container \(max-width: 920px\) \{\s*\.qcv-head \{ display: flex; flex-direction: column;/);
-    expect(css, "the art becomes a banner ABOVE the words, not a column beside them").toMatch(
-      /@container \(max-width: 920px\)[\s\S]{0,240}\.qcv-heroart \{ order: -1; width: 100%;/,
-    );
-    expect(css, "a media query is asking the viewport a question about a column").not.toMatch(/@media[^{]*\{\s*\.qcv-head/);
+    const html = frame();
+    expect(html).toContain(HERO_COURIER_MAP.src);
+    expect(html).toContain(`?v=${HERO_COURIER_MAP.version}`);
+    expect(html, "the art stopped reaching the header's slot").toContain('data-probe="art"');
   });
+  /**
+ * ⚠️ RETIRED BY §3 — the head's grid and its container-query fallback belonged to the page's own
+ * hero. The shared header places the art absolutely against its own bottom-right corner, at 42%
+ * of the header's width, and `pageHeader`/`mastheadFormat` own that claim for every page that has
+ * art. A copy of it here would be a second description of one layout.
+ */
   it("⚠️ Record a response is the GLOBAL flow, with no query chosen — the entry `+ New` took away", () => {
     expect(page).toContain('onRecord={() => onNavigate?.("queries", "Record a response")}');
   });
   it("the Log button says so while a query is already being written", () => {
-    expect(frame({ logDisabled: true })).toMatch(/data-qcv="head-cta"[^>]*disabled=""/);
-    expect(frame()).not.toMatch(/data-qcv="head-cta"[^>]*disabled/);
+    expect(frame({ logDisabled: true })).toMatch(/class="ph-primary"[^>]*disabled=""/);
+    expect(frame()).not.toMatch(/class="ph-primary"[^>]*disabled/);
   });
   /**
    * ⚠️ THE SWITCH AND THE BACK LINK ARE BOTH GONE (v65 §1), AND THIS ASSERTS BOTH ABSENCES. The

@@ -103,7 +103,10 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
        h1) and by the crumb; the page is still on the grid. */
     expect(queries).toContain("<WorkspacePageGrid");
     expect(queries).toContain("masthead={null}");
-    expect(readFileSync(resolve(__dirname, "../queries/centre/QcCentre.tsx"), "utf8")).toContain(">Query Centre</h1>");
+    /* ⚠️ THE PAGE STATES ITS TITLE, IT NO LONGER DRAWS IT (page header v1 §3) — the `<h1>` is the
+       shared header's, so the claim is that the page still names itself rather than that it renders
+       a heading of its own. */
+    expect(readFileSync(resolve(__dirname, "../queries/centre/QcCentre.tsx"), "utf8")).toContain('title="Query Centre"');
     /* ⚠️ COMMENT-STRIPPED, because "compact" appears in this page's PROSE — I wrote this
        assertion against the raw text and it failed on the notes describing the retired variant,
        one edit after fixing the identical fault in the anchor scanner. */

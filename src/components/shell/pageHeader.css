@@ -496,3 +496,112 @@
  * its own height.
  */
 /* ⚠️ `.wsh-lead` IS DELETED with the prop — see `PageHeader`. The departure is the record bar's. */
+
+/* ═══ §3 (page header v1) — ONE HEADER, TWO SIZES ═══
+ *
+ * Every value here is the MOCK's, measured off a render of `design-refs/page-headers-v6.html` at
+ * 1280/1440/1920 rather than read from its cascade. Where the brief and the mock disagreed the mock
+ * won, as ruled: a 1px rule (not 1.5), the title at eyebrow + 22 (not + 20), the full header 264 at
+ * 1280 and 270 at 1440 (not 259/265), and the compact title at header + 42 (not + 40).
+ *
+ * ⚠️ THE HEADER HAS NO BOX. No background, no border, no radius. The page ground shows through and
+ * the only line is the rule beneath — which is what makes it read as the page's opening rather than
+ * as a card resting on it.
+ */
+.ph {
+  position: relative;
+  box-sizing: border-box;
+  /* §3 — 18px below the bar, stated ONCE here rather than as each page's own top inset. A page
+     that pays its own would add to this, which is how ten pages come to open at ten heights. */
+  margin-top: 18px;
+  /* ⚠️ 1px, NOT 1.5 — measured in the mock, which is the authority. */
+  border-bottom: 1px solid rgba(28, 19, 15, 0.16);
+}
+.ph-eyebrow {
+  margin: 0;
+  font-family: var(--sp-mono);
+  font-size: 9px; line-height: 1.3; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.45);
+}
+/* ⚠️ THE PAGE'S OWN NAME IS THE DARKER HALF — the section is where you are, the page is what you
+   are looking at, and the eyebrow says both in one line. */
+.ph-eyebrow b { font-weight: 400; color: rgba(28, 19, 15, 0.7); }
+.ph-title {
+  margin: 0;
+  font-family: var(--sp-type);
+  font-weight: 400;
+  color: var(--sp-ink);
+  /* ⚠️ ONE LINE, AND `line-height: 1` IS SAFE HERE ONLY BECAUSE THIS FACE HAS NO DESCENDER
+     PROBLEM AT THIS SIZE AND NOTHING CLIPS IT. The house floor of 1.3 is for mixed-case Playfair
+     inside a box WITH a height; this header has neither. */
+  line-height: 1;
+  white-space: nowrap;
+}
+.ph-intro {
+  margin: 0;
+  font-family: var(--sp-serif);
+  color: rgba(28, 19, 15, 0.7);
+}
+/* a manuscript's title inside the intro is set in the typewriter face, in full ink */
+.ph-intro .ph-ms { font-family: var(--sp-type); color: var(--sp-ink); }
+.ph-acts { display: flex; gap: 10px; width: fit-content; }
+.ph-primary, .ph-secondary {
+  box-sizing: border-box;
+  height: 48px; padding: 0 22px; border: 0; border-radius: 24px;
+  font-family: var(--sp-type); font-size: 16px; line-height: 1;
+  cursor: pointer; white-space: nowrap;
+}
+/* ⚠️ THE TOKEN, NEVER THE LITERAL — this app already has two near-black button fills one unit
+   apart in its history, on the two buttons whose whole justification was that they matched. */
+.ph-primary { background: var(--sp-anthracite); color: #fff; }
+/* ⚠️ THE SECONDARY IS THE CARD'S EDGE, drawn with two inset shadows rather than a border — a border
+   would take part in the box and change the button's height beside the primary. */
+.ph-secondary { background: #fff; color: var(--sp-ink); box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 6px var(--sp-frame); }
+.ph-primary:disabled, .ph-secondary:disabled { opacity: 0.45; cursor: default; }
+
+/* ── §3.1 · full ── */
+.ph--full { padding: 26px 0; min-height: 232px; }
+/* ⚠️ AT MOST HALF THE HEADER'S WIDTH — the art takes the other side, and a text block that grew
+   past its half would run under the drawing. */
+.ph--full .ph-text { max-width: 50%; }
+/* ⚠️ 10px, BECAUSE THE TITLE'S TOP IS THE MEASUREMENT — the mock puts it at eyebrow + 22, and the
+   eyebrow's own line box is 12, so the gap beneath it is what makes up the difference. */
+.ph--full .ph-eyebrow { margin-bottom: 10px; }
+.ph--full .ph-title { font-size: 56px; }
+@media (max-width: 1360px) { .ph--full .ph-title { font-size: 50px; } }
+.ph--full .ph-intro { margin-top: 14px; max-width: 460px; font-size: 18px; line-height: 1.45; }
+.ph--full .ph-acts { margin-top: 22px; }
+/**
+ * ⚠️ ANCHORED TO THE HEADER'S BOTTOM-RIGHT CORNER, SO THE DRAWING STANDS ON THE RULE. With
+ * `object-position: right bottom` the image's own bottom edge is the box's bottom edge whatever its
+ * aspect ratio — which is the claim, and it is what an anchor to the TOP cannot make: there the
+ * drawing floats a different distance above the rule for every picture.
+ *
+ * ⚠️ AND THE BOX MAY RISE ABOVE THE HEADER'S TOP EDGE. It is 276 tall against a 232 minimum, so on
+ * a short header it overhangs — deliberately, and it is why it is absolute rather than a grid cell.
+ */
+.ph--full .ph-art {
+  position: absolute; right: 0; bottom: 0;
+  width: 42%; height: 276px;
+  pointer-events: none;
+}
+.ph--full .ph-art img, .ph--full .ph-art svg {
+  display: block; width: 100%; height: 100%;
+  object-fit: contain; object-position: right bottom;
+}
+
+/* ── §3.2 · compact ── */
+.ph--compact {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end; column-gap: 24px;
+  padding: 20px 0 22px;
+}
+/* the same 22 from the eyebrow's top to the title's, which is what makes the two sizes read as one
+   object at different scales rather than as two headers */
+.ph--compact .ph-eyebrow { margin-bottom: 10px; }
+.ph--compact .ph-title { font-size: 44px; }
+/* ⚠️ ONE LINE, AND `nowrap` IS ON `.ph-title` ALREADY — the intro is the one that must not wrap in
+   compact, and it is capped rather than truncated so a longer sentence shortens the measure rather
+   than disappearing. */
+.ph--compact .ph-intro { margin-top: 8px; max-width: 460px; font-size: 16px; line-height: 1.45; }
+.ph--compact .ph-acts { grid-column: 2; }

@@ -186,7 +186,7 @@ describe("/manuscripts/packages renders", () => {
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(<SubmissionPackages />, "/manuscripts/packages")).toContain('wsh-title">Submission packages');
+    expect(renderPage(<SubmissionPackages />, "/manuscripts/packages")).toContain('ph-title" data-probe="title">Submission packages');
   });
 
   it("renders without throwing once a manuscript is active", () => {

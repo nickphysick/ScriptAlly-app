@@ -32,6 +32,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
    because that bar needs to know which one to draw, so it stays a page's declaration rather than a
    second table keyed by route. */
 import type { MarkName } from "../dashboard/OneScreenMark";
+import { useMastheadSection } from "./mastheadSection";
 import "./pageHeader.css";
 
 
@@ -100,7 +101,26 @@ export interface PageHeaderProps {
    * Comparable titles, Import, Help centre and Plans: they are not exempted by a list, they simply
    * never pass the new value. `pageHeaderDefault.test.tsx` fails if a pixel of it moves.
    */
+  /**
+   * §3 (page header v1) — TWO SIZES OF ONE HEADER, and the names are kept rather than renamed so
+   * nine mounts do not churn: `full` is the OPEN header (eyebrow · 56px title · intro · actions ·
+   * art, on Query Centre and Contact list) and `workspace` is the COMPACT one (a two-column row:
+   * eyebrow · 44px title · intro, with the actions beside them) on every other workspace route.
+   */
   variant?: "full" | "workspace";
+  /**
+   * §3 — A REF ON THE PRIMARY, because focus has to come back to it.
+   *
+   * ⚠️ IT IS NOT DECORATION: the Query Centre's create flow returns focus to "+ Log a query" when
+   * it closes, and that button used to be the page's own. Moving it into this component without
+   * the ref would have left the flow returning focus to nothing — a keyboard reader dropped at the
+   * top of the document every time they cancelled.
+   */
+  primaryRef?: React.Ref<HTMLButtonElement>;
+  /** §3.1 — the secondary action, beside the primary. Absent renders nothing. */
+  secondary?: { label: string; onClick: () => void; disabled?: boolean };
+  /** §3.1 — the drawing, anchored to the header's bottom-right. `full` only; absent renders no slot. */
+  art?: React.ReactNode;
   title: string;
   /**
    * ⚠️ A NODE, NOT A STRING, SINCE THE PACKAGES PAGE STATES ITS SCOPE HERE.
@@ -161,6 +181,9 @@ export interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   variant = "full",
+  primaryRef,
+  secondary,
+  art,
   title,
   icon,
   primary,
@@ -173,6 +196,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actionsSlot,
   overflow,
 }) => {
+  /**
+   * §3.1/§3.2 — THE EYEBROW'S SECTION ARRIVES BY CONTEXT, never as a prop.
+   *
+   * ⚠️ AND IT IS THE SHELL'S OWN ANSWER, which is what stops the header and the sidebar disagreeing
+   * about which section a page is in. A prop would be a second table keyed by route, and this app
+   * has been caught by exactly that before: the pill and the crumb naming different sections for
+   * one page, each correct in its own file.
+   */
+  const section = useMastheadSection();
+
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   /* Whether THIS page's masthead scrolls away. Published by the grid; `true` outside one. */
   /**
@@ -306,79 +339,69 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     return (
       /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
          ground and scrolls away with the page. */
-      <header className="wsh">
-        {/* ⚠️ ARIA-HIDDEN, BECAUSE IT IS A RULE AND NOT A SEPARATOR IN THE DOCUMENT'S SENSE. An
-            `<hr>` here would put a thematic break between a page's title and the page. */}
-        <div className="wsh-toprule" aria-hidden="true" />
-        <div className="wsh-row">
-          {/**
-            * ⚠️ THE ICON SITS DIRECTLY ON THE PAGE GROUND — no tile, no border, no plate, no
-            * background of its own. The ref draws it in a 64px rounded card with a white fill and
-            * `object-fit: cover`; the brief names 72px, `contain`, and bare ground, and gives the
-            * reason. A ref wins on what it shows, except where the pack names a value AND its
-            * reason — and a tile would put a second object in a row whose whole job is to be one.
-            *
-            * ⚠️ ABSENT MEANS NO SLOT, NOT AN EMPTY BOX. Nine of the ten pages have no asset yet, and
-            * a reserved 72px well on each would be nine pages with a hole where a picture will go.
-            * The text starts at the gutter on those, which is asserted rather than assumed.
-            *
-            * ⚠️ `alt=""`, BECAUSE THE TITLE IS BESIDE IT. The icon names the page a second time; a
-            * screen reader hearing "Contact list, Contact list" is the mark's fault, not the
-            * heading's.
-            */}
-          {icon && <img className="wsh-icon" src={icon} alt="" />}
-          <div className="wsh-text">
-            <h1 className="wsh-title">
-              {title}{titleAdornment}
-            </h1>
-            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING. In flow there is no
-                height to keep, so a title-only page is simply shorter. */}
-            {description && <p className="wsh-sub">{description}</p>}
-          </div>
-          {/* ⚠️ THE ILLUSTRATION SLOT IS ADDITIVE AND NINE PAGES PASS NOTHING (QC-chassis round,
-              Phase 1). It sits between the text and the primary, so the sentence still bounds
-              itself against what the button leaves; a page that passes no `illo` renders no node
-              and reserves no width, exactly as an absent description renders nothing. It is a
-              SLOT rather than a mark because the mark registry draws 20px monoline glyphs and
-              this is a commissioned picture — the two are different objects, which is why this
-              page carries no mark. */}
-          {illo}
-          {/**
-            * ⚠️ ONE BUTTON, AND IT IS THE PAGE'S — the same handler the toolbar used to call, moved
-            * rather than copied. The slim bar renders the same `primary` at its own size, so a page
-            * states its call to action once and it survives the scroll.
-            */}
-          {primary && (
-            /* ⚠️ `disabled` IS NOT DECORATION — Query Centre's `Log new query` greys out while a
-               draft is open, and moving the button here without it was a silent behaviour
-               regression. `queryReentry` caught it, which is what that lock is for. */
-            <button type="button" className="wsh-cta" onClick={primary.onClick} disabled={primary.disabled}>
-              <Plus aria-hidden="true" />
-              {primary.label}
-            </button>
-          )}
+      <header className="ph ph--compact" data-probe="page-header" data-size="compact">
+        {/**
+          * §3.2 — A TWO-COLUMN ROW: the eyebrow, the 44px title and the intro on the left; the
+          * actions on the right, on one line, bottom-aligned with the text. The rule closes it.
+          *
+          * ⚠️ `align-items: end` IS WHAT PUTS THE ACTIONS ON THE INTRO'S BASELINE rather than in
+          * the middle of a two-line block. It is a row default, so the actions state no alignment
+          * of their own — the house law about per-item alignment applies the other way here.
+          */}
+        <div className="ph-text">
+          {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
+          <h1 className="ph-title" data-probe="title">{title}{titleAdornment}</h1>
+          {/* ⚠️ ABSENT INTRO RENDERS NOTHING AND RESERVES NOTHING — in flow there is no height to
+              keep, so a title-only page is simply shorter. Five compact pages have none. */}
+          {description && <p className="ph-intro" data-probe="intro">{description}</p>}
         </div>
+        {(primary || secondary) && (
+          <div className="ph-acts" data-probe="actions">
+            {primary && (
+              <button ref={primaryRef} type="button" className="ph-primary" onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
+            )}
+            {secondary && (
+              <button type="button" className="ph-secondary" onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
+            )}
+          </div>
+        )}
       </header>
-    );
-  }
+      );
+}
 
   return (
-    <header className={"svh svh--full"}>
-      <div className="svh-top">
-        <div className="svh-txt">
-          <h1 className="svh-title">
-            {title}
-            {titleAdornment}
-          </h1>
-          {description && <div className="svh-sub">{description}</div>}
-        </div>
+    /**
+     * §3.1 — THE OPEN HEADER. Eyebrow · 56px title · intro · actions, in a text block at most half
+     * the header's width, with the drawing anchored to the bottom-right corner so it always stands
+     * ON the rule.
+     *
+     * ⚠️ NO BOX. No background, no border, no radius — the page ground shows through, and the only
+     * line in it is the rule beneath. What this replaces had a fill and a shadow, and the header
+     * read as a card sitting on the page rather than as the page's own opening.
+     */
+    <header className="ph ph--full" data-probe="page-header" data-size="full">
+      <div className="ph-text">
+        {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
+        <h1 className="ph-title" data-probe="title">{title}{titleAdornment}</h1>
+        {description && <p className="ph-intro" data-probe="intro">{description}</p>}
+        {(primary || secondary) && (
+          <div className="ph-acts" data-probe="actions">
+            {primary && (
+              <button ref={primaryRef} type="button" className="ph-primary" onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
+            )}
+            {secondary && (
+              <button type="button" className="ph-secondary" onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
+            )}
+          </div>
+        )}
       </div>
-      {/* THE TOOL ROW (Baked 10) — the default: the page's actions on their own row, above the
-          hairline, primary pink at the RIGHT. */}
-      {(acts.length > 0 || actionsSlot || (overflow && overflow.length > 0)) && (
-        <div className="svh-tools">{controls}</div>
-      )}
-      <div className="svh-rule" />
+      {/**
+        * ⚠️ ABSENT ART RENDERS NO SLOT AND NO PLACEHOLDER. Manuscripts is a full header with no
+        * drawing yet, and a reserved 42% well there would be a page with a hole where a picture
+        * will go. The text block keeps its half either way, so the two pages that do have art and
+        * the one that does not open identically.
+        */}
+      {art && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
     </header>
   );
 };

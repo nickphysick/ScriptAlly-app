@@ -73,8 +73,14 @@ describe("re-entry is a no-op, from every entry point", () => {
        and `QcCentre` puts it on the control. Both halves, or a button that merely accepts the prop
        and ignores it would pass. */
     expect(queries, "the page's Log button stays live while a draft is open").toContain("logDisabled={creating}");
+    /**
+     * ⚠️ RETARGETED BY §3 (page header v1) — the CTA is the shared header's button, so the page no
+     * longer writes `disabled` on an element of its own; it passes the flag through `primary`. The
+     * claim is unchanged and both halves still matter: the page hands the flag on, and the header
+     * puts it on the button (asserted in `pageHeaderDefault`, byte for byte).
+     */
     expect(read("../components/queries/centre/QcCentre.tsx"), "QcCentre accepts logDisabled and never applies it")
-      .toMatch(/data-qcv="head-cta"[^>]*disabled=\{logDisabled(?: \|\| loading)?\}/); /* …or while the page is still loading */
+      .toMatch(/disabled: logDisabled(?: \|\| loading)?/); /* …or while the page is still loading */
     expect(queries, "the retired `.qc-phead` copy came back — the page would state its verb twice")
       .not.toContain('className="qc-btn qc-logq"');
   });

@@ -89,9 +89,9 @@
   box-sizing: border-box;
   color: var(--qcv-ink);
   font-family: var(--qcv-serif);
-  /* the title sits 25px under the bar's controls, as the dashboard's greeting does (measured: the
-     controls end 14px above the scroll row, so the page pays the other 11) */
-  padding-top: 11px;
+  /* ⚠️ THE PAGE PAYS NO TOP INSET (page header v1 §3). It paid 11 so its title sat 25 under the
+     bar's controls; the header states its own 18 below the bar now, for every page at once, and a
+     page that kept its own would add to it — ten pages opening at ten heights. */
   padding-bottom: 90px;
   min-width: 0;
   /**

@@ -1044,7 +1044,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       </WorkspacePageGrid>,
     );
     expect(html, "a page arrived folded — no page may set that state").not.toContain("wpg--hidden");
-    expect(html, "the masthead is not rendered on arrival").toContain("wsh-title");
+    expect(html, "the masthead is not rendered on arrival").toContain("ph-title");
     expect(html, "the mini bar rendered beside a visible masthead").not.toContain("wpg-mini-name");
   });
 

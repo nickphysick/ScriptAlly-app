@@ -12,6 +12,7 @@ import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PageHeader, PageHeaderAction, PageHeaderActions } from "./PageHeader";
+import { MastheadSectionContext } from "./mastheadSection";
 
 const two: PageHeaderActions = [
   { label: "Task settings", onClick: () => {} },
@@ -22,13 +23,28 @@ describe("PageHeader — full", () => {
   const html = renderToStaticMarkup(
     <PageHeader variant="full" title="What's on your desk?" description="Urgent tasks, housekeeping, notes." actions={two} />
   );
-  it("renders title, description, both actions and the rule", () => {
-    expect(html).toContain("svh--full");
-    expect(html).toContain("on your desk?"); // (the apostrophe HTML-escapes in static markup)
-    expect(html).toContain("Urgent tasks, housekeeping, notes.");
-    expect(html).toContain("svh-rule");
-    expect(html).toContain("svh-btn-ghost");
-    expect(html).toContain("svh-btn-primary");
+  it("renders the eyebrow, the title, the intro, both actions and the art", () => {
+    const out = renderToStaticMarkup(
+      <MastheadSectionContext.Provider value={{ section: "Queries" }}>
+        <PageHeader
+          title="Query Centre"
+          description="Every query."
+          primary={{ label: "+ Log a query", onClick: () => {} }}
+          secondary={{ label: "Record a response", onClick: () => {} }}
+          art={<img src="/a.png" alt="" />}
+        />
+      </MastheadSectionContext.Provider>,
+    );
+    /* the eyebrow is SECTION / PAGE, and the page's own name is the darker half */
+    expect(out).toContain('<p class="ph-eyebrow" data-probe="eyebrow"><span>Queries</span> / <b>Query Centre</b></p>');
+    expect(out).toContain('<h1 class="ph-title" data-probe="title">Query Centre</h1>');
+    expect(out).toContain('<p class="ph-intro" data-probe="intro">Every query.</p>');
+    expect(out).toContain('<button type="button" class="ph-primary">+ Log a query</button>');
+    expect(out).toContain('<button type="button" class="ph-secondary">Record a response</button>');
+    /* ⚠️ THE ART IS LAST AND `aria-hidden` — a decorative drawing announced between a page's title
+       and its controls is a screen reader stopping at a picture that says nothing. */
+    expect(out).toContain('<div class="ph-art" data-probe="art" aria-hidden="true">');
+    expect(out.indexOf("ph-acts")).toBeLessThan(out.indexOf("ph-art"));
   });
 });
 
@@ -67,127 +83,28 @@ describe("PageHeader — the greeting variant is retired (flyouts pack P4)", () 
   });
 });
 
-describe("PageHeader — the two-action maximum", () => {
-  it("slices a third action at runtime (the tuple type already rejects it at compile time)", () => {
-    const three = [
-      { label: "One", onClick: () => {} },
-      { label: "Two", onClick: () => {} },
-      { label: "Three", onClick: () => {} },
-    ] as unknown as PageHeaderActions;
-    const html = renderToStaticMarkup(<PageHeader variant="full" title="T" actions={three} />);
-    expect(html).toContain("One");
-    expect(html).toContain("Two");
-    expect(html).not.toContain("Three");
-  });
-
-  it("renders no actions container when none are given", () => {
-    const html = renderToStaticMarkup(<PageHeader variant="full" title="Help centre" />);
-    expect(html).not.toContain("svh-acts");
-    expect(html).toContain("svh-rule");
-  });
-
-  it("the HOUSE DISABLED treatment (todo rebuild P4): a real disabled button, never opacity-only, never dashed", () => {
-    const html = renderToStaticMarkup(
-      <PageHeader variant="full" title="What’s on your desk?" actions={[{ label: "Last week in review", onClick: () => {}, disabled: true }]} />,
-    );
-    expect(html).toContain("disabled"); // the attribute, so it is inert to click AND to Enter
-    const css = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
-    // ANCHOR FIRST. `?? ""` on a missed match would leave `rule` empty, and an empty string
-    // satisfies every `.not.toContain` below — the two negative assertions would stop testing
-    // anything while still passing. Assert the rule is there before reading it.
-    const DISABLED_RULE = /\.svh-btn:disabled,\n\.svh-btn:disabled:hover \{([^}]*)\}/;
-    expect(css).toMatch(DISABLED_RULE);
-    const rule = css.match(DISABLED_RULE)![1];
-    expect(rule).toContain("background: var(--shell-card)"); // paper fill
-    expect(rule).toContain("border-color: var(--shell-line-soft)"); // hairline border
-    expect(rule).toContain("color: #bcb0a3"); // faint text
-    expect(rule).toContain("box-shadow: none");
-    expect(rule).toContain("cursor: not-allowed");
-    expect(rule).not.toContain("opacity"); // never opacity-only
-    expect(rule).not.toContain("dashed"); // never dashed
-  });
-
-  it("type-level: a PageHeaderAction[] of three does not satisfy PageHeaderActions", () => {
-    // Compile-time documentation — @ts-expect-error proves the tuple rejection.
-    const three: PageHeaderAction[] = [
-      { label: "One", onClick: () => {} },
-      { label: "Two", onClick: () => {} },
-      { label: "Three", onClick: () => {} },
-    ];
-    // @ts-expect-error — three actions must not typecheck
-    const rejected: PageHeaderActions = three;
-    expect(rejected.length).toBe(3);
-  });
-});
+/**
+ * ⚠️ RETIRED BY §3 (page header v1) — "PageHeader — the two-action maximum" DESCRIBED THE HEADER THIS ONE REPLACES.
+ *
+ * It asserted a tool ROW: the page's actions on a line of their own above a hairline, a two-action
+ * maximum enforced by slicing at runtime, and a ⋯ overflow beyond that. The header has no tool row.
+ * `full` puts a primary and a secondary inside the text block, under the intro; `compact` puts the
+ * same pair in the row's second column. Two actions is still the maximum — it is the shape of the
+ * props now (`primary` and `secondary`), which is a stronger guarantee than a runtime slice, and
+ * the compile-time one the old tuple was reaching for.
+ */
 
 /**
- * THE TOOL ROW (app-shell pack, Baked 10) — and the two-action cap, which the row did NOT relax.
+ * ⚠️ RETIRED BY §3 (page header v1) — "the tool row" DESCRIBED THE HEADER THIS ONE REPLACES.
+ *
+ * It asserted a tool ROW: the page's actions on a line of their own above a hairline, a two-action
+ * maximum enforced by slicing at runtime, and a ⋯ overflow beyond that. The header has no tool row.
+ * `full` puts a primary and a secondary inside the text block, under the intro; `compact` puts the
+ * same pair in the row's second column. Two actions is still the maximum — it is the shape of the
+ * props now (`primary` and `secondary`), which is a stronger guarantee than a runtime slice, and
+ * the compile-time one the old tuple was reaching for.
  */
-describe("the tool row", () => {
-  const src = readFileSync(resolve(__dirname, "./PageHeader.tsx"), "utf8");
 
-  it("DEFAULT: the actions get their own row, above the hairline", () => {
-    const html = renderToStaticMarkup(
-      <PageHeader title="Your agent list" actions={[{ label: "Add agent", onClick: () => {}, primary: true }]} />
-    );
-    expect(html).toContain("svh-tools");
-    expect(html).toContain("svh-btn-primary");
-    expect(html.indexOf("svh-tools")).toBeLessThan(html.indexOf("svh-rule"));
-  });
-
-  /* ⚠️ THE COMPACT DENSITY TEST GOES WITH THE FLAG. It asserted that compact kept its actions
-     INLINE rather than on their own row, because a row added back exactly the height compact
-     existed to remove. Nothing passes compact now — Query Centre was its only caller and it is on
-     the grid — so the flag, the branch and this are retired together. */
-
-  it("⚠️ THE TWO-ACTION CAP SURVIVED THE ROW — a third is a type error, and sliced at runtime", () => {
-    expect(src).toContain("MAX TWO ACTIONS");
-    expect(src).toContain("export type PageHeaderActions = [] | [PageHeaderAction] | [PageHeaderAction, PageHeaderAction];");
-    expect(src).toContain("(actions ?? []).slice(0, 2)");
-  });
-
-  it("beyond two goes to OVERFLOW, behind a ⋯ at the end of the row", () => {
-    const html = renderToStaticMarkup(
-      <PageHeader
-        title="Queries Hub"
-        actions={[{ label: "Log a query", onClick: () => {}, primary: true }]}
-        overflow={[{ label: "Export CSV", onClick: () => {} }, { label: "Mark closed", onClick: () => {} }]}
-      />
-    );
-    expect(html).toContain("svh-more");
-    expect(html).toContain('aria-label="More actions"');
-    // the menu is closed at rest — the items are behind it, not laid out beside the primary
-    expect(html).not.toContain("Export CSV");
-  });
-
-});
-
-/**
- * ⚠️ THE TWO STATES (consolidated header spec §2; ref design-refs/84-header-strip-toolbar-below.html).
- *
- * The header has a REST state and a WORKING state, and the difference is not a size — it is
- * whether the header is an object on the page or the page's own top edge. Ten properties change
- * together; asserting the height alone would let a squashed card pass, which is exactly what the
- * previous version was.
- *
- * ⚠️ THE STATE IS SPLIT ACROSS TWO STYLESHEETS AND BOTH HALVES ARE READ HERE. The plate's own
- * treatment is `.wsh--scrolled` in pageHeader.css; the WIDTH change and the hairline belong to the
- * grid row (`.wpg-plate--working`), because the header fills its row in both states and it is the
- * row's inset that opens and closes. Reading only this file would leave the strip's defining
- * property — full container width — unlocked.
- */
-/**
- * ⚠️ THE MASTHEAD HAS ONE STATE, AND THIS BLOCK REPLACES THE ONE THAT ASSERTED TWO.
- *
- * What stood here locked the plate ↔ band condense: the card's border/radius/shadow at rest, the
- * 52px strip, the mark dropping to zero, the register cross-fade, the white-on-band buttons, the
- * shared .22s curve. Every one of those described a state the masthead can no longer reach, so the
- * whole block was asserting CSS no element can match — which is the vacuous-lock family CLAUDE.md
- * keeps re-teaching, in its most expensive form: green, detailed, and about nothing.
- *
- * The band's RULES are still in pageHeader.css and are deleted at step 4 with the rest of the
- * machinery. These assert what the masthead IS.
- */
 describe("the masthead is content, not chrome", () => {
   const hdrCss = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
   const gridCss = readFileSync(resolve(__dirname, "./workspacePageGrid.css"), "utf8");
@@ -231,13 +148,18 @@ describe("the masthead is content, not chrome", () => {
        full-width line at its base, and `workspacePageGrid.test.tsx` asserts it there. */
     expect(wsh, "the masthead drew its own hairline again — the slab's base is the only line in the chrome")
       .not.toContain("border-bottom");
-    /* ⚠️ RETARGETED: THE AIR IS ON `.wsh-row` NOW, and `.wsh` states `padding: 0` for a structural
-       reason rather than a stylistic one — the top rule sits ABOVE the text's inset, so padding on
-       the masthead itself would push the rule down with the words and it would stop reading as the
-       page's top edge. The law is unchanged: ONE element states the vertical air. */
-    expect(wsh, "the masthead itself pays vertical air as well as its body").toContain("padding: 0");
-    expect(decls(all(hdrCss, ".wsh-row")), "the masthead's body stopped stating its own vertical air")
-      .toContain("padding: var(--mast-pad-y) 0");
+    /**
+     * ⚠️ RETARGETED BY §3 (page header v1) — THE AIR IS BACK ON THE HEADER ITSELF, and the reason
+     * the old arrangement existed has gone with the element it was about. It sat on `.ph-text`
+     * because a top RULE sat above the text's inset, and padding on the header would have pushed
+     * that rule down with the words. There is no top rule: the header's only line is the one
+     * BENEATH it, so the header states its own 26/26 and the law is unchanged — one element pays
+     * the vertical air.
+     */
+    expect(decls(all(hdrCss, ".ph--full")), "the full header stopped stating its own vertical air")
+      .toContain("padding: 26px 0");
+    expect(decls(all(hdrCss, ".ph--compact")), "the compact header stopped stating its own vertical air")
+      .toContain("padding: 20px 0 22px");
     /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */
     expect(wsh, "the masthead kept a bottom margin — that air belongs below the whole slab now")
       .not.toContain("margin-bottom");
@@ -260,7 +182,7 @@ describe("the masthead is content, not chrome", () => {
      */
     const SETTLING = ["padding", "font-size", "width", "height", "flex-basis", "opacity", "max-height", "margin"];
     const FORBIDDEN = ["background", "border-color", "border-radius", "box-shadow", "color"];
-    for (const sel of [".wsh", ".wsh-title", ".wsh-sub", ".wsh-mark", ".wsh-mark .os-mark"]) {
+    for (const sel of [".wsh", ".ph-title", ".ph-intro", ".wsh-mark", ".wsh-mark .os-mark"]) {
       const t = /transition:([^;}]*)/.exec(decls(all(hdrCss, sel)));
       if (!t) continue;
       /* ⚠️ STRIP THE TIMING FUNCTIONS BEFORE SPLITTING — `cubic-bezier(.4, 0, .2, 1)` carries commas,
@@ -276,7 +198,7 @@ describe("the masthead is content, not chrome", () => {
     }
     /* ⚠️ AND THE ROW AND THE TEXT BLOCK TWEEN NOTHING — they hold no settling property of their own,
        so a transition there would be easing something nobody declared. */
-    for (const sel of [".wsh-row", ".wsh-txt"]) {
+    for (const sel of [".ph-text", ".wsh-txt"]) {
       expect(decls(all(hdrCss, sel)), `${sel} gained a transition — nothing about it changes between postures`)
         .not.toContain("transition");
     }
@@ -340,10 +262,14 @@ describe("the masthead is content, not chrome", () => {
        around. The account changed with the guard's third form: the masthead holds exactly one
        primary, and what it refuses is a PLURAL surface. */
     expect(hdrSrc, "the refusal lost its account of what a masthead is").toContain("pass `primary`");
-    const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
+    /* ⚠️ THE END ANCHOR MOVED WITH THE REWRITE (§3). The full branch's `return (` is indented
+       differently now, and an anchor that is gone makes `sliceBetween` fail LOUDLY rather than
+       silently widening to the rest of the file — which is what it is for. Bounded on the compact
+       branch's own closing instead. */
+    const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', 'className="ph ph--full"');
     /* ⚠️ `wsh-cta` LEAVES THIS LIST — the masthead carries exactly one primary again, which is the
        third and final form of that guard and the reason the format exists. `wsh-mark` STAYS: the
-       icon is `wsh-icon` on the page ground, not the registry's monoline glyph in a plate. */
+       icon is `ph-art` on the page ground, not the registry's monoline glyph in a plate. */
     for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark"]) {
       expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
     }
@@ -365,7 +291,7 @@ describe("the masthead is content, not chrome", () => {
 
   it("⚠️ ONE TITLE SIZE — the solo step is retired with the fixed height", () => {
     const decl = decls(hdrCss);
-    /* ⚠️ THE TOKEN'S NAME AND VALUE BOTH MOVED — `--wsh-title-size: 30px` became
+    /* ⚠️ THE TOKEN'S NAME AND VALUE BOTH MOVED — `--ph-title-size: 30px` became
        `--mast-title-size: 56px` when the two header types became one format. The claim is unchanged:
        ONE title size, stated once, with no per-page step. */
     /* ⚠️ THE VALUE MOVED 56 → 44 (Phase 2a) AND THE CLAIM DID NOT. Pinning it is deliberate — it is a
@@ -380,10 +306,10 @@ describe("the masthead is content, not chrome", () => {
       expect(decl, `the masthead's ${tok} moved off ${val}`).toContain(`${tok}: ${val}`);
     }
     expect(decl, "the old title token survived alongside the new one — two sizes, one masthead")
-      .not.toContain("--wsh-title-size");
+      .not.toContain("--ph-title-size");
     /* bounded, so `wsh--solo` cannot be matched by some longer live class that starts with it */
     expect(decl, "the solo step came back — it would add two points to every title-only page")
       .not.toMatch(/["\s`.]wsh--solo["\s`,{]/);
-    expect(decl).not.toMatch(/["\s`.]wsh-title--solo["\s`,{]/);
+    expect(decl).not.toMatch(/["\s`.]ph-title--solo["\s`,{]/);
   });
 });

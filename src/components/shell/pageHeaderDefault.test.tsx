@@ -46,26 +46,35 @@ const renderInLeavingGrid = (el: React.ReactElement) =>
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
     expect(render(<PageHeader title="Help centre" />)).toBe(
-      '<header class="svh svh--full"><div class="svh-top"><div class="svh-txt">'
-      + '<h1 class="svh-title">Help centre</h1></div></div><div class="svh-rule"></div></header>'
+      '<header class="ph ph--full" data-probe="page-header" data-size="full">'
+      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Help centre</h1></div></header>'
     );
   });
 
-  it("title + description + one action — byte for byte", () => {
+  it("title + intro + both actions — byte for byte", () => {
     const out = render(
       <PageHeader
         title="Your agent list"
         description="Everyone you're querying."
-        actions={[{ label: "Add new agent", onClick: () => {} }]}
+        primary={{ label: "Add new agent", onClick: () => {} }}
+        secondary={{ label: "Record a response", onClick: () => {} }}
       />
     );
     expect(out).toBe(
-      '<header class="svh svh--full"><div class="svh-top"><div class="svh-txt">'
-      + '<h1 class="svh-title">Your agent list</h1>'
-      + '<div class="svh-sub">Everyone you&#x27;re querying.</div></div></div>'
-      + '<div class="svh-tools"><button type="button" class="svh-btn svh-btn-ghost">Add new agent</button></div>'
-      + '<div class="svh-rule"></div></header>'
+      '<header class="ph ph--full" data-probe="page-header" data-size="full">'
+      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Your agent list</h1>'
+      + '<p class="ph-intro" data-probe="intro">Everyone you&#x27;re querying.</p>'
+      + '<div class="ph-acts" data-probe="actions">'
+      + '<button type="button" class="ph-primary">Add new agent</button>'
+      + '<button type="button" class="ph-secondary">Record a response</button>'
+      + '</div></div></header>'
     );
+  });
+
+  /* ⚠️ NO SECTION, NO EYEBROW — the section arrives by context, and a page rendered outside the
+     shell has none. An eyebrow reading " / Title" would be the separator with nothing before it. */
+  it("no section in context renders no eyebrow", () => {
+    expect(render(<PageHeader title="T" />)).not.toContain("ph-eyebrow");
   });
 
   it("⚠️ an explicit variant=\"full\" is identical to omitting it", () => {
@@ -81,14 +90,14 @@ describe("⚠️ the default variant is frozen", () => {
   });
 
   it("the default still renders its closing rule", () => {
-    expect(render(<PageHeader title="T" />)).toContain('<div class="svh-rule">');
+    expect(render(<PageHeader title="T" />)).toContain('<header class="ph ph--full"');
   });
 });
 
 describe("the workspace variant", () => {
   it("renders title and no mark — and nothing actionable unless a CTA is passed", () => {
     const out = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
-    expect(out).toContain('class="wsh"');
+    expect(out).toContain('class="ph ph--compact"');
     expect(out).toContain("Query Centre");
     /* ⚠️ THE MARK IS DECLARED AND NOT DRAWN. It belongs to the collapsed bar now; the prop survives
        so that bar knows which one, rather than a second table keyed by route. */
@@ -96,11 +105,11 @@ describe("the workspace variant", () => {
        page's mark at 20px — that is the whole reason the prop survives — so a document-wide search
        for `data-mark` finds the BAR's and reports the masthead as drawing one. The claim is about
        where the mark is, so the slice has to be as well. */
-    expect(sliceBetween(out, '<header class="wsh"', "</header>"), "the masthead drew a declared mark")
+    expect(sliceBetween(out, '<header class="ph ph--compact"', "</header>"), "the masthead drew a declared mark")
       .not.toContain('data-mark="queries"');
     /* ⚠️ ASSERTED STRUCTURALLY, NOT AGAINST A LIST OF LABELS. A name list passes the day someone
        adds a button this test has never heard of, which is precisely the day it should fail. */
-    const masthead = sliceBetween(out, '<header class="wsh"', "</header>");
+    const masthead = sliceBetween(out, '<header class="ph ph--compact"', "</header>");
     expect(masthead).not.toContain("<button");
     expect(masthead).not.toContain("<a ");
   });
@@ -148,7 +157,10 @@ describe("the workspace variant", () => {
      * scroller, then the slab, then the masthead, then the controls — all inside the scrollport, none
      * of it in a chrome row above.
      */
-    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-toprule", "wsh-row"];
+    /* ⚠️ THE TOP RULE IS GONE (§3) — it used to be the fourth key here. The header's only line is
+       the one beneath it, so the order ends at the header's own body. The eyebrow is not in this
+       list because it needs a section in context, and this render has none. */
+    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "ph-text"];
     const order = KEYS.map((k) => out.indexOf(k));
     for (const [i, k] of KEYS.entries()) {
       expect(order[i], `${k} is not in the rendered output`).toBeGreaterThan(-1);
@@ -182,14 +194,14 @@ describe("the workspace variant", () => {
        ⚠️ THE CLASSES ARE ASSERTED ABSENT, not merely unstyled: a class the markup emits and no rule
        consumes is what a bundle sweep exists to find. */
     const solo = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
-    expect(solo).not.toContain("wsh-sub");
+    expect(solo).not.toContain("ph-intro");
     expect(solo).not.toContain("wsh--solo");
-    expect(solo).not.toContain("wsh-title--solo");
+    expect(solo).not.toContain("ph-title--solo");
     const withSub = renderInGrid(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
-    expect(withSub).toContain("wsh-sub");
+    expect(withSub).toContain("ph-intro");
     /* ⚠️ ONE CLASS IN BOTH STATES — the only difference is whether the paragraph exists. */
-    expect(withSub).toContain('class="wsh"');
-    expect(solo).toContain('class="wsh"');
+    expect(withSub).toContain('class="ph ph--compact"');
+    expect(solo).toContain('class="ph ph--compact"');
   });
 
   /**
@@ -221,23 +233,25 @@ describe("the workspace variant", () => {
     expect(KEYS.length, "the mark census shrank").toBeGreaterThan(8);
     for (const m of KEYS) {
       const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
-      expect(out, `${m} threw or failed to render`).toContain('class="wsh"');
+      expect(out, `${m} threw or failed to render`).toContain('class="ph ph--compact"');
       expect(out, `${m} is drawn somewhere — the bar carries the page's own icon now`)
         .not.toContain(`data-mark="${m}"`);
     }
   });
 
   /**
-   * ⚠️ AND THE ICON IS WHAT THE BAR CARRIES, which is the other half of the same fact: asserting
-   * only that the glyph is gone passes on a bar that draws nothing at all.
+   * ⚠️ RETARGETED BY §3.2 — THE COMPACT HEADER HAS NO ART AT ALL, so "the header keeps its icon"
+   * has no subject. The bar's half of the fact survives and is the half that was always the point:
+   * asserting only that the glyph is gone passes on a bar that draws nothing.
    */
   it("the bar carries the page's own icon, at its own size", () => {
     const out = renderInGrid(
       <PageHeader variant="workspace" title="Contact list" icon="/rolodex.png" />,
     );
-    expect(out, "the header lost its icon").toContain('class="wsh-icon" src="/rolodex.png"');
+    expect(out, "the compact header drew art").not.toContain("ph-art");
     expect(out, "the bar did not take the header's icon").toContain('class="wpg-barmk" src="/rolodex.png"');
   });
+
 });
 
 describe("⚠️ the shell never mounts PageHeader", () => {
@@ -262,17 +276,17 @@ describe("⚠️ the shell never mounts PageHeader", () => {
  */
 describe("no prop can choose the masthead's shape", () => {
   /** the masthead's own markup, sliced out of whatever it is mounted in */
-  const shape = (el: React.ReactElement) => sliceBetween(renderInGrid(el), '<header class="wsh"', "</header>");
+  const shape = (el: React.ReactElement) => sliceBetween(renderInGrid(el), '<header class="ph ph--compact"', "</header>");
 
   it("only `description` changes it — and it changes ONE element", () => {
     const solo = shape(<PageHeader variant="workspace" title="T" mark="todo" />);
     const withSub = shape(<PageHeader variant="workspace" title="T" mark="todo" description="D" />);
-    expect(solo).not.toContain("wsh-sub");
-    expect(withSub).toContain("wsh-sub");
+    expect(solo).not.toContain("ph-intro");
+    expect(withSub).toContain("ph-intro");
     /* ⚠️ AND NOTHING ELSE MOVES WITH IT. Adding the paragraph must not change the header's class,
        the title's class or the mark's — the solo step is retired, so the two states differ by the
        description alone. */
-    expect(withSub.replace(/<p class="wsh-sub">.*?<\/p>/, "")).toBe(solo);
+    expect(withSub.replace(/<p class="ph-intro"[^>]*>.*?<\/p>/, "")).toBe(solo);
 
     /* ⚠️ THE ACTION-BEARING PROPS ARE NOT IN THIS LIST ANY MORE — they THROW (see above) rather
        than being inert, which is the stronger guarantee and the one the design needs. What remains

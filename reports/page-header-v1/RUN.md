@@ -111,3 +111,60 @@ Proved red by the brief's mutation — the column's padding set to 22px — and 
 96 instead of 16.
 
 Gates after Phase 3: tsc 0 · build clean · **8,298 passed**.
+
+## Phase 4 — `PageHeader`, rewritten, mounted on the Query Centre
+
+One component, two sizes, the prop names kept so nine mounts do not churn: **`full`** is the open
+header (eyebrow · 56px title · intro · actions · art) and **`workspace`** is the compact one (a
+two-column row, actions beside the text). New props: `secondary`, `art`, `primaryRef`.
+
+**The 18px below the bar is stated once, on the header.** The Query Centre paid its own 11px top
+inset "so the title sits 25 under the bar's controls"; a page that keeps its own adds to the
+header's, which is ten pages opening at ten heights.
+
+**`primaryRef` is not decoration.** The create flow returns focus to "+ Log a query" when it
+closes, and that button used to be the page's own — moving it into the component without the ref
+would have dropped a keyboard reader at the top of the document every time they cancelled.
+
+Measured against the mock, both widths: 18 below the bar · eyebrow at +26 · title at eyebrow + 22,
+56px (50 at ≤1360) · intro 14 below the title, capped 460 · actions 22 below, 48px tall · art 42% ×
+276 anchored bottom-right, drawn bottom on the rule · text block ≤ half. Compact: 18 below the bar ·
+title at header + 42, 44px · 140 tall with a one-line intro · actions sharing the title's row · no art.
+
+**The full header measures 267 at 1440 against the mock's 270**, and that is content rather than
+geometry: every offset matches, and the app's real facts line wraps to 52px where the mock's sample
+takes 55. The lock asserts the offsets and reports the height.
+
+### Two faults of my own
+
+**⚠️ MY ART PROBE ASSERTED A PROPERTY OF THE BOX AND CALLED IT THE DRAWING.** It read the image
+element's `bottom` — which, with `object-fit: contain`, is the *container's* bottom and says nothing
+about where the picture ends. The mutation that anchors the art to the top reddened it, but on the
+BOX having moved, so the message named the wrong fault. It now computes the drawn bottom from
+`object-position`, and re-proved: moving only the anchor, with the box untouched, reddens it at
+**184 against a rule at 384**.
+
+**⚠️ AND IT READ A HIDDEN PAGE'S HEADER.** Every workspace page stays mounted and the shell toggles
+`display`, so `querySelector` found the Query Centre's full header while measuring To-do and
+reported a full header 0px tall. The probe measures to find the visible one.
+
+### The suites, rewritten rather than retired
+
+`pageHeaderDefault`'s byte-for-byte lock is **repointed, not deleted** — its stated reason (five
+pages "protected by nothing except" the frozen string) is obsolete now those pages have moved, but
+the mechanism is the only check that notices a stray wrapper or a reordered child. `mastheadFormat`
+keeps its partition and now asserts **two** shapes and **names the pages in each**, because a count
+alone passes on two groups split down any line at all.
+
+**Retired with their reasons, and named here so the report does not hide a shrinking count:**
+`pageHeader`'s "the two-action maximum" and "the tool row" (five cases — there is no tool row, and
+two actions is now the shape of the props rather than a runtime slice), `mastheadFormat`'s "none of
+them holds a control" (inverted by design), and `qcCentre`'s head-grid container-query case (the
+header places the art, and a copy here would be a second description of one layout). **8,290 against
+a baseline of 8,298.**
+
+Three claims inverted rather than dropped: the eyebrow exists (it was "no kicker anywhere — the
+section is the crumb's job", and the crumb is gone), the header holds controls, and there is no top
+rule. The primary reads `--sp-anthracite` rather than a literal — the colour changed, the law did not.
+
+Gates after Phase 4: tsc 0 · build clean · **8,290 passed**.

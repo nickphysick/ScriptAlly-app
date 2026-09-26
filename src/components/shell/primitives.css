@@ -112,6 +112,10 @@
    `lib/brand.tsx` injects a family on bare `span`/`button`/`kbd` at runtime, which a class outranks. */
 :root {
   --sp-type: "Special Elite", "Courier New", Courier, monospace;
+  /* ⚠️ THE MONO FACE IS A TOKEN NOW, because the page header reads it and `primitives.css` stated
+     it as a literal in three rules of its own. A fourth literal is how a stack comes to disagree
+     with itself one rule at a time. */
+  --sp-mono: "JetBrains Mono", monospace;
   /* app shell v3 — the sidebar and breadcrumb face. Declared beside the typewriter face for the same
      reason: these primitives render under two shells, and a token that resolves to nothing falls
      back in silence. */

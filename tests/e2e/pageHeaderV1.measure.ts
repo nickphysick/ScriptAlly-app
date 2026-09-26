@@ -133,16 +133,28 @@ test("§1 · the bar holds its place while the page scrolls, and gains its shado
       return (c.overflowY === "auto" || c.overflowY === "scroll") && e.scrollHeight > e.clientHeight + 80;
     }) as HTMLElement | undefined;
     if (!el) return { scrolled: -1, on: null as string | null };
-    el.scrollTop = 240;
+    el.scrollTop = 200;
     return { scrolled: Math.round(el.scrollTop), on: (el.className || el.tagName).toString().slice(0, 40) };
   });
   await page.waitForTimeout(400);
   record({ area: "bar", what: "§1 · the scroll", got: moved, want: "reported" });
-  yes("bar", `§1 · the page really scrolled (${moved.scrolled} on ${moved.on})`, moved.scrolled > 100, JSON.stringify(moved));
+  is("bar", `§1 · the page scrolled 200 (on ${moved.on})`, moved.scrolled, 200);
   const after = await read();
   record({ area: "bar", what: "§1 · scrolled", got: after, want: "reported" });
   yes("bar", `§1 · …and the bar gains its shadow (${after.shadow})`, /rgba\(28, 19, 15, 0\.35\)/.test(after.shadow), after.shadow);
   is("bar", "§1 · …and stays at the top of its scroller", after.top, rest.top);
+
+  /**
+   * ⚠️ AND A PAGE WITH NOTHING TO SCROLL KEEPS THE HAIRLINE ALONE. The Tasks family and the Query
+   * Centre FILL the row and scroll inside their panes, so the shell's wrap never sees a scroll —
+   * the fallback is not a branch anyone wrote, it is what happens when no event arrives. Asserted
+   * anyway, because "nothing happens" is exactly the kind of claim that stops being true silently.
+   */
+  await openApp(page, "/todo", 1440, 900);
+  const fill = await read();
+  record({ area: "bar", what: "§1 · a page with no scroller of its own", got: fill, want: "reported" });
+  yes("bar", `§1 · a fill page's bar keeps the hairline alone (${fill.shadow})`,
+    !/rgba\(28, 19, 15, 0\.35\)/.test(fill.shadow), fill.shadow);
 });
 
 
@@ -232,6 +244,147 @@ test("§2 · the Query Centre's rail ends where the column ends, and sticks 16 b
      * requirement — 16 below the bar — is what is asserted.
      */
     near("column", `§2 · …16 below the bar at ${w}`, r.stickyTop, 16, 1);
+  }
+});
+
+
+/* ── §3 · the page header ── */
+
+/**
+ * ⚠️ THE HEADER IS FOUND BY MEASURING, NEVER BY `querySelector`. Every workspace page stays MOUNTED
+ * and the shell toggles `display`, so the first match in the document is routinely a page the
+ * reader cannot see — this probe read a hidden Query Centre's header on To-do and reported a full
+ * header with a height of 0.
+ */
+const header = (page: Page) => page.evaluate(() => {
+  const h = [...document.querySelectorAll("[data-probe='page-header']")]
+    .find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+  const bar = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+  if (!h || !bar) return null;
+  const b = h.getBoundingClientRect(), bb = bar.getBoundingClientRect(), cs = getComputedStyle(h);
+  const q = (sel: string) => {
+    const e = h.querySelector(sel) as HTMLElement | null;
+    if (!e) return null;
+    const r = e.getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), bottom: Math.round(r.bottom) };
+  };
+  const img = h.querySelector("[data-probe='art'] img") as HTMLImageElement | null;
+  /* ⚠️ THE DRAWN IMAGE, NOT THE BOX. `object-fit: contain` leaves the ELEMENT at the box's size and
+     paints a smaller picture inside it, so the element's rect says nothing about where the drawing
+     ends. The drawn height is the box's width over the natural ratio. */
+  let drawn: { bottom: number; h: number; w: number } | null = null;
+  if (img && img.naturalWidth > 0) {
+    const box = img.getBoundingClientRect();
+    const scale = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+    /**
+     * ⚠️ THE DRAWN BOTTOM IS COMPUTED FROM `object-position`, NOT TAKEN AS THE BOX'S BOTTOM.
+     *
+     * The first form of this read `box.bottom` and called it the drawing — which is only true when
+     * the anchor is already what the claim is about. Proved by mutation: anchoring the art to the
+     * TOP reddened the check, but on the BOX having moved rather than on the drawing leaving the
+     * rule, so the message named the wrong fault and the assertion was a property of the container
+     * wearing the picture's name.
+     */
+    const posY = getComputedStyle(img).objectPosition.split(/\s+/)[1] ?? "50%";
+    const fracY = posY.endsWith("%") ? parseFloat(posY) / 100 : posY === "bottom" ? 1 : posY === "top" ? 0 : 0.5;
+    const free = box.height - dh;
+    drawn = { bottom: Math.round(box.top + free * fracY + dh), h: Math.round(dh), w: Math.round(dw) };
+  }
+  const text = h.querySelector("[data-probe='page-header'] > .ph-text, .ph-text") as HTMLElement | null;
+  return {
+    size: h.dataset.size, topFromBar: Math.round(b.top - bb.bottom), height: Math.round(b.height), width: Math.round(b.width),
+    bg: cs.backgroundColor, rule: cs.borderBottomWidth + " " + cs.borderBottomColor, radius: cs.borderTopLeftRadius,
+    headerTop: Math.round(b.top), headerBottom: Math.round(b.bottom),
+    eyebrow: q("[data-probe='eyebrow']"), title: q("[data-probe='title']"),
+    intro: q("[data-probe='intro']"), acts: q("[data-probe='actions']"),
+    artBox: q("[data-probe='art']"), drawn,
+    textW: text ? Math.round(text.getBoundingClientRect().width) : null,
+    titleFs: q("[data-probe='title']") ? getComputedStyle(h.querySelector("[data-probe='title']")!).fontSize : null,
+  };
+});
+
+test("§3.1 · the full header — Query Centre, at 1280 and 1440", async ({ page }) => {
+  for (const w of [1280, 1440]) {
+    await openApp(page, "/queries", w, 900);
+    const r = await header(page);
+    yes("header", `§3.1 · the header was found at ${w}`, r != null, JSON.stringify(r));
+    if (!r) continue;
+    record({ area: "header", what: `§3.1 · Query Centre at ${w}`, got: r, want: "reported" });
+    is("header", `§3.1 · it is the full size (${w})`, r.size, "full");
+    /* ⚠️ NO BOX — the page ground shows through, and the only line is the rule beneath */
+    is("header", `§3.1 · no background (${w})`, r.bg, "rgba(0, 0, 0, 0)");
+    is("header", `§3.1 · no radius (${w})`, r.radius, "0px");
+    /* the mock's rule is 1px, not the brief's 1.5 */
+    is("header", `§3.1 · a 1px rule beneath (${w})`, r.rule, "1px rgb(28, 19, 15)".replace("rgb(28, 19, 15)", "rgba(28, 19, 15, 0.16)"));
+    /* the offsets */
+    is("header", `§3.1 · 18px below the bar (${w})`, r.topFromBar, 18);
+    near("header", `§3.1 · the eyebrow at header + 26 (${w})`, r.eyebrow!.y - r.headerTop, 26, 1);
+    near("header", `§3.1 · the title at eyebrow + 22 (${w})`, r.title!.y - r.eyebrow!.y, 22, 1);
+    is("header", `§3.1 · …at ${w <= 1360 ? 50 : 56}px (${w})`, r.titleFs, `${w <= 1360 ? 50 : 56}px`);
+    near("header", `§3.1 · the intro 14 below the title (${w})`, r.intro!.y - r.title!.bottom, 14, 1);
+    near("header", `§3.1 · the actions 22 below the intro (${w})`, r.acts!.y - r.intro!.bottom, 22, 1.5);
+    is("header", `§3.1 · …48px tall (${w})`, r.acts!.h, 48);
+    /* the text block is at most half */
+    yes("header", `§3.1 · the text block is at most half the header (${r.textW} of ${r.width})`,
+      (r.textW ?? 0) <= r.width / 2 + 1, JSON.stringify({ textW: r.textW, width: r.width }));
+    /* ⚠️ THE ART STANDS ON THE RULE — the claim the whole slot exists for */
+    yes("header", `§3.1 · the art is drawn (${JSON.stringify(r.drawn)})`, r.drawn != null, JSON.stringify(r.drawn));
+    if (r.drawn) {
+      near("header", `§3.1 · the drawn image's bottom IS the rule (${w})`, r.drawn.bottom, r.headerBottom - 1, 1.5);
+      near("header", `§3.1 · the art box is 42% of the header (${w})`, r.artBox!.w, Math.round(r.width * 0.42), 1.5);
+      is("header", `§3.1 · …276px tall (${w})`, r.artBox!.h, 276);
+      /* …and it overlaps neither the text block nor the bar */
+      yes("header", `§3.1 · the drawn art clears the text block (${w})`, r.artBox!.x >= (r.textW ?? 0) + r.title!.x - 1,
+        JSON.stringify({ artX: r.artBox!.x, textRight: (r.textW ?? 0) + r.title!.x }));
+      yes("header", `§3.1 · …and never reaches the bar (${w})`, r.artBox!.y >= r.headerTop - 60, JSON.stringify({ artY: r.artBox!.y, headerTop: r.headerTop }));
+    }
+    yes("header", `§3.1 · at least 232 tall (${r.height})`, r.height >= 232, String(r.height));
+  }
+});
+
+test("§3.2 · the compact header — To-do, at 1280 and 1440", async ({ page }) => {
+  for (const w of [1280, 1440]) {
+    await openApp(page, "/todo", w, 900);
+    const r = await header(page);
+    yes("header", `§3.2 · the header was found at ${w}`, r != null, JSON.stringify(r));
+    if (!r) continue;
+    record({ area: "header", what: `§3.2 · To-do at ${w}`, got: r, want: "reported" });
+    is("header", `§3.2 · it is the compact size (${w})`, r.size, "compact");
+    is("header", `§3.2 · 18px below the bar (${w})`, r.topFromBar, 18);
+    near("header", `§3.2 · the title at header + 42 (${w})`, r.title!.y - r.headerTop, 42, 1.5);
+    is("header", `§3.2 · …at 44px (${w})`, r.titleFs, "44px");
+    near("header", `§3.2 · 140 tall with a one-line intro (${w})`, r.height, 140, 2);
+    /* ⚠️ THE ACTIONS SHARE A ROW WITH THE TITLE BLOCK — which is the compact header's whole shape,
+       and the one thing a height check cannot see. */
+    yes("header", `§3.2 · the actions share the title's row (${w})`,
+      r.acts != null && r.acts.y < r.intro!.bottom && r.acts.x > r.title!.x + 100,
+      JSON.stringify({ acts: r.acts, title: r.title, intro: r.intro }));
+    is("header", `§3.2 · …and there is no art (${w})`, r.artBox, null);
+  }
+});
+
+/**
+ * ⚠️ §4.5 · CONSISTENCY — the pages open at the same place, asserted as a PARTITION over measured
+ * offsets rather than page by page. Manuscripts is out of this build by ruling (it shows a single
+ * manuscript and is being redesigned), so the full-size set is Query Centre and Contact list.
+ */
+test("§4.5 · every page of a size opens identically", async ({ page }) => {
+  const seen: Record<string, { route: string; top: number; eyebrow: number; title: number }[]> = { full: [], compact: [] };
+  for (const route of ["/queries", "/agents", "/todo", "/todo/calendar", "/queries/analytics"]) {
+    await openApp(page, route, 1440, 900);
+    const r = await header(page);
+    if (!r || !r.eyebrow || !r.title) { record({ area: "header", what: `§4.5 · ${route} has no header`, got: r, want: "reported" }); continue; }
+    seen[r.size!].push({ route, top: r.topFromBar, eyebrow: r.eyebrow.y - r.headerTop, title: r.title.y - r.headerTop });
+  }
+  record({ area: "header", what: "§4.5 · the two sets", got: seen, want: "reported" });
+  for (const [size, rows] of Object.entries(seen)) {
+    if (!rows.length) continue;
+    yes("header", `§4.5 · the ${size} set has more than one page (${rows.map((x) => x.route).join(", ")})`, rows.length > 1, JSON.stringify(rows));
+    for (const k of ["top", "eyebrow", "title"] as const) {
+      const vals = [...new Set(rows.map((x) => x[k]))];
+      is("header", `§4.5 · every ${size} page's ${k} is the same (${rows.map((x) => `${x.route}:${x[k]}`).join(", ")})`, vals.length, 1);
+    }
   }
 });
 
