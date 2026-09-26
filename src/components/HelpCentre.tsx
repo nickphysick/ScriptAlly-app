@@ -171,7 +171,9 @@ export function HelpCentre() {
       {/* The standard page header (shell rollout Phase 5) — full variant, deliberately
           zero-action: nothing here warrants a header verb (flagged for a browser check). */}
       <PageHeader
-        variant="full"
+        /* §3.3 (page header v1) — compact: `full` is the OPEN header now, and this page is not one
+           of the two that opens with one. */
+        variant="workspace"
         title="QueryHawk Help Centre"
         description="Welcome to your querying command centre manual. Discover expert tips and tools for tracking submissions, discovering literary representation, and moving closer to publication."
       />

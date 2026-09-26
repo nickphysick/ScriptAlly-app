@@ -766,7 +766,9 @@ export const ImportCsv: React.FC<{
           DESK" meta line is dropped with it (no meta slot under the header law). */}
       <div className="max-w-4xl mx-auto px-4">
         <PageHeader
-          variant="full"
+          /* §3.3 (page header v1) — compact: `full` is the OPEN header now, and this page is not one
+           of the two that opens with one. */
+        variant="workspace"
           title="Import"
           description="Bring your existing spreadsheet across — agents, queries and dates, matched for you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
         />

@@ -370,18 +370,40 @@ test("§3.2 · the compact header — To-do, at 1280 and 1440", async ({ page })
  * manuscript and is being redesigned), so the full-size set is Query Centre and Contact list.
  */
 test("§4.5 · every page of a size opens identically", async ({ page }) => {
-  const seen: Record<string, { route: string; top: number; eyebrow: number; title: number }[]> = { full: [], compact: [] };
-  for (const route of ["/queries", "/agents", "/todo", "/todo/calendar", "/queries/analytics"]) {
+  /**
+   * ⚠️ THE LEFT EDGE IS IN HERE, AND ITS ABSENCE LET A REAL FAULT THROUGH. This compared only
+   * vertical offsets, so it was perfectly green while every compact page opened 35px right of every
+   * full one — the grid's masthead slot still carried its own pre-§2 gutter. "Opens identically" is
+   * a claim about both axes, and only one of them was being asked.
+   */
+  const seen: Record<string, { route: string; top: number; left: number; eyebrow: number; title: number }[]> = { full: [], compact: [] };
+  for (const route of ["/queries", "/agents", "/todo", "/todo/calendar", "/queries/analytics", "/manuscripts/comps", "/manuscripts/packages", "/agents/discover"]) {
     await openApp(page, route, 1440, 900);
     const r = await header(page);
     if (!r || !r.eyebrow || !r.title) { record({ area: "header", what: `§4.5 · ${route} has no header`, got: r, want: "reported" }); continue; }
-    seen[r.size!].push({ route, top: r.topFromBar, eyebrow: r.eyebrow.y - r.headerTop, title: r.title.y - r.headerTop });
+    seen[r.size!].push({ route, top: r.topFromBar, left: r.title.x, eyebrow: r.eyebrow.y - r.headerTop, title: r.title.y - r.headerTop });
   }
   record({ area: "header", what: "§4.5 · the two sets", got: seen, want: "reported" });
+  /**
+   * ⚠️ THE FULL SET HAS ONE PAGE IN IT, AND THAT IS AN UNFINISHED BUILD RATHER THAN A PASS.
+   * Manuscripts is out by ruling; the Contact list is not converted, because its hero is a MEASURED
+   * layout that places its cards from the art's own box — taking the art into the header leaves
+   * that machinery measuring something that is no longer there. So this states the population and
+   * asserts the compact set, which really does have six pages in it. A "more than one" check over
+   * the full set would be red for work nobody has done yet; a skip would be a green about nothing.
+   */
+  /* ⚠️ AND THE TWO SIZES SHARE IT. A per-size check passes on two sets that each agree internally
+     and with nothing else — which is exactly the state this found. */
+  const lefts = [...new Set([...seen.full, ...seen.compact].map((x) => x.left))];
+  is("header", `§4.5 · full and compact open at the same left edge (${lefts.join(", ")})`, lefts.length, 1);
   for (const [size, rows] of Object.entries(seen)) {
     if (!rows.length) continue;
+    if (size === "full" && rows.length < 2) {
+      record({ area: "header", what: "§4.5 · the full set is not finished — the Contact list is still its own hero", got: rows, want: "reported" });
+      continue;
+    }
     yes("header", `§4.5 · the ${size} set has more than one page (${rows.map((x) => x.route).join(", ")})`, rows.length > 1, JSON.stringify(rows));
-    for (const k of ["top", "eyebrow", "title"] as const) {
+    for (const k of ["top", "left", "eyebrow", "title"] as const) {
       const vals = [...new Set(rows.map((x) => x[k]))];
       is("header", `§4.5 · every ${size} page's ${k} is the same (${rows.map((x) => `${x.route}:${x[k]}`).join(", ")})`, vals.length, 1);
     }

@@ -204,7 +204,9 @@ export const PlansPage: React.FC = () => {
           full variant replaces the centred italic hero; the mono "QueryHawk · two tiers"
           strapline is dropped, not restyled (rollout report). */}
       <PageHeader
-        variant="full"
+        /* §3.3 (page header v1) — compact: `full` is the OPEN header now, and this page is not one
+           of the two that opens with one. */
+        variant="workspace"
         title="Choose your plan"
         description="Free covers the tracking; Pro adds the tools that think alongside you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
       />

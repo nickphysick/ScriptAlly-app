@@ -639,6 +639,15 @@
      measured, max scroll 1918 → 1934. One box, no collapsing, one arithmetic. */
   /* ⚠️ FULL WIDTH — 0-2-0, so it beats `.wpg-scroll > *` on specificity rather than source order */
   max-width: none;
+  /**
+   * §2/§3 — AND NO GUTTER, BECAUSE THE MASTHEAD INSIDE IT CARRIES ONE. The band is full-bleed by
+   * design; with the column's padding on the band AND on the masthead the gutter was paid twice and
+   * the compact header opened at 340 against the full header's 294. Exactly one of them pays it,
+   * and it has to be the MASTHEAD: the band's own ink runs edge to edge, and past the cap only a
+   * capped-and-centred box lands where the column's content does — a padded full-bleed band puts
+   * its contents 52 from the window rather than 462 from it at 1920.
+   */
+  padding-inline: 0;
   width: 100%;
   /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN and the slab would otherwise
      shrink as the panes below claim the space, exactly as the masthead and the row each state. */
@@ -791,26 +800,28 @@
    deleted with the bar (§4). */
 .wpg-chrome > .wpg-mast,
 .wpg-scroll > .wpg-mast {
-  width: 100%;
-  margin-inline: auto;
   /**
-   * ⚠️ THE GUTTER IS A REDUCTION HERE TOO, AND THE REF'S `padding-inline` IS A DELIBERATE DEVIATION.
-   * In the ref BOTH measures are padded, so they behave alike; here the content's gutter had to be a
-   * max-width reduction (padding would land on the page's own first box), and mixing the two
-   * mechanisms makes them diverge exactly where it matters.
+   * §2/§3 (page header v1) — THE MASTHEAD TAKES THE SHARED COLUMN, exactly as the page's content
+   * does. It had its own measure (`--work-max`) and its own gutter (`--mast-gutter`) because the
+   * two used different MECHANISMS: the content's gutter was a max-width reduction and the
+   * masthead's was padding, and mixing them made them diverge precisely where the cap binds. The
+   * rule this file's own comment reached for — "computing both the same way makes it true at every
+   * width rather than at the two where nothing caps" — is what the one column now does for every
+   * child of the scroller, so the masthead states the same thing rather than a matching copy.
    *
-   * Measured: with padding, at 1440 the masthead's ink and the tight pages' content both landed on
-   * 297 — and at 2300, where the cap binds, content ABSORBED its gutter into the cap while the
-   * masthead ADDED its padding on top, so the ink sat 35px inside the panes it titles. Computing
-   * both the same way makes "the masthead aligns with Query Centre and Tasks" true at every width
-   * rather than at the two where nothing caps.
+   * ⚠️ MEASURED BEFORE THE FIX: the compact header's ink sat at 329 at 1440 where the column starts
+   * at 294 — 35px in, which is `--content-gutter-tight`. Every compact page opened 35px right of
+   * every full one, and §4.5 could not see it because it compared only vertical offsets.
    *
-   * ⚠️ AND THE PADDING-VERSUS-MEASURE CHOICE DECIDES WHERE AN ABSOLUTE CHILD LANDS. `right: 0`
-   * resolves against the PADDING box, so a padded measure would hang any such child 35px outside
-   * the masthead's own ink — outside the line its title sits on. Nothing is positioned in here
-   * today; the constraint is recorded because it decides the next one.
+   * ⚠️ AND THE PADDING IS WHAT PLACES THE ART. `right: 0` on the full header's art resolves against
+   * the PADDING box, so the drawing lands on the column's own right edge rather than 52px outside
+   * the line its title sits on.
    */
-  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1360px;
+  padding-inline: clamp(28px, 3.2vw, 52px);
+  margin-inline: auto;
 }
 .wpg-mast {
   min-width: 0;

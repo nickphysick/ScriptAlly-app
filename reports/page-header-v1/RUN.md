@@ -168,3 +168,67 @@ section is the crumb's job", and the crumb is gone), the header holds controls, 
 rule. The primary reads `--sp-anthracite` rather than a literal — the colour changed, the law did not.
 
 Gates after Phase 4: tsc 0 · build clean · **8,290 passed**.
+
+## Phase 5 — the rollout
+
+**Compact, and already correct:** To-do, Calendar, Noteboard, Analytics, Discover, Comparable
+titles, Submission packages — each already passed `variant="workspace"`, so the rewrite reached them
+without a per-page edit. **Moved to compact:** `/import`, `/plans`, `/help`, which said
+`variant="full"` when that meant "the plain one".
+
+**`/import` mounted at the top of its chassis with no restructuring** — your note 2 resolves the
+good way. It is 141px tall at both widths, 18 below the bar, on the column.
+
+### What each compact page ended up with — rendered, nothing invented
+
+| Page | Intro | Actions |
+|---|---|---|
+| To-do list | yes | Add a task |
+| Calendar | **none** | New task |
+| Noteboard | yes | **none** |
+| Analytics | yes | **none** |
+| Discover | yes | **none** |
+| Comparable titles | yes | Add a comp |
+| Submission packages | yes | New package |
+| Import | yes | **none** |
+
+Calendar's header is 109px (no intro), the one-line pages are 140–141, the two-line ones 163. **No
+copy was written.**
+
+**⚠️ `/import` RENDERS NO EYEBROW**, because it is in no nav section and the section arrives by
+context. That is the rule working — an eyebrow reading " / Import" would be the separator with
+nothing before it — but it does mean one workspace page opens without its first line.
+
+### ⚠️ The Contact list is NOT converted, and this is the report rather than a silent reshape
+
+It is named as a full-header page and it is the one thing in this build that did not land. Its hero
+is a **measured layout**: `place()` reads the art's box and the text's height and writes seven custom
+properties that position the count cards and the add card, with a `ResizeObserver` and a fonts pass
+behind it. Taking the title, the facts line and the drawing into the header leaves that machinery
+measuring elements that are no longer there — `place()` returns early, `data-ready` never flips, and
+the page's own CSS is gated on it.
+
+**What it would take:** retire `heroLayout` and `place()`, and lay the count cards and the blank card
+out in flow beneath the header (they no longer need to dodge an image the header owns). That is a
+restructure of a page another session shipped this week, and the brief's own instruction for
+`/import` — *"if it needs more than that, leave it as it is, and list it in the report with what it
+would take. Don't reshape it silently"* — is the same judgement. It also means **§4.5's full-size
+consistency is unproven**: with one page in the set the claim is vacuous, so the lock records the
+population and says so rather than passing.
+
+The brief also **changes the Contact list's drawing** to `active_queries_hawk` (it draws the
+Archivist today). That decision is recorded and unapplied.
+
+### A fault my own lock could not see
+
+**Every compact page opened 35px right of every full one** — the grid's masthead slot still carried
+its pre-§2 measure (`--work-max`, `--mast-gutter`). §4.5 was green throughout, because it compared
+only **vertical** offsets: "opens identically" is a claim about both axes and only one was being
+asked. The left edge is in it now, along with a cross-size check, since a per-size comparison passes
+on two sets that each agree internally and with nothing else.
+
+Fixing it surfaced a second: with the column's padding on the full-bleed chrome band **and** on the
+masthead inside it, the gutter was paid twice (340 against 294). Exactly one pays it, and it has to
+be the masthead — past the cap, only a capped-and-centred box lands where the column's content does.
+
+Gates after Phase 5: tsc 0 · build clean · **8,290 passed**. Ten measurement cases green.

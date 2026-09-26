@@ -311,8 +311,19 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .toContain("max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)))");
     /* the cap is READ, never restated — `--work-max` is the app's shared centring measure and the
        content reads the same token through `--wpg-measure` */
-    expect(mastMeasure, "the masthead restated the cap as a number instead of reading the shared token")
-      .not.toMatch(/max-width:[^;]*\d{3,4}px/);
+    /**
+     * ⚠️ REVERSED BY §2 (page header v1) — AND THIS IS THE SAME CLAIM POINTING THE OTHER WAY. It
+     * required the masthead to read a shared TOKEN rather than restate a number, because the
+     * masthead and the content used different mechanisms and only a token could keep them in step.
+     * There is one column now, stated once in this file, and the masthead states the SAME rule
+     * rather than a token that happens to hold the same value — which is what a shared token was
+     * reaching for. What must not come back is a measure of its own.
+     */
+    const mast = block(".wpg-scroll > .wpg-mast");
+    expect(mast, "the masthead left the shared column").toContain("max-width: 1360px");
+    expect(mast, "…and its gutter").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
+    expect(mast, "the masthead kept a measure of its own").not.toContain("--work-max");
+    expect(mast, "…or a gutter of its own").not.toContain("--mast-gutter");
     expect(block(".wpg"), "the constant gutter is not defined on the grid").toContain("--mast-gutter: 35px");
     /* ⚠️ `width: 100%` IS PART OF THE CLAIM, NOT TIDINESS. Without it an auto inline margin stops a
        FLEX child stretching, so on the five fill pages the masthead and the content both shrank to
