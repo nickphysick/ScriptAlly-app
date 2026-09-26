@@ -232,3 +232,32 @@ masthead inside it, the gutter was paid twice (340 against 294). Exactly one pay
 be the masthead — past the cap, only a capped-and-centred box lands where the column's content does.
 
 Gates after Phase 5: tsc 0 · build clean · **8,290 passed**. Ten measurement cases green.
+
+## Phase 6 — the masthead suites, and the law
+
+**Both rewritten rather than retired**, with a stated division of labour so they do not become two
+descriptions of one thing:
+
+- **`mastheadMatrix.measure.ts`** — every workspace route opens with the size the table says, on the
+  column. It asserted ONE shared masthead across ten pages: the same shape, one mark size, no
+  control anywhere, and an `OPTED_OUT` set of three that declined it. Every claim is now untrue by
+  design or moved — the SHAPE is `mastheadFormat.test.tsx`'s partition, the GEOMETRY is
+  `pageHeaderV1`. **And the opted-out set inverted**: the pages that declined the shared masthead
+  are the ones that now get the full header, which is the opposite relationship to the one the name
+  described. The register is the file's own table, so a page changing size is a diff rather than a
+  silent regrouping — and `/agents` and `/manuscripts` are in it as `none` **with their reasons**,
+  so the gap is in the table rather than in a comment nobody reads.
+- **`illustratedMasthead.measure.ts`** — the drawing stands on the rule, clears the words, and a
+  page without one reserves nothing. It measured a 52px MARK on ten pages; there are no marks. The
+  old claims have no subject, so they are not retargeted — what survives is the question they were
+  asking. It computes the drawn edge from `object-position`, which is the whole reason it can make
+  its claim: asserting the element's rect passes with the art anchored to the top, the one
+  arrangement the design forbids.
+
+One fault in my own rewrite: `mastheadMatrix` first took "the column" from whichever scroller child
+carried a `max-width`, picked a full-bleed one whose padding is 0, and failed a page whose header
+was exactly right. It computes the column from the rule now.
+
+**CLAUDE.md** gains "The page header — PageHeader, full or compact, and there is no breadcrumb",
+carrying the five laws this build established, and the old masthead section is **fenced as history
+in place** rather than deleted.

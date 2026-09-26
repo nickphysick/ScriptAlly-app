@@ -2,325 +2,83 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE ILLUSTRATED MASTHEAD — A TRIAL ON ONE PAGE, LOCKED AS ONE PAGE.
+ * illustratedMasthead — REWRITTEN for page header v1 (§3.1). The full header's drawing: it stands
+ * on the rule, it stays out of the words, and a page without one reserves nothing.
  *
- * ⚠️ THE POINT OF EVERY CASE HERE IS THE POPULATION. A trial that quietly becomes two pages is no
- * longer a trial, and a treatment that quietly stops applying is a revert nobody decided. Both
- * directions are asserted: the named page has artwork, the other masthead pages do not, and the SET
- * is exact — not the count, so moving the trial to a different page fails as loudly as spreading it.
+ * ⚠️ WHAT THIS REPLACES. It measured the MARK — a 52px glyph in the shared masthead, one size for
+ * both the monoline and illustrated families, on ten pages. There are no marks: the compact header
+ * draws none at all, and the full header carries a commissioned drawing anchored to its own
+ * bottom-right corner. The old claims have no subject, so they are not retargeted; what survives is
+ * the question they were asking — does the page's picture sit where the design puts it.
+ *
+ * ⚠️ AND THE DRAWN IMAGE IS NOT THE BOX. With `object-fit: contain` the element keeps the box's
+ * size and paints a smaller picture inside it, so `getBoundingClientRect` says nothing about where
+ * the drawing ends. Computing the drawn edge from `object-position` is the whole reason this file
+ * can make its claim at all — asserting the element's rect would pass with the art anchored to the
+ * top, which is the one arrangement the design forbids.
  */
-import { test, expect, Page } from "@playwright/test";
-import { openRoute, liftMotionSuppression } from "./measure";
-import { readPng } from "./pngPixels";
+import { expect, test, type Page } from "@playwright/test";
+import { openRoute } from "./measure";
 
-/**
- * ⚠️ THE QUERY CENTRE IS NOT IN THIS CENSUS, BECAUSE IT HAS NO MASTHEAD TO ILLUSTRATE (v11, 19 Sep).
- * It declined the shared masthead by decision and draws its own head on the page ground with no
- * artwork at all. That it is the ONE page to decline is asserted where the population is counted —
- * `mastheadMatrix.measure.ts` (`OPTED_OUT`) — so its absence here is a consequence of that lock and
- * not a second, quieter exemption.
- */
-const PAGES: { name: string; route: string; cls: string }[] = [
-  { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
-  { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
-  { name: "Discover",            route: "/agents/discover",      cls: "dv-wpg"   },
-  { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
-  { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-  { name: "To-do list",          route: "/todo",                 cls: "tpl-wpg"  },
-  { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
-  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
-];
-/**
- * ⚠️ ONE PAGE AGAIN, AND THE SET IS THE GATE. The trial began on Submission packages; the Query
- * Centre joined it deliberately and LEFT it deliberately when v11 took its masthead away (no
- * illustrations on that page at all). The SET is asserted rather than a count, so neither moving
- * the artwork to a different page nor a second page joining can pass — someone has to edit this
- * list and read this paragraph.
- */
-const TRIAL = ["Submission packages"];
+/** §3.3 — the pages that open with the full header. The Contact list is not converted yet. */
+const WITH_ART = ["/queries"];
+const WITHOUT_ART = ["/todo", "/queries/analytics", "/manuscripts/comps"];
 
-const readBand = (page: Page, cls: string) => page.evaluate((c) => {
-  const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-  if (!g) return null;
-  const ch = g.querySelector(".wpg-chrome") as HTMLElement;
-  const cs = getComputedStyle(ch);
-  /**
-   * ⚠️ THE ARTWORK IS LOOKED FOR ON EITHER HOST, because it has now lived on both. It began on the
-   * slab and moved into the MEASURE — the box the text lives in — so that the ground and the
-   * illustration share a coordinate space with the title. A lock that named one element would have
-   * reported "no page carries artwork" after a move that changed nothing about the claim.
-   */
-  const mastEl = g.querySelector(".wpg-mast") as HTMLElement;
-  const slabAfter = getComputedStyle(ch, "::after");
-  const mastAfter = getComputedStyle(mastEl, "::after");
-  const af = /url\(/.test(mastAfter.backgroundImage) ? mastAfter : slabAfter;
+async function open(page: Page, path: string, w: number) {
+  await openRoute(page, path, { width: w, height: 900 });
+  await expect(page.locator(".os-skelpage")).toHaveCount(0, { timeout: 15_000 }).catch(() => {});
+  await page.evaluate(async () => { await document.fonts.ready; });
+  await page.waitForTimeout(700);
+}
+
+const art = (page: Page) => page.evaluate(() => {
+  const h = [...document.querySelectorAll("[data-probe='page-header']")]
+    .find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+  if (!h) return null;
+  const img = h.querySelector("[data-probe='art'] img") as HTMLImageElement | null;
+  const hb = h.getBoundingClientRect();
+  const text = h.querySelector(".ph-text") as HTMLElement | null;
+  if (!img) return { has: false, headerBottom: Math.round(hb.bottom) };
+  const box = img.getBoundingClientRect();
+  const scale = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+  const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+  const posY = getComputedStyle(img).objectPosition.split(/\s+/)[1] ?? "50%";
+  const fracY = posY.endsWith("%") ? parseFloat(posY) / 100 : posY === "bottom" ? 1 : posY === "top" ? 0 : 0.5;
   return {
-    /* the artwork lives on the pseudo-element; the band's own image is the wash's gradient */
-    artwork: af.backgroundImage,
-    hasArtwork: /url\(/.test(af.backgroundImage),
-    pointerEvents: af.pointerEvents,
-    bandBg: cs.backgroundColor,
-    bandImg: cs.backgroundImage,
-    sticky: cs.position,
-
-    scroller: g.getAttribute("data-wpg-scroller"),
-    toolbandBg: (() => { const b = g.querySelector(".wpg-toolband") as HTMLElement | null; return b ? getComputedStyle(b).backgroundColor : null; })(),
-    toolbandArt: (() => { const b = g.querySelector(".wpg-toolband") as HTMLElement | null; return b ? getComputedStyle(b, "::after").backgroundImage : null; })(),
+    has: true,
+    drawnBottom: Math.round(box.top + (box.height - dh) * fracY + dh),
+    drawnLeft: Math.round(box.right - dw),
+    headerBottom: Math.round(hb.bottom),
+    headerTop: Math.round(hb.top),
+    textRight: text ? Math.round(text.getBoundingClientRect().right) : null,
+    boxW: Math.round(box.width), headerW: Math.round(hb.width),
+    natural: `${img.naturalWidth}×${img.naturalHeight}`,
   };
-}, cls);
-
-test("⚠️ EXACTLY ONE PAGE CARRIES MASTHEAD ARTWORK — asserted in both directions", async ({ page }) => {
-  const lines: string[] = [];
-  const withArt: string[] = [];
-  for (const { name, route, cls } of PAGES) {
-    await openRoute(page, route, { width: 1440, height: 900 });
-    await liftMotionSuppression(page);
-    const r = await readBand(page, cls);
-    expect(r, `${name}: no grid`).not.toBeNull();
-    if (r!.hasArtwork) withArt.push(name);
-    lines.push(`${name.padEnd(21)} ${r!.hasArtwork ? "ARTWORK" : "—      "} · band ${r!.bandBg}${r!.toolbandArt && /url\(/.test(r!.toolbandArt) ? " ⚠️ TOOLBAR ARTWORK" : ""}`);
-    /* the toolbar never carries artwork, on any page — the trial is a masthead treatment */
-    if (r!.toolbandArt) {
-      expect(/url\(/.test(r!.toolbandArt), `${name}: its toolbar band carries artwork — the trial is the masthead's alone`).toBe(false);
-    }
-  }
-  console.log("\n══ MASTHEAD ARTWORK (1440)\n" + lines.join("\n"));
-  /* ⚠️ THE EXACT SET, NOT A COUNT. `toHaveLength(1)` would pass the day the artwork moved to a
-     different page, which is a decision nobody took and nobody would see. */
-  expect(withArt.slice().sort(), "masthead artwork is not on exactly the trial pages").toEqual(TRIAL.slice().sort());
 });
 
-const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-];
-
-for (const width of [1280, 1440, 1920, 2560]) {
- for (const trial of TRIAL_ROUTES) {
-  test(`⚠️ NO TEXT SITS ON PAINTED ARTWORK — ${trial.name} — ${width}`, async ({ page }) => {
-    await openRoute(page, trial.route, { width, height: 900 });
-    await liftMotionSuppression(page);
-    await page.waitForTimeout(900);
-    const lines: string[] = [];
-    /**
-     * ⚠️ ONE POSTURE. This used to run at rest and again "settled" — the masthead scrolled 400px and
-     * held in its tightened form, where a band drawn for a 128px header had to be re-checked at
-     * about half of it. The settle is deleted: scrolling now takes the masthead AWAY, so the second
-     * posture's clip was a box above the viewport and every reading came back
-     * "Clipped area is either empty or outside the resulting image".
-     *
-     * ⚠️ AND THAT IS A SIMPLIFICATION RATHER THAN LOST COVERAGE. There is one shape to check because
-     * there is one shape; the artwork can no longer be cropped into a posture nobody drew it for.
-     */
-    for (const posture of ["rest"] as const) {
-      const geo = await page.evaluate((c) => {
-        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        const ch = g.querySelector(".wpg-chrome") as HTMLElement;
-        const b = ch.getBoundingClientRect();
-        const ink = (sel: string) => {
-          const el = g.querySelector(sel) as HTMLElement | null;
-          if (!el || !el.getBoundingClientRect().height) return null;
-          const r = document.createRange(); r.selectNodeContents(el);
-          const rects = [...r.getClientRects()];
-          if (!rects.length) return null;
-          return { right: Math.round(Math.max(...rects.map((x) => x.right))), y: Math.round(rects[0].top + rects[0].height / 2) };
-        };
-        return { band: { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }, title: ink(".wsh-title"), sub: ink(".wsh-sub") };
-      }, trial.cls);
-      /**
-       * ⚠️ THE BAND PHOTOGRAPHED WITH THE ARTWORK OFF AND ON, NOT AGAINST ONE "GROUND" COLOUR — and
-       * the single-colour form broke the moment a page's ground became a GRADIENT. It sampled the
-       * far left as "the ground" and compared the text's surroundings to it; with a two-colour
-       * ground those are different colours by design, so it reported artwork over the title on a
-       * band where the mask was working perfectly.
-       *
-       * Switching the pseudo-element's opacity to 0 and back gives the ground exactly as painted at
-       * every x, with no modelling of the gradient and nothing assumed about what the band is filled
-       * with. The claim becomes what it always meant: at the text, the band looks the same whether
-       * the artwork is there or not.
-       */
-      const clip = { x: geo.band.x, y: geo.band.y, width: geo.band.w, height: geo.band.h };
-      await page.addStyleTag({ content: `.wpg .wpg-chrome::after { opacity: 0 !important; }` });
-      await page.waitForTimeout(120);
-      const bare = readPng(await page.screenshot({ clip }));
-      await page.locator("style").last().evaluate((e) => e.remove());
-      await page.waitForTimeout(160);
-      const png = readPng(await page.screenshot({ clip }));
-      const at = (ax: number, ay: number) => png.at(Math.min(Math.max(ax - geo.band.x, 0), png.width - 1), Math.min(Math.max(ay - geo.band.y, 0), png.height - 1)).join(",");
-      const bareAt = (ax: number, ay: number) => bare.at(Math.min(Math.max(ax - geo.band.x, 0), png.width - 1), Math.min(Math.max(ay - geo.band.y, 0), png.height - 1)).join(",");
-      for (const [what, k] of [["title", geo.title], ["description", geo.sub]] as const) {
-        if (!k) { lines.push(`  ${posture}: no ${what} rendered`); continue; }
-        /**
-         * ⚠️ JUST PAST THE LAST GLYPH, NOT ON IT — sampling ON the glyph returns the TEXT'S OWN INK
-         * (116,111,109 for the title), so the first version of this compared the title's colour
-         * against the band's ground and failed on a page where the mask was working perfectly. The
-         * claim is about what is painted BEHIND the text, so the sample is taken immediately beyond
-         * where the text ends, on the same line — the strictest point that is still background.
-         */
-        const painted = at(k.right + 3, k.y);
-        const ground = bareAt(k.right + 3, k.y);
-        lines.push(`  ${posture.padEnd(7)} ${what.padEnd(11)} last glyph x${k.right} → ${painted} (ground there ${ground})`);
-        /**
-         * ⚠️ THE GROUND EXACTLY, NOT "CLOSE TO IT". The mask's job is that the artwork is FULLY
-         * transparent where text sits — a pixel a few units off the ground is artwork showing
-         * through faintly, which is precisely the state this is written to forbid.
-         */
-        expect(painted, `${posture}: painted artwork reaches the ${what}'s last glyph — the band differs there with the artwork on`).toBe(ground);
-      }
+test("§3.1 · the drawing stands on the rule and stays out of the words", async ({ page }) => {
+  for (const route of WITH_ART) {
+    for (const w of [1280, 1440]) {
+      await open(page, route, w);
+      const a = await art(page);
+      expect(a, `${route} at ${w}: no header`).toBeTruthy();
+      expect(a!.has, `${route} at ${w}: the full header drew no art`).toBe(true);
+      /* ⚠️ THE CLAIM — the drawn image's bottom IS the rule, within a pixel. */
+      expect(Math.abs(a!.drawnBottom! - (a!.headerBottom - 1)), `${route} at ${w}: the drawing left the rule (${a!.drawnBottom} vs ${a!.headerBottom - 1})`)
+        .toBeLessThanOrEqual(1.5);
+      /* …the box is 42% of the header */
+      expect(Math.abs(a!.boxW! - a!.headerW! * 0.42), `${route} at ${w}: the art box is ${a!.boxW} of ${a!.headerW}`).toBeLessThanOrEqual(2);
+      /* …and the DRAWING clears the text block. The box may overlap; the picture may not. */
+      expect(a!.drawnLeft!, `${route} at ${w}: the drawing runs under the words`).toBeGreaterThanOrEqual((a!.textRight ?? 0) - 1);
     }
-    console.log(`\n══ TEXT CLEARS THE ARTWORK — ${trial.name} — ${width}\n` + lines.join("\n"));
-    expect(lines.filter((l) => l.includes("last glyph")).length, "no glyph was sampled").toBeGreaterThan(1);
-  });
- }
-}
-
-test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — the treated pages answer like every untreated one", async ({ page }) => {
-  /**
-   * ⚠️ THE TWO HEADER TYPES ARE DELETED, WHICH MAKES THIS CASE SIMPLER AND STRONGER. It used to
-   * split on `data-wpg-type` — Type A pins and settles, Type B sits in flow — and compare each
-   * treated page against untreated peers of its OWN type; that had already broken once when
-   * Manuscripts changed type and left Query Centre as the only Type B page, with nothing to compare
-   * against and a failure for want of a sample rather than for a fault.
-   *
-   * There is one behaviour now: the masthead is in flow, it scrolls away as content, and the page
-   * declares where it scrolls. So every page is a peer of every other, and the claim is that the
-   * artwork changes none of it.
-   */
-  const rows: { name: string; sticky: string; scroller: string | null; toolband: string | null }[] = [];
-  for (const { name, route, cls } of PAGES) {
-    await openRoute(page, route, { width: 1440, height: 900 });
-    await liftMotionSuppression(page);
-    const r = (await readBand(page, cls))!;
-    rows.push({ name, sticky: r.sticky, scroller: r.scroller, toolband: r.toolbandBg });
-  }
-  console.log("\n══ BEHAVIOUR (1440)\n" + rows.map((r) => `${r.name.padEnd(21)} ${r.sticky.padEnd(8)} · scrolls at ${r.scroller}`).join("\n"));
-  const trials = rows.filter((r) => TRIAL.includes(r.name));
-  const peers = rows.filter((r) => !TRIAL.includes(r.name));
-  expect(trials.length, "a trial page did not render").toBe(TRIAL.length);
-  expect(peers.length, "no untreated page was measured — the comparison would be vacuous").toBeGreaterThan(2);
-  /* ⚠️ THE PEERS MUST AGREE WITH EACH OTHER FIRST, or "the trial matches the peers" is satisfied by
-     a census in which every page differs. */
-  expect([...new Set(peers.map((r) => r.sticky))], `untreated pages disagree about their band's positioning: ${peers.map((r) => `${r.name}→${r.sticky}`).join(" | ")}`)
-    .toHaveLength(1);
-  for (const t of trials) {
-    expect(t.sticky, `${t.name}: its band's positioning differs from untreated pages — the trial changed behaviour`).toBe(peers[0].sticky);
-    expect(t.scroller, `${t.name}: it stopped declaring where it scrolls`).toBeTruthy();
   }
 });
 
-
-/**
- * ══ THE TINT FADES, IT DOES NOT STEP ══════════════════════════════════════════════════════════
- *
- * ⚠️ A NON-MONOTONIC PAIR OF GRADIENT STOPS IS NOT AN ERROR — CSS CLAMPS THE LATER ONE UP TO ITS
- * PREDECESSOR, and the result is a hard vertical line where a fade was written. It happened here:
- * the two stops arrived transposed, both resolved to 458, and the band painted solid 242,228,221 to
- * offset 450 and 253,249,246 at 458. Every declaration was valid, the build was green, and the only
- * way to see it was to look.
- *
- * ⚠️ SO THE CLAIM IS THE SHAPE OF THE TRANSITION, NOT THE STOP VALUES. Sampling the row across the
- * tint's own range, the biggest single step between adjacent samples must be a small fraction of
- * the whole change — a fade spreads its difference over its length, a clamped pair delivers all of
- * it between two neighbouring pixels. Asserting the token values instead would pass on exactly the
- * fault, because the values were right and their ORDER was not.
- */
-/**
- * ══ THE 47px TITLE'S LINE BOX ═════════════════════════════════════════════════════════════════
- *
- * ⚠️ NOT `scrollHeight === clientHeight`, AND THAT IS A CORRECTION RATHER THAN A SHORTCUT. On an
- * `overflow: visible` box `scrollHeight` reports the union of the content box and anything spilling
- * out of it, and Playfair's ascent plus descent exceed the line box at any leading below ~1.15 —
- * measured here, the title reads 62 against 61 at a leading of 1.30 with nothing clipped anywhere.
- * That reading is a false red on a correct page, and taking it at face value would have "fixed" a
- * fault that does not exist.
- *
- * ⚠️ THE INSTRUMENT THAT IS ALWAYS RIGHT IS INK AGAINST A CLIPPING ANCESTOR: the union of the
- * element's own text rects, against the box of the first ancestor whose overflow is not visible.
- * `.wpg-mast` really does clip on a Type B page — it is the fold's own animation — so the question
- * is a real one, and this is the only form that answers it.
- */
-/**
- * ⚠️ ONE POSTURE, FOR THE REASON STATED AT THE CASE ABOVE: the settle is deleted, so a "settled"
- * reading is of a masthead that has left the viewport — and the ink of an element above the
- * scrollport is outside its clipping ancestor by construction, which is a true statement about
- * nothing. Measured red that way: "the title's ink overflows its clipping ancestor by 340.5px".
- */
-{
- for (const trial of TRIAL_ROUTES) {
-  test(`⚠️ THE TITLE'S INK IS NOT CLIPPED — ${trial.name}`, async ({ page }) => {
-    await openRoute(page, trial.route, { width: 1440, height: 900 });
-    await liftMotionSuppression(page);
-    await page.waitForTimeout(700);
-    const out = await page.evaluate((c) => {
-      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-      const wsh = g.querySelector(".wsh") as HTMLElement;
-      return [".wsh-title", ".wsh-sub"].map((sel) => {
-        const el = wsh.querySelector(sel) as HTMLElement | null;
-        if (!el || !el.getBoundingClientRect().height) return { sel, absent: true } as any;
-        let top = Infinity, bot = -Infinity;
-        const walk = (n: Node) => {
-          if (n.nodeType === 3 && (n.textContent || "").trim()) {
-            const rg = document.createRange(); rg.selectNodeContents(n);
-            for (const r of rg.getClientRects()) if (r.height > 0) { top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); }
-          }
-          n.childNodes.forEach(walk);
-        };
-        walk(el);
-        let anc: HTMLElement | null = el.parentElement, clip: any = null;
-        while (anc) {
-          const cs = getComputedStyle(anc);
-          if (!/^visible/.test(cs.overflowY) || !/^visible/.test(cs.overflowX)) {
-            const b = anc.getBoundingClientRect();
-            clip = { cls: String(anc.className).slice(0, 30), top: b.top, bot: b.bottom };
-            break;
-          }
-          anc = anc.parentElement;
-        }
-        const own = getComputedStyle(el);
-        return { sel, fs: own.fontSize, lh: own.lineHeight, ink: { top, bot }, clip,
-                 over: clip ? Math.max(0, +(clip.top - top).toFixed(1), +(bot - clip.bot).toFixed(1)) : 0 };
-      });
-    }, trial.cls);
-    console.log(`\n══ TITLE INK vs CLIPPER — ${trial.name}\n` +
-      out.map((o: any) => o.absent ? `   ${o.sel}: absent` :
-        `   ${o.sel.padEnd(11)} ${o.fs}/${o.lh} · ink ${o.ink.top.toFixed(1)}→${o.ink.bot.toFixed(1)} · clipper ${o.clip ? `${o.clip.cls} ${o.clip.top.toFixed(1)}→${o.clip.bot.toFixed(1)}` : "none"} · over ${o.over}`).join("\n"));
-    const present = out.filter((o: any) => !o.absent);
-    expect(present.length, "neither the title nor the description rendered — nothing was checked").toBeGreaterThan(0);
-    for (const o of present as any[]) {
-      expect(o.over, `${trial.name}: ${o.sel}'s ink overflows its clipping ancestor (${o.clip?.cls}) by ${o.over}px at ${o.fs}/${o.lh}`).toBeLessThanOrEqual(0.5);
-    }
-  });
- }
-}
-
-
-test("⚠️ NO TRIAL PAGE PAINTS A GROUND — the masthead's ground is the window's", async ({ page }) => {
-  /**
-   * ⚠️ THIS REPLACES THE TINT-FADE CASES, whose subject is deleted. They asserted the SHAPE of a
-   * horizontal tint — the biggest step between adjacent samples against the total change, with
-   * monotonic stops asserted first — on a page that had one. The rebuild put every masthead on the
-   * window's own plain ground, so there is no gradient left to check the shape of, and the honest
-   * successor is the absence.
-   *
-   * ⚠️ ASSERTED OVER `TRIAL_ROUTES`, never a page typed here. The tint outlived the accent bar by a
-   * phase because a list said one page still had it; a claim over the whole set cannot go stale
-   * the same way. (Two pages until the Query Centre left the trial with v11; one now.)
-   */
-  for (const t of TRIAL_ROUTES) {
-    await openRoute(page, t.route, { width: 1440, height: 900 });
-    await liftMotionSuppression(page);
-    await page.waitForTimeout(500);
-    const r = await page.evaluate((c) => {
-      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-      const ch = g.querySelector(".wpg-chrome") as HTMLElement;
-      const cs = getComputedStyle(ch);
-      const d = document.createElement("div");
-      d.style.color = cs.getPropertyValue("--ws-window").trim();
-      ch.appendChild(d); const ground = getComputedStyle(d).color; d.remove();
-      return { img: cs.backgroundImage, bg: cs.backgroundColor, ground };
-    }, t.cls);
-    expect(r.img, `${t.name}'s band still paints a gradient (${r.img}) — the ground is meant to be plain`).toBe("none");
-    expect(r.bg, `${t.name}'s band is not on the window's own ground`).toBe(r.ground);
+test("§3.1 · a page with no drawing reserves nothing for one", async ({ page }) => {
+  for (const route of WITHOUT_ART) {
+    await open(page, route, 1440);
+    const a = await art(page);
+    expect(a, `${route}: no header`).toBeTruthy();
+    expect(a!.has, `${route}: an empty art well was reserved`).toBe(false);
   }
 });
-

@@ -652,7 +652,31 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
   brief says 25px/1.32.** Measured in the rendered mockup. A reasoned value in prose beats an
   unreasoned one in an artefact; `text-wrap: balance` survived there only by accident.
 
-## The page masthead — ONE FORMAT, ONE BEHAVIOUR (⚠️ SUPERSEDES "Header types — canonical" in full, 30 Aug; refs `174-pinned-chrome-options.html`, `175-sticky-masthead-chevron.html`, `collapse-transition.html` option B)
+## The page header — PageHeader, full or compact, and there is no breadcrumb (page header v1, 26 Sep; ref `design-refs/page-headers-v6.html`)
+- **Every workspace page opens with `PageHeader`, full or compact; there is no breadcrumb.** `full`
+  is the open header — eyebrow · 56px title · intro · actions · art — on the Query Centre and (once
+  converted) the Contact list. `compact` is every other workspace route with a title. The Dashboard,
+  `/manuscripts` and the settings chassis are out.
+- **⚠️ THE 18px BELOW THE BAR IS STATED ONCE, ON THE HEADER.** A page that pays its own top inset
+  adds to it — which is ten pages opening at ten heights. The Query Centre's own 11px is deleted for
+  exactly this reason.
+- **⚠️ ONE CONTENT COLUMN: `max-width: 1360px`, `padding-inline: clamp(28px, 3.2vw, 52px)`,
+  `margin-inline: auto`, `box-sizing: border-box` — AND THE GUTTER IS INSIDE THE CAP.** The form it
+  replaced was `min(measure, 100% − 2 × gutter)`, where the cap bounded the CONTENT and the gutter
+  came off the outside, so past the cap the content ran the full 1360 and the gutter did nothing.
+  `3.2vw` is of the WINDOW, never the main area, or it drifts from the bar whenever the sidebar
+  collapses. **Exactly one element pays it**: a full-bleed band and the masthead inside it both
+  paying put every compact page 35px right of every full one.
+- **⚠️ THE BAR IS NOT IN THE SCROLL CONTAINER, so it takes no `position: sticky`.** `.ws-main` is a
+  flex column holding the bar and then `.ws-winwrap`; every page's scroller lives inside the wrap.
+  A sticky there is a declaration that can never do anything. Its scrolled shadow is derived from
+  `scrollTop` on a **capture-phase** listener at the wrap — `scroll` does not bubble and every page
+  owns a different scroller — and reset on a route change.
+- **⚠️ "OPENS IDENTICALLY" IS A CLAIM ABOUT BOTH AXES.** `§4.5` compared only vertical offsets and
+  was green while every compact page opened 35px to the right. Where two sets each agree internally,
+  assert that they agree with EACH OTHER too.
+
+## The page masthead — ONE FORMAT, ONE BEHAVIOUR (⚠️ SUPERSEDED IN FULL by "The page header" above, 26 Sep — kept as history; the `.wsh` markup, the marks and the settle it describes are gone from live code. 30 Aug; refs `174-pinned-chrome-options.html`, `175-sticky-masthead-chevron.html`, `collapse-transition.html` option B)
 
 **Every masthead behaves identically: it is the first thing in the scroll row, it scrolls away as content, and a 46px collapsed bar takes over.** No sticky slab, no settle, no Hide, no chevron, no fold, no per-page arrangement — and no partition, because a partition needs two behaviours and there is one.
 
