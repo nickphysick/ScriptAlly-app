@@ -534,15 +534,11 @@
    inside can take a definite height and scroll internally. `shrink:0` is what stops a TALL page
    being squeezed to fit — with shrink allowed it would compress instead of overflowing, and the
    card would never scroll at all. `basis:auto` keeps content height as the starting point. */
-/* ⚠️ THIS IS THE GROUND ANYONE ACTUALLY SEES, AND `.ws-window` IS NOT. `.ws-work` fills the window
-   on every page, so the window's own fill is masked almost everywhere — recolouring `.ws-window`
-   alone changes nothing on screen and leaves every fade resolving into a colour no page displays.
-   Browser-measured on all ten pages: the paint chain under the content is `.ws-work #ffffff ←
-   .ws-window`, with nothing else between them.
-   ⚠️ SO THE TWO MOVE TOGETHER, ALWAYS. They are one surface in two elements — the window draws the
-   frame and the radius, this fills it — and a difference between them can only ever show as a seam.
-   `--tdg-ground` in todoGroups.css is a third reader of the same value and is locked against it. */
-.ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: var(--ws-window); }
+/* ⚠️ v3 (D7): TRANSPARENT — the page sits straight on the page ground, with no card behind it. This
+   element and the window used to be one white surface in two elements; both are transparent now, and
+   the fades that resolved INTO that surface (`.wpg-hem`, `.wpg-dock`, `.tpl-hem`, `--tdg-ground`,
+   `--clv-ground`) resolve into `--ws-page` instead (ruling 1). */
+.ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: transparent; }
 /* ⚠️ FIXED-VIEWPORT OPT-IN (Query Centre) — and `min-height: 0` ALONE DOES NOTHING HERE.
    The blocker on the base rule is `flex-shrink: 0` (the `0` in `flex: 1 0 auto`): the wrapper can
    never shrink below its content, so min-height is never consulted. Measured at a 720px viewport
@@ -763,7 +759,7 @@
 .ws-grow { flex: 1 1 auto; min-width: 0; }
 /* ⚠️ v3: THE DASHBOARD'S BAR IS NO LONGER LAID OVER ITS SCROLLER — `--dash-bar-h`, the absolute
    placement, the measure-padding and the transparent-until-scrolled ground are retired together.
-   The bar is in the flow on every route; `oneScreen.css` reads `--dash-bar-h` with a 0px fallback. */
+   The bar is in the flow on every route; the dashboard's page reads the frame's `--ws-frame-top` instead. */
 /* ── the collapse toggle — at the sidebar/content seam, first in the bar (sidebar-collapse pack).
    It does not move between states: same slot, same size, both directions. The glyph's left-column
    fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
@@ -849,55 +845,19 @@
    anchor, the absolutely-placed panel, its entrance keyframe and the button's own fill. Each page's
    primary is where that page makes something. */
 
-/* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
-   its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
-   off screen on the first wheel, at which point it is just a border. */
-/**
- * ⚠️ THE RIM IS AN ::after OVERLAY, MANDATORY — not a precaution.
- *
- * The band is a child with an OPAQUE background at the top of this rounded, clipping window. A
- * child's background is clipped to the BORDER box, not the padding box, so it paints over the
- * window's 1px border along every straight edge it touches, leaving only the corner arcs. Proven
- * by test on the dashboard cards (see CLAUDE.md); an inset box-shadow on this element fails the
- * same way, because inset shadows paint BELOW descendants. Only an overlay above them survives.
- *
- * The border stays for geometry — removing it shifts every page's contents by 1px.
- */
-.ws-window { position: relative; }
-.ws-window::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--ws-edge);
-  pointer-events: none;
-}
-/* ⚠️ THE GROUND IS A TOKEN AND IT IS NOT WHITE. Five other places resolve a gradient or a
-   translucent fill INTO this surface (both `.wpg-hem`s, `.wpg-dock`, `.tpl-hem`, `--tbd-ground`),
-   and each of them was a hand-written `#ffffff` matching this one by coincidence. A literal here
-   is the one that makes all five wrong at once — and wrong INVISIBLY, because a fade to a
-   near-match reads as a pale stripe rather than as a colour anyone can name. */
-/* ⚠️ THE WRAPPER HOLDS THE COLUMN'S SLOT AND THE WINDOW FILLS IT (pinned chrome, §3) — see the note
-   in `WorkspaceShell.tsx`. It exists so the fold's chevron can straddle the window's top border
-   without being clipped by the radius or interrupting the border's run. */
+/* ══ THE PAGE FRAME — app shell v3 (D7; ref `.win`) ══
+   ⚠️ THE WINDOW HAS DISSOLVED, ON EVERY ROUTE. No fill, no border, no radius, no shadow and no rim: the
+   page sits straight on the page ground, and the only things between it and the chrome are the
+   sidebar's hairline and the bar's. It was a white 16px-radius card with a 1px edge, a two-stop shadow
+   and an inset `::after` rim, dissolved route by route (the dashboard, the Query Centre, settings);
+   one rule does it for all of them now, and the three per-mode dissolvers are deleted with the radius
+   and border tokens nothing else read. The ELEMENT stays: it is the box `.ws-wbody` — the scroller,
+   `#app-stage-scroll` — sizes against. The wrapper holds the column's slot and the window fills it. */
 .ws-winwrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .ws-window {
-  /**
-   * ⚠️ THE RADIUS AND THE BORDER ARE TOKENS BECAUSE ANYTHING SITTING AT THIS BOX'S TOP EDGE HAS TO
-   * DERIVE ITS OWN CURVE FROM THEM. A control or a rule drawn flush inside the window needs the
-   * INNER radius — `radius - border` — and computing that from two literals typed somewhere else is
-   * the "literal another element owns" fault this file already records twice. They are the same two
-   * values, read by their own rule.
-   *
-   * ⚠️ AND A `calc()` OVER AN UNDEFINED CUSTOM PROPERTY IS THE GUARANTEED-INVALID VALUE, so the
-   * whole declaration reading it is DROPPED — silently, with the rule looking correct. That is what
-   * would have happened to the Packages accent bar's `border-radius` had these stayed literals.
-   */
-  --ws-window-radius: 16px;
-  --ws-window-border: 1px;
-  flex: 1; min-height: 0; background: var(--ws-window);
-  border: var(--ws-window-border) solid var(--ws-edge); border-radius: var(--ws-window-radius);
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 8px 26px rgba(58, 28, 20, 0.07);
+  position: relative;
+  flex: 1; min-height: 0;
+  background: transparent; border: 0; border-radius: 0; box-shadow: none;
   overflow: hidden; display: flex; flex-direction: column;
 }
 /* ⚠️ NO PADDING HERE, deliberately. The ref pads its own demo content; every page in this app
@@ -906,9 +866,7 @@
 .ws-wbody { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
 
 @media (max-width: 767px) {
-  /* below md the window IS the page — the frame would only steal width */
-  .ws-main { padding: 0; }
-  .ws-window { border-radius: 0; border: 0; box-shadow: none; }
+  /* below md the page is the viewport; the mobile bar replaces this one */
   .ws-pagebar { display: none; }
 }
 
@@ -1150,28 +1108,8 @@
     visibility 0s linear calc(0.12s * var(--set-k));
 }
 
-/* ── the window: its surface goes, the element stays ─────────────────────────────────────────
-   ⚠️ `background-color`, NEVER THE `background` SHORTHAND. The shorthand resets every background
-   longhand, so an override written that way would silently take an image with it the day one is
-   added — the fault this stylesheet's own note records under the masthead wash.
-
-   ⚠️ AND `overflow: hidden` STAYS. It is the scroller's clip, not decoration; the surface is what
-   dissolves, not the box. */
-.ws-window {
-  transition:
-    background-color calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)),
-    border-color calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)),
-    box-shadow calc(0.24s * var(--set-k)) ease;
-}
-.ws-window::after { transition: opacity calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)); }
-.set-mode .ws-window {
-  background-color: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  transition-delay: 0s;
-}
-/* the inset highlight — its own element, so its own fade */
-.set-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
+/* ── the window: v3 dissolved it on every route (the page frame, above), so settings mode has no
+   surface of its own left to fade. */
 
 /* ── the bar: Search and New leave, Back to app arrives ──────────────────────────────────────
    ⚠️ THE ROW'S SPACING MOVED FROM `gap` TO PER-CHILD `margin-left` (then 10px, 12 now). A gap is
@@ -1296,6 +1234,10 @@
  * computed style across routes) rightly reported two properties the rail had gained on this route.
  */
 .dash-mode .ws-main { --dash-page-max: 1440px; --dash-page-pad: 22px; }
+/* ⚠️ THE PAGE FRAME'S TOP INSET, AS A TOKEN (app shell v3, the ref's `.win` 28px). Every other page
+   brings its own inset through its grid's gutter; the dashboard's top offset USED to be the height of
+   the bar that lay over it, so with the bar in the flow it reads the frame's 28px instead. */
+.ws-main { --ws-frame-top: 28px; }
 /* ⚠️ ON A PHONE THE PAD TIGHTENS, AND IT DOES SO HERE — on the token — so the row above and the page
    step together. The page's own ≤640 padding was 14px before the measure existed. */
 @media (max-width: 640px) {
@@ -1305,18 +1247,6 @@
    the bar (which must be the page's colour) and every fade under it resolve the same value. Both
    halves are redeclared here because `--ws-page` is computed at `:root` from the channels. */
 .dash-mode .ws-main, .ground-mode .ws-main { --ws-page-rgb: 244, 240, 234; --ws-page: rgb(var(--ws-page-rgb)); }
-.dash-mode .ws-window {
-  background-color: transparent;
-  border-color: transparent;
-  /* ⚠️ NO BORDER AT ALL, NOT A TRANSPARENT ONE: the bar computes the page's edges from `.ws-main`'s
-     width, and a 1px border would put the page's box a pixel inside the bar's on each side. */
-  border-width: 0;
-  box-shadow: none;
-  border-radius: 0;
-  transition-delay: 0s;
-}
-.dash-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
-.dash-mode .ws-work { background: transparent; }
 
 /**
  * ══ `ground-mode` — A PAGE WHOSE CARDS SIT ON THE OPEN GROUND (Query Centre v11, 19 Sep) ══
@@ -1327,61 +1257,13 @@
  * ⚠️ ON `.ws-main`, NOT ON THE SHELL'S ROOT, for the reason the dashboard's tokens are: the rail
  * gate diffs the rail's whole computed style across routes and would rightly report a gain.
  */
-.ground-mode .ws-window { background-color: transparent; border-color: transparent; border-width: 0; box-shadow: none; border-radius: 0; transition-delay: 0s; }
-.ground-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
-.ground-mode .ws-work { background: transparent; }
 
 /* ⚠️ v3: THE QUERY CENTRE'S NARROW-BAR VARIANT (v65 §2) IS RETIRED. It dropped the save whisper and
    let the search pill shrink; the whisper is gone on every route and the search is a 36px icon. */
 
-/**
- * ══ THE SIDEBAR BOUNDARY — A SHADOW CAST *BY* THE RAIL (v33.2, Phase 3) ══
- *
- * ⚠️ THE DIRECTION IS THE WHOLE POINT, AND v33.1 HAD IT BACKWARDS. The scrim was on
- * `.dash-mode .ws-window::before`. Measured: the rail's right edge is x = 224 and the window's
- * left edge is x = 246, so the effect began 22px INSIDE the page — a band down the content's own
- * edge, which reads as the page being the raised object sitting on top of the rail. Same pixels,
- * opposite meaning, and the difference is visible.
- *
- * ⚠️ `.ws-main` IS THE ELEMENT BECAUSE IT IS THE ONE THAT IS FLUSH. It is the rail's flex sibling,
- * so its border box starts exactly where the rail's ends — 224 at 1536, 1710, 1920 and 2520 alike.
- * `left: 0` therefore begins precisely at the rail's right edge, with nothing to keep in step.
- * The 18px falls across the column's own 22px left padding — the desk between the two capsules —
- * and is gone before the window begins. A shadow falls away from its caster; it does not sit in a
- * band, and it does not need to reach the content to say the rail is above it.
- *
- * ⚠️ `position: relative` IS SCOPED TO `.dash-mode`, NOT ADDED TO `.ws-main` OUTRIGHT. `.ws-main`
- * is static on every route today; making it a containing block app-wide would re-anchor every
- * absolutely-positioned descendant on ten pages, silently, for one route's decoration.
- *
- * ⚠️ Z-INDEX 0, NOT THE 2 THE PACK NAMES. The pack's 2 is chosen against cards at 3, which is the
- * REF's numbering; `.os-card` in this app is `z-index: 1`, so 2 would put the scrim ABOVE every
- * card — the opposite of what the pack asks for in the same sentence. 0 is the value that
- * satisfies the stated rule here: above the ground, below every card. And it is not negative,
- * because a negative-z pseudo-element paints behind the BACKGROUNDS of every ancestor up to the
- * nearest stacking context — recorded twice in this repo already.
- *
- * ⚠️ NO `min-height: 100vh`, DELIBERATELY. `.ws-main` measures 1108.3 in a 1150 viewport — the
- * beta strip sits above the shell — so `100vh` would over-claim by 41.7px and push the last of the
- * page below the fold with nothing to scroll it. That is the Tasks chassis's unreachable 21px, to
- * the letter. `top: 0; bottom: 0` already spans the column's full height, which IS the full window
- * below the strip, at any page length: the column is a flex child that fills the chassis.
- */
-.dash-mode .ws-main { position: relative; }
-.dash-mode .ws-main::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 18px;
-  background: linear-gradient(
-    90deg,
-    rgba(42, 31, 24, 0.07),
-    rgba(42, 31, 24, 0.028) 45%,
-    rgba(42, 31, 24, 0)
-  );
-  pointer-events: none;
-  z-index: 0;
-}
+/* ⚠️ THE DASHBOARD'S SIDEBAR SEAM SHADOW (v33.2) IS RETIRED (app shell v3, D2). An 18px gradient cast
+   from the rail's edge across the column was a second divide beside the sidebar's hairline; v3 has
+   exactly one. */
 
 /* ⚠️ THE CRUMB GOES; THE ROW STAYS, AND THE ACTIONS STAY IN IT. Search, Feedback and New are not in
    the ref because the ref never drew the nav — they are chrome above the hero, and they are already

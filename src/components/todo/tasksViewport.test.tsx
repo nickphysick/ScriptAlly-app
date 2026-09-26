@@ -166,15 +166,17 @@ describe("⚠️ the fade hem: sticky, weightless, and only where content contin
    * It was written as a literal `#ffffff` back when the window was white; it now reads the ground
    * token, so it cannot drift from the surface it is supposed to disappear into.
    */
-  it("⚠️ IT RESOLVES INTO THE WINDOW'S GROUND — never a literal", () => {
+  /* RETARGETED (app shell v3, 26 Sep, ruling 1): the window dissolved, so the hem resolves into the
+     PAGE ground (`--ws-page`) — the same law, one token along. */
+  it("⚠️ IT RESOLVES INTO THE PAGE'S GROUND — never a literal", () => {
     const hem = rule(css, ".tpl-hem {");
     expect(hem, "the anchor this case reads is gone").toContain("background:");
     expect(hem, `the hem paints a hex literal — it fades to a colour the window no longer has: ${hem.trim()}`)
       .not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(hem, "the hem fades through white — the near end and the far end are no longer one colour")
       .not.toMatch(/\b255,\s*255,\s*255\b/);
-    expect(hem).toContain("var(--ws-window)");
-    expect(hem).toContain("rgba(var(--ws-window-rgb), 0)");
+    expect(hem).toContain("var(--ws-page)");
+    expect(hem).toContain("rgba(var(--ws-page-rgb), 0)");
   });
 
   it("⚠️ HEM IFF OVERFLOW — a hem over a list that fits fades to nothing and lies", () => {
@@ -1081,9 +1083,11 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * names. Painting nothing and leaving the token alone would put a heading's ground a shade off
    * the surface actually behind it.
    */
-  it("the rail repoints --ws-window even though it paints nothing itself", () => {
+  /* RETARGETED (app shell v3, ruling 1): the heading and the hem read `--ws-page` now, so that is the
+     pair the white rail redeclares. */
+  it("the rail repoints --ws-page even though it paints nothing itself", () => {
     const rail = rule(splitCss, ".tdw-rail {");
-    expect(rail).toContain("--ws-window-rgb");
+    expect(rail).toContain("--ws-page-rgb");
     expect(rail).toContain("background: transparent");
     expect(rail).not.toMatch(/background:\s*#fff/);
     /* ⚠️ AND THE WORKSPACE PAINTS NOTHING AT ALL NOW (visual rebuild). It used to carry the
@@ -1093,7 +1097,7 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(rule(splitCss, ".tdw-work {")).toContain("background: transparent");
     /* the tie this depends on, asserted at its source rather than assumed */
     expect(readFileSync(join(here, "todoGroups.css"), "utf8"))
-      .toContain("--tdg-ground: var(--ws-window)");
+      .toContain("--tdg-ground: var(--ws-page)");
   });
 
   /**

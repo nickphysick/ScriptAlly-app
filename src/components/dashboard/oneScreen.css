@@ -109,9 +109,10 @@
   width: 100%;
   max-width: calc(var(--dash-page-max) + 2 * var(--dash-page-pad));
   margin-inline: auto;
-  /* ⚠️ THE TOP PADDING IS THE SHELL'S BAR (the v34 mockup): on this route the scroller runs up under the
-     bar, so the page starts itself below it. `0px` wherever the token is not declared. */
-  padding: var(--dash-bar-h, 0px) var(--dash-page-pad) 44px;
+  /* ⚠️ THE TOP PADDING IS THE SHELL'S PAGE FRAME (app shell v3). The bar used to lie over this scroller
+     and the page padded itself down by the bar's height; the bar is in the flow now, so the page starts
+     the frame's 28px below it (`--ws-frame-top`, declared by the shell). `0px` wherever it is not. */
+  padding: var(--ws-frame-top, 0px) var(--dash-page-pad) 44px;
   min-width: 0;
 }
 
@@ -692,15 +693,14 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    Behind the cards, inert, absolute inside the content — it scrolls with the page — and FREE TO RUN UP
    BEHIND THE TOP BAR (the v34 mockup, 19 Sep).
 
-   ⚠️ HOW IT GETS BEHIND THE BAR. The bar is the shell's and sits above the page; on this route the
-   shell extends the page's scroller UP under it and pads the page down by the bar's height
-   (`--dash-bar-h`, workspaceShell.css). So this box starts at the top of the scroller — which is the
-   top of the column, behind the bar — and nothing here needs to know the bar exists. v33's 28px fade
-   at the scroller's edge is gone with the edge.
+   ⚠️ IT NO LONGER RUNS BEHIND THE BAR (app shell v3). The bar is in the flow and opaque on every route,
+   so this box starts at the top of the scroller, below the bar's hairline, and the image's top is cut
+   there. The placement below is unchanged except that the page's top offset is the frame's
+   (`--ws-frame-top`) rather than the retired bar height.
 
    ⚠️ PLACED FROM THE GREETING, IN THE REF'S OWN NUMBERS, MEASURED: the ref's image is 500px wide,
    18px right of and 162px above "Hello" (58/−66 from a column whose greeting starts at 40/96). Here
-   the greeting starts `--dash-bar-h + --dash-greet-top` down the content and `--dash-page-pad` in. */
+   the greeting starts `--ws-frame-top + --dash-greet-top` down the content and `--dash-page-pad` in. */
 .os-content { position: relative; }
 .os-content > * { position: relative; z-index: 1; }
 .os-content > .os-greetshadow {
@@ -711,7 +711,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-greetshadow img {
   position: absolute; display: block; width: 500px; height: auto; opacity: 0.08;
   left: calc(var(--dash-page-pad, 22px) + 18px);
-  top: calc(var(--dash-bar-h, 0px) + var(--dash-greet-top, 8px) - 162px);
+  top: calc(var(--ws-frame-top, 0px) + var(--dash-greet-top, 8px) - 162px);
 }
 
 /* ══ §6d · A TOP-ROW CARD WITH NOTHING IN IT (v33; `closed-empty.html`, option A) ══════════════

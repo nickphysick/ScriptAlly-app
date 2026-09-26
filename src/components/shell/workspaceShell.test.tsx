@@ -110,22 +110,20 @@ describe("one ground, one window", () => {
   /* ⚠️ AND THE WINDOW IS NO LONGER THE WHITE ONE — the CARDS are. Its ground stepped back to
      #fefcfa so a card can sit ON it; a literal here would silently break the five surfaces that
      resolve a gradient or a translucent fill into this one. */
-  it("the window is the ground surface: the token, radius, hairline, soft raise", () => {
+  /* ⚠️ RETARGETED (app shell v3, 26 Sep, D7): the window was the white ground surface — token, 16px
+     radius, hairline, soft raise. It has DISSOLVED on every route: no fill, border, radius, shadow or
+     rim, and the radius/border tokens nothing else read are deleted with it. The rendered claim is
+     shellV3.measure L7; this pins that the one rule states the dissolve and nothing re-frames it. */
+  it("the window has dissolved: no fill, no border, no radius, no shadow, no rim", () => {
     const w = rule(".ws-window");
-    expect(w, "the window's ground is a literal again — the hems, the dock and the two internal fades all resolve into it and would each need the same literal")
-      .toContain("background: var(--ws-window)");
-    expect(w).not.toContain("#ffffff");
-    /* ⚠️ THE CLAIM IS THE VALUE AND THE INDIRECTION, NOT THE SPELLING. This read `border-radius:
-       16px` and `border: 1px solid var(--ws-edge)` and went red when the two literals became tokens
-       — a refactor that changed nothing about the window and everything about whether anything else
-       can derive from it. Both halves are asserted, so the values are still pinned AND a rule that
-       stops reading them fails: `--ws-window-radius` exists to be read by things drawn flush inside
-       this box, and a token nothing reads is worth less than the literal it replaced. */
-    expect(w).toContain("--ws-window-radius: 16px");
-    expect(w).toContain("--ws-window-border: 1px");
-    expect(w).toContain("border-radius: var(--ws-window-radius)");
-    expect(w).toContain("border: var(--ws-window-border) solid var(--ws-edge)");
-    expect(w).toContain("box-shadow:");
+    expect(w).toContain("background: transparent");
+    expect(w).toContain("border: 0");
+    expect(w).toContain("border-radius: 0");
+    expect(w).toContain("box-shadow: none");
+    expect(cssRules).not.toContain(".ws-window::after");
+    expect(cssRules).not.toContain("--ws-window-radius");
+    expect(cssRules).not.toMatch(/\.(dash|ground|set)-mode \.ws-window/);
+    expect(rule(".ws-work")).toContain("background: transparent");
   });
 
   /* ⚠️ RETARGETED (audit pack P6), and the retarget FINISHES this rule rather than relaxing it.

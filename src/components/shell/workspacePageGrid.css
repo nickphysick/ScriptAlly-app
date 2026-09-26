@@ -277,7 +277,8 @@
   grid-row: 2;
   grid-column: 1;
   border-top: 1px solid var(--ws-edge);
-  background: rgba(var(--ws-window-rgb), 0.86);
+  /* v3: the window dissolved, so the dock's translucent ground is the PAGE's (ruling 1) */
+  background: rgba(var(--ws-page-rgb), 0.86);
   backdrop-filter: blur(6px);
 }
 
@@ -322,7 +323,7 @@
  * ⚠️ THE BOTTOM HEM STAYS AND IS A DIFFERENT CLAIM: content below the fold is hidden by the fold and
  * by nothing else, so a fade there still says the only thing it ever said.
  */
-.wpg-hem--bot { align-self: end; background: linear-gradient(to top, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
+.wpg-hem--bot { align-self: end; background: linear-gradient(to top, var(--ws-page) 12%, rgba(var(--ws-page-rgb), 0)); }
 .wpg-hem.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the crossfade goes, exactly as the header's collapse does */
@@ -612,8 +613,8 @@
    */
   position: relative;
   box-sizing: border-box;
-  /* opaque, or the content passes through the page's own title */
-  background: var(--ws-window);
+  /* opaque, or the content passes through the page's own title — the PAGE ground since v3 (ruling 1) */
+  background: var(--ws-page);
   border-bottom: 1px solid var(--ws-edge);
   /* ⚠️ NO MARGIN — THE GAP IS THE SPACER'S HEIGHT (see `.wpg-reclaim`). A `margin-bottom` here
      COLLAPSED with the content's own `margin-top` at rest and stopped collapsing the moment the
@@ -667,7 +668,7 @@
  *
  */
 .wpg > .wpg-scroll > .wpg-chrome {
-  background-color: var(--ws-window);
+  background-color: var(--ws-page);
 }
 /**
  * ══ THE SETTLE IS DELETED — ONE POSTURE, NOT TWO ══════════════════════════════════════════════
@@ -730,7 +731,7 @@
   position: sticky;
   top: var(--bar-h);
   z-index: 18;
-  background: var(--ws-window);
+  background: var(--ws-page);
   /* ⚠️ THE HAIRLINE ONLY WHILE IT HOLDS. At rest the header's own closing line is directly above it
      and a second one 50px below would be two boundaries around a row that is not a band. It fades
      in on the same signal the bar arrives on — one state, so the two cannot disagree. */
@@ -888,7 +889,7 @@
   z-index: 20;
   height: var(--bar-h);
   margin-bottom: calc(var(--bar-h) * -1);
-  background: var(--ws-window);
+  background: var(--ws-page);
   display: flex;
   align-items: center;
   pointer-events: none;

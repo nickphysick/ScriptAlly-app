@@ -181,8 +181,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        away as content and the collapsed bar carries the shadow instead (see `.wpg-bar--on`). */
     const slab = block(".wpg-scroll > .wpg-chrome").replace(/\s+/g, " ");
     expect(slab, "the slab lost its base hairline").toMatch(/border-bottom:\s*1px solid var\(--ws-edge\)/);
+    /* RETARGETED (app shell v3, 26 Sep, ruling 1): the window dissolved, so every ground and fade in
+       this grid — the slab, the toolbar band, the hems and the dock — reads the PAGE ground. */
     expect(slab, "the slab's ground is a literal — it will be wrong the next time the window is retoned")
-      .toMatch(/background:\s*var\(--ws-window\)/);
+      .toMatch(/background:\s*var\(--ws-page\)/);
     expect(cssRules, "the settle's posture class came back — one masthead, one posture")
       .not.toContain("wpg-chrome--stuck");
   });
@@ -320,7 +322,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* the band paints the page's ground, and paints it as a COLOUR — a gradient here would be the
        masthead's wash reaching the toolbar, which §2 exists to prevent */
     expect(block(".wpg-toolband"), "the toolbar's band does not paint the page's ground")
-      .toContain("background: var(--ws-window)");
+      .toContain("background: var(--ws-page)");
     expect(block(".wpg-toolband"), "the toolbar's band paints a gradient — the wash has reached it")
       .not.toContain("gradient");
     const tools = block(".wpg-tools");
@@ -592,15 +594,15 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(b, `${sel} paints a hex literal — it will drift from the window's ground and show as a pale band over content: ${b.trim()}`)
         .not.toMatch(/#[0-9a-f]{3,8}\b/i);
       expect(b, `${sel} paints a bare white — same fault, spelled in rgb`).not.toMatch(/\b255,\s*255,\s*255\b|\bwhite\b/);
-      expect(b, `${sel} does not resolve into the window's ground: ${b.trim()}`).toContain("var(--ws-window)");
+      expect(b, `${sel} does not resolve into the page's ground: ${b.trim()}`).toContain("var(--ws-page)");
       expect(b, `${sel}'s transparent end is not the ground's own channels — it fades through a different colour: ${b.trim()}`)
-        .toContain("rgba(var(--ws-window-rgb), 0)");
+        .toContain("rgba(var(--ws-page-rgb), 0)");
     }
     /* ⚠️ AND THE DOCK, which is the same fault wearing an alpha: `rgba(255,255,255,.86)` is 86% of
        a colour the window no longer has, so it reads as a cold panel over a warm ground. */
     const dock = block(".wpg-dock");
     expect(dock, "the dock has no rule — the anchor this case reads is gone").toContain("background:");
-    expect(dock, `the dock's translucent ground is not the window's channels: ${dock.trim()}`).toContain("var(--ws-window-rgb)");
+    expect(dock, `the dock's translucent ground is not the page's channels: ${dock.trim()}`).toContain("var(--ws-page-rgb)");
     expect(dock, "the dock went back to a white alpha — 86% of a colour the window no longer has")
       .not.toMatch(/\b255,\s*255,\s*255\b/);
   });

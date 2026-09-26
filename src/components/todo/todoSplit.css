@@ -164,12 +164,14 @@
    satisfied while a frame sat between the track and the card.
 
    ⚠️ THE TOKEN REPOINT STAYS AND IS NOT PART OF THE FRAME. `.tdg`'s sticky group heading paints
-   itself with `--tdg-ground`, which IS `var(--ws-window)`; the card's interior is white while the
+   itself with `--tdg-ground`, which IS `var(--ws-page)` since v3; the card's interior is white while the
    ground outside is warm, so without the override a heading would fade through the wrong colour
    INSIDE a white card. That is a fact about the heading, and it outlives the border. */
 .tdw-rail {
-  --ws-window-rgb: 255, 255, 255;
-  --ws-window: rgb(var(--ws-window-rgb));
+  /* v3 (ruling 1): the heading and the hem read the PAGE ground now, so this white card redeclares
+     THAT pair for its interior (both halves — `--ws-page` is computed from the channels at `:root`). */
+  --ws-page-rgb: 255, 255, 255;
+  --ws-page: rgb(var(--ws-page-rgb));
   display: flex;
   flex-direction: column;
   min-height: 0;

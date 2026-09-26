@@ -107,7 +107,10 @@ test("⚠️ the hidden layer is out of the tab order, not merely faded", async 
   expect(stole.taken, "a hidden settings control accepted focus").toBe(0);
 });
 
-test("⚠️ the window's surface dissolves in settings, and is opaque everywhere else", async ({ page }) => {
+/* ⚠️ RETARGETED (app shell v3, 26 Sep, D7 + ruling 6): the window dissolves on EVERY route now, so
+   settings mode has no surface of its own left to dissolve — "opaque everywhere else" is superseded.
+   What survives: in settings, as everywhere, the window paints nothing and the element stays. */
+test("⚠️ the window's surface is dissolved in settings, as it is everywhere else", async ({ page }) => {
   await openRoute(page, "/dashboard", { width: 1440, height: 900 });
   const off = await read(page, ".ws-window");
   await openRoute(page, "/account/profile", { width: 1440, height: 900 });
@@ -117,9 +120,11 @@ test("⚠️ the window's surface dissolves in settings, and is opaque everywher
   /* ⚠️ ASSERTED AS A CHANGE, NOT AS A PINNED COLOUR. A pinned value goes red on every legitimate
      retone and trains the next reader to rebaseline it without looking; "it was opaque and now it
      is not" is the claim, and it survives any palette. */
-  expect(off!.background, "the window should be opaque off-mode").not.toMatch(/rgba\(0, 0, 0, 0\)/);
+  expect(off!.background, "v3: the window is transparent off-mode too").toMatch(/rgba\(0, 0, 0, 0\)/);
   expect(on!.background, "the window's fill did not dissolve in settings").toMatch(/rgba\(0, 0, 0, 0\)/);
-  expect(on!.borderTopColor, "the window's border did not dissolve").toMatch(/rgba\(0, 0, 0, 0\)/);
+  /* v3: the border is gone by WIDTH (`border: 0`), so its colour falls back to currentColor — the
+     width is the claim now, not the colour */
+  expect(on!.borderTopWidth, "the window's border did not dissolve").toBe("0px");
   expect(on!.boxShadow, "the window kept its shadow in settings").toBe("none");
 
   /* ⚠️ THE ELEMENT STAYS. The surface goes; the box does not, because it is the scroller's clip. */
@@ -136,9 +141,11 @@ test("⚠️ the bar swaps its tools — Search and New leave, Feedback and help
       return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && Number(cs.opacity) > 0.01;
     };
     return {
-      search: vis(document.querySelector(".sp-search")),
+      /* app shell v3: the icon search `.ws-search` and the help circle `.ws-help`. `+ New` left the bar
+         on every route in Query Centre v11, so its expectation below is ABSENT in both modes. */
+      search: vis(document.querySelector(".ws-search")),
       neu: vis(document.querySelector(".ws-nbtn")),
-      help: vis(document.querySelector(".sp-help")),
+      help: vis(document.querySelector(".ws-help")),
       back: vis(document.querySelector(".ws-backapp")),
     };
   });
@@ -149,7 +156,7 @@ test("⚠️ the bar swaps its tools — Search and New leave, Feedback and help
   const on = await tools();
 
   expect(off.search, "search should be on the bar off-mode").toBe(true);
-  expect(off.neu, "+ New should be on the bar off-mode").toBe(true);
+  expect(off.neu, "+ New is gone from the bar on every route").toBe(false);
   expect(off.back, "Back to app is visible outside settings").toBe(false);
 
   expect(on.search, "search stayed in settings mode").toBe(false);

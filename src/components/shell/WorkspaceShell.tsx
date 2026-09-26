@@ -723,8 +723,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ⚠️ ONE BAR ON EVERY ROUTE, THE DASHBOARD INCLUDED. The dashboard used to lay this bar
               OVER its scroller, transparent at rest, with a 700px search field and no breadcrumb (the
               v34 mockup). v3 is the app shell, and the ref's bar is the one bar: in the flow, opaque,
-              the icon search, the crumb. The dashboard's page pads itself by `--dash-bar-h`, which is
-              0 now that the bar no longer lies over it.
+              the icon search, the crumb. The dashboard's page starts the frame's 28px below it
+              (`--ws-frame-top`), as the bar no longer lies over it.
 
               ⚠️ NO SAVE WHISPER (D5). "All changes saved" is gone from the shell and every route. It
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing

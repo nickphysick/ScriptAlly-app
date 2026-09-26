@@ -28,7 +28,9 @@
      because someone kept them agreeing; reading `--ws-window` makes the pair structural, so the
      ground can be retoned without this heading being remembered. The cross-file lock in
      `tasksList.test.tsx` stays — it now asserts they read one token rather than one hex. */
-  --tdg-ground: var(--ws-window);
+  /* v3 (ruling 1): the PAGE ground — the window dissolved, so a heading that must match what it sits
+     on reads `--ws-page`, which the To-do split's white rail redeclares for its own interior. */
+  --tdg-ground: var(--ws-page);
 
   /* ⚠️ ONE EASING AND TWO DURATIONS, PAGE-WIDE (P6; sheet 6). 120–160ms for EMPHASIS — a state
      change where nothing moves — and 220–260ms for MOVEMENT. Anything past 300ms is a bug, and

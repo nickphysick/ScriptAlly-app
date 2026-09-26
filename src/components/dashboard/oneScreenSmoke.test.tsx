@@ -137,8 +137,8 @@ describe("§1 · the page", () => {
     expect(c).toContain("box-sizing: border-box");
     expect(c).toContain("max-width: calc(var(--dash-page-max) + 2 * var(--dash-page-pad))");
     expect(c).toContain("margin-inline: auto");
-    /* the v34 mockup: the top padding is the shell's bar — the scroller runs up under it on this route */
-    expect(c).toMatch(/padding:\s*var\(--dash-bar-h, 0px\) var\(--dash-page-pad\) \d+px/);
+    /* v3: the top padding is the shell's page frame (`--ws-frame-top`, 28px), not the retired bar height */
+    expect(c).toMatch(/padding:\s*var\(--ws-frame-top, 0px\) var\(--dash-page-pad\) \d+px/);
     expect(c).not.toContain("--work-max");
     const shellCss = readFileSync(resolve(__dirname, "../shell/workspaceShell.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(shellCss.match(/--dash-page-max:\s*\d+px/g) ?? []).toHaveLength(1);

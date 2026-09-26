@@ -203,7 +203,7 @@
    which is why it reads the ground token rather than the white it was written against. */
 .tpl-hem {
   position: sticky; bottom: 0; height: 28px; margin-top: -28px; display: block;
-  background: linear-gradient(rgba(var(--ws-window-rgb), 0), var(--ws-window));
+  background: linear-gradient(rgba(var(--ws-page-rgb), 0), var(--ws-page));
   pointer-events: none;
 }
 

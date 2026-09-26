@@ -522,30 +522,16 @@ describe("the nav row loads with the page", () => {
  * page's own edge treatment, i.e. the page as the raised object resting on the rail. `.ws-main` is
  * the rail's flex sibling and starts exactly where the rail ends.
  */
+/* ⚠️ RETARGETED (app shell v3, 26 Sep, D2): the dashboard's 18px seam shadow cast from the rail is
+   RETIRED — the sidebar's own hairline is the one divide on every route. What survives from these two
+   cases is the half that was always the point: no boundary is drawn on the window. The rendered claim
+   is shellV3.measure L2. */
 describe("the sidebar boundary", () => {
-  it("⚠️ is on the column that is flush with the rail, not on the window", () => {
-    expect(shellCss).toContain(".dash-mode .ws-main::before {");
-    expect(shellCss).toContain(".dash-mode .ws-main { position: relative; }");
-    /* ⚠️ THE WINDOW'S COPY IS GONE FROM BOTH SHEETS, AND BOTH READS STRIP COMMENTS FIRST — this
-       repo documents every retirement by quoting what it retired, so the prose explaining the move
-       names the very selector the lock forbids. It went red on a correct sheet once already. */
-    const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+  it("⚠️ is the sidebar's own hairline — no seam shadow on the column, none on the window", () => {
+    const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(strip(shellCss)).not.toContain(".dash-mode .ws-main::before");
     expect(strip(shellCss)).not.toContain(".ws-window::before");
     expect(strip(css)).not.toContain(".ws-window::before");
-  });
-
-  it("⚠️ 18px, three stops, inert, and below every card", () => {
-    const at = shellCss.indexOf(".dash-mode .ws-main::before {");
-    const decl = shellCss.slice(at, shellCss.indexOf("\n}", at));
-    expect(decl).toContain("left: 0;");
-    expect(decl).toContain("width: 18px;");
-    expect(decl).toContain("rgba(42, 31, 24, 0.07)");
-    expect(decl).toContain("rgba(42, 31, 24, 0.028) 45%");
-    expect(decl).toContain("rgba(42, 31, 24, 0)");
-    expect(decl).toContain("pointer-events: none;");
-    /* ⚠️ 0, NOT THE PACK'S 2 — `.os-card` here is `z-index: 1`, so 2 would put the scrim ABOVE
-       every card, which is the opposite of what the same sentence asks for. */
-    expect(decl).toContain("z-index: 0;");
-    expect(decl).not.toContain("100vh");
+    expect(strip(shellCss)).toContain("box-shadow: inset -1px 0 0 var(--shell-rule)");
   });
 });

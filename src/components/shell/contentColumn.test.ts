@@ -49,8 +49,12 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     /* ⚠️ THE GROUND IS `--ws-window` (#fefcfa) NOW, NOT #ffffff — white moved to the cards, which
        is what lets them read as objects on the page. The RULE this case protects is unchanged and
        is the only thing it was ever about: painted ONCE, on the window, never per page. */
+    /* ⚠️ RETARGETED AGAIN (app shell v3, 26 Sep, D7): the window dissolved — it paints nothing — and the
+       ground is painted once, by the shell's column, from `--ws-page`. Same rule: painted ONCE, never
+       per page. */
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-window \{[^}]*background: var\(--ws-window\)/s);
+    expect(wsCss).toMatch(/\.ws-window \{[^}]*background: transparent/s);
+    expect(wsCss).toMatch(/\.ws-main \{[^}]*background: var\(--ws-page\)/s);
     expect(shell.includes('background: "var(--shell-canvas)"')).toBe(false);
   });
 
