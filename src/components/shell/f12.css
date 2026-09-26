@@ -1833,12 +1833,12 @@
    override of the grid's token rather than as padding on the page, because `.qc-wpg` and `.wpg`
    land on ONE element at equal specificity and the page's own padding would be a second
    contribution the grid knows nothing about. */
-.qc-wpg { --wpg-gutter: var(--content-gutter-tight); }
-@media (min-width: 1280px) { .qc-wpg { --wpg-gutter: 18px; } }
+/* §2 (page header v1) — the shared centred column replaces this page's own gutter and cap. */
+
 /* ⚠️ THE ONE PAGE THAT CAPS ITS WORK SURFACE, AND IT SAYS SO ONCE. `--work-max` is the shared
    work-surface measure (the dashboard's one-screen reads it too); naming it here puts the masthead,
    the mini bar and the panes on the same edges by construction. */
-.qc-wpg { --wpg-measure: var(--work-max); }
+
 
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that

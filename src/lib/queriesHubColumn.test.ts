@@ -120,8 +120,15 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
        The claim is unchanged and is asserted where the value now lives: this page's work surface is
        the shared token, never a number of its own. */
     expect(body, "the page stopped naming its work measure").not.toContain("max-width: var(--work-max)");
-    expect(f12, "the work measure is not the shared token, or it is not on the grid root")
-      .toContain("--wpg-measure: var(--work-max)");
+    /**
+     * ⚠️ RETARGETED BY §2 (page header v1) — THERE IS ONE COLUMN FOR EVERY WORKSPACE ROUTE.
+     * This required the page to point its work measure at the shared token, because the grid
+     * computed the cap and the gutter in one `min()` and a page wanting a different inset had to
+     * say so. The shared rule is now `max-width: 1360px` with the gutter INSIDE it, so no page
+     * states either — and the surviving claim is that this one still does not, which is what stops
+     * a second cap being re-introduced to contest the column.
+     */
+    expect(f12, "the page states a cap of its own again").not.toContain("--wpg-measure:");
     expect(body, "the frame invented a cap of its own").not.toMatch(/max-width:\s*\d/);
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");

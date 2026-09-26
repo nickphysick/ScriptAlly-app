@@ -335,7 +335,12 @@ describe("the sheet", () => {
      */
     expect(rule(".qcv-group"), "a second cap contests the grid's gutter reduction").not.toMatch(/max-width/);
     expect(rule(".qcv-group"), "…and a second centring with it").not.toMatch(/margin-inline/);
-    expect(css).toMatch(/--wpg-measure: 1480px/);
+    /**
+     * ⚠️ RETARGETED BY §2 (page header v1) — ONE COLUMN FOR EVERY WORKSPACE ROUTE. The page stated
+     * its own cap because the grid computed cap and gutter in one `min()`; the shared rule is now
+     * `max-width: 1360px` with the gutter inside it, so no page states either.
+     */
+    expect(css, "the page states a cap of its own again").not.toMatch(/--wpg-measure:/);
   });
   it("⚠️ the typewriter face is READ from the shell's one token, never named — and the title beats brand.tsx", () => {
     expect(css).not.toMatch(/Special Elite/);

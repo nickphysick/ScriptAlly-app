@@ -39,8 +39,7 @@
 
 /* ── the page frame: the QC's own group discipline (qc-wpg--v11 is the precedent) ───────────── */
 .agl-wpg {
-  --wpg-gutter: 22px;
-  --wpg-measure: 1480px;
+  /* §2 (page header v1) — the shared centred column owns the gutter and the cap now. */
 }
 
 /* the centred group: page column + the housekeeping rail. `align-items: start` keeps the rail's

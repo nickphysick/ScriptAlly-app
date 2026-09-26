@@ -182,7 +182,7 @@
    `--wpg-measure` stays: capping this page's CONTENT at the shared measure is a page's own choice
    and the grid offers it as one (`var(--wpg-measure, 100%)`). The masthead's gutter is not that
    kind of token. */
-.ct-wpg.wpg { --wpg-measure: var(--work-max); }
+/* §2 (page header v1) — the shared centred column replaces this page's own gutter and cap. */
 
 /* ⚠️ THE SLAB IS NOT HIDDEN HERE ANY MORE. This page declined the shared masthead and hid the empty
    sticky box it left behind; it takes the masthead again, so the slab has contents and does the same

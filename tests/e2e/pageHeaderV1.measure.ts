@@ -145,6 +145,96 @@ test("§1 · the bar holds its place while the page scrolls, and gains its shado
   is("bar", "§1 · …and stays at the top of its scroller", after.top, rest.top);
 });
 
+
+/* ── §2 · the centred content column ── */
+
+/**
+ * ⚠️ §2 · THE COLUMN IS ASSERTED AS A RELATION, NEVER AS THE BRIEF'S ABSOLUTE x VALUES.
+ *
+ * The brief's 301 / 306 / 462 are the MOCK's, and the mock draws a 260px sidebar where this app's
+ * is 248 — so every absolute number is 12px out while the column itself is exactly right. A lock
+ * on the numbers would fail on a correct page and, worse, would have to be "corrected" by moving
+ * the column to match a sidebar the app does not have.
+ */
+test("§2 · the content column is centred, capped and equally margined", async ({ page }) => {
+  for (const w of [1280, 1440, 1920]) {
+    for (const route of ["/queries", "/agents", "/queries/analytics"]) {
+      await openApp(page, route, w, 900);
+      const r = await page.evaluate(() => {
+        const vis = (s: string) => [...document.querySelectorAll(s)].find((e) => e.getBoundingClientRect().width > 0) as HTMLElement | undefined;
+        const main = vis(".ws-main"); const sc = vis(".wpg-scroll");
+        if (!main || !sc) return null;
+        /* the column is the first child of the scroller that actually takes the cap — the
+           full-bleed chrome (the slab, the mini bar, the reclaim spacer) states `max-width: none`
+           on purpose, and measuring one of those would be measuring the page's background. */
+        const col = [...sc.children].map((e) => e as HTMLElement)
+          .find((e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).maxWidth !== "none");
+        if (!col) return null;
+        const b = col.getBoundingClientRect(), m = main.getBoundingClientRect(), cs = getComputedStyle(col);
+        const gut = parseFloat(cs.paddingLeft);
+        return {
+          left: Math.round(b.left * 10) / 10, right: Math.round(b.right * 10) / 10,
+          mainL: Math.round(m.left * 10) / 10, mainW: Math.round(m.width * 10) / 10,
+          winW: window.innerWidth, gut: Math.round(gut * 10) / 10,
+          max: cs.maxWidth, boxSizing: cs.boxSizing,
+          contentW: Math.round((b.width - gut - parseFloat(cs.paddingRight)) * 10) / 10,
+          cls: (col.className || col.tagName).toString().slice(0, 30),
+        };
+      });
+      yes("column", `§2 · a capped column was found on ${route} at ${w}`, r != null, JSON.stringify(r));
+      if (!r) continue;
+      record({ area: "column", what: `§2 · ${route} at ${w}`, got: r, want: "reported" });
+      /* equal margins, ±1 */
+      const leftGap = r.left - r.mainL, rightGap = r.winW - r.right;
+      near("column", `§2 · equal left and right margins on ${route} at ${w} (${leftGap} / ${rightGap})`, leftGap - rightGap, 0, 1);
+      /* the gutter is the clamp, of the WINDOW */
+      near("column", `§2 · the gutter is clamp(28, 3.2vw, 52) at ${w}`, r.gut, Math.min(52, Math.max(28, w * 0.032)), 0.6);
+      /* content width = min(1360, main) − 2 × gutter */
+      near("column", `§2 · the content is min(1360, main) − 2 gutters on ${route} at ${w}`,
+        r.contentW, Math.min(1360, r.mainW) - 2 * r.gut, 1.2);
+      is("column", `§2 · …capped at 1360 (${route} at ${w})`, r.max, "1360px");
+      /* ⚠️ AND `border-box`, or the padding is ADDED to the cap and every margin reading still passes */
+      is("column", `§2 · …with the gutter inside the cap (${route} at ${w})`, r.boxSizing, "border-box");
+    }
+  }
+});
+
+/* ⚠️ THE RAIL'S RIGHT EDGE IS THE COLUMN'S — a sticky panel that sat outside it would be the one
+   element on the page not in the column, and nothing else would say so. */
+test("§2 · the Query Centre's rail ends where the column ends, and sticks 16 below the bar", async ({ page }) => {
+  for (const w of [1440, 1920]) {
+    await openApp(page, "/queries", w, 900);
+    const r = await page.evaluate(() => {
+      const vis = (s: string) => [...document.querySelectorAll(s)].find((e) => e.getBoundingClientRect().width > 0) as HTMLElement | undefined;
+      const group = vis(".qcv-group"); const rail = vis("[data-qcv='rail']"); const sc = vis(".wpg-scroll");
+      if (!group || !rail || !sc) return null;
+      const g = group.getBoundingClientRect(), rr = rail.getBoundingClientRect(), s2 = sc.getBoundingClientRect();
+      const cs = getComputedStyle(group);
+      return {
+        colRight: Math.round((g.right - parseFloat(cs.paddingRight)) * 10) / 10,
+        railRight: Math.round(rr.right * 10) / 10,
+        stickyTop: Math.round(parseFloat(getComputedStyle(rail).top) * 10) / 10,
+        railTopFromScroller: Math.round((rr.top - s2.top) * 10) / 10,
+        footGap: Math.round((s2.top + window.innerHeight - s2.top - rr.bottom) * 10) / 10,
+        pos: getComputedStyle(rail).position,
+      };
+    });
+    yes("column", `§2 · the rail was found at ${w}`, r != null, JSON.stringify(r));
+    if (!r) continue;
+    record({ area: "column", what: `§2 · the rail at ${w}`, got: r, want: "reported" });
+    near("column", `§2 · the rail's right edge is the column's at ${w}`, r.railRight, r.colRight, 1);
+    is("column", `§2 · …and it is sticky at ${w}`, r.pos, "sticky");
+    /**
+     * ⚠️ 16 FROM THE SCROLLER, NOT 80. §2 says "bar height + 16 (80px from the scroll container's
+     * top)", which is true of the MOCK, where the bar scrolls inside the same column as the
+     * content. Here the bar is a flex sibling ABOVE the scroller, so the scroller already starts at
+     * the bar's bottom and 80 would sit the rail 64px lower than the design draws it. The
+     * requirement — 16 below the bar — is what is asserted.
+     */
+    near("column", `§2 · …16 below the bar at ${w}`, r.stickyTop, 16, 1);
+  }
+});
+
 /* ⚠️ THE CRUMB IS GONE FROM THE SHELL, not merely from the bar — a trail rendered anywhere else in
    the workspace chrome is the same fact wearing a different parent. */
 test("§1 · no breadcrumb anywhere in the workspace shell", async ({ page }) => {

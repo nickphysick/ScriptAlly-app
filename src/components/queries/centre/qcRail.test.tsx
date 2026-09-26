@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { GROUP_GAP, GROUP_MAX, LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, expandedBox, railBox, railStick } from "./QcRail";
+import { GROUP_GAP, GROUP_MAX, LEDGER_MIN, QcRail, RAIL_INSET_FOOT, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, expandedBox, railBox, railStick } from "./QcRail";
 import { QcBirdsEye } from "./QcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -144,10 +144,14 @@ describe("the sheet, and the two shell rules", () => {
     expect(pageCss, "the reservation is a track now").not.toMatch(/padding-right:\s*var\(--qcv-rail-pad/);
     expect(pageCss).toMatch(/\.qcv-group \{[^}]*grid-template-columns: minmax\(0, 1fr\) 340px/);
     expect(pageCss).toMatch(/\.qcv-group \{[^}]*column-gap: 28px/);
-    /* ⚠️ THE CAP IS THE PAGE'S `--wpg-measure`, not a `max-width` here: the shared grid computes the
-       cap and the gutter reduction in ONE `min()`, and a second cap on this element beat the gutter
-       — the page started at the window's edge, 246 against the dashboard's 268. */
-    expect(pageCss).toMatch(/--wpg-measure: 1480px/);
+    /**
+     * ⚠️ RETARGETED BY §2 (page header v1). The cap was the page's own `--wpg-measure`, because the
+     * shared grid computed the cap and the gutter in one `min()` and a second cap here beat the
+     * gutter. There is one column for every workspace route now — 1360 with the gutter INSIDE it —
+     * so the page states no cap at all, and the claim that matters is the one below: this element
+     * still does not contest it.
+     */
+    expect(pageCss, "the page no longer states a cap of its own").not.toMatch(/--wpg-measure:/);
     expect(pageCss, "a second cap contests the grid's gutter reduction").not.toMatch(/\.qcv-group \{[^}]*max-width/);
     expect(pageCss).toMatch(/\.qcv-group\[data-rail="stacked"\] \{ grid-template-columns: minmax\(0, 1fr\); \}/);
     expect(pageCss, "the group asks a media query about a window question").not.toMatch(/@media[^{]*\{\s*\.qcv-group/);
@@ -294,10 +298,11 @@ describe("§2 · the card is sticky in the group, at a measured offset and heigh
   it("⚠️ the height runs from the card's OWN top, and `Math.max` serves both states with no state", () => {
     /* before it sticks, its top is where it happens to sit */
     const loose = railStick(WIN, 0, WIN.top + 200)!;
-    expect(loose.height).toBe(WIN.top + WIN.height - RAIL_INSET_Y - (WIN.top + 200));
+    /* §2 (page header v1) — the FOOT's inset is its own now, 20 against the top's 16 */
+    expect(loose.height).toBe(WIN.top + WIN.height - RAIL_INSET_FOOT - (WIN.top + 200));
     /* once stuck, it is the rest position, and the height is the window less both insets */
     const stuck = railStick(WIN, 0, WIN.top + RAIL_INSET_Y)!;
-    expect(stuck.height).toBe(WIN.height - RAIL_INSET_Y * 2);
+    expect(stuck.height).toBe(WIN.height - RAIL_INSET_Y - RAIL_INSET_FOOT);
     /* and a card scrolled ABOVE its rest position does not grow past it */
     const above = railStick(WIN, 0, WIN.top - 300)!;
     expect(above.height).toBe(stuck.height);
@@ -314,7 +319,8 @@ describe("§2 · the card is sticky in the group, at a measured offset and heigh
     const st = railStick(WIN, 0, wayBelow);
     expect(st, "an unplaced card refuses its own placement for ever").not.toBeNull();
     /* …and it is given the full resting height, not a negative one */
-    expect(st!.height).toBe(WIN.height - RAIL_INSET_Y * 2);
+    /* §2 (page header v1) — 16 at the top, 20 at the foot */
+    expect(st!.height).toBe(WIN.height - RAIL_INSET_Y - RAIL_INSET_FOOT);
   });
   it("…and it refuses what the fixed card refused", () => {
     expect(railStick({ ...WIN, height: 0 }, 0, 0)).toBeNull();

@@ -281,8 +281,21 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * than as padding — padding here would land on the page's own first element and clobber the
      * inner padding of a drawn frame like Query Centre's.
      */
-    expect(block(".wpg-scroll > *"), "the scroller's children stopped taking the page's measure")
-      .toContain("max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))))");
+    /**
+     * ⚠️ REWRITTEN BY §2 (page header v1) — ONE CENTRED COLUMN FOR EVERY WORKSPACE ROUTE.
+     *
+     * This asserted the old form: a cap bounding the CONTENT, with the gutter taken off the outside
+     * as a max-width reduction, and each page free to name both. The gutter lives INSIDE the cap
+     * now, which is what makes the column keep its air past 1360 — under the old form the content
+     * ran the full 1360 at an ultrawide window and the gutter did nothing.
+     */
+    const col = block(".wpg-scroll > *");
+    expect(col, "the scroller's children left the shared column").toContain("max-width: 1360px");
+    expect(col, "the gutter is outside the cap again").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
+    expect(col, "the column stopped centring itself").toContain("margin-inline: auto");
+    /* ⚠️ AND `border-box`, or the padding would be added to the 1360 rather than taken out of it —
+       the cap would be 1464 wide and every "equal margins" reading would still pass. */
+    expect(col, "the padding is added to the cap rather than taken out of it").toContain("box-sizing: border-box");
     /* ⚠️ AND THE PAGE'S GUTTER IS A FALLBACK, NOT A DEFAULT ON `.wpg`. A page's class sits on the
        SAME element as `.wpg`, so a default here is 0-1-0 against 0-1-0 and source order decides —
        this sheet is later, so it beat every override. Measured: Query Centre took the wide gutter. */

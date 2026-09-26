@@ -38,7 +38,7 @@
    page states its two numbers here and `.wpg-scroll > *` centres the capped column. A root that
    ALSO padded horizontally was a double inset — measured 109px from the window's edge against
    the mock's 28. */
-.msv12-wpg { --wpg-gutter: 28px; --wpg-measure: 1480px; }
+/* §2 (page header v1) — the shared centred column replaces this page's own gutter and cap. */
 
 /* ⚠️ THE FORMAT IS CLOSED, AND BARE ELEMENTS ARE RESET AT 0-1-1 — `lib/brand.tsx` names a body
    family on bare span/p/div/button at runtime; this beats it by one class and loses to every

@@ -30,6 +30,17 @@ import "./qcvRail.css";
 /** The card's own width, and the two insets, stated once (§2). */
 export const RAIL_W = 340;
 export const RAIL_INSET_Y = 16;
+/**
+ * §2 (page header v1) — THE FOOT'S INSET IS ITS OWN, and 20 rather than 16.
+ *
+ * ⚠️ AND THE TOP ONE IS 16 FROM THE SCROLL CONTAINER, NOT 80. The brief states "bar height + 16
+ * (80px from the scroll container's top)", which is true of the MOCK, where the bar scrolls inside
+ * the same column as the content. In this app the bar is a flex sibling ABOVE the scroller, so the
+ * scroller already starts at the bar's bottom — taking 80 from it would leave the rail sitting
+ * 64px lower than the design draws it. The requirement is 16 below the bar, and that is what this
+ * is; the arithmetic differs because the two shells put the bar in different places.
+ */
+export const RAIL_INSET_FOOT = 20;
 export const RAIL_INSET_X = 22;
 /**
  * ⚠️ BELOW THIS THE CARD STOPS BEING FIXED AND STACKS UNDER THE PAGE (§2) — AND THE NUMBER IS NOT
@@ -80,7 +91,7 @@ export function railStick(win: WinRect, scrollportTop: number, cardTop: number):
   if (!(win.height > 0) || !(win.width > 0)) return null;
   if (win.width < RAIL_STACK_BELOW) return null;
   const rest = win.top + RAIL_INSET_Y;
-  const floor = win.top + win.height - RAIL_INSET_Y;
+  const floor = win.top + win.height - RAIL_INSET_FOOT;
   /**
    * ⚠️ WHETHER IT CAN BE PLACED IS DECIDED WITHOUT READING THE CARD'S OWN TOP — OR IT LATCHES.
    * Measured 24 Sep: the card starts stacked, so its top is hundreds of pixels below the window's

@@ -339,7 +339,8 @@
  * at 1480. Stating it here rather than on `.qcv-group` is what keeps the cap and the gutter in one
  * `min()` — see the note at that rule for what happened when they were two.
  */
-.qc-wpg.qc-wpg--v11 { --wpg-gutter: 22px; --wpg-measure: 1480px; --ws-window: #f4f0ea; --ws-window-rgb: 244, 240, 234; }
+/* §2 (page header v1) — the gutter and the cap are the shared column's; the window tone stays. */
+.qc-wpg.qc-wpg--v11 { --ws-window: #f4f0ea; --ws-window-rgb: 244, 240, 234; }
 .qcv-log.sp-inkpill:disabled { opacity: 0.5; cursor: default; }
 
 /**

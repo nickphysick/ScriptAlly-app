@@ -64,3 +64,50 @@ scrolls, so the precondition refused it — correctly. It now finds a route that
 and reports which.
 
 Gates after Phase 2: tsc 0 · build clean · **8,298 passed** (level with baseline).
+
+## Phase 3 — the content column
+
+One rule for every workspace route, on `.wpg-scroll > *`: `max-width: 1360px`, `padding-inline:
+clamp(28px, 3.2vw, 52px)`, `margin-inline: auto`, `box-sizing: border-box`.
+
+**The gutter is inside the cap, and that is the whole difference from what it replaces.** The old
+form was `min(measure, 100% − 2 × gutter)`, where the cap bounded the *content* and the gutter came
+off the outside — so past the cap the content ran the full 1360 and the gutter did nothing. Now 1360
+is the box: at an ultrawide window the content is 1360 − 2 × 52 = 1256 and the column keeps its air.
+
+`3.2vw` is of the **window**, not the main area, which is what makes the two ends of the page agree:
+the bar is inset 24 from the window's right and the column's right margin is a share of the same
+width. Against the main area it would drift whenever the sidebar collapsed.
+
+**Six per-page overrides are gone** — the Query Centre, Contact list, Manuscripts v12, Comparable
+titles, Tasks and the F12 shell each named their own `--wpg-gutter` and `--wpg-measure`, because the
+old rule computed cap and gutter in one `min()` and a page wanting a different inset had to say so.
+There is one column now, so no page states either.
+
+**⚠️ THE BRIEF'S ABSOLUTE x VALUES ARE THE MOCK'S, AND THE APP'S SIDEBAR IS 248 WHERE THE MOCK'S IS
+260.** So 301 / 306 / 462 land at 289 / 294 / 450 here — the column is exactly right and every
+absolute is 12px out. The lock asserts the **relation** §2 states (equal margins ±1; content =
+min(1360, main) − 2 × gutter; the cap; `border-box`), which is true of both shells. A lock on the
+numbers would have failed on a correct page and could only have been "fixed" by moving the column to
+match a sidebar the app does not have.
+
+**The rail** sticks 16 below the bar and ends on the column's right edge, with `RAIL_INSET_FOOT = 20`
+split out from the single inset. **§2's "80px from the scroll container's top" is the mock's
+arithmetic**: there the bar scrolls inside the same column as the content, so bar + 16 = 80. Here
+the bar is a flex sibling *above* the scroller, which already starts at the bar's bottom — 80 would
+sit the rail 64px lower than the design draws it. The requirement is 16 below the bar, and that is
+what is built and locked.
+
+Three full-bleed children keep `max-width: none` on purpose — the reclaim spacer, the chrome slab
+and the mini bar — and their *inners* take the column. The lock finds the first child that actually
+takes the cap, so it cannot measure the page's background by accident.
+
+Five unit files retargeted, each asserting the old machinery: `queryCentreFrame`, `queriesHubColumn`,
+`qcCentre` (the page's own cap → it states none), `workspacePageGrid` (the rule rewritten, including
+`border-box`, without which the padding is added to the cap and every margin reading still passes),
+and `qcRail` (the foot inset).
+
+Proved red by the brief's mutation — the column's padding set to 22px — and by the rail sticking at
+96 instead of 16.
+
+Gates after Phase 3: tsc 0 · build clean · **8,298 passed**.

@@ -509,7 +509,24 @@
    * A fallback inside the `var()` has no such contest — it applies only when nothing declared the
    * token anywhere, which is exactly the intended meaning of "the page did not ask for a gutter".
    */
-  max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))));
+  /**
+   * §2 (page header v1) — THE CENTRED CONTENT COLUMN, and it is ONE rule for every workspace route.
+   *
+   * ⚠️ THE PADDING IS INSIDE THE CAP, which is the whole difference from what this replaces. The
+   * old form was `min(measure, 100% − 2 × gutter)`, where the cap bounded the CONTENT and the
+   * gutter was taken off the outside — so at an ultrawide window the content ran the full 1360 and
+   * the gutter did nothing. Here 1360 is the box and the gutter is inside it, so past the cap the
+   * content is 1360 − 2 × 52 = 1256 and the column keeps its air. Measured: 301→1239 at 1280,
+   * 306→1394 at 1440, 462→1718 at 1920.
+   *
+   * ⚠️ AND `3.2vw` IS OF THE WINDOW, NOT OF THE MAIN AREA, which is what makes the two ends of the
+   * page agree: the bar is inset 24 from the window's right, and the column's own right margin is a
+   * share of the same width. A gutter measured against the main area would drift from it whenever
+   * the sidebar collapsed.
+   */
+  box-sizing: border-box;
+  max-width: 1360px;
+  padding-inline: clamp(28px, 3.2vw, 52px);
   margin-inline: auto;
 }
 /**
@@ -762,8 +779,11 @@
   .wpg-toolband { transition: none; }
 }
 .wpg-toolband > .wpg-tools {
+  /* §2 — the toolband's inner takes the same column, so a page's controls line up with its content */
+  box-sizing: border-box;
   width: 100%;
-  max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))));
+  max-width: 1360px;
+  padding-inline: clamp(28px, 3.2vw, 52px);
   margin-inline: auto;
 }
 /* ⚠️ ONE SUBJECT NOW — the masthead lives inside the slab, and `.wpg-scroll > .wpg-mast` is kept
