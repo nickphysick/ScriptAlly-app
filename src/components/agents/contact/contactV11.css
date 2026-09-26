@@ -145,11 +145,24 @@
   z-index: 1;
   width: var(--clv-tw, 273px);
 }
-.clv-hero-t {
+/* ⚠️ APP SHELL v3 (D8): THE PAGE TITLE IS SPECIAL ELITE, AT THE QUERY CENTRE'S SIZE. This rule already
+   named the typewriter token and the title still drew in Playfair: `lib/brand.tsx` injects
+   `h1:not(.wsh-title) { font-family: … !important }` at 0-1-1, and a single-class rule loses to it
+   however it is written. So it is TWO classes and `!important`, the pattern the Query Centre's own
+   `.qcv-page .qcv-title` uses.
+   ⚠️ THE SIZE IS THE QUERY CENTRE'S — 50px — AS A CEILING, NOT A CONSTANT, and that is measured rather
+   than chosen. The typewriter face sets "Contact list" 318px wide at 50px, and where the Archivist sits
+   beside it the hero caps this column at about a third of its width (265px at 1440 expanded, 272 at
+   1280 collapsed): at a flat 50px the title ran 53px past its column. `5.2cqw` of the hero is the fit —
+   40.6px at a 780px hero, 7px of air — and it reaches 50px from a 962px hero up (1440 collapsed, 1920),
+   where the column grows to the title. The floor is the Query Centre's narrow size, 36px, which is also
+   what the stacked hero states. shellV3.measure L13 asserts both halves against the QC's own rendered
+   size: never above it, and equal to it wherever the hero is wide enough. */
+.clv-hero .clv-hero-t {
   margin: 0;
-  font-family: var(--clv-type);
+  font-family: var(--clv-type) !important;
   font-weight: 400;
-  font-size: clamp(38px, 5.1cqw, 50px);
+  font-size: clamp(36px, 5.2cqw, 50px);
   line-height: 1.02;
   white-space: nowrap;
   color: var(--clv-ink);
@@ -178,7 +191,7 @@
   align-items: flex-end;
   gap: 22px;
 }
-.clv-hero--stack .clv-hero-t { flex: none; }
+.clv-hero--stack .clv-hero-t { flex: none; font-size: 36px; }
 .clv-hero--stack .clv-facts { margin: 0 0 3px; flex: 1; min-width: 0; font-size: 14.5px; }
 
 /* the art — placed from its VISIBLE edge by the JS, never by the image box */

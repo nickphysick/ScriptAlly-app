@@ -1,0 +1,258 @@
+[
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":599.921875,\"parentRight\":868,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"38px\",\"narrow\":true,\"overflow\":0,\"right\":463.078125,\"parentRight\":867,\"hero\":598}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 38px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 463.078125 parent 867"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":447.921875,\"parentRight\":868,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"38.25px\",\"narrow\":false,\"overflow\":0,\"right\":372,\"parentRight\":372,\"hero\":750}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 38.25px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 372 parent 372"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":599.921875,\"parentRight\":1028,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"38.658px\",\"narrow\":false,\"overflow\":0,\"right\":527,\"parentRight\":527,\"hero\":758}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 38.658px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 527 parent 527"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":447.921875,\"parentRight\":1028,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"46.41px\",\"narrow\":false,\"overflow\":0,\"right\":426,\"parentRight\":426,\"hero\":910}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 46.41px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 426 parent 426"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":752,\"parentRight\":1444,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":662,\"parentRight\":662,\"hero\":1112}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 50px"
+ },
+ {
+  "lock": "L13 title · the QC's size where the hero holds it",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 50px hero 1112"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 662 parent 662"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":676,\"parentRight\":1368,\"hero\":0} cl {\"fam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":586,\"parentRight\":586,\"hero\":1112}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "contact \"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 50px"
+ },
+ {
+  "lock": "L13 title · the QC's size where the hero holds it",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 50px hero 1112"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 586 parent 586"
+ }
+]
