@@ -127,7 +127,12 @@ describe("§1 · the page", () => {
      about where the columns are. Both are declared once, on the route's `.ws-main` — the column holding
      both readers, so the rail does not inherit them. The alignment itself is a
      measurement (`tests/e2e/dashStages.measure.ts`); this is the construction. */
-  it("⚠️ the content is a centred block on the page measure, and the bar reads the same two tokens", () => {
+  /* ⚠️ RETARGETED (app shell v3, 26 Sep): the bar is IN THE FLOW on every route, the dashboard
+     included, so it no longer pads itself to the page's measure — the one bar is the shell's, full
+     width, with its controls at the ref's 24px inset. What survives is the page's half: a centred
+     block on the measure, and the tokens declared once, on `.ws-main`. `--dash-bar-h` is gone, so the
+     page's top padding reads it with its 0px fallback. */
+  it("⚠️ the content is a centred block on the page measure, and the tokens are declared once", () => {
     const c = rule(".os-content");
     expect(c).toContain("box-sizing: border-box");
     expect(c).toContain("max-width: calc(var(--dash-page-max) + 2 * var(--dash-page-pad))");
@@ -140,11 +145,8 @@ describe("§1 · the page", () => {
     expect(shellCss).toContain(".dash-mode .ws-main { --dash-page-max: 1440px; --dash-page-pad: 22px; }");
     /* not on the shell's root, where the rail would inherit them (the rail gate diffs its whole style) */
     expect(shellCss).not.toMatch(/\.dash-mode \{[^}]*--dash-page/);
-    const bar = /\.dash-mode \.ws-pagebar \{([^}]*)\}/.exec(shellCss)?.[1] ?? "";
-    expect(bar, "the bar's measure rule must exist").not.toBe("");
-    for (const t of ["var(--dash-page-max)", "var(--dash-page-pad)"]) {
-      expect(bar, t).toContain(t);
-    }
+    expect(shellCss, "the dashboard's bar no longer has a rule of its own").not.toMatch(/\.dash-mode \.ws-pagebar \{/);
+    expect(shellCss, "nothing declares the retired bar height").not.toMatch(/--dash-bar-h:/);
   });
 
   /* ⚠️ THREE ROWS, IN ONE BLOCK, IN THIS ORDER (v16) — and both bottom cards are INSIDE the block
@@ -614,17 +616,14 @@ describe("one search control, not two (v27, Phase 2)", () => {
   /* ⚠️ THE DASHBOARD RENDERS ITS OWN 620px FIELD, so the bar's pill was the SECOND search control
      on one screen. Two controls for one job is worse than either alone: the reader has to work out
      whether they do the same thing, and they do. */
-  it("the bar's search pill does not render on /dashboard", () => {
-    /* ⚠️ RETARGETED, SAME LAW (the v34 mockup, 19 Sep): the dashboard's field is `SearchPill big` now, so
-       the component is mounted TWICE in the source — and exactly one of them per route. The big one is
-       gated ON the dashboard flag, the small one on its negation. */
-    const mounts = [...shell.matchAll(/<SearchPill\b/g)].map((m) => m.index!);
-    expect(mounts, "one big, one small").toHaveLength(2);
-    const gate = (at: number) => shell.slice(Math.max(0, at - 160), at);
-    const big = mounts.find((at) => /\bbig\b/.test(shell.slice(at, at + 160)))!;
-    const small = mounts.find((at) => at !== big)!;
-    expect(gate(big), "the big field is the dashboard's alone").toMatch(/\{dashMode && \(\s*$/);
-    expect(gate(small), "the pill must be conditional on NOT being in dash mode").toMatch(/\{!dashMode && \(/);
+  /* ⚠️ RETARGETED, SAME LAW (app shell v3, 26 Sep): ONE search control per route. The dashboard's big
+     field and the small pill are both retired; the bar mounts ONE icon search, unconditionally, and
+     the shell no longer renders `SearchPill` at all. */
+  it("the bar mounts exactly one search control, on every route including /dashboard", () => {
+    expect(shell).not.toMatch(/<SearchPill\b/);
+    expect(shell.match(/aria-label="Search \(⌘K\)"/g) ?? [], "one icon search").toHaveLength(1);
+    const at = shell.indexOf('aria-label="Search (⌘K)"');
+    expect(shell.slice(Math.max(0, at - 700), at), "not gated on the dashboard").not.toMatch(/dashMode &&/);
   });
 
   /* ⚠️ REMOVED FROM THE DOM, NOT HIDDEN. "There is exactly one search control" is a claim about the

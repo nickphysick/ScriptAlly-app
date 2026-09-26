@@ -416,8 +416,11 @@ test("§2 · the narrow bar — the whisper goes, the crumb holds, and nothing o
     });
     const area = `bar@${w}`;
     yes(area, "the bar is on the page", !!bar, JSON.stringify(bar));
+    /* ⚠️ RETARGETED (app shell v3, 26 Sep, D5): the whisper and its divider are gone from EVERY route,
+       so the Query Centre no longer removes anything from the bar — nothing is drawn and nothing is
+       left laid out to remove. */
     is(area, "the save whisper is drawn", bar?.sync, 0);
-    is(area, "…and it is REMOVED rather than squeezed — with its divider and nothing else", bar?.removed, ["ws-vdiv", "ws-sync"]);
+    is(area, "…and the bar has nothing of its own to remove any more", bar?.removed, []);
     yes(area, `nothing runs past the bar's edges (${JSON.stringify(bar?.out)})`, (bar?.out.length ?? 1) === 0, JSON.stringify(bar?.out));
     yes(area, `nothing is squeezed to nothing (${JSON.stringify(bar?.squeezed)})`, (bar?.squeezed.length ?? 1) === 0, JSON.stringify(bar?.squeezed));
     /**

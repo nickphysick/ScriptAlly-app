@@ -13,6 +13,11 @@
  *   SA_E2E_BASE_URL=http://localhost:4173 npx playwright test accountSave
  *
  * ⚠️ IT WRITES TO THE HARNESS ACCOUNT and puts the display name back at the end.
+ *
+ * ⚠️ RETARGETED (app shell v3, 26 Sep, D5): the top bar's whisper ("All changes saved" / "Unsaved
+ * changes" / "Saving…") is retired from every route, so each place this read the whisper now asserts
+ * it is ABSENT. The Save/Discard row, the re-baseline and the leave-with-a-dirty-field toast — the
+ * parts of the hybrid model that belong to the page — are unchanged.
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
@@ -40,14 +45,13 @@ test("the Save/Discard row is ABSENT until the field diverges, and Discard resto
 
   expect(await page.locator(SAVE).count(), "no Save button at rest").toBe(0);
   expect(await page.locator(DISCARD).count(), "no Discard button at rest").toBe(0);
-  expect((await whisper(page))?.toLowerCase()).toBe("all changes saved");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 
   await page.fill(NAME, saved + " EDITED");
   await page.waitForTimeout(300);
   expect(await page.locator(SAVE).count(), "Save arrives with the divergence").toBe(1);
   expect(await page.locator(DISCARD).count()).toBe(1);
-  console.log("whisper while dirty:", await whisper(page));
-  expect((await whisper(page))?.toLowerCase()).toBe("unsaved changes");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 
   /* ⚠️ TYPING BACK TO THE STORED VALUE IS NOT AN EDIT. The row must retreat on equality, not on
      "the field was touched" — the latter leaves a Save button offering to write what is already
@@ -55,7 +59,7 @@ test("the Save/Discard row is ABSENT until the field diverges, and Discard resto
   await page.fill(NAME, saved);
   await page.waitForTimeout(300);
   expect(await page.locator(SAVE).count(), "typing back to the stored value clears it").toBe(0);
-  expect((await whisper(page))?.toLowerCase()).toBe("all changes saved");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 
   await page.fill(NAME, saved + " EDITED");
   await page.waitForTimeout(300);
@@ -63,7 +67,7 @@ test("the Save/Discard row is ABSENT until the field diverges, and Discard resto
   await page.waitForTimeout(400);
   expect(await page.inputValue(NAME), "Discard restores the stored value").toBe(saved);
   expect(await page.locator(SAVE).count()).toBe(0);
-  expect((await whisper(page))?.toLowerCase()).toBe("all changes saved");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 });
 
 test("Save commits, re-baselines, and the bar goes clean", async ({ page }) => {
@@ -77,7 +81,7 @@ test("Save commits, re-baselines, and the bar goes clean", async ({ page }) => {
   await page.waitForTimeout(2500);
 
   expect(await page.locator(SAVE).count(), "the row retreats after Save").toBe(0);
-  expect((await whisper(page))?.toLowerCase()).toBe("all changes saved");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 
   /* It survives a reload — proof the write reached Firestore rather than only React state. */
   await page.reload();
@@ -111,7 +115,7 @@ test("leaving a section with a dirty field warns and CONTINUES — never blocks,
 
   expect(url, "navigation must go through").toBe("/account/preferences");
   expect(toast.join(" | "), "and it must say what was left behind").toContain("not saved yet");
-  expect((await whisper(page))?.toLowerCase(), "the bar keeps telling the truth").toBe("unsaved changes");
+  expect(await whisper(page), "the bar keeps telling the truth").toBeNull(); // v3: no whisper on any route
 
   /* ⚠️ AND THE TEXT IS STILL THERE ON RETURN. "Warns and continues" is worthless if the value was
      dropped on the way out — that is the one outcome the writer cannot recover from. */
@@ -121,7 +125,7 @@ test("leaving a section with a dirty field warns and CONTINUES — never blocks,
 
   await page.locator(DISCARD).click();
   await page.waitForTimeout(400);
-  expect((await whisper(page))?.toLowerCase()).toBe("all changes saved");
+  expect(await whisper(page)).toBeNull(); // v3: no whisper on any route
 });
 
 test("the home-country dropdown is the app's own control, not a native select", async ({ page }) => {

@@ -158,21 +158,12 @@ describe("the sheet, and the two shell rules", () => {
     expect(GROUP_GAP).toBe(28);
     expect(RAIL_RESERVE).toBe(RAIL_W + RAIL_INSET_X * 2);
   });
-  it("⚠️ the narrow bar is PAGE-SCOPED: the other fourteen routes keep the whisper", () => {
-    expect(shellCss).toMatch(/\.ground-mode \.ws-sync, \.ground-mode \.ws-pagebar > \.ws-vdiv \{ display: none; \}/);
-    /* ⚠️ A SHRINK, NOT A GROW — the search is not a flex item of the BAR (it sits inside
-       `.ws-bright`, which is content-sized), so a `flex-grow` there had nothing to grow into and
-       measured 210px at 1280 and 210px at 1440: a rule that reads as doing something and does
-       nothing. With the whisper gone the bar has 140px of slack at 1280 and nothing overflows. */
-    expect(shellCss).toMatch(/\.ground-mode \.ws-pagebar \.sp-search \{ flex-shrink: 1; min-width: 0; \}/);
-    expect(shellCss, "a grow that has nothing to grow into").not.toMatch(/\.ground-mode[^\n]*\.sp-search \{[^}]*flex-grow: 1/);
-    /* ⚠️ AND THE SHARED BAR'S OWN RULES ARE UNTOUCHED. A shared control that changes between routes
-       is worse than a page starting lower — the standing ruling behind `--sp-ctl`. */
-    const base = shellCss.match(/(?:^|\n)\s*\.ws-sync\s*\{([^}]*)\}/);
-    expect(base, ".ws-sync lost its own rule").toBeTruthy();
-    expect(base![1], "the whisper was hidden for everyone").not.toContain("display: none");
-    const prim = read("src/components/shell/primitives.css").match(/(?:^|\n)\s*\.sp-search\s*\{([^}]*)\}/)![1];
-    expect(prim, "the search pill stopped being a fixed-size shared control").toMatch(/flex:\s*none/);
+  /* ⚠️ RETIRED (app shell v3, 26 Sep). The Query Centre's narrow-bar variant dropped the save whisper
+     and let the search pill shrink. The whisper is gone on EVERY route (D5) and the search is a 36px
+     icon, so the variant had nothing left to do; asserted gone so it cannot quietly return. */
+  it("⚠️ the Query Centre's narrow-bar variant is retired with the whisper it hid", () => {
+    expect(shellCss).not.toMatch(/\.ground-mode \.ws-sync/);
+    expect(shellCss).not.toMatch(/\.ground-mode \.ws-pagebar \.sp-search/);
   });
 });
 

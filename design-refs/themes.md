@@ -1749,5 +1749,6 @@ The shell's palette sits at **`:root`** in `src/index.css` (portalled chrome doe
 | `--shell-top-h` | `64px` | — | — |
 
 - ⚠️ **`--shell-side` changed meaning.** It was a legacy alias of `--shell-rail` (`#efe7db`); its three readers (the mobile tab bar and sheet in `mobileShell.css`, the retired v2 capsule in `shellV2.css`) now read `--shell-rail` and keep their colour.
+- **The page ground, `--ws-page` / `--ws-page-rgb`** (`:root`, `247, 244, 238` = `--ws-ground`): the top bar and the content column paint it, and it is theme-invariant like the rest of the shell. The Dashboard and the Query Centre redeclare it on `.ws-main` as `244, 240, 234` (their darker ground, formerly a literal). Its channels exist because fades read it at other alphas.
 - **Faces:** the sidebar and the breadcrumb read `--sp-serif` (`"Source Serif 4", Georgia, serif`), declared at `:root` in `src/components/shell/primitives.css` beside `--sp-type` (Special Elite); section labels stay JetBrains Mono.
 - **Burgundy never appears in the shell.** The active item is anthracite with cream text; the badge dot keeps the colour it has today.

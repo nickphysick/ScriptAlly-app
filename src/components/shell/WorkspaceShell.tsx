@@ -26,16 +26,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import { MastheadSectionContext } from "./mastheadSection";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, PenLine,
+  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
-import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
+import { CountChip, MenuCard, MenuCardItem, searchShortcut } from "./primitives";
 import { FEEDBACK_FAB } from "../../lib/beta";
-import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
@@ -173,27 +172,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      flow, swaps the search for the big field and hides controls. `ground-mode` is the one thing
      the two pages share, stated once. Analytics is a sub-route and keeps the window. */
   const groundMode = pathname === "/queries";
-  /**
-   * ⚠️ THE DASHBOARD'S BAR IS TRANSPARENT AT REST AND TAKES THE PAGE'S GROUND ONCE THE PAGE HAS
-   * SCROLLED (the v34 mockup, 19 Sep). On that route the scroller runs UP under the bar so the
-   * greeting's shadow can pass behind it; at rest nothing else is up there. Once anything scrolls, the
-   * cards would pass visibly under a see-through bar — so it goes opaque, and the shadow has scrolled
-   * away with the page by then.
-   *
-   * ⚠️ DERIVED FROM THE VALUE, NEVER FROM AN OBSERVER. `scrollTop > 2`, read on scroll and again when
-   * the route arrives (the shell remembers each route's scroll position, so a return to the dashboard
-   * can land already scrolled). A missed intersection event is permanent; a reading cannot go stale.
-   */
-  const [barSolid, setBarSolid] = useState(false);
-  const readBar = React.useCallback((el: HTMLElement | null) => {
-    const next = !!el && el.scrollTop > 2;
-    setBarSolid((was) => (was === next ? was : next));
-  }, []);
-  useEffect(() => {
-    if (!dashMode) { setBarSolid(false); return undefined; }
-    const id = window.requestAnimationFrame(() => readBar(scrollRef?.current ?? null));
-    return () => window.cancelAnimationFrame(id);
-  }, [dashMode, readBar, scrollRef]);
+  /* ⚠️ THE DASHBOARD'S TRANSPARENT-AT-REST BAR IS RETIRED (app shell v3). The bar is in the flow and
+     opaque on every route, so there is no scroll reading to take and nothing to fade. */
   /**
    * ⚠️ THE SHELL COMPUTES NO LOADING STATE, AND THAT IS THE FIX (v34). The nav row's loading
    * treatment is keyed in `workspaceShell.css` to the dashboard's COVER — its `.os-skelpage`
@@ -381,7 +361,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     chooseMs(next);
   }, [manuscripts, activeMs?.id, chooseMs]);
 
-  const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
   /**
    * ⚠️ THE CRUMB NO LONGER FOLLOWS THE OPEN QUERY (Query Centre v11, 19 Sep). It used to read
@@ -737,18 +716,26 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ink is `visibility: hidden`, which also takes the controls out of the accessibility tree and
               the tab order — so there is no `aria-hidden` here, and none set from a flag, because a flag is
               what ran on the wrong clock. */}
-          <header className={`ws-pagebar${dashMode && barSolid ? " is-solid" : ""}`} data-probe="navrow">
-              {/* ⚠️ THE COLLAPSE TOGGLE SITS AT THE SIDEBAR/CONTENT SEAM — first in the bar, before
-                  the crumb — and it does not move between states (sidebar-collapse pack, baked:
-                  not in the sidebar footer, not on the panel edge, not hover-revealed; a footer
-                  control loses to the nav list's internal scroll). The glyph is the ref's panel
-                  outline; its left-column fill fades when collapsed, keyed off aria-expanded so
-                  the icon cannot disagree with the state it reports.
-                  ⚠️ `[` rides `aria-keyshortcuts` alongside the chord — recon found it unbound;
-                  ⌘\ was freed by the tuck sweep one commit back. */}
+          {/* ══ THE TOP BAR — app shell v3 "Quiet" (D4; ref design-refs/shell/app-shell-v3.html `.top`) ══
+              collapse · breadcrumb · (space) · search · Give feedback · help. 64px on the page ground,
+              one hairline beneath it, 0 24px padding, 10px between controls.
+
+              ⚠️ ONE BAR ON EVERY ROUTE, THE DASHBOARD INCLUDED. The dashboard used to lay this bar
+              OVER its scroller, transparent at rest, with a 700px search field and no breadcrumb (the
+              v34 mockup). v3 is the app shell, and the ref's bar is the one bar: in the flow, opaque,
+              the icon search, the crumb. The dashboard's page pads itself by `--dash-bar-h`, which is
+              0 now that the bar no longer lies over it.
+
+              ⚠️ NO SAVE WHISPER (D5). "All changes saved" is gone from the shell and every route. It
+              could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
+              it hides nothing; the paths that DO report failures keep their own toasts and inline
+              errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
+          <header className="ws-pagebar" data-probe="navrow">
+              {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
+                  move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
               <button
                 type="button"
-                className="sb-toggle sp-disc"
+                className="sb-toggle ws-tbcol"
                 onClick={sidebar.toggle}
                 aria-expanded={!sidebar.collapsed}
                 aria-controls="ws-sidebar"
@@ -756,36 +743,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
                 {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <rect x="1.5" y="2.5" width="15" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
-                  <line x1="6.6" y1="2.5" x2="6.6" y2="15.5" stroke="currentColor" strokeWidth="1.5" />
-                  <rect className="sb-fillcol" x="2.6" y="3.6" width="3" height="10.8" rx="1" fill="#7c3a2a" opacity="0.28" />
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.3" />
+                  <path d="M6 2.5v11" stroke="currentColor" strokeWidth="1.3" />
+                  {/* the sidebar column's fill fades when collapsed — keyed off aria-expanded, so the
+                      glyph cannot disagree with the state it reports. Ink, never burgundy. */}
+                  <rect className="sb-fillcol" x="2.4" y="3.4" width="3" height="9.2" rx="0.8" fill="currentColor" opacity="0.22" />
                 </svg>
               </button>
-              {/* ⚠️ EVERY CRUMB SEGMENT IS INTERACTIVE (§5), and the separator is `/` throughout —
-                  the live mix of `/` and `·` made the brand look like a different KIND of step
-                  from the section. Only the current page is ink; ancestors are muted links. */}
+              {/* ⚠️ EVERY CRUMB SEGMENT BUT THE LAST IS INTERACTIVE, and the separator is `/` throughout.
+                  v3: Source Serif 4 at 15px, ancestors muted, slashes at 45%, the current page ink at
+                  600 with `aria-current="page"`. */}
               <nav className="ws-crumb" aria-label="Breadcrumb">
-                {/* ⚠️ THE CRUMB'S ROOT IS BACK — AS WORDS, NEVER AS THE MARK (audit pack P4).
-                    Removing the logotype from here was right and stays right; removing the ROOT
-                    with it was not, and it left the bar opening on a bare `/ Dashboard`, a
-                    separator with nothing on its left. It reads `QueryHawk / Dashboard` again.
-
-                    ⚠️ THE ONE-BRAND RULE IS ABOUT THE MARK, and the mark still appears exactly
-                    once, in the sidebar. A breadcrumb root is the name of the place you are in;
-                    that it happens to be the product's name does not make it a second logo.
-
-                    It navigates, because every other segment here does — the law this file already
-                    holds — and because home is where a breadcrumb root goes. */}
                 {crumb && (
                   <>
-                    <button
-                      type="button"
-                      className="ws-seg ws-croot"
-                      onClick={() => go("/dashboard")}
-                    >
-                      QueryHawk
-                    </button>
+                    <button type="button" className="ws-seg ws-croot" onClick={() => go("/dashboard")}>QueryHawk</button>
                     <span className="ws-sep" aria-hidden="true">/</span>
                     {crumb.child ? (
                       <>
@@ -797,18 +769,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           {crumb.section}
                         </button>
                         <span className="ws-sep" aria-hidden="true">/</span>
-                        {/**
-                          * ⚠️ THE RECORD TAKES THE LAST SEGMENT AND THE PAGE NAME BECOMES A LINK.
-                          * `QueryHawk / Queries / Greg Panetta` — and `Query Centre` drops out
-                          * rather than becoming a fourth segment, because the trail is where you
-                          * ARE and the grid is not somewhere you are while reading a record. The
-                          * section above it already returns there, as does the bar's back-link.
-                          */}
-                        {recordCrumb ? (
-                          <span className="ws-cur" aria-current="page">{recordCrumb}</span>
-                        ) : (
-                          <span className="ws-cur" aria-current="page">{crumb.child}</span>
-                        )}
+                        <span className="ws-cur" aria-current="page">{recordCrumb ?? crumb.child}</span>
                       </>
                     ) : (
                       <span className="ws-cur" aria-current="page">{recordCrumb ?? crumb.section}</span>
@@ -816,82 +777,32 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   </>
                 )}
               </nav>
-              {/* ⚠️ THE SAVE STATE BELONGS TO THE LEFT GROUP, after the page name and its hairline
-                  — it is a statement ABOUT this page, not a tool. Right-aligned it sat among the
-                  controls and read as one. Specced there and missed.
-                  ⚠️ IT IS A PAGEBAR CHILD, NOT A CRUMB CHILD. Inside the crumb it inherits
-                  `align-items: baseline`, and an 8.5px mono cap baselined against 17px Playfair
-                  sits 3.7px low — measured. The pagebar centres it instead.
-                  ⚠️ WIRED TO REAL WRITE STATE, never a constant — a bar that always says "saved"
-                  is worse than one that says nothing. See lib/saveSignal. */}
-              <span className="ws-vdiv" aria-hidden="true" />
-              <span className="ws-sync">{saveWhisper(save)}</span>
-
-              {/* ⚠️ `ws-bright` MOVED FROM `gap` TO PER-CHILD `margin-left`, and the spacing is
-                  unchanged at 10px. A gap is charged for a child even when that child has
-                  collapsed to zero width, so the two controls that LEAVE in settings mode would
-                  have left 20px of hole behind them — the swap reading as a bar with something
-                  missing rather than a bar with different tools. A margin collapses with its
-                  element. This is the idiom `.ws-lbl` already uses for the sidebar's own labels;
-                  nothing that stays on screen moves by a pixel. */}
-              {/* ⚠️ THE FIELD REPLACES THE PILL IN PLACE, ON THIS ROW (v28, Phase 2). It flexes to
-                  a 640px cap between the left group and the actions, which is what puts it on the
-                  same line as Feedback and New — the arrangement the ref draws and the one v27
-                  missed by giving the search a row of its own.
-                  ⚠️ IT IS THE DASHBOARD'S ALONE. Every other page keeps the pill: this row also
-                  carries a breadcrumb there, and a 640px field beside it would leave neither room.
-                  ⚠️ AND IT OPENS THE SAME PALETTE THE PILL DID. The field is a button dressed as an
-                  input rather than a real input, because the app's search IS the palette — a text
-                  box that looked typeable but opened an overlay on first keystroke would be a
-                  worse lie than the pill it replaces. */}
-              {/* ⚠️ AND IT IS THE SAME COMPONENT AS THE PILL, WIDER (the v34 mockup, 19 Sep). The field used
-                  to be its own markup with its own rules; one component in two widths is what stops the
-                  rim, the frame, the icon and the keycap drifting between this page and the other
-                  fourteen. `ws-bigsearch` rides along as a class because the loading cover keys on it. */}
-              {dashMode && (
-                <SearchPill
-                  big probe="search" anchorRef={searchAnchorRef} onOpen={onOpenSearch}
-                  label="Search agents, queries, manuscripts…"
-                />
-              )}
+              <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
+              {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
+                  settings mode takes its space with it rather than leaving a gap behind. */}
               <div className="ws-bright">
-                {!dashMode && (
-                  <span className="ws-appctl"><SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} /></span>
-                )}
-                {/* ⚠️ LABELLED, NOT ICON-ONLY, AND THAT IS A PRE-LAUNCH DECISION ABOUT
-                    DISCOVERABILITY — not a density one. A beta that hears nothing reads as "it's
-                    fine" right up until people stop signing in, and a pencil glyph among three
-                    other glyphs is a thing nobody presses.
+                {/* ⚠️ ICON-ONLY, SAME PALETTE (D4). The accessible name and the tooltip carry what the
+                    pill's label and keycap used to; ⌘K is bound in `usePalette`, unchanged. The ref
+                    passed to the palette is this node, so the dropdown still anchors to the opener. */}
+                <span className="ws-appctl">
+                  <button
+                    ref={searchAnchorRef}
+                    type="button"
+                    className="ws-ibtn ws-search"
+                    data-probe="search"
+                    onClick={onOpenSearch}
+                    aria-label="Search (⌘K)"
+                    aria-keyshortcuts="Meta+K Control+K"
+                    title={`Search  ${searchShortcut()}`}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                      <circle cx="6" cy="6" r="4.2" /><path d="M9.2 9.2l3 3" />
+                    </svg>
+                  </button>
+                </span>
 
-                    ⚠️ AND IT SITS LEFT OF THE DIVIDER, so it reads as the reader's action beside
-                    their search rather than as one more piece of system furniture in the icon
-                    cluster on the right.
-
-                    ⚠️ THE HANDLER IS THE DOCK'S OWN, UNCHANGED. This moved a control; it did not
-                    change what the control does. */}
-                {onOpenFeedback && (
-                  <>
-                    <button
-                      type="button"
-                      className="ws-fbpill sp-inkpill"
-                      data-probe="feedback"
-                      onClick={onOpenFeedback}
-                      aria-expanded={feedbackOpen}
-                      /* The accessible name survives the narrow state, where the label is hidden
-                         and only the pencil is left. */
-                      aria-label={FEEDBACK_FAB}
-                    >
-                      <PenLine aria-hidden="true" />
-                      <span className="ws-fbpill-l sp-inkpill-l">Give feedback</span>
-                    </button>
-                  </>
-                )}
-                <HelpButton onOpen={onOpenHelp} />
-
-                {/* ⚠️ "BACK TO APP" IS MOUNTED ALWAYS, so it can fade in AND out. Rendering it on
-                    the mode alone would give the swap one direction only: arriving would animate
-                    and leaving would be a control blinking out of existence. It is inert and out
-                    of the tab order until the mode is on — see the stylesheet's `visibility`. */}
+                {/* ⚠️ "BACK TO APP" TAKES THE SEARCH'S SLOT IN SETTINGS MODE, AND IS MOUNTED ALWAYS so it
+                    can fade in and out. It is inert and out of the tab order until the mode is on. */}
                 <button
                   type="button"
                   className="ws-setctl ws-backapp"
@@ -900,19 +811,31 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   aria-hidden={settingsMode ? undefined : true}
                 >
                   Back to app
-                  {/* ⚠️ AN AFFORDANCE, NOT A `<kbd>` THE PAGE ACTS ON. The key is bound in a window
-                      listener above; this only says so. */}
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
-                {/* ⚠️ THERE IS NO `+ New` IN THE BAR (Query Centre v11, 19 Sep — Nick). Each page's own
-                    primary is where that page makes something: "+ Log a query" on the Query Centre,
-                    "Add manuscript" on Manuscripts, "Add a task" on To-do, the dashboard's quick
-                    actions. The button, its popover, its focus handling and its keyboard effect went
-                    together — a control nobody can see that the shell still listens for is a dead
-                    claim. What it leaves thinner is recorded in CLAUDE.md, deliberately unfixed here:
-                    the query-less "Record a response" (dashboard tile and ⌘K only) and, on desktop,
-                    "Add a manuscript" (Manuscripts and the dashboard only). */}
+                {/* ⚠️ LABELLED — a discoverability decision for the beta, not a density one. v3 draws it
+                    as an OUTLINE button (D4): transparent, a 28% ink ring, 10px corners, Special Elite
+                    with the pencil. The handler is the dock's own, unchanged. */}
+                {onOpenFeedback && (
+                  <button
+                    type="button"
+                    className="ws-fb"
+                    data-probe="feedback"
+                    onClick={onOpenFeedback}
+                    aria-expanded={feedbackOpen}
+                    /* the accessible name survives the narrow state, where only the pencil is left */
+                    aria-label={FEEDBACK_FAB}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                      <path d="M9.5 2.5l2 2L5 11l-2.6.6L3 9z" />
+                    </svg>
+                    <span className="ws-fb-l">Give feedback</span>
+                  </button>
+                )}
+                <button type="button" className="ws-ibtn ws-help" onClick={onOpenHelp} aria-label="Help" title="Help centre">
+                  <span aria-hidden="true">?</span>
+                </button>
               </div>
           </header>
 
@@ -939,7 +862,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               className="ws-wbody sv2-stagepad"
               id={scrollId}
               ref={scrollRef}
-              onScroll={(ev) => { onScroll?.(ev); if (dashMode) readBar(ev.currentTarget); }}
+              onScroll={onScroll}
             >
               <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>
                 {/* ⚠️ THE MASTHEAD'S KICKER, SUPPLIED ONCE. Every page's masthead names its section;

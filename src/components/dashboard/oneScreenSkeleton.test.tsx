@@ -450,7 +450,9 @@ describe("the nav row loads with the page", () => {
   const NAV_ON = ".dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar";
   const NAV_ANY = ".dash-mode .ws-main:has(.os-skelpage) .ws-pagebar";
   const NAV_OUT = ".dash-mode .ws-main:has(.os-skelpage.out) .ws-pagebar";
-  const CONTROLS = ":is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)";
+  /* app shell v3 (26 Sep): the bar's controls are the collapse toggle, the icon search, the outline
+     feedback button and the help circle — the big field, the ink pill and `+ New` are retired. */
+  const CONTROLS = ":is(.sb-toggle, .ws-search, .ws-fb, .ws-help)";
   const ruleAt = (src: string, head: string) => {
     const at = src.indexOf(head);
     expect(at, `rule not found: ${head}`).toBeGreaterThan(-1);

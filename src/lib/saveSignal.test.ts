@@ -1,5 +1,6 @@
 /**
- * Locks for the save signal — the bar's status whisper reads it (refinement §2).
+ * Locks for the save signal (refinement §2). The bar's status whisper that read it is retired (app shell
+ * v3); the signal stays for whatever reports save state next.
  *
  * ⚠️ THE RULE THIS EXISTS FOR: the whisper must NEVER show a false "saved". Every fixture below
  * is a way that could happen, and each was a real possibility before the counter existed.
@@ -9,7 +10,6 @@ import {
   __resetSaveSignal, beginWrite, endWrite, saveState, subscribeSave, tracked, trackWrite,
   markDirty, clearDirty, dirtyFieldKeys,
 } from "./saveSignal";
-import { saveWhisper } from "./useSaveState";
 
 beforeEach(() => __resetSaveSignal());
 
@@ -97,21 +97,10 @@ describe("tracked() wraps a function so call sites need no editing", () => {
   });
 });
 
-describe("the whisper's words", () => {
-  it("reflects the state rather than a constant", () => {
-    expect(saveWhisper("idle")).toBe("All changes saved");
-    expect(saveWhisper("saving")).toBe("Saving…");
-    expect(saveWhisper("dirty")).toBe("Unsaved changes");
-  });
-
-  /* ⚠️ THERE IS STILL NO ERROR WORD, AND `dirty` IS NOT ONE. A failed write is the failing flow's
-     business to report, and those flows already do; an error string here would be a second,
-     quieter error surface nobody checks. "Unsaved changes" is not a failure — it is the whisper's
-     own law being kept, that it must never show a false "saved". */
-  it("has exactly three strings, one per state", () => {
-    expect(new Set([saveWhisper("idle"), saveWhisper("saving"), saveWhisper("dirty")]).size).toBe(3);
-  });
-});
+/* ⚠️ "THE WHISPER'S WORDS" IS RETIRED WITH THE WHISPER (app shell v3, 26 Sep, D5). `saveWhisper` had
+   one caller, the shell's "All changes saved", which is gone from every route. The signal itself —
+   everything above — stays: it is what a real save-failure surface (deferred, see the v3 report) would
+   read. The law this file keeps is unchanged: the state must never read a false "saved". */
 
 describe("the dirty registry — the bar must never claim saved over unsaved text", () => {
   it("a marked field turns the state dirty; clearing it returns to idle", () => {

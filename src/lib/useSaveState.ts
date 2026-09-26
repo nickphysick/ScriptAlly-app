@@ -22,19 +22,9 @@ export function useSaveState(): SaveState {
   return useSyncExternalStore(subscribeSave, saveState, () => "idle" as const);
 }
 
-/**
- * The whisper's words. Uppercasing is the stylesheet's job — this returns the sentence, so a
- * caller reading it aloud (or a test) gets the real copy.
- *
- * ⚠️ THERE IS NO THIRD STRING. The bar reports whether a write is outstanding and nothing else;
- * a failed write is the failing flow's business to report, and those flows already do it. An
- * error word here would be a second, quieter error surface that nobody would think to check.
- */
-export function saveWhisper(s: SaveState): string {
-  if (s === "saving") return "Saving…";
-  if (s === "dirty") return "Unsaved changes";
-  return "All changes saved";
-}
+/* ⚠️ `saveWhisper` IS RETIRED (app shell v3, 26 Sep, D5) — its one caller was the shell's "All changes
+   saved", removed from every route. It could never report a failure (`SaveState` has no error value),
+   so nothing is lost; `useSaveState` stays as the read a real failure surface would take. */
 
 /**
  * Register this component's field as dirty for as long as `isDirty` holds.

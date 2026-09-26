@@ -125,7 +125,7 @@ function read() {
     searchFace: st(document.querySelector("[data-probe='search'] .sp-search-l"))?.fontFamily ?? null,
     searchKey: document.querySelector("[data-probe='search'] .sp-search-k")?.textContent ?? null,
     feedback: box(document.querySelector("[data-probe='feedback']")), feedbackText: document.querySelector("[data-probe='feedback']")?.textContent?.trim() ?? null,
-    help: box(document.querySelector(".ws-pagebar .sp-help")), toggle: box(document.querySelector(".ws-pagebar .sb-toggle")),
+    help: box(document.querySelector(".ws-pagebar .ws-help")), toggle: box(document.querySelector(".ws-pagebar .sb-toggle")),
     scrollPad: st(document.querySelector(".ws-wbody"))?.scrollPaddingTop ?? null,
     brand: { mark: box(document.querySelector(".ws-bmark")), word: st(document.querySelector(".ws-bwm"))?.fontSize ?? null, src: document.querySelector(".ws-bmark")?.getAttribute("src") ?? null },
     pageScrollW: document.documentElement.scrollWidth,
@@ -325,19 +325,14 @@ test.describe("dashboard top row — v33", () => {
     expect(r.rangeLabels, "no DEC 2023, no TODAY").toBe(0);
     expect(r.rangeName, "its name states the visible range and that it drags").toMatch(/^Showing \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}\. Drag to change the dates\.$/);
     expect(r.rangeTitle).toBe(r.rangeName);
-    /* ── the bar ── */
-    expect([Math.round(r.search!.h), Math.round(r.feedback!.h), Math.round(r.help!.w), Math.round(r.help!.h), Math.round(r.toggle!.w), Math.round(r.toggle!.h)],
-      "search 60 · feedback 50 · help 50×50 · the toggle the same disc").toEqual([60, 50, 50, 50, 50, 50]);
-    expect(r.search!.w, "the search is capped at 700").toBeLessThanOrEqual(700.5);
-    expect([Math.round(r.search!.w - r.searchFrame!.w), Math.round(r.search!.h - r.searchFrame!.h)], "5px of white rim all round").toEqual([10, 10]);
-    expect(r.searchFace, "the placeholder is in the typewriter face — a token that resolved to nothing falls back in silence").toContain("Special Elite");
-    expect(r.searchKey).toMatch(/^(⌘K|Ctrl K)$/);
-    expect(r.feedbackText).toBe("Give feedback");
-    expect(near(r.help!.x - r.feedback!.r, 12, 1), `12px between Give feedback and Help (${(r.help!.x - r.feedback!.r).toFixed(1)})`).toBe(true);
-    expect(near(r.hello!.y - r.bar!.b, 8, 1.5) && near(r.hello!.y - r.search!.b, 20, 1.5), `20px from the bar's controls to the greeting (${(r.hello!.y - r.search!.b).toFixed(1)})`).toBe(true);
-    /* ── the brand ── */
-    expect([Math.round(r.brand.mark!.w), Math.round(r.brand.mark!.h), r.brand.word]).toEqual([40, 40, "21px"]);
-    expect([Math.round(r.brand.mark!.x), Math.round(r.brand.mark!.y - (await page.evaluate(() => document.querySelector(".ws-panel")!.getBoundingClientRect().top)))], "the slot is x 16 · y 20 of the sidebar").toEqual([16, 20]);
+    /* ── the bar and the brand — RETARGETED (app shell v3, 26 Sep) ──
+       The v34 bar (a 700px search field, 50px controls, the bar lying over the scroller) is superseded
+       by the shell's one bar on every route; its geometry is locked in shellV3.measure (L5, L6, L8), so
+       this case keeps only what is the dashboard's own: the greeting starts below the bar, and the brand
+       is the v3 mark (30px, x 20 · y 16 of the sidebar) beside a 20px wordmark. */
+    expect(r.hello!.y, "the greeting starts below the bar").toBeGreaterThan(r.bar!.b);
+    expect([Math.round(r.brand.mark!.w), Math.round(r.brand.mark!.h), r.brand.word]).toEqual([30, 30, "20px"]);
+    expect([Math.round(r.brand.mark!.x), Math.round(r.brand.mark!.y - (await page.evaluate(() => document.querySelector(".ws-panel")!.getBoundingClientRect().top)))], "the slot is x 20 · y 16 of the sidebar").toEqual([20, 16]);
     expect(r.brand.src).toContain("/images/app/queryhawk-mark.png?v=");
     await page.screenshot({ path: resolve(OUT, "v34-1440.png") });
   });
@@ -404,62 +399,26 @@ test.describe("dashboard top row — v33", () => {
     await page.evaluate(() => window.localStorage.removeItem("sa.dashChartWindowEnd"));
   });
 
-  test("the v34 mockup: the shadow passes behind the bar at rest, and the bar takes the ground once scrolled", async ({ page }) => {
-    await openDash(page, 1440, 860);
-    const r = await page.evaluate(read);
-    expect(r.barPosition, "the bar lies over the scroller on this route").toBe("absolute");
-    expect(r.scrollPad, "focus and anchors do not land under the bar").toBe(`${Math.round(r.bar!.h)}px`);
-    expect(near(r.shadow!.w, 500, 0.6)).toBe(true);
-    expect([near(r.shadow!.x - r.hello!.x, 18, 1.5), near(r.shadow!.y - r.hello!.y, -162, 2)], `the shadow is where the ref puts it against "Hello" (${(r.shadow!.x - r.hello!.x).toFixed(1)}, ${(r.shadow!.y - r.hello!.y).toFixed(1)})`).toEqual([true, true]);
-    expect(r.shadow!.y, "the precondition: the image reaches up into the bar's band").toBeLessThan(r.bar!.b - 20);
-    expect([r.barSolid, r.barGround], "at rest the bar has no ground").toEqual([false, "0"]);
-    /* ⚠️ THE PIXELS, NOT THE RECTS. An image whose box overlaps the bar proves nothing about what was
-       painted: clipped by a scroller that stops at the bar, the box still overlaps. So the bar's band
-       is photographed beside the search and must hold ink darker than the ground. */
-    /* the gap between the toggle's disc and the search's rim — bar, and nothing but bar. (A first cut
-       ran 70px left of the search and took in the toggle's own ring, which is dark in both states.) */
-    const gapX = Math.ceil(r.toggle!.r + 4), gapW = Math.floor(r.search!.x - 4) - gapX;
-    expect(gapW, "there is bare bar between the toggle and the search to photograph").toBeGreaterThan(20);
-    const clip = { x: gapX, y: Math.round(r.bar!.y + 2), width: gapW, height: Math.round(r.bar!.h - 4) };
-    const darkIn = async () => {
-      const png = readPng(await page.screenshot({ clip }));
-      let ground = 0, dark = 0;
-      const g = png.at(1, 1);
-      for (let y = 0; y < png.height; y += 1) for (let x = 0; x < png.width; x += 1) {
-        const [a, b, c] = png.at(x, y);
-        if (Math.abs(a - g[0]) + Math.abs(b - g[1]) + Math.abs(c - g[2]) > 12) dark += 1; else ground += 1;
-      }
-      return { ground, dark };
-    };
-    const rest = await darkIn();
-    report.shadowBehindBar = { clip, rest };
-    expect(rest.dark, `the wing is painted in the bar's band, left of the search (${JSON.stringify(rest)})`).toBeGreaterThan(150);
-    await page.screenshot({ path: resolve(OUT, "v34-shadow-behind-bar.png"), clip: { x: 224, y: 40, width: 1000, height: 330 } });
-
-    /* scrolled: the ground arrives, and nothing reads through it */
-    await page.evaluate(() => { const s = document.querySelector(".ws-wbody")!; s.scrollTop = 160; });
-    await settle(page);
-    const s2 = await page.evaluate(read);
-    expect([s2.barSolid, s2.barGround], "once the page has scrolled the bar takes the page's ground").toEqual([true, "1"]);
-    await page.screenshot({ path: resolve(OUT, "v34-scrolled.png"), clip: { x: 224, y: 40, width: 1000, height: 330 } });
-    const scrolled = await darkIn();
-    (report.shadowBehindBar as Record<string, unknown>).scrolled = scrolled;
-    expect(scrolled.dark, "…and the bar's band is ground from edge to edge").toBeLessThan(20);
-    await page.evaluate(() => { document.querySelector(".ws-wbody")!.scrollTop = 0; });
-    await settle(page);
-    expect((await page.evaluate(read)).barSolid, "back at the top it is transparent again").toBe(false);
-  });
+  /* ⚠️ RETIRED (app shell v3, 26 Sep): "the shadow passes behind the bar at rest, and the bar takes the
+     ground once scrolled". The dashboard's bar no longer lies over its scroller — it is the shell's one
+     bar, in the flow and opaque on every route (D4), so there is no band for the greeting's shadow to
+     pass behind and no transparent state to leave. The replacement claims — the bar's background IS the
+     page's, and nothing but its one hairline sits between it and the content — are shellV3 L2. */
 
   /* ⚠️ THE SHARED CONTROLS ARE ONE SIZE ON EVERY PAGE (the v34 mockup — Nick: "a Help button that changes
      size between routes is worse than every page starting 16px lower"). Asserted against the DASHBOARD'S
      own readings, never a literal on both sides, over routes that draw the bar three different ways. */
+  /* ⚠️ RETARGETED (app shell v3, 26 Sep): the law is unchanged — one size on every page, asserted
+     against the dashboard's own readings — but the controls are v3's: the 34px collapse ring, the 36px
+     icon search, the 36px outline feedback button and the 36px help circle, and no bar lies over a
+     scroller any more, the dashboard's included. */
   test("the v34 mockup: the bar's shared controls are one size on every page", async ({ page }) => {
     const readBar = () => page.evaluate(() => {
       const rd = (n: number) => Math.round(n * 10) / 10;
       const bar = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
       const b = (sel: string) => { const el = bar.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: rd(r.x), y: rd(r.y), w: rd(r.width), h: rd(r.height), cy: rd(r.y + r.height / 2) } : null; };
-      return { bar: { h: rd(bar.getBoundingClientRect().height), position: getComputedStyle(bar).position }, toggle: b(".sb-toggle"), help: b(".sp-help"), feedback: b(".ws-fbpill"),
-        pill: b(".sp-search:not(.sp-search--big)"), pillFrame: b(".sp-search:not(.sp-search--big) .sp-search-f"), crumb: b(".ws-crumb"),
+      return { bar: { h: rd(bar.getBoundingClientRect().height), position: getComputedStyle(bar).position }, toggle: b(".sb-toggle"), help: b(".ws-help"), feedback: b(".ws-fb"),
+        pill: b(".ws-search"), crumb: b(".ws-crumb"),
         /* ⚠️ `+ New` IS NOT A SHARED CONTROL ANY MORE — it was deleted from the bar on every route
            (Query Centre v11, phase 3, Nick's call). Its size was measured here as one of the set
            that must agree page to page, so with the button gone the set could never be met. It is
@@ -469,6 +428,8 @@ test.describe("dashboard top row — v33", () => {
     });
     await openDash(page, 1440, 860);
     const dash = await readBar();
+    expect(dash.bar.position, "the dashboard's bar is in the flow now").not.toBe("absolute");
+    expect([dash.toggle!.w, dash.help!.w, dash.help!.h, dash.feedback!.h, dash.pill!.w, dash.pill!.h], "v3: toggle 34 · help 36 · feedback 36 tall · search 36").toEqual([34, 36, 36, 36, 36, 36]);
     const pages: Record<string, Awaited<ReturnType<typeof readBar>>> = { "/dashboard": dash };
     for (const route of ["/queries", "/todo", "/manuscripts", "/account"]) {
       await openRoute(page, route, { width: 1440, height: 860 });
@@ -479,12 +440,11 @@ test.describe("dashboard top row — v33", () => {
         expect([r[k]!.w, r[k]!.h], `${route}: ${k} is the size it is on the dashboard`).toEqual([dash[k]!.w, dash[k]!.h]);
       }
       if (r.pill) {
-        expect(r.pill.h, `${route}: the search pill is 50`).toBe(50);
-        expect([r.pill.w - r.pillFrame!.w, r.pill.h - r.pillFrame!.h], `${route}: the pill has the card's 5px rim`).toEqual([10, 10]);
+        expect([r.pill.w, r.pill.h], `${route}: the search is the 36px icon it is on the dashboard`).toEqual([dash.pill!.w, dash.pill!.h]);
       }
       expect(r.neu, `${route}: + New is back in the bar — it was removed from every route`).toBe(0);
       if (r.crumb) expect(Math.abs(r.crumb.cy - r.help!.cy), `${route}: the breadcrumb is vertically centred in the taller bar`).toBeLessThanOrEqual(3);
-      expect(r.bar.position, `${route}: only the dashboard's bar lies over the scroller`).not.toBe("absolute");
+      expect(r.bar.position, `${route}: no bar lies over a scroller`).not.toBe("absolute");
     }
     report.barEverywhere = pages;
     /* the population: the loop really met a pill and a crumb somewhere — `+ New` is no longer part
@@ -497,7 +457,7 @@ test.describe("dashboard top row — v33", () => {
     await settle(page);
     const narrow = await readBar();
     report.barNarrow = narrow;
-    expect([narrow.feedback!.w, narrow.feedback!.h], "under 1100 Give feedback is a 50px ink disc with the pencil").toEqual([50, 50]);
+    expect([narrow.feedback!.w, narrow.feedback!.h], "under 1100 Give feedback is a 36px outline square with the pencil").toEqual([36, 36]);
     await page.screenshot({ path: resolve(OUT, "v34-bar-queries-1060.png"), clip: { x: 0, y: 0, width: 1060, height: 200 } });
   });
 

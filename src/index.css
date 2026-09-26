@@ -167,6 +167,13 @@
      `--shell-edge` (the control border) on purpose: a divider that matches a card's border
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
+  /* ⚠️ APP SHELL v3 — THE PAGE GROUND, AS CHANNELS. The window dissolved (D7), so the page sits straight
+     on this ground and the top bar is painted with it; the scroll hems, the dock and the sticky grounds
+     that used to fade into the white window fade into THIS now. Channels because those fades need it at
+     other alphas and `color-mix()` is banned at runtime. It starts equal to `--ws-ground` and the
+     dashboard and the Query Centre redeclare it (workspaceShell.css) for their darker ground. */
+  --ws-page-rgb: 247, 244, 238;
+  --ws-page: rgb(var(--ws-page-rgb));
   --ws-edge: #e9e2d7;
   /**
    * ⚠️ THE WINDOW IS NO LONGER PURE WHITE, AND CARDS ARE — that inversion is the point. At

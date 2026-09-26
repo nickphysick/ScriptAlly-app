@@ -310,20 +310,25 @@ describe("the breadcrumb is chrome", () => {
     expect(html).toContain('class="ws-cur"');
     expect(html).toContain('class="ws-seg"');
     expect(html).toContain(">/<");
-    const crumb = sliceBetween(html, 'class="ws-crumb"', 'class="ws-vdiv"', "the breadcrumb");
+    /* app shell v3 (26 Sep): the crumb ends at the bar's spacer now (the whisper and its hairline are
+       retired), the current page is `--sp-ink` at 600 and the ancestors `--shell-mute`. */
+    const crumb = sliceBetween(html, 'class="ws-crumb"', 'class="ws-grow"', "the breadcrumb");
     expect(crumb).not.toContain("·");
-    expect(rule(".ws-cur")).toContain("color: #241811");
-    expect(rule(".ws-seg")).toContain("color: #8a7a6c");
+    expect(rule(".ws-cur")).toContain("color: var(--sp-ink)");
+    expect(rule(".ws-cur")).toContain("font-weight: 600");
+    expect(rule(".ws-seg")).toContain("color: var(--shell-mute)");
+    expect(rule(".ws-sep")).toContain("opacity: 0.45");
   });
 
-  /* ⚠️ RETARGETED from "the divider is 1px x 18px on the line token". */
-  it("the vertical hairline is 1px x 18px, and the save whisper is mono caps", () => {
-    const v = rule(".ws-vdiv");
-    expect(v).toContain("width: 1px");
-    expect(v).toContain("height: 18px");
-    const w = rule(".ws-sync");
-    expect(w).toContain("text-transform: uppercase");
-    expect(w).toContain("JetBrains Mono");
+  /* ⚠️ RETIRED (app shell v3, 26 Sep, D5): the save whisper and the hairline beside it are gone from
+     the shell — element and rule. The rendered claim (no route's DOM says "all changes saved") is
+     shellV3.measure L5. */
+  it("the save whisper and its hairline are gone — element and rule", () => {
+    expect(cssRules).not.toMatch(/(?:^|\n)\s*\.ws-vdiv\s*\{/);
+    expect(cssRules).not.toMatch(/(?:^|\n)\s*\.ws-sync\s*\{/);
+    expect(srcCode).not.toContain('className="ws-sync"');
+    expect(srcCode).not.toContain('className="ws-vdiv"');
+    expect(srcCode).not.toContain("saveWhisper");
   });
 
   /**
