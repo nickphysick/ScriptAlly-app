@@ -39,7 +39,16 @@ const BAKED: Record<string, string> = {
   "--shell-cap-rim": "inset 0 1px 0 rgba(255,255,255,.55)",
   "--shell-ground": "#e7e0d5",
   "--shell-rail": "#efe7db",   // the COLUMN capsule (app-shell Baked 3)
-  "--shell-side": "#efe7db",   // legacy alias — the panel it named is gone
+  // App shell v3: `--shell-side` is STONE, the sidebar's own surface — no longer an alias of the
+  // rail (its three old readers moved to `--shell-rail`). The rest of the v3 set sits beside it.
+  "--shell-side": "#e7e3dc",
+  "--shell-rule": "rgba(28, 19, 15, 0.10)",
+  "--shell-side-w": "248px",
+  "--shell-side-w-collapsed": "68px",
+  "--shell-top-h": "64px",
+  "--shell-active-bg": "var(--sp-anthracite)",
+  "--shell-active-fg": "#fdf9f5",
+  "--shell-hover-bg": "rgba(255, 255, 255, 0.45)",
   "--shell-canvas": "#f7f2e9", // the CONTENT capsule, and its top bar
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
@@ -191,7 +200,14 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
   it("surfaces + fills", () => {
     expect(dt.shellGround).toBe("#e7e0d5");
     expect(dt.shellRail).toBe("#efe7db");
-    expect(dt.shellSide).toBe("#efe7db");
+    expect(dt.shellSide).toBe("#e7e3dc"); // app shell v3 Stone (was the rail's alias, #efe7db)
+    expect(dt.shellRule).toBe("rgba(28, 19, 15, 0.10)");
+    expect(dt.shellSideW).toBe(248);
+    expect(dt.shellSideWCollapsed).toBe(68);
+    expect(dt.shellTopH).toBe(64);
+    expect(dt.shellActiveBg).toBe("#2a3a52");
+    expect(dt.shellActiveFg).toBe("#fdf9f5");
+    expect(dt.shellHoverBg).toBe("rgba(255, 255, 255, 0.45)");
     expect(dt.shellCanvas).toBe("#f7f2e9");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");
@@ -232,9 +248,15 @@ describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () 
     expect(lum(dt.shellDesk)).toBeLessThan(lum(dt.shellRail));
     expect(lum(dt.shellRail)).toBeLessThan(lum(dt.shellCanvas));
   });
-  it("TWO capsules now — the panel folded into the column, so its token is a legacy alias", () => {
+  it("TWO capsules now — and `--shell-side` stopped being the column's alias (app shell v3)", () => {
     expect(dt.shellRail).not.toBe(dt.shellCanvas);
-    expect(dt.shellSide).toBe(dt.shellRail); // the alias tracks the column it merged into
+    // v3: `shellSide` is the sidebar's own Stone surface; the alias it used to be went with its
+    // readers, which read `--shell-rail` now. What must hold is that no sheet still reads the old
+    // name expecting the column's colour.
+    expect(dt.shellSide).toBe("#e7e3dc");
+    for (const f of ["./mobileShell.css", "./shellV2.css"]) {
+      expect(readFileSync(resolve(__dirname, f), "utf8"), `${f} still reads --shell-side`).not.toContain("var(--shell-side)");
+    }
   });
   it("⚠️ THE INTERIOR FILL NO LONGER READS AS AN INSET ON THE COLUMN — reported, not hidden", () => {
     // --shell-inset (#efe8df) and the column (#efe7db) are within a hair of each other now, so a

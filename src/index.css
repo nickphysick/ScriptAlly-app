@@ -316,7 +316,21 @@
      into the column — and both fills come from the sage-desk mockup. The old cream trio was
      tuned against a cream ground; against sage it read as three washed-out greys. */
   --shell-rail: #efe7db;              /* THE COLUMN capsule */
-  --shell-side: #efe7db;              /* ⚠️ LEGACY alias — the panel it named is gone (Phase 2) */
+  /* ── APP SHELL v3 (ref design-refs/shell/app-shell-v3.html) ──
+     ⚠️ `--shell-side` IS STONE NOW — the v3 sidebar's own surface, one shade deeper than the page.
+     It used to be a legacy alias of `--shell-rail` (#efe7db); its three readers (the mobile tab
+     bar, the mobile sheet and the retired v2 capsule) were repointed at `--shell-rail`, so they keep
+     their colour and this name means one thing. The palette sits at `:root` because portalled
+     chrome does not inherit page-scoped tokens; `.t-bold` and `.t-edn` map each colour to their
+     own existing equivalent (see those blocks). */
+  --shell-side: #e7e3dc;                  /* "Stone": the sidebar surface */
+  --shell-rule: rgba(28, 19, 15, 0.10);   /* THE one hairline — sidebar edge + under the top bar */
+  --shell-side-w: 248px;
+  --shell-side-w-collapsed: 68px;
+  --shell-top-h: 64px;
+  --shell-active-bg: var(--sp-anthracite);  /* the anthracite highlight (= the mock's --btn) */
+  --shell-active-fg: #fdf9f5;
+  --shell-hover-bg: rgba(255, 255, 255, 0.45);
   --shell-canvas: #f7f2e9;            /* THE CONTENT capsule — and its top bar */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
   /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the
@@ -723,6 +737,14 @@
   --hub-btn-rad: 7px;
 }
 .t-bold {
+  /* app shell v3 — each shell colour is this theme's EXISTING equivalent, never a new colour:
+     the surface is the desk, the hairline the rail's, the highlight the rail's ink on the card,
+     the hover the rail's own. */
+  --shell-side: var(--desk);
+  --shell-rule: var(--rail-hair);
+  --shell-active-bg: var(--rail-ink);
+  --shell-active-fg: var(--card);
+  --shell-hover-bg: var(--rail-hov);
   --bd: #1d1712;   /* ink */
   --bdw: 1.5px;
   --desk: #c2cfda; /* muted blue */
@@ -865,6 +887,13 @@
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
    radius, borderless, layered shadow (.sa-soft below). All tints pre-computed as static hexes. */
 .t-edn {
+  /* app shell v3 — this theme's existing equivalents: the desk, the rail's hairline, and the
+     midnight accent that this theme reserves for selected marks (`--a-ink`) on the card. */
+  --shell-side: var(--desk);
+  --shell-rule: var(--rail-hair);
+  --shell-active-bg: var(--a-ink);
+  --shell-active-fg: var(--card);
+  --shell-hover-bg: var(--rail-hov);
   --bd: #e3e2e0;   /* hairline */
   --bdw: 1px;
   --desk: #f4f4f3;

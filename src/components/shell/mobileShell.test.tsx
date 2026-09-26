@@ -47,7 +47,7 @@ describe("the tab bar — a floating capsule with the nav active law", () => {
     expect(bar).toContain("border: var(--shell-cap-border)");
     expect(bar).toContain("border-radius: var(--shell-cap-radius)");
     expect(bar).toContain("box-shadow: var(--shell-cap-shadow)");
-    expect(bar).toContain("background: var(--shell-side)");
+    expect(bar).toContain("background: var(--shell-rail)"); // v3: --shell-side is the desktop sidebar's Stone now
   });
 
   it("THE NAV ACTIVE LAW — a bright surface LAID ON, ink text; never burgundy, never pink", () => {

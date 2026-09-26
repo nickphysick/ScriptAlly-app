@@ -194,7 +194,7 @@
     height: 34px;
     border-radius: 99px;
     border: var(--shell-cap-border);
-    background: var(--shell-side);
+    background: var(--shell-rail);
     color: var(--shell-ink-soft);
     cursor: pointer;
     padding: 0;
@@ -284,7 +284,7 @@
     align-items: center;
     padding: 0 8px;
     height: 62px;
-    background: var(--shell-side);
+    background: var(--shell-rail);
     border: var(--shell-cap-border);
     border-radius: var(--shell-cap-radius);
     box-shadow: var(--shell-cap-shadow);

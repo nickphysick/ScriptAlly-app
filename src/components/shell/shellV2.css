@@ -208,7 +208,7 @@
     flex: none;
     min-width: 0;
     overflow: hidden;
-    background-color: var(--shell-side); /* one capsule surface — no edge, no grain of its own */
+    background-color: var(--shell-rail); /* one capsule surface — no edge, no grain of its own */
     transition: width 0.26s ease, opacity 0.2s ease, margin-left 0.26s ease;
   }
 }

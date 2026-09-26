@@ -1730,3 +1730,21 @@ The appraisal sweep removed three surfaces whose **styling carried the verdict a
   cannot support.
 - After the sweep the only consumer of `--ct-warn` is the Scout's error box — which is an advisory,
   and the one place on the page that should be.
+
+## App shell v3 — the sidebar, the top bar and the page frame (26 Sep 2026; ref `design-refs/shell/app-shell-v3.html`)
+
+The shell's palette sits at **`:root`** in `src/index.css` (portalled chrome does not inherit page-scoped tokens), with JS twins in `src/lib/designTokens.ts` (`shellSide`, `shellRule`, `shellSideW`, `shellSideWCollapsed`, `shellTopH`, `shellActiveBg`, `shellActiveFg`, `shellHoverBg`) locked in step by `shellV2Tokens.test.ts`. `.t-bold` and `.t-edn` map each colour to an **existing** colour of their own; nothing new was invented for them.
+
+| Token | Default (`:root`, Cappuccino) | `.t-bold` | `.t-edn` |
+|---|---|---|---|
+| `--shell-side` | `#e7e3dc` "Stone" | `var(--desk)` `#c2cfda` | `var(--desk)` `#f4f4f3` |
+| `--shell-rule` | `rgba(28,19,15,.10)` | `var(--rail-hair)` `rgba(29,23,18,.18)` | `var(--rail-hair)` `#ececeb` |
+| `--shell-active-bg` | `var(--sp-anthracite)` `#2a3a52` | `var(--rail-ink)` `#1d1712` | `var(--a-ink)` `#233150` |
+| `--shell-active-fg` | `#fdf9f5` | `var(--card)` `#fffefb` | `var(--card)` `#ffffff` |
+| `--shell-hover-bg` | `rgba(255,255,255,.45)` | `var(--rail-hov)` `#f6efec` | `var(--rail-hov)` `#f3f3f2` |
+| `--shell-side-w` | `248px` | — | — |
+| `--shell-side-w-collapsed` | `68px` | — | — |
+| `--shell-top-h` | `64px` | — | — |
+
+- ⚠️ **`--shell-side` changed meaning.** It was a legacy alias of `--shell-rail` (`#efe7db`); its three readers (the mobile tab bar and sheet in `mobileShell.css`, the retired v2 capsule in `shellV2.css`) now read `--shell-rail` and keep their colour.
+- **Burgundy never appears in the shell.** The active item is anthracite with cream text; the badge dot keeps the colour it has today.

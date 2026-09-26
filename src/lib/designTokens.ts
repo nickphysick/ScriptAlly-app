@@ -132,7 +132,17 @@ export const statusParchment = "#fdfaf5"; // offer tick
    is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
 export const shellRail = "#efe7db"; // THE COLUMN capsule (app-shell Baked 3)
-export const shellSide = "#efe7db"; // legacy alias — the panel it named folded into the column
+export const shellSide = "#e7e3dc"; // app shell v3 "Stone" — the sidebar surface (was a legacy alias of shellRail)
+/* ── App shell v3 (ref design-refs/shell/app-shell-v3.html) — JS twins of the :root tokens in
+   index.css, kept in step by shellV2Tokens.test.ts. Default theme; .t-bold/.t-edn map to their
+   own existing colours in CSS. ── */
+export const shellRule = "rgba(28, 19, 15, 0.10)"; // the one hairline: sidebar edge + under the top bar
+export const shellSideW = 248; // expanded sidebar (px)
+export const shellSideWCollapsed = 68; // collapsed icon rail (px)
+export const shellTopH = 64; // the top bar (px)
+export const shellActiveBg = "#2a3a52"; // anthracite (= --sp-anthracite)
+export const shellActiveFg = "#fdf9f5"; // cream on the highlight
+export const shellHoverBg = "rgba(255, 255, 255, 0.45)"; // the hover wash
 export const shellCanvas = "#f7f2e9"; // THE CONTENT capsule — and its top bar
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill
