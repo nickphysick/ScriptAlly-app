@@ -1,0 +1,82 @@
+[
+ {
+  "lock": "L6 search · icon button present",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "count 0"
+ },
+ {
+  "lock": "L6 search · ⌘K opens palette (guard)",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "keyboard"
+ },
+ {
+  "lock": "L6 search · icon button present",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "count 0"
+ },
+ {
+  "lock": "L6 search · ⌘K opens palette (guard)",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "keyboard"
+ },
+ {
+  "lock": "L6 search · icon button present",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "count 0"
+ },
+ {
+  "lock": "L6 search · ⌘K opens palette (guard)",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "keyboard"
+ },
+ {
+  "lock": "L6 search · icon button present",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "count 0"
+ },
+ {
+  "lock": "L6 search · ⌘K opens palette (guard)",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "keyboard"
+ },
+ {
+  "lock": "L6 search · icon button present",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "count 0"
+ },
+ {
+  "lock": "L6 search · ⌘K opens palette (guard)",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "keyboard"
+ }
+]

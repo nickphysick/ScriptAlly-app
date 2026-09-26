@@ -1,0 +1,1666 @@
+[
+ {
+  "lock": "L1 tone",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(244, 240, 234)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(255, 255, 255) fg rgb(36, 24, 17)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L4 nav-type · faces loaded",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "serif false mono true"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"breadcrumb\",\"search\",\"feedback\",\"help\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L6 search · 36×36",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "search 210×50"
+ },
+ {
+  "lock": "L6 search · no visible text",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "text \"Search\\n⌘K\""
+ },
+ {
+  "lock": "L6 search · name",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "aria-label null"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.b 121.8 win.y 121.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 80"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 30"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 81.8 · 82.8/82.8/82.8"
+ },
+ {
+  "lock": "L8 geometry · search→feedback 10",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "gap 16"
+ },
+ {
+  "lock": "L8 geometry · active 40×34 centred",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "52×36 cx 36 side.cx 36"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "mark.cx 36 side.cx 36"
+ },
+ {
+  "lock": "L9 collapse · labels hidden",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "hidden 12/12"
+ },
+ {
+  "lock": "L9 collapse · every link named",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "unnamed 12/12"
+ },
+ {
+  "lock": "L1 tone",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "borders=[{\"side\":\"Top\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Right\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Bottom\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Left\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"}] shadows=[{\"color\":\"rgba(58, 28, 20, 0.04)\",\"nums\":[0,1,2,0],\"inset\":false},{\"color\":\"rgba(58, 28, 20, 0.07)\",\"nums\":[0,8,26,0],\"inset\":false}] after=[{\"color\":\"rgb(233, 226, 215)\",\"nums\":[0,0,0,1],\"inset\":true}]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(247, 244, 238)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(255, 255, 255) fg rgb(36, 24, 17)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L4 nav-type · faces loaded",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "serif true mono true"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"breadcrumb\",\"divider\",\"whisper\",\"search\",\"feedback\",\"help\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L6 search · 36×36",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "search 210×50"
+ },
+ {
+  "lock": "L6 search · no visible text",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "text \"Search\\n⌘K\""
+ },
+ {
+  "lock": "L6 search · name",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "aria-label null"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 16/16/16/16 borders 4 shadows 2 after 1"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.b 121.8 win.y 121.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 80"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 30"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 81.8 · 82.8/82.8/82.8"
+ },
+ {
+  "lock": "L8 geometry · search→feedback 10",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "gap 16"
+ },
+ {
+  "lock": "L8 geometry · active 40×34 centred",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "52×36 cx 36 side.cx 36"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "mark.cx 36 side.cx 36"
+ },
+ {
+  "lock": "L9 collapse · labels hidden",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "hidden 12/12"
+ },
+ {
+  "lock": "L9 collapse · every link named",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "unnamed 12/12"
+ },
+ {
+  "lock": "L1 tone",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "borders=[{\"side\":\"Top\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Right\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Bottom\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Left\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"}] shadows=[{\"color\":\"rgba(58, 28, 20, 0.04)\",\"nums\":[0,1,2,0],\"inset\":false},{\"color\":\"rgba(58, 28, 20, 0.07)\",\"nums\":[0,8,26,0],\"inset\":false}] after=[{\"color\":\"rgb(233, 226, 215)\",\"nums\":[0,0,0,1],\"inset\":true}]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(247, 244, 238)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(255, 255, 255) fg rgb(36, 24, 17)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L4 nav-type · faces loaded",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "serif true mono true"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"breadcrumb\",\"divider\",\"whisper\",\"search\",\"feedback\",\"help\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L6 search · 36×36",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "search 210×50"
+ },
+ {
+  "lock": "L6 search · no visible text",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "text \"Search\\n⌘K\""
+ },
+ {
+  "lock": "L6 search · name",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "aria-label null"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 16/16/16/16 borders 4 shadows 2 after 1"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.b 121.8 win.y 121.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 80"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 30"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 81.8 · 82.8/82.8/82.8"
+ },
+ {
+  "lock": "L8 geometry · search→feedback 10",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "gap 16"
+ },
+ {
+  "lock": "L8 geometry · active 40×34 centred",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "52×36 cx 36 side.cx 36"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "mark.cx 36 side.cx 36"
+ },
+ {
+  "lock": "L9 collapse · labels hidden",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "hidden 12/12"
+ },
+ {
+  "lock": "L9 collapse · every link named",
+  "route": "Manuscripts",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "unnamed 12/12"
+ },
+ {
+  "lock": "L1 tone",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(244, 240, 234)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(255, 255, 255) fg rgb(36, 24, 17)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L4 nav-type · faces loaded",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "serif false mono true"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"search\",\"feedback\",\"help\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L6 search · 36×36",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "search 700×60"
+ },
+ {
+  "lock": "L6 search · no visible text",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "text \"Search agents, queries, manuscripts…\\n⌘K\""
+ },
+ {
+  "lock": "L6 search · name",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "aria-label null"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(244, 240, 234)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.b 125.8 win.y 41.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 84"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 46"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 83.8 · 83.8/83.8/83.8"
+ },
+ {
+  "lock": "L8 geometry · search→feedback 10",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 182.2"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap null"
+ },
+ {
+  "lock": "L8 geometry · active 40×34 centred",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "52×36 cx 36 side.cx 36"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "mark.cx 36 side.cx 36"
+ },
+ {
+  "lock": "L9 collapse · labels hidden",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "hidden 12/12"
+ },
+ {
+  "lock": "L9 collapse · every link named",
+  "route": "Dashboard",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "unnamed 12/12"
+ },
+ {
+  "lock": "L1 tone",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "borders=[{\"side\":\"Top\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Right\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Bottom\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"},{\"side\":\"Left\",\"w\":1,\"color\":\"rgb(233, 226, 215)\",\"style\":\"solid\"}] shadows=[{\"color\":\"rgba(58, 28, 20, 0.04)\",\"nums\":[0,1,2,0],\"inset\":false},{\"color\":\"rgba(58, 28, 20, 0.07)\",\"nums\":[0,8,26,0],\"inset\":false}] after=[{\"color\":\"rgb(233, 226, 215)\",\"nums\":[0,0,0,1],\"inset\":true}]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(247, 244, 238)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(255, 255, 255) fg rgb(36, 24, 17)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L4 nav-type · faces loaded",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "serif false mono true"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"breadcrumb\",\"divider\",\"whisper\",\"search\",\"feedback\",\"help\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L6 search · 36×36",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "search 210×50"
+ },
+ {
+  "lock": "L6 search · no visible text",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "text \"Search\\n⌘K\""
+ },
+ {
+  "lock": "L6 search · name",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "aria-label null"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 16/16/16/16 borders 4 shadows 2 after 1"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.b 121.8 win.y 121.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 80"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 30"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 81.8 · 82.8/82.8/82.8"
+ },
+ {
+  "lock": "L8 geometry · search→feedback 10",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "gap 16"
+ },
+ {
+  "lock": "L8 geometry · active 40×34 centred",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "52×36 cx 36 side.cx 36"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "mark.cx 36 side.cx 36"
+ },
+ {
+  "lock": "L9 collapse · labels hidden",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "hidden 12/12"
+ },
+ {
+  "lock": "L9 collapse · every link named",
+  "route": "To-do list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "unnamed 12/12"
+ },
+ {
+  "lock": "L1 tone",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar bg rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "L2 one-divide · sidebar edge",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · top-bar edge",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "rules=0 others=0 shadows=[] borders=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-winwrap unframed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-window unframed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-wbody unframed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · ws-work unframed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "borders=[] shadows=[] after=[]"
+ },
+ {
+  "lock": "L2 one-divide · bar bg = page bg",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar rgba(0, 0, 0, 0) · page rgb(247, 244, 238)"
+ },
+ {
+  "lock": "L3 active · exactly one",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "active count 1"
+ },
+ {
+  "lock": "L3 active · colours",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(245, 226, 218) fg rgb(124, 58, 42)"
+ },
+ {
+  "lock": "L4 nav-type · serif 14.5",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "nav {\"fam\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"size\":\"14.5px\"}"
+ },
+ {
+  "lock": "L4 nav-type · labels mono",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "glabel {\"fam\":\"\\\"JetBrains Mono\\\", monospace\"} n=5"
+ },
+ {
+  "lock": "L5 top-bar · order",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "seq [\"collapse\",\"breadcrumb\",\"divider\",\"whisper\",\"feedback\",\"help\",\"back\"]"
+ },
+ {
+  "lock": "L5 top-bar · no save whisper",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "\"all changes saved\" in DOM: true"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-winwrap",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-window",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 16/16/16/16 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-wbody",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bg rgba(0, 0, 0, 0) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L7 no-inner-card · ws-work",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bg rgb(254, 252, 250) (page rgb(247, 244, 238)) radii 0/0/0/0 borders 0 shadows 0 after 0"
+ },
+ {
+  "lock": "L8 geometry · sidebar width",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "sidebar 72"
+ },
+ {
+  "lock": "L8 geometry · sidebar right = window left",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "side.r 72 win.x 94"
+ },
+ {
+  "lock": "L8 geometry · bar bottom = window top",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.b 121.8 win.y 121.8"
+ },
+ {
+  "lock": "L8 geometry · bar height 64",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.h 80"
+ },
+ {
+  "lock": "L8 geometry · bar left = sidebar right",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "bar.x 94 side.r 72"
+ },
+ {
+  "lock": "L8 geometry · help right clearance 24",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "clearance 145.6"
+ },
+ {
+  "lock": "L8 geometry · controls centred",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "bar.cy 81.8 · 82.8/82.8"
+ },
+ {
+  "lock": "L8 geometry · feedback→help 10",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "gap 12"
+ },
+ {
+  "lock": "L8 geometry · crumb = collapse + 14",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "gap 16"
+ },
+ {
+  "lock": "L8 geometry · mark centred collapsed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": false,
+  "detail": "mark.cx 28 side.cx 36"
+ }
+]

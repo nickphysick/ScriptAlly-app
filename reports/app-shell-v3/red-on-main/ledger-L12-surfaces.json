@@ -1,0 +1,18 @@
+[
+ {
+  "lock": "L12 surfaces · back-to-app present",
+  "route": "Settings",
+  "size": "1440",
+  "state": "hover",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L12 surfaces · back-to-app hover",
+  "route": "Settings",
+  "size": "1440",
+  "state": "hover",
+  "ok": true,
+  "detail": "bg rgb(254, 252, 250)"
+ }
+]

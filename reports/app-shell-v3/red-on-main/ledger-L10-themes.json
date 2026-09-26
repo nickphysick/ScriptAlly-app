@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": false,
+  "detail": "{\"side\":\"#efe7db\",\"rule\":\"\",\"activeBg\":\"\",\"activeFg\":\"\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": false,
+  "detail": "bg rgba(0, 0, 0, 0) token rgb(239, 231, 219)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": false,
+  "detail": "shadow none token rgb(58, 28, 20)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": false,
+  "detail": "active rgb(255, 255, 255)/rgb(36, 24, 17) tokens rgb(58, 28, 20)/rgb(58, 28, 20)"
+ },
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": false,
+  "detail": "{\"side\":\"#efe7db\",\"rule\":\"\",\"activeBg\":\"\",\"activeFg\":\"\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": false,
+  "detail": "bg rgba(0, 0, 0, 0) token rgb(239, 231, 219)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": false,
+  "detail": "shadow none token rgb(58, 28, 20)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": false,
+  "detail": "active rgb(255, 255, 255)/rgb(36, 24, 17) tokens rgb(58, 28, 20)/rgb(58, 28, 20)"
+ },
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": false,
+  "detail": "{\"side\":\"#efe7db\",\"rule\":\"\",\"activeBg\":\"\",\"activeFg\":\"\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": false,
+  "detail": "bg rgba(0, 0, 0, 0) token rgb(239, 231, 219)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": false,
+  "detail": "shadow none token rgb(58, 28, 20)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": false,
+  "detail": "active rgb(255, 255, 255)/rgb(36, 24, 17) tokens rgb(58, 28, 20)/rgb(58, 28, 20)"
+ }
+]

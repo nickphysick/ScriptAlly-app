@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L9 persist · toggle present",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "toggle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9 persist · collapse survives reload",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "toggle",
+  "ok": true,
+  "detail": "stored 1 w 224→72 expanded false"
+ },
+ {
+  "lock": "L9 persist · expand survives reload",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "toggle",
+  "ok": true,
+  "detail": "stored 0 w 224"
+ }
+]
