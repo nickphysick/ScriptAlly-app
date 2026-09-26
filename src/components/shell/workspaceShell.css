@@ -756,6 +756,17 @@
   background: var(--ws-page);
   box-shadow: inset 0 -1px 0 var(--shell-rule);
 }
+/**
+ * §1 (page header v1) — ONCE THE PAGE HAS SCROLLED, a soft shadow beneath the bar; at rest the
+ * hairline alone.
+ *
+ * ⚠️ THE HAIRLINE IS RESTATED HERE, and it has to be: `box-shadow` is one property, so a rule that
+ * named only the new shadow would drop the inset hairline and the bar would lose its edge the
+ * moment a reader scrolled. Two shadows, one declaration.
+ */
+.ws-pagebar--scrolled {
+  box-shadow: inset 0 -1px 0 var(--shell-rule), 0 8px 16px -14px rgba(28, 19, 15, 0.35);
+}
 .ws-grow { flex: 1 1 auto; min-width: 0; }
 /* ⚠️ v3: THE DASHBOARD'S BAR IS NO LONGER LAID OVER ITS SCROLLER — `--dash-bar-h`, the absolute
    placement, the measure-padding and the transparent-until-scrolled ground are retired together.
@@ -781,11 +792,6 @@
    45%, the current page ink at 600. Every element NAMES its face: brand.tsx gives bare spans and
    buttons the sans face at runtime, which a class outranks. The `.ws-vdiv`/`.ws-sync` save whisper
    is retired with its elements (D5). */
-.ws-crumb { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: var(--shell-mute); }
-.ws-sep { font-family: var(--sp-serif); font-size: 15px; font-weight: 400; color: var(--shell-mute); opacity: 0.45; }
-.ws-cur { font-family: var(--sp-serif); font-size: 15px; font-weight: 600; color: var(--sp-ink); }
-.ws-seg { font-family: var(--sp-serif); font-size: 15px; font-weight: 400; line-height: inherit; color: var(--shell-mute); background: none; border: 0; padding: 0; cursor: pointer; }
-.ws-seg:hover { color: var(--sp-ink); }
 /* the spacing between its children is NOT here — it is per-child `margin-left`, further down, so a
    control that collapses takes its space with it. A `gap` on this rule is overridden and reads as live. */
 .ws-bright { flex: none; display: flex; align-items: center; }
@@ -1334,7 +1340,6 @@
   color: transparent;
 }
 .dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.sb-toggle, .ws-search, .ws-fb, .ws-help) > *,
-.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar .ws-crumb { visibility: hidden; }
 /* the layer — present for the cover's whole life, so the dissolve has somewhere to start */
 .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-search, .ws-fb, .ws-help) { position: relative; }
 .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-search, .ws-fb, .ws-help)::after {

@@ -83,6 +83,7 @@
     "design-refs/manuscripts/comps-tray-archivist.png": "0b2a7884ab29987fcea7d5ee20dc2ca4edca626c674dedeaaed53c5b8272d1dd",
     "design-refs/shell/app-shell-v3.html": "98a30a87eb58f174920154054164ae70bf7d38a10a8f947ba45d460d1d707b60",
     "design-refs/shell/page-anatomy.md": "81f0b507622b379d8522b8526837f4b7f1fbe2ccc52ff7583b794a47f854b558",
-    "design-refs/shell/app-shell-v3-geometry.json": "536f9d263b75acb2f8eec4fa7ba44596ea058c5cef9a7c3f3fd565624d509a4c"
+    "design-refs/shell/app-shell-v3-geometry.json": "536f9d263b75acb2f8eec4fa7ba44596ea058c5cef9a7c3f3fd565624d509a4c",
+    "design-refs/page-headers-v6.html": "0813d2ace33d2df716138481d3d303eb80e1e5388c7d8f536fe6e7786df174cb"
   }
 }

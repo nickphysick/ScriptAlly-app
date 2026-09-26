@@ -31,7 +31,7 @@ import {
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
 import {
-  ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
+  ShellSection, openForHit, sectionClick, sectionRowState, shellHitFor,
 } from "../../lib/workspaceShell";
 import { CountChip, MenuCard, MenuCardItem, searchShortcut } from "./primitives";
 import { FEEDBACK_FAB } from "../../lib/beta";
@@ -361,7 +361,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     chooseMs(next);
   }, [manuscripts, activeMs?.id, chooseMs]);
 
-  const crumb = shellCrumb(sections, hit);
   /**
    * ⚠️ THE CRUMB NO LONGER FOLLOWS THE OPEN QUERY (Query Centre v11, 19 Sep). It used to read
    * `QueryHawk / Queries / Greg Panetta` on `/queries?q=<id>`, on the reasoning that the page was
@@ -370,7 +369,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * trail says where you are, `Query Centre`. Measured at a 1280 window it also wrapped the crumb
    * to two lines and moved the bar every time a row was selected.
    */
-  const recordCrumb: string | null = null;
   /**
    * ⚠️ THE MASTHEAD'S KICKER IS THE CRUMB'S OWN SECTION, TAKEN FROM THE SAME CALL. Reading a second
    * derivation put the two three inches apart and disagreeing: `shellV2Nav`'s `SHELL_SECTIONS` calls
@@ -389,12 +387,41 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     [sections, hit],
   );
   const mastheadSection = useMemo(() => ({ section: sectionLabel }), [sectionLabel]);
-  /* The section segment navigates to the section's DEFAULT child — the same destination its rail
-     icon and panel row reach, so all three agree about what "Queries" means. */
-  const activeSection = sections.find((sx) => sx.id === hit?.section);
-  const sectionDefaultPath = activeSection?.children?.length
-    ? (activeSection.children.find((c) => c.id === activeSection.def) ?? activeSection.children[0]).path
-    : activeSection?.path ?? null;
+  /**
+   * §1 (page header v1) — THE BAR GAINS A SHADOW ONCE THE PAGE HAS SCROLLED, and nothing else.
+   *
+   * ⚠️ THE LISTENER IS ON THE WRAP, IN THE CAPTURE PHASE, because `scroll` does not bubble. Each
+   * page owns its own scroller and the shell does not know which element that is — it changes with
+   * the route, and on the pages that fill it is not the row but a pane inside one. Capturing at the
+   * wrap catches a scroll from any descendant without the shell having to hunt for the element or
+   * re-find it every time a page swaps.
+   *
+   * ⚠️ AND THE STATE IS DERIVED FROM THE VALUE, NEVER FROM AN EVENT WE MIGHT MISS. An
+   * `IntersectionObserver` on a sentinel fires only on a CHANGE of intersection, so a callback that
+   * never arrives is wrong for the life of the page; `scrollTop > 2`, read on every scroll, cannot
+   * go stale. It is written only when it differs, so a scrolling page is not re-rendering the shell
+   * on every frame.
+   */
+  const winWrapRef = useRef<HTMLDivElement | null>(null);
+  const [barScrolled, setBarScrolled] = useState(false);
+  useEffect(() => {
+    const wrap = winWrapRef.current;
+    if (!wrap) return undefined;
+    let frame = 0;
+    const read = (e: Event) => {
+      const t = e.target as HTMLElement | null;
+      const top = t && typeof t.scrollTop === "number" ? t.scrollTop : 0;
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; setBarScrolled((was) => (was === top > 2 ? was : top > 2)); });
+    };
+    wrap.addEventListener("scroll", read, true);
+    return () => { wrap.removeEventListener("scroll", read, true); if (frame) cancelAnimationFrame(frame); };
+  }, []);
+  /* ⚠️ A ROUTE CHANGE STARTS A NEW PAGE AT THE TOP, and its scroller is a new element that will
+     never announce the position the old one was left in. Without this the shadow survives into a
+     page that has not been scrolled. */
+  useEffect(() => { setBarScrolled(false); }, [pathname]);
+
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
 
@@ -730,7 +757,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
-          <header className="ws-pagebar" data-probe="navrow">
+          <header className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
               {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
                   move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
               <button
@@ -751,32 +778,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <rect className="sb-fillcol" x="2.4" y="3.4" width="3" height="9.2" rx="0.8" fill="currentColor" opacity="0.22" />
                 </svg>
               </button>
-              {/* ⚠️ EVERY CRUMB SEGMENT BUT THE LAST IS INTERACTIVE, and the separator is `/` throughout.
-                  v3: Source Serif 4 at 15px, ancestors muted, slashes at 45%, the current page ink at
-                  600 with `aria-current="page"`. */}
-              <nav className="ws-crumb" aria-label="Breadcrumb">
-                {crumb && (
-                  <>
-                    <button type="button" className="ws-seg ws-croot" onClick={() => go("/dashboard")}>QueryHawk</button>
-                    <span className="ws-sep" aria-hidden="true">/</span>
-                    {crumb.child ? (
-                      <>
-                        <button
-                          type="button"
-                          className="ws-seg"
-                          onClick={() => { const d = sectionDefaultPath; if (d) go(d); }}
-                        >
-                          {crumb.section}
-                        </button>
-                        <span className="ws-sep" aria-hidden="true">/</span>
-                        <span className="ws-cur" aria-current="page">{recordCrumb ?? crumb.child}</span>
-                      </>
-                    ) : (
-                      <span className="ws-cur" aria-current="page">{recordCrumb ?? crumb.section}</span>
-                    )}
-                  </>
-                )}
-              </nav>
+              {/**
+                * §1 (page header v1) — THE BREADCRUMB IS GONE, AND NOTHING REPLACES IT. The space
+                * between the toggle and the tools is empty.
+                *
+                * ⚠️ IT STRANDED NOTHING, which is why it could go. Its two links were "QueryHawk" →
+                * `/dashboard` and the section → its default child — and the section segment went, in
+                * this file's own words, to "the same destination its rail icon and panel row reach".
+                * Both are the sidebar's own doors. What the trail really carried was the PAGE'S
+                * NAME, said a second time a few pixels above where the header now says it.
+                */}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
               {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
                   settings mode takes its space with it rather than leaving a gap behind. */}
@@ -854,7 +865,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               chevron badge onto the window's top border, which is the only chrome that ever had to
               leave its own subtree; `shellSlots.ts` is deleted with it. The wrapper itself stays —
               it takes the window's slot and is what the window sizes against. */}
-          <div className="ws-winwrap">
+          <div className="ws-winwrap" ref={winWrapRef}>
           <div className="ws-window">
             {/* ⚠️ `sv2-stagepad` RIDES WITH THE SCROLLER, and it is not decoration: below md it
                 adds the floating tab bar's clearance. It followed the stage element here. */}

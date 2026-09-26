@@ -295,27 +295,41 @@ describe("the breadcrumb is chrome", () => {
     expect(rule(".ws-pagebar")).toContain("flex: none");
   });
 
-  /* ⚠️ RETARGETED — both survive, on the pagebar rather than the bar.
-     ⚠️ AND THE "no `·`" CLAUSE IS NOW SCOPED TO THE CRUMB (settings-mode pack, Phase 1). It was
-     asserted over the WHOLE rendered shell, which was a proxy for "the crumb separates with `/`"
-     and held only while nothing ELSE in the shell used an interpunct. The settings rail's plan
-     strip states "1 manuscript · unlimited agents · unlimited queries" — correct, and nothing to do
-     with the breadcrumb — so the page-wide form went red over a sentence in a different component.
-     Bounded on the next sibling's class rather than on `</nav>`: a closing tag is not a delimiter
-     (the house rule about slices bounded by anchors that cannot nest). */
-  it("only the current page is ink; ancestors are muted links; `/` throughout", () => {
-    const html = at("/queries/analytics");
-    expect(html).toContain('class="ws-cur"');
-    expect(html).toContain('class="ws-seg"');
-    expect(html).toContain(">/<");
-    /* app shell v3 (26 Sep): the crumb ends at the bar's spacer now (the whisper and its hairline are
-       retired), the current page is `--sp-ink` at 600 and the ancestors `--shell-mute`. */
-    const crumb = sliceBetween(html, 'class="ws-crumb"', 'class="ws-grow"', "the breadcrumb");
-    expect(crumb).not.toContain("·");
-    expect(rule(".ws-cur")).toContain("color: var(--sp-ink)");
-    expect(rule(".ws-cur")).toContain("font-weight: 600");
-    expect(rule(".ws-seg")).toContain("color: var(--shell-mute)");
-    expect(rule(".ws-sep")).toContain("opacity: 0.45");
+  /**
+   * ⚠️ RETIRED AND INVERTED (page header v1): THE BREADCRUMB IS GONE FROM THE SHELL.
+   *
+   * What it asserted — the current page ink at 600, ancestors muted, `/` throughout, no interpunct
+   * inside the trail — described a trail that no longer exists. It is not deleted into silence: the
+   * claim becomes its opposite, because "there is no crumb" is exactly as losable as the styling was.
+   *
+   * ⚠️ AND IT ASSERTS BOTH THE ELEMENTS AND THE WORDS. A check for the classes alone would pass on
+   * a bar rebuilt with the same trail under new names; a check for the words alone would fail the
+   * day a page's title legitimately contains a slash. The page's name is the one thing the trail
+   * really carried, and the header says it now, 18px below.
+   */
+  it("⚠️ there is no breadcrumb — not its elements, not its separators, not the page's name", () => {
+    for (const route of ["/queries/analytics", "/todo", "/agents"]) {
+      const html = at(route);
+      for (const cls of ["ws-crumb", "ws-seg", "ws-sep", "ws-cur", "ws-croot"]) {
+        expect(html, `${route} still renders .${cls}`).not.toContain(`class="${cls}"`);
+      }
+      expect(html, `${route} still renders a Breadcrumb landmark`).not.toContain('aria-label="Breadcrumb"');
+      /**
+       * ⚠️ THE BAR'S WORDS, AND THE CLAIM IS NOT "it says nothing" — it still names its own tools
+       * (Search, Give feedback, Help), which is what they are for. What it must not do is say where
+       * you are: no separator, and not the page's name.
+       */
+      const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
+      const words = bar.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      expect(words, `${route}'s bar carries a separator`).not.toContain("/");
+      for (const name of ["Analytics", "To-do", "Contact list", "QueryHawk"]) {
+        expect(words, `${route}'s bar states "${name}"`).not.toContain(name);
+      }
+    }
+    /* …and the styling went with it, so nothing can quietly render the trail again and look right */
+    for (const sel of [".ws-crumb", ".ws-seg", ".ws-sep", ".ws-cur"]) {
+      expect(cssRules, `${sel} still has a rule`).not.toContain(`${sel} {`);
+    }
   });
 
   /* ⚠️ RETIRED (app shell v3, 26 Sep, D5): the save whisper and the hairline beside it are gone from
