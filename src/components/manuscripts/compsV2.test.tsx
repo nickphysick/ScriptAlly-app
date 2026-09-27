@@ -16,6 +16,8 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinTags, splitTags, yearError } from "./CompForm";
+import { CompCard } from "./CompCard";
+import { CompsExampleCards } from "./CompsEmpty";
 import { CompsScoutRail } from "./CompsScoutRail";
 import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 
@@ -39,7 +41,7 @@ describe("C3 · the form's rules", () => {
 });
 
 describe("C5 · the page cannot reach the Scout", () => {
-  const page = ["ComparableTitlesPage.tsx", "CompsScoutRail.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx"];
+  const page = ["ComparableTitlesPage.tsx", "CompsScoutRail.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx", "CompsEmpty.tsx"];
   it("nothing the page mounts imports the Scout's client or its panel", () => {
     for (const f of page) {
       const s = src(f);
@@ -57,6 +59,24 @@ describe("C5 · the page cannot reach the Scout", () => {
   });
 });
 
+describe("C7 · the empty state's examples are pictures", () => {
+  it("example cards render no button, and the block is aria-hidden and inert", () => {
+    const html = renderToStaticMarkup(<CompsExampleCards now={2026} />);
+    expect(html).not.toMatch(/<button\b/);
+    expect(html).toMatch(/aria-hidden="true"/);
+    expect(html).toMatch(/\binert=""/);
+    expect(html).toContain(">Example<");
+  });
+  it("the live card is the same component with real buttons", () => {
+    const html = renderToStaticMarkup(<CompCard comp={{ title: "A", inQuery: true }} position={1} now={2026} />);
+    expect((html.match(/<button\b/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    expect(html).toContain('role="switch"');
+    expect(html).toContain(">1st<");
+  });
+  it("the page no longer mounts the v3 marketing blocks", () => {
+    expect(src("ComparableTitlesPage.tsx")).not.toMatch(/StagesBlock|FeatureBlock|compsMarketing/);
+  });
+});
 
 describe("C9 · a failed write reverts and says so, and never escapes", () => {
   it("runWrite resolves false, calls onFail once, and does not reject", async () => {

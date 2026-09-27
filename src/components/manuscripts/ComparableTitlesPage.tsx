@@ -36,6 +36,7 @@ import { CompCard } from "./CompCard";
 import { CompForm } from "./CompForm";
 import { CompsQueryLine } from "./CompsQueryLine";
 import { CompsScoutRail } from "./CompsScoutRail";
+import { CompsExampleCards, CompsHow } from "./CompsEmpty";
 import "./compsV2.css";
 
 /** Shared with the bar's switcher and the packages page — the section's one active-manuscript key. */
@@ -98,7 +99,7 @@ export const ComparableTitlesPage: React.FC<{
   const keys = cardKeys(comps);
   const now = currentYear();
   const isEmpty = !!activeMs && comps.length === 0;
-  const liveForm: FormState | null = form;
+  const liveForm: FormState | null = form ?? (isEmpty && emptyClosedFor !== activeMs?.id ? { mode: "add" } : null);
   formOpenRef.current = !!liveForm;
   const full = comps.length >= MAX_COMPS;
 
@@ -337,6 +338,13 @@ export const ComparableTitlesPage: React.FC<{
           <div className="cpv-main" data-cpv="main">
             {!activeMs ? (
               <p className="cpv-hint">No manuscript to compare yet.</p>
+            ) : isEmpty ? (
+              <>
+                {liveForm && formEl(liveForm)}
+                <CompsHow />
+                <CompsQueryLine comps={[]} msTitle={activeMs.title} format="readers" onFormat={() => {}} example />
+                <CompsExampleCards now={now} />
+              </>
             ) : (
               <>
                 <CompsQueryLine comps={comps} msTitle={activeMs.title} format={format} onFormat={setFormat} />

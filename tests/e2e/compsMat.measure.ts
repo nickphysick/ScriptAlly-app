@@ -428,8 +428,12 @@ test("C7 · empty", async ({ page }) => {
   L.check("C7 · examples are marked Example", ctx, r.exTags === 1 && /^Example · /.test(r.exLineCap ?? ""), `tags ${r.exTags} cap ${r.exLineCap}`);
   L.check("C7 · two example comp cards", ctx, r.exCards === 2, `${r.exCards}`);
   L.check("C7 · the old StagesBlock / FeatureBlock are gone", ctx, !r.oldBlocks, "");
-  await page.locator("#cpv-f-title:visible").fill("First Light");
-  await page.keyboard.press("Enter");
+  /* ⚠️ GUARDED: with no open form this must become a red ROW, not a crash at `fill` (it crashed on P5) */
+  const titleIn = page.locator("#cpv-f-title:visible");
+  if (await titleIn.count()) {
+    await titleIn.fill("First Light");
+    await page.keyboard.press("Enter");
+  }
   await expect.poll(async () => (await readList(page))?.cards.map((c) => c.title), { timeout: 10_000 }).toEqual(["First Light"]).catch(() => {});
   const after = await readFrame(page);
   const list = await readList(page);
