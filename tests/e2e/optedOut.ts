@@ -37,10 +37,12 @@
  * page ground with no slab, per design-refs/manuscripts/manuscripts-v12.html. A shared masthead
  * above that hero would be two heads on one page.
  */
-export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts"];
+/* Comparable titles joined on 27 Sep (comps v2; Nick: "Comparable titles and Submission packages take
+   full headers") — its full header is the first row of its own group, so the grid's masthead is null. */
+export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);

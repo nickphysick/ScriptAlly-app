@@ -244,7 +244,13 @@ export async function readMockHeader(page: Page, vp: { width: number; height: nu
   }, DRAWN);
 }
 
-export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof readFull>>>, ctx: { route: string; size: string; state: string }, mock?: Awaited<ReturnType<typeof readMockHeader>>) {
+/**
+ * ⚠️ `withArt: false` (comps v2) is for a WITHOUT_ART page: the four drawn-art rows become one row
+ * asserting there is no art slot at all. Additive — every existing caller passes nothing and is
+ * judged exactly as before.
+ */
+export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof readFull>>>, ctx: { route: string; size: string; state: string }, mock?: Awaited<ReturnType<typeof readMockHeader>>, opts: { withArt?: boolean } = {}) {
+  const withArt = opts.withArt ?? true;
   const n = (a: number, b: number, t: number) => Number.isFinite(a) && Math.abs(a - b) <= t;
   L.check("§4.2 · the header spans the column", ctx, n(r.hdL, r.colL, 1) && n(r.hdR, r.colR, 1), `hd ${r.hdL.toFixed(1)}→${r.hdR.toFixed(1)} col ${r.colL.toFixed(1)}→${r.colR.toFixed(1)}`);
   L.check("§4.2 · its top is the bar's bottom + 18", ctx, n(r.hdT, 18, 1), `${r.hdT.toFixed(1)}`);
@@ -259,10 +265,14 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   L.check("§4.3 · the frame is min(920, column) wide", ctx, !!r.frame && n(r.frame.w, fw, 1), `frame ${r.frame?.w.toFixed(1)} want ${fw.toFixed(1)}`);
   L.check("§4.3 · …and centred in the column", ctx, !!r.frame && n((r.frame.l + r.frame.r) / 2, (r.colL + r.colR) / 2, 1), `frame ${r.frame?.l.toFixed(1)}→${r.frame?.r.toFixed(1)}`);
   L.check("§4.3 · the text block is ≤ 55% of the frame", ctx, !!r.frame && r.textW <= r.frame.w * 0.55 + 0.5, `text ${r.textW.toFixed(1)} of ${r.frame?.w.toFixed(1)}`);
-  L.check("§4.3 · the drawn art's right is the frame's right", ctx, !!r.art && !!r.frame && n(r.art.r, r.frame.r, 1), `art ${r.art?.r.toFixed(1)} frame ${r.frame?.r.toFixed(1)}`);
-  L.check("§4.3 · the drawn art's bottom is the rule", ctx, !!r.art && n(r.art.b, r.rule, 1), `art ${r.art?.b.toFixed(1)} rule ${r.rule.toFixed(1)}`);
-  L.check("§4.3 · the drawn art clears the text", ctx, !!r.art && r.art.l >= r.textR, `art ${r.art?.l.toFixed(1)} text ${r.textR.toFixed(1)} gap ${r.art ? (r.art.l - r.textR).toFixed(1) : "?"}`);
-  L.check("§4.3 · the drawn art clears the bar", ctx, !!r.art && r.art.t >= r.barB - 0.5, `art top ${r.art?.t.toFixed(1)} bar ${r.barB.toFixed(1)}`);
+  if (withArt) {
+    L.check("§4.3 · the drawn art's right is the frame's right", ctx, !!r.art && !!r.frame && n(r.art.r, r.frame.r, 1), `art ${r.art?.r.toFixed(1)} frame ${r.frame?.r.toFixed(1)}`);
+    L.check("§4.3 · the drawn art's bottom is the rule", ctx, !!r.art && n(r.art.b, r.rule, 1), `art ${r.art?.b.toFixed(1)} rule ${r.rule.toFixed(1)}`);
+    L.check("§4.3 · the drawn art clears the text", ctx, !!r.art && r.art.l >= r.textR, `art ${r.art?.l.toFixed(1)} text ${r.textR.toFixed(1)} gap ${r.art ? (r.art.l - r.textR).toFixed(1) : "?"}`);
+    L.check("§4.3 · the drawn art clears the bar", ctx, !!r.art && r.art.t >= r.barB - 0.5, `art top ${r.art?.t.toFixed(1)} bar ${r.barB.toFixed(1)}`);
+  } else {
+    L.check("§4.3 · no art slot on a WITHOUT_ART page", ctx, !r.art, JSON.stringify(r.art));
+  }
   L.check("§2 · eyebrow at header + 26, title at eyebrow + 24", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 24, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
   L.check("§2 · the title is Special Elite", ctx, /^"?Special Elite"?/.test(r.titleFam ?? ""), `${r.titleFam}`);
   L.check("§2 · …at 56px (50 at 1360 and below)", ctx, r.titleSize === (Number(ctx.size) <= 1360 ? "50px" : "56px"), `${r.titleSize}`);

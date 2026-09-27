@@ -32,10 +32,10 @@ const OUT = resolve("test-results/masthead-matrix");
  */
 const MATRIX: { route: string; size: "full" | "compact" | "none"; why?: string }[] = [
   { route: "/queries", size: "full" },
-  /* ⚠️ NOT CONVERTED, AND NOT A FAILURE — recorded as `none` with its reason so the gap is in the
-     table rather than in a comment nobody reads. Its hero is a measured layout that places its
-     cards from the art's own box; see the run report. */
-  { route: "/agents", size: "none", why: "the Contact list still draws its own measured hero" },
+  /* ⚠️ CORRECTED (comps v2, 27 Sep): this row read `none` — "the Contact list still draws its own
+     measured hero" — after page header v2 §4 (190a7b7d) gave it the shared FULL header. The row was
+     stale, not the page. */
+  { route: "/agents", size: "full" },
   /* out of this build by ruling — it shows a single manuscript and is being redesigned */
   { route: "/manuscripts", size: "none", why: "out of this build by ruling" },
   { route: "/queries/analytics", size: "compact" },
@@ -43,7 +43,8 @@ const MATRIX: { route: string; size: "full" | "compact" | "none"; why?: string }
   { route: "/todo/calendar", size: "compact" },
   { route: "/todo/noteboard", size: "compact" },
   { route: "/agents/discover", size: "compact" },
-  { route: "/manuscripts/comps", size: "compact" },
+  /* comps v2 (27 Sep): the full header, ruled by Nick */
+  { route: "/manuscripts/comps", size: "full" },
   { route: "/manuscripts/packages", size: "compact" },
   { route: "/import", size: "compact" },
 ];

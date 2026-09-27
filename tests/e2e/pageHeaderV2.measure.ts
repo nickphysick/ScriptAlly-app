@@ -113,19 +113,39 @@ for (const vp of SIZES) {
   });
 }
 
-test("§4.4 · the two full headers are one header", async ({ page }) => {
+/* ── §2 · Comparable titles' full header (comps v2, 27 Sep) — WITHOUT_ART until Nick supplies it ── */
+for (const vp of SIZES) {
+  test(`§2 · Comparable titles' full header at ${vp.width}`, async ({ page }) => {
+    const L = new Ledger(`v2-full-comps-${vp.width}`);
+    await openApp(page, "/manuscripts/comps", vp);
+    const r = await readFull(page, '[data-cpv="rail"]');
+    const ctx = { route: "/manuscripts/comps", size: `${vp.width}`, state: "expanded" };
+    L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
+    /* no mock: this file's mock is the Contact list's header; comps is held to its own mock in
+       compsMat.measure.ts */
+    if (r) judgeFull(L, r, ctx, undefined, { withArt: false });
+    L.write();
+    expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(12);
+  });
+}
+
+test("§4.4 · the full headers are one header", async ({ page }) => {
   const L = new Ledger("v2-consistency");
   for (const vp of SIZES) {
     await openApp(page, "/queries", vp); const q = await readTops(page);
     await openApp(page, "/agents", vp); const c = await readTops(page);
-    const ctx = { route: "/queries vs /agents", size: `${vp.width}`, state: "expanded" };
+    await openApp(page, "/manuscripts/comps", vp); const m = await readTops(page);
+    const ctx = { route: "/queries vs /agents vs /manuscripts/comps", size: `${vp.width}`, state: "expanded" };
     for (const k of ["header", "eyebrow", "title"] as const) {
       L.check(`§4.4 · the ${k}'s top is the same on both`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - c[k]) <= 0.5, `qc ${q[k].toFixed(1)} contact ${c[k].toFixed(1)}`);
+      L.check(`§4.4 · the ${k}'s top is the same on Comparable titles`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - m[k]) <= 0.5, `qc ${q[k].toFixed(1)} comps ${m[k].toFixed(1)}`);
     }
     L.check("§4.4 · the Contact list's eyebrow is its sidebar section", ctx, (c.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "AGENTS / CONTACT LIST", `${c.eyebrowText}`);
+    L.check("§4.4 · Comparable titles' eyebrow is its sidebar section", ctx, (m.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / COMPARABLE TITLES", `${m.eyebrowText}`);
   }
   L.write();
-  expect(L.rows.length).toBe(SIZES.length * 4);
+  expect(L.rows.length).toBe(SIZES.length * 8);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 
