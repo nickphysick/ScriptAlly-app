@@ -1,5 +1,13 @@
 # Contact list v11 — the run report (25 Sep)
 
+> **⚠️ ADDENDUM, 27 Sep — the top of the page has moved on.** Page header v2 (`190a7b7d`, on
+> dev as `index-B8P3fcVV.js`) deleted the v11 HERO — the Archivist composition, `heroLayout`
+> and the blank card — and the page now opens with the shared full header (eyebrow · title ·
+> facts · "+ Add an agent" quick-add · the hawk-only crop), with the count cards and
+> Housekeeping below the rule. **The walk list below predates that**: skip its hero items and
+> read `reports/page-header-v2/REPORT.md` for the current top-of-page. Everything from the
+> pop-up down (Also-changes, the add card, Housekeeping) is unchanged and still current.
+
 **All seven phases are on `main` and pushed. Nothing is deployed** (per the go-ahead: no deploy
 beyond the dev Firestore rules, which went out with P4 and were probe-verified). The page was
 measured against a local build of each phase's tip, served from the measurement worktree at
