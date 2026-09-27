@@ -19,11 +19,16 @@
  *   node tests/e2e/seedCompsFixture.mjs            # write both, print the ids
  *   node tests/e2e/seedCompsFixture.mjs --restore  # delete both
  *   node tests/e2e/seedCompsFixture.mjs --dump <id> # print that manuscript's stored comps
+ *   node tests/e2e/seedCompsFixture.mjs --feed <id> # count its "Manuscript Updated" feed items
+ *
+ * ⚠️ `--restore` DELETES THE FIXTURES' FEED ITEMS TOO. Every comp write used to append a
+ * "Manuscript Updated" activity, so earlier runs left items on the harness account naming
+ * manuscripts that no longer exist — residue a restore that only deletes the manuscripts misses.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, deleteDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -85,8 +90,22 @@ if (di > -1) {
   process.exit(0);
 }
 
+const feedFor = async (id) => (await getDocs(query(collection(db, "users", uid, "activities"), where("manuscriptId", "==", id))))
+  .docs.filter((d) => d.data().activityType === "Manuscript Updated");
+
+/* `--feed <id>` prints how many "Manuscript Updated" feed items name that manuscript. */
+const fi = process.argv.indexOf("--feed");
+if (fi > -1) {
+  /* ⚠️ A STRING: under Playwright's FORCE_COLOR, console.log of a NUMBER prints ANSI-coloured digits */
+  console.log(String((await feedFor(process.argv[fi + 1])).length));
+  process.exit(0);
+}
+
 if (process.argv.includes("--restore")) {
   for (const id of [FILLED, EMPTY]) {
+    const items = await feedFor(id);
+    for (const d of items) await deleteDoc(d.ref);
+    if (items.length) console.log(`removed ${items.length} feed item(s) naming ${id}`);
     const existed = (await getDoc(ref(id))).exists();
     await deleteDoc(ref(id));
     console.log(existed ? `removed ${id}` : `${id} was already absent`);

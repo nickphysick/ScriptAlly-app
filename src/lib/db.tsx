@@ -42,6 +42,7 @@ import {
 } from "./seeds";
 
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
+import { narratesManuscriptWrite } from "./manuscriptFeed";
 
 import {
   signInWithEmailAndPassword,
@@ -1593,7 +1594,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
     }
 
-    if (writeSuccess) {
+    /* a comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts */
+    if (writeSuccess && narratesManuscriptWrite(fields)) {
       const dateStr = new Date().toISOString();
       await addActivity({
         activityType: ActivityType.MANUSCRIPT_UPDATED,

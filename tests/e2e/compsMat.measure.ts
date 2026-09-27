@@ -496,3 +496,31 @@ test("C9 · save failure", async ({ page }) => {
   L.check("C9 · no unhandled rejection", ctx, errors.length === 0, JSON.stringify(errors.slice(0, 3)));
   close(L, 4);
 });
+
+/* ══ C10 · a comps-only write narrates nothing (Nick's ruling, 27 Sep) ══
+   A reorder is the purest comps-only write: it must add ZERO "Manuscript Updated" items to the feed.
+   The other half — a write touching any other field (the title) still narrates — is proved at unit
+   level against the same decision function (manuscriptFeed.test.ts); this page has no title control. */
+test("C10 · a comp reorder writes no feed item", async ({ page }) => {
+  const L = new Ledger("comps-C10");
+  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  /* ⚠️ A COUNT THAT CANNOT BE READ IS A FAILURE, NOT A NUMBER — the raw output goes into the row */
+  const feed = () => {
+    const raw = execFileSync("node", ["tests/e2e/seedCompsFixture.mjs", "--feed", FILLED], { encoding: "utf8" });
+    const n = Number(raw.trim().split("\n").pop());
+    if (!Number.isFinite(n)) throw new Error(`the feed count was unreadable: ${JSON.stringify(raw)}`);
+    return n;
+  };
+  await freshFilled(page);
+  const before = feed();
+  await grip(page, 0).focus();
+  await page.keyboard.press("Alt+ArrowDown");
+  const want = ["Salt Road", "The Tidewater Line", ...FIXTURE_TITLES.slice(2)];
+  await waitForOrder(page, want).catch(() => {});
+  await page.waitForTimeout(2500);
+  const stored = JSON.parse(execFileSync("node", ["tests/e2e/seedCompsFixture.mjs", "--dump", FILLED], { encoding: "utf8" }).trim().split("\n").pop() ?? "[]");
+  L.check("C10 · precondition: the reorder was stored", ctx, JSON.stringify(stored.map((c: { title: string }) => c.title)) === JSON.stringify(want), JSON.stringify(stored.map((c: { title: string }) => c.title)));
+  const after = feed();
+  L.check("C10 · the reorder added zero feed items", ctx, after - before === 0, `before ${before} after ${after}`);
+  close(L, 2);
+});
