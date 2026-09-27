@@ -393,7 +393,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Manuscripts", "components/manuscripts/manuscripts.css", [".msv1", ".msv-wpg", ".msv-wrap"]],
       /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
       ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],
-      ["Submission packages", "components/packages/packageWorkshop.css", [".pkgw", ".pkgw-wpg"]],
+      /* packages v2 (27 Sep): the same shape as comps — its own group under `.ppv-page` */
+      ["Submission packages", "components/packages/packagesV2.css", [".ppv-page", ".ppv-group", ".ppv-main"]],
       ["Analytics", "components/shell/workspaceShell.css", [".qa-wrap"]],
     ];
       /* ⚠️ EXTRACT THE VALUE, NEVER LOOK AHEAD PAST IT — and this file already says so, about a
@@ -436,10 +437,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
         .not.toContain("contentVariant");
     }
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    const rootStyle = /className="pkg-root pkgw" style=\{\{([^}]*)\}\}/.exec(pkg);
-    expect(rootStyle, "the Packages root changed shape — this assertion no longer reads it").toBeTruthy();
-    const pad = /padding:\s*"([^"]+)"/.exec(rootStyle![1]);
-    expect(pad![1].trim().split(/\s+/)[1], `Packages pads its root's sides inline (\`${pad![1]}\`) — invisible to every stylesheet lock`).toMatch(/^0(px)?$/);
+    /* packages v2 (27 Sep): the root is `.ppv-page` and states NO inline style at all — its padding
+       lives in packagesV2.css, which the chain above reads */
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className="ppv-page" data-ppv="page"');
+    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/className="ppv-page"[^>]*style=/);
   });
 
   /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter
@@ -451,7 +452,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
       ["Comparable titles", "components/manuscripts/compsV2.css"],
       ["Discover", "components/agents/discover.css"],
-      ["Submission packages", "components/packages/packageWorkshop.css"],
+      ["Submission packages", "components/packages/packagesV2.css"],
       /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
       ["Query Centre", "components/shell/f12.css"],
     ];
@@ -1090,7 +1091,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        pages through one layout. */
     const CONVERTED = [
       ["Discover", "../DiscoverNewAgents.tsx"],
-      ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
       ["Tasks family (To-do · Calendar · Noteboard)", "../todo/TasksPageLayout.tsx"],
     ] as const;
@@ -1119,8 +1119,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../manuscripts/v12/ManuscriptPage.tsx"],
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
+      /* SUBMISSION PACKAGES JOINED ON 27 SEP (packages v2, the same ruling): full header as the first
+         row of its own group, grid masthead null. 4 → 5. */
+      ["Submission packages", "../SubmissionPackages.tsx"],
     ] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(4);
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(5);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
@@ -1194,7 +1197,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Discover", "components/agents/discover.css", ".dv2"],
       ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
       ["Comparable titles", "components/manuscripts/compsV2.css", ".cpv-page"],
-      ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
+      ["Submission packages", "components/packages/packagesV2.css", ".ppv-page"],
     ];
     for (const [page, file, sel] of ROOTS) {
       const css = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");

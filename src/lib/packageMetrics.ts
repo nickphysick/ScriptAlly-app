@@ -221,8 +221,10 @@ export const LOCKED_PACKAGE_FIELDS = [
 
 /** What the writer is told, where the editing happens. States the fact; offers the way on. */
 export const LOCKED_NOTE = "Locked — this package has been sent";
+/* ⚠️ IN STEP WITH THE CARD'S LOCK LINE (packages v2, lib/packagesPage.lockLine): same reason, same
+   way on. The card adds the date; this is the date-free form updatePackage's refusal quotes. */
 export const LOCKED_WHY =
-  "Its contents are fixed so every query that used it keeps reporting what the agent actually received.";
+  "Its letter, synopsis and version stay fixed, so your records stay true. Duplicate it to try a different mix.";
 
 /** The name a duplicate takes (D-D2). `Standard UK` → `Standard UK v2`, then v3, v4… */
 export function duplicateName(name: string, existing: readonly string[]): string {

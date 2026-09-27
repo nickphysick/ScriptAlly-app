@@ -100,57 +100,8 @@
  * the accent tokens and `--illo-gnd-*` are gone, deleted with the treatment they served rather than
  * left inert for a sweep to find.
  */
-/* ⚠️ THE `:not(.wpg-chrome--stuck)` GUARD IS GONE WITH THE SETTLE. It suppressed the artwork while
-   the slab was in its tightened posture, where a band drawn for a 128px header would have been
-   cropped to about half. There is one posture now, so the guard has nothing to exclude — and a
-   `:not()` against a class that can never appear is a selector nobody can reason about. */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {
-  content: '';
-  position: absolute;
-  /**
-   * ⚠️ THE BOX STARTS BELOW THE TOP RULE, so the rule always sits in clear space. It was `inset: 0`
-   * and painted over the rule on both illustrated pages — visible in the Phase 1 screenshots. The
-   * offset is the rule's own two tokens rather than a matching pair of numbers, so moving the rule
-   * moves the artwork with it. The BOTTOM needs nothing: `bottom: 0` resolves against the slab's
-   * PADDING box, which stops above its `border-bottom` — the masthead's closing hairline.
-   */
-  top: calc(var(--mast-toprule-y) + var(--mast-toprule-h));
-  right: 0;
-  bottom: 0;
-  left: 0;
-  /* ⚠️ IT MUST NOT SWALLOW A CLICK — the page's controls sit over this band. */
-  pointer-events: none;
-  background-image: var(--illo-art);
-  /**
-   * ⚠️ `auto 100%` FITS THE ILLUSTRATION EXACTLY BETWEEN THE TWO RULES, and that is what makes it
-   * self-correcting. It was `auto 150%`, sized against a band height it had to overshoot to fill —
-   * so when the header grew the artwork grew half again with it and bled past the edges. `100%` of
-   * this box IS the space between the floating rule above and the hairline below, so a change to the
-   * type refits the picture with no second number to keep in step.
-   *
-   * ⚠️ AND `bottom` RATHER THAN `center`, because the box no longer starts at the band's top: a
-   * centred picture would drift by half the rule's offset. Anchored to the closing hairline it sits
-   * on the line the eye reads as the masthead's base.
-   */
-  background-position: 100% bottom;
-  background-size: auto 100%;
-  background-repeat: no-repeat;
-  opacity: 0.86;
-  /**
-   * Rule 1 · the reveal is anchored to the TEXT — measured per page as the WIDEST ink in the header,
-   * whichever element that turns out to be. On both illustrated pages it is the SUBTITLE rather than
-   * the title, which is why the token cannot be reasoned out of the type scale and has to be read
-   * off a render.
-   *
-   * ⚠️ THE RUN IS 490, THE BRIEF'S VALUE, AND THE BENCH SAYS 430. The bench composes
-   * `rb = ra + --reveal-run` with `--reveal-run: 430px`; the brief's own code block says `+ 490px`.
-   * Taking the brief's, because it is the later instruction and because the run only sets how LONG
-   * the fade is — Rule 3 depends on where it STARTS, so neither value can make the artwork fall
-   * short. 490 is the softer fade of the two.
-   */
-  -webkit-mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));
-          mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));
-}
+/* ⚠️ THE ARTWORK RULE (`.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after`) IS DELETED (packages v2,
+   27 Sep): the page draws its art in the full PageHeader's own slot, and nothing imports this sheet. */
 
 /**
  * ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this

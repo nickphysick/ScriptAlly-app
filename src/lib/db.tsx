@@ -1636,7 +1636,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const setActivePackage = async (manuscriptId: string, packageId: string) => {
     if (!currentUser) return;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", manuscriptId), { activePackageId: packageId });
+      /* "" means NONE, and none is the key's absence (packages v2): a stored "" would be a second way of
+         saying it, and `resolveActivePackage` would have to know both */
+      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", manuscriptId), { activePackageId: packageId || deleteField() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${manuscriptId}`);
     }

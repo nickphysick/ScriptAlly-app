@@ -2,923 +2,429 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages (route /manuscripts/packages) — the host: manuscript scoping, the two modals,
- * and every write this page makes. The page itself is `PackagesOverview`; the masthead is
- * `PackagesHero`.
+ * ══ Submission packages v2 (route /manuscripts/packages) — ONE PAGE (27 Sep) ══════════════════════
+ * Ref: design-refs/materials/packages-v2.html. Replaces the Packages · Builder · Tracking tabs (D1).
  *
- * Design authority: `design-refs/submission-packages-broadsheet.html` for the layout,
- * `design-refs/submission-packages-flow.html` for the modal flows.
+ * The page renders its OWN group, like the Contact list and Comparable titles: the FULL `PageHeader`
+ * is row 1 across both tracks, the main column and the Materials rail are row 2 at the rule + 24.
+ * `WorkspacePageGrid` is given `masthead={null}`.
  *
- * ⚠️ THE HEADER BOUNDARY. The hero is passed as the grid's existing `masthead` node — a public
- * `ReactNode` prop — so the shared `PageHeader` and `WorkspacePageGrid` are untouched. They belong
- * to the parallel masthead session. Nothing here reads or compensates for `--header-inset`.
+ * ⚠️ THE DEEP LINKS SURVIVE THE TABS (P7). `?tab=builder` opens the composer (App's "New package"
+ * lands there), `?tab=tracking` scrolls to Side by side, `?tab=packages` is the top of the page.
+ * They are read on every arrival (`location.key`), so a second "New package" while already here
+ * still opens it.
  *
- * ⚠️ NO PRO GATE ON THIS ROUTE, and the wax seal is branding rather than a gate. Package CREATION is
- * Pro-gated inside `addPackage` (db.tsx) — the builder surfaces that refusal instead of swallowing
- * it, which the old composer did. See F-E in the flow report.
+ * ⚠️ FACTS ONLY (D6). Side by side states what the log records per sent package, in the list's own
+ * order; no row is marked, sorted by outcome or called best. `strongestPackage` / `rank*` are not
+ * imported here.
  *
- * ⚠️ THE WORKSHOP AND ANALYTICS SURFACES ARE GONE — not unreachable, deleted (flow pack D9 made
- * them unreachable; the 25 Aug tidy-up deleted all six, together with the dev review route that had
- * been the stated reason for keeping them). Do not rebuild one to give the guided tour a door —
- * that tour's missing entry point is F-F, and it wants a decision, not a shortcut.
+ * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan; the one gate is `addPackage`'s, behind
+ * `PACKAGES_OPEN_TO_ALL`.
  */
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { PackageTracking } from "./packages/PackageTracking";
-import { useScriptAllyDb } from "../lib/db";
-import { BookVersionKind, ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
-import { useLocation, useNavigate } from "react-router-dom";
-import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
-import { PackagesBand } from "./packages/PackagesBand";
-import { TrackingBand } from "./packages/TrackingBand";
-import { PackageDetailDrawer } from "./packages/PackageDetailDrawer";
-import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/bookVersions";
-import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
-import { FootnoteBand } from "./packages/FootnoteBand";
-import { RemovePopover } from "./packages/RemovePopover";
-import { BuilderRail } from "./packages/BuilderRail";
-import { BuildPanel } from "./packages/BuildPanel";
-import { VersionQuickAdd } from "./packages/VersionQuickAdd";
-import { UNFILLED_SLOT } from "../lib/packageMetrics";
-import { ArchivedSection, ArchivedRow } from "./packages/ArchivedRow";
-import { MATERIAL_LABEL } from "../lib/manuscriptPackages";
-import { builderRail, type RailChip, type RailKind } from "../lib/builderRail";
-import { packageHolders, packagedQueries } from "../lib/packagesOverview";
-import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
-import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
-import { PackageTabs, PACKAGE_TABS, type PackageTabKey } from "./packages/PackageTabs";
-import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
-import { trackingTotals } from "../lib/packageTracking";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { deleteField } from "firebase/firestore";
-import { Tour } from "./Tour";
-import { WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
-import { FONT_SERIF } from "../lib/designTokens";
+import { useScriptAllyDb } from "../lib/db";
+import { useToast } from "./toast/ToastProvider";
+import { ComponentType, SubmissionPackage } from "../types";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { PageHeader } from "./shell/PageHeader";
-import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
-import { PackagesDrawer } from "./packages/PackagesDrawer";
-import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
-import "./packages/packageWorkshop.css";
-/* the illustrated-masthead trial — one file for both pages, delete it to revert */
-import "./shell/illustratedMasthead.css";
+import { PageRail } from "./containers/PageRail";
+import { BE_HAWK_HEAD } from "./queries/centre/qcArt";
+import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/bookVersions";
+import { createPayload } from "../lib/materialDraft";
+import { duplicateOf } from "../lib/buildRow";
+import { duplicateName, resolveActivePackage } from "../lib/packageMetrics";
+import { initialsOf, packageUsageCounts } from "../lib/manuscriptSummary";
+import {
+  isSent, MatKind, MaterialItem, materialMeta, materialsFor, offered, PACKAGES_HERO, sideBySide,
+  suggestPackageName, usesOf,
+} from "../lib/packagesPage";
+import { PkgCard } from "./packages/PkgCard";
+import { CompState, EMPTY_COMP, PkgComposer } from "./packages/PkgComposer";
+import { PkgMaterialModal, PkgMaterials } from "./packages/PkgMaterials";
+import "./packages/packagesV2.css";
+
+const KEY = "scriptally_active_manuscript_id";
+
+/** The empty state's example card — a picture of a package, never a record (P8). */
+const EXAMPLE: SubmissionPackage = {
+  id: "example", userId: "", manuscriptId: "", packageName: "Autumn round", queryLetterVersionId: "x",
+  synopsisVersionId: "x", samplePagesVersionId: "", status: "Active", createdDate: "",
+  otherMaterials: "Author bio in the email body", note: "Sending in batches of five, Tuesdays.",
+};
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, activities, agents, updateManuscript, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, restoreVersion, restorePackage, updateUserProfile } = useScriptAllyDb();
-  /**
-   * ⚠️ NEVER AUTO-OPENS (D7). Plain component state, seeded `false`: no localStorage, no first-run
-   * trigger, nothing watching the teach→workspace transition. A drawer that opened itself would
-   * interrupt someone who came to the page to do something, and the one thing this drawer knows is
-   * that it was asked for.
-   */
-  const [howOpen, setHowOpen] = useState(false);
-  /* the permanent composer's column — the masthead's primary scrolls to it rather than opening it */
-  const buildRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const {
+    manuscripts, versions, packages, queries, agents, addPackage, updatePackage, retirePackage,
+    restorePackage, deletePackage, setActivePackage, addVersion, deleteVersion, restoreVersion, updateManuscript,
+  } = useScriptAllyDb();
+  const { showToast } = useToast();
   const location = useLocation();
 
-  const [activeMsId, setActiveMsId] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
+  /* ⚠️ KEYED ON location.key: the bar's switcher writes the key and re-opens the route (page header v2) */
+  const activeMs = useMemo(() => {
+    let id: string | null = null;
+    try { id = localStorage.getItem(KEY); } catch { /* */ }
+    return manuscripts.find((m) => m.id === id) ?? manuscripts[0] ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [manuscripts, location.key]);
+  const msId = activeMs?.id ?? "";
+  const bookVersions = useMemo(() => bookVersionsOf(activeMs), [activeMs]);
+  /* ⚠️ TWO SETS, ON PURPOSE (the archive model): a card's slots resolve against EVERY material, so
+     putting a letter away never makes a package look like it is missing one; the rail and the
+     composer offer only what has not been put away. */
+  const allMats = useMemo(() => materialsFor(msId, versions, bookVersions), [msId, versions, bookVersions]);
+  const mats = useMemo(() => offered(allMats), [allMats]);
+  const putAway = useMemo(() => [...allMats.letter, ...allMats.synopsis].filter((m) => m.retired), [allMats]);
+  const msPkgs = useMemo(
+    () => packages.filter((p) => p.manuscriptId === msId).sort((a, b) => (a.createdDate < b.createdDate ? 1 : a.createdDate > b.createdDate ? -1 : 0)),
+    [packages, msId],
   );
-  // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
-  // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
-  const [tourActive, setTourActive] = useState(false);
-  /* Which surface is showing. Component-local UI state by design — deliberately NOT persisted and
-     deliberately not a route, so you always land on the overview.
+  const active = useMemo(() => resolveActivePackage(activeMs, msPkgs), [activeMs, msPkgs]);
+  const live = msPkgs.filter((p) => p.status !== "Retired");
+  const retired = msPkgs.filter((p) => p.status === "Retired");
+  const sent = msPkgs.filter(isSent);
+  const empty = !!activeMs && msPkgs.length === 0;
 
-     ⚠️ THE OLD TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1). `PackageTab` was
-     two values and this is three, because the overview is a real destination rather than a third
-     tab: the rail was the navigation, and Workshop and Analytics were what it opened.
+  /* ── the composer: open when asked, or by default while there are no packages (P8) ── */
+  const [comp, setComp] = useState<CompState | null>(null);
+  const [emptyDismissed, setEmptyDismissed] = useState(false);
+  const shown: CompState | null = comp ?? (empty && !emptyDismissed ? EMPTY_COMP : null);
+  const opener = useRef<HTMLElement | null>(null);
+  const compRef = useRef<HTMLDivElement | null>(null);
+  const [dragKind, setDragKind] = useState<MatKind | null>(null);
+  /* ⚠️ THE DROP TEST READS A REF, NOT THE STATE: `dragover` can fire before the render that
+     `setDragKind` schedules, and a stale closure would refuse a legal drop */
+  const dragKindRef = useRef<MatKind | null>(null);
+  const dragId = useRef<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
+  const [showRetired, setShowRetired] = useState(false);
+  const [modal, setModal] = useState<{ kind: MatKind; opener: HTMLElement | null } | null>(null);
+  const sbsRef = useRef<HTMLDivElement | null>(null);
+  const scrollerOf = () => (compRef.current ?? sbsRef.current)?.closest(".wpg-scroll") as HTMLElement | null;
 
-     ⚠️ AND A `PackageTabs` EXISTS AGAIN, UNDER THE SAME NAME AND MEANING SOMETHING ELSE. This note
-     used to end "`PackageTabs` itself is deleted", which is no longer true and would have sent the
-     next reader looking for a contradiction. What was deleted was a strip of VIEWS of one
-     workspace — Workshop, Analytics, overview — retired because the rail had become the way
-     between them. What exists now is a split of the PAGE into Builder and Tracking: two different
-     jobs, not two views of one. The name is reused because it is the honest name for both; the
-     thing is not. */
-  /* ⚠️ THE `view` STATE IS GONE, AND SO ARE BOTH BRANCHES IT SWITCHED (D9, R5's whole list).
-     Materials open the modal, packages open the builder, and Tracking is a dashboard on the stage —
-     so nothing on this page could set `view` to anything but "overview" any more, which made the
-     WorkshopTab and AnalyticsTab branches unreachable code. Traced to a rendered root before
-     removing, in both directions: the two components, `BackToOverview`, the four signal states and
-     the analytics scope were reachable ONLY from those branches. This pass deleted only the dead
-     switch and left the components on disk, because a dev review route still mounted them; that
-     route and all six components have since gone too. */
-  /* The material modal (flow pack Phase 2). `matModal` is the open flag; `matEditing` is the record
-     being edited, or null when adding. Both local — a modal is not a destination. */
-  const [matModal, setMatModal] = useState(false);
-  const [matEditing, setMatEditing] = useState<ManuscriptVersion | null>(null);
-  /* ⚠️ THE TYPE THE MODAL OPENS ON, AND IT IS PART OF THE MODAL'S KEY. The band's three columns each
-     add a material of their own type, so `+ ADD` under Synopses must skip the type step and land on
-     Synopsis. Keying the mount on it means clicking Letters after Synopses is a remount rather than a
-     stale draft seeded from the previous type — the same reason `matEditing.id` is in the key. */
-  const [matPreselect, setMatPreselect] = useState<ComponentType | null>(null);
-  /* The package builder (flow pack Phase 3). */
-  const [pkgModal, setPkgModal] = useState(false);
-  const [pkgEditing, setPkgEditing] = useState<SubmissionPackage | null>(null);
-  /** The package being COPIED (D-D2). Never set at the same time as `pkgEditing`. */
-  const [pkgDuplicating, setPkgDuplicating] = useState<SubmissionPackage | null>(null);
-
-  // Default to the first manuscript when none is selected / the saved one is gone.
+  /* a different manuscript is a different page: close the composer — but only on a real CHANGE, never on
+     the first arrival of data ("" → the id), which would swallow a `?tab=builder` opened on mount */
+  const lastMs = useRef(msId);
   useEffect(() => {
-    if (manuscripts.length === 0) return;
-    if (!activeMsId || !manuscripts.some((m) => m.id === activeMsId)) {
-      const first = manuscripts[0].id;
-      setActiveMsId(first);
-      localStorage.setItem("scriptally_active_manuscript_id", first);
-    }
-  }, [manuscripts, activeMsId]);
+    if (lastMs.current && lastMs.current !== msId) { setComp(null); setEmptyDismissed(false); }
+    lastMs.current = msId;
+  }, [msId]);
+  useEffect(() => { if (!flash) return; const t = window.setTimeout(() => setFlash(null), 1300); return () => window.clearTimeout(t); }, [flash]);
 
-  const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
-  /**
-   * The active manuscript's BOOK versions — named orderings of the book, NOT the `versions`
-   * subcollection above, which holds materials. See the note on `BookVersion` in types.ts.
-   *
-   * ⚠️ READ THROUGH `bookVersionsOf`, WHICH IS THE ONE DEFENDED ACCESSOR. A raw
-   * `activeMs?.bookVersions ?? []` would pass a malformed stored value straight to four surfaces.
-   */
-  const msBookVersions = useMemo(() => bookVersionsOf(activeMs), [activeMs]);
-  const msId = activeMs?.id;
-  const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
-  /**
-   * ⚠️ THE ARCHIVED SETS ARE SEPARATE LISTS, WHICH IS WHAT MAKES D3 STRUCTURAL. `materialShelf` and
-   * `msPackages` are untouched and still active-only, so `N held` / `N built` cannot count an
-   * archived item in any state of the toggle — not because the counts remember to exclude them, but
-   * because the arrays they read never contain them.
-   *
-   * ⚠️ AND THE TOGGLE DOES NOT RENDER WHEN THESE ARE EMPTY (D5). The concept appears when it becomes
-   * true; an always-present "Show archived" on an account with nothing archived teaches a state the
-   * writer has never been in.
-   */
-  const archivedVersions = useMemo(
-    () => versions.filter((v) => v.manuscriptId === msId && v.status === "Retired"), [versions, msId]);
-  const archivedPackages = useMemo(
-    () => packages.filter((p) => p.manuscriptId === msId && p.status === "Retired"), [packages, msId]);
-  const [showArchived, setShowArchived] = useState(false);
-  const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
-  const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
-  /* ⚠️ THE LEDGER'S EVENTS ARE SCOPED TO THE MANUSCRIPT LIKE EVERY OTHER FIGURE ON THIS PAGE.
-     `Activity.manuscriptId` is stored, so this is a filter rather than a join — but scoping it
-     matters: the band's counts are all manuscript-scoped, and a "Latest activity" list spanning
-     every book would name events none of the numbers above it include. */
-  const msActivities = useMemo(() => activities.filter((a) => a.manuscriptId === msId), [activities, msId]);
-  /* ⚠️ NAME, THEN AGENCY, THEN NOTHING — the app never invents a name for an agent it cannot
-     resolve, and it never uses a pronoun for one either. An agency-less agent is valid in this
-     model (name OR agency), so both are tried. */
-  const agentName = useCallback((agentId: string): string | null => {
-    const a = agents.find((x) => x.id === agentId);
-    if (!a) return null;
-    return [a.name, a.agency].find((x) => !!x?.trim()) ?? null;
-  }, [agents]);
-
-  if (!currentUser) return null;
-
-  // ── Workshop persistence — all scoped to the active manuscript. ──
-  /**
-   * The material modal's write. Create or update, through the SAME primitives the Workshop editor
-   * uses (R2) — this page adds no second persistence path.
-   *
-   * ⚠️ `unset` BECOMES `deleteField()` HERE, and only here. `lib/materialDraft` decides WHAT a mode
-   * switch has to clear and is unit-locked on it; the Firestore sentinel is a detail of the write,
-   * so it lives at the write. Turning a pasted material into a name-only one has to clear the body
-   * and its count, and a `0` there would say the document is empty rather than unread.
-   */
-  const saveMaterial = async (d: MaterialDraftResult) => {
-    if (!msId) return;
-    if (matEditing) {
-      const { set, unset } = updatePayload(d);
-      const fields: Record<string, unknown> = { ...set };
-      for (const key of unset) fields[key] = deleteField();
-      await updateVersion(matEditing.id, fields);
-    } else {
-      await addVersion(createPayload(d, msId) as Parameters<typeof addVersion>[0]);
-    }
-    setMatModal(false);
-    setMatEditing(null);
-    setMatPreselect(null);
-  };
-
-  /** Open the modal on an existing material. One opener, so every surface opens it the same way. */
-  /** The package the drawer is reading, or null. Read-only — the composer keeps its own state. */
-  const [pkgOpen, setPkgOpen] = useState<SubmissionPackage | null>(null);
-
-  const openMaterial = (id: string) => {
-    setMatEditing(msVersions.find((x) => x.id === id) ?? null);
-    setMatPreselect(null);
-    setMatModal(true);
-  };
-
-  /**
-   * The builder's write. Create or update through the SAME `addPackage` / `updatePackage` the
-   * Workshop composer uses.
-   *
-   * ⚠️ THE EMPTY SAMPLE SLOT IS `""`, NOT AN ABSENT KEY. `isValidPackage` requires all three slot
-   * keys to be PRESENT, so omitting one fails the rule outright — this is the single place on this
-   * page where `deleteField()` would be the wrong instinct, and the modal sends `UNFILLED_SLOT`.
-   */
-  /**
-   * `＋ New version…` — the version is created on the MANUSCRIPT, which is where versions live, and
-   * the new id comes back so the builder's select can land on it.
-   *
-   * ⚠️ IT RETURNS NULL ON FAILURE RATHER THAN THROWING, because the caller's only sane response is
-   * to leave the select where it was. An id handed back for a write that did not land would point
-   * the package at a version the manuscript does not have.
-   *
-   * ⚠️ AND IT GOES THROUGH `appendBookVersion`, which owns the cap. A raw spread here would be a
-   * second writer of the same list and the 50-version ceiling would apply on one path only.
-   */
-  const createBookVersion = async (name: string, kind: BookVersionKind): Promise<string | null> => {
-    if (!msId) return null;
-    const id = newBookVersionId();
-    const next = appendBookVersion(msBookVersions, {
-      id, name, kind, createdDate: new Date().toISOString().slice(0, 10),
+  const openComp = useCallback((pre: Partial<CompState> = {}) => {
+    opener.current = document.activeElement as HTMLElement | null;
+    setComp({ ...EMPTY_COMP, ...pre });
+    requestAnimationFrame(() => {
+      compRef.current?.scrollIntoView({ block: "nearest" });
+      compRef.current?.querySelector<HTMLElement>("select, [data-clear]")?.focus();
     });
-    try {
-      await updateManuscript(msId, { bookVersions: next });
-      return id;
-    } catch {
-      return null;
-    }
+  }, []);
+  const cancelComp = () => {
+    setComp(null);
+    if (empty) setEmptyDismissed(true);
+    const o = opener.current; opener.current = null;
+    requestAnimationFrame(() => { if (o && o.isConnected) o.focus(); });
   };
+  const patch = (p: Partial<CompState>) => setComp((c) => ({ ...(c ?? EMPTY_COMP), ...p }));
 
-  /**
-   * ⚠️ TAB STATE IS LOCAL — no route, no URL param, no persistence. The same law the book profile's
-   * tabs state; a tab that wrote to the URL would turn a within-page toggle into navigation the
-   * shell has to model.
-   */
-  /**
-   * ⚠️ THE TAB IS THE URL, NOT STATE (D3) — `?tab=builder` on this route.
-   *
-   * There is no `useState` beside it, deliberately: a state that mirrored the param could disagree
-   * with it, and the two would drift the first time something navigated without going through the
-   * setter. The URL is read on every render and written by `navigate`, so what the address bar says
-   * and what the page shows cannot come apart — which is also what makes it survive a reload.
-   *
-   * ⚠️ AND IT MATCHES THE APP'S OWN IDIOM rather than adding a second. `App.tsx` reads its params
-   * with `new URLSearchParams(location.search)`; `useSearchParams` would be a different way to do
-   * the same thing in the same router.
-   */
-  const tabParam = new URLSearchParams(location.search).get("tab");
+  /* ── deep links, on every arrival ── */
+  const tab = new URLSearchParams(location.search).get("tab");
+  const [pendingTrack, setPendingTrack] = useState(false);
+  useEffect(() => {
+    if (tab === "builder") { if (!comp) openComp(); }
+    else if (tab === "tracking") setPendingTrack(true);
+    else if (tab === "packages") { const s = scrollerOf(); if (s) s.scrollTop = 0; }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
+  useLayoutEffect(() => {
+    if (!pendingTrack || !sbsRef.current) return;
+    sbsRef.current.scrollIntoView({ block: "start" });
+    setPendingTrack(false);
+  }, [pendingTrack, sent.length]);
 
-  /* ── the rail, and the build row it fills ──────────────────────────────────────────────── */
-
-  const railSections = useMemo(
-    () => builderRail(msVersions, msPackages, msBookVersions, msQueries, activities),
-    [msVersions, msPackages, msBookVersions, msQueries, activities],
-  );
-
-  /**
-   * ⚠️ THE BUILD ROW IS CLOSED BY DEFAULT AND ARMS ITSELF ON DRAGSTART (D12).
-   *
-   * A permanent empty three-slot form made the page look unfinished — the ref says so in as many
-   * words. It opens on click, and ALSO the moment a chip starts being dragged, so a drag never has
-   * to find a hidden target. Those are two routes to one state, not two states.
-   */
-  /* ⚠️ `building` AND `armed` ARE RETIRED WITH THE CLOSED STRIP (Part C). They existed because the
-     build row was hidden until clicked, so a drag needed something to arm; the New-package panel is
-     always its own target. `clearBuild` survives as what Escape and Clear both reach. */
-  const [slots, setSlots] = useState<Record<RailKind, RailChip | null>>({ let: null, syn: null, ver: null });
-  /**
-   * ⚠️ `＋ Add` ON VERSIONS WRITES TO THE MANUSCRIPT (D11), through `createBookVersion` — the same
-   * function the package builder's `＋ New version…` already uses, so the 50-version cap and the
-   * id shape apply on one path rather than two. The rail's note says so above the control, because
-   * a writer who adds one here and later finds it on the book profile should have been told.
-   */
-  const [verAdding, setVerAdding] = useState(false);
-
-  /**
-   * ⚠️ CLICK, ENTER AND DRAG ALL REACH THIS ONE FUNCTION (D14) — a mouse-only build path is the
-   * picker trap this repo has recorded once already. It fills the slot of the chip's own type, and
-   * REPLACES what is there rather than refusing: a slot holds one thing, and a writer clicking a
-   * second letter plainly means that one.
-   */
-  const pickChip = (c: RailChip) => {
-    setSlots((prev) => ({ ...prev, [c.kind]: c }));
-  };
-
-  /**
-   * ⚠️ THE PAGE RESOLVES A DROPPED ID AGAINST THE RAIL IT ALREADY HAS. A drop carries an id and a
-   * kind and nothing else; resolving it here means one chip object, from one source, whichever
-   * route filled the slot. Building one at the drop site produced a slot with a blank name.
-   */
-  const dropChip = (kind: RailKind, id: string) => {
-    const c = railSections.find((s) => s.kind === kind)?.chips.find((x) => x.id === id);
-    /* an id that resolves to nothing fills nothing — silently, because no gesture completed */
-    if (c) pickChip(c);
-  };
-
-  const onChipDragStart = (_c: RailChip) => {};
-
-  /* ⚠️ CLOSING CLEARS (D18). A row that reopened holding yesterday's half-built package would be
-     asking the writer to notice and undo a decision they did not make. */
-  const clearBuild = () => { setSlots({ let: null, syn: null, ver: null }); };
-
-  /**
-   * ⚠️ IT GOES THROUGH `savePackageDraft`, THE PAGE'S ONE PACKAGE WRITER — the same path the modal
-   * uses, so the FREE-plan refusal and the `""`-sentinel discipline apply here without being
-   * restated. A second write path is a second answer to what a package is.
-   */
-  const createFromSlots = (name: string) => {
-    void (async () => {
-      const err = await savePackageDraft({
-        name,
-        letterId: slots.let?.id ?? "",
-        synopsisId: slots.syn?.id ?? UNFILLED_SLOT,
-        sampleId: UNFILLED_SLOT,
-        bookVersionId: slots.ver?.id ?? "",
-        otherMaterials: "",
-      });
-      if (!err) clearBuild();
-    })();
-  };
-  const onChipDragEnd = () => {};
-
-  /* ── cross-highlighting, both directions (Part E) ──────────────────────────────────────── */
-  const [hoverChip, setHoverChip] = useState<RailChip | null>(null);
-  const [ledgerHover, setLedgerHover] = useState<{ kind: RailKind; id: string } | null>(null);
-  const litChipId = ledgerHover ? ledgerHover.id : null;
-
-
-  /**
-   * `Builder 3 · 8` — packages built, then everything the rail holds (D2). Both refs agree: 3
-   * packages against 3 letters + 2 synopses + 3 versions in `builder-refined`, 4 against 5 in
-   * `packages-tabs`.
-   */
-
-  /**
-   * `18 SENT`, or **null when nothing has been sent** — which is what makes the Tracking tab absent
-   * rather than empty (D3), and what sends a writer who is mid-setup back to Builder if the last
-   * send is ever undone.
-   *
-   * ⚠️ IT COUNTS SENDS, NOT QUERIES CARRYING A PACKAGE. Tracking's three panels all answer
-   * questions about packages that have gone out, so the figure that decides whether the tab exists
-   * has to be the one those panels are about.
-   */
-  const sentCount = useMemo(
-    () => msQueries.filter((q) => !!q.packageId && msPackages.some((p) => p.id === q.packageId)).length,
-    [msQueries, msPackages],
-  );
-  /* ⚠️ SUPERSEDED BY `tabCounts.tracking` — one derivation, not two, so the tab's presence and its
-     count cannot disagree about whether anything has been sent. */
-
-  /**
-   * The tab counts, per the ref: `Packages 3` · `Builder 9 parts` · `Tracking 18 sent`.
-   *
-   * ⚠️ A NULL HIDES THE TAB (D2). Packages appears once one exists; Tracking once something has
-   * been sent. **Builder is never null** — it is where a writer with nothing at all begins, so it is
-   * the one tab that must always have somewhere to land.
-   */
-  const parts = msVersions.length + msBookVersions.length;
-  const tabCounts: Record<PackageTabKey, string | null> = {
-    packages: msPackages.length > 0 ? `${msPackages.length}` : null,
-    builder: `${parts} part${parts === 1 ? "" : "s"}`,
-    tracking: sentCount > 0 ? `${sentCount} sent` : null,
-  };
-
-  /**
-   * ⚠️ THE TAB IS DERIVED, SO AN UNREACHABLE ONE CANNOT BE LANDED ON. A `?tab=tracking` typed
-   * before anything is sent, or held in a bookmark from when something was, resolves to a tab that
-   * exists rather than rendering an empty panel or a blank page. The fallback order is D2's: a
-   * writer with no packages lands on Builder.
-   */
-  const wanted = (PACKAGE_TABS as readonly string[]).includes(tabParam ?? "")
-    ? (tabParam as PackageTabKey) : null;
-  const tab: PackageTabKey = wanted && tabCounts[wanted] !== null
-    ? wanted
-    : (tabCounts.packages !== null ? "packages" : "builder");
-
-  /**
-   * ⚠️ `replace`, NOT `push` — a tab is a view of one page, and pushing would make Back walk through
-   * every tab a writer glanced at before leaving the page.
-   */
-  const setTab = (k: PackageTabKey) => {
-    const p = new URLSearchParams(location.search);
-    p.set("tab", k);
-    navigate({ pathname: location.pathname, search: `?${p.toString()}` }, { replace: true });
-  };
-
-  /* ⚠️ AND A TAB THAT VANISHES MUST NOT STRAND THE READER ON IT. */
-  /* ⚠️ THE STRAND-GUARD IS GONE, AND ITS JOB IS DONE BY CONSTRUCTION. It was an effect that pushed
-     the reader off Tracking when the last send was undone. `tab` is DERIVED from `tabCounts` now, so
-     a hidden tab cannot be resolved to at all — there is no state to correct after the fact, and no
-     frame in which the wrong panel is on screen. */
-
-  const savePackageDraft = async (d: PackageDraftResult): Promise<string | null> => {
-    if (!msId) return "No manuscript is selected.";
-    const fields = {
-      packageName: d.name.trim() || "Untitled package",
-      queryLetterVersionId: d.letterId,
-      synopsisVersionId: d.synopsisId,
-      samplePagesVersionId: d.sampleId,
-      /**
-       * ⚠️ ABSENT WHEN NOT RECORDED, never `""` — the opposite convention to the three slots above,
-       * and deliberately. Those are required-present by `isValidPackage` and cannot change without
-       * invalidating every stored package; this field is new, so it can be modelled honestly: no
-       * key means the writer has not said. `updatePackage` turns the blank into `deleteField()`,
-       * so clearing it back to `Not recorded` is expressible.
-       */
-      bookVersionId: d.bookVersionId,
-      /* ⚠️ ALWAYS SENT, EVEN WHEN BLANK — `updatePackage` turns blank into `deleteField()`, which is
-         how the writer CLEARS the line. Omitting the key here instead would make a cleared field
-         indistinguishable from an untouched one, and the old text would survive the edit. */
-      otherMaterials: d.otherMaterials,
+  /* ── derived per-card facts ── */
+  const matName = (k: MatKind, id: string | undefined) => (id ? allMats[k].find((m) => m.id === id) ?? null : null);
+  const metaOf = (m: MaterialItem) => materialMeta(m, usesOf(m, msPkgs));
+  const cardProps = (p: SubmissionPackage) => {
+    const mine = queries.filter((q) => q.packageId === p.id);
+    const agentIds = [...new Set(mine.map((q) => q.agentId).filter(Boolean))];
+    const l = matName("letter", p.queryLetterVersionId);
+    const s = matName("synopsis", p.synopsisVersionId);
+    return {
+      letter: l ? { name: l.name, words: l.words } : null,
+      synopsis: s ? { name: s.name, words: s.words } : null,
+      version: matName("version", p.bookVersionId)?.name ?? null,
+      counts: packageUsageCounts(p.id, queries),
+      agents: agentIds.length,
+      discs: agentIds.map((id) => initialsOf(agents.find((a) => a.id === id)?.name)),
     };
-    if (pkgEditing) {
-      /* ⚠️ THE REFUSAL IS RETURNED, NOT DISCARDED. `updatePackage` now declines a slot write on a
-         SENT package and hands back the reason; dropping it here would close the modal on a write
-         that never happened — which is the silent-denial family this page has been bitten by twice,
-         and precisely the "edited the package, nothing changed, no feedback" fault being fixed. */
-      const err = await updatePackage(pkgEditing.id, fields);
-      if (err) return err;
-    } else {
-      /* ⚠️ THE REFUSAL IS RETURNED, NOT DISCARDED. `addPackage` declines on a FREE plan with a
-         reason; the existing `savePackage` above drops it on the floor (`res.success ? … :
-         undefined`), which is why a free user's Save appeared to work and did nothing. */
-      const res = await addPackage({ manuscriptId: msId, ...fields });
-      if (!res.success) return res.error ?? "Couldn't save that package.";
+  };
+
+  const flashCard = (id: string) => {
+    setFlash(id);
+    requestAnimationFrame(() => document.querySelector(`[data-ppv="pkg"][data-id="${id}"]`)?.scrollIntoView({ block: "nearest" }));
+  };
+
+  /* ── writes ── */
+  const clearActive = () => setActivePackage(msId, "");
+  const create = async () => {
+    if (!shown || !shown.letter || !activeMs) return;
+    const c = shown;
+    const name = c.name.trim() || suggestPackageName(matName("letter", c.letter)?.name ?? null, matName("synopsis", c.synopsis)?.name ?? null);
+    /* ⚠️ THE COMPOSER CLOSES BEFORE THE WRITE, NOT AFTER IT: `await setDoc` waits for the SERVER,
+       while the new card arrives from the local snapshot at once — closing afterwards leaves the
+       composer open over a card that already exists. A refusal reopens it with the draft intact. */
+    setComp(null);
+    if (c.editId) {
+      const prev = msPkgs.find((p) => p.id === c.editId);
+      const err = await updatePackage(c.editId, {
+        packageName: name, queryLetterVersionId: c.letter, synopsisVersionId: c.synopsis,
+        bookVersionId: (c.version || deleteField()) as unknown as string, otherMaterials: c.other, note: c.note,
+        ...(c.note.trim() !== (prev?.note ?? "") ? { noteEditedAt: new Date().toISOString() } : {}),
+      });
+      if (err) { setComp(c); showToast({ message: err }); return; }
+      flashCard(c.editId);
+      showToast({
+        message: `Saved ${name}.`,
+        undo: prev ? async () => { await updatePackage(prev.id, {
+          packageName: prev.packageName, queryLetterVersionId: prev.queryLetterVersionId, synopsisVersionId: prev.synopsisVersionId,
+          bookVersionId: (prev.bookVersionId || deleteField()) as unknown as string, otherMaterials: prev.otherMaterials ?? "", note: prev.note ?? "",
+        }); } : undefined,
+      });
+      return;
     }
-    setPkgModal(false);
-    setPkgEditing(null);
-    setPkgDuplicating(null);
-    return null;
+    const note = c.note.trim();
+    const res = await addPackage({
+      manuscriptId: activeMs.id, packageName: name, queryLetterVersionId: c.letter, synopsisVersionId: c.synopsis,
+      samplePagesVersionId: "", ...(c.version ? { bookVersionId: c.version } : {}), otherMaterials: c.other,
+      ...(note ? { note, noteEditedAt: new Date().toISOString() } : {}),
+    });
+    if (!res.success || !res.id) { setComp(c); showToast({ message: res.error ?? "That didn't save. Try again." }); return; }
+    const id = res.id;
+    const becameActive = !active;
+    setEmptyDismissed(false); flashCard(id);
+    if (becameActive) await setActivePackage(activeMs.id, id);
+    showToast({ message: `Created ${name}.`, undo: async () => { if (becameActive) await clearActive(); await deletePackage(id); } });
   };
 
-
-  // ── Guided tour ──
-  const hasSeenTour = !!currentUser.hasSeenTour;
-  // End (finish OR skip): drop the example data + stamp hasSeenTour so it never auto-runs again. The
-  // write rides the parked user-update rules allowlist — silently denied (graceful) until it deploys.
-  const endTour = () => {
-    setTourActive(false);
-    if (!hasSeenTour) void updateUserProfile({ hasSeenTour: true });
+  const onAct = (p: SubmissionPackage) => async (a: "use" | "edit" | "dup" | "retire" | "delete" | "restore") => {
+    const wasActive = active?.id === p.id;
+    const prevActive = activeMs?.activePackageId ?? "";
+    switch (a) {
+      case "use":
+        await setActivePackage(msId, p.id); flashCard(p.id);
+        showToast({ message: `${p.packageName} will be filled in when you log a new query.`, undo: () => setActivePackage(msId, prevActive) });
+        return;
+      case "edit":
+        openComp({ letter: p.queryLetterVersionId, synopsis: p.synopsisVersionId || "", version: p.bookVersionId || "", name: p.packageName, other: p.otherMaterials ?? "", note: p.note ?? "", editId: p.id });
+        return;
+      case "dup":
+        openComp({ letter: p.queryLetterVersionId, synopsis: p.synopsisVersionId || "", version: p.bookVersionId || "", name: duplicateName(p.packageName, msPkgs.map((x) => x.packageName)), other: p.otherMaterials ?? "", note: "", dupFrom: p.packageName });
+        return;
+      case "retire":
+        if (wasActive) await clearActive();
+        await retirePackage(p.id);
+        showToast({ message: `Retired ${p.packageName}. Its history stays.`, undo: async () => { await restorePackage(p.id); if (wasActive) await setActivePackage(msId, p.id); } });
+        return;
+      case "restore":
+        await restorePackage(p.id); flashCard(p.id);
+        showToast({ message: `Restored ${p.packageName}.`, undo: () => retirePackage(p.id) });
+        return;
+      case "delete": {
+        if (wasActive) await clearActive();
+        const ok = await deletePackage(p.id);
+        if (!ok) { showToast({ message: `${p.packageName} couldn't be deleted.` }); return; }
+        showToast({
+          message: `Deleted ${p.packageName}.`,
+          undo: async () => {
+            const r = await addPackage({
+              manuscriptId: p.manuscriptId, packageName: p.packageName, queryLetterVersionId: p.queryLetterVersionId,
+              synopsisVersionId: p.synopsisVersionId, samplePagesVersionId: "", ...(p.bookVersionId ? { bookVersionId: p.bookVersionId } : {}),
+              otherMaterials: p.otherMaterials ?? "", ...(p.note ? { note: p.note, noteEditedAt: p.noteEditedAt ?? new Date().toISOString() } : {}),
+            });
+            if (r.id && wasActive) await setActivePackage(msId, r.id);
+          },
+        });
+      }
+    }
   };
-  // The ONE way into the guided tour: the example-data band on the workshop's empty state and the
-  // matching action on the analytics empty state both call this. hasSeenTour still stamps on end.
-  const startTour = () => setTourActive(true);
 
-  /* ⚠️ THE GUIDED TOUR IS CURRENTLY UNREACHABLE, AND THAT IS A CONSEQUENCE TO DECIDE ON, NOT A BUG
-     TO PATCH BLIND. Its only two doors were `onTryExample` on WorkshopEmpty and AnalyticsEmpty —
-     both on surfaces this page no longer opens (D9). So `startTour` has no caller, `tourActive` can
-     never become true, and the `<Tour>` overlay below cannot render.
+  const saveNote = (p: SubmissionPackage) => async (note: string) => {
+    const prev = p.note ?? "";
+    if (note === prev) return;
+    const err = await updatePackage(p.id, { note, noteEditedAt: new Date().toISOString() });
+    if (err) showToast({ message: err });
+    else flashCard(p.id);
+  };
 
-     The machinery is left INTACT rather than deleted: where a tour belongs on the restructured page
-     is a product decision (the modal's type step? the onboarding stage?), and deleting a feature to
-     tidy up a sweep would make that decision by accident. Flagged as F-F. What IS removed is the
-     `EXAMPLE_*` aliasing, which only ever fed the two retired surfaces.
+  /* ── the rail ── */
+  const inPkg = (m: MaterialItem) => !!shown && shown[m.kind] === m.id;
+  const onChip = (m: MaterialItem) => {
+    if (!shown) { openComp({ [m.kind]: m.id } as Partial<CompState>); return; }
+    patch({ [m.kind]: shown[m.kind] === m.id ? "" : m.id } as Partial<CompState>);
+  };
+  const saveMaterial = async (kind: MatKind, d: { name: string; text: string; note: string }): Promise<boolean> => {
+    if (!activeMs) return false;
+    let id: string | null = null;
+    let undo: () => Promise<unknown>;
+    if (kind === "version") {
+      id = newBookVersionId();
+      const next = appendBookVersion(bookVersions, {
+        id, name: d.name, kind: bookVersions.length ? "revision" : "initial", createdDate: new Date().toISOString().slice(0, 10),
+        ...(d.note ? { note: d.note } : {}),
+      });
+      try { await updateManuscript(activeMs.id, { bookVersions: next }); } catch { return false; }
+      const vid = id;
+      undo = () => updateManuscript(activeMs.id, { bookVersions: bookVersionsOf(activeMs).filter((v) => v.id !== vid) });
+    } else {
+      const type = kind === "letter" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS;
+      try {
+        id = await addVersion(createPayload({ type, name: d.name, mode: "paste", text: d.text, refName: "" }, activeMs.id) as Parameters<typeof addVersion>[0]);
+      } catch { return false; }
+      if (!id) return false;
+      const vid = id;
+      undo = () => deleteVersion(vid);
+    }
+    const o = modal?.opener; setModal(null);
+    if (shown) patch({ [kind]: id } as Partial<CompState>);
+    requestAnimationFrame(() => { if (o && o.isConnected) o.focus(); });
+    showToast({ message: `Added ${d.name}.`, undo: async () => { await undo(); setComp((c) => (c && c[kind] === id ? { ...c, [kind]: "" } : c)); } });
+    return true;
+  };
+  const closeModal = () => { const o = modal?.opener; setModal(null); requestAnimationFrame(() => { if (o && o.isConnected) o.focus(); }); };
 
-     ⚠️ Do not "fix" this by re-opening a Workshop route — that is the thing D9 retired. Give the
-     tour a door on a surface that still exists. */
+  /* ── header ── */
+  const sentQueries = queries.filter((q) => msPkgs.some((p) => p.id === q.packageId)).length;
+  const description = empty
+    ? "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received."
+    : <>A letter, synopsis and version for each round of querying. <strong>{live.length}</strong> in use, <strong>{sentQueries}</strong> queries sent.</>;
+  const nl = mats.letter.length, ns = mats.synopsis.length, nv = mats.version.length;
+  const editing = shown?.editId ?? null;
+  const dupe = shown && shown.letter
+    ? duplicateOf({
+      let: { id: shown.letter, name: "" }, syn: shown.synopsis ? { id: shown.synopsis, name: "" } : null, ver: shown.version ? { id: shown.version, name: "" } : null,
+    }, msPkgs.filter((p) => p.id !== editing))
+    : null;
+  const rows = sideBySide(sent, queries);
+  const slotLine = (p: SubmissionPackage) =>
+    [matName("letter", p.queryLetterVersionId)?.name, matName("synopsis", p.synopsisVersionId)?.name, matName("version", p.bookVersionId)?.name].filter(Boolean).join(" · ");
 
-  // Book glyph for the manuscript selector — burgundy strokes.
-  const bookIcon = (
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" style={{ color: "var(--burg)", flexShrink: 0 }} aria-hidden="true">
-      <path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z" />
-      <path d="M4 18a2 2 0 012-2h13" />
-    </svg>
+  const card = (p: SubmissionPackage) => (
+    <PkgCard key={p.id} pkg={p} active={active?.id === p.id} flash={flash === p.id} {...cardProps(p)} onAct={onAct(p)} onSaveNote={saveNote(p)} />
   );
 
-  // Header right slot: the manuscript selector chip. One manuscript = plain; 2+ = a switcher menu.
-  /* ⚠️ THE CHIP IS A CLASS, NOT AN INLINE STYLE, AND THAT IS WHAT LETS IT SCALE. Inline styles
-     cannot be reached by `.wsh--scrolled`, so while this was a style object the selector sat at its
-     resting 15px/9px in a 52px strip where every other element had stepped down — the header's
-     height was right and its contents were not. It is also the third time an inline style on this
-     page has been invisible to a rule that needed it (the root's `overflowY`, then its 28px side
-     padding). `.pkgw-mschip` carries the same declarations. */
-  const chipShell: React.CSSProperties = {};
-  /**
-   * ⚠️ THE PAGE'S MANUSCRIPT SELECTOR IS DELETED (Phase 0, D0a) — it duplicated the sidebar's.
-   *
-   * Both read and write the SAME key, `scriptally_active_manuscript_id`, and offer the same list.
-   * The sidebar's is a strict superset: `WorkspaceShell.tsx:400` gives it prev/next arrows and
-   * position dots, and its rows carry a subtitle this one omitted — on every page, not just here.
-   * Two controls doing one job in two places is worse than one.
-   *
-   * ⚠️ AND IT DOES NOT MOVE TO THE HEADER EITHER. A band head's actions act on THAT band, so page
-   * scope sitting on Packages implies it does not scope Materials, which is false; and the shared
-   * masthead refuses actions outright. The sidebar is already the right home.
-   *
-   * ⚠️ `activeMs` STAYS — it is load-bearing and the deletion check found it (D0c). It derives
-   * `msId`, which scopes every list on this page, and it drives the no-manuscript branch below.
-   * Only the selector's own machinery went: `selectMs`, `multiMs`, `msMenuOpen`, `msMenuRef`,
-   * `bookIcon` and the `.pkgw-mschip` / `.pkg-msopt` rules.
-   */
-
-  /* ⚠️ THE SIDE PADDING IS GONE (strip-fixes §3/§4), for a related reason and with the same
-     invisibility: 28px each side here inset the whole GRID, so this page's header sat 28px
-     narrower than the Contact list's and its scroller stopped reaching the container edge. Inline,
-     so no stylesheet lock could see it — the width lock added at step 1 reads page CSS and passed
-     this page while it was wrong.
-
-     ⚠️ `overflowY: "auto"` IS GONE FROM THIS ROOT, and it was an INLINE style — which is why
-     neither the CSS locks nor a grep of packageWorkshop.css could see it. It wrapped the whole
-     grid in a scrollport of its own, so the plate and tool row scrolled away on this page while
-     every other converted page pinned them. The grid's row 3 is the scroller. */
   return (
-    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "0 0 16px" /* no top inset — the grid owns the gap above the header */, gap: 14, overflow: "hidden" }}>
-      <style>{`
-        @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
-      `}</style>
-
-      {/* ⚠️ THIS PAGE CONFORMS (F-E, ruled). The masthead is the SHARED `PageHeader` with
-          `variant="workspace"`, so the census in `workspacePageGrid.test.tsx` stays green by
-          conforming rather than by gaining an entry, and no shared header file is touched. The
-          hero lived on as `PackagesHeroBand`, immediately beneath — everything the ref drew except
-          the page title, which belongs to the header alone.
-
-          ⚠️ AND THERE IS NO PRO MARKER ON THIS PAGE AT ALL (D1). The wax seal that rode
-          `titleAdornment` is deleted with its styles, and no page-local Pro badge replaces it.
-          Checked before removing: `PageHeader` renders no Pro marker of its own — the seal was
-          entirely this page's code passing an existing prop — so unmounting it needed no shared
-          edit and left nothing behind in the shell. See F-K in the report. */}
-      <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
-        <PageHeader
-          variant="workspace"
-          /* ⚠️ NO MARK ON THIS PAGE — the illustration IS the page's picture, and a 52px monoline
-             parcel opposite a drawing of parcels is the same subject twice in two hands. It is also
-             the degrade path rather than commissioned art: `packages` has no `src` in the mark
-             registry, so what rendered here was the fallback. Part of the trial's carve-out. */
-          title="Submission packages"
-          /**
-           * ⚠️ THIS PAGE HAS NO BUTTON TO MOVE, AND THE HANDLER IS THE HONEST READING OF THAT.
-           * `BuildPanel` is a PERMANENT composer beside the library rather than something a control
-           * opens, so "+ New package" cannot mean "open the builder" — it is already open. It means
-           * "take me to where I make one": the panel is scrolled into view and nothing is cleared.
-           *
-           * ⚠️ IT DELIBERATELY DOES NOT CALL `clearBuild`. That would read as the obvious
-           * implementation and would silently discard a part-built package — three drag-drops gone
-           * because the writer pressed a button that says NEW. A destructive act needs a control
-           * that says so, and this one does not.
-           */
-          primary={{ label: "New package", onClick: () => buildRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) }}
-          /**
-           * ⚠️ THE MASTHEAD HOLDS NO SELECTOR AND NO SCOPE INDICATOR — it holds the page's sentence.
-           * `cec65b21` put `for {manuscript}` in this slot, reading `builder-refined.html` as
-           * normative over `packages-tabs.html`, and it cost the page the one line that says what
-           * the feature IS. Two things decide it against that ref: this masthead is declared to hold
-           * no actions and no controls (`PageHeader` variant="workspace" THROWS on an actions slot),
-           * so a scope indicator is the first control in a box built to have none; and the shell
-           * already states the scope permanently in the sidebar chip, three inches away and visible
-           * in every posture including the settled bar, which this line is not.
-           */
-          description="Bundle your materials once, then send them without rebuilding each time."
-          /* ⚠️ NO ACTIONS SLOT — AND THE SHARED MASTHEAD ENFORCES THAT WITH A THROW, not a comment.
-             `PageHeader` refuses `actions` on `variant="workspace"`: a masthead with nothing
-             actionable never needs restoring mid-visit, so it can scroll away on a scrolling page
-             and vanish outright on a fill page without stranding a control. "How it works" was
-             tried here first and belongs in the band head instead, beside the page's own count. */
-        />
-      }>
-      {/**
-        * ⚠️ THE PAGE'S BODY CARRIES THE PAGE'S RHYTHM — the grid's chrome must not be inside it
-        * (in-flow masthead, step 5).
-        *
-        * `.pkgw .wpg-scroll` was `display: flex; flex-direction: column; gap: 14px`, because this
-        * page's panels are separated by that gap and it was the scroller's own children they were
-        * separating. The masthead and the control row are children of that scroller now, so the
-        * page's BODY rhythm was being applied to the grid's CHROME: measured at 1440×900, this
-        * page's control row sat 14px lower than every other page's — 16px of masthead margin plus
-        * 14px of page gap.
-        *
-        * ⚠️ THE RULE'S OWN COMMENT ARGUED AGAINST THIS FIX AND WAS WRONG: "a single wrapper would
-        * collapse those gaps into one." True of a PLAIN wrapper; not of one carrying the same
-        * `display: flex; gap: 14px`, which reproduces the rhythm exactly one level down. It is the
-        * third comment in this pack that was true when written and stopped being true when
-        * something moved underneath it.
-        */}
-      <div className="pkgw-body">
-      {/* ⚠️ `.pkgw-strip` IS RETIRED FROM THIS PAGE (restructure). It carried the scorecard sentence
-          as a thin band above the tab row; the overview's problem-statement card is that same
-          sentence promoted to the stage, in the ref's own words. Keeping both would state the
-          page's one argument twice, a few pixels apart. Removed from the render rather than hidden.
-          ⚠️ ITS CSS IS STILL IN packageWorkshop.css AND NOW HAS NO RENDERER AT ALL — it was kept
-          because a dev review route drew it, and that route is gone. Orphaned, flagged, not swept
-          here. */}
-      {!activeMs ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>
-          <div>
-            <div style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: "var(--ink)", marginBottom: 6 }}>No manuscripts yet</div>
-            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 420, lineHeight: 1.5, margin: "0 auto" }}>Add a manuscript from the Manuscripts list first — packages are built per manuscript.</div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* ⚠️ THE REAL, MANUSCRIPT-SCOPED DATA — never the tour fixture. `wsVersions` and its
-              siblings swap to `EXAMPLE_*` while the guided tour runs, which was right for the
-              Workshop (the tour drove it) and wrong here: the overview is where you see what YOU
-              have, and a register quietly listing four invented materials is a page lying about
-              the writer's own work. The tour never opens on this surface. */}
-          {/* ⚠️ THE BAND SITS DIRECTLY BENEATH THE HEADER, and it is the ref's hero minus the title
-              (F-E, ruled: this page conforms). Rendered inside the page body rather than as chrome,
-              so it scrolls with the content exactly as the masthead above it now does. */}
-          {msVersions.length + msPackages.length > 0 ? (
-            <>
-            <PackageTabs
-              active={tab} onChange={setTab}
-              counts={tabCounts}
+    <WorkspacePageGrid scrollLabel="Submission packages" masthead={null}>
+      <div className="ppv-page" data-ppv="page">
+        <div className="ppv-group">
+          <div className="ppv-head">
+            <PageHeader
+              variant="full"
+              title="Submission packages"
+              description={activeMs ? description : "No manuscript yet."}
+              primary={activeMs && !empty ? { label: "+ New package", onClick: () => openComp() } : undefined}
+              secondary={sent.length >= 2 ? { label: "Side by side", onClick: () => sbsRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }) } : undefined}
+              art={<img src={`${PACKAGES_HERO.src}?v=${PACKAGES_HERO.version}`} width={PACKAGES_HERO.width} height={PACKAGES_HERO.height} alt="" />}
             />
-            {/**
-              * ⚠️ NO HERO IN WORKSPACE STATE (D1), AND THE COMPONENT IS NOW DELETED — it had no
-              * importer and carried a fourth `＋ New package`. `PackagesHeroBand` rendered here — INSIDE the
-              * populated branch, not leaking from the teach one — so a writer with four materials
-              * and two packages was still being asked "Fed up of guessing which materials are
-              * landing with agents?". A page that has the thing should stop selling it. Measured
-              * before removing: workspace state rendered `heroBand: 1` with the copy present.
-              *
-              * ⚠️ ITS TWO CONTROLS MOVED RATHER THAN GOING WITH IT. The band carried the manuscript
-              * selector and the New-package CTA, and both are load-bearing: the selector is this
-              * page's scope and the CTA is its primary action. They are the packages band head's
-              * now, which is where the ref puts the actions.
-              */}
-            {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
-                deleted there in the same commit, so the two never coexist. */}
-              {/* ⚠️ PACKAGES LEAD (D-B1). Materials came first and it read as a filing
-                  cabinet with the point of the feature underneath it — the packages ARE the
-                  feature, and the shelf is what they are built from. Measured, not assumed:
-                  the first screenshot of this rebuild had "Your packages" below the fold. */}
-            {/* ⚠️ THE RAIL IS GONE, AND ITS REGISTERS WITH IT (D1). Materials, Packages and Tracking
-                are bands on the page now — the rail was an index of two of them beside the things it
-                indexed, which is a second copy of a list rather than a way to reach it. Nothing
-                navigated anywhere: every rail row scrolled to a tile three inches to its right. */}
-            {/**
-              * ⚠️ THE BOUNDARY MOVED, AND IT IS A BEHAVIOUR CHANGE RATHER THAN A RE-SKIN (D-A).
-              * It was `msPackages.length > 0`, so a writer who had saved three materials and not yet
-              * built a package still met the teaching screen — and their materials were invisible.
-              * The state is now `materials + packages === 0`: nothing filed, nothing to file with.
-              *
-              * ⚠️ DERIVED, NEVER STORED. It comes back if a writer clears everything out, which is
-              * correct — they are a first-time user of a feature they now have no record in. A
-              * `hasSeenPackages` flag would strand them on a workspace with nothing to show.
-              */}
-              {/**
-                * ⚠️ THE PACKAGES PANEL EXISTS SO ITS TAB IS NOT A CLICK INTO NOTHING (Part A).
-                *
-                * It holds the LEDGER, moved here from Builder rather than copied — which is
-                * where it belongs in the finished design anyway: Builder becomes materials and the
-                * New package panel (Part B), and what a writer HAS is this tab's question. Part E
-                * swaps the ledger for the ref's carousel.
-                *
-                * ⚠️ MOVED, NOT DUPLICATED. Two ledgers on one page would be two answers to one
-                * question, and a placeholder sentence here would be a tab that lands on a promise.
-                */}
-              {/* ⚠️ A PANEL AND ITS TAB APPEAR AND VANISH TOGETHER. Tracking's was already gated
-                  and this one was not, so a manuscript with no packages carried a panel no tab could
-                  reach — invisible, because `hidden` covered it, and therefore exactly the kind of
-                  thing that survives until something queries it by id. One condition, both halves. */}
-              {tabCounts.packages !== null && (
-              <div role="tabpanel" id="pkgt-panel-packages" aria-labelledby="pkgt-tab-packages"
-                   hidden={tab !== "packages"}>
-              <div className="bldr-main">
-              <PackagesBand
-                packages={msPackages}
-                versions={msVersions}
-                queries={msQueries}
-                bookVersions={msBookVersions}
-                /* ⚠️ CROSS-HIGHLIGHTING RUNS BOTH WAYS THROUGH THE PAGE (D19), which is the only
-                   place that holds both the rail and the ledger. Neither component knows about the
-                   other; each reports a hover and renders a state. */
-                hoverChip={hoverChip ? { kind: hoverChip.kind, id: hoverChip.id } : null}
-                onHoverCell={(v) => setLedgerHover(v as { kind: RailKind; id: string } | null)}
-                /**
-                 * ⚠️ THE CARD OPENS A READER, NOT AN EDITOR (D8/D16). It used to open the composer
-                 * straight away — which is an edit the lock would refuse on any sent package, and
-                 * which answers "change this" when the question a card provokes is "what IS this?".
-                 * The drawer's footer is where Edit and Duplicate live now.
-                 */
-                onOpenPackage={(id) => setPkgOpen(msPackages.find((p) => p.id === id) ?? null)}
-                onHowItWorks={() => setHowOpen(true)}
-                sent={trackingTotals(msPackages, msQueries).sent}
-                archived={archivedPackages}
-                showArchived={showArchived}
-                onToggleArchived={() => setShowArchived((v) => !v)}
-                onRestore={restorePackage}
-                /* ⚠️ A CREATE, NOT AN EDIT — `pkgEditing` stays null, so Save writes a NEW document
-                   and the sent package is untouched, which is the entire point of D-D2. */
-                onDuplicatePackage={(id) => {
-                  setPkgEditing(null);
-                  setPkgDuplicating(msPackages.find((p) => p.id === id) ?? null);
-                  setPkgModal(true);
-                }}
-                /* §3 — ⚠️ DERIVED, NEVER STORED. The count is a read over the queries already in
-                   memory; nothing writes to the package when one is logged, so a deleted query
-                   stops being counted with no cleanup. See `sendsWithPackage`. */
-                renderTracking={(p) => (
-                  <PackageTracking
-                    packageId={p.id}
-                    queries={msQueries}
-                    agentName={agentName}
-                    onOpenQuery={(id) => navigate(`/queries?q=${id}`)}
-                    user={currentUser}
-                    onAttach={() => navigate("/queries")}
-                  />
-                )}
-                /* ⚠️ THE SAME POPOVER THE SHEETS USE, AND THE SAME DECISION FUNCTION. A package
-                   nothing has been sent with is deleted; one that has travelled is archived,
-                   because a query still points at it and it is the record of what was in the
-                   envelope. `removalChoice` is given the PACKAGE's own id against the queries, so
-                   "has anything been sent with this" is what decides. */
-                renderRemove={(p) => (
-                  <RemovePopover
-                    id={p.id}
-                    name={p.packageName}
-                    typeLabel="package"
-                    subject="package"
-                    holders={packageHolders(p.id, msQueries, agentName)}
-                    onDelete={deletePackage}
-                    onArchive={retirePackage}
-                  />
-                )}
-              />
-              </div>
-              </div>
-              )}
-              {/* ⚠️ BUILDER AND TRACKING ARE TWO JOBS, NOT TWO VIEWS. The ledger and the shelf are
-                  what a writer ASSEMBLES with; the three panels are what they READ afterwards. The
-                  split is here rather than in a route because it is a within-page toggle — see the
-                  note on `tab` above. */}
-              <div role="tabpanel" id="pkgt-panel-builder" aria-labelledby="pkgt-tab-builder"
-                   hidden={tab !== "builder"}>
-              {/* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`, 296px against the rest. The
-                  shelf used to sit BELOW the ledger, which meant a writer assembling a package
-                  could not see what they were assembling from. */}
-              <div className="bldr-split">
-              {/**
-                * ⚠️ THE RAIL REPLACES THE MATERIALS SHELF — mounted here and unmounted there in the
-                * SAME commit, so the two never coexist (Part C). The shelf was a band of banded cards
-                * BELOW the ledger; the rail is the same information beside it, where a writer
-                * assembling a package can see both at once.
-                *
-                * ⚠️ THE ARCHIVE DRAWER CAME WITH IT, and that is not decoration. `ArchivedSection`
-                * was the shelf's, and it is the only route back for an archived material — Part C's
-                * retirement of the sample type put four of them in there. Unmounting the shelf
-                * without rehoming it would have made the writer's own put-away work unreachable, the
-                * same fault `otherMaterials` came one commit from last pack.
-                *
-                * ⚠️ THE LEGEND DID NOT COME WITH IT. It keyed the shelf's banded CARD heads, and a
-                * chip is not a card — it would be teaching a treatment that appears nowhere, which is
-                * exactly why the packages swatch was dropped from it a pack ago.
-                */}
-              <div className="bldr-railcol">
-                <BuilderRail
-                  sections={railSections}
-                  onPick={pickChip}
-                  onAdd={(kind) => {
-                    if (kind === "ver") { setVerAdding(true); return; }
-                    setMatEditing(null);
-                    setMatPreselect(kind === "let" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS);
-                    setMatModal(true);
-                  }}
-                  onDragStart={onChipDragStart}
-                  onDragEnd={onChipDragEnd}
-                  litId={litChipId}
-                  dimming={ledgerHover !== null}
-                  onHoverChip={setHoverChip}
-                /* ⚠️ THE BENCH IS THE PAGE'S, so the card and the slot cannot disagree about what
-                   is in the package being built. The rail asks; it does not keep its own copy. */
-                inBench={(id) => Object.values(slots).some((f) => f?.id === id)}
-                />
-                {verAdding && (
-                <VersionQuickAdd
-                  onCancel={() => setVerAdding(false)}
-                  onCreate={async (name, kind) => {
-                    const id = await createBookVersion(name, kind);
-                    /* ⚠️ ONLY CLOSE IF IT LANDED. A form that closes on a write that failed tells
-                       the writer their version exists when it does not. */
-                    if (id) setVerAdding(false);
-                    return id;
-                  }}
-                />
-              )}
-              <ArchivedSection show={showArchived} n={archivedVersions.length}>
-                  {archivedVersions.map((v) => (
-                    <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}
-                                   onRestore={() => void restoreVersion(v.id)} />
-                  ))}
-                </ArchivedSection>
-              </div>
-              {/**
-                * ⚠️ THE PANEL IS THE SPLIT'S SECOND COLUMN, AND THE BUILD ROW NEVER WAS.
-                * The row sat INSIDE the rail column, under the library, so the second column
-                * of a two-column grid held nothing at all — which is the empty right half of
-                * a 2,000px page, and the reason widening the rail looked like it had fixed
-                * something. A composer beside the library is the whole point of the split.
-                */}
-              <div className="bldr-panelcol" ref={buildRef}>
-                <BuildPanel
-                  slots={slots}
-                  existing={msPackages}
-                  onClear={(k) => setSlots((prev) => ({ ...prev, [k]: null }))}
-                  onDrop={dropChip}
-                  onClearAll={clearBuild}
-                  onCreate={createFromSlots}
-                />
-              </div>
-              </div>
-              </div>
-              {/* ⚠️ MOVED WHOLESALE, NOT REDESIGNED (D4). The three panels are byte-identical to
-                  what stood on the single-page version; this pack relocates them and nothing else.
-                  ⚠️ AND IT IS NOT RENDERED AT ALL BELOW ONE SEND (D3) — `tabCounts.tracking` is null
-                  there, so the tab does not exist and neither does its panel. */}
-              {tabCounts.tracking !== null && (
-              <div role="tabpanel" id="pkgt-panel-tracking" aria-labelledby="pkgt-tab-tracking"
-                   hidden={tab !== "tracking"}>
-              <TrackingBand
-                packages={msPackages}
-                versions={msVersions}
-                queries={msQueries}
-                bookVersions={msBookVersions}
-                activities={activities}
-                /* ⚠️ THROUGH `agentLabel`, WHICH IS THE APP'S ONE ANSWER TO "what do we call this
-                   agent" — including when there is no record to call anything. A local
-                   `a?.name ?? "Unknown"` here would be a second vocabulary for the same absence. */
-                agentName={(id) => agentLabel(agents.find((a) => a.id === id) ?? null, AGENT_NOT_RECORDED)}
-                onLogQuery={() => navigate("/queries")}
-              />
-              {/**
-                * ⚠️ THE EXPLAINER BELONGS WHERE THE FIGURES IT EXPLAINS LIVE. It sat OUTSIDE all
-                * three panels, so it rendered on every tab — the same three cards on Packages and
-                * on Builder, explaining how Replies and Requests are counted beside a ledger and a
-                * card library that state neither as a concept.
-                */}
-              <FootnoteBand />
-              </div>
-              )}
-            </>
-          ) : (
-            <PackagesTeachFirst onAddMaterial={() => { setMatPreselect(null); setMatEditing(null); setMatModal(true); }} />
-          )}
-        </>
-      )}
+          </div>
 
-      {tourActive && (
-        <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />
-      )}
+          <div className="ppv-main" data-ppv="main">
+            {shown ? (
+              <div ref={compRef}>
+                <PkgComposer comp={shown} mats={mats} metaOf={metaOf}
+                  editName={editing ? msPkgs.find((p) => p.id === editing)?.packageName ?? null : null}
+                  suggestion={suggestPackageName(matName("letter", shown.letter)?.name ?? null, matName("synopsis", shown.synopsis)?.name ?? null)}
+                  dupe={dupe} dragKind={dragKind} accepts={() => dragKindRef.current}
+                  onChange={patch}
+                  onDropMat={(k) => { const id = dragId.current; if (id) patch({ [k]: id } as Partial<CompState>); }}
+                  onShowDup={flashCard} onCancel={cancelComp} onCreate={() => void create()} />
+              </div>
+            ) : null}
 
-      {/* The material modal — mounted at page level so it overlays whatever surface is showing. */}
-      {/* ⚠️ MOUNTED ONLY WHILE OPEN, AND KEYED. A fresh mount per opening is what lets the modal seed
-          its draft in `useState` initialisers instead of an effect — which is what removed the
-          type-grid flash when opening a material to edit. The key makes reopening a DIFFERENT
-          material a remount rather than a stale-state hazard. */}
-      {/**
-        * ⚠️ MOUNTED ONLY WHILE OPEN, so every opening is a fresh mount — the same reason the
-        * material modal is. A drawer kept mounted and hidden would carry the previous package's
-        * scroll position and its `Form11Drawer` entry animation would not replay.
-        */}
-      <PackageDetailDrawer
-        pkg={pkgOpen}
-        materials={msVersions}
-        bookVersions={msBookVersions}
-        queries={msQueries}
-        agents={agents}
-        onClose={() => setPkgOpen(null)}
-        onOpenMaterial={(id) => { setPkgOpen(null); openMaterial(id); }}
-        onDuplicate={(id) => {
-          setPkgOpen(null);
-          setPkgEditing(null);
-          setPkgDuplicating(msPackages.find((p) => p.id === id) ?? null);
-          setPkgModal(true);
-        }}
-        onEdit={(id) => {
-          setPkgOpen(null);
-          setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
-          setPkgDuplicating(null);
-          setPkgModal(true);
-        }}
-        onArchive={(id) => { setPkgOpen(null); void retirePackage(id); }}
-        /* ⚠️ THROUGH `updatePackage`, THE PAGE'S ONE PACKAGE WRITER — which turns a blank into an
-             unset and clears the stamp with it. A local write here would be a second answer to what
-             "cleared" means. */
-          onSaveNote={(id, text) => updatePackage(id, {
-            note: text,
-            ...(text.trim() ? { noteEditedAt: new Date().toISOString() } : {}),
-          })}
-        />
-      {matModal && <MaterialModal
-        bookVersions={msBookVersions}
-        key={matEditing?.id ?? `new-${matPreselect ?? "material"}`}
-        editing={matEditing}
-        versions={msVersions}
-        preselect={matPreselect}
-        onClose={() => { setMatModal(false); setMatEditing(null); setMatPreselect(null); }}
-        onSave={saveMaterial}
-      />}
+            {!activeMs ? null : empty ? (
+              <div className="ppv-exwrap" data-ppv="example" aria-hidden="true" inert>
+                <span className="ppv-ex" data-ppv="ex-tag">Example</span>
+                <div className="ppv-ghost">
+                  <PkgCard pkg={EXAMPLE} active ghost letter={{ name: "Query letter v3", words: 310 }} synopsis={{ name: "Synopsis, 1 page", words: 480 }}
+                    version="Fast-paced opening" counts={[]} agents={0} discs={[]} />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="ppv-sech">
+                  <h2>Your packages <span className="ppv-pill">{live.length}</span></h2>
+                  <span className="ppv-hint">{active ? <><b>{active.packageName}</b> is filled in when you log a new query</> : "No package is filled in for new queries"}</span>
+                </div>
+                <div className="ppv-list" data-ppv="list">
+                  {live.filter((p) => p.id !== editing).map(card)}
+                </div>
 
-      {pkgModal && <PackageModal
-        key={pkgEditing?.id ?? (pkgDuplicating ? `dup-${pkgDuplicating.id}` : "new-package")}
-        editing={pkgEditing}
-        duplicating={pkgDuplicating}
-        existingNames={msPackages.map((p) => p.packageName)}
-        versions={msVersions}
-        bookVersions={msBookVersions}
-        packageCount={msPackages.length}
-        onCreateVersion={createBookVersion}
-        onClose={() => { setPkgModal(false); setPkgEditing(null); setPkgDuplicating(null); }}
-        onSave={savePackageDraft}
-      />}
+                {sent.length >= 2 ? (
+                  <>
+                    <div className="ppv-sech" data-ppv="sbs-h" ref={sbsRef} id="ppv-sbs">
+                      <h2>Side by side</h2><span className="ppv-hint">Facts from your query log</span>
+                    </div>
+                    <div className="ppv-cmp">
+                      <table data-ppv="sbs">
+                        <thead><tr><th scope="col">Package</th><th scope="col">Queries</th><th scope="col">Requests</th><th scope="col">Replies</th><th scope="col">Typical reply</th></tr></thead>
+                        <tbody>
+                          {rows.map((r) => {
+                            const p = sent.find((x) => x.id === r.id)!;
+                            return (
+                              <tr key={r.id} className={r.retired ? "is-retired" : undefined}>
+                                <td>{p.packageName}<span className="m">{slotLine(p)}</span></td>
+                                <td>{r.queries}</td>
+                                <td>{r.requests} <span className="of">of {r.queries}</span></td>
+                                <td>{r.replies} <span className="of">of {r.queries}</span></td>
+                                <td>{r.typical}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                      <div className="foot">Requests count partials and fulls. Typical reply is the median time to any reply.</div>
+                    </div>
+                  </>
+                ) : null}
+
+                {retired.length ? (
+                  <>
+                    <button type="button" className="ppv-retired-h" data-ppv="retired-toggle" aria-expanded={showRetired} onClick={() => setShowRetired((v) => !v)}>
+                      <span className="chev" aria-hidden="true">›</span>Retired <span className="ppv-pill">{retired.length}</span>
+                    </button>
+                    {showRetired ? <div className="ppv-list" data-ppv="retired">{retired.filter((p) => p.id !== editing).map(card)}</div> : null}
+                  </>
+                ) : null}
+              </>
+            )}
+          </div>
+
+          <PageRail
+            label="Materials"
+            className="ppv-rail"
+            dataAttrs={{ "data-ppv": "rail" }}
+            trayClassName="ppv-tray"
+            tray={<>
+              <h2>Materials</h2>
+              <div className="sum"><b>{nl}</b> letter{nl === 1 ? "" : "s"} · <b>{ns}</b> synops{ns === 1 ? "is" : "es"} · <b>{nv}</b> version{nv === 1 ? "" : "s"}</div>
+              <img className="ppv-peek" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" />
+            </>}
+          >
+            {activeMs ? (
+              <PkgMaterials mats={mats} metaOf={metaOf} composing={!!shown} inPkg={inPkg} onChip={onChip}
+                onDragStart={(m) => { dragId.current = m.id; dragKindRef.current = m.kind; setDragKind(m.kind); }}
+                onDragEnd={() => { dragId.current = null; dragKindRef.current = null; setDragKind(null); }}
+                onAdd={(k, el) => setModal({ kind: k, opener: el })}
+                putAway={putAway} onRestore={(m) => { void restoreVersion(m.id); showToast({ message: `Restored ${m.name}.` }); }} />
+            ) : null}
+          </PageRail>
+        </div>
+        {modal ? <PkgMaterialModal key={modal.kind} kind={modal.kind} onClose={closeModal} onSave={(d) => saveMaterial(modal.kind, d)} /> : null}
       </div>
-      </WorkspacePageGrid>
-
-      {/* ⚠️ OUTSIDE THE GRID, because it is an overlay rather than page content — `Form11Drawer`
-          fixes itself to the viewport and paints its own scrim, so nesting it inside the scroll row
-          would put a fixed element inside a clipping container for no reason. */}
-      <PackagesDrawer open={howOpen} onClose={() => setHowOpen(false)} />
-    </div>
+    </WorkspacePageGrid>
   );
 };
+
+export default SubmissionPackages;

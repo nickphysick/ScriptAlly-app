@@ -1,0 +1,175 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v2 — the Materials rail's body and the add-material modal (ref `renderRail`,
+ * `openMatModal`). The card, the stickiness and the height are the shared `PageRail`'s.
+ *
+ * ⚠️ THE MODAL TRAPS FOCUS AND RENDERS INSIDE THE PAGE ROOT, NOT A PORTAL: the `--ppv-*` aliases are
+ * declared on `.ppv-page`, and a portal to `body` would read none of them (the house portal-scope
+ * law). `position: fixed` escapes the scroller without needing one.
+ *
+ * ⚠️ A VERSION HAS NO WORD-COUNT FIELD. The mock draws one; `BookVersion` has no word count, so the
+ * field would take a number and store it nowhere (a false premise, reported).
+ */
+import React, { useEffect, useRef, useState } from "react";
+import { MatKind, MaterialItem } from "../../lib/packagesPage";
+import { countWords } from "../../lib/materialDraft";
+
+const PLURAL: Record<MatKind, string> = { letter: "Query letters", synopsis: "Synopses", version: "Versions" };
+const LABEL: Record<MatKind, string> = { letter: "Query letter", synopsis: "Synopsis", version: "Version" };
+
+export interface PkgMaterialsProps {
+  mats: Record<MatKind, MaterialItem[]>;
+  metaOf: (m: MaterialItem) => string;
+  composing: boolean;
+  inPkg: (m: MaterialItem) => boolean;
+  onChip: (m: MaterialItem) => void;
+  onDragStart: (m: MaterialItem) => void;
+  onDragEnd: () => void;
+  onAdd: (k: MatKind, opener: HTMLElement) => void;
+  /** put-away letters and synopses — the only route back for them, so it renders only when there are any */
+  putAway?: MaterialItem[];
+  onRestore?: (m: MaterialItem) => void;
+}
+
+export const PkgMaterials: React.FC<PkgMaterialsProps> = ({ mats, metaOf, composing, inPkg, onChip, onDragStart, onDragEnd, onAdd, putAway = [], onRestore }) => {
+  const [open, setOpen] = useState(false);
+  return (
+  <div className="ppv-rbody">
+    {composing
+      ? <p className="ppv-rhint">Click a material to put it in the package, or drag it onto a slot.</p>
+      : <p className="ppv-rhint ppv-rhint--quiet">Click any material to start a package with it.</p>}
+    {(["letter", "synopsis", "version"] as MatKind[]).map((k) => (
+      <React.Fragment key={k}>
+        <div className="ppv-mh">
+          <b>{PLURAL[k]}</b><span className="ppv-pill">{mats[k].length}</span><span className="grow" />
+          <button type="button" className="ppv-mini" data-add={k} onClick={(e) => onAdd(k, e.currentTarget)}>+ Add</button>
+        </div>
+        <div className="ppv-mats">
+          {mats[k].length ? mats[k].map((m) => {
+            const inp = composing && inPkg(m);
+            return (
+              /* ⚠️ A `div role="button"`, NOT A <button>: Chromium never starts a native drag on a
+                 button, so a draggable <button> is a chip that cannot be dragged (measured — no
+                 dragstart fires). Enter and Space are handled here to keep it a real control. */
+              <div key={m.id} role="button" tabIndex={0} className={`ppv-chip${k === "version" ? " is-ver" : ""}${composing ? " is-composing" : ""}${inp ? " is-in" : ""}`}
+                data-mat={m.id} draggable={composing} aria-pressed={composing ? inp : undefined}
+                aria-label={composing ? `${inp ? "In package" : "Add to package"}: ${m.name}` : undefined}
+                onClick={() => onChip(m)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChip(m); } }}
+                onDragStart={(e) => { if (!composing) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", m.id); e.dataTransfer.effectAllowed = "copy"; onDragStart(m); }}
+                onDragEnd={onDragEnd}>
+                <i aria-hidden="true" />
+                <span className="cx">
+                  <span className="cn">{m.name}{m.current ? <> <span className="ppv-tag ppv-tag--ms">Current</span></> : null}</span>
+                  <span className="cm">{metaOf(m)}</span>
+                </span>
+                {composing ? <span className="add">{inp ? "✓ In" : "Add"}</span> : null}
+              </div>
+            );
+          }) : <div className="ppv-memp">None yet.</div>}
+        </div>
+      </React.Fragment>
+    ))}
+    {/* ⚠️ NOT IN THE MOCK, AND DELIBERATELY KEPT: the old page's archive drawer was the only way
+        back for a put-away material, so retiring it without a door would strand the writer's own
+        work. Absent unless something is put away. */}
+    {putAway.length ? (
+      <>
+        <button type="button" className="ppv-retired-h" data-ppv="putaway-toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          <span className="chev" aria-hidden="true">›</span>Put away <span className="ppv-pill">{putAway.length}</span>
+        </button>
+        {open ? (
+          <div className="ppv-mats">
+            {putAway.map((m) => (
+              <div key={m.id} className="ppv-chip">
+                <i aria-hidden="true" />
+                <span className="cx"><span className="cn">{m.name}</span><span className="cm">{metaOf(m)}</span></span>
+                <button type="button" className="ppv-mini" onClick={() => onRestore?.(m)}>Restore</button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </>
+    ) : null}
+  </div>
+  );
+};
+
+export interface MatModalProps {
+  kind: MatKind;
+  onClose: () => void;
+  /** resolves false when the write did not land — the modal stays open */
+  onSave: (d: { name: string; text: string; note: string }) => Promise<boolean>;
+}
+
+export const PkgMaterialModal: React.FC<MatModalProps> = ({ kind, onClose, onSave }) => {
+  const isV = kind === "version";
+  const [name, setName] = useState("");
+  const [text, setText] = useState("");
+  const [note, setNote] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => { nameRef.current?.focus(); }, []);
+  const words = countWords(text);
+
+  const save = async () => {
+    if (busy) return;
+    if (!name.trim()) { setErr("Add a name to save it."); nameRef.current?.focus(); return; }
+    setBusy(true);
+    const ok = await onSave({ name: name.trim(), text, note: note.trim() });
+    setBusy(false);
+    if (!ok) setErr("That didn't save. Try again.");
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onClose(); return; }
+    if (e.key === "Tab") {
+      const f = [...(modalRef.current?.querySelectorAll<HTMLElement>("input, textarea, button:not([disabled])") ?? [])];
+      if (!f.length) return;
+      const i = f.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === f.length - 1 || i === -1)) { e.preventDefault(); f[0].focus(); }
+    }
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") { e.preventDefault(); void save(); }
+  };
+
+  return (
+    <div className="ppv-scrim" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="ppv-modal" role="dialog" aria-modal="true" aria-labelledby="ppv-m-title" data-ppv="modal" ref={modalRef} onKeyDown={onKey}>
+        <div className="mh">
+          <h3 id="ppv-m-title">Add {isV ? "a version" : `a ${LABEL[kind].toLowerCase()}`}</h3>
+          <p>{isV ? "Name it for the edit it represents, like “Fast-paced opening”." : "Paste the text so its word count is kept with it."}</p>
+        </div>
+        <div className="mb">
+          <div className="ppv-f w">
+            <label htmlFor="ppv-m-name">Name <span className="req">*</span></label>
+            <input id="ppv-m-name" ref={nameRef} autoComplete="off" value={name} maxLength={120}
+              placeholder={isV ? "e.g. Fast-paced opening" : kind === "letter" ? "e.g. Query letter v4" : "e.g. Synopsis, 2 pages"}
+              onChange={(e) => { setName(e.target.value); if (err) setErr(""); }} />
+            <span className="err" data-ppv="m-err" role="alert">{err}</span>
+          </div>
+          {isV ? (
+            <div className="ppv-f w">
+              <label htmlFor="ppv-m-note">What changed</label>
+              <textarea id="ppv-m-note" rows={3} maxLength={2000} placeholder="e.g. Cut the prologue; opens on the ferry." value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+          ) : (
+            <div className="ppv-f w">
+              <label htmlFor="ppv-m-text">Text</label>
+              <textarea id="ppv-m-text" rows={7} placeholder={`Paste your ${LABEL[kind].toLowerCase()} here`} value={text} onChange={(e) => setText(e.target.value)} />
+              <span className="hint" id="ppv-m-count" aria-live="polite">{words.toLocaleString("en-GB")} word{words === 1 ? "" : "s"}</span>
+            </div>
+          )}
+        </div>
+        <div className="mf">
+          <button type="button" className="ppv-btn" onClick={onClose}>Cancel</button>
+          <button type="button" className="ppv-btn ppv-btn--dark" data-ppv="m-save" disabled={busy} onClick={() => void save()}>Add {isV ? "version" : LABEL[kind].toLowerCase()}</button>
+        </div>
+      </div>
+    </div>
+  );
+};

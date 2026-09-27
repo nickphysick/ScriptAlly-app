@@ -59,6 +59,43 @@ async function openPkgs(page: Page, ms: string, vp = VP, search = "") {
 async function fresh(page: Page, ms = FILLED, search = "") { seed(); await openPkgs(page, ms, VP, search); }
 const on = (page: Page, sel: string) => page.locator(`[data-ppv="page"]:visible ${sel}`);
 const card = (page: Page, name: string) => on(page, `[data-ppv="pkg"][data-name="${name}"]`);
+/* a RAIL chip — the composer's filled chip carries the same data-mat, so an unscoped locator is ambiguous */
+const chip = (page: Page, id: string) => on(page, `[data-ppv="rail"] [data-mat="${id}"]`);
+/**
+ * ⚠️ A DRAG NEEDS BOTH ENDS ON SCREEN, AND `dragTo` CANNOT ARRANGE THAT HERE. The rail is taller than
+ * the window at rest (by design: it is the height it has when stuck) and its body scrolls; `dragTo`
+ * scrolls the SOURCE into view by scrolling every ancestor, which lifts the composer off the top,
+ * and then drops on a target that is no longer there. So: page at the top, the rail's BODY scrolled
+ * to the chip, both rects asserted inside the viewport (the precondition, stated), then a stepped
+ * native drag. Measured: with the source on screen a real dragstart/dragover/drop fire.
+ */
+async function dragChip(page: Page, id: string, k: string): Promise<boolean> {
+  const ok = await page.evaluate(([id, k]) => {
+    const root = [...document.querySelectorAll('[data-ppv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const sc = root.closest(".wpg-scroll") as HTMLElement;
+    const chip = root.querySelector(`[data-ppv="rail"] [data-mat="${id}"]`) as HTMLElement;
+    const rail = root.querySelector('[data-ppv="rail"]') as HTMLElement;
+    const body = chip.closest(".sa-prail-body") as HTMLElement;
+    const w = root.querySelector(`[data-ppv="composer"] [data-well="${k}"]`) as HTMLElement;
+    const on = (e: Element) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; };
+    /* first at rest; then with the page scrolled just far enough for the rail to STICK, where the
+       whole card fits the window and the composer's wells are still above the fold */
+    sc.scrollTop = 0;
+    for (const lift of [0, rail.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16]) {
+      sc.scrollTop = lift;
+      body.scrollTop += chip.getBoundingClientRect().top - body.getBoundingClientRect().top - 8;
+      if (on(chip) && on(w)) return true;
+    }
+    return false;
+  }, [id, k]);
+  if (!ok) return false;
+  const a = (await chip(page, id).boundingBox())!; const b = (await well(page, k).boundingBox())!;
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down();
+  await page.mouse.move(a.x + a.width / 2 + 8, a.y + a.height / 2 + 4, { steps: 3 });
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 12 }); await page.mouse.up();
+  await page.waitForTimeout(150);
+  return true;
+}
 const well = (page: Page, k: string) => on(page, `[data-ppv="composer"] [data-well="${k}"]`);
 async function read(page: Page) {
   return page.evaluate(() => {
@@ -165,25 +202,27 @@ test(`P2 · composer fill · ${W}`, async ({ page }) => {
   const L = new PLedger(`pkg-P2-${W}`);
   const ctx = { route: ROUTE, size: W, state: "filled" };
   await fresh(page);
-  await on(page, '[data-mat="pv2-l2"]').click();
+  await chip(page, "pv2-l2").click();
   let r = await read(page);
   L.check("P2 · a click with the composer closed opens it with that material in place", ctx, !!r?.composer && r.wells.letter === "pv2-l2", JSON.stringify(r?.wells));
-  await on(page, '[data-mat="pv2-l2"]').click();
+  await chip(page, "pv2-l2").click();
   r = await read(page);
   L.check("P2 · clicking it again empties the slot", ctx, r?.wells.letter === "", JSON.stringify(r?.wells));
   await on(page, '[data-well="synopsis"] select').selectOption("pv2-s3");
   r = await read(page);
   L.check("P2 · the select fills its own well", ctx, r?.wells.synopsis === "pv2-s3", JSON.stringify(r?.wells));
-  await on(page, '[data-mat="pv2-v2"]').dragTo(well(page, "version"));
+  const d1 = await dragChip(page, "pv2-v2", "version");
+  L.check("P2 · precondition: the chip and the well are both on screen for the drag", ctx, d1, "");
   r = await read(page);
   L.check("P2 · a drag onto the matching well fills it", ctx, r?.wells.version === "pv2-v2", JSON.stringify(r?.wells));
-  await on(page, '[data-mat="pv2-s1"]').dragTo(well(page, "letter"));
+  const d2 = await dragChip(page, "pv2-s1", "letter");
+  L.check("P2 · precondition: the wrong-kind drag had both ends on screen", ctx, d2, "");
   r = await read(page);
   L.check("P2 · a drag onto the wrong kind is refused", ctx, r?.wells.letter === "" && r?.wells.synopsis === "pv2-s3", JSON.stringify(r?.wells));
-  await on(page, '[data-mat="pv2-l3"]').click();
+  await chip(page, "pv2-l3").click();
   r = await read(page);
   L.check("P2 · a click with the composer open fills its kind's well", ctx, r?.wells.letter === "pv2-l3", JSON.stringify(r?.wells));
-  close(L, 6);
+  close(L, 8);
 });
 
 /* ══ P3 · letter required ══ */
@@ -281,8 +320,9 @@ test("P7 · ?tab=builder opens the composer; ?tab=tracking scrolls to Side by si
   L.check("P7 · ?tab=builder opens the composer", ctx, (await read(page))?.composer === true, "");
   await openPkgs(page, FILLED, VP, "?tab=tracking");
   await page.waitForTimeout(800);
-  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="sbs-h"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop } : null; });
-  L.check("P7 · ?tab=tracking scrolls Side by side to the top of the window", ctx, !!t && t.st > 0 && t.top >= -2 && t.top < 80, JSON.stringify(t));
+  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="sbs-h"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop, max: sc.scrollHeight - sc.clientHeight, ch: sc.clientHeight } : null; });
+  /* ⚠️ "TO THE TOP" OR AS FAR AS THE SCROLLER GOES: a section near the page's end cannot reach the top */
+  L.check("P7 · ?tab=tracking scrolls to Side by side (at the top, or at max scroll with it in view)", ctx, !!t && t.st > 0 && t.top >= -2 && (t.top < 80 || (Math.abs(t.st - t.max) <= 1 && t.top < t.ch - 60)), JSON.stringify(t));
   await openPkgs(page, FILLED, VP, "?tab=packages");
   const top = await page.evaluate(() => ([...document.querySelectorAll('[data-ppv="page"]')].find((e) => e.getBoundingClientRect().height > 0)?.closest(".wpg-scroll") as HTMLElement | null)?.scrollTop ?? -1);
   L.check("P7 · ?tab=packages is the top of the page", ctx, top === 0, `${top}`);
@@ -339,5 +379,5 @@ test("P9 · the add-material modal: focus trap, Esc, name required, live word co
     await page.keyboard.press("Escape");
     L.check("P9 · Esc closes it", ctx, (await page.locator('[data-ppv="modal"]:visible').count()) === 0, "");
   }
-  close(L, 6);
+  close(L, 5);
 });

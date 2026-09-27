@@ -120,7 +120,9 @@ describe("the copy states the fact and offers the way on", () => {
   });
   it("the note names the fact; the why names the reason", () => {
     expect(LOCKED_NOTE).toBe("Locked — this package has been sent");
-    expect(LOCKED_WHY).toContain("what the agent actually received");
+    /* rewritten (packages v2): LOCKED_WHY follows the card's lock line */
+    expect(LOCKED_WHY).toContain("so your records stay true");
+    expect(LOCKED_WHY).toContain("Duplicate it to try a different mix.");
   });
 });
 
@@ -255,51 +257,26 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     expect(rule).not.toMatch(/#f?[ce][0-9a-f]{4}|amber|warn/i);
   });
 
+  /* ⚠️ RETARGETED ONTO PACKAGES v2 (27 Sep). The composer's state names its mode once: `editId` for
+     an edit, `dupFrom` for a duplicate. Duplicate & edit sets `dupFrom` and never `editId`, and
+     `create()` writes through `updatePackage` ONLY when `editId` is set — so a duplicate is always an
+     `addPackage`, and a sent package is never the write target. The same law as before, stated
+     over the new page's two lines rather than the old builder's pair of setters. */
   it("duplicating is a CREATE — the sent package is never the write target", () => {
-    /**
-     * ⚠️ THE ENTIRE POINT OF D-D2. `pkgEditing` stays null while `pkgDuplicating` is set, so
-     * `savePackageDraft` takes the `addPackage` branch and the sent package is untouched.
-     */
-    expect(page).toContain("setPkgEditing(null);\n                  setPkgDuplicating(");
-    expect(page).toMatch(/if \(pkgEditing\) \{[\s\S]{0,600}updatePackage\(pkgEditing\.id/);
+    const dup = page.slice(page.indexOf('case "dup":'), page.indexOf('case "retire":'));
+    expect(dup, "no Duplicate & edit entry point").toContain("openComp(");
+    expect(dup).toContain("dupFrom: p.packageName");
+    expect(dup, "a duplicate opens as an EDIT").not.toContain("editId");
+    expect(dup).toContain("duplicateName(p.packageName");
+    expect(page).toMatch(/if \(c\.editId\) \{[\s\S]{0,400}updatePackage\(c\.editId/);
   });
 
   it("the two modes are mutually exclusive at every entry point", () => {
-    /**
-     * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: **whichever mode an entry point sets, it clears the
-     * other**, so the builder can never be handed both an `editing` and a `duplicating` package.
-     *
-     * It used to assert two whitespace-exact source literals, and went red when the open-to-edit
-     * path MOVED — the card now opens a reader and the drawer's footer opens the composer, which is
-     * a change of entry point and not of the rule. A lock bound to indentation cannot tell a
-     * relocation from a regression, which is the only thing a lock is for.
-     *
-     * Stated structurally now: every `setPkgEditing(` call site is checked for a `setPkgDuplicating`
-     * within the same handler, and the reverse. It survives the next relocation and still fails the
-     * day somebody sets one without clearing the other.
-     */
-    const setters = [...page.matchAll(/setPkg(Editing|Duplicating)\(/g)].map((m) => m.index ?? 0);
-    expect(setters.length, "no builder-mode entry points found").toBeGreaterThan(2);
-    for (const i of setters) {
-      /* the handler around it — bounded by the nearest braces either side, not by a line count */
-      const win = page.slice(Math.max(0, i - 260), i + 260);
-      expect(win, `a mode is set without clearing the other near offset ${i}`)
-        .toMatch(/setPkgEditing\([\s\S]*setPkgDuplicating\(|setPkgDuplicating\([\s\S]*setPkgEditing\(/);
-    }
-    /**
-     * ⚠️ THE `New` ENTRY POINT IS GONE, AND THE LAW SURVIVES WITHOUT IT.
-     *
-     * This asserted that the one handler seeding from NEITHER mode cleared both — `＋ New package`
-     * in the ledger head. That control is retired: `builder-refined.html` contains "New package"
-     * zero times, and the build row is the only way to make one now. So there is no longer an
-     * entry point that seeds from neither, and requiring one would pin a control the ref does not
-     * have.
-     *
-     * What is locked is unchanged and is the part that matters — asserted above, over EVERY
-     * remaining setter: a mode is never set without the other being cleared, so Edit and Duplicate
-     * cannot both be live. That claim got stronger when the third entry point went, not weaker.
-     */
-    expect(page, "the retired head control must not come back").not.toContain("pkgb-newpkg");
+    const edit = page.slice(page.indexOf('case "edit":'), page.indexOf('case "dup":'));
+    expect(edit).toContain("editId: p.id");
+    expect(edit, "an edit also claims to be a duplicate").not.toContain("dupFrom");
+    /* and Edit is offered only on UNSENT packages — the lock's visible half */
+    expect(decls(read("src/components/packages/PkgCard.tsx"))).toMatch(/sent \? act\("dup", "Duplicate & edit"\) : act\("edit", "Edit"\)/);
   });
 
   it("the builder seeds from whichever it was given, and names the duplicate", () => {

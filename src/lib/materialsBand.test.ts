@@ -65,37 +65,21 @@ describe("the materials band replaces the rail's register (D1)", () => {
     }
   });
 
-  it("⚠️ THE BAND IS SUPERSEDED BY THE RAIL — swapped, not added", () => {
-    /**
-     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. This required `<MaterialsBand` to be mounted once.
-     * Part C replaces the shelf with the Builder's rail: the same materials, beside the ledger
-     * instead of below it, so a writer assembling a package can see what they are assembling from.
-     *
-     * What survives is the part that would actually cause harm if lost — the materials surface is
-     * mounted EXACTLY ONCE, and it is one surface rather than two. A page carrying both would be
-     * two answers to what materials this manuscript has.
-     */
+  /* ⚠️ RETARGETED ONTO PACKAGES v2 (27 Sep). The Builder's rail, the working bands and the archive
+     drawer are all retired with the tabs; the page's ONE materials surface is `PkgMaterials` in the
+     shared `PageRail`, and the put-away route survives inside it. The laws are unchanged: one
+     materials surface, and a put-away material always has a way back. */
+  it("⚠️ ONE materials surface — the v2 rail — and none of the retired ones", () => {
     const d = decls(page);
-    expect(d.match(/<BuilderRail\b/g) ?? [], "the rail is mounted exactly once").toHaveLength(1);
-    expect(d, "the shelf it replaces is gone from the page").not.toMatch(/<MaterialsBand\b/);
-  });
-
-  it("⚠️ AND THE ARCHIVE DRAWER CAME WITH IT — the only route back for a put-away material", () => {
-    /**
-     * `ArchivedSection` was the shelf's. Unmounting the shelf without rehoming it would have made
-     * the writer's own put-away work unreachable — and Part C's retirement of the sample type put
-     * four materials in there. Asserted on the PAGE, because that is where the rehoming happened.
-     */
-    const d = decls(page);
-    expect(d).toMatch(/<ArchivedSection\b/);
-    expect(d).toMatch(/archivedVersions/);
-  });
-
-  it("mounts the three working bands, once each", () => {
-    const d = decls(page);
-    for (const band of ["PackagesBand", "TrackingBand", "FootnoteBand"]) {
-      expect(d.match(new RegExp(`<${band}\\b`, "g")) ?? [], `${band} is not mounted exactly once`).toHaveLength(1);
+    expect(d.match(/<PkgMaterials\b/g) ?? [], "the rail is mounted exactly once").toHaveLength(1);
+    for (const gone of ["MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
+      expect(d, `${gone} is back on the page`).not.toMatch(new RegExp(`<${gone}\\b`));
     }
+  });
+
+  it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
+    expect(decls(page)).toMatch(/putAway=\{putAway\}[\s\S]{0,120}restoreVersion\(m\.id\)/);
+    expect(decls(read("../components/packages/PkgMaterials.tsx"))).toContain('data-ppv="putaway-toggle"');
   });
 });
 
@@ -121,30 +105,12 @@ describe("every entry point names its type (D3)", () => {
     expect(src, "the per-type column heads are back").not.toMatch(/["\s`]pkgb-matcolhead["\s`]/);
   });
 
-  it("carries the preselect through to the modal", () => {
-    const src = decls(page);
-    expect(src).toContain("preselect={matPreselect}");
-    /* The key must move with the type, or clicking Letters after Synopses reuses the Synopsis draft. */
-    expect(src).toMatch(/key=\{matEditing\?\.id \?\? `new-\$\{matPreselect/);
-  });
-
-  it("clears the preselect on every exit, so a later edit cannot open on a stale type", () => {
-    /**
-     * ⚠️ THE PROPERTY, NOT A COUNT. This asserted exactly three clears — save · close · openMaterial
-     * — so it went RED the day a fourth, entirely CORRECT entry point was added (the first-visit
-     * CTA, which opens the modal with no preselect and clears it exactly as the rule requires).
-     * A literal count is not "every entry point clears it"; it is "there are three entry points",
-     * which is a claim nobody meant to make and which fails on the change it should welcome.
-     *
-     * The real claim: every call that OPENS the material modal clears the preselect first, or
-     * deliberately sets one. So count the opens, and require a clear-or-set beside each.
-     */
-    const src = decls(page);
-    const opens = (src.match(/setMatModal\(true\)/g) ?? []).length;
-    const preselects = (src.match(/setMatPreselect\((null|[a-zA-Z]+)\)/g) ?? []).length;
-    expect(opens, "no entry point opens the material modal").toBeGreaterThan(0);
-    expect(preselects, "an entry point opens the modal without saying which type")
-      .toBeGreaterThanOrEqual(opens);
+  /* ⚠️ RETARGETED ONTO PACKAGES v2: every `+ Add` names its kind, and the modal is keyed on it, so
+     a Letters add after a Synopses add is a fresh mount, never a stale draft. */
+  it("every + Add names its kind, and the modal is keyed on it", () => {
+    const rail = decls(read("../components/packages/PkgMaterials.tsx"));
+    expect(rail).toContain("data-add={k} onClick={(e) => onAdd(k, e.currentTarget)}");
+    expect(decls(page)).toContain("<PkgMaterialModal key={modal.kind} kind={modal.kind}");
   });
 });
 

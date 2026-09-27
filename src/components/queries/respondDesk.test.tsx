@@ -822,11 +822,12 @@ describe("Contact parity · the Query Centre wears Contact list's header", () =>
     expect(trial, "a live qc-wpg selector survived the removal").not.toContain("qc-wpg");
     for (const sel of [
       ".wpg.pkgw-wpg {",
-      ".wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {",
       ".wpg.pkgw-wpg .wsh {",
       ".wpg.pkgw-wpg .wpg-toolband {",
     ]) expect(trial, `Packages lost ${sel}`).toContain(sel);
     expect(trial).toContain("--illo-art: url(../../assets/packages/packages.webp)");
+    /* packages v2 (27 Sep): the artwork rule is RETIRED — the page's art is PageHeader's own slot */
+    expect(trial, "the chrome artwork rule came back").not.toContain(".wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {");
     /* and the page no longer claims a wash it does not have */
     expect(page, "the masthead still refuses a picture on the band's behalf").not.toContain("NO MARK");
   });
