@@ -45,7 +45,7 @@ const MATRIX: { route: string; size: "full" | "compact" | "none"; why?: string }
   { route: "/agents/discover", size: "compact" },
   /* comps v2 (27 Sep): the full header, ruled by Nick */
   { route: "/manuscripts/comps", size: "full" },
-  { route: "/manuscripts/packages", size: "compact" },
+  { route: "/manuscripts/packages", size: "full" },
   { route: "/import", size: "compact" },
 ];
 

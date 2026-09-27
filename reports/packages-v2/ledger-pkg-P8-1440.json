@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "P8 · the composer is open by default",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P8 · one example card: aria-hidden, inert, tagged Example, not clickable",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "empty",
+  "ok": true,
+  "detail": "{\"composer\":true,\"exHidden\":true,\"exInert\":true,\"exTag\":\"Example\",\"exControls\":0,\"exClickable\":false,\"sbs\":false,\"retired\":false,\"lede\":\"Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received.\"}"
+ },
+ {
+  "lock": "P8 · no Side by side, no Retired",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P8 · the empty lede",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "empty",
+  "ok": true,
+  "detail": "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received."
+ },
+ {
+  "lock": "P8 · the first create flips to filled",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "empty",
+  "ok": true,
+  "detail": "[{\"name\":\"Query letter v1\",\"active\":false,\"acts\":[\"use\",\"edit\",\"retire\",\"delete\",\"note\"]}]"
+ }
+]

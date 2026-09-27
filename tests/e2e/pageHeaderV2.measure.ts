@@ -130,22 +130,41 @@ for (const vp of SIZES) {
   });
 }
 
+/* ── §2 · Submission packages' full header (packages v2, 27 Sep) — WITH its padded archivist (D8) ── */
+for (const vp of SIZES) {
+  test(`§2 · Submission packages' full header at ${vp.width}`, async ({ page }) => {
+    const L = new Ledger(`v2-full-packages-${vp.width}`);
+    await openApp(page, "/manuscripts/packages", vp);
+    const r = await readFull(page, '[data-ppv="rail"]');
+    const ctx = { route: "/manuscripts/packages", size: `${vp.width}`, state: "expanded" };
+    L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
+    /* the page is held to its own mock in pkgMat.measure.ts */
+    if (r) judgeFull(L, r, ctx, undefined, { withArt: true });
+    L.write();
+    expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(12);
+  });
+}
+
 test("§4.4 · the full headers are one header", async ({ page }) => {
   const L = new Ledger("v2-consistency");
   for (const vp of SIZES) {
     await openApp(page, "/queries", vp); const q = await readTops(page);
     await openApp(page, "/agents", vp); const c = await readTops(page);
     await openApp(page, "/manuscripts/comps", vp); const m = await readTops(page);
-    const ctx = { route: "/queries vs /agents vs /manuscripts/comps", size: `${vp.width}`, state: "expanded" };
+    await openApp(page, "/manuscripts/packages", vp); const pk = await readTops(page);
+    const ctx = { route: "/queries vs /agents vs /manuscripts/comps vs /manuscripts/packages", size: `${vp.width}`, state: "expanded" };
     for (const k of ["header", "eyebrow", "title"] as const) {
       L.check(`§4.4 · the ${k}'s top is the same on both`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - c[k]) <= 0.5, `qc ${q[k].toFixed(1)} contact ${c[k].toFixed(1)}`);
       L.check(`§4.4 · the ${k}'s top is the same on Comparable titles`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - m[k]) <= 0.5, `qc ${q[k].toFixed(1)} comps ${m[k].toFixed(1)}`);
+      L.check(`§4.4 · the ${k}'s top is the same on Submission packages`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - pk[k]) <= 0.5, `qc ${q[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
     }
     L.check("§4.4 · the Contact list's eyebrow is its sidebar section", ctx, (c.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "AGENTS / CONTACT LIST", `${c.eyebrowText}`);
+    L.check("§4.4 · Submission packages' eyebrow is its sidebar section", ctx, (pk.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / SUBMISSION PACKAGES", `${pk.eyebrowText}`);
     L.check("§4.4 · Comparable titles' eyebrow is its sidebar section", ctx, (m.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / COMPARABLE TITLES", `${m.eyebrowText}`);
   }
   L.write();
-  expect(L.rows.length).toBe(SIZES.length * 8);
+  expect(L.rows.length).toBe(SIZES.length * 12);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 

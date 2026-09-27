@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "P6 · shown with ≥2 sent (three sent here: two live, one retired)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "true 3"
+ },
+ {
+  "lock": "P6 · no live row is visually distinguished",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"400|normal|rgba(0, 0, 0, 0)|rgba(0, 0, 0, 0)|none|none\"]"
+ },
+ {
+  "lock": "P6 · the page has no rank or verdict word",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "undefined"
+ },
+ {
+  "lock": "P6 · the facts read from the log (Autumn round: 8 queries, 3 of 8 requests)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"Autumn roundQuery letter v3 · Synopsis, 1 page · Fast-paced opening\",\"8\",\"3 of 8\",\"3 of 8\",\"2 weeks\"]"
+ },
+ {
+  "lock": "P6 · absent with fewer than two sent",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -368,7 +368,9 @@ describe("the book profile's cap assignment — one table, checked against the r
       .map((f) => f.split("/").pop()!)
       .sort();
 
-    expect(rendersBand).toEqual(["CappedCard.tsx", "CardBand.tsx", "MaterialsBand.tsx", "PackageDetailDrawer.tsx"]);
+    /* packages v2 (27 Sep) deleted MaterialsBand and PackageDetailDrawer with the tabs — the band's only
+       renderers are now the component and its one consumer */
+    expect(rendersBand).toEqual(["CappedCard.tsx", "CardBand.tsx"]);
   });
 
   /** ⚠️ AND THE PANEL SPEAKS THE FIELDS' GRAMMAR — the same `SectionHeader` the pitch and synopsis use. */

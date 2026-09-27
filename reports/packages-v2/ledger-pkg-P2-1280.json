@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "P2 · a click with the composer closed opens it with that material in place",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"pv2-l2\",\"synopsis\":\"\",\"version\":\"\"}"
+ },
+ {
+  "lock": "P2 · clicking it again empties the slot",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"\",\"synopsis\":\"\",\"version\":\"\"}"
+ },
+ {
+  "lock": "P2 · the select fills its own well",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"\",\"synopsis\":\"pv2-s3\",\"version\":\"\"}"
+ },
+ {
+  "lock": "P2 · precondition: the chip and the well are both on screen for the drag",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P2 · a drag onto the matching well fills it",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"\",\"synopsis\":\"pv2-s3\",\"version\":\"pv2-v2\"}"
+ },
+ {
+  "lock": "P2 · precondition: the wrong-kind drag had both ends on screen",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P2 · a drag onto the wrong kind is refused",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"\",\"synopsis\":\"pv2-s3\",\"version\":\"pv2-v2\"}"
+ },
+ {
+  "lock": "P2 · a click with the composer open fills its kind's well",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"letter\":\"pv2-l3\",\"synopsis\":\"pv2-s3\",\"version\":\"pv2-v2\"}"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "P7 · ?tab=builder opens the composer",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P7 · ?tab=tracking scrolls to Side by side (at the top, or at max scroll with it in view)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"top\":323.125,\"st\":1021,\"max\":1021,\"ch\":794}"
+ },
+ {
+  "lock": "P7 · ?tab=packages is the top of the page",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "P5 · exactly one card carries the tag, and it is the stored one",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"Autumn round\"]"
+ },
+ {
+  "lock": "P5 · Use for new queries sets activePackageId",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pv2-p2"
+ },
+ {
+  "lock": "P5 · …and exactly one card carries the tag",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"Agents with MSWL\"]"
+ },
+ {
+  "lock": "P5 · retiring the active package clears activePackageId",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"id\":\"pv2-p2\",\"name\":\"Agents with MSWL\",\"ql\":\"pv2-l2\",\"syn\":\"pv2-s3\",\"bv\":\"pv2-v2\",\"status\":\"Retired\",\"sent\":true,\"note\":null}"
+ }
+]

@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "P9 · + Add opens the modal with the name focused",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P9 · the word count is live",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "5 words"
+ },
+ {
+  "lock": "P9 · a name is required",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P9 · Tab and Shift+Tab stay inside the modal",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[true,true,true,true,true,true,true,true,true,true,true,true]"
+ },
+ {
+  "lock": "P9 · Esc closes it",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ }
+]

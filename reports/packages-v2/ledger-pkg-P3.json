@@ -1,0 +1,18 @@
+[
+ {
+  "lock": "P3 · no letter: Create is disabled and the reason shown",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "true Add a query letter to continue."
+ },
+ {
+  "lock": "P3 · a letter alone enables Create (synopsis and version optional)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "false"
+ }
+]

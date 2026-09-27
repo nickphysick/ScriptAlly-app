@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "P1 · precondition: the harness account is on Free",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Free"
+ },
+ {
+  "lock": "P1 · the package was created (stored)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"P1 probe\",\"Autumn round\",\"Agents with MSWL\",\"Spring round\",\"Winter draft\"]"
+ },
+ {
+  "lock": "P1 · no Pro tag, lock or upgrade on the packages page",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "2674"
+ },
+ {
+  "lock": "P1 · the Manuscripts page carries no Pro tag on packages",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"pro\":0,\"lock\":false}"
+ }
+]

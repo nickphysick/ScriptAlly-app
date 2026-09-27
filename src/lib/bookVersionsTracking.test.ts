@@ -214,23 +214,6 @@ describe("D17 — earlier is a count, and nothing more", () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-describe("D18 — both panels are gated, once", () => {
-  const band = readFileSync(join(__dirname, "..", "components", "packages", "TrackingBand.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-
-  it("reads the shared gate rather than counting versions itself", () => {
-    expect(band).toContain("versionsActive(");
-    /* a second surface inventing its own threshold is how two surfaces come to disagree */
-    expect(band).not.toMatch(/bookVersions\.length\s*[><]=?\s*\d/);
-  });
-
-  it("gates BOTH panels on it", () => {
-    expect((band.match(/\{showVersions &&/g) ?? []).length).toBe(2);
-  });
-
-  it("⚠️ the holders panel also needs somebody holding something", () => {
-    /* an empty "Manuscripts out with agents · 0 held" is a heading with nothing under it */
-    expect(band).toContain("showVersions && holders.length > 0");
-  });
-});
+/* D18 ("both panels are gated, once") is RETIRED with TrackingBand (packages v2, 27 Sep): the page
+   that drew the two version panels is deleted; the gate itself, `versionsActive`, is locked in
+   bookVersions.test.ts. */

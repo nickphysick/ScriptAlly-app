@@ -206,8 +206,6 @@ describe("the rule — proven against the deployed database by rulesProbe, asser
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers the way on", () => {
-  const band = decls(read("src/components/packages/PackagesBand.tsx"));
-  const modal = decls(read("src/components/packages/PackageModal.tsx"));
   const page = decls(read("src/components/SubmissionPackages.tsx"));
 
   /**
@@ -219,43 +217,11 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
    * ⚠️ THE LAW IS UNCHANGED: a sent package says so on its card, and offers the way on in the same
    * place. Only the shape moved — and the REASON moved with it, to the drawer, which is the one
    * place a writer asks why.
+   *
+   * ⚠️ PACKAGES v2 (27 Sep): the row, drawer, palette and builder-seed cases are RETIRED with
+   * PackagesBand, PackageDetailDrawer and PackageModal. The v2 card's lock line and its way on are
+   * measured rendered (pkgMat P4); the two cases below state the write law against the new page.
    */
-  it("a sent package's ROW says so, and states what it was sent with", () => {
-    /**
-     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. The card carried a lock LINE — a sentence plus a
-     * Duplicate button. The ledger (D12) is ruled rows, where a sentence is a second row's worth of
-     * height on every sent package, so the fact moves to a sub-line under the name and the way on
-     * is the drawer's footer, which already offers Duplicate.
-     *
-     * What is locked is unchanged and is the part that matters: a sent package SAYS it is sent, on
-     * the surface where the writer is looking at it, and states what it went with. A lock the
-     * writer only discovers by trying to edit is the dead end this rule exists to prevent.
-     */
-    const band = read("src/components/packages/PackagesBand.tsx");
-    expect(band).toContain("isPackageLocked(pkg)");
-    expect(band).toMatch(/Locked · sent with \{t\.sent\}/);
-    /* the two-sentence box, and then the lock line, are both gone from this surface */
-    expect(band).not.toContain("{LOCKED_WHY}");
-    expect(band).not.toContain("pkgb-lockline");
-  });
-
-  it("⚠️ and the way on is the drawer's, which is where the reason is asked for", () => {
-    /* The row states the fact; the drawer explains it and offers Duplicate. Asserted on the drawer
-       so "the way on exists" cannot pass on a build where the row merely stopped offering it. */
-    const drawer = read("src/components/packages/PackageDetailDrawer.tsx");
-    expect(drawer).toContain("isPackageLocked");
-    expect(drawer).toMatch(/onDuplicate/);
-    expect(read("src/components/packages/PackagesBand.tsx")).not.toContain("pkgb-dup");
-  });
-
-  it("the note reports rather than warns — no caution palette", () => {
-    const css = read("src/components/packages/packagesBroadsheet.css");
-    const i = css.indexOf(".pkgb-lockline");
-    expect(i, ".pkgb-lockline is not declared").toBeGreaterThan(-1);
-    const rule = css.slice(i, css.indexOf("}", i));
-    /* ⚠️ NO AMBER, NO BLUSH, NO ICON-RED. A sent package is an ordinary state, not a caution. */
-    expect(rule).not.toMatch(/#f?[ce][0-9a-f]{4}|amber|warn/i);
-  });
 
   /* ⚠️ RETARGETED ONTO PACKAGES v2 (27 Sep). The composer's state names its mode once: `editId` for
      an edit, `dupFrom` for a duplicate. Duplicate & edit sets `dupFrom` and never `editId`, and
@@ -279,11 +245,6 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     expect(decls(read("src/components/packages/PkgCard.tsx"))).toMatch(/sent \? act\("dup", "Duplicate & edit"\) : act\("edit", "Edit"\)/);
   });
 
-  it("the builder seeds from whichever it was given, and names the duplicate", () => {
-    expect(modal).toContain("const seed = editing ?? duplicating ?? null;");
-    expect(modal).toContain("duplicateName(duplicating.packageName, existingNames)");
-    expect(modal).toContain('duplicating ? "Duplicate package"');
-  });
 
   /* ⚠️ THE OLD PALETTE CASE IS GONE WITH `.pkgb-locked` (D8). It required the box to be SAGE —
      correct for a tinted box, and meaningless for a footnote line that has no fill at all. The
@@ -351,7 +312,8 @@ describe("Ruling 2 — the stamp rides the write that creates the link", () => {
     //    same act reached from two surfaces; a third would be a third answer to "when did it go out".
     const roots = ["src/lib/db.tsx", "src/lib/saveQueryEdits.ts"];
     for (const f of ["src/components/Queries.tsx", "src/components/ImportCsv.tsx",
-                     "src/components/packages/PackageModal.tsx", "src/lib/packagesOverview.ts"]) {
+                     "src/components/SubmissionPackages.tsx", "src/lib/packagesPage.ts", "src/lib/packagesOverview.ts"]) {
+      /* packages v2: the page that creates packages is SubmissionPackages now (PackageModal is deleted) */
       expect(decls(read(f)), `${f} writes firstSentAt`).not.toMatch(/firstSentAt\s*:/);
     }
     const writers = roots.filter((f) => /firstSentAt\s*:\s*new Date/.test(decls(read(f))));

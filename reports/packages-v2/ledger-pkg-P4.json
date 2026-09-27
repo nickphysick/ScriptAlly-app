@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "P4 · a sent package offers no Edit, and offers Duplicate & edit",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"dup\",\"retire\",\"note\"]"
+ },
+ {
+  "lock": "P4 · an unsent package offers Edit and Delete",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"use\",\"edit\",\"retire\",\"delete\",\"note\"]"
+ },
+ {
+  "lock": "P4 · Duplicate & edit opens a new package named by duplicateName",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Autumn round v2"
+ },
+ {
+  "lock": "P4 · …a NEW document with the same slots, unsent",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"id\":\"pkg-8oorzqdpw\",\"name\":\"Autumn round v2\",\"ql\":\"pv2-l3\",\"syn\":\"pv2-s1\",\"bv\":\"pv2-v3\",\"status\":\"Active\",\"sent\":false,\"note\":null}"
+ },
+ {
+  "lock": "P4 · …and the original is untouched",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"before\":{\"id\":\"pv2-p1\",\"name\":\"Autumn round\",\"ql\":\"pv2-l3\",\"syn\":\"pv2-s1\",\"bv\":\"pv2-v3\",\"status\":\"Active\",\"sent\":true,\"note\":\"Sending in batches of five, Tuesdays.\"},\"orig\":{\"id\":\"pv2-p1\",\"name\":\"Autumn round\",\"ql\":\"pv2-l3\",\"syn\":\"pv2-s1\",\"bv\":\"pv2-v3\",\"status\":\"Active\",\"sent\":true,\"note\":\"Sending in batches of five, Tuesdays.\"}}"
+ },
+ {
+  "lock": "P4 · the note saves on a locked package",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Locked, but the note moves."
+ }
+]

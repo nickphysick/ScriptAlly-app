@@ -47,8 +47,8 @@ const PAGES: { title: string; mark: string; section: string; description?: strin
 
 /** §3.3 — the pages that open with the full header; every other workspace route is compact. */
 /* ⚠️ COMPARABLE TITLES JOINED ON 27 SEP (comps v2; Nick: "Comparable titles and Submission
-   packages take full headers"). The packages run adds the fourth. */
-const FULL_PAGES = ["Query Centre", "Contact list", "Comparable titles"];
+   packages take full headers"). SUBMISSION PACKAGES is the fourth (packages v2, 27 Sep). */
+const FULL_PAGES = ["Query Centre", "Contact list", "Comparable titles", "Submission packages"];
 
 /**
  * ⚠️ THE SECTION PROVIDER IS BACK, because the eyebrow is back. It was removed when the kicker was
