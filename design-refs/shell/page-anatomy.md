@@ -1,3 +1,5 @@
+> **SUPERSEDED (27 Sep 2026) by `page-anatomy-v2.md`**, which describes the shell as built on `main` at 770881f — kept for history, not as a spec.
+
 # QueryHawk page anatomy (v1, 26 Sep 2026)
 
 Every QueryHawk page is made of four layers. The shell and the page frame are **the same on every page**. Only the hero, and what's in the main column, may differ from page to page.

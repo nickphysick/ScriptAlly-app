@@ -82,9 +82,14 @@
     "design-refs/manuscripts/manuscripts-hero-archivist.png": "1845222092dd272b001c4ddcc353e2153d76ae711b51a2bf9e4f9d242b6f6ea6",
     "design-refs/manuscripts/comps-tray-archivist.png": "0b2a7884ab29987fcea7d5ee20dc2ca4edca626c674dedeaaed53c5b8272d1dd",
     "design-refs/shell/app-shell-v3.html": "98a30a87eb58f174920154054164ae70bf7d38a10a8f947ba45d460d1d707b60",
-    "design-refs/shell/page-anatomy.md": "81f0b507622b379d8522b8526837f4b7f1fbe2ccc52ff7583b794a47f854b558",
+    "design-refs/shell/page-anatomy.md": "662e1f237a7e2bb425fdc57efdbbf523d444533da30727872e40c2137fdb1e32",
     "design-refs/shell/app-shell-v3-geometry.json": "536f9d263b75acb2f8eec4fa7ba44596ea058c5cef9a7c3f3fd565624d509a4c",
     "design-refs/page-headers-v6.html": "0813d2ace33d2df716138481d3d303eb80e1e5388c7d8f536fe6e7786df174cb",
-    "design-refs/page-header/contact-list-header-v5.html": "7ec63b6957309ad8602729757d9d3194096046182a1b981d5c1d66dff1d717fd"
+    "design-refs/page-header/contact-list-header-v5.html": "7ec63b6957309ad8602729757d9d3194096046182a1b981d5c1d66dff1d717fd",
+    "design-refs/materials/comps-v2.html": "7195113e04f2f78625cb593e61d3938511bec07264b40c425045ffae28b036ae",
+    "design-refs/materials/packages-v2.html": "caf4bb51dbbe34e214d65e5103205128e16db2f17110ea639d9dd7e56a5472dc",
+    "design-refs/materials/packages-hero-archivist.png": "57cd50d7ce485bc33a18324aac836b54ee0930dd458f03ea6f53256cc481425f",
+    "design-refs/materials/materials-v2-geometry.json": "33bd6a65bb7c69d84982067409c9490317439c802894c06d98c2e7647dec304d",
+    "design-refs/shell/page-anatomy-v2.md": "7cd16345773d790b6d87cbadd68207a3941e7b2daf2d96400aba0575bf0afc1a"
   }
 }
