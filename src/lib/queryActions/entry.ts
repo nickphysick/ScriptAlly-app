@@ -13,9 +13,9 @@ import { QueryStatus } from "../../types";
 import type { DrawerMode } from "./drawerStore";
 
 export const DRAWER_LIVE: Record<DrawerMode, boolean> = {
-  log: false,
-  resp: false,
-  sent: false,
+  log: true,
+  resp: true,
+  sent: true,
   nudge: false,
   close: false,
   offer: false,

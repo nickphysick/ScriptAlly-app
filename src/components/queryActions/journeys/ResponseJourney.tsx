@@ -12,7 +12,8 @@
  * closure entry first so Analytics counts the reply (ruling: the ending is REPLACED, not appended to).
  */
 import React, { useMemo, useState } from "react";
-import { deleteField } from "firebase/firestore";
+import { collection, deleteDoc, deleteField, doc, getDocs, query as fsQuery, where } from "firebase/firestore";
+import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type EventKey, type Query } from "../../../types";
 import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
@@ -205,11 +206,21 @@ export function ResponseJourney({ req, today, children }: JourneyProps) {
       /* A late reply to a query closed as NO REPLY replaces that ending: the closure rung goes
          first, so the reply is the query's next event rather than a note after a close. */
       if (closedNoReply) {
+        /* ⚠️ NOT `db.deleteActivity`: it finds its target in the FEED, and a closure written only to
+           the query's own log (a heal, an import) has no feed row — the rung survived and the reply
+           was appended after it. Both stores are cleared here, by id and by the projection's status;
+           the undo snapshot holds every document either delete touches. */
+        const uid = db.currentUser.id;
         const log = await db.readQueryActivity(q.id);
         const closure = log
           .filter((e) => (e.data.resultingStatus ?? e.data.type) === QueryStatus.NO_RESPONSE)
           .sort((a, b) => ms_(b.data.createdAt) - ms_(a.data.createdAt))[0];
-        if (closure) await db.deleteActivity(closure.id);
+        if (closure) {
+          await deleteDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", closure.id));
+          const feed = await getDocs(fsQuery(collection(fsdb, "users", uid, "activities"), where("queryId", "==", q.id)));
+          const twins = feed.docs.filter((f) => f.id === closure.id || f.data().resultingStatus === QueryStatus.NO_RESPONSE);
+          for (const t of twins) await deleteDoc(t.ref);
+        }
       }
       const unit = s.unit === "words" ? "Words" : s.unit === "chapters" ? "Chapters" : "Pages";
       const data: RecordResponseData = {
