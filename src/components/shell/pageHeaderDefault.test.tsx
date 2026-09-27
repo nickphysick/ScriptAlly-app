@@ -43,11 +43,14 @@ const renderInGrid = (el: React.ReactElement) =>
 const renderInLeavingGrid = (el: React.ReactElement) =>
   renderToStaticMarkup(<WorkspacePageGrid masthead={el} fill>{null}</WorkspacePageGrid>);
 
+/* ⚠️ UPDATED DELIBERATELY IN PAGE HEADER v2 §2, IN THE SAME COMMIT AS THE CHANGE: the full
+   variant's contents now sit in `.ph-hin`, the centred 920px hero frame. Nothing else moved. */
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
     expect(render(<PageHeader title="Help centre" />)).toBe(
       '<header class="ph ph--full" data-probe="page-header" data-size="full">'
-      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Help centre</h1></div></header>'
+      + '<div class="ph-hin" data-probe="hero-frame">'
+      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Help centre</h1></div></div></header>'
     );
   });
 
@@ -62,12 +65,13 @@ describe("⚠️ the default variant is frozen", () => {
     );
     expect(out).toBe(
       '<header class="ph ph--full" data-probe="page-header" data-size="full">'
+      + '<div class="ph-hin" data-probe="hero-frame">'
       + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Your agent list</h1>'
       + '<p class="ph-intro" data-probe="intro">Everyone you&#x27;re querying.</p>'
       + '<div class="ph-acts" data-probe="actions">'
       + '<button type="button" class="ph-primary">Add new agent</button>'
       + '<button type="button" class="ph-secondary">Record a response</button>'
-      + '</div></div></header>'
+      + '</div></div></div></header>'
     );
   });
 

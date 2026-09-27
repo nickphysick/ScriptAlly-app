@@ -311,7 +311,12 @@ describe("the kicker's and the CTA's treatment", () => {
     /* ⚠️ AND IT IS ANCHORED TO THE BOTTOM, which is the claim the whole slot exists for: the
        drawing stands ON the rule whatever its aspect ratio. Anchored to the top it would float a
        different distance above the rule for every picture. */
-    expect(art).toContain("bottom: 0");
+    /* ⚠️ RETARGETED (page header v2 §2): the art now lives in the centred hero frame, which sits
+       INSIDE the header's vertical padding, so "the rule" is the padding's own depth below the
+       frame. The claim is unchanged — the bottom edge is the rule — and it is asserted as the
+       relationship (the header's padding token, negated) rather than a number either side owns. */
+    expect(art).toContain("bottom: calc(-1 * var(--ph-pad-y))");
+    expect(rule(".ph--full")).toContain("padding: var(--ph-pad-y) 0");
     expect(rule(".ph--full .ph-art img, .ph--full .ph-art svg")).toContain("object-position: right bottom");
   });
 

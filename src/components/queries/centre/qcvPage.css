@@ -135,7 +135,10 @@
   min-width: 0;
 }
 .qcv-group[data-rail="stacked"] { grid-template-columns: minmax(0, 1fr); }
-.qcv-group > .qcv-page { grid-column: 1; }
+/* §2 (page header v2): the header takes row 1 across BOTH tracks; the page and the rail share row 2,
+   so the rail starts below the header's rule instead of beside it. */
+.qcv-group > .ph { grid-column: 1 / -1; grid-row: 1; }
+.qcv-group > .qcv-page { grid-column: 1; grid-row: 2; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at

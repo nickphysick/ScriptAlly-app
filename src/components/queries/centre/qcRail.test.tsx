@@ -129,7 +129,7 @@ describe("the sheet, and the two shell rules", () => {
     for (const p of ["right:", "bottom:", "left:", "width:"]) {
       expect(beside, `${p} is stated in CSS as well as measured`).not.toContain(p);
     }
-    expect(beside, "a constant offset is a guess at everything above the card").not.toMatch(/top:\s*\d/);
+    expect(beside, "a constant offset is a guess at everything above the card").not.toMatch(/(?<![-\w])top:\s*\d/); /* ⚠️ `(?<![-\w])` since page header v2: the rail's `margin-top: 24px` is its FLOW gap below the header's rule (§4.2), not a sticky offset */
     expect(beside, "100vh is the viewport, and the card does not start at y 0").not.toContain("100vh");
   });
   it("§2 · one measurement owns both sides — the card publishes, the group reads", () => {

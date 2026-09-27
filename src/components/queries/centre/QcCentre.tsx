@@ -130,9 +130,11 @@ export const QcCentre: React.FC<{
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
     <div ref={groupRef} className="qcv-group qcv-own" data-qcv="group" data-rail="beside">
-    <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
-      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
       {/**
+        * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
+        * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the
+        * first track only, which is why v1's rule and art stopped short of the rail.
+        *
         * §3.1 (page header v1) — THE PAGE'S OWN HERO IS REPLACED BY THE SHARED HEADER. What it
         * drew — a 48px title, the facts line, two pills and the courier beside them — is what the
         * full header draws for every page that has one, so the page states its content and nothing
@@ -147,6 +149,8 @@ export const QcCentre: React.FC<{
         secondary={{ label: "Record a response", onClick: onRecord, disabled: loading }}
         art={<img src={`${HERO_COURIER_MAP.src}?v=${HERO_COURIER_MAP.version}`} width={HERO_COURIER_MAP.width} height={HERO_COURIER_MAP.height} alt="" />}
       />
+    <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
+      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
 
       {/* §4 — the three courts, 18px under the pills */}
       {courts}

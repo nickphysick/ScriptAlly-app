@@ -157,7 +157,7 @@ describe("the masthead is content, not chrome", () => {
      * the vertical air.
      */
     expect(decls(all(hdrCss, ".ph--full")), "the full header stopped stating its own vertical air")
-      .toContain("padding: 26px 0");
+      .toMatch(/--ph-pad-y:\s*26px;\s*padding:\s*var\(--ph-pad-y\) 0/); /* token since page header v2 §2: the art's offset reads it */
     expect(decls(all(hdrCss, ".ph--compact")), "the compact header stopped stating its own vertical air")
       .toContain("padding: 20px 0 22px");
     /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */

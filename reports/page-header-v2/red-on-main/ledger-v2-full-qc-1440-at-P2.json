@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "§2 · the mock rendered with its fonts",
+  "route": "mock",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"hdT\":18,\"hdH\":271.734375,\"frame\":{\"l\":384,\"r\":1304,\"w\":920},\"art\":{\"l\":979.4132029339853,\"r\":1304,\"t\":86.734375,\"b\":362.734375,\"w\":324.58679706601464,\"h\":276},\"eyebrowT\":26,\"titleT\":24,\"rule\":362.734375,\"railT\":25,\"rail\":{\"l\":1053.921875,\"r\":1393.921875,\"w\":340},\"countsT\":25,\"fonts\":true}"
+ },
+ {
+  "lock": "§2 · the full header was found",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"colL\":294.08,\"colR\":1393.92,\"colW\":1099.8400000000001,\"hdL\":294.078125,\"hdR\":1025.921875,\"hdT\":18,\"hdH\":266.875,\"rule\":389.625,\"barB\":105.75,\"frame\":null,\"textW\":365.921875,\"textR\":660,\"art\":{\"l\":718.5625,\"r\":1025.921875,\"t\":293.2539585075251,\"b\":389.625,\"w\":307.359375,\"h\":96.37104149247492},\"eyebrowT\":26,\"titleT\":21.6875,\"titleFam\":\"\\\"Playfair Display\\\", Garamond, Georgia, serif\",\"titleSize\":\"56px\",\"panel\":{\"t\":121.75,\"l\":1053.921875,\"r\":1393.921875,\"b\":880.046875,\"w\":340},\"hdBox\":{\"l\":294.078125,\"r\":1025.921875,\"t\":123.75,\"b\":390.625}}"
+ },
+ {
+  "lock": "§4.2 · the header spans the column",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "hd 294.1→1025.9 col 294.1→1393.9"
+ },
+ {
+  "lock": "§4.2 · its top is the bar's bottom + 18",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "§4.2 · the side panel starts at the rule + 24",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "panel 121.8 rule 389.6"
+ },
+ {
+  "lock": "§4.2 · the side panel does not overlap the header",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"t\":121.75,\"l\":1053.921875,\"r\":1393.921875,\"b\":880.046875,\"w\":340}"
+ },
+ {
+  "lock": "§4.3 · the frame is min(920, column) wide",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "frame undefined want 920.0"
+ },
+ {
+  "lock": "§4.3 · …and centred in the column",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "frame undefined→undefined"
+ },
+ {
+  "lock": "§4.3 · the text block is ≤ 55% of the frame",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "text 365.9 of undefined"
+ },
+ {
+  "lock": "§4.3 · the drawn art's right is the frame's right",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "art 1025.9 frame undefined"
+ },
+ {
+  "lock": "§4.3 · the drawn art's bottom is the rule",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "art 389.6 rule 389.6"
+ },
+ {
+  "lock": "§4.3 · the drawn art clears the text",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "art 718.6 text 660.0 gap 58.6"
+ },
+ {
+  "lock": "§4.3 · the drawn art clears the bar",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "art top 293.3 bar 105.8"
+ },
+ {
+  "lock": "§2 · eyebrow at header + 26, title at eyebrow + 22",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "26.0 / 21.7"
+ },
+ {
+  "lock": "§2 · the title is Special Elite",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "\"Playfair Display\", Garamond, Georgia, serif"
+ },
+ {
+  "lock": "§2 · …at 56px (50 at 1360 and below)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "56px"
+ },
+ {
+  "lock": "§4.3 · the header's height is the mock's ±2",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "app 266.9 mock 271.7"
+ },
+ {
+  "lock": "§4.3 · the frame sits where the mock's does ±1",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "app undefined→undefined mock 384.0→1304.0"
+ }
+]

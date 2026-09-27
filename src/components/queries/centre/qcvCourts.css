@@ -10,7 +10,8 @@
 
 .qcv-courts {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
-  margin-top: 18px;
+  /* page header v2 §2: the page body starts at the rule + 24, level with the rail beside it */
+  margin-top: 24px;
 }
 
 .qcv-court {

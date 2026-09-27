@@ -559,11 +559,26 @@
 .ph-secondary { background: #fff; color: var(--sp-ink); box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 6px var(--sp-frame); }
 .ph-primary:disabled, .ph-secondary:disabled { opacity: 0.45; cursor: default; }
 
-/* ── §3.1 · full ── */
-.ph--full { padding: 26px 0; min-height: 232px; }
-/* ⚠️ AT MOST HALF THE HEADER'S WIDTH — the art takes the other side, and a text block that grew
-   past its half would run under the drawing. */
-.ph--full .ph-text { max-width: 50%; }
+/**
+ * ⚠️ THE TITLE IS SPECIAL ELITE, AND IT NEEDS TWO CLASSES AND `!important` TO BE. `lib/brand.tsx`
+ * injects `h1:not(.wsh-title) { font-family: …Playfair… !important }` at 0-1-1 on every route, and
+ * any single-class rule loses to it however it is written — so v1's `.ph-title` rendered in PLAYFAIR
+ * on the Query Centre, measured 27 Sep (pageHeaderV2 §2 locks the face). The same pattern the Query
+ * Centre's old `.qcv-page .qcv-title` used.
+ */
+.ph .ph-title { font-family: var(--sp-type) !important; }
+
+/* ── §3.1 · full — page header v2 §2: across the column, with a centred 920 hero frame ── */
+.ph--full { --ph-pad-y: 26px; padding: var(--ph-pad-y) 0; min-height: 232px; }
+/**
+ * THE HERO FRAME. `max-width: 920px; margin: 0 auto` — centred in the column, and the column's own
+ * width where that is narrower. `min-height: 180px` so a short text block still gives the drawing
+ * its ground. The header keeps the column's width; only its contents narrow.
+ */
+.ph-hin { position: relative; box-sizing: border-box; max-width: 920px; margin: 0 auto; min-height: 180px; }
+/* ⚠️ AT MOST 55% OF THE FRAME — the art takes 48% from the other side; a text block past its share
+   would run under the drawing. */
+.ph--full .ph-text { max-width: 55%; }
 /* ⚠️ 10px, BECAUSE THE TITLE'S TOP IS THE MEASUREMENT — the mock puts it at eyebrow + 22, and the
    eyebrow's own line box is 12, so the gap beneath it is what makes up the difference. */
 .ph--full .ph-eyebrow { margin-bottom: 10px; }
@@ -580,9 +595,11 @@
  * ⚠️ AND THE BOX MAY RISE ABOVE THE HEADER'S TOP EDGE. It is 276 tall against a 232 minimum, so on
  * a short header it overhangs — deliberately, and it is why it is absolute rather than a grid cell.
  */
+/* v2 §2: 48% of the FRAME × 276, anchored to the frame's right, its bottom ON THE RULE — the frame
+   ends 26px above the rule (the header's padding), so the box's bottom is −26. */
 .ph--full .ph-art {
-  position: absolute; right: 0; bottom: 0;
-  width: 42%; height: 276px;
+  position: absolute; right: 0; bottom: calc(-1 * var(--ph-pad-y));
+  width: 48%; height: 276px;
   pointer-events: none;
 }
 .ph--full .ph-art img, .ph--full .ph-art svg {

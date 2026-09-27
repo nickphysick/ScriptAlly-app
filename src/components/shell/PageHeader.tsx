@@ -380,6 +380,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header className="ph ph--full" data-probe="page-header" data-size="full">
+      {/**
+        * §2 (page header v2) — THE HERO FRAME. The header spans the whole content column and its rule
+        * runs the column's full width; the text and the drawing sit in a narrower frame inside it,
+        * `max-width: 920px`, centred — or the full column where the column is narrower. The art is
+        * anchored to the FRAME's right and to the rule, so it moves with the frame, not the column.
+        */}
+      <div className="ph-hin" data-probe="hero-frame">
       <div className="ph-text">
         {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
         <h1 className="ph-title" data-probe="title">{title}{titleAdornment}</h1>
@@ -402,6 +409,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         * the one that does not open identically.
         */}
       {art && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
+      </div>
     </header>
   );
 };

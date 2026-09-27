@@ -30,7 +30,8 @@
  */
 .qcv-rail--beside {
   position: sticky; z-index: 6;
-  grid-column: 2; grid-row: 1; align-self: start;
+  /* page header v2 §2: row 2, under the header's rule, starting at the rule + 24 like the page body */
+  grid-column: 2; grid-row: 2; align-self: start; margin-top: 24px;
   top: var(--be-rail-top, 16px);
   height: var(--be-rail-h, 600px);
 }
@@ -40,7 +41,7 @@
  * its natural height under the page. It is also what renders for the one frame before the first
  * measurement lands — which is why it must look like a finished state rather than a gap.
  */
-.qcv-rail--stacked { position: static; width: auto; height: auto; margin-top: 22px; grid-column: 1; }
+.qcv-rail--stacked { position: static; width: auto; height: auto; margin-top: 22px; grid-column: 1; grid-row: 3; }
 
 /**
  * ⚠️ THE QUERY CARD SITS 14px INSIDE THE RAIL'S EDGES (§6.5), AND THE BIRDS-EYE VIEW DOES NOT. The
