@@ -1,0 +1,38 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PageRail (page-anatomy-v2 §3). The card, the sticky offset and the tray; the page's grid places
+ * the card (its `margin-top: 24px` below the rule belongs to the page's group, not to this sheet).
+ *
+ * ⚠️ STICKY, NEVER FIXED — it travels inside its grid AREA, which spans the row while the item keeps
+ * its own height (`align-items: start` on the group). A fixed card measures from the viewport and
+ * leaves the column; the S4 lock asserts the computed `position` for exactly that reason.
+ */
+.sa-prail {
+  position: sticky;
+  top: 16px;
+  box-sizing: border-box;
+  width: 340px;
+  min-width: 0;
+  /* the JS writes the real cap from the scroller's measured top; this is the same 860 ceiling so a
+     frame before the first measurement cannot overshoot */
+  max-height: 860px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: var(--mat-soft);
+  overflow: hidden;
+}
+.sa-prail-tray {
+  position: relative;
+  flex: none;
+  background: var(--mat-tray);
+  overflow: hidden;
+}
+.sa-prail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
