@@ -265,3 +265,33 @@ export function openForHit(hit: ShellHit | null): string | null {
    ⚠️ `sectionClick`'s `expand`/`collapse` limbs now name nothing; its callers pass `false` and
    read only `open`/`go`. Left in place rather than reshaped so the pure function keeps its own
    table-driven tests — but it is dead weight, and a later pass may narrow it. */
+
+/**
+ * The bar's page name (page header v2 §1): the page's sidebar label, with its sidebar section
+ * heading above it as an eyebrow — or the name alone where the sidebar draws no heading (the first
+ * group, the Dashboard's) or the page is in no section.
+ *
+ * ⚠️ THE EYEBROW IS THE HEADING THE SIDEBAR DRAWS, SO IT FOLLOWS THE SIDEBAR'S OWN RULE: the first
+ * group gets no heading (`gi > 0` in WorkspaceShell), and neither does its page here. A table keyed
+ * by route would be a second description of the nav, free to disagree with it.
+ *
+ * Routes outside the nav name themselves from the table below — the words their own headers use.
+ */
+export const OFF_NAV_NAMES: Record<string, string> = { "/import": "Import", "/plans": "Plans", "/help": "Help centre" };
+
+export function barPageName(
+  sections: ShellSection[],
+  hit: ShellHit | null,
+  pathname: string,
+): { section: string | null; name: string } | null {
+  if (hit) {
+    const gi = sections.findIndex((s) => s.id === hit.section);
+    const sec = gi >= 0 ? sections[gi] : undefined;
+    const child = hit.child ? sec?.children?.find((c) => c.id === hit.child) : undefined;
+    const name = child?.label ?? sec?.label;
+    if (!sec || !name) return null;
+    return { section: gi > 0 ? sec.label : null, name };
+  }
+  const n = OFF_NAV_NAMES[pathname.replace(/\/+$/, "") || "/"];
+  return n ? { section: null, name: n } : null;
+}

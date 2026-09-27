@@ -150,9 +150,15 @@ describe("one ground, one window", () => {
   /* ⚠️ AND THE CONTAINING BLOCK SURVIVES THE HAIRLINE. `.ws-msmenu` is absolutely positioned and
      anchors to the panel; removing a decoration is not a reason to remove `position: relative`,
      and the flyout would silently reparent to the viewport if it were. */
-  it("⚠️ the panel is still a containing block — the manuscript flyout anchors to it", () => {
+  /* ⚠️ RETARGETED (page header v2, 27 Sep): the manuscript flyout moved to the bar with the switcher,
+     and it anchors to the SWITCHER now, 8px below and right-aligned. The panel keeps
+     `position: relative` for the settings layer that lies over it. */
+  it("⚠️ the panel is still a containing block, and the switcher's menu anchors to the switcher", () => {
     expect(rule(".ws-panel")).toContain("position: relative");
-    expect(rule(".ws-msmenu")).toContain("position: absolute");
+    expect(rule(".ws-ms")).toContain("position: relative");
+    expect(rule(".ws-ms-menu")).toContain("position: absolute");
+    expect(rule(".ws-ms-menu")).toContain("top: calc(100% + 8px)");
+    expect(rule(".ws-ms-menu")).toContain("right: 0");
   });
 
   /* ⚠️ RETARGETED from contentColumn's "the slot paints NOTHING — the stage owns the ground". */
@@ -187,8 +193,10 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
   it("every size in the pack's table", () => {
     expect(rule(".ws-ni")).toContain("font-size: 14.5px");        // nav items
     expect(rule(".ws-glabel")).toContain("font-size: 8.5px");     // section labels
-    expect(rule(".ws-mst")).toContain("font-size: 14px");         // manuscript title
-    expect(rule(".ws-msg")).toContain("font-size: 11.5px");       // manuscript sub-line
+    /* page header v2: the manuscript title and sub-line left the sidebar with the card; they are the
+       bar switcher's now (`.ws-ms-t` 15px Special Elite, `.ws-ms-m` 8.5px mono) */
+    expect(rule(".ws-ms-t")).toContain("font-size: 15px");        // switcher title
+    expect(rule(".ws-ms-m")).toContain("font-size: 8.5px");       // switcher sub-line
     expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
     expect(rule(".ws-pl")).toContain("font-size: 11.5px");        // plan line
     // ⚠️ `.ws-upgrow` since Option D — the pill left the account ROW to become a full-width
@@ -245,8 +253,9 @@ describe("the sidebar's one scrolling region", () => {
   /* ⚠️ A flex item shrinks by default, so at a short viewport the brand and the selector would
      compress instead of the list scrolling — the sidebar would look subtly wrong everywhere
      rather than obviously wrong in one place. */
-  it("⚠️ brand, selector and foot are pinned, so the list is what gives", () => {
-    expect(rule(".ws-brand, .ws-phead, .ws-pfoot")).toContain("flex: none");
+  /* page header v2: the selector left the sidebar, so the brand and the foot are what is pinned */
+  it("⚠️ brand and foot are pinned, so the list is what gives", () => {
+    expect(rule(".ws-brand,\n.ws-pfoot")).toContain("flex: none");
   });
 });
 
@@ -307,7 +316,10 @@ describe("the breadcrumb is chrome", () => {
    * day a page's title legitimately contains a slash. The page's name is the one thing the trail
    * really carried, and the header says it now, 18px below.
    */
-  it("⚠️ there is no breadcrumb — not its elements, not its separators, not the page's name", () => {
+  /* ⚠️ RETARGETED (page header v2, 27 Sep): still no breadcrumb — no crumb element, no separator — but
+     the bar now NAMES THE PAGE by design (§1: the sidebar section as an eyebrow, the sidebar label as the
+     name). So "not the page's name" is inverted: the name is there, once, and nothing else of a trail. */
+  it("⚠️ there is no breadcrumb — not its elements, not its separators; the page name is the one thing said", () => {
     for (const route of ["/queries/analytics", "/todo", "/agents"]) {
       const html = at(route);
       for (const cls of ["ws-crumb", "ws-seg", "ws-sep", "ws-cur", "ws-croot"]) {
@@ -322,9 +334,12 @@ describe("the breadcrumb is chrome", () => {
       const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
       const words = bar.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
       expect(words, `${route}'s bar carries a separator`).not.toContain("/");
-      for (const name of ["Analytics", "To-do", "Contact list", "QueryHawk"]) {
-        expect(words, `${route}'s bar states "${name}"`).not.toContain(name);
-      }
+      expect(words, `${route}'s bar names no product root`).not.toContain("QueryHawk");
+      /* the name comes from the NAV the shell is given; this file's fixture has no Agents section, so
+         `/agents` is a page the bar cannot name, and it must then say nothing rather than guess */
+      const pname = ({ "/queries/analytics": "Analytics", "/todo": "To-do list", "/agents": null } as Record<string, string | null>)[route];
+      if (pname) expect(html, `${route}'s bar names the page`).toMatch(new RegExp(`class="ws-pname-n">${pname}<`));
+      else expect(html, `${route} is in no section of this nav, so the bar names nothing`).not.toContain("ws-pname-n");
     }
     /* …and the styling went with it, so nothing can quietly render the trail again and look right */
     for (const sel of [".ws-crumb", ".ws-seg", ".ws-sep", ".ws-cur"]) {
@@ -379,11 +394,13 @@ describe("the sidebar", () => {
      mark there". The rail carried the mark; with it gone the sidebar is the leftmost chrome, so
      the brand lives there — mark AND wordmark — and the crumb carries none. The ONE-BRAND rule
      is what survived; only its address changed. */
-  it("⚠️ the brand appears ONCE, in the sidebar, above the manuscript selector", () => {
+  /* page header v2: the selector it sat above is in the bar now; the brand is the sidebar's first item */
+  it("⚠️ the brand appears ONCE, in the sidebar, above the nav", () => {
     const html = at("/dashboard");
     expect(html).toContain('class="ws-bmark"');
     expect(html).toContain("QueryHawk");
-    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('className="ws-phead"'));
+    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('className="ws-nav"'));
+    expect(srcCode, "the sidebar card is gone").not.toContain('className="ws-phead"');
     // and NOT in the breadcrumb
     expect(html).not.toContain("ws-logotype");
   });
@@ -455,11 +472,11 @@ describe("the sidebar", () => {
      padding". THE HEIGHT NO LONGER COMES FROM `--head`: that calc existed solely to close the
      masthead on the same continuous line as the greige bar, and there is no bar. The selector is
      sized by its own contents beneath the brand block. */
-  it("⚠️ .ws-phead is content-sized and reads no --head", () => {
-    const h = rule(".ws-phead");
-    expect(h).toContain("height: auto");
-    expect(h).not.toContain("--head");
-    expect(h).toContain("box-sizing: border-box");
+  /* ⚠️ RETIRED (page header v2, 27 Sep): `.ws-phead` held the sidebar's manuscript card, which moved
+     to the bar. Asserted gone, rule and element, so the card cannot quietly come back to the sidebar. */
+  it("⚠️ the sidebar's manuscript card is gone — rule and element", () => {
+    expect(cssRules).not.toMatch(/\.ws-phead|\.ws-mspill|\.ws-msnav|\.ws-msarrow/);
+    expect(srcCode).not.toMatch(/ws-phead|ws-mspill|ws-msarrow/);
   });
 
   /* ⚠️ RETARGETED from "panel rows and rail icons both take a visible ring". */

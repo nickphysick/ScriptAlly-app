@@ -142,30 +142,7 @@ export function planLine(plan: UserPlan | undefined): { label: string; upgrade: 
   return plan === UserPlan.PRO ? { label: "Pro plan", upgrade: false } : { label: "Free plan", upgrade: true };
 }
 
-/**
- * The manuscript arrows' destination (polish P6).
- *
- * ⚠️ IT WRAPS, AND THAT IS THE POINT OF A SHORTCUT. Clamping at the ends would give the arrows a
- * SECOND disabled state — greyed at one manuscript, and greyed again at either end of three —
- * which turns a quick step-through into a control you have to look at before using. The card
- * itself still opens the full picker, so nothing depends on the arrows reaching a particular end.
- *
- * Returns the current id when there is nothing to step to, so a caller can compare and skip the
- * write rather than storing the same value again.
- */
-export function stepManuscript(
-  manuscripts: { id: string }[],
-  currentId: string | null,
-  dir: 1 | -1,
-): string | null {
-  if (manuscripts.length === 0) return null;
-  if (manuscripts.length === 1) return manuscripts[0].id;
-  const at = manuscripts.findIndex((m) => m.id === currentId);
-  // An unknown current id steps from the first, matching resolveActiveManuscript's own fallback.
-  const from = at === -1 ? 0 : at;
-  const next = (from + dir + manuscripts.length) % manuscripts.length;
-  return manuscripts[next].id;
-}
+/* `stepManuscript` — the sidebar card's arrows — is retired with the card (page header v2, 27 Sep). */
 
 /**
  * The manuscript the workspace is scoped to (manuscript-scope B1).

@@ -54,7 +54,9 @@ describe("picking a manuscript — scope everywhere, view only on the manuscript
    */
   it("the desktop picker navigates exactly once", () => {
     const src = decls(readFileSync(join(root, "src/components/shell/WorkspaceShell.tsx"), "utf8"));
-    const body = src.slice(src.indexOf("const pickMs ="), src.indexOf("const stepMs ="));
+    /* page header v2: the arrows (`stepMs`) are retired with the sidebar card, so the slice ends at the
+       next thing the shell declares — the switcher that calls `pickMs` is in the bar now. */
+    const body = src.slice(src.indexOf("const pickMs ="), src.indexOf("}, [chooseMs, onNavigatePath, pathname, search]);"));
     expect(body).not.toBe("");
     expect((body.match(/onNavigatePath\(/g) ?? []).length, "picked a book and navigated twice").toBe(1);
     expect(body).toContain("manuscriptViewPath(pathname, id) ?? ");

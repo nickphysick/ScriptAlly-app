@@ -345,6 +345,16 @@
   --shell-switch-bg: rgba(255, 255, 255, 0.7); /* the switcher card's fill */
   --shell-switch-hover: rgba(255, 255, 255, 0.92);
   --shell-control-bg: #ffffff;              /* the search and help circles, the avatar */
+  /* page header v2 — the bar's ghost tools, its divider, and the switcher's cover tints (the active
+     book is always the rust pair, the rest take the other two in turn) */
+  --shell-ink-70: rgba(28, 19, 15, 0.7);
+  --shell-ink-45: rgba(28, 19, 15, 0.45);
+  --shell-ghost-hover: rgba(28, 19, 15, 0.08);
+  --shell-bar-vr: rgba(28, 19, 15, 0.14);
+  --shell-menu-on: #f7f3ee;
+  --shell-cover-a-bg: #f1e2d8; --shell-cover-a-ink: #8a4a3c;
+  --shell-cover-b-bg: #e3e9ee; --shell-cover-b-ink: #5f7b93;
+  --shell-cover-c-bg: #e0e5dd; --shell-cover-c-ink: #5d7059;
   --shell-canvas: #f7f2e9;            /* THE CONTENT capsule — and its top bar */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
   /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the

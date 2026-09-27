@@ -157,6 +157,9 @@ export async function probeShell(page: Page) {
       if (el.matches(".ws-sync")) return "whisper";
       if (el.matches(".ws-vdiv")) return "divider";
       if (el.matches('[data-shell="spacer"]')) return "spacer";
+      if (el.matches(".ws-bvr")) return "vr";
+      if (el.matches('[data-shell="pagename"]')) return "pagename";
+      if (el.matches('[data-shell="switcher"]')) return "switcher";
       if (el.matches('.sp-search, [aria-label^="Search"]')) return "search";
       if (el.matches('[data-probe="feedback"]')) return "feedback";
       if (el.matches('.sp-help, [aria-label="Help"], [aria-label="Help centre"]')) return "help";
@@ -180,7 +183,8 @@ export async function probeShell(page: Page) {
       return all.find((e) => classify(e) === k && shown(e)) ?? null;
     };
     const collapseBtn = find("collapse");
-    const crumb = find("breadcrumb");
+    /* page header v2: no breadcrumb — the page name is what sits after the toggle and its divider */
+    const crumb = find("pagename");
     const search = find("search");
     const feedback = find("feedback");
     const help = find("help");
@@ -263,7 +267,9 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
     c(`L2 one-divide · ${f.cls} unframed`, f.borders.length === 0 && f.shadows.length === 0 && f.after.length === 0,
       `borders=${JSON.stringify(f.borders)} shadows=${JSON.stringify(f.shadows)} after=${JSON.stringify(f.after)}`);
   }
-  c("L2 one-divide · bar bg = page bg", !!p.bar && p.bar.bg === pageBg && !/rgba\([^)]*,\s*0\)$/.test(pageBg) && pageBg !== "transparent",
+  /* ⚠️ RETARGETED (page header v2, 27 Sep): the bar is the SIDEBAR'S colour now, read from its token —
+     pageHeaderV2 §1 owns the claim; this keeps the one-divide lock honest about what the bar paints. */
+  c("L2 one-divide · bar bg = the sidebar's", !!p.bar && !!p.side && p.bar.bg === p.side.bg && !/rgba\([^)]*,\s*0\)$/.test(p.bar.bg),
     `bar ${p.bar?.bg} · page ${pageBg}`);
 
   /* L3 active */
@@ -278,15 +284,18 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
   if (!p.settings) c("L4 nav-type · faces loaded", p.loadedSerif && p.loadedMono, `serif ${p.loadedSerif} mono ${p.loadedMono}`);
 
   /* L5 top-bar */
+  /* ⚠️ RETARGETED (page header v2, 27 Sep): toggle · divider · page name · space · switcher · tools.
+     The breadcrumb went in v1; the page name and the manuscript switcher arrived in v2. */
   const want = p.settings
-    ? ["collapse", "breadcrumb", "spacer", "back", "feedback", "help"]
-    : ["collapse", "breadcrumb", "spacer", "search", "feedback", "help"];
+    ? ["collapse", "vr", "pagename", "spacer", "switcher", "back", "feedback", "help"]
+    : ["collapse", "vr", "pagename", "spacer", "switcher", "search", "feedback", "help"];
   c("L5 top-bar · order", JSON.stringify(p.seq) === JSON.stringify(want), `seq ${JSON.stringify(p.seq)}`);
   c("L5 top-bar · no save whisper", !p.savedText, `"all changes saved" in DOM: ${p.savedText}`);
 
   /* L6 search (geometry + name; the open-on-click/⌘K half is its own case) */
   if (!p.settings) {
-    c("L6 search · 36×36", !!p.search && near(p.search.w, 36, 0.6) && near(p.search.h, 36, 0.6), `search ${f1(p.search?.w)}×${f1(p.search?.h)}`);
+    /* page header v2: a 40px ghost square (was a 36px white circle) */
+    c("L6 search · 40×40", !!p.search && near(p.search.w, 40, 0.6) && near(p.search.h, 40, 0.6), `search ${f1(p.search?.w)}×${f1(p.search?.h)}`);
     c("L6 search · no visible text", p.searchText === "", `text ${JSON.stringify(p.searchText)}`);
     c("L6 search · name", p.searchName === "Search (⌘K)", `aria-label ${JSON.stringify(p.searchName)}`);
   }
@@ -309,9 +318,11 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
   c("L8 geometry · help right clearance 24", !!bar && !!p.help && near(bar.r - p.help.r, 24, 1), `clearance ${f1(bar && p.help ? bar.r - p.help.r : null)}`);
   const trio = p.settings ? [p.feedback, p.help] : [p.search, p.feedback, p.help];
   c("L8 geometry · controls centred", !!bar && trio.every((t) => !!t && near(t.cy, bar.cy, 1)), `bar.cy ${f1(bar?.cy)} · ${trio.map((t) => f1(t?.cy)).join("/")}`);
-  if (!p.settings) c("L8 geometry · search→feedback 10", !!p.search && !!p.feedback && near(p.feedback.x - p.search.r, 10, 1), `gap ${f1(p.search && p.feedback ? p.feedback.x - p.search.r : null)}`);
-  c("L8 geometry · feedback→help 10", !!p.feedback && !!p.help && near(p.help.x - p.feedback.r, 10, 1), `gap ${f1(p.feedback && p.help ? p.help.x - p.feedback.r : null)}`);
-  c("L8 geometry · crumb = collapse + 14", !!p.crumb && !!p.collapse && near(p.crumb.x - p.collapse.r, 14, 2), `gap ${f1(p.crumb && p.collapse ? p.crumb.x - p.collapse.r : null)}`);
+  /* ⚠️ RETARGETED (page header v2): the tools sit 4px apart (the mock's `.tools{gap:4px}`), and the
+     page name starts after the toggle, the 12px gap, the 1px divider and another 12px — 25px. */
+  if (!p.settings) c("L8 geometry · search→feedback 4", !!p.search && !!p.feedback && near(p.feedback.x - p.search.r, 4, 1), `gap ${f1(p.search && p.feedback ? p.feedback.x - p.search.r : null)}`);
+  c("L8 geometry · feedback→help 4", !!p.feedback && !!p.help && near(p.help.x - p.feedback.r, 4, 1), `gap ${f1(p.feedback && p.help ? p.help.x - p.feedback.r : null)}`);
+  c("L8 geometry · page name = toggle + 25", !!p.crumb && !!p.collapse && near(p.crumb.x - p.collapse.r, 25, 1), `gap ${f1(p.crumb && p.collapse ? p.crumb.x - p.collapse.r : null)}`);
   const act = p.active[0]?.box;
   if (!collapsed) {
     c("L8 geometry · active inset 14", !!act && !!s && near(act.x - s.x, 14, 1) && near(s.r - act.r, 14, 1), `left ${f1(act && s ? act.x - s.x : null)} right ${f1(act && s ? s.r - act.r : null)}`);

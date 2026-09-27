@@ -1,0 +1,1330 @@
+[
+ {
+  "lock": "§1 bar · found",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(244, 240, 234)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(244, 240, 234) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 658: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(244, 240, 234)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(244, 240, 234) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/queries",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 455: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 0: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/todo",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 800: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 122: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/import",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 434: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":0,\"inSidebar\":0,\"overlaps\":[],\"items\":4}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 0 sidebar 0"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "items 4 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 0: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/plans",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 569: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · found",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"barL\":248,\"barR\":1440,\"barT\":41.75,\"barH\":64,\"mainL\":248,\"winR\":1440,\"barBg\":\"rgb(247, 244, 238)\",\"sideBg\":\"rgb(231, 227, 220)\",\"radii\":[\"0px\",\"0px\",\"0px\",\"0px\"],\"sideRule\":true,\"sideShadow\":\"rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset\",\"toggleL\":24,\"helpR\":24,\"nameShown\":false,\"nameLines\":0,\"nameText\":null,\"eyebrow\":null,\"switchers\":1,\"inSidebar\":2,\"overlaps\":[],\"items\":5}"
+ },
+ {
+  "lock": "§1 bar · box: left = main, right = window, 64 tall",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "l 248/248 r 1440/1440 h 64"
+ },
+ {
+  "lock": "§1 bar · background = the sidebar's",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "bar rgb(247, 244, 238) side rgb(231, 227, 220)"
+ },
+ {
+  "lock": "§1 bar · no radius",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "0px/0px/0px/0px"
+ },
+ {
+  "lock": "§1 bar · the sidebar has a 1px right hairline",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "§1 bar · toggle at left + 24",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · Help at right − 24",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "§1 bar · the page name is visible, one line",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "null / null lines 0"
+ },
+ {
+  "lock": "§1 bar · exactly one visible switcher, none in the sidebar",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": false,
+  "detail": "visible 1 sidebar 2"
+ },
+ {
+  "lock": "§1 bar · no item overlaps another",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "items 5 overlaps []"
+ },
+ {
+  "lock": "§1 bar · its top is unchanged after the page scrolls",
+  "route": "/help",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "scrolled 665: 41.75 → 41.75"
+ },
+ {
+  "lock": "§1 bar · at least one route scrolled the full 800",
+  "route": "*",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "7 routes"
+ }
+]

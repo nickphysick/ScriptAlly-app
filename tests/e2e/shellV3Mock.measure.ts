@@ -24,8 +24,8 @@ type Box = { x: number; y: number; w: number; h: number } | null;
 
 /** Differences over 2px that are explained in the report, keyed `probe.field`. */
 const EXPLAINED: Record<string, string> = {
-  "firstLabel.y": "expanded only: the app's manuscript stepper draws its dots (4px + 5px margin) under the switcher when there is more than one manuscript — the fixture has five, the ref draws one",
-  "active.y": "the same 9px, carried down: every row below the switcher sits under the stepper's dots",
+  "firstLabel.y": "page header v2 moved the manuscript switcher from the sidebar to the bar, so the nav starts the switcher's height and gap higher than this (v3) ref draws it",
+  "active.y": "the same offset, carried down: every row below where the switcher was sits higher",
   "switcher.h": "the app's switcher carries a real cover mark and a two-line title at the ref's type; the fixture's manuscript meta line differs",
   "user.y": "the user row is pinned to the sidebar's foot, and the app's foot carries the Upgrade control for a free fixture account",
   "user.h": "the app's user row is a single interactive row; the ref's is a plain block",
@@ -98,7 +98,10 @@ test("the app against the mock, by one ruler", async ({ page, browser }) => {
     await page.screenshot({ path: `${OUT}/app-${vp.width}-${state}.png` });
     all[`${vp.width}-${state}`] = { mock: m, app: a };
     expect(m.fonts.every(([, ok]) => ok), `the mock loaded its web fonts at ${vp.width}: ${JSON.stringify(m.fonts)}`).toBe(true);
-    for (const probe of ["sidebar", "mark", "wordmark", "switcher", "firstLabel", "active", "user", "bar", "collapse", "crumb", "search", "feedback", "help"] as const) {
+    /* ⚠️ page header v2 (27 Sep) OWNS THE BAR AND THE SWITCHER: the bar's controls are drawn by
+       design-refs/page-header/contact-list-header-v5.html and measured in pageHeaderV2, and the
+       switcher left the sidebar. This comparison keeps the SIDEBAR and the bar's height. */
+    for (const probe of ["sidebar", "mark", "wordmark", "firstLabel", "active", "user", "bar"] as const) {
       const mb = m[probe] as Box, ab = a[probe] as Box;
       if (collapsed && probe === "wordmark") continue;
       if (!mb || !ab) { rows.push(`| ${vp.width} | ${state} | ${probe} | — | ${mb ? "present" : "absent"} | ${ab ? "present" : "absent"} | — | ${!mb && !ab ? "" : "PRESENCE"} |`); if (!!mb !== !!ab) over.push(`${vp.width} ${state} ${probe}: presence differs`); continue; }
@@ -115,6 +118,7 @@ test("the app against the mock, by one ruler", async ({ page, browser }) => {
   writeFileSync(`${OUT}/compare.json`, JSON.stringify(all, null, 1));
   console.log(`COMPARE: ${rows.length - 2} rows, ${over.length} unexplained over 2px`);
   for (const o of over) console.log("  ✗ " + o);
-  expect(rows.length - 2, "population floor").toBeGreaterThan(250);
+  /* 7 probes × 4 fields × 6 states, less the collapsed wordmark: the bar's controls are pageHeaderV2's now */
+  expect(rows.length - 2, "population floor").toBeGreaterThan(150);
   expect(over).toEqual([]);
 });

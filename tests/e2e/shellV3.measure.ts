@@ -225,7 +225,8 @@ test("L13 page title · the Contact list's title matches the Query Centre's", as
   for (const vp of SIZES) for (const collapsed of [false, true]) {
     const ctx = { route: "Contact list", size: `${vp.width}`, state: collapsed ? "collapsed" : "expanded" };
     await openShell(page, "/queries", vp, collapsed);
-    const qc = await read(".qcv-title", ".qcv-page--narrow");
+    /* page header v1 moved the Query Centre's title into PageHeader (`.ph-title`); `.qcv-title` is gone */
+    const qc = await read('[data-probe="page-header"] .ph-title', ".qcv-page--narrow");
     await openShell(page, "/agents", vp, collapsed);
     const cl = await read(".clv-hero-t", ".clv-hero--stack");
     L.check("L13 title · both found", ctx, !!qc && !!cl, `qc ${JSON.stringify(qc)} cl ${JSON.stringify(cl)}`);

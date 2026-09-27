@@ -131,112 +131,17 @@
    version overshot to 56.0 — so the wrong one shipped, verified, with a lock written around it.
    Measured against the BUILT css: padding-only leaves the pill at 41.0 against the bar's 48.0.
    A harness must load `dist/assets/index-*.css`, never a hand-picked list of sources. */
-/* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER DERIVES FROM `--head`, and the box-sizing note moves with
-   it. The old rule was `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on
-   the same continuous line as the greige breadcrumb bar. That bar is retired, so the alignment it
-   served does not exist — the selector is sized by ITS OWN CONTENTS, sitting beneath the brand
-   block. `box-sizing` is still DECLARED rather than inherited, because the padding here is the
-   kind that double-counts under content-box, and a harness that inlines only the shell sheets
-   does not get Tailwind's preflight — that difference shipped a wrong fix once already. */
-.ws-phead {
-  box-sizing: border-box;
-  height: auto;
-  padding: 0;
-}
+
 /* ⚠️ LEFT-ALIGNED, AND THE COVER IS WHY. An earlier build centred the title+chevron pair, because
    at 186px with nothing on the left a left-aligned row left a gap in the middle that read as a
    missing element. The cover slot IS that missing element: with it in place the row anchors left
    and the gap closes for the right reason. Superseded, not reversed on taste. */
 /* ⚠️ THE CARD IS THE CONTAINER (fixes-2 A1) — the opener and the arrows are its children, so it
    is `position: relative` and carries the frame, while `.ws-msopen` carries the click. */
-/* v3: the switcher card sits on a .7 WHITE fill with a hairline (the ref's `.sw`), 12px corners,
-   sized by its padding — the fixed 56px went with the 30×40 cover slot it was measured around. */
-.ws-mspill {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  background: var(--shell-switch-bg);
-  border: 0;
-  box-shadow: inset 0 0 0 1px var(--shell-hairline);
-  border-radius: 12px;
-}
-.ws-msopen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  /* gap 0 + margin on .ws-mstt — the shared collapse mechanism (see .ws-ni) */
-  gap: 0;
-  /* ⚠️ THE RIGHT PADDING RESERVES THE ARROWS' LANE, so a long title runs UNDER them rather than
-     to the card's edge and out of reach beneath a control. */
-  padding: 9px 50px 9px 10px;
-  background: none;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-  min-width: 0;
-}
 
-/* ⚠️ THE COVER SLOT ANCHORS THE LEFT EDGE, which is why the row is left-aligned and not centred.
 
-   ⚠️ TWO STATES, STYLED DIFFERENTLY ON PURPOSE (polish §5):
-     .framed  — a real cover, or the interim glyph: parchment ground, hairline, soft shadow. It
-                reads as a BOOK COVER, an object with an edge.
-     .illus   — the illustrated manuscript mark: 30x30, object-fit:contain, and NO frame at all.
-                It is an illustration sitting on the panel, not a stand-in for a cover, and
-                framing it would claim the artwork is the book.
-   The distinction is the point: a frame says "this is the cover"; the illustration says "there
-   isn't one yet". Do not unify them. */
-.ws-mcov {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--sp-ink);
-  overflow: hidden;
-}
-.ws-mcov.framed {
-  background: var(--shell-parch);
-  border: 1px solid var(--shell-edge);
-  box-shadow: 0 1px 2px rgba(46, 39, 35, 0.1);
-}
-/* the uploaded cover fills the slot; TODO(cover-upload) — the slot accepts one already */
-.ws-mcov.framed img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ws-mcov.illus { background: none; border: 0; box-shadow: none; }
-.ws-mcov.illus img { width: 26px; height: 26px; object-fit: contain; display: block; }
-.ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
-.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; line-height: 1.2; margin-left: 10px; overflow: hidden; }
-.ws-msg {
-  font-family: inherit;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--shell-mute);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ws-mspill.static .ws-msopen { cursor: default; }
-.ws-mspill.static { cursor: default; }
-.ws-mst {
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--sp-ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* Shrinks (and ellipsises) as a flex item so a long title never pushes the chevron out. */
-  flex: 0 1 auto;
-}
-.ws-mspill .ws-chev { color: var(--shell-muted); display: flex; flex: none; }
-.ws-mspill .ws-chev svg { width: 12px; height: 12px; stroke-width: 1.8; }
-.ws-msmenu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; }
+
+
 
 /* ⚠️ THE HEAD'S « GHOST IS GONE (polish §3) — it competed with the manuscript pill for the head's
    attention and read as an action ON the manuscript. */
@@ -275,10 +180,9 @@
   scrollbar-width: none;
 }
 .ws-nav::-webkit-scrollbar { width: 0; height: 0; }
-/* ⚠️ AND THE THREE FIXED BLOCKS ARE PINNED EXPLICITLY. A flex item shrinks by default, so at a
-   short viewport the brand and the selector would compress instead of the list scrolling — the
-   sidebar would look subtly wrong everywhere rather than obviously wrong in one place. */
-.ws-brand, .ws-phead, .ws-pfoot { flex: none; }
+
+.ws-brand,
+.ws-pfoot { flex: none; }
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */
@@ -564,16 +468,15 @@
 .sv2-app.ws-host { padding: 0; gap: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ws-panel,
-  .ws-sub,
-  .ws-ri,
-  .ws-ri::after,
-  .ws-tile,
-  .ws-ni,
-  .ws-ic,
-  .ws-srow,
-  .ws-pch,
-  .ws-mspill {
+.ws-panel,
+.ws-sub,
+.ws-ri,
+.ws-ri::after,
+.ws-tile,
+.ws-ni,
+.ws-ic,
+.ws-srow,
+.ws-pch {
     transition: none;
   }
 }
@@ -750,10 +653,15 @@
 .ws-pagebar {
   /* the space between the right-hand cluster's controls — a token because TWO rules state it: the
      cluster's per-child margin, and the margin "Back to app" takes when settings mode brings it in */
-  --ws-bright-gap: 10px;
-  box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 10px;
+  --ws-bright-gap: 4px;
+  box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 12px;
   height: var(--shell-top-h); padding: 0 24px;
-  background: var(--ws-page);
+  /* ⚠️ PAGE HEADER v2: THE BAR IS THE SIDEBAR'S COLOUR, READ FROM THE SIDEBAR'S OWN TOKEN. The design is
+     "the bar is the sidebar's colour", not a number — so the two cannot drift apart, and a theme that
+     retones the sidebar retones the bar with it. Flat: no radius anywhere, including where it meets
+     the sidebar. The lock asserts the two computed backgrounds are EQUAL, never a literal. */
+  background: var(--shell-side);
+  border-radius: 0;
   box-shadow: inset 0 -1px 0 var(--shell-rule);
 }
 /**
@@ -776,18 +684,62 @@
    fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
 /* v3: the ref's `.tb-col` — 34px, a hairline ring, transparent, and a 4px margin that makes the
    crumb start 14px after it (4 + the bar's 10px gap). */
+/* v2: a 38px GHOST square — 10px corners, ink at 70%, and a fill only on hover. Its left edge is the
+   bar's left + 24 (the bar's own padding). */
 .sb-toggle {
   box-sizing: border-box; flex: none;
-  width: 34px; height: 34px; margin-right: 4px; padding: 0;
+  width: 38px; height: 38px; margin: 0; padding: 0;
   display: grid; place-items: center;
-  border: 0; border-radius: 50%; background: transparent;
-  box-shadow: inset 0 0 0 1px var(--shell-hairline);
-  color: var(--sp-ink); cursor: pointer;
+  border: 0; border-radius: 10px; background: transparent; box-shadow: none;
+  color: var(--shell-ink-70); cursor: pointer;
 }
-.sb-toggle:hover { background: var(--shell-hover-bg); }
+.sb-toggle:hover { background: var(--shell-ghost-hover); color: var(--sp-ink); }
+/* the divider between the toggle and the page name */
+.ws-bvr { flex: none; width: 1px; height: 26px; background: var(--shell-bar-vr); }
+/* THE PAGE NAME — the sidebar section as an eyebrow 5px above, then the name in the typewriter face on
+   one line. With no section the name stands alone, and the bar's `align-items: center` centres it. */
+.ws-pname { flex: none; display: block; min-width: 0; white-space: nowrap; font-family: var(--sp-type); font-size: 22px; line-height: 1; color: var(--sp-ink); }
+.ws-pname-n { font-family: inherit; display: block; }
+.ws-pname-s { display: block; margin-bottom: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-ink-45); }
+
+/* ══ THE MANUSCRIPT SWITCHER (page header v2 §1; ref `.ms`) — moved here from the sidebar's card ══ */
+.ws-ms { position: relative; flex: none; }
+.ws-ms-btn {
+  box-sizing: border-box; display: flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 12px 0 6px; border: 0; border-radius: 12px;
+  background: var(--shell-control-bg);
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), inset 0 0 0 1px var(--shell-rule);
+  color: var(--sp-ink); cursor: pointer; white-space: nowrap; text-align: left; font: inherit;
+}
+.ws-ms-cov { flex: none; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: var(--sp-type); }
+.ws-ms-cov--a { background: var(--shell-cover-a-bg); color: var(--shell-cover-a-ink); }
+.ws-ms-cov--b { background: var(--shell-cover-b-bg); color: var(--shell-cover-b-ink); }
+.ws-ms-cov--c { background: var(--shell-cover-c-bg); color: var(--shell-cover-c-ink); }
+.ws-ms-tx { display: block; min-width: 0; }
+.ws-ms-t { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 15px; line-height: 1.1; color: var(--sp-ink); }
+.ws-ms-m { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 8.5px; line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-ink-45); }
+.ws-ms-chev { display: flex; color: var(--shell-ink-45); }
+/* the menu: 8px below the button, right-aligned to it, 300 wide */
+.ws-ms-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 40;
+  box-sizing: border-box; width: 300px; padding: 8px;
+  background: var(--shell-control-bg); border-radius: 14px;
+  box-shadow: 0 18px 40px -16px rgba(28, 19, 15, 0.4), 0 0 0 1px var(--shell-rule);
+}
+.ws-ms-h { margin: 6px 10px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.2; letter-spacing: 0.16em; color: var(--shell-ink-45); }
+.ws-ms-it {
+  box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 10px; background: transparent;
+  cursor: pointer; text-align: left; font: inherit; color: var(--sp-ink);
+}
+.ws-ms-it:hover, .ws-ms-it.on { background: var(--shell-menu-on); }
+.ws-ms-ck { margin-left: auto; font-family: var(--sp-serif); }
+.ws-ms-add {
+  box-sizing: border-box; display: block; width: 100%; margin-top: 6px; padding: 10px 10px 4px;
+  border: 0; border-top: 1px solid var(--shell-rule); background: transparent;
+  text-align: left; cursor: pointer; font-family: var(--sp-type); font-size: 14px; color: var(--sp-ink);
+}
 .sb-toggle svg { display: block; }
-.sb-fillcol { transition: opacity 160ms ease; }
-.sb-toggle[aria-expanded="false"] .sb-fillcol { opacity: 0; }
 /* v3: the ref's `.crumb` — Source Serif 4 at 15px, 6px apart, centred; ancestors muted, slashes at
    45%, the current page ink at 600. Every element NAMES its face: brand.tsx gives bare spans and
    buttons the sans face at runtime, which a class outranks. The `.ws-vdiv`/`.ws-sync` save whisper
@@ -798,17 +750,16 @@
 
 /* v3: search and help — 36px WHITE circles with the hairline ring (the ref's `.i-btn`). Search is
    icon-only; its name is "Search (⌘K)" and its tooltip carries the shortcut. */
+/* v2: GHOST TOOLS — 40px tall, 10px corners, no border, no outline and no fill at rest; ink at 70%,
+   ink with a light fill on hover. Search and Help are icon-only squares. */
 .ws-ibtn {
   box-sizing: border-box; flex: none;
-  width: 36px; height: 36px; padding: 0;
+  width: 40px; height: 40px; padding: 0;
   display: grid; place-items: center;
-  border: 0; border-radius: 50%; background: var(--shell-control-bg);
-  box-shadow: inset 0 0 0 1px var(--shell-hairline);
-  color: var(--sp-ink); cursor: pointer;
-  font-family: var(--sp-serif); font-size: 15px; font-weight: 600; line-height: 1;
+  border: 0; border-radius: 10px; background: transparent; box-shadow: none;
+  color: var(--shell-ink-70); cursor: pointer;
 }
-.ws-ibtn > span { font-family: inherit; }
-.ws-ibtn:hover { box-shadow: inset 0 0 0 1px var(--shell-ring); }
+.ws-ibtn:hover { background: var(--shell-ghost-hover); color: var(--sp-ink); }
 .ws-ibtn svg { display: block; }
 
 /* ── THE FEEDBACK BUTTON (feedback pack) ──
@@ -817,17 +768,17 @@
    declares its own box model because the bar's flanks are measured. (The v34 ink pill is retired.) */
 /* v3: an OUTLINE button (the ref's `.fb`) — 36px, transparent, a 28% ink ring, 10px corners,
    Special Elite at 13.5px with the pencil. */
+/* v2: Give feedback is a ghost button with its icon and label — the outlined look is gone. */
 .ws-fb {
   box-sizing: border-box; flex: none;
-  height: 36px; padding: 0 16px;
+  height: 40px; padding: 0 12px;
   display: inline-flex; align-items: center; gap: 8px;
-  border: 0; border-radius: 10px; background: transparent;
-  box-shadow: inset 0 0 0 1px var(--shell-ring);
-  color: var(--sp-ink); cursor: pointer; white-space: nowrap;
-  font-family: var(--sp-type); font-size: 13.5px; line-height: 1;
+  border: 0; border-radius: 10px; background: transparent; box-shadow: none;
+  color: var(--shell-ink-70); cursor: pointer; white-space: nowrap;
+  font-family: var(--sp-type); font-size: 14px; line-height: 1;
 }
 .ws-fb-l { font-family: inherit; }
-.ws-fb:hover { background: var(--shell-btn-hover); }
+.ws-fb:hover { background: var(--shell-ghost-hover); color: var(--sp-ink); }
 .ws-fb svg { display: block; flex: none; }
 /* ⚠️ `.ws-bdiv` — THE HAIRLINE BETWEEN FEEDBACK AND HELP — IS RETIRED, RULE AND ELEMENT (the v34 mockup, 19 Sep).
    It separated a labelled pill from a cluster of bare glyphs. Both are 50px objects in one language now,
@@ -845,7 +796,7 @@
 /* under 1100 it is a 36px outline square with the pencil alone — same height, same ring */
 @media (max-width: 1100px) {
   .ws-fb-l { display: none; }
-  .ws-fb { padding: 0; width: 36px; justify-content: center; gap: 0; }
+  .ws-fb { padding: 0; width: 40px; justify-content: center; gap: 0; }
 }
 /* ⚠️ `+ New` IS GONE FROM THE BAR (Query Centre v11, 19 Sep), and its rules went with it: the menu's
    anchor, the absolutely-placed panel, its entrance keyframe and the button's own fill. Each page's
@@ -889,11 +840,7 @@
 .ws-ni > .sp-ct { transition: transform 0.14s ease; }
 .ws-ni:hover > .sp-ct { transform: translateX(2px); }
 
-/* manuscript selector: the fill brightens and the mark tilts */
-.ws-mspill { transition: background-color 0.16s ease; }
-.ws-mspill:not(.static):hover { background: var(--shell-switch-hover); }
-.ws-mspill img, .ws-mspill svg { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
-.ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
+
 
 /* buttons — the pressed state, again the one usually missed */
 .ws-upgrow { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
@@ -917,42 +864,12 @@
 
 
 /* ══ POLISH P6 — the manuscript selector ═════════════════════════════════════════════════════ */
-/* ⚠️ THE HEAD IS A COLUMN NOW: card, then arrows/dots beneath it. The pill was the only child and
-   sat in a row; the arrows are a sibling, so the container has to say which way things stack. */
-.ws-phead { display: flex; flex-direction: column; }
-/* full width, matching the nav rows below — the card no longer shares its line with a chevron */
-.ws-phead .ws-mspill { width: 100%; flex: none; }
-/* the dots sit beneath the card; the arrows no longer do */
-.ws-msdots { margin-top: 6px; }
-/* ⚠️ INSIDE THE CARD, VERTICALLY CENTRED AGAINST THE TITLE BLOCK (fixes-2 A1). Absolutely
-   positioned so the opener beneath keeps the full card as its hit area; `z-index` puts the arrows
-   on top, or the opener would swallow their clicks. */
-.ws-msnav {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 1px;
-  z-index: 1;
-}
-/* 20x24 hit areas, per the ref */
-.ws-msarrow {
-  width: 20px; height: 24px; padding: 0;
-  display: grid; place-items: center;
-  background: none; border: none; cursor: pointer;
-  color: var(--shell-mute);
-  border-radius: 6px;
-  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
-}
-.ws-msarrow svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; }
-.ws-msarrow:hover:not(:disabled) { background: var(--shell-hover-bg); color: var(--sp-ink); }
-.ws-msarrow:active:not(:disabled) { transform: scale(0.97); }
-/* ⚠️ GREYED AND ACTUALLY DISABLED — a control that looks off but still fires is worse than either */
-.ws-msarrow:disabled { opacity: 0.4; cursor: default; }
-.ws-msdots { display: flex; justify-content: center; gap: 4px; margin-top: 5px; }
-.ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: var(--shell-hairline); transition: background-color 0.14s ease; }
-.ws-msdot.on { background: var(--shell-mute); }
+
+
+
+
+
+
 
 /* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
    design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
@@ -977,15 +894,11 @@
 .sb-collapsed .ws-pin { width: var(--shell-side-w-collapsed); }
 .sb-collapsed .ws-pin { padding: 16px 10px 12px; align-items: center; }
 .sb-collapsed .ws-brand { padding: 0; justify-content: center; }
-.sb-collapsed .ws-phead { align-items: center; width: 100%; }
-.sb-collapsed .ws-phead .ws-mspill { width: auto; }
 .sb-collapsed .ws-nav { align-items: center; width: 100%; }
 
-/* the collapsing text: opacity leads (140ms), the box follows on the rail's own curve */
+
 .ws-panel.sb-ready .ws-lbl,
-.ws-panel.sb-ready .ws-mstt,
-.ws-panel.sb-ready .ws-utext,
-.ws-panel.sb-ready .ws-msnav {
+.ws-panel.sb-ready .ws-utext {
   transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
     margin 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
 }
@@ -1027,15 +940,8 @@
    `display: none`, so the heading stays in the accessibility tree. */
 .sb-collapsed .ws-glabel { height: 1px; width: 28px; margin: 8px auto; padding: 0; background: var(--shell-hairline); font-size: 0; overflow: hidden; color: transparent; user-select: none; }
 
-/* manuscript selector: the 40px book tile alone, centred; title, meta and arrows collapse.
-   (Its 10px gap moved onto .ws-mstt as margin — same mechanism as the nav rows.) */
-.sb-collapsed .ws-msopen { justify-content: center; padding: 8px; }
-/* ⚠️ `max-height: 0` AS WELL AS WIDTH — the hidden title is two lines tall, and a zero-width block of
-   two lines still holds the tile 7.5px taller than the ref's 42px icon-only switcher (measured against
-   the mock). Height and width both collapse; the text stays in the accessibility tree. */
-.sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; max-height: 0; opacity: 0; margin-left: 0; }
-.sb-collapsed .ws-msnav { opacity: 0; pointer-events: none; }
-.sb-collapsed .ws-msdots { display: none; }
+
+
 
 /* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
    that kept them would survive as a stray 10px lozenge of border beside the avatar. */

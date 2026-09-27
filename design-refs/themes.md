@@ -1755,3 +1755,19 @@ The shell's palette sits at **`:root`** in `src/index.css` (portalled chrome doe
 - **The page ground, `--ws-page` / `--ws-page-rgb`** (`:root`, `247, 244, 238` = `--ws-ground`): the top bar and the content column paint it, and it is theme-invariant like the rest of the shell. The Dashboard and the Query Centre redeclare it on `.ws-main` as `244, 240, 234` (their darker ground, formerly a literal). Its channels exist because fades read it at other alphas.
 - **Faces:** the sidebar and the breadcrumb read `--sp-serif` (`"Source Serif 4", Georgia, serif`), declared at `:root` in `src/components/shell/primitives.css` beside `--sp-type` (Special Elite); section labels stay JetBrains Mono.
 - **Burgundy never appears in the shell.** The active item is anthracite with cream text; the badge dot keeps the colour it has today.
+
+## Page header v2 — the bar, app-wide (27 Sep 2026; ref `design-refs/page-header/contact-list-header-v5.html`)
+
+- **The bar paints `var(--shell-side)`** — the sidebar's own token, so the bar *is* the sidebar's colour in every theme (`#e7e3dc` by default; `.t-bold` / `.t-edn` map `--shell-side` to their `--desk`). Flat, no radius; the sidebar's right hairline and the bar's bottom hairline are both `--shell-rule`.
+- New `:root` tokens (theme-invariant):
+
+| Token | Value | Reads |
+|---|---|---|
+| `--shell-ink-70` | `rgba(28,19,15,.7)` | the ghost tools and the toggle at rest |
+| `--shell-ink-45` | `rgba(28,19,15,.45)` | the page name's eyebrow, the switcher's meta line, chevron and menu heading |
+| `--shell-ghost-hover` | `rgba(28,19,15,.08)` | the ghost tools' and the toggle's hover fill |
+| `--shell-bar-vr` | `rgba(28,19,15,.14)` | the divider between the toggle and the page name |
+| `--shell-menu-on` | `#f7f3ee` | the switcher menu's hover and active row |
+| `--shell-cover-a-bg` / `-ink` | `#f1e2d8` / `#8a4a3c` | the active book's cover tile (always) |
+| `--shell-cover-b-bg` / `-ink` | `#e3e9ee` / `#5f7b93` | the other books, alternating |
+| `--shell-cover-c-bg` / `-ink` | `#e0e5dd` / `#5d7059` | — |

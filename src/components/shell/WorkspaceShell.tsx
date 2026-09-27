@@ -26,14 +26,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import { MastheadSectionContext } from "./mastheadSection";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight,
+  Book, ChevronDown, ChevronsUpDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
+import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
-  ShellSection, openForHit, sectionClick, sectionRowState, shellHitFor,
+  ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor,
 } from "../../lib/workspaceShell";
-import { CountChip, MenuCard, MenuCardItem, searchShortcut } from "./primitives";
+import { CountChip, searchShortcut } from "./primitives";
+import { BarSwitcher } from "./BarSwitcher";
 import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
@@ -47,7 +48,6 @@ import { SettingsRail, SETTINGS_RAIL_HEADING_ID } from "../settings/SettingsRail
 import { UserPlan } from "../../types";
 import { APP_MARK, artUrl } from "../../lib/appArt";
 import "./primitives.css";
-import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import "./workspaceShell.css";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
@@ -281,28 +281,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const toggleKbd = macLike ? "⌘\\" : "Ctrl+\\";
 
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
-  const [msOpen, setMsOpen] = useState(false);
 
 
   useEffect(() => { setOpenId(openForHit(hit)); }, [hit?.section, hit?.child]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
-  /* ⚠️ THE `[` SHORTCUT IS RETIRED with the sidebar state it toggled. A key bound to nothing is
-     worse than no key: it eats the character in any field that is not caught by the guard. */
-  useEffect(() => {
-    if (!msOpen) return;
-    const onDown = () => setMsOpen(false);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMsOpen(false); };
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [msOpen]);
 
   const go = useCallback((path: string) => {
-    setMsOpen(false);
     onNavigatePath(path);
   }, [onNavigatePath]);
 
@@ -335,7 +320,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
   const activeMs = resolveScopedManuscript(manuscripts, storedMs);
-  const manyMs = manuscripts.length > 1;
   const chooseMs = useCallback((id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* not worth an error */ }
   }, []);
@@ -350,16 +334,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const pickMs = useCallback((id: string) => {
     chooseMs(id);
-    setMsOpen(false);
     onNavigatePath(manuscriptViewPath(pathname, id) ?? `${pathname}${search}`);
   }, [chooseMs, onNavigatePath, pathname, search]);
-  /* ⚠️ STEPPING DOES NOT RE-ROUTE — the picker navigates for its own reasons; an arrow is a
-     change of scope, not of page. */
-  const stepMs = useCallback((dir: 1 | -1) => {
-    const next = stepManuscript(manuscripts, activeMs?.id ?? null, dir);
-    if (!next || next === activeMs?.id) return;
-    chooseMs(next);
-  }, [manuscripts, activeMs?.id, chooseMs]);
+  /* ⚠️ THE STEPPER ARROWS ARE RETIRED WITH THE SIDEBAR CARD (page header v2 §1). They wrote the key
+     without re-routing, so a page that reads the key on render did not follow them until something
+     else re-rendered it; the switcher's menu is the one way to change book, and it re-routes. */
 
   /**
    * ⚠️ THE CRUMB NO LONGER FOLLOWS THE OPEN QUERY (Query Centre v11, 19 Sep). It used to read
@@ -424,6 +403,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
+  const pageName = barPageName(sections, hit, pathname);
 
   return (
     /* ⚠️ THE COLLAPSED STATE IS ANNOUNCED ON THE APP, NOT ONLY ON THE PANEL. `sb-collapsed` lives on
@@ -471,89 +451,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             <span className="ws-bwm">QueryHawk</span>
           </button>
 
-          <div className="ws-phead">
-            {activeMs ? (
-              <>
-                {/**
-                  * ⚠️ THE CARD IS A CONTAINER, NOT A BUTTON (fixes-2 A1). The arrows belong INSIDE
-                  * the card — an arrow that steps between manuscripts must be attached to the
-                  * manuscript it steps from, and below the card it belongs to nothing. But a
-                  * button inside a button is invalid markup and the inner one never receives its
-                  * own click, so the card is a positioned DIV holding two siblings: the opener,
-                  * which fills it, and the arrow pair laid over its right edge.
-                  */}
-                <div className={`ws-mspill${manyMs ? "" : " static"}`}>
-                  <button
-                    type="button"
-                    className="ws-msopen"
-                    aria-haspopup={manyMs ? "menu" : undefined}
-                    aria-expanded={manyMs ? msOpen : undefined}
-                    onClick={() => {
-                      /* ⚠️ COLLAPSED, THE TILE EXPANDS THE SIDEBAR RATHER THAN OPENING THE MENU
-                         (sidebar-collapse pack, a decision the pack's ref does not draw). The
-                         flyout is absolutely positioned against the panel and spans its width —
-                         at 72px it would render as a 72px sliver of menu. Expanding first costs
-                         one click and keeps the menu one component with one geometry. */
-                      if (sidebar.collapsed) { sidebar.setCollapsed(false); return; }
-                      if (manyMs) setMsOpen((o) => !o);
-                    }}
-                    {...railTipFor(activeMs.title, msMeta(activeMs) || undefined, undefined, 120, sidebar.collapsed)}
-                  >
-                    {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
-                        FRAMED — parchment, hairline, soft shadow — because it is an object with an
-                        edge. The illustrated mark is UNFRAMED, an illustration sitting on the panel;
-                        framing it would make the artwork claim to be the book.
-                        TODO(cover-upload): `coverUrl` does not exist on Manuscript yet — when it
-                        does, this ternary is the only thing that changes. */}
-                    {activeMs.coverUrl ? (
-                      <span className="ws-mcov framed"><img src={activeMs.coverUrl} alt="" /></span>
-                    ) : (
-                      <span className="ws-mcov illus"><img src={manuscriptMark} alt="" aria-hidden="true" /></span>
-                    )}
-                    <span className="ws-mstt">
-                      <span className="ws-mst">{activeMs.title}</span>
-                      {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}
-                    </span>
-                  </button>
-                  {/* ⚠️ SINGLE chevrons. The double `«`/`»` pair is the sidebar-COLLAPSE idiom and
-                      read as a collapse control rather than a stepper. */}
-                  <div className="ws-msnav">
-                    <button
-                      type="button" className="ws-msarrow" disabled={!manyMs}
-                      aria-label="Previous manuscript"
-                      onClick={() => stepMs(-1)}
-                    ><ChevronLeft aria-hidden="true" /></button>
-                    <button
-                      type="button" className="ws-msarrow" disabled={!manyMs}
-                      aria-label="Next manuscript"
-                      onClick={() => stepMs(1)}
-                    ><ChevronRight aria-hidden="true" /></button>
-                  </div>
-                </div>
-                {/* ⚠️ DOTS ONLY WHEN THERE IS SOMETHING TO STEP THROUGH — one dot beneath one
-                    manuscript is a control describing nothing. */}
-                {manyMs && (
-                  <div className="ws-msdots" aria-hidden="true">
-                    {manuscripts.map((m) => (
-                      <span key={m.id} className={`ws-msdot${m.id === activeMs?.id ? " on" : ""}`} />
-                    ))}
-                  </div>
-                )}
-                {msOpen && manyMs && (
-                  <MenuCard heading="Manuscript" className="ws-msmenu" role="menu">
-                    {manuscripts.map((m) => (
-                      <MenuCardItem
-                        key={m.id}
-                        label={m.title}
-                        on={m.id === activeMs.id}
-                        onSelect={() => pickMs(m.id)}
-                      />
-                    ))}
-                  </MenuCard>
-                )}
-              </>
-            ) : <span className="ws-mspill static" aria-hidden="true" />}
-          </div>
+          {/* ⚠️ THE MANUSCRIPT CARD HAS MOVED TO THE BAR (page header v2 §1) — `BarSwitcher`. There is
+              exactly one switcher on a desktop page, and it is not in the sidebar. */}
 
           {/* v3: NO DIVIDER UNDER THE SWITCHER — the ref draws none, and the sidebar's own 12px gap is
               the only separation between the head and the nav. */}
@@ -760,6 +659,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <header className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
               {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
                   move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
+              {/* the sidebar toggle — first in the bar, 24px in from its left, and it does not move
+                  between states. `[` and ⌘\ ride `aria-keyshortcuts`. v2: a 38px ghost square. */}
               <button
                 type="button"
                 className="sb-toggle ws-tbcol"
@@ -770,25 +671,32 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
                 {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.3" />
-                  <path d="M6 2.5v11" stroke="currentColor" strokeWidth="1.3" />
-                  {/* the sidebar column's fill fades when collapsed — keyed off aria-expanded, so the
-                      glyph cannot disagree with the state it reports. Ink, never burgundy. */}
-                  <rect className="sb-fillcol" x="2.4" y="3.4" width="3" height="9.2" rx="0.8" fill="currentColor" opacity="0.22" />
+                <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <rect x="3" y="4" width="14" height="12" rx="2" /><path d="M8 4v12" />
                 </svg>
               </button>
+              <span className="ws-bvr" aria-hidden="true" />
               {/**
-                * §1 (page header v1) — THE BREADCRUMB IS GONE, AND NOTHING REPLACES IT. The space
-                * between the toggle and the tools is empty.
-                *
-                * ⚠️ IT STRANDED NOTHING, which is why it could go. Its two links were "QueryHawk" →
-                * `/dashboard` and the section → its default child — and the section segment went, in
-                * this file's own words, to "the same destination its rail icon and panel row reach".
-                * Both are the sidebar's own doors. What the trail really carried was the PAGE'S
-                * NAME, said a second time a few pixels above where the header now says it.
+                * §1 (page header v2) — THE PAGE NAME, and still no breadcrumb. The eyebrow is the sidebar
+                * heading the page sits under, the name its sidebar label; a page under no heading shows
+                * the name alone. The header below repeats the name as its title, by design.
                 */}
+              {pageName && (
+                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}`} data-shell="pagename">
+                  {pageName.section && <small className="ws-pname-s">{pageName.section}</small>}
+                  <span className="ws-pname-n">{pageName.name}</span>
+                </span>
+              )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
+              {/* §1 — THE MANUSCRIPT SWITCHER, moved here from the sidebar's card. It switches exactly
+                  as the card did: `pickMs` writes the shared key and re-opens the route. */}
+              <BarSwitcher
+                manuscripts={manuscripts}
+                queries={queries}
+                activeId={activeMs?.id ?? null}
+                onPick={pickMs}
+                onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+              />
               {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
                   settings mode takes its space with it rather than leaving a gap behind. */}
               <div className="ws-bright">
@@ -806,8 +714,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     aria-keyshortcuts="Meta+K Control+K"
                     title={`Search  ${searchShortcut()}`}
                   >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-                      <circle cx="6" cy="6" r="4.2" /><path d="M9.2 9.2l3 3" />
+                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <circle cx="8.5" cy="8.5" r="5.5" /><path d="M13 13l4 4" />
                     </svg>
                   </button>
                 </span>
@@ -838,14 +746,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     /* the accessible name survives the narrow state, where only the pencil is left */
                     aria-label={FEEDBACK_FAB}
                   >
-                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-                      <path d="M9.5 2.5l2 2L5 11l-2.6.6L3 9z" />
+                    <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                      <path d="M4 16l1-4 8-8 3 3-8 8z" />
                     </svg>
                     <span className="ws-fb-l">Give feedback</span>
                   </button>
                 )}
                 <button type="button" className="ws-ibtn ws-help" onClick={onOpenHelp} aria-label="Help" title="Help centre">
-                  <span aria-hidden="true">?</span>
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                    <circle cx="10" cy="10" r="7.5" /><path d="M8 8a2 2 0 1 1 2.8 1.8c-.6.3-.8.7-.8 1.4M10 14h.01" />
+                  </svg>
                 </button>
               </div>
           </header>
