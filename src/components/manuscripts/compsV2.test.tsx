@@ -9,7 +9,7 @@
  * without a browser: the form's pure rules, what the page imports (C5), that the examples are
  * pictures (C7), and that a failed write cannot escape (C9).
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -17,6 +17,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinTags, splitTags, yearError } from "./CompForm";
 import { CompsScoutRail } from "./CompsScoutRail";
+import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
@@ -57,3 +58,25 @@ describe("C5 · the page cannot reach the Scout", () => {
 });
 
 
+describe("C9 · a failed write reverts and says so, and never escapes", () => {
+  it("runWrite resolves false, calls onFail once, and does not reject", async () => {
+    const onFail = vi.fn();
+    const err = new Error("PERMISSION_DENIED");
+    await expect(runWrite(() => Promise.reject(err), onFail)).resolves.toBe(false);
+    expect(onFail).toHaveBeenCalledTimes(1);
+    expect(onFail).toHaveBeenCalledWith(err);
+  });
+  it("…and a write that lands resolves true without calling onFail", async () => {
+    const onFail = vi.fn();
+    await expect(runWrite(() => Promise.resolve(), onFail)).resolves.toBe(true);
+    expect(onFail).not.toHaveBeenCalled();
+  });
+  it("the page's writes all go through runWrite, and a failure toasts SAVE_FAILED", () => {
+    const s = src("ComparableTitlesPage.tsx");
+    expect(SAVE_FAILED).toBe("Couldn't save that change. Check your connection and try again.");
+    expect(s, "a write still discards its promise").not.toMatch(/void updateManuscript/);
+    expect((s.match(/updateManuscript\(/g) ?? []).length, "updateManuscript is called from more than the one guarded path").toBe(1);
+    expect(s).toMatch(/runWrite\(\s*\(\) => updateManuscript\(/);
+    expect(s).toContain("showToast({ message: SAVE_FAILED })");
+  });
+});

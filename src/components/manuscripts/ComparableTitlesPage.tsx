@@ -13,8 +13,9 @@
  * (no stored `order`); the line, the ordinals, the composition and the ages are derived at render
  * (lib/compsPage.ts). Every write goes through `normalizeComp`, so optional fields stay omit-empty.
  *
- * ⚠️ UNTIL PHASE 5 A WRITE STILL FIRES AND FORGETS — `void updateManuscript(…)`, as v3 did, so a
- * refused write is an unhandled rejection and the page goes on showing the change. Phase 5 closes it.
+ * ⚠️ NO WRITE FAILS SILENTLY (Phase 5). Each write shows its change at once, awaits the store, and
+ * on a refusal puts the list back and says so (`lib/compsWrite.ts`). It used to be
+ * `void updateManuscript(…)`, an unhandled rejection on every failure.
  *
  * ⚠️ SCOPE IS THE BAR SWITCHER'S, READ EVERY RENDER — never latched in state. The switcher writes
  * `scriptally_active_manuscript_id` and re-opens the route.
@@ -29,6 +30,7 @@ import {
   CompDraft, MAX_COMPS, manuscriptComps, normalizeComp, withCompAdded, withCompEdited, withCompMoved, withCompRemoved,
 } from "../../lib/comps";
 import { QueryFormat, compCounts, compositionLine, currentYear } from "../../lib/compsPage";
+import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 import { useToast } from "../toast/ToastProvider";
 import { CompCard } from "./CompCard";
 import { CompForm } from "./CompForm";
@@ -143,8 +145,16 @@ export const ComparableTitlesPage: React.FC<{
   /** Show `next` now, write it, and on a refusal put the list back and say so. Never rejects. */
   const commit = async (next: CompTitle[]): Promise<boolean> => {
     if (!activeMs) return false;
-    void updateManuscript(activeMs.id, { comps: next.map(normalizeComp) });
-    return true;
+    const msId = activeMs.id;
+    const mine = ++seq.current;
+    const clean = next.map(normalizeComp);
+    setPending({ msId, comps: clean });
+    const ok = await runWrite(
+      () => updateManuscript(msId, { comps: clean }),
+      () => showToast({ message: SAVE_FAILED }),
+    );
+    if (seq.current === mine) setPending(null);
+    return ok;
   };
 
   const flashAt = (index: number, list = compsRef.current) => {
