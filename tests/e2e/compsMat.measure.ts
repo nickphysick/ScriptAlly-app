@@ -143,9 +143,13 @@ for (const vp of SIZES) {
     const ctx = { route: "/manuscripts/comps", size: `${vp.width}`, state: "scrolled 600" };
     await openComps(page, FILLED, vp);
     const rest = await readFrame(page);
-    const did = await scrollPage(page, 600);
+    const { did, max } = await scrollPage(page, 600);
     const r = await readFrame(page);
-    L.check("S4 · precondition: the page scrolled 600", ctx, did >= 600, `scrollTop ${did}`);
+    /* ⚠️ THE PRECONDITION IS "FAR ENOUGH TO STICK", NOT "600". At 1920×1080 the filled page scrolls
+       551 in all, so 600 cannot happen; what the claim needs is the panel's resting top to have
+       passed the stick line (scroller top + 16). The distance actually scrolled is reported. */
+    const stickAt = rest.rail ? rest.rail.t - rest.scrollerTop - 16 : NaN;
+    L.check("S4 · precondition: the page scrolled past the stick line (600, or its end)", ctx, Math.abs(did - Math.min(600, max)) <= 1 && did > stickAt, `scrollTop ${did} of max ${max}, stick at ${f1(stickAt)}`);
     L.check("S4 · the panel's top = the window's top + 16 (±1)", ctx, !!r.rail && n(r.rail.t, r.scrollerTop + 16, 1), `rail ${f1(r.rail?.t)} window ${f1(r.scrollerTop)}`);
     L.check("S4 · it is sticky, not fixed", ctx, r.railPos === "sticky", `${r.railPos}`);
     L.check("S4 · it stayed in its column", ctx, !!rest.rail && !!r.rail && n(r.rail.l, rest.rail.l, 0.5), `${f1(rest.rail?.l)} → ${f1(r.rail?.l)}`);
@@ -182,7 +186,9 @@ async function freshFilled(page: Page, vp = { width: 1440, height: 900 }) {
   await openComps(page, FILLED, vp);
   await waitForOrder(page, FIXTURE_TITLES);
 }
-const grip = (page: Page, i: number) => on(page, `[data-cpv="list"] [data-cpv="comp"]:nth-child(${i + 1}) [data-cpv="grip"]`);
+/* ⚠️ NTH CARD, NOT NTH CHILD: the list's first child is the add button (the first run used
+   `:nth-child` and waited out a focus on the button's neighbour). */
+const grip = (page: Page, i: number) => on(page, '[data-cpv="list"] > [data-cpv="comp"]').nth(i).locator('[data-cpv="grip"]');
 const card = (page: Page, title: string) => on(page, `[data-cpv="list"] [data-cpv="comp"][data-title="${title}"]`);
 
 /* ══ C1 · the line follows the switches, in list order ══ */
@@ -237,10 +243,19 @@ test("C2 · order persists", async ({ page }) => {
   await page.reload();
   await page.waitForTimeout(2500);
   L.check("C2 · Alt+↓ survives a reload", ctx, JSON.stringify((await readList(page))?.cards.map((c) => c.title)) === JSON.stringify(want1), JSON.stringify((await readList(page))?.cards.map((c) => c.title)));
-  /* pointer drag: the last card's grip to above the first card */
-  const g = grip(page, 4);
-  const first = on(page, '[data-cpv="list"] [data-cpv="comp"]').first();
+  /* pointer drag: the third card's grip to above the first card — with BOTH on screen first. The
+     first version dragged the fifth card, which sat below the fold at 1440×900: the pointer went down
+     on nothing and the lock reported a drag that never started. */
+  await page.evaluate(() => {
+    const first = [...document.querySelectorAll('[data-cpv="page"] [data-cpv="list"] > [data-cpv="comp"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    const sc = first?.closest(".wpg-scroll") as HTMLElement | null;
+    if (first && sc) sc.scrollTop += first.getBoundingClientRect().top - sc.getBoundingClientRect().top - 80;
+  });
+  await page.waitForTimeout(200);
+  const g = grip(page, 2);
+  const first = on(page, '[data-cpv="list"] > [data-cpv="comp"]').first();
   const gb = await g.boundingBox(); const fb = await first.boundingBox();
+  L.check("C2 · precondition: both cards on screen", ctx, !!gb && !!fb && gb.y + gb.height < 900 && fb.y > 60, JSON.stringify({ gb, fb }));
   if (gb && fb) {
     await page.mouse.move(gb.x + gb.width / 2, gb.y + gb.height / 2);
     await page.mouse.down();
@@ -250,7 +265,7 @@ test("C2 · order persists", async ({ page }) => {
     await page.mouse.move(fb.x + 40, fb.y + 6, { steps: 12 });
     await page.mouse.up();
   }
-  const want2 = ["Kestrel Hour", ...want1.slice(0, 4)];
+  const want2 = [want1[2], want1[0], want1[1], want1[3], want1[4]];
   await waitForOrder(page, want2).catch(() => {});
   await page.waitForTimeout(1500);
   await page.reload();
@@ -258,7 +273,7 @@ test("C2 · order persists", async ({ page }) => {
   L.check("C2 · a pointer drag survives a reload", ctx, JSON.stringify((await readList(page))?.cards.map((c) => c.title)) === JSON.stringify(want2), JSON.stringify((await readList(page))?.cards.map((c) => c.title)));
   const stored = JSON.parse(execFileSync("node", ["tests/e2e/seedCompsFixture.mjs", "--dump", FILLED], { encoding: "utf8" }).trim().split("\n").pop() ?? "[]");
   L.check("C2 · the stored array is in that order", ctx, JSON.stringify(stored.map((c: { title: string }) => c.title)) === JSON.stringify(want2), JSON.stringify(stored.map((c: { title: string }) => c.title)));
-  close(L, 4);
+  close(L, 5);
 });
 
 /* ══ C3 · the form: required title, four-digit year, tags, duplicates ══ */
@@ -369,9 +384,9 @@ test("C6 · no appraisal", async ({ page }) => {
     await openComps(page, ms, { width: 1440, height: 900 });
     const text = await pageText(page);
     L.check("C6 · the page has text", ctx, text.length > 200, `${text.length}`);
-    /* ⚠️ NOT "only": the mock's own form hint reads "Only the title is needed", which states a
-       requirement rather than appraising anything. */
-    const hit = text.match(/\b(dated|outdated|old|older|stale|too old|good|great|strong|weak|poor|bad|fresh|current|relevant|should|must|already|still|just|finally|recent enough)\b/i);
+    /* ⚠️ NOT "only" AND NOT "already": the mock's own copy reads "Only the title is needed" and "the
+       comps you already have" — requirements and facts, not appraisals, and normative. */
+    const hit = text.match(/\b(dated|outdated|old|older|stale|too old|good|great|strong|weak|poor|bad|fresh|current|relevant|should|must|still|just|finally|recent enough)\b/i);
     L.check("C6 · no appraisal word", ctx, !hit, `${hit?.[0]} in …${hit ? text.slice(Math.max(0, (hit.index ?? 0) - 40), (hit.index ?? 0) + 40) : ""}…`);
     if (ms === FILLED) {
       const r = await readList(page);

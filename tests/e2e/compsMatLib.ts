@@ -116,14 +116,14 @@ export async function readFrame(page: Page) {
   });
 }
 
-/** Scroll the page's scroller by `by` (clamped by the page), and let sticky settle. */
+/** Scroll the page's scroller to `by` (clamped by the page), let sticky settle; report where it got and its maximum. */
 export async function scrollPage(page: Page, by: number) {
   const did = await page.evaluate((n) => {
     const el = [...document.querySelectorAll('[data-cpv="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     const s = el?.closest(".wpg-scroll") as HTMLElement | null;
-    if (!s) return -1;
+    if (!s) return { did: -1, max: -1 };
     s.scrollTop = n;
-    return s.scrollTop;
+    return { did: s.scrollTop, max: s.scrollHeight - s.clientHeight };
   }, by);
   await page.waitForTimeout(250);
   return did;
