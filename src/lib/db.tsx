@@ -3183,9 +3183,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (estimateMin !== undefined) patch.estimateMin = estimateMin === null ? deleteField() : estimateMin;
     /* ⚠️ `null` CLEARS THE COMPLETION STAMP, and un-ticking must use it. A task that is not done
        has no time at which it was done: leaving `completedAt` behind is an INCOHERENT RECORD, and
-       the trap is that it reads perfectly — `briefingCleared` counts the weekly review's cleared
-       tasks by this field, correctly, because it is the field that records when a thing was
-       completed. Guarding that consumer on `done` would paper over the incoherence and leave it
+       the trap is that it reads perfectly, because it is the field that records when a thing was
+       completed (the since-deleted weekly review counted cleared tasks by it). Guarding a
+       consumer on `done` would paper over the incoherence and leave it
        for the next reader who reasonably trusts the stamp. Found by the harness's first
        stored-field Undo assertion (completion-paths). */
     if (completedAt !== undefined) patch.completedAt = completedAt === null ? deleteField() : completedAt;

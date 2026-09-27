@@ -157,8 +157,8 @@ describe("the calendar's settled values — locked so a rebuild cannot lose them
     expect(calSrc).toContain("min?: string;");
     expect(calSrc).toContain("max?: string;");
     expect(calSrc).not.toContain("todayISO()");
-    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
-    expect(flow).toContain("max={todayISO()}");
+    /* its one caller was FocusFlow's recording journeys, which went to the query drawer (27 Sep);
+       the component has no mount today and the caller half of this lock went with them. */
   });
 
   it("⚠️ THE HEADER NAMES ALL THREE DATE SURFACES, and defers the fourth question", () => {

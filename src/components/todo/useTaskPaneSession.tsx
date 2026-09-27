@@ -17,8 +17,8 @@
  *
  * ⚠️ THE HOST KEEPS SEVEN CALLBACKS, EACH FOR A REASON A HOOK CANNOT ARGUE WITH: three open
  * surfaces the PAGE renders (`onSnooze`'s `AnchoredPanel`, `onDismiss`'s dialog, `openQuery`'s
- * navigation), one reaches the DOM (`jumpToSection`), one is the `offer`/`fix` hand-off to
- * `FocusFlow`, one is the commit family that writes and toasts, and one moves the dock cursor. A
+ * navigation), one reaches the DOM (`jumpToSection`), one is the hand-off (`openFlow` — a query
+ * card goes to the query drawer, anything else to `HousekeepingSweep`), one is the commit family that writes and toasts, and one moves the dock cursor. A
  * hook cannot own a node it does not render, and it must not own navigation.
  *
  * ⚠️ THE BODIES BELOW MOVED VERBATIM from `ToDoPage`. Every comment came with its code, because the
@@ -774,13 +774,12 @@ export function useTaskPaneSession(
    * The standing law in this file is that the action button never completes directly — it opens
    * the journey, and the journey commits. The pane contract puts a form and a `Will record:` strip
    * in front of that button, which is easy to read as "this records", and building it that way
-   * would give one act two write paths that could disagree. `FocusFlow` already accepts a
-   * `prefill`, so the pane's answers ARRIVE at the one commit path as its opening values, and the
-   * writer sees them again before anything is written.
+   * would give one act two write paths that could disagree. (The pane's answers once travelled to
+   * the takeover as its opening values; every query task now finishes in the query drawer.)
    *
    * ⚠️ WHAT DOES NOT TRAVEL YET, STATED PLAINLY: the expectation dates. `recordMaterialsSent`
    * accepts `writerExpectedDate` and `nudgeDate` and the rules allow both, but `markSentWriteArgs`
-   * (lib/todoWalk.ts) does not pass them and `FocusFlow`'s prefill has no field for them. The
+   * (lib/todoWalk.ts) does not pass them. The
    * `.expect` block is therefore ASKED and not yet STORED — see the run report; it is the
    * remaining half of Phase 4, and half a write path is worse than none.
    */

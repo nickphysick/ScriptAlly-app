@@ -1213,11 +1213,6 @@ export const AccountSettings: React.FC<{
           control={<Toggle on={prefs.rollForward} onChange={(v) => saveTodoPref({ rollForward: v }, "Keep unfinished tasks")} label="Keep unfinished tasks" />}
         />
         <SettingsRow
-          label="Start the week with a summary"
-          description="A short review of the week just gone, on Monday."
-          control={<Toggle on={prefs.weeklyBriefing} onChange={(v) => saveTodoPref({ weeklyBriefing: v }, "Weekly summary")} label="Start the week with a summary" />}
-        />
-        <SettingsRow
           label="Move a task to the back of the list after"
           control={
             <select

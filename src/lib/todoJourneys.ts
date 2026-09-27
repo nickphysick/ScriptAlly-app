@@ -5,7 +5,7 @@
  * todoJourneys — which journey a card opens, and the three ways a query closes (journeys pack,
  * Phase 4; ref design-refs/todo-workspace-v14.html).
  *
- * ⚠️ THESE LIVE IN `lib/` SO THEY CAN BE TESTED AS FUNCTIONS. `FocusFlow.tsx` imports `db.tsx`,
+ * ⚠️ THESE LIVE IN `lib/` SO THEY CAN BE TESTED AS FUNCTIONS. `HousekeepingSweep.tsx` imports `db.tsx`,
  * which initialises Firebase at module load, so anything exported from the component can only ever
  * be asserted as a source STRING — and a source lock cannot see a runtime crash, only that code was
  * written. The routing table and the close outcomes are pure, so they belong here beside
@@ -49,9 +49,9 @@ export function cardJourney(c: BoardCard): CardJourney {
  * `cardJourney`'s branches used to land in the send sheet and be offered "Mark sent" for something
  * that is not a send; naming them here is what lets the fall-through hand off instead.
  *
- * ⚠️ THE HAND-OFF IS THE FALL-THROUGH ONLY — it never fronts `offerSheet` or `dqSheet`. Ruled and
- * accepted; the full reasoning sits on `handoffSheet` in `FocusFlow.tsx`. In one line: the mockup's
- * hand-offs existed because it had neither flow, and this app has both.
+ * ⚠️ THE HAND-OFF IS THE FALL-THROUGH ONLY — it never fronts `dqSheet`, and a query card never
+ * reaches it (every query task opens the query drawer). The reasoning sits on `handoffSheet` in
+ * `HousekeepingSweep.tsx`.
  *
  * ⚠️ `exclusive_expiring` IS THE ONE DECLARED TYPE WITH NO PRODUCER, and if it is ever built it
  * wants its OWN journey and its own row in `todoBuckets`, not this generic hand-off — an exclusive

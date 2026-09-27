@@ -16,7 +16,9 @@ import { readFileSync } from "fs";
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const strip = (s: string) => s.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
 const tl = strip(read("../components/reading-pane/QueryTimeline.tsx"));
-const focus = strip(read("../components/todo/FocusFlow.tsx"));
+/* the To-do takeover — `FocusFlow`, renamed `HousekeepingSweep` (27 Sep) when its query journeys, and
+   with them its condensed timeline, moved to the query drawer */
+const focus = strip(read("../components/todo/HousekeepingSweep.tsx"));
 
 describe("§3 · waiting and the nudge are timeline events", () => {
   /**
@@ -142,12 +144,12 @@ describe("§3 · To-do's rendering is unchanged", () => {
    * not reach `QueryTimeline` itself — the moment it did, every projected event would arrive in the
    * sheet and this section would have changed a surface it never looked at.
    */
-  it("To-do renders the shared rows and never the full timeline", () => {
-    expect(focus, "To-do stopped using the shared rows").toContain(
-      'import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline"',
-    );
+  it("To-do's sweep renders no timeline at all — never the full one", () => {
+    /* the condensed history went with the query journeys (27 Sep); what must never arrive is the
+       full timeline, projections and all */
     expect(focus, "To-do now renders the whole timeline, projections and all")
       .not.toMatch(/<QueryTimeline/);
+    expect(focus, "the sweep grew a timeline back").not.toMatch(/<TimelineRows/);
   });
 
   /**
@@ -160,9 +162,8 @@ describe("§3 · To-do's rendering is unchanged", () => {
     expect(tl, "the flag stopped being defaulted").toMatch(/continues\s*=\s*false/);
     expect(tl, "the last row's terminal behaviour is no longer conditional")
       .toMatch(/rows\.length - 1 && !continues/);
-    const use = focus.slice(focus.indexOf("<TimelineRows"), focus.indexOf("<TimelineRows") + 120);
-    expect(use, "To-do's TimelineRows call is missing").toContain("<TimelineRows");
-    expect(use, "To-do started opting into the continuing connector").not.toContain("continues");
+    /* To-do's own call went with its condensed history (27 Sep); the default is what protects the
+       next caller */
   });
 
   /* ⚠️ AND THE ROW OUTPUT ITSELF IS UNTOUCHED. `buildTimelineRows` is the other half of the seam:

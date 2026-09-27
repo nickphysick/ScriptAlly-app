@@ -40,9 +40,9 @@ console.log("");
 /**
  * ⚠️ BOTH HALVES, BECAUSE THE SECOND IS WHAT THE FIRST RUN FOUND. Undo reverting `done` while
  * leaving `completedAt` is an INCOHERENT RECORD — a completion timestamp on a task that is not
- * complete — and it reads perfectly, which is why nothing had caught it. `briefingCleared` counts
- * the weekly review's cleared tasks by that field, correctly, because it is the field that records
- * when a thing was completed. The inverse clears both now; this asserts it stays that way.
+ * complete — and it reads perfectly, which is why nothing had caught it: it is the field that
+ * records when a thing was completed (the since-deleted weekly review counted by it). The inverse
+ * clears both now; this asserts it stays that way.
  */
 const reverted = t.done === false || t.done === undefined;
 const stampCleared = t.completedAt === undefined || t.completedAt === null;

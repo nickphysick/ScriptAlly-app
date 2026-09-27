@@ -31,7 +31,7 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 const overlay = read("../components/shell/useOverlay.ts");
 const sheet = read("../components/queries/QueryJourneySheet.tsx");
 const queries = read("../components/Queries.tsx");
-const flow = read("../components/todo/FocusFlow.tsx");
+const flow = read("../components/todo/HousekeepingSweep.tsx");
 
 /** Every file under `src/` that composes the overlay primitive, found rather than listed. */
 function overlayCallers(): { name: string; src: string }[] {
@@ -74,7 +74,7 @@ describe("§3 · the extraction actually replaced both copies", () => {
      discard, so its backdrop click nudges; the settings sheet has written everything already, so
      its backdrop click closes. Collapsing them would have been a silent behaviour change. */
   it("the one real difference between them survived the merge", () => {
-    expect(flow, "FocusFlow's backdrop stopped nudging — a stray click would discard staged work")
+    expect(flow, "HousekeepingSweep's backdrop stopped nudging — a stray click would discard staged work")
       .toMatch(/onScrimClick:[^\n]*setNudged\(true\)/);
     /* ⚠️ THE SPECIMEN FOR "closes on a stray click" IS THE JOURNEY SHEET NOW. The settings sheet
        was the original, and it is retired; the law is about the DIFFERENCE surviving, not about

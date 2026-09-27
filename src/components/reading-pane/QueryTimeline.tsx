@@ -556,11 +556,11 @@ export const TimelineRows: React.FC<{
               * materials twice, three lines apart, the first time without any of the information
               * the second one adds.
               *
-              * ⚠️ THE PILLS ARE NOT DELETED, BECAUSE THEY ARE STILL RENDERED ELSEWHERE. To-do's
-              * focus sheet (`FocusFlow.sheetTimeline`) mounts `<TimelineRows rows={rows} />` with no
-              * `sentExtra` — a condensed, read-only view with no attach control and no manuscript
-              * name — so `row.pills` is its only materials list. Removing them from the row spec
-              * would have taken the materials off that surface to fix a duplicate on this one.
+              * ⚠️ THE PILLS WERE NOT DELETED, BECAUSE THEY WERE RENDERED ELSEWHERE: To-do's focus
+              * sheet (`FocusFlow.sheetTimeline`) mounted `<TimelineRows rows={rows} />` with no
+              * `sentExtra`, so `row.pills` was its only materials list. That sheet went with the
+              * query journeys (27 Sep, HousekeepingSweep); whether the pills still have a reader
+              * is unchecked here, not assumed.
               * Traced to a rendered root before touching it, in both directions.
               *
               * ⚠️ SO IT IS "SUPERSEDED WHERE BOTH EXIST", not "removed": the caller that supplies

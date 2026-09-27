@@ -7,7 +7,7 @@
  * 1. ⚠️ ONE COUNT DERIVATION — the badge said 42 beside a page saying fifteen cards, and Today's
  *    FILTERS said 27/24 against the list's 15/12: the badge was left on the member-unit law and
  *    Today fed its FILTERS the raw lanes. Everything walks assembleBoardColumns now.
- * 2. ⚠️ THE OFFER SNOOZE CAP holds on EVERY path — the bypass was FocusFlow's generic snooze
+ * 2. ⚠️ THE OFFER SNOOZE CAP holds on EVERY path — the bypass was FocusFlow's (now gone) generic snooze
  *    (a flat 7 days), plus the dock's clock pointed at a popover that never mounted there.
  * 3. Snoozed cards keep their ORIGINAL titles (derivedCopy — never a template); the band says
  *    SNOOZED · BACK {date}.
@@ -27,7 +27,7 @@ import { facetCounts } from "../../lib/todoBoardSort";
 const here = __dirname;
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const sidebar = readFileSync(join(here, "..", "shell", "ShellSidebar.tsx"), "utf8");
-const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
 /* ⚠️ RE-POINTED AT THE PORTED PANE — `TodoDock.tsx` is deleted. Where a case's subject was the
    retired component's own markup it is retired with it; what survives is read here. */
 const dock = readFileSync(join(here, "TaskPane.tsx"), "utf8");
@@ -109,15 +109,14 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
     expect(fn).not.toContain('c.taskType === "offer_received" && days > 1');
   });
 
-  it("⚠️ THE PATH THAT BYPASSED IT — FocusFlow's generic snooze — is clamped, and says so", () => {
-    /* ⚠️ AND THESE WERE COPIES TWO AND THREE. FocusFlow carried the offer cap twice more — once
-       in the sweep snooze, once in the staged runner — so one rule lived in three places and
-       each was free to drift. Both call the ONE ceiling now. */
-    const sn = flow.slice(flow.indexOf("function sweepSnooze"), flow.indexOf("function sweepSnooze") + 2600);
-    expect(sn).toContain("clampSnoozeDays(c.taskType, 7)");
-    expect(sn).toContain("Snoozed until tomorrow");
-    expect(flow).toContain("clampSnoozeDays(p.taskType, p.days)");
-    // no hand-written cap survives anywhere in the flow
+  it("⚠️ THE PATH THAT BYPASSED IT — the takeover's generic snooze — is gone, and no cap survives there", () => {
+    /* ⚠️ COPIES TWO AND THREE WENT WITH THE TAKEOVER'S QUERY PATHS (27 Sep). FocusFlow carried the
+       offer cap in its sweep snooze and its staged runner; both were removed when every query task
+       moved to the query drawer, and the survivor (`HousekeepingSweep`) snoozes nothing and stages
+       no snooze — so there is no path left here to bypass the ceiling. */
+    expect(flow).not.toContain("function sweepSnooze");
+    expect(flow).not.toContain("dismissTask(");
+    // no hand-written cap survives anywhere in the sweep
     expect(flow).not.toContain('taskType === "offer_received" ? 1 : 7');
     expect(flow).not.toContain("Math.min(p.days, 1)");
   });

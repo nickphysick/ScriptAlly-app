@@ -31,8 +31,7 @@ import { useTaskPaneSession, paneJourneyKind, type TaskPaneHost } from "./useTas
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import {
-  assembleBoard, todaySplit, ribbonTiles, reviewWeek, reviewCompletionSnooze, weekReviewStats,
-  briefingCleared, briefingFigures, briefingHeadline, briefingNarrative,
+  assembleBoard, todaySplit, ribbonTiles,
   BoardCard, USER_TASK_FLAG_TYPE,
 } from "../../lib/todoBoard";
 import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -45,8 +44,6 @@ import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/tod
 import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
-// VI P2 — the review cup (original QueryHawk artwork; currentColor → inlined so it inherits ink)
-import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
@@ -62,7 +59,9 @@ import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality
 import { SweepMember } from "./PaneSweep";
 import { SweepRow, SweepRule, emptySweepRow, isSweepRule, sweepFields, sweepOutcome } from "../../lib/paneSweep";
 import { BrandDatePicker } from "../forms";
-import { FocusFlow, FocusItem } from "./FocusFlow";
+import { HousekeepingSweep, SweepItem } from "./HousekeepingSweep";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { drawerDoorForTask } from "../../lib/queryActions/entry";
 import {
   TODO_OPEN_COMPOSER, TODO_ADD_TO_TODAY,
 } from "../../lib/todoRoutes";
@@ -191,7 +190,7 @@ const shortHeaderDate = (ms: number): string =>
 // ⚠ MODULE scope on purpose: the render helpers live BELOW the component's return statement
 // (hoisted function declarations), where a component-body `const` is dead code — never
 // initialised — and a hoisted reader hits the TDZ at first render (the crash class that took
-// the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
+// the whole app down twice: a since-deleted review opener `4d4fbed`, GHOST_BARS this fix). The regression
 /* ⚠️ `VERB_LABELS` IS RETIRED WITH THE ROW/REEL CLUSTER (15 Aug). All four members —
    action · todayAdd · todayRemove · later — were consumed only by `rowActionLane`, `renderCard`,
    `runBatchRow`, `renderGroupCard` and `laterMenu`, every one of which was unreachable. The CARD
@@ -202,15 +201,6 @@ const shortHeaderDate = (ms: number): string =>
 // follows TypeGlyph's exact grammar (currentColor stroke SVG, viewBox 24, aria-hidden, size
 // prop) as a page-scoped sibling — TypeGlyph itself is LOCKED to the three material
 // ComponentTypes and cannot carry a clock verbatim.
-const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (
-  // hero-pair P2 — the ↺ rewind (todo-hero-pair.html): the review chip's glyph, seated
-  // exactly as Begin's play (same flex seat, the button's own gap).
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
-    <path d="M3.5 8 A 9.5 9.5 0 1 1 3 13.5" />
-    <path d="M3.5 3.5 v4.5 h4.5" />
-  </svg>
-);
-
 const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
     <circle cx="12" cy="12" r="9" />
@@ -403,8 +393,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [composerAt]);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
-  // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
-  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
+  // the housekeeping sweep — "Start the sweep" on a grouped card, or a single non-query card handed off.
+  const [flow, setFlow] = useState<{ items: SweepItem[] } | null>(null);
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   /* (showDone was the corner panel's done-row toggle — retired with it in workspace P3.) */
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
@@ -584,9 +574,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   const plus7iso = () => new Date(Date.now() + 7 * 86400000).toISOString();
+  /**
+   * ⚠️ A QUERY CARD OPENS THE QUERY DRAWER, NEVER THE SWEEP. Every task that finishes a query has a
+   * drawer door (`drawerDoorForTask`), and only the drawer writes. What is left for the sweep is a
+   * card with no query journey: the writer's own note, one agent's record gaps, or a hand-off.
+   */
   const openFlowCards = (cards: BoardCard[]) => {
-    // III P1 — the board is review-free by construction (the banner/bar own the review's entry)
-    if (cards.length) setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
+    const rest: BoardCard[] = [];
+    for (const card of cards) {
+      const door = drawerDoorForTask(card.taskType, card.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
+      if (door) { openQueryDrawer(door); return; }
+      rest.push(card);
+    }
+    if (rest.length) setFlow({ items: rest.map((card) => ({ kind: "card", card })) });
   };
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
@@ -652,15 +652,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
-  // "Opened" reads the only stored review record — the completion sentinel finishReview
-  // writes — and composes into the frame-P3 seen flag (a completed week never re-shows the
-  // banner, on any device).
-  const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
-  const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   /* ⚠️ THE ONE DERIVATION (tasks-pages P2): assemble → groups → sweeps → columns, through the
      SAME assembleBoardColumns every Tasks surface and the sidebar badge use — identically scoped,
      so no two counts can disagree again. save-and-today P1's in-flight hide rides the input
-     (hiddenUserTaskId); the Sunday CARD's mutedTaskRules dep is unchanged. */
+     (hiddenUserTaskId). */
   const assembled = useMemo(
     () => assembleBoardColumns({
       tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now,
@@ -771,8 +766,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
-  // ── Phase 4: search + filters compose AND-wise over BOTH views. The review entry card is
-  // furniture — it renders only while nothing is filtered/searched (it would dilute matches).
+  // ── Phase 4: search + filters compose AND-wise over BOTH views.
   const sctx = { queries, agents, manuscripts };
   /* (`active` and `anyVisible` are DELETED with the body branch they served — Phase 4. They
      answered "is a narrowing hiding everything" over four `v*` sets built with a filter model the
@@ -1297,37 +1291,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // driven by the FocusedSession through this ONE lifted view-model (the hero stays a real
   // stacked flow — nothing absolutely positioned over the board).
   const [heroSession, setHeroSession] = useState<HeroSession>({ clearing: false, slot: null });
-  // frame P3 — the review's AFTERLIFE: opening or dismissing the banner collapses it for the
-  // week (per-week sa. prefs; recon found no existing seen/dismissed flags — the completion
-  // sentinel is the one stored "opened" record, and it composes into seen below). The rail's
-  // REVIEW row is then the sole entry point; a new week resets both.
-  const [reviewSeenWk, setReviewSeenWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewSeen"); } catch { return null; } });
-  const [reviewDismissedWk, setReviewDismissedWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewDismissed"); } catch { return null; } });
-  const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;
-  const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;
-  const markReviewSeen = () => {
-    if (!reviewWin) return;
-    setReviewSeenWk(reviewWin.key);
-    try { localStorage.setItem("sa.todoReviewSeen", reviewWin.key); } catch { /* private mode */ }
-  };
-  const dismissReviewWeek = () => {
-    if (!reviewWin) return;
-    setReviewDismissedWk(reviewWin.key);
-    try { localStorage.setItem("sa.todoReviewDismissed", reviewWin.key); } catch { /* private mode */ }
-  };
-  const openReview = () => { markReviewSeen(); openSundayReview(); };
-  // THE BRIEFING'S FIGURES — derived from the existing review data, never hardcoded. FOCUSED
-  // has no source anywhere in the app (no time is recorded), so that column always drops; a
-  // zero cleared/replies drops its column too rather than showing a nought.
-  const briefStats = useMemo(
-    () => (reviewWin ? weekReviewStats({ activities, queries, agents }, reviewWin) : null),
-    [activities, queries, agents, reviewWin?.key], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-  const briefCleared = reviewWin ? briefingCleared(userTasks, reviewWin) : 0;
-  const briefReplies = briefStats ? briefStats.back.length : 0;
-  const briefFigures = briefingFigures(briefCleared, briefReplies);
-  const briefNarrative = briefStats ? briefingNarrative(briefStats) : null;
-
   /* (The corner pop-up and ALL its state went in workspace P3 — todayActive / todayShown /
      todayLeaving / todayMin, the slide effect and the help-FAB clearance. Today is a route now,
      and the only reason any of this existed was to float a copy of it over this page.) */
@@ -2022,40 +1985,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               ) : null}
             </>
           )}
-          {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
-              SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
-              filter row, rendering the review briefing and nothing else.
-
-              THE COLLAPSE LAW: dismissed, or no fresh review, and the slot renders NOTHING — no
-              node, no margin, no reserved height, so the filter row moves straight up under the
-              hero. That is why the whole block sits inside this one condition and why the slot
-              owns no wrapper of its own. Dismissal is already per-review-period
-              (sa.todoReviewDismissed keyed on reviewWin.key), so a new review brings it back. */}
-          {/**
-            * ⚠️ THE WEEKLY REVIEW BANNER IS UNMOUNTED, NOT DELETED — it comes back deliberately.
-            *
-            * The `.tdb-brief` card rendered here: the review masthead art, `↺ LAST WEEK IN REVIEW`,
-            * the headline, the narrative, the figures, `Read the review` and the ✕. Every one of
-            * its inputs is still computed a few hundred lines up and still correct — `reviewWin`,
-            * `reviewSeen`, `reviewDismissed`, `briefCleared`, `briefReplies`, `briefNarrative`,
-            * `briefFigures`, `markReviewSeen`, `dismissReviewWeek`, `openReview` — and
-            * `openSundayReview` still opens the review with the live Urgent cards as its seed.
-            *
-            * ⚠️ SO NOTHING HERE IS ORPHANED BY THIS COMMIT, and that is deliberate rather than
-            * untidy: a derivation deleted now is one that has to be rebuilt from the git history
-            * when the banner returns, and the reasoning that produced `briefingHeadline`'s copy is
-            * not recoverable from its call site. Restoring the card is putting this block back.
-            *
-            * ⚠️ WHAT THIS CHANGES BESIDES THE BANNER, stated because it is not obvious: the tool
-            * row's `.tdb-revlink` renders only when `reviewSeen || reviewDismissed`, and the ONLY
-            * thing that set `reviewSeen` was this card being opened or dismissed. With the card
-            * gone, a fresh account never sets either — so the link does not appear, and the weekly
-            * review has no entry point on this page at all. An account whose localStorage already
-            * carries `sa.todoReviewSeen` for the current week WILL still see the link. That is a
-            * consequence of unmounting, not a second decision, and it is reported rather than
-            * worked around.
-            */}
-
           {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
               view toggle fold into the header's tool row, which is now the page's single
               instrument — one place to look for anything that changes what the list shows. Two
@@ -2368,12 +2297,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} quickDone={quickDone} />}
+      {flow && <HousekeepingSweep items={flow.items} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} quickDone={quickDone} />}
       {/* ⚠️ FocusedSession IS RETIRED (board+dock P4). It was a SECOND work surface, and two of
           them would have had to agree about what "done" means — the first time they disagreed,
           one would have been silently wrong. The dock is the one surface, and "Focused session"
           and Today's "Work the list" are entrances to it rather than to anything of their own.
-          FocusFlow survives as the per-kind flow engine, which is what it was always good at. */}
+          HousekeepingSweep survives for the grouped housekeeping batch and the non-query cards;
+          every query task finishes in the query drawer. */}
     </div>
   );
 
@@ -2515,12 +2445,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
               Begin focused session
             </button>
-            {reviewWin && (reviewSeen || reviewDismissed) && (
-              <button type="button" className={`tdb-revlink${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-                <RewindGlyph />
-                Last week in review
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -3037,8 +2961,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* (`commitSweep` is deleted — popup round, Phase 2. It was the page's copy of the agent-gaps
      COHORT write, built for a pane sweep that was never drawn, and it had no caller. The grouped
-     housekeeping batch still lives in `FocusFlow`, which the Calendar and the Sunday review both
-     open, so nothing a writer can reach has changed.) */
+     housekeeping batch lives in `HousekeepingSweep`, so nothing a writer can reach has changed.) */
 
 
   /**
@@ -3665,19 +3588,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      own (the house rule on orphans). */
   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,
   // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)
-
-  // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
-  //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
-  // MUST be a hoisted `function` (not a post-return `const`): the banner/bar JSX calls it from
-  // within the component's return — a `const` here sits in the TDZ for the whole render (the
-  // demotion bug's lesson).
-  function openSundayReview() {
-    // board.do is review-free by construction (P1) — no filter needed
-    setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
-  }
-
-
-
 
 };
 

@@ -14,16 +14,13 @@
  * copy asserts what the code does today and a writer with three books beside a working switcher
  * must not be told more are coming soon.
  *
- * ⚠️ NOTHING HERE CHANGES A QUERY INLINE (L4/D13). An owed row's button opens TaskModal with the
- * query's own BOARD CARD — the same card the dashboard's rows open, found in the same assembled
- * board — and only the modal's commit writes, through DashTaskCommit → useTaskCommit, the app's
- * one writing path. No card on the board (snoozed included) means the button routes to the Query
- * Centre rather than inventing a card by hand.
+ * ⚠️ NOTHING HERE CHANGES A QUERY INLINE (L4/D13). An owed row's button opens the query drawer's
+ * "I've sent it" journey for that query, and only the drawer writes.
  *
  * ⚠️ EVERY STATUS GLYPH IS `StatusDot` (L5). The mock's `.dot` rings are stand-ins and none is
  * ported.
  */
-import React, { Suspense, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { packagesUnlocked } from "../../../lib/entitlements";
 import { ComponentType, ManuscriptStatus, QueryStatus, UserPlan } from "../../../types";
@@ -34,24 +31,13 @@ import {
   packageUsageCounts, packagesInUse, queryingSince, scopedManuscript, versionUsage,
 } from "../../../lib/manuscriptSummary";
 import { bookVersionsOf, bookVersionById } from "../../../lib/bookVersions";
-import { assembleBoardColumns } from "../../../lib/todoColumns";
-import { todoRows, nudgeCount, replyWindow } from "../../../lib/dashTodo";
-import { listRowInputs } from "../../../lib/taskCardFacts";
-import { modalJourney, modalWhen } from "../../../lib/taskModal";
-import { localYMD } from "../../../lib/shellSidebar";
-import type { BoardCard } from "../../../lib/todoBoard";
-import { blankDraft, draftToValues, type RowDraft } from "../../dashboard/TodoRowEditor";
 import { StatusDot } from "../../StatusDot";
-import { DashTaskCommit, type CommitRequest } from "../../dashboard/DashTaskCommit";
-import { useTodoToast } from "../../todo/useTodoToast";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { MaterialModal } from "../../packages/MaterialModal";
 import { applyMaterialDraft } from "./msv12Materials";
-import type { TaskModalValues } from "../../task/TaskModal";
-import type { SendMethod } from "../../../lib/paneJourney";
 import {
   CountCluster, MaterialsSections, OtherSection, OwedList, PackagesSection, SectionH,
-  VersionsSection, fmtDay, OWED_SEND_TASK_TYPES,
+  VersionsSection, fmtDay,
 } from "./Msv12Sections";
 import type { PkgCardModel } from "./Msv12Sections";
 import { CompsRail } from "./Msv12Rail";
@@ -60,9 +46,6 @@ import { Msv12Empty } from "./Msv12Empty";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import "./msv12.css";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
-import { DRAWER_LIVE } from "../../../lib/queryActions/entry";
-
-const TaskModal = React.lazy(() => import("../../task/TaskModal").then((m) => ({ default: m.TaskModal })));
 
 /** The shell's shared scope key — the sidebar switcher writes it; this page only reads. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -75,8 +58,8 @@ export interface ManuscriptPageProps {
 
 export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, openId = null }) => {
   const {
-    currentUser, manuscripts, versions, packages, agents, queries, activities,
-    userTasks, tasks, taskFlags, updateManuscript, addVersion, updateVersion,
+    currentUser, manuscripts, versions, packages, agents, queries,
+    updateManuscript, addVersion, updateVersion,
   } = useScriptAllyDb();
 
   const stored = useMemo(() => {
@@ -113,93 +96,11 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
     return p?.bookVersionId ? bookVersionById(bookVersions, p.bookVersionId)?.name ?? null : null;
   };
 
-  /* ══ the owed rows' modal host — the dashboard's own machinery, scoped ══════════════════════ */
+  /* ══ the owed rows' door — the query drawer's "I've sent it" journey ══════════════════════ */
 
-  const now = useMemo(() => new Date(), []);
-  const cols = useMemo(() => assembleBoardColumns({
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
-    now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
-  }).cols, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
-  const taskData = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities }),
-    [queries, agents, manuscripts, userTasks, activities]);
-
-  /** The query's own board card — live first, then snoozed; never hand-built. */
-  const cardForOwed = (row: { query: Query; kind: "partial" | "full" }): BoardCard | null => {
-    const want = OWED_SEND_TASK_TYPES[row.kind];
-    const pool = [...cols.todo, ...cols.today, ...cols.snoozed];
-    return pool.find((c) => c.relatedRecordId === row.query.id && c.taskType === want)
-      ?? pool.find((c) => c.relatedRecordId === row.query.id) ?? null;
-  };
-
-  const [modalCard, setModalCard] = useState<BoardCard | null>(null);
-  const [warn, setWarn] = useState<string | null>(null);
-  const [request, setRequest] = useState<CommitRequest | null>(null);
-  const seq = useRef(0);
-  const { flash } = useTodoToast();
-
+  /* Query actions v1 (K1) — "I've sent it" finishes in the query drawer. */
   const openSend = (row: { query: Query; kind: "partial" | "full" }) => {
-    /* Query actions v1 (K1) — "I've sent it" finishes in the query drawer once that journey is live. */
-    if (DRAWER_LIVE.sent) { openQueryDrawer({ mode: "sent", queryId: row.query.id }); return; }
-    const c = cardForOwed(row);
-    if (!c || !modalJourney(c)) {
-      /* the board is not raising this card (muted, or mid-write) — the Query Centre hosts the
-         full flow rather than this page inventing a card (see the header) */
-      onNavigate("queries");
-      return;
-    }
-    setWarn(null);
-    setModalCard(c);
-  };
-
-  const modalFacts = useMemo(() => {
-    const c = modalCard;
-    const j = c ? modalJourney(c) : null;
-    if (!c || !j) {
-      return { journey: "sent" as const, title: { pre: "", who: "", post: "" }, when: "",
-        agent: { name: "", initials: "", meta: "" }, partial: false, materials: "",
-        expected: null, remind: null, method: "Email" as SendMethod };
-    }
-    const row = todoRows({ cards: [c], data: taskData, isUrgent: () => false })[0];
-    const inputs = listRowInputs(c, taskData);
-    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-    const agent = agents.find((a) => a.id === (q?.agentId ?? c.agentId));
-    const win = replyWindow((q?.status as QueryStatus) ?? null, agent?.responseTimeWeeks);
-    const day = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
-    return {
-      journey: j,
-      title: row.title,
-      when: modalWhen(j, inputs.anchorDate, row.days, nudgeCount(row.queryId, activities)),
-      agent: {
-        name: c.who || "the agent",
-        initials: row.initials,
-        meta: [inputs.agency, win.stated ? `${Math.round(win.days / 7)}-week window` : null].filter(Boolean).join(" · "),
-      },
-      partial: inputs.partial,
-      materials: inputs.ask || (inputs.partial ? "Partial" : "Full manuscript"),
-      expected: win.days ? { date: day(win.days), hint: win.stated ? `Their ${Math.round(win.days / 7)}-week window` : "House estimate" } : null,
-      remind: win.days ? { date: day(win.days + 14), hint: "2 weeks after" } : null,
-      method: (q?.sendMethod as SendMethod) ?? "Email",
-    };
-  }, [modalCard, taskData, queries, agents, activities]);
-
-  /** The modal's answer, routed to the write that names it — the dashboard's own mapping. */
-  const commitFromModal = (c: BoardCard, v: TaskModalValues) => {
-    seq.current += 1;
-    const id = seq.current;
-    const allow = !!warn;
-    setModalCard(null); setWarn(null);
-    if (v.answer.write === "close") { setRequest({ id, kind: "close", card: c, note: v.note || undefined }); return; }
-    if (v.answer.write === "mute") { setRequest({ id, kind: "mute", card: c }); return; }
-    if (v.answer.write === "commit" && modalJourney(c) === "quiet") { setRequest({ id, kind: "nudge", card: c }); return; }
-    const mode = modalJourney(c) === "nudge" ? "nudge" as const : "sent" as const;
-    const base: RowDraft = blankDraft(todoRows({ cards: [c], data: taskData, isUrgent: () => false })[0]);
-    const draft: RowDraft = {
-      ...base,
-      materials: v.materials ? [v.materials] : base.materials,
-      also: v.also, sentDate: v.when, method: v.method,
-      expected: v.expected, remind: v.remind, note: v.note,
-    };
-    setRequest({ id, kind: "values", card: c, values: draftToValues(draft, mode), allowDuplicate: allow });
+    openQueryDrawer({ mode: "sent", queryId: row.query.id });
   };
 
   /* ══ the page's own dialogs ═════════════════════════════════════════════════════════════════ */
@@ -399,30 +300,6 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
           }}
         />
       ) : null}
-      {modalCard ? (
-        <Suspense fallback={null}>
-          <TaskModal
-            facts={modalFacts}
-            order={null}
-            warn={warn}
-            onOpenQuery={() => { setModalCard(null); onNavigate("queries"); }}
-            onClose={() => { setModalCard(null); setWarn(null); }}
-            onCommit={(v) => commitFromModal(modalCard, v)}
-          />
-        </Suspense>
-      ) : null}
-      <DashTaskCommit
-        request={request}
-        onLogged={() => { /* the commit's own toast carries the receipt and the undo */ }}
-        onDuplicate={(_key, prompt) => {
-          /* the guard declined and hands the question up — reopen the modal with the banner */
-          setWarn(prompt);
-          const c = request && "card" in request ? request.card : null;
-          if (c) setModalCard(c);
-        }}
-        onFailed={(_key, message) => flash(message)}
-        onNeedsPage={() => onNavigate("queries")}
-      />
     </>,
   );
 };

@@ -6778,8 +6778,8 @@ export const Queries: React.FC<{
               expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
               /**
                * ⚠️ THE TRACKING TAB IS THE SHARED TIMELINE — the same `QueryTimeline` the record
-               * view rendered and FocusFlow condenses, never a drawer-local imitation. The ⋯ is ON
-               * here (onEditEntry/onDeleteEntry) and off in FocusFlow, which renders the bare rows.
+               * view rendered, never a drawer-local imitation. The ⋯ is ON here
+               * (onEditEntry/onDeleteEntry).
                * §2 wires the send-rung extras; this mount is the chassis.
                */
               tracking={qpTracking}

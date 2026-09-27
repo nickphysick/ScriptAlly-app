@@ -159,7 +159,7 @@
 .qpn-track { margin-top: 18px; --tl-title: 19px; }
 /* ⚠️ THE 19px IS THE DRAWER'S RHYTHM FOR THE SHARED RENDERER — the ref draws event titles at 19
    where the retired record view set the :root 16. A token override at the use site: TimelineRows
-   is untouched, FocusFlow's condensed copy keeps the :root value, and retuning the drawer is one
+   is untouched, every other mount keeps the :root value, and retuning the drawer is one
    line here rather than an edit to a renderer three surfaces share. */
 .qpn-chip { cursor: default; }
 .qpn-hint {

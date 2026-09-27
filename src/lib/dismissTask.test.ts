@@ -93,7 +93,7 @@ describe("the nearest-neighbour call shape is gone from the app", () => {
    */
   it("no caller expresses an undo as a zero-day snooze", () => {
     const files = ["../components/Queries.tsx", "../components/Dashboard.tsx", "../components/TasksPopover.tsx",
-      "../components/TasksDropdown.tsx", "../components/todo/ToDoPage.tsx", "../components/todo/FocusFlow.tsx"];
+      "../components/TasksDropdown.tsx", "../components/todo/ToDoPage.tsx", "../components/todo/HousekeepingSweep.tsx"];
     for (const f of files) {
       const src = stripComments(readFileSync(new URL(f, import.meta.url), "utf8"));
       expect(src, `${f} undoes a dismissal with a zero-day snooze`).not.toMatch(/"fixed snooze",\s*0\s*\)/);

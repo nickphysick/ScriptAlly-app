@@ -115,8 +115,8 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
       }
       /* ⚠️ THE INVERSE CLEARS THE STAMP TOO. Undoing a completion used to write `{ done: false }`
          alone, leaving `completedAt` on a task that is not complete — an incoherent record, and one
-         that reads perfectly: `briefingCleared` counts the weekly review's cleared tasks by that
-         field, correctly, because it is the field that says when a thing was completed. Fixed in
+         that reads perfectly, because it is the field that says when a thing was completed (the
+         weekly review's `briefingCleared` counted by it, until the review was deleted). Fixed in
          the primitive rather than in the consumer, because four entrances reach this inverse and
          the next reader to trust the stamp would meet the same trap. */
       const undo = () => updateUserTask(c.userTaskId!, { done: false, completedAt: null });

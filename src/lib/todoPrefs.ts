@@ -25,8 +25,6 @@ export interface TodoPrefs {
      and nothing reads is dormant code, and the revert-shaped alternative is what P6 taught. */
   /** At midnight, undone work moves to today (the calendar's roll-forward markers). */
   rollForward: boolean;
-  /** Mondays, the weekly review briefing above the list. */
-  weeklyBriefing: boolean;
   /**
    * ⚠️ WHICH TASK TYPES ARE GENERATED AT ALL — the sheet's half of the line the funnel draws the
    * other side of. Generation decides what EXISTS; the funnel decides what is SHOWN. A type turned
@@ -61,7 +59,6 @@ export const TASK_TYPE_GLOSS: Record<TaskTypeKey, string> = {
 export const TODO_PREFS_DEFAULT: TodoPrefs = {
   staleMonths: 12,
   rollForward: true,
-  weeklyBriefing: true,
   types: { send: true, decide: true, chase: true, close: true, fix: true },
 };
 
@@ -77,7 +74,6 @@ export function todoPrefs(stored: Partial<TodoPrefs> | undefined | null): TodoPr
   return {
     staleMonths,
     rollForward: typeof s.rollForward === "boolean" ? s.rollForward : TODO_PREFS_DEFAULT.rollForward,
-    weeklyBriefing: typeof s.weeklyBriefing === "boolean" ? s.weeklyBriefing : TODO_PREFS_DEFAULT.weeklyBriefing,
     /* ⚠️ TOTAL, AND `decide` IS FORCED. A stored map from a future build cannot switch a type this
        one does not know about, and cannot turn offers off — the one value the sheet refuses to
        take an instruction on. Unknown keys are dropped; missing ones default to on. */
@@ -93,7 +89,6 @@ export function todoPrefs(stored: Partial<TodoPrefs> | undefined | null): TodoPr
 export const TODO_PREF_ROWS = [
   { key: "staleMonths" as const, title: "Stale threshold", sub: "When a silent query becomes housekeeping" },
   { key: "rollForward" as const, title: "Roll unfinished work forward", sub: "At midnight, undone moves to today" },
-  { key: "weeklyBriefing" as const, title: "Weekly review briefing", sub: "Mondays, above the list" },
 ];
 
 /** "12 months" · "3 months" — the stale row's own value display. */

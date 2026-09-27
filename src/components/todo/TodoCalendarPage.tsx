@@ -89,9 +89,8 @@ import {
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
-/* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
-   from the To-do world (`FocusFlow.tsx:33`), so the precedent and the shape are both established;
-   building a calendar-local conversation would be the second implementation this repo forbids. */
+/* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. Building a calendar-local
+   conversation would be the second implementation this repo forbids. */
 import { StatusDot } from "../StatusDot";
 import { formatQueryMaterial } from "../../lib/materials";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";

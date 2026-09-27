@@ -98,8 +98,8 @@ describe("L4 · the owed row's click path writes nothing (source half)", () => {
   const secSrc = strip(readFileSync(join(root, "Msv12Sections.tsx"), "utf8"));
 
   it("no status writer is named anywhere in the page or its sections", () => {
-    /* the writers a shortcut would reach for — the modal's commit path (DashTaskCommit →
-       useTaskCommit) is the ONLY route, and it is declarative, not a call the row can make */
+    /* the writers a shortcut would reach for — the query drawer is the ONLY route, opened through
+       `openQueryDrawer`, and it is declarative, not a call the row can make */
     for (const src of [pageSrc, secSrc]) {
       expect(src).not.toMatch(/\bupdateQueryStatus\s*\(/);
       expect(src).not.toMatch(/\brecordMaterialsSent\b/);
@@ -108,13 +108,13 @@ describe("L4 · the owed row's click path writes nothing (source half)", () => {
     }
   });
 
-  it("the send button's handler opens the modal host and nothing else", () => {
-    /* the owed button's one job: hand its row to `onSend`; the page's `openSend` only sets the
-       modal card (or routes to the Query Centre when the board raises no card) */
+  it("the send button's handler opens the query drawer and nothing else", () => {
+    /* the owed button's one job: hand its row to `onSend`; the page's `openSend` only opens the
+       drawer's "I've sent it" journey for that query (TaskModal is deleted, 27 Sep) */
     expect(secSrc).toContain('data-msv12="owed-send" onClick={() => onSend(row)}');
-    expect(pageSrc).toContain("setModalCard(c)");
-    expect(pageSrc, "openSend must not raise a CommitRequest — only commitFromModal does")
-      .not.toMatch(/openSend[\s\S]{0,400}setRequest\(/);
+    expect(pageSrc).toContain('openQueryDrawer({ mode: "sent", queryId: row.query.id })');
+    expect(pageSrc, "no modal host survives").not.toMatch(/TaskModal|setModalCard|commitFromModal/);
+    expect(pageSrc, "openSend raises no CommitRequest").not.toMatch(/setRequest\(|DashTaskCommit/);
   });
 });
 

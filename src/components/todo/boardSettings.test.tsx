@@ -97,12 +97,12 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
   });
 
   it("a stored value inside the bounds is honoured", () => {
-    expect(todoPrefs({ staleMonths: 6, rollForward: false, weeklyBriefing: false }))
+    expect(todoPrefs({ staleMonths: 6, rollForward: false }))
       /* ⚠️ THE MAP GAINED THE PER-TYPE SWITCHES (frame2 Phase 5), and the reader is still TOTAL —
          which is the claim this case makes. A stored map that says nothing about types gets all
          five on, and `decide` is forced on whatever it says, because an offer is not something a
          setting may hide. */
-      .toEqual({ staleMonths: 6, rollForward: false, weeklyBriefing: false,
+      .toEqual({ staleMonths: 6, rollForward: false,
                  types: { send: true, decide: true, chase: true, close: true, fix: true } });
     expect(STALE_MONTHS_CHOICES).toContain(6);
     expect(staleLabel(1)).toBe("1 month");
@@ -110,8 +110,9 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
   });
 
   it("⚠️ THE DEFAULTS ARE THE BEHAVIOUR THE APP ALREADY HAD — a setting's arrival changes nothing", () => {
-    expect(TODO_PREFS_DEFAULT.rollForward).toBe(true);   // both behaviours shipped ON
-    expect(TODO_PREFS_DEFAULT.weeklyBriefing).toBe(true);
+    expect(TODO_PREFS_DEFAULT.rollForward).toBe(true);   // shipped ON
+    /* `weeklyBriefing` went with the weekly review (27 Sep) — a stored one reads as nothing */
+    expect(todoPrefs({ weeklyBriefing: false } as Partial<typeof TODO_PREFS_DEFAULT>)).toEqual(TODO_PREFS_DEFAULT);
   });
 
   /* ⚠️ `TODO_PREF_ROWS` HAS NO READER AND THIS LOCK HAD BEEN ASSERTING AGAINST A DEAD COMPONENT
@@ -119,8 +120,8 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
      claim is not "the sheet renders these titles" but "the page owns all four fields". The data
      survives unread; it is listed in the report rather than deleted, because whether the page
      should read it is a copy decision rather than a cleanup. */
-  it("all four behaviours have a home, and it is the settings page", () => {
-    for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
+  it("all three behaviours have a home, and it is the settings page", () => {
+    for (const key of ["rollForward", "staleMonths", "types"]) {
       expect(tasksPage, key).toContain(key);
     }
   });

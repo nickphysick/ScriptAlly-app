@@ -15,7 +15,7 @@ describe("TASK_SETTING_ROWS — the approved v2 rows (Offers the only locked row
   });
   it("the toggleable rows map to engine keys — Your turn to send in THE WORK ITSELF; no reply-windows row", () => {
     const keyed = TASK_SETTING_ROWS.filter((r) => r.key).map((r) => r.key);
-    expect(keyed).toEqual(["send", "nudge_overdue", "no_response_close", "dq_materials", "dq_mswl", "sunday_review"]);
+    expect(keyed).toEqual(["send", "nudge_overdue", "no_response_close", "dq_materials", "dq_mswl"]);
     expect(TASK_SETTING_ROWS.find((r) => r.key === "send")!.group).toBe("urgent");
     expect(TASK_SETTING_ROWS.find((r) => r.key === "no_response_close")!.group).toBe("urgent"); // Stale in THE WORK ITSELF
     expect(keyed).not.toContain("dq_responseTime"); // the reply-windows row is dropped entirely

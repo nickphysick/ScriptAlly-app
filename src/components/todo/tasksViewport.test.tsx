@@ -656,7 +656,7 @@ describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () 
      is dropped rather than repointed: what it protected (nothing stranded when the sheet retired)
      is now protected by `boardSettings`'s ledger group, against the surface that renders it. */
   it("every task preference has a home on the page", () => {
-    for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
+    for (const key of ["rollForward", "staleMonths", "types"]) {
       expect(acct, key).toContain(key);
     }
     expect(acct, "hiding is the board's now, all three kinds together").not.toContain("mutedRuleRows");
@@ -1576,7 +1576,9 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
        page's own toolbar trigger now, so the anchors are the toolbar row's. Both anchors are
        asserted before slicing — a missing one silently widens the slice to the rest of the file,
        which is the fault `sliceBetween` exists for. */
-    const fn = sliceBetween(board, 'className="tdb-qtool"', "THE BRIEFING SLOT");
+    /* the end anchor was the briefing slot's comment until the weekly review was deleted (27 Sep);
+       the control-bar note is what follows the tool row now */
+    const fn = sliceBetween(board, 'className="tdb-qtool"', "THE STANDALONE CONTROL BAR IS GONE");
     /* ⚠️ RE-POINTED AGAIN (drawer round, Phase 6), AND THE CLAIM SHARPENED WITH IT. The sort-filter
        contract's counts are CONDITIONAL — "what this choice would leave, given the others" — so
        the one derivation both readers share is now `viewLeaving`: the view re-run with the

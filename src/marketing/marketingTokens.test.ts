@@ -1178,7 +1178,6 @@ describe("the feature rows set their own type, and nothing else uses its familie
         "components/dashboard/queryCard.css",
         "components/manuscripts/v12/msv12.css",
         "components/shell/primitives.css",
-        "components/task/taskModal.css",
         "components/todo/taskPane.css",
       ]);
     const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));

@@ -124,9 +124,10 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).not.toContain("function renderTools");
   });
 
-  it("the briefing seat still renders above the groups — it is what the pill pointed at", () => {
-    expect(chrome).toContain("tdb-brief");
-    expect(chrome).toContain("LAST WEEK IN REVIEW");
+  /* the briefing seat went with the weekly review (27 Sep) — deleted, not unmounted */
+  it("the briefing seat is gone with the weekly review", () => {
+    expect(chrome).not.toContain("tdb-brief");
+    expect(chrome).not.toContain("LAST WEEK IN REVIEW");
   });
 });
 

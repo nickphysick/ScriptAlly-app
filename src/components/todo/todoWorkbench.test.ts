@@ -221,12 +221,12 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
 });
 
 describe("frame P4 — sweep", () => {
-  it("the press primitives + the roundel are extinct; the tour's review stop targets the rail row", () => {
+  it("the press primitives + the roundel are extinct; the tour has no review stop", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).toContain('".tdb-revlink"'); // the workspace shell: the review link in the hero
+    /* the weekly review — and its tour stop on the hero's review link — is deleted (27 Sep) */
+    expect(tour).not.toContain("tdb-revlink");
     expect(tour).not.toContain("tdb-rvbox");
     expect(tour).not.toMatch(/["\s`]tdb-rvrow["\s`]/);
-    expect(tour).toContain("beneath Begin");
     expect(page).not.toContain("tdb-cta");
     expect(css).not.toContain("tdb-cta");
     expect(page).not.toContain("tdb-sic");
@@ -283,7 +283,7 @@ describe("toolbelt P3 — sweep", () => {
 describe("hero-pair P5 — sweep", () => {
   it("the toolbelt-era clothes are extinct: no stack gap, no cream chip fill, no mono pills, no dot, no fsb2", () => {
     expect(css).not.toContain(".tdb-fside"); // the floating filter rail is retired
-    expect(rule(".tdb-rvchip")).not.toContain("#f3e7da"); // cream lives on the ink primary's TEXT only
+    expect(css).not.toContain(".tdb-rvchip"); // the review chip went with the weekly review (27 Sep)
     expect(css).not.toContain(".tdb-fpill"); // panel-final P4: the filter ROW-LIST is fully extinct
     for (const dead of ["tdb-rvnew", "tdb-fsb2", "renderToolbelt"]) {
       expect(page).not.toContain(dead);
@@ -333,7 +333,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
   it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
-    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
     const ask = readFileSync(join(here, "ConfirmAsk.tsx"), "utf8");
     for (const f of [page, flow]) {
       expect(f).not.toContain("window.prompt(");
@@ -360,7 +360,9 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
        like this is exactly the thing that should have to be told — and it was, on the same commit
        that added the guard, which is the whole reason it is counted rather than described. */
     expect((scope.match(/await confirmAsk\(/g) ?? []).length).toBe(4); // quick-✓ duplicate · the pane committer's duplicate · composer discard · delete-note/task confirm
-    expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
+    /* the takeover's staged-send and quick-send duplicate guards went with its query paths to the
+       query drawer (27 Sep); the sweep keeps the exit guard alone */
+    expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(1); // exit guard
     /* ⚠️ THE CLAIM IS "ABOVE EVERYTHING IT BLOCKS", NOT A NUMBER (v30, Phase 4). This pinned 90 and
        went red when the drawer moved to 9001 and the ask had to follow it — a lock failing on the
        edit that kept its own law true. It asserts the RELATION now: the confirm outranks the toast
@@ -377,28 +379,16 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
   });
 });
 
-describe("hero-pair P2 — the review is an underlined text link (the shell's .revlink)", () => {
-  it("underlined text, quiet ink, hover darkens text + rule together", () => {
-    const c = rule(".tdb-revlink");
-    expect(c).toContain("border-bottom: 1px solid #c9bcae");
-    expect(c).toContain("color: #5d5245");
-    expect(c).toContain("font-size: 11px");
-    expect(rule(".tdb-revlink:hover")).toContain("color: #2a1a13");
-    expect(rule(".tdb-revlink:hover")).toContain("border-color: #2a1a13");
-  });
-  it("the ↺ rewind (TypeGlyph grammar, 12px) leads the label; the dot is GONE", () => {
-    expect(page).toContain("const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (");
-    expect(page).toContain('<path d="M3.5 8 A 9.5 9.5 0 1 1 3 13.5" />');
-    expect(page).toContain('<path d="M3.5 3.5 v4.5 h4.5" />');
-    expect(page).toContain("<RewindGlyph />");
+/* the review link, its ↺ rewind glyph and its seen/dismissed flags went with the weekly review
+   (27 Sep) — deleted, not dormant */
+describe("hero-pair P2 — the review link is gone with the weekly review", () => {
+  it("no review link, no rewind glyph, no seen flags", () => {
+    expect(css).not.toContain(".tdb-revlink");
+    expect(page).not.toContain("RewindGlyph");
+    expect(page).not.toContain("tdb-revlink");
+    expect(page).not.toContain("reviewSeen");
     expect(page).not.toContain("tdb-rvnew");
     expect(css).not.toContain("tdb-rvnew");
-  });
-  it("unread by WEIGHT: unopened = full ink; opened softens glyph + label to muted; the same flags; weekly reset", () => {
-    expect(page).toContain("className={`tdb-revlink${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // the shell: the review link in the hero
-    expect(css).toContain(".tdb-revlink.seen { color: #8a7d6e; }"); // opened softens it
-    expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
-    expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week resets
   });
 });
 
@@ -411,12 +401,8 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
        assigned and never read, so it asserted nothing even before its anchor died) */
     const heroFn = sliceBetween(page, "function renderHero", "function renderComposer");
     expect(heroFn).toContain('className="tdb-btnp tdb-herobegin"');
-    expect(heroFn).toContain("className={`tdb-revlink${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, ""));
-  });
-  it("the review link renders ONLY in its afterlife state; Begin stands alone otherwise", () => {
-    expect(page).toContain("{reviewWin && (reviewSeen || reviewDismissed) && (");
-    expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
-    expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
+    /* the review link that stacked beneath Begin went with the weekly review (27 Sep) */
+    expect(heroFn).not.toContain("tdb-revlink");
   });
   it("the FILTER chips are ONE source, mounted once on the control line — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -615,13 +601,9 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     /* re-anchored on the list itself — `TplZone` went with the retired rail wrapper */
     const zone = page.indexOf("<TaskList");
     expect(centre).toBeGreaterThan(0);
-    /* ⚠️ THE BRIEFING SIBLING IS UNMOUNTED, so the order this case protects is now centre → body.
-       Its SLOT is still the first thing inside `.tdb-centre` — the unmount comment sits exactly
-       where the card did — so restoring the card restores the three-sibling order without moving
-       anything else. Asserted against the comment rather than deleted, because "the briefing comes
-       first inside the centre" is the fact worth keeping. */
-    const slot = page.indexOf("THE WEEKLY REVIEW BANNER IS UNMOUNTED");
-    expect(slot).toBeGreaterThan(centre);
+    /* ⚠️ THE BRIEFING SIBLING IS DELETED with the weekly review (27 Sep), so the order this case
+       protects is centre → body, and nothing sits in the briefing's old seat. */
+    expect(page).not.toContain("THE WEEKLY REVIEW BANNER");
     /* ⚠️ THE THIRD SIBLING IS THE ZONE ITSELF NOW — `.tdb-board` wrapped it and is extinct (scroll
        fix, 9 Aug). The ORDER is what this case protects and it is unchanged: centre → briefing →
        the body. (The zone renders from `renderList`, below the return, so its position in the
@@ -999,7 +981,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
     expect(rule(".tdb-band.hk")).toContain("var(--lat-1)");
     expect(css).not.toContain(".tdb-secrule.hk"); // the tightening P1: the family stub is retired (the dot column carries family)
-    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
     expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
   });
   /**

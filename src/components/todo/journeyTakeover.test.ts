@@ -2,8 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The journey takeover — one chrome, six journeys, and the calendar (journeys pack, Phase 4;
- * ref design-refs/todo-workspace-v14.html).
+ * The journey takeover — one chrome, and the calendar (journeys pack, Phase 4; ref
+ * design-refs/todo-workspace-v14.html). ⚠️ 27 Sep: the takeover is `HousekeepingSweep` now. Every
+ * journey that finishes a QUERY (send, resubmit, nudge, offer, stale close) moved to the query
+ * drawer and its locks went with it; the note, the agent-gap and the hand-off journeys remain.
  *
  * ⚠️ EVERY SOURCE LOCK HERE STRIPS COMMENTS FIRST. This codebase documents each retirement by
  * quoting what it retired, so a bare `toContain` over raw source finds the token it forbids inside
@@ -22,7 +24,7 @@ import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-/* ⚠️ IMPORTED FROM `lib/`, NOT FROM THE COMPONENT. `FocusFlow.tsx` pulls in `db.tsx`, which
+/* ⚠️ IMPORTED FROM `lib/`, NOT FROM THE COMPONENT. `HousekeepingSweep.tsx` pulls in `db.tsx`, which
    initialises Firebase at module load — so anything exported from there can only ever be asserted
    as a source string. These are pure, so they are tested by CALLING them. */
 import { cardJourney, CLOSE_REASONS, isSendTask } from "../../lib/todoJourneys";
@@ -36,7 +38,7 @@ const read = (p: string) => readFileSync(join(here, p), "utf8");
 /** ⚠️ COMMENTS OUT BEFORE ANY ASSERTION — see the header. */
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
-const flow = decls(read("FocusFlow.tsx"));
+const flow = decls(read("HousekeepingSweep.tsx"));
 const cal = decls(read("RecordingCalendar.tsx"));
 const css = decls(read("todo.css"));
 
@@ -97,20 +99,25 @@ describe("⚠️ EACH BUCKET OPENS ITS OWN JOURNEY", () => {
       "data_quality_poor", "exclusive_expiring", undefined]) {
       expect(isSendTask(t), `${t} is treated as a send`).toBe(false);
     }
-    const gate = "if (isSendTask(it.card.taskType)) return sendSheet(it.card);";
-    expect(flow.indexOf(gate), "the fall-through no longer gates on isSendTask").toBeGreaterThan(-1);
-    const after = flow.slice(flow.indexOf(gate));
-    expect(after).toContain('handoffSheet(it.card, bucket === "decide" ? "decide" : "fix")');
+    /* ⚠️ AND THE SWEEP HAS NO SEND SHEET AT ALL (27 Sep): a send opens the query drawer, so the
+       sweep's fall-through is the hand-off, reached after the note and agent-gap journeys */
+    expect(flow, "a send sheet came back to the sweep").not.toContain("sendSheet");
+    const dq = flow.indexOf('if (j === "dq") return dqSheet(it.card);');
+    const note = flow.indexOf('if (j === "note") return noteSheet(it.card);');
+    const hand = flow.indexOf("return handoffSheet(it.card);");
+    expect(dq, "the agent-gap journey is no longer routed").toBeGreaterThan(-1);
+    expect(note, "the note journey is no longer routed").toBeGreaterThan(dq);
+    expect(hand, "the fall-through is no longer the hand-off").toBeGreaterThan(note);
   });
 });
 
 /* ── Decide and Fix write nothing ───────────────────────────────────────────────────────────── */
 
 describe("⚠️ DECIDE AND FIX RECORD NOTHING, AND SAY SO", () => {
-  const anchor = 'function handoffSheet(c: BoardCard, kind: "decide" | "fix") {';
+  const anchor = "function handoffSheet(c: BoardCard) {";
   it("the hand-off journey calls no write path at all", () => {
     expect(flow.indexOf(anchor), "handoffSheet is gone or renamed").toBeGreaterThan(-1);
-    const body = sliceBetween(flow, anchor, "function nudgeSheet(c: BoardCard)");
+    const body = sliceBetween(flow, anchor, "function dqSheet(c: BoardCard)");
     expect(body.length, "the handoffSheet slice came out empty").toBeGreaterThan(200);
     /* every write this component can perform, named once */
     for (const w of ["recordMaterialsSent", "logNudge", "updateQueryStatus", "updateUserTask",
@@ -120,7 +127,7 @@ describe("⚠️ DECIDE AND FIX RECORD NOTHING, AND SAY SO", () => {
   });
 
   it("its commit verb navigates, and its hint says nothing is recorded", () => {
-    const body = sliceBetween(flow, anchor, "function nudgeSheet(c: BoardCard)");
+    const body = sliceBetween(flow, anchor, "function dqSheet(c: BoardCard)");
     expect(body).toContain('hint: "Nothing is recorded here."');
     expect(body).toContain("onCommit: () => requestExit(");
     expect(body).toContain("onNavigate(");
@@ -151,15 +158,15 @@ describe("⚠️ ESCAPE AND CANCEL ABANDON A PART-FILLED JOURNEY WITH NO WRITE",
   });
 
   /**
-   * ⚠️ ABANDONING MUST ALSO NOT LEAVE THE NEXT ITEM PRE-FILLED. `alsoText` was missing from
+   * ⚠️ ABANDONING MUST ALSO NOT LEAVE THE NEXT ITEM PRE-FILLED. `alsoText` was once missing from
    * `resetScratch`, so a note typed against one agent arrived filled in against the next — the
-   * quietest kind of wrong, because the form looked correct.
+   * quietest kind of wrong, because the form looked correct. The fields are the sweep's now.
    */
   it("every journey scratch field is cleared when the walk crosses an item", () => {
     const anchor = "const resetScratch = () => {";
     expect(flow.indexOf(anchor), "resetScratch is gone or renamed").toBeGreaterThan(-1);
     const body = flow.slice(flow.indexOf(anchor), flow.indexOf("};", flow.indexOf(anchor)));
-    for (const setter of ["setAlsoText(\"\")", "setWhenMode(\"today\")", "setCheckBack(", "setCloseReason(", "setCalAnchor(null)", "setMats({})"]) {
+    for (const setter of ["setRows({})", "setNoMeansNo({})", "setFound({})", "setNotFound(new Set())", "setAssistAt(null)", "setAssistMsg(null)", "setAssisting(false)", "setShowMuted(false)", "setNoteText(null)"]) {
       expect(body, `resetScratch does not clear ${setter}`).toContain(setter);
     }
   });
@@ -173,7 +180,7 @@ describe("⚠️ ESCAPE AND CANCEL ABANDON A PART-FILLED JOURNEY WITH NO WRITE",
     const at = flow.indexOf("}, [atReview, qi, step, items,");
     expect(at, "the content memo's dep array moved").toBeGreaterThan(-1);
     const deps = flow.slice(at, flow.indexOf("]", at));
-    for (const dep of ["alsoText", "whenMode", "checkBack", "closeReason", "calAnchor", "sentDate", "method", "mats"]) {
+    for (const dep of ["rows", "noMeansNo", "found", "notFound", "assistAt", "assisting", "assistMsg", "showMuted", "noteText", "staged"]) {
       expect(deps, `${dep} is read by a journey but missing from the memo deps`).toContain(dep);
     }
   });
@@ -204,10 +211,9 @@ describe("⚠️ THE SYNOPSIS ROW APPEARS ONLY ON A KNOWN ABSENCE, AND STATES WH
     expect(m.note).toBeNull();
   });
 
-  it("the journey reads the package STRUCTURALLY, never by parsing a display string", () => {
-    expect(flow).toContain("synopsisStateFor(");
-    expect(flow).toContain("isSlotFilled");
-    /* `details` is displayed, never parsed — no journey may read it to decide anything */
+  it("no sweep journey decides anything by parsing a display string", () => {
+    /* the send journey that read the package moved to the query drawer (27 Sep); what survives here
+       is the half that holds for every journey: `details` is displayed, never parsed */
     expect(flow).not.toMatch(/\.details\s*\.(includes|match|indexOf|split)/);
   });
 });
@@ -316,9 +322,9 @@ describe("⚠️ RecordingCalendar NAMES A DATE INSIDE A RANGE, AND ASSUMES NOTH
     expect(css).not.toMatch(/\.cal-d\.on \{[^}]*--burg/);
   });
 
-  it("the anchor relabels itself to the chosen date and stays selected", () => {
-    expect(flow).toContain("{chosenHere ? shortDate(sentDate) : o.label}");
-    expect(flow).toContain('${chosenHere ? " hasdate" : ""}');
+  /* its anchor-relabelling caller was the sweep's `When` step, which moved to the query drawer with
+     the recording journeys (27 Sep); the date's own phrasing is what survives here */
+  it("the chosen date reads in the app's own short form", () => {
     expect(shortDate("2026-08-12")).toBe("12 Aug");
   });
 
@@ -353,7 +359,7 @@ describe("⚠️ RecordingCalendar NAMES A DATE INSIDE A RANGE, AND ASSUMES NOTH
 
 describe("⚠️ THE JOURNEY GOES SINGLE-COLUMN ON ITS CONTAINER, NOT ON THE VIEWPORT", () => {
   /**
-   * The Calendar's item sheet mounts FocusFlow with no width constraint of its own, so the journey
+   * The Calendar's item sheet once mounted this takeover with no width constraint of its own, so the journey
    * must answer to the box it is in. Asserted as the SIGNAL — a containment context plus a
    * container query that yields one track — never as the pixel, which is a tuning value.
    */
@@ -400,67 +406,8 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
     return body;
   };
 
-  it("a send stages ONE mark-sent, and it is the same payload the quick path writes", () => {
-    const body = slice("const commitSend = async () => {", "return journeySheet({");
-    expect((body.match(/stageAndAdvance\(/g) ?? [])).toHaveLength(1);
-    expect(body).toContain('kind: "mark-sent"');
-    expect(body).toContain("journeyEventISO(sentDate,");
-    /* the write itself remains recordMaterialsSent via markSentWriteArgs — never a second path */
-    expect(flow).toContain("markSent: (p: Extract<StagedPayload, { kind: \"mark-sent\" }>) => recordMaterialsSent(markSentWriteArgs(p))");
-  });
-
-  it("a resubmission stages ONE mark-sent, flagged as a resubmit", () => {
-    const body = slice("function resubmitSheet(c: BoardCard) {", "function nudgeSheet(c: BoardCard)");
-    expect((body.match(/stageAndAdvance\(/g) ?? [])).toHaveLength(2); // the step-0 snooze + the commit
-    expect(body).toContain('isResubmit: action.markKind === "resubmit"');
-  });
-
-  it("a chase stages ONE nudge, through the same logNudge write args", () => {
-    const body = slice("function nudgeSheet(c: BoardCard) {", "function offerSheet(c: BoardCard)");
-    expect((body.match(/kind: "nudge"/g) ?? [])).toHaveLength(1);
-    expect(flow).toContain("logNudge(...nudgeWriteArgs(p, new Date().toISOString()))");
-  });
-
-  /**
-   * ⚠️ EVERY CHECK-BACK OPTION MUST GENUINELY SET A REMINDER. "Don't remind me" shipped briefly and
-   * was removed: `logNudge`'s `checkBackDate` is required by the write path, so the activity still
-   * STORED "Follow-up reminder set for {date}" — the app stating something untrue about its own
-   * record. That line is composed in `buildNudgeWrites` and persisted, so suppressing it is a
-   * write-path change, not a display one. Two options that tell the truth beat three where one lies.
-   *
-   * This asserts the ABSENCE, on comment-stripped source, because the prose above names the very
-   * string it forbids — which is the whole reason `decls` exists.
-   */
-  it("the chase offers no option that logs a reminder the writer declined", () => {
-    const body = slice("function nudgeSheet(c: BoardCard) {", "function offerSheet(c: BoardCard)");
-    expect(body).not.toContain("remind me");
-    /* no mute is staged beside the nudge — that was the shape that papered over the stored line */
-    expect(body).not.toContain("mute-item");
-    /* and the windows that remain are real day counts, not a sentinel */
-    expect(body).toContain("plusDaysISO(checkBack)");
-    expect(flow).toContain("const [checkBack, setCheckBack] = useState<number>(DEFAULT_CHECKBACK_DAYS);");
-  });
-
-  /**
-   * ⚠️ THE SWEEP ARM COMPLETES THROUGH THE PRIMITIVE, AND ITS ADVANCE IS GATED ON THE WRITE
-   * (completion-paths Phase 2). This is a SOURCE claim deliberately: the arm is unreachable from
-   * the UI — nothing in `src/` sets `mode: "sweep"`, and the weekly review's only entrance sits
-   * inside `renderHero`, which has no caller — so there is no rendered page on which to press it.
-   * Stating the route in source is the strongest artefact available, and saying which kind of
-   * claim it is matters more than the claim.
-   */
-  it("the sweep arm completes through quickDone, and only advances if the write happened", () => {
-    const body = slice("async function sweepDone(c: BoardCard) {", "function sweepSnooze");
-    expect(body, "the sweep arm writes a completion in place again").not.toMatch(/done:\s*true/);
-    expect(body, "the sweep arm stopped reaching the completion primitive")
-      .toContain("if (await quickDone(c)) advanceAfterReceipt(");
-  });
-
-  it("a close writes ONE status change and undoes by DELETING it, never by compensating", () => {
-    const body = slice("function staleSheet(c: BoardCard) {", "function dqSheet(c: BoardCard)");
-    expect((body.match(/await updateQueryStatus\(/g) ?? [])).toHaveLength(1);
-    expect(body).toContain("undoQueryStatus(q.id, prev, chosen.status)");
-  });
+  /* the send, resubmit, chase, sweep-arm and close cases went with their journeys to the query drawer
+     (27 Sep) — their write paths are locked beside the drawer now */
 
   /**
    * ⚠️ RESTATED, AND STRONGER (completion-paths Phase 3). This asserted exactly ONE
@@ -475,7 +422,7 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
    * "no inline completion" alone would pass on a sheet that had stopped completing at all.
    */
   it("a note completes through the primitive, writes no `done` of its own, and logs nothing against a query", () => {
-    const body = slice("function noteSheet(c: BoardCard) {", "const advanceAfterReceipt");
+    const body = slice("function noteSheet(c: BoardCard) {", "const stagedDetail");
     expect(body, "the note journey writes a completion in place again").not.toMatch(/done:\s*true/);
     expect(body, "the note journey stopped reaching the completion primitive").toContain("await quickDone(c)");
     /* the edit survives as its own write — silent, and the same one "Keep it" makes */

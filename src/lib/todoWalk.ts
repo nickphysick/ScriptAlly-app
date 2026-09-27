@@ -199,8 +199,7 @@ export type StagedPayload =
   | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate?: string; note?: string; nudgeDate?: string; method?: string }
   | { kind: "snooze"; cardKey: string; label?: string; taskType: string; relatedRecordId: string; days: number }
   | { kind: "mute-item"; cardKey: string; label?: string; taskType: string; relatedRecordId: string }
-  | { kind: "mute-rule"; cardKey: string; label?: string; rule: string }
-  | { kind: "close"; cardKey: string; label?: string; queryId: string; prevStatus: QueryStatus };
+  | { kind: "mute-rule"; cardKey: string; label?: string; rule: string };
 
 /** The EXACT args the one mark-sent write path takes — quick-✓ and the journey both build their
  *  payload then pass through here, so the two can never write differently. */
@@ -301,9 +300,6 @@ export interface StagedHandlers {
   snooze: (p: Extract<StagedPayload, { kind: "snooze" }>) => Promise<void>;
   muteItem: (p: Extract<StagedPayload, { kind: "mute-item" }>) => Promise<void>;
   muteRule: (p: Extract<StagedPayload, { kind: "mute-rule" }>) => Promise<void>;
-  /** The Sunday review's staged stale-close — the EXISTING close path (updateQueryStatus →
-   *  NO_RESPONSE) at Save; staging only defers, never re-shapes. */
-  close: (p: Extract<StagedPayload, { kind: "close" }>) => Promise<void>;
 }
 
 /**
@@ -319,7 +315,6 @@ export async function applyStaged(items: StagedPayload[], h: StagedHandlers): Pr
       else if (item.kind === "nudge") await h.nudge(item);
       else if (item.kind === "snooze") await h.snooze(item);
       else if (item.kind === "mute-item") await h.muteItem(item);
-      else if (item.kind === "close") await h.close(item);
       else await h.muteRule(item);
       ok.push(item.cardKey);
     } catch {

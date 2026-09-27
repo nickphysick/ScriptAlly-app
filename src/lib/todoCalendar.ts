@@ -540,7 +540,7 @@ export function dedupeAgainstRecord(
  *
  * ⚠️ SUMMARISATION IS A GRID-RENDER CONCERN, AND THIS IS THE ONLY FUNCTION THAT DOES IT.
  * Nothing upstream is shortened: `calendarDays` and `recordDays` keep full labels, the day panel
- * reads them unchanged, and `FocusFlow` receives the same card it always did. The design ref makes
+ * reads them unchanged, and the pane receives the same card it always did. The design ref makes
  * the opposite choice — it shortens at the data layer — and copying that here would degrade the
  * TO-DO LIST, which reads the same `assembleBoardColumns` output. One vocabulary, applied at one
  * call site, on one surface.

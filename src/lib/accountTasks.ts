@@ -4,8 +4,8 @@
  *
  * accountTasks — what the Tasks settings section shows, derived from the fields that already exist.
  *
- * ⚠️ NO NEW FIELD AND NO NEW VOCABULARY. The page owns the four `todoPrefs` values —
- * `rollForward`, `weeklyBriefing`, `staleMonths`, `types` — and every label it renders comes from
+ * ⚠️ NO NEW FIELD AND NO NEW VOCABULARY. The page owns the three `todoPrefs` values —
+ * `rollForward`, `staleMonths`, `types` — and every label it renders comes from
  * the list the to-do board already reads. A settings page that invented its own plain-English
  * names would give the app two vocabularies for one set of tasks, and the writer would meet both.
  *

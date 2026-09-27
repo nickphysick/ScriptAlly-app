@@ -5,7 +5,7 @@
  * paneCommit — the pane form's answers, in the shape the committers already take.
  *
  * ⚠️ THIS EXISTS BECAUSE THE WRITE PATH ALREADY DID. `ToDoPage` holds a committer per journey, each
- * of which calls the same writer `FocusFlow` calls — and every one of them was UNREACHABLE, because
+ * of which calls the same writer the takeover (then `FocusFlow`) called — and every one of them was UNREACHABLE, because
  * their entrance `commitFromPane` lost its caller when `PaneJourney.tsx` was deleted. The primary
  * opened the takeover instead, so the pane asked its questions and a second dialog asked them again.
  * What was missing was never a writer. It was this: the pane's own value shape translated into the

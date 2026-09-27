@@ -177,7 +177,7 @@ export interface CardFactsInput {
    *
    * `src/lib/offerDecision.ts` has recorded offer decisions since July: `OFFER_ACCEPTED` /
    * `OFFER_DECLINED` activities, built by `buildOfferDecisionWrites`, collected by the To-do
-   * board's `FocusFlow` and written through `db.tsx`. The brief proposed an optional `decision`
+   * board's old takeover (`FocusFlow`, retired for the query drawer) and written through `db.tsx`. The brief proposed an optional `decision`
    * field on the Offer activity "written by the existing Record decision surface IF ONE EXISTS" —
    * one does, and it expresses the decision as the activity's TYPE. Adding the field would be a
    * SECOND way to record one fact, which is the shape this repo has an audit about.

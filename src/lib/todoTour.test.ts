@@ -2,16 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The first-visit tour — polish P5 retarget: hero → search → rail pills → the review chip → a card →
- * Today. Copy snapshot-locked; the auto-run gate unchanged.
+ * The first-visit tour — polish P5 retarget: hero → search → rail pills → a card → Today (the
+ * weekly-review stop went with the review, 27 Sep). Copy snapshot-locked; the auto-run gate unchanged.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 
-describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), Done on the last", () => {
-  it("is exactly the eight stops in order: rail → hero → add → search → pills → review → a card → Today", () => {
+describe("TOUR_STOPS — seven stops (notes-and-tasks adds the note/task step), Done on the last", () => {
+  it("is exactly the seven stops in order: rail → hero → add → search → pills → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".spine-rail",
       ".tdb-herobegin",
@@ -22,7 +22,6 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       // census exists: a stop can go wrong without going missing.
       ".l-search",
       ".tdb-popwrap",
-      ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
       '[aria-expanded][class*="asec"], .ws-navrow',
@@ -37,7 +36,6 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       "A note, or a task.",
       "Search your list.",
       "Narrow the list.",
-      "Your week, reviewed.",
       "Every card works the same.",
       "Today has its own page.",
     ]);
@@ -50,10 +48,9 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
        stop must teach instead is that the button FILLS while a narrowing is on, because that is
        the only thing left on the page saying a short list is short on purpose. */
     expect(TOUR_STOPS[4].p).toContain("fills with ink");
-    expect(TOUR_STOPS[5].p).toContain("turns the dial in your favour");
-    expect(TOUR_STOPS[6].p).toContain("Hover for the actions");
-    expect(TOUR_STOPS[6].p).toContain("Batches expand in place");
-    expect(TOUR_STOPS[7].p).toContain("under To-do in the sidebar");
+    expect(TOUR_STOPS[5].p).toContain("Hover for the actions");
+    expect(TOUR_STOPS[5].p).toContain("Batches expand in place");
+    expect(TOUR_STOPS[6].p).toContain("under To-do in the sidebar");
   });
 });
 

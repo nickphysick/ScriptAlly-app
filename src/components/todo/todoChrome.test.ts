@@ -52,7 +52,7 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
 });
 
 describe("P3→C1 — the exit is the corner circle on the WRAPPER (the in-sheet bar is retired)", () => {
-  const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+  const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
 
   it("no bar, no exit pill — the wrapper carries the 44px corner exit OUTSIDE the sheet's clip", () => {
@@ -73,12 +73,15 @@ describe("P3→C1 — the exit is the corner circle on the WRAPPER (the in-sheet
   it("dots + count render in multi-item modes only, relocated to the sheet FOOT before the staged chip", () => {
     const foot = flow.match(/className="tdb-fffoot">[\s\S]{0,1700}/)?.[0] ?? "";
     expect(foot).toContain("tdb-fffprog");
-    expect(foot).toContain(": items.length > 1 && (");
+    /* the Sunday review's own five-dot branch went with the review (27 Sep) — one branch now */
+    expect(foot).toContain("{items.length > 1 && (");
     expect(foot.indexOf("tdb-fffprog")).toBeLessThan(foot.indexOf("tdb-ffpend"));
   });
 
   it("every in-step skip is KEPT (semantically distinct: skip advances, exit discards behind confirm)", () => {
-    for (const skip of ["Leave it", "Not now — leave it", "Skip the rest", "Skip — I’ll send them now"]) {
+    /* the query journeys' skips ("Leave it", "Not now — leave it", …) went with them to the query
+       drawer (27 Sep); the sweep's own skips remain */
+    for (const skip of [">Not now<", ">Skip<", ">Skip the rest<"]) {
       expect(flow).toContain(skip);
     }
   });

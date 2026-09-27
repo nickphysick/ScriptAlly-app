@@ -30,7 +30,6 @@ export type ArtSlotName =
   | "noteboard-empty"   // the Noteboard's first run
   | "done-empty"        // the Done column before the first tick today (must read at 260px)
   | "dock-seal"         // 600ms flourish as a flow completes, before the card animates to Done
-  | "review-masthead"   // the weekly briefing card, while fresh
   | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
   | "seize-the-day"     // Today's plan card — the ONE slot with a real asset committed
   | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
@@ -80,11 +79,6 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "The completion stamp — a wax seal struck as the flow finishes.",
     w: 120, h: 120,
     alt: "A wax seal, freshly struck",
-  },
-  "review-masthead": {
-    caption: "A slim banner across the weekly briefing card.",
-    w: 640, h: 90,
-    alt: "A slim decorative banner for the week’s review",
   },
   "first-run-board": {
     caption: "An empty desk waiting to be used — before the first query.",

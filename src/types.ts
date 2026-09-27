@@ -84,7 +84,7 @@ export interface User {
   /* board-optimise P5: the four desk behaviours as ONE map (see lib/todoPrefs) — one allowlist
      entry, one write path, one place to look. Readers go through todoPrefs(), which is total. */
   todoPrefs?: {
-    staleMonths?: number; goodDay?: number; rollForward?: boolean; weeklyBriefing?: boolean;
+    staleMonths?: number; goodDay?: number; rollForward?: boolean;
     /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
        sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
        sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away

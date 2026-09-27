@@ -79,13 +79,6 @@ export const TOUR_STOPS: TourStop[] = [
     p: "Filter and sort sit beside the search. The filter fills with ink while a narrowing is on, so a short list is never a mystery.",
     cta: "Next →",
   },
-  {
-    // the workspace shell: the review is the underlined link beneath Begin in the hero
-    sel: ".tdb-revlink",
-    h: "Your week, reviewed.",
-    p: "Every box ticked turns the dial in your favour \u2014 open it from the banner, or the chip beneath Begin.",
-    cta: "Next →",
-  },
   /* ⚠️ THIS STOP IS DEAD AND IS LEFT STANDING (completion-paths Phase 2). None of the three
      classes has been rendered since the board became a grouped list; `.tdb-tile` survived only
      inside `overlayCards`, a renderer with no caller, which is why the census could not see it.

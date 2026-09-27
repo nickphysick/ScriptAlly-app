@@ -124,7 +124,7 @@ export const EXIT_RIGHT = ".tdb-tdpop"; // the Today corner leaves (ONE node in 
 // rebuild retired the centred search pill and both views' lane header bars), so they are
 // dropped rather than left as selectors that can never match. .tdb-heroright/.tdb-herosub
 // belong to the dormant hero — kept, since they return with the session's own entry point.
-export const EXIT_FADE = ".tdb-brief, .tdb-heroright, .tdb-herosub"; // the briefing, the hero pair + subtitle
+export const EXIT_FADE = ".tdb-heroright, .tdb-herosub"; // the hero pair + subtitle (the briefing went with the weekly review)
 export const EXIT_BAR = ".tdb-dochead"; // the panel's items row slides up and out
 export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // the panel's border + contents dissolve; the items float
 /** The gatherable items — cards, group bars, or ledger rows, whichever view is up. */

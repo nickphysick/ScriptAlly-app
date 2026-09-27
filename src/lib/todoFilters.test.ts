@@ -88,8 +88,8 @@ describe("search — title, agent, agency, manuscript (case-insensitive; groups 
 });
 
 describe("filterCounts — derived from the live board sets", () => {
-  it("counts per checkbox; snoozed spans lanes; the review card never counts", () => {
-    const doCards = [card("o", { taskType: "offer_received" }), card("s1", { taskType: "full_requested", snoozes: 1 }), card("w", { taskType: "weekly_review" })];
+  it("counts per checkbox; snoozed spans lanes", () => {
+    const doCards = [card("o", { taskType: "offer_received" }), card("s1", { taskType: "full_requested", snoozes: 1 })];
     const stale = [card("st", { taskType: "no_response_close", snoozes: 2 })];
     const nt = [card("n", { userTaskId: "u" })];
     const c = filterCounts({ doCards, hkGroups: [group("dq_materials", 4), group("dq_mswl", 2)], staleCards: stale, ntCards: nt, committedCount: 3 });

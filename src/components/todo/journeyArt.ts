@@ -13,7 +13,7 @@ import sendArt from "../../assets/journeys/send.png";
 
 export type JourneyArtKey =
   | "send" | "nudge" | "offer" | "offerCelebration" | "stale" | "details"
-  | "batch" | "note" | "review" | "reviewOpen" | "reviewClose" | "settings";
+  | "batch" | "note" | "review" | "reviewClose" | "settings";
 
 export const JOURNEY_ART: Record<JourneyArtKey, string | null> = {
   send: sendArt,
@@ -25,7 +25,6 @@ export const JOURNEY_ART: Record<JourneyArtKey, string | null> = {
   batch: null,
   note: null,
   review: null,
-  reviewOpen: null,
   reviewClose: null,
   settings: null,
 };

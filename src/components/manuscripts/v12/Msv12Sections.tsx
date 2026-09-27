@@ -320,10 +320,4 @@ export const PackagesSection: React.FC<{
   </section>
 );
 
-/** Re-exported for the page's owed handler — the send statuses in one place. */
-export const OWED_SEND_TASK_TYPES: Record<"partial" | "full", string> = {
-  partial: "partial_requested",
-  full: "full_requested",
-};
-
 export { QueryStatus };
