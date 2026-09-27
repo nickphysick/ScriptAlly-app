@@ -6,7 +6,9 @@
 > facts · "+ Add an agent" quick-add · the hawk-only crop), with the count cards and
 > Housekeeping below the rule. **The walk list below predates that**: skip its hero items and
 > read `reports/page-header-v2/REPORT.md` for the current top-of-page. Everything from the
-> pop-up down (Also-changes, the add card, Housekeeping) is unchanged and still current.
+> pop-up down (Also-changes, the add card, Housekeeping) is unchanged and still current —
+> except deviation 2's LOG half: since Query actions v1 (27 Sep) the Log-query doors open the
+> query drawer IN PLACE with the agent carried; Record a response still routes as written.
 
 **All seven phases are on `main` and pushed. Nothing is deployed** (per the go-ahead: no deploy
 beyond the dev Firestore rules, which went out with P4 and were probe-verified). The page was

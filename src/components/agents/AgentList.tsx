@@ -58,6 +58,7 @@ import { isGenreMatch } from "../../lib/genreMatch";
 import { ContactControls } from "./contact/ContactControls";
 import { ContactRows } from "./contact/ContactRows";
 import { normaliseSubmissionsUrl } from "../../lib/quickAdd";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { BarChip, ContactBar } from "./contact/ContactBar";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
@@ -549,7 +550,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
   const [newId, setNewId] = useState<string | null>(null);
   const onAddAgent = () => setAdding("name");
-  const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
+  /* Query actions v1 (27 Sep): every page finishes in the query drawer — the log doors open
+     it IN PLACE with the agent carried, instead of navigating to the hub so ITS seed effect
+     could open the same drawer one route later. Both doors (the row's mini and the pop-up's
+     Log query) come through here; the pop-up closes first, so there is one asking surface. */
+  const onLogQuery = (agent: { id: string }) => openQueryDrawer({ mode: "log", agentId: agent.id });
 
   useEffect(() => {
     if (!active) return;

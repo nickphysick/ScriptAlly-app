@@ -917,3 +917,44 @@ test("§11.8 — CHECKED, REMIND ME and the inline save each remove exactly one 
   expect(await gaps(), "the inline save must remove exactly one gap").toBe(n0 - 3);
   bump(9);
 });
+
+/* ═════════════ Query actions v1 follow-through — the log doors open the drawer IN PLACE ═════════════ */
+
+test("Log query opens the query drawer on this page — no navigation, the agent carried (both doors)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  /* door 1: the row's mini on a never-queried, open-door agent */
+  const row = page.locator(`${scope} [data-clv="row"]`, { has: page.locator('[data-clv="mini-log"]') }).first();
+  const who = (await row.locator(".clv-rwho b").textContent())?.trim() ?? "";
+  expect(who.length, "population first — no row offers Log query").toBeGreaterThan(0);
+  await row.locator('[data-clv="mini-log"]').click();
+  /* the drawer ROOT is a boxless wrapper — wait for ATTACHMENT; the content assertions carry visibility */
+  await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
+  const after = await page.evaluate(() => ({
+    path: window.location.pathname,
+    drawer: (document.querySelector("[data-qad-root]") as HTMLElement).textContent ?? "",
+  }));
+  expect(after.path, "the log door NAVIGATED — the drawer must open in place (query actions v1: every page finishes in the drawer)").toBe("/agents");
+  expect(after.drawer, "the agent did not carry into the drawer").toContain(who);
+  /* the drawer's own dismissal layers (Escape steps back one; ✕ raises the discard bar) are its
+     suite's business — nothing is committed here, so a reload is the honest reset between doors */
+  await page.reload();
+  /* the reload rebuilt the DOM, so visiblePage's tag went with it — let the app come back
+     through its splash, then re-derive the scope */
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0));
+  const scope2 = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope2} [data-clv="row"]`);
+  /* door 2: the pop-up's Log query — the pop-up yields to the drawer (one asking surface at a time) */
+  await page.click(`${scope2} [data-clv="row"][data-stand="none"]`);
+  await page.waitForSelector('[data-clv="profile"]');
+  await page.click('[data-clv="profile"] [data-clv="logquery"]');
+  await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
+  const two = await page.evaluate(() => ({
+    path: window.location.pathname,
+    popup: !!document.querySelector('[data-clv="profile"]'),
+  }));
+  expect(two.path).toBe("/agents");
+  expect(two.popup, "the pop-up stayed open behind the drawer — two asking surfaces at once").toBe(false);
+  bump(5);
+});
