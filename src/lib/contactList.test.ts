@@ -40,7 +40,7 @@ describe("railHeight — the rail derives its height from its own measured top",
 /* ══ phase 2 — standing, cards, facts and the hero's placement ══════════════════════════════ */
 import { buildQcRows } from "./qcSummary";
 import {
-  ART, HERO_CARD_W, agentRows, contactCensus, contactStanding, heroFacts, heroLayout,
+  agentRows, contactCensus, contactStanding, heroFacts,
   matchesCards, rowYourMove,
 } from "./contactList";
 import {
@@ -114,56 +114,8 @@ describe("where you stand — the page-local union over the QC's own rows", () =
   });
 });
 
-describe("heroLayout — the mock's own chain, reproduced from the width", () => {
-  /* the rendered mock at 1440×900 (hero W 804, card offsetHeight ≈ 417): c .804, s .56,
-     imgLeft ≈ 383, cardLeft ≈ 300.6 — measured off the render, not read out of its source */
-  it("side-by-side at W 804 reproduces the render", () => {
-    const l = heroLayout({ W: 804, cardH0: 417, textH: 326 });
-    expect(l.stacked).toBe(false);
-    expect(l.pinned, "the chain clears the text column at 804 — no pin").toBe(false);
-    expect(l.c).toBeCloseTo(0.804, 3);
-    expect(l.s).toBeCloseTo(0.56, 3);
-    expect(Math.round(l.imgLeft)).toBe(383);
-    /* the probe's rect rounding sat 1px above the arithmetic (382.88 + 222.88 − 64.32 − 241.2);
-       the formula is the mock's own chain and the RELATIONS below are the oracle */
-    expect(Math.round(l.cardLeft)).toBe(300);
-    expect(l.cardTop).toBe(14);
-    expect(l.textW).toBe(Math.min(Math.round(804 * 0.34), 330));
-  });
-
-  it("the app's own 1440 column (W 758) stays side by side — the mock's 760 was its frame's fact", () => {
-    const l = heroLayout({ W: 758, cardH0: 417, textH: 326 });
-    expect(l.stacked).toBe(false);
-    expect(l.pinned, "758 clears the text floor by 1.6px — unpinned").toBe(false);
-    expect(l.cardLeft, "the card clears the text column").toBeGreaterThanOrEqual((l.textW as number) + Math.round(758 * 0.02));
-  });
-
-  it("stacked at W 644 reproduces the render (s .64, cardLeft ≈ 114)", () => {
-    const l = heroLayout({ W: 644, cardH0: 417, textH: 47, titleRowH: 47 });
-    expect(l.stacked).toBe(true);
-    expect(l.c).toBe(0.8);
-    expect(l.s).toBeCloseTo(0.64, 3);
-    expect(Math.round(l.cardLeft)).toBe(113);
-    expect(l.cardTop).toBe(47 + 9);
-  });
-
-  it("the pin branch: a narrow hero pins the card and re-solves the art's scale", () => {
-    const l = heroLayout({ W: 500, cardH0: 417, textH: 40, titleRowH: 40 });
-    expect(l.pinned).toBe(true);
-    expect(l.cardLeft).toBe(0);
-    /* the solved scale keeps the peek: drawn card right − card right ≈ 80c */
-    const peek = l.imgLeft + ART.drawnCardRight * l.s - (l.cardLeft + HERO_CARD_W * l.c);
-    expect(peek).toBeCloseTo(80 * l.c, 0);
-  });
-
-  it("the art's visible right edge lands on the column's right, by construction", () => {
-    for (const W of [804, 700, 1000, 1250]) {
-      const l = heroLayout({ W, cardH0: 417, textH: 300 });
-      expect(l.imgLeft + ART.inkRight * l.s, `W ${W}`).toBeCloseTo(W, 6);
-    }
-  });
-
-});
+/* ⚠️ RETIRED (page header v2 §4): "heroLayout — the mock's own chain, reproduced from the width".
+   Its subject — the blank card's placement inside the Archivist's drawing — is deleted. */
 
 /* ══ phase 3 — row facts, the date line, filters, groups and sorts ══════════════════════════ */
 import {

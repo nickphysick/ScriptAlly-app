@@ -161,69 +161,10 @@ export function heroFacts(
   };
 }
 
-/* ── the hero's placement (v11 §3.1–3.2) — every number from the hero's own measured width ── */
-
-/** The art file's geometry: 810×375, the drawing ends at x 752, the drawn card's right edge at
- *  x 398 (contact-list-hero-archivist.png — place art from its VISIBLE edge, not the image box). */
-export const ART = { w: 810, h: 375, inkRight: 752, drawnCardRight: 398 } as const;
-/** The live card's designed width at scale 1 (the mock's `.hart .ac.blank`). */
-export const HERO_CARD_W = 300;
-/** ⚠️ THE MOCK'S 760 IS A FACT ABOUT THE MOCK'S FRAME, NOT ABOUT THE DESIGN (the ref-breakpoint
- *  law, v65's own lesson). Its column is 804 at a 1440 window; the app's — behind the wider
- *  sidebar and the window's insets — is 758, so carrying 760 across stacked the hero at the
- *  everyday desktop width the design draws side by side. 700 keeps 1440 (758) side by side with
- *  margin and stacks the app's 1280 (~598); the side-by-side chain holds unpinned at 758
- *  (cardLeft 274.6 against a 273 floor) and the pin branch carries it below that. */
-export const HERO_STACK_BELOW = 700;
-
-export interface HeroLayout {
-  stacked: boolean;
-  /** The live card's scale, and the art's. */
-  c: number;
-  s: number;
-  /** Whether the card was pinned to the text column's edge and s re-solved. */
-  pinned: boolean;
-  textW: number | null;
-  cardLeft: number;
-  cardTop: number;
-  imgLeft: number;
-  imgTop: number;
-  imgW: number;
-  heroH: number;
-}
-
-const clamp = (lo: number, v: number, hi: number) => Math.max(lo, Math.min(hi, v));
-
-/**
- * The whole hero from four measured facts: its width, the card's UNSCALED height (offsetHeight —
- * a transform never affects layout), the text column's height, and (stacked) the title row's
- * height. Pure, so the pin branch and the clamps are unit-locked rather than eyeballed.
- */
-export function heroLayout(input: { W: number; cardH0: number; textH: number; titleRowH?: number }): HeroLayout {
-  const { W, cardH0, textH } = input;
-  const stacked = W < HERO_STACK_BELOW;
-  const c = stacked ? 0.8 : clamp(0.78, W / 1000, 1);
-  const textW = stacked ? null : Math.min(Math.round(W * 0.34), 330);
-  const minCardLeft = stacked ? 0 : (textW as number) + Math.round(W * 0.02);
-  let s = stacked ? 0.64 : clamp(0.34, (0.56 * W) / 804, 0.72);
-  let imgLeft = W - ART.inkRight * s;
-  let cardLeft = imgLeft + ART.drawnCardRight * s - 80 * c - HERO_CARD_W * c;
-  let pinned = false;
-  if (cardLeft < minCardLeft) {
-    /* pin the card, solve the art's scale so the peek is kept: s = (W − cardRight − 80c) / 354 */
-    pinned = true;
-    cardLeft = minCardLeft;
-    const cardRight = cardLeft + HERO_CARD_W * c;
-    s = Math.max(0.34, (W - cardRight - 80 * c) / (ART.inkRight - ART.drawnCardRight));
-    imgLeft = W - ART.inkRight * s;
-  }
-  const cardTop = stacked ? (input.titleRowH ?? 0) + 9 : 14;
-  const imgTop = cardTop + (cardH0 * c - ART.h * s) / 2 + 18 * c;
-  const heroH = stacked
-    ? cardTop + cardH0 * c + 28
-    : Math.max(cardTop + cardH0 * c + 28, textH + 28);
-  return { stacked, c, s, pinned, textW, cardLeft, cardTop, imgLeft, imgTop, imgW: ART.w * s, heroH };
-}
+/* ⚠️ THE HERO'S PLACEMENT CHAIN IS RETIRED (page header v2 §4): `ART`, `HERO_CARD_W`,
+   `HERO_STACK_BELOW` and `heroLayout` solved where the blank card sat inside the Archivist's
+   drawing. The card is a quick-add panel under the shared header's actions now and the drawing is
+   the hawk alone, so there is no chain to solve. Recover at 25cb2cad if ever wanted. */
 
 /* ══ phase 3 — the list: row facts, the date line, filters, groups and sorts (v11 §4–6) ═════ */
 import { STAGE_NAME } from "./qcSummary";

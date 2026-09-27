@@ -3467,9 +3467,9 @@ export const Queries: React.FC<{
   const qcScopeTitle = qcScope && qcScope !== QC_UNASSIGNED ? (qcMsTitle.get(qcScope) || null) : null;
   const qcLineTitle = qcScopeTitle ?? (manuscripts.length === 1 ? (manuscripts[0].title || null) : null);
   const qcHeadLine = qcLineTitle
-    ? <>Every query for <span className="qcv-line-ms">{qcLineTitle}</span>, from the first letter to the last reply.</>
+    ? <>Every query for <span className="ph-ms">{qcLineTitle}</span>, from the first letter to the last reply.</>
     : manuscripts.length > 1
-      ? <>Every query for all <span className="qcv-line-ms">{manuscripts.length}</span> manuscripts, from the first letter to the last reply.</>
+      ? <>Every query for all <span className="ph-ms">{manuscripts.length}</span> manuscripts, from the first letter to the last reply.</>
       : <>Every query, from the first letter to the last reply.</>;
   const qcScopeMenu = manuscripts.length > 1 ? {
     current: qcScope,

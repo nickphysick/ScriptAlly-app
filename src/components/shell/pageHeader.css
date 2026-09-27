@@ -579,13 +579,20 @@
 /* ⚠️ AT MOST 55% OF THE FRAME — the art takes 48% from the other side; a text block past its share
    would run under the drawing. */
 .ph--full .ph-text { max-width: 55%; }
-/* ⚠️ 10px, BECAUSE THE TITLE'S TOP IS THE MEASUREMENT — the mock puts it at eyebrow + 22, and the
-   eyebrow's own line box is 12, so the gap beneath it is what makes up the difference. */
-.ph--full .ph-eyebrow { margin-bottom: 10px; }
+/* ⚠️ 12px (page header v2), BECAUSE THE TITLE'S TOP IS THE MEASUREMENT — the v5 ref puts it at
+   eyebrow + 24 (a 12px eyebrow line and a 12px gap). The 10 this replaced was tuned to the v1 ref's
+   eyebrow + 22, and it made both full headers 2.3px shorter than the ref. */
+.ph--full .ph-eyebrow { margin-bottom: 12px; }
 .ph--full .ph-title { font-size: 56px; }
 @media (max-width: 1360px) { .ph--full .ph-title { font-size: 50px; } }
 .ph--full .ph-intro { margin-top: 14px; max-width: 460px; font-size: 18px; line-height: 1.45; }
-.ph--full .ph-acts { margin-top: 22px; }
+/* `position: relative` IS THE ANCHOR for a panel an action opens (`actionsPopover`): it hangs 10px
+   below this row, not below the frame. The panel carries its own `z-index`, which is what puts it
+   over the count cards — this row needs none (measured: removing one here changed nothing). */
+.ph--full .ph-acts { margin-top: 22px; position: relative; }
+/* the intro's counts — serif, full ink, 600 (the mock's `strong`) */
+.ph-intro strong { color: var(--sp-ink); font-weight: 600; }
+.ph--full .ph-intro .ph-ms { font-size: 17px; }
 /**
  * ⚠️ ANCHORED TO THE HEADER'S BOTTOM-RIGHT CORNER, SO THE DRAWING STANDS ON THE RULE. With
  * `object-position: right bottom` the image's own bottom edge is the box's bottom edge whatever its

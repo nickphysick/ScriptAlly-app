@@ -20,6 +20,12 @@ import { openRoute, visiblePage } from "./measure";
 let asserts = 0;
 let ran = 0;
 const bump = (n = 1) => { asserts += n; };
+/** The add card's door since page header v2 §4: "+ Add an agent" drops the quick-add card, and
+ *  clicking into it opens the add card, as the retired hero's blank card did. */
+const openAddCard = async (page: import("@playwright/test").Page, scope: string) => {
+  await page.click(`${scope} [data-probe="page-header"] .ph-primary`);
+  await page.click(`${scope} [data-clv="quickadd"] .clv-qa-go`);
+};
 
 test.beforeAll(async () => { await assertLocalBundleIsDev(); });
 test.beforeEach(() => { ran += 1; });
@@ -54,7 +60,9 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
         groupW: Math.round(gr.width),
         railW: Math.round(rr.width),
         gapPx: Math.round(rr.left - mr.right),
-        railTop: Math.round(rr.top), mainTop: Math.round(mr.top),
+        /* ⚠️ RETARGETED (page header v2 §4): the column's CONTENT top — its box starts at the shared
+           header's rule and its first 24px are the gap below it, which the rail takes as a margin */
+        railTop: Math.round(rr.top), mainTop: Math.round(mr.top + parseFloat(getComputedStyle(main as HTMLElement).paddingTop)),
       };
     }, scope);
 
@@ -64,8 +72,8 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
     expect(g.railW, "the rail's track is not 340px").toBe(340);
     expect(g.gapPx, "the gap between the column and the rail").toBe(28);
     expect(g.groupW, "the group overran the 1480 measure").toBeLessThanOrEqual(1480);
-    /* the rail spans from the top of the page column — level with the hero once it exists */
-    expect(Math.abs(g.railTop - g.mainTop), "the rail does not start level with the column").toBeLessThanOrEqual(1);
+    /* the rail starts level with the page column's content — both at the shared header's rule + 24 */
+    expect(Math.abs(g.railTop - g.mainTop), "the rail does not start level with the column's content").toBeLessThanOrEqual(1);
     bump(4);
   });
 
@@ -179,104 +187,38 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
 
 /* ══ phase 2 — the hero (v11 §3, §11.1) and the count cards (§3.3, §11.3) ═══════════════════ */
 
-const heroRead = (scope: string) => async (page: import("@playwright/test").Page) =>
-  page.evaluate((scope) => {
-    const hero = document.querySelector(`${scope} [data-clv="hero"]`) as HTMLElement | null;
-    const htx = hero?.querySelector(".clv-htx") as HTMLElement | null;
-    const card = hero?.querySelector('[data-clv="herocard"]') as HTMLElement | null;
-    const art = hero?.querySelector('[data-clv="art"]') as HTMLElement | null;
-    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement | null;
-    const title = hero?.querySelector(".clv-hero-t") as HTMLElement | null;
-    if (!hero || !htx || !card || !art || !main || !title) return null;
-    const v = (n: string) => parseFloat(hero.style.getPropertyValue(n)) || 0;
-    const hr = hero.getBoundingClientRect();
-    const s = art.getBoundingClientRect().width / 810;
-    return {
-      ready: hero.dataset.ready === "true",
-      stacked: hero.className.includes("--stack"),
-      heroBox: { w: Math.round(hr.width), h: Math.round(hr.height) },
-      htxRight: htx.getBoundingClientRect().right,
-      mainRight: main.getBoundingClientRect().right,
-      artLeft: art.getBoundingClientRect().left,
-      artTop: art.getBoundingClientRect().top,
-      htxTop: htx.getBoundingClientRect().top,
-      htxBottom: htx.getBoundingClientRect().bottom,
-      s,
-      cardLeftVar: v("--clv-cl"), cardScaleVar: v("--clv-cc"),
-      heroLeft: hr.left,
-      titleLines: Math.round(title.getBoundingClientRect().height / parseFloat(getComputedStyle(title).fontSize) / 1.02),
-      tilesInHero: hero.querySelectorAll('[data-clv="tile"]').length,
-      masthead: !!document.querySelector(`${scope} .wsh`),
-      oldTiles: !!document.querySelector(`${scope} .agl-stat, ${scope} .stt-row`),
-    };
-  }, scope);
+/* ⚠️ RETIRED BY PAGE HEADER v2 §4, each by name: `heroRead`, "the hero, side by side at 1440 / 1920
+   — card clear of the text, art on the column's edge, the peek kept", and "the hero stacks at 1280 —
+   one-line title beside the sentence, the cards above the list, the same edge rules". Their subject
+   — the v11 hero, the blank card placed inside the Archivist's drawing by `heroLayout` — is deleted;
+   the page opens with the shared full header, measured in pageHeaderV2.measure.ts §4. The one claim
+   that outlives it, that the three count cards sit as a row between the header and the list, is
+   restated below. */
 
-for (const width of [1440, 1920] as const) {
-  test(`the hero, side by side at ${width} — card clear of the text, art on the column's edge, the peek kept`, async ({ page }) => {
-    await openRoute(page, "/agents", { width, height: width === 1440 ? 900 : 1080 });
+for (const width of [1280, 1440] as const) {
+  test(`the count cards at ${width}: a row of three below the header's rule, above the list`, async ({ page }) => {
+    await openRoute(page, "/agents", { width, height: 900 });
     const scope = await visiblePage(page, ".agl-wpg");
-    await page.evaluate(() => document.fonts.ready);
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-    const h = await heroRead(scope)(page);
-    expect(h, "no hero on the page").not.toBeNull();
+    const r = await page.evaluate((scope) => {
+      const row = document.querySelector(`${scope} .clv-tiles--row`) as HTMLElement | null;
+      const hd = document.querySelector(`${scope} [data-probe="page-header"]`) as HTMLElement | null;
+      const grid = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement | null;
+      if (!row || !hd || !grid) return null;
+      return {
+        n: row.querySelectorAll('[data-clv="tile"]').length,
+        belowRule: row.getBoundingClientRect().top >= hd.getBoundingClientRect().bottom - 1,
+        aboveList: row.getBoundingClientRect().bottom <= grid.getBoundingClientRect().top + 1,
+      };
+    }, scope);
+    expect(r, "no count-card row, header or list").not.toBeNull();
     bump();
-    if (!h) return;
-    // eslint-disable-next-line no-console
-    console.log(`[hero ${width}] W=${h.heroBox.w} h=${h.heroBox.h} s=${h.s.toFixed(3)}`);
-    expect(h.ready, "the hero never measured itself").toBe(true);
-    expect(h.stacked, "side-by-side width rendered the stacked hero").toBe(false);
-    expect(h.masthead, "the shared masthead is still mounted beside the hero").toBe(false);
-    expect(h.oldTiles, "the old StatTiles row survived the hero").toBe(false);
-    expect(h.titleLines, "the title wrapped").toBe(1);
-    expect(h.tilesInHero, "the three count cards ride in the hero when side-by-side").toBe(3);
-    bump(6);
-
-    /* the vars are the CONTRACT — the card's layout box in hero space, unswollen by the rotation */
-    const cardLeftAbs = h.heroLeft + h.cardLeftVar;
-    const cardRightAbs = cardLeftAbs + 300 * h.cardScaleVar;
-    expect(cardLeftAbs, "the live card sits over the text column").toBeGreaterThanOrEqual(h.htxRight + 16);
-    const artVisibleRight = h.artLeft + 752 * h.s;
-    expect(artVisibleRight, "the art's VISIBLE edge overran the column").toBeLessThanOrEqual(h.mainRight + 1);
-    const drawnCardRight = h.artLeft + 398 * h.s;
-    expect(drawnCardRight - cardRightAbs, "less than 60px of the drawn card shows past the live one").toBeGreaterThanOrEqual(60);
-    expect(h.artLeft, "the art's box overlaps the text column").toBeGreaterThanOrEqual(h.htxRight - 1);
-    bump(4);
+    if (!r) return;
+    expect(r.n).toBe(3);
+    expect(r.belowRule, "the card row sits above the header's rule").toBe(true);
+    expect(r.aboveList, "the card row fell below the list").toBe(true);
+    bump(3);
   });
 }
-
-test("the hero stacks at 1280 — one-line title beside the sentence, the cards above the list, the same edge rules", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1280, height: 800 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-  const h = await heroRead(scope)(page);
-  expect(h).not.toBeNull();
-  bump();
-  if (!h) return;
-  expect(h.stacked, "1280 should stack (the column is under 760 beside the rail)").toBe(true);
-  expect(h.titleLines).toBe(1);
-  expect(h.tilesInHero, "stacked: the cards leave the hero").toBe(0);
-  const rowTiles = await page.evaluate((scope) => {
-    const row = document.querySelector(`${scope} .clv-tiles--row`) as HTMLElement | null;
-    const hero = document.querySelector(`${scope} [data-clv="hero"]`) as HTMLElement | null;
-    const grid = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement | null;
-    if (!row || !hero || !grid) return null;
-    return {
-      n: row.querySelectorAll('[data-clv="tile"]').length,
-      belowHero: row.getBoundingClientRect().top >= hero.getBoundingClientRect().bottom - 1,
-      aboveList: row.getBoundingClientRect().bottom <= grid.getBoundingClientRect().top + 1,
-    };
-  }, scope);
-  expect(rowTiles, "no stacked card row").not.toBeNull();
-  expect(rowTiles!.n).toBe(3);
-  expect(rowTiles!.belowHero, "the card row sits inside the hero").toBe(true);
-  expect(rowTiles!.aboveList, "the card row fell below the list").toBe(true);
-  const artVisibleRight = h.artLeft + 752 * h.s;
-  expect(artVisibleRight).toBeLessThanOrEqual(h.mainRight + 1);
-  const cardRightAbs = h.heroLeft + h.cardLeftVar + 300 * h.cardScaleVar;
-  expect(h.artLeft + 398 * h.s - cardRightAbs, "the stacked peek").toBeGreaterThanOrEqual(60);
-  bump(7);
-});
 
 test("the count cards filter — populations proved non-zero first, OR on multi-select, dim on the rest", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
@@ -410,7 +352,8 @@ test("the filter panel — faceted counts, kept scroll, and an outside pointerdo
   bump();
 
   /* an outside pointerdown closes it — the five §11.4 targets in turn */
-  for (const sel of ["h2", '[data-clv="band"]', '[data-clv="row"]', '[data-clv="tray"]', '[data-clv="herocard"]'] as const) {
+  /* the fifth target was the retired hero's card; the shared header's title stands in (v2 §4) */
+  for (const sel of ["h2", '[data-clv="band"]', '[data-clv="row"]', '[data-clv="tray"]', '[data-probe="page-header"] [data-probe="title"]'] as const) {
     if (!(await page.locator(`${scope} [data-clv="fpanel"]`).count())) {
       await page.locator(`${scope} [data-clv="btn-filter"]`).click();
       await expect(page.locator(`${scope} [data-clv="fpanel"]`)).toBeVisible();
@@ -668,7 +611,7 @@ test("§11.7 write half — save says what else moved, and the fixture agent is 
 test("the add card (§11.9): disabled until name AND agency, the duplicate blocks with OPEN CARD through, typing keeps the node", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
-  await page.click(`${scope} [data-clv="herocard"]`);
+  await openAddCard(page, scope);
   await page.waitForSelector('[data-clv="addcard"]');
   const disabledAt = async () => page.evaluate(() => (document.querySelector('[data-clv="add-save"]') as HTMLButtonElement).disabled);
   expect(await disabledAt(), "Add enabled on an empty form").toBe(true);
@@ -703,7 +646,7 @@ test("the add card (§11.9): disabled until name AND agency, the duplicate block
   await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
 
   /* §11.9's identity clause: the focused element is the SAME NODE before and after typing */
-  await page.click(`${scope} [data-clv="herocard"]`);
+  await openAddCard(page, scope);
   await page.waitForSelector('[data-clv="addcard"]');
   await page.click('[data-clv="addcard"] [data-clv="f-name"]');
   await page.evaluate(() => { (window as unknown as { __n1: Element | null }).__n1 = document.activeElement; });
@@ -726,7 +669,7 @@ test("§11.9 the free cap surfaces IN the card — Add refuses, says why, and wr
      re-thought, not skipped. */
   const plan = /plan: (\w+)/.exec(execSync("node tests/e2e/harnessPlan.mjs", { encoding: "utf8" }))?.[1];
   expect(plan, "the cap lock's premise: a Free account at the cap").toBe("Free");
-  await page.click(`${scope} [data-clv="herocard"]`);
+  await openAddCard(page, scope);
   await page.waitForSelector('[data-clv="addcard"]');
   await page.fill('[data-clv="addcard"] [data-clv="f-name"]', "Zz Probe Agent");
   await page.fill('[data-clv="addcard"] [data-clv="f-agency"]', "Probe & Co");
@@ -750,7 +693,7 @@ test("§11.9 after adding (the lab, over known content) — Not yet queried, cen
   await page.click('[data-lab-view="cast"]');
   const scope = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope} [data-clv="row"]`);
-  await page.click(`${scope} [data-clv="herocard"]`);
+  await openAddCard(page, scope);
   await page.waitForSelector('[data-clv="addcard"]');
   await page.fill('[data-clv="addcard"] [data-clv="f-name"]', "Zz Probe Agent");
   await page.fill('[data-clv="addcard"] [data-clv="f-agency"]', "Probe & Co");

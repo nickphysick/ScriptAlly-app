@@ -121,6 +121,15 @@ export interface PageHeaderProps {
   secondary?: { label: string; onClick: () => void; disabled?: boolean };
   /** §3.1 — the drawing, anchored to the header's bottom-right. `full` only; absent renders no slot. */
   art?: React.ReactNode;
+  /**
+   * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
+   * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
+   *
+   * ⚠️ IT RENDERS INSIDE `.ph-acts`, WHICH IS WHY THAT ROW IS POSITIONED: it is the anchor. The
+   * panel states its own `z-index`, and nothing between it and the page creates a stacking context,
+   * so that alone puts it over the count cards below the rule.
+   */
+  actionsPopover?: React.ReactNode;
   title: string;
   /**
    * ⚠️ A NODE, NOT A STRING, SINCE THE PACKAGES PAGE STATES ITS SCOPE HERE.
@@ -192,6 +201,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions,
   toolbar,
   titleAdornment,
+  actionsPopover,
   illo,
   actionsSlot,
   overflow,
@@ -399,6 +409,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             {secondary && (
               <button type="button" className="ph-secondary" onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
             )}
+            {actionsPopover}
           </div>
         )}
       </div>

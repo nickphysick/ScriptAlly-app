@@ -7,7 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
-import { BAR_ROUTES, DRAWN, KEY, MOCK, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, switchAndCompare, visiblePageText, scrollAndRead } from "./pageHeaderV2Lib";
+import { BAR_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
 
@@ -90,3 +90,88 @@ for (const vp of SIZES) {
   });
 }
 
+
+for (const vp of SIZES) {
+  test(`§4 · the Contact list's full header at ${vp.width}`, async ({ page, browser }) => {
+    const L = new Ledger(`v2-full-agents-${vp.width}`);
+    const mp = await browser.newPage();
+    const mock = vp.width === 1920 ? undefined : await readMockHeader(mp, vp);
+    if (mock) L.check("§2 · the mock rendered with its fonts", { route: "mock", size: `${vp.width}`, state: "expanded" }, mock.fonts, JSON.stringify(mock));
+    await mp.close();
+    await openApp(page, "/agents", vp);
+    const r = await readFull(page, ".clv-rail");
+    const ctx = { route: "/agents", size: `${vp.width}`, state: "expanded" };
+    L.check("§4 · the full header was found", ctx, !!r, JSON.stringify(r));
+    if (r) judgeFull(L, r, ctx, mock);
+    const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="tiles"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
+    if (r) L.check("§4 · the count cards start at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `counts ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
+    const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
+    L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
+    L.write();
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 20 : 17);
+    expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
+  });
+}
+
+test("§4.4 · the two full headers are one header", async ({ page }) => {
+  const L = new Ledger("v2-consistency");
+  for (const vp of SIZES) {
+    await openApp(page, "/queries", vp); const q = await readTops(page);
+    await openApp(page, "/agents", vp); const c = await readTops(page);
+    const ctx = { route: "/queries vs /agents", size: `${vp.width}`, state: "expanded" };
+    for (const k of ["header", "eyebrow", "title"] as const) {
+      L.check(`§4.4 · the ${k}'s top is the same on both`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - c[k]) <= 0.5, `qc ${q[k].toFixed(1)} contact ${c[k].toFixed(1)}`);
+    }
+    L.check("§4.4 · the Contact list's eyebrow is its sidebar section", ctx, (c.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "AGENTS / CONTACT LIST", `${c.eyebrowText}`);
+  }
+  L.write();
+  expect(L.rows.length).toBe(SIZES.length * 4);
+  expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
+});
+
+test("§4.5 · the switcher on the Contact list", async ({ page }) => {
+  const L = new Ledger("v2-switcher-agents");
+  await switchAndCompare(page, L, "/agents");
+  L.write();
+  expect(L.rows.length).toBeGreaterThanOrEqual(3);
+  expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
+});
+
+test("§4.6 · the quick-add card", async ({ page }) => {
+  const L = new Ledger("v2-quickadd");
+  const ctx = { route: "/agents", size: "1440", state: "quick-add" };
+  await openApp(page, "/agents", { width: 1440, height: 900 });
+  const add = page.locator('[data-probe="page-header"] .ph-primary').filter({ hasText: "+ Add an agent" }).first();
+  const paste = page.locator('[data-probe="page-header"] .ph-secondary').filter({ hasText: "Paste a link" }).first();
+  const before = await readQuick(page);
+  L.check("§4.6 · closed at rest", ctx, !before.qa, JSON.stringify(before.qa));
+  await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
+  const open = await readQuick(page);
+  L.check("§4.6 · + Add an agent opens it", ctx, !!open.qa, "");
+  L.check("§4.6 · 340 wide, 10 below the actions, on their left", ctx, !!open.qa && !!open.acts && Math.abs(open.qa.w - 340) <= 0.5 && Math.abs(open.qa.t - (open.acts.b + 10)) <= 1 && Math.abs(open.qa.l - open.acts.l) <= 1,
+    JSON.stringify({ qa: open.qa, acts: open.acts }));
+  L.check("§4.6 · its header is anthracite and says Add new agent", ctx, open.head?.bg === "rgb(42, 58, 82)" && open.head?.text === "Add new agent", JSON.stringify(open.head));
+  L.check("§4.6 · it is painted over the page, not under the count cards", ctx, open.onTop, "");
+  L.check("§4.6 · the count cards did not move", ctx, !!before.tiles && !!open.tiles && Math.abs(before.tiles.t - open.tiles.t) <= 0.5, `${before.tiles?.t} → ${open.tiles?.t}`);
+  await page.locator('[data-shell="pagename"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
+  L.check("§4.6 · an outside press closes it", ctx, !(await readQuick(page)).qa, "");
+  await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(100); await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
+  L.check("§4.6 · + Add an agent toggles it shut", ctx, !(await readQuick(page)).qa, "");
+  await add.click({ timeout: 5000 }).catch(() => {}); await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+  L.check("§4.6 · Escape closes it", ctx, !(await readQuick(page)).qa, "");
+  await add.click({ timeout: 5000 }).catch(() => {}); await page.locator('[data-clv="quickadd"] .clv-qa-go').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+  let q = await readQuick(page);
+  L.check("§4.6 · clicking into it opens the add card, name focused", ctx, q.addCard && !q.qa && q.focused === "f-name", JSON.stringify(q));
+  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
+  await add.click({ timeout: 5000 }).catch(() => {}); await page.locator('[data-clv="quickadd"] .clv-qa-ln button').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+  q = await readQuick(page);
+  L.check("§4.6 · Fill in opens the add card, link focused", ctx, q.addCard && !q.qa && q.focused === "f-link", JSON.stringify(q));
+  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
+  await paste.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+  q = await readQuick(page);
+  L.check("§4.6 · Paste a link opens the add card, link focused", ctx, q.addCard && q.focused === "f-link", JSON.stringify(q));
+  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
+  L.write();
+  expect(L.rows.length).toBe(12);
+  expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
+});

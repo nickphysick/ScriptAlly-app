@@ -1115,7 +1115,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
       expect(src, `${page} took the shared masthead back — move it to CONVERTED`).toContain("masthead={null}");
-      expect(src, `${page} mounts a PageHeader while listed as opted out`).not.toContain("<PageHeader");
+      /* ⚠️ RETIRED (page header v2 §4): "mounts a PageHeader while listed as opted out". An opted-out
+         page may carry the shared full header AS CONTENT — the Query Centre has since v1 (in
+         QcCentre.tsx, which is why this line passed for it vacuously) and the Contact list does now.
+         The claim that matters is that it is not the grid's MASTHEAD, which `masthead={null}` above
+         asserts; that the full header renders on both is measured in pageHeaderV2.measure.ts §4.4. */
     }
     const grid = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
     expect(grid, "a grid with no masthead still renders an empty chrome slab").toContain("{!barOnly && !record && hasMast && (");

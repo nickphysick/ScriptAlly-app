@@ -45,8 +45,10 @@ import type { FormSection } from "./contact/ContactAgentForm";
 import { AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor } from "../../lib/contactEdit";
 import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../lib/computeAgentDeadlineWrites";
-import { useNavigate } from "react-router-dom";
-import { ContactHero, CountCards } from "./contact/ContactHero";
+import { useLocation, useNavigate } from "react-router-dom";
+import { CountCards } from "./contact/ContactCounts";
+import { CONTACT_HAWK, ContactIntro, ContactQuickAdd } from "./contact/ContactHeader";
+import { PageHeader } from "../shell/PageHeader";
 import {
   ContactCardKey, ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
@@ -87,6 +89,10 @@ interface AgentListProps {
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
   const navigate = useNavigate();
+  /* ⚠️ THE SWITCHER RE-OPENS THE ROUTE (page header v2 §4.5), so a switch is a new location KEY on
+     the same path — and that key is what the scope reads on. Memoised on `manuscripts` alone, the
+     page went on stating the old book's facts after the bar had changed book. */
+  const { key: locationKey } = useLocation();
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady, userTasks, addUserTask, resolveTaskFlag } =
     useScriptAllyDb();
 
@@ -99,7 +105,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     let id: string | null = null;
     try { id = window.localStorage.getItem(ACTIVE_MS_KEY); } catch { id = null; }
     return resolveScopedManuscript(manuscripts, id);
-  }, [manuscripts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the key is the switch's signal
+  }, [manuscripts, locationKey]);
   /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the
      count cards through the same value, so a card can never count an agent whose chip is not
      tinted. */
@@ -120,8 +127,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       return next;
     });
   }, []);
-  /* the hero publishes its stacked flag — below 760 the count cards leave it for the list's top */
-  const [heroStacked, setHeroStacked] = useState(false);
+  /* the quick-add card "+ Add an agent" drops beneath the header's actions (page header v2 §4) */
+  const [quickOpen, setQuickOpen] = useState(false);
+  const addBtnRef = useRef<HTMLButtonElement>(null);
+  const closeQuick = useCallback(() => setQuickOpen(false), []);
 
   const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -680,6 +689,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             a blank account's pitch and the settling beat are single-column, and a grid with an
             absent second child would hold a 340px hole open for nothing. */}
         <div className={pageState === "list" ? "clv-group" : undefined}>
+        {/* ⚠️ THE SHARED FULL HEADER (page header v2 §4): the Query Centre's component, frame and rule.
+            It spans the whole group — column AND rail — so the Housekeeping rail starts below the
+            rule, as the Birds-eye rail does. It renders over a LIST only: the blank account's pitch
+            is its own page, and a header stating figures about nothing would be the empty-desk fault. */}
+        {pageState === "list" && (
+          <PageHeader
+            variant="full"
+            title="Contact list"
+            description={<ContactIntro f={facts} />}
+            primaryRef={addBtnRef}
+            primary={{ label: "+ Add an agent", onClick: () => setQuickOpen((o) => !o) }}
+            secondary={{ label: "Paste a link", onClick: () => { setQuickOpen(false); setAdding("link"); } }}
+            art={<img src={`${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`} width={CONTACT_HAWK.width} height={CONTACT_HAWK.height} alt="" />}
+            actionsPopover={quickOpen ? (
+              <ContactQuickAdd
+                anchorRef={addBtnRef}
+                onClose={closeQuick}
+                onOpen={(focus) => { setQuickOpen(false); setAdding(focus); }}
+              />
+            ) : null}
+          />
+        )}
         <div className={pageState === "list" ? "clv-main" : undefined} ref={mainColRef}>
 
         {/* ⚠️ THE BLANK ACCOUNT IS ITS OWN PAGE, NOT A DASHED BOX IN THE GRID. What it replaces —
@@ -704,26 +735,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         ) : pageState === "settling" ? null : (
         <>
 
-        {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
-            filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
-        {/* ⚠️ THE HERO IS THE PAGE'S HEAD (v11 §3) — and it renders only over a LIST: the blank
-            account's pitch is its own page, and a hero stating figures about nothing would be
-            the empty-desk fault. The count cards ride inside it side-by-side and move to a row
-            of three above the list when the hero stacks (§3.2). */}
+        {/* ⚠️ THE COUNT CARDS ARE THE FIRST THING BELOW THE RULE (page header v2 §4), a row of three
+            at the top of the page column — moved out of the retired hero, not restyled. */}
         {pageState === "list" && (
-          <ContactHero
-            facts={facts}
-            cards={census.cards}
-            cardSel={cardSel}
-            onToggleCard={toggleCard}
-            addOpen={adding !== null}
-            onAdd={() => setAdding("name")}
-            onPasteAdd={() => setAdding("link")}
-            onStacked={setHeroStacked}
-            stacked={heroStacked}
-          />
-        )}
-        {pageState === "list" && heroStacked && (
           <CountCards cards={census.cards} sel={cardSel} onToggle={toggleCard} row />
         )}
         {/* the v11 header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}

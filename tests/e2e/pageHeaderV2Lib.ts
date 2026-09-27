@@ -263,21 +263,53 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   L.check("§4.3 · the drawn art's bottom is the rule", ctx, !!r.art && n(r.art.b, r.rule, 1), `art ${r.art?.b.toFixed(1)} rule ${r.rule.toFixed(1)}`);
   L.check("§4.3 · the drawn art clears the text", ctx, !!r.art && r.art.l >= r.textR, `art ${r.art?.l.toFixed(1)} text ${r.textR.toFixed(1)} gap ${r.art ? (r.art.l - r.textR).toFixed(1) : "?"}`);
   L.check("§4.3 · the drawn art clears the bar", ctx, !!r.art && r.art.t >= r.barB - 0.5, `art top ${r.art?.t.toFixed(1)} bar ${r.barB.toFixed(1)}`);
-  L.check("§2 · eyebrow at header + 26, title at eyebrow + 22", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 22, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
+  L.check("§2 · eyebrow at header + 26, title at eyebrow + 24", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 24, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
   L.check("§2 · the title is Special Elite", ctx, /^"?Special Elite"?/.test(r.titleFam ?? ""), `${r.titleFam}`);
   L.check("§2 · …at 56px (50 at 1360 and below)", ctx, r.titleSize === (Number(ctx.size) <= 1360 ? "50px" : "56px"), `${r.titleSize}`);
-  /* ⚠️ THE HEIGHT IS CONTENT, SO IT IS HELD TO THE RIGHT REFERENCE. The rendered mock (with its fonts)
-     is 271.7 / 265.7 at 1440 / 1280 because its intro carries a 17px Special Elite run that makes its
-     line boxes taller; the brief's 267 / 261 are the same header with a serif-only intro, which is the
-     Query Centre's. So the Query Centre is held to the brief's figures and the Contact list, whose
-     intro has the mock's shape, to the rendered mock — and both numbers are reported every run. */
-  const BRIEF_H: Record<string, number> = { "1280": 261, "1440": 267 };
-  if (ctx.route === "/queries" && BRIEF_H[ctx.size]) {
-    L.check("§4.3 · the header's height is the brief's ±2", ctx, n(r.hdH, BRIEF_H[ctx.size], 2), `app ${r.hdH.toFixed(1)} brief ${BRIEF_H[ctx.size]} mock ${mock?.hdH.toFixed(1)}`);
-  }
+  /* ⚠️ BOTH HEADERS ARE HELD TO THE RENDERED MOCK (271.7 / 265.7 at 1440 / 1280). The brief's
+     267 / 261 were the same header with v1's eyebrow gap (title at eyebrow + 22); the v5 ref draws
+     eyebrow + 24, and the first version of this lock blamed the difference on the intro's Special
+     Elite run — measured, the intro's line boxes are identical to the mock's (54.73 both). The
+     height is still content: a third intro line would fail this, which is the point. */
   if (mock) {
-    if (ctx.route !== "/queries") L.check("§4.3 · the header's height is the mock's ±2", ctx, n(r.hdH, mock.hdH, 2), `app ${r.hdH.toFixed(1)} mock ${mock.hdH.toFixed(1)}`);
+    L.check("§4.3 · the header's height is the mock's ±2", ctx, n(r.hdH, mock.hdH, 2), `app ${r.hdH.toFixed(1)} mock ${mock.hdH.toFixed(1)}`);
     L.check("§4.3 · the frame sits where the mock's does ±1", ctx, !!r.frame && n(r.frame.l, mock.frame.l, 1) && n(r.frame.r, mock.frame.r, 1), `app ${r.frame?.l.toFixed(1)}→${r.frame?.r.toFixed(1)} mock ${mock.frame.l.toFixed(1)}→${mock.frame.r.toFixed(1)}`);
   }
 }
 
+
+/* ══ §4 · the Contact list ══ */
+
+/** The header's three tops, absolute, for the §4.4 comparison between pages. */
+export async function readTops(page: Page) {
+  return page.evaluate(() => {
+    const vis = (s: string) => [...document.querySelectorAll(s)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    const hd = vis('[data-probe="page-header"][data-size="full"]');
+    const t = (e?: Element | null) => (e ? e.getBoundingClientRect().top : NaN);
+    return { header: t(hd), eyebrow: t(hd?.querySelector('[data-probe="eyebrow"]')), title: t(hd?.querySelector('[data-probe="title"]')),
+      eyebrowText: hd?.querySelector('[data-probe="eyebrow"]')?.textContent ?? null };
+  });
+}
+
+/** The quick-add card, the actions row and the count cards, in one read. */
+export async function readQuick(page: Page) {
+  return page.evaluate(() => {
+    const vis = (s: string) => [...document.querySelectorAll(s)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    const box = (e?: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; };
+    const qa = vis('[data-clv="quickadd"]');
+    const hd = qa?.querySelector(".clv-qa-hd") as HTMLElement | null;
+    const acts = vis('[data-probe="page-header"] [data-probe="actions"]');
+    /* what the browser paints across the card — a 5×5 grid of points inside it, each of which must
+       hit the card. ⚠️ ONE POINT WAS NOT ENOUGH: the centre falls below the count cards, so a card
+       painted UNDER them still answered "on top" there (caught by the z-index mutation). */
+    const qb = qa?.getBoundingClientRect();
+    let onTopAll = !!qb && qb.bottom <= innerHeight;
+    if (qa && qb && onTopAll) for (let i = 1; i <= 5; i++) for (let j = 1; j <= 5; j++) {
+      const hit = document.elementFromPoint(qb.left + (qb.width * i) / 6, qb.top + (qb.height * j) / 6);
+      if (!hit || !qa.contains(hit)) onTopAll = false;
+    }
+    return { qa: box(qa), acts: box(acts), tiles: box(vis('[data-clv="tiles"]')), head: hd ? { bg: getComputedStyle(hd).backgroundColor, text: hd.textContent } : null,
+      onTop: onTopAll, addCard: !!vis('[data-clv="addcard"]'),
+      focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-clv") ?? null };
+  });
+}

@@ -219,7 +219,6 @@ test("L13 page title · the Contact list's title matches the Query Centre's", as
     return {
       fam: cs.fontFamily, size: cs.fontSize, narrow: !!el.closest(n),
       overflow: el.scrollWidth - el.clientWidth, right: el.getBoundingClientRect().right, parentRight: parent.getBoundingClientRect().right,
-      hero: (el.closest(".clv-hero") as HTMLElement | null)?.getBoundingClientRect().width ?? 0,
     };
   }, [sel, narrowSel]);
   for (const vp of SIZES) for (const collapsed of [false, true]) {
@@ -228,22 +227,20 @@ test("L13 page title · the Contact list's title matches the Query Centre's", as
     /* page header v1 moved the Query Centre's title into PageHeader (`.ph-title`); `.qcv-title` is gone */
     const qc = await read('[data-probe="page-header"] .ph-title', ".qcv-page--narrow");
     await openShell(page, "/agents", vp, collapsed);
-    const cl = await read(".clv-hero-t", ".clv-hero--stack");
+    /* ⚠️ RETARGETED (page header v2 §4): the Contact list's title is the shared PageHeader's now */
+    const cl = await read('[data-probe="page-header"] .ph-title', ".qcv-page--narrow");
     L.check("L13 title · both found", ctx, !!qc && !!cl, `qc ${JSON.stringify(qc)} cl ${JSON.stringify(cl)}`);
     if (!qc || !cl) continue;
     L.check("L13 title · Special Elite", ctx, /^"?Special Elite"?/.test(cl.fam), `contact ${cl.fam}`);
     L.check("L13 title · QC confirmed Special Elite", ctx, /^"?Special Elite"?/.test(qc.fam), `qc ${qc.fam}`);
-    /* ⚠️ THE QC'S SIZE IS A CEILING, REACHED WHEREVER THE HERO CAN HOLD IT. Beside the Archivist the Contact
-       hero caps its text column at about a third of its width, so the title scales with the hero
-       (contactV11.css) — never above the QC's, and equal to it from a 962px hero up. */
-    const q = parseFloat(qc.size), c2 = parseFloat(cl.size);
-    L.check("L13 title · never above the QC's size", ctx, c2 <= q + 0.1, `qc ${qc.size} contact ${cl.size}`);
-    if (!qc.narrow && !cl.narrow && cl.hero >= 962) L.check("L13 title · the QC's size where the hero holds it", ctx, Math.abs(c2 - q) < 0.1, `qc ${qc.size} contact ${cl.size} hero ${cl.hero}`);
-    console.log(`L13 ${vp.width} ${ctx.state}: qc ${qc.size} narrow=${qc.narrow} · contact ${cl.size} stacked=${cl.narrow} hero ${cl.hero}`);
+    /* ⚠️ TIGHTENED (page header v2 §4): "never above the QC's size" and "the QC's size where the hero
+       holds it" were written for the v11 hero, which scaled its title with its own width. Both titles
+       are the one PageHeader title now, so the claim is equality in every state. */
+    L.check("L13 title · the QC's size, in every state", ctx, Math.abs(parseFloat(qc.size) - parseFloat(cl.size)) < 0.1, `qc ${qc.size} contact ${cl.size}`);
+    console.log(`L13 ${vp.width} ${ctx.state}: qc ${qc.size} · contact ${cl.size}`);
     L.check("L13 title · never overflows its column", ctx, cl.overflow <= 0.5 && cl.right <= cl.parentRight + 0.5, `overflow ${cl.overflow} right ${cl.right} parent ${cl.parentRight}`);
   }
   L.write();
   expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(26);
-  expect(L.rows.filter((r) => r.lock === "L13 title · the QC's size where the hero holds it").length, "the equality branch ran").toBeGreaterThan(1);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} ${f.state} — ${f.detail}`)).toEqual([]);
 });
