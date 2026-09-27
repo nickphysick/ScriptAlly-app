@@ -181,7 +181,9 @@ test("S7 · the run touches no G4 file, and the page's sheet names no shell sele
 });
 
 /* ── helpers for the page locks ── */
-async function freshFilled(page: Page, vp = { width: 1440, height: 900 }) {
+/* the page locks' viewport: 1440×900 by default, `CM_CW=1280` for 1280×800 */
+const CVP = Number(process.env.CM_CW ?? 1440) === 1280 ? { width: 1280, height: 800 } : { width: 1440, height: 900 };
+async function freshFilled(page: Page, vp = CVP) {
   seed();
   await openComps(page, FILLED, vp);
   await waitForOrder(page, FIXTURE_TITLES);
@@ -194,7 +196,7 @@ const card = (page: Page, title: string) => on(page, `[data-cpv="list"] [data-cp
 /* ══ C1 · the line follows the switches, in list order ══ */
 test("C1 · line", async ({ page }) => {
   const L = new Ledger("comps-C1");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   await freshFilled(page);
   let r = await readList(page);
   L.check("C1 · readers-of line from the two switched on, in list order", ctx,
@@ -233,7 +235,7 @@ test("C1 · line", async ({ page }) => {
 /* ══ C2 · the order is the array, and it survives a reload ══ */
 test("C2 · order persists", async ({ page }) => {
   const L = new Ledger("comps-C2");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   await freshFilled(page);
   await grip(page, 0).focus();
   await page.keyboard.press("Alt+ArrowDown");
@@ -249,13 +251,13 @@ test("C2 · order persists", async ({ page }) => {
   await page.evaluate(() => {
     const first = [...document.querySelectorAll('[data-cpv="page"] [data-cpv="list"] > [data-cpv="comp"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
     const sc = first?.closest(".wpg-scroll") as HTMLElement | null;
-    if (first && sc) sc.scrollTop += first.getBoundingClientRect().top - sc.getBoundingClientRect().top - 80;
+    if (first && sc) sc.scrollTop += first.getBoundingClientRect().top - sc.getBoundingClientRect().top - 10;
   });
   await page.waitForTimeout(200);
   const g = grip(page, 2);
   const first = on(page, '[data-cpv="list"] > [data-cpv="comp"]').first();
   const gb = await g.boundingBox(); const fb = await first.boundingBox();
-  L.check("C2 · precondition: both cards on screen", ctx, !!gb && !!fb && gb.y + gb.height < 900 && fb.y > 60, JSON.stringify({ gb, fb }));
+  L.check("C2 · precondition: both cards on screen", ctx, !!gb && !!fb && gb.y + gb.height < CVP.height && fb.y > 60, JSON.stringify({ gb, fb }));
   if (gb && fb) {
     await page.mouse.move(gb.x + gb.width / 2, gb.y + gb.height / 2);
     await page.mouse.down();
@@ -279,7 +281,7 @@ test("C2 · order persists", async ({ page }) => {
 /* ══ C3 · the form: required title, four-digit year, tags, duplicates ══ */
 test("C3 · form", async ({ page }) => {
   const L = new Ledger("comps-C3");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   await freshFilled(page);
   await on(page, '[data-cpv="add"]').click();
   const f = on(page, '[data-cpv="form"]');
@@ -325,7 +327,7 @@ test("C3 · form", async ({ page }) => {
 /* ══ C4 · Remove then Undo restores the same comp at the same index ══ */
 test("C4 · undo", async ({ page }) => {
   const L = new Ledger("comps-C4");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   await freshFilled(page);
   await card(page, "Nine Miles Out").locator('[data-cpv="remove"]').click();
   await waitForOrder(page, FIXTURE_TITLES.filter((t) => t !== "Nine Miles Out")).catch(() => {});
@@ -343,11 +345,11 @@ test("C4 · undo", async ({ page }) => {
 /* ══ C5 · the Scout is inert: no call, no enabled control ══ */
 test("C5 · scout inert", async ({ page }) => {
   const L = new Ledger("comps-C5");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   const calls: string[] = [];
   page.on("request", (q) => { if (/suggestComps/i.test(q.url())) calls.push(q.url()); });
   seed();
-  await openComps(page, FILLED, { width: 1440, height: 900 });
+  await openComps(page, FILLED, CVP);
   const rail = on(page, '[data-cpv="rail"]');
   L.check("C5 · the rail renders", ctx, (await rail.count()) === 1, "");
   const r = await page.evaluate(() => {
@@ -382,9 +384,9 @@ test("C6 · no appraisal", async ({ page }) => {
   const L = new Ledger("comps-C6");
   const now = new Date().getFullYear();
   for (const ms of [FILLED, EMPTY]) {
-    const ctx = { route: "/manuscripts/comps", size: "1440", state: ms === FILLED ? "filled" : "empty" };
+    const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: ms === FILLED ? "filled" : "empty" };
     seed();
-    await openComps(page, ms, { width: 1440, height: 900 });
+    await openComps(page, ms, CVP);
     const text = await pageText(page);
     L.check("C6 · the page has text", ctx, text.length > 200, `${text.length}`);
     /* ⚠️ NOT "only" AND NOT "already": the mock's own copy reads "Only the title is needed" and "the
@@ -404,9 +406,9 @@ test("C6 · no appraisal", async ({ page }) => {
 /* ══ C7 · the empty state ══ */
 test("C7 · empty", async ({ page }) => {
   const L = new Ledger("comps-C7");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "empty" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "empty" };
   seed();
-  await openComps(page, EMPTY, { width: 1440, height: 900 });
+  await openComps(page, EMPTY, CVP);
   const r = await page.evaluate(() => {
     const root = [...document.querySelectorAll('[data-cpv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
     const main = root?.querySelector('[data-cpv="main"]');
@@ -449,7 +451,7 @@ test("C7 · empty", async ({ page }) => {
 /* ══ C8 · keys ══ */
 test("C8 · keys", async ({ page }) => {
   const L = new Ledger("comps-C8");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   await freshFilled(page);
   await page.locator("body").click({ position: { x: 5, y: 300 } }).catch(() => {});
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
@@ -471,7 +473,7 @@ test("C8 · keys", async ({ page }) => {
 /* ══ C9 · a save that fails reverts and says so ══ */
 test("C9 · save failure", async ({ page }) => {
   const L = new Ledger("comps-C9");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await freshFilled(page);
@@ -503,7 +505,7 @@ test("C9 · save failure", async ({ page }) => {
    level against the same decision function (manuscriptFeed.test.ts); this page has no title control. */
 test("C10 · a comp reorder writes no feed item", async ({ page }) => {
   const L = new Ledger("comps-C10");
-  const ctx = { route: "/manuscripts/comps", size: "1440", state: "filled" };
+  const ctx = { route: "/manuscripts/comps", size: `${CVP.width}`, state: "filled" };
   /* ⚠️ A COUNT THAT CANNOT BE READ IS A FAILURE, NOT A NUMBER — the raw output goes into the row */
   const feed = () => {
     const raw = execFileSync("node", ["tests/e2e/seedCompsFixture.mjs", "--feed", FILLED], { encoding: "utf8" });
