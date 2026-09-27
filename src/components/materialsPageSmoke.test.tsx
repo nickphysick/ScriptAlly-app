@@ -172,6 +172,10 @@ describe("/manuscripts/comps renders", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
     expect(html, "the query line did not render").toContain("Your query line");
+    /* the comp card rendered, with the two read-time derivations that only run here */
+    expect(html, "the comp card did not render").toContain("The Smoke Comp");
+    expect(html, "compAgeLine did not run").toMatch(/2021 · (\d+ years? ago|this year)/);
+    expect(html, "compFacets did not run").toContain("structure");
     expect(html, "the page renders the full header").toContain('data-size="full"');
   });
 });

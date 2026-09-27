@@ -21,7 +21,7 @@ import { definedTokens, readTokens, renderedClasses, styledClasses } from "../..
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "compsV2.css"), "utf8");
-const FILES = ["ComparableTitlesPage.tsx", "CompsQueryLine.tsx"];
+const FILES = ["ComparableTitlesPage.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx"];
 const tsx = FILES.map((f) => readFileSync(join(here, f), "utf8")).join("\n");
 
 describe("compsV2.css — every token it defines is read", () => {
@@ -42,13 +42,13 @@ describe("compsV2.css — every class the page renders has a rule", () => {
 
   /** ⚠️ AND THE GUARD MUST BE READING SOMETHING — both halves above pass on empty extractions. */
   it("is actually extracting classes and tokens, not passing on empty sets", () => {
-    expect(renderedClasses(tsx, "cpv-").length).toBeGreaterThan(10);
-    expect(definedTokens(css, "cpv-").length).toBeGreaterThan(5);
-    expect(styledClasses(css, "cpv-").length).toBeGreaterThan(15);
+    expect(renderedClasses(tsx, "cpv-").length).toBeGreaterThan(30);
+    expect(definedTokens(css, "cpv-").length).toBeGreaterThan(10);
+    expect(styledClasses(css, "cpv-").length).toBeGreaterThan(30);
   });
 
   /** an `id` is not a class — the form's inputs carry `id="cpv-f-title"` and friends */
-  it.skip("does not mistake an id for a class (the form lands in Phase 3)", () => {
+  it("does not mistake an id for a class", () => {
     expect(tsx).toContain('id="cpv-f-title"');
     expect(renderedClasses(tsx, "cpv-")).not.toContain("cpv-f-title");
   });
