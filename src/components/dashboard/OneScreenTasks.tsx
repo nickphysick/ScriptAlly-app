@@ -68,6 +68,8 @@ import type { SendMethod } from "../../lib/paneJourney";
 import { TodoRowEditor, blankDraft, draftToValues, stripFor, type RowDraft } from "./TodoRowEditor";
 import type { CommitRequest } from "./DashTaskCommit";
 import { localYMD } from "../../lib/shellSidebar";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { drawerDoorForTask } from "../../lib/queryActions/entry";
 
 export interface OneScreenTasksProps {
   loading: boolean;
@@ -243,6 +245,25 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     if (panels[r.key]) return;
     const c = cardFor(r.key);
     if (!c) return;
+    /* ⚠️ QUERY ACTIONS v1 (K1/K2) — a task whose journey is live in the query drawer opens THE
+       DRAWER, at that task's step; the tick still commits nothing. The row keeps its receipt strip
+       and the drawer shows no undo bar, so there is one Undo, where the writer is looking — the
+       strip's Undo IS the drawer's. */
+    const door = drawerDoorForTask(c.taskType, c.relatedRecordId);
+    if (door) {
+      openQueryDrawer({
+        ...door,
+        receipt: true,
+        onSaved: (res) => {
+          const logged = res.message.split(" · ")[0];
+          const undoFn = () => { void res.undo(); };
+          setPanels((ps) => ({ ...ps, [r.key]: { kind: "strip", text: stripFor(r, logged, door.mode === "nudge" ? "nudge" : door.mode === "close" ? "close" : "sent"), canChange: false } }));
+          setUndos((u) => ({ ...u, [r.key]: undoFn }));
+          holdCompletion(r.key, { logged, undo: undoFn });
+        },
+      });
+      return;
+    }
     if (!modalJourney(c)) { openGap(c); return; }
     setWarn(null);
     setModal({ key: r.key, fromFeed: !!opts?.fromFeed });

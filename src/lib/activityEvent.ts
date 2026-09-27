@@ -18,12 +18,15 @@
  * input type, so prose cannot carry meaning. A row with no typed signal maps to null — visibly
  * inert (not rendered), never mis-mapped.
  */
+import { EVENT_LABEL, isEventKey } from "./queryActions/eventKeys";
 import { ActivityType, QueryStatus } from "../types";
 import { normalizeResultingStatus } from "./queryDerivation";
 
 export interface EventLabelInput {
   activityType?: unknown;
   resultingStatus?: unknown;
+  /** Query actions v1 (K5) — read FIRST when present. */
+  eventKey?: unknown;
 }
 
 /**
@@ -45,6 +48,11 @@ export interface EventLabelOptions {
 }
 
 export function activityEventLabel(act: EventLabelInput, opts: EventLabelOptions = {}): string | null {
+  // Query actions v1 (K5): a structured key is the answer; the send keeps its hero-row suppression.
+  if (isEventKey(act.eventKey)) {
+    if ((act.eventKey === "query_sent" || act.eventKey === "requery_sent") && !opts.includeSend) return null;
+    return EVENT_LABEL[act.eventKey];
+  }
   // The send is the timeline's own hero row above the events — never repeated as an event.
   if (act.activityType === ActivityType.QUERY_SENT) return opts.includeSend ? "Query sent" : null;
   if (act.activityType === ActivityType.NUDGE_SENT) return "Nudge sent";

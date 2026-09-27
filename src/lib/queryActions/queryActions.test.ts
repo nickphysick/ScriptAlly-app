@@ -146,3 +146,38 @@ describe("the undo plan — delete what the save created, write back what it cha
     expect(p.write).toEqual([]);
   });
 });
+
+import { drawerDoorForTask } from "./entry";
+import { EVENT_LABEL, LEGACY_KEY } from "./eventKeys";
+import { feedPill } from "../dashFeed";
+import { activityEventLabel } from "../activityEvent";
+import { ActivityType } from "../../types";
+
+describe("K3 — a task opens its journey, and the tick commits nothing", () => {
+  it("the send tasks open I've sent it on that query", () => {
+    for (const t of ["partial_requested", "full_requested", "revise_resubmit"]) {
+      expect(drawerDoorForTask(t, "q1")).toEqual({ mode: "sent", queryId: "q1" });
+    }
+  });
+  it("a door is only offered for a live journey — never a dead end", () => {
+    for (const t of ["nudge_overdue", "no_response_close", "offer_received", "offer_tell", "offer_send_full", "partial_requested"]) {
+      const d = drawerDoorForTask(t, "q1");
+      if (d) expect(DRAWER_LIVE[d.mode]).toBe(true);
+    }
+  });
+  it("no query, no door", () => expect(drawerDoorForTask("partial_requested", undefined)).toBeNull());
+});
+
+describe("K5 — the event key is read first", () => {
+  it("a key overrides the status for the pill and the timeline label", () => {
+    expect(feedPill({ activityType: ActivityType.STATUS_CHANGED, resultingStatus: QueryStatus.WITHDRAWN, eventKey: "withdrawn_on_offer" })).toBe(EVENT_LABEL.withdrawn_on_offer);
+    expect(activityEventLabel({ activityType: ActivityType.STATUS_CHANGED, resultingStatus: QueryStatus.REJECTED, eventKey: "pass" })).toBe("Passed");
+  });
+  it("the send stays suppressed where the surface draws its own hero row", () => {
+    expect(activityEventLabel({ activityType: ActivityType.QUERY_SENT, eventKey: "query_sent" })).toBeNull();
+    expect(activityEventLabel({ activityType: ActivityType.QUERY_SENT, eventKey: "query_sent" }, { includeSend: true })).toBe("Query sent");
+  });
+  it("every key has a label and a legacy mapping entry", () => {
+    for (const k of Object.keys(EVENT_LABEL)) expect(k in LEGACY_KEY).toBe(true);
+  });
+});

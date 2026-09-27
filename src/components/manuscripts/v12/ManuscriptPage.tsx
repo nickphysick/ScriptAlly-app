@@ -59,6 +59,8 @@ import { Msv12EditDetails, Msv12NewVersion } from "./Msv12EditDetails";
 import { Msv12Empty } from "./Msv12Empty";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import "./msv12.css";
+import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { DRAWER_LIVE } from "../../../lib/queryActions/entry";
 
 const TaskModal = React.lazy(() => import("../../task/TaskModal").then((m) => ({ default: m.TaskModal })));
 
@@ -136,6 +138,8 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   const { flash } = useTodoToast();
 
   const openSend = (row: { query: Query; kind: "partial" | "full" }) => {
+    /* Query actions v1 (K1) — "I've sent it" finishes in the query drawer once that journey is live. */
+    if (DRAWER_LIVE.sent) { openQueryDrawer({ mode: "sent", queryId: row.query.id }); return; }
     const c = cardForOwed(row);
     if (!c || !modalJourney(c)) {
       /* the board is not raising this card (muted, or mid-write) — the Query Centre hosts the

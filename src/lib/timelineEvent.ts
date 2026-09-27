@@ -98,7 +98,7 @@ export const getTimelineFamily = (act: TimelineActivityLike): TimelineFamily => 
   }
 
   // Pre-migration / unstamped events: fall back to the desc-based key.
-  const { key } = getActivityKeyAndDefaults(act.description || "", act.activityType);
+  const { key } = getActivityKeyAndDefaults(act.description || "", act.activityType, (act as { eventKey?: unknown }).eventKey);
   switch (key) {
     case "offer":
       return "offer";

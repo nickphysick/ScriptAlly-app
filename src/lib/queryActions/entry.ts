@@ -58,3 +58,21 @@ export function primaryDoor(status: QueryStatus | string): Door | null {
   const d = cardDoors(status).find((x) => x.primary) ?? null;
   return d && DRAWER_LIVE[d.mode] ? d : null;
 }
+
+/**
+ * K3 — which journey a query task opens, and at which step. The tick NEVER commits: it opens the
+ * drawer here, and only the drawer writes. Returns null for a task whose journey is not yet live
+ * in the drawer, so the caller keeps its old route (the one-journey-at-a-time cut-over).
+ */
+export interface TaskDoor { mode: DrawerMode; queryId: string; preset?: { nudgeTab?: "sent" | "plan"; closeWhy?: "noreply"; step?: number } }
+export function drawerDoorForTask(taskType: string | undefined, queryId: string | undefined): TaskDoor | null {
+  if (!taskType || !queryId) return null;
+  const door: TaskDoor | null =
+    taskType === "partial_requested" || taskType === "full_requested" || taskType === "revise_resubmit" ? { mode: "sent", queryId }
+    : taskType === "nudge_overdue" ? { mode: "nudge", queryId, preset: { nudgeTab: "sent" } }
+    : taskType === "no_response_close" ? { mode: "close", queryId, preset: { closeWhy: "noreply" } }
+    : taskType === "offer_received" || taskType === "offer_tell" ? { mode: "offer", queryId, preset: { step: 1 } }
+    : taskType === "offer_send_full" ? { mode: "sent", queryId }
+    : null;
+  return door && DRAWER_LIVE[door.mode] ? door : null;
+}

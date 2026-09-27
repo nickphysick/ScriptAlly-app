@@ -76,6 +76,8 @@ import { getStatusLabel } from "../StatusPill";
 import { agentWindowMs } from "../../lib/expectedDate";
 import { elapsedParts } from "../../lib/elapsed";
 import { localYMD } from "../../lib/shellSidebar";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { drawerDoorForTask } from "../../lib/queryActions/entry";
 
 /**
  * ⚠️ MODULE-LEVEL AND TAKING `agents`, BECAUSE IT HAS TWO CONSUMERS AND MUST STAY ONE TABLE. The
@@ -892,6 +894,11 @@ export function useTaskPaneSession(
   }, [host.jumpToSection]);
 
   function dockPrimary(card: BoardCard) {
+    /* ⚠️ QUERY ACTIONS v1 (K1) — "every page finishes in the query drawer". The pane stays the
+       READING surface; a card whose journey is live in the drawer finishes there, and this pane's
+       own finishing path is the fallback only while that journey is not. */
+    const door = drawerDoorForTask(card.taskType, card.relatedRecordId);
+    if (door) { openQueryDrawer(door); return; }
     /* ⚠️ NO INTENT, NO PRIMARY — so there is nothing to gate. The bar renders no primary while the
        fork is showing, which makes this unreachable rather than merely unnecessary; the guard is
        here because a caller could still reach it. */

@@ -1,4 +1,5 @@
 import { Activity, ActivityType } from "../types";
+import { EVENT_LABEL, LEGACY_KEY, isEventKey } from "./queryActions/eventKeys";
 import { computeResponseDeadline } from "./responseDeadline";
 import { writerExpectedIso } from "./expectedDate";
 
@@ -8,7 +9,9 @@ import { writerExpectedIso } from "./expectedDate";
  *  (one source, never a second regex drifting). */
 export const OFFER_RECEIVED_DESC_RE = /^Congratulations!\s+You've\s+received\s+an\s+offer\s+of\s+representation\s+from\s+/i;
 
-export const getActivityKeyAndDefaults = (description: string, activityType?: ActivityType) => {
+export const getActivityKeyAndDefaults = (description: string, activityType?: ActivityType, eventKey?: unknown) => {
+  /* Query actions v1 (K5) — a row the drawer wrote says what it is; the words are not consulted. */
+  if (isEventKey(eventKey) && LEGACY_KEY[eventKey]) return { key: LEGACY_KEY[eventKey] as string | null, defaultLabel: EVENT_LABEL[eventKey] };
   const normalized = (description || "").toLowerCase();
   
   let key: string | null = null;
