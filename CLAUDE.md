@@ -594,7 +594,43 @@
 - **⚠️ THE DRAWER'S HUG BELOW 1050px IS KNOWN AND DELIBERATELY UNFIXED.** The sheet's content wants 461px; the cap is 404 at a 900px viewport and clear of 461 from 1050 up, so on a 1440×900 laptop the drawer scrolls internally where it used to hug. `tightened` P3.10b tests the hug law at 1050 so it is not silently dropped — **which is not the same as the hug being fine**. It belongs to a mobile/laptop pass, not to a correction of the desktop layout.
 - **⚠️ AND `.card .ttl` IS DECLARED TWICE IN THE CONTRACT** — Inter 14.5/600, then Playfair 18/500 two hundred lines later, so the artefact RENDERS Playfair while the brief specifies Inter 600. The brief wins (a reasoned value in prose beats an unreasoned one in an artefact). A reader diffing the ref against `TaskTicket.tsx` will find the difference and it is not a mistake.
 
-## Finishing a task — THE PANE READS, THE MODAL FINISHES (task-modal round, 21 Sep; ref `task-modal.html`)
+## Query actions v1 — EVERY PAGE FINISHES IN THE QUERY DRAWER (27 Sep; ref = design-refs/query-actions-v11.html; report reports/query-actions-v1/)
+- **⚠️ THE STANDING SENTENCE IS NOW "EVERY PAGE FINISHES IN THE QUERY DRAWER"** — it SUPERSEDES the
+  section below's "dashboard finishes in the modal, To-do page finishes in the pane". One right-hand
+  drawer (`src/components/queryActions/`), mounted once by `App.tsx`, opened ONLY through
+  `openQueryDrawer(…)` (`lib/queryActions/drawerStore`). Seven journeys: log (D1) · resp (D2, incl. a
+  late reply) · sent (D3) · nudge (D4) · close (D5) · offer (D6) · edit (D7). The To-do pane stays the
+  READING surface; its finish buttons open the drawer.
+- **⚠️ `DRAWER_LIVE` (`lib/queryActions/entry.ts`) IS THE CUT-OVER, AND THE DOOR TABLES ARE THE ONLY
+  ROUTES.** `cardDoors` (the card footer, by status), `rowDoors` (row actions) and `drawerDoorForTask`
+  (a task → its journey and step) each offer a door ONLY for a live journey, so no door is ever dead.
+  A door not live keeps its old route. **The tick never commits** — it opens the drawer; only the
+  drawer writes.
+- **⚠️ UNDO IS BY SNAPSHOT (`lib/queryActions/snapshot.ts`), NOT EACH WRITER'S INVERSE.** Before a
+  save the drawer reads the query docs, their `activity` logs, their feed rows, their task flags and
+  their stored tasks for every query the save touches; undo deletes what was created and writes back
+  what changed. **The task flags and tasks are in the set because the drawer writes neither** — one
+  appearing is a fault, and the mutation run found that a stored task went unnoticed until they were. Restoring the documents
+  restores the derived fields, so nothing is recomputed after. The e2e locks assert Firestore is
+  byte-identical after Undo.
+- **⚠️ A LATE REPLY REMOVES THE NO-REPLY CLOSURE AFTER THE REPLY IS RECORDED, NEVER BEFORE** — the
+  closure rung often carries the self-heal's id (`act-status-no-response-<qid>`) and the heal
+  re-creates it the instant the query reads No Response with no rung. And it removes it from BOTH
+  stores directly: `db.deleteActivity` finds its target in the FEED, and a heal rung has no feed row.
+- **⚠️ NEW STATUSES `Resubmitted` AND `Signed`; `eventKey` ON EVERY DRAWER-WRITTEN ACTIVITY.** Labels
+  read `eventKey` first (`lib/queryActions/eventKeys.ts`), description text only for older rows.
+  Signed takes no Query Centre tile (the writer's own act, like Withdrawn). A declined offer is
+  Withdrawn with `closingReason: offer_declined` and still counts as an offer in Analytics.
+- **⚠️ THE DRAWER'S FIELDS ARE FLAT** (`sentPackageId`/`sentMaterials`/`sentVersions`, `closePlan`,
+  `nrmnOverride`, the `offer*` marks on each OTHER query, `withdrawTold`, `agentRecheckOn`, …) — a map
+  meets the nested-allowlist denial. Dev rules carry them (§R); **prod rules are Nick's.**
+- **⚠️ THE DRAWER WRITES NO TASK OR DISMISSAL DOCUMENT.** Planned nudges are `nudgeDate`, "Consider
+  closing" is `closePlan` (read by `replyTask`), and the five new task types (`offer_tell`,
+  `offer_send_full`, `withdraw_tell`, `signed_tell`, `agent_recheck`) derive from the flat fields.
+  `logNudge` writes a task flag, which is why the drawer never calls it.
+- **⚠️ QueryHawk never writes for the writer — `nudgeDraft.ts` and every draft UI it fed are deleted.**
+
+## Finishing a task — THE PANE READS, THE MODAL FINISHES (⚠️ SUPERSEDED by "Query actions v1" above, 27 Sep — kept as history. task-modal round, 21 Sep; ref `task-modal.html`)
 
 **⚠️ THAT SENTENCE IS THE WHOLE RULE, AND IT IS NICK'S (21 Sep): *"I'd rather hold one sentence than
 a flag."*** `TaskPane` is where a writer READS a task — its quick-reference rail, its dated timeline,
