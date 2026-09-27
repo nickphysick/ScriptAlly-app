@@ -176,6 +176,9 @@ describe("/manuscripts/comps renders", () => {
     expect(html, "the comp card did not render").toContain("The Smoke Comp");
     expect(html, "compAgeLine did not run").toMatch(/2021 · (\d+ years? ago|this year)/);
     expect(html, "compFacets did not run").toContain("structure");
+    /* comps v2: the rail is the Scout, coming soon — and the working Scout panel is not mounted */
+    expect(html, "the rail did not render").toContain("Coming soon");
+    expect(html, "ScoutPanel is mounted on the page").not.toMatch(/ct-sbody|ct-upsell/);
     expect(html, "the page renders the full header").toContain('data-size="full"');
   });
 });

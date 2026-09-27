@@ -10,10 +10,13 @@
  * pictures (C7), and that a failed write cannot escape (C9).
  */
 import { describe, it, expect } from "vitest";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinTags, splitTags, yearError } from "./CompForm";
+import { CompsScoutRail } from "./CompsScoutRail";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
@@ -34,5 +37,23 @@ describe("C3 · the form's rules", () => {
   });
 });
 
+describe("C5 · the page cannot reach the Scout", () => {
+  const page = ["ComparableTitlesPage.tsx", "CompsScoutRail.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx"];
+  it("nothing the page mounts imports the Scout's client or its panel", () => {
+    for (const f of page) {
+      const s = src(f);
+      expect(s, `${f} imports lib/suggestComps`).not.toMatch(/from ["'][./]*lib\/suggestComps["']/);
+      expect(s, `${f} names fetchCompRun`).not.toContain("fetchCompRun");
+      expect(s, `${f} mounts ScoutPanel`).not.toMatch(/<ScoutPanel\b|from ["']\.\/ScoutPanel["']/);
+    }
+  });
+  it("the rail renders no control at all", () => {
+    const html = renderToStaticMarkup(<CompsScoutRail />);
+    expect(html).toContain("The Scout");
+    expect(html).toContain("Coming soon");
+    expect(html, "the rail rendered a button").not.toMatch(/<button\b|<a\b[^>]*href|<input\b/);
+    expect(html).toMatch(/data-cpv="rail-examples"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*data-cpv="rail-examples"/);
+  });
+});
 
 

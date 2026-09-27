@@ -21,7 +21,7 @@ import { definedTokens, readTokens, renderedClasses, styledClasses } from "../..
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "compsV2.css"), "utf8");
-const FILES = ["ComparableTitlesPage.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx"];
+const FILES = ["ComparableTitlesPage.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx", "CompsScoutRail.tsx"];
 const tsx = FILES.map((f) => readFileSync(join(here, f), "utf8")).join("\n");
 
 describe("compsV2.css — every token it defines is read", () => {

@@ -6,7 +6,7 @@
  *
  * The page renders its OWN group, like the Contact list's `.clv-group`: the full `PageHeader` is row 1
  * across both tracks, and beneath its rule sit the main column (the query line and the library, the
- * add form included) and, from Phase 4, the rail (the Scout, coming soon). `WorkspacePageGrid` is given
+ * add form included) and the rail (the Scout, coming soon). `WorkspacePageGrid` is given
  * `masthead={null}` — the header is the page's first row, not the grid's slab.
  *
  * ⚠️ STORE FACTS AND ONE INTENT. `inQuery` is the only stored intent; the order is array position
@@ -33,6 +33,7 @@ import { useToast } from "../toast/ToastProvider";
 import { CompCard } from "./CompCard";
 import { CompForm } from "./CompForm";
 import { CompsQueryLine } from "./CompsQueryLine";
+import { CompsScoutRail } from "./CompsScoutRail";
 import "./compsV2.css";
 
 /** Shared with the bar's switcher and the packages page — the section's one active-manuscript key. */
@@ -369,6 +370,7 @@ export const ComparableTitlesPage: React.FC<{
             )}
           </div>
 
+          <CompsScoutRail />
         </div>
       </div>
     </WorkspacePageGrid>
