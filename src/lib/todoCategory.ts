@@ -111,6 +111,9 @@ export function taskCategory(card: BoardCard): Category {
     case "revise_resubmit":
     case "partial_requested":
     case "full_requested":
+    /* Query actions v1 (K3): an agent waiting on the writer, like a request. */
+    case "offer_tell":
+    case "offer_send_full":
       return "req";
     case "nudge_overdue":
       return card.reason === "nudge-again" ? "quiet" : "nudge";
@@ -122,6 +125,10 @@ export function taskCategory(card: BoardCard): Category {
     case "materials_unrecorded":
     case "materials_unrecorded_bulk":
     case "weekly_review":
+    /* Query actions v1 (K3): courtesy and follow-up, not an agent's request. */
+    case "withdraw_tell":
+    case "signed_tell":
+    case "agent_recheck":
       return "house";
     default: {
       const unhandled: never = t;

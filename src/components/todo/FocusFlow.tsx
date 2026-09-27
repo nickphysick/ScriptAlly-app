@@ -39,7 +39,6 @@ import { useOverlay } from "../shell/useOverlay";
 import { reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, SeedCandidate } from "../../lib/todoBoard";
 import { clampSnoozeDays } from "../../lib/todoActions";
 import { agentPrimary } from "../../lib/agentDisplay";
-import { nudgeDraft, requestedProse } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import { journeyMaterials, synopsisStateFor, journeySummary } from "../../lib/journeyMaterials";
 import { RecordingCalendar } from "./RecordingCalendar";
@@ -197,7 +196,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [method, setMethod] = useState("Email");
   /* the writer's stated expectation, travelling from the pane to the one commit path. Held rather
      than re-asked: the journey does not ask this question, so it has nothing of its own to keep. */
-  const [copied, setCopied] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
   const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
   /* ⚠️ ONE `When` CONTROL FOR EVERY JOURNEY (journeys pack, Phase 2a). `sentDate` stays the single
@@ -259,7 +257,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const item = atReview ? undefined : items[qi];
 
   const resetScratch = () => {
-    setMats({}); setSentDate(todayISO()); setMethod("Email"); setCopied(false); setExtrasOpen(false); setBackdated(false);
+    setMats({}); setSentDate(todayISO()); setMethod("Email"); setExtrasOpen(false); setBackdated(false);
     /* ⚠️ `alsoText` WAS MISSING FROM THIS RESET, and it is the field every journey composes in — so
        a note typed against item one of a walk arrived pre-filled on item two, ready to be committed
        against a different agent. It is the quietest kind of wrong: the form looked filled in. */
@@ -713,26 +711,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
          The kick keeps "25 DAYS · NO REPLY" — that is a fact and is untouched. */
       band("pink", c.due || "No reply yet", <>Nudge {c.who ? <em>{c.who}</em> : "them"}</>, c.subtitle || undefined, { art: "nudge", kickCls: c.warn ? "warn" : "" }),
     );
-    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
-    const draft = nudgeDraft({
-      agentName: ag ? agentPrimary(ag) : null,
-      dateSent: q?.dateSent,
-      msTitle: ms?.title,
-      requested: requestedProse(q?.status as QueryStatus | undefined),
-    });
     const chaseWhen = [whenSent(), whenYesterday(), WHEN_OTHER];
     const weeksWaited = q?.dateSent ? Math.floor((Date.now() - new Date(q.dateSent).getTime()) / (7 * 86400000)) : null;
     return journeySheet({
-      /* ⚠️ THE DRAFT IS A LEDE, NOT A STEP. The ref is a mockup with no draft feature, so it had no
-         slot for one; deleting a working "here is a note you could send" to match a drawing would
-         be losing a feature to a picture. It is not numbered because it is not a decision. */
+      /* K7: QueryHawk never writes anything for the writer — the drafted nudge letter and its Copy
+         button were retired with src/lib/nudgeDraft.ts. The lede is a plain instruction, no words. */
       lede: (
         <div className="tdb-jnlede">
-          <div className="tdb-ffdraft">{draft}</div>
-          <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
-            {copied ? "✓ Copied" : "⧉  Copy the draft"}
-          </button>
-          <div className="tdb-ffsmall">QueryHawk never sends anything for you. Copy it, send it from your own email, then record it below.</div>
+          <div className="tdb-ffsmall">Send your nudge from your own email, then record it here.</div>
         </div>
       ),
       steps: [{
@@ -1989,7 +1975,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     /* ⚠️ THE JOURNEY STATE BELONGS IN THESE DEPS OR THE SHEET DOES NOT REDRAW. `content` is memoised
        over every piece of scratch it reads, so a new one — `whenMode`, `checkBack`, `closeReason`,
        `calAnchor`, `alsoText` — that is left out renders as a control that visibly does nothing. */
-  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo,
+  }, [atReview, qi, step, items, mats, sentDate, method, extrasOpen, backdated, rows, noMeansNo,
     whenMode, checkBack, closeReason, calAnchor, alsoText, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, review, rvStep, rvQuiet, rvSeed, rvSummary, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
 

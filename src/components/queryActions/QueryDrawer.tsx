@@ -26,6 +26,8 @@ import { ResponseJourney } from "./journeys/ResponseJourney";
 import { SentJourney } from "./journeys/SentJourney";
 import { NudgeJourney } from "./journeys/NudgeJourney";
 import { CloseJourney } from "./journeys/CloseJourney";
+import { OfferJourney } from "./journeys/OfferJourney";
+import { EditJourney } from "./journeys/EditJourney";
 import "./queryDrawer.css";
 
 export interface JourneyProps {
@@ -43,6 +45,8 @@ const JOURNEYS: Partial<Record<DrawerMode, React.ComponentType<JourneyProps>>> =
   sent: SentJourney,
   nudge: NudgeJourney,
   close: CloseJourney,
+  offer: OfferJourney,
+  edit: EditJourney,
 };
 
 /* The measurement harness opens the drawer the way every door does, through the store. Development

@@ -897,7 +897,7 @@ export function useTaskPaneSession(
     /* ⚠️ QUERY ACTIONS v1 (K1) — "every page finishes in the query drawer". The pane stays the
        READING surface; a card whose journey is live in the drawer finishes there, and this pane's
        own finishing path is the fallback only while that journey is not. */
-    const door = drawerDoorForTask(card.taskType, card.relatedRecordId);
+    const door = drawerDoorForTask(card.taskType, card.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
     if (door) { openQueryDrawer(door); return; }
     /* ⚠️ NO INTENT, NO PRIMARY — so there is nothing to gate. The bar renders no primary while the
        fork is showing, which makes this unreachable rather than merely unnecessary; the guard is

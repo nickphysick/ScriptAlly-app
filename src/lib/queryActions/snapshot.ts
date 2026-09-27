@@ -50,6 +50,14 @@ async function readSet(uid: string, queryIds: string[]): Promise<Map<string, Doc
   for (const ids of chunk(queryIds, 10)) {
     const feed = await getDocs(query(collection(db, "users", uid, "activities"), where("queryId", "in", ids)));
     feed.forEach((d) => out.set(d.ref.path, d.data()));
+    /* a query's task flags go with it on a delete, so an undo of that delete brings them back —
+       the drawer itself writes none */
+    const flags = await getDocs(query(collection(db, "users", uid, "taskFlags"), where("queryId", "in", ids)));
+    flags.forEach((d) => out.set(d.ref.path, d.data()));
+    /* and a stored task attached to the query: the drawer writes none (K4), so any that appears
+       between the snapshot and the undo is exactly what the undo must take away again */
+    const tasks = await getDocs(query(collection(db, "users", uid, "tasks"), where("queryId", "in", ids)));
+    tasks.forEach((d) => out.set(d.ref.path, d.data()));
   }
   return out;
 }

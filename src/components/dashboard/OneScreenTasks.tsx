@@ -249,7 +249,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
        DRAWER, at that task's step; the tick still commits nothing. The row keeps its receipt strip
        and the drawer shows no undo bar, so there is one Undo, where the writer is looking — the
        strip's Undo IS the drawer's. */
-    const door = drawerDoorForTask(c.taskType, c.relatedRecordId);
+    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
     if (door) {
       openQueryDrawer({
         ...door,

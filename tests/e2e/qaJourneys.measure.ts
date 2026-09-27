@@ -36,6 +36,9 @@ async function readSet(ids: string[]): Promise<Docs> {
     if (q.exists()) out.set(q.ref.path, canon(q.data()));
     (await getDocs(collection(db, "users", uid, "queries", id, "activity"))).forEach((d) => out.set(d.ref.path, canon(d.data())));
     (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
+    /* the drawer writes no task flag and no stored task (K4); both are in the set so a journey
+       that writes either fails the byte-identical undo, not only the one case that counts flags */
+    for (const c of ["taskFlags", "tasks"]) (await getDocs(fsQuery(collection(db, "users", uid, c), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
   }
   return out;
 }
@@ -72,7 +75,9 @@ async function toReview(page: Page) {
 }
 async function saveAndUndo(page: Page, ids: () => string[], before: Docs, onSaved: () => Promise<void>) {
   await page.locator("[data-qad-primary]").click();
-  await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 20_000 });
+  /* a big save (an accept withdrawing many queries) can take well past 20s; the wait is long because
+     a toast that never arrives means NO undo runs, and the mutation run left 115 documents that way */
+  await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 90_000 });
   await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
   /* ⚠️ THE UNDO RUNS IN A `finally`. A failed assertion about the save must never leave the shared
      account changed — it happened once, on `msv12-q-8`, and was repaired by hand. */
@@ -198,7 +203,9 @@ test.describe("query drawer journeys", () => {
 
 async function flagsFor(id: string): Promise<number> {
   const { db, uid } = await harnessDb();
-  return (await getDocs(fsQuery(collection(db, "users", uid, "taskFlags"), where("queryId", "==", id)))).size;
+  let n = 0;
+  for (const c of ["taskFlags", "tasks"]) n += (await getDocs(fsQuery(collection(db, "users", uid, c), where("queryId", "==", id)))).size;
+  return n;
 }
 async function queryDoc(id: string) {
   const { db, uid } = await harnessDb();
@@ -229,7 +236,7 @@ test.describe("query drawer journeys — Tier 2", () => {
       ok(q.status === target!.status, "a nudge never changes the status");
       const rows = (await rawDocs(ids)).filter((d) => d.data.eventKey === "nudge_sent");
       ok(rows.length === 2, `the nudge is in both stores (${rows.length})`);
-      ok((await flagsFor(target!.id)) === flags0, "the drawer wrote no task flag (H8)");
+      ok((await flagsFor(target!.id)) === flags0, "the drawer wrote no task flag and no stored task (H8)");
     });
   });
 
@@ -288,5 +295,115 @@ test.describe("query drawer journeys — Tier 2", () => {
     await expect(page.locator('[data-qad-sec="Feedback"]')).toBeVisible();
     asserted++;
     await page.keyboard.press("Escape");
+  });
+});
+
+test.describe("query drawer journeys — Tier 3 · the offer", () => {
+  test.setTimeout(420_000);
+  test.beforeEach(async ({ page }) => {
+    await ensureSignedIn(page);
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+  });
+
+  async function offerFixture() {
+    const { qs } = await fixture();
+    const offer = qs.find((q) => q.status === "Offer");
+    ok(!!offer, "an Offer query on the harness account");
+    const others = qs.filter((q) => q.id !== offer!.id && q.manuscriptId === offer!.manuscriptId && !TERMINAL.has(String(q.status)));
+    return { offer: offer!, others };
+  }
+
+  test("D6 — still deciding: the told marks land on each OTHER query, flat; undo exact", async ({ page }) => {
+    const { offer, others } = await offerFixture();
+    ok(others.length > 0, "someone else is considering the book");
+    const ids = [offer.id, ...others.map((o) => o.id)];
+    const before = await readSet(ids);
+    await openDrawer(page, { mode: "offer", queryId: offer.id });
+    await page.locator("[data-qad-primary]").click();
+    await page.locator(`[data-qad-told="${others[0].id}"]`).click();
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const o = await queryDoc(others[0].id);
+      ok(o.offerRefQueryId === offer.id && o.offerTold === true, `told marks ${o.offerRefQueryId}/${o.offerTold}`);
+      const q = await queryDoc(offer.id);
+      ok(q.status === "Offer", "saving progress closes nothing");
+    });
+  });
+
+  test("D6 — accept: Signed, only the TICKED others withdraw; undo exact", async ({ page }) => {
+    const { offer, others } = await offerFixture();
+    const ids = [offer.id, ...others.map((o) => o.id)];
+    const before = await readSet(ids);
+    await openDrawer(page, { mode: "offer", queryId: offer.id });
+    for (let i = 0; i < 3; i++) await page.locator("[data-qad-primary]").click();
+    await page.locator('[data-qad-rad="accept"]').click();
+    /* untick every withdrawal but the first — the unticked must stay live */
+    for (const o of others.slice(1)) await page.locator(`[data-qad-toggle="wd-${o.id}"]`).click();
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const q = await queryDoc(offer.id);
+      ok(q.status === "Signed", `offer query status ${q.status}`);
+      if (others.length) {
+        const w = await queryDoc(others[0].id);
+        ok(w.status === "Withdrawn" && w.closingReason === "accepted_offer", `ticked other ${w.status}/${w.closingReason}`);
+        for (const o of others.slice(1)) {
+          const k = await queryDoc(o.id);
+          ok(k.status === o.status, `an UNTICKED query was withdrawn: ${o.id} ${k.status}`);
+        }
+      }
+      ok((await rawDocs([offer.id])).some((d) => d.data.eventKey === "signed"), "the signed rung carries its key");
+    });
+  });
+
+  test("D6 — decline: Withdrawn as offer_declined, others untouched; undo exact", async ({ page }) => {
+    const { offer, others } = await offerFixture();
+    const ids = [offer.id, ...others.map((o) => o.id)];
+    const before = await readSet(ids);
+    await openDrawer(page, { mode: "offer", queryId: offer.id });
+    for (let i = 0; i < 3; i++) await page.locator("[data-qad-primary]").click();
+    await page.locator('[data-qad-rad="decline"]').click();
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const q = await queryDoc(offer.id);
+      ok(q.status === "Withdrawn" && q.closingReason === "offer_declined", `declined ${q.status}/${q.closingReason}`);
+      for (const o of others) ok((await queryDoc(o.id)).status === o.status, `other ${o.id} changed on a decline`);
+    });
+  });
+});
+
+test.describe("query drawer journeys — Tier 3 · correcting the record", () => {
+  test.setTimeout(300_000);
+  test.beforeEach(async ({ page }) => {
+    await ensureSignedIn(page);
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+  });
+
+  test("D7 — a date outside its neighbours is BLOCKED; a valid correction saves and undoes exactly", async ({ page }) => {
+    const { qs } = await fixture();
+    const target = qs.find((q) => q.status === "Partial Requested" || q.status === "Full Requested");
+    ok(!!target, "a query with at least two entries");
+    const docs = await rawDocs([target!.id]);
+    const log = docs.filter((d) => /\/activity\//.test(d.path)).map((d) => ({ id: d.path.split("/").pop()!, t: (d.data.createdAt as { toMillis?: () => number })?.toMillis?.() ?? new Date(String(d.data.createdAt)).getTime() }))
+      .sort((a, b) => a.t - b.t);
+    ok(log.length >= 2, `the query has ${log.length} entries`);
+    const first = log[0];
+    const ids = [target!.id];
+    const before = await readSet(ids);
+    await openDrawer(page, { mode: "edit", queryId: target!.id, entryId: first.id });
+    await expect(page.locator('[data-qad-date="edDate"]')).toBeVisible({ timeout: 10_000 });
+    /* Today is after the next entry, so moving the FIRST entry to today must block */
+    await page.locator('[data-qad-date="edDate"] [data-qad-chip="t"]').click();
+    ok(await page.locator("[data-qad-primary]").isDisabled(), "a date after the next entry blocks Next");
+    await expect(page.locator('[data-qad-note="WORTH A LOOK"]')).toHaveCount(0);
+    /* back to as recorded, change the note only — valid */
+    await page.locator('[data-qad-date="edDate"] [data-qad-chip="orig"]').click();
+    await page.locator(".qad-fta").fill("Corrected by the drawer lock");
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const after = await rawDocs(ids);
+      ok(after.some((d) => d.path.endsWith(`/activity/${first.id}`) && d.data.note === "Corrected by the drawer lock"), "the note was corrected in the authoritative log");
+    });
   });
 });

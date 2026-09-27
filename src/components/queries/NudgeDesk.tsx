@@ -4,9 +4,9 @@
  *
  * NudgeDesk — Nudge inside the desk (respond-nudge run, §4).
  *
- * ⚠️ THE DRAFT IS `nudgeDraft`'s — the template the modal and the To-do walkthrough already share
- * (decision 4's first branch: one exists, so it is used). It is COPIED, never sent, and the desk
- * says so in the derived line and above the draft itself.
+ * ⚠️ IT DRAFTS NOTHING (K7: QueryHawk never writes anything for the writer — no drafted letters,
+ * emails or templates). The writer sends their own nudge from their own mail client; this desk
+ * only RECORDS that it went — the date, and when to nudge again. `nudgeDraft` was retired.
  */
 import React from "react";
 import "./respondDesk.css";
@@ -25,7 +25,6 @@ export interface NudgeDeskProps {
   agencyName: string;          /* `Nudge Stillwater Reps` */
   subject: string;             /* `Query sent 12 Aug · 24 days ago · window 6 weeks` */
   toEmail: string | null;      /* the agent's recorded email — null renders no To line */
-  draftText: string;           /* nudgeDraft's output, built by the page */
   defaultWeeks: number;        /* the leading sage chip — the existing reminder's interval, else 4 */
   draft: NudgeDeskDraft;
   onDraft: (d: NudgeDeskDraft) => void;
@@ -42,7 +41,7 @@ const plusWeeks = (iso: string, w: number) => {
 };
 
 export const NudgeDesk: React.FC<NudgeDeskProps> = ({
-  agencyName, subject, toEmail, draftText, defaultWeeks, draft, onDraft, derivedLine, saving, onRecord, onCancel,
+  agencyName, subject, toEmail, defaultWeeks, draft, onDraft, derivedLine, saving, onRecord, onCancel,
 }) => {
   const [dateOpen, setDateOpen] = React.useState(false);
   const datePanelRef = React.useRef<HTMLElement>(null);
@@ -60,11 +59,8 @@ export const NudgeDesk: React.FC<NudgeDeskProps> = ({
       <h3>Nudge {agencyName}</h3>
       <div className="qrd-subj">{subject}</div>
 
-      <div className="qrd-mail">
-        <div className="qrd-mh">
-          {toEmail ? <>To <b>{toEmail}</b> · </> : null}from your own mail client
-        </div>
-        {draftText.split("\n").map((line, i) => <React.Fragment key={i}>{line}<br /></React.Fragment>)}
+      <div className="qrd-subj">
+        Send your nudge from your own mail client{toEmail ? <> to <b>{toEmail}</b></> : null}, then record it here.
       </div>
 
       <div className="qrd-row" style={{ marginTop: 12 }}>
@@ -116,7 +112,7 @@ export const NudgeDesk: React.FC<NudgeDeskProps> = ({
       <div className="qrd-btns">
         <button type="button" className="qrd-b qrd-b--c" onClick={onCancel}>Cancel</button>
         <button type="button" className="qrd-b qrd-b--s" disabled={saving} onClick={onRecord}>
-          {saving ? "Saving…" : "Copy draft & record nudge"}
+          {saving ? "Saving…" : "Record nudge"}
         </button>
       </div>
     </div>

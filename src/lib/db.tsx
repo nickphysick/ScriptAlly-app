@@ -950,6 +950,49 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         });
       }
 
+      /* ⚠️ QUERY ACTIONS v1 (K3) — FIVE TASKS DERIVED FROM THE DRAWER'S FLAT FIELDS, never stored.
+         Change the field and the task changes with it; undo, edit and delete stay honest for free. */
+      const offerRef = q.offerRefQueryId ? queries.find((x) => x.id === q.offerRefQueryId) : undefined;
+      const liveOther = ![QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED].includes(q.status);
+      if (offerRef && offerRef.status === QueryStatus.OFFER && q.offerTold === false && liveOther) {
+        calculatedTasks.push({
+          id: `task-offer-tell-${q.id}`, priority: "urgent",
+          title: `Tell ${aName} about your offer`,
+          description: `You have an offer on '${mTitle}'. Let ${aName} know, with your deadline.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: "offer_tell", actionLabel: "Open the offer", actionPath: "queries",
+        });
+      }
+      if (offerRef && q.offerReply === "full" && liveOther
+        && [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED].includes(q.status)) {
+        calculatedTasks.push({
+          id: `task-offer-full-${q.id}`, priority: "urgent",
+          title: `Send the full to ${aName}`,
+          description: `${aName} wants the full of '${mTitle}' before your offer deadline.`,
+          manuscriptTitle: mTitle, context: `Request from ${aName}`, relatedRecordId: q.id,
+          taskType: "offer_send_full", actionLabel: "Log it", actionPath: "queries",
+        });
+      }
+      if (q.status === QueryStatus.WITHDRAWN && q.withdrawTold === false && (q.closingReason === "withdrew" || q.closingReason === "accepted_offer")) {
+        const signed = q.closingReason === "accepted_offer";
+        calculatedTasks.push({
+          id: `task-${signed ? "signed" : "withdraw"}-tell-${q.id}`, priority: "suggested",
+          title: signed ? `Tell ${aName} you've signed` : `Tell ${aName} you've withdrawn`,
+          description: signed ? `You accepted an offer for '${mTitle}'. Let ${aName} know.` : `You withdrew '${mTitle}'. Let ${aName} know.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: signed ? "signed_tell" : "withdraw_tell", actionLabel: "Mark as told", actionPath: "queries",
+        });
+      }
+      if (q.agentRecheckOn && new Date(q.agentRecheckOn).getTime() <= Date.now()) {
+        calculatedTasks.push({
+          id: `task-recheck-${q.id}`, priority: "suggested",
+          title: `Check on ${aName}`,
+          description: `${aName} had stopped taking queries. See whether they've reopened, or where they've moved to.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: "agent_recheck", actionLabel: "Open the agent", actionPath: "agents",
+        });
+      }
+
       if (q.status === QueryStatus.PARTIAL_REQUESTED) {
         calculatedTasks.push({
           id: `task-partial-${q.id}`,

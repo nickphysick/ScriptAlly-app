@@ -5,12 +5,14 @@
  * NudgeModal — "Send a nudge" content inside the locked FormShell. Opened from the OverToYou
  * nudge_overdue row's "Nudge" button. Collects an optional note + a check-back date; on submit the
  * caller runs logNudge (db.tsx). Purely a surface: no Firestore writes happen here.
+ *
+ * It drafts nothing (K7: QueryHawk never writes anything for the writer) — the writer sends their
+ * own nudge; this only records it. The follow-up draft and its Copy button were retired.
  */
 import React, { useState } from "react";
 import { ConciergeBell } from "lucide-react";
 import { FormShell } from "./forms/FormShell";
 import { CheckBackSlider } from "./forms/CheckBackSlider";
-import { nudgeDraft } from "../lib/nudgeDraft";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
@@ -38,7 +40,6 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
   const [note, setNote] = useState("");
   const [days, setDays] = useState(14); // default "2 weeks"
   const [submitting, setSubmitting] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const firstName = agentName ? agentName.split(" ")[0] : null;
   const subjectClause = firstName ? `${firstName} has` : "They've";
@@ -61,17 +62,6 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
     sentenceParts.push(`Their response is ${plural(overdueDays, "day")} overdue.`);
   }
   const sentence = sentenceParts.join(" ");
-
-  // A copyable follow-up draft — the user pastes it into their own email client (5c). We never send
-  // it. Shared with the To-do drawer/walkthrough via src/lib/nudgeDraft.ts (one source, no duplication).
-  const followUpDraft = nudgeDraft({ agentName, dateSent });
-  const copyDraft = async () => {
-    try {
-      await navigator.clipboard.writeText(followUpDraft);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch { /* clipboard blocked — the draft is still visible to select manually */ }
-  };
 
   const handleSubmit = async () => {
     if (submitting) return;
@@ -101,17 +91,6 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
       <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, lineHeight: 1.5, color: "#5a4034", marginBottom: 14 }}>
         {sentence}
       </p>
-
-      {/* Copyable follow-up draft — a starting point to paste into your own email (5c). */}
-      <div style={{ border: "1px solid #e6dccd", borderRadius: 10, background: "#fdfaf5", padding: "11px 13px", marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 7 }}>
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a89a8a" }}>Follow-up draft</span>
-          <button type="button" onClick={copyDraft} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600, color: copied ? "#3f5340" : "#7c3a2a", background: copied ? "#eef2ec" : "#f6cfc9", border: "none", borderRadius: 99, padding: "5px 12px", cursor: "pointer" }}>
-            {copied ? "Copied ✓" : "Copy"}
-          </button>
-        </div>
-        <pre style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 12.5, lineHeight: 1.5, color: "#5a4034", whiteSpace: "pre-wrap", margin: 0 }}>{followUpDraft}</pre>
-      </div>
 
       <label className="sa-label" htmlFor="nudge-note">
         Add a note <span className="sa-opt">optional</span>

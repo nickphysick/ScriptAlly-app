@@ -154,7 +154,7 @@ describe("§3 · the window rule is the log sheet's, verbatim", () => {
 });
 
 /* ══ §4 — nudge in the desk ═══════════════════════════════════════════════════════════════════ */
-describe("§4 · the draft is the ONE template, and the nudge is one activity with a whole undo", () => {
+describe("§4 · the nudge draft is RETIRED (K7), and the nudge is one activity with a whole undo", () => {
   const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "");
   const save = (() => {
@@ -164,21 +164,18 @@ describe("§4 · the draft is the ONE template, and the nudge is one activity wi
     return page.slice(at, end);
   })();
 
-  it("the desk's letter is nudgeDraft over the shared requestedProse — never a second letter", () => {
-    expect(page).toContain("? nudgeDraft({");
-    expect(page).toContain("requested: requestedProse(activeQuery.status as QueryStatus)");
-    /* and the mapping has ONE home — FocusFlow imports the same one */
-    const flow = readFileSync(join(process.cwd(), "src/components/todo/FocusFlow.tsx"), "utf8");
-    expect(flow).toContain('import { nudgeDraft, requestedProse } from "../../lib/nudgeDraft"');
-    expect(flow.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("function requestedProse");
+  /* K7 — QueryHawk never writes anything for the writer: no drafted letters, emails or templates.
+     The nudge template, its derivation on the page, and the clipboard copy are all retired. */
+  it("the nudge template is gone: no module, no import, no derivation, no clipboard copy", () => {
+    expect(existsSync(join(process.cwd(), "src/lib/nudgeDraft.ts"))).toBe(false);
+    expect(page).not.toContain("nudgeDraft");
+    expect(page).not.toContain("requestedProse");
+    expect(page).not.toContain("navigator.clipboard");
+    expect(page).not.toContain("deskNudgeDraftText");
   });
 
-  it("the clipboard copy happens FIRST, inside the click's gesture, and is best-effort", () => {
-    const copyAt = save.indexOf("navigator.clipboard?.writeText(deskNudgeDraftText)");
-    const logAt = save.indexOf("await logNudge(");
-    expect(copyAt).toBeGreaterThan(-1);
-    expect(logAt).toBeGreaterThan(-1);
-    expect(copyAt, "the copy must precede the write — clipboard access outside the gesture is refused").toBeLessThan(logAt);
+  it("the save still records ONE nudge through logNudge", () => {
+    expect(save.indexOf("await logNudge(")).toBeGreaterThan(-1);
   });
 
   it("one nudge activity through logNudge; the chosen interval IS the recorded check-back", () => {
@@ -219,7 +216,8 @@ describe("§4 · the draft is the ONE template, and the nudge is one activity wi
 
   it("the derived line states record + unchanged status + never-sends, in the ref's words", () => {
     expect(page).toContain("Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>.");
-    expect(page).toContain("draft is copied for your mail client — QueryHawk never sends.");
+    expect(page).toContain("QueryHawk never sends.");
+    expect(page).not.toContain("draft is copied");
   });
 });
 
@@ -229,7 +227,6 @@ describe("§4 · the NudgeDesk renders the ref's anatomy", () => {
       agencyName: "Stillwater Reps",
       subject: "Query sent 12 Aug · 24 days ago · window 6 weeks",
       toEmail: "harriet@stillwaterreps.co.uk",
-      draftText: "Dear Harriet,\n\nA line.",
       defaultWeeks: 4,
       draft: { nudgeDate: "2026-09-05", again: { kind: "weeks", weeks: 4 } },
       onDraft: () => {},
@@ -240,20 +237,21 @@ describe("§4 · the NudgeDesk renders the ref's anatomy", () => {
     }),
   );
 
-  it("mail block: To + from-your-own-client, the draft's lines, and the sage default chip leads", () => {
+  it("To + from-your-own-client, NO drafted letter, and the sage default chip leads", () => {
     const html = render();
     expect(html).toContain("harriet@stillwaterreps.co.uk");
     expect(html).toContain("from your own mail client");
-    expect(html).toContain("Dear Harriet,");
+    expect(html).not.toContain("qrd-mail");
     const chips = html.slice(html.indexOf("qrd-chips"));
     expect(chips.indexOf("qrd-win"), "the default interval chip leads the row").toBeLessThan(chips.indexOf("Pick a date"));
     expect(chips).toContain("No more nudges");
-    expect(html).toContain("Copy draft &amp; record nudge");
+    expect(html).toContain("Record nudge");
+    expect(html).not.toContain("Copy");
   });
 
   it("no To line when the agent has no recorded email — absence, not a placeholder", () => {
     const html = render({ toEmail: null });
-    expect(html).not.toContain(">To <");
+    expect(html).not.toContain(" to <b>");
     expect(html).toContain("from your own mail client");
   });
 });

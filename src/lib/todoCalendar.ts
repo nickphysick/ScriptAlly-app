@@ -584,6 +584,9 @@ export const PILL_BY_TASK: Partial<Record<TaskType, string>> = {
   revise_resubmit: "Send resubmission",
   nudge_overdue: "Nudge due",
   offer_received: "Decide on offer",
+  /* Query actions v1 (K3) */
+  offer_tell: "Tell them",
+  offer_send_full: "Send full",
 };
 
 /** The snoozed family's pill — a return is a return whatever came back. */

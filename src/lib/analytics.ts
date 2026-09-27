@@ -355,7 +355,9 @@ export function buildRows(
       agentName: agent ? agentPrimary(agent) : "Agent not on file",
       agentSub: agent ? agentSecondary(agent) : "",
       status: q.status,
-      outcome: outcomeFor(q.status),
+      /* Query actions v1 (K6) — a DECLINED OFFER closes as Withdrawn and is still an offer received:
+         the writer's decision, not a pass and not a withdrawal from a live query. */
+      outcome: q.status === QueryStatus.WITHDRAWN && q.closingReason === "offer_declined" ? "offer" : outcomeFor(q.status),
       sentMs,
       respondedMs,
       respondedStatus,

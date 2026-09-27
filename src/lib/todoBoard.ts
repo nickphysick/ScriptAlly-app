@@ -37,11 +37,15 @@ export const isNoteTask = (t: Pick<UserTask, "dueDate" | "done">): boolean => !t
 export type BoardStream = "do" | "hk" | "nt" | "done";
 
 /** Derived task types the board surfaces (querying_unstarted / dream_agent are OUT of scope). */
-const DO_NEXT_TYPES: ReadonlySet<string> = new Set(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue"]);
+const DO_NEXT_TYPES: ReadonlySet<string> = new Set(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue",
+  /* Query actions v1 (K3) — an agent waiting on the writer while an offer runs */
+  "offer_tell", "offer_send_full"]);
 /* ⚠️ THE TWO MATERIALS TYPES ARE HOUSEKEEPING, NOT URGENT. A send that recorded nothing is a gap
    in your own history — worth closing, never something an agent is waiting on. Putting it in the
    `do` lane would make the urgent count disagree with what "urgent" means everywhere else. */
-const HK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "no_response_close", "materials_unrecorded", "materials_unrecorded_bulk"]);
+const HK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "no_response_close", "materials_unrecorded", "materials_unrecorded_bulk",
+  /* Query actions v1 (K3) — courtesy and follow-up after a query closes */
+  "withdraw_tell", "signed_tell", "agent_recheck"]);
 
 /**
  * ⚠️ THE SILENCE ANCHOR — how long an agent has been quiet, in whole days.
@@ -285,6 +289,17 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
         status: undefined as QueryStatus | undefined,
         hk: true,
       };
+    /* ── QUERY ACTIONS v1 (K3) — derived from the drawer's flat fields; each opens its journey ── */
+    case "offer_tell":
+      return { kind: "OFFER", title: `Tell ${name} about your offer`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
+    case "offer_send_full":
+      return { kind: "AGENT WAITING", title: `Send the full to ${name}`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
+    case "withdraw_tell":
+      return { kind: "COURTESY", title: `Tell ${name} you've withdrawn`, who: name, subtitle: msTitle, due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
+    case "signed_tell":
+      return { kind: "COURTESY", title: `Tell ${name} you've signed`, who: name, subtitle: msTitle, due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
+    case "agent_recheck":
+      return { kind: "CHECK BACK", title: `Check on ${name}`, who: name, subtitle: "Reopened, or moved?", due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
     default:
       return { kind: "", title: task.title, who: "", subtitle: task.context, due: "", warn: false, status: q?.status, hk: false };
   }

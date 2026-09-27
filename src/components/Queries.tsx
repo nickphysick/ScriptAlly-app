@@ -127,7 +127,6 @@ import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
 import { NudgeDesk, type NudgeDeskDraft } from "./queries/NudgeDesk";
 import { MarkClosedDesk, type MarkClosedDraft } from "./queries/MarkClosedDesk";
-import { nudgeDraft, requestedProse } from "../lib/nudgeDraft";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
@@ -136,7 +135,8 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { openQueryDrawer } from "../lib/queryActions/drawerStore";
+import { openQueryDrawer, showUndoBar } from "../lib/queryActions/drawerStore";
+import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
@@ -884,9 +884,8 @@ export const Queries: React.FC<{
   };
 
   /**
-   * §4 — NUDGE'S SAVE: the draft to the clipboard FIRST (inside the click's gesture — clipboard
-   * access outside one is refused, and a refusal is best-effort: the record still stands), then
-   * ONE nudge activity through `logNudge`. The Undo deletes the rung — `deleteActivity`'s own
+   * §4 — NUDGE'S SAVE: ONE nudge activity through `logNudge`. QueryHawk drafts nothing for the
+   * writer (K7) — the nudge is theirs to write and send; this only records that it went. The Undo deletes the rung — `deleteActivity`'s own
    * nudge path re-derives nudgeDate/lastNudgeSentDate via `reconcileNudge` and releases the
    * snoozed task when no nudges remain — and then puts the PRIOR reminder back explicitly,
    * because a reminder set at mark-sent time is not backed by any nudge activity and the
@@ -897,7 +896,6 @@ export const Queries: React.FC<{
     const q = activeQuery;
     setRespSaving(true);
     try {
-      try { await navigator.clipboard?.writeText(deskNudgeDraftText); } catch { /* copy best-effort */ }
       const checkBackDate = deskNudge.again.kind === "weeks"
         ? (() => { const d = new Date(`${deskNudge.nudgeDate}T12:00:00`); d.setDate(d.getDate() + deskNudge.again.weeks * 7); return d.toISOString(); })()
         : deskNudge.again.kind === "custom" ? new Date(`${deskNudge.again.date}T12:00:00`).toISOString()
@@ -911,7 +909,7 @@ export const Queries: React.FC<{
       setDeskVerb(null);
       setDeskFreshStatus({ toStatus: NUDGE_NESTED_TYPE, at: Date.now() });
       showToast({
-        message: `Nudged ${agency} — draft copied${checkBackDate ? ` · next nudge ${fmtShortISO(checkBackDate)}` : ""}`,
+        message: `Nudged ${agency}${checkBackDate ? ` · next nudge ${fmtShortISO(checkBackDate)}` : ""}`,
         undo: res.activityId ? async () => {
           await deleteActivities([res.activityId!]);
           await updateQuery(q.id, {
@@ -1540,7 +1538,12 @@ export const Queries: React.FC<{
     return Number.isNaN(t) ? "" : new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   };
 
-  const onEditEntry = (entry: TimelineEntryRef) => setCorrecting({ step: "fork", entry });
+  const onEditEntry = (entry: TimelineEntryRef) => {
+    /* Query actions v1 (D7) — "Correct the record" finishes in the drawer once that journey is live. */
+    const qid = selectedQueryId ?? activeQuery?.id;
+    if (qid && DRAWER_LIVE.edit) { openQueryDrawer({ mode: "edit", queryId: qid, entryId: entry.activityId }); return; }
+    setCorrecting({ step: "fork", entry });
+  };
 
   /**
    * ⚠️ A FUNCTION, NOT A `useMemo`, AND THE REASON IS THE TDZ. `activeQuery` is declared further
@@ -1780,6 +1783,20 @@ export const Queries: React.FC<{
   const handleDeleteQuery = (id: string) => {
     setSelectedQueryId(null);
     void deleteQuery(id);
+  };
+  /** Query actions v1 (D7) — the card footer's delete, through the undo snapshot and the undo bar. */
+  const deleteQueryWithUndo = async (id: string) => {
+    if (!currentUser) return;
+    const q = queries.find((x) => x.id === id);
+    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    const snap = await takeSnapshot(currentUser.id, [id]);
+    setSelectedQueryId(null);
+    await deleteQuery(id);
+    showUndoBar({
+      message: `Query deleted · ${ag?.name || ag?.agency || "The agent"}`,
+      sub: "ITS HISTORY AND REMINDERS WENT WITH IT",
+      undo: async () => { await restoreSnapshot(snap); },
+    });
   };
 
   /* The counted confirm, now through the SHARED dialog (ToastProvider) rather than a bespoke
@@ -2740,9 +2757,8 @@ export const Queries: React.FC<{
   })();
 
   /**
-   * §4 — THE NUDGE DESK. The draft is `nudgeDraft`'s — the template the modal and the To-do
-   * walkthrough already share (decision 4's first branch: one exists, so it is used). Copied,
-   * never sent. The "again after" default is the existing reminder's own interval — nudgeDate
+   * §4 — THE NUDGE DESK. It records a nudge the writer has sent; it drafts no words for them
+   * (K7 — the nudge template was retired). The "again after" default is the existing reminder's own interval — nudgeDate
    * minus its anchor (the last nudge, else the send), in whole weeks — else 4.
    */
   const [deskNudge, setDeskNudge] = useState<NudgeDeskDraft | null>(null);
@@ -2760,14 +2776,6 @@ export const Queries: React.FC<{
     if (deskVerb !== "nudge" && deskNudge) setDeskNudge(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deskVerb, activeQuery?.id]);
-  const deskNudgeDraftText = deskVerb === "nudge" && activeQuery && activeAgent
-    ? nudgeDraft({
-        agentName: agentPrimary(activeAgent) || null,
-        dateSent: activeQuery.dateSent,
-        msTitle: manuscripts.find((m) => m.id === activeQuery.manuscriptId)?.title,
-        requested: requestedProse(activeQuery.status as QueryStatus),
-      })
-    : "";
   const deskNudgeSubject = (() => {
     if (deskVerb !== "nudge" || !activeQuery?.dateSent) return "";
     const days = Math.max(0, Math.floor((Date.now() - new Date(activeQuery.dateSent).getTime()) / 86400000));
@@ -2776,8 +2784,8 @@ export const Queries: React.FC<{
     return `Query sent ${fmtShortISO(activeQuery.dateSent)} · ${days} ${days === 1 ? "day" : "days"} ago${win}`;
   })();
   const deskNudgeDerived = activeQuery ? (
-    <>Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>. The
-      draft is copied for your mail client — QueryHawk never sends.</>
+    <>Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>.
+      QueryHawk never sends.</>
   ) : null;
 
   /**
@@ -5139,6 +5147,9 @@ export const Queries: React.FC<{
       }}
       /* Query actions v1 — the footer's doors. A live journey opens the drawer (the card docks to a
          chip); one not yet live keeps its old route, so no door is ever dead. */
+      /* Query actions v1 (D7) — "Delete query": the whole query, its log, its feed rows and its task
+         flags, undoable through the drawer's own bar because the snapshot holds every one of them. */
+      onDeleteQuery={() => { void deleteQueryWithUndo(activeQuery.id); }}
       onDoor={(mode, anchor) => {
         const ag = agents.find((a) => a.id === activeQuery.agentId);
         if (DRAWER_LIVE[mode]) {
@@ -6078,7 +6089,6 @@ export const Queries: React.FC<{
                 agencyName={activeAgent.agency?.trim() || agentPrimary(activeAgent) || "the agent"}
                 subject={deskNudgeSubject}
                 toEmail={activeAgent.email?.trim() || null}
-                draftText={deskNudgeDraftText}
                 defaultWeeks={deskNudgeDefaultWeeks}
                 draft={deskNudge}
                 onDraft={setDeskNudge}

@@ -88,6 +88,12 @@ const TABLE: Record<TaskType, { onBoard: boolean; with: DueSource | null; owner:
   querying_unstarted:        { onBoard: false, with: null,      owner: "none",   ownerUndated: "none" },
   dream_agent_unqueried:     { onBoard: false, with: null,      owner: "none",   ownerUndated: "none" },
   weekly_review:             { onBoard: false, with: null,      owner: "none",   ownerUndated: "none" },
+  /* Query actions v1 (27 Sep): the drawer's derived tasks carry no natural date of their own. */
+  offer_tell:                { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
+  offer_send_full:           { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
+  withdraw_tell:             { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
+  signed_tell:               { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
+  agent_recheck:             { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
 };
 
 /** for each type: a query that HOLDS its natural date, and one that does not */
@@ -139,7 +145,9 @@ describe("every task type derives a due date or a deliberate null", () => {
         expect(d.ymd).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(d.owner).toBe(row.owner);
       } else {
-        expect(d).toEqual({ ymd: null, owner: "none", source: "none" });
+        /* Query actions v1 (27 Sep): a dateless type still has an owner where the writer owes it
+           (offer_tell, offer_send_full) — the table states it, every older null row says "none". */
+        expect(d).toEqual({ ymd: null, owner: row.owner, source: "none" });
       }
       expect(u.ymd, `${t}: an undated record must not borrow a date`).toBeNull();
       expect(u.source).toBe("none");

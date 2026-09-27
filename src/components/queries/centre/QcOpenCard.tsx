@@ -54,7 +54,10 @@ export const QcOpenCard: React.FC<{
    * the footer draws one button per door and the ⋯ menu keeps only what no door covers (snooze).
    */
   onDoor?: (mode: DrawerMode, anchor: HTMLElement) => void;
-}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor }) => {
+  /** Query actions v1 (D7) — the quiet "Delete query" at the footer's right, behind an inline confirm. */
+  onDeleteQuery?: () => void;
+}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery }) => {
+  const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
   const [moreOpen, setMoreOpen] = useState(false);
@@ -132,12 +135,21 @@ export const QcOpenCard: React.FC<{
           <button type="button" className={`qcv-open-act${liveAction === "primary" ? " qcv-open-act--live" : ""}`} data-qcv="open-action" onClick={(e) => onPrimary(e.currentTarget)}>{action}</button>
         )}
       </div>
-      {doors.length > 0 && (
+      {askDelete && onDeleteQuery ? (
+        <div className="qcv-open-doors">
+          <div className="qcv-open-delc" data-qcv="open-delc" role="alertdialog" aria-label="Delete this whole query?">
+            <span><b>Delete this whole query?</b>Its history and reminders go too.</span>
+            <button type="button" onClick={() => setAskDelete(false)}>Keep</button>
+            <button type="button" className="d" data-qcv="open-del-go" onClick={() => { setAskDelete(false); onDeleteQuery(); }}>Delete</button>
+          </div>
+        </div>
+      ) : (doors.length > 0 || onDeleteQuery) && (
         <div className="qcv-open-doors" data-qcv="open-doors">
           {doors.map((d) => (
             <button key={d.mode} type="button" className={d.primary ? "qcv-open-act" : "qcv-open-cb"} data-qcv={d.primary ? "open-action" : "open-door"} data-door={d.mode}
               onClick={(e) => onDoor!(d.mode, e.currentTarget)}>{d.label}</button>
           ))}
+          {onDeleteQuery ? <button type="button" className="qcv-open-cdel" data-qcv="open-del" onClick={() => setAskDelete(true)}>DELETE QUERY</button> : null}
         </div>
       )}
       {moreOpen && (

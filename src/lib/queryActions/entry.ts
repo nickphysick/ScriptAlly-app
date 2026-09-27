@@ -18,8 +18,8 @@ export const DRAWER_LIVE: Record<DrawerMode, boolean> = {
   sent: true,
   nudge: true,
   close: true,
-  offer: false,
-  edit: false,
+  offer: true,
+  edit: true,
 };
 
 const OWED: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
@@ -65,14 +65,26 @@ export function primaryDoor(status: QueryStatus | string): Door | null {
  * in the drawer, so the caller keeps its old route (the one-journey-at-a-time cut-over).
  */
 export interface TaskDoor { mode: DrawerMode; queryId: string; preset?: { nudgeTab?: "sent" | "plan"; closeWhy?: "noreply"; step?: number } }
-export function drawerDoorForTask(taskType: string | undefined, queryId: string | undefined): TaskDoor | null {
+export function drawerDoorForTask(
+  taskType: string | undefined,
+  queryId: string | undefined,
+  /** resolves a query's offer reference — `offer_tell` hangs on the OTHER agent's query and opens
+   *  the offering query's journey */
+  offerRefOf?: (id: string) => string | undefined,
+): TaskDoor | null {
   if (!taskType || !queryId) return null;
+  if (taskType === "offer_tell") {
+    const ref = offerRefOf?.(queryId);
+    return ref && DRAWER_LIVE.offer ? { mode: "offer", queryId: ref, preset: { step: 1 } } : null;
+  }
   const door: TaskDoor | null =
     taskType === "partial_requested" || taskType === "full_requested" || taskType === "revise_resubmit" ? { mode: "sent", queryId }
     : taskType === "nudge_overdue" ? { mode: "nudge", queryId, preset: { nudgeTab: "sent" } }
     : taskType === "no_response_close" ? { mode: "close", queryId, preset: { closeWhy: "noreply" } }
-    : taskType === "offer_received" || taskType === "offer_tell" ? { mode: "offer", queryId, preset: { step: 1 } }
+    : taskType === "offer_received" ? { mode: "offer", queryId, preset: { step: 1 } }
     : taskType === "offer_send_full" ? { mode: "sent", queryId }
+    /* the "told" variant of D7 — no entry id: one step, "I've told …" */
+    : taskType === "withdraw_tell" || taskType === "signed_tell" ? { mode: "edit", queryId }
     : null;
   return door && DRAWER_LIVE[door.mode] ? door : null;
 }

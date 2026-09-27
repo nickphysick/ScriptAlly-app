@@ -231,6 +231,12 @@ export const TASK_TYPES = [
   "materials_unrecorded",
   "materials_unrecorded_bulk",
   "weekly_review",
+  /* Query actions v1 (K3) — derived from the drawer's flat fields; each opens its journey. */
+  "offer_tell",
+  "offer_send_full",
+  "withdraw_tell",
+  "signed_tell",
+  "agent_recheck",
 ] as const;
 
 export type TaskType = (typeof TASK_TYPES)[number];
@@ -297,6 +303,15 @@ export function completionVia(card: BoardCard): CompletionVia {
     case "querying_unstarted":
     case "dream_agent_unqueried":
     case "weekly_review":
+      return "none";
+
+    /* Query actions v1 (K3) — each of these finishes in the query drawer; the tick opens it and
+       writes nothing here. */
+    case "offer_tell":
+    case "offer_send_full":
+    case "withdraw_tell":
+    case "signed_tell":
+    case "agent_recheck":
       return "none";
 
     default: {
