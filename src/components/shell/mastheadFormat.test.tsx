@@ -45,8 +45,10 @@ const PAGES: { title: string; mark: string; section: string; description?: strin
   { title: "Noteboard", mark: "noteboard", section: "Tasks", description: "Notes to self, undated." },
 ];
 
-/** §3.3 — the two pages that open with the full header; every other workspace route is compact. */
-const FULL_PAGES = ["Query Centre", "Contact list"];
+/** §3.3 — the pages that open with the full header; every other workspace route is compact. */
+/* ⚠️ COMPARABLE TITLES JOINED ON 27 SEP (comps v2; Nick: "Comparable titles and Submission
+   packages take full headers"). The packages run adds the fourth. */
+const FULL_PAGES = ["Query Centre", "Contact list", "Comparable titles"];
 
 /**
  * ⚠️ THE SECTION PROVIDER IS BACK, because the eyebrow is back. It was removed when the kicker was
@@ -96,7 +98,7 @@ describe("one masthead format, ten pages", () => {
       expect(groups, `mastheads split on something other than size (description ${withSub}): ${groups.map((v) => v.join(", ")).join(" | ")}`)
         .toHaveLength(2);
       const full = groups.find((g) => g.includes("Query Centre"));
-      expect(full, "the full group is not Query Centre and Contact list").toEqual([...FULL_PAGES].sort());
+      expect(full, "the full group is not exactly FULL_PAGES").toEqual([...FULL_PAGES].sort());
       const compact = groups.find((g) => !g.includes("Query Centre"));
       expect(compact, "a page left the compact group").toHaveLength(PAGES.length - FULL_PAGES.length);
     }

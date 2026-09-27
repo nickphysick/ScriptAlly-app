@@ -18,7 +18,10 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "comps.css"), "utf8");
-const tsx = readFileSync(join(here, "ComparableTitlesPage.tsx"), "utf8");
+/* ⚠️ RETARGETED (comps v2, 27 Sep): a RELOCATION, not a behaviour change. `ScoutPanel` moved verbatim
+   out of ComparableTitlesPage.tsx into its own file when the page's rail became "The Scout, coming
+   soon"; every law below is about the panel and survives the move. The panel is mounted nowhere. */
+const tsx = readFileSync(join(here, "ScoutPanel.tsx"), "utf8");
 const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const src = tsx.replace(/\/\*[\s\S]*?\*\//g, "");
 

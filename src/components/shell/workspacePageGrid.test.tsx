@@ -391,7 +391,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Contact list", "components/agents/agentList.css", [".aglist", ".aglist .agl-page", ".aglist .agl-inner", ".aglist .agl-wpg"]],
       ["Discover", "components/agents/discover.css", [".dv2", ".dv-wpg", ".dv-wrap"]],
       ["Manuscripts", "components/manuscripts/manuscripts.css", [".msv1", ".msv-wpg", ".msv-wrap"]],
-      ["Comparable titles", "components/manuscripts/comps.css", [".ctpage", ".ct-wpg", ".ct-desk"]],
+      /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
+      ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],
       ["Submission packages", "components/packages/packageWorkshop.css", [".pkgw", ".pkgw-wpg"]],
       ["Analytics", "components/shell/workspaceShell.css", [".qa-wrap"]],
     ];
@@ -448,7 +449,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const PAGES: [string, string][] = [
       ["Contact list", "components/agents/agentList.css"],
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
-      ["Comparable titles", "components/manuscripts/comps.css"],
+      ["Comparable titles", "components/manuscripts/compsV2.css"],
       ["Discover", "components/agents/discover.css"],
       ["Submission packages", "components/packages/packageWorkshop.css"],
       /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
@@ -545,13 +546,18 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(i, `${sel} has no rule — the anchor this case reads is gone`).toBeGreaterThan(-1);
       return css.slice(i, css.indexOf("}", i));
     };
-    const comps = readFileSync(resolve(__dirname, "../manuscripts/comps.css"), "utf8");
+    const comps = readFileSync(resolve(__dirname, "../manuscripts/compsV2.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const discover = readFileSync(resolve(__dirname, "../agents/discover.css"), "utf8");
     /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never tested with a `(?!0)` lookahead — `\s*`
        backtracks to zero width and the lookahead runs against the space, so `padding: 0` "matches".
        That shape has bitten this repo twice and is banned. */
     const padTop = (r: string) => (/padding:\s*([^;]+);/.exec(r)?.[1] ?? "").trim().split(/\s+/)[0];
-    expect(padTop(rule(comps, ".ct-pagebody")), "Comparable titles pads its own body again — its gap renders larger than the token says").toBe("0");
+    /* ⚠️ RETARGETED (comps v2, 27 Sep): the page's root is `.cpv-page` (`.ct-pagebody` is gone with
+       the v3 page). Its first row is the full header, whose 18px is the header's own; the root must
+       add no top padding of its own — neither the shorthand nor the longhand. */
+    const cpvRoot = rule(comps, ".cpv-page");
+    expect(cpvRoot, "Comparable titles' root states a padding shorthand — it would zero the gutter AND pad its top").not.toMatch(/(^|[;{\s])padding\s*:/);
+    expect(cpvRoot, "Comparable titles pads its own root's top — its header would open lower than every other full header").not.toMatch(/padding-top\s*:/);
     expect(padTop(rule(discover, ".dv-hero")), "Discover's hero pads its own top again — it rendered a 154px gap against a 70px token").toBe("0");
   });
 
@@ -1086,7 +1092,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
-      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Tasks family (To-do · Calendar · Noteboard)", "../todo/TasksPageLayout.tsx"],
     ] as const;
     for (const [page, file] of CONVERTED) {
@@ -1095,7 +1100,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
 
-    /* ⚠️ THE OPTED-OUT SET IS EXACTLY THREE PAGES (each one a decision, announced here). The Query
+    /* ⚠️ THE OPTED-OUT SET IS EXACTLY FOUR PAGES (each one a decision, announced here). The Query
        Centre (v11, 19 Sep; Nick) renders the grid and NO masthead — its head is its own. The
        CONTACT LIST joined on 25 Sep (Contact list v11, ruling in the go-ahead): its head is the
        hero — title, facts sentence, count cards and the live add card over the Archivist's art —
@@ -1104,13 +1109,18 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        art, the title block and the cover plate — so the shared masthead would be a second head.
        The routed page is `manuscripts/v12/ManuscriptPage`; the locked `AllManuscripts.tsx` keeps
        its masthead but is no longer routed, so it leaves CONVERTED with this entry. The list is
-       asserted by LENGTH so a fourth page cannot join it unannounced. */
+       asserted by LENGTH so a fifth page cannot join it unannounced. */
+    /* ⚠️ COMPARABLE TITLES JOINED ON 27 SEP (comps v2; Nick's ruling: "Comparable titles and
+       Submission packages take full headers"). It renders the shared FULL header as the first row of
+       its own group, like the Contact list, so the grid's masthead is null. 3 → 4; the packages run
+       takes it to 5. */
     const OPTED_OUT = [
       ["Query Centre", "../Queries.tsx"],
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../manuscripts/v12/ManuscriptPage.tsx"],
+      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
     ] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(3);
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(4);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
@@ -1183,7 +1193,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Contact list", "components/agents/agentList.css", ".aglist"],
       ["Discover", "components/agents/discover.css", ".dv2"],
       ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
-      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
+      ["Comparable titles", "components/manuscripts/compsV2.css", ".cpv-page"],
       ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
     ];
     for (const [page, file, sel] of ROOTS) {

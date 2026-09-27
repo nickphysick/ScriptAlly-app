@@ -1,0 +1,207 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Comparable titles v2 (27 Sep; ref design-refs/materials/comps-v2.html). The page's own sheet —
+ * the main column and the rail's CONTENTS. What this sheet does NOT style is the point of it:
+ *
+ *   - the bar, the sidebar, the column, the gutter: the shell's (`.wpg-scroll > *` pays the gutter
+ *     on this page's root, and the root never states `padding` as a shorthand — S5);
+ *   - the header: `PageHeader variant="full"`, with props. The mock's `.ph` CSS is a replica of
+ *     pageHeader.css and is NOT ported;
+ *   - the rail's card, its stickiness and its height: `PageRail` (containers/), shared.
+ *
+ * ⚠️ S7 READS THIS FILE: no selector here names a shell (`.ws-*`), header (`.ph*`) or grid (`.wpg*`)
+ * class. A page restyling the chrome is the fault that lock exists to catch.
+ *
+ * ⚠️ EVERY VALUE IS A TOKEN THAT ALREADY EXISTS, aliased once below — `:root` in index.css (the
+ * object colours and the materials surfaces), primitives.css (`--sp-*`) and the shell block. The
+ * aliases are the page's vocabulary, not new colours.
+ */
+
+/* ⚠️ FIRST IN THE SHEET, AT 0-1-0: `lib/brand.tsx` names a body family on bare span/p/div/button/
+   input/label at runtime (0-0-1). This beats it by one class and — being first — loses on source
+   order to every `.cpv-*` rule below that states its own face (the qcvPage.css arrangement). */
+.cpv-page :where(span, p, div, label, li, ol, b, i, a, button, input, textarea, section, article, aside, form) {
+  font-family: inherit;
+}
+
+.cpv-page {
+  --cpv-ink: var(--sp-ink);
+  --cpv-muted: var(--shell-mute);
+  --cpv-hair: var(--shell-hairline);
+  --cpv-ring: var(--shell-ring);
+  --cpv-btn: var(--sp-anthracite);
+  --cpv-parch-1: var(--shell-active-fg);
+  --cpv-parch-2: var(--mat-parch-2);
+  --cpv-parch-3: var(--mat-parch-3);
+  --cpv-shadow: var(--mat-soft);
+  --cpv-type: var(--sp-type);
+  --cpv-serif: var(--sp-serif);
+  --cpv-mono: var(--font-mono);
+
+  box-sizing: border-box;
+  color: var(--cpv-ink);
+  font-family: var(--cpv-serif);
+  font-size: 15px;
+  line-height: 1.45;
+  /* ⚠️ VERTICAL ONLY — the inline gutter is the grid's (`.wpg-scroll > *`). The shorthand would
+     zero it; that is exactly the S5 mutation. */
+  padding-bottom: 110px;
+  min-width: 0;
+}
+.cpv-page *, .cpv-page *::before, .cpv-page *::after { box-sizing: border-box; }
+
+/* ── the group: the full header is row 1 across both tracks; the column and the rail are row 2 at
+   the rule + 24 (page-anatomy-v2 §3 — the Contact list's `.clv-group`, exactly) ── */
+.cpv-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  /* column gap only: a row gap would add to the 24 below the rule */
+  column-gap: 28px;
+  row-gap: 0;
+  align-items: start;
+}
+.cpv-group > .cpv-head { grid-column: 1 / -1; grid-row: 1; }
+.cpv-group > .cpv-main { grid-column: 1; grid-row: 2; padding-top: 24px; }
+.cpv-group > .cpv-rail { grid-column: 2; grid-row: 2; margin-top: 24px; }
+.cpv-main { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+/* ── shared bits: labels, tags, buttons ── */
+.cpv-lbl {
+  font-family: var(--cpv-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cpv-muted);
+  font-weight: 600;
+}
+.cpv-ex {
+  font-family: var(--cpv-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cpv-muted);
+  box-shadow: inset 0 0 0 1px var(--cpv-hair);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: #fff;
+}
+.cpv-mini {
+  font-family: var(--cpv-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: #fff;
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
+  border-radius: 6px;
+  padding: 4px 7px;
+  white-space: nowrap;
+  color: var(--cpv-ink);
+  cursor: pointer;
+}
+.cpv-mini:hover { background: var(--cpv-parch-2); }
+.cpv-btn {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--cpv-parch-2);
+  font-family: var(--cpv-type);
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  color: var(--cpv-ink);
+  cursor: pointer;
+}
+.cpv-btn:hover { background: var(--cpv-parch-3); }
+.cpv-btn--dark { background: var(--cpv-btn); color: var(--cpv-parch-1); }
+.cpv-btn--dark:hover { background: #34476a; }
+.cpv-btn--line { background: transparent; box-shadow: inset 0 0 0 1px var(--cpv-ring); align-self: flex-start; }
+.cpv-btn--line:hover { background: var(--shell-btn-hover); }
+.cpv-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.cpv-txt {
+  border: 0;
+  background: none;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-family: var(--cpv-type);
+  font-size: 12px;
+  color: var(--cpv-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cpv-txt:hover { background: var(--cpv-parch-2); }
+.cpv-txt--quiet { color: var(--cpv-muted); }
+.cpv-seg { display: inline-flex; background: var(--cpv-parch-2); border-radius: 10px; padding: 3px; gap: 2px; }
+.cpv-seg button {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-family: var(--cpv-type);
+  font-size: 12px;
+  color: var(--cpv-muted);
+  cursor: pointer;
+}
+.cpv-seg button[aria-checked="true"] {
+  background: #fff;
+  color: var(--cpv-ink);
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px var(--cpv-hair);
+}
+.cpv-page :focus-visible { outline: 2px solid var(--cpv-btn); outline-offset: 2px; }
+.cpv-stepn {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cpv-btn);
+  color: var(--cpv-parch-1);
+  font-family: var(--cpv-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+.cpv-hint { font-size: 13.5px; color: var(--cpv-muted); }
+/* ⚠️ FADED AND INERT — a picture of the page, never a second set of controls */
+.cpv-ghost { opacity: 0.5; filter: saturate(0.7); pointer-events: none; user-select: none; }
+
+
+/* ── the query-line card ── */
+.cpv-qcard { background: #fff; border-radius: 14px; box-shadow: var(--cpv-shadow); padding: 18px 20px; }
+.cpv-qh { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+/* ⚠️ `!important` + two classes: brand.tsx forces `h2, h3` to its heading face with !important */
+.cpv-page .cpv-qh h2 {
+  margin: 0;
+  font-family: var(--cpv-type) !important;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.cpv-qline {
+  background: var(--cpv-parch-1);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--cpv-hair);
+  font-size: 19px;
+  line-height: 1.5;
+  padding: 18px 20px;
+}
+.cpv-qline i { font-style: italic; }
+.cpv-qline[data-kind="empty"], .cpv-qline[data-kind="unavailable"] { font-size: 14px; color: var(--cpv-muted); }
+.cpv-qbot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.cpv-qcap {
+  font-family: var(--cpv-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cpv-muted);
+  line-height: 1.7;
+}
+.cpv-qacts { display: flex; align-items: center; gap: 10px; }
+.cpv-copied { font-size: 13px; color: var(--cpv-muted); line-height: 1.45; }

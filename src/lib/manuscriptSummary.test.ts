@@ -21,7 +21,7 @@ import {
   packageUsageCounts, packagesInUse, queryVersionId, queryingSince, scopedManuscript,
   unattributedQueryIds, versionUsage,
 } from "./manuscriptSummary";
-import { oMs, oPkg } from "./designTokens";
+import { oMs, oPkg, oScout, matParch2, matParch3, matTray, matSoft } from "./designTokens";
 
 const q = (id: string, status: QueryStatus, pkg: string, extra: Partial<Query> = {}): Query => ({
   id, userId: "u", manuscriptId: "ms", agentId: `ag-${id}`, packageId: pkg,
@@ -267,5 +267,19 @@ describe("the object colours", () => {
     expect(decl("--o-pkg")).toBe(oPkg);
     expect(oMs).toBe("#8a4a3c");
     expect(oPkg).toBe("#9a7233");
+  });
+
+  it("the Scout's teal and the materials surfaces agree between index.css and designTokens", () => {
+    const css = readFileSync(resolve(__dirname, "../index.css"), "utf8");
+    const decl = (name: string) => new RegExp(`(?:^|\\n)\\s*${name}:\\s*([^;]+);`).exec(css)?.[1].trim();
+    expect(decl("--o-scout")).toBe(oScout);
+    expect(decl("--mat-parch-2")).toBe(matParch2);
+    expect(decl("--mat-parch-3")).toBe(matParch3);
+    expect(decl("--mat-tray")).toBe(matTray);
+    expect(decl("--mat-soft")).toBe(matSoft);
+    /* each declared exactly once — a second declaration is the one that wins */
+    for (const t of ["--o-scout", "--mat-parch-2", "--mat-parch-3", "--mat-tray", "--mat-soft"]) {
+      expect(css.split(new RegExp(`\\n\\s*${t}:`)).length - 1, t).toBe(1);
+    }
   });
 });

@@ -53,6 +53,20 @@
    */
   --o-ms: #8a4a3c;
   --o-pkg: #9a7233;
+  /* The Scout's teal (comps v2, 27 Sep) — the third object colour, the mock's `--o-scout`. It lived
+     page-scoped as `--msv12-scout`, which no other page can reach; the materials pages read it here. */
+  --o-scout: #467a76;
+  /**
+   * THE MATERIALS SURFACES (comps v2, 27 Sep; design-refs/materials/) — the mocks' parchment field
+   * fill and its hover, the blush rail tray and the soft card lift. Declared ONCE here because the
+   * Comparable titles and Submission packages pages both read them; the per-page copies that exist
+   * (`--msv12-parch-2/3`, `--msv12-shadow`, `--be-accent` on `.qcv-page`) are page-scoped and cannot
+   * be reached from another page. Mirrored in designTokens.ts (matParch2 … matSoft).
+   */
+  --mat-parch-2: #f7f3ee;
+  --mat-parch-3: #f3eee7;
+  --mat-tray: #e9c9b8;
+  --mat-soft: 0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06);
   --sa-sk-base: #ece6de;
   --sa-sk-sheen: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%);
   --burg: #7c3a2a;    /* query-letter ink · primary brand (=== --color-burgundy) */

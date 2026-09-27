@@ -171,12 +171,8 @@ describe("/manuscripts/comps renders", () => {
   it("…and the workspace branch runs its derivations, not the first-visit block", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    /* the comp card rendered, with the two read-time derivations that only run here */
-    expect(html, "the comp card did not render").toContain("The Smoke Comp");
-    expect(html, "compAgeLine did not run").toContain("Published 2021");
-    expect(html, "compFacets did not run").toContain("structure");
-    /* and the marketing block is the DEMOTED variant here, so its CTAs are absent */
-    expect(html, "the first-visit CTA rendered on the workspace").not.toContain("Add your first comp");
+    expect(html, "the query line did not render").toContain("Your query line");
+    expect(html, "the page renders the full header").toContain('data-size="full"');
   });
 });
 

@@ -226,3 +226,10 @@ export const onbHeadingInk = "#241711";
  */
 export const oMs = "#8a4a3c";
 export const oPkg = "#9a7233";
+/** The Scout's teal — the third object colour (comps v2). CSS: `--o-scout` at :root. */
+export const oScout = "#467a76";
+/** The materials surfaces (comps v2) — CSS: `--mat-parch-2/3`, `--mat-tray`, `--mat-soft` at :root. */
+export const matParch2 = "#f7f3ee";
+export const matParch3 = "#f3eee7";
+export const matTray = "#e9c9b8";
+export const matSoft = "0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06)";

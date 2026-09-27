@@ -68,51 +68,29 @@ export function compRole(c: CompTitle, now: number): CompRole {
 }
 
 /**
- * A book's age in years, when it is old enough for the row to state it — otherwise null.
+ * The card's age line — a FACT about the record and nothing else (comps v2, 27 Sep; the mock's
+ * `ageLine`).
  *
- * ⚠️ IT RETURNS THE NUMBER BECAUSE THE CHIP STATES THE NUMBER. It was a boolean feeding a chip that
- * read "Old for a market comp" — an assessment of that comp's fit, which is precisely what baked
- * decision 8 forbids: old comps get a factual `N YRS AGO` and nothing on this page tells a writer
- * their comp is bad. A boolean cannot say "12"; the wording had to be a verdict because the shape
- * left nothing else to say.
+ * ⚠️ NO THRESHOLD, NO CUTOFF, NO COMPARISON. Every comp states its age the same way whatever the
+ * number is; none gets a colour, an icon, an ordering or a warning. A line that appeared only on
+ * older comps would be a flag whatever its words said — the appraisal this page has been walked
+ * back from twice (c5832984, and the v3 `compAge` chip).
  *
- * ⚠️ AND IT NO LONGER REQUIRES `inQuery`. The old gate fired only on a ticked comp, on the reasoning
- * that it was "being asked to carry a market case it can't" — reasoning that is itself an appraisal.
- * An age is a fact about the book whether or not the writer has ticked it, and both the pack (Phase
- * 2) and the v5 ref show it unconditionally.
+ * ⚠️ AND IF YOU FIND YOURSELF WRITING A COMPARISON AGAINST A CUTOFF HERE, STOP.
+ *
+ * `2021 · 5 years ago` · `2025 · 1 year ago` · `2026 · this year` · `Year not recorded`.
+ * Numerals, not words, and the same wording for a book and a broadcast — the v2 mock's, which
+ * replaces v3's "Published 2021 · five years ago" / "First aired 2022". A year in the future (a
+ * recorded forthcoming title) reads "this year" rather than a negative count.
+ *
+ * ⚠️ AN ABSENT YEAR IS STATED, NOT OMITTED — the card's age row is always present, and a missing
+ * row would read as a card that failed to render.
  */
-/** Spelled to twelve, then numerals — the house convention the dashboard's week eyebrow uses. */
-const ELAPSED_WORDS = [
-  "zero", "one", "two", "three", "four", "five", "six",
-  "seven", "eight", "nine", "ten", "eleven", "twelve",
-];
-
-/**
- * The card's age chip — a FACT about the record and nothing else.
- *
- * ⚠️ NO THRESHOLD, NO CUTOFF, NO COMPARISON. This is the deliberate difference from `compAge`
- * below, which returns null unless a book is more than five years old — so the chip it feeds appears
- * ONLY on older comps, and a chip that appears only on some rows is a flag whatever its wording is.
- * The writer reads "this one got marked", which is an appraisal of their choice delivered by
- * presence rather than by words. Every comp with a year gets this chip; none of them gets a colour,
- * an icon, an ordering or a warning.
- *
- * ⚠️ AND IF YOU FIND YOURSELF WRITING A COMPARISON AGAINST A CUTOFF HERE, STOP — that is the
- * appraisal line, and this page has been walked back from it once already (c5832984).
- *
- * Book → "Published 2021 · five years ago". Screen → "First aired 2022", with no elapsed clause,
- * because the ref draws it that way and a broadcast year is not a publication date.
- * Published this year → the year alone; "zero years ago" is not something anyone says.
- * No year recorded → null, and the card omits the chip rather than stating an absence.
- */
-export function compAgeLine(c: CompTitle, now: number): string | null {
+export function compAgeLine(c: CompTitle, now: number): string {
   const y = compYear(c);
-  if (y === null) return null;
-  if (compMedia(c) !== "book") return `First aired ${y}`;
-  const elapsed = now - y;
-  if (elapsed <= 0) return `Published ${y}`;
-  const words = elapsed <= 12 ? ELAPSED_WORDS[elapsed] : String(elapsed);
-  return `Published ${y} · ${words} ${elapsed === 1 ? "year" : "years"} ago`;
+  if (y === null) return "Year not recorded";
+  const d = now - y;
+  return `${y} · ${d <= 0 ? "this year" : d === 1 ? "1 year ago" : `${d} years ago`}`;
 }
 
 /**
@@ -131,6 +109,20 @@ export function compFacets(c: CompTitle): string[] {
     .filter((x) => x !== "");
 }
 
+/**
+ * A book's age in years, when it is old enough for the row to state it — otherwise null.
+ *
+ * ⚠️ IT RETURNS THE NUMBER BECAUSE THE CHIP STATES THE NUMBER. It was a boolean feeding a chip that
+ * read "Old for a market comp" — an assessment of that comp's fit, which is precisely what baked
+ * decision 8 forbids: old comps get a factual `N YRS AGO` and nothing on this page tells a writer
+ * their comp is bad. A boolean cannot say "12"; the wording had to be a verdict because the shape
+ * left nothing else to say.
+ *
+ * ⚠️ AND IT NO LONGER REQUIRES `inQuery`. The old gate fired only on a ticked comp, on the reasoning
+ * that it was "being asked to carry a market case it can't" — reasoning that is itself an appraisal.
+ * An age is a fact about the book whether or not the writer has ticked it, and both the pack (Phase
+ * 2) and the v5 ref show it unconditionally.
+ */
 export function compAge(c: CompTitle, now: number): number | null {
   if (compMedia(c) !== "book") return null;
   const y = compYear(c);
@@ -148,17 +140,19 @@ export function compAge(c: CompTitle, now: number): number | null {
  */
 export type QueryFormat = "readers" | "meets";
 
-/** One run of the composed line — `emphasis` drives WEIGHT only, never colour or italics. */
+/** One run of the composed line — `emphasis` marks the titles the line sets in italic. */
 export interface LineSeg {
   text: string;
-  /** ms = the manuscript title (700) · title = a comp title (600) · absent = the connecting prose. */
+  /** ms = the manuscript title · title = a comp title · absent = the connecting prose. Both marked
+   *  runs render in ITALIC (comps v2 — the mock's `<i>`), the way a title is set in running prose;
+   *  v3's weight-only rule is superseded. */
   emphasis?: "ms" | "title";
 }
 
 export type QueryLine =
-  /** Nothing ticked — the same prompt in either format. */
-  | { kind: "empty"; prompt: string; caption: string | null }
-  /** X-meets-Y with anything other than two ticked: state the rule, state the count, no scolding. */
+  /** Nothing switched on — the same prompt in either format. */
+  | { kind: "empty"; prompt: string; caption: string }
+  /** A-meets-B with anything other than two switched on: the rule and the count, no scolding. */
   | { kind: "unavailable"; prompt: string; caption: string }
   | { kind: "line"; text: string; segments: LineSeg[]; caption: string };
 
@@ -174,93 +168,81 @@ function joinTitles(titles: string[]): LineSeg[] {
 
 const segText = (segs: LineSeg[]): string => segs.map((s) => s.text).join("");
 
+/** The phrase the empty prompt and its caption both name — the switch's own label, verbatim. */
+export const IN_QUERY_LABEL = "In query letter";
+
 /**
- * The query-letter line, composed from the ticked comps IN LIST ORDER.
+ * The query-letter line, composed from the switched-on comps IN LIST ORDER.
  *
  * ⚠️ LIST ORDER IS THE CONTRACT, which is why the list is reorderable and why the caption says so.
  * Sorting here — by year, by recency, by anything — would silently overrule the writer's own
  * arrangement of their sentence.
  *
- * ⚠️ THE CAPTION APPENDS THE COMPOSITION, never a verdict on it. See `compositionLine`.
+ * ⚠️ THE COPY IS THE v2 MOCK'S (27 Sep), and the composition LEFT the caption: it is a fact about
+ * the whole library now and sits under "Your comps" (`compositionLine`). The caption says only how
+ * the line was built.
  */
-export function queryLine(
-  comps: CompTitle[],
-  manuscriptTitle: string,
-  format: QueryFormat,
-  now: number
-): QueryLine {
+export function queryLine(comps: CompTitle[], manuscriptTitle: string, format: QueryFormat): QueryLine {
   const inq = comps.filter((c) => c.inQuery);
+  const waiting = `Switch on “${IN_QUERY_LABEL}” for a comp below`;
   if (inq.length === 0) {
-    return { kind: "empty", prompt: "Tick a comp below to start building your query line.", caption: null };
+    return { kind: "empty", prompt: `Switch on ${IN_QUERY_LABEL} for a comp to start your line.`, caption: waiting };
   }
-  const composition = compositionLine(comps, now);
-  const plural = inq.length === 1 ? "" : "s";
-
-  if (format === "meets") {
-    if (inq.length !== 2) {
-      /* factual: what the format needs, and how many are ticked. No instruction, no "only". */
-      return {
-        kind: "unavailable",
-        prompt: "The X-meets-Y format takes exactly two comps.",
-        caption: `${inq.length} ticked`,
-      };
-    }
-    const segments: LineSeg[] = [
-      { text: inq[0].title, emphasis: "title" },
-      { text: " meets " },
-      { text: inq[1].title, emphasis: "title" },
-      { text: "." },
-    ];
+  if (format === "meets" && inq.length !== 2) {
+    /* factual: what the format needs, and how many are switched on. No instruction, no "only". */
     return {
-      kind: "line",
-      text: segText(segments),
-      segments,
-      caption: [`built from 2 ticked comps`, composition].filter(Boolean).join(" · "),
+      kind: "unavailable",
+      prompt: `“A meets B” takes exactly two comps. ${inq.length} ${inq.length === 1 ? "is" : "are"} switched on.`,
+      caption: waiting,
     };
   }
-
-  const segments: LineSeg[] = [
-    { text: manuscriptTitle, emphasis: "ms" },
-    { text: " will appeal to readers of " },
-    ...joinTitles(inq.map((c) => c.title)),
-    { text: "." },
-  ];
+  const segments: LineSeg[] = format === "meets"
+    ? [{ text: inq[0].title, emphasis: "title" }, { text: " meets " }, { text: inq[1].title, emphasis: "title" }, { text: "." }]
+    : [{ text: manuscriptTitle, emphasis: "ms" }, { text: " will appeal to readers of " }, ...joinTitles(inq.map((c) => c.title)), { text: "." }];
   return {
     kind: "line",
     text: segText(segments),
     segments,
-    caption: [`built from ${inq.length} ticked comp${plural}`, "in list order", composition]
-      .filter(Boolean)
-      .join(" · "),
+    caption: `Built from ${inq.length} comp${inq.length === 1 ? "" : "s"} switched on below, in list order`,
   };
 }
 
 /**
- * The composition of the query line, stated as a count.
+ * The library's composition, stated as counts — the mono line under "Your comps" (comps v2).
  *
- * ⚠️ THIS REPLACES `queryHealth`, WHICH WAS DELETED RATHER THAN REWORDED (baked decision 17). Its
- * information was worth keeping and its framing was not: it read "a strong, current case", "solid",
- * and "add one so agents see a live market" — two adjectives about the writer's choices and one
- * instruction about their specific list, which Phase 2 forbids in nearly those words. Worse, its
- * TYPE was the verdict: `status: "empty" | "ok" | "tip"` encoded a quality judgement in the data,
- * so every consumer inherited it whatever the copy said. Rewording would have left that in place.
+ * `3 of 4 books published in the last five years · 1 film or TV`. Either part is omitted when its
+ * count is 0; null for an empty library.
  *
- * Count and state. No adjective, no recommendation, no threshold to fall short of — a writer reading
- * "1 OF 3" can draw their own conclusion, which is the difference between reporting and appraising.
+ * ⚠️ IT MOVED FROM THE QUERY LINE'S CAPTION AND CHANGED ITS DENOMINATOR WITH THE MOVE. In the
+ * caption it counted the SWITCHED-ON comps (films in the total, so it agreed with "built from N");
+ * here it describes the whole list, so books are counted against books and screen comps are their
+ * own clause — the mock's arithmetic.
  *
- * ⚠️ THE DENOMINATOR IS EVERY TICKED COMP, not just the books. A ticked film counts in the total and
- * never in the count, so the sentence stays true ("2 of 3 published in the last five years" — the
- * film is not), and the total agrees with the `BUILT FROM N TICKED COMPS` beside it. A books-only
- * denominator would silently disagree with the caption it sits in.
- *
- * Null when nothing is ticked: there is no composition to state, and the line above is already
- * telling the writer to tick something.
+ * ⚠️ IT REPLACED `queryHealth`, AND THE REASON STANDS: count and state. No adjective, no
+ * recommendation, no threshold to fall short of — `queryHealth`'s verdict lived in its TYPE
+ * (`"ok" | "tip"`), so every consumer inherited the judgement whatever the copy said.
  */
 export function compositionLine(comps: CompTitle[], now: number): string | null {
-  const inq = comps.filter((c) => c.inQuery);
-  if (inq.length === 0) return null;
-  const recent = inq.filter((c) => isRecentBook(c, now)).length;
-  return `${recent} of ${inq.length} published in the last five years`;
+  const books = comps.filter((c) => compMedia(c) === "book");
+  const recent = books.filter((c) => isRecentBook(c, now)).length;
+  const screen = comps.length - books.length;
+  const parts: string[] = [];
+  if (books.length) parts.push(`${recent} of ${books.length} book${books.length === 1 ? "" : "s"} published in the last five years`);
+  if (screen) parts.push(`${screen} film or TV`);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+/** "1st", "2nd", "3rd", "4th" … "11th", "12th", "13th", "21st" — the switch's position pill. */
+export function ordinal(n: number): string {
+  const t = n % 100;
+  const suffix = t >= 11 && t <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
+  return `${n}${suffix}`;
+}
+
+/** The spine tile's initial: the title's first letter, a leading The / A / An set aside. */
+export function spineInitial(title: string): string {
+  const t = title.trim().replace(/^(the|a|an)\s+/i, "");
+  return (t.charAt(0) || title.trim().charAt(0) || "·").toUpperCase();
 }
 
 /** Masthead + strategy-strip counts. */
