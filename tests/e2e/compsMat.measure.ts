@@ -313,7 +313,10 @@ test("C3 · form", async ({ page }) => {
   L.check("C3 · a duplicate title asks first", ctx, !!dupe && dupe.includes("Salt Road is already on your list."), `${dupe}`);
   stored = JSON.parse(execFileSync("node", ["tests/e2e/seedCompsFixture.mjs", "--dump", FILLED], { encoding: "utf8" }).trim().split("\n").pop() ?? "[]");
   L.check("C3 · …and nothing was written", ctx, stored.filter((c: { title: string }) => c.title.toLowerCase() === "salt road").length === 1, `${stored.length}`);
-  await on(page, '[data-cpv="dupe"] button:has-text("Add anyway")').click();
+  /* ⚠️ GUARDED: with the duplicate check gone there is no row and no button — that must be a red
+     ROW (the two above, and the count below), not a crash on this click */
+  const anyway = on(page, '[data-cpv="dupe"] button:has-text("Add anyway")');
+  if (await anyway.count()) await anyway.click();
   await expect.poll(async () => (await readList(page))?.cards.filter((c) => (c.title ?? "").toLowerCase() === "salt road").length, { timeout: 10_000 }).toBe(2).catch(() => {});
   L.check("C3 · Add anyway adds it", ctx, ((await readList(page))?.cards.filter((c) => (c.title ?? "").toLowerCase() === "salt road").length ?? 0) === 2, "");
   close(L, 8);
