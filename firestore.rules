@@ -430,7 +430,10 @@ service cloud.firestore {
           data.status == 'Offer' ||
           data.status == 'Rejected' ||
           data.status == 'Withdrawn' ||
-          data.status == 'No Response'
+          data.status == 'No Response' ||
+          // Query actions v1 (K6, 27 Sep)
+          data.status == 'Resubmitted' ||
+          data.status == 'Signed'
         )
         && (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))
         && (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisationNotes.size() <= 16384))
@@ -491,7 +494,27 @@ service cloud.firestore {
         && (data.get('agentComments', null) == null || (data.agentComments is string && data.agentComments.size() <= 16384))
         && (data.get('fullVersionSent', null) == null || (data.fullVersionSent is string && data.fullVersionSent.size() <= 512))
         && (data.get('revisionRound', null) == null || (data.revisionRound is int && data.revisionRound >= 1 && data.revisionRound <= 100))
-        && (data.get('hasAgentResponded', null) == null || data.hasAgentResponded is bool);
+        && (data.get('hasAgentResponded', null) == null || data.hasAgentResponded is bool)
+        // ⚠️ QUERY ACTIONS v1 (27 Sep) — the drawer's fields, every one FLAT (a map meets the
+        // nested-allowlist denial) and every one optional: absent means "not recorded".
+        && (data.get('sentPackageId', null) == null || (data.sentPackageId is string && data.sentPackageId.size() <= 128))
+        && (data.get('sentMaterials', null) == null || (data.sentMaterials is string && data.sentMaterials.size() <= 1024))
+        && (data.get('sentVersions', null) == null || (data.sentVersions is list && data.sentVersions.size() <= 10))
+        && (data.get('lastSentLabel', null) == null || (data.lastSentLabel is string && data.lastSentLabel.size() <= 256))
+        && (data.get('requery', null) == null || data.requery is bool)
+        && (data.get('requestFrom', null) == null || (data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 10000000))
+        && (data.get('requestFromUnit', null) == null || data.requestFromUnit in ['chapter', 'page', 'word'])
+        && (data.get('requestSynopsis', null) == null || data.requestSynopsis is bool)
+        && (data.get('closePlan', null) == null || (data.closePlan is string && data.closePlan.size() <= 64))
+        && (data.get('nrmnOverride', null) == null || data.nrmnOverride is bool)
+        && (data.get('offerRefQueryId', null) == null || (data.offerRefQueryId is string && data.offerRefQueryId.size() <= 128))
+        && (data.get('offerTold', null) == null || data.offerTold is bool)
+        && (data.get('offerReply', null) == null || data.offerReply in ['wait', 'full', 'aside', 'offer'])
+        && (data.get('offerToldOn', null) == null || (data.offerToldOn is string && data.offerToldOn.size() <= 64))
+        && (data.get('offerCall', null) == null || data.offerCall in ['none', 'booked', 'done'])
+        && (data.get('offerCallOn', null) == null || (data.offerCallOn is string && data.offerCallOn.size() <= 64))
+        && (data.get('withdrawTold', null) == null || data.withdrawTold is bool)
+        && (data.get('agentRecheckOn', null) == null || (data.agentRecheckOn is string && data.agentRecheckOn.size() <= 64));
     }
 
     /**
@@ -538,7 +561,9 @@ service cloud.firestore {
           // correction pass 3 · finding 1: the four fields recordQueryResponse writes onto a
           // partial/full/rejected rung — absent since this list landed (26 Aug), so every such
           // record was denied while R&R/offer/no-reply passed. See reports/query-respond-nudge.md.
-          'materialsType', 'materialsQuantity', 'fullVersionSent', 'feedbackType'
+          'materialsType', 'materialsQuantity', 'fullVersionSent', 'feedbackType',
+          // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
+          'eventKey'
         ])
         && data.type is string && data.type.size() <= 128
         && (data.createdAt is timestamp || data.createdAt is string)
@@ -553,7 +578,9 @@ service cloud.firestore {
           data.resultingStatus == 'Offer' ||
           data.resultingStatus == 'Rejected' ||
           data.resultingStatus == 'Withdrawn' ||
-          data.resultingStatus == 'No Response'
+          data.resultingStatus == 'No Response' ||
+          data.resultingStatus == 'Resubmitted' ||
+          data.resultingStatus == 'Signed'
         )))
         && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
         && (!data.keys().hasAny(['agentName']) || (data.agentName is string && data.agentName.size() <= 256))
@@ -564,7 +591,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['materialsType']) || (data.materialsType is string && data.materialsType.size() <= 64))
         && (!data.keys().hasAny(['materialsQuantity']) || (data.materialsQuantity is string && data.materialsQuantity.size() <= 64))
         && (!data.keys().hasAny(['fullVersionSent']) || (data.fullVersionSent is string && data.fullVersionSent.size() <= 128))
-        && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64));
+        && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64))
+        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64));
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
@@ -672,7 +700,9 @@ service cloud.firestore {
           data.resultingStatus == 'Offer' ||
           data.resultingStatus == 'Rejected' ||
           data.resultingStatus == 'Withdrawn' ||
-          data.resultingStatus == 'No Response'
+          data.resultingStatus == 'No Response' ||
+          data.resultingStatus == 'Resubmitted' ||
+          data.resultingStatus == 'Signed'
         )))
         // ── the send's own materials (Query Centre §2) ──────────────────────────────────────
         // ⚠️ OPTIONAL, because every activity written before this deploy has none and must stay
@@ -694,7 +724,9 @@ service cloud.firestore {
         // ⚠️ SENDS ONLY IS A CLIENT RULE, not this one. Restating "Full Sent or Partial Sent" here
         // would make a CORRECTION that moves an event between statuses fail on a field it is not
         // touching; the client is the single writer and never puts one on another type.
-        && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128));
+        && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128))
+        // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
+        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64));
     }
 
     function isValidJournalEntry(data, userId) {
@@ -931,7 +963,12 @@ service cloud.firestore {
             // editMaterialsUpdate. Unchanged values were never affectedKeys, which is why attaching
             // a package failed while ordinary query edits did not — the narrow, quiet kind.
             'materialsWanted', 'packageId', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments',
-            'fullVersionSent', 'revisionRound', 'hasAgentResponded', 'closureOfferDismissed', 'writerExpectedDate', 'writerExpectedSetAt'
+            'fullVersionSent', 'revisionRound', 'hasAgentResponded', 'closureOfferDismissed', 'writerExpectedDate', 'writerExpectedSetAt',
+            // Query actions v1 (§R, 27 Sep) — the drawer's flat fields.
+            'sentPackageId', 'sentMaterials', 'sentVersions', 'lastSentLabel', 'requery',
+            'requestFrom', 'requestFromUnit', 'requestSynopsis', 'closePlan', 'nrmnOverride',
+            'offerRefQueryId', 'offerTold', 'offerReply', 'offerToldOn', 'offerCall', 'offerCallOn',
+            'withdrawTold', 'agentRecheckOn'
           ])
         );
 
@@ -963,7 +1000,7 @@ service cloud.firestore {
           // filed under a query belonging to a different manuscript while the feed still counted
           // it against the old book — which is worse than the denial it replaces, because it looks
           // correct on the page the writer is standing on.
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey'])
         );
       }
 
