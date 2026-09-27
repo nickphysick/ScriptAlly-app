@@ -17,6 +17,7 @@
  */
 import React from "react";
 import trayArt from "../../../assets/manuscripts/comps-tray-archivist.png";
+import { PACKAGES_OPEN_TO_ALL } from "../../../lib/entitlements";
 
 const ExampleTag: React.FC = () => <span className="msv12-ex" data-msv12="example-tag">Example</span>;
 
@@ -155,7 +156,7 @@ export const Msv12Empty: React.FC<{ heroArt: string; onCreate: () => void }> = (
 
         <section className="msv12-sec msv12-sec--e" data-msv12-esec="packages">
           <div className="msv12-sech">
-            <h2><span className="msv12-step">4</span>Submission packages<span className="msv12-pro">Pro</span></h2>
+            <h2><span className="msv12-step">4</span>Submission packages{PACKAGES_OPEN_TO_ALL ? null : <span className="msv12-pro">Pro</span>}</h2>
             <ExampleTag />
           </div>
           <p className="msv12-cap">

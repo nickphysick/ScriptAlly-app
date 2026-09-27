@@ -24,6 +24,7 @@
  * the record does not hold, printed as if it did.
  */
 import { ComponentType, type BookVersion, type ManuscriptVersion, type QueryMaterial, type SubmissionPackage, type User } from "../types";
+import { packagesUnlocked } from "./entitlements";
 import { isSlotFilled } from "./packageMetrics";
 import { bookVersionOf } from "./bookVersions";
 import { MATERIAL_LABEL } from "./manuscriptPackages";
@@ -303,8 +304,8 @@ export const attachablePackages = (
 export { isProUser };
 
 export function canAttachPackages(_user: Pick<User, "plan"> | null | undefined): boolean {
-  /* becomes `isProUser(_user)` when billing arrives — see above. */
-  return true;
+  /* the one entitlement (lib/entitlements.ts): open to all while PACKAGES_OPEN_TO_ALL */
+  return packagesUnlocked(_user);
 }
 
 /**

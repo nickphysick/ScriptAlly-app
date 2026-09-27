@@ -13,12 +13,14 @@
  * save paths (LogQueryFocusForm / Queries.tsx edit / Queries.tsx inline log) is step (b).
  *
  * Reuses: MaterialsEditor (the editor), MountPanel (the clipping card, for the pink-band explainer),
- * BrandDropdown (the package picker), and the existing Query.packageId link. isPro is the single
- * entitlement source (currentUser.plan === UserPlan.PRO). No billing/enforcement here.
+ * BrandDropdown (the package picker), and the existing Query.packageId link. isPro reads the one
+ * package entitlement, `packagesUnlocked` (lib/entitlements.ts) — open to all while
+ * PACKAGES_OPEN_TO_ALL. No billing/enforcement here.
  */
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { packagesUnlocked } from "../lib/entitlements";
 import { ComponentType, QueryMaterial, SubmissionPackage, UserPlan } from "../types";
 import { MaterialsEditor } from "./MaterialsEditor";
 import { MountPanel } from "./MountPanel";
@@ -150,7 +152,8 @@ export const MaterialsField: React.FC<MaterialsFieldProps> = ({
   onNavigate,
 }) => {
   const { currentUser, packages, versions } = useScriptAllyDb();
-  const isPro = currentUser?.plan === UserPlan.PRO;
+  /* founding-member access (lib/entitlements.ts) — the attach lock reads the entitlement */
+  const isPro = packagesUnlocked(currentUser);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [picking, setPicking] = useState(false);
 

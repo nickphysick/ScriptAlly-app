@@ -43,6 +43,7 @@ import {
 
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
+import { packagesUnlocked } from "./entitlements";
 
 import {
   signInWithEmailAndPassword,
@@ -1926,7 +1927,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication required." };
 
-    if (currentUser.plan === UserPlan.FREE) {
+    /* founding-member access: open to all while PACKAGES_OPEN_TO_ALL (lib/entitlements.ts) */
+    if (!packagesUnlocked(currentUser)) {
       return {
         success: false,
         error: "Custom Submission Packages & A/B Tracking are premium features. Upgrade to QueryHawk Pro!"

@@ -25,6 +25,7 @@
  */
 import React, { Suspense, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
+import { packagesUnlocked } from "../../../lib/entitlements";
 import { ComponentType, ManuscriptStatus, QueryStatus, UserPlan } from "../../../types";
 import type { Manuscript, ManuscriptVersion, Query } from "../../../types";
 import {
@@ -95,7 +96,8 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   const inUseLetter = useMemo(() => letterInUse(msPackages, msQueries), [msPackages, msQueries]);
   const owed = useMemo(() => owedRequests(msQueries), [msQueries]);
   const since = useMemo(() => queryingSince(msQueries), [msQueries]);
-  const pro = currentUser?.plan === UserPlan.PRO;
+  /* founding-member access — the packages lock reads the entitlement, not the plan (packages v2 D7) */
+  const pro = packagesUnlocked(currentUser);
 
   const agentName = (id: string) => agents.find((a) => a.id === id)?.name ?? "The agent";
 
