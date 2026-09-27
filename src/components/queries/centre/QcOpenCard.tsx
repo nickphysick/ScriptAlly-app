@@ -26,6 +26,8 @@ import { turnFor } from "../../../lib/queryCardFacts";
 import { COURT_LABEL, STAGE_NAME, factLine, primaryActionLabel, standLine, type QcRow } from "../../../lib/qcSummary";
 import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
+import { cardDoors } from "../../../lib/queryActions/entry";
+import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import "./qcvPage.css";
 import "./qcvOpen.css";
 
@@ -47,7 +49,12 @@ export const QcOpenCard: React.FC<{
   agentTab: React.ReactNode;
   notesTab: React.ReactNode;
   noteCount: number;
-}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount }) => {
+  /**
+   * Query actions v1 — the footer's doors, by status (the mock's table, `cardDoors`). When given,
+   * the footer draws one button per door and the ⋯ menu keeps only what no door covers (snooze).
+   */
+  onDoor?: (mode: DrawerMode, anchor: HTMLElement) => void;
+}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor }) => {
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
   const [moreOpen, setMoreOpen] = useState(false);
@@ -57,10 +64,13 @@ export const QcOpenCard: React.FC<{
   /* ⚠️ ONE PREDICATE decides what a query offers — `queryVerbs`, the same one the drawer reads */
   const verbs = queryVerbs(turnFor(row.status));
   const action = primaryActionLabel(row.status);
-  const more: { key: OpenAction; label: string }[] = [
-    ...(verbs.nudge ? [{ key: "nudge" as const, label: "Nudge the agent" }, { key: "snooze" as const, label: "Snooze the nudge" }] : []),
-    ...(verbs.markClosed ? [{ key: "closed" as const, label: "Mark closed" }] : []),
-  ];
+  const doors = onDoor ? cardDoors(row.status) : [];
+  const more: { key: OpenAction; label: string }[] = onDoor
+    ? (verbs.nudge ? [{ key: "snooze" as const, label: "Snooze the nudge" }] : [])
+    : [
+      ...(verbs.nudge ? [{ key: "nudge" as const, label: "Nudge the agent" }, { key: "snooze" as const, label: "Snooze the nudge" }] : []),
+      ...(verbs.markClosed ? [{ key: "closed" as const, label: "Mark closed" }] : []),
+    ];
 
   return (
     <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr" bandClassName="qcv-open-bd"
@@ -118,10 +128,18 @@ export const QcOpenCard: React.FC<{
             <i aria-hidden="true">···</i>
           </button>
         )}
-        {action && (
+        {!onDoor && action && (
           <button type="button" className={`qcv-open-act${liveAction === "primary" ? " qcv-open-act--live" : ""}`} data-qcv="open-action" onClick={(e) => onPrimary(e.currentTarget)}>{action}</button>
         )}
       </div>
+      {doors.length > 0 && (
+        <div className="qcv-open-doors" data-qcv="open-doors">
+          {doors.map((d) => (
+            <button key={d.mode} type="button" className={d.primary ? "qcv-open-act" : "qcv-open-cb"} data-qcv={d.primary ? "open-action" : "open-door"} data-door={d.mode}
+              onClick={(e) => onDoor!(d.mode, e.currentTarget)}>{d.label}</button>
+          ))}
+        </div>
+      )}
       {moreOpen && (
         <QcMenu anchor={moreRef.current} label="More actions" onClose={closeMore} placement="up"
           groups={[{ kind: "action", current: "", items: more.map((m) => ({ key: m.key, label: m.label })), onPick: (k) => { if (moreRef.current) onAction(k as OpenAction, moreRef.current); } }]} />

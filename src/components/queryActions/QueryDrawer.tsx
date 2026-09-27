@@ -24,6 +24,8 @@ import type { JourneyView } from "./journey";
 import { LogJourney } from "./journeys/LogJourney";
 import { ResponseJourney } from "./journeys/ResponseJourney";
 import { SentJourney } from "./journeys/SentJourney";
+import { NudgeJourney } from "./journeys/NudgeJourney";
+import { CloseJourney } from "./journeys/CloseJourney";
 import "./queryDrawer.css";
 
 export interface JourneyProps {
@@ -39,6 +41,8 @@ const JOURNEYS: Partial<Record<DrawerMode, React.ComponentType<JourneyProps>>> =
   log: LogJourney,
   resp: ResponseJourney,
   sent: SentJourney,
+  nudge: NudgeJourney,
+  close: CloseJourney,
 };
 
 /* The measurement harness opens the drawer the way every door does, through the store. Development
@@ -108,6 +112,15 @@ export function QueryDrawer() {
       savingRef.current = false;
     }
   }, [req, db.currentUser?.id]);
+
+  /* Opened from a query card, the card DOCKS while the drawer is open — it steps out of the way to
+     the chip at bottom-left and comes back on cancel or save (brief §A). One body class carries it,
+     so the card's own stylesheet need not know the drawer exists. */
+  const docked = !!req?.dock && !hidden;
+  useEffect(() => {
+    document.body.classList.toggle("qad-docked", docked);
+    return () => { document.body.classList.remove("qad-docked"); };
+  }, [docked]);
 
   if (!req) return null;
   const J = JOURNEYS[req.mode];

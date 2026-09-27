@@ -65,6 +65,11 @@ export interface RecordResponseData {
   /** Query actions v1 (K5) — stamped on both stores' rows when present. Optional: every existing
    *  caller omits it and writes exactly what it wrote before. */
   eventKey?: EventKey;
+  /** Query actions v1 (K6) — close as WITHDRAWN whatever the reason token (an agent who stopped
+   *  taking queries, an offer declined). Absent for every older caller. */
+  closeAs?: "withdrawn";
+  /** Query actions v1 (K6) — the stored `closingReason` token, overriding the mapped one. */
+  closingToken?: string;
 }
 
 export interface RecordResponseDeps {
@@ -227,8 +232,9 @@ export async function recordQueryResponse(
     }
   }
 
+  if (data.responseType === "close" && data.closingToken) closingReason = data.closingToken;
   let newStatus = STATUS_MAP[selectedResponseType];
-  if (selectedResponseType === "noResponse" && closingReason === "withdrew") {
+  if (selectedResponseType === "noResponse" && (closingReason === "withdrew" || data.closeAs === "withdrawn")) {
     newStatus = QueryStatus.WITHDRAWN;
   }
   if (!newStatus) {

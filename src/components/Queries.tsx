@@ -1458,6 +1458,10 @@ export const Queries: React.FC<{
    */
   const [deskVerb, setDeskVerb] = useState<"respond" | "marksent" | "nudge" | "closed" | null>(null);
   const openDeskVerb = (verb: "respond" | "marksent" | "nudge" | "closed", anchor: HTMLElement) => {
+    /* Query actions v1 — every desk verb whose journey is live finishes in the drawer instead. */
+    const mode = verb === "respond" ? "resp" : verb === "marksent" ? "sent" : verb === "nudge" ? "nudge" : "close";
+    const qid = selectedQueryId ?? activeQuery?.id;
+    if (qid && DRAWER_LIVE[mode]) { setDeskVerb(null); openQueryDrawer({ mode, queryId: qid }); return; }
     setCorrecting(null);
     correctingTriggerRef.current = anchor;
     setDeskVerb((cur) => (cur === verb ? null : verb));
@@ -1751,6 +1755,7 @@ export const Queries: React.FC<{
     return true;
   };
   const handleRowVerb = (id: string, verb: "primary" | "snooze" | "closed", anchor: HTMLElement) => {
+    if (verb === "closed" && DRAWER_LIVE.close) { openQueryDrawer({ mode: "close", queryId: id }); return; }
     if (verb === "snooze" || verb === "closed") {
       openQuick(verb === "snooze" ? "snooze" : "close", id, anchor);
       return;
@@ -2593,6 +2598,13 @@ export const Queries: React.FC<{
    * is being nudged.
    */
   const nudgeTarget = beNudge ? queries.find((q) => q.id === beNudge) ?? null : (isMobile && isNudgeOpen ? activeQuery : null);
+  /* Query actions v1 — the bird's-eye and mobile nudge doors open the drawer while D4 is live. */
+  useEffect(() => {
+    if (!nudgeTarget || !DRAWER_LIVE.nudge) return;
+    openQueryDrawer({ mode: "nudge", queryId: nudgeTarget.id });
+    setIsNudgeOpen(false);
+    setBeNudge(null);
+  }, [nudgeTarget?.id]);
   const nudgeAgent = nudgeTarget ? agents.find((a) => a.id === nudgeTarget.agentId) ?? null : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
   /**
@@ -5124,6 +5136,20 @@ export const Queries: React.FC<{
       onAction={(action, anchor) => {
         if (action === "nudge") openDeskVerb("nudge", anchor);
         else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
+      }}
+      /* Query actions v1 — the footer's doors. A live journey opens the drawer (the card docks to a
+         chip); one not yet live keeps its old route, so no door is ever dead. */
+      onDoor={(mode, anchor) => {
+        const ag = agents.find((a) => a.id === activeQuery.agentId);
+        if (DRAWER_LIVE[mode]) {
+          openQueryDrawer({ mode, queryId: activeQuery.id, ...(ag ? { dock: { initials: "", name: ag.name || ag.agency || "The agent", status: String(activeQuery.status) } } : {}) });
+          return;
+        }
+        if (mode === "offer") openRecord(activeQuery);
+        else if (mode === "sent") openDeskVerb("marksent", anchor);
+        else if (mode === "nudge") openDeskVerb("nudge", anchor);
+        else if (mode === "close") openQuick("close", activeQuery.id, anchor);
+        else openDeskVerb("respond", anchor);
       }}
       liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
       tracking={qpTracking}
@@ -8818,7 +8844,7 @@ export const Queries: React.FC<{
         id, without selecting it. A second mount would be two surfaces free to disagree about the
         same act — and the chip's query is often NOT the selected one, which is the whole reason it
         carries an id rather than setting `?q`. */}
-    {nudgeTarget && nudgeAgent && (
+    {nudgeTarget && nudgeAgent && !DRAWER_LIVE.nudge && (
       <NudgeModal
         agentName={agentPrimary(nudgeAgent) || null}
         agency={nudgeAgent.name?.trim() ? nudgeAgent.agency || "" : ""}

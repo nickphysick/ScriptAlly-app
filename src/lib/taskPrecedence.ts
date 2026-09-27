@@ -46,6 +46,8 @@ export interface ReplyTaskInput {
    */
   writerNudgeDate?: string;
   lastNudgeSentDate?: string; // ISO — when a nudge was actually sent (drives the progression)
+  /** Query actions v1 (K4) — "Consider closing on …", set when a nudge is logged in the drawer. */
+  closePlan?: string;
   /**
    * §3 (policy pack) — a FUTURE nudge reminder the writer has scheduled on this query.
    *
@@ -158,6 +160,19 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
       || (!Number.isNaN(sentAt) && sentAt > nudgeDueMs)
       || (!Number.isNaN(chasedAt) && chasedAt > nudgeDueMs);
     if (!moved) return "nudge";
+  }
+
+  /* ⚠️ QUERY ACTIONS v1 (K4) — THE WRITER'S PLAN OUTRANKS THE ARITHMETIC. A nudge planned for a
+     day not yet reached means nothing is overdue ("NUDGE PLANNED 18 DEC" rather than a count); a
+     "Consider closing" date, set when a nudge was logged, is what raises the close — and until it
+     is reached, nothing does. A reply since the nudge ends the case for closing, as below. */
+  if (!Number.isNaN(nudgeDueMs) && now < nudgeDueMs) return "none";
+  const closePlanMs = ms(inp.closePlan);
+  if (!Number.isNaN(closePlanMs)) {
+    if (now < closePlanMs) return "none";
+    const chased = ms(inp.lastNudgeSentDate);
+    const repliedAfterNudge = inp.repliedSinceMs != null && !Number.isNaN(chased) && inp.repliedSinceMs > chased;
+    return repliedAfterNudge ? "none" : "close";
   }
 
   if (now < deadlineMs + NUDGE_GRACE_DAYS * DAY) return "none"; // still inside window + grace

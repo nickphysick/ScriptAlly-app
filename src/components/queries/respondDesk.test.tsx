@@ -281,7 +281,8 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
    */
   it("NudgeModal has exactly one mount, and one resolved target behind two doors", () => {
     expect((page.match(/<NudgeModal/g) ?? []).length).toBe(1);
-    expect(page).toContain("{nudgeTarget && nudgeAgent && (");
+    /* Query actions v1 (27 Sep): the one mount stands down while the drawer's Nudge journey is live. */
+    expect(page).toContain("{nudgeTarget && nudgeAgent && !DRAWER_LIVE.nudge && (");
     /* the mobile door is still the selected query; the calendar's names one by id */
     expect(page).toMatch(/const nudgeTarget = beNudge \? queries\.find\(\(q\) => q\.id === beNudge\) \?\? null : \(isMobile && isNudgeOpen \? activeQuery : null\);/);
     /* ⚠️ THE CLAIM IS THAT THE CHIP DOES NOT SELECT — it names the query for the nudge and leaves
@@ -344,7 +345,9 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
      so the two cannot drift into two surfaces for one verb. `openDeskVerb("closed", …)` must now
      appear NOWHERE. */
   it("both live close controls open the QUICK POPOVER with their own anchor — and neither the desk", () => {
-    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(2);
+    /* Query actions v1 (27 Sep): 3 — the card footer's Close door falls back to the same popover while
+       the drawer's Close journey is not live, and carries its own anchor like the other two. */
+    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(3);
     expect(page, "a close control went back through the desk")
       .not.toMatch(/openDeskVerb\("closed"/);
     /* ⚠️ AND NUDGE STAYS ON THE DESK, which is the distinction §4.5 refuses to collapse: nudging

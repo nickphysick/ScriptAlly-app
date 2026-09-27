@@ -16,8 +16,8 @@ export const DRAWER_LIVE: Record<DrawerMode, boolean> = {
   log: true,
   resp: true,
   sent: true,
-  nudge: false,
-  close: false,
+  nudge: true,
+  close: true,
   offer: false,
   edit: false,
 };

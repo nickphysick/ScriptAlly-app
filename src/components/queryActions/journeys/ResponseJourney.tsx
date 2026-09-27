@@ -203,25 +203,6 @@ export function ResponseJourney({ req, today, children }: JourneyProps) {
     touched: () => [q.id, ...(type === "offer" && notify ? others.map((x) => x.id) : [])],
     commit: async () => {
       if (!type || !db.currentUser) throw new Error("No response chosen");
-      /* A late reply to a query closed as NO REPLY replaces that ending: the closure rung goes
-         first, so the reply is the query's next event rather than a note after a close. */
-      if (closedNoReply) {
-        /* ⚠️ NOT `db.deleteActivity`: it finds its target in the FEED, and a closure written only to
-           the query's own log (a heal, an import) has no feed row — the rung survived and the reply
-           was appended after it. Both stores are cleared here, by id and by the projection's status;
-           the undo snapshot holds every document either delete touches. */
-        const uid = db.currentUser.id;
-        const log = await db.readQueryActivity(q.id);
-        const closure = log
-          .filter((e) => (e.data.resultingStatus ?? e.data.type) === QueryStatus.NO_RESPONSE)
-          .sort((a, b) => ms_(b.data.createdAt) - ms_(a.data.createdAt))[0];
-        if (closure) {
-          await deleteDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", closure.id));
-          const feed = await getDocs(fsQuery(collection(fsdb, "users", uid, "activities"), where("queryId", "==", q.id)));
-          const twins = feed.docs.filter((f) => f.id === closure.id || f.data().resultingStatus === QueryStatus.NO_RESPONSE);
-          for (const t of twins) await deleteDoc(t.ref);
-        }
-      }
       const unit = s.unit === "words" ? "Words" : s.unit === "chapters" ? "Chapters" : "Pages";
       const data: RecordResponseData = {
         responseType: type === "pass" ? "rejected" : type,
@@ -240,6 +221,23 @@ export function ResponseJourney({ req, today, children }: JourneyProps) {
         eventKey: KEY[type],
       };
       await recordQueryResponse({ userId: db.currentUser.id, query: q, agent, manuscript: ms }, data);
+      /* A late reply to a query closed as NO REPLY replaces that ending.
+         ⚠️ AFTER THE REPLY, NEVER BEFORE IT. A closure rung often carries the SELF-HEAL's id
+         (`act-status-no-response-<qid>`), and the heal re-creates it the instant the query reads No
+         Response with no such rung — so removing it first loses a race to the heal and the ending
+         survives (caught on `msv12-q-8`). Once the reply is recorded the query no longer reads No
+         Response, and the rung can go. The status is unchanged by its going: the reply is the last rung.
+         ⚠️ NOT `db.deleteActivity`: it finds its target in the FEED, and a closure written only to the
+         query's own log has no feed row. Both stores are cleared here, by id and by the projection's
+         status; the undo snapshot holds every document either delete touches. */
+      if (closedNoReply) {
+        const uid = db.currentUser.id;
+        const log = await db.readQueryActivity(q.id);
+        const closures = log.filter((e) => (e.data.resultingStatus ?? e.data.type) === QueryStatus.NO_RESPONSE);
+        for (const c of closures) await deleteDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", c.id));
+        const feed = await getDocs(fsQuery(collection(fsdb, "users", uid, "activities"), where("queryId", "==", q.id)));
+        for (const f of feed.docs) if (closures.some((c) => c.id === f.id) || f.data().resultingStatus === QueryStatus.NO_RESPONSE) await deleteDoc(f.ref);
+      }
       const extra: Record<string, unknown> = {};
       if (q.nudgeDate) extra.nudgeDate = deleteField();
       if (q.closePlan) extra.closePlan = deleteField();
@@ -266,12 +264,6 @@ export function ResponseJourney({ req, today, children }: JourneyProps) {
   return children(view, type && req.preset?.respType ? 1 : undefined);
 }
 
-const ms_ = (v: unknown): number => {
-  if (!v) return 0;
-  if (typeof v === "object" && v && typeof (v as { toMillis?: () => number }).toMillis === "function") return (v as { toMillis: () => number }).toMillis();
-  const t = new Date(v as string).getTime();
-  return isNaN(t) ? 0 : t;
-};
 
 export function emptyView(eyebrow: string, title: string): JourneyView {
   return {

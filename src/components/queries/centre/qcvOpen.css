@@ -58,6 +58,13 @@
 .qcv-open-act { flex: none; height: 38px; padding: 3px 18px 0; border: 0; border-radius: 22px; background: var(--qcv-navy); color: #ffffff; cursor: pointer; white-space: nowrap; font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; }
 .qcv-open-act:hover { background: var(--qcv-navy-hov); }
 .qcv-open-act:focus-visible, .qcv-open-more:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+/* Query actions v1 — the footer's doors (the mock's card footer, MOCK-SPEC §3.4): the primary is the
+   navy pill above, the others are white pills with a hairline. A row of their own under the stand
+   line, so three doors never crowd the facts off a 396px card. */
+.qcv-open-doors { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 18px 14px; background: #ffffff; }
+.qcv-open-cb { flex: none; height: 38px; padding: 3px 16px 0; border: 0; border-radius: 22px; background: #ffffff; color: var(--qcv-ink); box-shadow: inset 0 0 0 1.3px rgba(28, 19, 15, 0.25); cursor: pointer; white-space: nowrap; font-family: var(--qcv-type); font-size: 14px; line-height: 1; }
+.qcv-open-cb:hover { background: #f7f3ee; }
+.qcv-open-cb:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
 .qcv-open-act--live, .qcv-open-more--live { box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.6px var(--qcv-ink); }
 .qcv-open-more { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(28, 19, 15, 0.14); background: #ffffff; cursor: pointer; color: var(--qcv-ink); display: flex; align-items: center; justify-content: center; }
 .qcv-open-more:hover { background: var(--qcv-parchment); }

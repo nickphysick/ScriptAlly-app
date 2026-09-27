@@ -1002,8 +1002,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         dateSent: q.dateSent,
         responseDeadline: q.responseDeadline,
         responseTimeWeeks: agent.responseTimeWeeks,
-        noResponseMeansNo: agent.noResponseMeansNo,
+        /* Query actions v1 — this query's own answer first, else the agent's guidelines. */
+        noResponseMeansNo: typeof q.nrmnOverride === "boolean" ? q.nrmnOverride : agent.noResponseMeansNo,
         lastNudgeSentDate: q.lastNudgeSentDate,
+        closePlan: q.closePlan,
         /* the writer's own reminder date — raises the SAME nudge when it arrives (Phase 2) */
         writerNudgeDate: q.nudgeDate,
         /* §3 — a nudge the writer has already scheduled supersedes both answers. The predicate is

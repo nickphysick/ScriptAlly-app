@@ -195,3 +195,98 @@ test.describe("query drawer journeys", () => {
     });
   });
 });
+
+async function flagsFor(id: string): Promise<number> {
+  const { db, uid } = await harnessDb();
+  return (await getDocs(fsQuery(collection(db, "users", uid, "taskFlags"), where("queryId", "==", id)))).size;
+}
+async function queryDoc(id: string) {
+  const { db, uid } = await harnessDb();
+  return (await getDoc(doc(db, "users", uid, "queries", id))).data() as Record<string, unknown>;
+}
+
+test.describe("query drawer journeys — Tier 2", () => {
+  test.setTimeout(300_000);
+  test.beforeEach(async ({ page }) => {
+    await ensureSignedIn(page);
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+  });
+
+  test("D4 — nudge sent: the rows, lastNudgeSentDate, closePlan; no task flag; undo exact", async ({ page }) => {
+    const { qs } = await fixture();
+    const target = qs.find((q) => q.status === "Queried");
+    ok(!!target, "a Queried query");
+    const ids = [target!.id];
+    const before = await readSet(ids);
+    const flags0 = await flagsFor(target!.id);
+    await openDrawer(page, { mode: "nudge", queryId: target!.id });
+    await page.locator('[data-qad-rad="sent"]').click();
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const q = await queryDoc(target!.id);
+      ok(typeof q.lastNudgeSentDate === "string" && typeof q.closePlan === "string", `nudge fields ${q.lastNudgeSentDate} / ${q.closePlan}`);
+      ok(q.status === target!.status, "a nudge never changes the status");
+      const rows = (await rawDocs(ids)).filter((d) => d.data.eventKey === "nudge_sent");
+      ok(rows.length === 2, `the nudge is in both stores (${rows.length})`);
+      ok((await flagsFor(target!.id)) === flags0, "the drawer wrote no task flag (H8)");
+    });
+  });
+
+  test("D4 — remind me: nudgeDate only; and Close it instead hands over to D5", async ({ page }) => {
+    const { qs } = await fixture();
+    const target = qs.find((q) => q.status === "Queried");
+    const ids = [target!.id];
+    const before = await readSet(ids);
+    await openDrawer(page, { mode: "nudge", queryId: target!.id });
+    await page.locator('[data-qad-rad="plan"]').click();
+    await toReview(page);
+    await saveAndUndo(page, () => ids, before, async () => {
+      const q = await queryDoc(target!.id);
+      ok(typeof q.nudgeDate === "string", "the planned nudge is nudgeDate");
+      const rows = (await rawDocs(ids)).filter((d) => d.data.eventKey === "nudge_sent");
+      ok(rows.length === 0, "planning writes no nudge row");
+    });
+    const any = qs.find((q) => q.status === "Queried" && q.id !== target!.id) ?? target!;
+    await openDrawer(page, { mode: "nudge", queryId: any.id });
+    const closeRad = page.locator('[data-qad-rad="close"]');
+    if (await closeRad.count()) {
+      await closeRad.click();
+      await expect(page.locator('[data-qad-drawer="close"]')).toBeVisible();
+      asserted++;
+    }
+    await page.keyboard.press("Escape");
+  });
+
+  for (const why of ["noreply", "withdraw", "gone"] as const) {
+    test(`D5 — close as ${why}: the status, the reason, the key; undo exact`, async ({ page }) => {
+      const { qs } = await fixture();
+      const target = qs.find((q) => q.status === "Queried");
+      const ids = [target!.id];
+      const before = await readSet(ids);
+      await openDrawer(page, { mode: "close", queryId: target!.id });
+      await page.locator(`[data-qad-rad="${why}"]`).click();
+      await toReview(page);
+      await saveAndUndo(page, () => ids, before, async () => {
+        const q = await queryDoc(target!.id);
+        const want = why === "noreply" ? "No Response" : "Withdrawn";
+        ok(q.status === want, `status ${q.status}, wanted ${want}`);
+        if (why === "gone") ok(q.closingReason === "agent_closed", `closingReason ${q.closingReason}`);
+        const key = why === "noreply" ? "closed_no_reply" : why === "withdraw" ? "withdrawn" : "closed_agent_gone";
+        ok((await rawDocs(ids)).some((d) => d.data.eventKey === key), `a row carries ${key}`);
+      });
+    });
+  }
+
+  test("D5 — They said no records a pass in D2", async ({ page }) => {
+    const { qs } = await fixture();
+    const target = qs.find((q) => q.status === "Queried");
+    await openDrawer(page, { mode: "close", queryId: target!.id });
+    await page.locator('[data-qad-rad="said"]').click();
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible();
+    /* D2 opens with Pass chosen, at the step after the choice — the Feedback step */
+    await expect(page.locator('[data-qad-sec="Feedback"]')).toBeVisible();
+    asserted++;
+    await page.keyboard.press("Escape");
+  });
+});

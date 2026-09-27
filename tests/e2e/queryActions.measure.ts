@@ -66,3 +66,24 @@ test.describe("query drawer", () => {
 });
 
 export { readFileSync };
+
+test("§F the query card's footer draws the mock's doors, and a door opens the drawer with the card docked", async ({ page }) => {
+  test.setTimeout(240_000);
+  await ensureSignedIn(page);
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const row = page.locator('.qcv-page [data-qcv="row"]').first();
+  await expect(row).toBeVisible({ timeout: 20_000 });
+  await row.click();
+  const doors = page.locator('[data-qcv="open-doors"]');
+  await expect(doors).toBeVisible({ timeout: 10_000 });
+  const labels = await doors.locator("button").allTextContents();
+  expect(labels.length).toBeGreaterThan(0);
+  await page.screenshot({ path: `${OUT}/app-card-footer-1440.png` });
+  await doors.locator("button").first().click();
+  await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator("[data-qad-dock]")).toBeVisible();
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${OUT}/app-card-door-open-1440.png` });
+  writeFileSync(`${OUT}/card-doors.json`, JSON.stringify(labels));
+});
