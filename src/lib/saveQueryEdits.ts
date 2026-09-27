@@ -82,7 +82,7 @@ export type SaveQueryResult = { ok: true } | { ok: false; error: string };
 /** The activity FAMILY for a status — the global-feed projection's `activityType`. */
 export function activityTypeForStatus(status: QueryStatus): ActivityType {
   if (status === QueryStatus.QUERIED) return ActivityType.QUERY_SENT;
-  if (status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT) return ActivityType.MATERIALS_SENT;
+  if (status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED) return ActivityType.MATERIALS_SENT;
   return ActivityType.STATUS_CHANGED;
 }
 

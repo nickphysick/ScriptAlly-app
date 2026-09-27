@@ -43,7 +43,7 @@ export function flagIdsForCascade(
 }
 
 /** Materials currently OUT with an agent — the dialog calls these out ("M fulls/partials out"). */
-export const MATERIALS_OUT_STATUSES: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+export const MATERIALS_OUT_STATUSES: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
 
 export interface DestroyData {
   queries: Pick<Query, "id" | "manuscriptId" | "agentId" | "status">[];

@@ -231,7 +231,7 @@ export const eyeFaded = (row: EyeRow, focus: EyeFocus): boolean => focus !== "al
 /** A live status is one the Birds-eye view can draw. Exported so a lock can name the set. */
 export const EYE_STATUSES: readonly QueryStatus[] = [
   QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
-  QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
+  QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED, QueryStatus.OFFER,
 ];
 
 /* ── §4.2 · today & next up ── */

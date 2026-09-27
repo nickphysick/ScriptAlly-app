@@ -42,6 +42,7 @@ export const STANDING_STATIONS: readonly QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
 ];
 
@@ -142,7 +143,7 @@ const furthestOf = (row: {
   reachedOffer: boolean;
 }): FurthestKey => {
   if (row.reachedOffer) return "offer";
-  if (row.stageMs[QueryStatus.REVISE_RESUBMIT] !== undefined || row.status === QueryStatus.REVISE_RESUBMIT) return "rr";
+  if (row.stageMs[QueryStatus.REVISE_RESUBMIT] !== undefined || row.status === QueryStatus.REVISE_RESUBMIT || row.status === QueryStatus.RESUBMITTED) return "rr";
   if (row.reachedFull) return "full";
   if (row.reachedRequest) return "partial";
   /* ⚠️ A REJECTION IS A RESPONSE. `AGENT_RESPONSE_STATUSES` carries it, so a query that was

@@ -125,7 +125,7 @@ export const PipelineCard: React.FC<{
   /* ⚠️ THE BAND'S COUNTS ARE THE SAME DERIVATION THE TREND'S BREAKDOWN USES. Two stage tallies on
      one page, computed two ways, is how they come to disagree. */
   const stages = activeStageBreakdown(queries);
-  const live = queries.filter((q) => q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.PARTIAL_SENT);
+  const live = queries.filter((q) => q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.RESUBMITTED || q.status === QueryStatus.PARTIAL_SENT);
   const agentOf = (id?: string) => agents.find((a) => a.id === id);
   const msOf = (id?: string) => manuscripts.find((m) => m.id === id);
 

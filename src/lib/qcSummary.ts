@@ -55,19 +55,23 @@ export const STAGE_NAME: Record<QueryStatus, string> = {
   [QueryStatus.REJECTED]: "Passed",
   [QueryStatus.WITHDRAWN]: "Withdrawn",
   [QueryStatus.NO_RESPONSE]: "Closed with no reply",
+  [QueryStatus.RESUBMITTED]: "Resubmitted",
+  [QueryStatus.SIGNED]: "Signed",
 };
 /** Six columns; seven — R&R between Full sent and Offer — only while a live R&R exists. */
 export function stageOrder(rows: readonly QcRow[]): QueryStatus[] {
   const rr = rows.some((r) => r.status === QueryStatus.REVISE_RESUBMIT);
-  if (!rr) return [...BASE_STAGES];
+  const resub = rows.some((r) => r.status === QueryStatus.RESUBMITTED);
+  if (!rr && !resub) return [...BASE_STAGES];
   const out = [...BASE_STAGES];
-  out.splice(out.indexOf(QueryStatus.OFFER), 0, QueryStatus.REVISE_RESUBMIT);
+  if (rr) out.splice(out.indexOf(QueryStatus.OFFER), 0, QueryStatus.REVISE_RESUBMIT);
+  if (resub) out.splice(out.indexOf(QueryStatus.OFFER), 0, QueryStatus.RESUBMITTED);
   return out;
 }
 /** The calendar's groups: by who must act first, R&R after Full requested, Closed last. */
 export const CALENDAR_GROUPS: readonly (QueryStatus | "closed")[] = [
   QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
-  QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, "closed",
+  QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED, "closed",
 ];
 
 /* ── the row ── */
@@ -229,7 +233,9 @@ export function tileCourt(status: QueryStatus): TileCourt | null {
   const c = courtOf(status);
   if (c === "you" || c === "offer") return "you";
   if (c === "agent") return "agent";
-  return status === QueryStatus.WITHDRAWN ? null : "closed";
+  /* Query actions v1 — SIGNED sits with WITHDRAWN in no tile: both are the writer's own act, not an
+     outcome an agent produced, and a signing counted in the Closed fan beside passes would misname it. */
+  return status === QueryStatus.WITHDRAWN || status === QueryStatus.SIGNED ? null : "closed";
 }
 export const rowsForTile = (rows: readonly QcRow[], tile: TileCourt): QcRow[] =>
   rows.filter((r) => tileCourt(r.status) === tile);
@@ -394,7 +400,7 @@ export function standLine(row: QcRow): string {
     const what = row.status === QueryStatus.PARTIAL_REQUESTED ? "partial" : row.status === QueryStatus.FULL_REQUESTED ? "full" : "revisions";
     return `${first} is waiting on your ${what}`;
   }
-  return row.status === QueryStatus.PARTIAL_SENT ? `${first} has your partial` : row.status === QueryStatus.FULL_SENT ? `${first} has your full` : `Waiting on ${first}`;
+  return row.status === QueryStatus.PARTIAL_SENT ? `${first} has your partial` : row.status === QueryStatus.FULL_SENT || row.status === QueryStatus.RESUBMITTED ? `${first} has your full` : `Waiting on ${first}`;
 }
 
 /* ── ?status= — the deep link's four values, onto the sentence ── */

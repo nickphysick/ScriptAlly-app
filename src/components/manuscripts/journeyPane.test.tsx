@@ -98,8 +98,9 @@ describe("the track", () => {
   });
 
   it("fills the rail to the furthest occupied station, and draws no fill when nothing is on it", () => {
-    // Furthest occupied of [Queried, Full sent, R&R] is R&R — index 5 of 0..6.
-    expect(pane()).toContain('style="width:83.33333333333334%"');
+    // Furthest occupied of [Queried, Full sent, R&R] is R&R — index 5 of 0..7 (5/7).
+    // Query actions v1 (27 Sep): + Resubmitted — eight stations, so 5/6 → 5/7.
+    expect(pane()).toContain('style="width:71.42857142857143%"');
     // All closed: nothing on the rail at all, so no fill element rather than a zero-width one.
     const allClosed = pane([q("a", QueryStatus.REJECTED)], [], []);
     expect(allClosed).not.toContain("msp-railfill");

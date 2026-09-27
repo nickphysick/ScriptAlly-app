@@ -65,6 +65,7 @@ describe("the wider set is derived from the pipeline, never listed", () => {
   it("is exactly Partial Requested onward, plus Rejected", () => {
     const expected = new Set<QueryStatus>([
       ...STATUS_ORDER.slice(STATUS_ORDER.indexOf(QueryStatus.PARTIAL_REQUESTED)),
+      QueryStatus.SIGNED, // Query actions v1 (27 Sep): + Signed — a signing follows an offer, so the agent has replied
       QueryStatus.REJECTED,
     ]);
     expect([...AGENT_HAS_RESPONDED_STATUSES].sort()).toEqual([...expected].sort());
@@ -79,7 +80,8 @@ describe("the wider set is derived from the pipeline, never listed", () => {
   /** The two the widening adds, and the reason it exists. */
   it("adds exactly the writer's own sends", () => {
     const added = [...AGENT_HAS_RESPONDED_STATUSES].filter((s) => !AGENT_RESPONSE_STATUSES.has(s));
-    expect(added.sort()).toEqual([QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT].sort());
+    // Query actions v1 (27 Sep): + Resubmitted (the writer's revised send) / + Signed (the writer's own acceptance)
+    expect(added.sort()).toEqual([QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT, QueryStatus.RESUBMITTED, QueryStatus.SIGNED].sort());
   });
 });
 

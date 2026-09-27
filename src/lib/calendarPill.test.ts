@@ -16,7 +16,7 @@ describe("a pill says a status or a deed, and nothing else", () => {
   const ALL = Object.values(QueryStatus);
 
   it("covers every status, both holders, and the nudge — the sweep is exhaustive by construction", () => {
-    expect(ALL.length, "QueryStatus shrank").toBe(10);
+    expect(ALL.length, "QueryStatus shrank").toBe(12); // Query actions v1 (27 Sep): + Resubmitted / + Signed
     let n = 0;
     for (const s of ALL) for (const h of ["agent", "writer"] as const) for (const nd of [false, true]) {
       const p = pillText(s, h, nd);
@@ -26,7 +26,7 @@ describe("a pill says a status or a deed, and nothing else", () => {
       expect(PILL_WORDS, `${s}/${h}/${nd} produced "${p.text}"`).toContain(p.text);
       n += 1;
     }
-    expect(n, "the sweep did not run").toBe(40);
+    expect(n, "the sweep did not run").toBe(48); // Query actions v1 (27 Sep): + Resubmitted / + Signed
   });
 
   it("not one invented word is reachable", () => {

@@ -30,7 +30,9 @@ const REQUEST_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
+  QueryStatus.SIGNED,
 ]);
 
 /** Did the agent request materials at any point? Current status OR a recorded request date
@@ -118,7 +120,9 @@ const FULL_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
+  QueryStatus.SIGNED,
 ]);
 /** Did this query reach a full request (or beyond)? Current status OR a recorded full-request date. */
 export const reachedFull = (q: Query): boolean => FULL_OR_BEYOND.has(q.status) || !!q.fullRequestedDate;
@@ -144,7 +148,7 @@ export function packageStages(pkgId: string, queries: Query[]): PackageStages {
     responded: S.filter(isResponse).length,
     partial: S.filter(isRequest).length,
     full: S.filter(reachedFull).length,
-    offer: S.filter((q) => q.status === QueryStatus.OFFER).length,
+    offer: S.filter((q) => q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED).length,
   };
 }
 
@@ -525,7 +529,7 @@ export function funnelStages(queries: Query[]): PackageFunnelStages {
     sent,
     replied,
     requests: queries.filter(isRequest).length,
-    offers: queries.filter((q) => q.status === QueryStatus.OFFER).length,
+    offers: queries.filter((q) => q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED).length,
     replyRate: rate(replied, sent),
   };
 }

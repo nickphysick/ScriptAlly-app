@@ -62,6 +62,8 @@ const TL_TITLES: Record<QueryStatus, string> = {
   [QueryStatus.REJECTED]: "Query rejected",
   [QueryStatus.WITHDRAWN]: "Query withdrawn",
   [QueryStatus.NO_RESPONSE]: "Closed — no response",
+  [QueryStatus.RESUBMITTED]: "Revision resubmitted",
+  [QueryStatus.SIGNED]: "Signed",
 };
 const FONT_SERIF = "'Playfair Display', serif";
 

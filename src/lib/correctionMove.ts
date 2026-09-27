@@ -27,7 +27,7 @@ export interface MoveCandidate extends MoveTarget {
   search: string;
 }
 
-const CLOSED: ReadonlySet<string> = new Set(["Rejected", "Withdrawn", "No Response"]);
+const CLOSED: ReadonlySet<string> = new Set(["Rejected", "Withdrawn", "No Response", "Signed"]);
 
 /**
  * ⚠️ THE SOURCE QUERY IS NOT A DESTINATION. Offering it would let a writer "move" an event onto the

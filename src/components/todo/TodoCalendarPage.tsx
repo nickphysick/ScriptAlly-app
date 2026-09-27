@@ -668,7 +668,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         : kind === "task" ? (over > 0 ? over : days(today, end ?? today))
         : totalDays;
     const openStatuses = new Set([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
-      QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT]);
+      QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED]);
     const facts: CardCFacts = {
       kind, start, end, today, startLab, endLab,
       eyebrowDays,

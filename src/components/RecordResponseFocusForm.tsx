@@ -49,9 +49,11 @@ const PIPELINE_RANK: Partial<Record<QueryStatus, number>> = {
   [QueryStatus.FULL_REQUESTED]: 2,
   [QueryStatus.FULL_SENT]: 2.5,
   [QueryStatus.REVISE_RESUBMIT]: 3,
+  [QueryStatus.RESUBMITTED]: 3.5,
   [QueryStatus.OFFER]: 4,
+  [QueryStatus.SIGNED]: 5,
 };
-const TERMINAL_STATUSES = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.OFFER]);
+const TERMINAL_STATUSES = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.OFFER, QueryStatus.SIGNED]);
 
 type TransitionMode = "forward" | "same" | "backward";
 function getTransitionMode(selected: QueryStatus, currentStatus: QueryStatus): TransitionMode {

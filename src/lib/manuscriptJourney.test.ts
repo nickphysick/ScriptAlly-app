@@ -101,9 +101,10 @@ describe("SEMANTIC 1 — current standing counts each query exactly once", () =>
     expect(STANDING_STATIONS).toEqual([
       QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
       QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
+      QueryStatus.RESUBMITTED, // Query actions v1 (27 Sep): + Resubmitted (eight stations now)
       QueryStatus.OFFER,
     ]);
-    for (const closed of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+    for (const closed of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED /* Query actions v1 (27 Sep): + Signed */]) {
       expect(STANDING_STATIONS).not.toContain(closed);
     }
   });

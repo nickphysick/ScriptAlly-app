@@ -18,6 +18,7 @@ export const STATUS_ORDER: QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
 ];
 
@@ -32,4 +33,5 @@ export const EXPECTED_NEXT_STEPS: Partial<Record<QueryStatus, QueryStatus[]>> = 
   [QueryStatus.QUERIED]: [QueryStatus.PARTIAL_REQUESTED, QueryStatus.REJECTED],
   [QueryStatus.PARTIAL_SENT]: [QueryStatus.FULL_REQUESTED, QueryStatus.REJECTED],
   [QueryStatus.FULL_SENT]: [QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED],
+  [QueryStatus.RESUBMITTED]: [QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED],
 };

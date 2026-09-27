@@ -99,8 +99,8 @@ export const BOARD_COLUMNS: readonly { key: string; label: string; statuses: rea
   { key: "preq", label: QueryStatus.PARTIAL_REQUESTED, statuses: [QueryStatus.PARTIAL_REQUESTED] },
   { key: "psent", label: QueryStatus.PARTIAL_SENT, statuses: [QueryStatus.PARTIAL_SENT] },
   { key: "freq", label: QueryStatus.FULL_REQUESTED, statuses: [QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT] },
-  { key: "fsent", label: QueryStatus.FULL_SENT, statuses: [QueryStatus.FULL_SENT] },
-  { key: "offer", label: QueryStatus.OFFER, statuses: [QueryStatus.OFFER] },
+  { key: "fsent", label: QueryStatus.FULL_SENT, statuses: [QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED] },
+  { key: "offer", label: QueryStatus.OFFER, statuses: [QueryStatus.OFFER, QueryStatus.SIGNED] },
   { key: "closed", label: "Closed", statuses: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE] },
 ];
 

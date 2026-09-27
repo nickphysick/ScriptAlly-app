@@ -84,6 +84,6 @@ describe("the facet model", () => {
     const st = FACET_SECTIONS.find((s) => s.key === "status")!;
     expect(st.options.map((o) => o.key)).toContain("Revise & Resubmit");
     expect(st.options.map((o) => o.key)).not.toContain("R&R");
-    expect(st.options.length).toBe(9);
+    expect(st.options.length).toBe(11); // Query actions v1 (27 Sep): + Resubmitted / + Signed
   });
 });

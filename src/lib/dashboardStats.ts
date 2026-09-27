@@ -87,6 +87,7 @@ const ACTIVE_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
 ]);
 
 /** Active queries whose ball-holder is the agent (writer has sent; no agent move yet). */
@@ -94,6 +95,7 @@ const AWAITING_REPLY_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.QUERIED,
   QueryStatus.PARTIAL_SENT,
   QueryStatus.FULL_SENT,
+  QueryStatus.RESUBMITTED,
 ]);
 
 /** Legacy fallback for docs recomputeQuery hasn't migrated — mirrors Dashboard's rule exactly. */
@@ -103,7 +105,9 @@ const LEGACY_RESPONSE_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
+  QueryStatus.SIGNED,
   QueryStatus.REJECTED,
 ]);
 
@@ -179,6 +183,7 @@ export const pipelineMix = (queries: Query[]): { status: QueryStatus; count: num
     QueryStatus.FULL_REQUESTED,
     QueryStatus.FULL_SENT,
     QueryStatus.REVISE_RESUBMIT,
+    QueryStatus.RESUBMITTED,
   ];
   return order
     .map((status) => ({ status, count: queries.filter((q) => q.status === status).length }))
@@ -208,6 +213,8 @@ export const STAGE_LABEL: Record<QueryStatus, string> = {
   [QueryStatus.REJECTED]: "Rejected",
   [QueryStatus.WITHDRAWN]: "Withdrawn",
   [QueryStatus.NO_RESPONSE]: "No response",
+  [QueryStatus.RESUBMITTED]: "Resubmitted",
+  [QueryStatus.SIGNED]: "Signed",
 };
 
 export interface StageRow {
@@ -236,6 +243,7 @@ const TERMINAL_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.REJECTED,
   QueryStatus.WITHDRAWN,
   QueryStatus.NO_RESPONSE,
+  QueryStatus.SIGNED,
 ]);
 
 /** When a terminal query stopped being active — the derived audit fields, oldest-truth first.
@@ -427,12 +435,12 @@ export const responseSplit = (queries: Query[]): ResponseSplit => {
   );
   let requests = 0, passes = 0, offers = 0, unclassified = 0;
   for (const q of responded) {
-    if (q.status === QueryStatus.OFFER) offers++;
+    if (q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED) offers++;
     /* An R&R IS a request for more — the agent asked for the work again. Grouping it with passes
        would read as a rejection, and giving it a fourth segment would split a three-part bar into
        one nobody can see at 8px tall. */
     else if (
-      q.status === QueryStatus.REVISE_RESUBMIT ||
+      q.status === QueryStatus.REVISE_RESUBMIT || q.status === QueryStatus.RESUBMITTED ||
       q.fullRequestedDate || q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT ||
       q.partialRequestedDate || q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT
     ) requests++;
@@ -474,8 +482,8 @@ export const outcomeGroups = (queries: Query[]): OutcomeGroup[] => {
   );
   const counts = { offers: 0, rr: 0, fulls: 0, partials: 0, passes: 0 };
   for (const q of responded) {
-    if (q.status === QueryStatus.OFFER) counts.offers++;
-    else if (q.status === QueryStatus.REVISE_RESUBMIT) counts.rr++;
+    if (q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED) counts.offers++;
+    else if (q.status === QueryStatus.REVISE_RESUBMIT || q.status === QueryStatus.RESUBMITTED) counts.rr++;
     else if (q.fullRequestedDate || q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT) counts.fulls++;
     else if (q.partialRequestedDate || q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT) counts.partials++;
     else if (q.status === QueryStatus.REJECTED) counts.passes++;

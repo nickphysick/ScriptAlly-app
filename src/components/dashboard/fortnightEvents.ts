@@ -117,7 +117,7 @@ const URGENCY_BY_TYPE: Record<FType, Urgency> = {
 export const requestStatus = (q: Query): QueryStatus => {
   if (q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT) return QueryStatus.PARTIAL_REQUESTED;
   if (q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT) return QueryStatus.FULL_REQUESTED;
-  if (q.status === QueryStatus.REVISE_RESUBMIT) return QueryStatus.REVISE_RESUBMIT;
+  if (q.status === QueryStatus.REVISE_RESUBMIT || q.status === QueryStatus.RESUBMITTED) return QueryStatus.REVISE_RESUBMIT;
   return q.fullRequestedDate ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
 };
 
@@ -228,7 +228,7 @@ export const deriveFortnightEvents = (
     // Response window — only for still-open queries that aren't mid-send
     const isOpen =
       q.status !== QueryStatus.OFFER && q.status !== QueryStatus.REJECTED &&
-      q.status !== QueryStatus.WITHDRAWN && q.status !== QueryStatus.NO_RESPONSE;
+      q.status !== QueryStatus.WITHDRAWN && q.status !== QueryStatus.NO_RESPONSE && q.status !== QueryStatus.SIGNED;
     if (isOpen && !awaitingSend) {
       /* the send this reply is owed against — the same three fields the list's wait anchor reads */
       const sendMs = [q.dateSent, q.partialSentDate, q.fullSentDate]

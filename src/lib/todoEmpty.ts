@@ -28,7 +28,7 @@ export function deskState(a: {
 }
 
 /** Closed = the terminal set (mirrors the Contact List's CLOSED_QUERY_STATUSES). */
-const CLOSED: ReadonlySet<string> = new Set([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+const CLOSED: ReadonlySet<string> = new Set([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]);
 
 /** Queries still in play — the count state B reassures with. */
 export function liveQueryCount(queries: Pick<Query, "status">[]): number {

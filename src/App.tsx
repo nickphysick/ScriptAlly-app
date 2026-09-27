@@ -78,6 +78,8 @@ import { NotesLab } from "./components/notes/NotesLab";
 // Dev review surface for the Contact list's three states — #/contact-lab, DEV only. The blank
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
+import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -850,6 +852,11 @@ function AppContent() {
         onClose={() => setIsAddManuscriptOpen(false)}
         onSuccessToast={(msg) => setSuccessToast(msg)}
       />
+
+      {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
+          Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}
+      <QueryDrawer />
+      <UndoBar />
 
       {/* Rail capture host — the existing RecordResponseScreen (same mount pattern as the
           dashboard's own instance; both are self-contained and independent). */}

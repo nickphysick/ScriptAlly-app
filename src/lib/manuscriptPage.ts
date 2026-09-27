@@ -30,6 +30,7 @@ const ACTIVE_ORDER: QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
 ];
 
@@ -37,6 +38,7 @@ export const CLOSED_STATUSES: QueryStatus[] = [
   QueryStatus.REJECTED,
   QueryStatus.WITHDRAWN,
   QueryStatus.NO_RESPONSE,
+  QueryStatus.SIGNED,
 ];
 
 export interface StageRow {

@@ -189,7 +189,8 @@ describe("the nudge resolves itself, so nothing resolves it", () => {
        OVERDUE group now both read — one deadline, one status test, no second clock. The clause is
        unchanged and is asserted at its new home; `if (!awaiting) return "none"` became
        `return NaN`, because a deadline that does not exist is not a verb that does not apply. */
-    expect(prec).toContain("const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT;");
+    // Query actions v1 (27 Sep): + Resubmitted
+    expect(prec).toContain("const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED;");
     expect(prec).toContain("if (!awaiting) return NaN;");
     expect(prec, "replyTask stopped reading the shared deadline — the gate would be restated")
       .toContain("const deadlineMs = replyDeadlineMs(inp);");

@@ -72,7 +72,7 @@ export const QueryCardLive: React.FC<{
      * three terminal states are named, so a tenth status arriving in the enum lands on the live side
      * and is visible rather than being quietly filed as closed.
      */
-    const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+    const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED];
     const court = status === QueryStatus.OFFER
       /* with the writer: an offer is theirs to answer */
       ? { label: "An offer", band: "rose" as const }

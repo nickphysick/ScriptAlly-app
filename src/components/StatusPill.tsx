@@ -38,6 +38,8 @@ export const STATUS_DESCRIPTIONS: Record<QueryStatus, string> = {
   [QueryStatus.REJECTED]: "A pass",
   [QueryStatus.WITHDRAWN]: "You withdrew this query",
   [QueryStatus.NO_RESPONSE]: "Closed with no reply",
+  [QueryStatus.RESUBMITTED]: "You've resubmitted the revised manuscript",
+  [QueryStatus.SIGNED]: "You accepted this agent's offer",
 };
 
 export const getStatusDescription = (status: QueryStatus | string): string =>
@@ -59,9 +61,11 @@ export const getStatusStyle = (status: QueryStatus | string): StatusStyle => {
     case QueryStatus.FULL_REQUESTED:
     case QueryStatus.FULL_SENT:
     case QueryStatus.REVISE_RESUBMIT:
+    case QueryStatus.RESUBMITTED:
       return { bg: '#FFF0F0', text: '#7c3d3d', border: '1px solid #f5c8c8', circleColor: '#7c3d3d' };
     
     case QueryStatus.OFFER:
+    case QueryStatus.SIGNED:
       return { bg: '#6b0f1a', text: '#ffffff', border: '1px solid #3a0009', circleColor: '#ffffff' };
     
     case QueryStatus.REJECTED:

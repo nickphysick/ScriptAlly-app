@@ -717,6 +717,14 @@ export enum QueryStatus {
   REJECTED = "Rejected",
   WITHDRAWN = "Withdrawn",
   NO_RESPONSE = "No Response",
+  /**
+   * Query actions v1 (K6) — the revised manuscript has gone back after a revise-and-resubmit. The
+   * agent's court, like Full Sent; a status of its own so the record says "resubmitted" rather
+   * than folding a second read into a first.
+   */
+  RESUBMITTED = "Resubmitted",
+  /** Query actions v1 (K6) — the writer accepted this agent's offer. Terminal. */
+  SIGNED = "Signed",
 }
 
 export interface Query {
@@ -784,7 +792,53 @@ export interface Query {
   // rejected received) exists in the log. THE source for "Responses Received" — boolean, so each
   // query counts at most once regardless of pipeline stage. Absent on un-migrated docs.
   hasAgentResponded?: boolean;
+
+  /* ⚠️ QUERY ACTIONS v1 (27 Sep) — every field below is written by the query drawer and is FLAT,
+     because a nested map meets the nested-allowlist denial in firestore.rules. Absent means "not
+     recorded", never a default. See reports/query-actions-v1/RECON.md §2. */
+  /** What went out, as it went out (P4): never read back from the live package. */
+  sentPackageId?: string;
+  sentMaterials?: string;
+  sentVersions?: string[];
+  /** The label of the last materials sent, e.g. "First 50 pages" — the date is the rung's. */
+  lastSentLabel?: string;
+  /** Logged as a second query to an agent this book was sent to before. */
+  requery?: boolean;
+  /** A requested partial's section: where it starts, in which unit, and whether a synopsis too. */
+  requestFrom?: number;
+  requestFromUnit?: "chapter" | "page" | "word";
+  requestSynopsis?: boolean;
+  /** "Consider closing on" — after a nudge. `no_response_close` derives from it. */
+  closePlan?: string;
+  /** This query's own answer to "does no reply mean no?", overriding the agent's guidelines. */
+  nrmnOverride?: boolean;
+  /** On each OTHER live query when one agent offers: the offering query, told?, and their reply. */
+  offerRefQueryId?: string;
+  offerTold?: boolean;
+  offerReply?: "wait" | "full" | "aside" | "offer";
+  offerToldOn?: string;
+  /** The offer call. */
+  offerCall?: "none" | "booked" | "done";
+  offerCallOn?: string;
+  /** Closed as withdrawn with a reminder to tell the agent; false until they are told. */
+  withdrawTold?: boolean;
+  /** Closed because the agent stopped taking queries: when to look again. */
+  agentRecheckOn?: string;
 }
+
+/**
+ * The drawer's structured event keys (brief K5). Stamped on every Activity the query drawer writes,
+ * in BOTH stores, so a label is read from the key rather than matched out of a sentence. Older rows
+ * carry none and fall back to text matching.
+ */
+export type EventKey =
+  | "query_sent" | "requery_sent"
+  | "partial_requested" | "full_requested" | "rr_requested"
+  | "partial_sent" | "full_sent" | "resubmitted"
+  | "pass" | "offer" | "offer_call" | "offer_accepted" | "offer_declined" | "signed"
+  | "nudge_sent"
+  | "closed_no_reply" | "withdrawn" | "withdrawn_on_offer" | "closed_agent_gone"
+  | "late_reply_reopened" | "entry_corrected";
 
 export enum ActivityType {
   STATUS_CHANGED = "Status Changed",
@@ -828,6 +882,8 @@ export interface Activity {
    * built without touching the derivation.
    */
   bookVersionId?: string;
+  /** Query actions v1 — see `EventKey`. */
+  eventKey?: EventKey;
 }
 
 export interface JournalEntry {

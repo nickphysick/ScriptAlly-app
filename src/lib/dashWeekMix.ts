@@ -36,6 +36,7 @@ export const MIX_STAGES: readonly QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
 ];
 

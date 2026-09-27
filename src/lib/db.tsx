@@ -18,6 +18,7 @@ import {
   SubmissionMethod,
   Query,
   QueryStatus,
+  type EventKey,
   Activity,
   ActivityType,
   JournalEntry,
@@ -207,6 +208,9 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
  */
 export type DismissType = "permanent" | "fixed snooze" | "custom date" | "lift";
 
+/** Query actions v1 — additive options for `addQuery`: the seed's event key and its details line. */
+export interface AddQueryOpts { eventKey?: EventKey; details?: string }
+
 interface DbContextType {
   currentUser: User | null;
   smartImportUsage: SmartImportUsage | null;
@@ -348,7 +352,7 @@ interface DbContextType {
   setAgentSetAside: (id: string, setAside: boolean) => Promise<void>;
   
   // Query Actions
-  addQuery: (q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
+  addQuery: (q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean, opts?: AddQueryOpts) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateQueryStatus: (id: string, newStatus: QueryStatus, systemNotes?: string) => Promise<void>;
   /**
    * Writer-side "I've sent the materials" action (Partial Sent / Full Sent). Distinct from
@@ -358,7 +362,7 @@ interface DbContextType {
    */
   recordMaterialsSent: (args: {
     queryId: string;
-    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
     sentDate: string; // ISO
     isResubmit?: boolean;
     writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
@@ -380,7 +384,7 @@ interface DbContextType {
    void signature for the To-do flows' handler table; this name is for callers that offer Undo. */
   markSentWithReceipt: (args: {
     queryId: string;
-    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
     sentDate: string; // ISO
     isResubmit?: boolean;
     writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
@@ -2333,7 +2337,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // Query Actions with Free limits
   const addQuery = async (
     q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string },
-    bypassLimits: boolean = false
+    bypassLimits: boolean = false,
+    opts?: AddQueryOpts,
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
 
@@ -2383,8 +2388,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           activityType: ActivityType.QUERY_SENT,
           description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
           date: new Date(nowMs).toISOString(),
-          details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
+          details: opts?.details ?? `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
           resultingStatus: QueryStatus.QUERIED,
+          ...(opts?.eventKey ? { eventKey: opts.eventKey } : {}),
         },
       ];
       if (newQ.status && newQ.status !== QueryStatus.QUERIED) {
@@ -2434,6 +2440,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queryId: id,
         agentName: agent?.name || "The agent",
         manuscriptTitle,
+        ...(act.eventKey ? { eventKey: act.eventKey } : {}),
       });
       for (const act of seeded) {
         await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
@@ -2635,7 +2642,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // NOT a response: never touches responseReceivedAt and never increments the response count.
   const recordMaterialsSent = async (args: {
     queryId: string;
-    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
     sentDate: string;
     isResubmit?: boolean;
     /* ⚠️ §2 · NAMED FOR THE FIELD IT WRITES. It was `responseDeadline`, which meant a caller said
@@ -2653,9 +2660,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     note?: string;
       /** Part E, D6 — see the interface above. Absent means not recorded. */
     bookVersionId?: string;
+    /** Query actions v1 (K5) — stamped on both stores' rows. Absent for every older caller. */
+    eventKey?: EventKey;
   }) => {
     if (!currentUser) return;
-    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note, bookVersionId } = args;
+    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note, bookVersionId, eventKey } = args;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
@@ -2710,6 +2719,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * exactly that: a value the writer never chose, indistinguishable from one they did.
        */
       ...(bookVersionId ? { bookVersionId } : {}),
+      ...(eventKey ? { eventKey } : {}),
     };
 
     try {
@@ -2755,6 +2765,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queryId,
         agentName: agent?.name || "The agent",
         manuscriptTitle,
+        ...(eventKey ? { eventKey } : {}),
       });
       await setDoc(doc(db, "users", currentUser.id, "activities", actId), { ...activity, id: actId });
       await recompute(queryId);

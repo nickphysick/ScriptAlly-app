@@ -20,7 +20,7 @@ import type { TaskPaneEvent } from "../components/todo/TaskPane";
 import { STAGE_NAME, primaryActionLabel, standLine, type QcRow } from "./qcSummary";
 
 /** The three terminal states, named so a tenth status lands on the live side and is visible. */
-const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED];
 
 const shortDate = (ms: number): string =>
   new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });

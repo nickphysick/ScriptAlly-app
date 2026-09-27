@@ -104,7 +104,8 @@ describe("option sets", () => {
   });
   it("treats offer/rejection/withdrawn/no-response as terminal", () => {
     expect([...TERMINAL_STATUSES].sort()).toEqual(
-      [QueryStatus.NO_RESPONSE, QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN].sort()
+      [QueryStatus.NO_RESPONSE, QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN,
+        QueryStatus.SIGNED /* Query actions v1 (27 Sep): + Signed */].sort()
     );
   });
 });

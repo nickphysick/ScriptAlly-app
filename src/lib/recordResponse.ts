@@ -29,7 +29,7 @@ import {
 } from "firebase/firestore";
 import { statedQuantity } from "./materials";
 import { db, handleFirestoreError, OperationType } from "./firebase";
-import { QueryStatus, ActivityType } from "../types";
+import { QueryStatus, ActivityType, type EventKey } from "../types";
 import { recomputeQuery, monotonicEventTime } from "./recomputeQuery";
 
 /** Shape of the payload produced by RecordResponseModal.onSave. */
@@ -62,6 +62,9 @@ export interface RecordResponseData {
     | "Agent no longer accepting queries"
     | "Other";
   closingNotes: string;
+  /** Query actions v1 (K5) — stamped on both stores' rows when present. Optional: every existing
+   *  caller omits it and writes exactly what it wrote before. */
+  eventKey?: EventKey;
 }
 
 export interface RecordResponseDeps {
@@ -292,6 +295,7 @@ export async function recordQueryResponse(
     queryId,
     agentName: agent?.name || "The agent",
     manuscriptTitle: manuscript?.title || "",
+    ...(data.eventKey ? { eventKey: data.eventKey } : {}),
   };
   if (newStatus === QueryStatus.PARTIAL_REQUESTED || newStatus === QueryStatus.FULL_REQUESTED) {
     if (materialsRequestedType) activityPayload.materialsType = materialsRequestedType;
@@ -340,6 +344,7 @@ export async function recordQueryResponse(
         date: new Date().toISOString(),
         details,
         resultingStatus: newStatus,
+        ...(data.eventKey ? { eventKey: data.eventKey } : {}),
       });
       legacyWritten = true;
     } catch (err) {

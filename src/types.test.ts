@@ -6,7 +6,8 @@ import { QueryStatus, ManuscriptStatus, ActivityType, SubmissionStatus } from '.
 // enum strings; never camelCase"). An accidental rename here would silently break derivation, the
 // Firestore rules allowlist, and StatusDot — so pin the exact values.
 describe('QueryStatus enum', () => {
-  it('has exactly the ten canonical values, verbatim', () => {
+  it('has exactly the twelve canonical values, verbatim', () => {
+    // Query actions v1 (27 Sep): + Resubmitted / + Signed
     expect(Object.values(QueryStatus)).toEqual([
       'Queried',
       'Partial Requested',
@@ -18,6 +19,8 @@ describe('QueryStatus enum', () => {
       'Rejected',
       'Withdrawn',
       'No Response',
+      'Resubmitted', // Query actions v1 (27 Sep): + Resubmitted
+      'Signed', // Query actions v1 (27 Sep): + Signed
     ]);
   });
   it('uses the ampersand spelling for R&R (not "R&R" or "Revise and Resubmit")', () => {

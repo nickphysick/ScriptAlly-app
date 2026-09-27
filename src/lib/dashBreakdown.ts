@@ -34,6 +34,7 @@ export const LIVE_STATUSES: readonly QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
   QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.OFFER,
 ];
 
@@ -130,7 +131,10 @@ export const stageSentAt = (
 ): { ms: number | null; fromLog: boolean } => {
   let latest: number | null = null;
   for (const a of log) {
-    if (a.queryId !== q.id || normalizeResultingStatus(a.resultingStatus) !== stage) continue;
+    const rs = normalizeResultingStatus(a.resultingStatus);
+    /* a resubmission is a full going back out, so it restarts the Full sent wait */
+    const matches = rs === stage || (stage === QueryStatus.FULL_SENT && rs === QueryStatus.RESUBMITTED);
+    if (a.queryId !== q.id || !matches) continue;
     const t = getActivityTime(a.date);
     if (t > 0 && (latest === null || t > latest)) latest = t;
   }
@@ -186,7 +190,8 @@ export const extrasLine = (rr: number, offer: number): string | null => {
 
 export const queryBreakdown = (input: BreakdownInput): Breakdown => {
   const live = liveQueries(input.queries);
-  const byStatus = (s: QueryStatus) => live.filter((q) => q.status === s);
+  /* a resubmitted query is a full with the agent, so it is counted in the Full sent column */
+  const byStatus = (s: QueryStatus) => live.filter((q) => q.status === s || (s === QueryStatus.FULL_SENT && q.status === QueryStatus.RESUBMITTED));
   const columns = BREAKDOWN_COLUMNS.map((spec): BreakdownColumn => {
     const set = byStatus(spec.status);
     let fact = "";

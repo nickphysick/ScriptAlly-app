@@ -91,7 +91,7 @@ const ms = (iso?: string): number => (iso ? new Date(iso).getTime() : NaN);
  */
 export function replyDeadlineMs(inp: ReplyTaskInput): number {
   const { status, responseTimeWeeks } = inp;
-  const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT;
+  const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED;
   if (!awaiting) return NaN;
   if (!responseTimeWeeks || responseTimeWeeks <= 0) return NaN;
   const stored = ms(inp.responseDeadline);

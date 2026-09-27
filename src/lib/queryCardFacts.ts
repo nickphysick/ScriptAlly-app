@@ -229,7 +229,7 @@ const YOU: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.FULL_REQUESTED,
   QueryStatus.REVISE_RESUBMIT,
 ]);
-const AGENT: ReadonlySet<QueryStatus> = new Set([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+const AGENT: ReadonlySet<QueryStatus> = new Set([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
 
 export function turnFor(status: QueryStatus): Turn {
   if (status === QueryStatus.QUERIED) return "sand";
@@ -251,6 +251,7 @@ const STAGE_OF: Partial<Record<QueryStatus, Stage>> = {
   [QueryStatus.QUERIED]: "out-1",
   [QueryStatus.PARTIAL_SENT]: "out-2",
   [QueryStatus.FULL_SENT]: "out-3",
+  [QueryStatus.RESUBMITTED]: "out-3",
   [QueryStatus.PARTIAL_REQUESTED]: "in-1",
   [QueryStatus.FULL_REQUESTED]: "in-2",
   [QueryStatus.REVISE_RESUBMIT]: "in-3",
@@ -270,6 +271,7 @@ const STATE_OF: Partial<Record<QueryStatus, State>> = {
   [QueryStatus.QUERIED]: "queried",
   [QueryStatus.PARTIAL_SENT]: "agent",
   [QueryStatus.FULL_SENT]: "agent",
+  [QueryStatus.RESUBMITTED]: "agent",
   [QueryStatus.PARTIAL_REQUESTED]: "you",
   [QueryStatus.FULL_REQUESTED]: "you",
   [QueryStatus.REVISE_RESUBMIT]: "you",

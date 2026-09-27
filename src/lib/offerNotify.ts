@@ -15,12 +15,14 @@ import { agentPrimary } from "./agentDisplay";
 const PAGES_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.PARTIAL_SENT,
   QueryStatus.FULL_SENT,
+  QueryStatus.RESUBMITTED,
   QueryStatus.REVISE_RESUBMIT,
 ]);
 const TERMINAL: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.REJECTED,
   QueryStatus.WITHDRAWN,
   QueryStatus.NO_RESPONSE,
+  QueryStatus.SIGNED,
 ]);
 
 export interface NotifyRow {

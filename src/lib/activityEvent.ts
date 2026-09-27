@@ -63,6 +63,8 @@ export function activityEventLabel(act: EventLabelInput, opts: EventLabelOptions
     case QueryStatus.REJECTED: return "Rejected";
     case QueryStatus.WITHDRAWN: return "Withdrawn";
     case QueryStatus.NO_RESPONSE: return "No response";
+    case QueryStatus.RESUBMITTED: return "Resubmitted";
+    case QueryStatus.SIGNED: return "Signed";
     default: {
       const unhandled: never = rs;
       return unhandled;

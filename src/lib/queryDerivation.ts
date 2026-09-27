@@ -67,6 +67,7 @@ export const AGENT_RESPONSE_STATUSES: ReadonlySet<QueryStatus> = new Set([
  */
 export const AGENT_HAS_RESPONDED_STATUSES: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
   ...STATUS_ORDER.slice(STATUS_ORDER.indexOf(QueryStatus.PARTIAL_REQUESTED)),
+  QueryStatus.SIGNED,
   QueryStatus.REJECTED,
 ]);
 
@@ -203,7 +204,7 @@ export function deriveLastStatusChange(activities: DerivableActivity[]): string 
 }
 
 /**
- * Revision round = 1 + the number of resubmission sends. A resubmission is a FULL_SENT whose
+ * Revision round = 1 + the number of resubmission sends. A resubmission is a FULL_SENT (or RESUBMITTED) whose
  * nearest preceding status-bearing activity is REVISE_RESUBMIT — derived from log shape, never
  * a stored counter, so editing/deleting an R&R recomputes the round correctly.
  */
@@ -211,7 +212,7 @@ export function deriveRevisionRound(activities: DerivableActivity[]): number {
   const ordered = orderedStatusBearing(activities);
   let round = 1;
   for (let i = 1; i < ordered.length; i++) {
-    if (ordered[i].status === QueryStatus.FULL_SENT && ordered[i - 1].status === QueryStatus.REVISE_RESUBMIT) {
+    if ((ordered[i].status === QueryStatus.FULL_SENT || ordered[i].status === QueryStatus.RESUBMITTED) && ordered[i - 1].status === QueryStatus.REVISE_RESUBMIT) {
       round++;
     }
   }
@@ -238,7 +239,8 @@ export function derivePipelineDates(activities: DerivableActivity[]): DerivedPip
     partialRequestedDate: latest(QueryStatus.PARTIAL_REQUESTED),
     partialSentDate: latest(QueryStatus.PARTIAL_SENT),
     fullRequestedDate: latest(QueryStatus.FULL_REQUESTED),
-    fullSentDate: latest(QueryStatus.FULL_SENT),
+    /* a resubmission is a full going back out — the latest of either is the latest full send */
+    fullSentDate: [latest(QueryStatus.FULL_SENT), latest(QueryStatus.RESUBMITTED)].filter((d): d is string => d != null).sort().pop() ?? null,
   };
 }
 

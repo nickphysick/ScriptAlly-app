@@ -265,7 +265,7 @@ describe("The ?status= filter — still live, now as in-page state", () => {
 
   it("closed is the three terminal statuses", () => {
     expect(CLOSED_QUERY_STATUSES)
-      .toEqual([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+      .toEqual([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]); // Query actions v1 (27 Sep): + Signed
   });
 });
 

@@ -168,6 +168,7 @@ describe("the row's words", () => {
       [QueryStatus.QUERIED, "Record a response"], [QueryStatus.PARTIAL_REQUESTED, "Mark partial sent"], [QueryStatus.PARTIAL_SENT, "Record a response"],
       [QueryStatus.FULL_REQUESTED, "Mark full sent"], [QueryStatus.FULL_SENT, "Record a response"], [QueryStatus.REVISE_RESUBMIT, "Record your resubmission"],
       [QueryStatus.OFFER, "Record your decision"], [QueryStatus.REJECTED, null], [QueryStatus.WITHDRAWN, null], [QueryStatus.NO_RESPONSE, null],
+      [QueryStatus.RESUBMITTED, "Record a response"], [QueryStatus.SIGNED, null], // Query actions v1 (27 Sep): + Resubmitted / + Signed
     ]);
   });
   it("⚠️ NO APPRAISAL LANGUAGE in anything this module can say — swept over every status, in and past its window", () => {
@@ -199,9 +200,10 @@ describe("⚠️ tileCourt is NOT courtOf, and the difference is the whole rulin
     const by: Record<string, QueryStatus[]> = { you: [], agent: [], closed: [], none: [] };
     for (const s of ALL) by[tileCourt(s) ?? "none"].push(s);
     expect(by.you.sort()).toEqual([QueryStatus.FULL_REQUESTED, QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.REVISE_RESUBMIT].sort());
-    expect(by.agent.sort()).toEqual([QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT, QueryStatus.QUERIED].sort());
+    expect(by.agent.sort()).toEqual([QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT, QueryStatus.QUERIED, QueryStatus.RESUBMITTED].sort()); // Query actions v1 (27 Sep): + Resubmitted
     expect(by.closed.sort()).toEqual([QueryStatus.NO_RESPONSE, QueryStatus.REJECTED].sort());
-    expect(by.none).toEqual([QueryStatus.WITHDRAWN]);
+    // Query actions v1 (27 Sep): + Signed — the writer's own act, like a withdrawal, so no tile.
+    expect(by.none.sort()).toEqual([QueryStatus.WITHDRAWN, QueryStatus.SIGNED].sort());
     /* the partition: nothing counted twice, nothing missed */
     expect(by.you.length + by.agent.length + by.closed.length + by.none.length).toBe(ALL.length);
   });

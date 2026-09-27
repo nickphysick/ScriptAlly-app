@@ -50,7 +50,7 @@ const C = {
 const METHOD_OPTIONS = [SubmissionMethod.EMAIL, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.ONLINE_FORM, SubmissionMethod.POST];
 const IF_NO_RESPONSE_OPTIONS = ["Remind me to nudge", "Mark as no response automatically", "Do nothing"];
 const REJECTION_TYPE_OPTIONS = ["Personalised rejection", "Form rejection", "No reason given"];
-const AWAITING = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+const AWAITING = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
 const CLOSED_REVIEW = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
 const PRO_COPY = "Attach custom submission packages to submissions, then track by-package and by-component stats to see how agents are responding to different versions of your materials. Available on Pro.";
 

@@ -24,6 +24,7 @@ export const TERMINAL_STATUSES: readonly QueryStatus[] = [
   QueryStatus.REJECTED,
   QueryStatus.WITHDRAWN,
   QueryStatus.NO_RESPONSE,
+  QueryStatus.SIGNED,
 ];
 
 /** The statuses where the agent has asked for something and the writer owes it — "your pages". */

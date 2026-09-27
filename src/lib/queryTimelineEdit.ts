@@ -19,7 +19,7 @@ import { QueryStatus } from "../types";
 
 /** Terminal statuses — a query can hold at most one, and it must be the LAST event. */
 export const TERMINAL_STATUSES: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+  QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED,
 ]);
 
 /** Statuses offered by "something changed" — the pipeline events you'd log onto an existing query. */

@@ -181,7 +181,7 @@ export function standingQuery(rows: readonly QcRow[]): QcRow | null {
   const pool = open.length ? open : rows;
   if (pool.length === 0) return null;
   if (open.length) {
-    const order = ["Queried", "Partial Requested", "Partial Sent", "Full Requested", "Full Sent", "Revise & Resubmit", "Offer"];
+    const order = ["Queried", "Partial Requested", "Partial Sent", "Full Requested", "Full Sent", "Revise & Resubmit", "Resubmitted", "Offer"];
     let best = pool[0];
     for (const r of pool.slice(1)) if (order.indexOf(r.status) > order.indexOf(best.status)) best = r;
     return best;

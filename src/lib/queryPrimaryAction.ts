@@ -36,9 +36,10 @@ export const getPrimaryAction = (status: QueryStatus): PrimaryAction => {
     case QueryStatus.QUERIED:
     case QueryStatus.PARTIAL_SENT:
     case QueryStatus.FULL_SENT:
+    case QueryStatus.RESUBMITTED:
       return { kind: "record", label: "Record response", ballHolder: "agent" };
     default:
-      // OFFER / REJECTED / WITHDRAWN / NO_RESPONSE — no ball-holder chip.
+      // OFFER / SIGNED / REJECTED / WITHDRAWN / NO_RESPONSE — no ball-holder chip.
       return { kind: "record", label: "Record response", ballHolder: null };
   }
 };

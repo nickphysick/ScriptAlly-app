@@ -92,7 +92,7 @@ export interface EditCtx {
 const sameList = (a: readonly string[], b: readonly string[]) =>
   a.length === b.length && a.every((x, i) => x === b[i]);
 
-const LIVE = (q: Query) => !["Rejected", "Withdrawn", "No Response"].includes(String(q.status));
+const LIVE = (q: Query) => !["Rejected", "Withdrawn", "No Response", "Signed"].includes(String(q.status));
 
 /**
  * The notes for the current draft — recomputed as the draft changes (§7.3: the note appears as

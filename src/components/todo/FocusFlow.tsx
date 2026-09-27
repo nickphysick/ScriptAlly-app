@@ -811,7 +811,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const kicker = `${who.toUpperCase()}${ag?.agency ? ` · ${ag.agency.toUpperCase()}` : ""} · AN OFFER OF REPRESENTATION`;
     const replyBy = q?.responseDeadline;
     const daysTo = replyBy ? Math.max(0, Math.ceil((new Date(replyBy).getTime() - Date.now()) / 86400000)) : null;
-    const OFFER_TERMINAL = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+    const OFFER_TERMINAL = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]);
     const others = q ? queries.filter((x) => x.manuscriptId === q.manuscriptId && x.id !== q.id && !OFFER_TERMINAL.has(x.status as QueryStatus)) : [];
 
     // ── door: notify — select-many → reminders (popup-notify-scrim P2; ref §2). Writes NO

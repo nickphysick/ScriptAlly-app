@@ -109,7 +109,9 @@ const STATUS_PILL: Partial<Record<QueryStatus, string>> = {
   [QueryStatus.FULL_REQUESTED]: "Full requested",
   [QueryStatus.FULL_SENT]: "Full sent",
   [QueryStatus.REVISE_RESUBMIT]: "Revise & resubmit",
+  [QueryStatus.RESUBMITTED]: "Resubmitted",
   [QueryStatus.OFFER]: "An offer",
+  [QueryStatus.SIGNED]: "Signed",
   [QueryStatus.REJECTED]: "Passed",
   [QueryStatus.WITHDRAWN]: "Withdrawn",
   [QueryStatus.NO_RESPONSE]: "No reply",
@@ -225,8 +227,14 @@ export const describeEvent = (
     case QueryStatus.REVISE_RESUBMIT:
       head = [...they, { t: " invited a revise and resubmit on" }, ...book];
       break;
+    case QueryStatus.RESUBMITTED:
+      head = [{ t: "You sent the revised manuscript of" }, ...book, ...to];
+      break;
     case QueryStatus.OFFER:
       head = [...they, { t: " offered representation for" }, ...book];
+      break;
+    case QueryStatus.SIGNED:
+      head = [{ t: "You accepted the offer from " }, ...they, ...(msTitle ? [{ t: " for" }, ...book] : [])];
       break;
     case QueryStatus.REJECTED:
       head = [...they, { t: " passed on" }, ...book];

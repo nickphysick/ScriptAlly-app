@@ -67,7 +67,7 @@ export function silentDays(
   if (!q) return null;
   const st = q.status as QueryStatus;
   const stageIso = st === QueryStatus.PARTIAL_SENT ? q.partialSentDate
-    : st === QueryStatus.FULL_SENT ? q.fullSentDate
+    : st === QueryStatus.FULL_SENT || st === QueryStatus.RESUBMITTED ? q.fullSentDate
     : q.dateSent;
   const iso = stageIso ?? q.dateSent;
   if (!iso) return null;

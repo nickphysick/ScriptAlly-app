@@ -31,7 +31,7 @@ export function anyToMs(v: unknown): number | null {
   return typeof s === "number" ? s * 1000 : null;
 }
 
-export const CLOSED_STATUSES: readonly QueryStatus[] = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+export const CLOSED_STATUSES: readonly QueryStatus[] = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED];
 export const isClosedStatus = (s: QueryStatus): boolean => CLOSED_STATUSES.includes(s);
 
 export interface StageSpan {

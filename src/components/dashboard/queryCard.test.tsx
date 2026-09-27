@@ -85,7 +85,8 @@ describe("the story's last line", () => {
     expect(live).toContain('{ label: "An offer", band: "rose" as const }');
     /* ⚠️ THE CLOSED SET IS NAMED, NOT INFERRED FROM A NULL — so a tenth status lands on the live
        side and is visible, rather than being quietly filed as closed. */
-    expect(live).toContain("const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]");
+    // Query actions v1 (27 Sep): + Signed
+    expect(live).toContain("const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]");
     expect(live).toContain("CLOSED.includes(status)");
   });
 

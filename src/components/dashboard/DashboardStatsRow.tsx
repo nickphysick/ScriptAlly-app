@@ -382,7 +382,7 @@ export const useStatDefs = (queries: Query[], agents: Agent[], activities: Activ
     const mix = pipelineMix(active);
     const split = ballHolderSplit(queries);
     const awaiting = awaitingReplyCount(queries);
-    const withPagesOut = queries.filter((q) => q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT).length;
+    const withPagesOut = queries.filter((q) => q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.RESUBMITTED).length;
     const summaries = agentStatusSummaries(agents, queries);
     const idle = idleAgentCount(agents, queries);
     const shownAgents = shownAgentCount(agents, queries);

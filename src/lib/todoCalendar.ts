@@ -315,6 +315,8 @@ export const RECORD_STATUS: Record<QueryStatus, RecordSpec | null> = {
   [QueryStatus.REJECTED]: { label: "Closed", dir: "in" },
   [QueryStatus.WITHDRAWN]: { label: "Closed", dir: "out" },
   [QueryStatus.NO_RESPONSE]: { label: "Closed", dir: "out" },
+  [QueryStatus.RESUBMITTED]: { label: "Resubmitted", dir: "out" },
+  [QueryStatus.SIGNED]: { label: "Signed", dir: "out" },
 };
 
 export interface RecordItem {

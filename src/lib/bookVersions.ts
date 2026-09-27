@@ -179,6 +179,7 @@ export const samplesOfVersion = (
 export const HOLDING_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.PARTIAL_SENT,
   QueryStatus.FULL_SENT,
+  QueryStatus.RESUBMITTED,
 ]);
 
 export interface Holding {
@@ -209,14 +210,14 @@ export const holdings = (
       const last = sends[sends.length - 1];
       return {
         query: q,
-        what: q.status === QueryStatus.FULL_SENT ? ("FULL" as const) : ("PARTIAL" as const),
+        what: q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.RESUBMITTED ? ("FULL" as const) : ("PARTIAL" as const),
         versionId: last?.bookVersionId ?? null,
       };
     });
 
 /** The two send statuses a version may ride on (D3). No other activity takes one. */
 export const isSendStatus = (s: QueryStatus | undefined): boolean =>
-  s === QueryStatus.PARTIAL_SENT || s === QueryStatus.FULL_SENT;
+  s === QueryStatus.PARTIAL_SENT || s === QueryStatus.FULL_SENT || s === QueryStatus.RESUBMITTED;
 
 /**
  * How many holders hold something other than the latest version (D17).

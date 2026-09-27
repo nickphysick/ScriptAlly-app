@@ -41,12 +41,13 @@ beforeEach(() => { warn = vi.spyOn(console, "warn").mockImplementation(() => {})
 afterEach(() => { warn.mockRestore(); });
 
 describe("the live set", () => {
-  it("is exactly seven statuses — an offer and an R&R included, a pass, a withdrawal and silence not", () => {
+  it("is exactly eight statuses — an offer, an R&R and a resubmission included, a pass, a withdrawal, silence and a signing not", () => {
     expect([...LIVE_STATUSES].sort()).toEqual([
       QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED,
       QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
+      QueryStatus.RESUBMITTED, // Query actions v1 (27 Sep): + Resubmitted
     ].sort());
-    for (const s of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+    for (const s of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED /* Query actions v1 (27 Sep): + Signed */]) {
       expect(isLive(q(s)), s).toBe(false);
     }
   });

@@ -37,6 +37,7 @@ export function queryBucket(status: QueryStatus): QueryBucket {
     case QueryStatus.QUERIED:
     case QueryStatus.PARTIAL_SENT:
     case QueryStatus.FULL_SENT:
+    case QueryStatus.RESUBMITTED:
       return "waiting";
     default:
       return "closed";
@@ -730,5 +731,5 @@ export function answeredSplit(queries: Pick<Query, "status">[]): AnsweredSplit {
 const AGENT_ANSWERED = new Set<QueryStatus>([
   QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
   QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT,
-  QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
+  QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED, QueryStatus.OFFER, QueryStatus.SIGNED, QueryStatus.REJECTED,
 ]);

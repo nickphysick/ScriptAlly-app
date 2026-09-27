@@ -80,6 +80,7 @@ export const getTimelineFamily = (act: TimelineActivityLike): TimelineFamily => 
   // Status-bearing events: the stamped resultingStatus is the authority.
   switch (act.resultingStatus) {
     case QueryStatus.OFFER:
+    case QueryStatus.SIGNED:
       return "offer";
     case QueryStatus.PARTIAL_REQUESTED:
     case QueryStatus.FULL_REQUESTED:
@@ -88,6 +89,7 @@ export const getTimelineFamily = (act: TimelineActivityLike): TimelineFamily => 
     case QueryStatus.QUERIED:
     case QueryStatus.PARTIAL_SENT:
     case QueryStatus.FULL_SENT:
+    case QueryStatus.RESUBMITTED:
       return "outgoing";
     case QueryStatus.REJECTED:
     case QueryStatus.WITHDRAWN:

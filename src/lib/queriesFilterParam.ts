@@ -26,7 +26,7 @@ const VALUES: QueriesStatusFilter[] = ["all", "attention", "awaiting", "closed"]
 
 /** Terminal statuses — the `closed` bucket, stated once. */
 export const CLOSED_QUERY_STATUSES: QueryStatus[] = [
-  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED,
 ];
 
 /**

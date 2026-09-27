@@ -170,8 +170,10 @@ export function outcomeFor(status: QueryStatus): AnalyticsOutcome {
     case QueryStatus.FULL_REQUESTED:
     case QueryStatus.FULL_SENT:
     case QueryStatus.REVISE_RESUBMIT:
+    case QueryStatus.RESUBMITTED:
       return "full";
     case QueryStatus.OFFER:
+    case QueryStatus.SIGNED:
       return "offer";
     case QueryStatus.REJECTED:
     case QueryStatus.WITHDRAWN:
@@ -330,7 +332,7 @@ export function buildRows(
        true figure and a flattering one. A query that drew a full request and was then declined
        still reached the full-manuscript rung; counting only live queries would quietly delete
        every request the writer has ever had the moment it closed. */
-    const reachedOffer = offerMs !== null || q.status === QueryStatus.OFFER;
+    const reachedOffer = offerMs !== null || q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED;
     /* An offer means the book was read, so it sits inside the full stage — which also keeps the
        cascade monotonic, so a transition can never exceed 100% and read as a rendering fault. */
     const reachedFull =
@@ -339,7 +341,8 @@ export function buildRows(
       fullSentMs !== null ||
       q.status === QueryStatus.FULL_REQUESTED ||
       q.status === QueryStatus.FULL_SENT ||
-      q.status === QueryStatus.REVISE_RESUBMIT;
+      q.status === QueryStatus.REVISE_RESUBMIT ||
+      q.status === QueryStatus.RESUBMITTED;
     const reachedRequest =
       reachedFull ||
       partialRequestedMs !== null ||
@@ -796,7 +799,7 @@ export interface FullRow {
  */
 export function fullsUnderConsideration(rows: AnalyticsRow[], nowMs: number): FullRow[] {
   return rows
-    .filter((r) => r.status === QueryStatus.FULL_SENT && r.fullSentMs !== null)
+    .filter((r) => (r.status === QueryStatus.FULL_SENT || r.status === QueryStatus.RESUBMITTED) && r.fullSentMs !== null)
     .map((r) => ({
       queryId: r.id,
       agentName: r.agentName,

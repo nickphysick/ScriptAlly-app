@@ -214,6 +214,9 @@ export function pillText(
     case QueryStatus.QUERIED:      return { text: QueryStatus.QUERIED, tone: "them" };
     case QueryStatus.PARTIAL_SENT: return { text: QueryStatus.PARTIAL_SENT, tone: "them" };
     case QueryStatus.FULL_SENT:    return { text: QueryStatus.FULL_SENT, tone: "them" };
+    case QueryStatus.RESUBMITTED:  return { text: QueryStatus.RESUBMITTED, tone: "them" };
+    /* Signed is nobody's move: the search is over. */
+    case QueryStatus.SIGNED:       return { text: QueryStatus.SIGNED, tone: "closed" };
 
     /* ⚠️ THE THREE CLOSED STATUSES KEEP THEIR OWN NAMES. The board used to draw all three as
        `Closed`, which is not a status and flattens three different endings into one word: an

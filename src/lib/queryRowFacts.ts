@@ -61,7 +61,7 @@ const CLOSED_STATUSES = new Set<string>([QueryStatus.REJECTED, QueryStatus.WITHD
 const REQUESTED_STATUSES = new Set<string>([
   QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT,
 ]);
-const SENT_STATUSES = new Set<string>([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+const SENT_STATUSES = new Set<string>([QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
 
 /**
  * Every recorded activity AFTER the send, in date order, classified into the five marks the row

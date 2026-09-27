@@ -74,7 +74,7 @@ const mkQuery = (over: Partial<Query>): Query =>
 
 describe("agentList · relationship vocabulary", () => {
   it("terminal set is exactly Rejected / Withdrawn / No Response — Offer stays ACTIVE", () => {
-    expect([...TERMINAL_STATUSES]).toEqual([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+    expect([...TERMINAL_STATUSES]).toEqual([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]); // Query actions v1 (27 Sep): + Signed
     expect(agentRelationship("a1", [mkQuery({ status: QueryStatus.OFFER })])).toBe("active");
   });
 

@@ -25,7 +25,7 @@ const LADDER: QueryStatus[] = [
 ];
 // Off-ladder final statuses, in a stable display order after the ladder.
 const OFF_LADDER: QueryStatus[] = [
-  QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
+  QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED, QueryStatus.OFFER, QueryStatus.SIGNED,
   QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
 ];
 
@@ -70,6 +70,14 @@ export function impliedRungs(q: ParsedQuery): SeedRung[] {
   } else if (final === QueryStatus.REVISE_RESUBMIT) {
     include.add(QueryStatus.FULL_REQUESTED);
     include.add(QueryStatus.FULL_SENT);
+  } else if (final === QueryStatus.RESUBMITTED) {
+    // a resubmission implies the R&R it answers, and the full that R&R was on
+    include.add(QueryStatus.FULL_REQUESTED);
+    include.add(QueryStatus.FULL_SENT);
+    include.add(QueryStatus.REVISE_RESUBMIT);
+  } else if (final === QueryStatus.SIGNED) {
+    // signing implies the offer that was accepted
+    include.add(QueryStatus.OFFER);
   }
   // Sent implies requested (an agent action — what "Responses received" derives from).
   if (include.has(QueryStatus.PARTIAL_SENT)) include.add(QueryStatus.PARTIAL_REQUESTED);

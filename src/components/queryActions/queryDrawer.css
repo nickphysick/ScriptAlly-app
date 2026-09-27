@@ -1,0 +1,358 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The query drawer (design-refs/query-actions-v11.html — the ink header, the journey layout).
+ * Values are the mock's RESOLVED ones (reports/query-actions-v1/MOCK-SPEC.md §1.0): the mock
+ * declares several selectors up to four times and the last base rule is the one it renders.
+ *
+ * ⚠️ EVERYTHING HERE PORTALS TO `document.body`, SO THE PALETTE IS DECLARED ON THE PORTAL'S OWN
+ * ROOTS (`.qad-root`, `.qad-dock`, `.qad-toast`) — never read from a page scope, which is an
+ * ancestor of nothing out here (the Query Centre card's 86 dead `--qcv-*` reads are the precedent).
+ *
+ * ⚠️ EVERY CLASS IS `qad-` PREFIXED. The mock's `.chip`, `.step`, `.plan`, `.note` and `.tag` are
+ * all names the app already uses elsewhere; unprefixed they would restyle other surfaces.
+ */
+
+.qad-root, .qad-dock, .qad-toast {
+  --qad-ink: #1c130f; --qad-ink70: rgba(28,19,15,.7); --qad-ink45: rgba(28,19,15,.45); --qad-ink25: rgba(28,19,15,.25);
+  --qad-hair: rgba(28,19,15,.1); --qad-btn: #2a3a52; --qad-rust: #8a4a3c; --qad-page: #f5f1eb;
+  --qad-sand: #f7efe3; --qad-rose: #f5e6df; --qad-sage: #e0e5dd; --qad-offer: #d7e0e8; --qad-stone: #e4e1db; --qad-blush: #e9c9b8;
+  /* The three faces are READ from the shell's `:root` tokens (primitives.css), never named here —
+     the marketing lock counts every file that names Special Elite or Source Serif 4. */
+  --qad-machine: var(--sp-type); --qad-serif: var(--sp-serif); --qad-mono: var(--sp-mono);
+  --qad-k: 1;
+  --qad-t1: calc(120ms * var(--qad-k)); --qad-t2: calc(200ms * var(--qad-k)); --qad-t3: calc(280ms * var(--qad-k)); --qad-t4: calc(360ms * var(--qad-k));
+  --qad-out: cubic-bezier(.2,.8,.2,1); --qad-in: cubic-bezier(.4,0,1,1);
+}
+/* A measurement-only slow-motion multiplier, never set by the app itself. */
+.qad-slow { --qad-k: 3; }
+
+.qad-root, .qad-root *, .qad-dock, .qad-dock *, .qad-toast, .qad-toast * { box-sizing: border-box; }
+.qad-root { font-family: var(--qad-serif); color: var(--qad-ink); font-size: 16px; line-height: 1.45; }
+/* ⚠️ brand.tsx injects `p, span, div, button, input, select, textarea, label { font-family: <body sans> }`
+   at 0-0-1 on every route. At 0-1-0 this hands every bare element back to the face its parent set;
+   every class rule below is later and at least as specific, so it still wins where it names a face. */
+.qad-root :where(p, span, div, button, input, select, textarea, label),
+.qad-dock :where(p, span, div, button, label),
+.qad-toast :where(p, span, div, button, label) { font-family: inherit; }
+
+/* ===== scrim + drawer ===== */
+.qad-scrim { position: fixed; inset: 0; background: rgba(28,19,15,.45); opacity: 0; z-index: 70; transition: opacity var(--qad-t2) ease; }
+.qad-root.is-open .qad-scrim { opacity: 1; }
+.qad-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 500px; max-width: 100vw; background: #fff; z-index: 71;
+  transform: translateX(102%); transition: transform calc(var(--qad-t3) * .85) var(--qad-in);
+  box-shadow: -24px 0 60px -30px rgba(28,19,15,.5); display: flex; flex-direction: column; }
+.qad-root.is-open .qad-drawer { transform: none; transition: transform var(--qad-t3) var(--qad-out); }
+.qad-drawer.is-shake { animation: qadShake var(--qad-t3) var(--qad-out); }
+@keyframes qadShake { 0%,100% { translate: 0 } 25% { translate: -8px 0 } 60% { translate: 5px 0 } }
+
+/* ===== the ink header ===== */
+.qad-head { position: relative; background: var(--qad-btn); padding: 20px 24px 14px; flex: none; }
+.qad-top { display: flex; align-items: center; gap: 12px; min-height: 0; }
+.qad-tt { flex: 1; padding: 0; min-width: 0; }
+.qad-mode { font: 400 9px var(--qad-mono); letter-spacing: .16em; color: rgba(255,255,255,.6); }
+.qad-head .qad-h2 { margin: 4px 0 0; font-family: var(--qad-machine); font-weight: 400; font-size: 22px; line-height: 1.3; color: #fff; }
+.qad-dx { position: absolute; right: 12px; top: 8px; z-index: 2; border: 0; background: none; font-size: 20px; line-height: 1; color: rgba(255,255,255,.7); cursor: pointer; padding: 6px; }
+.qad-dx:hover { color: #fff; }
+.qad-qwrap { display: flex; align-items: flex-end; justify-content: center; flex: none; position: relative;
+  width: 56px; height: 56px; border-radius: 50%; background: var(--qad-blush); margin: 0 40px 0 0; overflow: visible;
+  animation: qadDisc var(--qad-t3) var(--qad-out) both; animation-delay: var(--qad-t1); }
+.qad-qwrap img { height: 64px; width: auto; position: absolute; bottom: 3px; left: 50%; transform: translateX(-46%); pointer-events: none;
+  animation: qadDip var(--qad-t4) var(--qad-out) both; animation-delay: var(--qad-t2); transform-origin: 50% 100%; }
+@keyframes qadDip { from { opacity: 0; transform: translateX(-46%) translateY(10px) rotate(-12deg) } to { opacity: 1; transform: translateX(-46%) translateY(0) rotate(0) } }
+@keyframes qadDisc { from { transform: scale(.6); opacity: 0 } to { transform: none; opacity: 1 } }
+
+/* the agent card under the title */
+.qad-who { display: flex; align-items: center; gap: 10px; margin-top: 12px; background: #fff; border-radius: 12px; padding: 8px 12px; position: relative; z-index: 1; }
+.qad-av { width: 34px; height: 34px; border-radius: 50%; background: var(--qad-btn); color: #f5f1eb; font: 700 9px var(--qad-mono); display: flex; align-items: center; justify-content: center; flex: none; }
+.qad-who .qad-av { width: 32px; height: 32px; font-size: 8px; }
+.qad-who b { display: block; font-weight: 600; font-size: 15px; line-height: 1.3; }
+.qad-who small { display: block; font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); margin-top: 2px; }
+.qad-tags { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.qad-tag { font: 400 7.5px var(--qad-mono); letter-spacing: .12em; padding: 3px 7px; border-radius: 6px; background: #f3eee7; color: var(--qad-ink70); white-space: nowrap; }
+.qad-tag.dark { background: var(--qad-btn); color: #fff; }
+.qad-change { font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); cursor: pointer; background: none; border: 0; padding: 0; }
+
+/* ===== body, stepper, sections ===== */
+.qad-body { flex: 1; overflow: auto; background: #fff; padding: 0 24px 30px; }
+.qad-stepper { position: sticky; top: 0; z-index: 5; background: #fff; display: flex; align-items: flex-start; padding: 16px 18px 12px; border-bottom: 1px solid var(--qad-hair); margin: 0 -24px; }
+.qad-stepper-sm { display: none; }
+.qad-stp { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; width: 64px; text-align: center; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; color: inherit; }
+.qad-stp:disabled { cursor: default; }
+.qad-stp i { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.4px var(--qad-ink25); font: 700 9.5px var(--qad-mono); font-style: normal; display: flex; align-items: center; justify-content: center; color: var(--qad-ink45); background: #fff; }
+.qad-stp.done i { background: var(--qad-sage); color: #4f6149; box-shadow: none; }
+.qad-stp.auto i { box-shadow: inset 0 0 0 1.4px var(--qad-ink25); background: #fff; color: var(--qad-ink45); }
+.qad-stp.chk i { background: var(--qad-rose); color: var(--qad-rust); box-shadow: inset 0 0 0 1.4px rgba(138,74,60,.45); }
+.qad-stp.blk i { background: var(--qad-rust); color: #fff; box-shadow: none; }
+.qad-stp.cur i { background: var(--qad-btn) !important; color: #fff !important; box-shadow: none !important; }
+.qad-stp em { font-style: normal; font: 400 7.5px var(--qad-mono); letter-spacing: .06em; color: var(--qad-ink45); line-height: 1.3; text-transform: uppercase; }
+.qad-stp.cur em { color: var(--qad-ink); }
+.qad-stp.chk em, .qad-stp.blk em { color: var(--qad-rust); }
+.qad-stp.cur.pop i { animation: qadPop var(--qad-t2) var(--qad-out) both; }
+@keyframes qadPop { from { transform: scale(.7) } to { transform: none } }
+.qad-stl { flex: 1; height: 1.5px; background: var(--qad-ink25); margin-top: 12px; min-width: 4px; position: relative; overflow: hidden; }
+.qad-stl::after { content: ""; position: absolute; inset: 0; background: #4f6149; transform: scaleX(0); transform-origin: left; }
+.qad-stl.done::after { transform: none; }
+.qad-stl.fill::after { animation: qadFill var(--qad-t3) var(--qad-out) both; }
+@keyframes qadFill { from { transform: scaleX(0) } to { transform: none } }
+
+.qad-sec { padding: 18px 0 4px; position: relative; }
+.qad-sec.in-f { animation: qadInF var(--qad-t2) var(--qad-out) both; }
+.qad-sec.in-b { animation: qadInB var(--qad-t2) var(--qad-out) both; }
+@keyframes qadInF { from { opacity: 0; transform: translateX(28px) } to { opacity: 1; transform: none } }
+@keyframes qadInB { from { opacity: 0; transform: translateX(-28px) } to { opacity: 1; transform: none } }
+.qad-shd { display: flex; align-items: center; gap: 10px; min-width: 0; margin: 0 0 4px; }
+.qad-shd b { font-family: var(--qad-machine); font-weight: 400; font-size: 22px; line-height: 1.3; }
+.qad-secs { font-size: 13px; color: var(--qad-ink70); margin: 0 0 6px; }
+.qad-fl { font: 400 8.5px var(--qad-mono); letter-spacing: .14em; color: var(--qad-ink45); margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+.qad-fl .r { margin-left: auto; letter-spacing: .08em; text-transform: none; font-size: 9px; }
+
+/* chips */
+.qad-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.qad-chip { font-family: var(--qad-machine); font-size: 13.5px; line-height: 1.3; padding: 8px 13px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); cursor: pointer; background: #fff; border: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; color: var(--qad-ink);
+  transition: background var(--qad-t1), color var(--qad-t1), box-shadow var(--qad-t1); }
+.qad-chip small { font: 400 8px var(--qad-mono); letter-spacing: .08em; opacity: .65; }
+.qad-chip:hover { background: #f7f3ee; }
+.qad-chip.on { background: var(--qad-btn); color: #fff; box-shadow: none; }
+.qad-chip.on:hover { background: #233145; }
+.qad-chip.ghost { outline: 1px dashed rgba(28,19,15,.3); outline-offset: -1px; }
+.qad-chip:active, .qad-save:active { transform: scale(.97); }
+.qad-chip .ic { display: flex; }
+
+/* date field + calendar */
+.qad-dfield { position: relative; }
+.qad-dres { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; padding: 8px 2px 6px; border-bottom: 1.5px dashed rgba(28,19,15,.25); }
+.qad-dres b { font-family: var(--qad-machine); font-weight: 400; font-size: 17px; }
+.qad-dres span { font: 400 8.5px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); }
+.qad-dres .shift { margin-left: auto; color: var(--qad-rust); }
+.qad-tick { display: inline-block; animation: qadTick var(--qad-t2) var(--qad-out) both; }
+.qad-tick.dn { animation-name: qadTickD; }
+@keyframes qadTick { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+@keyframes qadTickD { from { opacity: 0; transform: translateY(-6px) } to { opacity: 1; transform: none } }
+.qad-cal { position: absolute; left: 0; top: calc(100% + 8px); width: 300px; background: #fff; border-radius: 14px; box-shadow: 0 22px 50px -18px rgba(28,19,15,.5), 0 0 0 1px var(--qad-hair); padding: 14px; z-index: 20; }
+.qad-cal .mh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.qad-cal .mh b { font-family: var(--qad-machine); font-weight: 400; font-size: 16px; }
+.qad-cal .mh button { border: 0; background: none; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 16px; color: var(--qad-ink70); }
+.qad-cal .mh button:hover { background: #f3eee7; }
+.qad-cal .dow, .qad-cal .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.qad-cal .dow span { font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); padding: 4px 0; }
+.qad-cal .grid button { height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font: 14px var(--qad-serif); cursor: pointer; position: relative; border: 0; background: none; color: var(--qad-ink); padding: 0; }
+.qad-cal .grid button:hover { background: #f3eee7; }
+.qad-cal .grid button.mut { color: var(--qad-ink25); }
+.qad-cal .grid button.no { color: var(--qad-ink25); pointer-events: none; text-decoration: line-through; text-decoration-color: rgba(28,19,15,.15); }
+.qad-cal .grid button.td { box-shadow: inset 0 0 0 1.5px var(--qad-ink45); }
+.qad-cal .grid button.sel { background: var(--qad-btn); color: #fff; box-shadow: none; }
+.qad-cal .grid button.wk::after { content: ""; position: absolute; bottom: 4px; width: 3px; height: 3px; border-radius: 50%; background: var(--qad-rust); }
+.qad-cal .cf { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--qad-hair); font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); }
+.qad-cal .cf button { border: 0; background: none; font-family: var(--qad-machine); font-size: 13px; cursor: pointer; color: var(--qad-ink); padding: 4px 6px; border-radius: 6px; }
+.qad-cal .cf button:hover { background: #f3eee7; }
+
+/* toggles */
+.qad-tgl { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); cursor: pointer; background: #fff; margin-top: 8px; border: 0; width: 100%; text-align: left; color: var(--qad-ink); font: inherit; }
+.qad-tgl .bx { width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 1.4px var(--qad-ink45); display: flex; align-items: center; justify-content: center; flex: none; font-size: 13px; color: #fff; }
+.qad-tgl.on .bx { background: var(--qad-btn); box-shadow: none; }
+.qad-tgl b { font-family: var(--qad-machine); font-weight: 400; font-size: 15px; }
+.qad-tgl small { margin-left: auto; font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); }
+
+/* sample control */
+.qad-samp { margin-top: 8px; border-radius: 14px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); padding: 14px; }
+.qad-samp.off { padding: 11px 14px; }
+.qad-srow { display: flex; align-items: center; gap: 12px; }
+.qad-srow b { font-family: var(--qad-machine); font-weight: 400; font-size: 15px; }
+.qad-seg { display: inline-flex; background: #f3eee7; border-radius: 11px; padding: 3px; gap: 2px; }
+.qad-seg button { font-family: var(--qad-machine); font-size: 13px; line-height: 1.3; padding: 6px 11px; border-radius: 9px; cursor: pointer; color: var(--qad-ink70); white-space: nowrap; border: 0; background: none; }
+.qad-seg button.on { background: #fff; color: var(--qad-ink); box-shadow: 0 1px 2px rgba(28,19,15,.12); }
+.qad-seg.wide { display: flex; }
+.qad-seg.wide button { flex: 1; text-align: center; }
+.qad-seg.sm { margin-top: 10px; }
+.qad-seg.sm button { font-size: 12px; padding: 6px 6px; }
+.qad-amt { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.qad-step { display: inline-flex; align-items: center; background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); }
+.qad-step button { width: 38px; height: 40px; border: 0; background: none; cursor: pointer; font-size: 18px; color: var(--qad-ink70); }
+.qad-step button:hover { color: var(--qad-ink); }
+.qad-step b { min-width: 74px; text-align: center; font-family: var(--qad-machine); font-weight: 400; font-size: 20px; }
+.qad-step.sm b { min-width: 64px; font-size: 17px; }
+.qad-step.sm button { width: 32px; height: 34px; }
+.qad-unitl { font-family: var(--qad-machine); font-size: 15px; color: var(--qad-ink70); }
+.qad-presets { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.qad-presets .qad-chip { padding: 5px 10px; font-size: 12.5px; }
+.qad-from { margin-top: 14px; }
+.qad-sectline { display: flex; align-items: center; gap: 10px; white-space: nowrap; margin-top: 10px; font-family: var(--qad-machine); font-size: 14.5px; color: var(--qad-ink70); }
+.qad-sline { margin-top: 12px; padding-top: 11px; border-top: 1px dashed rgba(28,19,15,.18); display: flex; align-items: baseline; gap: 10px; }
+.qad-sline b { font-family: var(--qad-machine); font-weight: 400; font-size: 15px; }
+.qad-sline span { margin-left: auto; font: 400 8.5px var(--qad-mono); letter-spacing: .08em; color: var(--qad-ink45); white-space: nowrap; }
+
+/* notes */
+.qad-note { margin-top: 12px; border-radius: 12px; padding: 11px 14px; font-size: 13.5px; line-height: 1.45; display: flex; gap: 10px; align-items: flex-start; }
+.qad-note .ni { font: 700 8px var(--qad-mono); letter-spacing: .1em; padding: 3px 6px; border-radius: 5px; flex: none; margin-top: 2px; }
+.qad-note.ok { background: var(--qad-sage); } .qad-note.ok .ni { background: #fff; color: #4f6149; }
+.qad-note.warn { background: var(--qad-rose); } .qad-note.warn .ni { background: #fff; color: var(--qad-rust); }
+.qad-note.info { background: var(--qad-page); } .qad-note.info .ni { background: #fff; color: var(--qad-ink70); }
+.qad-note b { font-family: var(--qad-machine); font-weight: 400; }
+.qad-note button.lk { color: var(--qad-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-family: var(--qad-machine); font-size: 13px; white-space: nowrap; background: none; border: 0; padding: 0; }
+.qad-fta { width: 100%; min-height: 72px; border: 1.5px dashed rgba(28,19,15,.22); border-radius: 12px; background: none; font-family: var(--qad-serif); font-size: 15px; padding: 10px 12px; color: var(--qad-ink); outline: none; resize: vertical; }
+.qad-fta:focus { border-color: rgba(28,19,15,.45); }
+
+/* agent picker */
+.qad-apick { position: relative; }
+.qad-fin { width: 100%; border: 0; border-bottom: 1.5px dashed rgba(28,19,15,.25); background: none; font-family: var(--qad-machine); font-size: 18px; line-height: 1.3; padding: 8px 2px; color: var(--qad-ink); outline: none; }
+.qad-fin:focus { border-bottom-color: rgba(28,19,15,.5); }
+.qad-sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: #fff; border-radius: 14px; box-shadow: 0 22px 50px -18px rgba(28,19,15,.5), 0 0 0 1px var(--qad-hair); padding: 6px; z-index: 20; }
+.qad-sugg .it { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; width: 100%; border: 0; background: none; text-align: left; color: var(--qad-ink); font: inherit; }
+.qad-sugg .it:hover, .qad-sugg .it.hi { background: #f7f3ee; }
+.qad-sugg .it b { display: block; font-weight: 600; font-size: 14.5px; }
+.qad-sugg .it small { font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); }
+.qad-sugg .it .qad-tag { margin-left: auto; }
+.qad-sugg .it .qad-av { width: 28px; height: 28px; font-size: 8px; }
+.qad-sugg .new { font-family: var(--qad-machine); font-size: 14px; border-top: 1px solid var(--qad-hair); margin-top: 4px; padding: 10px; width: 100%; text-align: left; border-left: 0; border-right: 0; border-bottom: 0; background: none; cursor: pointer; color: var(--qad-ink); }
+.qad-newag { margin-top: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); padding: 4px 14px 14px; }
+.qad-newag input.qad-fin { font-size: 16px; }
+.qad-newag .acts { display: flex; gap: 8px; margin-top: 14px; }
+
+/* timeline */
+.qad-plan { margin-top: 16px; border-radius: 14px; background: var(--qad-page); padding: 16px 18px 14px; }
+.qad-plan h5 { margin: 0 0 12px; font: 400 8.5px var(--qad-mono); letter-spacing: .14em; color: var(--qad-ink45); }
+.qad-plan h5 .tk { float: right; color: var(--qad-rust); }
+.qad-track { position: relative; height: 104px; margin: 0 8px; }
+.qad-track.deep { height: 132px; }
+.qad-track .ln { position: absolute; left: 0; right: 0; top: 50px; height: 2px; background: rgba(28,19,15,.14); border-radius: 2px; }
+.qad-track .pt { position: absolute; top: 44px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px var(--qad-ink); }
+.qad-track .pt.done { background: var(--qad-ink); }
+.qad-track .pt.fut { box-shadow: inset 0 0 0 1.6px var(--qad-ink45); }
+.qad-track .pt.nudge { background: var(--qad-blush); box-shadow: inset 0 0 0 1.6px var(--qad-rust); }
+.qad-track .pt.close { background: var(--qad-stone); box-shadow: inset 0 0 0 1.6px var(--qad-ink45); }
+.qad-track .pt.today { background: #fff; box-shadow: inset 0 0 0 2px var(--qad-rust); }
+.qad-track .lab { position: absolute; white-space: nowrap; text-align: center; line-height: 1.25; }
+.qad-track .lab.hi { top: 4px; } .qad-track .lab.lo { top: 66px; } .qad-track .lab.lo2 { top: 96px; }
+.qad-track .lab b { display: block; font-family: var(--qad-machine); font-weight: 400; font-size: 12.5px; }
+.qad-track .lab span { display: block; font: 400 8px var(--qad-mono); letter-spacing: .08em; color: var(--qad-ink45); }
+.qad-track .tdy { position: absolute; top: 40px; width: 0; height: 22px; border-left: 1.5px dashed var(--qad-rust); }
+.qad-plan.rv .ln { transform-origin: left; animation: qadFill calc(var(--qad-t4) * 1.3) var(--qad-out) both; animation-delay: var(--qad-t1); }
+.qad-plan.rv .pt { animation: qadPtIn var(--qad-t2) var(--qad-out) both; }
+.qad-plan.rv .lab { animation: qadFadeUp var(--qad-t2) var(--qad-out) both; }
+@keyframes qadPtIn { from { opacity: 0; transform: scale(.4) } to { opacity: 1 } }
+@keyframes qadFadeUp { from { opacity: 0; margin-top: 4px } to { opacity: 1; margin-top: 0 } }
+.qad-wsa { margin-top: 4px; }
+.qad-wsl { font-size: 15px; line-height: 1.5; margin: 12px 0 0; }
+
+/* radios */
+.qad-rads { display: flex; flex-direction: column; border-radius: 14px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); overflow: hidden; }
+.qad-rad { display: flex; align-items: center; gap: 12px; text-align: left; border: 0; background: #fff; padding: 12px 14px; cursor: pointer; border-top: 1px solid var(--qad-hair); color: var(--qad-ink); font: inherit; width: 100%; }
+.qad-rad:first-child { border-top: 0; }
+.qad-rad:hover { background: #faf7f2; }
+.qad-rad i { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--qad-ink45); flex: none; }
+.qad-rad.on i { box-shadow: inset 0 0 0 5px var(--qad-btn); }
+.qad-rad b { display: block; font-family: var(--qad-machine); font-weight: 400; font-size: 15.5px; }
+.qad-rad small { display: block; font-size: 13px; color: var(--qad-ink70); margin-top: 1px; }
+.qad-rad em { font-style: normal; font: 700 7.5px var(--qad-mono); letter-spacing: .1em; background: var(--qad-sage); color: #4f6149; padding: 3px 7px; border-radius: 5px; margin-left: auto; flex: none; }
+.qad-rad em.go { background: #f3eee7; color: var(--qad-ink70); }
+
+/* packages + the others */
+.qad-pkgs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+.qad-pkg { text-align: left; border: 0; background: #fff; border-radius: 12px; padding: 10px 12px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.16); cursor: pointer; color: var(--qad-ink); font: inherit; }
+.qad-pkg:hover { box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.4); }
+.qad-pkg.on { box-shadow: inset 0 0 0 2px var(--qad-btn); background: #f7f9fb; }
+.qad-pkg b { display: block; font-family: var(--qad-machine); font-weight: 400; font-size: 14px; }
+.qad-pkg b em { font-style: normal; font: 700 7px var(--qad-mono); letter-spacing: .08em; background: var(--qad-sage); color: #4f6149; padding: 2px 5px; border-radius: 4px; margin-left: 4px; vertical-align: 2px; }
+.qad-pkg small { display: block; font-size: 12px; color: var(--qad-ink70); margin-top: 3px; line-height: 1.3; }
+.qad-othr { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.qad-othr .qad-tgl { margin-top: 0; }
+.qad-oth { border-radius: 12px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); padding: 10px 12px; }
+.qad-ot { display: flex; align-items: center; gap: 10px; }
+.qad-ot .qad-av { width: 28px; height: 28px; font-size: 8px; }
+.qad-ot b { display: block; font-weight: 600; font-size: 14.5px; }
+.qad-ot small { font: 400 7.5px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); }
+.qad-told { margin-left: auto; border: 0; border-radius: 14px; padding: 6px 12px; font-family: var(--qad-machine); font-size: 13px; cursor: pointer; background: #fff; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.25); color: var(--qad-ink); }
+.qad-told.on { background: var(--qad-sage); box-shadow: none; color: #3f5139; }
+
+/* ===== the review ===== */
+.qad-recap { margin-top: 20px; }
+.qad-recap.in-f, .qad-gate.in-f { animation: qadInF var(--qad-t2) var(--qad-out) both; }
+.qad-recap h5, .qad-saves h5 { margin: 0 0 6px; font: 400 8.5px var(--qad-mono); letter-spacing: .14em; color: var(--qad-ink45); }
+.qad-saves h5 { margin-bottom: 8px; }
+.qad-gate { border-radius: 14px; padding: 14px 16px; margin: 4px 0 18px; }
+.qad-gate b { display: block; font-family: var(--qad-machine); font-weight: 400; font-size: 18px; }
+.qad-gate span { display: block; font-size: 13.5px; color: var(--qad-ink70); margin-top: 3px; }
+.qad-gate.ok { background: var(--qad-sage); } .qad-gate.chk { background: var(--qad-sand); }
+.qad-gate.blk { background: var(--qad-rust); } .qad-gate.blk b { color: #fff; }
+.qad-rr { display: grid; grid-template-columns: 150px 1fr auto; gap: 12px; align-items: baseline; padding: 11px 2px; border-bottom: 1px solid var(--qad-hair); cursor: pointer; width: 100%; text-align: left; background: none; border-top: 0; border-left: 0; border-right: 0; color: var(--qad-ink); font: inherit; }
+.qad-rr:hover { background: #faf7f2; }
+.qad-rr b { font-family: var(--qad-machine); font-weight: 400; font-size: 14.5px; }
+.qad-rr > span { font-size: 14px; }
+.qad-rr u { text-decoration: none; font: 700 8px var(--qad-mono); letter-spacing: .12em; color: var(--qad-ink45); }
+.qad-rr small { display: block; margin-top: 4px; font: 400 8px var(--qad-mono); letter-spacing: .08em; }
+.qad-rr small.fm { color: var(--qad-rust); font: 400 13px var(--qad-serif); letter-spacing: 0; }
+.qad-rr small.au { color: var(--qad-ink45); }
+.qad-rr.blk { background: var(--qad-rose); border-radius: 10px; padding-left: 10px; padding-right: 10px; border-bottom-color: transparent; margin: 2px 0; }
+.qad-rr.blk u { color: var(--qad-rust); }
+.qad-saves { margin-top: 20px; border-radius: 14px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); padding: 14px 16px; }
+.qad-saves ul { margin: 0; padding: 0; }
+.qad-saves li { list-style: none; display: flex; gap: 10px; padding: 5px 0; font-size: 14px; line-height: 1.4; }
+.qad-saves li i { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 6px; box-shadow: inset 0 0 0 1px rgba(28,19,15,.2); }
+.qad-saves li b { font-family: var(--qad-machine); font-weight: 400; }
+
+/* ===== footer ===== */
+.qad-foot { position: relative; display: flex; gap: 10px; align-items: center; padding: 16px 24px; border-top: 1px solid var(--qad-hair); flex: none; background: #fff; }
+.qad-save { flex: 1; height: 48px; border-radius: 24px; background: var(--qad-btn); color: #fff; font-family: var(--qad-machine); font-size: 16px; border: 0; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 18px; min-width: 0; }
+.qad-save:hover { background: #233145; }
+.qad-save:disabled { opacity: .35; cursor: default; }
+.qad-save.busy { pointer-events: none; background: #233145; }
+.qad-save.busy::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; vertical-align: -2px; animation: qadSpin calc(700ms * var(--qad-k)) linear infinite; }
+@keyframes qadSpin { to { transform: rotate(360deg) } }
+.qad-back, .qad-cancel, .qad-skip { border: 0; background: none; font-family: var(--qad-machine); font-size: 14px; cursor: pointer; color: var(--qad-ink); white-space: nowrap; }
+.qad-back { padding: 10px 6px; }
+.qad-cancel { color: var(--qad-ink70); padding: 10px 14px; }
+.qad-skip { padding: 10px 4px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--qad-ink25); }
+.qad-conf { position: absolute; inset: 0; background: var(--qad-ink); color: #f5f1eb; display: flex; align-items: center; gap: 10px; padding: 0 20px 0 24px; animation: qadUp var(--qad-t2) var(--qad-out) both; }
+@keyframes qadUp { from { transform: translateY(100%) } to { transform: none } }
+.qad-conf span { flex: 1; font-size: 13px; color: rgba(245,241,235,.75); }
+.qad-conf span b { display: block; font-family: var(--qad-machine); font-weight: 400; font-size: 16px; color: #fff; }
+.qad-conf button { height: 40px; border-radius: 20px; border: 0; font-family: var(--qad-machine); font-size: 14px; padding: 0 16px; cursor: pointer; }
+.qad-conf .keep { background: #fff; color: var(--qad-ink); }
+.qad-conf .disc { background: none; color: #f5f1eb; box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.4); }
+
+/* ===== the dock chip (a card waiting while the drawer is open) ===== */
+.qad-dock { position: fixed; left: 20px; bottom: 18px; display: flex; align-items: center; gap: 10px; background: var(--qad-ink); color: #f5f1eb; border-radius: 22px; padding: 8px 16px 8px 8px; font-family: var(--qad-machine); font-size: 14px; box-shadow: 0 12px 30px -10px rgba(28,19,15,.6); z-index: 72;
+  animation: qadDockIn var(--qad-t3) var(--qad-out) both; animation-delay: var(--qad-t1); }
+@keyframes qadDockIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+.qad-dock .qad-av { width: 28px; height: 28px; font-size: 8px; background: #3d4f6b; }
+
+/* ===== the undo bar ===== */
+.qad-toast { position: fixed; left: 20px; bottom: 18px; background: var(--qad-ink); color: #f5f1eb; font-family: var(--qad-machine); font-size: 14px; z-index: 90;
+  display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 18px; border-radius: 24px; max-width: 520px;
+  box-shadow: 0 12px 30px -10px rgba(28,19,15,.6); animation: qadToastIn var(--qad-t2) var(--qad-out) both; }
+@keyframes qadToastIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+.qad-toast.failed { box-shadow: inset 3px 0 0 var(--qad-rust), 0 12px 30px -10px rgba(28,19,15,.6); }
+.qad-toast .tx { display: flex; flex-direction: column; min-width: 0; }
+.qad-toast .tx b { font-weight: 400; }
+.qad-toast .tx small { font: 400 8px var(--qad-mono); letter-spacing: .1em; color: rgba(245,241,235,.55); margin-top: 3px; }
+.qad-toast .ub { display: flex; align-items: center; gap: 8px; height: 36px; border-radius: 18px; border: 0; background: rgba(255,255,255,.12); color: #fff; font-family: var(--qad-machine); font-size: 14px; padding: 0 8px 0 14px; cursor: pointer; flex: none; }
+.qad-toast .ub:hover { background: rgba(255,255,255,.2); }
+.qad-toast .ub kbd { font: 400 8px var(--qad-mono); letter-spacing: .06em; color: rgba(255,255,255,.55); }
+.qad-toast .ring { width: 22px; height: 22px; transform: rotate(-90deg); }
+.qad-toast .ring circle { fill: none; stroke-width: 2.2; }
+.qad-toast .ring .bg { stroke: rgba(255,255,255,.18); }
+.qad-toast .ring .fg { stroke: #fff; stroke-dasharray: 57; stroke-dashoffset: 0; animation: qadRing var(--qad-dur, 8s) linear forwards; }
+.qad-toast.paused .ring .fg { animation-play-state: paused; }
+@keyframes qadRing { to { stroke-dashoffset: 57 } }
+.qad-toast .view { border: 0; background: none; color: rgba(245,241,235,.8); font-family: var(--qad-machine); font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.3); white-space: nowrap; }
+
+/* ===== below 768: a full-screen sheet ===== */
+@media (max-width: 767px) {
+  .qad-drawer { width: 100vw; }
+  .qad-stepper { display: none; }
+  .qad-stepper-sm { display: block; position: sticky; top: 0; z-index: 5; background: #fff; margin: 0 -24px; padding: 12px 24px; border-bottom: 1px solid var(--qad-hair); font: 400 8.5px var(--qad-mono); letter-spacing: .12em; color: var(--qad-ink45); text-transform: uppercase; }
+  .qad-rr { grid-template-columns: 110px 1fr auto; }
+  .qad-foot { flex-wrap: wrap; }
+  .qad-toast { right: 12px; left: 12px; bottom: 12px; }
+}
+
+/* ===== reduced motion: fades only, and the undo countdown still runs ===== */
+@media (prefers-reduced-motion: reduce) {
+  .qad-root *, .qad-root *::before, .qad-root *::after, .qad-dock, .qad-toast, .qad-toast * {
+    animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: var(--qad-t1) !important; }
+  .qad-drawer, .qad-root.is-open .qad-drawer { transform: none; opacity: 0; transition-property: opacity !important; }
+  .qad-root.is-open .qad-drawer { opacity: 1; }
+  .qad-toast .ring .fg { animation-duration: var(--qad-dur, 8s) !important; }
+}

@@ -59,8 +59,8 @@ const noReplyLabel = (b: boolean) => (b ? NOREPLY_TRUE : NOREPLY_FALSE);
 
 const SOCIAL_DD = SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }));
 
-const AWAITING_REPLY = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
-const TERMINAL = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+const AWAITING_REPLY = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
+const TERMINAL = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]);
 
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const firstName = (n: string) => (n.trim().split(/\s+/)[0] || "this agent");

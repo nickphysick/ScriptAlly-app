@@ -30,7 +30,7 @@ const parseWhen = (v: unknown): number | null => {
    the rest of the app called it live. `dashboardStats`' own terminal set changed in the same pass,
    because its comment promises the two lines can never disagree. */
 const TERMINAL: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED,
 ]);
 
 /** When a terminal query stopped being active — derived-field precedence, matching
@@ -447,7 +447,7 @@ export const achievementPill = (queries: Query[], now: Date): Achievement => {
 
   /* 5 · Fallback, always true. */
   const awaiting = queries.filter((q) => !TERMINAL.has(q.status) && q.dateSent &&
-    (q.status === QueryStatus.QUERIED || q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT)).length;
+    (q.status === QueryStatus.QUERIED || q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.RESUBMITTED)).length;
   /* ⚠️ "OUT WITH AGENTS", NOT "AWAITING A REPLY" (polish P7). Same number, and the writer is the
      subject of it: the queries are somewhere, doing something. "Awaiting" made the line about
      sitting still, which is the one thing querying already feels like too much of. */

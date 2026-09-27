@@ -166,6 +166,7 @@ export const isBoardClosed = (
 ): boolean =>
   status === QueryStatus.REJECTED
   || status === QueryStatus.WITHDRAWN
+  || status === QueryStatus.SIGNED
   /**
    * ⚠️ AND ONLY WHERE THERE HAS BEEN NO RESPONSE — which is what "no response means no" is ABOUT.
    *

@@ -136,6 +136,8 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
+import { openQueryDrawer } from "../lib/queryActions/drawerStore";
+import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
@@ -606,6 +608,12 @@ export const Queries: React.FC<{
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
+    /* ⚠️ QUERY ACTIONS v1 — every "Log query" in the app funnels here, so this one line moves them
+       all to the drawer at once. The create pane below stays until the cut-over deletes it. */
+    if (DRAWER_LIVE.log) {
+      openQueryDrawer({ mode: "log", agentId: seed.agentId ?? undefined, manuscriptId: seed.manuscriptId ?? undefined });
+      return;
+    }
     /* IDEMPOTENT. Every "Log query" in the app funnels here — masthead, rail capture, dashboard,
        agent cards, manuscript plates — and a second call used to wipe the draft you were typing
        AND the stashed selection it needs to restore on discard, leaving the pane in create mode
@@ -1729,6 +1737,19 @@ export const Queries: React.FC<{
    * beside the drawer and its proposed rung is drawn on the drawer's timeline, so firing the verb
    * without the drawer would put a card beside nothing and a preview nowhere.
    */
+  /** Query actions v1 — a query's primary door, when its journey is live in the drawer. Returns
+   *  false to let the caller keep its old route (the one-journey-at-a-time cut-over). */
+  const openDrawerDoor = (q: Query, fromCard: boolean): boolean => {
+    const door = primaryDoor(q.status);
+    if (!door) return false;
+    const ag = agents.find((a) => a.id === q.agentId);
+    openQueryDrawer({
+      mode: door.mode,
+      queryId: q.id,
+      ...(fromCard && ag ? { dock: { initials: "", name: ag.name || ag.agency || "The agent", status: String(q.status) } } : {}),
+    });
+    return true;
+  };
   const handleRowVerb = (id: string, verb: "primary" | "snooze" | "closed", anchor: HTMLElement) => {
     if (verb === "snooze" || verb === "closed") {
       openQuick(verb === "snooze" ? "snooze" : "close", id, anchor);
@@ -1737,6 +1758,7 @@ export const Queries: React.FC<{
     setSelectedQueryId(id);
     onOpenQuery?.(id);
     const q = queries.find((x) => x.id === id);
+    if (q && openDrawerDoor(q as Query, false)) return;
     const t = q ? turnFor(q.status as QueryStatus) : "sand";
     if (t === "offer") { if (q) openRecord(q as Query); return; }
     openDeskVerb(t === "you" ? "marksent" : "respond", anchor);
@@ -5095,6 +5117,7 @@ export const Queries: React.FC<{
       /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
          Record response and Mark sent; an open offer keeps its own journey */
       onPrimary={(anchor) => {
+        if (openDrawerDoor(activeQuery as Query, true)) return;
         if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
         openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
       }}

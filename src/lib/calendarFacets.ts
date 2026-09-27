@@ -134,8 +134,8 @@ export const FACET_SECTIONS: readonly {
      nowhere: a task's absence of status is the Type section's business. */
   { key: "status", label: "Status", options: [
     QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
-    QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
-    QueryStatus.OFFER, QueryStatus.NO_RESPONSE, QueryStatus.REJECTED,
+    QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED,
+    QueryStatus.OFFER, QueryStatus.SIGNED, QueryStatus.NO_RESPONSE, QueryStatus.REJECTED,
   ].map((s) => ({ key: s as string, label: s as string })) },
   { key: "oc", label: "Open or closed", options: [
     { key: "open", label: "Open" }, { key: "shut", label: "Closed" }] },

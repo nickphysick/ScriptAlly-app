@@ -99,6 +99,15 @@ const STATUS_DOT_MAP: Record<QueryStatus, DotSpec> = {
   [QueryStatus.REJECTED]: { ring: "solid", centre: "bar" },
   [QueryStatus.WITHDRAWN]: { ring: "solid", centre: "bar" },
   [QueryStatus.NO_RESPONSE]: { ring: "solid", centre: "bar" },
+  /* ⚠️ QUERY ACTIONS v1 — the two new statuses, built only from the set's existing parts.
+     RESUBMITTED draws the SENT family's mark (a full manuscript has gone out, again), the same
+     drawing as Full Sent: the brief's "with R&R's ring" composes to a dashed ring round a full
+     centre, which IS Full Requested's drawing — a mark that would say the agent is asking when you
+     have answered. So the drawing collapses onto Full Sent, exactly as the closed set does, and the
+     accessible name and tooltip say which. (reports/query-actions-v1 "Decisions I made".) */
+  [QueryStatus.RESUBMITTED]: { ring: "solid", centre: "full" },
+  /* SIGNED is the Offer's document with a filled centre — the offer, taken. */
+  [QueryStatus.SIGNED]: { ring: "solid", centre: "full", document: true },
 };
 
 /**
@@ -146,6 +155,15 @@ const RING_R = 10;
 const CENTRE_R = 6.5;
 
 const renderRing = (spec: DotSpec): React.ReactNode => {
+  if (spec.document && spec.centre === "full") {
+    /* Signed — the Offer's document, its centre filled. */
+    return (
+      <>
+        <path d="M7 3.5h7l4 4V20.5H7z" strokeLinejoin="round" />
+        <circle cx={12.5} cy={13.5} r={3.4} fill="currentColor" stroke="none" />
+      </>
+    );
+  }
   if (spec.document) {
     /* Offer is the document itself — an outline with two lines of writing on it. */
     return (
