@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "V1 · the art is packages-hero-boxes.png",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "/images/packages/packages-hero-boxes.png?v=aee79d51"
+ },
+ {
+  "lock": "V1 · S6: the drawn art clears the title's last letter by 24",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "drawn 1081.9310344827586 title 981.734375"
+ },
+ {
+  "lock": "V1 · the art is packages-hero-boxes.png",
+  "route": "/manuscripts/packages",
+  "size": "1920",
+  "state": "filled",
+  "ok": true,
+  "detail": "/images/packages/packages-hero-boxes.png?v=aee79d51"
+ },
+ {
+  "lock": "V1 · S6: the drawn art clears the title's last letter by 24",
+  "route": "/manuscripts/packages",
+  "size": "1920",
+  "state": "filled",
+  "ok": true,
+  "detail": "drawn 1321.9310344827586 title 1221.734375"
+ }
+]

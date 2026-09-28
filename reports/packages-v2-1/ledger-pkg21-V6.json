@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "V6 · closed: hidden, so it cannot be tabbed into",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"vis\":\"hidden\",\"role\":\"dialog\",\"modal\":\"true\",\"kind\":null,\"title\":null,\"text\":null,\"label\":null,\"uses\":[]}"
+ },
+ {
+  "lock": "V6 · a letter: kind, name and its saved text with line breaks",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"vis\":\"visible\",\"role\":\"dialog\",\"modal\":\"true\",\"kind\":\"Query letter\",\"title\":\"Query letter v3\",\"text\":\"Dear [Agent],\\n\\nI am seeking representation for MURPHY'S DAY OUT.\\n\\nFerry skipper Liam Murphy has until the tide turns.\",\"label\":null,\"uses\":[\"Winter draft\",\"Autumn round\"]}"
+ },
+ {
+  "lock": "V6 · Used in lists the packages that hold it",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"Winter draft\",\"Autumn round\"]"
+ },
+ {
+  "lock": "V6 · Esc closes it; focus returns to ⋯",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pkg21-l3"
+ },
+ {
+  "lock": "V6 · a retired package in Used in is tagged Retired",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"Spring round Retired\"]"
+ },
+ {
+  "lock": "V6 · the scrim closes it; focus returns to ⋯",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pkg21-l1"
+ },
+ {
+  "lock": "V6 · a version: What changed and its note",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"vis\":\"visible\",\"role\":\"dialog\",\"modal\":\"true\",\"kind\":\"Version\",\"title\":\"Dual timeline edit\",\"text\":\"Cut the prologue; opens on the ferry.\",\"label\":\"What changed\",\"uses\":[\"Agents with MSWL\"]}"
+ },
+ {
+  "lock": "V6 · Close closes it; focus returns to ⋯",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pkg21-v2"
+ },
+ {
+  "lock": "V6 · no note: \"Nothing written about this version.\"",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"vis\":\"visible\",\"role\":\"dialog\",\"modal\":\"true\",\"kind\":\"Version\",\"title\":\"Prologue first\",\"text\":\"Nothing written about this version.\",\"label\":\"What changed\",\"uses\":[\"Spring round Retired\"]}"
+ }
+]

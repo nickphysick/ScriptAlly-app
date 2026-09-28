@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "V4 · the Nothing-in-use card states both packages are retired",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": "Nothing in use right nowAll 2 of your packages are retired, with their history kept. Start a new package, or restore one below to use it again."
+ },
+ {
+  "lock": "V4 · the composer is open and the card's button is hidden",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": "{\"card\":\"Nothing in use right nowAll 2 of your packages are retired, with their history kept. Start a new package, or restore one below to use it again.\",\"composer\":true,\"newBtn\":false,\"heads\":0,\"ex\":true,\"bandIsButton\":false,\"listed\":2,\"sbs\":false}"
+ },
+ {
+  "lock": "V4 · the header has no buttons",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V4 · the example is inert and aria-hidden",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V4 · Retired is a plain band and its list is open",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": "{\"card\":\"Nothing in use right nowAll 2 of your packages are retired, with their history kept. Start a new package, or restore one below to use it again.\",\"composer\":true,\"newBtn\":false,\"heads\":0,\"ex\":true,\"bandIsButton\":false,\"listed\":2,\"sbs\":false}"
+ },
+ {
+  "lock": "V4 · no Side by side",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V4 · Cancel keeps the composer closed and brings back the card's button",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V4 · Restore returns the filled state and closes the untouched composer",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "retired",
+  "ok": true,
+  "detail": ""
+ }
+]

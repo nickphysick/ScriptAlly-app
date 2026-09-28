@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "V8 · stored as put away",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · the chip leaves its section; the composer slot empties",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · the Put away section lists it",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · cards that use it still show its name",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · Undo brings the chip back",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · the put-away fixture shows the section with its letter",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "putaway",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · the card using it still shows its name",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "putaway",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V8 · Restore brings the chip back",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "putaway",
+  "ok": true,
+  "detail": ""
+ }
+]

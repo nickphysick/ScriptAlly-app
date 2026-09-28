@@ -1,0 +1,58 @@
+[
+ {
+  "lock": "V7 · the field is prefilled",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Query letter v2"
+ },
+ {
+  "lock": "V7 · an empty name is refused inline",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V7 · a letter's rename is stored (updateVersion)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V7 · the SENT package's slot shows the new name",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V7 · a version's rename is stored on the manuscript",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V7 · cards show the renamed version",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V7 · Side by side's sub-line shows the new names",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ }
+]

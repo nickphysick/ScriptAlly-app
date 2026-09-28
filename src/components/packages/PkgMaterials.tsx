@@ -19,6 +19,8 @@ import { countWords } from "../../lib/materialDraft";
 const PLURAL: Record<MatKind, string> = { letter: "Query letters", synopsis: "Synopses", version: "Versions" };
 const LABEL: Record<MatKind, string> = { letter: "Query letter", synopsis: "Synopsis", version: "Version" };
 
+export type MatAct = "open" | "rename" | "away";
+
 export interface PkgMaterialsProps {
   mats: Record<MatKind, MaterialItem[]>;
   metaOf: (m: MaterialItem) => string;
@@ -28,13 +30,50 @@ export interface PkgMaterialsProps {
   onDragStart: (m: MaterialItem) => void;
   onDragEnd: () => void;
   onAdd: (k: MatKind, opener: HTMLElement) => void;
+  /** the ⋯ menu (v2.1, E5): Open · Rename · Put away; `more` is the ⋯ button, for focus to return to */
+  onMenu?: (act: MatAct, m: MaterialItem, more: HTMLElement | null) => void;
   /** put-away letters and synopses — the only route back for them, so it renders only when there are any */
   putAway?: MaterialItem[];
   onRestore?: (m: MaterialItem) => void;
 }
 
-export const PkgMaterials: React.FC<PkgMaterialsProps> = ({ mats, metaOf, composing, inPkg, onChip, onDragStart, onDragEnd, onAdd, putAway = [], onRestore }) => {
-  const [open, setOpen] = useState(false);
+/** E5: book versions have no retired field, so they can be opened and renamed but never put away. */
+export const menuActs = (k: MatKind): MatAct[] => (k === "version" ? ["open", "rename"] : ["open", "rename", "away"]);
+const ACT_LABEL: Record<MatAct, string> = { open: "Open", rename: "Rename", away: "Put away" };
+
+export const PkgMaterials: React.FC<PkgMaterialsProps> = ({ mats, metaOf, composing, inPkg, onChip, onDragStart, onDragEnd, onAdd, onMenu, putAway = [], onRestore }) => {
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const moreRefs = useRef(new Map<string, HTMLButtonElement>());
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const closeMenu = (focusBack: boolean) => {
+    const id = menuFor;
+    setMenuFor(null);
+    if (focusBack && id) requestAnimationFrame(() => moreRefs.current.get(id)?.focus());
+  };
+  /* opening focuses the first item */
+  useEffect(() => { if (menuFor) menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus(); }, [menuFor]);
+  /* Esc, or a press outside the menu and its own ⋯, closes it and returns focus to the ⋯ */
+  useEffect(() => {
+    if (!menuFor) return undefined;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeMenu(true); } };
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (menuRef.current?.contains(t) || moreRefs.current.get(menuFor)?.contains(t)) return;
+      closeMenu(true);
+    };
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onDown, true);
+    return () => { document.removeEventListener("keydown", onKey, true); document.removeEventListener("pointerdown", onDown, true); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuFor]);
+  const onMenuKey = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const items = [...(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]?.focus();
+  };
+
   return (
   <div className="ppv-rbody">
     {composing
@@ -49,49 +88,60 @@ export const PkgMaterials: React.FC<PkgMaterialsProps> = ({ mats, metaOf, compos
         <div className="ppv-mats">
           {mats[k].length ? mats[k].map((m) => {
             const inp = composing && inPkg(m);
+            const openMenu = menuFor === m.id;
             return (
-              /* ⚠️ A `div role="button"`, NOT A <button>: Chromium never starts a native drag on a
-                 button, so a draggable <button> is a chip that cannot be dragged (measured — no
-                 dragstart fires). Enter and Space are handled here to keep it a real control. */
-              <div key={m.id} role="button" tabIndex={0} className={`ppv-chip${k === "version" ? " is-ver" : ""}${composing ? " is-composing" : ""}${inp ? " is-in" : ""}`}
-                data-mat={m.id} draggable={composing} aria-pressed={composing ? inp : undefined}
-                aria-label={composing ? `${inp ? "In package" : "Add to package"}: ${m.name}` : undefined}
-                onClick={() => onChip(m)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChip(m); } }}
-                onDragStart={(e) => { if (!composing) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", m.id); e.dataTransfer.effectAllowed = "copy"; onDragStart(m); }}
-                onDragEnd={onDragEnd}>
-                <i aria-hidden="true" />
-                <span className="cx">
-                  <span className="cn">{m.name}{m.current ? <> <span className="ppv-tag ppv-tag--ms">Current</span></> : null}</span>
-                  <span className="cm">{metaOf(m)}</span>
-                </span>
-                {composing ? <span className="add">{inp ? "✓ In" : "Add"}</span> : null}
+              <div key={m.id} className="ppv-chiprow">
+                {/* ⚠️ A `div role="button"`, NOT A <button>: Chromium never starts a native drag on a
+                    button, so a draggable <button> is a chip that cannot be dragged (measured — no
+                    dragstart fires). Enter and Space are handled here to keep it a real control. */}
+                <div role="button" tabIndex={0} className={`ppv-chip${k === "version" ? " is-ver" : ""}${composing ? " is-composing" : ""}${inp ? " is-in" : ""}`}
+                  data-mat={m.id} draggable={composing} aria-pressed={composing ? inp : undefined}
+                  aria-label={composing ? `${inp ? "In package" : "Add to package"}: ${m.name}` : undefined}
+                  onClick={() => onChip(m)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChip(m); } }}
+                  onDragStart={(e) => { if (!composing) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", m.id); e.dataTransfer.effectAllowed = "copy"; onDragStart(m); }}
+                  onDragEnd={onDragEnd}>
+                  <i aria-hidden="true" />
+                  <span className="cx">
+                    <span className="cn">{m.name}{m.current ? <> <span className="ppv-tag ppv-tag--ms">Current</span></> : null}</span>
+                    <span className="cm">{metaOf(m)}</span>
+                  </span>
+                  {composing ? <span className="add">{inp ? "✓ In" : "Add"}</span> : null}
+                </div>
+                {/* ⚠️ A SIBLING OF THE CHIP, NEVER INSIDE IT: interactive elements cannot nest, and the ⋯
+                    must never fill or empty a composer slot (the chip's click does that). */}
+                <button type="button" className="ppv-more" data-ppv="more" data-more={m.id}
+                  ref={(el) => { if (el) moreRefs.current.set(m.id, el); else moreRefs.current.delete(m.id); }}
+                  aria-label={`More for ${m.name}`} aria-haspopup="menu" aria-expanded={openMenu}
+                  onClick={() => (openMenu ? closeMenu(true) : setMenuFor(m.id))}>⋯</button>
+                {openMenu ? (
+                  <div className="ppv-mmenu" role="menu" aria-label={`${m.name}`} data-ppv="mmenu" ref={menuRef} onKeyDown={onMenuKey}>
+                    {menuActs(k).map((a) => (
+                      <button key={a} type="button" role="menuitem" data-mact={a}
+                        onClick={() => { const more = moreRefs.current.get(m.id) ?? null; setMenuFor(null); onMenu?.(a, m, more); }}>{ACT_LABEL[a]}</button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             );
           }) : <div className="ppv-memp">None yet.</div>}
         </div>
       </React.Fragment>
     ))}
-    {/* ⚠️ NOT IN THE MOCK, AND DELIBERATELY KEPT: the old page's archive drawer was the only way
-        back for a put-away material, so retiring it without a door would strand the writer's own
-        work. Absent unless something is put away. */}
+    {/* ⚠️ THE ONLY WAY BACK FOR A PUT-AWAY MATERIAL (v2 kept it; v2.1 draws it as the mock does, an
+        open list under a plain header). Absent unless something is put away. */}
     {putAway.length ? (
-      <>
-        <button type="button" className="ppv-retired-h" data-ppv="putaway-toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-          <span className="chev" aria-hidden="true">›</span>Put away <span className="ppv-pill">{putAway.length}</span>
-        </button>
-        {open ? (
-          <div className="ppv-mats">
-            {putAway.map((m) => (
-              <div key={m.id} className="ppv-chip">
-                <i aria-hidden="true" />
-                <span className="cx"><span className="cn">{m.name}</span><span className="cm">{metaOf(m)}</span></span>
-                <button type="button" className="ppv-mini" onClick={() => onRestore?.(m)}>Restore</button>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </>
+      <div data-ppv="putaway">
+        <div className="ppv-mh ppv-mh--away"><b>Put away</b><span className="ppv-pill">{putAway.length}</span></div>
+        <div className="ppv-mats">
+          {putAway.map((m) => (
+            <div key={m.id} className="ppv-away" data-away={m.id}>
+              <span>{m.name}<span className="cm">{LABEL[m.kind]}</span></span>
+              <button type="button" className="ppv-mini" data-ppv="restore-mat" onClick={() => onRestore?.(m)}>Restore</button>
+            </div>
+          ))}
+        </div>
+      </div>
     ) : null}
   </div>
   );

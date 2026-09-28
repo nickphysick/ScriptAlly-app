@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "V5 · every chip has a sibling ⋯ (never nested)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"chips\":8,\"sib\":8}"
+ },
+ {
+  "lock": "V5 · a letter offers Open, Rename, Put away",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"open\",\"rename\",\"away\"]"
+ },
+ {
+  "lock": "V5 · opening focuses the first item; ⋯ is expanded",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "lock": "V5 · Esc closes it and focus returns to ⋯",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pkg21-l2"
+ },
+ {
+  "lock": "V5 · a version offers Open and Rename only",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"open\",\"rename\"]"
+ },
+ {
+  "lock": "V5 · opening another chip's menu closes the first",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V5 · a click outside closes it and focus returns to ⋯",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "pkg21-s1"
+ },
+ {
+  "lock": "V5 · the ⋯ never opens the composer",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V5 · with the composer open, the ⋯ never fills or empties a slot",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "[\"pkg21-l2\",\"\",\"\"]"
+ }
+]

@@ -78,7 +78,11 @@ describe("the materials band replaces the rail's register (D1)", () => {
 
   it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
     expect(decls(page)).toMatch(/putAway=\{putAway\}[\s\S]{0,120}restoreVersion\(m\.id\)/);
-    expect(decls(read("../components/packages/PkgMaterials.tsx"))).toContain('data-ppv="putaway-toggle"');
+    /* v2.1 (28 Sep): the section is the mock's open list, not a collapsible, and every row carries its
+       own Restore — the law (a way back) is unchanged, only the hook moved */
+    const rail = decls(read("../components/packages/PkgMaterials.tsx"));
+    expect(rail).toContain('data-ppv="putaway"');
+    expect(rail).toMatch(/data-ppv="restore-mat" onClick=\{\(\) => onRestore\?\.\(m\)\}/);
   });
 });
 

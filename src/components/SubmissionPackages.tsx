@@ -30,7 +30,7 @@ import { ComponentType, SubmissionPackage } from "../types";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { PageHeader } from "./shell/PageHeader";
 import { PageRail } from "./containers/PageRail";
-import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/bookVersions";
+import { appendBookVersion, bookVersionsOf, newBookVersionId, renameBookVersion } from "../lib/bookVersions";
 import { createPayload } from "../lib/materialDraft";
 import { duplicateOf } from "../lib/buildRow";
 import { duplicateName, resolveActivePackage } from "../lib/packageMetrics";
@@ -41,7 +41,8 @@ import {
 } from "../lib/packagesPage";
 import { PkgCard } from "./packages/PkgCard";
 import { CompState, EMPTY_COMP, PkgComposer } from "./packages/PkgComposer";
-import { PkgMaterialModal, PkgMaterials } from "./packages/PkgMaterials";
+import { MatAct, PkgMaterialModal, PkgMaterials } from "./packages/PkgMaterials";
+import { DrawerItem, PkgMaterialDrawer, PkgRenameModal } from "./packages/PkgMaterialDrawer";
 import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
@@ -58,6 +59,7 @@ export const SubmissionPackages: React.FC = () => {
   const {
     manuscripts, versions, packages, queries, agents, addPackage, updatePackage, retirePackage,
     restorePackage, deletePackage, setActivePackage, addVersion, deleteVersion, restoreVersion, updateManuscript,
+    updateVersion, archiveVersion,
   } = useScriptAllyDb();
   const { showToast } = useToast();
   const location = useLocation();
@@ -300,6 +302,59 @@ export const SubmissionPackages: React.FC = () => {
   };
   const closeModal = () => { const o = modal?.opener; setModal(null); requestAnimationFrame(() => { if (o && o.isConnected) o.focus(); }); };
 
+  /* ── the material ⋯ menu (v2.1, E5): Open · Rename · Put away ── */
+  const [drawer, setDrawer] = useState<{ item: DrawerItem; more: HTMLElement | null } | null>(null);
+  const [renaming, setRenaming] = useState<{ m: MaterialItem; more: HTMLElement | null } | null>(null);
+  const focusBack = (el: HTMLElement | null | undefined) => requestAnimationFrame(() => { if (el && el.isConnected) el.focus(); });
+  const drawerItem = (m: MaterialItem): DrawerItem => {
+    const refs = (p: SubmissionPackage) =>
+      m.kind === "letter" ? p.queryLetterVersionId === m.id : m.kind === "synopsis" ? p.synopsisVersionId === m.id : p.bookVersionId === m.id;
+    const v = m.kind === "version" ? null : versions.find((x) => x.id === m.id);
+    return {
+      id: m.id, kind: m.kind, name: m.name, meta: metaOf(m),
+      text: v?.contentDraft ?? null, fileName: v?.fileName ?? null, link: v?.contentLink ?? null,
+      note: m.kind === "version" ? bookVersions.find((b) => b.id === m.id)?.note ?? null : null,
+      uses: msPkgs.filter(refs).map((p) => ({ name: p.packageName, retired: p.status === "Retired" })),
+    };
+  };
+  const closeDrawer = useCallback(() => {
+    setDrawer((d) => { if (d) focusBack(d.more); return null; });
+  }, []);
+  /* ⚠️ A RENAME IS A LABEL, NOT AN EDIT (Nick, 28 Sep): the same record keeps its id, no new version is
+     made, and a sent package that holds it stays locked — so it is offered inside sent packages too */
+  const renameMaterial = async (m: MaterialItem, name: string): Promise<boolean> => {
+    if (!activeMs) return false;
+    const old = m.name;
+    try {
+      if (m.kind === "version") {
+        const note = bookVersions.find((b) => b.id === m.id)?.note ?? "";
+        await updateManuscript(activeMs.id, { bookVersions: renameBookVersion(bookVersions, m.id, name, note) });
+      } else {
+        await updateVersion(m.id, { versionName: name });
+      }
+    } catch { return false; }
+    const more = renaming?.more; setRenaming(null); focusBack(more);
+    showToast({
+      message: `Renamed to ${name}.`,
+      undo: () => (m.kind === "version"
+        ? updateManuscript(activeMs.id, { bookVersions: renameBookVersion(bookVersionsOf(activeMs), m.id, old, bookVersions.find((b) => b.id === m.id)?.note ?? "") })
+        : updateVersion(m.id, { versionName: old })),
+    });
+    return true;
+  };
+  /* letters and synopses only: book versions have no retired field (E5) */
+  const putAwayMaterial = async (m: MaterialItem) => {
+    if (m.kind === "version") return;
+    if (shown && shown[m.kind] === m.id) patch({ [m.kind]: "" } as Partial<CompState>);
+    await archiveVersion(m.id);
+    showToast({ message: `Put away ${m.name}. Packages that use it keep it.`, undo: () => restoreVersion(m.id) });
+  };
+  const onMenu = (act: MatAct, m: MaterialItem, more: HTMLElement | null) => {
+    if (act === "open") setDrawer({ item: drawerItem(m), more });
+    else if (act === "rename") setRenaming({ m, more });
+    else void putAwayMaterial(m);
+  };
+
   /* ── header ── */
   const sentQueries = queries.filter((q) => msPkgs.some((p) => p.id === q.packageId)).length;
   const description = empty
@@ -437,11 +492,22 @@ export const SubmissionPackages: React.FC = () => {
                 onDragStart={(m) => { dragId.current = m.id; dragKindRef.current = m.kind; setDragKind(m.kind); }}
                 onDragEnd={() => { dragId.current = null; dragKindRef.current = null; setDragKind(null); }}
                 onAdd={(k, el) => setModal({ kind: k, opener: el })}
+                onMenu={onMenu}
                 putAway={putAway} onRestore={(m) => { void restoreVersion(m.id); showToast({ message: `Restored ${m.name}.` }); }} />
             ) : null}
           </PageRail>
         </div>
         {modal ? <PkgMaterialModal key={modal.kind} kind={modal.kind} onClose={closeModal} onSave={(d) => saveMaterial(modal.kind, d)} /> : null}
+        <PkgMaterialDrawer item={drawer?.item ?? null} onClose={closeDrawer}
+          onRename={(d) => {
+            const m = [...allMats.letter, ...allMats.synopsis, ...allMats.version].find((x) => x.id === d.id);
+            const more = drawer?.more ?? null;
+            setDrawer(null);
+            if (m) setRenaming({ m, more });
+          }} />
+        {renaming ? <PkgRenameModal key={renaming.m.id} kind={renaming.m.kind} name={renaming.m.name}
+          onClose={() => { const more = renaming.more; setRenaming(null); focusBack(more); }}
+          onSave={(name) => renameMaterial(renaming.m, name)} /> : null}
       </div>
     </WorkspacePageGrid>
   );

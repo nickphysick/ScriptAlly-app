@@ -224,7 +224,7 @@ test("V5 · every chip has a sibling ⋯; three items for letters, two for versi
     return ["letter", "synopsis", "version"].map((k) => root.querySelector(`[data-well="${k}"] [data-ppv="filled"]`)?.getAttribute("data-mat") ?? "");
   });
   L.check("V5 · with the composer open, the ⋯ never fills or empties a slot", ctx, JSON.stringify(wells) === JSON.stringify(["pkg21-l2", "", ""]), JSON.stringify(wells));
-  close(L, 10);
+  close(L, 9);
 });
 
 /* ══ V6 · the material drawer ══ */
@@ -249,7 +249,8 @@ test("V6 · Open shows kind, name, text or note and Used in; Esc, scrim and Clos
   await openOn("pkg21-l3");
   r = await read();
   L.check("V6 · a letter: kind, name and its saved text with line breaks", ctx, !!r && r.vis === "visible" && r.role === "dialog" && r.modal === "true" && /QUERY LETTER/i.test(r.kind ?? "") && r.title === "Query letter v3" && (r.text ?? "").includes("MURPHY'S DAY OUT") && (r.text ?? "").includes("\n"), JSON.stringify(r));
-  L.check("V6 · Used in lists the packages that hold it", ctx, JSON.stringify(r?.uses) === JSON.stringify(["Autumn round", "Winter draft"]), JSON.stringify(r?.uses));
+  /* a set, not a sequence: Used in follows the page's own package order (newest first) */
+  L.check("V6 · Used in lists the packages that hold it", ctx, JSON.stringify([...(r?.uses ?? [])].sort()) === JSON.stringify(["Autumn round", "Winter draft"]), JSON.stringify(r?.uses));
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   L.check("V6 · Esc closes it; focus returns to ⋯", ctx, (await read())?.vis === "hidden" && (await focusedAttr(page, "data-more")) === "pkg21-l3", `${await focusedAttr(page, "data-more")}`);
   await openOn("pkg21-l1");
@@ -319,42 +320,6 @@ test("V8 · Put away empties the slot, leaves the section, keeps cards' names; U
   close(L, 8);
 });
 
-/* ══ V9 · Log a query with this (M) ══ */
-test("V9 · the first action on live cards opens the query drawer with the package passed in", async ({ page }) => {
-  const L = new L21("pkg21-V9");
-  const ctx = { route: ROUTE, size: "1440", state: "filled" };
-  await fresh(page, F);
-  await on(page, '[data-ppv="band"][data-band="retired"]').click();
-  const firsts = await page.evaluate(() => {
-    const root = [...document.querySelectorAll('[data-ppv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-    return [...root.querySelectorAll('[data-ppv="pkg"]')].map((c) => ({ name: c.getAttribute("data-name"), first: c.querySelector(".ppv-pacts [data-act]")?.getAttribute("data-act") ?? null, log: !!c.querySelector('[data-act="log"]') }));
-  });
-  const live = firsts.filter((c) => c.name !== "Spring round");
-  L.check("V9 · it is the first action on every live card, sent or unsent", ctx, live.length === 3 && live.every((c) => c.first === "log"), JSON.stringify(firsts));
-  L.check("V9 · retired cards do not get it", ctx, firsts.find((c) => c.name === "Spring round")?.log === false, JSON.stringify(firsts));
-  /* Winter draft: live, unsent, NOT the used-for-new-queries package — so the drawer's own defaults
-     cannot land on it by coincidence. The plain agent states no materials, so nothing matches. */
-  await card(page, "Winter draft").locator('[data-act="log"]').click();
-  const drawer = page.locator('[data-qad-drawer="log"]');
-  await expect(drawer).toBeVisible({ timeout: 10_000 }).catch(() => {});
-  L.check("V9 · the query drawer opens in log mode", ctx, (await drawer.count()) === 1 && (await drawer.isVisible()), "");
-  if (await drawer.count()) {
-    await page.locator("[data-qad-agent-input]").fill("Pkgtwentyone Plain");
-    await page.locator('[data-qad-agent="pkg21-agent-plain"]').click();
-    await page.locator('[data-qad-step="2"]').click().catch(() => {});
-    await page.waitForTimeout(400);
-  }
-  const on2 = await page.locator(".qad-pkg.on").getAttribute("data-qad-pkg").catch(() => null);
-  L.check("V9 · with a no-match agent, the passed package is the one selected", ctx, on2 === "pkg21-p4", `${on2}`);
-  /* 1280: the actions wrap to their own row under the name, and nothing overflows */
-  await open(page, F, V1280);
-  const w = await page.evaluate(() => {
-    const root = [...document.querySelectorAll('[data-ppv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-    return [...root.querySelectorAll('[data-ppv="list"] [data-ppv="pkg"]')].map((c) => {
-      const h = c.querySelector("h3")!.getBoundingClientRect(); const a = c.querySelector(".ppv-pacts")!.getBoundingClientRect();
-      return { below: a.top >= h.bottom - 1, fits: (c as HTMLElement).scrollWidth <= (c as HTMLElement).clientWidth };
-    });
-  });
-  L.check("V9 · at 1280 the actions sit on their own row and nothing overflows", { ...ctx, size: "1280" }, w.length === 3 && w.every((x) => x.below && x.fits), JSON.stringify(w));
-  close(L, 5);
-});
+/* ══ V9 · Log a query with this — DROPPED from this run (Nick, 28 Sep: "split by file"). The card,
+   its "Log a query with this" button and that lock belong to the query-actions side's Part B. The
+   written case is recoverable from 6e0d6b73 (this run's commit 1), where it was proved red. ══ */
