@@ -341,6 +341,14 @@ test("ATOMIC — a save that fails partway writes nothing; Try again writes the 
   const qIds = async () => new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id));
   const feedFor = async (qid: string) => (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", qid)))).size;
   const before = await qIds();
+  /* ⚠️ ORPHANS, NOT THE WHOLE FEED: the page's own heal pass writes rows for EXISTING queries while
+     the test runs, so a whole-feed count is racy (measured: +2 with correct code). A row the failed
+     save leaked points at a query that was never written — an orphan — so new orphans are counted. */
+  const orphans = async () => {
+    const qs = await qIds();
+    return new Set((await getDocs(collection(db, "users", uid, "activities"))).docs.filter((d) => d.data().queryId && !qs.has(d.data().queryId)).map((d) => d.id));
+  };
+  const orphansBefore = await orphans();
   const stampedBefore = !!(await getDoc(doc(db, "users", uid, "packages", UNSENT))).data()?.firstSentAt;
   await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: UNSENT });
   await toStep2(page);
@@ -351,10 +359,20 @@ test("ATOMIC — a save that fails partway writes nothing; Try again writes the 
   const afterFail = await qIds();
   const leaked = [...afterFail].filter((id) => !before.has(id));
   ok(leaked.length === 0, `ATOMIC: nothing was written by the failed save (leaked ${JSON.stringify(leaked)})`);
+  const newOrphans = [...await orphans()].filter((id) => !orphansBefore.has(id));
+  ok(newOrphans.length === 0, `ATOMIC: no activity row was written by the failed save (${JSON.stringify(newOrphans)})`);
+  const bar = page.locator('[data-qad-toast="failed"]');
+  const barText = (await bar.innerText()).replace(/\s+/g, " ");
+  ok(barText.includes("Couldn't save") && barText.includes("Try again"), `ATOMIC: the bar says "Couldn't save" and offers "Try again" (${barText})`);
+  const edge = await bar.evaluate((e) => getComputedStyle(e).boxShadow);
+  ok(/rgb\(138, 74, 60\) 3px 0px 0px 0px inset|inset 3px 0px 0px 0px rgb\(138, 74, 60\)/.test(edge), `ATOMIC: the bar carries the rust edge (${edge})`);
+  ok(await page.locator("[data-qad-drawer]").isHidden(), "ATOMIC: the drawer steps aside while the bar is up");
   ok(!!(await getDoc(doc(db, "users", uid, "packages", UNSENT))).data()?.firstSentAt === stampedBefore, "ATOMIC: the package was not stamped by the failed save");
   await page.locator('[data-qad-toast="failed"]').screenshot({ path: `${SHOTS}/atomic-failed.png` });
   await page.locator('[data-qad-toast="failed"] .ub').click();
   await expect(page.locator("[data-qad-review]"), "Try again did not reopen the drawer as entered").toBeVisible({ timeout: 10_000 });
+  const review = (await page.locator("[data-qad-review]").innerText()).replace(/\s+/g, " ");
+  ok(review.includes(String(agent.name ?? "")) && review.includes("Winter draft"), `ATOMIC: Try again reopens with everything as entered — the agent and the package (${review.slice(0, 160)})`);
   await logAndCheck(page, async (q) => {
     ok(q.sentHow === "package" && q.sentPackageId === UNSENT, "the retry records the same answers");
     ok(await feedFor(String(q.id)) === 1, "the retry wrote the activity row once");
@@ -375,6 +393,9 @@ test("AGAIN — after an individual log, Log another opens individually with the
   ok(await how(page) === "package", "precondition: the manuscript's default package opens selected");
   await page.locator('[data-qad-how="individual"]').click();
   await page.locator(`[data-qad-toggle="syn"]`).click();
+  /* every piece's state as logged — the reopened drawer must match it whole, not just the synopsis */
+  const pieces = () => page.locator("[data-qad-toggle]").evaluateAll((els) => els.map((e) => `${e.getAttribute("data-qad-toggle")}=${e.getAttribute("aria-pressed")}`).join(" "));
+  const logged = await pieces();
   await toReview(page);
   await page.locator("[data-qad-primary]").click();
   await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 20_000 });
@@ -390,6 +411,8 @@ test("AGAIN — after an individual log, Log another opens individually with the
     await toStep2(page);
     ok(await how(page) === "individual", `AGAIN: Log another opens individually (got ${await how(page)})`);
     ok((await page.locator(`[data-qad-toggle="syn"]`).getAttribute("aria-pressed")) === "false", "AGAIN: with the same pieces (no synopsis)");
+    const again = await pieces();
+    ok(again === logged, `AGAIN: every piece as it was logged (logged "${logged}", reopened "${again}")`);
     await shot(page, "log-another-individual");
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Discard" }).click();

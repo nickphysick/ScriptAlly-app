@@ -104,6 +104,54 @@ the seven journeys.
 
 ---
 
+# The three prelude rulings — confirmed (commit `f1bfce5c`; tests tightened in the follow-up)
+
+These landed before Part B in `f1bfce5c` and were left out of this report. Each is below, with its test and the mutation that turned the test red. **Everything was re-run on 28 Sep against a dev build of `071750c0`.**
+
+**1. All-or-nothing save.** `addQuery` writes the query, every seeded row in the feed and the log, and the package's first-sent stamp in ONE `writeBatch`. A failure anywhere writes nothing.
+- On failure, the drawer steps aside, still mounted with the answers as entered, and the bar reads **"Couldn't save · Try again"** with the rust edge (`.qad-toast.failed`, an inset 3px `--qad-rust`).
+- Try again reopens the drawer on the review, exactly as entered, and writes the same query id whole.
+- **Test:** `ATOMIC` in `tests/e2e/packagesJourney.measure.ts`.
+  - A dev-only hook (`__SA_FAIL_NEXT_SAVE`, never read in a production build) poisons the batch partway, after the query and its rows are queued.
+  - Asserts that no query, no activity row and no package stamp was written.
+  - Asserts the bar's wording and rust edge, and that the drawer stepped aside.
+  - After Try again, asserts the review holds the same agent and package, and that exactly one query, one feed row and one log row exist.
+- **Proved red three ways:**
+  - feed rows written outside the batch → "no activity row was written" fails, naming the leaked row;
+  - the rust edge removed → the edge assertion fails;
+  - the drawer closed on failure → "Try again did not reopen the drawer as entered".
+- **A correction to this test while tightening it.** My first "no activity row" check counted the whole feed and was racy: the page's own heal pass writes rows for existing queries during the run, and the count moved by +2 with correct code. It now counts only NEW ORPHAN rows, meaning rows whose query doesn't exist, which is exactly what a failed save would leave.
+  - The existing per-query count after the retry was already sound: seeded activity ids are random per attempt, so a leaked row would sit beside the retried one rather than be overwritten.
+
+**2. v1 "Custom" queries read as individual, not unrecorded.**
+- `sentRecordOf`'s default:
+  - a `packageId` → package;
+  - a snapshot with no package → individual;
+  - no snapshot at all → unrecorded (imports only).
+- The migration `node tests/e2e/migrateSentHow.mjs --custom-to-individual [--apply]` is reversible: its backup records the value it replaced, and `--revert` puts it back. Status and every date are read before and after, and any movement stops the run.
+- **Counts on the harness account: 84 scanned, 0 to move** (every v1 Custom log there had been undone by earlier runs). The backup is `migration-custom-<uid>.json`, with 0 changes.
+- **Because 0 proves nothing, it was exercised on a planted v1 Custom query:**
+  - planted as `unrecorded`, Partial Requested, three dates;
+  - dry run found 1;
+  - apply moved it to `individual` with the status and all three dates unchanged;
+  - `--revert` put it back to `unrecorded`, with the status and dates unchanged;
+  - the planted query was removed.
+- **Unit test:** `sentRecord.test.ts`, "a v1 Custom log reads as individual". Proved red by making the default ignore the snapshot.
+
+**3. Log another repeats the last log as it was.**
+- The `again` record carries `how` (package or individual) and the pieces.
+- `openingChoice` keeps the order: explicit preset, then `again` (whichever way it was recorded), then the "used for new queries" default.
+- **Tests:**
+  - unit: `openingChoice` in `packagesJourney.test.ts`;
+  - rendered: `AGAIN`. It logs individually with the synopsis off, on a manuscript whose default is a package, presses Log another, and asserts that the drawer opens individually with **every piece as logged**. That last check compares the whole set; before the follow-up it compared only the synopsis.
+- **Proved red:**
+  - every log recorded as a package → "opens individually (got package)";
+  - a piece dropped on reopening → "logged ql=true syn=false, reopened ql=false syn=false".
+
+**After the runs:** the full Part A suite passes (11 tests, 94 assertions). Orphan rows on the account are unchanged (20, all dated 24 Aug and predating this work).
+
+---
+
 # Part B — the package side (28 Sep, on top of packages v2.1 `89b366cf`)
 
 ## What landed
