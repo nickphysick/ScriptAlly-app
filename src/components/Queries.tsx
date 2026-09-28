@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SendExtras } from "./queryActions/SendExtras";
+import { requeryLine } from "../lib/requery";
 import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
@@ -5065,10 +5067,14 @@ export const Queries: React.FC<{
                 /* §A4 — "Add what you sent ›" opens the correction on the Queried entry, the one door
                    that edits what was sent. Offered only where that entry is a real activity. */
                 const queriedAct = (trackingEvents as { id: string; type?: string }[]).find((e) => (e.type as QueryStatus) === QueryStatus.QUERIED);
+                /* item 2 (clean-up pass, 28 Sep): a requery says why, above the materials, and the link
+                   opens the earlier query in this same view */
                 const sentExtra = (
-                  <SentBox q={activeQuery} packages={packages}
-                    onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
-                    onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
+                  <SendExtras requery={requeryLine(activeQuery, queries)} onOpenQuery={(id) => pickRow(id)}>
+                    <SentBox q={activeQuery} packages={packages}
+                      onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
+                      onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
+                  </SendExtras>
                 );
                 const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
                 /**

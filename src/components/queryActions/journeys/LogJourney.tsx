@@ -10,12 +10,13 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
+import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, doc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
+import { ComponentType, QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
 import {
   addDays, dayDiff, dayIso, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
@@ -185,7 +186,12 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   /* ---------- the facts the guards read ---------- */
   const forBook = queries.filter((q) => q.manuscriptId === msId);
   const dup = agent ? forBook.find((q) => q.agentId === agent.id && isLive(q)) : null;
-  const prev = agent && !dup ? forBook.find((q) => q.agentId === agent.id && !isLive(q)) : null;
+  /* ⚠️ THE ONE REQUERY CHECK (lib/requery, clean-up pass 28 Sep): same agent, same book, closed, and
+     sent strictly BEFORE the date being logged — the latest such. It was the first closed match in
+     list order, with no date test, so a later closed query could be named as the "previous" one. */
+  const prev = agent && !dup
+    ? previousQueryFor({ id: "__new__", agentId: agent.id, manuscriptId: msId, status: QueryStatus.QUERIED, dateSent: "" }, forBook, sent.getTime())
+    : null;
   const sameAg = agent
     ? forBook.find((q) => q.agentId !== agent.id && isLive(q) && (() => {
         const o = agents.find((x) => x.id === q.agentId);

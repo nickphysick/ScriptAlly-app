@@ -47,7 +47,7 @@ export interface JourneyInputs {
    * QueryStatus on a status change and an activity type otherwise; deciding which is `toEntry`'s
    * job, above, and doing it at the call site would put that test in two places.
    */
-  events: { key: string; label: string; when: string; via?: string; status?: string; incoming?: boolean; minor?: boolean }[];
+  events: { key: string; label: string; when: string; via?: string; status?: string; incoming?: boolean; minor?: boolean; reconstructed?: boolean; extra?: React.ReactNode }[];
   /** the verb the list row states, so the pane cannot name the deed differently */
   primaryLabel: string;
   /** a note's age, already formatted — "2 days ago". Absent on every other journey. */
@@ -181,8 +181,19 @@ export function toEntry(e: JourneyInputs["events"][number]): TaskPaneEvent {
   const status = asQueryStatus(e.status);
   const base = { key: e.key, t: e.label, d: e.via ? `${e.when} · ${e.via}` : e.when };
   return status
-    ? { ...base, kind: "status", status }
+    ? { ...base, kind: "status", status, ...(e.reconstructed ? { reconstructed: true } : {}), ...(e.extra ? { extra: e.extra } : {}) }
     : { ...base, kind: "mark", ...(e.incoming ? { incoming: true } : {}) };
+}
+
+/**
+ * THE SEND RUNG CARRIES WHAT WENT AND WHY (clean-up pass, 28 Sep): the extra node lands on the first
+ * Queried rung; where the log has none (an older query whose send was never logged), on the first
+ * rung, so it is never silently dropped.
+ */
+export function withSendExtra<T extends { status?: string; extra?: React.ReactNode }>(events: T[], extra: React.ReactNode): T[] {
+  if (!extra || !events.length) return events;
+  const i = Math.max(0, events.findIndex((e) => e.status === QueryStatus.QUERIED));
+  return events.map((e, j) => (j === i ? { ...e, extra } : e));
 }
 
 /**

@@ -190,11 +190,12 @@ export const QueryCard: React.FC<{
             <div className={`qcard-ev${e.kind === "now" ? " qcard-ev--now" : ""}`} key={e.key}>
               <span className="qcard-g">
                 {e.kind === "status"
-                  ? <StatusDot status={e.status} overrideSize={16} decorative />
+                  ? <StatusDot status={e.status} overrideSize={16} decorative ghost={!!e.reconstructed} />
                   : <i aria-hidden="true" />}
               </span>
               <span><b>{e.t}</b></span>
               <span className="qcard-d">{e.d}</span>
+              {e.kind === "status" && e.extra ? <div className="qcard-x">{e.extra}</div> : null}
             </div>
           ))}
           {model.events.length === 0 && <p className="qcard-none">Nothing logged yet.</p>}

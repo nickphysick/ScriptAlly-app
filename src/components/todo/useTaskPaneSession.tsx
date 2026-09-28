@@ -26,10 +26,13 @@
  * revealed-but-empty date. Only the references changed: captured page scope became hook state, the
  * three lifted derivations became lib calls, and seven became host callbacks.
  */
+import { useNavigate } from "react-router-dom";
+import { requeryLine } from "../../lib/requery";
+import { SendExtras } from "../queryActions/SendExtras";
 import React from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { BoardCard } from "../../lib/todoBoard";
-import { buildJourney } from "../../lib/taskPaneJourney";
+import { buildJourney, withSendExtra } from "../../lib/taskPaneJourney";
 import type { TaskPaneJourney } from "./TaskPane";
 import { Agent, QueryStatus } from "../../types";
 import { DockTimelineEvent } from "./timelineEvent";
@@ -195,6 +198,13 @@ export function useTaskPaneSession(
   idPrefix = "",
 ): TaskPaneSession {
   const { queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser } = useScriptAllyDb();
+  const navigateTo = useNavigate();
+  /* item 2 (clean-up pass, 28 Sep): the send rung explains a requery, and the link opens the earlier query */
+  const sendExtraFor = (card: BoardCard): React.ReactNode => {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    const rq = q ? requeryLine(q, queries) : null;
+    return rq ? <SendExtras requery={rq} onOpenQuery={(id) => navigateTo(`/queries?q=${encodeURIComponent(id)}`)} /> : null;
+  };
   const now = Date.now();
   /* ⚠️ ONE BUNDLE, memoised on the five arrays the lifted derivations read — the same shape the
      page uses, so neither can drift onto different data. */
@@ -1096,8 +1106,9 @@ export function useTaskPaneSession(
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return formatQueryMaterials(q?.materialsWanted);
                     })(),
-                    events: dockTimelineFor(card).map((e) => ({
+                    events: withSendExtra(dockTimelineFor(card).map((e) => ({
                       key: e.key, label: e.label, when: e.when, via: e.via,
+                      ...(e.reconstructed ? { reconstructed: true } : {}),
                       /* ⚠️ THE LOG'S OWN STATUS, CARRIED WHOLE (Phase 8). `dockTimeline` already
                          sets it from `resultingStatus ?? type` — the same pair the derivation
                          reads — and a nudge has none. The pane decides what that means; this
@@ -1105,7 +1116,7 @@ export function useTaskPaneSession(
                       status: e.status,
                       /* the mockup's `in` rung — an event the AGENT caused */
                       incoming: /requested|offer|rejected|response|reply/i.test(e.label),
-                    })),
+                    })), sendExtraFor(card)),
                     primaryLabel: rowPrimaryLabel(card, groupColumn(cardBucket(card) === "note" ? "yours" : "urgent")),
                     ...(card.userTaskId ? { noteAdded: noteAgo(card) } : {}),
                     /* ⚠️ THROUGH THE APP'S ONE STATUS-WORD FUNCTION. `getStatusLabel` is what the

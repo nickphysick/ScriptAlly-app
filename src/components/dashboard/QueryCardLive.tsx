@@ -20,7 +20,10 @@ import React, { useMemo } from "react";
 import { QueryCard, type QueryCardModel } from "./QueryCard";
 import { useDockActivity } from "../todo/useDockActivity";
 import { dockTimeline } from "../../lib/dockTimeline";
-import { toEntry, withTerminus } from "../../lib/taskPaneJourney";
+import { toEntry, withSendExtra, withTerminus } from "../../lib/taskPaneJourney";
+import { useScriptAllyDb } from "../../lib/db";
+import { requeryLine } from "../../lib/requery";
+import { SendExtras } from "../queryActions/SendExtras";
 import { replyWindow } from "../../lib/dashTodo";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { getStatusLabel } from "../StatusPill";
@@ -39,16 +42,22 @@ export const QueryCardLive: React.FC<{
   onOpenQuery: (queryId: string) => void;
 }> = ({ uid, query, agent, manuscript, anchor, onClose, onOpenQuery }) => {
   const rows = useDockActivity(uid, query.id);
+  const { queries } = useScriptAllyDb();
   const status = query.status as QueryStatus;
+  /* item 2 (28 Sep): a requery says why — the earlier query's outcome and date, opening that query */
+  const requery = useMemo(() => requeryLine(query, queries), [query, queries]);
 
   const model = useMemo<QueryCardModel>(() => {
     const act = getPrimaryAction(status);
 
-    const rungs = dockTimeline(rows, { sendMethod: query.sendMethod ? String(query.sendMethod) : undefined })
-      .map((e) => toEntry({
+    const inputs = dockTimeline(rows, { sendMethod: query.sendMethod ? String(query.sendMethod) : undefined })
+      .map((e) => ({
         key: e.key, label: e.label, when: e.when, via: e.via, status: e.status as string | undefined,
         incoming: /requested|offer|rejected|response|reply/i.test(e.label),
+        ...(e.reconstructed ? { reconstructed: true } : {}),
       }));
+    const extra = requery ? <SendExtras requery={requery} onOpenQuery={onOpenQuery} /> : null;
+    const rungs = withSendExtra(inputs, extra).map(toEntry);
 
     /**
      * ⚠️ THE TERMINUS ONLY APPEARS WHERE THE BALL IS ACTUALLY WITH THE WRITER. The task pane appends
@@ -125,7 +134,7 @@ export const QueryCardLive: React.FC<{
       window: w.stated ? `Their window · ${weeks} weeks` : `House window · ${weeks} weeks`,
       onOpenQuery: () => onOpenQuery(query.id),
     };
-  }, [rows, query, agent, manuscript, status, onOpenQuery]);
+  }, [rows, query, agent, manuscript, status, onOpenQuery, requery]);
 
   return <QueryCard model={model} anchor={anchor} onClose={onClose} />;
 };

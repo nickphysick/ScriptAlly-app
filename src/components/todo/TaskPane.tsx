@@ -64,6 +64,13 @@ interface RungBase {
 export interface TaskPaneStatusEvent extends RungBase {
   kind: "status";
   status: QueryStatus;
+  /** a reconstruction (28 Sep): the drained mark, and the rung reads "Recorded from the imported status" */
+  reconstructed?: boolean;
+  /**
+   * What the send rung carries beneath it (clean-up pass, 28 Sep): the requery's explanation and the
+   * materials treatment. One slot, filled by `withSendExtra`, so every rail draws them in one place.
+   */
+  extra?: React.ReactNode;
 }
 /** A rung that is NOT a status — today a nudge; a note kind arriving later needs no new branch. */
 export interface TaskPaneMarkEvent extends RungBase {
@@ -245,9 +252,10 @@ function rung(e: TaskPaneEvent): React.ReactNode {
         <div className="tl-e" key={e.key}>
           {/* the real dot, at the dense-timeline size `QueryTimeline` already uses; decorative
               because the event's own title sits beside it and states the same thing in words */}
-          <span className="sd"><StatusDot status={e.status} overrideSize={12} decorative /></span>
+          <span className="sd"><StatusDot status={e.status} overrideSize={12} decorative ghost={!!e.reconstructed} /></span>
           <div className="t">{e.t}</div>
           <div className="d">{e.d}</div>
+          {e.extra ? <div className="x">{e.extra}</div> : null}
         </div>
       );
     case "mark":

@@ -193,6 +193,8 @@
 .tpn .tl-e.minor .t { font-weight:400;color:var(--muted2);font-size:11.5px; }
 .tpn .tl-e.now .t { color:var(--burg); }
 .tpn .tl-e .d { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:2px; }
+/* the send rung's extras (clean-up pass, 28 Sep): the requery line and the materials box */
+.tpn .tl-e .x { margin-top:4px;min-width:0; }
 /* (`.tl-foot` is `.rfoot` now — see the record-card block.) */
 
 

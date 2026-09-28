@@ -28,6 +28,7 @@
 import { EVENT_LABEL, isEventKey } from "./queryActions/eventKeys";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus } from "../types";
 import { agentPrimary } from "./agentDisplay";
+import { requeryLine } from "./requery";
 import { eventShape, markSentOffered } from "./feedConversation";
 import type { State } from "./queryCardFacts";
 
@@ -63,6 +64,12 @@ export interface FeedEntry {
   provenance: string;
   /** the underlined link at the right, where the record supports one */
   action: { label: string; queryId: string } | null;
+  /**
+   * A requery's explanation (clean-up pass, 28 Sep): on the row that records a query going out,
+   * when an earlier, closed query to the same agent for the same book exists — its outcome and date,
+   * and the id that opens it. The one check is lib/requery.
+   */
+  requery: { text: string; queryId: string } | null;
   /**
    * The query this entry is about, where it is about one.
    *
@@ -417,6 +424,11 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       say,
       provenance,
       action: markSentOffered(a, i.queries) ? { label: "Send it →", queryId: a.queryId } : null,
+      requery: (() => {
+        if (shape.status !== QueryStatus.QUERIED || !a.queryId) return null;
+        const q = i.queries.find((x) => x.id === a.queryId);
+        return q ? requeryLine(q, i.queries) : null;
+      })(),
       queryId: a.queryId ?? null,
       /* ⚠️ A DEVICE THAT HAS NEVER SHOWN THE PAGE MARKS NOTHING. Everything would be new, which puts a
          rust rule beside all thirty days of it and says nothing at all. */

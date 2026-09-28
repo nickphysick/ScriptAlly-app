@@ -54,7 +54,9 @@ describe("⚠️ the editor is NOT gated on status — that is what makes the ex
     expect(mat).not.toContain("QueryStatus.WITHDRAWN");
     expect(mat).not.toContain("QueryStatus.NO_RESPONSE");
     /* the mount: `sentExtra` is assigned unconditionally — no turn/status test guards it */
-    expect(code).toMatch(/const sentExtra = \(\n\s+<SentBox/);
+    /* retargeted (clean-up pass item 2, 28 Sep): the SentBox now sits inside SendExtras, beneath the
+       requery line — still assigned unconditionally, still no status test between them */
+    expect(code).toMatch(/const sentExtra = \(\n\s+<SendExtras [^\n]*\n\s+<SentBox/);
   });
 
   it("⚠️ the two halves reconcile: what the task list drops, the pane still reaches", () => {
