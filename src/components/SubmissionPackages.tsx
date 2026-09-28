@@ -30,19 +30,19 @@ import { ComponentType, SubmissionPackage } from "../types";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { PageHeader } from "./shell/PageHeader";
 import { PageRail } from "./containers/PageRail";
-import { BE_HAWK_HEAD } from "./queries/centre/qcArt";
 import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/bookVersions";
 import { createPayload } from "../lib/materialDraft";
 import { duplicateOf } from "../lib/buildRow";
 import { duplicateName, resolveActivePackage } from "../lib/packageMetrics";
 import { initialsOf, packageUsageCounts } from "../lib/manuscriptSummary";
 import {
-  isSent, MatKind, MaterialItem, materialMeta, materialsFor, offered, PACKAGES_HERO, sideBySide,
+  isSent, MATERIALS_PILE, MatKind, MaterialItem, materialMeta, materialsFor, offered, PACKAGES_HERO, sideBySide,
   suggestPackageName, usesOf,
 } from "../lib/packagesPage";
 import { PkgCard } from "./packages/PkgCard";
 import { CompState, EMPTY_COMP, PkgComposer } from "./packages/PkgComposer";
 import { PkgMaterialModal, PkgMaterials } from "./packages/PkgMaterials";
+import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
 const KEY = "scriptally_active_manuscript_id";
@@ -86,11 +86,14 @@ export const SubmissionPackages: React.FC = () => {
   const retired = msPkgs.filter((p) => p.status === "Retired");
   const sent = msPkgs.filter(isSent);
   const empty = !!activeMs && msPkgs.length === 0;
+  /* E4 · every package retired: behave like the empty state (composer open, the example, and the
+     retired list open) — never a list with a hole in it */
+  const noneLive = !!activeMs && msPkgs.length > 0 && live.length === 0;
 
   /* ── the composer: open when asked, or by default while there are no packages (P8) ── */
   const [comp, setComp] = useState<CompState | null>(null);
   const [emptyDismissed, setEmptyDismissed] = useState(false);
-  const shown: CompState | null = comp ?? (empty && !emptyDismissed ? EMPTY_COMP : null);
+  const shown: CompState | null = comp ?? ((empty || noneLive) && !emptyDismissed ? EMPTY_COMP : null);
   const opener = useRef<HTMLElement | null>(null);
   const compRef = useRef<HTMLDivElement | null>(null);
   const [dragKind, setDragKind] = useState<MatKind | null>(null);
@@ -123,7 +126,7 @@ export const SubmissionPackages: React.FC = () => {
   }, []);
   const cancelComp = () => {
     setComp(null);
-    if (empty) setEmptyDismissed(true);
+    if (empty || noneLive) setEmptyDismissed(true);
     const o = opener.current; opener.current = null;
     requestAnimationFrame(() => { if (o && o.isConnected) o.focus(); });
   };
@@ -229,6 +232,8 @@ export const SubmissionPackages: React.FC = () => {
         showToast({ message: `Retired ${p.packageName}. Its history stays.`, undo: async () => { await restorePackage(p.id); if (wasActive) await setActivePackage(msId, p.id); } });
         return;
       case "restore":
+        /* an UNTOUCHED composer closes — restoring returns the page to the filled state (E4) */
+        if (comp && !comp.letter && !comp.synopsis && !comp.version && !comp.editId) setComp(null);
         await restorePackage(p.id); flashCard(p.id);
         showToast({ message: `Restored ${p.packageName}.`, undo: () => retirePackage(p.id) });
         return;
@@ -300,7 +305,6 @@ export const SubmissionPackages: React.FC = () => {
   const description = empty
     ? "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received."
     : <>A letter, synopsis and version for each round of querying. <strong>{live.length}</strong> in use, <strong>{sentQueries}</strong> queries sent.</>;
-  const nl = mats.letter.length, ns = mats.synopsis.length, nv = mats.version.length;
   const editing = shown?.editId ?? null;
   const dupe = shown && shown.letter
     ? duplicateOf({
@@ -324,13 +328,23 @@ export const SubmissionPackages: React.FC = () => {
               variant="full"
               title="Submission packages"
               description={activeMs ? description : "No manuscript yet."}
-              primary={activeMs && !empty ? { label: "+ New package", onClick: () => openComp() } : undefined}
-              secondary={sent.length >= 2 ? { label: "Side by side", onClick: () => sbsRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }) } : undefined}
-              art={<img src={`${PACKAGES_HERO.src}?v=${PACKAGES_HERO.version}`} width={PACKAGES_HERO.width} height={PACKAGES_HERO.height} alt="" />}
+              primary={activeMs && !empty && !noneLive ? { label: "+ New package", onClick: () => openComp() } : undefined}
+              secondary={sent.length >= 2 && !noneLive ? { label: "Side by side", onClick: () => sbsRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }) } : undefined}
+              art={<img src={`${PACKAGES_HERO.src}?v=${PACKAGES_HERO.version}`} width={PACKAGES_HERO.width} height={PACKAGES_HERO.height} alt={PACKAGES_HERO.alt} />}
             />
           </div>
 
           <div className="ppv-main" data-ppv="main">
+            {noneLive ? (
+              <section className="ppv-nonelive" data-ppv="none-live" aria-label="Nothing in use">
+                <div>
+                  <b>Nothing in use right now</b>
+                  <p>{retired.length === 1 ? "Your one package is" : `All ${retired.length} of your packages are`} retired, with their history kept. Start a new package, or restore one below to use it again.</p>
+                </div>
+                {shown ? null : <button type="button" className="ppv-btn ppv-btn--dark" data-ppv="none-new" onClick={() => openComp()}>+ New package</button>}
+              </section>
+            ) : null}
+
             {shown ? (
               <div ref={compRef}>
                 <PkgComposer comp={shown} mats={mats} metaOf={metaOf}
@@ -343,29 +357,35 @@ export const SubmissionPackages: React.FC = () => {
               </div>
             ) : null}
 
-            {!activeMs ? null : empty ? (
-              <div className="ppv-exwrap" data-ppv="example" aria-hidden="true" inert>
-                <span className="ppv-ex" data-ppv="ex-tag">Example</span>
-                <div className="ppv-ghost">
-                  <PkgCard pkg={EXAMPLE} active ghost letter={{ name: "Query letter v3", words: 310 }} synopsis={{ name: "Synopsis, 1 page", words: 480 }}
-                    version="Fast-paced opening" counts={[]} agents={0} discs={[]} />
+            {!activeMs ? null : empty || noneLive ? (
+              <>
+                <div className="ppv-exwrap" data-ppv="example" aria-hidden="true" inert>
+                  <span className="ppv-ex" data-ppv="ex-tag">Example</span>
+                  <div className="ppv-ghost">
+                    <PkgCard pkg={EXAMPLE} active ghost letter={{ name: "Query letter v3", words: 310 }} synopsis={{ name: "Synopsis, 1 page", words: 480 }}
+                      version="Fast-paced opening" counts={[]} agents={0} discs={[]} />
+                  </div>
                 </div>
-              </div>
+                {noneLive ? (
+                  <>
+                    <PkgBand band="retired" title="Retired" count={retired.length} hint="Restore one to use it again" />
+                    <div className="ppv-list" data-ppv="retired">{retired.filter((p) => p.id !== editing).map(card)}</div>
+                  </>
+                ) : null}
+              </>
             ) : (
               <>
-                <div className="ppv-sech">
-                  <h2>Your packages <span className="ppv-pill">{live.length}</span></h2>
-                  <span className="ppv-hint">{active ? <><b>{active.packageName}</b> is filled in when you log a new query</> : "No package is filled in for new queries"}</span>
-                </div>
-                <div className="ppv-list" data-ppv="list">
-                  {live.filter((p) => p.id !== editing).map(card)}
-                </div>
+                <section className="ppv-pksec">
+                  <PkgBand band="packages" title="Your packages" count={live.length}
+                    hint={active ? <><b>{active.packageName}</b> is used for new queries</> : "No package is used for new queries"} />
+                  <div className="ppv-list" data-ppv="list">
+                    {live.filter((p) => p.id !== editing).map(card)}
+                  </div>
+                </section>
 
                 {sent.length >= 2 ? (
                   <>
-                    <div className="ppv-sech" data-ppv="sbs-h" ref={sbsRef} id="ppv-sbs">
-                      <h2>Side by side</h2><span className="ppv-hint">Facts from your query log</span>
-                    </div>
+                    <PkgBand band="sbs" title="Side by side" hint="Facts from your query log" ref={sbsRef} id="ppv-sbs" />
                     <div className="ppv-cmp">
                       <table data-ppv="sbs">
                         <thead><tr><th scope="col">Package</th><th scope="col">Queries</th><th scope="col">Requests</th><th scope="col">Replies</th><th scope="col">Typical reply</th></tr></thead>
@@ -391,9 +411,9 @@ export const SubmissionPackages: React.FC = () => {
 
                 {retired.length ? (
                   <>
-                    <button type="button" className="ppv-retired-h" data-ppv="retired-toggle" aria-expanded={showRetired} onClick={() => setShowRetired((v) => !v)}>
-                      <span className="chev" aria-hidden="true">›</span>Retired <span className="ppv-pill">{retired.length}</span>
-                    </button>
+                    {/* focus stays on the band after a toggle: it is the same button, re-rendered in place */}
+                    <PkgBandToggle band="retired" title="Retired" count={retired.length} hint={showRetired ? "Hide" : "Show"}
+                      expanded={showRetired} onToggle={() => setShowRetired((v) => !v)} />
                     {showRetired ? <div className="ppv-list" data-ppv="retired">{retired.filter((p) => p.id !== editing).map(card)}</div> : null}
                   </>
                 ) : null}
@@ -408,8 +428,8 @@ export const SubmissionPackages: React.FC = () => {
             trayClassName="ppv-tray"
             tray={<>
               <h2>Materials</h2>
-              <div className="sum"><b>{nl}</b> letter{nl === 1 ? "" : "s"} · <b>{ns}</b> synops{ns === 1 ? "is" : "es"} · <b>{nv}</b> version{nv === 1 ? "" : "s"}</div>
-              <img className="ppv-peek" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" />
+              {/* E2 · the talon and the pile; its leg runs off the top on purpose and the tray clips the pile */}
+              <img className="ppv-pile" data-ppv="pile" src={`${MATERIALS_PILE.src}?v=${MATERIALS_PILE.version}`} width={MATERIALS_PILE.width} height={MATERIALS_PILE.height} alt="" aria-hidden="true" />
             </>}
           >
             {activeMs ? (

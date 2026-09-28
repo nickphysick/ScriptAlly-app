@@ -149,7 +149,7 @@ test("V3 · the three headings are anthracite bands; Your packages lines up with
   await card(page, "Autumn round").locator('[data-act="retire"]').click();
   await expect.poll(() => txt(page, '[data-band="packages"] [data-ppv="band-hint"]'), { timeout: 12_000 }).toBe("No package is used for new queries").catch(() => {});
   L.check("V3 · with none in use the hint says so", ctx, (await txt(page, '[data-band="packages"] [data-ppv="band-hint"]')) === "No package is used for new queries", `${await txt(page, '[data-band="packages"] [data-ppv="band-hint"]')}`);
-  close(L, 15);
+  close(L, 14);
 });
 
 /* ══ V4 · nothing in use (M) ══ */
@@ -176,13 +176,15 @@ test("V4 · every package retired: the card, the open composer, the example and 
   L.check("V4 · the example is inert and aria-hidden", ctx, r.ex, "");
   L.check("V4 · Retired is a plain band and its list is open", ctx, !r.bandIsButton && r.listed === 2, JSON.stringify(r));
   L.check("V4 · no Side by side", ctx, !r.sbs, "");
-  await on(page, '[data-ppv="cancel"]').click();
+  /* guarded: a page without the state must FAIL its rows, not crash before writing them */
+  if (await on(page, '[data-ppv="cancel"]').count()) await on(page, '[data-ppv="cancel"]').click();
   await page.waitForTimeout(300);
   L.check("V4 · Cancel keeps the composer closed and brings back the card's button", ctx,
     (await on(page, '[data-ppv="composer"]').count()) === 0 && (await on(page, '[data-ppv="none-new"]').count()) === 1, "");
-  await on(page, '[data-ppv="none-new"]').click();
+  if (await on(page, '[data-ppv="none-new"]').count()) await on(page, '[data-ppv="none-new"]').click();
   await page.waitForTimeout(300);
-  await card(page, "First round").locator('[data-act="restore"]').click();
+  const rst = card(page, "First round").locator('[data-act="restore"]');
+  if (await rst.count()) await rst.click();
   await expect.poll(async () => on(page, '[data-ppv="list"] [data-ppv="pkg"][data-name="First round"]').count(), { timeout: 12_000 }).toBe(1).catch(() => {});
   L.check("V4 · Restore returns the filled state and closes the untouched composer", ctx,
     (await on(page, '[data-ppv="list"] [data-ppv="pkg"][data-name="First round"]').count()) === 1 && (await on(page, '[data-ppv="none-live"]').count()) === 0 && (await on(page, '[data-ppv="composer"]').count()) === 0, "");

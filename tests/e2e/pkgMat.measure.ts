@@ -312,7 +312,7 @@ test("P6 · Side by side: only with ≥2 sent; no row distinguished; no rank or 
   close(L, 5);
 });
 
-/* ══ P7 · deep links ══ */
+/* ══ P7 · deep links ══ (v2.1: Side by side is a band now — read by data-band) */
 test("P7 · ?tab=builder opens the composer; ?tab=tracking scrolls to Side by side", async ({ page }) => {
   const L = new PLedger("pkg-P7");
   const ctx = { route: ROUTE, size: W, state: "filled" };
@@ -320,7 +320,7 @@ test("P7 · ?tab=builder opens the composer; ?tab=tracking scrolls to Side by si
   L.check("P7 · ?tab=builder opens the composer", ctx, (await read(page))?.composer === true, "");
   await openPkgs(page, FILLED, VP, "?tab=tracking");
   await page.waitForTimeout(800);
-  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="sbs-h"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop, max: sc.scrollHeight - sc.clientHeight, ch: sc.clientHeight } : null; });
+  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="band"][data-band="sbs"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop, max: sc.scrollHeight - sc.clientHeight, ch: sc.clientHeight } : null; });
   /* ⚠️ "TO THE TOP" OR AS FAR AS THE SCROLLER GOES: a section near the page's end cannot reach the top */
   L.check("P7 · ?tab=tracking scrolls to Side by side (at the top, or at max scroll with it in view)", ctx, !!t && t.st > 0 && t.top >= -2 && (t.top < 80 || (Math.abs(t.st - t.max) <= 1 && t.top < t.ch - 60)), JSON.stringify(t));
   await openPkgs(page, FILLED, VP, "?tab=packages");
@@ -343,7 +343,7 @@ test(`P8 · empty · ${W}`, async ({ page }) => {
       exTag: ex?.querySelector('[data-ppv="ex-tag"]')?.textContent?.trim() ?? null,
       exControls: ex ? [...ex.querySelectorAll("button, a[href], input, select, textarea")].filter((c) => !c.closest("[inert]")).length : -1,
       exClickable: ex ? getComputedStyle(ex.querySelector(".ppv-ghost") ?? ex).pointerEvents !== "none" : true,
-      sbs: !!root?.querySelector('[data-ppv="sbs"]'), retired: !!root?.querySelector('[data-ppv="retired-toggle"]'), lede,
+      sbs: !!root?.querySelector('[data-ppv="sbs"]'), retired: !!root?.querySelector('[data-ppv="band"][data-band="retired"]'), lede,
     };
   });
   L.check("P8 · the composer is open by default", ctx, r.composer, "");

@@ -71,9 +71,22 @@
 .ppv-page :focus-visible { outline: 2px solid var(--ppv-btn); outline-offset: 2px; }
 /* ⚠️ FADED AND INERT — a picture of a card, never a second set of controls */
 .ppv-ghost { opacity: 0.5; filter: saturate(0.7); pointer-events: none; user-select: none; }
-.ppv-sech { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 2px -8px; }
-/* ⚠️ `!important` + two classes: brand.tsx forces `h2, h3` to its heading face */
-.ppv-page .ppv-sech h2 { margin: 0; font-family: var(--ppv-type) !important; font-weight: 400; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+/* ── section bands (v2.1, E1): anthracite, 52 tall, a Special Elite title and a mono hint ── */
+.ppv-band { display: flex; align-items: center; justify-content: space-between; gap: 16px; box-sizing: border-box; height: 52px; padding: 0 20px; border-radius: 12px; background: var(--ppv-btn); color: #fdf9f5; flex: none; }
+/* ⚠️ `!important` + two classes: brand.tsx forces `h2` to its heading face and ink */
+.ppv-page .ppv-band h2, .ppv-page .ppv-band .ppv-bandt { margin: 0; font-family: var(--ppv-type) !important; font-weight: 400; font-size: 20px; line-height: 1; display: flex; align-items: center; gap: 12px; color: #fdf9f5 !important; }
+.ppv-band .ppv-pill { font-size: 10px; background: rgba(253, 249, 245, 0.18); color: #fdf9f5; box-shadow: none; }
+.ppv-band .ppv-bandh { margin: 0; font-family: var(--ppv-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(253, 249, 245, 0.72); white-space: nowrap; }
+.ppv-band .ppv-bandh b { color: #fdf9f5; font-weight: 700; }
+.ppv-band--btn { width: 100%; border: 0; cursor: pointer; text-align: left; font: inherit; }
+.ppv-band--btn .chev { display: inline-block; font-size: 18px; transition: transform 0.15s; }
+.ppv-band--btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .ppv-band--btn .chev { transition: none; } }
+.ppv-pksec { display: flex; flex-direction: column; gap: 14px; }
+/* ── nothing in use (E4) ── */
+.ppv-nonelive { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; border-radius: 14px; box-shadow: var(--ppv-shadow); padding: 16px 20px; }
+.ppv-nonelive b { display: block; font-family: var(--ppv-type); font-weight: 400; font-size: 20px; }
+.ppv-nonelive p { margin: 4px 0 0; font-size: 14.5px; color: var(--ppv-muted); max-width: 60ch; }
 .ppv-f { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .ppv-f label { font-family: var(--ppv-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ppv-muted); font-weight: 600; }
 .ppv-f .req { color: var(--ppv-ms); }
@@ -167,11 +180,10 @@
 @media (prefers-reduced-motion: reduce) { .ppv-retired-h .chev { transition: none; } }
 
 /* ── the rail: materials (the card is PageRail's) ── */
-.ppv-tray { min-height: 150px; padding: 22px 20px 18px; }
-.ppv-page .ppv-tray h2 { position: relative; z-index: 2; margin: 0; font-family: var(--ppv-type) !important; font-weight: 400; font-size: 34px; line-height: 1; }
-.ppv-tray .sum { position: relative; z-index: 2; font-family: var(--ppv-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 12px; max-width: 190px; line-height: 1.7; }
-.ppv-tray .sum b { font-weight: 700; }
-.ppv-peek { position: absolute; right: -14px; bottom: -36px; width: 102px; height: auto; z-index: 1; pointer-events: none; }
+/* v2.1 (E2): the title and the talon-and-pile art, at minimal height. The tray (PageRail's) clips. */
+.ppv-tray { box-sizing: border-box; min-height: 80px; padding: 24px 20px 18px; }
+.ppv-page .ppv-tray h2 { position: relative; z-index: 2; margin: 0; font-family: var(--ppv-type) !important; font-weight: 400; font-size: 30px; line-height: 1; }
+.ppv-pile { position: absolute; top: 0; right: 6px; width: 150px; height: auto; z-index: 1; pointer-events: none; }
 .ppv-rbody { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .ppv-rhint { font-size: 13px; line-height: 1.45; margin: 0 2px; padding: 9px 11px; border-radius: 10px; background: var(--ppv-parch-2); }
 .ppv-rhint--quiet { background: transparent; padding: 0 2px; color: var(--ppv-muted); }

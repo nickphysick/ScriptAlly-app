@@ -106,8 +106,14 @@ export const lockLine = (sentAt: string): string =>
   `Letter, synopsis and version fixed since first sent on ${shortDate(sentAt)}, so your records stay true. Duplicate it to try a different mix.`;
 
 /**
- * The hero art (D8) — Nick's supplied PNG, PADDED ON PURPOSE (transparent space above the figure) so
- * `object-fit: contain` draws it small enough to clear the one-line title. A sized copy of the
- * 2791×2633 source at the same aspect, never trimmed; `version` is the copy's sha256 prefix.
+ * The hero art (v2.1, E3) — Nick's boxes image: the Archivist carrying a tall stack of archive boxes.
+ * Supplied transparent and TRIMMED at 560×696; it draws about 276 tall and clears the one-line title
+ * without the v2 art's padding (S6). `version` is the file's sha256 prefix.
  */
-export const PACKAGES_HERO = { src: "/images/packages/packages-hero-archivist.png", version: "e3775bcb", width: 600, height: 566 } as const;
+export const PACKAGES_HERO = {
+  src: "/images/packages/packages-hero-boxes.png", version: "aee79d51", width: 560, height: 696,
+  alt: "The Archivist carrying a tall stack of archive boxes",
+} as const;
+
+/** The Materials tray's art (v2.1, E2): the talon and the pile. Decorative; the tray clips it. */
+export const MATERIALS_PILE = { src: "/images/packages/materials-tray-pile.png", version: "47929d27", width: 400, height: 403 } as const;
