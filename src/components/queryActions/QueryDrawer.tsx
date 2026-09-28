@@ -79,7 +79,10 @@ export function QueryDrawer() {
   const close = useCallback(() => {
     const r = currentDrawerRequest();
     setOpen(false);
-    window.setTimeout(() => { closeQueryDrawer(); r?.onCancel?.(); }, 240);
+    /* ⚠️ ONLY THE REQUEST THAT ASKED TO CLOSE IS CLOSED. The slide-out takes 240ms, and a drawer
+       opened inside that window (a door clicked straight after Cancel) is a NEW request: closing
+       whatever is current then shut the new one as it arrived (packages-journey, 28 Sep). */
+    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, 240);
   }, []);
 
   const switchTo = useCallback((mode: DrawerMode, preset?: DrawerPreset) => {

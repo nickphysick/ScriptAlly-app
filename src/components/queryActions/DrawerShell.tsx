@@ -71,6 +71,7 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
   escRef.current = () => {
     if (openCal) { setOpenCal(null); return; }
     if (confirm) { setConfirm(false); return; }
+    if (view.leave) { view.leave.cancel(); return; }
     requestClose();
   };
   useEffect(() => {
@@ -193,6 +194,7 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
                 ) : (
                   <div className="qad-gate ok" data-qad-verdict="ok"><b>Ready to {view.verb}</b><span>Nothing looks out of place.</span></div>
                 )}
+                {view.reviewNote ?? null}
                 <h5>YOUR ANSWERS</h5>
                 {view.steps.map((s, i) => {
                   const st = state(i);
@@ -223,6 +225,13 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
           {view.pickOnly ? null : <button type="button" className={`qad-save${busy ? " busy" : ""}`} disabled={primaryDisabled} onClick={primary} data-qad-primary>{primaryLabel}</button>}
           {view.ok && cur < last - 1 && !curBlocked ? <button type="button" className="qad-skip" onClick={() => go(last)}>Review</button> : null}
           <button type="button" className="qad-cancel" onClick={requestClose}>Cancel</button>
+          {view.leave && !confirm ? (
+            <div className="qad-conf" data-qad-discard data-qad-leave>
+              <span><b>{view.leave.title}</b>{view.leave.sub}</span>
+              <button type="button" className="keep" onClick={view.leave.cancel}>Keep editing</button>
+              <button type="button" className="disc" onClick={() => { const go = view.leave!.go; view.leave!.cancel(); onCancel(); go(); }}>{view.leave.button}</button>
+            </div>
+          ) : null}
           {confirm ? (
             <div className="qad-conf" data-qad-discard>
               <span><b>Discard this query?</b>What you've entered will be lost.</span>

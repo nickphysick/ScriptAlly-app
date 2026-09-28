@@ -209,7 +209,17 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
 export type DismissType = "permanent" | "fixed snooze" | "custom date" | "lift";
 
 /** Query actions v1 — additive options for `addQuery`: the seed's event key and its details line. */
-export interface AddQueryOpts { eventKey?: EventKey; details?: string }
+export interface AddQueryOpts {
+  eventKey?: EventKey;
+  details?: string;
+  /**
+   * Stamp the attached package's `firstSentAt` when it has none — the same lock `setQueryPackage`
+   * sets for the pane (packages-journey §A2, 28 Sep). ⚠️ ONE-WAY UNDER TODAY'S PACKAGE RULES: an
+   * undo of the log cannot lift it. Nick's ruling: stamp now; Part B, which owns package rules,
+   * lets an undo lift a stamp no query still points at.
+   */
+  stampPackage?: boolean;
+}
 
 interface DbContextType {
   currentUser: User | null;
@@ -2456,7 +2466,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     try {
-      await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
+      /* The stamp rides the SAME batch as the query it accompanies (the packageLock law): a package
+         is never locked with nothing sent. Asked for only when unstamped — a re-stamp is denied by
+         the rules, and a denial would fail the whole batch, the query with it. */
+      const stampTarget = opts?.stampPackage && q.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        const batch = writeBatch(db);
+        batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
+        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
+        await batch.commit();
+      } else {
+        await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
+      }
 
       const seeded = seedActivities();
       const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";

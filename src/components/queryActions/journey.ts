@@ -64,6 +64,13 @@ export interface JourneyView {
    * would be wrong the moment a query is picked.
    */
   pickOnly?: boolean;
+  /** A box the review shows under its verdict, above YOUR ANSWERS — Log's "This is exactly your ‹name› package" (§A2). */
+  reviewNote?: React.ReactNode;
+  /**
+   * The journey asks to LEAVE rather than to discard — "Leave this query to make a package?" (§A1).
+   * The shell draws its own confirm bar with this wording; Leave closes the drawer and then calls `go`.
+   */
+  leave?: { title: string; sub: string; button: string; cancel: () => void; go: () => void } | null;
   /** The writer has entered something — a scrim click shakes rather than closes. */
   dirty: boolean;
   /** Closing asks first ("Discard this query?") — Log a query once an agent is chosen. */
