@@ -13,6 +13,8 @@ export interface DockTimelineEvent {
   key: string;
   label: string;
   when: string;
+  /** A reconstruction, drawn as "Recorded from the imported status" with a drained mark (28 Sep). */
+  reconstructed?: boolean;
   /**
    * ⚠️ EVERYTHING BELOW IS OPTIONAL AND ABSENT WHERE THE RECORD IS SILENT (journeys pack, Phase 2).
    * A row with no channel shows no channel; a row with no materials shows no chips. None of it is

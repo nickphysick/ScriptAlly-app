@@ -14,6 +14,7 @@
 import React, { useState, useRef } from "react";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { StatusDot } from "../StatusDot";
+import { RECONSTRUCTED_TITLE } from "../../lib/reconstructed";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus } from "../../lib/queryAmbient";
@@ -123,6 +124,12 @@ export interface RowSpec {
   /* ⚠️ NON-STATUS FAMILIES. Both borrow a glyph decoratively and neither enters the status dedupe:
      a nudge is the writer touching the agent, a holding reply is the agent touching back. */
   kind?: "nudge" | "holding";
+  /**
+   * A RECONSTRUCTION, NEVER A REAL EVENT (clean-up pass, 28 Sep): a starting step the migration
+   * wrote for a query whose log was empty. It reads "Recorded from the imported status", its mark
+   * is the drained ghost ring with no status fill, and the status it carries sits in row 2.
+   */
+  reconstructed?: boolean;
   status: QueryStatus;
   title: string;
   date?: string;
@@ -264,22 +271,26 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
   const statusRows: RowSpec[] = statusEvents.map((evt, i) => {
     const status = evt.type as QueryStatus;
     const baseTitle = TL_TITLES[status] || status;
-    const title = status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
+    const reconstructed = evt?.reconstructed === true;
+    const title = reconstructed ? RECONSTRUCTED_TITLE
+      : status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
     let sub: string | undefined;
     /* ⚠️ §3 · `Email`, NOT `via Email`. The qualifier already sits behind a `·` in row 1 — "Query
        sent · via Email" says the same thing twice, and the preposition was left over from the
        retired "Sent by …" line, where it was mid-sentence. `sendMethodLabel` capitalises for the
        same reason: the word is a method's NAME here, not a word in a clause. */
-    if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";
+    if (reconstructed) sub = baseTitle;
+    else if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";
     else if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED) sub = `${agent?.name?.split(" ")[0] || "The agent"} asked for ${status === QueryStatus.PARTIAL_REQUESTED ? "a partial" : "the full"}`;
     return {
       key: `s-${status}-${i}`,
+      ...(reconstructed ? { reconstructed: true } : {}),
       status,
       title,
       date: fmtShort(getTime(evt.createdAt)),
       sub,
       pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined,
-      subEditable: status === QueryStatus.QUERIED,
+      subEditable: status === QueryStatus.QUERIED && !reconstructed,
       activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",
@@ -504,8 +515,8 @@ export const TimelineRows: React.FC<{
       return (
         <TlEvent key={row.key} last={isLast} target={!!highlightId && row.activityId === highlightId}
           ghost={!!ghostId && row.activityId === ghostId} fresh={!!freshId && row.activityId === freshId}
-          mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
-          <div className="tl-rowbody">
+          mark={<StatusDot status={row.status} overrideSize={TL_MARK} ghost={!!row.reconstructed} />}>
+          <div className={`tl-rowbody${row.reconstructed ? " tl-recon" : ""}`} data-tl-reconstructed={row.reconstructed ? "" : undefined}>
             <div className="tl-r1">
               {/* ⚠️ §1 · THE TITLE IS PLAYFAIR AT `--tl-title`, THE ONE SIZE EVERY EVENT USES. It was
                   Inter 14/600 in a hardcoded near-black here, muted Inter in the projection and 12px

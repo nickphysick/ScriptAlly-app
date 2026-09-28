@@ -1347,159 +1347,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     })();
   }, [currentUser, versions, packages]);
 
-  // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
-  // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
-  useEffect(() => {
-    if (!currentUser || agents.length === 0 || activities.length === 0) return;
-
-    const backfill = async () => {
-      const missingActivities: (Omit<Activity, "id" | "userId"> & { id: string })[] = [];
-
-      // 1. Backfill Agent Added activities
-      for (const ag of agents) {
-        const hasAddActivity = activities.some(act => 
-          (act.id === `act-added-agent-${ag.id}`) ||
-          (act.activityType === ActivityType.AGENT_ADDED && act.description.includes(ag.name))
-        );
-
-        if (!hasAddActivity) {
-          missingActivities.push({
-            id: `act-added-agent-${ag.id}`,
-            activityType: ActivityType.AGENT_ADDED,
-            description: ag.name?.trim()
-              ? `Added ${ag.name} at ${ag.agency}`
-              : `Added ${ag.agency}`,
-            manuscriptId: "",
-            queryId: "",
-            date: ag.dateAdded || new Date().toISOString(),
-            details: ""
-          });
-        }
-      }
-
-      // 2. Backfill Manuscript Added activities
-      for (const ms of manuscripts) {
-        const hasAddActivity = activities.some(act => 
-          (act.id === `act-added-ms-${ms.id}`) ||
-          (act.activityType === ActivityType.MANUSCRIPT_ADDED && act.manuscriptId === ms.id)
-        );
-
-        if (!hasAddActivity) {
-          missingActivities.push({
-            id: `act-added-ms-${ms.id}`,
-            activityType: ActivityType.MANUSCRIPT_ADDED,
-            description: `Added new title ${ms.title} to your manuscripts`,
-            manuscriptId: ms.id,
-            queryId: "",
-            date: ms.createdDate || new Date().toISOString(),
-            details: ""
-          });
-        }
-      }
-
-      // 3. Heal queries whose AUTHORITATIVE per-query activity log is empty.
-      //    "Authoritative" = the per-query `activity` subcollection (the store derivation reads).
-      //    The old check judged against the global feed, so a query with a global-feed row but an
-      //    empty subcollection was skipped — leaving derivation to fall back to Queried. We now
-      //    judge and seed the SAME store, and only stamp activities (never write status;
-      //    recomputeQuery derives it).
-      for (const q of queries) {
-        if (q.status === QueryStatus.QUERIED) continue;
-
-        // Skip very-recently-changed queries — their own writers just logged in real time; the
-        // timer could otherwise race that write and duplicate it.
-        const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
-        let lastChangeMs = 0;
-        if (lastChangeRaw) {
-          if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
-          else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
-          else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
-          else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
-        }
-        if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
-
-        // Already has a status-bearing entry in the authoritative store? Leave it untouched (no dup).
-        let hasStatusBearing: boolean;
-        try {
-          const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
-          hasStatusBearing = sub.docs.some(d => {
-            const data = d.data();
-            return (
-              normalizeResultingStatus(data.resultingStatus) !== null ||
-              normalizeResultingStatus(data.type) !== null
-            );
-          });
-        } catch (err) {
-          // Never heal blind on a read error — that could create a duplicate.
-          console.error("[QueryHawk Backfill] Could not read per-query log; skipping heal:", err);
-          continue;
-        }
-        if (hasStatusBearing) continue;
-
-        // Seed one entry stamped with the CURRENT stored status, dated from the best available
-        // signal, so derivation reproduces exactly what the user already sees.
-        let dateVal = Date.now();
-        const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
-        if (rawDate) {
-          if (typeof rawDate === "string") dateVal = new Date(rawDate).getTime();
-          else if ((rawDate as any).seconds) dateVal = (rawDate as any).seconds * 1000;
-          else if (typeof (rawDate as any).toDate === "function") dateVal = (rawDate as any).toDate().getTime();
-          else if (rawDate instanceof Date) dateVal = rawDate.getTime();
-        }
-        const note = statusReconstructionNote(q.status);
-        /**
-         * ⚠️ THE ID IS SANITISED TO THE CHARSET THE RULES ACCEPT, AND IT WAS NOT.
-         *
-         * `isValidId` requires `^[a-zA-Z0-9_-]+$`. This id is built from the STATUS, and one status
-         * contains an ampersand — "Revise & Resubmit" produced
-         * `act-status-revise-&-resubmit-<qid>`, which the rule rejects. So the heal for EVERY R&R
-         * query was denied, permanently and silently: its per-query log was never seeded, so its
-         * derived state never computed, and the only trace was one console line.
-         *
-         * ⚠️ NO OTHER STATUS IS AFFECTED and no working id changes: every other status is letters
-         * and spaces, so the collapse below is a no-op for them. The R&R ids this replaces never
-         * existed to migrate, because none of those writes ever landed.
-         */
-        const healId = `act-status-${q.status.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${q.id}`;
-
-        try {
-          const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
-          const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
-          await setDoc(
-            doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
-            {
-              type: q.status,
-              resultingStatus: q.status,
-              createdAt: Timestamp.fromMillis(dateVal),
-              note,
-              queryId: q.id,
-              agentName,
-              manuscriptTitle,
-            },
-            { merge: true }
-          );
-          // Log changed → derive status/dates/flags from it. Stored status is unchanged.
-          await recomputeQueryOnline(currentUser.id, q.id);
-          console.log(`[QueryHawk Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
-        } catch (err) {
-          console.error("[QueryHawk Backfill] Online heal failed for query:", q.id, err);
-        }
-      }
-
-      if (missingActivities.length > 0) {
-        console.log(`[QueryHawk Backfill] Auto-healing ${missingActivities.length} missing activities.`);
-        for (const act of missingActivities) {
-          await addActivity(act);
-        }
-      }
-    };
-
-    const timer = setTimeout(() => {
-      backfill().catch(err => console.error("Error running database backfill", err));
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [currentUser, agents, activities, manuscripts, queries]);
+  /* ⚠️ THE RUNTIME REPAIR THAT LIVED HERE IS DELETED (clean-up pass, 28 Sep; Nick: "nothing is written
+     behind the writer's back after every change"). It re-ran 1.5s after ANY change to agents,
+     activities, manuscripts or queries, read every closed query's log each time, and wrote three
+     things: an "Added" row for an agent matched by NAME (so a renamed agent got a second one), an
+     "Added" row for a manuscript, and a status step for any query whose log had none — which
+     re-created steps the writer had just deleted.
+     - New records carry their own history: adding an agent writes `act-added-agent-<id>`, adding a
+       manuscript writes its row with the manuscript's id, and imports seed their starting status.
+     - The historical gaps are closed ONCE, by tests/e2e/migrateRecordCleanup.mts (reversible,
+       counted): a starting step flagged `reconstructed` for an empty log, and "Added" rows by id.
+     - Nothing remains to run "once per session": any backfill that ran on a reload would bring back
+       an "Added" row the writer deleted, which the ruling forbids. */
 
   // The timer-based "cleanupCorruptedData" self-healing script that used to live here is
   // retired. Status, the pipeline dates, revisionRound, and hasAgentResponded are now DERIVED
@@ -2279,7 +2138,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     if (writeSuccess) {
+      /* ⚠️ KEYED BY THE AGENT'S ID (clean-up pass, 28 Sep): the row is found by id, never by the name
+         in its sentence, so renaming the agent can never make it look missing and grow a second. */
       await addActivity({
+        id: `act-added-agent-${id}`,
         activityType: ActivityType.AGENT_ADDED,
         description: newAg.name?.trim()
           ? `Added ${newAg.name} at ${newAg.agency}`

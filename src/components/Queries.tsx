@@ -1656,7 +1656,7 @@ export const Queries: React.FC<{
    * and the confirm names both, because removing one would strand the other.
    *
    * ⚠️ BOTH STORES ARE CLEARED DIRECTLY, NOT THROUGH `deleteActivity`. That finds its target in the
-   * FEED, and a self-heal rung (`act-status-…`) is written only to the query's own log — the fault
+   * FEED, and a reconstructed step (`act-status-…`) lives only in the query's own log — the fault
    * v1 met on the late reply. The undo is the drawer's SNAPSHOT, so it puts back exactly the
    * documents that were there, whichever store held them.
    */
@@ -1696,14 +1696,8 @@ export const Queries: React.FC<{
       await deleteDoc(doc(db, "users", uid, "activities", id));
     }
     await recomputeQueryById(uid, q.id);
-    /* ⚠️ THE SELF-HEAL CAN RE-CREATE A RUNG FOR THE STATUS IT SAW BEFORE THE RECOMPUTE LANDED. Any
-       `act-status-…` rung that was not in the snapshot is that race, not the writer's record. */
-    const log = await getDocs(collection(db, "users", uid, "queries", q.id, "activity"));
-    const healed = log.docs.filter((x) => x.id.startsWith("act-status-") && !snap.docs.has(x.ref.path));
-    if (healed.length) {
-      for (const h of healed) { await deleteDoc(h.ref); await deleteDoc(doc(db, "users", uid, "activities", h.id)); }
-      await recomputeQueryById(uid, q.id);
-    }
+    /* The re-delete that stood here is gone with the runtime repair it chased (clean-up pass,
+       28 Sep): nothing writes a step behind the writer's back now, so a deleted step stays deleted. */
     const after = await getDoc(doc(db, "users", uid, "queries", q.id));
     const status = String(after.data()?.status ?? "");
     const ag = agents.find((a) => a.id === q.agentId);

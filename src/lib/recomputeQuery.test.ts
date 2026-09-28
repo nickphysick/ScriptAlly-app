@@ -242,7 +242,10 @@ describe('single-writer lock — the derived date fields', () => {
   // interface). Reads are `q.<field>` and the Query type declares `<field>?:` — neither matches
   // the pattern, so the sweep flags writers only.
   const SRC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-  const ALLOWED = new Set(['lib/queryDerivation.ts', 'lib/recomputeQuery.ts']);
+  /* retargeted (clean-up pass, 28 Sep): the pure half of the writer moved to recomputeFields.ts so
+     node scripts run the same derivation; it is the same writer, now in three files, and the law —
+     nothing outside the derivation writes these keys — is unchanged */
+  const ALLOWED = new Set(['lib/queryDerivation.ts', 'lib/recomputeQuery.ts', 'lib/recomputeFields.ts']);
   const offendersFor = (field: string): string[] => {
     const pattern = new RegExp(`${field}\\s*:`);
     const offenders: string[] = [];

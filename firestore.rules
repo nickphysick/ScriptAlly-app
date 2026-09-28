@@ -580,8 +580,12 @@ service cloud.firestore {
           // record was denied while R&R/offer/no-reply passed. See reports/query-respond-nudge.md.
           'materialsType', 'materialsQuantity', 'fullVersionSent', 'feedbackType',
           // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
-          'eventKey'
+          'eventKey',
+          // Clean-up pass (28 Sep): a starting step the migration reconstructed for a query whose log
+          // was empty. Only `true` is valid — absence is the only way to say "a real event".
+          'reconstructed'
         ])
+        && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
         && data.type is string && data.type.size() <= 128
         && (data.createdAt is timestamp || data.createdAt is string)
         && data.note is string && data.note.size() <= 16384
