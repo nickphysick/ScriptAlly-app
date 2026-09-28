@@ -800,6 +800,22 @@ export interface Query {
   sentPackageId?: string;
   sentMaterials?: string;
   sentVersions?: string[];
+  /* PACKAGE EDITIONS (docs/contracts/package-editions.md §C3, 28 Sep) — how the materials were
+     recorded, for life. Flat, like everything above. Absent on a query written before editions:
+     read through `sentRecordOf` (lib/queryActions/sentRecord.ts), which is the one reader and
+     supplies the migration's own defaults, so an unmigrated query reads exactly as a migrated one. */
+  /** `'package'` · `'individual'` · `'unrecorded'` (imported, or not known). */
+  sentHow?: "package" | "individual" | "unrecorded";
+  /** Set only when `sentHow === 'package'`, beside `sentPackageId`. */
+  sentPackageEdition?: number;
+  /** Set only when `sentHow === 'individual'` and the writer started from a package, then changed a piece. */
+  basedOnPackageId?: string;
+  basedOnPackageEdition?: number;
+  /** For "based on" only: `"Sample: first 3 chapters → first 10 pages"`. */
+  sentChanges?: string[];
+  /** Set when the writer corrected what was sent; `sentCorrectedFrom` is the old summary. */
+  sentCorrectedAt?: string;
+  sentCorrectedFrom?: string;
   /** The label of the last materials sent, e.g. "First 50 pages" — the date is the rung's. */
   lastSentLabel?: string;
   /** Logged as a second query to an agent this book was sent to before. */

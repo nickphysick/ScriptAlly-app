@@ -500,6 +500,16 @@ service cloud.firestore {
         && (data.get('sentPackageId', null) == null || (data.sentPackageId is string && data.sentPackageId.size() <= 128))
         && (data.get('sentMaterials', null) == null || (data.sentMaterials is string && data.sentMaterials.size() <= 1024))
         && (data.get('sentVersions', null) == null || (data.sentVersions is list && data.sentVersions.size() <= 10))
+        // PACKAGE EDITIONS (docs/contracts/package-editions.md §C3, 28 Sep) — how the materials were
+        // recorded. Flat and optional; absent means "written before editions", read as the migration's
+        // defaults by sentRecordOf.
+        && (data.get('sentHow', null) == null || data.sentHow in ['package', 'individual', 'unrecorded'])
+        && (data.get('sentPackageEdition', null) == null || (data.sentPackageEdition is int && data.sentPackageEdition >= 1 && data.sentPackageEdition <= 1000))
+        && (data.get('basedOnPackageId', null) == null || (data.basedOnPackageId is string && data.basedOnPackageId.size() <= 128))
+        && (data.get('basedOnPackageEdition', null) == null || (data.basedOnPackageEdition is int && data.basedOnPackageEdition >= 1 && data.basedOnPackageEdition <= 1000))
+        && (data.get('sentChanges', null) == null || (data.sentChanges is list && data.sentChanges.size() <= 10))
+        && (data.get('sentCorrectedAt', null) == null || (data.sentCorrectedAt is string && data.sentCorrectedAt.size() <= 64))
+        && (data.get('sentCorrectedFrom', null) == null || (data.sentCorrectedFrom is string && data.sentCorrectedFrom.size() <= 1024))
         && (data.get('lastSentLabel', null) == null || (data.lastSentLabel is string && data.lastSentLabel.size() <= 256))
         && (data.get('requery', null) == null || data.requery is bool)
         && (data.get('requestFrom', null) == null || (data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 10000000))
@@ -968,7 +978,10 @@ service cloud.firestore {
             'sentPackageId', 'sentMaterials', 'sentVersions', 'lastSentLabel', 'requery',
             'requestFrom', 'requestFromUnit', 'requestSynopsis', 'closePlan', 'nrmnOverride',
             'offerRefQueryId', 'offerTold', 'offerReply', 'offerToldOn', 'offerCall', 'offerCallOn',
-            'withdrawTold', 'agentRecheckOn'
+            'withdrawTold', 'agentRecheckOn',
+            // Package editions (§C3, 28 Sep) — how the materials were recorded.
+            'sentHow', 'sentPackageEdition', 'basedOnPackageId', 'basedOnPackageEdition',
+            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom'
           ])
         );
 
