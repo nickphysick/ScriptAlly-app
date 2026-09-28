@@ -1122,8 +1122,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       /* SUBMISSION PACKAGES JOINED ON 27 SEP (packages v2, the same ruling): full header as the first
          row of its own group, grid masthead null. 4 → 5. */
       ["Submission packages", "../SubmissionPackages.tsx"],
+      /* THE TO-DO LIST JOINED ON 28 SEP (to-do list v2, design-refs/todo-list-v2.html): the shared
+         full header is the first row of its own group, beside the desk rail. 5 → 6. */
+      ["To-do list", "../todo/ToDoPage.tsx"],
     ] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(5);
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(6);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");

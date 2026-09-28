@@ -50,15 +50,19 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
     expect(layoutCss).toContain("--tdb-chrome-gap"); // named in the warning, so the tie is stated
   });
 
-  it("ALL THREE pages stand on the SAME component", () => {
-    /* Three since 9 Aug (tasks-consolidation P1) — Today is retired. The contract is unchanged:
-       every Tasks page wears the one layout, which is what makes their top edges agree. */
-    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+  it("the Calendar and the Noteboard stand on the SAME component — the To-do list left it (v2)", () => {
+    /* ⚠️ TWO SINCE 28 SEP (to-do list v2). The To-do list opens with the SHARED full header over its
+       own group, beside the desk rail — the Contact list's and the Query Centre's arrangement — so
+       it no longer wears the family's layout, and its top edge is held by the shared header's own
+       locks (pageHeaderV2) rather than by this one. The two that remain still agree by
+       construction. */
+    for (const [name, src] of [["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
       expect(src, name).toContain("<TasksPageLayout");
       expect(src, name).toContain('from "./TasksPageLayout"');
     }
-    // and it does not IMPORT the retired header any more (supersession comments may still name it)
-    expect(listPage).not.toContain('from "../shell/PageHeader"');
+    expect(listPage).not.toContain("<TasksPageLayout");
+    expect(listPage).toContain('from "../shell/PageHeader"');
+    expect(listPage).toContain('variant="full"');
   });
 });
 

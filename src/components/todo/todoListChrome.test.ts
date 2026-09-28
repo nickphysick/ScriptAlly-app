@@ -57,7 +57,9 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   it("the page names itself for its breadcrumb", () => {
     /* ⚠️ Re-anchored (tasks-pages P1): the header block is TasksPageLayout's now — the page hands
        it the title/subtitle and renderTools feeds its tool row. Same law, new home. */
-    expect(chrome).toContain("<TasksPageLayout");
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the header is the SHARED full header now, the first row of
+       the page's own group — same law, the page names itself in the crumb's words. */
+    expect(chrome).toContain('variant="full"');
     expect(chrome).toContain('title="To-do list"');
     /* ⚠️ THE PROSE SUBTITLE IS RETIRED (tasks-consolidation P2) AND THE STAT CHIPS SAY IT NOW.
        `boardSubtitleCopy(boardFigures(boardCols))` and `taskStats(boardCols, …)` state the same
@@ -68,7 +70,7 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     /* Scoped to the LIVE chrome: `renderHero` is the dormant bespoke hero, kept whole behind its
        red gate, and it legitimately still carries the old wording. Asserting over the whole file
        would fail on a thing that is deliberately preserved. */
-    expect(chrome.slice(chrome.indexOf("<TasksPageLayout"))).not.toContain("What’s on your desk?");
+    expect(chrome.slice(chrome.indexOf('data-todo-v2="page"'))).not.toContain("What’s on your desk?");
   });
 
   /* ⚠️ THE SIDE CONTAINER'S MOUNT IS RETIRED (tasks-consolidation P2, 9 Aug), AND THE TRIPWIRE

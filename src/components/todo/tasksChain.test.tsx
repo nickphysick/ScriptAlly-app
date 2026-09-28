@@ -135,26 +135,18 @@ describe("⚠️ NOTHING UNNAMED MAY SIT BETWEEN `.tpl-body` AND THE SCROLLER", 
     <MemoryRouter initialEntries={["/todo"]}><ToDoPage onNavigate={() => {}} /></MemoryRouter>,
   );
 
-  it("the populated page renders a zone at all (or this case proves nothing)", () => {
-    /* ⚠️ THE ZONE IS THE GRID NOW (corrections 2.1). `.tpl-zone` was the rail's wrapper and went
-       with it; `.l-body` was the list card's scroller and is only rendered in LIST view, which
-       stopped being the default when the ticket grid arrived — so this anchored on an element the
-       page no longer draws and reported "the zone must be in the rendered page" about a page full
-       of work. The chain rule is unchanged and still the point: exactly one designated scroller,
-       with nothing unnamed above it. */
-    expect(html).toContain("tkt-grid");
-  });
-
-  it("every element above the zone is an enumerated chain link", () => {
-    const above = ancestorClasses(html, "tkt-grid");
-    expect(above, "the zone must be in the rendered page").not.toBeNull();
-    const start = above!.indexOf("tpl-body");
-    expect(start, "`.tpl-body` must be an ancestor of the zone").toBeGreaterThan(-1);
-    /* everything from .tpl-body down to the zone — the segment where a stray block is fatal */
-    const between = above!.slice(start);
-    for (const cls of between) {
-      expect(CHAIN, `\`.${cls}\` sits in the scroll chain and is not an enumerated link`).toContain(cls);
-    }
+  /* ⚠️ RETIRED FOR THE TO-DO LIST (to-do list v2, 28 Sep). The chain this describe guards is the
+     Tasks family's FILL layout — a frame that never scrolls, with one designated zone inside it.
+     The To-do list left that layout: it is a page that scrolls in the workspace grid's own
+     `.wpg-scroll`, rows flowing and the desk rail sticky beside them, so there is no zone and no
+     chain above one. The claim that replaces it is the one asserted here — the page renders none
+     of the family's chain links — and the fill measurement moved to tests/e2e/todoV2.measure.ts
+     (header, group and rail measured on the rendered page). Calendar and Noteboard keep the
+     family chassis and their own locks (tasksLayout / tasksViewport). */
+  it("the To-do list renders none of the fill chain — it scrolls in the grid's own scroller", () => {
+    expect(html).toContain("tdv2-wpg");
+    expect(html).not.toMatch(/["\s`]tpl-body["\s`]/);
+    expect(html).not.toMatch(/["\s`]tpl-zone["\s`]/);
   });
 
   it("⚠️ AND THE FIXTURE PROVES THE TRIPWIRE TRIPS — the pre-fix markup fails it", () => {

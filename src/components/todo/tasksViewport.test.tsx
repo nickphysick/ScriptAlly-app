@@ -696,8 +696,13 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
   it("⚠️ ALL FOUR PAGES WEAR THE SAME COLUMN — including the two with no sidebar", () => {
     /* The old alignment test covered the sidebar pages only, which is precisely why this shipped:
        the two that diverged were the two nobody was checking. */
+    /* ⚠️ THE TO-DO LIST LEFT THIS COLUMN (to-do list v2, 28 Sep): it opens with the shared full header
+       over its own group and wears the shared column the workspace grid pays — asserted here as
+       the absence of the family's layout, and measured in tests/e2e/todoV2.measure.ts. */
+    expect(board).not.toContain("<TasksPageLayout");
+    expect(board).toContain('className="tdv2-wpg"');
     for (const [name, src] of [
-      ["To-do list", board], ["Calendar", cal], ["Noteboard", note],
+      ["Calendar", cal], ["Noteboard", note],
     ] as const) {
       /* ⚠️ RETARGETED by the `calendar` session (journey-bars pack, Phase 2), flagged in
          reports/calendar-bars.md. THE LAW IS UNCHANGED — all four pages wear the same column, and

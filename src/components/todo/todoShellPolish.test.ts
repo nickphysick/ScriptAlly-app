@@ -29,7 +29,11 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
        and the columns both live inside it by construction, so the page needs no hand wrapper. */
     const layout = readFileSync(join(__dirname, "TasksPageLayout.tsx"), "utf8");
     expect(layout).toContain('className="tdb-col tpl"');
-    expect(page).toContain("<TasksPageLayout");
+    /* ⚠️ THE TO-DO LIST LEFT THE FAMILY LAYOUT (to-do list v2, 28 Sep) — it opens with the shared full
+       header over its own group in the grid's own column. `.tdb-col` still governs the Calendar and
+       the Noteboard, so its rule is still held below; the page's own column is measured in
+       tests/e2e/todoV2.measure.ts. */
+    expect(page).not.toContain("<TasksPageLayout");
     const c = rule(".tdb-col");
     expect(c).toContain("max-width: var(--tdb-col-max)");
     /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,

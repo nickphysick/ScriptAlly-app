@@ -19,6 +19,13 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
+import { PageHeader } from "../shell/PageHeader";
+import { PageRail } from "../containers/PageRail";
+import { useQcLoad } from "../queries/centre/useQcLoad";
+import { V2Popover } from "./v2/V2Popover";
+import { V2Skeleton } from "./v2/V2Skeleton";
+import "./v2/todoV2.css";
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
 import { agentPrimary } from "../../lib/agentDisplay";
@@ -534,6 +541,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      none. Hoisted beside the trigger so the toolbar button and the panel read one expression. */
   const asideN = hiddenItems(
     currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length;
+  /* v2 — the Query Centre's loading clock: nothing for 150ms, the cover for at least 400ms, one
+     entrance. Called here, unconditionally, above every early exit. */
+  const v2Load = useQcLoad(collectionsReady);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   /* ⚠️ THE FOCUSED ROW AND THE COLLAPSED SECTIONS (tightened round, Phase 2) — both the PAGE's
      state, because the key effect and the list must read one truth: j/k walk exactly the rows a
@@ -1824,12 +1834,36 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             THREE things: a subtitle, one primary and the illustration slot. `mark` goes with the
             picture arriving, for the reason the Query Centre records at its own header: a glyph
             beside a commissioned illustration is a second picture competing with the first. */}
-        <TasksPageLayout
-          title="To-do list"
-          subtitle="Everything that's yours to do, and everything worth a look."
-          primary={{ label: "Add a task", onClick: () => openComposer("task") }}
-          illo={<IlloSlot className="tdb-illo" name="page · to-do" width={132} height={72} />}
+        {/* ══ TO-DO LIST v2 (design-refs/todo-list-v2.html) ══════════════════════════════════════
+            The page opts out of the grid's masthead and opens with the SHARED full header as the first
+            row of its own group — the Contact list's and the Query Centre's arrangement — so the desk
+            rail starts below the rule. The group is a page that SCROLLS (not the Tasks family's fill
+            layout): rows flow down the page and the rail sticks beside them. */}
+        <WorkspacePageGrid className="tdv2-wpg" scrollLabel="To-do list" masthead={null}>
+        <div
+          className={`tdv2-group${v2Load.loading ? " tdv2--loading" : ""}${v2Load.blank ? " tdv2--blank" : ""}${v2Load.entering ? " tdv2--enter" : ""}`}
+          data-todo-v2="page"
+          aria-busy={v2Load.loading || undefined}
         >
+          <PageHeader
+            variant="full"
+            title="To-do list"
+            description="Everything that's yours to do, and everything worth a look."
+            /* interim until the desk's composer lands (v2 Phase 6a), which replaces it */
+            primary={{ label: "Add a task", onClick: () => openComposer("task") }}
+            secondary={{ label: asideN ? `Set aside · ${asideN}` : "Set aside", onClick: () => setAsideOpen((o) => !o) }}
+            actionsPopover={asideOpen ? (
+              <V2Popover className="tdv2-asidepop" label="Set aside and tags" onClose={() => setAsideOpen(false)}>
+                <SetAsidePanel />
+              </V2Popover>
+            ) : null}
+            /* ⚠️ THE ART SLOT SHIPS EMPTY — the illustration is not ready. A box of the ref's size,
+               standing on the rule, with nothing in it and nothing claiming something is missing: the
+               PNG drops in later without a reflow. */
+            art={<span className="tdv2-artslot" data-todo-v2="art-slot" />}
+          />
+          <div className="tdv2-main" data-todo-v2="main">
+          {v2Load.loading ? <V2Skeleton /> : (
           <div className="tdb-centre">
           {/* ⚠️ SEVEN TILES AND ONE TOOLBAR, BOTH THE QUERY CENTRE'S (QC-chassis round, Phase 1).
               The tiles are `shared/StatTiles` — the markup extracted from `QueryStatTiles`, so
@@ -2219,8 +2253,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               against an Outstanding of 16 in production. Whoever re-places it fixes the units
               first; the note is in reports/STATE.md. Not fixed here: this pack is four fixes and
               a units change to a Pro surface is neither of them. */}
-          </div>{/* .tdb-centre */}
-        </TasksPageLayout>
+          </div>
+          )}
+          </div>{/* .tdv2-main */}
+          <PageRail
+            className="tdv2-rail"
+            label="Your desk"
+            trayClassName="tdv2-tray"
+            dataAttrs={{ "data-todo-v2": "rail" }}
+            tray={(
+              <>
+                <h3 className="tdv2-deskttl">Your desk</h3>
+                {/* the hawk-head slot — empty, at the ref's size, the same rule as the header's art */}
+                <span className="tdv2-hawkslot" aria-hidden="true" data-todo-v2="hawk-slot" />
+              </>
+            )}
+          />
+        </div>{/* .tdv2-group */}
+        </WorkspacePageGrid>
         {/* ⚠️ THE DRAWER IS THE GRID'S AND THE BOARD'S PANE (QC-chassis round, Phase 5), and it is
             the first adopter of `SlideOver` — the app's three other right-hand drawers each own a
             private fixed element, and a primitive nobody mounts is a fourth one wearing a shared

@@ -1,0 +1,160 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ══ TO-DO LIST v2 (ref design-refs/todo-list-v2.html, SHA 67da1fb4…) ═══════════════════════════
+ *
+ * Values are the ref's, measured off its own sheet (LAST declaration of each selector). Where the
+ * app already owns a value — the five state fills (`--state-*`, f12.css), the shared full header,
+ * the shared column's cap and gutter, the rail card — the app's wins and this sheet reads it.
+ *
+ * ⚠️ NO `var()` INSIDE `@keyframes` (it fails silently here) and NO `color-mix()`.
+ */
+
+/* ── the reset: 0-1-0, first, and scoped to the page's own content — never the shared header ── */
+.tdv2-main :where(span, p, div, label), .tdv2-rail :where(span, p, div, label) { font-family: inherit; }
+
+.tdv2-group {
+  --tdv2-ink: #1c130f;
+  --tdv2-ink-soft: #5c5048;
+  --tdv2-ink-faint: #8a7f76;
+  --tdv2-anthracite: #2a3a52;
+  --tdv2-anthracite-hov: #223044;
+  --tdv2-on-dark: #fdf9f2;
+  --tdv2-card: #ffffff;
+  --tdv2-hair: #e6e0d6;
+  --tdv2-hair-soft: #efeae1;
+  --tdv2-stone-edge: #d8d2c8;
+  --tdv2-blush: #f5e2da;
+  --tdv2-sk: #efe9e0;
+  --tdv2-shadow-card: 0 1px 2px rgba(28, 19, 15, 0.04), 0 6px 18px rgba(28, 19, 15, 0.06);
+  --tdv2-shadow-lift: 0 2px 6px rgba(28, 19, 15, 0.06), 0 18px 44px rgba(28, 19, 15, 0.14);
+  --tdv2-r-row: 14px;
+  --tdv2-serif: var(--sp-serif);
+  --tdv2-sans: Inter, system-ui, sans-serif;
+  --tdv2-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  column-gap: 28px;
+  row-gap: 0;
+  align-items: start;
+  min-width: 0;
+  padding-bottom: 60px;
+  color: var(--tdv2-ink);
+  font-family: var(--tdv2-sans);
+  font-size: 14px;
+}
+/* the shared full header is row 1 across BOTH tracks; the column and the rail share row 2, 24 below
+   the rule (the Contact list's and the Query Centre's arrangement) */
+.tdv2-group > .ph { grid-column: 1 / -1; grid-row: 1; }
+.tdv2-group > .tdv2-main { grid-column: 1; grid-row: 2; padding-top: 24px; min-width: 0; }
+.tdv2-group > .tdv2-rail { grid-column: 2; grid-row: 2; margin-top: 24px; }
+
+/* ⚠️ THE STACK IS A CONTAINER QUERY ON THE SCROLLER, NOT THE REF'S 1180px VIEWPORT QUERY — the ref's
+   page is the viewport and this one is the viewport less the sidebar. It stacks when the column
+   would fall under 572px (572 + 28 + 340), and the rail goes BELOW the list rather than vanishing:
+   it is the only place a task is added. */
+.tdv2-wpg .wpg-scroll { container-type: inline-size; container-name: tdv2; }
+@container tdv2 (max-width: 940px) {
+  .tdv2-group { grid-template-columns: minmax(0, 1fr); }
+  .tdv2-group > .tdv2-rail { grid-column: 1; grid-row: 3; position: static; max-height: none !important; }
+}
+
+/* ── the header's art slot: the ref's 250 × 132, standing on the rule, empty ── */
+.tdv2-artslot {
+  position: absolute; right: 0; bottom: 0;
+  display: block; width: 250px; height: 132px;
+  box-sizing: border-box;
+}
+
+/* ── the Set-aside panel under the header's action ── */
+.tdv2-pop {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 40;
+  background: var(--tdv2-card, #fff);
+  border: 1px solid var(--tdv2-hair, #e6e0d6);
+  border-radius: 14px;
+  box-shadow: var(--tdv2-shadow-lift);
+  overflow: hidden;
+}
+.tdv2-asidepop { width: 360px; max-height: 420px; overflow-y: auto; }
+
+/* ── the desk rail's tray (PageRail draws the card) ── */
+.tdv2-tray {
+  background: var(--tdv2-blush);
+  padding: 14px 16px 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: 72px;
+}
+.tdv2-deskttl {
+  font-family: var(--sp-type);
+  font-weight: 400;
+  font-size: 23px;
+  line-height: 1.3;
+  margin: 0 0 10px;
+  position: relative;
+  z-index: 2;
+  color: var(--tdv2-ink);
+}
+/* the hawk-head slot — the ref's 92px, bottom-right, empty until the art arrives */
+.tdv2-hawkslot { position: absolute; right: 4px; bottom: -8px; width: 92px; height: 54px; z-index: 1; }
+
+/* ── loading ── */
+.tdv2-sk { display: block; flex: none; border-radius: 5px; background: var(--tdv2-sk); }
+.tdv2-sk--r { border-radius: 50%; }
+.tdv2-sk-col { display: flex; flex-direction: column; min-width: 0; }
+.tdv2-sk-band { background: var(--tdv2-sk) !important; }
+.tdv2--blank .tdv2-sk { visibility: hidden; }
+.tdv2--loading .tdv2-tile, .tdv2--loading .tdv2-row { cursor: default; }
+
+@keyframes tdv2-arrive { 0% { opacity: 0; transform: translateY(5px); } 100% { opacity: 1; transform: translateY(0); } }
+.tdv2--enter .tdv2-tile, .tdv2--enter .tdv2-row, .tdv2--enter .tdv2-ghead {
+  animation: tdv2-arrive 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.tdv2--enter .tdv2-row:nth-child(2) { animation-delay: 0.03s; }
+.tdv2--enter .tdv2-row:nth-child(3) { animation-delay: 0.06s; }
+.tdv2--enter .tdv2-row:nth-child(4) { animation-delay: 0.09s; }
+.tdv2--enter .tdv2-row:nth-child(5) { animation-delay: 0.12s; }
+.tdv2--enter .tdv2-row:nth-child(n + 6) { animation-delay: 0.15s; }
+@media (prefers-reduced-motion: reduce) {
+  .tdv2--enter *, .tdv2--enter *::before, .tdv2--enter *::after { animation: none !important; }
+}
+
+/* ══ the three tiles (ref `.tiles`/`.tile`) ══════════════════════════════════════════════════ */
+.tdv2-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.tdv2-tile {
+  display: block; box-sizing: border-box; width: 100%;
+  background: var(--tdv2-card); border-radius: var(--tdv2-r-row); box-shadow: var(--tdv2-shadow-card);
+  padding: 0; overflow: hidden; text-align: left; border: 1.5px solid transparent;
+  font: inherit; color: inherit; cursor: pointer;
+  transition: box-shadow 0.16s, border-color 0.16s, transform 0.16s;
+}
+.tdv2-tile:hover { box-shadow: var(--tdv2-shadow-lift); transform: translateY(-1px); }
+.tdv2-tile.on { border-color: var(--tdv2-anthracite); }
+.tdv2-band { display: block; height: 5px; }
+.tdv2-tbody { padding: 14px 16px 13px; display: flex; align-items: flex-start; gap: 12px; }
+
+/* ══ the controls row (ref `.controls`) ═══════════════════════════════════════════════════════ */
+.tdv2-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+
+/* ══ row cards (ref `.rows`/`.row`) ══════════════════════════════════════════════════════════ */
+.tdv2-rows { display: flex; flex-direction: column; gap: 11px; }
+.tdv2-row {
+  position: relative; display: block; box-sizing: border-box; width: 100%;
+  background: var(--tdv2-card); border-radius: var(--tdv2-r-row); box-shadow: var(--tdv2-shadow-card);
+  overflow: hidden; cursor: pointer; text-align: left;
+  transition: box-shadow 0.16s, transform 0.16s;
+}
+.tdv2-row:hover { box-shadow: var(--tdv2-shadow-lift); transform: translateY(-1px); }
+.tdv2-inner {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1.5fr) minmax(0, 1fr) 128px 116px;
+  gap: 16px; align-items: center;
+  padding: 13px 16px 13px 14px;
+}
+.tdv2-row--sk .tdv2-inner { min-height: 44px; }
+.tdv2-sk-agent { flex-direction: row; align-items: center; gap: 10px; }
+.tdv2-sk-act { align-items: flex-end; }
