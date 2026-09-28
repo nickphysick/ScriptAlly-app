@@ -121,7 +121,10 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        {n}", so the strip was the same figure told twice, three inches apart — and it sat inside the
        content area, which is what made the page look pinched. The claim is unchanged: the populated
        page STATES its total. It just states it once. */
-    expect(html).toContain("All tasks");
+    /* ⚠️ THREE TILES SINCE TO-DO LIST v2 (28 Sep); the seeded task is YOUR task, so it lands in
+       Your move — the default tile — as a row card. */
+    expect(html).toContain("Your move");
+    expect(html).toContain("Chase or close");
     /* ⚠️ THE DEFAULT VIEW IS THE GRID NOW (QC-chassis round, Phase 3), so the seeded work arrives
        as a TICKET rather than a group head and a row. The claim this case makes is unchanged —
        *real work renders on the populated page* — and the footer above still states the count,
@@ -130,8 +133,9 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        mounted directly: `taskListWide.test.tsx` and `tasksKeys.test.tsx`, both of which render
        `TaskList` with groups and neither of which this change touches. Checked before retargeting,
        so this is not coverage quietly shrinking. */
-    expect(html).toContain("tkt-grid");
-    expect(html).toContain("Your task");                 // the ticket's own category tag
+    /* ⚠️ ROW CARDS SINCE TO-DO LIST v2 — the grid, the board and the list are retired as views. */
+    expect(html).toContain('data-todo-v2="row"');
+    expect(html).toContain("Your task");                 // the row's own category tag
     /* ⚠️ THE WHITE PANEL IS THE PORTED CARD — `.tlc` with its own `.l-body`. `tdg-panel` went
        with the retired list, and the claim is unchanged: the populated page draws a card. */
     /* ⚠️ THE CARD IS THE LIST'S, AND THE DEFAULT VIEW IS THE GRID (corrections 2.1). `.tlc listcard`
@@ -139,7 +143,6 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        default page draws any more, because wrapping the grid in it was the fault this correction
        removed. What this case is for is that the populated page renders REAL WORK, which the
        assertions above and below make on the tile, the grid and the seeded task's own words. */
-    expect(html).toContain("tkt-grid");
     expect(html).toContain("Redraft the opening chapter");
     /* ⚠️ THE SEAT IS ALWAYS THERE; THE SPLIT IS NOT (Fix 4). The seeded row is a writer's own
        task, whose TICK is the act — so it draws the seat and no control, which is the deliberate

@@ -834,29 +834,17 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
     expect(page).toContain("togglePill");
   });
-  it("filtered-empty is a RAIL state now, and the pane is not part of it", () => {
-    /* ⚠️ THE BRANCH ORDER THIS CASE PROTECTED IS GONE, AND ITS REASON WITH IT (Phase 4). It
-       asserted the no-match panel came BEFORE the body, so a narrowing that found nothing never
-       rendered as "nothing needs you". The panel no longer competes with the body at all: it sits
-       inside the rail, the workspace column renders beside it either way, and the desk states are
-       the only branches left above the split. What replaces the order check is a STRONGER claim —
-       that the empty state cannot reach the pane. */
-    const a = page.indexOf('className="tdw-rail"');
-    const b = page.indexOf('className="tdw-work"');
-    expect(a, "the rail marker is gone").toBeGreaterThan(-1);
-    expect(b, "the workspace marker is gone").toBeGreaterThan(a);
-    const rail = page.slice(a, b);
-    expect(rail).toContain("tdw-empty");
-    expect(page).toContain("const railEmpty = railGroups().length === 0;");
-    /* the desk states still replace the whole body — a first run has no list to put in a rail */
-    expect(page).toContain('desk === "new-desk" ? renderNewDesk()');
-    /* ⚠️ A PATTERN, NOT THE LITERAL (drawer round, Phase 1). The split's class became a template
-       — `tdw-split` plus `open` — so this read `indexOf(...) === -1` and asserted "before −1",
-       which no index can satisfy. The claim is that the desk states sit ABOVE the body; the shape
-       of the body's class attribute is no part of it. */
-    const splitAt = page.search(/className=\{?[`"]tdw-split/);
-    expect(splitAt, "the split's opening element").toBeGreaterThan(-1);
-    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(splitAt);
+  it("filtered-empty is the LIST's state, and the pane is not part of it (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the split, its rail and `railEmpty` are retired with the
+       views. The claim survives in its strong form — the empty state cannot reach the pane — because
+       the empty message is `V2Rows`' own and the drawer reads only the held card. The desk states
+       still sit ABOVE the body: a first run has no list to put a row in. */
+    expect(page).not.toContain("const railEmpty");
+    expect(page).toContain("<V2Rows");
+    const bodyAt = page.indexOf('className="tdv2-body"');
+    expect(bodyAt, "the v2 body's element").toBeGreaterThan(-1);
+    expect(page.indexOf('desk === "new-desk"')).toBeGreaterThan(-1);
+    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(bodyAt);
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move

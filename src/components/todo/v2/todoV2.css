@@ -136,6 +136,13 @@
 .tdv2-tile.on { border-color: var(--tdv2-anthracite); }
 .tdv2-band { display: block; height: 5px; }
 .tdv2-tbody { padding: 14px 16px 13px; display: flex; align-items: flex-start; gap: 12px; }
+.tdv2-gl { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; margin-top: 2px; color: var(--tdv2-ink); }
+.tdv2-gl svg { width: 17px; height: 17px; }
+.tdv2-lab { flex: 1; min-width: 0; display: block; }
+.tdv2-lab b { display: block; font-family: var(--tdv2-serif); font-size: 15.5px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
+.tdv2-sub { display: block; font-family: var(--tdv2-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--tdv2-ink-faint); line-height: 1.5; }
+.tdv2-num { font-family: var(--sp-type); font-size: 34px; line-height: 0.92; }
+.tdv2-empty { padding: 40px; text-align: center; color: var(--tdv2-ink-faint); }
 
 /* ══ the controls row (ref `.controls`) ═══════════════════════════════════════════════════════ */
 .tdv2-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }

@@ -47,9 +47,11 @@ const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/
    spelling-versus-claim fault: the anchor's claim is "the page's body opens here", and how its
    class is assembled is no part of it. The pattern accepts a literal or a template and is what
    this anchor should have been the first time it moved. */
+/* ⚠️ AND A FIFTH (to-do list v2, 28 Sep): the split is retired with the views; the body opens at
+   `.tdv2-body`. Same claim — everything above the body is the chrome. */
 const chrome = (() => {
-  const i = page.search(/<div className=\{?[`"]tdw-split/);
-  expect(i, "the split — the page's body — must exist for this slice to mean anything").toBeGreaterThan(-1);
+  const i = page.search(/<div className=\{?[`"]tdv2-body/);
+  expect(i, "the body must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();
 

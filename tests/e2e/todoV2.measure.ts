@@ -153,3 +153,47 @@ test.describe("phase 2 — anatomy", () => {
     expect(Math.abs(held.railLeft - loaded.railLeft)).toBeLessThan(1); bump();
   });
 });
+
+test.describe("phase 3 — three tiles", () => {
+  test("three tiles; sub-lines sum to headlines; the total is the sidebar badge's; each tile filters to its own", async ({ page }) => {
+    const scope = await openV2(page);
+    const read = () => page.evaluate((s) => {
+      const tiles = [...document.querySelectorAll(`${s} [data-todo-v2="tiles"] .tdv2-tile`)] as HTMLElement[];
+      return tiles.map((t) => ({
+        tile: t.dataset.tile,
+        on: t.classList.contains("on"),
+        n: Number(t.querySelector('[data-todo-v2="tile-num"]')?.textContent),
+        sub: t.querySelector('[data-todo-v2="tile-sub"]')?.textContent ?? "",
+      }));
+    }, scope);
+    const tiles = await read();
+    expect(tiles.map((t) => t.tile)).toEqual(["move", "chase", "house"]); bump();
+    /* Your move is the default */
+    expect(tiles.find((t) => t.on)?.tile).toBe("move"); bump();
+    /* each sub-line's figures sum to its headline (the single-category tile states no figures) */
+    for (const t of tiles.slice(0, 2)) {
+      const nums = (t.sub.match(/\d+/g) ?? []).map(Number);
+      expect(nums.length, `${t.tile}: "${t.sub}"`).toBe(2);
+      expect(nums[0] + nums[1], `${t.tile}: "${t.sub}"`).toBe(t.n); bump();
+    }
+    /* derived, not stored: the three sum to the SIDEBAR BADGE, a separate derivation of the same board */
+    const badge = await page.evaluate(() => {
+      const row = [...document.querySelectorAll("a, button")].find((e) => /^\s*To-do list/.test(e.textContent || "") && e.closest("nav, aside"));
+      const m = row?.textContent?.match(/(\d+)\s*$/);
+      return m ? Number(m[1]) : null;
+    });
+    expect(badge, "the sidebar badge was not found").not.toBeNull();
+    expect(tiles.reduce((n, t) => n + t.n, 0)).toBe(badge); bump();
+    /* each tile: a NON-EMPTY population first, then every row belongs to it */
+    let entered = 0;
+    for (const t of tiles) {
+      if (t.n === 0) continue;
+      await page.click(`${scope} .tdv2-tile[data-tile="${t.tile}"]`);
+      const rows = await page.evaluate((s) => ([...document.querySelectorAll(`${s} [data-todo-v2="row"]`)] as HTMLElement[]).map((r) => r.dataset.tile), scope);
+      expect(rows.length, `${t.tile} showed ${rows.length} rows over a count of ${t.n}`).toBe(t.n); bump();
+      expect(rows.every((x) => x === t.tile), `${t.tile}: ${rows.join(",")}`).toBe(true); bump();
+      entered += 1;
+    }
+    expect(entered, "fewer than two tiles had anything in them — the fixture cannot prove the filter").toBeGreaterThanOrEqual(2); bump();
+  });
+});

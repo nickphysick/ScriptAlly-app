@@ -1030,48 +1030,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
   });
 
-  it("⚠️ THE RAIL SCROLLER IS THE EXISTING ZONE RELOCATED, never a second one", () => {
-    /* One overflow primitive on this page family — the fault `.tpl-zone` was extracted to fix.
-       The rail declares no overflow of its own; it is a flex column and the zone inside it
-       scrolls, exactly as `.tpl-body` did before the split. */
-    /* ⚠️ RE-POINTED — THE RAIL IS NOT A CARD ANY MORE, AND IT WAS ONE TOO MANY (drawer round,
-       Phase 1). It carried the border, the 14px radius and the clip from when it WAS the bare
-       column; the ported `.tlc` then brought its own 1px, 12px and shadow, so the page drew two
-       hairlines a pixel apart and clipped the inner card's lift away. Measured at 1440: rail left
-       282 · card left 283 · rail right 1382 · card right 1381.
-
-       ⚠️ THE CASE'S OWN CLAIM IS UNCHANGED AND IS NOW STATED WITHOUT AN EXCEPTION. It is about
-       there being ONE overflow primitive on this page family: the rail declares no overflow of
-       its own and the zone inside it scrolls. That used to need a carve-out for the card's edge;
-       with the frame on `.tlc`, where it belongs, the rule holds flat. */
-    expect(rule(splitCss, ".tdw-rail {"), "the rail is clipping again")
-      .not.toContain("overflow");
-    expect(drawsAnEdge(rule(splitCss, ".tdw-rail {")), "the rail grew a frame again").toEqual([]);
-    /* ⚠️ AND THE CARD STILL HAS ONE — the frame MOVED, it was not deleted. Asserting only the
-       absence would pass on a page with no card at all, which is the vacuous half of every
-       retirement lock. */
-    /* ⚠️ RETARGETED TO THE CLAIM, NOT THE NUMBER (three-views round, Phase 2). The law is that the
-       list card HAS the frame the rail gave up; the radius was a spelling standing in for it, and
-       the contract's `.listv` draws 16 where this pinned 12. A lock that fails on a legitimate
-       retone trains the next reader to rebaseline it without looking. */
-    expect(listCardCss, "the list card lost the frame the rail gave up").toMatch(/border-radius:\s*\d+px/);
-    expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
-    /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
-       one relocated scroller, which is what this case is about */
-    expect(board).toContain('<div className="tdw-rail">');
-    /* ⚠️ ON DECLARATIONS. The note explaining the retirement NAMES `renderRailTools`, so a raw read
-       goes red on a correct file — this repo's most-repeated lock fault, met again. */
-    expect(board.replace(/\/\*[\s\S]*?\*\//g, ""), "the rail grew a toolbar again")
-      .not.toContain("renderRailTools");
-    /* ⚠️ RETARGETED FROM THE SPELLING TO THE CLAIM (corrections 2.1). This pinned the literal
-       `) : renderList()}`, which stopped existing when the grid and the board became SIBLINGS of the
-       list on the page ground rather than a `body` inside its card. The claim is that the rail's
-       narrowed-to-nothing branch falls through to a rendered view — not which view, and not how the
-       ternary is spelled. */
-    expect(board.replace(/\s+/g, " "), "the rail's empty branch no longer falls through to a view")
-      .toMatch(/\) : todoView === "grid" \? renderGrid\(\)/);
-    expect(board, "the list is no longer one of the views the rail can fall through to")
-      .toContain("renderList()");
+  it("⚠️ THE RAIL SCROLLER IS RETIRED WITH THE SPLIT (to-do list v2) — the page has one scroller", () => {
+    /* ⚠️ RETIRED (to-do list v2, 28 Sep). This held that the split's rail declared no overflow of its
+       own and the zone inside it scrolled — one overflow primitive for the family. The To-do list
+       no longer renders the split; it scrolls in the workspace grid's own `.wpg-scroll`, which is
+       measured in tests/e2e/todoV2.measure.ts. The claim that survives is that the page does not
+       bring a scroller of its own back. */
+    const b = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(b).not.toContain('className="tdw-rail"');
+    expect(b).not.toContain('className="tpl-zone"');
   });
 
   /**
@@ -1111,23 +1078,14 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * thing without hiding what you were reading. `openDock` is still the one entrance and the dock
    * is still the one recording surface — nothing in the rail records anything.
    */
-  it("the dock mounts INSIDE the workspace pane, and the list keeps the rail", () => {
-    /* ⚠️ THE SPLIT'S CLASS IS A TEMPLATE NOW (drawer round, Phase 1) — `tdw-split` plus `open`
-       when a task is docked — so its literal stopped matching an element that had not moved. The
-       claim is the ORDER of three mounts, which is a fact about the tree and not about how a
-       class string is assembled; the other two are still literals because they still are. */
-    const splitAt = board.search(/className=\{?[`"]tdw-split/);
-    expect(splitAt, "the split's opening element").toBeGreaterThan(-1);
-    for (const anchor of ['className="tdw-rail"', 'className="tdw-work"', "<TaskPane"]) {
-      expect(board, anchor).toContain(anchor);
-    }
-    expect(splitAt).toBeLessThan(board.indexOf('className="tdw-rail"'));
-    expect(board.indexOf('className="tdw-rail"')).toBeLessThan(board.indexOf('className="tdw-work"'));
-    expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TaskPane"));
-    /* still exactly one dock mount and one entrance function */
-    /* ⚠️ BOUNDED — `<TaskPane` is a PREFIX of `<TaskPaneBody`, which the mount also renders, and the
-       unbounded form counted two mounts of one component. The house rule about prefix-matching a
-       class name applies to a component name identically. */
+  it("the dock mounts in ONE host — the drawer over the list (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the split, its rail and its workspace column are retired
+       with the views. The pane has one host, the drawer, and the order that matters is the body
+       first and the drawer after it. Still exactly one mount and one entrance function. */
+    expect(board).not.toMatch(/className=\{?[`"]tdw-split/);
+    const body = board.indexOf('className="tdv2-body"');
+    expect(body, "the v2 body").toBeGreaterThan(-1);
+    expect(body).toBeLessThan(board.indexOf("<SlideOver"));
     expect(board.match(/<TaskPane[\s>]/g) ?? []).toHaveLength(1);
     expect(board.match(/function openDock/g) ?? []).toHaveLength(1);
   });
@@ -1183,8 +1141,9 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
        HELD card, which is the whole claim — but the spelling could not say so.
        Asserted as: every host gates on `paneCard`, and NONE of them gates on `docked.card`, which
        is the fault the case exists for (a narrowing would blank the workspace). */
-    expect(board, "the split's host no longer gates on the held card")
-      .toContain("todoView === \"list\" && paneCard ? (");
+    /* ⚠️ ONE HOST SINCE TO-DO LIST v2 (28 Sep): the split is retired with the views, so the pane
+       has exactly one host — the drawer — and it still gates on the HELD card. */
+    expect(board, "the retired split host came back").not.toContain('todoView === "list" && paneCard');
     expect(board, "the drawer's host no longer gates on the held card")
       .toContain("open={!!paneCard}");
     expect(board, "a host gates on docked.card, so a narrowing would blank the workspace")
@@ -1226,20 +1185,14 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
     expect(board).toContain("const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? \"\"}`;");
   });
 
-  it("⚠️ THE EMPTY MESSAGE IS INSIDE THE RAIL, and the workspace column renders beside it", () => {
-    const ra = board.indexOf('className="tdw-rail"');
-    const rb = board.indexOf('className="tdw-work"');
-    expect(ra, "the rail marker is gone").toBeGreaterThan(-1);
-    expect(rb, "the workspace marker is gone").toBeGreaterThan(ra);
-    const rail = board.slice(ra, rb);
-    expect(rail).toContain("tdw-empty");
-    expect(rail).toContain("renderList()");
-    /* and it is read from the groups the rail actually draws — not a parallel predicate */
-    expect(board).toContain("const railEmpty = railGroups().length === 0;");
-    /* ⚠️ ON DECLARATIONS, NOT ON PROSE — this file's own helper carries the reason: these rules
-       explain themselves by QUOTING what they replaced, so a raw substring match reads the
-       comment and fails a file that is correct. It caught me on this very line. */
-    expect(board.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("anyVisible");
+  it("⚠️ THE EMPTY MESSAGE IS THE LIST'S, and the drawer cannot see it (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the split and its rail are retired with the views. The
+       law is unchanged — a narrowing that matches nothing is a LIST fact and must never blank the
+       workspace — and it now holds by construction: the empty state is `V2Rows`' own, and the
+       drawer is a sibling that reads only the held card. */
+    expect(board).toContain("<V2Rows");
+    expect(board).toContain("open={!!paneCard}");
+    expect(board).not.toContain('className="tdw-rail"');
   });
 
   it("⚠️ THE PANE'S QUEUE IS THE NARROWED SET, so ↑↓ never walk onto a card the rail is hiding", () => {
