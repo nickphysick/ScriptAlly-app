@@ -63,8 +63,9 @@
 
 /* ══ THE `cal-` COLLISION, NOW MOSTLY WITHOUT A SUBJECT ═════════════════════════════════════
  *
- * `todo.css` declares `.cal-d`, `.cal-dow`, `.cal-f`, `.cal-grid`, `.cal-h` and `.cal-nav` for the
- * RecordingCalendar, and a CSS import is global whatever mounts — so this page used to fight three
+ * `todo.css` declared `.cal-d`, `.cal-dow`, `.cal-f`, `.cal-grid`, `.cal-h` and `.cal-nav` for the
+ * RecordingCalendar (deleted 28 Sep; only `.cal-nav` remains, as shared chrome), and a CSS import
+ * is global whatever mounts — so this page used to fight three
  * of them with an ancestor scope and an explicit property reset. The timeline's classes are all
  * `tl-`, so five of the six collisions have nothing left to collide with and their resets are
  * retired rather than carried forward as decoration.

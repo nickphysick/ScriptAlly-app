@@ -22,7 +22,8 @@
  * The staged model: the group's "Never ask" STAGES a rule mute — nothing persists until the review
  * sheet's Save (apply = the existing per-item-isolated applyStaged; partial failures are re-listed,
  * never silently half-saved). Back at an item boundary un-stages the previous item. IMMEDIATE
- * writes (data entry, not a deferrable log): the batch/dq saves (updateAgent) and the note tick.
+ * writes (data entry, not a deferrable log): the batch/dq saves (updateAgent). (The note tick went
+ * with the note sheet, 949e8f25b.)
  *
  * Theme: F12 tokens only.
  */

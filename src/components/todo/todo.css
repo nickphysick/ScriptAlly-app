@@ -1356,38 +1356,13 @@ button.tdb-ldot { cursor: pointer; }
       a chase's "How you chased" and a send's "When" are the same control asking different
       questions, and building them twice is how two of them end up looking different. ── */
 
-/* ── RecordingCalendar (journeys pack, Phase 3) ─────────────────────────────────────────────────
-   ⚠️ PORTALLED TO `document.body`, so these rules must NOT be nested under `.tdb-…` — the card is
-   not inside the To-do tree at render time. It carries `.t-f12`'s tokens because the whole app
-   shell wears that class on /todo; the literals below are the ones `.t-f12` does not name. */
-/* ⚠️ EVERY TOKEN HERE CARRIES A LITERAL FALLBACK, AND THAT IS NOT BELT-AND-BRACES — IT IS THE FIX.
-   `RecordingCalendar` PORTALS TO `document.body`, and the theme's custom properties are declared on
-   a theme class inside `#root`. A portalled node is outside that subtree, so `--paper`, `--line` and
-   `--r-lg` resolved to NOTHING — and `var()` on an undefined property makes the whole declaration
-   invalid, which CSS drops in silence. Measured on the deployed page: computed background
-   `rgba(0,0,0,0)`, border black, radius 0, and `getPropertyValue("--paper")` an empty string on the
-   element itself. The page read straight through the calendar.
-   ⚠️ THE FILL BELONGS ON THE COMPONENT, NOT ON A WRAPPER — a themed ancestor would work until the
-   next caller portals it somewhere else. The fallbacks make it correct wherever it is mounted.
-   ⚠️ AND THE SELECTED DAY IS INK, NOT BURGUNDY. No burgundy button fills anywhere: `--ink-strong`
-   with parchment text, the same grammar as the black primary; hover is the parchment step `#f2ede7`;
-   today keeps its sage RING with no fill, because a fill would read as chosen when nothing is. */
+/* ── `.cal-nav` — the month stepper, shared chrome. It outlived RecordingCalendar (deleted 28 Sep,
+   949e8f25b) because other pickers draw it. Every token carries a literal fallback so it renders
+   correctly even when portalled outside the theme class that declares them. ── */
 .cal-nav { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--line, #e7dccd); background: var(--white, #fff); color: var(--burg, #7c3a2a); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .cal-nav:hover:not(:disabled) { background: var(--pink-btn, #f5e2da); border-color: var(--pink-b, #e8c8bc); }
 .cal-nav svg { width: 11px; height: 11px; }
 .cal-nav:disabled { opacity: 0.3; cursor: default; background: var(--white, #fff); }
-/* ⚠️ TODAY IS A RING, NEVER A FILL — a fill is what "chosen" means here, and two fills in one grid
-   would make today look picked before anything had been. */
-/* ⚠️ BLACK MEANS "THIS ADVANCES" — one grammar, everywhere. The confirm was PINK, which on this
-   page is the colour of a chosen segment and a hover; a control that looks like a selected option
-   is not obviously the thing that commits. `--ink-strong` fill, parchment text. */
-
-/* the anchor, once a day is chosen — it wears the date rather than the invitation */
-
-/* the lede — a journey's own material above step 01, unnumbered because it is not a decision */
-
-/* the writer's own note, at reading size — it is the subject of the screen, not a field on it */
-
 /* the hand-off paragraph — the one step on a journey that records nothing */
 .tdb-jnreport { font-size: 13px; line-height: 1.65; color: var(--ink-2); }
 
