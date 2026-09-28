@@ -32,6 +32,7 @@ import {
   type GroupKey as V2GroupKey, type SortKey as V2SortKey, type Tile as V2Tile, type V2Filters, type V2Row,
 } from "../../lib/todoV2";
 import { V2Controls } from "./v2/V2Controls";
+import { V2Desk } from "./v2/V2Desk";
 import { STAGE_NAME } from "../../lib/qcSummary";
 import "./v2/todoV2.css";
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
@@ -48,6 +49,7 @@ import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import {
   assembleBoard, todaySplit, ribbonTiles,
   BoardCard, USER_TASK_FLAG_TYPE,
+  isNoteTask,
 } from "../../lib/todoBoard";
 import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
@@ -968,13 +970,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         dueYmd: dueOf(c).ymd,
         pkg: pkgName(c),
         setAside,
+        /* a writer's own task names its attached agent by id only (`userCard` leaves `who` empty) */
+        who: !(c.who || "").trim()
+          ? (() => {
+            const aid = c.agentId ?? (c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.agentId : undefined);
+            const ag = aid ? agents.find((a) => a.id === aid) : undefined;
+            return ag ? agentPrimary(ag) : null;
+          })()
+          : null,
       }, today);
     };
     return [
       ...v2Live.map((c) => one(c, false)),
       ...[...boardCols.snoozed, ...boardCols.dismissed].map((c) => one(c, true)),
     ];
-  }, [v2Live, boardCols, listRowInputs, dueOf, queries, packages, today]);
+  }, [v2Live, boardCols, listRowInputs, dueOf, queries, packages, agents, userTasks, today]);
   const [v2Filters, setV2Filters] = useState<V2Filters>(EMPTY_FILTERS);
   const [v2Group, setV2Group] = useState<V2GroupKey>("when");
   const [v2Sort, setV2Sort] = useState<V2SortKey>("date");
@@ -994,6 +1004,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     [v2TileRows, search, v2Filters, v2StatusName, v2Sort],
   );
   const v2Groups = useMemo(() => groupRows(v2Shown, v2Group), [v2Shown, v2Group]);
+  /* ── the desk rail (Phase 6) — views of the SAME store the list reads, never a second one ── */
+  const v2Yours = useMemo(() => sortRows(v2AllRows.filter((r) => r.cat === "yours" && !r.setAside), "date"), [v2AllRows]);
+  const v2Notes = useMemo(
+    () => userTasks.filter(isNoteTask).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")),
+    [userTasks],
+  );
+  const addV2Task = async (f: { text: string; dueDate: string; agentId?: string }): Promise<boolean> => {
+    const id = "task-" + Math.random().toString(36).slice(2, 11);
+    const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate, ...(f.agentId ? { agentId: f.agentId } : {}) });
+    if (!got) return false;
+    /* ⚠️ IF THE TILE WOULD HIDE IT, SHOW IT: an own task is Your move, so a writer on another tile is
+       switched to it — a task added and then invisible is a task the writer thinks failed. The
+       search and the filters stay as they are; the arrival ring says where it landed. */
+    if (v2Tile !== "move") setV2Tile("move");
+    setV2Landed(got);
+    window.setTimeout(() => setV2Landed((k) => (k === got ? null : k)), 1600);
+    return true;
+  };
+  const addV2Note = async (f: { text: string }): Promise<boolean> => !!(await addUserTask({ text: f.text }));
+  /* bring the arrival into view once the board holds it */
+  useEffect(() => {
+    if (!v2Landed) return;
+    const el = document.querySelector(`.tdv2-wpg [data-row-key="${v2Landed}"][data-todo-v2="row"]`) as HTMLElement | null;
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [v2Landed, v2Shown]);
   /**
    * ⚠️ ONE DOOR PER ROW, AND NO DOOR WRITES. A query task opens the QUERY DRAWER on its journey
    * (Query actions v1: every page finishes in the drawer); anything with no drawer journey — your
@@ -1851,8 +1886,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             variant="full"
             title="To-do list"
             description="Everything that's yours to do, and everything worth a look."
-            /* interim until the desk's composer lands (v2 Phase 6a), which replaces it */
-            primary={{ label: "Add a task", onClick: () => openComposer("task") }}
+            /* ⚠️ NO "Add a task" HERE (to-do list v2, Phase 6): the desk's composer replaces it — one way
+               to add, beside the list it adds to. "Set aside" stays in the header. */
             secondary={{ label: asideN ? `Set aside · ${asideN}` : "Set aside", onClick: () => setAsideOpen((o) => !o) }}
             actionsPopover={asideOpen ? (
               <V2Popover className="tdv2-asidepop" label="Set aside and tags" onClose={() => setAsideOpen(false)}>
@@ -2095,7 +2130,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <span className="tdv2-hawkslot" aria-hidden="true" data-todo-v2="hawk-slot" />
               </>
             )}
-          />
+          >
+            <V2Desk
+              today={today}
+              agents={agents}
+              yours={v2Yours}
+              notes={v2Notes}
+              onAddTask={addV2Task}
+              onAddNote={addV2Note}
+              onOpenRow={openV2Row}
+              onOpenNoteboard={() => navigate("/todo/noteboard")}
+            />
+          </PageRail>
         </div>{/* .tdv2-group */}
         </WorkspacePageGrid>
         {/* ⚠️ THE DRAWER IS THE GRID'S AND THE BOARD'S PANE (QC-chassis round, Phase 5), and it is

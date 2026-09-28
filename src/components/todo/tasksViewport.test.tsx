@@ -958,29 +958,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * record produced a card TALLER than the pane whose band scrolled away with it and whose bottom
    * edge was never on screen.
    */
-  it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES ON THE LIST — and it is pink, not ink", () => {
+  it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES BESIDE THE LIST — the desk's composer (to-do list v2)", () => {
     const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    /* same handler as the bar's copy — a rehoming, not a new entrance */
-    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's filled control —
-       the contract's `.cb.fill`, pink by the stylesheet, labelled with the contract's words. Same
-       opener, task mode, read at each link of the new chain. */
-    /* ⚠️ RETARGETED (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary now —
-       the Query Centre's arrangement, where a page states its creative verb once, in the masthead,
-       and it survives the scroll. It was the card toolbar's filled control; that toolbar is
-       unmounted with the meter beside it. The law is unchanged and stronger: ONE add on the page,
-       reaching the SAME composer in task mode. */
-    expect(page, "the header lost the page's one primary")
-      .toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
-    expect((page.match(/openComposer\("task"\)/g) ?? []).length,
-      "a second Add appeared on the page").toBeLessThanOrEqual(2);
-    /* and the masthead's primary is the app's pink CTA, which `mastheadFormat` owns */
-    const hdrCss = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
-    expect(hdrCss).toMatch(/\.wsh-cta \{/);
-    /* ⚠️ BLACK IS RESERVED FOR "THIS ADVANCES". Adding opens a composer — the start of something,
-       not the end of it — so it wears the page's other colour. */
-    const add = rule(splitCss, ".tdw-add {");
-    expect(add).toContain("var(--pink-btn");
-    expect(add).not.toContain("--ink-strong");
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the header's primary is gone; the desk rail's composer is
+       the one add, and its button is the page's anthracite, the same fill as every other primary on
+       it. The law is unchanged: ONE add, and it writes through the existing `addUserTask`. */
+    expect(page, "the header grew an Add back").not.toContain('primary={{ label: "Add a task"');
+    expect((page.match(/<V2Desk[\s>]/g) ?? []).length, "a second desk").toBe(1);
+    const desk = readFileSync(join(here, "v2", "V2Desk.tsx"), "utf8");
+    expect((desk.match(/data-todo-v2="add"/g) ?? []).length, "a second Add in the desk").toBe(1);
   });
 
   it("⚠️ THE COUNTS ARE ONE LINE IN ONE PLACE, off the derivation the bands read", () => {

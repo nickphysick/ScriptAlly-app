@@ -147,6 +147,9 @@ export interface RowFacts {
   dueYmd: string | null;
   pkg: string | null;
   setAside?: boolean;
+  /** the agent's name where the card itself carries none — a writer's own task with an agent
+   *  attached names it only by id (`userCard` leaves `who` empty) */
+  who?: string | null;
 }
 
 /** What the row's button names — the ref's words, keyed on the category, exhaustive. It is a
@@ -169,7 +172,7 @@ export const NO_AGENT = "No agent attached";
 export function buildRow(card: BoardCard, f: RowFacts, todayYmd: string): V2Row {
   const cat = taskCategory(card);
   const when = whenOf(f.dueYmd, todayYmd);
-  const who = (card.who || "").trim();
+  const who = (card.who || f.who || "").trim();
   return {
     key: card.key, card, cat, tile: tileOfCategory(cat),
     typeLabel: CATEGORY_TAG[cat],

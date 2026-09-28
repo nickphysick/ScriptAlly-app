@@ -15,6 +15,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { openRoute, visiblePage } from "./measure";
@@ -388,5 +389,103 @@ test.describe("phase 5 — row cards", () => {
       return [c.color, c.backgroundColor, c.borderLeftColor].some((v) => v === "rgb(124, 58, 42)");
     }).length, scope);
     expect(burgundy, "a burgundy 'with you' highlight is in the list").toBe(0); bump();
+  });
+});
+
+test.describe("phase 6 — the desk", () => {
+  /* ⚠️ THESE CASES WRITE, AND EVERY WRITE IS REMOVED IN THE SAME RUN — before and after, by prefix,
+     through tests/e2e/cleanupTodoV2Probe.mjs. A run that cannot clean up fails loudly. */
+  const clean = () => {
+    const out = execSync("node tests/e2e/cleanupTodoV2Probe.mjs", { encoding: "utf8" });
+    expect(out).toMatch(/cleanupTodoV2Probe: deleted \d+ task/);
+    return out;
+  };
+  test.beforeAll(() => { clean(); });
+  test.afterAll(() => { clean(); });
+
+  test("the tray: Your desk in the typewriter face on blush, an empty hawk slot; the rail stays on screen", async ({ page }) => {
+    const scope = await openV2(page, 1440, 860);
+    const m = await page.evaluate((s) => {
+      const tray = document.querySelector(`${s} .tdv2-tray`) as HTMLElement;
+      const h = document.querySelector(`${s} .tdv2-deskttl`) as HTMLElement;
+      const hawk = document.querySelector(`${s} [data-todo-v2="hawk-slot"]`) as HTMLElement;
+      const rail = document.querySelector(`${s} .tdv2-rail`) as HTMLElement;
+      const sc = document.querySelector(`${s} .wpg-scroll`) as HTMLElement;
+      return {
+        bg: getComputedStyle(tray).backgroundColor, font: getComputedStyle(h).fontFamily, text: h.textContent,
+        hawkW: hawk.getBoundingClientRect().width, hawkHtml: hawk.innerHTML,
+        railBottom: rail.getBoundingClientRect().bottom, scBottom: sc.getBoundingClientRect().bottom,
+        composer: !!document.querySelector(`${s} [data-todo-v2="composer"]`),
+      };
+    }, scope);
+    expect(m.bg).toBe("rgb(245, 226, 218)"); bump();
+    expect(m.font).toMatch(/Special Elite/); bump();
+    expect(m.text).toBe("Your desk"); bump();
+    expect(Math.round(m.hawkW)).toBe(92); bump();
+    expect(m.hawkHtml).toBe(""); bump();
+    expect(m.composer).toBe(true); bump();
+    expect(m.railBottom, "the rail runs off the bottom on load").toBeLessThanOrEqual(m.scBottom + 0.5); bump();
+    /* "Add a task" has left the header — the composer is the one way to add */
+    expect(await page.locator(`${scope} .tdv2-group > .ph .ph-primary`).count()).toBe(0); bump();
+  });
+
+  test("a task added at the desk lands in the list under its heading AND in the rail — one store", async ({ page }) => {
+    const scope = await openV2(page, 1440, 900);
+    const text = `Zz v2 probe task ${Date.now()}`;
+    /* start on a tile that would HIDE an own task */
+    await page.click(`${scope} .tdv2-tile[data-tile="chase"]`);
+    await page.click(`${scope} [data-todo-v2="composer"] .tdv2-pill[data-when="next"]`);
+    await page.fill(`${scope} [data-todo-v2="capture"]`, text);
+    await page.click(`${scope} [data-todo-v2="attach"]`);
+    await page.click(`${scope} .tdv2-picker .tdv2-pickrow >> nth=0`);
+    const attached = (await page.locator(`${scope} [data-todo-v2="attached"]`).innerText()).replace("×", "").trim();
+    expect(attached.length, "no agent was attached").toBeGreaterThan(0); bump();
+    await page.focus(`${scope} [data-todo-v2="capture"]`);
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter");
+    /* the list — under Next week, on Your move */
+    const row = page.locator(`${scope} [data-todo-v2="row"]`, { hasText: text });
+    await expect(row).toHaveCount(1, { timeout: 15000 }); bump();
+    const where = await row.evaluate((r) => ({
+      group: r.closest(".tdv2-gsec")?.getAttribute("data-group"),
+      landed: r.classList.contains("landed"),
+      tile: document.querySelector(".tdv2-wpg .tdv2-tile.on")?.getAttribute("data-tile"),
+      who: r.querySelector(".tdv2-agt b")?.textContent,
+      key: r.getAttribute("data-row-key"),
+    }));
+    expect(where.tile, "the tile did not switch to show the new task").toBe("move"); bump();
+    expect(where.group).toBe("Next week"); bump();
+    expect(where.landed, "no arrival highlight").toBe(true); bump();
+    expect(where.who).toBe(attached); bump();
+    /* the rail — the same document, by the same key */
+    const railRow = page.locator(`${scope} [data-todo-v2="rail-row"][data-row-key="${where.key}"]`);
+    await expect(railRow).toHaveCount(1); bump();
+    await expect(railRow).toContainText(text); bump();
+    await expect(railRow).toContainText("Next week"); bump();
+    const said = await page.locator(`${scope} [data-todo-v2="said"]`).innerText();
+    expect(said).toMatch(/^Added to the list under Next week — due by \w{3} \d{1,2} \w{3}/); bump();
+    /* and it survives a reload — it is stored, not local */
+    await page.reload();
+    await page.waitForFunction((v) => [...document.querySelectorAll(v)].some((e) => e.getBoundingClientRect().height > 0), V2, { timeout: 30000 });
+    const scope2 = await visiblePage(page, V2);
+    await expect(page.locator(`${scope2} [data-todo-v2="rail-row"]`, { hasText: text })).toHaveCount(1, { timeout: 20000 }); bump();
+  });
+
+  test("a note written at the desk is on the Noteboard, and never on the list", async ({ page }) => {
+    const scope = await openV2(page, 1440, 900);
+    const text = `Zz v2 probe note ${Date.now()}`;
+    await page.click(`${scope} .tdv2-cseg[data-mode="note"]`);
+    expect(await page.locator(`${scope} .tdv2-pill`).count(), "the when-pills are a task's").toBe(0); bump();
+    await page.fill(`${scope} [data-todo-v2="capture"]`, text);
+    await page.click(`${scope} [data-todo-v2="add"]`);
+    await expect(page.locator(`${scope} [data-todo-v2="note"]`, { hasText: text })).toHaveCount(1, { timeout: 15000 }); bump();
+    await expect(page.locator(`${scope} [data-todo-v2="said"]`)).toContainText("on your Noteboard too"); bump();
+    expect(await page.locator(`${scope} [data-todo-v2="row"]`, { hasText: text }).count(), "a note reached the list").toBe(0); bump();
+    await page.click(`${scope} [data-todo-v2="noteboard-link"]`);
+    await expect(page).toHaveURL(/\/todo\/noteboard$/); bump();
+    /* ⚠️ THE TO-DO PAGE STAYS MOUNTED (hidden) WITH THE SAME TEXT IN ITS RAIL, so the Noteboard is found by
+       measuring which Tasks page is on screen, never by `.first()` */
+    await page.waitForFunction(() => [...document.querySelectorAll(".tpl-wpg")].some((e) => e.getBoundingClientRect().height > 0), undefined, { timeout: 20000 });
+    const nb = await visiblePage(page, ".tpl-wpg");
+    await expect(page.locator(nb).getByText(text)).toBeVisible({ timeout: 20000 }); bump();
   });
 });

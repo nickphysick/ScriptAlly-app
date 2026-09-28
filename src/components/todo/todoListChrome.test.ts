@@ -118,13 +118,13 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).toContain("<V2Rows");
   });
 
-  it("⚠️ THE ADD IS THE CONTROL BAR'S NOW, and still the only creation action", () => {
-    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4). The Add moved into the control bar as the
-       one list-level action there; the session launcher stays extinct. */
-    /* ⚠️ RETARGETED AGAIN (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary
-       now — the Query Centre's arrangement, where a page states its creative verb once in the
-       masthead. Same opener, same task mode; the law survives every move. */
-    expect(page).toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
+  it("⚠️ THE ADD IS THE DESK'S NOW (to-do list v2), and still the only creation action", () => {
+    /* ⚠️ RETARGETED A THIRD TIME (to-do list v2, 28 Sep): "Add a task" LEFT the header — the desk's
+       composer replaces it, beside the list it adds to. The law survives the move: ONE place to
+       add on this page, writing through the existing `addUserTask`. */
+    expect(page).not.toContain('primary={{ label: "Add a task"');
+    expect((page.match(/<V2Desk[\s>]/g) ?? []).length).toBe(1);
+    expect(page).toContain("const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate");
     expect(page).not.toContain("tdb-ghb");
     expect(page).not.toContain("function renderTools");
   });
