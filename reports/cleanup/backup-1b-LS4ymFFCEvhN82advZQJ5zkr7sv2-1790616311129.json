@@ -1,0 +1,601 @@
+{
+ "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+ "at": "2026-09-28T17:25:11.129Z",
+ "mode": "1b",
+ "changes": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/msv12-q-3/activity/act-status-partial-requested-msv12-q-3",
+   "before": {
+    "note": "Partial manuscript requested",
+    "resultingStatus": "Partial Requested",
+    "queryId": "msv12-q-3",
+    "type": "Partial Requested",
+    "manuscriptTitle": "Harbour of Glass",
+    "agentName": "Edda Voss",
+    "createdAt": {
+     "__ts": 1788685200000
+    }
+   },
+   "after": {
+    "note": "Partial manuscript requested",
+    "resultingStatus": "Partial Requested",
+    "queryId": "msv12-q-3",
+    "type": "Partial Requested",
+    "manuscriptTitle": "Harbour of Glass",
+    "agentName": "Edda Voss",
+    "createdAt": {
+     "__ts": 1788685200000
+    },
+    "reconstructed": true,
+    "eventKey": "partial_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/msv12-q-4/activity/act-status-full-requested-msv12-q-4",
+   "before": {
+    "queryId": "msv12-q-4",
+    "type": "Full Requested",
+    "manuscriptTitle": "Harbour of Glass",
+    "note": "Full manuscript requested",
+    "resultingStatus": "Full Requested",
+    "createdAt": {
+     "__ts": 1788771600000
+    },
+    "agentName": "Theo Abara"
+   },
+   "after": {
+    "queryId": "msv12-q-4",
+    "type": "Full Requested",
+    "manuscriptTitle": "Harbour of Glass",
+    "note": "Full manuscript requested",
+    "resultingStatus": "Full Requested",
+    "createdAt": {
+     "__ts": 1788771600000
+    },
+    "agentName": "Theo Abara",
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/msv12-q-5/activity/act-status-full-sent-msv12-q-5",
+   "before": {
+    "manuscriptTitle": "Harbour of Glass",
+    "note": "Full manuscript sent",
+    "agentName": "Sun-hee Park",
+    "createdAt": {
+     "__ts": 1782896400000
+    },
+    "resultingStatus": "Full Sent",
+    "queryId": "msv12-q-5",
+    "type": "Full Sent"
+   },
+   "after": {
+    "manuscriptTitle": "Harbour of Glass",
+    "note": "Full manuscript sent",
+    "agentName": "Sun-hee Park",
+    "createdAt": {
+     "__ts": 1782896400000
+    },
+    "resultingStatus": "Full Sent",
+    "queryId": "msv12-q-5",
+    "type": "Full Sent",
+    "reconstructed": true,
+    "eventKey": "full_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/msv12-q-6/activity/act-status-rejected-msv12-q-6",
+   "before": {
+    "createdAt": {
+     "__ts": 1772528400000
+    },
+    "agentName": "Rosa Quintana",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "queryId": "msv12-q-6",
+    "note": "Rejection received",
+    "manuscriptTitle": "Harbour of Glass"
+   },
+   "after": {
+    "createdAt": {
+     "__ts": 1772528400000
+    },
+    "agentName": "Rosa Quintana",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "queryId": "msv12-q-6",
+    "note": "Rejection received",
+    "manuscriptTitle": "Harbour of Glass",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/msv12-q-8/activity/act-status-no-response-msv12-q-8",
+   "before": {
+    "type": "No Response",
+    "manuscriptTitle": "Harbour of Glass",
+    "agentName": "Douglas Renner",
+    "createdAt": {
+     "__ts": 1772701200000
+    },
+    "resultingStatus": "No Response",
+    "note": "Query closed — no response",
+    "queryId": "msv12-q-8"
+   },
+   "after": {
+    "type": "No Response",
+    "manuscriptTitle": "Harbour of Glass",
+    "agentName": "Douglas Renner",
+    "createdAt": {
+     "__ts": 1772701200000
+    },
+    "resultingStatus": "No Response",
+    "note": "Query closed — no response",
+    "queryId": "msv12-q-8",
+    "reconstructed": true,
+    "eventKey": "closed_no_reply"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/rej-query-1/activity/act-status-rejected-rej-query-1",
+   "before": {
+    "note": "Rejection received",
+    "manuscriptTitle": "The Closed Fixture",
+    "type": "Rejected",
+    "agentName": "Imogen Rackham",
+    "queryId": "rej-query-1",
+    "createdAt": {
+     "__ts": 1785710764826
+    },
+    "resultingStatus": "Rejected"
+   },
+   "after": {
+    "note": "Rejection received",
+    "manuscriptTitle": "The Closed Fixture",
+    "type": "Rejected",
+    "agentName": "Imogen Rackham",
+    "queryId": "rej-query-1",
+    "createdAt": {
+     "__ts": 1785710764826
+    },
+    "resultingStatus": "Rejected",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/rj-send/activity/act-status-full-requested-rj-send",
+   "before": {
+    "agentName": "Imogen Vale",
+    "createdAt": {
+     "__ts": 1789161623127
+    },
+    "resultingStatus": "Full Requested",
+    "type": "Full Requested",
+    "queryId": "rj-send",
+    "note": "Full manuscript requested",
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "agentName": "Imogen Vale",
+    "createdAt": {
+     "__ts": 1789161623127
+    },
+    "resultingStatus": "Full Requested",
+    "type": "Full Requested",
+    "queryId": "rj-send",
+    "note": "Full manuscript requested",
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-10/activity/act-status-partial-sent-seed-pkgq-10",
+   "before": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Sent",
+    "agentName": "Peter Vance",
+    "resultingStatus": "Partial Sent",
+    "createdAt": {
+     "__ts": 1784851200000
+    },
+    "note": "Partial manuscript sent",
+    "queryId": "seed-pkgq-10"
+   },
+   "after": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Sent",
+    "agentName": "Peter Vance",
+    "resultingStatus": "Partial Sent",
+    "createdAt": {
+     "__ts": 1784851200000
+    },
+    "note": "Partial manuscript sent",
+    "queryId": "seed-pkgq-10",
+    "reconstructed": true,
+    "eventKey": "partial_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-5/activity/act-status-rejected-seed-pkgq-5",
+   "before": {
+    "createdAt": {
+     "__ts": 1781049600000
+    },
+    "queryId": "seed-pkgq-5",
+    "agentName": "Joan Whitfield",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Rejection received",
+    "type": "Rejected",
+    "resultingStatus": "Rejected"
+   },
+   "after": {
+    "createdAt": {
+     "__ts": 1781049600000
+    },
+    "queryId": "seed-pkgq-5",
+    "agentName": "Joan Whitfield",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Rejection received",
+    "type": "Rejected",
+    "resultingStatus": "Rejected",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-6/activity/act-status-rejected-seed-pkgq-6",
+   "before": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Rejected",
+    "queryId": "seed-pkgq-6",
+    "resultingStatus": "Rejected",
+    "createdAt": {
+     "__ts": 1781222400000
+    },
+    "note": "Rejection received",
+    "agentName": "Sam Okoro"
+   },
+   "after": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Rejected",
+    "queryId": "seed-pkgq-6",
+    "resultingStatus": "Rejected",
+    "createdAt": {
+     "__ts": 1781222400000
+    },
+    "note": "Rejection received",
+    "agentName": "Sam Okoro",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-8/activity/act-status-rejected-seed-pkgq-8",
+   "before": {
+    "note": "Rejection received",
+    "queryId": "seed-pkgq-8",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "createdAt": {
+     "__ts": 1783209600000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "David Marsh"
+   },
+   "after": {
+    "note": "Rejection received",
+    "queryId": "seed-pkgq-8",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "createdAt": {
+     "__ts": 1783209600000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "David Marsh",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-9/activity/act-status-full-sent-seed-pkgq-9",
+   "before": {
+    "agentName": "Ana Duarte",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1784419200000
+    },
+    "type": "Full Sent",
+    "queryId": "seed-pkgq-9",
+    "resultingStatus": "Full Sent",
+    "note": "Full manuscript sent"
+   },
+   "after": {
+    "agentName": "Ana Duarte",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1784419200000
+    },
+    "type": "Full Sent",
+    "queryId": "seed-pkgq-9",
+    "resultingStatus": "Full Sent",
+    "note": "Full manuscript sent",
+    "reconstructed": true,
+    "eventKey": "full_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-offer-seed-query-12",
+   "before": {
+    "note": "Offer of representation received",
+    "resultingStatus": "Offer",
+    "queryId": "seed-query-12",
+    "agentName": "Noah Bright",
+    "type": "Offer",
+    "createdAt": {
+     "__ts": 1781654400000
+    },
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "note": "Offer of representation received",
+    "resultingStatus": "Offer",
+    "queryId": "seed-query-12",
+    "agentName": "Noah Bright",
+    "type": "Offer",
+    "createdAt": {
+     "__ts": 1781654400000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "offer"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-rejected-seed-query-13",
+   "before": {
+    "note": "Rejection received",
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-13",
+    "type": "Rejected",
+    "agentName": "Elinor Hale",
+    "createdAt": {
+     "__ts": 1782000000000
+    },
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "note": "Rejection received",
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-13",
+    "type": "Rejected",
+    "agentName": "Elinor Hale",
+    "createdAt": {
+     "__ts": 1782000000000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-rejected-seed-query-14",
+   "before": {
+    "note": "Rejection received",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-14",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "agentName": "Tom Ellery",
+    "createdAt": {
+     "__ts": 1782345600000
+    }
+   },
+   "after": {
+    "note": "Rejection received",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-14",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "agentName": "Tom Ellery",
+    "createdAt": {
+     "__ts": 1782345600000
+    },
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-rejected-seed-query-15",
+   "before": {
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-15",
+    "type": "Rejected",
+    "createdAt": {
+     "__ts": 1782691200000
+    },
+    "agentName": "Marcus Reed",
+    "note": "Rejection received",
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-15",
+    "type": "Rejected",
+    "createdAt": {
+     "__ts": 1782691200000
+    },
+    "agentName": "Marcus Reed",
+    "note": "Rejection received",
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-rejected-seed-query-16",
+   "before": {
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "note": "Rejection received",
+    "agentName": "Priya Nair",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1783036800000
+    },
+    "queryId": "seed-query-16"
+   },
+   "after": {
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "note": "Rejection received",
+    "agentName": "Priya Nair",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1783036800000
+    },
+    "queryId": "seed-query-16",
+    "reconstructed": true,
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-withdrawn-seed-query-17",
+   "before": {
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Query withdrawn",
+    "queryId": "seed-query-17",
+    "resultingStatus": "Withdrawn",
+    "type": "Withdrawn",
+    "agentName": "Joan Whitfield",
+    "createdAt": {
+     "__ts": 1783382400000
+    }
+   },
+   "after": {
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Query withdrawn",
+    "queryId": "seed-query-17",
+    "resultingStatus": "Withdrawn",
+    "type": "Withdrawn",
+    "agentName": "Joan Whitfield",
+    "createdAt": {
+     "__ts": 1783382400000
+    },
+    "reconstructed": true,
+    "eventKey": "withdrawn"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-no-response-seed-query-18",
+   "before": {
+    "type": "No Response",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Sam Okoro",
+    "note": "Query closed — no response",
+    "queryId": "seed-query-18",
+    "createdAt": {
+     "__ts": 1783728000000
+    },
+    "resultingStatus": "No Response"
+   },
+   "after": {
+    "type": "No Response",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Sam Okoro",
+    "note": "Query closed — no response",
+    "queryId": "seed-query-18",
+    "createdAt": {
+     "__ts": 1783728000000
+    },
+    "resultingStatus": "No Response",
+    "reconstructed": true,
+    "eventKey": "closed_no_reply"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-sent-seed-query-21",
+   "before": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Full Sent",
+    "createdAt": {
+     "__ts": 1779148800000
+    },
+    "agentName": "Ana Duarte",
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-query-21",
+    "note": "Full manuscript sent"
+   },
+   "after": {
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Full Sent",
+    "createdAt": {
+     "__ts": 1779148800000
+    },
+    "agentName": "Ana Duarte",
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-query-21",
+    "note": "Full manuscript sent",
+    "reconstructed": true,
+    "eventKey": "full_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-sent-seed-query-23",
+   "before": {
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "queryId": "seed-query-23",
+    "createdAt": {
+     "__ts": 1783987200000
+    },
+    "agentName": "Rufus Oyelaran",
+    "type": "Partial Sent",
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "queryId": "seed-query-23",
+    "createdAt": {
+     "__ts": 1783987200000
+    },
+    "agentName": "Rufus Oyelaran",
+    "type": "Partial Sent",
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "partial_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-ms2-b/activity/act-status-full-sent-seed-query-ms2-b",
+   "before": {
+    "note": "Full manuscript sent",
+    "agentName": "Tom Ellery",
+    "queryId": "seed-query-ms2-b",
+    "createdAt": {
+     "__ts": 1780272000000
+    },
+    "manuscriptTitle": "The Quiet Second",
+    "type": "Full Sent",
+    "resultingStatus": "Full Sent"
+   },
+   "after": {
+    "note": "Full manuscript sent",
+    "agentName": "Tom Ellery",
+    "queryId": "seed-query-ms2-b",
+    "createdAt": {
+     "__ts": 1780272000000
+    },
+    "manuscriptTitle": "The Quiet Second",
+    "type": "Full Sent",
+    "resultingStatus": "Full Sent",
+    "reconstructed": true,
+    "eventKey": "full_sent"
+   }
+  }
+ ]
+}

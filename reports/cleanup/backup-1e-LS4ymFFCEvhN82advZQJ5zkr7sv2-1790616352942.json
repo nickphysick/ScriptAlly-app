@@ -1,0 +1,203 @@
+{
+ "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+ "at": "2026-09-28T17:25:52.942Z",
+ "mode": "1e",
+ "changes": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-6veol5epc",
+   "before": {
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "id": "act-6veol5epc",
+    "activityType": "Agent Added",
+    "details": "",
+    "manuscriptId": "",
+    "description": "Added Consent Probe Agent at ",
+    "queryId": "",
+    "date": "2026-08-24T21:53:35.819Z"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-hj3kkejxp",
+   "before": {
+    "queryId": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "description": "Added Empty Fields Probe at ",
+    "date": "2026-08-25T08:40:47.283Z",
+    "details": "",
+    "activityType": "Agent Added",
+    "manuscriptId": "",
+    "id": "act-hj3kkejxp"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-ibu6oijg6",
+   "before": {
+    "details": "",
+    "manuscriptId": "",
+    "activityType": "Agent Added",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "id": "act-ibu6oijg6",
+    "queryId": "",
+    "date": "2026-08-24T21:54:24.789Z",
+    "description": "Added Consent Probe Agent at "
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-lprxxzq4o",
+   "before": {
+    "details": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "id": "act-lprxxzq4o",
+    "manuscriptId": "",
+    "activityType": "Agent Added",
+    "date": "2026-08-24T21:33:28.606Z",
+    "description": "Added Also Nobody at Pending Match",
+    "queryId": ""
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-oykcqibr7",
+   "before": {
+    "activityType": "Agent Added",
+    "id": "act-oykcqibr7",
+    "manuscriptId": "",
+    "description": "Added Nobody At All at Pending Match",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "details": "",
+    "date": "2026-08-24T21:33:28.113Z",
+    "queryId": ""
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-wefrwdzk1",
+   "before": {
+    "manuscriptId": "",
+    "details": "",
+    "id": "act-wefrwdzk1",
+    "activityType": "Agent Added",
+    "date": "2026-08-24T16:58:35.797Z",
+    "queryId": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "description": "Added Dangling Probe Agent at Pending Match"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-8reldsnp8",
+   "before": {
+    "date": "2026-08-24T21:52:18.741Z",
+    "queryId": "",
+    "id": "act-8reldsnp8",
+    "description": "You added a new title Consent Probe Book to your manuscripts",
+    "manuscriptId": "ms-fromrow-upc2ydw3j",
+    "activityType": "Manuscript Added",
+    "details": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-added-ms-rej-ms",
+   "before": {
+    "activityType": "Manuscript Added",
+    "description": "Added new title The Closed Fixture to your manuscripts",
+    "manuscriptId": "rej-ms",
+    "queryId": "",
+    "id": "act-added-ms-rej-ms",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "date": "2026-09-01T22:46:51.295Z",
+    "details": ""
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-added-ms-seed-ms-comps0",
+   "before": {
+    "date": "2026-09-27T14:43:22.662Z",
+    "activityType": "Manuscript Added",
+    "description": "Added new title Murphy's Day Out to your manuscripts",
+    "manuscriptId": "seed-ms-comps0",
+    "details": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "queryId": "",
+    "id": "act-added-ms-seed-ms-comps0"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-added-ms-seed-ms-comps5",
+   "before": {
+    "queryId": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "manuscriptId": "seed-ms-comps5",
+    "date": "2026-09-27T14:43:22.662Z",
+    "id": "act-added-ms-seed-ms-comps5",
+    "activityType": "Manuscript Added",
+    "details": "",
+    "description": "Added new title Murphy's Day Out to your manuscripts"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-at65cyzuw",
+   "before": {
+    "details": "",
+    "description": "You added a new title Another Missing Book to your manuscripts",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "manuscriptId": "ms-autoimport-f1gxpdbly",
+    "date": "2026-08-24T21:33:28.484Z",
+    "id": "act-at65cyzuw",
+    "activityType": "Manuscript Added",
+    "queryId": ""
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-igplly036",
+   "before": {
+    "queryId": "",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "date": "2026-08-24T21:33:27.717Z",
+    "description": "You added a new title A Book That Does Not Exist to your manuscripts",
+    "details": "",
+    "activityType": "Manuscript Added",
+    "id": "act-igplly036",
+    "manuscriptId": "ms-autoimport-u57iocmal"
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-ijyiwlxr1",
+   "before": {
+    "activityType": "Manuscript Added",
+    "description": "You added a new title Consent Probe Book to your manuscripts",
+    "manuscriptId": "ms-fromrow-wzvaivgkx",
+    "queryId": "",
+    "id": "act-ijyiwlxr1",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "date": "2026-08-24T21:54:24.627Z",
+    "details": ""
+   },
+   "after": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-added-agent-clv-fx-never",
+   "before": null,
+   "after": {
+    "id": "act-added-agent-clv-fx-never",
+    "userId": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+    "activityType": "Agent Added",
+    "description": "Added Imogen Vale at Vale & Winter Literary",
+    "manuscriptId": "",
+    "queryId": "",
+    "date": "2026-09-25T18:19:27.625Z",
+    "details": ""
+   }
+  }
+ ]
+}

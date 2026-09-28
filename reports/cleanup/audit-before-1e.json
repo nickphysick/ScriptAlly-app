@@ -1,0 +1,135 @@
+{
+ "1a": {
+  "queriesPastQueriedWithNoStep": 0,
+  "datedFromLastStatusChange": 0,
+  "datedFromSent": 0,
+  "ids": []
+ },
+ "1b": {
+  "reconstructedSteps": 31,
+  "onlyRecord_keepAndFlag": 22,
+  "besideRealEvents": 9,
+  "besideReal_removeChangesNothing": [],
+  "besideReal_HELD": [
+   {
+    "query": "rj-dupe",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-09-08T21:20:23.179Z\" → null",
+     "responseReceivedAt: \"2026-09-08T21:20:23.179Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-cal-passed865-q",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2024-03-17T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2024-03-17T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-pkgq-3",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-06-20T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-20T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-pkgq-4",
+    "currentStatus": "Partial Requested",
+    "step": "Partial Requested",
+    "ifRemoved": [
+     "partialRequestedDate: \"2026-06-25T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-25T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-10",
+    "currentStatus": "Full Sent",
+    "step": "Full Sent",
+    "ifRemoved": [
+     "hasAgentResponded: true → false",
+     "fullSentDate: \"2026-06-09T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-11",
+    "currentStatus": "Revise & Resubmit",
+    "step": "Revise & Resubmit",
+    "ifRemoved": [
+     "revisionRound: 2 → 1",
+     "responseReceivedAt: \"2026-06-13T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-7",
+    "currentStatus": "Partial Requested",
+    "step": "Partial Requested",
+    "ifRemoved": [
+     "partialRequestedDate: \"2026-05-28T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-05-28T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-8",
+    "currentStatus": "Partial Sent",
+    "step": "Partial Sent",
+    "ifRemoved": [
+     "hasAgentResponded: true → false",
+     "partialSentDate: \"2026-06-01T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-9",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-06-05T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-05T00:00:00.000Z\" → null"
+    ]
+   }
+  ]
+ },
+ "1e": {
+  "agentAddedRows": 45,
+  "manuscriptAddedRows": 12,
+  "agentDuplicates": [],
+  "agentOrphans": [
+   "act-6veol5epc · Added Consent Probe Agent at ",
+   "act-added-agent-pkg21-agent-a · Added Pkgtwentyone Arden at Pkg21 Literary",
+   "act-added-agent-pkg21-agent-b · Added Pkgtwentyone Bexley at Pkg21 Literary",
+   "act-added-agent-pkg21-agent-plain · Added Pkgtwentyone Plainagent at Pkg21 Literary",
+   "act-hj3kkejxp · Added Empty Fields Probe at ",
+   "act-ibu6oijg6 · Added Consent Probe Agent at ",
+   "act-lprxxzq4o · Added Also Nobody at Pending Match",
+   "act-oykcqibr7 · Added Nobody At All at Pending Match",
+   "act-wefrwdzk1 · Added Dangling Probe Agent at Pending Match"
+  ],
+  "agentHeldUnattributable": [],
+  "manuscriptDuplicates": [],
+  "manuscriptOrphans": [
+   "act-8reldsnp8 · You added a new title Consent Probe Book to your manuscripts",
+   "act-added-ms-rej-ms · Added new title The Closed Fixture to your manuscripts",
+   "act-added-ms-seed-ms-comps0 · Added new title Murphy's Day Out to your manuscripts",
+   "act-added-ms-seed-ms-comps5 · Added new title Murphy's Day Out to your manuscripts",
+   "act-at65cyzuw · You added a new title Another Missing Book to your manuscripts",
+   "act-igplly036 · You added a new title A Book That Does Not Exist to your manuscripts",
+   "act-ijyiwlxr1 · You added a new title Consent Probe Book to your manuscripts"
+  ],
+  "leftForThePackagesSession": [
+   "act-added-agent-pkg21-agent-a",
+   "act-added-agent-pkg21-agent-b",
+   "act-added-agent-pkg21-agent-plain"
+  ],
+  "agentGapsToFill": [
+   "clv-fx-never · Imogen Vale"
+  ],
+  "agentGapsSkippedNoDate": [],
+  "manuscriptGapsToFill": 0,
+  "manuscriptGapsSkippedNoDate": []
+ }
+}

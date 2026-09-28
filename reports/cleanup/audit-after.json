@@ -1,0 +1,119 @@
+{
+ "1a": {
+  "queriesPastQueriedWithNoStep": 0,
+  "datedFromLastStatusChange": 0,
+  "datedFromSent": 0,
+  "ids": []
+ },
+ "1b": {
+  "reconstructedSteps": 31,
+  "onlyRecord_keepAndFlag": 22,
+  "besideRealEvents": 9,
+  "besideReal_removeChangesNothing": [],
+  "besideReal_HELD": [
+   {
+    "query": "rj-dupe",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-09-08T21:20:23.179Z\" → null",
+     "responseReceivedAt: \"2026-09-08T21:20:23.179Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-cal-passed865-q",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2024-03-17T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2024-03-17T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-pkgq-3",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-06-20T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-20T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-pkgq-4",
+    "currentStatus": "Partial Requested",
+    "step": "Partial Requested",
+    "ifRemoved": [
+     "partialRequestedDate: \"2026-06-25T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-25T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-10",
+    "currentStatus": "Full Sent",
+    "step": "Full Sent",
+    "ifRemoved": [
+     "hasAgentResponded: true → false",
+     "fullSentDate: \"2026-06-09T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-11",
+    "currentStatus": "Revise & Resubmit",
+    "step": "Revise & Resubmit",
+    "ifRemoved": [
+     "revisionRound: 2 → 1",
+     "responseReceivedAt: \"2026-06-13T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-7",
+    "currentStatus": "Partial Requested",
+    "step": "Partial Requested",
+    "ifRemoved": [
+     "partialRequestedDate: \"2026-05-28T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-05-28T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-8",
+    "currentStatus": "Partial Sent",
+    "step": "Partial Sent",
+    "ifRemoved": [
+     "hasAgentResponded: true → false",
+     "partialSentDate: \"2026-06-01T00:00:00.000Z\" → null"
+    ]
+   },
+   {
+    "query": "seed-query-9",
+    "currentStatus": "Full Requested",
+    "step": "Full Requested",
+    "ifRemoved": [
+     "fullRequestedDate: \"2026-06-05T00:00:00.000Z\" → null",
+     "responseReceivedAt: \"2026-06-05T00:00:00.000Z\" → null"
+    ]
+   }
+  ]
+ },
+ "1e": {
+  "agentAddedRows": 40,
+  "manuscriptAddedRows": 5,
+  "agentDuplicates": [],
+  "agentOrphans": [
+   "act-added-agent-pkg21-agent-a · Added Pkgtwentyone Arden at Pkg21 Literary",
+   "act-added-agent-pkg21-agent-b · Added Pkgtwentyone Bexley at Pkg21 Literary",
+   "act-added-agent-pkg21-agent-plain · Added Pkgtwentyone Plainagent at Pkg21 Literary"
+  ],
+  "agentHeldUnattributable": [],
+  "manuscriptDuplicates": [],
+  "manuscriptOrphans": [],
+  "leftForThePackagesSession": [
+   "act-added-agent-pkg21-agent-a",
+   "act-added-agent-pkg21-agent-b",
+   "act-added-agent-pkg21-agent-plain"
+  ],
+  "agentGapsToFill": [],
+  "agentGapsSkippedNoDate": [],
+  "manuscriptGapsToFill": 0,
+  "manuscriptGapsSkippedNoDate": []
+ }
+}

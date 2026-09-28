@@ -150,7 +150,8 @@ const report = {
     agentHeldUnattributable: agentHeld,
     manuscriptDuplicates: msDupes.map((r) => `${r.id} · ${r.data.description}`),
     manuscriptOrphans: msOrphans.map((r) => `${r.id} · ${r.data.description}`),
-    agentGapsToFill: agentGaps.filter((a) => a.dateAdded).length, agentGapsSkippedNoDate: agentGaps.filter((a) => !a.dateAdded).map((a) => a.id),
+    leftForThePackagesSession: [...agentOrphans, ...msOrphans].filter((x) => x.id.includes("pkg21")).map((r) => r.id),
+    agentGapsToFill: agentGaps.filter((a) => a.dateAdded).map((a) => `${a.id} · ${a.name ?? a.agency}`), agentGapsSkippedNoDate: agentGaps.filter((a) => !a.dateAdded).map((a) => a.id),
     manuscriptGapsToFill: msGaps.filter((m) => m.createdDate).length, manuscriptGapsSkippedNoDate: msGaps.filter((m) => !m.createdDate).map((m) => m.id),
   },
 };
@@ -220,7 +221,9 @@ if (arg("--apply-1b")) {
 
 if (arg("--apply-1e")) {
   const changes: Change[] = [];
-  for (const r of [...agentDupes, ...agentOrphans, ...msDupes, ...msOrphans]) changes.push({ path: `users/${uid}/activities/${r.id}`, before: r.data, after: null });
+  /* ⚠️ THE PACKAGES SESSION'S `pkg21-` DATA IS NEVER TOUCHED (standing rule) — its orphaned rows are
+     reported and left for that session */
+  for (const r of [...agentDupes, ...agentOrphans, ...msDupes, ...msOrphans].filter((x) => !x.id.includes("pkg21"))) changes.push({ path: `users/${uid}/activities/${r.id}`, before: r.data, after: null });
   for (const a of agentGaps.filter((x) => x.dateAdded)) {
     const name = String(a.name ?? "").trim();
     changes.push({ path: `users/${uid}/activities/act-added-agent-${a.id}`, before: null, after: { id: `act-added-agent-${a.id}`, userId: uid, activityType: "Agent Added", description: name ? `Added ${name} at ${a.agency}` : `Added ${a.agency}`, manuscriptId: "", queryId: "", date: a.dateAdded, details: "" } });
