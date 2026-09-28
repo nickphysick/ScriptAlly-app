@@ -286,3 +286,107 @@ test.describe("phase 4 — controls", () => {
     expect(await page.locator(`${scope} [data-todo-v2="filter-panel"]`).count()).toBe(0); bump();
   });
 });
+
+test.describe("phase 5 — row cards", () => {
+  for (const [w, h] of [[1440, 900], [1920, 1080]] as const) {
+    test(`row anatomy at ${w}: the declared grid, a flush band, no cell spilling into another`, async ({ page }) => {
+      const scope = await openV2(page, w, h);
+      /* ⚠️ THE GRID IS READ FROM THE DECLARATION UNDER TEST, not from a rendered track list */
+      const declared = await page.evaluate(() => {
+        for (const sh of [...document.styleSheets]) {
+          let rules: CSSRuleList; try { rules = sh.cssRules; } catch { continue; }
+          for (const r of [...rules]) {
+            if (r instanceof CSSStyleRule && r.selectorText === ".tdv2-inner") return r.style.gridTemplateColumns;
+          }
+        }
+        return null;
+      });
+      expect(declared).toBe("22px minmax(0px, 1.5fr) minmax(0px, 1fr) minmax(128px, max-content) max-content"); bump();
+      const rows = await page.evaluate((s) => ([...document.querySelectorAll(`${s} [data-todo-v2="row"]`)] as HTMLElement[]).slice(0, 12).map((row) => {
+        const band = row.querySelector('[data-todo-v2="band"]') as HTMLElement;
+        const rr = row.getBoundingClientRect(), br = band.getBoundingClientRect();
+        const cells = [...row.querySelectorAll(".tdv2-inner > *")] as HTMLElement[];
+        const spill = cells.filter((c) => c.scrollWidth > c.clientWidth + 1 && !c.classList.contains("tdv2-deedwrap") && !c.classList.contains("tdv2-agentcell")).map((c) => c.className);
+        /* ink of adjacent cells must not intersect (the ref's own fault) */
+        /* ⚠️ A RANGE REPORTS CLIPPED TEXT WHERE IT WOULD BE, NOT WHERE IT IS SEEN — the deed and the agent
+           ellipsise by design, so their ink is intersected with their own cell (which clips them);
+           the date and action cells do not clip, and the spill check above covers them. */
+        const inkRects = cells.map((c) => {
+          const rg = document.createRange(); rg.selectNodeContents(c);
+          const ink = rg.getBoundingClientRect();
+          const clips = c.classList.contains("tdv2-deedwrap") || c.classList.contains("tdv2-agentcell");
+          if (!clips) return ink;
+          const box = c.getBoundingClientRect();
+          return new DOMRect(Math.max(ink.left, box.left), ink.top, Math.min(ink.right, box.right) - Math.max(ink.left, box.left), ink.height);
+        });
+        const overlaps: string[] = [];
+        for (let i = 1; i < inkRects.length; i++) {
+          if (inkRects[i].left < inkRects[i - 1].right - 1 && inkRects[i - 1].width > 0 && inkRects[i].width > 0) overlaps.push(`${cells[i - 1].className}→${cells[i].className}`);
+        }
+        const cs = getComputedStyle(row);
+        return {
+          bandTop: br.top - rr.top, bandLeft: br.left - rr.left, bandW: br.width - rr.width, bandH: br.height,
+          radius: cs.borderTopLeftRadius, frame: parseFloat(cs.borderTopWidth) + parseFloat(cs.outlineWidth || "0"),
+          spill, overlaps,
+        };
+      }), scope);
+      expect(rows.length, "no rows to measure").toBeGreaterThan(2); bump();
+      for (const r of rows) {
+        expect(r.bandTop, "the band does not touch the card's top").toBeLessThan(0.5); bump();
+        expect(Math.abs(r.bandLeft) + Math.abs(r.bandW), "the band does not run edge to edge").toBeLessThan(0.5); bump();
+        expect(r.bandH).toBe(5); bump();
+        expect(r.radius).toBe("14px"); bump();
+        expect(r.spill, "a cell spills its contents").toEqual([]); bump();
+        expect(r.overlaps, "two cells' ink overlap").toEqual([]); bump();
+      }
+    });
+  }
+
+  test("past-the-date rows carry an inset, rounded ink edge; Your move is anthracite; group heads stick", async ({ page }) => {
+    const scope = await openV2(page, 1440, 900);
+    const m = await page.evaluate((s) => {
+      const past = [...document.querySelectorAll(`${s} [data-todo-v2="row"].past`)] as HTMLElement[];
+      const notPast = document.querySelector(`${s} [data-todo-v2="row"]:not(.past)`) as HTMLElement | null;
+      const e = past[0] ? getComputedStyle(past[0], "::after") : null;
+      const tag = document.querySelector(`${s} .tdv2-ttag.yourmove`) as HTMLElement | null;
+      const head = document.querySelector(`${s} [data-todo-v2="ghead"]`) as HTMLElement | null;
+      return {
+        nPast: past.length,
+        edge: e ? { content: e.content, top: e.top, bottom: e.bottom, width: e.width, bg: e.backgroundColor, r: e.borderTopRightRadius } : null,
+        notPastEdge: notPast ? getComputedStyle(notPast, "::after").content : "none",
+        tag: tag ? getComputedStyle(tag).backgroundColor : null,
+        head: head ? { bg: getComputedStyle(head).backgroundColor, fg: getComputedStyle(head).color, pos: getComputedStyle(head).position } : null,
+      };
+    }, scope);
+    expect(m.nPast, "the fixture has no row past its date — the edge cannot be proved").toBeGreaterThan(0); bump();
+    expect(m.edge!.width).toBe("3px"); bump();
+    expect(m.edge!.top).toBe("8px"); bump();
+    expect(m.edge!.bottom).toBe("8px"); bump();
+    expect(m.edge!.r).toBe("3px"); bump();
+    expect(m.edge!.bg).toBe("rgb(28, 19, 15)"); bump();
+    expect(m.notPastEdge === "none" || m.notPastEdge === "normal").toBe(true); bump();
+    expect(m.tag).toBe("rgb(42, 58, 82)"); bump();
+    expect(m.head).toEqual({ bg: "rgb(42, 58, 82)", fg: "rgb(253, 249, 242)", pos: "sticky" }); bump();
+    /* the head sticks: scroll the page past the first group's top and it stays at the scroller's top */
+    const stuck = await page.evaluate((s) => {
+      const sc = document.querySelector(`${s} .wpg-scroll`) as HTMLElement;
+      const heads = [...document.querySelectorAll(`${s} [data-todo-v2="ghead"]`)] as HTMLElement[];
+      const first = heads[0];
+      const sec = first.parentElement as HTMLElement;
+      sc.scrollTop = sec.offsetTop + 200;
+      const top = first.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+      const secR = sec.getBoundingClientRect();
+      return { top, secTop: secR.top - sc.getBoundingClientRect().top, secBottom: secR.bottom - sc.getBoundingClientRect().top };
+    }, scope);
+    /* precondition: the section is scrolled past its own top and still on screen */
+    expect(stuck.secTop).toBeLessThan(0); bump();
+    expect(stuck.secBottom).toBeGreaterThan(40); bump();
+    expect(Math.abs(stuck.top), "the group head did not stick").toBeLessThan(1); bump();
+    /* no burgundy highlight anywhere in the list */
+    const burgundy = await page.evaluate((s) => [...document.querySelectorAll(`${s} [data-todo-v2="list"] *`)].filter((e) => {
+      const c = getComputedStyle(e);
+      return [c.color, c.backgroundColor, c.borderLeftColor].some((v) => v === "rgb(124, 58, 42)");
+    }).length, scope);
+    expect(burgundy, "a burgundy 'with you' highlight is in the list").toBe(0); bump();
+  });
+});

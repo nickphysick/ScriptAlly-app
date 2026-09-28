@@ -249,12 +249,75 @@
   transition: box-shadow 0.16s, transform 0.16s;
 }
 .tdv2-row:hover { box-shadow: var(--tdv2-shadow-lift); transform: translateY(-1px); }
+/**
+ * ⚠️ THE LAST TWO TRACKS SIZE TO THEIR CONTENT, NOT THE REF'S 128px / 116px. Measured in the ref at
+ * 1440: its action cell holds a status (dot + "Partial requested") and a button ("Mark sent"), needs
+ * ~175px, is given 116, and spills LEFT over the date — "28 June · 3 months" printed under
+ * "Partial requested". The brief's own instruction is that dates and actions are never squished,
+ * so the date column keeps the ref's 128 as a floor and the action column takes what it needs; the
+ * deed and the agent share the rest at the ref's 1.5 : 1, so the agent cannot hog it.
+ */
 .tdv2-inner {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1.5fr) minmax(0, 1fr) 128px 116px;
+  grid-template-columns: 22px minmax(0, 1.5fr) minmax(0, 1fr) minmax(128px, max-content) max-content;
   gap: 16px; align-items: center;
   padding: 13px 16px 13px 14px;
 }
+.tdv2-row .tdv2-band { position: relative; z-index: 1; }
+/* past the date: an INK left edge, inset top and bottom and rounded — never to the card's edge */
+.tdv2-row.past::after {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  background: var(--tdv2-ink); border-radius: 0 3px 3px 0;
+}
+.tdv2-tick {
+  width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--tdv2-stone-edge); box-sizing: border-box;
+  background: var(--tdv2-card); display: grid; place-items: center; flex: none; padding: 0; cursor: pointer; color: var(--tdv2-ink);
+}
+.tdv2-tick:hover { border-color: var(--tdv2-anthracite); }
+.tdv2-tick svg { width: 10px; height: 10px; opacity: 0; }
+.tdv2-tick:hover svg { opacity: 0.45; }
+.tdv2-deedwrap { min-width: 0; }
+.tdv2-tagline { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.tdv2-ttag {
+  font-family: var(--tdv2-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 5px; background: var(--state-closed); color: var(--tdv2-ink-soft); line-height: 1.5; white-space: nowrap;
+}
+.tdv2-ttag.yourmove { background: var(--tdv2-anthracite); color: var(--tdv2-on-dark); }
+.tdv2-deed {
+  font-family: var(--tdv2-serif); font-size: 17px; font-weight: 600; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tdv2-agentcell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.tdv2-av {
+  width: 30px; height: 30px; border-radius: 50%; flex: none; background: var(--tdv2-anthracite); color: var(--tdv2-on-dark);
+  display: grid; place-items: center; font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
+}
+.tdv2-agt { min-width: 0; display: block; }
+.tdv2-agt b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tdv2-agt span { display: block; font-size: 12px; color: var(--tdv2-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tdv2-datecell { min-width: 0; }
+.tdv2-dk { font-family: var(--tdv2-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tdv2-ink-faint); margin-bottom: 3px; white-space: nowrap; }
+.tdv2-dv { font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+.tdv2-dv em { font-style: normal; color: var(--tdv2-ink-soft); }
+.tdv2-actcell { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.tdv2-statuspill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tdv2-ink-soft); white-space: nowrap; }
+.tdv2-act {
+  border: 1px solid var(--tdv2-hair); border-radius: 9px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 600;
+  background: var(--tdv2-card); color: var(--tdv2-ink); white-space: nowrap; cursor: pointer;
+}
+.tdv2-act:hover { background: var(--tdv2-anthracite); color: var(--tdv2-on-dark); border-color: var(--tdv2-anthracite); }
+.tdv2-row:focus-visible { outline: 2px solid var(--tdv2-anthracite); outline-offset: 2px; }
+
+/* ── group heads: sticky, anthracite, white (ref `.ghead`) ── */
+.tdv2-gsec { margin-bottom: 26px; }
+.tdv2-gsec:last-child { margin-bottom: 0; }
+.tdv2-ghead {
+  position: sticky; top: 0; z-index: 20; margin: 0 0 12px; background: var(--tdv2-anthracite); color: var(--tdv2-on-dark);
+  border-radius: 9px; padding: 7px 14px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1);
+}
+.tdv2-ghead b { font-family: var(--tdv2-serif); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; line-height: 1.3; }
+.tdv2-gn { margin-left: auto; font-family: var(--tdv2-mono); font-size: 11px; opacity: 0.75; }
 .tdv2-row--sk .tdv2-inner { min-height: 44px; }
 .tdv2-sk-agent { flex-direction: row; align-items: center; gap: 10px; }
 .tdv2-sk-act { align-items: flex-end; }
