@@ -37,6 +37,8 @@ export interface JourneyProps {
   children: (view: JourneyView, initialStep?: number) => React.ReactElement;
   /** Swap to another journey in place, keeping the same query. */
   switchTo: (mode: DrawerMode, preset?: DrawerPreset) => void;
+  /** v1.1 — a journey opened with no query (the sidebar's "Record a response") picks one. */
+  pickQuery: (queryId: string) => void;
 }
 
 const JOURNEYS: Partial<Record<DrawerMode, React.ComponentType<JourneyProps>>> = {
@@ -82,6 +84,10 @@ export function QueryDrawer() {
 
   const switchTo = useCallback((mode: DrawerMode, preset?: DrawerPreset) => {
     setReq((r) => (r ? { ...r, mode, preset } : r));
+    setGen((g) => g + 1);
+  }, []);
+  const pickQuery = useCallback((queryId: string) => {
+    setReq((r) => (r ? { ...r, queryId } : r));
     setGen((g) => g + 1);
   }, []);
 
@@ -133,7 +139,7 @@ export function QueryDrawer() {
   return createPortal(
     <DrawerContext.Provider value={{ today, openCal, setOpenCal }}>
       <div className={`qad-root${open ? " is-open" : ""}`} data-qad-root style={hidden ? { display: "none" } : undefined}>
-        <J key={`${req.mode}-${gen}`} req={req} today={today} switchTo={switchTo}>
+        <J key={`${req.mode}-${gen}`} req={req} today={today} switchTo={switchTo} pickQuery={pickQuery}>
           {(view, initialStep) => (
             <DrawerShell view={view} mode={req.mode} open={open && !hidden} initialStep={initialStep ?? req.preset?.step}
               onCancel={close} onSave={() => runSave(view)} />

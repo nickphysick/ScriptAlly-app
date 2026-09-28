@@ -11,6 +11,7 @@
  * offer's "tell the others" marks) and, for a late reply to a query closed as no reply, removes the
  * closure entry first so Analytics counts the reply (ruling: the ending is REPLACED, not appended to).
  */
+import { QueryPicker } from "./QueryPicker";
 import React, { useMemo, useState } from "react";
 import { collection, deleteDoc, deleteField, doc, getDocs, query as fsQuery, where } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
@@ -35,7 +36,16 @@ const DOT: Record<RType, string> = { partial: "var(--qad-rose)", full: "var(--qa
 const KEY: Record<RType, EventKey> = { partial: "partial_requested", full: "full_requested", rr: "rr_requested", pass: "pass", offer: "offer" };
 const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2], ["1d", "The day before", -1], ["0", "On the day", 0], ["no", "No reminder", null]];
 
-export function ResponseJourney({ req, today, children }: JourneyProps) {
+/**
+ * v1.1 — opened with no query at all (the sidebar's "Record a response"), the first step is
+ * choosing one. A wrapper rather than a branch inside the journey, so no hook is ever conditional.
+ */
+export function ResponseJourney(props: JourneyProps) {
+  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery}>{(v) => props.children(v)}</QueryPicker>;
+  return <ResponseJourneyForQuery {...props} />;
+}
+
+function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
   const db = useScriptAllyDb();
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;

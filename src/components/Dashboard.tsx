@@ -14,7 +14,6 @@ import { manuscriptGenres } from "../lib/manuscripts";
 import { agentBuckets } from "../lib/lifecycle";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { RecordResponseModal } from "./RecordResponseModal";
-import { RecordResponseScreen } from "./RecordResponseScreen";
 import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { StatusDot } from "./StatusDot";
@@ -572,7 +571,6 @@ export const Dashboard: React.FC<{
   // Drives the unified RecordResponseModal launched from the query slide-in panel.
   const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
   // The hero "Record a response" screen (paste-email fast lane + manual flow).
-  const [recordResponseScreenOpen, setRecordResponseScreenOpen] = useState(false);
 
   // Drives the Nudge modal (opened from a nudge_overdue row's "Nudge" button).
   const [nudgeTask, setNudgeTask] = useState<Task | null>(null);
@@ -1658,12 +1656,6 @@ export const Dashboard: React.FC<{
       {/* Edit Query is now an app-level overlay (EditQueryHost) opened via openEditQuery(id) — the
           legacy QuerySlideInPanel slab is retired. */}
 
-      {/* Record-a-response screen (hero entry): paste-email fast lane + manual record-a-response flow. */}
-      <RecordResponseScreen
-        isOpen={recordResponseScreenOpen}
-        onClose={() => setRecordResponseScreenOpen(false)}
-        onNavigate={onNavigate}
-      />
 
       {/* Unified Record-response modal (shared with the Queries page) */}
       {recordResponseQueryId && (() => {

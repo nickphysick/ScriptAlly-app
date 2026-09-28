@@ -345,9 +345,10 @@ body.qad-docked .qcv-qm, body.qad-docked .qcv-open {
 @keyframes qadRing { to { stroke-dashoffset: 57 } }
 .qad-toast .view { border: 0; background: none; color: rgba(245,241,235,.8); font-family: var(--qad-machine); font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.3); white-space: nowrap; }
 
-/* ===== below 768: a full-screen sheet ===== */
-@media (max-width: 767px) {
-  .qad-drawer { width: 100vw; }
+/* ===== 768 and below: a full-screen sheet (v1.1 — 768 included, as asked: a 500px drawer on a
+   768px tablet leaves a 268px strip of dimmed page that reads as broken rather than as context) ===== */
+@media (max-width: 768px) {
+  .qad-drawer { left: 0; width: auto; max-width: none; }
   .qad-stepper { display: none; }
   .qad-stepper-sm { display: block; position: sticky; top: 0; z-index: 5; background: #fff; margin: 0 -24px; padding: 12px 24px; border-bottom: 1px solid var(--qad-hair); font: 400 8.5px var(--qad-mono); letter-spacing: .12em; color: var(--qad-ink45); text-transform: uppercase; }
   .qad-rr { grid-template-columns: 110px 1fr auto; }
@@ -363,3 +364,8 @@ body.qad-docked .qcv-qm, body.qad-docked .qcv-open {
   .qad-root.is-open .qad-drawer { opacity: 1; }
   .qad-toast .ring .fg { animation-duration: var(--qad-dur, 8s) !important; }
 }
+/* v1.1 — the query picker ("Record a response" with no query): the Log picker's markup, plus an
+   empty line and the Pro paste link */
+.qad-root .qad-qpick-none { margin: 10px 14px; font-size: 14px; color: var(--qad-ink45); }
+.qad-root .qad-qpick-paste { display: inline-block; margin-top: 14px; border: 0; background: none; padding: 0; cursor: pointer;
+  font-family: var(--qad-machine); font-size: 14px; color: var(--qad-ink); text-decoration: underline; text-underline-offset: 3px; }

@@ -433,12 +433,22 @@ export const TimelineRows: React.FC<{
   ghostId?: string | null;
   /** §2 — the just-saved rung's one pulse, additive like the rest. */
   freshId?: string | null;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null }) => {
+  /**
+   * Query actions v1.1 — the inline delete confirm. The row whose `activityId` is `confirmFor` is
+   * REPLACED by `confirmNode` (the mock swaps the row's own markup for the ink confirm), so the
+   * question sits exactly where the entry was. Additive and defaulted off: To-do is untouched.
+   */
+  confirmFor?: string | null;
+  confirmNode?: React.ReactNode;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null, confirmFor = null, confirmNode = null }) => {
   /* ⚠️ THE GROUPING IS THE PURE `chapterise`, INCLUDING ITS THRESHOLD. Nothing here decides when a
      heading is worth drawing — `labelled` is the derivation's own answer, so a second surface
      cannot apply a different figure. */
   const book = chaptered ? chapterise(rows) : null;
   const render = (row: RowSpec, isLast: boolean) => {
+      if (confirmFor && row.activityId === confirmFor && confirmNode) {
+        return <div key={row.key} className="tl-delrow" data-qcv="entry-delc">{confirmNode}</div>;
+      }
       /* the caller's materials list for this row, if it has one — see the note at its render */
       const showsExtra = !!sentExtra && row.status === QueryStatus.QUERIED && !row.kind;
       /**
@@ -741,7 +751,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   onOpenReminder?: () => void;
   /** §6c — create the reminder task through the existing task-creation path. */
   onRemindLater?: () => void;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
+  /** v1.1 — the inline delete confirm, passed straight to `TimelineRows`. */
+  confirmFor?: string | null;
+  confirmNode?: React.ReactNode;
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater, confirmFor = null, confirmNode = null }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef } | null>(null);
   /* §1 — anchored, flipping and constrained like every other popover on this page. The trigger is
      assigned on open (the rows are many; a ref per row would be a ref per rung). */
@@ -820,6 +833,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         freshId={freshId}
         continues={ballHolder === "agent" && !!waiting}
         sentExtra={sentExtra}
+        confirmFor={confirmFor}
+        confirmNode={confirmNode}
       />
 
       {/**

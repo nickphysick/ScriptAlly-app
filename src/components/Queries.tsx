@@ -17,7 +17,10 @@ import {
   onSnapshot,
   query,
   orderBy,
-  limit
+  limit,
+  deleteDoc,
+  getDoc,
+  getDocs
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 /* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
@@ -137,6 +140,7 @@ import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
 import { openQueryDrawer, showUndoBar } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
+import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
@@ -1638,46 +1642,87 @@ export const Queries: React.FC<{
    * answers would strand the send; removing both is usually what is meant, and editing instead is
    * what is meant when only a detail was wrong.
    */
+  /**
+   * Query actions v1.1 — DELETING AN ENTRY IS THE MOCK'S INLINE CONFIRM ON THE ROW, then the Undo
+   * bar. The row itself turns into the ink confirm: "Delete “Nudge sent”? The status goes back to
+   * the entry before it." · Keep · Delete. The old guarded sheet with its consequence preview is
+   * retired; its two guards are not.
+   *
+   * ⚠️ THE ROOT IS THE WHOLE QUERY, as the mock has it: the first entry cannot be removed on its own,
+   * so its confirm asks "Delete this whole query?" and runs Delete query (snapshot + Undo bar).
+   *
+   * ⚠️ THE DEPENDENCY GUARD STILL OFFERS BOTH — a request whose send answers it goes with that send,
+   * and the confirm names both, because removing one would strand the other.
+   *
+   * ⚠️ BOTH STORES ARE CLEARED DIRECTLY, NOT THROUGH `deleteActivity`. That finds its target in the
+   * FEED, and a self-heal rung (`act-status-…`) is written only to the query's own log — the fault
+   * v1 met on the late reply. The undo is the drawer's SNAPSHOT, so it puts back exactly the
+   * documents that were there, whichever store held them.
+   */
+  const [entryDel, setEntryDel] = useState<null | { activityId: string; ids: string[]; labels: string[]; whole: boolean }>(null);
+  /* the confirm belongs to the query it was asked on — opening another query drops it */
+  useEffect(() => { setEntryDel(null); }, [selectedQueryId]);
   const onDeleteEntry = (entry: TimelineEntryRef) => {
     if (!activeQuery) return;
+    setCorrecting(null);
     const evts = guardEvents();
     const me = evts.find((e) => e.activityId === entry.activityId);
     if (!me) return;
-
-    /* the root is editable and never removable — the path out is deleting the query itself */
     const root = rootGuard(me, evts);
     if (root.kind === "route") {
-      showConfirm({
-        title: "This is the first entry",
-        body: <p style={{ margin: 0 }}>{root.message}</p>,
-        confirmLabel: "Close",
-        onConfirm: async () => {},
-      });
+      setEntryDel({ activityId: entry.activityId, ids: [entry.activityId], labels: [entry.label], whole: true });
       return;
     }
-
     const dep = dependencyGuard(me, evts);
-    const doomed = new Set<string>([entry.activityId, ...(dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [])]);
-    const proposed = trackingEvents.filter((e: any) => !doomed.has(e.id));
-    const diff = previewFor(proposed);
-
-    const commit = async () => {
-      /* ⚠️ ONE CALL, HOWEVER MANY DOCUMENTS MOVED — and it hands back the closure that reverses it.
-         The undo contract (Phase 4) is one toast per operation; a loop of single deletes would have
-         no inverse to give it, which is how the first wiring came to offer an Undo that did nothing. */
-      const restore = await deleteActivities(Array.from(doomed));
-      await finishCorrection(undoMessage(entry.label, agentPrimary(activeAgent), doomed.size), restore, activeQuery?.id);
-    };
-
-    setCorrecting({
-      step: "sheet",
-      entry,
-      question: doomed.size > 1 ? "Remove both entries?" : "Remove this entry?",
-      diff,
-      commit,
-      partners: dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [],
+    const partners = dep.kind === "cascade" ? dep.partners : [];
+    setEntryDel({
+      activityId: entry.activityId,
+      ids: [entry.activityId, ...partners.map((p) => p.activityId!)],
+      labels: [entry.label, ...partners.map((p) => String(p.status))],
+      whole: false,
     });
   };
+  const confirmEntryDelete = async () => {
+    const d = entryDel;
+    const q = activeQuery;
+    setEntryDel(null);
+    if (!d || !q || !currentUser) return;
+    if (d.whole) { await deleteQueryWithUndo(q.id); return; }
+    const uid = currentUser.id;
+    const snap = await takeSnapshot(uid, [q.id]);
+    for (const id of d.ids) {
+      await deleteDoc(doc(db, "users", uid, "queries", q.id, "activity", id));
+      await deleteDoc(doc(db, "users", uid, "activities", id));
+    }
+    await recomputeQueryById(uid, q.id);
+    /* ⚠️ THE SELF-HEAL CAN RE-CREATE A RUNG FOR THE STATUS IT SAW BEFORE THE RECOMPUTE LANDED. Any
+       `act-status-…` rung that was not in the snapshot is that race, not the writer's record. */
+    const log = await getDocs(collection(db, "users", uid, "queries", q.id, "activity"));
+    const healed = log.docs.filter((x) => x.id.startsWith("act-status-") && !snap.docs.has(x.ref.path));
+    if (healed.length) {
+      for (const h of healed) { await deleteDoc(h.ref); await deleteDoc(doc(db, "users", uid, "activities", h.id)); }
+      await recomputeQueryById(uid, q.id);
+    }
+    const after = await getDoc(doc(db, "users", uid, "queries", q.id));
+    const status = String(after.data()?.status ?? "");
+    const ag = agents.find((a) => a.id === q.agentId);
+    const gone = d.labels.map((l) => `“${l.toUpperCase()}”`).join(" AND ");
+    showUndoBar({
+      message: `${d.ids.length > 1 ? "Entries" : "Entry"} deleted · ${ag?.name || ag?.agency || "The agent"}`,
+      sub: `${gone} REMOVED${status ? ` · STATUS NOW ${status.toUpperCase()}` : ""}`,
+      undo: async () => { await restoreSnapshot(snap); },
+    });
+  };
+  const entryConfirmNode = entryDel ? (
+    <div className="qcv-open-delc qcv-entry-delc" role="alertdialog" aria-label={entryDel.whole ? "Delete this whole query?" : `Delete ${entryDel.labels[0]}?`}>
+      <span>
+        <b>{entryDel.whole ? "Delete this whole query?" : entryDel.labels.length > 1 ? `Delete “${entryDel.labels[0]}” and “${entryDel.labels[1]}”?` : `Delete “${entryDel.labels[0]}”?`}</b>
+        {entryDel.whole ? "Its history and reminders go too." : `The status goes back to the entry before ${entryDel.labels.length > 1 ? "them" : "it"}.`}
+      </span>
+      <button type="button" data-qcv="entry-keep" onClick={() => setEntryDel(null)}>Keep</button>
+      <button type="button" className="d" data-qcv="entry-del-go" onClick={() => { void confirmEntryDelete(); }}>Delete</button>
+    </div>
+  ) : null;
 
   /* ⚠️ THE ANCHORED CLOSE MENU IS RETIRED (§2, correction pass 3). Its trigger ref lived only in
      the dead browsing branch, so the live drawer opened it with an EMPTY menuStyle and the
@@ -5055,6 +5100,8 @@ export const Queries: React.FC<{
                       setCorrecting({ step: "fork", entry });
                     }}
                     highlightId={correcting?.entry.activityId ?? null}
+                    confirmFor={entryDel?.activityId ?? null}
+                    confirmNode={entryConfirmNode}
                     /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
                        that asked (the same anchor contract as the fork's ⋯). The modal it used to
                        open survives only as the mobile surface below. */
@@ -6148,7 +6195,13 @@ export const Queries: React.FC<{
                   onCorrect={() => setCorrecting({ step: "edit", entry: correcting.entry })}
                   /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
                      flow that appends already exists. No third way to record a response. */
-                  onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
+                  onAppend={() => {
+                    setCorrecting(null);
+                    /* v1.1 — what happened next is a response, and responses finish in the drawer. */
+                    if (activeQuery && DRAWER_LIVE.resp) { openQueryDrawer({ mode: "resp", queryId: activeQuery.id }); return; }
+                    setIsRecordResponseFocusFormOpen(true);
+                  }}
+                  onDelete={() => onDeleteEntry(correcting.entry)}
                   /* ⚠️ MOVE IS RESTORED (log-sheet run, ruling 1 — reversing decision 5). It sits
                      ON the correction branch, as before: filing an event under the wrong agent IS
                      the record being wrong. The pick and move steps already rendered inside the
@@ -8278,6 +8331,8 @@ export const Queries: React.FC<{
                               })()}
                               onEditEntry={onEditEntry}
                               onDeleteEntry={onDeleteEntry}
+                              confirmFor={entryDel?.activityId ?? null}
+                              confirmNode={entryConfirmNode}
                               onNudge={() => setIsNudgeOpen(true)}
                               /* §4c — the offer beneath a no-reply event opens the same close flow
                                  the bar's `Mark closed` does. One home for the act. */
