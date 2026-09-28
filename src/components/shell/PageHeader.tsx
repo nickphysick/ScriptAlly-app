@@ -360,7 +360,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           */}
         <div className="ph-text">
           {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
-          <h1 className="ph-title" data-probe="title">{title}{titleAdornment}</h1>
+          <h1 className="ph-title" data-probe="title" data-page-title="">{title}{titleAdornment}</h1>
           {/* ⚠️ ABSENT INTRO RENDERS NOTHING AND RESERVES NOTHING — in flow there is no height to
               keep, so a title-only page is simply shorter. Five compact pages have none. */}
           {description && <p className="ph-intro" data-probe="intro">{description}</p>}
@@ -399,7 +399,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="ph-hin" data-probe="hero-frame">
       <div className="ph-text">
         {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
-        <h1 className="ph-title" data-probe="title">{title}{titleAdornment}</h1>
+        <h1 className="ph-title" data-probe="title" data-page-title="">{title}{titleAdornment}</h1>
         {description && <p className="ph-intro" data-probe="intro">{description}</p>}
         {(primary || secondary) && (
           <div className="ph-acts" data-probe="actions">

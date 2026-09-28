@@ -83,7 +83,8 @@ export async function readBar(page: Page) {
     const switchers = [...document.querySelectorAll('[data-shell="switcher"], .sv2-scope, .ws-mspill')].filter(shown);
     return {
       barL: b.left, barR: b.right, barT: b.top, barH: b.height, mainL: m.left, winR: window.innerWidth,
-      barBg: bs.backgroundColor, sideBg: ss.backgroundColor,
+      barBg: bs.backgroundColor, sideBg: ss.backgroundColor, groundBg: getComputedStyle(main).backgroundColor,
+      nameHidden: !!name && parseFloat(getComputedStyle(name).opacity) === 0 && name.getAttribute("aria-hidden") === "true",
       radii: [bs.borderTopLeftRadius, bs.borderTopRightRadius, bs.borderBottomLeftRadius, bs.borderBottomRightRadius],
       sideRule, sideShadow: ss.boxShadow,
       toggleL: toggle ? toggle.l - b.left : null, helpR: help ? b.right - help.r : null,

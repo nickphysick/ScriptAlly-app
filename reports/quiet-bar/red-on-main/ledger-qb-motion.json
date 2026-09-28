@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "Q9 · reduce: the hairline's transition is 0s",
+  "route": "/queries",
+  "size": "1440",
+  "state": "reduce",
+  "ok": false,
+  "detail": "1e-05s"
+ },
+ {
+  "lock": "Q9 · reduce: the name's transition is 0s",
+  "route": "/queries",
+  "size": "1440",
+  "state": "reduce",
+  "ok": false,
+  "detail": "1e-05s"
+ },
+ {
+  "lock": "Q9 · no preference: the hairline fades over 0.25s",
+  "route": "/queries",
+  "size": "1440",
+  "state": "no-preference",
+  "ok": false,
+  "detail": "0s"
+ },
+ {
+  "lock": "Q9 · no preference: the name moves over 0.28s",
+  "route": "/queries",
+  "size": "1440",
+  "state": "no-preference",
+  "ok": false,
+  "detail": "0s"
+ }
+]

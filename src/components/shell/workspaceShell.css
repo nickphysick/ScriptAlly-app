@@ -656,25 +656,28 @@
   --ws-bright-gap: 4px;
   box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 12px;
   height: var(--shell-top-h); padding: 0 24px;
-  /* ⚠️ PAGE HEADER v2: THE BAR IS THE SIDEBAR'S COLOUR, READ FROM THE SIDEBAR'S OWN TOKEN. The design is
-     "the bar is the sidebar's colour", not a number — so the two cannot drift apart, and a theme that
-     retones the sidebar retones the bar with it. Flat: no radius anywhere, including where it meets
-     the sidebar. The lock asserts the two computed backgrounds are EQUAL, never a literal. */
-  background: var(--shell-side);
+  /* ⚠️ THE QUIET BAR (quiet-bar v1): THE BAR IS THE PAGE GROUND, and this REVERSES page header v2's
+     "the bar is the sidebar's colour". It reads `--ws-page`, which the routes retone on `.ws-main`
+     (the dashboard and the ground-mode pages), so the bar and the ground below it cannot disagree on
+     any route. The lock asserts the two computed backgrounds are EQUAL, never a literal. Flat: no
+     radius, and NO SHADOW in either state — the one edge is the hairline below, and only once the
+     page has scrolled. */
+  position: relative;
+  background: var(--ws-page);
   border-radius: 0;
-  box-shadow: inset 0 -1px 0 var(--shell-rule);
+  box-shadow: none;
 }
-/**
- * §1 (page header v1) — ONCE THE PAGE HAS SCROLLED, a soft shadow beneath the bar; at rest the
- * hairline alone.
- *
- * ⚠️ THE HAIRLINE IS RESTATED HERE, and it has to be: `box-shadow` is one property, so a rule that
- * named only the new shadow would drop the inset hairline and the bar would lose its edge the
- * moment a reader scrolled. Two shadows, one declaration.
- */
-.ws-pagebar--scrolled {
-  box-shadow: inset 0 -1px 0 var(--shell-rule), 0 8px 16px -14px rgba(28, 19, 15, 0.35);
+/* THE ONE HAIRLINE, faded in once the page scrolls. A pseudo-element rather than an inset shadow so it
+   can fade: `opacity` transitions cleanly where a shadow's colour does not.
+   ⚠️ A PSEUDO-ELEMENT KEEPS ITS OWN TRANSITION, so the reduced-motion rule below names it directly. */
+.ws-pagebar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--shell-rule); opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
 }
+.ws-pagebar--scrolled::after { opacity: 1; }
+/* ⚠️ THE SCROLLED SHADOW IS RETIRED (quiet-bar v1). `.ws-pagebar--scrolled` now only fades the hairline
+   in (above); a shadow under a bar that is the page's own ground reads as the bar lifting off it. */
 .ws-grow { flex: 1 1 auto; min-width: 0; }
 /* ⚠️ v3: THE DASHBOARD'S BAR IS NO LONGER LAID OVER ITS SCROLLER — `--dash-bar-h`, the absolute
    placement, the measure-padding and the transparent-until-scrolled ground are retired together.
@@ -699,6 +702,19 @@
 /* THE PAGE NAME — the sidebar section as an eyebrow 5px above, then the name in the typewriter face on
    one line. With no section the name stands alone, and the bar's `align-items: center` centres it. */
 .ws-pname { flex: none; display: block; min-width: 0; white-space: nowrap; font-family: var(--sp-type); font-size: 22px; line-height: 1; color: var(--sp-ink); }
+/* THE QUIET BAR: the name and its divider are laid out at rest and invisible; they fade and rise into
+   place once the page's title has gone up behind the bar, and reverse the same way. They keep their
+   boxes in both states, so nothing else in the bar moves (Q7). */
+.ws-pagebar .ws-pname, .ws-pagebar .ws-bvr {
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(.22, .8, .3, 1), transform 0.28s cubic-bezier(.22, .8, .3, 1);
+}
+.ws-pagebar--named .ws-pname, .ws-pagebar--named .ws-bvr { opacity: 1; transform: none; }
+.ws-pagebar--named .ws-pname { pointer-events: auto; }
+/* ⚠️ REDUCED MOTION IS THE SHELL'S ONE RULE, NOT A SECOND ONE HERE: `.ws-app *, *::before, *::after`
+   take `transition-duration: 0.01ms !important` under `prefers-reduced-motion: reduce` (the foot of
+   this sheet), which reaches the bar's hairline and the name. A local `transition: none` beside it was
+   measured to change nothing — deleting it left every duration at 0.01ms. */
 .ws-pname-n { font-family: inherit; display: block; }
 .ws-pname-s { display: block; margin-bottom: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-ink-45); }
 

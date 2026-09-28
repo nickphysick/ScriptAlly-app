@@ -1,0 +1,1258 @@
+[
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(244, 240, 234)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(244, 240, 234)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q5 · with no marked title, the name shows at 3",
+  "route": "/dashboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/queries",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/queries",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(244, 240, 234)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/queries",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/queries",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(244, 240, 234)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 226.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 123",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/queries",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/queries",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 206.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 103",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/agents",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/agents",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/agents",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/agents",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 226.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 123",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/agents",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/agents",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 206.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 103",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q5 · with no marked title, the name shows at 3",
+  "route": "/manuscripts",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 226.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 123",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 226.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 123",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "scrollTop 125",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/todo",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/todo",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/todo",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/todo",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 206.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 103",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.4375 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.4375 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/todo",
+  "size": "1440",
+  "state": "scrollTop 105",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/todo",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 209.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · a title that never scrolls behind the bar never names the bar",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "zone at its end",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 209.4375 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · a title that never scrolls behind the bar never names the bar",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "zone at its end",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/import",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/import",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/import",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/import",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 184.75 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 81",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.75 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 83",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.75 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/import",
+  "size": "1440",
+  "state": "scrollTop 83",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/import",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/account/profile",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/plans",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/plans",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/plans",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/plans",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 212.75 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 109",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.75 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 111",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.75 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/plans",
+  "size": "1440",
+  "state": "scrollTop 111",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/plans",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "Q1 · the bar was found",
+  "route": "/help",
+  "size": "1440",
+  "state": "rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q1 · at rest the bar's ground is the page's",
+  "route": "/help",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q2 · at rest no hairline and no shadow",
+  "route": "/help",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset hairline 0"
+ },
+ {
+  "lock": "Q2 · at rest the name is hidden and aria-hidden",
+  "route": "/help",
+  "size": "1440",
+  "state": "rest",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q1 · scrolled, the bar's ground is still the page's",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "bar rgb(231, 227, 220) ground rgb(247, 244, 238)"
+ },
+ {
+  "lock": "Q3 · at 3 the hairline is visible and there is no shadow",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "hairline 0 shadow rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.35) 0px 8px 16px -14px"
+ },
+ {
+  "lock": "Q3 · precondition: at 3 the title is still below the bar",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": true,
+  "detail": "title 248.75 bar 105.75"
+ },
+ {
+  "lock": "Q3 · at 3 the name is still hidden",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 3",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q4 · just short of it, the name is still hidden",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 145",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 106.75 bar 105.75"
+ },
+ {
+  "lock": "Q4 · once the title's bottom is at or above the bar's, the name shows",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 147",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} title 104.75 bar 105.75"
+ },
+ {
+  "lock": "Q7 · no control in the bar moved when the name appeared",
+  "route": "/help",
+  "size": "1440",
+  "state": "scrollTop 147",
+  "ok": true,
+  "detail": "moved [] of 8"
+ },
+ {
+  "lock": "Q4 · back at 0, the bar is at rest again",
+  "route": "/help",
+  "size": "1440",
+  "state": "back to 0",
+  "ok": false,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"} hairline 0"
+ },
+ {
+  "lock": "population · each branch entered",
+  "route": "*",
+  "size": "1440",
+  "state": "tally",
+  "ok": true,
+  "detail": "{\"titled\":10,\"untitled\":2,\"fixedTitle\":2,\"still\":1}"
+ }
+]

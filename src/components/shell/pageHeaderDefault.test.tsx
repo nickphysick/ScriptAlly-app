@@ -45,12 +45,14 @@ const renderInLeavingGrid = (el: React.ReactElement) =>
 
 /* ⚠️ UPDATED DELIBERATELY IN PAGE HEADER v2 §2, IN THE SAME COMMIT AS THE CHANGE: the full
    variant's contents now sit in `.ph-hin`, the centred 920px hero frame. Nothing else moved. */
+/* ⚠️ UPDATED DELIBERATELY BY THE QUIET BAR, IN THE SAME COMMIT AS THE CHANGE: the title carries
+   `data-page-title`, which the shell reads to know when the title has gone up behind the bar. */
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
     expect(render(<PageHeader title="Help centre" />)).toBe(
       '<header class="ph ph--full" data-probe="page-header" data-size="full">'
       + '<div class="ph-hin" data-probe="hero-frame">'
-      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Help centre</h1></div></div></header>'
+      + '<div class="ph-text"><h1 class="ph-title" data-probe="title" data-page-title="">Help centre</h1></div></div></header>'
     );
   });
 
@@ -66,7 +68,7 @@ describe("⚠️ the default variant is frozen", () => {
     expect(out).toBe(
       '<header class="ph ph--full" data-probe="page-header" data-size="full">'
       + '<div class="ph-hin" data-probe="hero-frame">'
-      + '<div class="ph-text"><h1 class="ph-title" data-probe="title">Your agent list</h1>'
+      + '<div class="ph-text"><h1 class="ph-title" data-probe="title" data-page-title="">Your agent list</h1>'
       + '<p class="ph-intro" data-probe="intro">Everyone you&#x27;re querying.</p>'
       + '<div class="ph-acts" data-probe="actions">'
       + '<button type="button" class="ph-primary">Add new agent</button>'
