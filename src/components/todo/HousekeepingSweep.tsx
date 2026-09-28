@@ -41,12 +41,13 @@ import { StagedPayload, applyStaged } from "../../lib/todoWalk";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFillError, AssistFound } from "../../lib/assistFill";
 import { Agent, Query } from "../../types";
+import { formatDate } from "../../lib/dates";
 
 export type SweepItem = { kind: "card"; card: BoardCard } | { kind: "group"; group: HkGroup };
 
 const fmtShort = (iso: string): string => {
   const ms = new Date(iso).getTime();
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 const WEEK_CHIPS = [4, 6, 8, 12];
 const MATERIAL_VOCAB = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];

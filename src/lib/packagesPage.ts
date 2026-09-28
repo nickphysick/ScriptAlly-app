@@ -16,6 +16,7 @@ import { isRequest, isResponse, medianReplyDays } from "./packageMetrics";
 import { countWords } from "./materialDraft";
 import { latestVersion } from "./bookVersions";
 import { suggestedName } from "./buildRow";
+import { formatDate } from "./dates";
 
 export type MatKind = "letter" | "synopsis" | "version";
 
@@ -35,7 +36,7 @@ export interface MaterialItem {
 export const shortDate = (iso: string | undefined | null): string => {
   if (!iso) return "";
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(d.getTime()) ? "" : formatDate(d, { day: "numeric", month: "short" });
 };
 
 const newestFirst = <T extends { createdDate: string }>(xs: T[]): T[] =>

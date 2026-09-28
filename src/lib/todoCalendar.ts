@@ -34,6 +34,7 @@ import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
 import { flagSleeps } from "./taskFlags";
 import { resolveExpectedDate } from "./expectedDate";
 import { queryBucket } from "./queryAmbient";
+import { formatDate } from "./dates";
 
 export type CalFamily = "agent" | "task" | "snoozed" | "done";
 
@@ -711,7 +712,7 @@ export function carriedLine(rolledFrom: string, today: string, turn = "Your turn
  */
 export function shortCalDate(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
-  const base = `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+  const base = `${d.getDate()} ${formatDate(d, { month: "short" }, "en-GB", true)}`;
   return d.getFullYear() === new Date().getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }
 

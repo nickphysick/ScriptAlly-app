@@ -12,8 +12,9 @@
  * the app passes the real day. A helper that reached for the clock itself could not be tested at a
  * weekend boundary, which is exactly where the weekend shift lives.
  */
+import { MONTHS_SHORT } from "../dates";
 
-export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const MON = MONTHS_SHORT;
 export const MONL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

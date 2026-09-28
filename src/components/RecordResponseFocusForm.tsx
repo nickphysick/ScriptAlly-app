@@ -15,6 +15,7 @@ import { Agent, Query, QueryStatus } from "../types";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { BrandDatePicker, BrandDropdown, FormShell } from "./forms";
 import { StatusDot } from "./StatusDot";
+import { formatDate } from "../lib/dates";
 
 // ── Date helpers (local-date-safe, no UTC off-by-one) ────────────────────
 
@@ -30,7 +31,7 @@ const todayISO = () => toISO(new Date());
 const fmtLong = (iso: string) => {
   const d = fromISO(iso);
   if (!d) return "Not specified";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return formatDate(d, { day: "numeric", month: "short", year: "numeric" });
 };
 const addDays = (iso: string, days: number): string => {
   const d = fromISO(iso);

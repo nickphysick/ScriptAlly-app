@@ -22,6 +22,7 @@
  * they change it. Where nobody has stated anything the resolver returns null and NO event is
  * pushed — the house 8/12/12-week assumption stays out of a panel that names dates.
  */
+import { MONTHS_SHORT } from "../../lib/dates";
 import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from "../../types";
 import { extractAgentFromText } from "../../lib/activityUtils";
 import { resolveExpectedDate } from "../../lib/expectedDate";
@@ -31,7 +32,7 @@ export const FORTNIGHT_FUTURE_DAYS = 7;
 /** Index of today in the 15-card strip. */
 export const FORTNIGHT_TODAY_IDX = FORTNIGHT_PAST_DAYS;
 
-export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const MONTHS = MONTHS_SHORT;
 
 export const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 export const dayDiff = (a: Date, b: Date) => Math.round((startOfDay(a).getTime() - startOfDay(b).getTime()) / 86400000);

@@ -46,6 +46,7 @@ import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy
  */
 const TL_MARK = 27;
 import { F12Menu } from "../shell/F12Shell";
+import { formatDate } from "../../lib/dates";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
 export interface TimelineEntryRef { activityId: string; status: QueryStatus; label: string; dateISO: string; note: string; }
@@ -96,13 +97,13 @@ const getTime = (val: any): number => {
 const fmtDay = (ms: number): string => {
   const d = new Date(ms);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(d, { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
 };
 /** Mockup timeline dates: "1 MAY" — day + short month, uppercased, no year. */
 const fmtShort = (ms: number): string => {
   const d = new Date(ms);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(d, { day: "numeric", month: "short" }).toUpperCase();
 };
 
 // ── the outline materials pill (mockup .pill) ─────────────────────────────────────

@@ -168,6 +168,7 @@ import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
 } from "../../lib/todoListPage";
 import { ToastAction, useTodoToast, WITH_UNDO_MS } from "./useTodoToast";
+import { formatDate } from "../../lib/dates";
 import "./todo.css";
 import "./todoGroups.css";
 import "./todoSplit.css";
@@ -185,7 +186,7 @@ const localYMD = (ms: number): string => {
 };
 /** The ink header's date line — "Thu 16 Jul" (design-refs/todo-header-ink.html). */
 const shortHeaderDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  formatDate(new Date(ms), { weekday: "short", day: "numeric", month: "short" });
 // VI P1 — the ghost rows' faded text-bar widths (the ref's 64/78/52), cycled by index.
 // ⚠ MODULE scope on purpose: the render helpers live BELOW the component's return statement
 // (hoisted function declarations), where a component-body `const` is dead code — never

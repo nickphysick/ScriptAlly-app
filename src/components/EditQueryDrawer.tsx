@@ -41,6 +41,7 @@ import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
 } from "../lib/queryTimelineEdit";
 import { commitQueryEdits, QueryEditAppend, QueryEditOps } from "../lib/saveQueryEdits";
+import { formatDate } from "../lib/dates";
 
 const C = {
   deep: "#3a1c14", burgundy: F11.burgundy, sub: "#6a5b4c", muted: "#a89a8a",
@@ -57,7 +58,7 @@ const PRO_COPY = "Attach custom submission packages to submissions, then track b
 const fmtDate = (d: string | number | Date | null | undefined): string => {
   if (!d && d !== 0) return "";
   const dt = new Date(d);
-  return isNaN(dt.getTime()) ? "" : dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return isNaN(dt.getTime()) ? "" : formatDate(dt, { day: "numeric", month: "short", year: "numeric" });
 };
 const toDateInput = (ms: number): string => {
   const d = new Date(ms);
@@ -610,7 +611,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
             {notes.map((n) => (
               <div key={n.id} className="eq-note">
                 <div className="eq-note-head">
-                  <span className="eq-note-date">{new Date(n.createdAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                  <span className="eq-note-date">{formatDate(new Date(n.createdAt), { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }, "en-GB", true)}</span>
                   {!(editNote && editNote.id === n.id) && (
                     <span className="eq-note-actions">
                       <button type="button" className="eq-note-btn" onClick={() => setEditNote({ id: n.id, text: n.entryText })}>edit</button>

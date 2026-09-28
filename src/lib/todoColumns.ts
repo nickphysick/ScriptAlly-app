@@ -28,6 +28,7 @@ import { flagSleeps, flagDismissed, flagReturnedToday, flagMatchesTask } from ".
 import { USER_TASK_FLAG_TYPE } from "./todoBoard";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
+import { formatDate } from "./dates";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
@@ -129,7 +130,7 @@ export interface SnoozedInput {
 export function backOnLabel(snoozedUntilIso: string): string {
   const d = new Date(snoozedUntilIso);
   if (Number.isNaN(d.getTime())) return "ASLEEP";
-  return `BACK ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+  return `BACK ${formatDate(d, { day: "numeric", month: "short" }).toUpperCase()}`;
 }
 
 /**

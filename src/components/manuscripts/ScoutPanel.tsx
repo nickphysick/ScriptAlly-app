@@ -23,6 +23,7 @@ import {
   suggestionToComp,
   visibleSuggestions,
 } from "../../lib/suggestComps";
+import { formatDate } from "../../lib/dates";
 import "./comps.css";
 
 // ── The Scout (Pro; flagged) ──
@@ -43,7 +44,7 @@ function lastSentOut(runAt: string): string | null {
   if (!runAt) return null;
   const d = new Date(runAt);
   if (Number.isNaN(d.getTime())) return null;
-  const date = d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const date = formatDate(d, { day: "numeric", month: "short" });
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   return `Last sent out — ${date}, ${time}`;
 }

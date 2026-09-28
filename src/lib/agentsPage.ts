@@ -13,6 +13,7 @@
 import { Agent, Query, Manuscript, Activity, QueryStatus, SubmissionStatus } from "../types";
 import { isHomeMarket, normaliseCountry } from "./territory";
 import { queryBucket } from "./queryAmbient";
+import { formatDate } from "./dates";
 
 export type AgentsSubFilter = "all" | "open" | "closed";
 export type AgentsQueriedFilter = "all" | "yes" | "no";
@@ -203,7 +204,7 @@ export function formatTimelineDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const day = String(d.getDate()).padStart(2, "0");
-  const month = d.toLocaleString("en-GB", { month: "short" });
+  const month = formatDate(d, { month: "short" }, "en-GB", true);
   return `${day} ${month} ${d.getFullYear()}`;
 }
 
@@ -387,7 +388,7 @@ export function paneProvenance(agent: Pick<Agent, "dateAdded">, queryCount: numb
   const parts: string[] = [];
   const d = agent.dateAdded ? new Date(agent.dateAdded) : null;
   if (d && !Number.isNaN(d.getTime())) {
-    parts.push(`Added ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`);
+    parts.push(`Added ${formatDate(d, { day: "numeric", month: "short", year: "numeric" })}`);
   }
   if (queryCount > 0) parts.push(`${queryCount} ${queryCount === 1 ? "query" : "queries"}`);
   return parts.join(" · ");

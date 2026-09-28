@@ -2,6 +2,7 @@ import { Activity, ActivityType } from "../types";
 import { EVENT_LABEL, LEGACY_KEY, isEventKey } from "./queryActions/eventKeys";
 import { computeResponseDeadline } from "./responseDeadline";
 import { writerExpectedIso } from "./expectedDate";
+import { formatDate } from "./dates";
 
 /** The OLD offer-recording path's celebration description ("Congratulations! You've received an
  *  offer of representation from …") — exported so the To-do done-band's terse-label deriver keys
@@ -113,7 +114,7 @@ export const replacePlaceholders = (
   const writerExpected = q ? writerExpectedIso(q as never) : undefined;
   if (writerExpected) {
     try {
-      deadlineStr = new Date(writerExpected).toLocaleDateString("en-GB", {
+      deadlineStr = formatDate(new Date(writerExpected), {
         day: "numeric",
         month: "short",
         year: "numeric"
@@ -125,7 +126,7 @@ export const replacePlaceholders = (
     try {
       // Same canonical formula the stored deadline + the Prompt-3 fan-out use → zero drift.
       const d = new Date(computeResponseDeadline(q.dateSent, (agent as any).responseTimeWeeks));
-      deadlineStr = d.toLocaleDateString("en-GB", {
+      deadlineStr = formatDate(d, {
         day: "numeric",
         month: "short",
         year: "numeric"

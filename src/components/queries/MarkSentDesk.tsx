@@ -20,6 +20,7 @@ import { formatQty, parseQty, stepLabel, stepQty } from "../../lib/createQty";
 import { SAMPLE_UNITS, snapToUnit, type SampleUnit } from "../../lib/agentMaterials";
 import { CREATE_SEND_METHODS, todayInputDate, type ReminderChoice } from "../../lib/queryDraft";
 import type { SubmissionMethod } from "../../types";
+import { formatDate } from "../../lib/dates";
 
 export interface MarkSentDraft {
   dateSent: string;            /* input-format YYYY-MM-DD */
@@ -51,7 +52,7 @@ export interface MarkSentDeskProps {
   onCancel: () => void;
 }
 
-const fmt1 = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const fmt1 = (iso: string) => formatDate(new Date(`${iso}T12:00:00`), { day: "numeric", month: "short" });
 
 const pop = (style: React.CSSProperties, ref: React.RefObject<HTMLElement>, label: string, children: React.ReactNode) =>
   createPortal(

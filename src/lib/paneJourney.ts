@@ -28,6 +28,7 @@
    exists to avoid. `agentMaterials` is pure — no firebase — so nothing about the module's
    testability changes. */
 import { materialRowsFromAgent, willRecordText, type MaterialRow } from "./agentMaterials";
+import { formatDate } from "./dates";
 
 /**
  * ⚠️ THE STEPS ARE DECLARED PER JOURNEY, AND THE STACKS ARE DELIBERATELY DIFFERENT LENGTHS.
@@ -340,7 +341,7 @@ export function whenMode(sentDate: string, now: Date): WhenMode {
 /** "12 Aug" — the chosen day on the relabelled segment. */
 export function shortDay(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
-  return Number.isNaN(d.getTime()) ? ymd : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(d.getTime()) ? ymd : formatDate(d, { day: "numeric", month: "short" });
 }
 
 /**

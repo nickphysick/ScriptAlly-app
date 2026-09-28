@@ -82,6 +82,7 @@ import { elapsedParts } from "../../lib/elapsed";
 import { localYMD } from "../../lib/shellSidebar";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { drawerDoorForTask } from "../../lib/queryActions/entry";
+import { formatDate } from "../../lib/dates";
 
 /**
  * ⚠️ MODULE-LEVEL AND TAKING `agents`, BECAUSE IT HAS TWO CONSUMERS AND MUST STAY ONE TABLE. The
@@ -703,7 +704,7 @@ export function useTaskPaneSession(
   function noteAddedDate(c: BoardCard): string {
     const t = c.userTaskId ? userTasks.find((x) => x.id === c.userTaskId) : undefined;
     const iso = isoOf(t?.createdAt);
-    return iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
+    return iso ? formatDate(new Date(iso), { day: "numeric", month: "short" }) : "—";
   }
 
   /* ⚠️ THE DAY, NOT THE INSTANT. Two rungs of one status seconds apart are the duplicate; two on
@@ -713,7 +714,7 @@ export function useTaskPaneSession(
   /** "2 Apr" — the rung's day, for a line that states a fact rather than quotes a person. */
   function dayLabel(raw: any): string {
     const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
-    return Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+    return Number.isFinite(ms) ? formatDate(new Date(ms), { day: "numeric", month: "short" }) : "";
   }
 
   /**

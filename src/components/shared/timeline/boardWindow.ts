@@ -11,6 +11,7 @@
  * would not disagree in detail — it would put the same date at two x positions.
  */
 
+import { MONTHS_SHORT } from "../../../lib/dates";
 import { shortCalDate } from "../../../lib/todoCalendar";
 import { MON } from "../../../lib/queryCardFacts";
 
@@ -32,7 +33,7 @@ export function todayAtOf(visible: readonly string[], today: string): number | n
 export function monthsOf(visible: readonly string[], today: string): BoardMonth[] {
 
     const out: { key: string; label: string; at: number; labelAt: number; current: boolean; past: boolean }[] = [];
-    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    const SHORT = MONTHS_SHORT; /* the one month table (lib/dates) — it said "Sept" here */
     let i = 0;
     while (i < visible.length) {
       const d = new Date(`${visible[i]}T12:00:00`);
@@ -62,7 +63,7 @@ export function dateLabelsOf(
 ): BoardDateLabel[] {
 
     const out: { ymd: string; at: number; text: string; day: string; mon: string; now: boolean }[] = [];
-    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    const SHORT = MONTHS_SHORT; /* the one month table (lib/dates) — it said "Sept" here */
     if (todayAt == null) return out;
     /* ⚠️ `todayAt` IS FRACTIONAL — it is the MIDPOINT of today's day cell (`index + 0.5`), which is
        what puts today's line half a day into the day rather than on its boundary. An array index

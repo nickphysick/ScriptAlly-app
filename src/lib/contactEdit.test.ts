@@ -7,6 +7,7 @@
  * fixture carries a query where the engine and `stage date + weeks × 7` DISAGREE — a writer-dated
  * query — so the naive-arithmetic mutation cannot pass. Inputs are produced, never typed.
  */
+import { formatDate } from "./dates";
 import { describe, expect, it } from "vitest";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_QUERIES } from "../components/agents/contactFixture";
 import { expectedFor } from "./qcSummary";
@@ -28,7 +29,8 @@ describe("the reply-time note is a dry run through the engine", () => {
     const q = QUERIES.find((x) => x.agentId === AGENT.id)!;
     const before = expectedFor(q, AGENT);
     const after = expectedFor(q, { ...AGENT, responseTimeWeeks: 12 });
-    const fmt = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    /* retargeted (clean-up pass item 4, 28 Sep): the one formatter, so the note reads "Sep" */
+    const fmt = (ms: number) => formatDate(ms, { day: "numeric", month: "short" });
     expect(reply.lines[0]).toContain(`${fmt(before.ms!)} → ${fmt(after.ms!)}`);
   });
 

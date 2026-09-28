@@ -17,6 +17,7 @@ import { useFixedMenu } from "../forms/useFixedMenu";
 import { createPortal } from "react-dom";
 import { todayInputDate } from "../../lib/queryDraft";
 import { QueryStatus } from "../../types";
+import { formatDate } from "../../lib/dates";
 
 export type ClosedReason = QueryStatus.REJECTED | QueryStatus.WITHDRAWN | QueryStatus.NO_RESPONSE;
 
@@ -43,7 +44,7 @@ export interface MarkClosedDeskProps {
   onCancel: () => void;
 }
 
-const fmt1 = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const fmt1 = (iso: string) => formatDate(new Date(`${iso}T12:00:00`), { day: "numeric", month: "short" });
 
 export const MarkClosedDesk: React.FC<MarkClosedDeskProps> = ({
   agencyName, subject, draft, onDraft, derivedLine, saving, onRecord, onCancel,

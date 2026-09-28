@@ -99,7 +99,8 @@ describe("§2 · pinned rows derive their summaries at render", () => {
   it("the When row restates the draft after a Back edit — nothing is stored at pin time", () => {
     const a = draw(draftAt({ dateSent: "2026-09-04" }), 3);
     const b = draw(draftAt({ dateSent: "2026-08-11" }), 3);
-    expect(a).toContain("4 Sept");
+    expect(a).toContain("4 Sep"); /* retargeted (item 4, 28 Sep): "Sep", never "Sept" */
+    expect(a).not.toContain("4 Sept");
     expect(b).toContain("11 Aug");
     expect(a).not.toContain("11 Aug");
     /* the What row names the manuscript and materials once completed */

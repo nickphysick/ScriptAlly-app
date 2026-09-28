@@ -32,6 +32,7 @@ import {
 } from "../../lib/todoActions";
 import { placeMenu } from "../../lib/todoMenu";
 import { BrandDatePicker } from "../forms";
+import { formatDate } from "../../lib/dates";
 import "./snoozeDial.css";
 
 export interface SnoozeDialProps {
@@ -63,7 +64,7 @@ export interface SnoozeDialBodyProps {
 /** "TUE 11 AUG" — the mono half of the readout, terse beside the Playfair duration. */
 export function dialDateShort(days: number, now = new Date()): string {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(d, { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
 }
 
 /** "Tuesday 11 August" — the resulting day, spelled. Now the SPOKEN form (`aria-valuetext`), where

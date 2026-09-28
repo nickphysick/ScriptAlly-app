@@ -45,6 +45,7 @@ import {
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import { NoteColour, UserTask, TagDef } from "../../types";
+import { formatDate } from "../../lib/dates";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoNoteboard.css";
@@ -58,7 +59,7 @@ export interface TodoNoteboardPageProps {
 
 /** "23 JUL" — the pin date, from createdAt. */
 const pinDate = (iso: string | undefined): string =>
-  iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : "";
+  iso ? formatDate(new Date(iso), { day: "numeric", month: "short" }).toUpperCase() : "";
 
 export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const { userTasks, addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
@@ -329,7 +330,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       await updateUserTask(note.id, { dueDate: dateDraft });
       setTaskFor(null);
       setDateDraft("");
-      flash(`On your to-do list for ${new Date(dateDraft).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}. The note stays here.`, {
+      flash(`On your to-do list for ${formatDate(new Date(dateDraft), { day: "numeric", month: "short" })}. The note stays here.`, {
         label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash("Detached — the note stays here."); },
       });
     } catch {
@@ -562,7 +563,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   {/* the badge is the note's OWN date — one document, nothing to consult */}
                   {n.dueDate && (
                     <div className="nb-taskbadge">
-                      ✓ On your to-do list · {new Date(n.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      ✓ On your to-do list · {formatDate(new Date(n.dueDate), { day: "numeric", month: "short" })}
                     </div>
                   )}
                   <div className="nb-foot">

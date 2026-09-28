@@ -25,6 +25,7 @@
  * writer's own act, so the stone pill and the muted treatment go to the rows that are not about a
  * query — an agent added, a manuscript updated — and no row claims the app did something it did not.
  */
+import { MONTHS_SHORT } from "./dates";
 import { EVENT_LABEL, isEventKey } from "./queryActions/eventKeys";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus } from "../types";
 import { agentPrimary } from "./agentDisplay";
@@ -34,7 +35,7 @@ import type { State } from "./queryCardFacts";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 
 /** How far back the feed reads. The ref's chip says so on the card: "30 days". */
 export const FEED_DAYS = 30;

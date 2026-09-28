@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MONTHS_SHORT } from "./dates";
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import {
   User,
@@ -196,7 +197,7 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
   if (isNaN(d.getTime())) return "unknown date";
   
   const day = d.getDate();
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = MONTHS_SHORT;
   const month = months[d.getMonth()];
   const year = d.getFullYear();
   return `${day} ${month} ${year}`;

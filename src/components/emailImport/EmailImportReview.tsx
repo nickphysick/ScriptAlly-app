@@ -32,6 +32,7 @@ import {
   FONT_SANS,
   FONT_MONO,
 } from "../../lib/designTokens";
+import { formatDate as fmtDate } from "../../lib/dates";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const todayISO = () => {
@@ -46,7 +47,7 @@ const initialsFrom = (s: string): string =>
 const formatDate = (iso: string): string => {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
-  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return fmtDate(new Date(y, m - 1, d), { day: "numeric", month: "short", year: "numeric" });
 };
 
 const dateChip: React.CSSProperties = {

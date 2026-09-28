@@ -28,12 +28,13 @@ import { agentDataQualityNeeds, AgentDataNeed } from "./agentDataQuality";
 import { flagMatchesTask } from "./taskFlags";
 import { agentInitials, agentPrimary } from "./agentDisplay";
 import { Agent, Query, TaskFlag } from "../types";
+import { formatDate } from "./dates";
 
 /** "31 Jul" — en-GB short date; empty on unparsable input. */
 const dShort = (iso?: string | null): string => {
   if (!iso) return "";
   const ms = new Date(iso).getTime();
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 const msOf = (iso?: string | null): number | null => {
   if (!iso) return null;

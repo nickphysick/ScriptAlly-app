@@ -13,13 +13,14 @@ import { QueryStatus } from "../../../types";
 import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../../../types";
 import type { CountEntry, OwedRow, VersionUsage } from "../../../lib/manuscriptSummary";
 import { initialsOf } from "../../../lib/manuscriptSummary";
+import { formatDate } from "../../../lib/dates";
 
 /** "2 Sep" / "2 Sep 2026" — the app's own short date, never a browser locale's. */
 export const fmtDay = (iso: string | null | undefined, withYear = false): string => {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", ...(withYear ? { year: "numeric" } : {}) });
+  return formatDate(d, { day: "numeric", month: "short", ...(withYear ? { year: "numeric" } : {}) });
 };
 
 /**

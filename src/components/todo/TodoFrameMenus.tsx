@@ -12,6 +12,7 @@ import {
   SortId, TYPE_LABEL, TYPE_ORDER, VIEW_DEFAULT,
 } from "../../lib/todoListView";
 import { snoozeParts } from "../../lib/elapsed";
+import { formatDate } from "../../lib/dates";
 
 /* the contract's swatches: family tints for the groups, pill tints for the types */
 const GROUP_SWATCH: Record<GroupId, string> = { urgent: "#c96f52", housekeeping: "#7e937c", yours: "#c2a869" };
@@ -207,7 +208,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({ deed, onCancel, onConf
   const chip = CHIPS.find((c) => c.days === days)?.label ?? null;
   const part = snoozeParts(days);
   const back = new Date(Date.now() + days * 86400000);
-  const returns = back.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const returns = formatDate(back, { weekday: "short", day: "numeric", month: "short" });
 
   return (
     <>

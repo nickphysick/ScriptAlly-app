@@ -24,6 +24,7 @@ import {
 import { PREDEFINED_GENRES, AGE_CATEGORIES } from "./manuscripts";
 import { manuscriptComps } from "./comps";
 import { normaliseCountry, isHomeMarket } from "./territory";
+import { formatDate } from "./dates";
 
 /* ── Fit band + display score ─────────────────────────────────────────────── */
 
@@ -277,7 +278,7 @@ export function monthYearLabel(iso?: string): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  return formatDate(d, { month: "short", year: "numeric" });
 }
 
 export interface CatalogueMeta {

@@ -22,6 +22,7 @@
  *   4 · the flip below the line is decided AFTER the stem length, against the stem actually used, and
  *       overlap is tested between GLYPH CENTRES — see `layoutPins`
  */
+import { MONTHS_SHORT } from "./dates";
 import { Activity, Agent, Manuscript, Query, QueryStatus } from "../types";
 import { sentAt } from "./oneScreen";
 import { DerivableActivity, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
@@ -162,7 +163,7 @@ export interface PinCopy {
 }
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 export const pinDate = (ms: number): string => { const d = new Date(ms); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 
 /**

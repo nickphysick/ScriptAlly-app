@@ -13,6 +13,7 @@
  *     the UI layer: it READS as open (no stamp, no fade, no closed-chip membership) and is only
  *     ever written as "Open"/"Closed", so an agent migrates off Unknown on its first saved edit.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
 import { materialRowsFromAgent, summaryFromRows } from "./agentMaterials";
 import { agentTerritory } from "./agentsPage";
@@ -490,7 +491,7 @@ export function contactMetaLine(agent: Pick<Agent, "city" | "country" | "respons
 export function formatCardDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = MONTHS_SHORT;
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 

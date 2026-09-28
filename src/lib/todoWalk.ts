@@ -13,6 +13,7 @@ import { BoardCard } from "./todoBoard";
 import { ledgerDetail } from "./todoLedger";
 import { Activity, ActivityType, Query, QueryStatus, TaskFlag } from "../types";
 import { defaultSentMaterials } from "./journeyMaterials";
+import { formatDate } from "./dates";
 
 export const MAX_TODAY = 5;
 const MAX_DO = 4;
@@ -81,7 +82,7 @@ export function priorSameTypeSend(
 export function duplicateSendPrompt(targetStatus: QueryStatus, agentName: string, priorISO: string): string {
   const typeWord = targetStatus === QueryStatus.PARTIAL_SENT ? "partial" : "full";
   const when = new Date(priorISO);
-  const dateLabel = Number.isNaN(when.getTime()) ? "earlier" : when.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const dateLabel = Number.isNaN(when.getTime()) ? "earlier" : formatDate(when, { day: "numeric", month: "short" });
   return `You logged a ${typeWord} to ${agentName || "this agent"} on ${dateLabel} — log another?`;
 }
 
@@ -273,7 +274,7 @@ export function quickNudgePayload(a: { cardKey: string; label?: string; queryId:
 
 const receiptDate = (iso: string): string => {
   const ms = new Date(iso).getTime();
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 
 /**

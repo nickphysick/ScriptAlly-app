@@ -21,6 +21,7 @@
 import React from "react";
 import type { SendMethod } from "../../lib/paneJourney";
 import type { TodoRow } from "../../lib/dashTodo";
+import { formatDate } from "../../lib/dates";
 
 /** the day the editor calls "today", as `YYYY-MM-DD` in the reader's own zone */
 const ymd = (d: Date): string =>
@@ -30,7 +31,7 @@ const shift = (days: number): string => { const d = new Date(); d.setDate(d.getD
 /** "31 Oct" — the app's own short date, never a second format */
 export const shortDate = (iso: string): string => {
   const t = new Date(iso);
-  return Number.isNaN(t.getTime()) ? "" : t.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(t.getTime()) ? "" : formatDate(t, { day: "numeric", month: "short" });
 };
 
 export interface RowDraft {

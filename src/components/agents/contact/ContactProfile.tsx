@@ -36,9 +36,10 @@ import { hrefFor } from "../../../lib/quickAdd";
 import { parseAgentMaterials, MAT_QTY } from "../../../lib/agentMaterials";
 import { AgentNote } from "../../../lib/agentNotes";
 import { ContactAgentForm, FormSection } from "./ContactAgentForm";
+import { formatDate } from "../../../lib/dates";
 
-const dmy = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-const monthYear = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+const dmy = (ms: number) => formatDate(new Date(ms), { day: "numeric", month: "short" });
+const monthYear = (iso: string) => formatDate(new Date(iso), { month: "short", year: "numeric" });
 
 export interface ContactProfileProps {
   agent: Agent;

@@ -231,6 +231,7 @@ import { useSegHover } from "../shared/timeline/useSegHover";
 import {
   todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
 } from "../shared/timeline/boardWindow";
+import { formatDate } from "../../lib/dates";
 
 /* ⚠️ `TbMenu` AND `TbOpt` ARE DELETED WITH THE TOOLBAR ERA (v64 §E). The winbar's controls are a
    segmented pair and plain buttons; the sidebar's are the Notion panel's own rows. A dropdown
@@ -406,8 +407,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const colLabel = (ymd: string, grain: "day" | "week" | "month") => {
     const d = new Date(`${ymd}T12:00:00`);
     if (grain === "day") return String(d.getDate());
-    if (grain === "week") return `${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}`;
-    return d.toLocaleDateString("en-GB", { month: "short" });
+    if (grain === "week") return `${d.getDate()} ${formatDate(d, { month: "short" })}`;
+    return formatDate(d, { month: "short" });
   };
   /* ⚠️ A PAST WEEK IS A PROPERTY OF THE WINDOW, not of a row — nothing in it is provisional any
      more, so the dashes go solid, the waypoints render as passed, and the pulse stops. */

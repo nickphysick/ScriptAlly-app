@@ -8,6 +8,7 @@
  * an input the caller derived from existing fields; a missing field OMITS its clause, never
  * guesses. An empty composition means the card does not render (notes carry no derived facts).
  */
+import { formatDate } from "./dates";
 
 export interface StandInput {
   kind: "offer" | "awaiting-send" | "nudge" | "stale" | "dq" | "note";
@@ -37,7 +38,7 @@ export const STATUS_OWED: Record<string, string> = {
 
 const fmtDay = (iso: string): string => {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(d.getTime()) ? "" : formatDate(d, { day: "numeric", month: "short" });
 };
 
 /** The last word of a display name — the template's short form ("Jonathan Marsh" → "Marsh"). */

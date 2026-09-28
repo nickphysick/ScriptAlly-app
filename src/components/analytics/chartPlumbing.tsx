@@ -9,6 +9,7 @@
  * all of which would then need overriding to match a page that already has all three.
  */
 import React from "react";
+import { formatDate } from "../../lib/dates";
 
 /* ────────────────────────────────── width ────────────────────────────────── */
 
@@ -125,11 +126,11 @@ export function gridTicks(maxValue: number, lines: number): { value: number; fra
 
 /** `12 Aug` — the page's one short-date format, so no two panels spell a date differently. */
 export const shortDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  formatDate(new Date(ms), { day: "numeric", month: "short" });
 
 /** `12 Aug 2026` — where the year matters, as it does on a window that closes next year. */
 export const shortDateYear = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
 
 /** `3 days` / `1 day` — one place, so no panel writes "1 days". */
 export const days = (n: number): string => `${n} ${n === 1 ? "day" : "days"}`;

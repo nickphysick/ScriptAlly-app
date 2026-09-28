@@ -28,6 +28,7 @@
  * ⚠️ SLICES AND KEY ROWS ARE ONE CONTROL, TWICE. Hovering either grows that slice's stroke, drops the
  * other three to 38%, tints its row and shows the same popup; clicking either pins it.
  */
+import { MONTHS_SHORT } from "../../lib/dates";
 import React, { useEffect, useRef, useState } from "react";
 import type { Agent, Query } from "../../types";
 import {
@@ -53,7 +54,7 @@ const CHIP_MARK: Record<ClosedBucketKey, string> = {
   full: "M5.3 4.9c2.3 2.8 5 5.3 7.7 8.3M13.2 5.4c-3 2.3-5.5 5.3-8.3 7.7",
 };
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 const shortDate = (ms: number | null): string => { if (ms === null) return ""; const d = new Date(ms); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 
 /** "27 closed queries" · "1 closed query" · "No closed queries" */

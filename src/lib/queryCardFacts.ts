@@ -18,6 +18,7 @@
  * not say `still`, `already`, `only` or `overdue`. `queryCardFacts.test.ts` asserts the absence of
  * that vocabulary, because the temptation arrives one adverb at a time.
  */
+import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
 import type { Query } from "../types";
 import { resolveExpectedDate, type ExpectedSource } from "./expectedDate";
@@ -28,7 +29,7 @@ import { formatQueryMaterial } from "./materials";
 const DAY = 86_400_000;
 /** ⚠️ EXPORTED (v14 §2) so the list's Sent leaf builds its month strip from the SAME table the
  *  card's leaf does — a second array of month names is a second thing to keep in step. */
-export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+export const MON = MONTHS_SHORT;
 
 /**
  * ⚠️ HOW LONG A REQUEST MAY SIT BEFORE THE CARD MARKS IT — Nick's call, and a NAMED constant so it

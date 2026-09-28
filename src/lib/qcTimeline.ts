@@ -11,6 +11,7 @@
  * centre and an overdue bar's end meet on the same pixel at every zoom is not a thing to check
  * afterwards — it is what one derivation makes true.
  */
+import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
 /* §C3 — the chip's second wording switches at the Next-action grouping's own closing threshold.
    `qcCalView` does not import this module, so there is no cycle; one constant, two surfaces. */
@@ -97,7 +98,7 @@ export function zoomAbout(ext: Extent, pxd: number, nextPxd: number, scrollLeft:
 
 /* ── §8.4 · the date tier's labels ── */
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON = MONTHS_SHORT;
 export interface Tick { ms: number; x: number; label: string }
 /**
  * ⚠️ NO MONTH LABEL WITHIN 3.2% OF TODAY (§8.4). The TODAY pill sits at today's x and a month name

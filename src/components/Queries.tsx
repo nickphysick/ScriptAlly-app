@@ -312,6 +312,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { csvCell } from "../lib/csvCell";
+import { formatDate } from "../lib/dates";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -319,7 +320,7 @@ import { csvCell } from "../lib/csvCell";
 function formatWhatsAppDate(dateString: string): string {
   const d = new Date(dateString);
   const day = d.getDate();
-  const month = d.toLocaleString("en-GB", { month: "short" });
+  const month = formatDate(d, { month: "short" }, "en-GB", true);
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day} ${month}, ${time}`;
 }
@@ -990,7 +991,7 @@ export const Queries: React.FC<{
       await updateQuery(q.id, { nudgeDate: next } as Partial<Query>);
       await dismissTask("nudge_overdue", q.id, "fixed snooze", days);
       showToast({
-        message: `Nudge moved to ${new Date(next).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`,
+        message: `Nudge moved to ${formatDate(new Date(next), { day: "numeric", month: "short" })}`,
         /* ⚠️ THE UNDO RESTORES, IT DOES NOT COMPENSATE — the prior date back on the query, and the
            suppression lifted. An undo that merely snoozed by a negative number would leave a
            second dismissal behind. */
@@ -1542,7 +1543,7 @@ export const Queries: React.FC<{
   /** The subject line's date — the app's short spelling, so the sheet names the event as the row does. */
   const fmtShortISO = (iso: string): string => {
     const t = new Date(iso).getTime();
-    return Number.isNaN(t) ? "" : new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return Number.isNaN(t) ? "" : formatDate(new Date(t), { day: "numeric", month: "short", year: "numeric" });
   };
 
   const onEditEntry = (entry: TimelineEntryRef) => {
@@ -4150,7 +4151,7 @@ export const Queries: React.FC<{
       try {
         const d = new Date(isoString);
         if (isNaN(d.getTime())) return "";
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const months = MONTHS_SHORT;
         return `${d.getDate()} ${months[d.getMonth()]}`;
       } catch (e) {
         return "";
@@ -4387,7 +4388,7 @@ export const Queries: React.FC<{
       timelineEvents.push({
         title: "Query sent",
         date: activeQuery.dateSent,
-        formattedDate: new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        formattedDate: formatDate(new Date(activeQuery.dateSent), { day: "numeric", month: "short", year: "numeric" }),
         detail: `via ${rawSendMethod}`,
         materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
         expectedDate: null,
@@ -4416,7 +4417,7 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: act.type,
           date: act.date,
-          formattedDate: new Date(act.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(act.date), { day: "numeric", month: "short", year: "numeric" }),
           detail: displayedDetail,
           materials: materialsSent,
           expectedDate: null,
@@ -4436,11 +4437,11 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: "Waiting to hear back",
           date: deadlineDate,
-          formattedDate: new Date(deadlineDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(deadlineDate), { day: "numeric", month: "short", year: "numeric" }),
           detail: null,
           materials: null,
-          expectedDate: resolvedExp.ms ? new Date(resolvedExp.ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "None set",
-          nudgeDate: activeQuery.nudgeDate ? new Date(activeQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null
+          expectedDate: resolvedExp.ms ? formatDate(new Date(resolvedExp.ms), { day: "numeric", month: "short", year: "numeric" }) : "None set",
+          nudgeDate: activeQuery.nudgeDate ? formatDate(new Date(activeQuery.nudgeDate), { day: "numeric", month: "short", year: "numeric" }) : null
         });
       } else {
         let finalLabel = "Final Decision Outcome Marker Logged";
@@ -4452,7 +4453,7 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: finalLabel,
           date: lastActivityDate,
-          formattedDate: new Date(lastActivityDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(lastActivityDate), { day: "numeric", month: "short", year: "numeric" }),
           detail: activeQuery.status === QueryStatus.REJECTED ? "Pipeline archived. We keep tracking performance metrics on packages." : null,
           materials: null,
           expectedDate: null,
@@ -4465,7 +4466,7 @@ export const Queries: React.FC<{
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
         .map(entry => ({
           text: entry.entryText,
-          formattedDate: new Date(entry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+          formattedDate: formatDate(new Date(entry.createdAt), { day: "numeric", month: "short", year: "numeric" })
         }));
 
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -4520,7 +4521,7 @@ export const Queries: React.FC<{
       doc.line(margin, y, pageWidth - margin, y); y += 8;
 
       const statusLabel = status;
-      const exportedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const exportedDate = formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' });
       const headerStartY = y;
 
       doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(58, 28, 20);
@@ -4614,7 +4615,7 @@ export const Queries: React.FC<{
       checkPageBreak(10); y += 4; addLine(y); y += 6;
       doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
       doc.text('QueryHawk', margin, y);
-      doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
+      doc.text(`Generated ${formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
 
       const pdfFilename = `${(agentName || 'agent').toLowerCase().replace(/\s+/g, '-')}-${(manuscriptTitle || 'manuscript').toLowerCase().replace(/\s+/g, '-')}-query.pdf`;
       doc.save(pdfFilename);
@@ -5136,7 +5137,7 @@ export const Queries: React.FC<{
                       if (q.id === activeQuery.id) return "this query";
                       const iso = q.lastStatusChange || q.dateSent;
                       if (!iso) return "";
-                      return new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                      return formatDate(new Date(iso), { month: "short", year: "numeric" });
                     })();
                     return {
                       queryId: q.id,
@@ -6077,7 +6078,7 @@ export const Queries: React.FC<{
             kind={quick.kind}
             title={agentPrimary(agents.find((a) => a.id === quickQuery.agentId) ?? ({} as never)) || "this query"}
             dueLabel={quickQuery.nudgeDate
-              ? new Date(quickQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+              ? formatDate(new Date(quickQuery.nudgeDate), { day: "numeric", month: "short" })
               : null}
             style={quickStyle}
             panelRef={quickPanelRef}
@@ -6731,7 +6732,7 @@ export const Queries: React.FC<{
                   ?? openingRead(activeQuery, packages, versions, activeBookVersions);
                 if (!v) return null;
                 const m = /^(\d{4})-(\d{2})/.exec(v.createdDate);
-                const when = m ? new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : null;
+                const when = m ? formatDate(new Date(Number(m[1]), Number(m[2]) - 1, 1), { month: "short", year: "numeric" }) : null;
                 return when ? `${v.name} · ${when}` : v.name;
               })()}
               position={{ index: panelIndex, total: gridRows.length }}

@@ -18,6 +18,7 @@ import { StatusPill } from "./StatusPill";
 import { formatQueryMaterial } from "../lib/materials";
 import { agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { FormShell, BrandDatePicker } from "./forms";
+import { formatDate } from "../lib/dates";
 
 export interface RecordResponseModalProps {
   isOpen: boolean;
@@ -118,7 +119,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
 
   const fmt = (dateStr: string, fallback = "Not specified") => {
     if (!dateStr) return fallback;
-    return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return formatDate(new Date(dateStr), { day: "numeric", month: "short", year: "numeric" });
   };
 
   // ── SAVE PATH — unchanged shared write. Gains dateReceived (#4) + rrNotes (#2) in the payload;

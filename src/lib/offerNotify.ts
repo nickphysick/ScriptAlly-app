@@ -10,6 +10,7 @@
  */
 import { Agent, Query, QueryStatus, UserTask } from "../types";
 import { agentPrimary } from "./agentDisplay";
+import { formatDate } from "./dates";
 
 /** Statuses where the agent is HOLDING PAGES (full/partial sent, R&R in progress). */
 const PAGES_STATUSES: ReadonlySet<QueryStatus> = new Set([
@@ -42,7 +43,7 @@ const shortDay = (iso?: string): string | null => {
   if (!iso) return null;
   const ms = Date.parse(iso);
   if (Number.isNaN(ms)) return null;
-  return new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(new Date(ms), { day: "numeric", month: "short" }).toUpperCase();
 };
 
 function statusLine(q: Query): string {

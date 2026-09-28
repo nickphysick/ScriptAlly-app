@@ -31,6 +31,7 @@ import { statedQuantity } from "./materials";
 import { db, handleFirestoreError, OperationType } from "./firebase";
 import { QueryStatus, ActivityType, type EventKey } from "../types";
 import { recomputeQuery, monotonicEventTime } from "./recomputeQuery";
+import { formatDate } from "./dates";
 
 /** Shape of the payload produced by RecordResponseModal.onSave. */
 export interface RecordResponseData {
@@ -439,7 +440,7 @@ function buildLegacyActivity(
     const weeks = agent?.responseTimeWeeks ?? 6;
     const d = new Date();
     d.setDate(d.getDate() + weeks * 7);
-    return `Respond by ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+    return `Respond by ${formatDate(d, { day: "numeric", month: "short", year: "numeric" })}`;
   };
 
   switch (newStatus) {

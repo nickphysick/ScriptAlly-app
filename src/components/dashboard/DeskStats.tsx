@@ -34,6 +34,7 @@ import {
   weeklySendSeries,
   weekQueryRows,
 } from "../../lib/dashboardStats";
+import { formatDate } from "../../lib/dates";
 import "./deskStats.css";
 
 const SEND_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>;
@@ -45,7 +46,7 @@ const rectOf = (el: Element): Rect => {
   return { left: r.left, top: r.top, width: r.width, height: r.height };
 };
 
-const weekLabel = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const weekLabel = (d: Date) => formatDate(d, { day: "numeric", month: "short" });
 
 /* ══════════════ 1 · QUERIES SENT ══════════════ */
 

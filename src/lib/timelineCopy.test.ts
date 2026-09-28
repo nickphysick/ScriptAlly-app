@@ -23,9 +23,9 @@ const c = (over: Partial<RowCopy> = {}): RowCopy => ({
 describe("the situations in the brief", () => {
   it("renders each one", () => {
     const cases: [string, RowCopy][] = [
-      /* ⚠️ "Sept", NOT "Sep" — `en-GB` spells September that way and the brief draws it that
-         way too. Written from the render rather than from an assumption about the locale. */
-      ["Out with Reed — reply expected by 10 Sept", c({ expectedYmd: "2026-09-10" })],
+      /* retargeted (clean-up pass item 4, 28 Sep): "Sep", NOT "Sept" — Nick ruled every short
+         month three letters, and every date now goes through lib/dates' one formatter */
+      ["Out with Reed — reply expected by 10 Sep", c({ expectedYmd: "2026-09-10" })],
       ["Out with Reed — no reply time given", c()],
       ["They want the full — asked 3 days ago", c({ status: QueryStatus.FULL_REQUESTED, lastWordYmd: ago(3) })],
       ["No word in 40 days", c({ lastWordYmd: ago(40), expectedYmd: ago(10) })],

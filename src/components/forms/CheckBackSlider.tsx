@@ -1,4 +1,5 @@
 import React, { useId } from "react";
+import { formatDate } from "../../lib/dates";
 import "./forms.css";
 
 /**
@@ -41,7 +42,7 @@ export const CheckBackSlider: React.FC<CheckBackSliderProps> = ({ valueDays, onC
   const target = new Date();
   target.setHours(0, 0, 0, 0);
   target.setDate(target.getDate() + valueDays);
-  const dateStr = target.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const dateStr = formatDate(target, { weekday: "short", day: "numeric", month: "short" });
   const readout = `${checkBackLabel(valueDays)} · ${dateStr}`;
 
   return (

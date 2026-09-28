@@ -121,13 +121,9 @@ export function rowWord(status: QueryStatus): string {
   }
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-/** "2 Sep" — a fixed month table, because en-GB's short month is "Sept" in some engines. */
-export function dayMonth(at: number | string | null | undefined): string {
-  if (at == null || at === "") return "";
-  const d = typeof at === "number" ? new Date(at) : new Date(at);
-  return Number.isNaN(d.getTime()) ? "" : `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-}
+/* the fixed month table lives in the one date formatter now (clean-up pass item 4) */
+import { dayMonth } from "./dates";
+export { dayMonth };
 
 /** The SENT tile's subline: "SINCE 2 SEP" for the current edition or all, a range for a past one. */
 export function sentSpan(r: Pick<EditionResults, "sent" | "firstSentMs" | "lastSentMs">, past: boolean): string {

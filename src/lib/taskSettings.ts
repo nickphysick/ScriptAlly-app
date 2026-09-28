@@ -16,6 +16,7 @@
 import { Agent, Query, TaskFlag } from "../types";
 import { MUTED_UNTIL } from "./taskFlags";
 import { agentPrimary } from "./agentDisplay";
+import { formatDate } from "./dates";
 
 /** The keys a switch can toggle — each an existing `mutedTaskRules` entry the engine already honours
  *  (dq_* & no_response_close via visibleAgentNeeds/isRuleMuted) or a new one (nudge_overdue)
@@ -81,7 +82,7 @@ export interface HiddenItem {
 
 const shortDate = (iso: string): string => {
   const ms = Date.parse(iso);
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 
 const flagSubject = (f: TaskFlag, agents: Agent[], queries: Query[]): string => {

@@ -22,6 +22,7 @@ import { agentPrimary, agentInitials } from "./agentDisplay";
 import { elapsedPhrase, elapsedWhole } from "./elapsed";
 import { flagMatchesTask, isFlagSuppressing } from "./taskFlags";
 import { clearedTodayItems } from "./clearedToday";
+import { formatDate } from "./dates";
 
 /** The stance-store taskType for a note (UserTask) snooze/mute — the quick rail's ⏸ writes a
  *  TaskFlag with this type + the task id in queryId. Notes have no engine task, so the lane filters
@@ -164,7 +165,7 @@ const auditMs = (v: unknown): number | null => {
 const requestedFigures = (q: Query | undefined): string => {
   const ms = auditMs(q?.lastStatusChange);
   if (ms == null) return "";
-  return `REQUESTED ${new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+  return `REQUESTED ${formatDate(new Date(ms), { day: "numeric", month: "short" }).toUpperCase()}`;
 };
 
 const dqLabel = (gap?: string) =>
@@ -354,7 +355,7 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
 const shortDate = (iso?: string): string => {
   if (!iso) return "";
   const ms = new Date(iso).getTime();
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 
 /**

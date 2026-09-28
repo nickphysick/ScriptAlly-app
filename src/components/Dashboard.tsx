@@ -92,6 +92,7 @@ import {
   ZoomOut
 } from "lucide-react";
 import { seedQuotes, seedFacts } from "../lib/seeds";
+import { formatDate } from "../lib/dates";
 
 const formatRichText = (str: string): React.ReactNode => {
   if (!str) return "";
@@ -1018,7 +1019,7 @@ export const Dashboard: React.FC<{
     }
   });
   const fmtWeekCommencing = (binIdx: number) =>
-    new Date(nowTime - (8 - binIdx) * ONE_WEEK_MS).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    formatDate(new Date(nowTime - (8 - binIdx) * ONE_WEEK_MS), { day: "numeric", month: "short" });
   const statSentWeeks = [1, 2, 3, 4, 5, 6, 7].map(idx => ({
     weekLabel: fmtWeekCommencing(idx),
     count: dynamicQueriesSentPerWeek[idx],
@@ -1079,7 +1080,7 @@ export const Dashboard: React.FC<{
   // Focus's related-activity lookup. A day left with only cut rows yields no group key, so no
   // empty day-separator renders, and an emptied feed falls through to the existing empty-state.
   mergedActivities.filter(isFeedDrawable).forEach(act => {
-    const dStr = new Date(act.date).toLocaleDateString("en-GB", {
+    const dStr = formatDate(new Date(act.date), {
       day: "numeric",
       month: "short",
       year: "numeric"
@@ -1438,7 +1439,7 @@ export const Dashboard: React.FC<{
         return dayName;
       } else {
         const day = d.getDate();
-        const monthShort = d.toLocaleDateString("en-GB", { month: "short" }).toUpperCase();
+        const monthShort = formatDate(d, { month: "short" }).toUpperCase();
         const weekdayShort = d.toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase();
         return `${weekdayShort} ${day} ${monthShort}`;
       }

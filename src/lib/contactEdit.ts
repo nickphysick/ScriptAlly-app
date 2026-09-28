@@ -23,10 +23,11 @@ import type { Agent, Query } from "../types";
 import { expectedFor } from "./qcSummary";
 import { isDoorOpen } from "./agentList";
 import { isGenreMatch, matchGenre } from "./genreMatch";
+import { formatDate } from "./dates";
 
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  formatDate(new Date(ms), { day: "numeric", month: "short" });
 
 /** The draft fields the engine compares — the form's own value shapes. */
 export interface ContactDraft {
