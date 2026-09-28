@@ -123,6 +123,10 @@ describe("PE4 · the six tiles (§C4) — the FIRST answer decides the column", 
     expect(all.sent).toBe(r.sent + two.sent);
     expect(all.out).toBe(r.out + two.out);
   });
+  it("dates use a fixed month table — never en-GB's \"Sept\"", async () => {
+    const { lockLine } = await import("./packagesPage");
+    expect(lockLine("2026-09-06T09:00:00.000Z")).toContain("First sent on 6 Sep,");
+  });
   it("the SENT subline: since for the current edition, a range for a past one", () => {
     expect(sentSpan(r, false)).toBe("Since 15 Jun");
     expect(sentSpan({ sent: 2, firstSentMs: T0, lastSentMs: T0 + 30 * DAY }, true)).toBe("15 Jun – 15 Jul");

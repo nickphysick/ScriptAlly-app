@@ -101,3 +101,117 @@ the seven journeys.
 - The exact-match prompt: `exact-match-prompt`; the "based on" note: `based-on-note`; the package review: `review-package`
 - The correction journey: `correction-journey`, `correction-review`
 - Package-card edition settings, a retired card, the edition warning, the locked-version message: **Part B**
+
+---
+
+# Part B — the package side (28 Sep, on top of packages v2.1 `89b366cf`)
+
+## What landed
+
+A prelude, `f1bfce5c`, carries Nick's rulings on Part A:
+- an all-or-nothing save, with the failed state reopening the drawer as entered;
+- Log another repeats the last log;
+- v1 Custom logs read as individual;
+- a correction onto an unsent package stamps it.
+
+Part B itself is `b6f0ed1a`, plus the pkg21 V5 retarget in the follow-up.
+
+- **Editions (§B1).**
+  - Editing a sent package's contents starts its next edition: the letter, synopsis, book version or other materials.
+  - Never: the sample's size, a rename, or the note.
+  - The composer says so before saving: *"This starts Autumn round's 2nd edition. Queries already sent keep the 1st."*
+  - The edit's Undo puts the package back exactly (`revertPackageEdition`). Writing the old slots back would itself start a 3rd edition, and a mutation proves this.
+  - The Undo is refused once a query has gone out with the new edition.
+- **Locked sent versions (§B2).**
+  - Letters and synopses gain ⋯ Edit.
+  - On a sent version it says *"v3 has been sent, so your changes become v4."* and saves the next version; v3 stays byte-identical, and this is measured.
+  - On an unsent version the edit is made in place.
+  - `updateVersion` refuses content edits on a sent version as the backstop.
+- **Retire, don't delete (§B3).**
+  - `retiredAt` is written, and cleared on Restore.
+  - Delete is offered only while a package is unsent.
+  - A retired card reads "Retired 28 Sep", keeps its results, and says *"its 5 queries still point here"*.
+  - Its actions are Reuse as new and Restore.
+- **Results (§B4).**
+  - Six tiles: Sent · Still out · Requests (highlighted) · Offers · Passes · No reply.
+  - The first answer decides the column, through Analytics' own `buildRows`. Offers are a subset. The rate is "N in M answered".
+  - Withdrawn-before-answer and sent-with-changes are listed and never counted.
+  - The edition switch reads "All editions · 2nd edition · current · 1st edition". A past edition's line is a date range; All is labelled "for the big picture".
+  - The query list shows five, with Show all; each row opens its query.
+- **"Log a query with this"** is the primary action on live cards. It opens the drawer with that package attached, beating the "used for new queries" default.
+- **`sentPackageName`**:
+  - written by the log and by a correction, and cleared when a correction leaves no package;
+  - readers prefer it over the summary's prefix.
+- **The stale-stamp rule.**
+  - Undo, and a correction off a package, reconcile every package the query pointed at before and after the save.
+  - A stamp is lifted when nothing points at the package any more.
+  - It is restored when something does. That covers undoing a correction, which Nick's rule did not name but which would otherwise leave a sent package editable.
+- **Corrections** offer each past edition with its own pieces, not the package's live ones.
+
+## Rules (dev deployed from a clean worktree of `b6f0ed1a`; PROD IS NICK'S)
+
+- **Packages:**
+  - `edition` (int), `editions` (list) and `retiredAt` (string) are validated and allowlisted.
+  - `otherMaterials`, `edition` and `editions` join the frozen set.
+  - A sent package's contents may change only when `edition` goes up by exactly one and the list grows by exactly one, with the stamp and the sample slot untouched. The edit's undo is the mirror: down by one, shorter by one.
+  - Removing `firstSentAt` is allowed only as the sole change: the lift.
+- **Queries:** `sentPackageName` (string ≤ 256).
+- **Verification:** the release's updateTime was not read. The CLI's success line was not trusted either; instead, PB2's rendered run wrote `edition: 2` plus the list, and PB3 wrote `retiredAt`, both accepted after the deploy.
+- ⚠️ **The lift cannot be checked by a rule.** Rules cannot query for "no query points at this package", so the client decides when to lift. What the rule holds is that the lift carries no other change.
+
+## Migrations (`tests/e2e/migratePartB.mjs`: reversible, dry-run by default; harness account, dev)
+
+| Mode | Counted | Written |
+|---|---|---|
+| `--package-name` | 83 queries, 19 package sends, **0 with a name prefix**, 19 left to the reader | 0 |
+| `--stale-stamps` | 7 packages, 5 stamped, **0 stale** | 0 |
+| `--editions` | 7 packages, 0 with `edition`, 7 read as their 1st edition | 0 by design |
+
+- The 19 package sends came from the Part A migration and never had a summary to take a name from.
+- Editions are not backfilled. `editionsOf` synthesises the 1st edition from `createdDate` (§C5), and on a sent package the rules freeze the edition fields outside a bump, so a backfill would need a second route round them for a value the reader already supplies.
+- The packages still locked by an undone log: **none**.
+
+## Locks, each proved red
+
+- **Unit** — `src/lib/packageEditions.test.ts`, 25 cases. Ten mutations, each red:
+  - an unsent package starting an edition;
+  - the first answer read from the current status;
+  - offers counted as a column;
+  - based-on queries counted;
+  - the legacy package slots ignored;
+  - the prefix preferred over `sentPackageName`;
+  - undo reconciling only the before-set;
+  - the rule letting the number stand still;
+  - the re-stamp ungated;
+  - a sent version rewritten.
+- **Rendered** — `tests/e2e/packagesPartB.measure.ts`: 5 cases, 44 assertions. Four mutations, each red:
+  - undo leaving the stamp (PB5/6);
+  - undo rewriting the old slots, which starts a 3rd edition (PB2);
+  - the rate over all sent (PB1);
+  - a sent version edited in place (PB4).
+- **Retargeted, each with its law stated:**
+  - `packageLock.test.ts`: 5 cases;
+  - `materialsBand.test.ts`: the modal key;
+  - `pkgMat` P4: a sent package offers Edit and Duplicate, never Delete;
+  - `pkg21` V5: the letter menu is Open · Edit · Rename · Put away. The packages session asked for this retarget.
+- **Neighbour suites on the build:**
+  - pkg21 V5–V8: 5 passed;
+  - pkgMat P4: 2 passed;
+  - packagesJourney (Part A): 11 passed, 88 assertions.
+- **Account after all runs:** 83 queries, 0 stale stamps, no edition fields left on the fixture.
+
+## Deviations and flags
+
+- **An edition starts only once the package has been sent** — a deliberate reading of §C2. Editing an unsent draft changes the draft; a 2nd edition that nobody ever received would put an empty 1st edition on every card.
+- **The re-stamp half of the stale-stamp rule.** Nick ruled the lift. Undoing a correction puts a query back on a package whose stamp the correction lifted, so reconciliation also re-stamps. Without that, a sent package would become editable.
+- **The one stamp outside a batch** is the reconcile's re-stamp, gated on a server read proving that a query holds the package. `packageLock.test.ts` names it as the only exception.
+- **One line in the manuscripts session's `msv12Materials.ts`:** `updateVersion`'s parameter type widened from `Promise<void>` to `Promise<unknown>`, because `updateVersion` now returns its refusal. Only `addVersion` is called there.
+- **Prod rules are Nick's.** They now need the Part A query fields plus everything above.
+
+## Screenshots (Part B)
+
+- `pb-card-1st-edition.png`: the six tiles, the rate, the list.
+- `pb-edition-warning.png`: the composer naming the 2nd edition.
+- `pb-card-2nd-edition.png` · `pb-card-1st-edition-past.png` · `pb-card-all-editions.png`: the package card at each setting of the switch.
+- `pb-card-retired.png`: the retired card.
+- `pb-locked-version.png`: "v3 has been sent, so your changes become v4."

@@ -10,6 +10,7 @@
  * ⚠️ FACTS ONLY (D6): nothing here ranks, orders by outcome or names a best package. The Side by side
  * rows keep the packages' own list order.
  */
+import { dayMonth } from "./packageResults";
 import { BookVersion, ComponentType, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 import { isRequest, isResponse, medianReplyDays } from "./packageMetrics";
 import { countWords } from "./materialDraft";
@@ -102,8 +103,9 @@ export function sideBySide(sent: SubmissionPackage[], queries: Query[]): SideRow
 export const isSent = (p: Pick<SubmissionPackage, "firstSentAt">): boolean => !!p.firstSentAt;
 
 /** The copy the card's lock line shows — kept in step with packageMetrics.LOCKED_WHY. */
+/* the date through a fixed month table — en-GB's short month renders "Sept" in some engines */
 export const lockLine = (sentAt: string): string =>
-  `First sent on ${shortDate(sentAt)}, so what went out stays as it went. Editing it starts a new edition; queries already sent keep theirs.`;
+  `First sent on ${dayMonth(sentAt)}, so what went out stays as it went. Editing it starts a new edition; queries already sent keep theirs.`;
 
 /**
  * The hero art (v2.1, E3) — Nick's boxes image: the Archivist carrying a tall stack of archive boxes.

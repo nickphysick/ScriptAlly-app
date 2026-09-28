@@ -204,7 +204,8 @@ test("V5 · every chip has a sibling ⋯; three items for letters, two for versi
   L.check("V5 · every chip has a sibling ⋯ (never nested)", ctx, s.chips === 8 && s.sib === s.chips, JSON.stringify(s));
   const items = async (id: string) => { await more(page, id).click(); await page.waitForTimeout(150); const r = await on(page, '[data-ppv="mmenu"] [role="menuitem"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-mact"))); return r; };
   const li = await items("pkg21-l2");
-  L.check("V5 · a letter offers Open, Rename, Put away", ctx, JSON.stringify(li) === JSON.stringify(["open", "rename", "away"]), JSON.stringify(li));
+  /* retargeted (Part B, 28 Sep): letters and synopses gain Edit — a sent one saves as the next version */
+  L.check("V5 · a letter offers Open, Edit, Rename, Put away", ctx, JSON.stringify(li) === JSON.stringify(["open", "edit", "rename", "away"]), JSON.stringify(li));
   L.check("V5 · opening focuses the first item; ⋯ is expanded", ctx, (await focusedAttr(page, "data-mact")) === "open" && (await more(page, "pkg21-l2").getAttribute("aria-expanded")) === "true", `${await focusedAttr(page, "data-mact")}`);
   await page.keyboard.press("Escape");
   L.check("V5 · Esc closes it and focus returns to ⋯", ctx, (await on(page, '[data-ppv="mmenu"]').count()) === 0 && (await focusedAttr(page, "data-more")) === "pkg21-l2", `${await focusedAttr(page, "data-more")}`);
