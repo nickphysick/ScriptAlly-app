@@ -239,7 +239,7 @@ export function EditJourney({ req, today, children }: JourneyProps) {
           sentCorrectedFrom: q.sentMaterials ?? "",
         });
       }
-      if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>);
+      if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>, sentChanged && next?.id ? { stampPackage: next.id } : undefined);
       return { queryId: q.id, message: `Entry corrected · ${agentName(agent)}`, sub: sentChanged && next ? `NOW ${next.name ? `${next.name.toUpperCase()}, ${ordinal(next.edition ?? 1).toUpperCase()} EDITION` : "CHOSEN INDIVIDUALLY"}` : moved ? `${e.name.toUpperCase()} NOW ${up(day)}` : "NOTE UPDATED", touched: [q.id] };
     },
   };

@@ -42,7 +42,10 @@ const edition = (n: unknown): number => (typeof n === "number" && Number.isInteg
 
 export function sentRecordOf(q: Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "basedOnPackageId" | "basedOnPackageEdition" | "sentChanges" | "sentMaterials" | "sentVersions" | "sentCorrectedAt" | "sentCorrectedFrom">>): SentRecord {
   const inferred = q.sentHow == null;
-  const how: SentHow = q.sentHow ?? (q.packageId ? "package" : "unrecorded");
+  /* The migration's defaults (Nick, 28 Sep): a packageId is a package; a snapshot with no package
+     is INDIVIDUAL — a v1 "Custom" log recorded what went piece by piece; only a query with no
+     snapshot at all (an import, or one written before snapshots) is unrecorded. */
+  const how: SentHow = q.sentHow ?? (q.packageId ? "package" : q.sentMaterials ? "individual" : "unrecorded");
   const pkgId = how === "package" ? (q.sentPackageId || q.packageId || null) : null;
   const basedOnId = how === "individual" ? (q.basedOnPackageId || null) : null;
   return {

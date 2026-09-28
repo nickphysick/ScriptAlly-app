@@ -23,7 +23,7 @@ import {
   bookOf, capFirst, materialsName, sameSample, sampleName, type Materials, type Sample,
 } from "../../../lib/queryActions/sample";
 import {
-  activePackageId, currentVersion, exactPackage, guidelineAsk, openingPackage, packageMatches, packageToAttach, packagesFor,
+  activePackageId, currentVersion, exactPackage, guidelineAsk, openingChoice, openingPackage, packageMatches, packageToAttach, packagesFor,
   piecesChanged, sentPieces, summaryOf, summaryWith, type PackageCard,
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
@@ -80,10 +80,10 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   /* ---------- step 2: a package, or individually (§A1) ---------- */
   const orderFor = (id: string) => {
     const live = packagesFor(id, packages, versions, manuscripts.find((m) => m.id === id)?.bookVersions);
-    return { live, opened: openingPackage(live, req.packageId, again?.pkg, activePackageId(manuscripts.find((m) => m.id === id), packages)) };
+    return { live, ...openingChoice(live, req.packageId, again, activePackageId(manuscripts.find((m) => m.id === id), packages)) };
   };
-  const [how, setHow] = useState<"package" | "individual">(() => (orderFor(msId).opened ? "package" : "individual"));
-  const [pkg, setPkg] = useState<string | null>(() => orderFor(msId).opened);
+  const [how, setHow] = useState<"package" | "individual">(() => orderFor(msId).how);
+  const [pkg, setPkg] = useState<string | null>(() => orderFor(msId).pkg);
   /** The writer chose an option or a package themselves: nothing re-applies the order after that. */
   const [pkgTouched, setPkgTouched] = useState(false);
   /** The package the writer started from before switching to individually — the "based on" (§A2). */
@@ -93,11 +93,11 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const navigate = useNavigate();
   /** The order again, for a new manuscript or for packages that arrived after the drawer opened. */
   function applyOrder(id: string) {
-    const { opened } = orderFor(id);
-    setHow(opened ? "package" : "individual");
-    setPkg(opened);
+    const { how: opened, pkg: openedPkg, live } = orderFor(id);
+    setHow(opened);
+    setPkg(openedPkg);
     setBasedOn(null);
-    const card = opened ? orderFor(id).live.find((p) => p.id === opened) : null;
+    const card = openedPkg ? live.find((p) => p.id === openedPkg) : null;
     if (card) setMat((m) => ({ ...m, ql: card.ql, syn: card.syn }));
   }
   const [mat, setMat] = useState<Materials>(() => (again?.mat as Materials) ?? { ql: true, syn: true, s: { unit: "chapters", amt: 3, from: 1, sect: false, fu: null } });
@@ -288,7 +288,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
           </>
         ) : (
           <>
-            {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>Same day, same way and the same package as your last query. Just choose the agent.</Note> : null}
+            {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>{again.how === "individual" || again.pkg === "custom" ? "Same day, same way and the same pieces as your last query." : "Same day, same way and the same package as your last query."} Just choose the agent.</Note> : null}
             <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} book={book} />
           </>
         )}
@@ -538,7 +538,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the
          writer's choice writes that date, and only that choice does. */
       if (ifNo === "close") await db.updateQuery(newId.current, { responseDeadline: dayIso(expect) });
-      const keep = { sent, via, pkg: pkCard ? pkCard.id : "custom", mat, manuscriptId: msId };
+      const keep = { sent, via, how: (pkCard ? "package" : "individual") as "package" | "individual", pkg: pkCard ? pkCard.id : "custom", mat, manuscriptId: msId };
       return {
         queryId: newId.current,
         message: `Query logged · ${agentName(agent)}`,

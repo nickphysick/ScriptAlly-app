@@ -28,6 +28,8 @@ export interface DrawerPreset {
 export interface LogAgain {
   sent: Date;
   via: string;
+  /** How the last log was recorded — "Log another" repeats it as it was (Nick, 28 Sep). */
+  how?: "package" | "individual";
   pkg: string;
   mat: unknown;
   manuscriptId: string;

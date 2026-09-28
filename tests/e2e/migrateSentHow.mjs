@@ -20,6 +20,11 @@
  *   node tests/e2e/migrateSentHow.mjs                # dry run (default): counts only
  *   node tests/e2e/migrateSentHow.mjs --apply
  *   node tests/e2e/migrateSentHow.mjs --revert reports/packages-journey/migration-<uid>.json
+ *
+ * ⚠️ STEP 2 (Nick, 28 Sep): a v1 "Custom" log recorded what went piece by piece, so it is INDIVIDUAL,
+ * not unrecorded. `--custom-to-individual` moves every query that reads `sentHow: 'unrecorded'` while
+ * carrying a snapshot (`sentMaterials`) and no package to `'individual'`, backing up the value it
+ * REPLACED; `--revert` puts it back. Dry run unless `--apply` is passed too.
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -67,17 +72,37 @@ if (revertFile) {
   const plan = JSON.parse(readFileSync(revertFile, "utf8"));
   if (plan.uid !== uid) throw new Error(`Backup is for ${plan.uid}, signed in as ${uid}.`);
   let n = 0;
-  for (const { id, added } of plan.changes) {
+  for (const { id, added = [], restore = {} } of plan.changes) {
     const ref = doc(db, "users", uid, "queries", id);
     const before = await getDoc(ref);
     if (!before.exists()) { console.log(`  skip ${id} — gone`); continue; }
     const g = guarded(before.data());
-    await updateDoc(ref, Object.fromEntries(added.map((k) => [k, deleteField()])));
+    await updateDoc(ref, { ...Object.fromEntries(added.map((k) => [k, deleteField()])), ...restore });
     const after = guarded((await getDoc(ref)).data());
     if (!sameGuarded(g, after)) { console.error(`  ✗ ${id}: a guarded field moved on revert`); process.exit(1); }
     n++;
   }
   console.log(`reverted ${n} of ${plan.changes.length}`);
+  process.exit(0);
+}
+
+if (process.argv.includes("--custom-to-individual")) {
+  const all = await getDocs(collection(db, "users", uid, "queries"));
+  const hits = all.docs.filter((d) => { const q = d.data(); return q.sentHow === "unrecorded" && !q.packageId && typeof q.sentMaterials === "string" && q.sentMaterials.trim(); });
+  console.log(JSON.stringify({ scanned: all.size, customToIndividual: hits.length, ids: hits.map((d) => d.id) }));
+  if (!apply) { console.log("dry run: nothing written"); process.exit(0); }
+  mkdirSync("reports/packages-journey", { recursive: true });
+  const backup = `reports/packages-journey/migration-custom-${uid}.json`;
+  writeFileSync(backup, JSON.stringify({ uid, at: new Date().toISOString(), mode: "custom-to-individual", changes: hits.map((d) => ({ id: d.id, restore: { sentHow: "unrecorded" } })) }, null, 2));
+  console.log(`backup written: ${backup}`);
+  let moved = 0;
+  for (const d of hits) {
+    const g = guarded(d.data());
+    await updateDoc(d.ref, { sentHow: "individual" });
+    if (!sameGuarded(g, guarded((await getDoc(d.ref)).data()))) { console.error(`  ✗ ${d.id}: status or a date moved`); moved++; }
+  }
+  if (moved) { console.error(`STOP: ${moved} moved. Revert with --revert ${backup}`); process.exit(1); }
+  console.log(`moved ${hits.length} to individual; status and every date unchanged`);
   process.exit(0);
 }
 

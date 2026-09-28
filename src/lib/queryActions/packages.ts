@@ -134,6 +134,23 @@ export function openingPackage(live: PackageCard[], explicitId: string | null | 
   return null;
 }
 
+/**
+ * STEP 2'S OPENING CHOICE, WITH "LOG ANOTHER" (Nick, 28 Sep): the order stays explicit preset, then
+ * `again`, then the default — but `again` is taken WHICHEVER WAY it was recorded. A repeat of an
+ * individual log opens on individually with the same pieces, even when the manuscript has a "used
+ * for new queries" package; a repeat of a package log opens on that package if it is still live.
+ */
+export function openingChoice(live: PackageCard[], explicitId: string | null | undefined, again: { how?: "package" | "individual"; pkg?: string } | null | undefined, activeId: string | null | undefined): { how: "package" | "individual"; pkg: string | null } {
+  if (explicitId && live.some((p) => p.id === explicitId)) return { how: "package", pkg: explicitId };
+  if (again) {
+    const how = again.how ?? (again.pkg && again.pkg !== "custom" ? "package" : "individual");
+    if (how === "individual") return { how: "individual", pkg: null };
+    if (again.pkg && live.some((p) => p.id === again.pkg)) return { how: "package", pkg: again.pkg };
+  }
+  if (activeId && live.some((p) => p.id === activeId)) return { how: "package", pkg: activeId };
+  return { how: "individual", pkg: null };
+}
+
 /** What "Attach a submission package" selects when the writer switches to it: the order, then a match, then the first. */
 export function packageToAttach(live: PackageCard[], ordered: string | null, ask: GuidelineAsk | null): string | null {
   if (ordered && live.some((p) => p.id === ordered)) return ordered;
@@ -200,7 +217,13 @@ export function readSummary(summary: string | null | undefined): { packageName: 
 }
 
 export function piecesOf(summary: string | null | undefined): SentPiece[] {
-  const segs = String(summary ?? "").split(" · ").map((x) => x.trim()).filter(Boolean);
+  const whole = String(summary ?? "").trim();
+  /* v1's older one-line form — "Query letter, synopsis and first 3 chapters" — has no separators to
+     split on; it is read as one row rather than mis-split into a letter whose version is a list. */
+  if (whole && !whole.includes(" · ") && (whole.includes(", ") || / and /.test(whole))) {
+    return [{ key: "other", label: "What went", value: whole }];
+  }
+  const segs = whole.split(" · ").map((x) => x.trim()).filter(Boolean);
   const out: SentPiece[] = [];
   const sample: string[] = [];
   for (const seg of segs) {

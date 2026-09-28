@@ -8,9 +8,13 @@ describe("sentRecordOf — the one reader of §C3", () => {
     expect(r).toMatchObject({ how: "package", packageId: "p1", edition: 1, inferred: true });
   });
 
-  it("an unmigrated query with no packageId reads as unrecorded, with no package", () => {
+  it("an unmigrated query with no packageId and no snapshot reads as unrecorded, with no package", () => {
     const r = sentRecordOf({ packageId: "" });
     expect(r).toMatchObject({ how: "unrecorded", packageId: null, edition: null, inferred: true });
+  });
+
+  it("a v1 Custom log (a snapshot, no package) reads as individual (Nick, 28 Sep)", () => {
+    expect(sentRecordOf({ packageId: "", sentMaterials: "Query letter, synopsis and first 3 chapters" }).how).toBe("individual");
   });
 
   it("a recorded package send keeps its own id and edition", () => {

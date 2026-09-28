@@ -331,3 +331,70 @@ test("LP10 — correcting a query from one package to another moves its credit, 
   }
   if (failure) throw failure;
 });
+
+/* ─────────────── ATOMIC — a failed save writes nothing, and Try again writes it whole (Nick, 28 Sep) ─────────────── */
+test("ATOMIC — a save that fails partway writes nothing; Try again writes the log whole", async ({ page }) => {
+  test.setTimeout(400_000);
+  await start(page);
+  const { db, uid } = await harnessDb();
+  const agent = await freeAgentFor(MS);
+  const qIds = async () => new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id));
+  const feedFor = async (qid: string) => (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", qid)))).size;
+  const before = await qIds();
+  const stampedBefore = !!(await getDoc(doc(db, "users", uid, "packages", UNSENT))).data()?.firstSentAt;
+  await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: UNSENT });
+  await toStep2(page);
+  await toReview(page);
+  await page.evaluate(() => { (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE = true; });
+  await page.locator("[data-qad-primary]").click();
+  await expect(page.locator('[data-qad-toast="failed"]'), "the save did not report failure").toBeVisible({ timeout: 20_000 });
+  const afterFail = await qIds();
+  const leaked = [...afterFail].filter((id) => !before.has(id));
+  ok(leaked.length === 0, `ATOMIC: nothing was written by the failed save (leaked ${JSON.stringify(leaked)})`);
+  ok(!!(await getDoc(doc(db, "users", uid, "packages", UNSENT))).data()?.firstSentAt === stampedBefore, "ATOMIC: the package was not stamped by the failed save");
+  await page.locator('[data-qad-toast="failed"]').screenshot({ path: `${SHOTS}/atomic-failed.png` });
+  await page.locator('[data-qad-toast="failed"] .ub').click();
+  await expect(page.locator("[data-qad-review]"), "Try again did not reopen the drawer as entered").toBeVisible({ timeout: 10_000 });
+  await logAndCheck(page, async (q) => {
+    ok(q.sentHow === "package" && q.sentPackageId === UNSENT, "the retry records the same answers");
+    ok(await feedFor(String(q.id)) === 1, "the retry wrote the activity row once");
+    const log = (await getDocs(collection(db, "users", uid, "queries", String(q.id), "activity"))).size;
+    ok(log === 1, `the retry wrote the log row once (${log})`);
+  });
+});
+
+/* ─────────────── AGAIN — "Log another" repeats the last log as it was (Nick, 28 Sep) ─────────────── */
+test("AGAIN — after an individual log, Log another opens individually with the same pieces, despite a default package", async ({ page }) => {
+  test.setTimeout(400_000);
+  await start(page);
+  const { db, uid } = await harnessDb();
+  const agent = await freeAgentFor(MS);
+  const before = new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id));
+  await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS });
+  await toStep2(page);
+  ok(await how(page) === "package", "precondition: the manuscript's default package opens selected");
+  await page.locator('[data-qad-how="individual"]').click();
+  await page.locator(`[data-qad-toggle="syn"]`).click();
+  await toReview(page);
+  await page.locator("[data-qad-primary]").click();
+  await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 20_000 });
+  const qid = (await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id).find((id) => !before.has(id))!;
+  let failure: unknown = null;
+  try {
+    ok(!!qid, "the individual log was written");
+    await page.locator("[data-qad-again]").click();
+    await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
+    const agent2 = await freeAgentFor(MS);
+    await page.locator("[data-qad-agent-input]").fill(String(agent2.name ?? "").slice(0, 5));
+    await page.locator(`[data-qad-agent="${agent2.id}"]`).dispatchEvent("mousedown");
+    await toStep2(page);
+    ok(await how(page) === "individual", `AGAIN: Log another opens individually (got ${await how(page)})`);
+    ok((await page.locator(`[data-qad-toggle="syn"]`).getAttribute("aria-pressed")) === "false", "AGAIN: with the same pieces (no synopsis)");
+    await shot(page, "log-another-individual");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Discard" }).click();
+  } catch (e) { failure = e; } finally {
+    if (qid) await removeQuery(qid);
+  }
+  if (failure) throw failure;
+});

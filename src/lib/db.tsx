@@ -419,7 +419,7 @@ interface DbContextType {
     input: { repliedOn: string; weeks?: number | null; note?: string },
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
-  updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
+  updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
   deleteQuery: (id: string) => Promise<void>;
   
   // Journal Actions
@@ -2466,19 +2466,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     try {
-      /* The stamp rides the SAME batch as the query it accompanies (the packageLock law): a package
-         is never locked with nothing sent. Asked for only when unstamped — a re-stamp is denied by
-         the rules, and a denial would fail the whole batch, the query with it. */
-      const stampTarget = opts?.stampPackage && q.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
-      if (stampTarget && !isPackageLocked(stampTarget)) {
-        const batch = writeBatch(db);
-        batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
-        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
-        await batch.commit();
-      } else {
-        await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
-      }
-
       const seeded = seedActivities();
       const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
       /**
@@ -2487,14 +2474,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * the task pane's story column reads. This loop wrote every entry to the feed and only the
        * ADVANCED one to the log — so `QUERY_SENT` reached the projection and never the record.
        *
-       * Measured on dev: a chase card for a query sent in July rendered a story column containing
-       * nothing but its "Your turn · Today" terminus, beside tiles stating that query's own dates
-       * correctly. The panel was right and the filter was right; the rung it was looking for had
-       * never been written. The Query Centre reads the feed, which is why the same query looked
-       * complete three inches away — the disagreement `useDockActivity`'s own header describes.
-       *
        * ⚠️ THE TWO SHAPES ARE NOT THE SAME DOCUMENT, which is why this is a builder rather than a
-       * second `setDoc` of `act`. The log keys on `type`/`createdAt`/`note`; the feed keeps the
+       * second write of `act`. The log keys on `type`/`createdAt`/`note`; the feed keeps the
        * `Activity` shape. Writing one into the other's collection would produce a row that parses
        * and renders as nothing.
        */
@@ -2508,10 +2489,36 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         manuscriptTitle,
         ...(act.eventKey ? { eventKey: act.eventKey } : {}),
       });
+      /**
+       * ⚠️ ONE BATCH: THE QUERY, EVERY SEEDED ROW IN BOTH STORES, AND THE PACKAGE STAMP — ALL OR
+       * NOTHING (packages-journey Part B, Nick's ruling 28 Sep). These were separate writes, so a
+       * failure after the query landed left a query with no activity and no Undo: the drawer said
+       * "Couldn't save" about a save that had half happened. Now a refusal anywhere writes nothing,
+       * and "Try again" writes the same id from scratch.
+       *
+       * The stamp rides the same batch (the packageLock law): a package is never locked with nothing
+       * sent. Asked for only when unstamped — a re-stamp is denied by the rules, and a denial fails
+       * the whole batch, the query with it.
+       */
+      const batch = writeBatch(db);
+      batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
       for (const act of seeded) {
-        await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
-        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
+        batch.set(doc(db, "users", currentUser.id, "activities", act.id), act);
+        batch.set(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
       }
+      const stampTarget = opts?.stampPackage && q.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
+      }
+      /* A DEV-ONLY way to make the batch fail PARTWAY — after the query and its rows are queued — so
+         the all-or-nothing lock can be proved on a rendered page. The hook is read only outside
+         production builds, so a production bundle carries no way to reach it. */
+      if (import.meta.env.MODE !== "production" && (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE) {
+        (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE = false;
+        batch.set(doc(db, "users", currentUser.id, "no-such-collection", "refused"), { refused: true });
+      }
+      await batch.commit();
+
       /* the derived status still follows an advanced seed, and only an advanced seed — a query born
          at Queried is already at its derived status and has nothing to recompute towards */
       if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
@@ -3271,13 +3278,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const updateQuery = async (queryId: string, fields: Partial<Query>) => {
+  const updateQuery = async (queryId: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => {
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
+      /* A correction onto a never-sent package stamps its first-sent lock in the SAME batch as the
+         query update — the packageLock law, as logging does (Nick, 28 Sep). */
+      const stampTarget = opts?.stampPackage ? packages.find((p) => p.id === opts.stampPackage) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "users", currentUser.id, "queries", queryId), fields);
+        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
+        await batch.commit();
+      } else {
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }

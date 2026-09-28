@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
-  editionsOn, exactPackage, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, readSummary, sentPieces, summaryOf, summaryWith,
+  editionsOn, exactPackage, openingChoice, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, readSummary, sentPieces, summaryOf, summaryWith,
   type PackageCard,
 } from "./packages";
 import { ComponentType, type ManuscriptVersion, type SubmissionPackage } from "../../types";
@@ -126,5 +126,30 @@ describe("§A4 · the correction offers every edition that existed on the query'
   });
   it("each row is keyed by package and edition, which is how AS RECORDED is found", () => {
     expect(on.map((c) => c.key)).toContain("p1#1");
+  });
+});
+
+describe("Log another repeats the last log as it was (Nick, 28 Sep)", () => {
+  it("after an individual log, it opens individually — even with a default package", () => {
+    expect(openingChoice(pkgs, null, { how: "individual", pkg: "custom" }, "p2")).toEqual({ how: "individual", pkg: null });
+  });
+  it("after a package log, the same package", () => {
+    expect(openingChoice(pkgs, null, { how: "package", pkg: "p3" }, "p2")).toEqual({ how: "package", pkg: "p3" });
+  });
+  it("an explicit preset still comes first", () => {
+    expect(openingChoice(pkgs, "p1", { how: "individual", pkg: "custom" }, "p2")).toEqual({ how: "package", pkg: "p1" });
+  });
+  it("a repeat whose package has since been retired falls through to the default", () => {
+    expect(openingChoice(pkgs, null, { how: "package", pkg: "px" }, "p2")).toEqual({ how: "package", pkg: "p2" });
+  });
+  it("with no again and no default, individually", () => {
+    expect(openingChoice(pkgs, null, null, null)).toEqual({ how: "individual", pkg: null });
+  });
+});
+
+describe("v1's one-line summaries read as one row", () => {
+  it("a legacy materialsName summary is not mis-split", () => {
+    expect(piecesOf("Query letter, synopsis and first 3 chapters")).toEqual([{ key: "other", label: "What went", value: "Query letter, synopsis and first 3 chapters" }]);
+    expect(readSummary("Winter draft package: Query letter and synopsis").pieces).toHaveLength(1);
   });
 });
