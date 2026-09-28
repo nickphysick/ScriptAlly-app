@@ -112,10 +112,22 @@ test("S1 + LP2 + LP3 — a preset holds against the agent; a retired preset fall
   test.setTimeout(180_000);
   await start(page);
   const agent = await freeAgentFor(MS);
-  await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: UNSENT });
-  await toStep2(page);
-  ok(await selected(page) === UNSENT, `LP2: the preset holds after the agent is picked (got ${await selected(page)})`);
-  console.log("MATCHES tags:", await page.locator(".qad-prow em.m").count());
+  /* the agent asks for a letter and a synopsis, so EVERY fixture package with a synopsis matches —
+     including ones that are not the preset. Restored in the finally. */
+  const { db, uid } = await harnessDb();
+  const agRef = doc(db, "users", uid, "agents", agent.id);
+  const agBefore = (await getDoc(agRef)).data()!;
+  await updateDoc(agRef, { materialsWanted: ["Query letter", "Synopsis"] });
+  try {
+    await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: UNSENT });
+    await toStep2(page);
+    ok(await selected(page) === UNSENT, `LP2: the preset holds after the agent is picked (got ${await selected(page)})`);
+    const matched = await page.locator(".qad-prow:has(em.m)").evaluateAll((els) => els.map((e) => e.getAttribute("data-qad-pkg")));
+    console.log("MATCHES on:", JSON.stringify(matched));
+    ok(matched.some((id) => id !== UNSENT), `LP2: another package still shows MATCHES (${JSON.stringify(matched)})`);
+  } finally {
+    await updateDoc(agRef, { materialsWanted: agBefore.materialsWanted ?? deleteField() });
+  }
   await shot(page, "step2-2-package-preset");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Discard" }).click();
