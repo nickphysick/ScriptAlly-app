@@ -125,6 +125,7 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
+import { SentBox, FromPackageTag } from "./queryActions/SentHow";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
@@ -5063,15 +5064,15 @@ export const Queries: React.FC<{
                  * evidence of what went. The fallback survives only where the query carries
                  * nothing at all — where it answers "what does this agency ask for".
                  */
+                /* ⚠️ PACKAGES-JOURNEY §A3 (28 Sep) SUPERSEDES THE STRIP ABOVE FOR THIS CARD: the Queried
+                   entry is one of the two treatments — the ink band for a package, the dashed box for
+                   individually, the quiet one for not recorded — read from the query's own frozen
+                   record (SentHow). `SentMaterials` still serves the three-column arm below. */
                 const sentExtra = (
-                  <SentMaterials
-                    query={activeQuery}
-                    base={activeQuery.packageId ? ((activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[]) : baseMaterialsFor(activeQuery, activeAgent)}
-                    packages={packages}
-                    portion={queryPortion(activeQuery, activeAgent)}
-                    onViewPackages={() => onNavigate?.("manuscripts", "Submission packages")}
-                  />
+                  <SentBox q={activeQuery} packages={packages}
+                    onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")} />
                 );
+                const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
                 /**
                  * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
                  * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
@@ -5118,6 +5119,7 @@ export const Queries: React.FC<{
                       if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
                     } : undefined}
                     sentExtra={sentExtra}
+                    requestExtra={requestExtra}
                   />
                 );
               })()) : null;
@@ -5175,6 +5177,7 @@ export const Queries: React.FC<{
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
       nowMs={Date.now()}
+      packages={packages}
       /* §1 — the ✕, Escape and the scrim are ONE act, and it knows which door opened the card:
          a query opened inside the calendar is the calendar's, one from the ledger or `?q` is the
          page's. Clearing both would drop the page's selection for a click made in an overlay. */

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
-  exactPackage, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, sentPieces, summaryOf,
+  exactPackage, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, readSummary, sentPieces, summaryOf, summaryWith,
   type PackageCard,
 } from "./packages";
 import { ComponentType, type ManuscriptVersion, type SubmissionPackage } from "../../types";
@@ -87,6 +87,15 @@ describe("the summary never repeats a piece's name", () => {
     const pieces = sentPieces({ ql: true, syn: true, s: { unit: "none", amt: 0, from: 1, sect: false, fu: null } },
       { qlVersion: "Query letter v3", synVersion: "Synopsis, 3 pages", bookVersion: null, other: null });
     expect(summaryOf(pieces)).toBe("Query letter v3 · Synopsis 3 pages");
+  });
+});
+
+describe("LP6 · the frozen name rides in the summary", () => {
+  const pieces = sentPieces({ ql: true, syn: false, s: { unit: "none", amt: 0, from: 1, sect: false, fu: null } }, { qlVersion: "v3", synVersion: null, bookVersion: null, other: null });
+  it("a package's name, and a based-on name, read back from the summary", () => {
+    expect(readSummary(summaryWith(pieces, "Standard", null))).toEqual({ packageName: "Standard", basedOnName: null, pieces });
+    expect(readSummary(summaryWith(pieces, null, "Standard"))).toEqual({ packageName: null, basedOnName: "Standard", pieces });
+    expect(readSummary(summaryWith(pieces, null, null))).toEqual({ packageName: null, basedOnName: null, pieces });
   });
 });
 

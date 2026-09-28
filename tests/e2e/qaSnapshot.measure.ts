@@ -79,7 +79,7 @@ test("H11 — the sent snapshot outlives a renamed package and a renamed version
     /* §C3 (28 Sep): the summary is the pieces as they went — the package is `sentPackageId`, not a
        prefix on the summary — so the snapshot is the pieces and the version NAMES they carried. */
     expect(sent.sentHow).toBe("package");
-    expect(String(sent.sentMaterials)).toMatch(/^Query letter /);
+    expect(String(sent.sentMaterials)).toContain(`${pkgBefore.packageName} package: Query letter `);
     const detailsBefore = (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", qid)))).docs.map((d) => d.data().details).join("|");
 
     /* the package is renamed and its letter version renamed, on the packages page's own documents */

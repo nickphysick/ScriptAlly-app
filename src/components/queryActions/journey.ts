@@ -19,8 +19,8 @@ export interface Guard { level: GuardLevel; msg: string }
 export interface JourneyStep {
   /** Stepper label, step heading and review row label. */
   title: string;
-  /** The review row's value. */
-  summary: string;
+  /** The review row's value — a node where the answer wears a treatment (Log's "What you sent", §A3). */
+  summary: React.ReactNode;
   guard?: Guard | null;
   /** The step draws its own warning note, so the shell adds no WORTH A LOOK. */
   ownWarn?: boolean;

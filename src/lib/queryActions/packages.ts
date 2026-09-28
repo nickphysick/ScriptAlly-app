@@ -176,6 +176,29 @@ export function summaryOf(pieces: SentPiece[]): string {
   return pieces.map((p) => (p.key === "sample" ? p.value : p.key === "other" ? `Also: ${p.value}` : `${p.label}${p.value ? ` ${p.value}` : ""}`)).join(" · ");
 }
 
+/**
+ * ⚠️ THE FROZEN NAME RIDES IN THE SUMMARY, BECAUSE §C3 HAS NO FIELD FOR IT. LP6 requires a query
+ * to keep the package's name as it was on the day, after any rename, and a new field would take
+ * the rules beyond the Part C set (a §S stop). So the summary carries it as a prefix —
+ * `Standard package: …` for a package, `Based on Standard: …` for based-on — and `readSummary`
+ * is the one parser. Flagged for the contract.
+ */
+export function summaryWith(pieces: SentPiece[], pkgName: string | null, basedOnName: string | null): string {
+  const body = summaryOf(pieces);
+  if (pkgName) return `${pkgName} package: ${body}`;
+  if (basedOnName) return `Based on ${basedOnName}: ${body}`;
+  return body;
+}
+
+export function readSummary(summary: string | null | undefined): { packageName: string | null; basedOnName: string | null; pieces: SentPiece[] } {
+  const s = String(summary ?? "");
+  const pk = / package: /.exec(s);
+  if (pk && !s.startsWith("Based on ")) return { packageName: s.slice(0, pk.index), basedOnName: null, pieces: piecesOf(s.slice(pk.index + pk[0].length)) };
+  const bo = /^Based on (.+?): /.exec(s);
+  if (bo) return { packageName: null, basedOnName: bo[1], pieces: piecesOf(s.slice(bo[0].length)) };
+  return { packageName: null, basedOnName: null, pieces: piecesOf(s) };
+}
+
 export function piecesOf(summary: string | null | undefined): SentPiece[] {
   const segs = String(summary ?? "").split(" · ").map((x) => x.trim()).filter(Boolean);
   const out: SentPiece[] = [];

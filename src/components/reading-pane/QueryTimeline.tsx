@@ -383,6 +383,9 @@ const TlEvent: React.FC<{ last?: boolean; minor?: boolean; target?: boolean; gho
   </div>
 );
 
+/** The rungs on which an agent ASKED — the package's results, so they carry its tag (§A3). */
+const REQUEST_RUNGS = new Set<QueryStatus>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
+
 export const TimelineRows: React.FC<{
   rows: RowSpec[];
   /**
@@ -411,6 +414,8 @@ export const TimelineRows: React.FC<{
    * nothing, so it keeps the rung it has always had.
    */
   sentExtra?: React.ReactNode;
+  /** Packages-journey §A3: under each REQUEST rung (partial, full, R&R) — "from the ‹name› package". */
+  requestExtra?: React.ReactNode;
   /**
    * §1 — group the rows into rounds and head each with its own label.
    *
@@ -440,7 +445,7 @@ export const TimelineRows: React.FC<{
    */
   confirmFor?: string | null;
   confirmNode?: React.ReactNode;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null, confirmFor = null, confirmNode = null }) => {
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, requestExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null, confirmFor = null, confirmNode = null }) => {
   /* ⚠️ THE GROUPING IS THE PURE `chapterise`, INCLUDING ITS THRESHOLD. Nothing here decides when a
      heading is worth drawing — `labelled` is the derivation's own answer, so a second surface
      cannot apply a different figure. */
@@ -571,6 +576,7 @@ export const TimelineRows: React.FC<{
             )}
             {/* the send's own materials — rendered by the caller, on the send rung only */}
             {showsExtra && sentExtra}
+            {requestExtra && !row.kind && REQUEST_RUNGS.has(row.status as QueryStatus) ? requestExtra : null}
             </div>
           </div>
         </TlEvent>
@@ -741,6 +747,8 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
 
 export const QueryTimeline: React.FC<QueryTimelineProps & {
   sentExtra?: React.ReactNode;
+  /** Packages-journey §A3: under each REQUEST rung (partial, full, R&R) — "from the ‹name› package". */
+  requestExtra?: React.ReactNode;
   /** §2 (correction pass 3): carries the clicked control so the desk can notch to it. */
   onMarkClosed?: (anchor: HTMLElement) => void;
   /** §5d — "Keep tracking". Absent ⇒ the offer renders no dismissal, never a dead button. */
@@ -754,7 +762,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   /** v1.1 — the inline delete confirm, passed straight to `TimelineRows`. */
   confirmFor?: string | null;
   confirmNode?: React.ReactNode;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater, confirmFor = null, confirmNode = null }) => {
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, requestExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater, confirmFor = null, confirmNode = null }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef } | null>(null);
   /* §1 — anchored, flipping and constrained like every other popover on this page. The trigger is
      assigned on open (the rows are many; a ref per row would be a ref per rung). */
@@ -833,6 +841,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         freshId={freshId}
         continues={ballHolder === "agent" && !!waiting}
         sentExtra={sentExtra}
+        requestExtra={requestExtra}
         confirmFor={confirmFor}
         confirmNode={confirmNode}
       />

@@ -16,6 +16,7 @@
  * WHICH one, and `materials` says what it contained on the day.
  */
 import type { Query } from "../../types";
+import { readSummary } from "./packages";
 
 export type SentHow = "package" | "individual" | "unrecorded";
 
@@ -63,4 +64,16 @@ export function sentRecordOf(q: Partial<Pick<Query, "packageId" | "sentHow" | "s
 export function creditedTo(q: Parameters<typeof sentRecordOf>[0], packageId: string, ed?: number): boolean {
   const r = sentRecordOf(q);
   return r.how === "package" && r.packageId === packageId && (ed == null || r.edition === ed);
+}
+
+/**
+ * The treatment in WORDS, for a surface that can only carry text (the Birds-eye row's native
+ * tooltip). The same three cases, the same order, as the chip in components/queryActions/SentHow.
+ */
+export function sentHowWords(q: Parameters<typeof sentRecordOf>[0], liveName?: string | null): string {
+  const r = sentRecordOf(q);
+  const sum = readSummary(r.materials);
+  if (r.how === "package") return `Sent as the ${sum.packageName ?? liveName ?? "attached"} package`;
+  if (r.how === "individual") return `Materials logged individually${r.basedOnId && sum.basedOnName ? `, based on ${sum.basedOnName}` : ""}`;
+  return "Materials not recorded";
 }

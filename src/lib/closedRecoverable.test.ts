@@ -45,14 +45,16 @@ describe("⚠️ the editor is NOT gated on status — that is what makes the ex
      * A status gate that would strand closed queries can live in exactly two places: inside the
      * renderer, or as a conditional on the mount. Both are asserted.
      */
-    const mat = readFileSync(join(process.cwd(), "src/components/queries/SentMaterials.tsx"), "utf8")
+    /* RETARGETED AGAIN (packages-journey §A3, 28 Sep) — same law: the live card's materials surface
+       is SentHow's `SentBox` now, so it is the renderer this reads. */
+    const mat = readFileSync(join(process.cwd(), "src/components/queryActions/SentHow.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
     expect(mat).not.toContain("isTerminalStatus");
     expect(mat).not.toContain("QueryStatus.REJECTED");
     expect(mat).not.toContain("QueryStatus.WITHDRAWN");
     expect(mat).not.toContain("QueryStatus.NO_RESPONSE");
     /* the mount: `sentExtra` is assigned unconditionally — no turn/status test guards it */
-    expect(code).toMatch(/const sentExtra = \(\n\s+<SentMaterials/);
+    expect(code).toMatch(/const sentExtra = \(\n\s+<SentBox/);
   });
 
   it("⚠️ the two halves reconcile: what the task list drops, the pane still reaches", () => {

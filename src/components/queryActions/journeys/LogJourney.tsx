@@ -24,9 +24,10 @@ import {
 } from "../../../lib/queryActions/sample";
 import {
   activePackageId, currentVersion, exactPackage, guidelineAsk, openingPackage, packageMatches, packageToAttach, packagesFor,
-  piecesChanged, sentPieces, summaryOf, type PackageCard,
+  piecesChanged, sentPieces, summaryOf, summaryWith, type PackageCard,
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { SentChip } from "../SentHow";
 import { buildAgentMaterials, emptyMaterials } from "../../../lib/agentMaterials";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
@@ -320,7 +321,16 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const bookTitle = ms?.title ?? "this book";
     steps.push({
       title: "What you sent",
-      summary: pkCard ? `${pkCard.name} package` : `Chosen individually · ${summaryOf(pieces) || "nothing ticked"}`,
+      /* ⚠️ THE REVIEW WEARS THE SAME PAIR AS THE CARD AND TRACKING (§A3): the chip is SentChip
+         itself, fed the record this save will write, so the three cannot disagree. */
+      summary: (
+        <span className="qad-sentsum" data-qad-sentsum={pkCard ? "package" : "individual"}>
+          <SentChip q={pkCard
+            ? { sentHow: "package", sentPackageId: pkCard.id, sentMaterials: summaryWith(pieces, pkCard.name, null) }
+            : { sentHow: "individual", basedOnPackageId: basedOn && changes.length ? basedOn.id : undefined, sentMaterials: summaryWith(pieces, null, basedOn && changes.length ? basedOn.name : null) }} />
+          <span>{pkCard ? `${pkCard.name} package` : `Chosen individually · ${summaryOf(pieces).replace(/^./, (c) => c.toLowerCase()) || "nothing ticked"}`}</span>
+        </span>
+      ),
       guard: g3,
       ownWarn: true,
       body: (
@@ -497,7 +507,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     commit: async () => {
       if (!agent) throw new Error("No agent chosen");
       /* §C3 — how the materials were recorded, frozen here and never read back from a live package. */
-      const summary = summaryOf(pieces);
+      const summary = summaryWith(pieces, pkCard?.name ?? null, !pkCard && basedOn && changes.length ? basedOn.name : null);
       const versionIds = [pieceV.qlId, pieceV.synId].filter((x): x is string => !!x);
       const record: Record<string, unknown> = pkCard
         ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition }
@@ -522,7 +532,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
         ...(prev || (dup && requery) ? { requery: true } : {}),
         ...(nrmnNow !== !!agent.noResponseMeansNo ? { nrmnOverride: nrmnNow } : {}),
       };
-      const details = pkCard ? `${pkCard.name} package · ${summary}` : summary;
+      const details = summary;
       const res = await db.addQuery(payload as never, false, { eventKey: prev || (dup && requery) ? "requery_sent" : "query_sent", details, stampPackage: !!pkCard });
       if (!res.success) throw new Error(res.error || "Couldn't log the query");
       /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the

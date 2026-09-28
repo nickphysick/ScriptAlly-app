@@ -401,3 +401,7 @@ body.qad-docked .qcv-qm, body.qad-docked .qcv-open {
 .qad-root .qad-qpick-none { margin: 10px 14px; font-size: 14px; color: var(--qad-ink45); }
 .qad-root .qad-qpick-paste { display: inline-block; margin-top: 14px; border: 0; background: none; padding: 0; cursor: pointer;
   font-family: var(--qad-machine); font-size: 14px; color: var(--qad-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* the review's "What you sent" wears the chip (§A3) */
+.qad-sentsum { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.qad-sentsum .sh-chip { margin-top: 0; }

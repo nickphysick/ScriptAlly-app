@@ -15,7 +15,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc, deleteField } from "firebase/firestore";
+import { openQueryById, openTab } from "./openQuery";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
 
@@ -163,7 +164,7 @@ test("S1 + LP5 — a package save records the package; an individual save record
     ok(q.sentPackageId === UNSENT && q.packageId === UNSENT, "the id, in step with packageId");
     ok(q.sentPackageEdition === 1, "edition 1");
     ok(Array.isArray(q.sentVersions) && (q.sentVersions as string[]).every((v) => v.startsWith("pv2-")), `sentVersions are version ids (${JSON.stringify(q.sentVersions)})`);
-    ok(typeof q.sentMaterials === "string" && /^Query letter /.test(q.sentMaterials as string), `the summary is the pieces (${q.sentMaterials})`);
+    ok(typeof q.sentMaterials === "string" && /^Winter draft package: Query letter /.test(q.sentMaterials as string), `the summary is the name and the pieces (${q.sentMaterials})`);
     const { db, uid } = await harnessDb();
     const p = (await getDoc(doc(db, "users", uid, "packages", UNSENT))).data()!;
     ok(!!p.firstSentAt, "the package is stamped first-sent");
@@ -217,4 +218,50 @@ test("LP8 — individually but exactly a package: the review asks, and declining
     ok(q.sentHow === "individual", "LP8: kept individual — never converted silently");
     ok(!("sentPackageId" in q), "no package");
   });
+});
+
+/* ─────────────── LP9 · the six cases on the rendered card and Tracking (§A3) ─────────────── */
+const AUTUMN = "Autumn round package: Query letter v3 · Synopsis 1 page · Fast-paced opening · Also: Author bio in the email body";
+const SIX: Record<string, { id: string; fields: Record<string, unknown>; chip: RegExp; box: string }> = {
+  pkg: { id: "pv2-q1", fields: { sentHow: "package", sentPackageId: "pv2-p1", sentPackageEdition: 1, sentMaterials: AUTUMN }, chip: /AUTUMN ROUND PACKAGE/, box: "package" },
+  ind: { id: "pv2-q2", fields: { sentHow: "individual", packageId: "", sentMaterials: "Query letter v3 · first 5,000 words" }, chip: /^MATERIALS LOGGED INDIVIDUALLY$/, box: "individual" },
+  based: { id: "pv2-q3", fields: { sentHow: "individual", packageId: "", basedOnPackageId: "pv2-p1", basedOnPackageEdition: 1, sentChanges: ["Synopsis: 1 page → none"], sentMaterials: "Based on Autumn round: Query letter v3 · Fast-paced opening" }, chip: /BASED ON AUTUMN ROUND/, box: "individual" },
+  ret: { id: "pv2-q14", fields: { sentHow: "package", sentPackageId: "pv2-p3", sentPackageEdition: 1, sentMaterials: "Spring round package: Query letter v1 · Slow-burn opening" }, chip: /SPRING ROUND PACKAGE/, box: "package" },
+  cor: { id: "pv2-q4", fields: { sentHow: "package", sentPackageId: "pv2-p1", sentPackageEdition: 1, sentMaterials: AUTUMN, sentCorrectedAt: "2026-09-28T10:00:00Z", sentCorrectedFrom: "Agents with MSWL package: Query letter v2" }, chip: /AUTUMN ROUND PACKAGE/, box: "package" },
+  imp: { id: "pv2-q9", fields: { sentHow: "unrecorded", packageId: "", sentMaterials: deleteField() }, chip: /MATERIALS NOT RECORDED/, box: "unrecorded" },
+};
+
+test("LP9 — the six cases: solid ink for a package, dashed for individually, quiet for not recorded", async ({ page }) => {
+  test.setTimeout(400_000);
+  const { db, uid } = await harnessDb();
+  for (const c of Object.values(SIX)) await updateDoc(doc(db, "users", uid, "queries", c.id), c.fields as Record<string, unknown>);
+  await page.addInitScript((ms) => { try { localStorage.setItem("scriptally_active_manuscript_id", ms); } catch { /* */ } }, MS);
+  await start(page);
+  const seen: Record<string, string> = {};
+  for (const [k, c] of Object.entries(SIX)) {
+    const host = await openQueryById(page, c.id);
+    const chip = page.locator(`${host.root} [data-sent-how]`).first();
+    await expect(chip, `${k}: the card has no chip`).toBeVisible();
+    const txt = (await chip.innerText()).trim();
+    ok(c.chip.test(txt), `${k}: chip reads ${txt}`);
+    const cls = (await chip.getAttribute("class")) ?? "";
+    ok(cls.includes(c.box === "package" ? "sh-chip--pk" : c.box === "individual" ? "sh-chip--in" : "sh-chip--no"), `${k}: chip treatment (${cls})`);
+    await openTab(page, host, "Tracking");
+    const box = page.locator(`${host.root} [data-sent-box]`).first();
+    await expect(box, `${k}: Tracking has no box`).toBeVisible();
+    ok((await box.getAttribute("data-sent-box")) === c.box, `${k}: the Tracking box is the ${c.box} treatment`);
+    /* the treatment is the RENDERED style, not only the class: ink band vs dashed outline */
+    /* preflight gives every box `border-style: solid` at 0px, so the style alone says nothing: read width AND style */
+    const style = await box.evaluate((el) => { const cs = getComputedStyle(el); return `${cs.borderTopWidth} ${cs.borderTopStyle}|${cs.boxShadow}`; });
+    ok(c.box === "package" ? style.startsWith("0px") && /rgb\(42, 58, 82\)/.test(style) : /^1(\.5)?px dashed/.test(style), `${k}: rendered treatment ${style}`); /* 1.5px snaps to 1px at DPR 1 */
+    if (k === "ret") ok((await box.innerText()).includes("RETIRED"), "ret: the RETIRED tag");
+    if (k === "cor") ok((await box.innerText()).includes("WAS RECORDED AS"), "cor: the corrected line");
+    if (k === "based") ok((await box.locator(".sh-row.chg").count()) > 0, "based: the changed piece shows in rust");
+    seen[k] = txt;
+    const card = page.locator(host.root);
+    await card.screenshot({ path: `${SHOTS}/case-${k}.png` });
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+  }
+  console.log("SIX CASES:", JSON.stringify(seen));
 });
