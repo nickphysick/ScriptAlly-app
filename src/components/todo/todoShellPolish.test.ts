@@ -155,7 +155,7 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -183,7 +183,7 @@ describe("shell polish P5 — the sweep + the record", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -374,7 +374,7 @@ describe("centring fix P2 — the big search in the panel header", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the field derives from the container, never from vw", () => {
     expect(rule(".tdb-bsearch")).not.toContain("vw");
@@ -387,7 +387,7 @@ describe("centring fix P2 — the big search in the panel header", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("session: the search leaves with the panel (EXIT_FADE), no orphaned bar-clearing target", () => {
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");

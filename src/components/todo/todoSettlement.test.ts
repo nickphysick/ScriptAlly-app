@@ -117,7 +117,7 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
     const heroFn = sliceBetween(page, "function renderHero", "function renderComposer");
@@ -175,6 +175,6 @@ describe("settlement P4 — the sweep", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });

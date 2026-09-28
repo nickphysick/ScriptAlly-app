@@ -21,7 +21,7 @@ describe("TOUR_STOPS — seven stops (notes-and-tasks adds the note/task step), 
       // confidently at the page's sort and Add while describing filters. The second is why this
       // census exists: a stop can go wrong without going missing.
       ".l-search",
-      ".tdb-popwrap",
+      ".tdv2-popwrap", // to-do list v2: the v2 controls row
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
       '[aria-expanded][class*="asec"], .ws-navrow',
@@ -47,7 +47,7 @@ describe("TOUR_STOPS — seven stops (notes-and-tasks adds the note/task step), 
        true of a chip you could see — describes a row you have to open a menu to find. What the
        stop must teach instead is that the button FILLS while a narrowing is on, because that is
        the only thing left on the page saying a short list is short on purpose. */
-    expect(TOUR_STOPS[4].p).toContain("fills with ink");
+    expect(TOUR_STOPS[4].p).toContain("named in a bar"); // to-do list v2
     expect(TOUR_STOPS[5].p).toContain("Hover for the actions");
     expect(TOUR_STOPS[5].p).toContain("Batches expand in place");
     expect(TOUR_STOPS[6].p).toContain("under To-do in the sidebar");
@@ -157,7 +157,7 @@ describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is droppe
     /* ⚠️ RE-POINTED (corrections 2.1): the card's own bar went with the set-aside door and took
        `.l-menuwrap` with it. Filter and sort are the PAGE's, in the toolbar row — which is what
        this stop already described, so only its selector was stale. */
-    expect(sels).toContain(".tdb-popwrap");
+    expect(sels).toContain(".tdv2-popwrap"); // to-do list v2
     /* `.tdb-bsearch` is extinct; `.tdb-tools` still exists but is no longer what this stop meant */
     expect(sels).not.toContain(".tdb-bsearch");
     expect(sels).not.toContain(".tdb-tools");

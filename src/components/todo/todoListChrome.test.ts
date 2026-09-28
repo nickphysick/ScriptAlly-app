@@ -111,10 +111,11 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).not.toContain("function groupCard");
     /* the retired board was a COMPONENT, so its absence is asserted where it can actually be seen */
     expect(page).not.toContain("<TodoBoard");
-    /* and the list is still reachable as a body — Phase 4 is what made that worth asserting */
-    expect(page).toContain("function renderList");
-    // the slice above already proves the call is reached from the chrome, not from a view branch
-    expect(page).toContain("<TaskList");
+    /* ⚠️ AND THE THREE-VIEW BODIES ARE RETIRED TOO (to-do list v2, 28 Sep): the page draws ONE body,
+       v2's row cards, and none of the grid, the board or the list. */
+    expect(page).not.toContain("function renderList");
+    expect(page).not.toMatch(/<TaskList[\s>]/);
+    expect(page).toContain("<V2Rows");
   });
 
   it("⚠️ THE ADD IS THE CONTROL BAR'S NOW, and still the only creation action", () => {
@@ -188,8 +189,13 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
        ⚠️ SUPERSEDED A THIRD TIME, and this one ends the sequence: the chips are retired and the
        control bar's figure is `railShown()`, which SUMS THE RENDERED GROUPS rather than deriving
        a parallel total. There is no longer a second tally to keep in step with the first. */
-    expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
+    /* ⚠️ AND A FOURTH (to-do list v2, 28 Sep): the figures are the THREE TILES', off `v2Live` — the
+       sidebar badge's own population — and the Filter panel's numbers are `facetCounts` over the very
+       rows the list filters, never the raw board. */
+    expect(page).toContain("const v2Live = useMemo(() => [...boardCols.todo, ...boardCols.today], [boardCols]);");
+    expect(page).toContain("tileCounts(v2Live)");
     expect(code(page)).not.toContain("taskStats(");
-    expect(page).not.toContain("facetCounts(");
+    expect((page.match(/facetCounts\(/g) ?? []).length, "a second tally").toBe(1);
+    expect(page).toContain("facetCounts(v2TileRows, v2StatusName)");
   });
 });

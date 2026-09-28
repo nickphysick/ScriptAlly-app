@@ -74,9 +74,11 @@ export const TOUR_STOPS: TourStop[] = [
        the toolbar row beside the search — which is what this stop already DESCRIBES, so its words
        were right about a selector that had stopped existing. `.tdb-popwrap` is that row's own
        wrapper. The census below is what caught it, which is the third time it has. */
-    sel: ".tdb-popwrap",
+    /* ⚠️ RE-POINTED (to-do list v2, 28 Sep): the controls row is v2's — search, Filter, Group, Sort —
+       and an active narrowing is stated in a bar at the foot of the page, so the copy says so. */
+    sel: ".tdv2-popwrap",
     h: "Narrow the list.",
-    p: "Filter and sort sit beside the search. The filter fills with ink while a narrowing is on, so a short list is never a mystery.",
+    p: "Filter, group and sort sit beside the search. Anything narrowing the list is named in a bar at the foot of the page, so a short list is never a mystery.",
     cta: "Next →",
   },
   /* ⚠️ THIS STOP IS DEAD AND IS LEFT STANDING (completion-paths Phase 2). None of the three

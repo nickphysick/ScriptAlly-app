@@ -535,21 +535,15 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
 });
 
 describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
-  it("the zone wraps the grid — it does not sit between the body and its cards", () => {
-    /* The pack's own instruction: if the scrollzone changes margin handling, the fix is the
-       scrollzone and never the gap. P6's lane div is the precedent — a wrapper one level too
-       deep killed `.tbd-body > .tbd-card` silently. The zone is OUTSIDE `.tbd` entirely. */
-    const i = board.indexOf("<TaskList");
-    expect(i).toBeGreaterThan(-1);
-    const seg = board.slice(i, i + 500);
-    /* ⚠️ THE BODY CHANGED, THE LAW DID NOT (tasks-consolidation P2, 9 Aug). The zone wraps
-       whatever the body is and introduces nothing inside it — P6's lane div is the precedent: a
-       wrapper one level too deep killed `.tbd-body > .tbd-card` in perfect silence. The list's
-       own equivalent is `.tdg-panel > .tdg-row`, locked in tasksList.test.tsx. */
-    expect(seg).toContain("<TaskList");
-    /* the retired panel's job is the card's own `.l-body` now, and nothing sits between them */
-    expect(seg).not.toContain("tdg-panel");
-    expect(seg, "a wrapper came back between the card and its rows").not.toContain("TplZone");
+  it("the rows sit DIRECTLY in their list — nothing between the group and its cards (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the page no longer mounts `TaskList`. The law survives in
+       the new body — a wrapper one level too deep kills a gap rule in perfect silence — so the row
+       cards are asserted to be the rows container's direct children. */
+    const rows = readFileSync(join(here, "v2", "V2Rows.tsx"), "utf8");
+    const i = rows.indexOf('<div className="tdv2-rows">');
+    expect(i, "the rows container").toBeGreaterThan(-1);
+    expect(rows.slice(i, i + 200)).toMatch(/<div className="tdv2-rows">\s*\{g\.rows\.map\(\(r\) => <V2RowCard/);
+    expect(board).not.toMatch(/<TaskList[\s>]/);
   });
 });
 
@@ -1351,13 +1345,16 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
    * that wrote 34 would be two statements of one scope — and the button's is the one nobody
    * checks until the file is open. Both read `railGroups()`.
    */
-  it("the footer's count and its export read one derivation", () => {
+  it("the export writes the rows the list renders — one derivation (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the rail footer and `exportRail` are retired. The claim is
+       unchanged — the file cannot disagree with the list — and it is `v2Shown` on both sides:
+       the groups the page draws are `groupRows(v2Shown, …)` and the CSV is `rowsCsv(v2Shown)`. */
     expect(board, "the two-number footer came back").not.toContain("showingLine(");
-    expect(board).toContain("function railShown()");
-    expect(board).toContain("return railGroups().reduce(");
-    const ex = board.indexOf("function exportRail()");
+    expect(board).not.toContain("function exportRail()");
+    const ex = board.indexOf("function exportV2()");
     expect(ex, "the export is gone — this case would read nothing").toBeGreaterThan(-1);
-    expect(board.slice(ex, ex + 900)).toContain("railGroups().flatMap");
+    expect(board.slice(ex, ex + 700)).toContain("rowsCsv(v2Shown)");
+    expect(board).toContain("groupRows(v2Shown, v2Group)");
   });
 
   /**
@@ -1494,20 +1491,14 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * button's ink fill is the ONLY thing left that can say a filter is on — so that fill is not
    * decoration and not optional.
    */
-  it("the filter button takes the active fill whenever the chip is not `all`", () => {
-    /* the narrowed-state marker is the card's `filterActive` now — same fact, the card's clothing */
-    /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, not from whether the menu is open (frame round). A menu
-       being open says nothing about whether the list is narrowed; `isFiltered(view)` compares to
-       the default, so a list that was filtered and then unfiltered stops wearing the marker. */
-    /* ⚠️ RETARGETED (QC-chassis round, Phase 1): the funnel is the PAGE's toolbar button, and its
-       active state is a COUNT rather than a fill — the Query Centre's own `.qcc-tb-cnt` badge,
-       which says HOW MANY choices are narrowing rather than merely that something is. The claim
-       is unchanged: a narrowed list is never silently narrowed. */
-    expect(board, "the toolbar's Filter stopped stating its count")
-      .toContain("count={filterBadge(view)}");
-    const on = rule(splitCss, ".tdw-cbic.on {");
-    expect(on).toContain("background: #2b2118");
-    expect(on).toContain("color: #fdfaf5");
+  it("the filter button states its count whenever a filter is on (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the button is `V2Controls`' own, and a narrowed list is stated
+       TWICE, deliberately — the count on the button where the hand is, and the floating bar that
+       names every active filter. The claim is unchanged: a narrowed list is never silently narrowed. */
+    const ctl = readFileSync(join(here, "v2", "V2Controls.tsx"), "utf8");
+    expect(ctl).toContain('className={`tdv2-ctl${n ? " has" : ""}`}');
+    expect(ctl).toContain('{n > 0 && <span className="tdv2-badge">{n}</span>}');
+    expect(ctl).toContain('className={`tdv2-activebar${chips.length ? " show" : ""}`}');
   });
 
   it("…and it states WHAT it is narrowed to, beneath the row", () => {
@@ -1524,27 +1515,12 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * menu row and the section band it names cannot state different figures — which is the whole
    * reason the chips could be folded away at all.
    */
-  it("the filter menu reads `railChips`, the same derivation the bands read", () => {
-    const at = board.indexOf("function renderList");
-    expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
-    /* bounded by the next function, not by a guessed length — the 3200-char window silently
-       stopped short of the FilterMenu block the moment the chips grew above it */
-    /* ⚠️ THE SLICE FOLLOWED THE PANEL (QC-chassis round, Phase 1). It bounded `renderList`,
-       because the filter panel was passed INTO the list card as a prop; the panel hangs off the
-       page's own toolbar trigger now, so the anchors are the toolbar row's. Both anchors are
-       asserted before slicing — a missing one silently widens the slice to the rest of the file,
-       which is the fault `sliceBetween` exists for. */
-    /* the end anchor was the briefing slot's comment until the weekly review was deleted (27 Sep);
-       the control-bar note is what follows the tool row now */
-    const fn = sliceBetween(board, 'className="tdb-qtool"', "THE STANDALONE CONTROL BAR IS GONE");
-    /* ⚠️ RE-POINTED AGAIN (drawer round, Phase 6), AND THE CLAIM SHARPENED WITH IT. The sort-filter
-       contract's counts are CONDITIONAL — "what this choice would leave, given the others" — so
-       the one derivation both readers share is now `viewLeaving`: the view re-run with the
-       option's own facet lifted. A raw-board count here would promise rows the other filters have
-       already hidden, which is the disagreement this case exists to forbid, wearing a new face. */
-    expect(fn, "the type counts stopped being conditional").toContain('viewFacts, "types")');
-    expect(fn, "the agent counts stopped being conditional").toContain('viewFacts, "agents")');
-    expect(fn, "a raw-board count crept back in").not.toContain("viewTypeCounts(railGroupsAll())");
+  it("the filter panel counts the rows the list filters — one derivation (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the panel's numbers are `facetCounts(v2TileRows)` and the list is
+       `applyFilters(searchRows(v2TileRows, …))` — the same array on both sides, so a row in the
+       panel and the rows it leaves cannot state different figures. */
+    expect(board).toContain("facetCounts(v2TileRows, v2StatusName)");
+    expect(board).toContain("applyFilters(searchRows(v2TileRows, search), v2Filters, v2StatusName)");
   });
 
   /**
@@ -1553,34 +1529,16 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * something you have to escape from. Escape is deliberately NOT captured or stopped: this page
    * has its own Escape business, and swallowing the key here would reach past these menus.
    */
-  it("the two menus dismiss the same three ways, and neither traps focus", () => {
-    const at = board.indexOf("if (!filterOpen && !sortOpen) return;");
-    expect(at, "the dismissal effect is gone").toBeGreaterThan(-1);
-    const eff = board.slice(at, at + 700);
-    expect(eff).toContain('document.addEventListener("pointerdown", close)');
-    expect(eff).toContain('if (e.key === "Escape") close();');
-    /* not captured, not stopped — the page's own Escape still reaches past them */
-    expect(eff).not.toContain("true)");
-    expect(eff).not.toContain("stopPropagation");
-    /* mutually exclusive: opening one shuts the other */
-    /* the same two-menu exclusivity, now handed to the card as `onFilter` */
-    /* the same two-menu exclusivity, now also handing the trigger element up so the menu can anchor */
-    /* ⚠️ RETARGETED WITH THE TRIGGERS (QC-chassis round, Phase 1) — the two menus are the page's
-       toolbar buttons now, and there are THREE of them (Group joined, per the chassis contract).
-       The claim is unchanged and now covers one more: opening any of them shuts the others, so a
-       page can never show two panels at once. */
-    for (const [own, others] of [
-      ["setFilterOpen", ["setSortOpen(false)", "setAsideOpen(false)"]],
-      ["setGroupOpen", ["setFilterOpen(false)", "setSortOpen(false)"]],
-      ["setSortOpen", ["setFilterOpen(false)", "setGroupOpen(false)"]],
-    ] as const) {
-      const i = board.indexOf(own + "((o) => !o)");
-      expect(i, own + " lost its toggle").toBeGreaterThan(-1);
-      const line = board.slice(board.lastIndexOf("onClick", i), i);
-      for (const other of others) {
-        expect(line, own + " stopped shutting " + other).toContain(other);
-      }
-    }
+  it("the three panels are ONE state, and dismiss by a press outside or Escape (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): Filter, Group and Sort are one `open` state in `V2Controls`, so
+       "opening one shuts the others" is structural rather than three booleans agreeing. Dismissal is
+       the house idiom — a capture-phase press outside, or Escape — and nothing is stopped, so the
+       page's own Escape still reaches past it. */
+    const ctl = readFileSync(join(here, "v2", "V2Controls.tsx"), "utf8");
+    expect(ctl).toContain('type Open = null | "filter" | "group" | "sort";');
+    expect(ctl).toContain('document.addEventListener("pointerdown", onDown, true);');
+    expect(ctl).toContain('if (e.key === "Escape") setOpen(null);');
+    expect(ctl).not.toContain("stopPropagation");
   });
 });
 

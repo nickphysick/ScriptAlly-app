@@ -30,7 +30,7 @@ const rule = (sel: string): string => {
 };
 
 describe("notes-and-tasks P1 — the empty Notes section", () => {
-  const emptyFn = sliceBetween(page, "function renderNotesEmpty", "function renderList");
+  const emptyFn = sliceBetween(page, "function renderNotesEmpty", "function ledgerHeading"); // re-anchored (to-do list v2): renderList is deleted
 
   it("the Notes section renders the dashed butter card (frame 1) when it is empty", () => {
     expect(page).toContain("function renderNotesEmpty()");
@@ -48,7 +48,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
   it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
@@ -57,7 +57,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
   it("the dashed card's tokens + treatment: butter ground, dashed border, the ink button", () => {
@@ -83,7 +83,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -128,7 +128,7 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
   it("the type segment: ✎ Note / ✓ Task, the selected one deep-ink filled", () => {
@@ -273,7 +273,7 @@ describe("notes gaps — adding another, and removing one (found in live use)", 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
 

@@ -197,3 +197,92 @@ test.describe("phase 3 — three tiles", () => {
     expect(entered, "fewer than two tiles had anything in them — the fixture cannot prove the filter").toBeGreaterThanOrEqual(2); bump();
   });
 });
+
+test.describe("phase 4 — controls", () => {
+  test("no view switch; Group and Sort offer exactly the brief's options; the retired word appears nowhere", async ({ page }) => {
+    const scope = await openV2(page);
+    expect(await page.locator(`${scope} .qvs`).count()).toBe(0); bump();
+    const texts: string[] = [];
+    const sweep = async () => texts.push(await page.evaluate((s) => {
+      const root = document.querySelector(`${s} .tdv2-group`) as HTMLElement;
+      const attrs = [...root.querySelectorAll("*")].flatMap((e) => [...e.attributes].map((a) => a.value));
+      return root.innerText + "\n" + attrs.join("\n");
+    }, scope));
+    await sweep();
+    for (const t of ["move", "chase", "house"]) {
+      await page.click(`${scope} .tdv2-tile[data-tile="${t}"]`);
+      await sweep();
+    }
+    await page.click(`${scope} [data-todo-v2="group-btn"]`);
+    const groups = await page.locator(`${scope} .tdv2-menu .tdv2-mi`).allInnerTexts();
+    expect(groups.map((g) => g.trim())).toEqual(["When", "Task type", "Agent", "Submission package", "None"]); bump();
+    await sweep();
+    await page.click(`${scope} [data-todo-v2="sort-btn"]`);
+    const sorts = await page.locator(`${scope} .tdv2-menu .tdv2-mi`).allInnerTexts();
+    expect(sorts.map((g) => g.trim())).toEqual(["Date on the task", "Time past the date", "Agent", "Task type"]); bump();
+    await sweep();
+    await page.click(`${scope} [data-todo-v2="filter-btn"]`);
+    await sweep();
+    const all = texts.join("\n");
+    expect(all.length, "the sweep read nothing").toBeGreaterThan(500); bump();
+    expect(all.toLowerCase(), "the page uses the retired word").not.toContain("overdue"); bump();
+  });
+
+  test("a filter's floating bar moves nothing on the page; picking keeps the panel's scroll; a press outside closes it", async ({ page }) => {
+    const scope = await openV2(page);
+    /* pick a tile that has rows, and a filter that does NOT change which rows show — so any shift is the bar's */
+    const geo = () => page.evaluate((s) => {
+      const r = (sel: string) => (document.querySelector(`${s} ${sel}`) as HTMLElement).getBoundingClientRect().toJSON();
+      const sc = document.querySelector(`${s} .wpg-scroll`) as HTMLElement;
+      return { tiles: r(".tdv2-tiles"), controls: r(".tdv2-controls"), main: r(".tdv2-main"), rail: r(".tdv2-rail"), sh: sc.scrollHeight };
+    }, scope);
+    await page.click(`${scope} [data-todo-v2="filter-btn"]`);
+    /* the chosen option: a Task type tick equal to the whole tile's population, so the rows are unchanged */
+    const pick = await page.evaluate((s) => {
+      const opts = [...document.querySelectorAll(`${s} [data-todo-v2="filter-panel"] .tdv2-psec`)][0]?.querySelectorAll(".tdv2-opt") ?? [];
+      return opts.length === 1 ? 0 : -1;
+    }, scope);
+    let before;
+    if (pick === 0) {
+      await page.keyboard.press("Escape");
+      before = await geo();
+      await page.click(`${scope} [data-todo-v2="filter-btn"]`);
+      await page.click(`${scope} [data-todo-v2="filter-panel"] .tdv2-psec:first-child .tdv2-opt`);
+    } else {
+      /* no single-type tile here — the set-aside row count is compared instead, off */
+      await page.keyboard.press("Escape");
+      await page.click(`${scope} .tdv2-tile[data-tile="house"]`);
+      before = await geo();
+      await page.click(`${scope} [data-todo-v2="filter-btn"]`);
+      await page.click(`${scope} [data-todo-v2="filter-panel"] .tdv2-psec:first-child .tdv2-opt`);
+    }
+    const bar = await page.evaluate((s) => {
+      const b = document.querySelector(`${s} [data-todo-v2="activebar"]`) as HTMLElement;
+      return { show: b.classList.contains("show"), pos: getComputedStyle(b).position };
+    }, scope);
+    expect(bar.show, "the floating bar did not appear").toBe(true); bump();
+    expect(bar.pos).toBe("fixed"); bump();
+    const after = await geo();
+    for (const k of ["tiles", "controls", "rail"] as const) {
+      expect(Math.abs(after[k].top - before![k].top), `${k} moved`).toBeLessThan(0.5); bump();
+      expect(Math.abs(after[k].height - before![k].height), `${k} resized`).toBeLessThan(0.5); bump();
+    }
+    expect(after.sh, "the page's scroll height changed when the bar appeared").toBe(before!.sh); bump();
+
+    /* scroll is kept across a pick — the panel is capped short so it must scroll (the property is the cap's, not the fixture's) */
+    await page.addStyleTag({ content: ".tdv2-scrollbox { max-height: 90px !important; }" });
+    const sb = `${scope} [data-todo-v2="filter-scroll"]`;
+    const can = await page.evaluate((sel) => { const e = document.querySelector(sel) as HTMLElement; return e.scrollHeight - e.clientHeight; }, sb);
+    expect(can, "the panel cannot scroll even capped — precondition").toBeGreaterThan(20); bump();
+    await page.evaluate((sel) => { const e = document.querySelector(sel) as HTMLElement; e.scrollTop = e.scrollHeight; }, sb);
+    const top0 = await page.evaluate((sel) => (document.querySelector(sel) as HTMLElement).scrollTop, sb);
+    expect(top0).toBeGreaterThan(0); bump();
+    await page.click(`${scope} [data-todo-v2="filter-panel"] .tdv2-psec:last-child .tdv2-opt`);
+    const top1 = await page.evaluate((sel) => (document.querySelector(sel) as HTMLElement | null)?.scrollTop ?? -1, sb);
+    expect(top1, "the panel closed or jumped on a pick").toBe(top0); bump();
+
+    /* a press outside closes it */
+    await page.mouse.click(5, 300);
+    expect(await page.locator(`${scope} [data-todo-v2="filter-panel"]`).count()).toBe(0); bump();
+  });
+});

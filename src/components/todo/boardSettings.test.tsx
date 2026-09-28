@@ -76,10 +76,11 @@ describe("⚠️ BOTH ARE SHEETS OVER THE PAGE, NEVER ROUTES", () => {
      it without looking. */
   it("tag management is reachable from the page's own toolbar row", () => {
     expect(panel, "the panel does not render the tags pane").toContain("<TagsPane />");
-    expect(listPage, "the page's toolbar has no set-aside door").toContain('label="Set aside"');
-    /* the accessible name is the PANEL's now — the trigger is a labelled toolbar button, and the
-       panel it opens carries the name (corrections 2.1) */
-    expect(listPage).toContain('ariaLabel="Set aside and tags"');
+    /* ⚠️ MOVED A THIRD TIME (to-do list v2, 28 Sep): the door is the page HEADER's action — "Set aside
+       stays in the header" — and the panel it opens still carries the name. */
+    expect(listPage, "the page's header has no set-aside door").toContain('label: asideN ? `Set aside · ${asideN}` : "Set aside"');
+    expect(listPage).toContain('label="Set aside and tags"');
+    expect(listPage).toContain("<SetAsidePanel />");
   });
 });
 
@@ -197,15 +198,16 @@ describe("⚠️ the set-aside ledger lives on the board, and states its own cou
   it("the door is on the list's tool row and carries the figure", () => {
     /* the accessible name is the PANEL's now — the trigger is a labelled toolbar button, and the
        panel it opens carries the name (corrections 2.1) */
-    expect(listPage).toContain('ariaLabel="Set aside and tags"');
+    expect(listPage).toContain('label="Set aside and tags"');
     /* ⚠️ RETARGETED (list round, Phase 2) — THIS LINE WAS PASSING ON PROSE. It read `asideCount` out
        of `TaskList.tsx`, a prop corrections 2.1 RETIRED when the door moved to the page's toolbar; the
        only occurrence left was the comment recording that retirement. So for four rounds it asserted
        the opposite of the truth and stayed green, and it went red the day the comment was rewritten.
        The claim it stood for — the door carries the ledger's figure — is asserted where the door is,
        on CODE with comments stripped, and the card is asserted not to have a second one. */
-    expect(code(listPage), "the toolbar's Set aside door stopped stating its figure")
-      .toContain('value={asideN ? String(asideN) : ""}');
+    /* the header's door states it (to-do list v2) */
+    expect(code(listPage), "the header's Set aside door stopped stating its figure")
+      .toContain('label: asideN ? `Set aside · ${asideN}` : "Set aside"');
     expect(code(list), "the list card grew its own set-aside door back").not.toContain("asideCount");
   });
 

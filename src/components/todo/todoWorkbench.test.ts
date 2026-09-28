@@ -47,7 +47,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal) — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -55,7 +55,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card — RETIRED SURFACE (board+dock P4)", () => {
     /* ⚠️ FocusedSession IS RETIRED (board+dock P4) — it was a SECOND work surface, and two of
@@ -134,7 +134,7 @@ describe("v4 P6 — empty-state copy + sweep", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("no orphan Pro-square / RESET / header-Begin selectors; the tour targets the rail's button", () => {
     for (const stale of ["tdb-prosq", "tdb-frst", "tdb-herorow", "tdb-fsb\""]) {
@@ -193,7 +193,7 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the '{n} items' line went with it — the All chip's struck total already carries the narrowed count", () => {
     expect(page).not.toContain("${shownX} of ${shownY} items");
@@ -264,7 +264,7 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -297,7 +297,7 @@ describe("hero-pair P5 — sweep", () => {
     /* ⚠️ THE CHIP STRIP IS A MENU NOW (corrections, Phase 5) — "All brings everything back" was
        true of a chip you could see. The stop teaches the button's ink fill instead, which is the
        only thing left on the page saying a short list is short on purpose. */
-    expect(tour).toContain("fills with ink");
+    expect(tour).toContain("named in a bar"); // to-do list v2: the floating active-filters bar
     expect(tour).not.toContain("RESET");
   });
 });
@@ -330,7 +330,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
     const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
@@ -410,7 +410,7 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
     // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
@@ -503,7 +503,7 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
@@ -554,7 +554,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("A11Y: ONE section-heading builder, shared by both views (no duplicate heading grammars) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -562,7 +562,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -599,7 +599,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
     /* re-anchored on the list itself — `TplZone` went with the retired rail wrapper */
-    const zone = page.indexOf("<TaskList");
+    const zone = page.indexOf("<V2Rows"); // re-anchored (to-do list v2): the body is v2's row cards
     expect(centre).toBeGreaterThan(0);
     /* ⚠️ THE BRIEFING SIBLING IS DELETED with the weekly review (27 Sep), so the order this case
        protects is centre → body, and nothing sits in the briefing's old seat. */
@@ -626,7 +626,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("ONE review surface repo-wide: the briefing slot; the banner, card + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
@@ -657,7 +657,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
     expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");
@@ -680,7 +680,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("ZERO strip/deck/post-it remnants", () => {
     for (const stale of ["tdb-strip", "tdb-striprow", "tdb-tblock", "tdb-postit", "tdb-pv", "tdb-pk", "soloPostit", "renderStrip", "tdb-deck", "tdb-deckrow", "tdb-ctl", "tdb-dsrch", "tdb-vdiv", "deckPill", "tdb-dspc", "renderDeck", "tdb-fdrop", "filterDropOpen"]) {
@@ -756,7 +756,7 @@ describe("grouping P2 — the ledger nest", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the parent row persists while open (progress + meta intact) as the collapse control — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -764,7 +764,7 @@ describe("grouping P2 — the ledger nest", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -775,7 +775,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the WASHED SECTIONS are retired (todo rebuild P1) — no tinted container; rows are cards on the bare capsule — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -783,7 +783,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the ☰ view's headings are the GROUP CARD heads now (workspace P2); the washed sticky bar stays extinct — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -791,7 +791,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("COLLAPSE is retired with the header bar (todo rebuild P1): a heading is a heading, not a control — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -799,7 +799,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the actions live in the RESERVED lane (the tightening P2); Action now OPENS (both kinds), never completes — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -807,7 +807,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the leading-checkbox quick-complete is SUPERSEDED (the tightening P2, system A): the dot is a family marker — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -815,7 +815,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the step family is extinct; the 9-col ledger stays extinct", () => {
     for (const stale of ["tdb-step", "runHeading", "tdb-lgrid", "tdb-lcols", "tdb-ltd", "truncateRows"]) {
@@ -828,7 +828,7 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
   it("BOTH views read the same visible sets (cards lanes and ledger sections consume vDo/vGroups/vStale/vNt) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the filter derivations survive the deck's death (the rail consumes them in P2)", () => {
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
@@ -897,12 +897,12 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
   it("Final Shape P1 (transitional): the deck is extinct; filters re-land on the rail (P2), the segment in the sheet corner (P3) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("retired species stay retired; the Notes inline ＋ survives in BOTH views (the ledger's nt head gained it) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -919,7 +919,7 @@ describe("II·B P4 — one tag grammar + card polish", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -952,7 +952,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the grid: fluid columns that fill the capsule; the cards flow larger; no pagers, no partials", () => {
     expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier // fills the capsule
@@ -964,7 +964,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
   it("filtered lanes append x OF y · FILTERED · SHOW ALL (reset) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("THE LATTE LAW: bands/underline/post-it/dot latte; coffee survives only in journey-sheet headers", () => {
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");

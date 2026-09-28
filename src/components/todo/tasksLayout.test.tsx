@@ -250,17 +250,16 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
       expect(bare, `${cls} is still on the page`).not.toContain(cls);
     }
     const card = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    /* the page holds the instruments — one search box, and one button per instrument */
-    expect(bare, "the page lost its toolbar row").toContain("tdb-qtool");
-    expect((bare.match(/<ToolbarSearch/g) ?? []).length, "the page draws ToolbarSearch once").toBe(1);
-    /* ⚠️ THE SET, NOT THE COUNT (corrections 2.1). This pinned `ToolbarButton` at THREE, which went
-       red the moment a fourth instrument legitimately joined the row — the set-aside door, moving up
-       from the card. A count cannot tell a new instrument from a duplicated one; the labels can, and
-       they are what the claim was always about: ONE of each, no second copy. */
-    const labels = [...bare.matchAll(/<ToolbarButton[\s\S]{0,200}?label="([^"]+)"/g)].map((m) => m[1]);
-    expect([...labels].sort(), "the toolbar's instruments changed")
-      .toEqual(["Filter", "Group", "Set aside", "Sort"]);
-    expect(new Set(labels).size, "an instrument is drawn twice").toBe(labels.length);
+    /* ⚠️ RE-POINTED A FOURTH TIME (to-do list v2, 28 Sep): the controls row is `V2Controls` — search,
+       Filter, Group, Sort, Export — mounted ONCE; the Set-aside door is the header's action. The claim
+       is unchanged: one home, one of each. */
+    expect((bare.match(/<V2Controls[\s>]/g) ?? []).length, "the page draws the controls row once").toBe(1);
+    expect(bare, "the retired toolbar row is back").not.toContain("tdb-qtool");
+    const ctlSrc = readFileSync(join(here, "v2", "V2Controls.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const probe of ["filter-btn", "group-btn", "sort-btn", "export"]) {
+      expect((ctlSrc.match(new RegExp(`data-todo-v2="${probe}"`, "g")) ?? []).length, `${probe} is drawn once`).toBe(1);
+    }
+    expect((ctlSrc.match(/<input/g) ?? []).length, "one search box").toBe(1);
     /* and the card holds NO second copy of any of them */
     for (const cls of ["l-search", "qcc-tb-btn", "ToolbarSearch"]) {
       expect(card, `${cls} is a second copy in the card`).not.toContain(cls);
