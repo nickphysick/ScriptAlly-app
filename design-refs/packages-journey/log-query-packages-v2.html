@@ -1,0 +1,1343 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log a query packages v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c130f;--ink70:rgba(28,19,15,.7);--ink45:rgba(28,19,15,.45);--ink25:rgba(28,19,15,.25);--hair:rgba(28,19,15,.1);--btn:#2a3a52;--frame:#7c3a2a;--page:#f5f1eb;--side:#e7e3dc;--rust:#8a4a3c;
+ --sand:#f7efe3;--rose:#f5e6df;--sage:#e0e5dd;--offer:#d7e0e8;--stone:#e4e1db;--blush:#e9c9b8;
+ --machine:'Special Elite',monospace;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:#2b3547;color:var(--ink);font-family:var(--serif)}
+button{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:248px 1fr;grid-template-rows:minmax(0,1fr);height:100vh;overflow:hidden;border-top:10px solid #2b3547}
+.side{background:var(--side);border-right:1px solid var(--hair);padding:16px 14px;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:21px;padding:4px 6px 14px}.brand i{width:30px;height:30px;border-radius:50%;background:#5f7b93}
+.side h6{margin:12px 8px 4px;font:400 9px var(--mono);letter-spacing:.16em;color:var(--ink45)}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:15px}
+.side a::before{content:"";width:14px;height:14px;border:1.4px solid var(--ink70);border-radius:3px}
+.side a.on{background:var(--btn);color:#fff}.side a.on::before{border-color:#fff}
+.main{display:flex;flex-direction:column;min-width:0;background:var(--page)}
+.bar{height:64px;flex:none;display:flex;align-items:center;gap:12px;padding:0 24px;background:var(--side);border-bottom:1px solid var(--hair)}
+.pname{font-family:var(--machine);font-size:22px;line-height:1;white-space:nowrap}
+.pname small{display:block;font:400 8px var(--mono);letter-spacing:.16em;color:var(--ink45);margin-bottom:5px}
+.scroll{flex:1;min-height:0;overflow:auto}
+.wrap{max-width:980px;margin:0 auto;padding:26px clamp(28px,3.2vw,52px) 80px}
+.hd{display:flex;align-items:end;gap:24px;padding:14px 0 20px;border-bottom:1px solid rgba(28,19,15,.16);margin-bottom:22px}
+.hd h1{margin:0;font-family:var(--machine);font-weight:400;font-size:44px;line-height:1;flex:1}
+.b1{height:44px;padding:0 20px;border-radius:22px;background:var(--btn);color:#fff;display:flex;align-items:center;font-family:var(--machine);font-size:15px;border:0;cursor:pointer}
+.hint{font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45);margin:0 0 12px}
+.qrow{position:relative;display:grid;grid-template-columns:44px minmax(0,1.3fr) minmax(0,1fr) auto;align-items:center;gap:14px;height:76px;margin-top:10px;padding:0 20px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(28,19,15,.05),0 10px 24px -18px rgba(28,19,15,.22);cursor:pointer}
+.av{width:34px;height:34px;border-radius:50%;background:var(--btn);color:#f5f1eb;font:700 9px var(--mono);display:flex;align-items:center;justify-content:center;flex:none}
+.qn b{display:block;font-weight:600;font-size:16.5px}.qn small{font:400 8.5px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.st{display:flex;align-items:center;gap:8px;font-family:var(--machine);font-size:14px}
+.st i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18)}
+.due{font:700 8.5px var(--mono);letter-spacing:.1em;text-align:right}
+.due.over{color:var(--rust)}
+.qacts{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:none;gap:6px;background:#fff;padding-left:10px}
+.qrow:hover .qacts{display:flex}.qrow:hover .due{visibility:hidden}
+.qa{border:0;background:#fff;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.22);border-radius:9px;font:400 8.5px var(--mono);letter-spacing:.1em;padding:8px 10px;cursor:pointer}
+.qa:hover{background:#f7f3ee}
+.scrim{position:fixed;inset:0;background:rgba(28,19,15,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+body.s-dim .scrim{opacity:1;pointer-events:auto}
+/* card */
+.card{position:fixed;left:50%;top:50%;width:580px;max-height:min(640px,86vh);transform:translate(-50%,-50%);background:#fff;border-radius:16px;box-shadow:0 30px 70px -20px rgba(28,19,15,.55);z-index:50;opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .24s;display:flex;flex-direction:column;overflow:hidden}
+body.s-card .card{opacity:1;pointer-events:auto}
+body.s-docked .card{transform:translate(-50%,-50%) translate(calc(-50vw + 320px),calc(50vh - 90px)) scale(.08);opacity:0;pointer-events:none}
+.card header{display:flex;align-items:center;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--hair)}
+.card header .av{width:42px;height:42px;font-size:11px}
+.card header b{display:block;font-family:var(--machine);font-weight:400;font-size:22px;line-height:1.1}
+.card header small{font:400 8.5px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.card .x{margin-left:auto;border:0;background:none;font-size:20px;color:var(--ink45);cursor:pointer;padding:6px}
+.chipst{display:inline-flex;align-items:center;gap:7px;font-family:var(--machine);font-size:13px;padding:5px 12px;border-radius:12px;margin-left:6px;white-space:nowrap}
+.chipst i{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18)}
+.tabs{display:flex;gap:2px;padding:0 22px;border-bottom:1px solid var(--hair)}
+.tabs span{font:400 9px var(--mono);letter-spacing:.14em;padding:12px 12px;color:var(--ink45)}
+.tabs span.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
+.tl{flex:1;overflow:auto;padding:16px 22px}
+.ev{display:flex;gap:12px;padding:11px 6px;border-bottom:1px solid var(--hair);align-items:baseline;border-radius:8px}
+.ev i{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18);transform:translateY(-1px)}
+.ev b{font-family:var(--machine);font-weight:400;font-size:14.5px}
+.ev em{font-style:normal;font-size:13px;color:var(--ink70);margin-left:6px}
+.ev small{margin-left:auto;font:400 8.5px var(--mono);letter-spacing:.1em;color:var(--ink45);white-space:nowrap}
+.ev.plan b{color:var(--ink70)}.ev.plan i{background:#fff!important;box-shadow:inset 0 0 0 1.4px var(--ink45)}
+.ev.new{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--sage)}100%{background:transparent}}
+.card footer{display:flex;gap:8px;padding:16px 22px;border-top:1px solid var(--hair)}
+.cb{height:42px;padding:0 16px;border-radius:21px;font-family:var(--machine);font-size:14px;border:0;cursor:pointer;background:#fff;box-shadow:inset 0 0 0 1.3px rgba(28,19,15,.25)}
+.cb.pri{background:var(--btn);color:#fff;box-shadow:none}
+.cb:hover{background:#f7f3ee}.cb.pri:hover{background:#233145}
+.dock{position:fixed;left:20px;bottom:18px;display:flex;align-items:center;gap:10px;background:var(--ink);color:#f5f1eb;border-radius:22px;padding:8px 16px 8px 8px;font-family:var(--machine);font-size:14px;box-shadow:0 12px 30px -10px rgba(28,19,15,.6);z-index:46;opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s .12s}
+body.s-docked .dock{opacity:1;transform:none}
+.dock .av{width:28px;height:28px;font-size:8px;background:#3d4f6b}
+.dock i{width:8px;height:8px;border-radius:50%}
+.toast{position:fixed;left:20px;bottom:18px;background:var(--ink);color:#f5f1eb;border-radius:20px;padding:12px 18px;font-family:var(--machine);font-size:14px;z-index:46;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+
+/* ===== drawer ===== */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:500px;max-width:100vw;background:#fff;z-index:60;transform:translateX(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);box-shadow:-24px 0 60px -30px rgba(28,19,15,.5);display:flex;flex-direction:column}
+body.s-drawer .drawer{transform:none}
+.dhead{padding:20px 24px 16px;border-bottom:1px solid var(--hair);background:var(--sand);position:relative}
+.dtop{display:flex;align-items:flex-end;gap:12px;min-height:92px}
+.dtop .tt{flex:1;padding-bottom:12px}
+.dtop img{height:104px;width:auto;margin:-8px 30px -16px 0;position:relative;z-index:0;pointer-events:none}
+.dhead .who{position:relative;z-index:1}
+.dhead.bare .dtop img{margin-bottom:-17px}
+.dhead .mode{font:400 9px var(--mono);letter-spacing:.16em;color:var(--ink45)}
+.dhead h2{margin:6px 0 0;font-family:var(--machine);font-weight:400;font-size:26px;line-height:1.1}
+.dhead .dx{position:absolute;right:12px;top:10px;z-index:2;border:0;background:none;font-size:20px;color:var(--ink45);cursor:pointer;padding:6px}
+.who{display:flex;align-items:center;gap:10px;margin-top:14px;background:#fff;border-radius:12px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--hair)}
+.who .av{width:32px;height:32px;font-size:8px}
+.who b{display:block;font-weight:600;font-size:15px}.who small{display:block;font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45);margin-top:2px}
+.who .tags{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.tag{font:400 7.5px var(--mono);letter-spacing:.12em;padding:3px 7px;border-radius:6px;background:#f3eee7;color:var(--ink70);white-space:nowrap}
+.tag.dark{background:var(--btn);color:#fff}
+.dbody{flex:1;overflow:auto;padding:6px 24px 30px}
+.sec{padding:18px 0 4px}
+.sec+.sec{border-top:1px solid var(--hair);margin-top:14px}
+.sech{font-family:var(--machine);font-size:17px;margin:0 0 2px}
+.secs{font-size:13px;color:var(--ink70);margin:0 0 6px}
+.fl{font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45);margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.fl .r{margin-left:auto;letter-spacing:.08em;text-transform:none;font-size:9px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-family:var(--machine);font-size:13.5px;padding:8px 13px;border-radius:18px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.22);cursor:pointer;background:#fff;border:0;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip small{font:400 8px var(--mono);letter-spacing:.08em;opacity:.65}
+.chip:hover{background:#f7f3ee}
+.chip.on{background:var(--btn);color:#fff;box-shadow:none}.chip.on:hover{background:#233145}
+.chip.dis{opacity:.4;pointer-events:none}
+.chip.ghost{box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.22);border:0;outline:1px dashed rgba(28,19,15,.3);outline-offset:-1px}
+.chip .ic{display:flex}
+/* date field */
+.dfield{position:relative}
+.dres{display:flex;align-items:baseline;gap:10px;margin-top:10px;padding:8px 2px 6px;border-bottom:1.5px dashed rgba(28,19,15,.25)}
+.dres b{font-family:var(--machine);font-weight:400;font-size:17px}
+.dres span{font:400 8.5px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+.dres .shift{margin-left:auto;color:var(--rust)}
+.cal{position:absolute;left:0;top:calc(100% + 8px);width:300px;background:#fff;border-radius:14px;box-shadow:0 22px 50px -18px rgba(28,19,15,.5),0 0 0 1px var(--hair);padding:14px;z-index:20}
+.cal .mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal .mh b{font-family:var(--machine);font-weight:400;font-size:16px}
+.cal .mh button{border:0;background:none;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;color:var(--ink70)}
+.cal .mh button:hover{background:#f3eee7}
+.cal .dow,.cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal .dow span{font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45);padding:4px 0}
+.cal .grid span{height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;cursor:pointer;position:relative}
+.cal .grid span:hover{background:#f3eee7}
+.cal .grid span.mut{color:var(--ink25)}
+.cal .grid span.no{color:var(--ink25);pointer-events:none;text-decoration:line-through;text-decoration-color:rgba(28,19,15,.15)}
+.cal .grid span.td{box-shadow:inset 0 0 0 1.5px var(--ink45)}
+.cal .grid span.sel{background:var(--btn);color:#fff;box-shadow:none}
+.cal .grid span.wk::after{content:"";position:absolute;bottom:4px;width:3px;height:3px;border-radius:50%;background:var(--rust)}
+.cal .cf{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--hair);font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+.cal .cf button{border:0;background:none;font-family:var(--machine);font-size:13px;cursor:pointer;color:var(--ink);padding:4px 6px;border-radius:6px}
+.cal .cf button:hover{background:#f3eee7}
+/* toggles */
+.tgl{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);cursor:pointer;background:#fff;margin-top:8px}
+.tgl .bx{width:20px;height:20px;border-radius:6px;box-shadow:inset 0 0 0 1.4px var(--ink45);display:flex;align-items:center;justify-content:center;flex:none;font-size:13px;color:#fff}
+.tgl.on .bx{background:var(--btn);box-shadow:none}
+.tgl b{font-family:var(--machine);font-weight:400;font-size:15px}
+.tgl small{margin-left:auto;font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+/* sample */
+.samp{margin-top:8px;border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);padding:14px}
+.samp.off{padding:11px 14px}
+.srow{display:flex;align-items:center;gap:12px}
+.srow b{font-family:var(--machine);font-weight:400;font-size:15px}
+.seg{display:inline-flex;background:#f3eee7;border-radius:11px;padding:3px;gap:2px}
+.seg span{font-family:var(--machine);font-size:13px;padding:6px 11px;border-radius:9px;cursor:pointer;color:var(--ink70);white-space:nowrap}
+.seg span.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(28,19,15,.12)}
+.seg.wide{display:flex}.seg.wide span{flex:1;text-align:center}
+.amt{display:flex;align-items:center;gap:12px;margin-top:14px}
+.step{display:inline-flex;align-items:center;background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.22)}
+.step button{width:38px;height:40px;border:0;background:none;cursor:pointer;font-size:18px;color:var(--ink70)}
+.step button:hover{color:var(--ink)}
+.step b{min-width:74px;text-align:center;font-family:var(--machine);font-weight:400;font-size:20px}
+.step.sm b{min-width:64px;font-size:17px}.step.sm button{width:32px;height:34px}
+.unitl{font-family:var(--machine);font-size:15px;color:var(--ink70)}
+.presets{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.presets .chip{padding:5px 10px;font-size:12.5px}
+.from{margin-top:14px}
+.sectline{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:10px;font-family:var(--machine);font-size:14.5px;color:var(--ink70)}
+.sline{margin-top:12px;padding-top:11px;border-top:1px dashed rgba(28,19,15,.18);display:flex;align-items:baseline;gap:10px}
+.sline b{font-family:var(--machine);font-weight:400;font-size:15px}
+.sline span{margin-left:auto;font:400 8.5px var(--mono);letter-spacing:.08em;color:var(--ink45);white-space:nowrap}
+/* notes */
+.note{margin-top:12px;border-radius:12px;padding:11px 14px;font-size:13.5px;line-height:1.45;display:flex;gap:10px;align-items:flex-start}
+.note .ni{font:700 8px var(--mono);letter-spacing:.1em;padding:3px 6px;border-radius:5px;flex:none;margin-top:2px}
+.note.ok{background:var(--sage)}.note.ok .ni{background:#fff;color:#4f6149}
+.note.warn{background:var(--rose)}.note.warn .ni{background:#fff;color:var(--rust)}
+.note.info{background:var(--page)}.note.info .ni{background:#fff;color:var(--ink70)}
+.note b{font-family:var(--machine);font-weight:400}
+.note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--machine);font-size:13px;white-space:nowrap}
+.fta{width:100%;min-height:72px;border:1.5px dashed rgba(28,19,15,.22);border-radius:12px;background:none;font-family:var(--serif);font-size:15px;padding:10px 12px;color:var(--ink);outline:none;resize:vertical}
+.fta:focus{border-color:rgba(28,19,15,.45)}
+/* agent picker */
+.apick{position:relative}
+.fin{width:100%;border:0;border-bottom:1.5px dashed rgba(28,19,15,.25);background:none;font-family:var(--machine);font-size:18px;padding:8px 2px;color:var(--ink);outline:none}
+.fin:focus{border-bottom-color:rgba(28,19,15,.5)}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border-radius:14px;box-shadow:0 22px 50px -18px rgba(28,19,15,.5),0 0 0 1px var(--hair);padding:6px;z-index:20}
+.sugg .it{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer}
+.sugg .it:hover,.sugg .it.hi{background:#f7f3ee}
+.sugg .it b{display:block;font-weight:600;font-size:14.5px}.sugg .it small{font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+.sugg .it .tag{margin-left:auto}
+.sugg .new{font-family:var(--machine);font-size:14px;border-top:1px solid var(--hair);margin-top:4px;padding:10px}
+/* timeline preview */
+.plan{margin-top:16px;border-radius:14px;background:var(--page);padding:16px 18px 14px}
+.plan h5{margin:0 0 12px;font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.track{position:relative;height:104px;margin:0 8px}
+.track .ln{position:absolute;left:0;right:0;top:50px;height:2px;background:rgba(28,19,15,.14);border-radius:2px}
+.track .pt{position:absolute;top:44px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px var(--ink)}
+.track .pt.done{background:var(--ink)}
+.track .pt.fut{box-shadow:inset 0 0 0 1.6px var(--ink45)}
+.track .pt.nudge{background:var(--blush);box-shadow:inset 0 0 0 1.6px var(--rust)}
+.track .pt.close{background:var(--stone);box-shadow:inset 0 0 0 1.6px var(--ink45)}
+.track .lab{position:absolute;white-space:nowrap;text-align:center;line-height:1.25}
+.track .lab.hi{top:4px}.track .lab.lo{top:66px}.track .lab.lo2{top:96px}.track.deep{height:132px}
+.track .lab b{display:block;font-family:var(--machine);font-weight:400;font-size:12.5px}
+.track .lab span{display:block;font:400 8px var(--mono);letter-spacing:.08em;color:var(--ink45)}
+.track .tdy{position:absolute;top:40px;width:0;height:22px;border-left:1.5px dashed var(--rust)}
+.plan h5 .tk{float:right;color:var(--rust)}
+/* consequences */
+.saves{margin-top:20px;border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);padding:14px 16px}
+.saves h5{margin:0 0 8px;font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.saves li{list-style:none;display:flex;gap:10px;padding:5px 0;font-size:14px;line-height:1.4}
+.saves ul{margin:0;padding:0}
+.saves li i{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.2)}
+.dfoot{display:flex;gap:10px;align-items:center;padding:16px 24px;border-top:1px solid var(--hair)}
+.save{flex:1;height:48px;border-radius:24px;background:var(--btn);color:#fff;font-family:var(--machine);font-size:16px;border:0;cursor:pointer}
+.save:hover{background:#233145}
+.save:disabled{opacity:.35;cursor:default}
+.cancel{border:0;background:none;font-family:var(--machine);font-size:14px;color:var(--ink70);cursor:pointer;padding:10px 14px}
+.hidden{display:none!important}
+/* ===== v4: section layouts ===== */
+.dbody{background:#f7f4ef}
+.sec .sech{display:none}
+.sec{position:relative}
+.shd{display:flex;align-items:center;gap:10px;min-width:0}
+.shd .num{width:24px;height:24px;border-radius:50%;background:var(--btn);color:#fff;font:700 9.5px var(--mono);display:flex;align-items:center;justify-content:center;flex:none}
+.shd .num.done{background:var(--sage);color:#4f6149}
+.shd b{font-family:var(--machine);font-weight:400;font-size:18px;white-space:nowrap}
+.shd .sum{margin-left:auto;font:400 8.5px var(--mono);letter-spacing:.08em;color:var(--ink45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-transform:uppercase}
+.shd .ed{display:none;font:700 8px var(--mono);letter-spacing:.12em;color:var(--ink70);flex:none}
+/* sections: each a card with a clear numbered header */
+body[data-lay=sec] .sec,body[data-lay=acc] .sec{background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(28,19,15,.05),0 0 0 1px var(--hair);padding:16px 18px 18px;margin:0 0 12px}
+body[data-lay=sec] .sec+.sec,body[data-lay=acc] .sec+.sec,body[data-lay=jour] .sec+.sec{border-top:0;margin-top:0}
+body[data-lay=sec] .shd{padding-bottom:12px;margin-bottom:2px;border-bottom:1px solid var(--hair)}
+body[data-lay=sec] .shd .sum{display:none}
+body[data-lay=sec] .dbody,body[data-lay=acc] .dbody{padding:16px 18px 30px}
+/* accordion */
+body[data-lay=acc] .sec.shut{padding:14px 18px;cursor:pointer}
+body[data-lay=acc] .sec.shut > :not(.shd){display:none}
+body[data-lay=acc] .sec.shut .ed{display:block}
+body[data-lay=acc] .sec.shut:hover{box-shadow:0 1px 2px rgba(28,19,15,.05),0 0 0 1px rgba(28,19,15,.25)}
+body[data-lay=acc] .sec:not(.shut){box-shadow:0 0 0 1.5px var(--btn),0 12px 28px -18px rgba(28,19,15,.35)}
+body[data-lay=acc] .sec:not(.shut) .shd{padding-bottom:12px;border-bottom:1px solid var(--hair)}
+body[data-lay=acc] .sec:not(.shut) .shd .sum{display:none}
+.cont{display:block;width:100%;margin-top:18px;height:42px;border-radius:21px;border:0;background:#f3eee7;font-family:var(--machine);font-size:14px;cursor:pointer}
+.cont:hover{background:#ebe4da}
+/* journey */
+body[data-lay=jour] .dbody{background:#fff;padding:0 24px 30px}
+body[data-lay=jour] .shd{margin:18px 0 4px}
+body[data-lay=jour] .shd .num{display:none}
+body[data-lay=jour] .shd b{font-size:22px}
+body[data-lay=jour] .shd .sum{display:none}
+.stepper{position:sticky;top:0;z-index:5;background:#fff;display:flex;align-items:flex-start;padding:16px 0 12px;border-bottom:1px solid var(--hair);margin:0 -24px;padding-left:18px;padding-right:18px}
+.stp{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:64px;text-align:center;cursor:default}
+.stp.go{cursor:pointer}
+.stp i{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1.4px var(--ink25);font:700 9.5px var(--mono);font-style:normal;display:flex;align-items:center;justify-content:center;color:var(--ink45);background:#fff}
+.stp.cur i{background:var(--btn);color:#fff;box-shadow:none}
+.stp.done i{background:var(--sage);color:#4f6149;box-shadow:none}
+.stp em{font-style:normal;font:400 7.5px var(--mono);letter-spacing:.06em;color:var(--ink45);line-height:1.3;text-transform:uppercase}
+.stp.cur em{color:var(--ink)}
+.stl{flex:1;height:1.5px;background:var(--ink25);margin-top:12px;min-width:4px}
+.recap{margin-top:20px}
+.recap h5{margin:0 0 6px;font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.recap .rr{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--hair);cursor:pointer}
+.recap .rr:hover{background:#faf7f2}
+.recap .rr b{font-family:var(--machine);font-weight:400;font-size:14.5px}
+.recap .rr span{font-size:14px}
+.recap .rr u{text-decoration:none;font:700 8px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.back{border:0;background:none;font-family:var(--machine);font-size:14px;color:var(--ink);cursor:pointer;padding:10px 6px}
+/* ===== v4: header formats ===== */
+.qwrap{display:flex;align-items:flex-end;justify-content:center;flex:none;position:relative}
+.dtop img{margin:0!important}
+/* band: sand, quill on the right standing on the edge */
+body[data-hdr=band] .qwrap{height:112px;margin:-12px 34px -16px 0}
+body[data-hdr=band] .qwrap img{height:100%}
+body[data-hdr=band] .dhead.bare .qwrap{margin-bottom:-17px}
+/* hero: taller, bigger quill bleeding off the top */
+body[data-hdr=hero] .dhead{padding-top:30px}
+body[data-hdr=hero] .dtop{min-height:132px}
+body[data-hdr=hero] h2{font-size:32px;white-space:nowrap}
+body[data-hdr=hero] .qwrap{height:172px;margin:-40px 26px -18px 0}
+body[data-hdr=hero] .qwrap img{height:100%}
+body[data-hdr=hero] .dhead.bare .qwrap{margin-bottom:-17px}
+/* compact: white header, small quill before the title */
+body[data-hdr=compact] .dhead{background:#fff;padding:16px 24px 14px}
+body[data-hdr=compact] .dtop{min-height:0;align-items:center;gap:14px}
+body[data-hdr=compact] .qwrap{order:-1;height:62px;width:50px}
+body[data-hdr=compact] .qwrap img{height:100%}
+body[data-hdr=compact] .dtop .tt{padding:0}
+body[data-hdr=compact] .who{margin-top:12px;background:#faf7f2}
+/* ink: anthracite band, quill in a blush disc */
+body[data-hdr=ink] .dhead{background:var(--btn);border-bottom:0}
+body[data-hdr=ink] .dhead .mode{color:rgba(255,255,255,.6)}
+body[data-hdr=ink] .dhead h2{color:#fff}
+body[data-hdr=ink] .dhead .dx{color:rgba(255,255,255,.7)}
+body[data-hdr=ink] .qwrap{width:92px;height:92px;border-radius:50%;background:var(--blush);margin:0 38px 4px 0;overflow:visible}
+body[data-hdr=ink] .qwrap img{height:118px;position:absolute;bottom:4px;left:50%;transform:translateX(-46%)}
+body[data-hdr=ink] .who{box-shadow:none}
+/* tile: quill in a sand tile on the left, title beside */
+body[data-hdr=tile] .dhead{background:#fff;padding:20px 24px 16px}
+body[data-hdr=tile] .dtop{min-height:0;align-items:center;gap:16px}
+body[data-hdr=tile] .qwrap{order:-1;width:78px;height:78px;border-radius:18px;background:var(--sand);box-shadow:inset 0 0 0 1px rgba(28,19,15,.08);overflow:hidden;align-items:flex-end}
+body[data-hdr=tile] .qwrap img{height:88px;margin-bottom:-6px!important}
+body[data-hdr=tile] .dtop .tt{padding:0}
+body[data-hdr=tile] h2{font-size:28px}
+body[data-hdr=tile] .who{background:#faf7f2}
+
+/* ===== v5: guardrails ===== */
+body[data-hdr=ink] .dhead{padding-top:36px}
+.save{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 18px}
+.stp.auto i{box-shadow:inset 0 0 0 1.4px var(--ink25);background:#fff;color:var(--ink45)}
+.stp.chk i{background:var(--rose);color:var(--rust);box-shadow:inset 0 0 0 1.4px rgba(138,74,60,.45)}
+.stp.blk i{background:var(--rust);color:#fff;box-shadow:none}
+.stp.cur i{background:var(--btn)!important;color:#fff!important;box-shadow:none!important}
+.stp.chk em,.stp.blk em{color:var(--rust)}
+.gate{border-radius:14px;padding:14px 16px;margin:4px 0 18px}
+.gate b{display:block;font-family:var(--machine);font-weight:400;font-size:18px}
+.gate span{display:block;font-size:13.5px;color:var(--ink70);margin-top:3px}
+.gate.ok{background:var(--sage)}.gate.chk{background:var(--sand)}.gate.blk{background:var(--rust)}.gate.blk b{color:#fff}
+.recap .rr span small{display:block;margin-top:4px;font:400 8px var(--mono);letter-spacing:.08em}
+.recap .rr small.fm{color:var(--rust);font:400 13px var(--serif);letter-spacing:0}
+.recap .rr small.au{color:var(--ink45)}
+.recap .rr.blk{background:var(--rose);border-radius:10px;padding-left:10px;padding-right:10px;border-bottom-color:transparent;margin:2px 0}
+.recap .rr.blk u{color:var(--rust)}
+.plan.rv{margin-top:20px}
+.skip{border:0;background:none;font-family:var(--machine);font-size:14px;color:var(--ink);cursor:pointer;padding:10px 4px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--ink25)}
+.dfoot{position:relative}
+.dfoot .conf{display:none;position:absolute;inset:0;background:var(--ink);color:#f5f1eb;align-items:center;gap:10px;padding:0 20px 0 24px}
+.dfoot.confirm .conf{display:flex}
+.conf span{flex:1;font-size:13px;color:rgba(245,241,235,.75)}
+.conf span b{display:block;font-family:var(--machine);font-weight:400;font-size:16px;color:#fff}
+.conf button{height:40px;border-radius:20px;border:0;font-family:var(--machine);font-size:14px;padding:0 16px;cursor:pointer}
+.conf .keep{background:#fff;color:var(--ink)}.conf .disc{background:none;color:#f5f1eb;box-shadow:inset 0 0 0 1.2px rgba(255,255,255,.4)}
+
+
+/* ===== v6: motion ===== */
+:root{--k:1;--t1:calc(120ms*var(--k));--t2:calc(200ms*var(--k));--t3:calc(280ms*var(--k));--t4:calc(360ms*var(--k));--out:cubic-bezier(.2,.8,.2,1);--in:cubic-bezier(.4,0,1,1)}
+body.slow{--k:3}
+.scrim{transition:opacity var(--t2) ease}
+.drawer{transition:transform var(--t3) var(--out)}
+body:not(.s-drawer) .drawer{transition:transform calc(var(--t3)*.85) var(--in)}
+.card{transition:transform var(--t3) var(--out),opacity var(--t2)}
+/* quill dips in when the drawer opens */
+.qwrap img.dip{animation:dip var(--t4) var(--out) both;animation-delay:var(--t2);transform-origin:50% 100%}
+@keyframes dip{from{opacity:0;transform:translateX(-46%) translateY(10px) rotate(-12deg)}to{opacity:1;transform:translateX(-46%) translateY(0) rotate(0)}}
+body[data-hdr=ink] .qwrap{animation:disc var(--t3) var(--out) both;animation-delay:var(--t1)}
+body.opening[data-hdr=ink] .qwrap{animation-name:disc}
+@keyframes disc{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+/* step changes slide in the direction of travel */
+.sec.in-f{animation:inF var(--t2) var(--out) both}
+.sec.in-b{animation:inB var(--t2) var(--out) both}
+@keyframes inF{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes inB{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.recap.in-f,.gate.in-f{animation:inF var(--t2) var(--out) both}
+.stl{position:relative;overflow:hidden}
+.stl::after{content:"";position:absolute;inset:0;background:#4f6149;transform:scaleX(0);transform-origin:left}
+.stl.done::after{transform:none}
+.stl.fill::after{animation:fill var(--t3) var(--out) both}
+@keyframes fill{from{transform:scaleX(0)}to{transform:none}}
+.stp.cur.pop i{animation:pop var(--t2) var(--out) both}
+@keyframes pop{from{transform:scale(.7)}to{transform:none}}
+/* values tick when they change */
+.tick{display:inline-block;animation:tick var(--t2) var(--out) both}
+@keyframes tick{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tick.dn{animation-name:tickd}
+@keyframes tickd{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.chip:active,.cb:active,.save:active{transform:scale(.97)}
+.chip{transition:background var(--t1),color var(--t1),box-shadow var(--t1)}
+/* the plan draws itself on the review */
+.plan.rv .ln{transform-origin:left;animation:fill calc(var(--t4)*1.3) var(--out) both;animation-delay:var(--t1)}
+.plan.rv .pt,.plan.rv .lab{animation:ptin var(--t2) var(--out) both}
+@keyframes ptin{from{opacity:0;transform:scale(.4)}to{opacity:1}}
+.plan.rv .lab{animation-name:fadeup}
+@keyframes fadeup{from{opacity:0;margin-top:4px}to{opacity:1;margin-top:0}}
+/* save button */
+.save.busy{pointer-events:none;background:#233145}
+.save.busy::after{content:"";display:inline-block;width:14px;height:14px;margin-left:10px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;vertical-align:-2px;animation:spin calc(700ms*var(--k)) linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* rows arrive, change and leave */
+.qrow.arrive{animation:arrive var(--t4) var(--out) both, wash calc(1800ms*var(--k)) ease-out var(--t4) both}
+@keyframes arrive{from{max-height:0;margin-top:0;opacity:0;transform:translateY(-8px)}to{max-height:76px;opacity:1;transform:none}}
+.qrow.changed{animation:wash calc(1800ms*var(--k)) ease-out both}
+@keyframes wash{0%{background:var(--sand);box-shadow:0 0 0 1.5px rgba(138,74,60,.35)}100%{background:#fff}}
+.qrow.changed .st,.qrow.changed .due{animation:tick var(--t3) var(--out) both;animation-delay:var(--t1)}
+.qrow.leave{animation:leave var(--t3) var(--in) both;overflow:hidden}
+@keyframes leave{from{max-height:76px;opacity:1}to{max-height:0;margin-top:0;opacity:0;padding-top:0;padding-bottom:0}}
+.qrow.undone{animation:washu calc(1400ms*var(--k)) ease-out both}
+@keyframes washu{0%{background:var(--stone)}100%{background:#fff}}
+/* discard bar slides up */
+.dfoot.confirm .conf{animation:up var(--t2) var(--out) both}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+/* toast with undo */
+.toast{display:flex;align-items:center;gap:14px;padding:10px 10px 10px 18px;border-radius:24px;pointer-events:auto;transition:opacity var(--t2),transform var(--t2) var(--out);z-index:90;max-width:520px}
+.toast .tx{display:flex;flex-direction:column}
+.toast .tx b{font-weight:400}
+.toast .tx small{font:400 8px var(--mono);letter-spacing:.1em;color:rgba(245,241,235,.55);margin-top:3px}
+.toast .ub{display:flex;align-items:center;gap:8px;height:36px;border-radius:18px;border:0;background:rgba(255,255,255,.12);color:#fff;font-family:var(--machine);font-size:14px;padding:0 8px 0 14px;cursor:pointer}
+.toast .ub:hover{background:rgba(255,255,255,.2)}
+.toast .ub kbd{font:400 8px var(--mono);letter-spacing:.06em;color:rgba(255,255,255,.55)}
+.toast .ring{width:22px;height:22px;transform:rotate(-90deg)}
+.toast .ring circle{fill:none;stroke-width:2.2}
+.toast .ring .bg{stroke:rgba(255,255,255,.18)}
+.toast .ring .fg{stroke:#fff;stroke-dasharray:57;stroke-dashoffset:0}
+.toast.on .ring .fg{animation:ring var(--dur,8s) linear forwards}
+.toast:hover .ring .fg{animation-play-state:paused}
+@keyframes ring{to{stroke-dashoffset:57}}
+.toast .view{border:0;background:none;color:rgba(245,241,235,.8);font-family:var(--machine);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.3)}
+.toast.done .ub,.toast.done .view{display:none}
+/* reduced motion: fades only */
+body.rm *,body.rm *::before,body.rm *::after{animation-duration:1ms!important;animation-delay:0ms!important;transition-duration:var(--t1)!important}
+body.rm .drawer,body.rm .card{transition-property:opacity!important}
+body.rm .drawer{transform:none;opacity:0;pointer-events:none}body.rm.s-drawer .drawer{opacity:1;pointer-events:auto}
+body.rm .toast.on .ring .fg{animation-duration:var(--dur,8s)!important}
+
+
+/* ===== v7: nudge journey ===== */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.facts>div{background:#faf7f2;border-radius:12px;padding:11px 12px}
+.facts>div.hot{background:var(--rose)}
+.facts small{display:block;font:400 7.5px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.facts b{display:block;font-family:var(--machine);font-weight:400;font-size:15px;margin-top:6px}
+.facts span{display:block;font:400 8px var(--mono);letter-spacing:.06em;color:var(--ink45);margin-top:3px;text-transform:uppercase}
+.paths{display:flex;flex-direction:column;gap:8px}
+.path{display:block;text-align:left;border:0;background:#fff;border-radius:14px;padding:13px 16px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.16);cursor:pointer;transition:box-shadow var(--t1),background var(--t1)}
+.path:hover{box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.4)}
+.path.on{box-shadow:inset 0 0 0 2px var(--btn);background:#f7f9fb}
+.path b{display:block;font-family:var(--machine);font-weight:400;font-size:16px}
+.path span{display:block;font-size:13.5px;color:var(--ink70);margin-top:2px}
+.path em{display:inline-block;font-style:normal;font:700 7.5px var(--mono);letter-spacing:.1em;background:var(--sage);color:#4f6149;padding:3px 7px;border-radius:5px;margin-top:8px}
+.letter{margin-top:14px;border-radius:14px;background:#fffdf9;box-shadow:0 1px 2px rgba(28,19,15,.06),inset 0 0 0 1px rgba(28,19,15,.1);overflow:hidden}
+.letter .lh{padding:11px 16px;border-bottom:1px dashed rgba(28,19,15,.15)}
+.letter .lh small{font:400 7.5px var(--mono);letter-spacing:.12em;color:var(--ink45);margin-right:8px}
+.letter .lh b{font-family:var(--machine);font-weight:400;font-size:14px}
+.letter .lb{padding:14px 16px 16px;white-space:pre-wrap;font-size:14.5px;line-height:1.5}
+.lacts{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.lacts .lt{flex:1 1 100%;font-size:12.5px;color:var(--ink45);margin-top:2px}
+
+
+/* ===== v8: a smaller header ===== */
+body[data-hdr=ink] .dhead{padding:14px 24px 14px}
+body[data-hdr=ink] .dtop{min-height:0;align-items:center}
+body[data-hdr=ink] .dtop .tt{padding:0}
+body[data-hdr=ink] .dhead h2{font-size:22px;margin-top:4px}
+body[data-hdr=ink] .qwrap{width:56px;height:56px;margin:0 40px 0 0}
+body[data-hdr=ink] .qwrap img{height:64px;bottom:3px}
+body[data-hdr=ink] .dhead{padding-top:20px}
+body[data-hdr=ink] .who{margin-top:12px;padding:8px 12px}
+.dhead .dx{top:8px}
+
+
+/* ===== v9: where-it-stands variants ===== */
+.wsA{margin-top:4px}
+.track .pt.today{background:#fff;box-shadow:inset 0 0 0 2px var(--rust)}
+.wsl{font-size:15px;line-height:1.5;margin:12px 0 0}
+.rads{display:flex;flex-direction:column;border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);overflow:hidden}
+.rad{display:flex;align-items:center;gap:12px;text-align:left;border:0;background:#fff;padding:12px 14px;cursor:pointer;border-top:1px solid var(--hair)}
+.rad:first-child{border-top:0}
+.rad:hover{background:#faf7f2}
+.rad i{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink45);flex:none}
+.rad.on i{box-shadow:inset 0 0 0 5px var(--btn)}
+.rad b{display:block;font-family:var(--machine);font-weight:400;font-size:15.5px}
+.rad small{display:block;font-size:13px;color:var(--ink70);margin-top:1px}
+.rad em.go{background:#f3eee7;color:var(--ink70)}
+.rad em,.why em{font-style:normal;font:700 7.5px var(--mono);letter-spacing:.1em;background:var(--sage);color:#4f6149;padding:3px 7px;border-radius:5px;margin-left:auto;flex:none}
+.why{font-size:14px;margin:14px 0 10px;display:flex;align-items:center;gap:8px}.why em{margin:0}
+.story{font-family:var(--machine);font-size:21px;line-height:1.45;margin:6px 0 4px}
+.story u{text-decoration:none;box-shadow:inset 0 -.38em 0 var(--blush)}
+.seg.big span{padding:11px 10px;font-size:14.5px}
+.orclose{margin:10px 0 0;font-size:14px;color:var(--ink70);text-align:center}
+.orclose a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--machine)}
+.ledger{border-top:1px solid var(--hair)}
+.ledger>div{display:grid;grid-template-columns:130px 1fr auto;gap:12px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--hair)}
+.ledger b{font-family:var(--machine);font-weight:400;font-size:14.5px}
+.ledger span{font-size:14.5px}
+.ledger small{font:400 8.5px var(--mono);letter-spacing:.08em;color:var(--ink45);text-transform:uppercase}
+.ledger .hot small{color:var(--rust);font-weight:700}
+.pbar{margin-top:4px}
+.ptop{display:flex;align-items:baseline;justify-content:space-between}
+.ptop b{font-family:var(--machine);font-weight:400;font-size:24px}
+.ptop span{font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+.pb{position:relative;height:22px;border-radius:11px;background:#f3eee7;margin-top:8px;overflow:visible}
+.pb i{position:absolute;top:0;bottom:0}
+.pb .in{left:0;background:var(--sand);border-radius:11px 0 0 11px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.06)}
+.pb .ov{background:var(--rose);box-shadow:inset 0 0 0 1px rgba(138,74,60,.2)}
+.pb .wl{width:0;border-left:2px solid var(--ink);top:-4px;bottom:-4px}
+.pb .nd{width:10px;height:10px;top:6px;margin-left:-5px;border-radius:50%;background:var(--blush);box-shadow:inset 0 0 0 1.5px var(--rust)}
+.pb .now{width:0;border-left:1.5px dashed var(--rust);top:-6px;bottom:-6px}
+.pleg{position:relative;height:16px;margin-top:6px;font:400 7.5px var(--mono);letter-spacing:.08em;color:var(--ink45)}
+.pleg span{position:absolute;white-space:nowrap}
+.pleg span+span{transform:translateX(-50%)}
+.pbar p{font-size:14.5px;margin:12px 0 0}.pbar p b{font-family:var(--machine);font-weight:400}
+
+
+/* ===== v11 ===== */
+.pkgs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.pkg{text-align:left;border:0;background:#fff;border-radius:12px;padding:10px 12px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.16);cursor:pointer}
+.pkg:hover{box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.4)}
+.pkg.on{box-shadow:inset 0 0 0 2px var(--btn);background:#f7f9fb}
+.pkg b{display:block;font-family:var(--machine);font-weight:400;font-size:14px}
+.pkg b em{font-style:normal;font:700 7px var(--mono);letter-spacing:.08em;background:var(--sage);color:#4f6149;padding:2px 5px;border-radius:4px;margin-left:4px;vertical-align:2px}
+.pkg small{display:block;font-size:12px;color:var(--ink70);margin-top:3px;line-height:1.3}
+.othr{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.oth{border-radius:12px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);padding:10px 12px}
+.ot{display:flex;align-items:center;gap:10px}
+.ot .av{width:28px;height:28px;font-size:8px}
+.ot b{display:block;font-weight:600;font-size:14.5px}.ot small{font:400 7.5px var(--mono);letter-spacing:.1em;color:var(--ink45)}
+.told{margin-left:auto;border:0;border-radius:14px;padding:6px 12px;font-family:var(--machine);font-size:13px;cursor:pointer;background:#fff;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.25)}
+.told.on{background:var(--sage);box-shadow:none;color:#3f5139}
+.seg.sm{margin-top:10px}.seg.sm span{font-size:12px;padding:6px 6px}
+.othr .tgl{margin-top:0}
+.ev{position:relative}
+.evx{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:none;gap:6px;background:#fff;padding-left:10px}
+.ev:hover .evx{display:flex}.ev:hover small{visibility:hidden}
+.evx u{text-decoration:none;font:700 8px var(--mono);letter-spacing:.1em;padding:5px 8px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.22);cursor:pointer}
+.evx u:hover{background:#f7f3ee}
+.delc{display:flex;align-items:center;gap:8px;background:var(--ink);color:#f5f1eb;border-radius:12px;padding:10px 10px 10px 14px;margin:4px 0;width:100%}
+.delc span{flex:1;font-size:12.5px;color:rgba(245,241,235,.75)}.delc span b{display:block;font-family:var(--machine);font-weight:400;font-size:14.5px;color:#fff}
+.delc button{border:0;border-radius:16px;height:32px;padding:0 12px;font-family:var(--machine);font-size:13px;cursor:pointer;background:#fff;color:var(--ink)}
+.delc button.d{background:var(--rust);color:#fff}
+.cdel{margin-left:auto;border:0;background:none;font:700 8px var(--mono);letter-spacing:.1em;color:var(--ink45);cursor:pointer}
+.cdel:hover{color:var(--rust)}
+.card footer{align-items:center;flex-wrap:wrap}
+.pkg{position:relative}
+.usedtag{display:inline-block;font-style:normal;font:700 7px var(--mono);letter-spacing:.1em;background:var(--btn);color:#fff;padding:3px 6px;border-radius:4px;margin-bottom:6px}
+.nopkg{font:400 11px var(--mono);letter-spacing:.02em;color:var(--ink45);padding:10px 2px 4px}
+.nopkg a{color:var(--ink70);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.hows{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.how{display:flex;gap:10px;align-items:flex-start;text-align:left;border:0;background:#fff;border-radius:14px;padding:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.16);cursor:pointer}
+.how:hover{box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.4)}
+.how.on{box-shadow:inset 0 0 0 2px var(--btn);background:#f7f9fb}
+.how.dis{opacity:.45;cursor:default;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.12)}
+.how i,.prow i{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink45);flex:none;margin-top:1px}
+.how.on i,.prow.on i{box-shadow:inset 0 0 0 5px var(--btn)}
+.how b{display:block;font-family:var(--machine);font-weight:400;font-size:15px;line-height:1.2}
+.how small{display:block;font-size:12.5px;color:var(--ink70);margin-top:4px}
+.plist{display:flex;flex-direction:column;border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);overflow:hidden}
+.prow{display:flex;align-items:center;gap:12px;text-align:left;border:0;background:#fff;padding:12px 14px;cursor:pointer;border-top:1px solid var(--hair)}
+.prow:first-child{border-top:0}.prow:hover{background:#faf7f2}.prow.on{background:#f7f9fb}
+.prow b{display:block;font-family:var(--machine);font-weight:400;font-size:15px}
+.prow small{display:block;font-size:12.5px;color:var(--ink70);margin-top:2px}
+.ptags{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none}
+.ptags em{font-style:normal;font:700 7px var(--mono);letter-spacing:.1em;padding:3px 6px;border-radius:4px;white-space:nowrap}
+.ptags em.u{background:var(--btn);color:#fff}.ptags em.m{background:var(--sage);color:#4f6149}
+.inpk{margin-top:12px;border-radius:14px;background:#faf7f2;padding:12px 16px}
+.inpk h5{margin:0 0 6px;font:400 8px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.inpk div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.inpk div b{font-family:var(--machine);font-weight:400;font-size:14px}.inpk div span{font-size:13.5px;color:var(--ink70);text-align:right}
+.inpk p{margin:10px 0 0;font-size:12.5px;color:var(--ink70)}.inpk p a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--machine)}
+.nopkg{margin-top:8px}
+/* review pill */
+.rvp{position:fixed;left:272px;top:84px;transform:none;justify-content:flex-start;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:3px;padding:6px 8px 6px 14px;border-radius:22px;background:#fff;box-shadow:0 10px 30px -10px rgba(28,19,15,.45),0 0 0 1px var(--hair);font:400 12px var(--machine);z-index:80;max-width:calc(100vw - 800px)}
+.rvp button{border:0;background:none;font:inherit;padding:6px 10px;border-radius:14px;cursor:pointer}
+.rvp button[aria-pressed=true]{background:var(--ink);color:#fff}
+.rvp .sp{width:1px;height:20px;background:var(--hair);margin:0 6px}
+
+</style></head><body>
+<div class="app">
+ <aside class="side"><div class="brand"><i></i>QueryHawk</div>
+  <a>Dashboard</a><h6>QUERIES</h6><a class="on">Query Centre</a><a>Analytics</a><h6>AGENTS</h6><a>Contact list</a><a>Discover</a><h6>MATERIALS</h6><a>Manuscripts</a><a>Comparable titles</a><a>Submission packages</a><h6>TASKS</h6><a>To-do list</a><a>Calendar</a><a>Noteboard</a></aside>
+ <div class="main">
+  <div class="bar"><span class="pname"><small>QUERIES</small>Query Centre</span></div>
+  <div class="scroll"><div class="wrap">
+   <div class="hd"><h1>Query Centre</h1><button class="b1" onclick="openDrawer('log',null)">+ Log a query</button></div>
+   <p class="hint">TODAY IS SUN 27 SEP · CLICK A ROW FOR ITS CARD · HOVER FOR QUICK ACTIONS · ESC STEPS BACK</p>
+   <div id="rows"></div>
+  </div></div>
+ </div>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="card" id="card" role="dialog">
+ <header><span class="av" id="cAv"></span><span><b id="cName"></b><small id="cSub"></small></span><span class="chipst" id="cSt"><i></i><span></span></span><button class="x" onclick="closeCard()">×</button></header>
+ <div class="tabs"><span>OVERVIEW</span><span class="on">TRACKING</span><span>MATERIALS</span><span>NOTES</span></div>
+ <div class="tl" id="cTl"></div>
+ <footer id="cFoot"></footer>
+</div>
+<div class="dock" id="dock"><span class="av" id="dAv"></span><span id="dName"></span><i id="dDot"></i></div>
+<aside class="drawer" id="drawer">
+ <div class="dhead" id="dHead"><div class="dtop"><div class="tt"><div class="mode" id="mMode"></div><h2 id="mTitle"></h2></div><span class="qwrap"><img id="quill" alt=""></span></div><button class="dx" onclick="cancelDrawer()">×</button><div id="mWho"></div></div>
+ <div class="dbody" id="mBody"></div>
+ <div class="dfoot" id="dfoot"><button class="back" id="mBack" onclick="go(-1)">‹ Back</button><button class="save" id="mSave" onclick="primary()"></button><button class="skip" id="mSkip" onclick="review()">Review</button><button class="cancel" onclick="cancelDrawer()">Cancel</button><div class="conf"><span><b id="cfT">Discard this query?</b><span id="cfS">What you've entered will be lost.</span></span><button class="keep" onclick="F._conf=false;F._leave=false;render()">Keep editing</button><button class="disc" id="cfB" onclick="confGo()">Discard</button></div></div>
+</aside>
+<div class="toast" id="toast" onmouseenter="toastPause(true)" onmouseleave="toastPause(false)"><span class="tx"><b id="tMsg"></b><small id="tSub"></small></span><button class="view" id="tView">View</button><button class="view" id="tAgain" onclick="hideToast(true);openDrawer('log','again')">Log another</button><button class="ub" id="tUndo" onclick="undo()">Undo <kbd id="tKey">⌘Z</kbd><svg class="ring" viewBox="0 0 22 22"><circle class="bg" cx="11" cy="11" r="9"/><circle class="fg" cx="11" cy="11" r="9"/></svg></button></div>
+<div class="rvp" id="rvp">Step 2 as <button data-st="def">Package (default)</button><button data-st="pre">Package (preset)</button><button data-st="cus">Individually</button><button data-st="none">No packages yet</button><span class="sp"></span>Speed <button data-sp="1">1×</button><button data-sp="3">Slow-mo</button><span class="sp"></span>Motion <button data-mo="full">Full</button><button data-mo="rm">Reduced</button></div>
+
+<script>
+const QUILL="data:image/webp;base64,UklGRrZkAABXRUJQVlA4WAoAAAAQAAAAOwEAjwEAQUxQSOAaAAAB8IZt27Ir2bat23acg+7u7jQQ0Qv0VrCxwe5uvbAVO64LLy87L7v1sruVWxFb6QsEUbqVhsE4tm39Mc4xQMZx7Ds/I2ICsA1SNBFUXED9eigBGpYAgm2boqooL2jVZPCh+9x4zqXXXHH91aceNbxHzfaKbZqiAgAdB4+46+Wnp/26Ki1lceOSTrV7o/G2C1EF0OHg2z74ZRUrdndzM3r6WO32R3eDbKNQAO3Oe2kWy7uVd3cWd6dd/TrPQwKRbQ+iSAbcsIAkzcy5hTeNlBLBNkdRoM/LK0hPzbnFUx9fH0DDRtsYEqDBpXNJc/6V7uv3Q83hz0+6EwLZZiCCwlHjSHP+tcZ7cei7ZfxjbxSwzVCBwa+Q7vzrbxyTkrP3Q83WbVpBtgkIGo9ZRTdujWUkx/VC405J5wc7QOJPFHt/R6bcSlN+2LThsWN/HjXwbzs3Fok9STB8Nc25lbrPOua2GSR5LW4YDo08UZy5iim34vVrSbcyf333ESMbIfITnFlK49ZtxvIXtz6tDSTqBKeW0rl1O8ub37L78BJEuhRRnLCOxirpXLpLo4MKcSYorxixns4q6jyiXReJLxFR1K4NKPrPobGqmr+0XedmsSUKAM2H1ISi0Tgaqw7/13BYR0hUCVCtfu1BV3WEauEBpqzK689vWC9BTCv0oHd+HLv2FojifDNWZecF1Uc2gkSTJGh0fynJudtLAXuspFcp4z17NxZEswh2GkumKc9DgjZTaKxitze8oiskkgQ4eT7NjV81Va32NI1V2/nWXnsNKUSSotYYp5HuZ6GA02iscj8efvSuiihO0Oo5upHOaS0Ffee5V72fhl++QxJFiu2/ojtJ9+sg1V+hseqXPrD7+c1jSLHrbKYkaZzbVXBxap4BNumpfarHjygGzWLK8s67BQOX05mF6Zt3DogeAU6bQ2N558pdpPaHNGbjhH9vJ5GjqDW6jMaixicSXOzGbFz3znWHl8RNgubPkcaizrV7YMBieiYYv9v3zksRs6Lo8BHNWdz4Xo1anzJlNvrPr596bMuIEcHgn2is0D09G1fSmBWvHvOPo6rFiwKnLqOxYuMvDUdsMM8I44SR1x9WPVoUNa53Giv1YMffacxK5+wLzm0ZK4oOb9GNlXSu3/cupszQNXPOQpyKYq9JdGdljROOWuaeJVz7XOsoEeCClUy5uUtn0pmp/mHzGFEUrtjAlFvQmanG+xGhCVo9Qzq3oDNrvmscHwn6jKU7s9/4fK3YEMHwuUydufAwIlMExy1jylw0flgtLgRy8UYa8+LtuBCpcbfTmBv/REyKltxPd+bntTEhgtFuzrx0rtw9IhTJRRvcmScD40FRcofTmSP+SAuJhQStn6U784RnQSNB0e4TmjNHnb/uL4jDBNv/zJS5avyoJiQKFN2m0Ziz6fOtokAEB82gMV/NF/SCIPxFcPafNObu5y2g4afQ68tozFfnmk9OEkHwC2pc7TTmrHHKgM4If5Gaz7s789btxrqQ8FPcQHfmq5txQmMogj/BHmvMma9Gmp0ORfALmnxEY66acfEzmyY1FIkAuYcpc9XIV3u3//IwKIJfZfsV7nliKaeeXhM1OkAQ/oI7aMxPN/LTLoACgsAXQKXrXM8PN3LpvxsiEUAQ+AJAcB2N+ehm5Kr7dwAUESjY/iyg1S/0PHAzkn++tDsggggUqfnyGcC1NGa+m5FMJ987GBBFFCpOGlcb3RZmnpuRLJv5zNGNASiKikrYiTT47FBgDI0Z7mZOctPEBw5rL4Aoiooi9BUnPluCzovds6z8mp8e3L8lAKigvEgClIzYLegE9d4cinov0ZnlK6c+f84eDQEkSaIqKqoCQIe8Zg9DAk6x7/OF6o/QmOFuV9bCFmza6dCX15BflkBCbtTx1R6iM9M47a4Thw0dslPfbm3r1m/aukGvpnvf/PSEWWVkmX9RCDhBjVt2up2WbUU3bVi/aum86V+N+3naN3O+Xs7yqRsn1gm6bve+RHdmvJtzc83MnDQfXzPgEtlnBZ156OXN0tTKO4uX8XWEmxRwHS0ftqylXHUMBIEuis6/ujGf3ZyceijCXAAFtvuIzlx2I/n7mHaQMIMoOty5gM48diP9i3O7AIoAF6BzTfT6kTTmsBtpX5xQFxBBgIvosWdhyAymzrx1S51c98bIOoAqQlwUZ92OAbOZMl/dzEly6TN7lwAqCHIBrrxFdphGY666keSGGa9c2AuACsJcUbjrk0Z9ptGYq05u/OWN6/dqkwBIBIGuaPLs960GzqQxZxfdsU/HBABUBaGuaPvttLb9fmXKXHWfvD0AqKog3BO0HruxT4/ZNOar8RKoiiDoBfXe5AH9fqExX42z26lCVEVVJNAEHR/lWV0n0Zg36alQBL7gwNm8rudPNOas8ZlEBdJspyOuum309ftXDzHFHgv5yICfmDJnnTM6aqLVzv7lj5QkZ/aHBpei+2xu+nQWjTnrtuYQABi4gKSXceZZ9SChpSg8wpSkMXeY3vXPMZcdeDPNPeUvOyC8FXXvoJHuzFvngvtmpKSlThr/HIokuBQt36Izl73sqRFfbzQn6cZ150IR2oLm79KZy85fX1hJku7m/P1oCEJbJHmWKfM6JZ10c/KFfhAEt+JsmucW6XQjfeIpJVAEt+L81e7McyPXvHxcG0AR3IqBq+nMcXOufW1fBVQQ3Ir2P9CY225Ofr53AiSC8BYtPM+UeW1GcuZFtQEVhLjiCjPmtDm57rOz2wGJIMgVA1bS88mNnHDbnrUAFYS5oNl4OnPZyCnntQCggkAXKfyHxlw22kPtAFVBsCvOcvM8MueM4wAVBLxi/9XuzGEjn+wKUYS8SNvJNOavG387vQAVhLwo7qUxf518dztAEfSiOGOTef44191SAyoI/SNW0pm77qWnAIqwF61+wUoa89f4rIoi8BNcTTrz17hkIBSBn2CfVW7MXTfyJhUEvqLHdBrz1o1celsrhJ6gwec05q2R65/dCRAEviYP0pi/ZS8MSwBB4Cc43szzxm3scACK0E/QbTaNOetccUSzwbs2QOCroO2ndOavz526cu3T1SEhp8BuP9CY19cVBAGv6HbfHzTmchnXXKIIecVO00hjHnvKRUcg6BW9JzF15rGTP/4NIgEnaD6WKXPZyOfaIkHAixb+w5R57CnXXFICRcgrTi4zzyMnp+wHKEJescM8OnPYWPZYB4gg5BXNvqQxf9245DiFIuhF9WEa89edX+4MKMJeceom8/wx8j9NkAjCXjFoKZ25m3LpRQUkCHxF4y9ozFs3Th8KCAJftOQ+GvPWyNe6QQWhrzglNeatMb21JhTBr+gxl7mTcsXZgCL4RWr9l8acTfm/vSGC8FdcRvN8ceNXPaCC8FcMWExnrjr5YlsoIlCk1kc05qqx7JpqUMSgyuU05qpx+SmAIgYVu/7pnisp5xwAFcSgSI03aczTlBMHQBGHijPLjHlqnNAfCeJQpM3/mCvGb3tDEYmKG2jMUeN3HZEgEhU9FuSKc952SBCJIoVH6cxPt9LjkSAWFXuv8zxJea8kiEWRmu/QmJ/GTxqJREOCg0vd88M5rw8UsShS+xMac9PNT4MiGhVHmjM/Uz5fUyUaROp+TssP408tIYhGxYgy99xwLhkCRTxK9TdpzEu31cdCEY+KYWvd88KNNyBBRAoeoTEvU75ZVzQiFN3n0/PC+F1HCKLiajpz0rl4EBJEpKDRBFpOuJeeDEVMKo5MnTlpvE1UYkJQ/XWmOWEc3wSKmFT0W07PB+fy3aCIjHPpzEW3jadDEZeCF2j5YPyXqkSEAIIWk3LC+EZDCOJSsftaeh4Yx7eBICZrlUAxis4cNE7vB0VECo7tCJEXaTlg/HVXKCJS0PjJVkC9H/PAuHgvJIhJxT7Plgi6L6JnnnPV4VBEZYLr7kAB+5Rmn/uGs6ASF4LHrkIJzqAz4915OVQQlYIm356IAu6gZZw7b1cRxKWi14qTgOofZ52b3V0dgugYzquBZtPp2Wa8rxoEsSm4njcDff/IOOPzdaGITYH8l/8C9i/LNuMHzSGIkKY/8FHgXDozPOWXbaGIzwQDlvOjmriGlmEpf+oGRZQcZD6jKe5jml0pJ/SGIkYV5/hdP/XB6xmW8uc+UESp4J5lO759gHyeWe78qicUsfr6wpb3XVdvMi2bjHy8DRRxKsCnC+td92rXJfRMMq6/tgBFtBTG/144ZfyoTcxic84aCSjipcHUBQ32XbKcGexGvtoDIohNqUzL3xe1bvEbPXuMnHluDSgiVCvRYcEfPZMP3LLGnOkTPQBFfNYqgUgRRe9FdiDuYsaYkd8dCaggOgXbPTAS0GJ9F/BivTxT3Jycfk4TiCJGBYNev6YFkiK95vFJnJIhZiSnX90RUERrtTMfHgwFBF3ncun1b9Azwc1Ilo27sD2ggmhVYND7h0IhaDOLGelmJPn70wfVBhJFzEqCnh/sAxU0+ompWZVzc5KbJj98UhcBShC9CW7+oTEU1d6ksWq7mZNc+/29h7QEkAiQ9OkeOSpt5tyJRPHvKld+2XuXD2kMIAGQ9Dzt7f/vBIkaKP5ZNhIluLDquLuTPu/9u07vXx3FG+157ruLaAdCEDky1Ka0AkY4q7LZ8vMaoXxJw567n/nY+PUk07OhsSOo+xWfLpGBK+hVI53/22qSXPrhy6+/9+YLr41fVEqSZWaXQgWxq7jM/e9oPoFWFZwbTuu0/X7HXfDILFbWzFh6EUQQuQJF/0Vcth/erBok57xx68nDhuzzuKXlzdxJ58YzkAjiV1AYR/628+NVpujGUlbeVp8GRfRqjxIo/slS/jKfXkXcUuPmpnwQKtGjGHkWCjiMK+eyart7pVIuHSyC6BXU++hkSNd56fwyr1KbadxwCgQRrNhr5mBU/5RZmnLdSVBEseLmye1wIy07Uq48DopIkvozxrXYi5npzqn7QyWSoLiSbwxdRc8GI9/rDkU0q+yyir9vYia6cfU1daGIZ0H9cczIlBy3H6CIacHd3JQFZtz472YQQVQnOM296rmR4w8GFJGt2HEZvYq5kfNGN4YIYltQ6ytalTIj/3ywL6CIcMEdVcjNSK54aBCgghhPcCK9SribOcnpt+8IiCLOFX9bRf+LfPPNzFl+5lMndQBEEeuCZpNpf9EW9j9/eOT4jgBEEfGCB/6qsg3r12xcu3J9WVq6Yf3G0o2rZn373v0XjRxQH4CoIuoVe27kX+lcetPQPv367zjk4MOH7bbr7sOG7Ni6bjUUVUHsC+qNp/0FpM144ITdGqDyUigpKahgG6DiWvpfsGEty8//6IFzh3Zp0aBOjXLbEFX2WEvfchtXpL5kzPl3vz953sLZk3/4ctzzjzxwzw1XXXr87jvW2zaw46ot5+aW2tyLE0AadBk47OhTLr5+zC13PvT4Ew/femoryDYA3ErnXz3lnetPOvyMcy644b4HHuqLbYiKHf/cUs6FL9406ran3/li/M8zJk+fPmfu/N9/fXFEo0IhUQVE4k+kxms0bul1Tw4BINWq1WhQv3WHjp3aN62NbYqKEal7JdzcK0P+cXtzKCqvEmciIpsnUuMrGjfT0tTcnfQ0JcfuBJXKIpqlvCblVVUAQFSTJElURIooTi0zr8i9bPpCY3E3kl7GBcMgiGgRTVRFsAUVlRVVVWkxhcZK8LaGfY6+9N6Xv527geTid2aQZZzbGxJFIqoqqLh6rcatexxwxGlnnff3iy+76alnn3j5nmuvOP24Ew7avX3tBAAKuJrOip2fNUB5rd9hz9OueuCKFs3Omkjn43UgsSOaKIpqzW6D9j1zzCPvfvPDtNkLjVvQ183+4auHRx3THj0WeCWcKwdLtSRJBBUK0OSGUl5RoohaTQQAqrfY4ahrn37n07mlrKzb5rqzwumPfE9nxSlfRvlERURVBRAFjl39Ri1oxKgCaLjLRQ+8P201i7tV7NyC7lbeSTor6Vzw0g2X91MAioo1wVF8pgCJFFEFupz15KxVLGppau7cOi01bv7yj/7eD4BUAElwEe8oEYkSAdDrH7+RpKepubMqe2pGctG7IwCpAKK4h5cgSgQ6+J75pJs7s9HNSL+1tmoFUDScvqQ9ND4EvZ5eRZoxU72MG3YGtAIoTprVJUIUPSeR5sxa5/LhbRpDKhBpOrKA+ExwGs2YyfOmfHMApFisKvZbR88mkku2g1YkcXLQxqxyK+MbNSEVRGmCm2nMavdFHaERIyi8yTS7uKxf1Cg6zaNn2KqBcaO7McOdq3eNG1xIz7KVO8eM4JQ/PNOWd40Yxb7r6Mxw33ipiESKSOFFljHjRyFa0HSmW7Y5l+0AjZUGEy3jaLwqWgT/onm2uY+KFQhavkp6lrnz4GiBoPYdlmnGcc0gsQIRvYWeXc4Vg6CIVy25PcuM10IRrSJyg3uGOW+FSrQousyjMcN8w4mIlwT7bXTPMBqntoDEy3F0Zrr5aGisKO6mZd398SL4yLPNnUfEzDNMMy3lo3UgsaIYuoSeYSn/vw4EEbvz6/Ts4q97QBGxggbjmWaVPdgFgqgt4MgN5pnkTIcjQdyKtJpDyyQaX1GJHJVDSt2zanpzkaiRBE8xZUZ7egIKMaMFHLzGPauME1qgILGiChy8mM7Mdn7aFVCJEEkE6PCPNXRmuHHi0ATQ2BAFMHDMHNKY6cb1Lx9WA6ISEwrUGvrYStKcGe8k3x0AQKNBFHUO+biMTJ3Z7ym59JF960AjQYHBY0maMx/dyLJPdoRKDCgajV5GN2d+upG/7g9I8Ilg4FjSmLOecu2t1SCBJ4ITl9Cc+Wvkf2pDgk6QXL+BKXPZUz5dIhJwgloPksacduMYiASbSM1HaM7cdrPREAk1xbU0Z447eQk00BQj15kz191XHwoJMpU202nMeeOMNtAQE9xAY+4bzwgyRfvZHgQfFiAhdhWd+e9cuSs0uAQl37kFAI2jkQSXYuAKehD4uCaQ0EpwKp0h6Fy+IzS0FFfSAuH3TuEluI9pICzvF16Km2mBsGlYeCU4gR4IHB5iR5MeAjReH2LHhELK1xHcCU5kIKYcWxsSWIpz6GHgXNwDGlyjaKHAIUiC69KA2BcaXNcyDQTnYQH271Cg8/jgEtwXDMZbIIEFeS4gXguvau/TguH18Kr+cUC8G161x2/T+XZbTv2fA+Kd8Go0NSBeC68GIfFWeDWfGRD/Ca8mMwLi7i0gIlo82WytUEQkx9rPpwfDQ5UR0SRJFFupqorkU4dFAXFHOdEkUVRco1n7rj132PuQ4y4afd11N91066033Hj15RdfcO45Z5xy0qHDdu3bqWn9miiuqip5M2hNQNwtiQqK1uyw95mX/+P+Zz6YsXTFyrWlKbdoWrpm6exJ33781C0XHNC1LoqKqkqO7LYhGJw3A0D1TsNPH/P51LlruZlulfTy3MwNc7/+760n7NauOsonKpITx5ozEI0P1xl00XNfzjIW9bQsTVPz4tx8L2pmaWrOoqumf3DPabt1qgEAKrkwisHgXPjJHyxv5Z1btbuZsejaWW+OGtpKANUcuJIWCkUtTc1ZVd3NzEhy3fRnj2kJiGbePUzDwc2Zge7mJP1/t3QHNOueCIkMdUtJzrmtM0QyTZ+PEpJuRs48AiJZVuMtWpyQtJSrz0Gm1/kgYkjjxsuqiWRX3Y+ihk5egQxr8HncMOVvzSCZ1fy7yHEu6QfNrFY/R8+aoRnWbio9clbulmF95kaOcXEnSGb1nxc3lqb3JoLMHrA0apz8rj6ybHHMOBf/cwcIsnv7mHHOGgQIMrzP3Igxzu0tCbK874KIofExFcmyLrNixv2XZtAsq/8JLWK4uEPGfRo3K/tkW/XX42bNdtlW4624WdY12wovMo0X8+/rQ7IMD9Eihs8nGXd/xDhX7w9Bpt8eMcb5bbPu1ohx478KkEy7KlrcyGX3Zd2Z9DgxZ+nzvWsh449weoSY0V8eVh2Zv+fGgDDPCDeSU46pDqhkXc9lAUGamVcxNzOSE0a3B1SQ+S1m0sLAOffuSSRpZl413M2MJDe8dXozIBHkYO0vQsH4CVqN+nwey3uapmbuvpW4m6Wpk2Q6/d2Ldk0AFeSh4FGmofBhLaCkx0GjP568lBW7W2pm7lvE3d3MzFl80aSXLj2glQBIBPmoGE0LhTcSSVC+7o5n3fTIez/PW7m2lJV0dyuepmZmzkpu/HPOl0/+69SetVBeVZCXCc6gh8ILAhFNFEWrN2rba6eh515xwwPPvjP1jw3ckrZhxbwv//vobWcP7dumLopqIoIcVey1nh4Ij0JQXkSTRFDZQqs+Ow07ZOTpNz/06DP/feX1d9964el7LztzxAF/692lvqC4aCKCvBU0/5UWCLdVUFxEyyeJCv5aSVRVRZDHgpo/BoLzUmilKi2iRaXSWlwEeS5IvgyGs7dcwAruDATyzABTDFlNDwHjF/UhoSWoPY5pEPi8rtDQguBKehDwiYJIcCm6L6Lnn3FhPyiCW1Dyrqf552UXQhHgiotpuecs3V+SEBM0/oyWe75ybwQZBD0m0XIu5cd1IEEGxS6LabnmXLQrFIGuOK6UaY45lxwEQbArzllByy33jScjQcAL9vkfU8+plDdBJeSQoMtnpOVSyvdriSDsE7R6I6Wb542nnNYfitBX1Dh4LEkzzxE3cuJACMJfgHrHf1hKMjXPBbeUXPtwdwhiUBKg5l5jJqUkzdwzzo3k2rcPUigiURRAoyMemryOJN3MM8rNnOTsR4cJoIhHSRRAk/+79qXZa0nSzcyzxd2MJOc8c1wHACqIS1EBIO0HnPncD6tZ3lNz90xwMydZOv25U7oCgCJGRROUbzTk1Ie+mbOORd1Sc6867mZOkgveu2a/NgCgKohVUVUBgGrt9z7rH+/OXc8K3czMfWtwdzcvauYsv+qHB0/ulQCAKqJXNBGUr9F+0JGX3vH810vWsWK3ol6cXkkrzs3dOO+Lu0/fuREAaCKCSBbRRFG8Yfddjh1939PvTVy0mlthWrp63oTZf8yfs2zB989cPbxbPQCQRAWxLaKqigqlac+dDzv12vve+WbqzNlzlq/dVJZyU7ph/fq1KxfPnzX5q/dfuu/KMw4fvvcefZv133tgzx36tUR5URVEvGhRVFio26Jjt/67HXjkMcedeuRxhx968PChO23fs2OjWtWx2aKqgtgEVlA4ILBJAABwyQCdASo8AZABPj0ci0QiIaEUK2TwIAPEs7d+M1nhnoX/ff2f9ep3QnEXou4A/mY0UZnXr9pPThHHyr5Nxu/4fZ18V/z/O3ft/5nqx/qnqB+PB62f3b9VX7K/td73Ppy/ynqAf07/Adbd/ef+X7DH7Aenh+5Hw7f2v/p/uP7NP/X6wDhZ/6N+LXf5/dvyr82fE546/ev8X/qP7l/7f9t97n1H/Td+XpfzS/kX22/If3T9zv8p+433+/g/9t9qfoX8Ov6j7mPkF/F/5X/dP7P+2f9x/d77KfveyD13/L/7b1AvWv59/iP8J/gv+L/i/kV+O/33oT9j/9t9zH2A/0D+r/5j81v8N////V+D/9nwPvwn+1/bz4Af5l/Xf9V/j/8r/7f858fX+d/mv9f+0/tZ+if+l/lv9b+2P2Dfyv+m/6f+7f5D/y/4n////T7t//p7hP2+/+XuafrH/xfzkLqHohA3am3nK0ghW9ws3cTPyhE4kWfUaSnK+7Gd9TaZhFZTbHvxcIG7U285tnnX8Oqm3dBUPkhYYXQcjOd0DbynE6T5F+RUwWg6iJJRKSiUlDSAk22gfIec7HhZVreNfqIdqGzhvdfB6hi4reJkfPJZzHj6MIIdvObecxyRH7cBZ7WhN3Ud3NM/v0kIAupYFu76g3SYrXjgpE1o44qXam3nNqAqXXVdIokeqe2BY+8QbKrRIkLFDc7DyCRwtBcTiu4hs0LNeD1GsTksuZEWKUxtYL5iA32BSjdHEyqkzASIZSrfESKw5I1iGgz9b9Xi+VjfFNuHmtElON2/qzF0SFkpnbWXvaaAcOfKSiUlC/hKQOYUZloTVLv4HanLZ3KDgktS7OFSAevicamhi0+W8Vr1hGZYt3yYyxWZw8MNw7OGKVJRKSho/6k7ZWHnwX9IMIa8PDTu/YmOx95lg+PTCmbM5YvlUg2kpL99WT9wxgpCwt9gb7AYHq4NhtatZUQUklc5xHDoF7DYLnp+Bg0J/SsdvFL6RLoR6O5TO2b7UxAw8OA+HhyVN7VdFu6LFEYw6dCDX8NBhuY3s71WLQAg5Rgp5CFhRpJQ1WkjMKztb0zn0l0wE31NedEIG7U2oIrs+0KDWw9cagwiRkHNVg3+21oaz95lKZ7ka8jtcR8UfZQaQkv30BP1wrot3RYhCjyziGa9mV7WHgekqfEFlv14ur8TnlHDbDMgdTKtkbV601LtDP6HsLfYG+wN8C0vuNEDcCx10FMETlkclvIRQs29cSx5kuU8gFrotp/rx5+7KZvmw82vw8olJRKShgIi1/vMt6Ysj9rFUH6WCgPoYL+ZrRGyJfVJEP/+l5DrTfHd0SkolJRJKFkTctgqnPKdlQG6QfWz7+8Z3qmDjEVCuo7eY5s3/cETdZlKagD/qYvAb7A31y5UvaE7+LHjK5VZ+hHgS0K1NLXivj/Qugb5h4jnArSSSV/jK7GFLTZWaSwmxzbzm3nMHWSDoLPHvxYEI0VEk7qWQdQwPV1W0lgZLRh/t3Cin0PkORuY8BWpg/kFXWYbec285t1LlLNXmFWbkPOsjOx8B8KfaC4+7sU6mtn+t8D86OzqS8TMVzsXutpzzSJskvM5SWSzVkQLxDuCHcEJrU3aMK+VBuVtNXNVApxErhqar5xA+Mm6IKkeDm4mnb3pRZX+ctUrew3W4t8oQQ+YpxG10W7otvLzpgoFy2rXJTho0HUbLo14VAwqbFWK+r+pedBjJg+Hel6xpj5Md7i8vAaOI40tYpPz4G+wN9bvsnani3M58yBnRTa/wYRLHYIv7+1NdByBTGU+OAe7QN43GhVTcSMp1Be/iKIEyM1mcdhKVLcJxoyz+ByMe6OUkk2ijpM3kAc4upK0RI8IGzNKDEXD6DRbQI4UQIYNzK6BM+vQWoXhFioGnl9N/7hcUKJxcBG7n/hPnMakAkiGFfzZIk+LzU2kzlY+0wi7yPm01vbNBC8j1OJp/ucsuUFt2N+tS6+eAYdZ3xKms68EJnS4vWiivCFO9H2AqC3bUzTduIOAPL1pyWbmcQCaj5Co+9ui4oZqwQg00KYYmR82w7rmiHVoldpKrpf/CR9llvbYV0GzAv/8DgQ45uRHha9ZDmajL+RsB/39QGd1S4Ia9IcBDDTpx+kf/0H+X3gTvkTUw+piA32BveAA/uv/QAKC1CdQ0ZaSPvHvD4L/frSRUgMkWIBmKiOW6j5r5bYYvBDxlR1fXs2iclXL5CESbxooNZZa5kjCUhQYQLqn6m7L+6S5+yTdROY2kIJvWtbZFhveEceSziwfM+Q4C2NQ9WHYU/nHK3gjKcOUkcKfZMfpAOIlQs/O9XXxfFOGPnkrFpjw5qZmbpW+K893rqXDtohpajOpaFWf2Y0PKb+dm+FHLqmV4WFRIEJAfOZCESuOwr0hFDKtogdFFOXc6wJUaBZDARkf8WSPiYvDcABarCCAz7B0YMd1PITGx/wqiQgI8Vo8DUgBew7GXYpbhKFvMj2SivPpI4ZY+vpsngADDjgTGddCA23IYLLgT3M7WGO8ToFMLatLfFHuGtMdlRH+Zrmlt37JQ0kuZVeEc/AT9S6tDTiIKgeuXS93qCfv9UUZUwjwWyyfi5yPu+ux8949v5gycfzX2JEViQySdBQ4PdgPGB7+VRj4zDTBNNN5U7TzUnevnmEuzNTbMCttoSqb6iFh1/8XNXmX2I4+uPHdPonNuAvABt612aHF19FVZZaTD8LPv1fIrQQUfgENQamXpU/DQ/4uvfG3WfEwoxtZLRo99xEbZHFEARKcBJ74A8PIY6BWwI8tUnioFQqzMQtbywiPU9tq0ZQbizEVKshPTutf2Y6j4lQpye045qFzz7WPcgFPqR4Q6BdnYUPueXdTY4P0s7QkhuHQoDzlrd7uE5rbay60JPMT7d6G2DnbBn1RWOM4wPYdkH5tli2YHwwKsZS4fPLKVM8UDAWluleifSlhAtFL+6sBHUs34tcbR4jyiUAytcilABsRdQ2pWJ34t8QnwUYh1el18up096xe6+pdIVz6FbF9QdoItzhZNLCW+76ym81yZ1Z1asC2YHqBIQCQrIXqtbAzuqXjN/8TRKDclGNSBaT7zPyAgoCC1ck6W2mngAazxcb8BLL2fKyr/AAyI1n8mXVj/1M55k1jOzjY3cf3HHC7O22wSxN64yWEXCBbOXwYZIQjzxmkEa3gWdTXLGFfe3x85nCU6lEPygK5DoD5/S8vM5GCfckO05A8LBttBkIrCKc/DjmxH/WiL0xmFMy89O/KuO76Fkt/UqjhKgYA4ZBUL7RLRanF1W+3As0mewLtRTUoQWYKk7QANU1jyCb0lwbABpJjkLN7S5RNz9MUxp3rS36K5aftkxDRz8EWGIT7nI8zQFWpZz9Wo5iFtdRXrSm1X3ouxRqhaLVp+5Fdq5eS7rwtGOVgHOK49JJvXOMyO+DsoUnKebnkANY69lEdblHzNLWSDLxGNG1NY/l4ha7uxeTxt3OtIHxeBIkFUMnI5OxLHmscTXTP47ZW/ZK6xpPl9qOyc0XEUP/sVIGa0ttAhzelRnR4CEXeJiS0GfgaBGloeIME9owOXYUSw054CVYVRVxnqCY1ACVKAiYBetkoXUJICJgA8zWZbf41XRDomkRW5FkKVuLXHH0roBdNCAu6ROYFSZMMhPCs+rQdfwV/uyDr+yWgmgf8bS3BAmhLgAfIgM4jQBigAKAFaXNhUsDdJISHJcTm4JEzlPJ4CVYC4QTc/YAKARYB0VgezABsAHshbpCGSAAoJ3rmBQM8C9qzXXEYZ6S+Abo8V6q9ypgVCw4U87dNqSMFF37HCJkNxtZPUvkyIMPzKWTJ0wfvhQvlpKNtG8MnS5xb70fWFbstj6KD7D1Gvo7urTlUDTd8QbWMEfJqs2DP7+tiICvUSsfdZVmP91Av+fxIPwqyO1tLK4mdQRFQ6yzOUcXYDjuvummabcUA6tvHRztMi3n4l57Mu71jjVvXhICdUDej4kUo4Fr0ZLUDL9K6aZYCxwAS0OkOMtayTDv+fvy7X7PS7RjT9Zqqf97ozp6oivEFBQCwQn5GCm9fPn8a+iKJsaJR+pnHRJz69knQPWGzKFOQ/K0e5PKw2FRIrTMfrn6Oegy+K1io6JUv0FUS8cBDQ92rOt2K+q7v77Ycq92hVWjDnl+aUiN0c8b94SSiym2M0F14Z6aJABrIkAMG1RABO2o6ZCE8TQ1YHQZY6R4m/+7Cu9sqyu1mIkjpKlL3CaSNI/X+2ACyNWu4OhJluMo+BXSX7Ho1NrUEJlNw7fnF+77rEjYfDVe3vESANrAC7uA66cbpqLeAAeAQ7Az7j/P4K49WBkb5H/YbvGaxs4dqj4noFxmL6hU3cmOvJ9dIMqHXYsNAgIAp2D9wVdZwvppmyHhHySbWy0hYBwPwrvzp+BA9IB31gpYBpwd4CVYC4QB/ujfZqFo7cGza4NbHMIZbahvpx9WjHwtZyN4V7FTzmxAyS+0jATR+Pcqsn/ZXxCTCbMUuaiJtSxZzHywDH0cBFgLNG6meArZAQ7wESUwTkkps6AbvcCwQC0AAvdgA4fUJGvwHGS7/FcUT6B/DgsClBrKIIkGRNlqpFHsQPSyihnsCNaQbsdHZI3GS+rdTLDub/B1IRAdpoawwrHMO6b/SuLyZufVH/+OwwgwijmkbRQWm5kEC0Mn5TueCRIr6m7D2BYSA9VoU1n3z8gjbIlwBQios63uZBrSGLPuA8pIDF61gV3egwFGkvSOl0RcXjvy2LMlpmk9PDrBJDsa77xeX0+FJuBnWWbrwh7oP5TFIXl7Y7haIVE465ANq0NxuymQZJY6vcJEFpGIXvRKTb3X5jqpzSxMU/4UC5GRL7phBAyDQo78AZFprZ8i33RGCIKnZrekqKnbyAUwdqIyvJqM/+xG0eCQjtV/RPt9fW2mKfW7xbuy0VdRijWqno2CtI3wJVS4GmKed1cl9XHncqllA8vAPz+5h1DDiAFrlSjezniVa7hXEKWNiTFWC8WIQ+NNDH5DmT+RvJy92PYoUfOQ11veZxDzCpr12TseAB/WaN6t8eFL2mYmubGMCJmmSnhT6j7z8T9kuytuwkzOuST+ELi+7k6cqWQfXSuoBvEhWppu7+Zq44PG4jAbgAjXkTWV9IAPizAYOMewS4+4xADVdPo61tO4Oi24VHeJ2AMqto7ZAQ7zLr2ATOAHdQPXWsD24B9JZKwxT7b/P8NNRjpwQNGw42EfqM4QDwFsUn3gAMPAPzAebAGGg36QBHBIGR9H8EW944N0b51Ab1+AmClYJoB+uBA3gTTS/De7xZMX5nJbCQAGHgH5gGm4CYv1Yd0/FJGGHKcXe/bQplG2VeyU9lnT804jd03zjUewJV7fUeSv0rMVkL+ChNgMu80rE3oCobmJe1/rq18IjnbXOYN1/R4BU3sKj0rYZ+uYESaIacPPs0ptK1x+bjqgyQpjgbn9NHM7MOT8L9ocplcKgm7WrpwIT6dcbBcx+YhnVxPXv5E/KgvRqWLl1md9dD8zLJU5c4Dq/U/PVDfA1zPJAwv/xb070obcmrAX0WDIeiFXfZPpwPtWFea4/+KmaWkJWdxyXOIcYCwmaC3x4ssqIX0wmPx3PgfeWUk/NGVDCeWHv1fDMSTNf38Zy7pYd/h5IrYYwUxHxi56P1EP1uSFogni2sCtnWYX9gkYRSy0QpoAJqHSgQEGANkazlG+vUaXj8Stoqo/2IL++pU1hxwfYTE/ctby1BLooviDdS5Jb8BkMcRkA1jqt1iB7Iu2RS5hjdQjLYatQVQQZ3Ge9XiTzpUfPTd98YYgGiLwzbv5qOvf0uHiDAayyR0/lulviUe1TlICOygcXyvAkIrJyxdOElODEDtk5lB/9rEJf/vQx8JpsG6HxqSV0nsnGo4Z6ZDE3fEQFAl28Ox6AaZGeuyF09pZBy/S6Y8qx4erLL4mBSNG1cQGvEJgtmyaWhYjrLfuTB2eR1SDCZtkbKMh1L3Xd62ebunlpcnlJWCrGdwCQA1duMLyeBxV1/blfw0Yc2NHzCbJ7Pvo3ZoXXIJmO9OEEG2bysD1nmfz4bi4W5b7pc0gtWgL4iZMFN9oSHmrw7cL7PbIw5JtKJ42cmkbDT7rc6FbAamwYwuLvWPGNfMe+1n2fjlAWWlG3BIgjIGsjswvV/HyzsvLKuioJFBBoAbZLXbLx3Z1UM5DI0yAhKHMxwx+m/mzEpeGSsDiY5LWW0AFv51MIlGbQ2yXw1FUFLtSvt0W6KZm29dpR7GVFNO9cXLti6dsjQs3/Y/HIsMSV1LHW7J0mIauuugrzhDhYGvZnT+LPZqrvU9uOYz3uEBdvXtzNH4d6R0gEm+ZUmEvd3X9yY/c8AA8AagACgB57bHGvaKB4AAaANrACek4CFqsesxYryuXMqDCzjlYpMO1JqcaSl1cjabLBwlpf9hmi3Wnpi17jAeFR+WVsAM9AEuA/++y8JysoBMaDA45/X25mHiiJsQ9/jfhO5v2BGUgRHH4mlBO2KNAnSSlyZKYwKFryQQDuDmsIAv7AHEfvdiA+J1tLYtNuj12LFdL0e1KfbhW62PgcStaXoSvF9z+Gc7sGYZ8LEc0qM69jYToNMZtICZapJA3eloj9SorKFA6VP7LQDjEfhGU1DR1ukijdJljAt0B9ZJ2xUuTHuqGpa0EL9P1qAZHFjXNUvh9og+68drEewXhUpR/4fscW4xLl6hKhCZe+0j/wbui//uzacwTX243tr4Ox2BLtl6xYAIHor9vN2P5Uv7cev+SS0JMcnLOKFU1zngss8CzUa+SjRn+ULISTY0A9s6XfH2Y0nWf3H2uQThOIDzq49b9Qqr6ga3k/jD8T2TGCwkg6gTG8SbPT2AL3D1kY3Ea+1+GeLg54i3ee+Cdl22pzrYslFJFAJEcia2IAO59cbLjG9RX2gU6jiOWBC95nkxugyebMNgxRqRm2KO667dmOpq6CVZLYOSIP+BKHdjSHI/GMQmyof4pgWh5ZdizDYms7m65RyVLhFc3ftg7aj8A/zGJ4I5I8Y1rXoNpW15Dz/QLzJLtTWW5s4/lT1nYixdf01O8Ax6a2pc4p7L21jyZMbWjjgM8Zo6glGmBrkQmpqTvaoFvGnnZOrArxg+tjeL1RT/Labr++knudsb8rPqM7YLqDcbah6Eszivk2KLUjK7tYM4nqQ1eL5MTPDWUs6wgNvl1xmuxSRemPLnpB4ahsy6JPUWUDe44X2v/aTNKG2O/vKKjNVm64quB3ZtLjilViky12gU7664labvl/D125avur2aPxuhbLN4RrLGvDWv2kv1YVfpn5knUC5SW8swY0sb9MvSTnqHSCSLyhLsyvPEv17DHDVuvx0LqbezoCG23e8jG4svVydrfwQzelMdujGcE39Y8lQ/OfuauocLL04xcqJ+HK7uopHZPL7TIt6yyM21HDJzjLx8BJV1UHDZ81OzMuHIzJj6RJ1Oi6OxDEXQHHUeVl+M1MizPwTHliRSpBIQXWHhFtA8MqpEQXNWnUgFQ1WKM/4YG+xEbS2Fvjc65sE/nzX3k4RSQpy8t5lg++XRR7W+g3+dNPKb2f4B3UNDS08Gir7QletybDOw5rbqQt0aRvn8avuDqEPpljY30/o2raEp2pRuJFlfP7ZHMKhwLE8MmyAnwNgUlM/hEW9gs6Th4lCnvjmoKCGJUgqu1CoHubG1d37XA4wpofALlBx97x9W2BVcFrhK7qT330t0sCUfOWbxg2QgrXCxKPb8ikRu9I6yxUMbeW/SUZBHr6G8XJI2Modv44gziUX6TVVssy08R8e7MFJ7iRLbtI72FTw9/oQubg6nLwA0jUjIoPGCOkSAAAwqKGOi6QmwF4tw2uaQJO9VLcYRpNIG2EIN5r9ryhODJrIc5Q9vtQhJkUQbgvBciNURA/MR4qjAJW7+djPFsk7GK05VL3C4m5EST1JDmuHmiIA/bhNXQDScXaONDM+2Y8DdhyaTmYbEhoYBoLtRQJ7iuBH3V9O0d/DGw/q1xTVJCMpqytWKuYNdhMYJYmLqNdWSZh+fQufZG/kKbZVdN55zUnL3+4Z0jDqQpZrLEBEWV5z8IM5CTVUNaimZqA4mrs3poXWGz75jiOXZWdGbbTPvmT1megzhiKB+RfnyCwPq4kixOMwaXmzXugHrK/5KPycaZRMudI4dTUifTIewgAiX+H4mj+kYwomBcV/hQUTB9H5dENnrdEMkFfWyZeRn7kPSsHmx2W+sJHS/A7Iu//EebaSM/Gxar779Cgzacf2ALFWuXKuuNEpek+sbIkExVtF6gUrcxshsw1KLBcN9s9ZgJNLD5/SU2BQAK6Qu982Ln7xv3abM5rm0ecN2nvvj94STOImcI86DaOQP/tL37h4LGrihnSUbw9MghjF7KXag3Nl12BWfHphqCBH19t8EAE5fit79NQHBKkjdYe2D9CEq/Lri0lFrzZvj2LyT0+a1WAXVV6+YzpW9QE85pP2BYa75pwuakTlPOG9C3J7AZLyk9l3M/WLXkggZa6DGpbZRJDeWsph5p5KrCRoTVt//GvWBPkW1iyjlMEAECPG7FdUdYA3yVtAvW1eUMluqpTPOOxzvl7ExQfeLqk9MorcteMLMi0MfvKt7QgtLFjTTqRnUEP2PpyG4HPrZbG8u5h/aM9u/d+6NvxLyZ0YXhFLv6h9lw/mA7Dsf/0LcAF8JJPezEQag9ZNW1LbmCogS49FSYRRpWd2dLYVF4JzOkBTmV+4CZWiS/ZUczbDEDs5yku3vcBNtP9LR8KDa4KJQtiRwZqDMpBECJUxw4TZg5Y9mSOV1tX+WEc+yHXfdMeE5/3+21Oy3l/OiX4Sqoz57WIvm4DM0NHlZHzTY2VxRid09xbTTR+dGm6+gPkISVgajuMmjrOj8MwwrN+a8ZNY9YGmY1+RsoaQzPt8HoPTA+rX4f0YByXKEsoEY5eDQ2xJiziYuCweVlSHWYV9rIE1RmnJZkIEOd7wCYPRPVBHOC8Xq8cq8w1VChCF7zH6NC28UU1jW5Ed0HbsauSOJLyg146YgAgJQRKpPIL51m2REFdbVJqkaYNUmH/MQ98hyuNDZBD5dNoSSRRIMgnXweTHoqZZ1Bl1AlY4WVXtpy9zlvG9VcPK4GTVP4wFpUlA3DLRDYFZGFieTqLL10OajcFlYC4Es4MBQMRKeMx8J7LztFJZjEQvETSSwt/MNyIpT5uU7mqtBJLYjbrMkruxlwOrKeYbiTeNN/D/GP96Ha/9keRcbieOBuRg/agTUn720xaeCU9uDa2PxOOlbRRBfn3vpODazoMxjmvm7wufxIAikyrNcA1bgBIzzKT2tJZb/M5WySG3Nl5kU2peaBCdpApe7ctwMZMzwlM8KkNJNaVuOxMM3IWrG/kUwF2zuTwc2YeF//maoTjDylZdHo7SAOIiYUm+zxMOeQpCkCn+KS7Okg8Y2xXG2v7z7X7xbHTPV0mDq6Rhate5jBwFtmr5937DoqZL7Lr7t0tk84RZaU/aIN3jEHex05AxFKtnrXAV0SQ/TgeeOaUqzQpdqvs32hISR8JAJIcpJ3UX6Ii5Ia4iN7OfzGAdydQVdCCkgYO4ypJgCLJS3BUb1Ki/founMLE+iS90OC2PAA9OD4YAGghlGSTJ/PVnwzfpOCKKu/RqSmo/OczM/6nyczwBC/9Dg5tbAccz74njdCsDdQVcCRT63bVjf2RpGInuy2iwATOLPL8na/tqrWIISk7NouxV2s9/SBJsXcZ8B6g6p1UKIiabJCSYAdVzX31WcVc6d8A8mr4Zwk90e5cWSihuMoalI6ANYs5mwWQewelXy3MVwINq8jjhGivxjF7gjoxZSN0/7qB92/ALKqEFwuTUXmrbOFD3wZAkqPl5PUIpYtVD6c+gT+bPAND+iNEAfVjnVWb72E2NhbD+coqi3YYBU/IlKnYwqhB5HPXG7Jdr2B4hqiNgG4W4hMjTcC+iZMyNwDV0NhnZmCnN1nFgrMeDpW1khhOjybzr5vZLBfYEgaEgpa66UeHAYw6rcFxTZiUZ5twJskXLgtglMS/bysD+nZ3KF97k314Xw+6K0v5ubhFU6yhoWWD1YoT+7FwgyNDQSVnb4gPwc4jXShE3C2kqdY8ceZ3UVCezZ95cmQkQIqglHMouRuR28bBtwHnDlbBVDFIplxWuvCbN01vRvy5vqCclMYoW8nhege+GDvpTBRtkl4J98gyHf3ff15tr/O9E8CSN/9t1uZd3QIG9sMTmLPlEUg/U9Z1nrbALiLrGTWGhzPSp4EeopnKH65IUzBX8v43gMqBYIpIsu6WBD8mS+nMfT2jaL7cM3NLZsOmiVVXH3w5+Z101GPYSI8HRg+Rpl1V4lrnrjQC6NAjKXfX0l0Yb4/+fZOGpul+V8sc/QqzVo3Zg+S08muEyT0YbDOI2NltwC6wwhI0t2SqcveOK/dluxUZMnGKVeitFG/MLOZgFFy3ObZV4eB66UwQAa2S9Br36ZbHG8DTkgAUf274fi4b0bkdNeuUxxMwFrEIxE9lQmCALlyJF+3J3SJQFT4mIdutVsVhRjLIgyMHPccO7M2b5gDXPihV285h8F21MRo/8/eSpd0Jdhr2qQgA+/bTLgj2/N8/08BUgEjmYkQG7r+anSM9bV8s/DmXwi0Ep+f/xbTRANNK1baWB+KIroj3bLA0qtsoUVpr8A9R5R10jjSCknocZZ/Z7YHGgajKTB9hxTz1NLG45U60nYYa9Ef1W4b7Ug0s9SmfC2o6Jb0kXagtXakOP51meXGaJUZka4GNTvoQiuC14U206VwjtMtJKf7F4redCQAFRwxqy7ouZn4lfPgKWrNoVqKFmJGY9T1Ogjf/hqjyfPChAKZ8hQJKlx4hOTKdsoBhBL5f4gPwvt0rTDts2EnYFTVJVTDEx/xMPCK44w/Qa3uTzQxLmf1B72CEfr6ffEeJAslWJ9U//3tTAWg7ZDB3PVw81d1WDKVUF1zL1P7y6ObNnZEpat/+u2E9svh/0wOwQMgipxdZmyMAEO8jmYNfliQxR8LG+I+80Aj1GOdzbjnXpm97UDkrLyQfe0OrIInXD8SNknN5/4fkxXQk4MS7POmtxKD775WBEEM96VJvJv0vANRzScBSLYy4pKmjiGNKPUg2c+7S8j2Hs2+XHbB3QCPOY7MrXP2egBOwESD3oUEKZ/4Fq1wsMLHvTkxS8IGiOyNibzuizBXQzJVNDyoztXnN5roKaDsNHElODCOX6k5n03Cg9PDwrYSN2ZtF6714PUBXrLMzNlWVlTeJSFsePQtq3OnHJbgqYFzIkKo4n9mZpUkdbT5oX1y8Ds4GV6ZQroxNaAXijBl2ReDyyMmB4oqs+smpYca8uF8/d0O9J8gpEX+jDIAA0ncNLN6GafSYtKNexD58EBf53lQDluoHSUQfcVncOyp6VGESpZVQtRsLZXR8Uil8fs+4at/o0RvlymO/hL0BGTCbt4qARJkiIvRarGuu7abRECT86P8ynAhyG+GgcuA2uafu9eUjwE4V6REp6pmBMX1ruyT5jSUuMCMZDqZyaaj5yFEwpzv+KtmUg2U/Ckwxzvicv2V0hhsUhXDeBMIlKs1FlvGsWw26ghm8/zHgySdvd1rTdN4pc8mr2gCkkOzrKBjW2Z/kUuf03/HMUf5szCCWrMOFaqQ9ZJDFGcUNNHbGO5jxKadcHDD2wGRP+Z4KxWh0uDEDWU7bGuiFgKC+Cc1jRSeQ7EE6YEInlhMPV/ktZTThq63FV8tbopYGzM3/OJDSqHBA0ju8lefoewCHB/1b+PBKRyNX+TF/iNg8mpkwVkwtLepeU/S083vv8X5XwoLlNDbIApEVHapCY3l6mYhuv5ytwbdv5Re9s/xPwgswZrjB/EcTNNprT53W5vgjWVA1GVmgjhplX2Z0usv/s3pOMtln1HBmkntWWRcEiwqPa7zDjt4sG2QFcAFmSg7mUOL2wFyOB05Z1jGTQ8oqoHuwgS4xrG/mlIZJjY+0TMAPfAu+kw0TDUcfJh4NcCxVF+QfxxbynpuNAiy6k+8w42V5u95Oc12gCLBjU+gX0fsFdGrR6vXkfyF8NU64MUGh2S+7GKvLubfZbKERk4e1IyBop4D3RKvUyFCsnBXUFmmvWTXDiZqe0h1WsBhvU+1TVZ2iqM6f9ombSmmoN1dSlgojP9SKZdPpbZ3QNXcGgBm7bJeCRBpuLmf9aqlL9BZu2RPNgRD65QYrZPhjAcAb9ov+aTPns7mwOl/XxKT6xq12MfnSNDLPnuS6qheKRSDPmp7g8M//2qL8X8OFWc4dKmrwKILb+LD19WgVfS1xy7/5/1X5lyHtlgl9X3l9W5hEOf/bCPAeJKh37p7CanXtq40wf1YIDZ7zKHABkeJDXUa0e3M0PBVk9zDmZUcmoAIt2VIcuTnfVFyrUXQ4fNeBq2UB1FQsopMXURsoEhbkA9M97H/vDmrQArGW3nviwgva1vZaPRiWChPFv+WIJr5bMjh2RYk/mLdt1PNqWDQYU+eXEgMS9Ik3uMoZKGM90s2Pm2X2MaavxSD7ClNaudqSqe5G69F/4Jiqx+lJZms2xvlwv7wzb/RUGugaRy9W3Mfw0ZBzAEx2dDf4fJdowsN+7jKc03mB8NwNfnLlfMlBToGq+Q6N3lfe4jVhvAn0C8UE887IWdvUFzftyXpLvMeNdIrQ1Wo6DKk465WV33GBwUCsUkC61zTFriUKbbg4DCOQkxCIlWgcCmUPlROeaTPSrYdASdkW6BH9cdnxJmxlLBzlDwLR73+Gcv4EM6w2tq9pbhf0gMCAJg1QMFdqGbGTPhfgW6DubbXHnpX5olS997IQsYzmInAubMMb2ySJOEz2vZfl7jhGVZ1MVBOUwsS9lpne4yXja07xx/VzV6kODg9/i3nc5rgw7SQnZGm/2e96mfCu2HwZExq9X9IUiWAVw50ztD0IrCqOtETKVVOV80qwIMi53I651rBAfAt8jwlAUkt7zp8Q5h4Y13CPankNLUTS3JoYtGDSSyZvT/HqtEk5OE7oGAYAkZVK5fVncvIU07E7mQIpNPjHOXR4D3tHWeOW4b5PHobTlfPVxWAFWe59YVJPt5O2uKmHR0SFIPAqjSm53YmLjwWmIajhS0ezqxN+HJVZIAUdCJ4Zvdhv8bafK3zy7dCzXatfCZW4tsfcu4r0iX9fsWQj9vo5fnFsNil6mOgMn4hQABR6OfFJ8fJl1j8FnKofjyPv0gkrP7UpmvUifKvI+2q96szwBpNMGnZifM80hanuHzqG25nfZtCtKhq4eEp18+QHrXMrUFMqidlbpaJUyb7X85YnAX1I5SwxpyMHedxhVfW5dXTcjKnN/QfAav5Jxytlu9BzeCjB4zM5eQNIjmN4ThYeyP6++ExHFM3VDoaoVX22H9D6V/N1OUWEwzpGk9z330AfeyjyRzWTOZyVXm+bv4hesSstHfet8KPbyrv2Y+QDu/0+c+iG0JM/w5sBcdDGQF3XLaR3lCS5vir1V5HPwIaJxXuh3Rj8aHIpehWMfgE9tKInNZezGfy0YapC//ZOqJ15mJc8srhUCNbu1QiLFCpnRccaYsrgmpqZjgu/1wYuJIGg4PvunSPzOfit4YvfcWZyPiBncsgDsEhjPE4p8F0Yem/m6Mvye59h73CTghk6l6ozq1sDlvUKRJm2NVsGZ6NNmyZ2hCaTZpUAuU0G/pK4zs1L22txM4+U/dtplau4bBmmDuKloJb9QLRNqHIicIiM2HDGWHiG2luF0o8gwZnph0ekB+LmxjxDBDmAYA61cIH+mVEFA3H3COrcqvx8NzwLtHOpjSIJvVev6f+NJV5+FS4d0EF5SAn2dFHzTsjGUpPk6kXzeDNmH18IhokO1y7Dm7jl0hp0AbGPsXm+V7gibFHWDdwf4b+gQmbLrKiMGH6lmnoMs/F+QH7YyAAABq6HxIHXWg3SuYEUUr7HDz7VSpRPrtwoZx4IuSlitPO87qDeMkkPCjVhJsWYW8cyoZ8I2foUHMCYW6DqveO6YCJzD4XIlShEcu3XIiUPfqurE4AwJY232AEJ1gJVZkNYbDSAbEKOR/e4A4xkhP0Vfl1QpfkO6s+vhvyreB00BrZoxXBX7tZf3tcqiVStYQppQkt2yT1mWEgPsSPs0/uoO5dO6A0y31B9k9T1BuIDYAnoSPFNDFhTymmCuL0tV+r41JxNhfh1/mmlTurYOtw+VLBDnEpfhFsmr3UeNFdgWvLOCILnzst8Q8ATI1+jXVbCXdFWCAF/Gnq7WFj4K7Y66WpDTggCRUknchd5pn3GftO7hkTBBfo7FxJZ/Qn6pKsj4jP6CmY47ZNCbhk2m7+7V/FVW885P4D1vQZDKLlJ5XK4fmzBJyo1YX0zRAay9Z1VO66XaVFv7z96c6VpIdYRQcKjH0L453OG7r1vpQAhxK/JIQ3vfc2uUefU6Azz3uhptt+UXG5bjXp1A03sliK3gNAfgeGqtTyQ3rButU4N1HY25reAhUr/vskEO4NqCyWe9OnGcxoH6vMznH+zas2D5ijVqbyycb2eIG79zhRvQWiFrMZuLqYu43dyAKDs8WaVaTV3yHQqN47ZZ1DANaY0y3uyOiC7DnIaFlLCCXECnmoay0iH2P9Vn0UkbChvNs79YfA2n93lM698bIELpJ09iMgBOY/yfcAAKn/TmzVgv1ciodwsddL0S3QJbm+LBjYLclBOaS+V+AvVaiMqSHUvdJUz2J3T05jsm3hX553SoZCmEWDBs37yoK+0lxKqJwdeSscn34uC5A0YCDSpez1R2qWr5uB8DIFdmDH5nhSkclsGKzaqId98nakxZkHbgsV0Hj/FDAIl/BE6n3+Ash+wvv8xSqpS2iej/iPumAzqb0r8fRnwX/EB0WHiNySwY6ceUSxzf5X/NNkU6YrvsXuhyK8ab77GNWWiXkd2ZYnNGBrF1BBpAY0GlA5OgHe7EIIf/taxMdwF8LIfocYWxQh1Kx8L4kjLWTq5dv03fVrd8BqQlInY59kPcPz1wriPvN66fHWl0UKtKnE9nYCgtFzj2WP5iLaMLezH0CcN42ugWVR/4L4YtCXM9mUk3xTkhikor4oEcrHtwbKzHpUWzv1X0fZQWqOs9Qpc63fW8FAAp56jM78Fm1PcCVUkvJfcybCEgF/BML0xt2XcyiTXgc2l0EVLYlbsCOyBnWHfCczX5/bW43U1Ys4E3tgRX5YAeHGWgSpLXXqzxe9faglwdms64Ku6RhFgNnhL4wsvVOeGzCHViv42A8r3yA6ZzqH2PPJunywfTXFGRqo1iYy8PP7/67N5WDY7cmyOb+JOV0le5a6N/vf5sbIc2NQQYhQP/xTnWl55QWGsjCKLfdKSUlclugj4Js6TX56r8NtXyr41HnrNkmGsyG5U+iPYgKopaSkyAoBk90j+btz7INEKuIYqatZ0eM9bZ+nWISKuc8KvMd/n1SP/CJh46YpKsqWyNgBr1AEHawtxrSXQ6cTALGe38AuLuiWcbuOycaohEPa6T9ff+MccaYohacZdd9OkJvN5YuScgZpiSVtOmItv7zSNo5XrJW0M5awvqjA1y9OMalYpyWuMdScKjeufX2Bpe78FnShkMbKMIrLTa1u5fh8TqmMmrNMfr/+NwqfWAnRnWHBi6o/wkMczSmdzaFr/wwkPo4EjyknM6cwCBAYi+lgPR/7A7C/DZak8t7ZsyZd8Oj7SW6b3nJAfkPoknFUuEtOVUI3ODbT9tjIMII/j6lZwbGM3kXcdOpSRhdD8EduFWe4dfAAEUglT6dGd4K8Ez6MP6kywWy6mmrLbwid77cK9qcE08GSNpnbU8KiOn4v/zMVcRWODQkekMohahFEU3KwKV4FHfpQpXM+Xv1TnY2tqTZADjXyHjasIMZwzAnFBE2QRr0Oyxu5LPlmOdDkGTn4wqB26Wgr3QUmqlgz7/Y1bpddEZaB9SUiewyOAp2gc/ZO95z64MQaFxo7DyUJIjkn4pmk+P3cu715AQBioP+yGwzegNxCdvF9iDByBHPAZfBT8ei93VBBRmjGbqNpT+sRN93us4oIIfhrVO8/II3vbdFXNwFRooGv0sWLtYSoDpcqRza1nEN/HBDiKo2plJMxRHr/5KwV66d9eamDHKAk0iezaNaZjOdtksnR7arMACYdw0BvI6gdZ+wCtCWfj6GCNI8TuSI2054DEVOvf2lFCfrwzfb+zQdHF23M17gonPvAXeUtiVAIC593ESwAxgd8680LPGLMogRP20Niv0JPICsYVmQvTVpdT3lgV2roP4TGjES+ienrGHbCkWJGKS6YCYWDk8EQxstaDV/AOZk0vztO1LSD6+wrU6V8ZVrcfyy+uP7bvNGwM1lH2XjCXJW6L2mUBCfDiPMtzvbzLp0VWka/8v+ZuDMJnsy6rwhzntl04QVAE0Z6l6GpXipz6Zy6ACmnqnaylF7SLR6dPjHVvzTShvjpJ7XgTSP5JfIx2z+7gb6I8HEt9qQKX9eOvwRG0nb1eaA7hov8JIkRDquI9rcrK3PMPc4u9A1DBxTWd6zzATNLqIS8uamcKHjW4Xipr880RnjeSHKuBQrdBhgrXFT+ln6g8HwYxcVn9ZstTsczIVOy1Wrl0SY+HC+stX3Wgf/DbSr65uhTTVpAV9Z/bseXj6rmUq669JUx4V4xFQka8Sbfou8RA72hfMdRgBYpbY6/uJQtZ8Rwb3z+4ZvZ9QrgH5yyeK26S01qZyphU+i3aWqEafRktnP2T45Ty/wfS8vulFN0ztquQlrY+nLAAA6wTCaQ7HrocQTBHAznOg3XohPBd2Rm/47FkL3cg+vCJACCRMRmUaQBVW0O4zm3DkpwLRPeCQdT1nWvFWNG5w/STZHgr7aaw97Jfm12kA8jF3+FQeJVG5Bpn7lZc3LAFyJOG7LY4XKIlyryQI9+vafhLFjmfX2jYjRCqvQ3TkoZPla6DsDoOriM3dVGq14An7uW8UroTgTw4HOwUoGWk7pWsmClyC30Wr5e9yKsHfH3mSHGQ1VXpL9ApuE1UxGftO97V0WlCVYmnMe8LSh+CsuVGhtojB6KGisYE5EeFGzRey8cCY7AMSDZI/YCvM3bHGDxINdXUS7tgkdhIjiv0evI+/KZR/H5CdSebxs+VELZbCNeb8HyLuK72FjABpGtlNule54+X15nTz/thR3ir9SAzCsPg6nh/K94lIkewXg5CmYSJQvb3G5jBOWdWTXogoYyzyu+V8xmlvvqBanTz69ka2hH6mdGibXuQ7idnFn8fQ1FfSdZyO5ubD6rsWBBssyO44KNsFa4absWmEwRfeCM3PeNQCotxVaTqbZDolzfwyaXT/3oRn7yIMbJwfeW86/Xud9cXYiYA58VxI2D8Gn1rLpkSP81/4Qydg0OtlN0vZEiKHtdMlH9AfjVicMVcrRvP0WojVxub+U7Ir3ghv6z8s/9bITUoRYrAZHek/boUOHFADERzM5qSRffY8ZJGzMxCY/omhCPN/5fK5+GXH0qNbuiaz9H8XMzyASTw2MpmF9OukK1vxIeawPnOd2EN8tNkMi2OOctgwuerEp5a8sWg9BgoaPkP3jlX42BdFRG9vUJuDMCJIV+ydFTjMNLQBHdl3FnSLk3fOWNHEO0a67ul0ssW/blT0mclBZcXGD8E6i2nA5k3xnPt7i0IjRSxyO/Dpi2KkZS2+7nGA0PQJV820ocPxstftPvA08SaihwHLIDaQDXSc2sq7TaGmZZ0qAosnnCGXpLluTbV6QOjJe6aXKyE5T5iHfObWxrFnUrJgzK+b0HbpKTLl1ZBsupzpoYO0GUxcrcVdmWCdNC9JsEUa3wdgBThTeLDIZj4T4XM1UaPhleBsnDDtC/96qvYsUIHCCnVyrAZ46pRF9LATgAMEC6UTZWgBYfA/o5J6n+kDEFHaWE6qEmFiciI+W3QZXgckkxI0stKsW7MmBgNIeL+hHyqKQR9amZ96i7A1NQYB0mdKzx3GcjuYuP0D9DUfOSoh+AzaNjEPT5sdzvnWuOywT7ho2k8aUhiYnidlcsgLMvOTap+aER2cmA3RVd3ryKgAwyTxbYPXZ/nUt0bZX0J7/EDtDPm6CX8NrRp3l3d8X+fFISijMRfUCrwvIq1mnRT88cKNdEQxwO9XMI4o87+ijDgSIeUGr7YQM6h255/3R7e2f/h+VxSTCvyX4mSu9wwsHgSfKNquI3wlR9EZ464GrtUzy28xFxqW9/5E8O3hNoIO76erzcBefi64CjTWvcSYgWk5CfqDRgdId6+ZadGdg2UzIF/CLyfN8aSxvXsILISzV3KwBDL6mmFs0q5m8qet1XleEwuSf96oZJpD3tMMWBrROPvs3eluzyQDmtORmU0YKzMl1gDY0PUCwdwYq6Hb+V7tqKhiz1jJTsnbGh+DKREv1ZewD59+tQB7+Fn3BKDp9szReJLlzUWN3WeZbmpUOTtL0X2GMSEhv8x2yO9Jhi7bL8uhlh5M7AuaPvtOVTQfKNEYekgJdb/+5PNt25sPtDlurrmUjEwffezjx0HQeNOkyeJpndmJak0IPvZqeHTsubSnfi0yOfH8A74pM+SqETEPuNulj4OkDgu1Cjefm6StDnKV6RQxiTl0S54tn+JCVUaQkVPQGCVziHXoOAWbrGkLllluTJtTVTy8FNafOnrrNzfBVbNrm18rNCIlrMr+Lr0Z7FBE2NLWjptF+dO7UeEKQ4J0pOHZT6Zkz5CqnI7T//PeHg1mbT2MbQtbff6z/7mZbgk3ADA2XzWOCZbgSDdMOysGhBb5ZtbZH7jVZEAQWckz8qyfu0flMdjo+XS/y2/alJjHmX+aFc45hVrpfwokCVNIs3arkBz9UQw42RgkRPyK2dWjCoKqNl0jj3WPcuGAWYUeJiGx0nNja1NR4hszSRXU4HOmeQt+W0gkCvA+zOOsITnb3MU/8ONb3fRq0gbvfpP8KTXOoF5S6X/3cwku3nnk33fJMQOKQddpT8+MywnsLCLnQRR+Epe423X55gbUBMz/4FWGM492b82qGbcY51etJwpVZLTxi7XOFofzBUkEJPq8wgwKH+RTmlo46dOD7yYfd4X07YpiT8sE+HmHAHsgXNcnEsCBU8Yog4eGMG8Yog4eGM1oQUQkTIfNRx7ZbCQY0Tt8cTmhZ2HXUQ+nRCcl3/pwmgcfw8sKEokLvc/UiWRzyqaITBOUDBjkYYqyB20KkhZ9DmLmO/kTYTeRNuQkto4tiehLJKggU94GbQjwcGPekqOAxxkdTyEmCcEYw9AO9m+tImzIw989G+6zW93Iv8cOQXMx06lL/0Qd9cgaCX6vlic4QyhzhEgvQOEsZfhgxcTSv3idX5Du4FMgYa5PyaA+bOgG1oCpuFZMgHX3upnhat8pa6XViOC732LeKMTmDoEimb2zAhKYXv92U2KDTyTehxpPc5MkbAQRMQ7qAPhcPkOAr7mCcklNnoyavpFJkaJVS/dPcw1sdbRuq7O/K0CEBdXRUHxJRcvJ+QRqq7Xy6dAWMQG+o5u+YgOlhwAcCVWXS5NSnTOVwsPgsIA5szKPRS48MrmVVsRYudeG1uiD+J6GQpTKxscN48hmBpGRIMoUHyUMYj36uWiqmKhPdBvz0iSOfPl0GJ/9aZ4uoMtv3HPqFDOhtROFnIsI7g/YUA3ijdtS64R6q6C5jIHuPHDHGHWJQouGBWV7R3hkNsbaAajCJO2v54+jEi/JKex/LbVgM+6oitzz0d9m8XgtjB/Frl8pjF4RLS2qRBi3PSGI6YZdNkROSItFnVHtN9OFhVGFc4VRaU3kp+fBRuxSFPK21eeS0Uk92M+y9FB02mguHM51cFwmG7SwL2DDoCAOLSCkYOV5MoY6yvWMdme39MtUgcdMYQaxo0zH1eLMD4mxcus251A4PaIoPHJRXh65fJ/+XX2y7xEPANi/8rGubJdUD8vCm91SYb0IC1nH2sjBpiXHBVwnkhQy1RYeEUYQ+mvBbK60yqCWtVRYHykACq4EZWhH2WZM/heZDOvwRDkpFz9kasf34AIrn/OQ5rsqJKRCEsDPVtcVHcYmMDtzlNNcEkZuYTKgYjS5jTno15CWK5g/ogAev2Csk8xlJJZT0M3X5NZgWBRIQxvgCb08No+zIt3pJAYwCJ3KBCjuFc6uDZKjy6E0W44vF/M/GhnxI9VxPIroP/lPizCnFRfzy5jSz9XZLEYjKE7/uTJEC9V0HEg/jp4GawbVCLJGBkuOK+XmsUgSkuCro5nP95CHQy53+riz6Z4BYNPKkwsUoZILLy7QIxBdM1DKFmmBzCV8Q8V9ukMceIyAVJHrZ8Dbe+/Iy4HJNKZvtscNZZb1ue1FxdJMK3IY/qppV6vUT8I/mhrQMtyOB8v/HZQu27HlplwV1ZCxM9LPxDGgBuhJLvdC9c4mAbcUt17tFfsF0mX10VMaV0do6+AkdcuWVfyFmRB2OBhbbv1Pr/BSobqalB5RKqLk3ohEwaghZmE+4vZXa1aZHcYL+1fI7NfNjBhK0qN+f+j8C/1GZ1f972eb3UIFM7K8VYzoqr6HcYt9HtjtVnrm3XS0tUOY03u86dafq78tBPJCm+MtzSfwYOlKnGt7276i3U6vE9sIDhvsWAlvrnqUuf74Di2yKSSlXWNARqjeMZ5G7Syc5F8hSQg4RgWgevsM28FlUKspXyukJBdH7eaQasR+13jLyLomUkQi2+6Ye+zzjNpKnPpkwlGPhDbBknNPtNaMny888cmPYADVtcvgyQk5+fh0QFH9AfeNaetk6Nqg/GlCV4jDj3kMlZO9IWa+x+bzeKIHEz6MVlR0Y0jZURBz9PFNDWQDVVVIvA+yrgiXSZYPii1SJ66nqPeBtTmn8NMeT+LtD0uBeLwqFR72tJ7SiOxt9QZuultvqPweegIbMNLnGBtcxqJ75WfFzROIH2XBGkLawr+Bh//09O7dBmOuxUL/SLaC1r7iX5RuVJOearvrHQIiaLSL71pYe1IUHiClbJRhEsu9YD0BgrCEBB7dGAzqbFnBf8PAlQA7ARWOn3pLbjabkqGfD6Ru3VSyvmPP7d+HWKT3pfIJ6W3oDrB28aPnfin/qln6nKnn0oIh0rMDHgHcQthYJO6uiQxE8unR+vSU9zfCeieDtwF3il857s1AKyq4y8UFrs+Xh39/wHokTSKzhxrI1zrIgFatAGmiAGGIQmwuggmp/zo0e9p9N7QRKmS8QvSpuys6MXglQ2r7XbVOnVpbsDfnTl4s9DkWZOTiGQTpxgWupLdZFuaFfgZfkoAckg1elcIURn10McqdVfJmOJ0+hTz+k8AXP5Vd/UcEuh4T/M+JK9GNp21YgtiOVqFNeK8a2JEFix1oIEdmFufY37eOmqyDdnsKxZVMMwEA0eJsxoX9XjyC6se4t77qfHlprZ4iDVrM7QTAKb9nI3Ox5806mcP0STNDfYPVI9t3Nx0LOrg9kSODr3S4bnm6/pkZnobxJdwQJSycY1uHZGcry7B4g/ZTNi5DltC4JrY9FmCEP++63fLW0/qy0ldMsCNaZNsjphhtyOW2zvZoSMNG5TXuuejmLMloByQKsEmm05xn0xkrAehb2mbx3KuN+iv99ItQeZYEoj9rbGjGBRM03uzwqD1g83O7jWR1khlzrivhqCxB2mE3CxAHlk0jUiTji2zLO/+a13Ui4p0nkG0nLguaDSpBv4mey/HdNd3yJEhuRPuA968RwJYb/XHuSElRWAu8UBmV0vj403mMIgKv1DMEkLu03fsuZ0Wsj6enYstC7HNgrNxxfb7G/eZSGUKsdLopxsEXQnt2fH4S5SsbiNUESCg8pSXxFrzBcxGduYOIfuHjssuXv0y25ln5+FOBlaBxe+yBJzjHBgc/Zry1zLqpWRhqYHm99Xn1gIQufOksXG03+PUeZ7n2EnfiVycfS563xkKP963zFGqF4RuBVbe4hj1uPxMa2fXD+3tIGPVvJB5wc/VZHIpFipkACOXwbasXJo9BajYq7w7Uvc4q5r/uPb7WU+QFsyUmKJhquj8EFgYXP5ZQKc9HyNReyXpgIXMvjdIy0+Bg+frwes5H+GQsakM+EoAJArHPg9kgX6tQNvKTqDMZZALoSqi1Om3twjwnXtmRPxcvDQ3dXfqhDXIU/q4GFMhvABBg+12rlDStlUOIomvl6cY0PZa2HyJMIUTLuB1BvOqRA5Ru+FfiMTL5QH/8M5c+dfbmiwuVcm46e1mGwbqLmJ8XrOL/J4oCtG3dgrK+aC6+XLRr9iQyYZhHTqWoddP5M/xtcGrlrQli0coSXOzwwQ4cbQcr2mS7sKYSlLQSbGpcjznRgkQjDnW+82kHC8RywXdDJRe0Y9hnWDO5HCTFbmVw1rN/6Ob79R/WSbluVMtOUr45DVdUQhHoFh75o9vyL3qr6fSYer/h57EnvhOCC4uVq4bHGpLYRGOGCPJPGCTvqfwVC5X3Y28nSpR8UEvMkHnrseImLBcR8HqvFDoFaRmc4+pl35qQC4fsAUMJb/wTDuQD58nvdvvXjgcnSJE03mR8+eGVx59iYbvsBRorK6oOaJqWzjgp8FcwNjFGEzT5f0UGHKMuxC4BZcmcBgenBP70eeGo15Cj0n5Yu3IxybDrmlTDVgvvsgarIcspPfuwTHIjdWAWMmkKp3R8+BjKPW7PXvwH8miTqxzeGEFrBVx3AROZXQtfLgBFrB1L6NMkIDt0lB5ViNeRSIgOn94OgkhCOthUev24tj/fa5UdShTOyy5QhM2Kfb9wYXsRc4w9d9gBK/upU1qJ3kblZTZBlvd+Ypc/p+s4m4+cw6jv4/vGrN8Rrj41zV1gzwYFRa4kKLEvVjRJSqM+llTV1mcabf2DnBExhLOSUWi0PYoTxKtW1YzCnhwErjMMRX/rtiGMUNM8pxziiBwrrhUCIW3vFw7mXOTJzAw0FDSW0CKxHmk2sfee0hE9u1tSdwrfqVzAN8tqydKrJkb0ZqpJTKyYI1v5yC7eWupC4ze35ufM+ZJbbJyBZOeM49w2G5WkE0JBT/yRuzoxx54tMwvgAAd9wC+3LMcnPbAdynGiM1Nu1P48XO0LQ2HKHCyMUOJkbvFTStRWIrlCZxjK+zllgbH1SGD/7IEo72fr45tn8WgORVFuYprTu3HRe4+BkoLnMDwxAJ0t6lvdXKkp6azNzpD0oB5Y9q1pqVLltqmclD0VLPNbEy83VIxNo9dAkFGJTTZyGeaEX9y0dOaKXL6iOSI94YyVDZSSRtEpLBbtmUQUgiE734pI+Wd0fWbax22RBJGK9zvdNX7w5J0LAcNsqwQuui8uiQRrkrMAO3K4bQwk+5R/dZeMGWVFk/psfG+8w9FVp7Nlp1j6yBDvae8UAnIbM1Rxw/t/lTedubf9wjeKRSXgAjS84gtySPUzJHMyv4MUirkIzJZ+mRY807tz7G1ZajLDxs8kBnmcz9PWPn7RVPLgkUTaY08Cl0p3UMHlAXdV4a8ZO5Z5xAcDkD0ldpDr7EOVbUWdjSdW45kumEE1ZlYuEoCuM7Zyld1Pzga+e/Oi9KywW7LVfnRe8USIdiXn3yO9eVC4bfnGXdGMnxjP7rhETyj/D1eMfp9FDVRNzDuO2QtG9C6ougnTyJe+i5N1VDYrTcKsUHLsHi9544OlkwMffSJa7iTjsYM4FdrjcEejRh+u7rmYxGyPSy95XbuyCZMdteEYzWCR7DOpH/FE37Mx7Ms2pBjL+Jd4JH5GiPXH6b8Jx9NJc0tJ/jOhfbr7faRpJD+I0y11N2Gy+VwSxOzrO86iTTjDvNUvmPGKxtZGbpRi8u0ENu1fT30V3CN4li2q2stf1GfLrKeTDtj7De+3SFCF3i8DQUzpfd32M1b0TuFm98ps4EqJfwBm3s0mk4rnGHVFpoHLarHulq7bBfTfCBbss+wjF7sXLkC+2APaXclY5Zo+L1s4CuwdQQtgc8mPdm4UMevlvsCcz/84l5e/jIV5wWe9pyTCI2l05LpnE5DnI9mhNEeg3P9NyJoem8ihCkvs754M4XnXKjFrGej/mY7ek2S0T25S7RSbcLvrVRMSm3Se03BAkN+w8HvVILeyf0oinYucRd1RRReirXzjki/0CKSa8YrUbyAmLMaA85eTuWh7FdDfgAA0zFYBDfdBta/tdSy1d1QcPiqNhOP0VhPgCZJT4DSaPKTwFeXZ8hR9VYIdySQBPdKJ7z8IK1bGbzysC/3PaTa3nmqK1EcQAAAAEF80Q3EVsWqhnWtGZRwZNn1CphbtuR59bGdLHLgOGUMMqiEr6szWGl7GqeRkQkEIvFk/KJy/9R07k6pbCsjeg9Vk5wLR5MuXoEdYfb1xdKblgxODUWvHAlAi65WfBU9f1fDkskfgxYr8CfWPKedOPBvUoRcJUnayUiZTKoUc/2OrxrnAIBmQA0g6LVc2grQerv+whFyHbvTrApi32r9c1gfSCl+5cebiXxvzuzMC8Ql9KfGGaECq9V9caOUdr0MyzdeB13mZ3Wu6GsJNo6ATtpGVCRGqlesE4Q/acYeSwhGqYTiCpUgEt5oU3d8wJArc8v65HyKdZz12BDF2s108q/JZC15eGyu5kLjSQw/Sk02csTphwmwwuUlXRcw+D+Scfh9Lgu1FDpRfTyLOKqWsziXpl5c6rx26doQoz1zs5GifK+JNUKcMus6YPUq+5T7uht3Pzy4RN513YzC702qJT3L0qnKQs++2Ym83TcZqQ8owMIQ5RukytqxbCbsO/69YrRqHAt9wczI43DLs4pQdL6y78YsaowCiWq5WpJiHHaSndJu+KLELyzAH120MF4LoKdceLF7VrUb2qLHdc6YZjntLmVFGmt+q5Yu0S+N/yK+iUgXiS6SS7B9Cd4iiPVbIBfq+rLamqU4TQidyLwzLh3NRoSbXOgvl8zMBT6fsoiU7lQ/qJtsVLE1lahKIlCOegUk+r2GiWNS+02JKfx8JzuP6EU1dKmIBpgCG4tnMyAQkAFPdm+KvvYXah5+2e1KWEdjpNBzqCUH6QiwwNItr5vnDBUSsE5+IRczmcyXgF7eL7so6MwyRjygGpDR3VhAx1wgLnog3ImLdxQDHHZpHxb+4cBXKumIuBfJoESseF3RzaPqpeim+x7ipVe0ppIkjHSaBMLek02e/QqVBa3sYYZ2vVix9SGutA2rCYH/iKW9zxdSWA0ZT3xmPxbsZu2CqA+/gAAAAAA=";
+/* ---------- dates ---------- */
+const TODAY=new Date(2026,8,27);
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const D=(y,m,d)=>new Date(y,m,d);
+const add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const same=(a,b)=>a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+const diff=(a,b)=>Math.round((new Date(a.getFullYear(),a.getMonth(),a.getDate())-new Date(b.getFullYear(),b.getMonth(),b.getDate()))/864e5);
+const fmt=d=>`${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+const fmtY=d=>`${fmt(d)} ${d.getFullYear()}`;
+const up=d=>`${d.getDate()} ${MON[d.getMonth()]}`.toUpperCase();
+function rel(d){const n=diff(d,TODAY);if(n===0)return'today';if(n===-1)return'yesterday';if(n===1)return'tomorrow';
+ if(n<0){const a=-n;return a<14?`${a} days ago`:a<63?`${Math.round(a/7)} weeks ago`:`${Math.round(a/30)} months ago`}
+ return n<14?`in ${n} days`:n<63?`in ${Math.round(n/7)} weeks`:`in ${Math.round(n/30)} months`}
+const weekend=d=>d.getDay()===0||d.getDay()===6;
+const offWeekend=d=>d.getDay()===6?add(d,2):d.getDay()===0?add(d,1):d;
+function lastWeekday(){let d=add(TODAY,-2);while(weekend(d))d=add(d,-1);return d} // the working day before yesterday
+
+/* ---------- the book ---------- */
+const BOOK={title:"Murphy's Day Out",words:50000,chapters:24,wpp:250};
+const PAGES=Math.round(BOOK.words/BOOK.wpp), WPC=Math.round(BOOK.words/BOOK.chapters);
+
+/* ---------- data ---------- */
+const COL={Queried:'var(--sand)','Partial requested':'var(--rose)','Partial sent':'var(--sage)','Full requested':'var(--rose)','Full sent':'var(--sage)','Revise & resubmit':'var(--rose)',Offer:'var(--offer)',Signed:'var(--offer)',Resubmitted:'var(--sage)',Closed:'var(--stone)',Passed:'var(--stone)'};
+const AG={
+ AK:{i:'AK',n:'Aisha Kapoor',first:'Aisha',a:'The Lantern Agency',wks:6,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'chapters',amt:3,from:1}},
+ MR:{i:'MR',n:'Marcus Reed',first:'Marcus',a:'Bloomsbury Quill',wks:8,nrmn:false,via:'QueryManager',wants:{ql:1,syn:0,unit:'pages',amt:10,from:1}},
+ EW:{i:'EW',n:'Eleanor Whitfield',first:'Eleanor',a:'Greenfield Literary',wks:8,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'pages',amt:50,from:1}},
+ WT:{i:'WT',n:'William Tan',first:'William',a:'Foxglove Literary',wks:12,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'chapters',amt:3,from:1}},
+ HV:{i:'HV',n:'Harriet Vane-Coe',first:'Harriet',a:'Stillwater Reps',wks:6,nrmn:true,via:'Online form',wants:{ql:1,syn:0,unit:'words',amt:5000,from:1}},
+ SD:{i:'SD',n:'Sophie Dunn',first:'Sophie',a:'Arden & Lowe',wks:8,nrmn:false,via:'QueryManager',wants:{ql:1,syn:1,unit:'pages',amt:10,from:1}},
+ TH:{i:'TH',n:'Tom Hartley',first:'Tom',a:'Hartley & Rowe',wks:12,nrmn:true,via:'Email',wants:{ql:1,syn:0,unit:'words',amt:5000,from:1}},
+ PA:{i:'PA',n:'Priya Anand',first:'Priya',a:'The Story Collective',wks:10,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'chapters',amt:3,from:1}},
+ FL:{i:'FL',n:'Freya Lowe',first:'Freya',a:'The Lantern Agency',wks:6,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'chapters',amt:3,from:1}},
+ OB:{i:'OB',n:'Oliver Bright',first:'Oliver',a:'Bright Lines',wks:4,nrmn:false,via:'Email',wants:{ql:1,syn:1,unit:'none',amt:0,from:1}}
+};
+const Q=[
+ {ag:'AK',st:'Queried',sent:D(2026,7,14),nudges:[],tl:[['Queried',D(2026,7,14),'Query, synopsis, first 3 chapters']]},
+ {ag:'MR',st:'Partial requested',sent:D(2026,6,23),sendBy:D(2026,9,3),req:{s:{unit:'pages',amt:50,from:1,sect:false,fu:null},syn:false,on:D(2026,8,20)},nudges:[],tl:[['Partial requested',D(2026,8,20),'First 50 pages · send by 3 Oct'],['Queried',D(2026,6,23)]]},
+ {ag:'EW',st:'Queried',sent:D(2026,5,29),nudges:[D(2026,8,2)],tl:[['Nudge sent',D(2026,8,2)],['Queried',D(2026,5,29)]]},
+ {ag:'WT',st:'Full sent',sent:D(2026,7,11),fullSent:D(2026,8,18),nudges:[],tl:[['Full sent',D(2026,8,18)],['Full requested',D(2026,8,10)],['Queried',D(2026,7,11)]]},
+ {ag:'HV',st:'Queried',sent:D(2026,7,16),nudges:[],tl:[['Queried',D(2026,7,16),'Query, first 5,000 words']]},
+ {ag:'PA',st:'Offer',sent:D(2026,5,20),fullSent:D(2026,7,24),offerOn:D(2026,8,22),offerBy:D(2026,9,6),nudges:[],others:{},call:'none',tl:[['Offer',D(2026,8,22),'answer by 6 Oct'],['Full sent',D(2026,7,24)],['Full requested',D(2026,7,10)],['Queried',D(2026,5,20)]]},
+ {ag:'TH',st:'Closed',sent:D(2026,5,2),nudges:[],tl:[['Query closed',D(2026,8,15),'No reply'],['Queried',D(2026,5,2)]]},
+ {ag:'OB',st:'Passed',sent:D(2026,4,10),nudges:[],tl:[['Passed',D(2026,5,12),'Form rejection'],['Queried',D(2026,4,10)]]}
+];
+Q.forEach((q,i)=>{q.id='q'+i;q.window=add(q.fullSent||q.sent,(q.fullSent?12:AG[q.ag].wks)*7)});
+const ACTIVE=()=>Q.filter(q=>!['Closed','Passed','Offer','Signed'].includes(q.st));
+const LIVE=q=>!['Closed','Passed','Signed'].includes(q.st);
+const OWE=q=>['Partial requested','Full requested','Revise & resubmit'].includes(q.st);
+
+function dueText(q){
+ if(q.st==='Partial requested'||q.st==='Full requested')return{t:`SEND BY ${up(q.sendBy||add(TODAY,7))}`,o:false};
+ if(q.st==='Revise & resubmit')return{t:`RESUBMIT BY ${up(q.sendBy||add(TODAY,28))}`,o:false};
+ if(q.st==='Closed'){const e=q.tl.find(x=>x[0]==='Query closed');return{t:`CLOSED${e&&e[2]?' · '+e[2].toUpperCase():''}`,o:false}}
+ if(q.st==='Passed')return{t:'PASSED',o:false};
+ if(q.st==='Signed')return{t:'YOUR AGENT',o:false};
+ if(q.st==='Offer'){const n=diff(q.offerBy,TODAY);return{t:`ANSWER BY ${up(q.offerBy)} · ${n} DAYS`,o:n<=7}}
+ if(q.nudgePlan)return{t:`NUDGE PLANNED ${up(q.nudgePlan)}`,o:false};
+ if(q.closePlan){const n=diff(TODAY,q.closePlan);return{t:n>=0?`NUDGED ${up(q.nudges[q.nudges.length-1])} · CONSIDER CLOSING`:`NUDGED ${up(q.nudges[q.nudges.length-1])} · CLOSE BY ${up(q.closePlan)}`,o:n>=0}}
+ const n=diff(TODAY,q.window);
+ if(n>0){const a=AG[q.ag];return{t:a.nrmn?`${n} DAYS PAST · NO REPLY MEANS NO`:q.nudges.length?`${n} DAYS OVERDUE · NUDGED ${up(q.nudges[q.nudges.length-1])}`:`${n} DAYS OVERDUE · NUDGE`,o:true}}
+ if(n===0)return{t:'REPLY WINDOW CLOSES TODAY',o:true};
+ return{t:`REPLY EXPECTED ${up(q.window)}`,o:false};
+}
+const $=id=>document.getElementById(id);
+function rows(){$('rows').innerHTML=Q.map((q,x)=>{const a=AG[q.ag],d=dueText(q);return`<div class="qrow" data-id="${q.id}" onclick="openCard(${x})">
+ <span class="av">${a.i}</span><span class="qn"><b>${a.n}</b><small>${a.a.toUpperCase()} · MURPHY'S DAY OUT</small></span>
+ <span class="st"><i style="background:${COL[q.st]||'var(--stone)'}"></i>${q.st}</span>
+ <span class="due${d.o?' over':''}">${d.t}</span>
+ <span class="qacts" onclick="event.stopPropagation()">${OWE(q)?`<button class="qa" onclick="openDrawer('matsent',${x})">✓ SENT IT</button>`:q.st==='Offer'?`<button class="qa" onclick="openDrawer('offer',${x})">OFFER</button>`:!LIVE(q)?`<button class="qa" onclick="openDrawer('resp',${x})">LATE REPLY</button>`:`<button class="qa" onclick="openDrawer('resp',${x})">✓ RESPONSE</button><button class="qa" onclick="openDrawer('nudge',${x})">NUDGE</button>`}</span></div>`}).join('')}
+rows();
+$('quill').src=QUILL;
+document.body.dataset.hdr='ink';document.body.dataset.lay='jour';
+function K(){return document.body.classList.contains('slow')?3:1}
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.body.classList.add('rm');
+document.body.dataset.ws='A';
+function syncRv(){document.querySelectorAll('#rvp button:not([data-st])').forEach(x=>x.setAttribute('aria-pressed',x.dataset.ws?x.dataset.ws===document.body.dataset.ws:x.dataset.sp?(x.dataset.sp==='3')===document.body.classList.contains('slow'):(x.dataset.mo==='rm')===document.body.classList.contains('rm')))}
+function demo(k){F=null;document.body.classList.remove('s-drawer','s-card','s-docked','s-dim');cur=null;
+ NOPKG=k==='none';openDrawer('log',null);F._focusAg=false;if(k==='pre')F.log.presetPkg='std';pickAg('TH');
+ if(k==='cus'){setHow('ind')}F.step=2;F.seen=new Set([0,1,2]);F._jump=true;render();document.querySelectorAll('#rvp [data-st]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.st===k))}
+document.querySelectorAll('#rvp [data-st]').forEach(x=>x.onclick=()=>demo(x.dataset.st));
+document.querySelectorAll('#rvp button:not([data-st])').forEach(x=>x.onclick=()=>{if(x.dataset.ws){document.body.dataset.ws=x.dataset.ws;syncRv();if(F)render();return}if(x.dataset.sp)document.body.classList.toggle('slow',x.dataset.sp==='3');else document.body.classList.toggle('rm',x.dataset.mo==='rm');syncRv()});syncRv();setTimeout(()=>demo('def'),300);
+$('tKey').textContent=/Mac|iPhone|iPad/.test(navigator.platform)?'⌘Z':'CTRL+Z';
+
+/* ---------- card ---------- */
+let cur=null,fromCard=false,F=null;
+function openCard(x){cur=x;const q=Q[x],a=AG[q.ag];
+ $('cAv').textContent=a.i;$('cName').textContent=a.n;$('cSub').textContent=a.a.toUpperCase()+' · MURPHY’S DAY OUT';
+ const st=$('cSt');st.style.background=COL[q.st]||'var(--stone)';st.querySelector('span').textContent=q.st;
+ let plan='';if(q.nudgePlan)plan=`<div class="ev plan"><i></i><b>Nudge planned</b><em>reminder on your to-do</em><small>${up(q.nudgePlan)} ${q.nudgePlan.getFullYear()}</small></div>`;
+ if(q.closePlan)plan+=`<div class="ev plan"><i></i><b>Consider closing</b><small>${up(q.closePlan)} ${q.closePlan.getFullYear()}</small></div>`;
+ $('cTl').innerHTML=plan+q.tl.map((e,k)=>`<div class="ev${e[3]?' new':''}" data-k="${k}"><i style="background:${COL[e[0]]||'var(--stone)'}"></i><b>${e[0]}</b>${e[2]?`<em>${e[2]}</em>`:''}<small>${up(e[1])} ${e[1].getFullYear()}</small><span class="evx"><u onclick="EDITK=${k};openDrawer('edit',cur,true)">Edit</u><u onclick="askDel(${k})">Delete</u></span></div>`).join('');
+ q.tl.forEach(e=>e[3]=false);
+ const closed=['Closed','Passed'].includes(q.st);let f='';
+ if(closed)f=`<button class="cb pri" onclick="openDrawer('resp',cur,true)">Record a late reply</button>`;
+ else if(q.st==='Signed')f=`<button class="cb" disabled>Your agent</button>`;
+ else if(q.st==='Offer')f=`<button class="cb pri" onclick="openDrawer('offer',cur,true)">Offer: next steps</button>`;
+ else if(OWE(q))f=`<button class="cb pri" onclick="openDrawer('matsent',cur,true)">I've sent it</button><button class="cb" onclick="openDrawer('resp',cur,true)">Record a response</button><button class="cb" onclick="openDrawer('close',cur,true)">Close</button>`;
+ else f=`<button class="cb pri" onclick="openDrawer('resp',cur,true)">Record a response</button><button class="cb" onclick="openDrawer('nudge',cur,true)">Nudge</button><button class="cb" onclick="openDrawer('close',cur,true)">Close query</button>`;
+ $('cFoot').innerHTML=f+`<button class="cdel" onclick="askDel(-1)">Delete query</button>`;
+ document.body.classList.add('s-dim','s-card');document.body.classList.remove('s-docked')}
+function askDel(k){const q=Q[cur];const whole=k<0||k===q.tl.length-1;
+ const html=`<div class="delc"><span><b>${whole?'Delete this whole query?':`Delete “${q.tl[k][0]}”?`}</b>${whole?'Its history and reminders go too.':'The status goes back to the entry before it.'}</span><button onclick="openCard(cur)">Keep</button><button class="d" onclick="doDel(${whole?-1:k})">Delete</button></div>`;
+ if(whole)$('cFoot').innerHTML=html;else{const r=document.querySelector(`.ev[data-k="${k}"]`);r.outerHTML=html}}
+const STATUSOF=e=>e==='Nudge sent'||e==='Offer call'?null:e==='Query closed'||e==='Offer declined'?'Closed':e==='Offer accepted'?'Signed':e;
+function doDel(k){const snap=structuredClone(Q);const q=Q[cur],a=AG[q.ag];let msg;
+ if(k<0){Q.splice(cur,1);UNDO={snap,hit:q.id,kind:'changed',msg:`Query deleted · ${a.n}`};closeCard();rows();msg=UNDO.msg;showToast(msg,'ITS HISTORY AND REMINDERS WENT WITH IT',true);return}
+ const gone=q.tl.splice(k,1)[0];if(gone[0]==='Nudge sent')q.nudges=q.nudges.filter(n=>!same(n,gone[1]));
+ const st=q.tl.map(e=>STATUSOF(e[0])).find(Boolean)||'Queried';q.st=st;
+ UNDO={snap,hit:q.id,kind:'changed',msg:`Entry deleted · ${a.n}`};openCard(cur);rows();showToast(UNDO.msg,`“${gone[0].toUpperCase()}” REMOVED · STATUS NOW ${st.toUpperCase()}`,true)}
+function closeCard(){document.body.classList.remove('s-dim','s-card','s-docked');cur=null}
+
+/* ---------- submission packages ---------- */
+const PKGS=[{k:'std',n:'Standard',v:{ql:'Query letter v3',syn:'Synopsis v2'},m:{ql:1,syn:1,s:{unit:'chapters',amt:3,from:1,sect:false,fu:null}}},
+ {k:'open',n:'Opening pages',v:{ql:'Query letter v3',syn:'Synopsis v2'},m:{ql:1,syn:1,s:{unit:'pages',amt:10,from:1,sect:false,fu:null}}},
+ {k:'lean',n:'Letter and 5,000 words',v:{ql:'Query letter v3'},m:{ql:1,syn:0,s:{unit:'words',amt:5000,from:1,sect:false,fu:null}}}];
+PKGS[0].bv='Fast-paced opening';PKGS[1].bv='Fast-paced opening';PKGS[2].bv='Slow-burn opening';
+let MS_ACTIVE='open',NOPKG=false;const livePk=()=>NOPKG?[]:PKGS;
+const pkgMatch=(p,w)=>p.m.ql===w.ql&&p.m.syn===w.syn&&p.m.s.unit===w.unit&&p.m.s.amt===w.amt;
+/* ---------- materials helpers ---------- */
+const UNIT={pages:{step:5,min:1,max:PAGES,pre:[5,10,25,50],def:10,one:'page',many:'pages'},
+ words:{step:500,min:500,max:BOOK.words,pre:[1000,2500,5000,10000],def:5000,one:'word',many:'words'},
+ chapters:{step:1,min:1,max:BOOK.chapters,pre:[1,2,3,5],def:3,one:'chapter',many:'chapters'}};
+const n0=n=>n.toLocaleString('en-GB');
+const toWords=(u,a)=>u==='pages'?a*BOOK.wpp:u==='chapters'?a*WPC:a;
+function convert(u1,a,u2){const w=toWords(u1,a);let v;
+ if(u2==='words')v=Math.max(500,Math.round(w/500)*500);
+ else if(u2==='pages'){v=w/BOOK.wpp;v=v<5?Math.max(1,Math.round(v)):Math.round(v/5)*5}
+ else v=Math.max(1,Math.round(w/WPC));
+ return Math.min(v,UNIT[u2].max)}
+const FU={chapter:{step:1,min:2,max:BOOK.chapters,def:4},page:{step:5,min:2,max:PAGES,def:40},word:{step:1000,min:1000,max:BOOK.words-1000,def:20000}};
+const defFU=u=>u==='pages'?'page':u==='words'?'chapter':'chapter';
+function sampleName(s){if(!s||s.unit==='none')return'no sample';const U=UNIT[s.unit],a=s.amt;
+ const word=a===1?U.one:U.many;
+ if(!s.sect)return`first ${n0(a)} ${word}`;
+ const fu=s.fu||defFU(s.unit),f=s.from;
+ if(s.unit==='chapters'&&fu==='chapter')return a===1?`chapter ${f}`:`chapters ${f}–${f+a-1}`;
+ if(s.unit==='pages'&&fu==='page')return`pages ${n0(f)}–${n0(f+a-1)}`;
+ if(s.unit==='words'&&fu==='word')return`words ${n0(f)}–${n0(f+a)}`;
+ return`${n0(a)} ${word} from ${fu} ${n0(f)}`}
+function sampleApprox(s){if(s.unit==='none')return'';const w=toWords(s.unit,s.amt);const pc=Math.round(w/BOOK.words*100);
+ if(s.unit==='words')return`≈ ${(s.amt/WPC).toFixed(1)} CHAPTERS · ${pc}% OF THE BOOK`;
+ return`≈ ${n0(Math.round(w/50)*50)} WORDS · ${pc}% OF THE BOOK`}
+function pkgName(m){const p=[];if(m.ql)p.push('query letter');if(m.syn)p.push('synopsis');if(m.s.unit!=='none')p.push(sampleName(m.s));
+ if(!p.length)return'nothing selected';const t=p.join(p.length>2?', ':' and ').replace(/, ([^,]*)$/,' and $1');return t[0].toUpperCase()+t.slice(1)}
+function matchNotes(m,a){if(!a)return'';const w=a.wants,out=[];
+ if(w.ql&&!m.ql)out.push(`${a.first} asks for a query letter`);
+ if(w.syn&&!m.syn)out.push(`${a.first} asks for a synopsis`);
+ if(!w.syn&&m.syn)out.push(`${a.first} doesn't ask for a synopsis`);
+ const ws={unit:w.unit,amt:w.amt,from:w.from};
+ if(w.unit==='none'&&m.s.unit!=='none')out.push(`${a.first} doesn't ask for a sample`);
+ else if(w.unit!=='none'&&(m.s.unit!==w.unit||m.s.amt!==w.amt||m.s.sect))out.push(`${a.first} asks for the ${sampleName(ws)}${m.s.unit==='none'?'':` — you're sending ${!m.s.sect?'the ':''}${sampleName(m.s)}`}`);
+ if(!out.length)return`<div class="note ok"><span class="ni">MATCH</span><span>Matches what ${a.first} asks for.</span></div>`;
+ return`<div class="note warn"><span class="ni">CHECK</span><span>${out.join('. ')}. <a onclick="useAsk()">Use ${a.first}'s list</a></span></div>`}
+
+/* ---------- drawer state ---------- */
+function freshMat(a){const w=a?a.wants:{ql:1,syn:1,unit:'chapters',amt:3,from:1};return{ql:w.ql,syn:w.syn,s:{unit:w.unit,amt:w.unit==='none'?UNIT.chapters.def:w.amt,from:1,sect:false,fu:null},u:false}}
+let LASTLOG=null,EDITK=0;
+function openDrawer(mode,x,card){fromCard=!!card;if(x==='again'){cur=null}else if(x!==null&&x!==undefined)cur=x;else cur=null;
+ const q=cur!==null?Q[cur]:null,a=q?AG[q.ag]:null;
+ F={mode,cal:null,
+  log:{pkg:'custom',ag:null,typed:'',ms:0,sent:TODAY,via:'Email',mat:freshMat(null),note:'',expect:null,expectMode:'usual',ifNo:'nudge',nudgeWhen:'week',nudgeDate:null},
+  resp:{type:null,recv:TODAY,s:{unit:'pages',amt:50,from:1,sect:false},syn:false,sendByMode:'2w',sendBy:add(TODAY,14),remind:'2d',fb:'form',offerBy:add(TODAY,14),offerByMode:'2w',notify:true},
+  nudge:{tab:null,sent:TODAY,via:a?a.via:'Email',thenMode:'4w',then:add(TODAY,28),whenMode:null,when:null},
+  close:{why:null,on:TODAY,onMode:'t',wd:'offer',told:false,remindTell:true,recheck:'3m'},
+  ms:{s:q&&q.req?structuredClone(q.req.s):{unit:'pages',amt:50,from:1,sect:false,fu:null},syn:!!(q&&q.req&&q.req.syn),ver:'v4',changed:'',sent:TODAY,via:a?a.via:'Email',expMode:null,exp:null,ifNo:'nudge'},
+  of:q&&q.st==='Offer'?{others:structuredClone(q.others||{}),call:q.call||'none',callOn:add(TODAY,2),dec:'wait',withdraw:{},remindTell:true}:null,
+  edit:null};
+ if(q){const rc=nudgeRec(q,AG[q.ag]);F.nudge.tab=rc.tab;
+  const nw=nudgeAnchors(q);const pickN=nw.find(z=>z.k==='week')||nw[0];F.nudge.whenMode=pickN.k;F.nudge.when=pickN.d;}
+ document.body.classList.add('s-dim','s-drawer');F._lastStep=0;
+ const qi=$('quill');qi.classList.remove('dip');void qi.offsetWidth;qi.classList.add('dip');const qw=qi.parentNode;qw.style.animation='none';void qw.offsetWidth;qw.style.animation='';
+ if(fromCard){document.body.classList.add('s-docked');$('dAv').textContent=a.i;$('dName').textContent=a.n;$('dDot').style.background=COL[q.st]||'var(--stone)'}
+ F.open=0;F.step=0;DFLAST={};AMTLAST={};
+ if(q&&diff(TODAY,q.window)>0&&!['Partial requested','Full requested','Revise & resubmit'].includes(q.st))F.close.why='noreply';
+ if(mode==='log')F._focusAg=true;
+ if(mode==='log'&&LASTLOG&&x==='again'){F.log.sent=LASTLOG.sent;F.log.via=LASTLOG.via;F.log.pkg=LASTLOG.pkg;F.log.mat=structuredClone(LASTLOG.mat);F._again=true}
+ if(mode==='edit')F.edit={k:EDITK,d:new Date(q.tl[EDITK][1]),orig:new Date(q.tl[EDITK][1])},F._note=q.tl[EDITK][2]||'';
+ render();$('mBody').scrollTop=0}
+function leaveForPkgs(){F._conf=true;F._leave=true;render()}
+function confGo(){const lv=F._leave;F._conf=false;F._force=true;cancelDrawer();if(lv){const t=$('toast');showToast('Opening Submission packages','YOUR QUERY WASN’T SAVED',false)}}
+function cancelDrawer(){if(F&&!F._force&&F.mode==='log'&&F.log.ag){if(!F._conf){F._conf=true;render()};return}
+ document.body.classList.remove('s-drawer');
+ if(fromCard)document.body.classList.remove('s-docked');else if(!document.body.classList.contains('s-card'))document.body.classList.remove('s-dim');F=null}
+
+/* ---------- date field ---------- */
+// opts: key (path in F), dir past|future, anchors [{k,label,d,sub}], min, max, mode path for chip selection
+function dateField(id,label,val,anchors,dir,right,forceKey){
+ const hit=forceKey?anchors.find(x=>x.k===forceKey):anchors.find(x=>x.d&&same(x.d,val));
+ const custom=!hit&&!!val;
+ let h=`${label?`<div class="fl">${label}${right?`<span class="r">${right}</span>`:''}</div>`:''}<div class="dfield" data-df="${id}"><div class="chips">`;
+ h+=anchors.map(x=>`<button class="chip${hit&&hit.k===x.k?' on':''}" onclick="pickDate('${id}','${x.k}')">${x.label}${x.sub?` <small>${x.sub}</small>`:''}</button>`).join('');
+ h+=`<button class="chip ghost${custom?' on':''}" data-cal onclick="toggleCal('${id}')"><span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 3v3M13 3v3"/></svg></span>${custom?fmt(val):'Pick a date'}</button>`;
+ h+=`</div>`;
+ const ch=DFLAST[id]!==undefined&&DFLAST[id]!==(val?val.getTime():0);const dn=ch&&val&&DFLAST[id]>val.getTime();DFLAST[id]=val?val.getTime():0;
+ if(val)h+=`<div class="dres"><b class="${ch?'tick'+(dn?' dn':''):''}">${fmtY(val)}</b><span>${rel(val).toUpperCase()}</span>${DFSHIFT[id]?`<span class="shift">${DFSHIFT[id]}</span>`:''}</div>`;
+ if(F.cal&&F.cal.id===id)h+=calHTML(id,val,dir);
+ h+=`</div>`;DF[id]={anchors,dir};return h}
+let DF={},DFSHIFT={},DFLAST={},AMTLAST={};
+function calHTML(id,val,dir){const v=F.cal.view,first=D(v.getFullYear(),v.getMonth(),1),start=(first.getDay()+6)%7;
+ const dim=D(v.getFullYear(),v.getMonth()+1,0).getDate();let g='';
+ for(let i=0;i<start;i++)g+=`<span class="mut">${D(v.getFullYear(),v.getMonth(),i-start+1).getDate()}</span>`;
+ for(let d=1;d<=dim;d++){const dd=D(v.getFullYear(),v.getMonth(),d);const bad=(dir==='past'&&diff(dd,TODAY)>0)||(dir==='future'&&diff(dd,TODAY)<0);
+  g+=`<span class="${bad?'no':''}${same(dd,TODAY)?' td':''}${same(dd,val)?' sel':''}${dir==='future'&&weekend(dd)&&!bad?' wk':''}" onclick="calPick('${id}',${dd.getTime()})">${d}</span>`}
+ return`<div class="cal" onclick="event.stopPropagation()"><div class="mh"><button onclick="calNav(-1)">‹</button><b>${MONL[v.getMonth()]} ${v.getFullYear()}</b><button onclick="calNav(1)">›</button></div>
+ <div class="dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="grid">${g}</div>
+ <div class="cf"><span>${dir==='past'?'NO FUTURE DATES':dir==='future'?'• WEEKEND':''}</span><button onclick="calPick('${id}',${TODAY.getTime()})">Today</button></div></div>`}
+function toggleCal(id){const v=getVal(id)||TODAY;F.cal=(F.cal&&F.cal.id===id)?null:{id,view:D(v.getFullYear(),v.getMonth(),1)};render()}
+function calNav(n){F.cal.view=D(F.cal.view.getFullYear(),F.cal.view.getMonth()+n,1);render()}
+function calPick(id,t){setVal(id,new Date(t),'custom');F.cal=null;render()}
+function pickDate(id,k){const x=DF[id].anchors.find(a=>a.k===k);setVal(id,x.d?new Date(x.d):null,k);F.cal=null;render()}
+document.addEventListener('pointerdown',e=>{if(F&&F.cal&&!e.target.closest('.cal')&&!e.target.closest('[data-cal]')){F.cal=null;render()}},true);
+function getVal(id){return{msSent:F.ms&&F.ms.sent,msExp:F.ms&&F.ms.exp,ofCall:F.of&&F.of.callOn,edDate:F.edit&&F.edit.d,logSent:F.log.sent,logExpect:F.log.expect,logNudge:F.log.nudgeDate,recv:F.resp.recv,sendBy:F.resp.sendBy,offerBy:F.resp.offerBy,nSent:F.nudge.sent,nThen:F.nudge.then,nWhen:F.nudge.when,closeOn:F.close.on}[id]}
+function setVal(id,d,k){
+ if(id==='logSent'){F.log.sent=d}
+ if(id==='logExpect'){F.log.expect=d;F.log.expectMode=k}
+ if(id==='logNudge'){F.log.nudgeDate=d;F.log.nudgeWhen=k}
+ if(id==='recv')F.resp.recv=d;
+ if(id==='sendBy'){if(d)F.resp.sendBy=d;F.resp.sendByMode=k}
+ if(id==='offerBy'){F.resp.offerBy=d;F.resp.offerByMode=k}
+ if(id==='nSent')F.nudge.sent=d;
+ if(id==='nThen'){F.nudge.then=d;F.nudge.thenMode=k}
+ if(id==='nWhen'){F.nudge.when=d;F.nudge.whenMode=k}
+ if(id==='closeOn')F.close.on=d;
+ if(id==='msSent')F.ms.sent=d;if(id==='msExp'){F.ms.exp=d;F.ms.expMode=k}if(id==='ofCall')F.of.callOn=d;if(id==='edDate')F.edit.d=d}
+function pastAnchors(){const y=add(TODAY,-1);return[{k:'t',label:'Today',d:TODAY,sub:`${TODAY.getDate()} ${MON[TODAY.getMonth()]}`},{k:'y',label:'Yesterday',d:y,sub:`${y.getDate()} ${MON[y.getMonth()]}`}]}
+function nudgeAnchors(q){const a=AG[q.ag];const w=q.window;const out=[];
+ if(diff(w,TODAY)>=0){[['w0','When the window closes',0],['week','A week after',7],['2w','Two weeks after',14]].forEach(([k,l,n])=>out.push({k,label:l,d:offWeekend(add(w,n)),raw:add(w,n)}))}
+ else{[['tm','Tomorrow',1],['1w','In a week',7],['2w','In two weeks',14]].forEach(([k,l,n])=>out.push({k,label:l,d:offWeekend(add(TODAY,n)),raw:add(TODAY,n)}))}
+ out.forEach(x=>{x.sub=`${x.d.getDate()} ${MON[x.d.getMonth()]}`});return out}
+function futureWeeks(base,list){return list.map(([k,l,n])=>({k,label:l,d:add(base,n),sub:`${add(base,n).getDate()} ${MON[add(base,n).getMonth()]}`}))}
+
+/* ---------- materials block ---------- */
+function matBlock(m,a,label){const s=m.s;
+ const L=F.log,PK=livePk(),how=L.pkg==='custom'?'ind':'pkg';
+ const match=a?PK.find(p=>pkgMatch(p,a.wants)):null;
+ let h=`<div class="hows">
+  <button class="how${how==='pkg'?' on':''}${PK.length?'':' dis'}" onclick="${PK.length?'setHow(\'pkg\')':''}"><i></i><span><b>Attach a submission package</b><small>${PK.length?`${PK.length} ready for Murphy's Day Out`:'None made yet'}</small></span></button>
+  <button class="how${how==='ind'?' on':''}" onclick="setHow('ind')"><i></i><span><b>Choose materials individually</b><small>Tick what you sent, piece by piece</small></span></button></div>`;
+ if(!PK.length)h+=`<div class="nopkg">No packages yet. <a onclick="leaveForPkgs()">Make one in Submission packages ›</a></div>`;
+ const asks=a?`<div class="fl" style="margin-top:20px">${how==='pkg'?'WHICH PACKAGE':'WHAT YOU SENT'}<span class="r">${a.first.toUpperCase()} ASKS FOR: ${pkgName({ql:a.wants.ql,syn:a.wants.syn,s:{unit:a.wants.unit,amt:a.wants.amt,from:1}}).toUpperCase()}</span></div>`:'';
+ if(how==='pkg'){const pk=PKGS.find(p=>p.k===L.pkg);
+  h+=asks+`<div class="plist">${PK.map(p=>`<button class="prow${L.pkg===p.k?' on':''}" onclick="pickPkg('${p.k}')"><i></i><span><b>${p.n}</b><small>${pkgName(p.m)}${p.bv?' · '+p.bv:''}</small></span><span class="ptags">${p.k===MS_ACTIVE?'<em class="u">USED FOR NEW QUERIES</em>':''}${a&&pkgMatch(p,a.wants)?`<em class="m">MATCHES ${a.first.toUpperCase()}</em>`:''}</span></button>`).join('')}</div>`;
+  h+=`<div class="inpk"><h5>IN THIS PACKAGE</h5>${pk.m.ql?`<div><b>Query letter</b><span>${pk.v.ql.replace('Query letter ','')}</span></div>`:''}${pk.m.syn?`<div><b>Synopsis</b><span>${pk.v.syn.replace('Synopsis ','')}</span></div>`:''}${pk.m.s.unit!=='none'?`<div><b>Sample</b><span>${sampleName(pk.m.s)}${pk.bv?' · '+pk.bv:''}</span></div>`:''}<p>Sent something slightly different? <a onclick="setHow('ind')">Choose individually</a>, starting from this package.</p></div>`;
+  if(a&&!pkgMatch(pk,a.wants))h+=`<div class="note warn"><span class="ni">CHECK</span><span>${a.first} asks for the ${pkgName({ql:a.wants.ql,syn:a.wants.syn,s:{unit:a.wants.unit,amt:a.wants.amt,from:1}}).replace(/^Q/,'q')}. ${match?`<a onclick="pickPkg('${match.k}')">Attach ${match.n} instead</a>`:`<a onclick="setHow('ind');useAsk()">Choose individually to match</a>`}</span></div>`;
+  else if(a)h+=`<div class="note ok"><span class="ni">MATCH</span><span>Matches what ${a.first} asks for.</span></div>`;
+  return h}
+ h+=asks;
+ h+=`<div class="tgl${m.ql?' on':''}" onclick="F.${F.mode}.mat.ql^=1;touch();render()"><span class="bx">${m.ql?'✓':''}</span><b>Query letter</b><small>${m.ql?'V3 · CURRENT':''}</small></div>`;
+ h+=`<div class="tgl${m.syn?' on':''}" onclick="F.${F.mode}.mat.syn^=1;touch();render()"><span class="bx">${m.syn?'✓':''}</span><b>Synopsis</b><small>${m.syn?'V2 · CURRENT':''}</small></div>`;
+ h+=sampleBlock(`F.${F.mode}.mat.s`,s,true);
+ h+=`<div class="sline"><b>${pkgName(m)}</b><span>${s.unit!=='none'?sampleApprox(s):''}</span></div>`;
+ h+=matchNotes(m,a);
+ if(match)h+=`<div class="note info"><span class="ni">PACKAGE</span><span>Your <b>${match.n}</b> package matches what ${a.first} asks for. <a onclick="pickPkg('${match.k}')">Attach it</a></span></div>`;
+ return h}
+function setHow(k){const L=F.log;L.pkgTouched=true;
+ if(k==='ind'){if(L.pkg!=='custom'){const p=PKGS.find(x=>x.k===L.pkg);L.mat={ql:p.m.ql,syn:p.m.syn,s:structuredClone(p.m.s),u:true}}L.pkg='custom'}
+ else{const PK=livePk(),a=L.ag?AG[L.ag]:null;const k2=(MS_ACTIVE&&PK.some(p=>p.k===MS_ACTIVE))?MS_ACTIVE:(a&&PK.find(p=>pkgMatch(p,a.wants))||PK[0]).k;pickPkg(k2);return}
+ render()}
+function sampleBlock(path,s,allowNone){const U=UNIT[s.unit];
+ const units=['pages','words','chapters'].concat(allowNone?['none']:[]);
+ let h=`<div class="samp${s.unit==='none'?' off':''}"><div class="srow"><b>Sample</b><span class="seg" style="margin-left:auto">${units.map(u=>`<span class="${s.unit===u?'on':''}" onclick="setUnit('${path}','${u}')">${u==='none'?'None':u[0].toUpperCase()+u.slice(1)}</span>`).join('')}</span></div>`;
+ if(s.unit!=='none'){
+  const pv=AMTLAST[path];const tk=pv!==undefined&&pv!==s.amt?(s.amt>pv?'tick':'tick dn'):'';AMTLAST[path]=s.amt;
+  h+=`<div class="amt"><span class="step"><button onclick="bump('${path}',-1)">−</button><b><span class="${tk}">${n0(s.amt)}</span></b><button onclick="bump('${path}',1)">+</button></span><span class="unitl">${s.amt===1?U.one:U.many}</span></div>`;
+  h+=`<div class="presets">${U.pre.map(p=>`<button class="chip${s.amt===p?' on':''}" onclick="setAmt('${path}',${p})">${n0(p)}</button>`).join('')}</div>`;
+  h+=`<div class="from"><span class="seg wide"><span class="${!s.sect?'on':''}" onclick="setSect('${path}',false)">From the opening</span><span class="${s.sect?'on':''}" onclick="setSect('${path}',true)">A specific section</span></span>`;
+  if(s.sect){const fu=s.fu||defFU(s.unit);
+   h+=`<div class="sectline">Starting at<span class="seg">${['chapter','page','word'].map(u=>`<span class="${fu===u?'on':''}" onclick="setFU('${path}','${u}')">${u[0].toUpperCase()+u.slice(1)}</span>`).join('')}</span><span class="step sm"><button onclick="bumpFrom('${path}',-1)">−</button><b>${n0(s.from)}</b><button onclick="bumpFrom('${path}',1)">+</button></span></div>`}
+  h+=`</div>`}
+ return h+`</div>`}
+function S(path){return eval(path)}
+function setUnit(path,u){const s=S(path);if(u!=='none'&&s.unit!=='none'){s.amt=convert(s.unit,s.amt,u)}
+ else if(u!=='none')s.amt=UNIT[u].def;s.unit=u;touch();render()}
+function bump(path,d){const s=S(path),U=UNIT[s.unit];let v=s.amt;
+ if(s.unit==='pages'){if(d>0)v=v<5?v+1:(Math.floor(v/5)+1)*5;else v=v<=5?v-1:(Math.ceil(v/5)-1)*5}
+ else if(s.unit==='words'){v=d>0?(Math.floor(v/500)+1)*500:(Math.ceil(v/500)-1)*500}
+ else v=v+d;
+ s.amt=Math.max(U.min,Math.min(U.max,v));touch();render()}
+function setAmt(path,v){S(path).amt=v;touch();render()}
+function setSect(path,on){const s=S(path);s.sect=on;if(on){s.fu=s.fu||defFU(s.unit);if(s.from<=1)s.from=FU[s.fu].def}else s.from=1;touch();render()}
+function setFU(path,u){const s=S(path),old=s.fu||defFU(s.unit);if(old!==u){const w=old==='chapter'?(s.from-1)*WPC:old==='page'?(s.from-1)*BOOK.wpp:s.from;s.from=u==='chapter'?Math.max(2,Math.round(w/WPC)+1):u==='page'?Math.max(2,Math.round(w/BOOK.wpp/5)*5||2):Math.max(1000,Math.round(w/1000)*1000);s.fu=u}touch();render()}
+function bumpFrom(path,d){const s=S(path),F2=FU[s.fu||defFU(s.unit)];let v=s.from+d*F2.step;if(F2.step>1)v=d>0?Math.floor(s.from/F2.step)*F2.step+F2.step:Math.ceil(s.from/F2.step)*F2.step-F2.step;s.from=Math.max(F2.min,Math.min(F2.max,v));touch();render()}
+function touch(){if(F.mode==='log'){F.log.mat.u=true;F.log.pkg='custom';F.log.pkgTouched=true}}
+function pickPkg(k){const p=PKGS.find(x=>x.k===k);F.log.pkg=k;F.log.pkgTouched=true;F.log.mat={ql:p.m.ql,syn:p.m.syn,s:structuredClone(p.m.s),u:false};render()}
+function useAsk(){const a=AG[F.log.ag];F.log.mat=freshMat(a);render()}
+
+/* ---------- plan track ---------- */
+function track(pts){const points=[];pts.forEach(p=>{const last=points[points.length-1];if(last&&Math.abs(diff(p.d,last.d))<=2){last.l=last.l+' · '+p.l.toLowerCase();last.c=p.c;last.s=p.s||last.s}else points.push({...p})});
+ const t0=points[0].d,t1=points[points.length-1].d;const span=Math.max(1,diff(t1,t0));
+ const pos=d=>Math.max(0,Math.min(100,diff(d,t0)/span*100));
+ let h=`<div class="track"><div class="ln"></div>`;
+ const tp=diff(TODAY,t0)>=0&&diff(TODAY,t1)<=0?pos(TODAY):null;
+ if(tp!==null&&tp>2&&tp<98)h+=`<div class="tdy" style="left:${tp}%"></div>`;
+ const TW=400,ends={hi:-1e9,lo:-1e9,lo2:-1e9};let deep=false;
+ points.forEach((p,i)=>{const x=pos(p.d);const w=Math.max(p.l.length*7.4,(up(p.d)+(p.s?` · ${p.s}`:'')).length*5.6)+10;const px=x/100*TW;
+  const l0=x<8?px-w*.14:x>92?px-w*.86:px-w/2;
+  let row=l0>=ends.hi?'hi':l0>=ends.lo?'lo':'lo2';if(row==='lo2')deep=true;ends[row]=l0+w;const al=x<8?'translateX(-14%)':x>92?'translateX(-86%)':'translateX(-50%)';
+  h+=`<div class="pt ${p.c||''}" style="left:${x}%"></div><div class="lab ${row}" style="left:${x}%;transform:${al}"><b>${p.l}</b><span>${up(p.d)}${p.s?` · ${p.s}`:''}</span></div>`});
+ return (deep?h.replace('<div class="track">','<div class="track deep">'):h)+`</div>`}
+/* ---------- render ---------- */
+const MODES={log:['LOG A QUERY','Log a query'],resp:['RECORD A RESPONSE','Record a response'],nudge:['NUDGE','Nudge'],close:['CLOSE QUERY','Close query'],matsent:['SENT WHAT THEY ASKED FOR','I\u2019ve sent it'],offer:['OFFER OF REPRESENTATION','The offer'],edit:['CORRECT THE RECORD','Edit an entry']};
+function who(a,q,extra){return`<div class="who"><span class="av">${a.i}</span><span><b>${a.n}</b><small>${a.a.toUpperCase()}${q?` · ${q.st.toUpperCase()} · SENT ${up(q.sent)}`:` · REPLIES IN ~${a.wks} WKS · ${a.via.toUpperCase()}`}</small></span><span class="tags">${a.nrmn?'<span class="tag dark">NO REPLY MEANS NO</span>':''}${extra||''}</span></div>`}
+function render(){if(!F)return;DF={};DFSHIFT={};
+ const q=cur!==null?Q[cur]:null,a=q?AG[q.ag]:null;
+ $('mMode').textContent=MODES[F.mode][0];$('mTitle').textContent=MODES[F.mode][1];
+ $('mWho').innerHTML=q?who(a,q):'';$('dHead').classList.toggle('bare',!q);
+ const b=$('mBody');const keep=b.scrollTop;let h='',saves=[],ok=true,btn='Save';
+ if(F.mode==='log'){[h,saves,ok,btn]=renderLog()}
+ if(F.mode==='resp'){[h,saves,ok,btn]=renderResp(q,a)}
+ if(F.mode==='nudge'){[h,saves,ok,btn]=renderNudge(q,a)}
+ if(F.mode==='close'){[h,saves,ok,btn]=renderClose(q,a)}
+ if(F.mode==='matsent'){[h,saves,ok,btn]=renderMatSent(q,a)}
+ if(F.mode==='offer'){[h,saves,ok,btn]=renderOffer(q,a)}
+ if(F.mode==='edit'){[h,saves,ok,btn]=renderEdit(q,a)}
+ if(saves.length)h+=`<div class="saves"><h5>WHEN YOU SAVE</h5><ul>${saves.map(s=>`<li><i style="background:${s[1]||'#fff'}"></i><span>${s[0]}</span></li>`).join('')}</ul></div>`;
+ b.innerHTML=h;F._btn=btn;F._ok=ok;layout();b.scrollTop=F._jump?0:keep;F._jump=false;
+ const inp=$('agIn');if(inp&&F._focusAg){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);F._focusAg=false}
+ b.querySelectorAll('textarea').forEach(t=>t.oninput=()=>{F._note=t.value});
+}
+
+/* LOG */
+function fa(l,m){return l?` data-f="${l}" data-fm="${String(m).replace(/"/g,'&quot;')}"`:''}
+function renderLog(){const L=F.log,a=L.ag?AG[L.ag]:null;let h='',saves=[];
+ const dup=a?Q.find(q=>q.ag===L.ag&&LIVE(q)&&!q._new):null;
+ const prev=a&&!dup?Q.find(q=>q.ag===L.ag&&!LIVE(q)):null;
+ const sameAg=a?Q.find(q=>q.ag!==L.ag&&AG[q.ag].a===a.a&&LIVE(q)):null;
+ const f1=!a?fa('block','Choose the agent you queried'):(dup&&!L.requery)?fa('block',`You already have a live query with ${a.first} for this book, sent ${fmt(dup.sent)}`):'';
+ const f1b=!f1&&sameAg?fa('check',`You have a live query with ${AG[sameAg.ag].n}, also at ${a.a}`):'';
+ const f2=a&&L.via!==a.via?fa('check',`${a.first} takes queries by ${a.via} — you've chosen ${L.via}`):'';
+ const nothing=a&&!L.mat.ql&&!L.mat.syn&&L.mat.s.unit==='none';
+ let f3='';if(nothing)f3=fa('block','Nothing is marked as sent');else if(a){const w=a.wants,m=L.mat,iss=[];if(w.ql&&!m.ql)iss.push('no query letter');if(w.syn&&!m.syn)iss.push('no synopsis');if(w.unit!=='none'&&(m.s.unit!==w.unit||m.s.amt!==w.amt||m.s.sect))iss.push(`${a.first} asks for the ${sampleName({unit:w.unit,amt:w.amt,from:1})}`);if(iss.length)f3=fa('check',`Different from ${a.first}'s guidelines: ${iss.join('; ')}`)}
+ h+=`<div class="sec"${f1||f1b} data-t="Agent and book" data-s="${a?a.n+' · Murphy&#39;s Day Out'+(a&&Q.find(q=>q.ag===L.ag&&!LIVE(q))?' · requery':''):'Choose the agent'}"><div class="fl">WHO YOU QUERIED</div>`;
+ if(a){if(dup)h+=`<div class="note ${L.requery?'info':'warn'}" style="margin-bottom:10px"><span class="ni">${L.requery?'NOTED':'ALREADY LIVE'}</span><span>${L.requery?`Logging a second, separate query to ${a.first}.`:`You already have a live query with ${a.first} for Murphy's Day Out, sent ${fmt(dup.sent)}. Did you mean to record a response or a nudge instead?`} <a onclick="F.log.requery=!F.log.requery;render()">${L.requery?'Undo':'It\'s a separate query'}</a></span></div>`;if(sameAg)h+=`<div class="note warn" style="margin-bottom:10px"><span class="ni">SAME AGENCY</span><span>You have a live query with <b>${AG[sameAg.ag].n}</b> at ${a.a}, sent ${fmt(sameAg.sent)}. Many agencies count a no from one agent as a no from all, so check their guidelines.</span></div>`;
+ if(prev){const pe=prev.tl[0];h+=`<div class="note info" style="margin-bottom:10px"><span class="ni">QUERIED BEFORE</span><span>You queried ${a.first} with this book on ${fmt(prev.sent)} — ${pe[0].toLowerCase()} ${fmt(pe[1])}. This will be logged as a requery.</span></div>`}
+ h+=who(a,null,`<a style="font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink45);cursor:pointer" onclick="F.log.ag=null;F.log.typed='';F._focusAg=true;render()">CHANGE</a>`)}
+ else{if(F._again)h+=`<div class="note ok" style="margin-bottom:10px"><span class="ni">KEPT</span><span>Same day, same way and the same package as your last query. Just choose the agent.</span></div>`;h+=`<div class="apick"><input class="fin" id="agIn" placeholder="Start typing an agent's name…" value="${L.typed}" oninput="agType(this.value)" onblur="setTimeout(()=>{if($('sugg'))$('sugg').innerHTML=''},150)" onkeydown="agKey(event)" autocomplete="off"><div id="sugg"></div></div>`}
+ h+=`<div class="fl">MANUSCRIPT</div><div class="chips"><button class="chip on">Murphy's Day Out</button><button class="chip">The Salt Road</button></div></div>`;
+ if(!a){setTimeout(()=>{if($('agIn')){agType($('agIn').value,true)}},0);return[h+`<div class="note info" style="margin-top:22px"><span class="ni">NEXT</span><span>Choose the agent first. Their reply time, how they take queries and what they ask for fill in the rest.</span></div>`,[],false,'Log query']}
+ // when
+ h+=`<div class="sec"${f2} data-t="Sending" data-s="${fmt(L.sent)} · ${L.via}"><p class="sech">Sent</p>`;
+ h+=dateField('logSent','SENT ON',L.sent,pastAnchors(),'past');
+ h+=`<div class="fl">SENT VIA<span class="r">${a.first.toUpperCase()} TAKES ${a.via.toUpperCase()}</span></div><div class="chips">${['Email','QueryManager','Online form'].map(v=>`<button class="chip${L.via===v?' on':''}" onclick="F.log.via='${v}';render()">${v}</button>`).join('')}</div></div>`;
+ // what
+ h+=`<div class="sec"${f3} data-t="What you sent" data-s="${L.pkg!=='custom'?PKGS.find(p=>p.k===L.pkg).n+' package':'Chosen individually · '+pkgName(L.mat)}"><p class="sech">What you sent</p>`+matBlock(L.mat,a,'')+`</div>`;
+ // response expectations
+ const usual=add(L.sent,a.wks*7);
+ const exA=[{k:'usual',label:`Their usual · ${a.wks} wks`,d:usual},{k:'+2',label:`${a.wks+2} wks`,d:add(L.sent,(a.wks+2)*7)},{k:'+4',label:`${a.wks+4} wks`,d:add(L.sent,(a.wks+4)*7)}];
+ exA.forEach(x=>x.sub=`${x.d.getDate()} ${MON[x.d.getMonth()]}`);
+ if(L.expectMode!=='custom'){const x=exA.find(z=>z.k===L.expectMode)||exA[0];L.expect=x.d;L.expectMode=x.k}
+ if(L.nrmn===undefined)L.nrmn=a.nrmn;
+ h+=`<div class="sec" data-t="Response expectations" data-s="By ${fmt(L.expect)} · ${L.nrmn?'silence is a no':'they reply'}"><p class="sech">Response expectations</p><p class="secs">What ${a.first} says about replies — change either if you know better.</p>`;
+ h+=dateField('logExpect','REPLY EXPECTED BY',L.expect,exA,'future');
+ h+=`<div class="fl">DOES NO REPLY MEAN NO?<span class="r">${a.nrmn?`${a.first.toUpperCase()}'S GUIDELINES SAY YES`:`${a.first.toUpperCase()}'S GUIDELINES DON'T SAY SO`}</span></div><div class="chips">${[[true,'Yes — silence is a pass'],[false,'No — they reply to everyone']].map(([v,l])=>`<button class="chip${L.nrmn===v?' on':''}" onclick="setNrmn(${v})">${l}</button>`).join('')}</div></div>`;
+ // if they don't reply
+ h+=`<div class="sec" @F5@ data-t="If they don't reply" data-s="@IFNO@"><p class="sech">If they don't reply</p><p class="secs">${L.nrmn?`Silence is ${a.first}'s answer, so the usual move is to close it. You can still plan a nudge.`:`Plan the chase now, so it lands on your to-do list at the right moment.`}</p>`;
+ const ifs=[['nudge','Remind me to nudge'],['close','Close it'],['nothing','Do nothing']];
+ h+=`<div class="fl">WHEN ${up(L.expect)} PASSES</div><div class="chips">${ifs.map(([k,l])=>`<button class="chip${L.ifNo===k?' on':''}" onclick="F.log.ifNo='${k}';F.log.ifNoSet=true;render()">${l}${L.nrmn&&k==='close'?' <small>USUAL</small>':''}</button>`).join('')}</div>`;
+ let nd=null;
+ if(L.ifNo==='nudge'){const na=[['w0','On the day',0],['week','A week later',7],['2w','Two weeks later',14]].map(([k,l,n])=>{const raw=add(L.expect,n),d=offWeekend(raw);return{k,label:l,d,raw,sub:`${d.getDate()} ${MON[d.getMonth()]}`}});
+  if(L.nudgeWhen!=='custom'){const x=na.find(z=>z.k===L.nudgeWhen)||na[1];L.nudgeDate=x.d;L.nudgeWhen=x.k;if(!same(x.raw,x.d))DFSHIFT.logNudge=`MOVED OFF THE WEEKEND`}
+  h+=dateField('logNudge','REMIND ME TO NUDGE',L.nudgeDate,na,'future');nd=L.nudgeDate;
+  if(diff(nd,L.expect)<0)h+=`<div class="note warn"><span class="ni">EARLY</span><span>That's before ${a.first}'s reply window closes. An early nudge can read as impatient.</span></div>`;
+  else if(L.nrmn)h+=`<div class="note info"><span class="ni">YOUR CALL</span><span>${a.first} doesn't expect nudges, but a short, polite one rarely does harm. We'll plan it as you've asked.</span></div>`}
+ h=h.replace('@F5@',nd&&diff(nd,L.expect)<0?fa('check',`The nudge is before ${a.first}'s reply window closes`):'');
+ h=h.replace('@IFNO@',L.ifNo==='nudge'?`Nudge reminder ${fmt(nd)}`:L.ifNo==='close'?`Close after ${fmt(L.expect)}`:'Do nothing');
+ const pts=[{l:'Sent',d:L.sent,c:'done'},{l:'Reply due',d:L.expect,c:'fut'}];
+ if(nd)pts.push({l:'Nudge',d:nd,c:'nudge'},{l:'Consider closing',d:add(nd,28),c:'close',s:'4 WKS ON'});
+ if(L.ifNo==='close')pts[1].l='Reply due · closes';
+ h+=`<div class="plan"><h5>THE PLAN<span class="tk">┆ TODAY</span></h5>${track(pts)}</div></div>`;
+ // saves
+ saves.push([`<b style="font-family:var(--machine);font-weight:400">Queried</b> ${a.n}, ${fmt(L.sent)}, via ${L.via}`,'var(--sand)']);
+ saves.push([`${pkgName(L.mat)} recorded as sent`]);
+ saves.push([`Reply expected by ${fmt(L.expect)}`]);
+ if(L.ifNo==='nudge')saves.push([`“Nudge ${a.first}” lands on your to-do on ${fmt(nd)}; if still quiet, “Consider closing” four weeks after`,'var(--blush)']);
+ if(L.ifNo==='close')saves.push([`Closes itself on ${fmt(add(L.expect,1))} if nothing comes back — you'll see it in the Query Centre first`,'var(--stone)']);
+ return[h,saves,true,'Log query']}
+function agType(v,noRender){F.log.typed=v;const t=v.trim().toLowerCase();const queried=new Set(Q.map(q=>q.ag));
+ const list=Object.values(AG).filter(a=>!t||a.n.toLowerCase().includes(t)||a.a.toLowerCase().includes(t)).slice(0,5);
+ let h='';if(document.activeElement&&document.activeElement.id==='agIn'||t){h=`<div class="sugg">${list.map((a,i)=>`<div class="it${i===0&&t?' hi':''}" onmousedown="pickAg('${a.i}')"><span class="av" style="width:28px;height:28px;font-size:8px">${a.i}</span><span><b>${a.n}</b><small>${a.a.toUpperCase()} · ~${a.wks} WKS</small></span>${queried.has(a.i)?'<span class="tag">ALREADY QUERIED</span>':a.nrmn?'<span class="tag">NO REPLY MEANS NO</span>':''}</div>`).join('')}${t?`<div class="new">+ Add “${v.trim()}” as a new agent</div>`:''}</div>`}
+ if($('sugg'))$('sugg').innerHTML=h}
+function agKey(e){if(e.key==='Enter'){const t=F.log.typed.trim().toLowerCase();const a=Object.values(AG).find(a=>a.n.toLowerCase().includes(t));if(a)pickAg(a.i)}}
+function pickAg(id){const a=AG[id];F.log.ag=id;F.log.requery=false;F.log.via=a.via;if(!F.log.pkgTouched){const PK=livePk(),ok=k=>PK.some(p=>p.k===k);let k='custom';
+  if(F.log.presetPkg&&ok(F.log.presetPkg))k=F.log.presetPkg;else if(F._again&&ok(F.log.pkg))k=F.log.pkg;else if(MS_ACTIVE&&ok(MS_ACTIVE))k=MS_ACTIVE;
+  if(k==='custom'){const m=PK.find(p=>pkgMatch(p,a.wants));if(m)k=m.k}
+  F.log.pkg=k;if(k==='custom')F.log.mat=freshMat(a);else{const p=PKGS.find(x=>x.k===k);F.log.mat={ql:p.m.ql,syn:p.m.syn,s:structuredClone(p.m.s),u:false}}}F.log.expectMode='usual';F.log.nrmn=a.nrmn;F.log.ifNoSet=false;F.log.ifNo=a.nrmn?'close':'nudge';F.log.nudgeWhen='week';render()}
+function setNrmn(v){F.log.nrmn=v;if(!F.log.ifNoSet)F.log.ifNo=v?'close':'nudge';render()}
+document.addEventListener('focusin',e=>{if(e.target.id==='agIn')agType(e.target.value,true)});
+
+const RL={partial:'Partial requested',full:'Full requested',rr:'Revise & resubmit',pass:'Pass',offer:'Offer'};
+/* RESPONSE */
+function renderResp(q,a){const late=!LIVE(q);const R=F.resp;let h='',saves=[];
+ const types=q.st==='Partial requested'||q.st==='Full requested'?[]:null;
+ const opts=[['partial','Partial requested'],['full','Full requested'],['rr','Revise & resubmit'],['pass','Pass'],['offer','Offer']];
+ if(late){const ce=q.tl[0];F._late=`<div class="note warn"><span class="ni">LATE REPLY</span><span>This query was ${q.st==='Passed'?'recorded as passed':'closed'} on ${fmt(ce[1])}${ce[2]?' ('+ce[2].toLowerCase()+')':''}. Recording a reply reopens it${q.st==='Closed'?' and replaces that ending':''}.</span></div>`}else F._late='';
+ h+=`<div class="sec" data-t="The response" data-s="${R.type?RL[R.type]+' · '+fmt(R.recv):'Choose one'}">${F._late}<div class="fl">WHAT DID ${a.first.toUpperCase()} SAY?</div><div class="chips">${opts.map(([k,l])=>`<button class="chip${R.type===k?' on':''}" onclick="F.resp.type='${k}';render()">${l}</button>`).join('')}</div>`;
+ h+=dateField('recv','RECEIVED ON',R.recv,pastAnchors(),'past')+`</div>`;
+ if(!R.type)return[h+`<div class="note info" style="margin-top:22px"><span class="ni">NEXT</span><span>Pick the response and the rest of the form fits it.</span></div>`,[],false,'Save response'];
+ const reqAnch=futureWeeks(R.recv,[['1w','In a week',7],['2w','In two weeks',14],['4w','In four weeks',28]]);
+ if(R.type==='partial'){
+  h+=`<div class="sec" data-t="What they asked for" data-s="${(R.syn?'Synopsis, ':'')+sampleName(R.s)}"><p class="sech">What they asked for</p><p class="secs">Most requests are the opening pages; some want a later section.</p>`+sampleBlock('F.resp.s',R.s,false);
+  h+=`<div class="tgl${R.syn?' on':''}" onclick="F.resp.syn=!F.resp.syn;render()"><span class="bx">${R.syn?'✓':''}</span><b>A synopsis too</b></div>`;
+  h+=`<div class="sline"><b>${R.syn?'Synopsis and ':''}${sampleName(R.s)[0].toUpperCase()+sampleName(R.s).slice(1)}</b><span>${sampleApprox(R.s)}</span></div></div>`}
+ if(R.type==='rr')h+=`<div class="sec" data-t="What they'd like revised" data-s=""><p class="sech">What they'd like revised</p><textarea class="fta" placeholder="Their notes, in your words or theirs.">${F._note||''}</textarea></div>`;
+ if(['partial','full','rr'].includes(R.type)){
+  const anch=reqAnch.concat([{k:'none',label:'No date given',d:null}]);
+  h+=`<div class="sec" data-t="${R.type==='rr'?'When you\'ll resubmit by':'When you\'ll send it by'}" data-s="${R.sendByMode==='none'?'No date given':'By '+fmt(R.sendBy)}"><p class="sech">${R.type==='rr'?'When you\'ll resubmit':'When you\'ll send it'}</p>`;
+  const none=R.sendByMode==='none';
+  h+=dateField('sendBy',R.type==='rr'?'RESUBMIT BY':'SEND BY',none?null:R.sendBy,anch,'future','',none?'none':null);
+  if(!none){const rem=[['2d','Two days before'],['1d','The day before'],['0','On the day'],['no','No reminder']];
+   h+=`<div class="fl">REMIND ME</div><div class="chips">${rem.map(([k,l])=>`<button class="chip${R.remind===k?' on':''}" onclick="F.resp.remind='${k}';render()">${l}</button>`).join('')}</div>`}
+  else h+=`<div class="note info"><span class="ni">TIP</span><span>Agents who don't set a date still notice speed. We'll put “Send the ${R.type==='full'?'full':'pages'}” on your to-do for <b>${fmt(offWeekend(add(TODAY,3)))}</b>, so it doesn't drift.</span></div>`;
+  h+=`</div>`}
+ if(R.type==='pass'){h+=`<div class="sec" data-t="Feedback" data-s="${R.fb==='form'?'Form rejection':'A personal note'}"><div class="fl">FEEDBACK</div><div class="chips">${[['form','Form rejection'],['personal','A personal note']].map(([k,l])=>`<button class="chip${R.fb===k?' on':''}" onclick="F.resp.fb='${k}';render()">${l}</button>`).join('')}</div>`;
+  if(R.fb==='personal')h+=`<div class="fl">WHAT THEY SAID</div><textarea class="fta" placeholder="Worth keeping — patterns across passes show up in Analytics.">${F._note||''}</textarea>`;
+  h+=`</div>`}
+ if(R.type==='offer'){const others=ACTIVE().filter(x=>x!==q);
+  h+=`<div class="sec" data-t="The offer" data-s="Answer by ${fmt(R.offerBy)}"><p class="sech">The offer</p>`+dateField('offerBy','THEY\'D LIKE AN ANSWER BY',R.offerBy,futureWeeks(R.recv,[['1w','In a week',7],['2w','In two weeks',14]]),'future');
+  h+=`<div class="tgl${R.notify?' on':''}" style="margin-top:16px" onclick="F.resp.notify=!F.resp.notify;render()"><span class="bx">${R.notify?'✓':''}</span><b>Tell the others who have it</b><small>${others.length} AGENTS</small></div>`;
+  h+=`<div class="note info"><span class="ni">WHY</span><span>It's standard to let every agent still considering <b>Murphy's Day Out</b> know you have an offer, with your deadline. We'll add one to-do per agent: ${others.map(x=>AG[x.ag].first).join(', ')}.</span></div></div>`}
+ // saves
+ const lab={partial:'Partial requested',full:'Full requested',rr:'Revise & resubmit',pass:'Passed',offer:'Offer'}[R.type];
+ saves.push([`${a.n} → <b style="font-family:var(--machine);font-weight:400">${lab}</b>, ${fmt(R.recv)}`,COL[lab]||'var(--stone)']);
+ if(R.type==='partial')saves.push([`Request logged: ${R.syn?'synopsis and ':''}${sampleName(R.s)}`]);
+ if(['partial','full','rr'].includes(R.type)){
+  if(R.sendByMode==='none')saves.push([`“Send the ${R.type==='full'?'full':'pages'}” on your to-do for ${fmt(offWeekend(add(TODAY,3)))}`,'var(--blush)']);
+  else{saves.push([`Your move, due ${fmt(R.sendBy)} — it joins “Your move” in the Query Centre`]);
+   if(R.remind!=='no'){const off={'2d':-2,'1d':-1,'0':0}[R.remind];saves.push([`Reminder on ${fmt(add(R.sendBy,off))}`,'var(--blush)'])}}
+  if(q.nudgePlan)saves.push([`Your planned nudge (${fmt(q.nudgePlan)}) is cancelled — they've replied`])}
+ if(late)saves.push([`The query reopens${q.st==='Closed'?' — the “'+(q.tl[0][2]||'closed').toLowerCase()+'” ending is replaced, so Analytics counts the reply':''}`]);
+ if(R.type==='pass')saves.push([`Query closed as passed. ${a.first} stays on your contact list, marked as queried for this book`,'var(--stone)']);
+ if(R.type==='offer'){saves.push([`Offer deadline ${fmt(R.offerBy)} pinned to the top of your dashboard`]);if(R.notify)saves.push([`${ACTIVE().length-1} “Tell them about the offer” to-dos, due ${fmt(offWeekend(add(TODAY,1)))}`,'var(--blush)'])}
+ return[h,saves,true,'Save response']}
+
+/* NUDGE */
+function nudgeRec(q,a){const past=diff(TODAY,q.window);
+ if(past<0)return{tab:'plan',rec:'plan',why:`Too early — ${a.first}'s window closes ${rel(q.window)}`};
+ if(q.nudges.length)return{tab:'sent',rec:'close',why:`You've already nudged ${a.first} once`};
+ if(a.nrmn)return{tab:'sent',rec:'close',why:`${a.first}'s guidelines say no reply means no`};
+ return{tab:'sent',rec:'sent',why:`${a.first}'s window closed ${past===0?'today':rel(q.window)}`}}
+function soFar(q,a,extra){const past=diff(TODAY,q.window),fs=!!q.fullSent;
+ if(['Partial requested','Full requested','Revise & resubmit'].includes(q.st)){const ev=q.tl.find(e=>e[0]===q.st);const sb=q.sendBy||add(TODAY,7);
+  const pts=[{l:'Queried',d:q.sent,c:'done'},{l:q.st,d:ev?ev[1]:TODAY,c:'done'},...(extra||[]),{l:'Send by',d:sb,c:'fut'}].sort((x,y)=>x.d-y.d);
+  if(!extra)pts.push({l:'Today',d:TODAY,c:'today'});return track(pts.sort((x,y)=>x.d-y.d))}
+ const pts=[...(fs?[{l:'Queried',d:q.sent,c:'done'}]:[]),{l:fs?(q.sentLabel||'Full sent'):'Queried',d:q.fullSent||q.sent,c:'done'},{l:past>=0?'Window closed':'Window closes',d:q.window,c:past>=0?'done':'fut'},...q.nudges.map(n=>({l:'Nudged',d:n,c:'nudge'})),...(extra||[])].sort((x,y)=>x.d-y.d);
+ if(!extra&&diff(TODAY,pts[pts.length-1].d)>0)pts.push({l:'Today',d:TODAY,c:'today'});
+ return track(pts)}
+function renderNudge(q,a){const N=F.nudge;let h='',saves=[];
+ const past=diff(TODAY,q.window),rc=nudgeRec(q,a);
+ const nudgedN=q.nudges.length;const last=nudgedN?q.nudges[nudgedN-1]:null;
+ // 1 · where it stands
+ const paths=[['sent','I’ve sent a nudge','Record it, and plan what happens if it’s still quiet'],['plan','Remind me to send one','Put it on your to-do list for the right day']];
+ if(rc.rec==='close'||past>=28)paths.push(['close','Close it instead','If it’s time to move on']);
+ const lab={sent:'Logging a nudge',plan:'Reminder to nudge'}[N.tab];
+ h+=`<div class="sec" data-t="Where it stands" data-s="${lab}">`;
+ const clk=k=>k==='close'?"F.mode='close';F.step=0;F._jump=true;render()":`F.nudge.tab='${k}';render()`;
+ const ws=document.body.dataset.ws||'A';
+ const el=diff(TODAY,q.fullSent||q.sent),win=Math.round(diff(q.window,q.fullSent||q.sent));const fs=!!q.fullSent;const startL=fs?'Full sent':'Queried';const wksN=Math.round(win/7);
+ const winTxt=past>0?`closed ${past===1?'yesterday':rel(q.window)}`:past===0?'closes today':`closes ${rel(q.window)}`;
+ const nudTxt=nudgedN?`you nudged on ${fmt(last)}`:`you haven't nudged yet`;
+ const plannedNote=q.nudgePlan?`<div class="note info"><span class="ni">PLANNED</span><span>You planned to nudge on <b>${fmt(q.nudgePlan)}</b>.</span></div>`:'';
+ const radios=()=>`<div class="rads">${paths.map(([k,t,d])=>`<button class="rad${N.tab===k?' on':''}" onclick="${clk(k)}"><i></i><span><b>${t}</b><small>${d}</small></span>${rc.rec===k?'<em>SUGGESTED</em>':''}</button>`).join('')}</div>`;
+ const why=`<div class="why"><em>SUGGESTED</em> ${rc.why}.</div>`;
+ if(ws==='A'){ // timeline
+  const pts=[...(fs?[{l:'Queried',d:q.sent,c:'done'}]:[]),{l:startL,d:q.fullSent||q.sent,c:'done'},{l:past>=0?'Window closed':'Window closes',d:q.window,c:past>=0?'done':'fut'},...q.nudges.map(n=>({l:'Nudged',d:n,c:'nudge'}))].sort((x,y)=>x.d-y.d);
+  if(diff(TODAY,pts[pts.length-1].d)>0)pts.push({l:'Today',d:TODAY,c:'today'});
+  h+=`<div class="plan wsA"><h5>SO FAR</h5>${track(pts)}</div>`;
+  h+=`<p class="wsl">${a.first}'s ${wksN}-week window ${winTxt}, and ${nudTxt}.</p>`+plannedNote;
+  h+=`<div class="fl">WHAT WOULD YOU LIKE TO DO?</div>`+radios();
+ }
+ if(ws==='B'){ // sentence
+  h+=`<p class="story">${fs?`You sent ${a.first} the full manuscript`:`You queried ${a.first}`} <u>${el} days ago</u>. ${a.first}'s ${wksN}-week ${fs?'reading ':''}window ${past>0?`closed <u>${past===1?'yesterday':rel(q.window)}</u>`:past===0?'closes <u>today</u>':`closes <u>${rel(q.window)}</u>`}${nudgedN?`, and you nudged on <u>${fmt(last)}</u>`:''}.${a.nrmn?' Their guidelines say no reply means no.':''}</p>`+plannedNote;
+  h+=why+`<span class="seg wide big">${paths.filter(p=>p[0]!=='close').map(([k,t])=>`<span class="${N.tab===k?'on':''}" onclick="${clk(k)}">${t}</span>`).join('')}</span>`;
+  if(paths.some(p=>p[0]==='close'))h+=`<p class="orclose">or <a onclick="${clk('close')}">close the query instead</a></p>`;
+ }
+ if(ws==='C'){ // ledger
+  const rows=[['Queried',fmt(q.sent),`${diff(TODAY,q.sent)} days ago`,''],...(fs?[['Full sent',fmt(q.fullSent),`${el} days ago`,'']]:[]),[fs?'Reading window':'Reply window',`${wksN} weeks · ${fmt(q.window)}`,past>0?`${past} days over`:past===0?'today':rel(q.window),past>=0?'hot':''],['Nudges',nudgedN?`${nudgedN} · last ${fmt(last)}`:'None yet','',''],['Their guidelines',a.nrmn?'No reply means no':'They reply to everyone','','']];
+  if(q.nudgePlan)rows.push(['Planned',`Nudge on ${fmt(q.nudgePlan)}`,rel(q.nudgePlan),'']);
+  h+=`<div class="ledger">${rows.map(([k,v,r,c])=>`<div class="${c}"><b>${k}</b><span>${v}</span><small>${r}</small></div>`).join('')}</div>`;
+  h+=`<div class="fl">WHAT WOULD YOU LIKE TO DO?</div><div class="chips">${paths.map(([k,t])=>`<button class="chip${N.tab===k?' on':''}" onclick="${clk(k)}">${t}</button>`).join('')}</div>`+why;
+ }
+ if(ws==='D'){ // progress bar
+  const span=Math.max(win,el)*1.12;const wp=win/span*100,ep=Math.min(el/span*100,100);
+  h+=`<div class="pbar"><div class="ptop"><b>Day ${el}</b><span>${wksN}-WEEK ${fs?'READING ':''}WINDOW = ${win} DAYS</span></div>
+   <div class="pb"><i class="in" style="width:${Math.min(ep,wp)}%"></i>${el>win?`<i class="ov" style="left:${wp}%;width:${ep-wp}%"></i>`:''}<i class="wl" style="left:${wp}%"></i>${q.nudges.map(n=>`<i class="nd" style="left:${diff(n,q.fullSent||q.sent)/span*100}%"></i>`).join('')}<i class="now" style="left:${ep}%"></i></div>
+   <div class="pleg"><span>${up(q.fullSent||q.sent)} · ${fs?'FULL SENT':'QUERIED'}</span><span style="left:${wp}%">${up(q.window)} · WINDOW</span></div>
+   <p>${el>win?`<b>${el-win} days past</b> ${a.first}'s window`:el===win?`${a.first}'s window closes <b>today</b>`:`<b>${win-el} days left</b> in ${a.first}'s window`} · ${nudgedN?`nudged ${fmt(last)}`:'no nudges yet'}</p></div>`+plannedNote;
+  h+=`<div class="fl">WHAT WOULD YOU LIKE TO DO?</div>`+radios();
+ }
+ h+=`</div>`;
+ const ear=past<0?fa('check',`Earlier than ${a.first}'s window — it closes ${fmt(q.window)}`):nudgedN?fa('check',`A second nudge — you last nudged ${fmt(last)}`):a.nrmn?fa('check',`${a.first}'s guidelines say no reply means no`):'';
+ if(N.tab==='sent'){
+  const bad=diff(N.sent,q.sent)<0?fa('block','That date is before you queried'):ear;
+  h+=`<div class="sec"${bad} data-t="The nudge" data-s="${fmt(N.sent)} · ${N.via}">`+dateField('nSent','NUDGED ON',N.sent,pastAnchors(),'past');
+  h+=`<div class="fl">VIA</div><div class="chips">${['Email','QueryManager','Online form'].map(v=>`<button class="chip${N.via===v?' on':''}" onclick="F.nudge.via='${v}';render()">${v}</button>`).join('')}</div>`;
+  h+=`<div class="fl">WHAT YOU SAID · OPTIONAL</div><textarea class="fta" placeholder="Paste it in if you want it on the record.">${F._note||''}</textarea></div>`}
+ if(N.tab==='sent'){
+  h+=`<div class="sec" data-t="If it's still quiet" data-s="Consider closing ${fmt(N.then)}"><p class="secs">A nudge usually gets an answer within a month, or never.</p>`;
+  h+=dateField('nThen','CONSIDER CLOSING ON',N.then,futureWeeks(N.sent,[['2w','In two weeks',14],['4w','In four weeks',28],['6w','In six weeks',42]]).map(x=>x.k==='4w'?{...x,label:'In four weeks · usual'}:x),'future');
+  h+=`<div class="plan"><h5>THE PLAN<span class="tk">┆ TODAY</span></h5>${track([{l:'Queried',d:q.sent,c:'done'},{l:past>=0?'Window closed':'Window closes',d:q.window,c:past>=0?'done':'fut'},...q.nudges.map(n=>({l:'Nudged',d:n,c:'nudge'})),{l:nudgedN?'Nudged again':'Nudged',d:N.sent,c:'nudge'},{l:'Consider closing',d:N.then,c:'close'}].sort((x,y)=>x.d-y.d))}</div></div>`;
+  saves.push([`<b style="font-family:var(--machine);font-weight:400">Nudge sent</b> to ${a.n}, ${fmt(N.sent)}, via ${N.via}`,'var(--blush)']);
+  saves.push([`The overdue flag clears; the row reads “Nudged ${up(N.sent)}”`]);
+  saves.push([`“Consider closing” lands on your to-do on ${fmt(N.then)}`,'var(--stone)']);
+  if(q.nudgePlan)saves.push([`Your planned reminder for ${fmt(q.nudgePlan)} is done — it comes off your to-do`]);
+  return[h,saves,true,'Log nudge']}
+ // plan
+ const anchors=nudgeAnchors(q);
+ const hit=anchors.find(x=>x.k===N.whenMode);if(hit&&!same(hit.raw||hit.d,hit.d))DFSHIFT.nWhen='MOVED OFF THE WEEKEND';
+ const early=diff(N.when,q.window)<0?fa('check',`Before ${a.first}'s window closes on ${fmt(q.window)}`):'';
+ h+=`<div class="sec"${early} data-t="When to nudge" data-s="${fmt(N.when)}"><p class="secs">${past>=0?'The window has passed, so any day from now is fair.':'Most agents say to wait until the window closes, then give it a week.'}</p>`;
+ h+=dateField('nWhen','REMIND ME ON',N.when,anchors,'future');
+ if(diff(N.when,q.window)<0)h+=`<div class="note warn"><span class="ni">EARLY</span><span>That's before ${a.first}'s window closes on ${fmt(q.window)}. An early nudge can read as impatient.</span></div>`;
+ h+=`<div class="plan"><h5>THE PLAN<span class="tk">┆ TODAY</span></h5>${track([{l:'Queried',d:q.sent,c:'done'},{l:past>=0?'Window closed':'Window closes',d:q.window,c:past>=0?'done':'fut'},{l:'Nudge',d:N.when,c:'nudge'},{l:'Consider closing',d:add(N.when,28),c:'close',s:'4 WKS ON'}].sort((x,y)=>x.d-y.d))}</div></div>`;
+ saves.push([`“Nudge ${a.first}” on your to-do for ${fmt(N.when)} — tapping it opens this drawer, ready to log the nudge`,'var(--blush)']);
+ saves.push([`The row reads “Nudge planned ${up(N.when)}” until then, instead of overdue`]);
+ saves.push([`If they reply first, the reminder cancels itself`]);
+ return[h,saves,true,'Schedule nudge']}
+function verb(){if(!F)return'save';if(F.mode==='nudge')return F.nudge.tab==='plan'?'schedule':'log';if(F.mode==='offer')return({wait:'save',accept:'accept',decline:'decline'})[F.of.dec];return({log:'log',resp:'save',close:'close',matsent:'log',edit:'save'})[F.mode]||'save'}
+/* SENT WHAT THEY ASKED FOR */
+function renderMatSent(q,a){const M=F.ms;let h='',saves=[];
+ const kind=q.st==='Full requested'?'full':q.st==='Revise & resubmit'?'rr':'partial';
+ const reqOn=(q.tl.find(e=>e[0]===q.st)||[0,TODAY])[1];const due=q.sendBy||add(TODAY,7);
+ const what=kind==='full'?'the full manuscript':kind==='rr'?'a revised manuscript':(q.req?`the ${sampleName(q.req.s)}`:'a partial');
+ // 1 · the request
+ h+=`<div class="sec" data-t="The request" data-s="${kind==='partial'&&q.req?sampleName(q.req.s):kind==='full'?'Full manuscript':'Revision'} · due ${fmt(due)}">`;
+ h+=`<div class="plan wsA"><h5>SO FAR</h5>${soFar(q,a)}</div>`;
+ const left=diff(due,TODAY);
+ h+=`<p class="wsl">${a.first} asked for ${what} on ${fmt(reqOn)}. ${left>0?`It's due by ${fmt(due)}, ${rel(due)}.`:left===0?`It's due <b>today</b>.`:`It was due ${fmt(due)}, ${rel(due)}.`}</p></div>`;
+ // 2 · what you're sending
+ let f2='';
+ if(kind==='partial'&&q.req){const r=q.req.s,m=M.s;if(r.unit!==m.unit||r.amt!==m.amt||!!r.sect!==!!m.sect)f2=fa('check',`${a.first} asked for the ${sampleName(r)} — you're sending ${m.sect?'':'the '}${sampleName(m)}`)}
+ h+=`<div class="sec"${f2} data-t="What you're sending" data-s="${kind==='partial'?(M.syn?'Synopsis and ':'')+sampleName(M.s):kind==='full'?'Full manuscript · '+M.ver:'Revised manuscript · '+M.ver}">`;
+ if(kind==='partial'){h+=sampleBlock('F.ms.s',M.s,false);
+  h+=`<div class="tgl${M.syn?' on':''}" onclick="F.ms.syn=!F.ms.syn;render()"><span class="bx">${M.syn?'✓':''}</span><b>A synopsis too</b><small>${M.syn?'V2 · CURRENT':''}</small></div>`;
+  h+=`<div class="sline"><b>${M.syn?'Synopsis and ':''}${sampleName(M.s)}</b><span>${sampleApprox(M.s)}</span></div>`;
+  if(!f2&&q.req)h+=`<div class="note ok"><span class="ni">MATCH</span><span>Matches what ${a.first} asked for.</span></div>`;
+  else if(f2)h+=`<div class="note warn"><span class="ni">CHECK</span><span>${a.first} asked for the ${sampleName(q.req.s)}. <a onclick="F.ms.s=structuredClone(Q[cur].req.s);render()">Match the request</a></span></div>`}
+ else{const vers=kind==='rr'?[['v5','Draft 5','Your revision · new'],['v4','Draft 4','The version they read']]:[['v4','Draft 4','Current · 50,000 words'],['v3','Draft 3','48,200 words']];
+  h+=`<div class="fl">WHICH VERSION</div><div class="rads">${vers.map(([k,t,d])=>`<button class="rad${M.ver===k?' on':''}" onclick="F.ms.ver='${k}';render()"><i></i><span><b>${t}</b><small>${d}</small></span></button>`).join('')}</div>`;
+  h+=`<div class="tgl${M.syn?' on':''}" style="margin-top:12px" onclick="F.ms.syn=!F.ms.syn;render()"><span class="bx">${M.syn?'✓':''}</span><b>A synopsis too</b></div>`;
+  if(kind==='rr')h+=`<div class="fl">WHAT YOU CHANGED · OPTIONAL</div><textarea class="fta" placeholder="A few lines on the revision, for your own record.">${F._note||''}</textarea>`;
+  if(kind==='rr'&&M.ver==='v4')h+=`<div class="note warn"><span class="ni">CHECK</span><span>That's the version ${a.first} has already read.</span></div>`}
+ h+=`</div>`;
+ // 3 · sent
+ const bad=diff(M.sent,reqOn)<0?fa('block','That date is before they asked'):diff(M.sent,due)>0?fa('check',`That's after the ${fmt(due)} deadline`):'';
+ h+=`<div class="sec"${bad} data-t="Sending it" data-s="${fmt(M.sent)} · ${M.via}">`+dateField('msSent','SENT ON',M.sent,pastAnchors(),'past');
+ h+=`<div class="fl">VIA</div><div class="chips">${['Email','QueryManager','Online form'].map(v=>`<button class="chip${M.via===v?' on':''}" onclick="F.ms.via='${v}';render()">${v}</button>`).join('')}</div></div>`;
+ // 4 · reading window
+ const wk=kind==='partial'?[6,8,10]:[8,12,16];
+ const ex=wk.map((w,i)=>({k:'w'+i,label:i===1?`Usual for a ${kind==='partial'?'partial':'full'} · ${w} wks`:`${w} wks`,d:add(M.sent,w*7)}));ex.forEach(x=>x.sub=`${x.d.getDate()} ${MON[x.d.getMonth()]}`);
+ if(M.expMode!=='custom'){const x=ex.find(z=>z.k===M.expMode)||ex[1];M.exp=x.d;M.expMode=x.k}
+ h+=`<div class="sec" data-t="Reading window" data-s="Reply by ${fmt(M.exp)}"><p class="secs">${kind==='partial'?'Partials':'Full manuscripts'} usually take longer than queries. We'll restart the clock from the day you sent it.</p>`;
+ h+=dateField('msExp','REPLY EXPECTED BY',M.exp,ex,'future');
+ h+=`<div class="fl">IF THEY DON'T REPLY BY THEN</div><div class="chips">${[['nudge','Remind me to nudge'],['nothing','Do nothing']].map(([k,l])=>`<button class="chip${M.ifNo===k?' on':''}" onclick="F.ms.ifNo='${k}';render()">${l}</button>`).join('')}</div>`;
+ const nd=M.ifNo==='nudge'?offWeekend(add(M.exp,7)):null;
+ const lab=kind==='full'?'Full sent':kind==='rr'?'Resubmitted':'Partial sent';
+ h+=`<div class="plan"><h5>THE PLAN<span class="tk">┆ TODAY</span></h5>${track([{l:'Queried',d:q.sent,c:'done'},{l:'Requested',d:reqOn,c:'done'},{l:lab,d:M.sent,c:'done'},{l:'Reply due',d:M.exp,c:'fut'},...(nd?[{l:'Nudge',d:nd,c:'nudge'}]:[])].sort((x,y)=>x.d-y.d))}</div></div>`;
+ saves.push([`${a.n} → <b style="font-family:var(--machine);font-weight:400">${lab}</b>, ${fmt(M.sent)}, via ${M.via}`,COL[lab]]);
+ saves.push([`It leaves “Your move” — the ball's in ${a.first}'s court again`]);
+ saves.push([`Reply expected by ${fmt(M.exp)}`]);
+ if(nd)saves.push([`“Nudge ${a.first}” lands on your to-do on ${fmt(nd)}`,'var(--blush)']);
+ saves.push([`Your “send by ${fmt(due)}” reminder comes off your to-do`]);
+ return[h,saves,true,'Log it']}
+
+/* OFFER */
+function renderOffer(q,a){const O=F.of;let h='',saves=[];
+ const others=Q.filter(x=>x!==q&&LIVE(x)&&x.st!=='Offer'||(x!==q&&x.st==='Offer'));
+ const left=diff(q.offerBy,TODAY);
+ // 1 · the offer
+ h+=`<div class="sec" data-t="The offer" data-s="Answer by ${fmt(q.offerBy)}">`;
+ h+=`<div class="plan wsA"><h5>SO FAR</h5>${track([{l:'Queried',d:q.sent,c:'done'},{l:'Full sent',d:q.fullSent,c:'done'},{l:'Offer',d:q.offerOn,c:'done'},{l:'Today',d:TODAY,c:'today'},{l:'Answer by',d:q.offerBy,c:'fut'}])}</div>`;
+ h+=`<p class="wsl">${a.first} offered on ${fmt(q.offerOn)}. You said you'd answer by ${fmt(q.offerBy)} — <b>${left} days</b> from now.</p></div>`;
+ // 2 · the others
+ const R={wait:'Waiting',full:'Wants the full',aside:'Stepped aside',offer:'Offered too'};
+ others.forEach(x=>{if(!O.others[x.id])O.others[x.id]={told:false,reply:'wait'}});
+ const told=others.filter(x=>O.others[x.id].told).length;
+ const f2=told<others.length?fa('check',`${others.length-told} of ${others.length} still to be told`):'';
+ h+=`<div class="sec"${f2} data-t="The others" data-s="${told} of ${others.length} told">`;
+ h+=`<p class="secs">Everyone still considering <b>Murphy's Day Out</b> should hear about the offer and your deadline. Tick them off as you tell them, and note what they say.</p>`;
+ h+=`<div class="othr">${others.map(x=>{const o=O.others[x.id],g=AG[x.ag];return`<div class="oth"><div class="ot"><span class="av">${g.i}</span><span><b>${g.n}</b><small>${x.st.toUpperCase()} · ${g.a.toUpperCase()}</small></span><button class="told${o.told?' on':''}" onclick="F.of.others['${x.id}'].told=!F.of.others['${x.id}'].told;render()">${o.told?'✓ Told':'Mark as told'}</button></div>${o.told?`<div class="seg wide sm">${Object.entries(R).map(([k,l])=>`<span class="${o.reply===k?'on':''}" onclick="F.of.others['${x.id}'].reply='${k}';render()">${l}</span>`).join('')}</div>`:''}</div>`}).join('')}</div>`;
+ const wantFull=others.filter(x=>O.others[x.id].reply==='full'),rival=others.filter(x=>O.others[x.id].reply==='offer');
+ if(wantFull.length)h+=`<div class="note info"><span class="ni">NEXT</span><span>${wantFull.map(x=>AG[x.ag].first).join(' and ')} ${wantFull.length>1?'want':'wants'} the full — we'll add “Send the full” to your to-do for today.</span></div>`;
+ if(rival.length)h+=`<div class="note ok"><span class="ni">ANOTHER OFFER</span><span>${rival.map(x=>AG[x.ag].first).join(' and ')} offered too. Record it on ${rival.length>1?'their queries':'their query'} so you can compare.</span></div>`;
+ h+=`</div>`;
+ // 3 · the call
+ h+=`<div class="sec" data-t="The call" data-s="${({none:'Not arranged',booked:'Booked · '+fmt(O.callOn),done:'Had the call'})[O.call]}"><p class="secs">Most agents offer a call to talk through the book and how they work. Optional.</p>`;
+ h+=`<span class="seg wide">${[['none','Not arranged'],['booked','Booked'],['done','Had the call']].map(([k,l])=>`<span class="${O.call===k?'on':''}" onclick="F.of.call='${k}';render()">${l}</span>`).join('')}</span>`;
+ if(O.call==='booked')h+=dateField('ofCall','CALL ON',O.callOn,futureWeeks(TODAY,[['1d','Tomorrow',1],['2d','In two days',2],['1w','In a week',7]]),'future');
+ if(O.call==='done')h+=`<div class="fl">NOTES FROM THE CALL · OPTIONAL</div><textarea class="fta" placeholder="What they said about the book, edits, their list, how they work.">${F._note||''}</textarea>`;
+ h+=`</div>`;
+ // 4 · decision
+ const dF=O.dec==='accept'&&told<others.length?fa('check','Not everyone has been told about the offer yet'):'';
+ h+=`<div class="sec"${dF} data-t="Your decision" data-s="${({wait:'Still deciding',accept:'Accepting',decline:'Declining'})[O.dec]}">`;
+ h+=`<div class="rads">${[['wait','Still deciding','Save your progress — nothing closes'],['accept',`Accept ${a.first}'s offer`,`${a.first} becomes your agent`],['decline',`Decline ${a.first}'s offer`,'This query closes as offer declined']].map(([k,t,d])=>`<button class="rad${O.dec===k?' on':''}" onclick="F.of.dec='${k}';render()"><i></i><span><b>${t}</b><small>${d}</small></span></button>`).join('')}</div>`;
+ const wd=others.filter(x=>O.withdraw[x.id]!==false);
+ if(O.dec==='accept'){h+=`<div class="fl">WITHDRAW FROM EVERYONE ELSE<span class="r">${wd.length} OF ${others.length}</span></div><div class="othr">${others.map(x=>{const g=AG[x.ag],on=O.withdraw[x.id]!==false;return`<div class="tgl${on?' on':''}" onclick="F.of.withdraw['${x.id}']=${on?'false':'true'};render()"><span class="bx">${on?'✓':''}</span><b>${g.n}</b><small>${x.st.toUpperCase()}</small></div>`}).join('')}</div>`;
+  h+=`<div class="tgl${O.remindTell?' on':''}" style="margin-top:14px" onclick="F.of.remindTell=!F.of.remindTell;render()"><span class="bx">${O.remindTell?'✓':''}</span><b>Remind me to tell each of them</b></div>`}
+ if(O.dec==='decline')h+=`<div class="note info"><span class="ni">FOR THE RECORD</span><span>${a.first} stays on your Contact list. Declining an offer is recorded as your decision, not a pass.</span></div>`;
+ h+=`<div class="plan"><h5>${O.dec==='wait'?'WHAT\'S AHEAD':'THE RECORD'}<span class="tk">┆ TODAY</span></h5>${track(O.dec==='wait'?[{l:'Offer',d:q.offerOn,c:'done'},...(O.call==='booked'?[{l:'Call',d:O.callOn,c:'fut'}]:[]),{l:'Answer by',d:q.offerBy,c:'fut'}].sort((x,y)=>x.d-y.d):[{l:'Queried',d:q.sent,c:'done'},{l:'Full sent',d:q.fullSent,c:'done'},{l:'Offer',d:q.offerOn,c:'done'},{l:O.dec==='accept'?'Signed':'Declined',d:TODAY,c:O.dec==='accept'?'done':'close'}])}</div></div>`;
+ if(O.dec==='wait'){saves.push([`Progress saved: ${told} of ${others.length} told${O.call==='booked'?`, call on ${fmt(O.callOn)}`:''}`]);if(wantFull.length)saves.push([`“Send the full” on your to-do for ${wantFull.map(x=>AG[x.ag].first).join(' and ')}`,'var(--blush)']);saves.push([`“Answer ${a.first}” stays pinned to your dashboard until ${fmt(q.offerBy)}`])}
+ if(O.dec==='accept'){saves.push([`<b style="font-family:var(--machine);font-weight:400">Signed</b> — ${a.n} becomes your agent for Murphy's Day Out`,'var(--offer)']);saves.push([`${wd.length} other ${wd.length===1?'query closes':'queries close'} as “withdrawn — accepted an offer”`,'var(--stone)']);if(O.remindTell&&wd.length)saves.push([`${wd.length} “Tell them you've signed” to-dos, due ${fmt(offWeekend(add(TODAY,1)))}`,'var(--blush)']);saves.push([`Every planned nudge and reminder for this book comes off your to-do`])}
+ if(O.dec==='decline'){saves.push([`Query closes · offer declined · ${fmt(TODAY)}`,'var(--stone)']);saves.push([`Your other queries carry on as they were`])}
+ return[h,saves,true,({wait:'Save progress',accept:'Accept offer',decline:'Decline offer'})[O.dec]]}
+
+/* EDIT AN ENTRY */
+function renderEdit(q,a){const E=F.edit;let h='',saves=[];const ev=q.tl[E.k];
+ const newer=E.k>0?q.tl[E.k-1][1]:TODAY,older=E.k<q.tl.length-1?q.tl[E.k+1][1]:null;
+ const bad=diff(E.d,newer)>0?fa('block',`It must be on or before ${fmt(newer)}${E.k>0?`, when “${q.tl[E.k-1][0]}” happened`:''}`):older&&diff(E.d,older)<0?fa('block',`It must be on or after ${fmt(older)}, when “${q.tl[E.k+1][0]}” happened`):'';
+ const anch=[{k:'orig',label:'As recorded',d:E.orig,sub:`${E.orig.getDate()} ${MON[E.orig.getMonth()]}`}];
+ h+=`<div class="sec"${bad} data-t="${ev[0]}" data-s="${fmt(E.d)}${same(E.d,E.orig)?'':' · was '+fmt(E.orig)}">`;
+ h+=`<p class="secs">Correct the date or the note. The query's plan and reminders are worked out again from the new date.</p>`;
+ h+=dateField('edDate','DATE',E.d,anch,'past');
+ h+=`<div class="fl">NOTE</div><textarea class="fta">${F._note||''}</textarea></div>`;
+ if(!same(E.d,E.orig))saves.push([`“${ev[0]}” moves from ${fmt(E.orig)} to ${fmt(E.d)}`]);
+ saves.push([`Dates worked out from it — reply expected, nudge reminders — move with it`]);
+ return[h,saves,true,'Save correction']}
+
+/* CLOSE */
+const WHY={noreply:['No reply','The window has passed and it’s gone quiet'],said:['They said no','A pass is a response — we’ll record it as one'],withdraw:['I’m withdrawing','You’re taking it off their desk'],gone:['They’ve stopped taking queries','Closed to queries, or left the agency']};
+function renderClose(q,a){const C=F.close;let h='',saves=[];
+ const past=diff(TODAY,q.window),owe=['Partial requested','Full requested','Revise & resubmit'].includes(q.st);
+ const sug=past>0&&!owe?'noreply':null;
+ // 1 · where it stands + why
+ h+=`<div class="sec"${C.why?'':fa('block','Choose why it’s closing')} data-t="Where it stands" data-s="${C.why?WHY[C.why][0]:'Choose a reason'}">`;
+ h+=`<div class="plan wsA"><h5>SO FAR</h5>${soFar(q,a)}</div>`;
+ h+=owe?`<p class="wsl">${a.first} asked for the ${q.st==='Full requested'?'full manuscript':q.st==='Partial requested'?'partial':'revision'}, and it's due by ${fmt(q.sendBy||add(TODAY,7))}.</p>`:`<p class="wsl">${a.first}'s ${Math.round(diff(q.window,q.fullSent||q.sent)/7)}-week window ${past>0?`closed ${rel(q.window)}`:past===0?'closes today':`closes ${rel(q.window)}`}${q.nudges.length?`, and you nudged on ${fmt(q.nudges[q.nudges.length-1])}`:''}.</p>`;
+ if(owe)h+=`<div class="note warn"><span class="ni">YOUR MOVE</span><span>${a.first} is waiting on you. Closing drops the request — if you're not sending it, it's courteous to let ${a.first} know.</span></div>`;
+ h+=`<div class="fl">WHY IS IT CLOSING?</div><div class="rads">${Object.entries(WHY).filter(([k])=>!(owe&&k==='noreply')).map(([k,[t,d]])=>`<button class="rad${C.why===k?' on':''}" onclick="${k==='said'?"F.mode='resp';F.resp.type='pass';F.step=1;F._jump=true;render()":`F.close.why='${k}';render()`}"><i></i><span><b>${t}</b><small>${d}</small></span>${sug===k?'<em>SUGGESTED</em>':k==='said'?'<em class="go">RECORD A PASS →</em>':''}</button>`).join('')}</div></div>`;
+ if(!C.why)return[h,[],true,'Close query'];
+ // 2 · details
+ const early=C.why==='noreply'&&past<0?fa('check',`${a.first}'s window doesn't close until ${fmt(q.window)}`):'';
+ const bad=diff(C.on,q.sent)<0?fa('block','That date is before you queried'):early;
+ const anch=pastAnchors();if(C.why==='noreply'&&past>0)anch.push({k:'win',label:'When the window closed',d:q.window,sub:`${q.window.getDate()} ${MON[q.window.getMonth()]}`});
+ const detT={noreply:'Calling it',withdraw:'Withdrawing',gone:'Their status'}[C.why];
+ let ds=fmt(C.on);if(C.why==='withdraw')ds=({offer:'Offer elsewhere',revise:'Revising the book',other:'Other reason'})[C.wd]+' · '+ds;
+ h+=`<div class="sec"${bad} data-t="${detT}" data-s="${ds}">`;
+ if(C.why==='noreply'){
+  h+=dateField('closeOn','CLOSED ON',C.on,anch,'past');
+  h+=`<div class="note info"><span class="ni">FOR THE RECORD</span><span>${diff(C.on,q.fullSent||q.sent)} days of silence${q.nudges.length?` and ${q.nudges.length===1?'one nudge':q.nudges.length+' nudges'}`:''}. Analytics counts this as “no reply”, not a pass.</span></div>`}
+ if(C.why==='withdraw'){
+  h+=`<div class="fl">WHY</div><div class="chips">${[['offer','An offer elsewhere'],['revise','I’m revising the book'],['other','Something else']].map(([k,l])=>`<button class="chip${C.wd===k?' on':''}" onclick="F.close.wd='${k}';render()">${l}</button>`).join('')}</div>`;
+  if(C.wd==='offer')h+=`<div class="note info"><span class="ni">TIP</span><span>Recording the offer on that agent's query sets up “tell the others” for every agent at once — including ${a.first}.</span></div>`;
+  h+=dateField('closeOn','WITHDRAWN ON',C.on,anch,'past');
+  h+=`<div class="tgl${C.told?' on':''}" style="margin-top:16px" onclick="F.close.told=!F.close.told;render()"><span class="bx">${C.told?'✓':''}</span><b>I’ve told ${a.first}</b></div>`;
+  if(!C.told)h+=`<div class="tgl${C.remindTell?' on':''}" onclick="F.close.remindTell=!F.close.remindTell;render()"><span class="bx">${C.remindTell?'✓':''}</span><b>Remind me to tell ${a.first}</b><small>TOMORROW</small></div>`}
+ if(C.why==='gone'){
+  h+=dateField('closeOn','CLOSED ON',C.on,anch,'past');
+  h+=`<div class="fl">CHECK BACK ON ${a.first.toUpperCase()}</div><div class="chips">${[['3m','In 3 months'],['6m','In 6 months'],['no','No need']].map(([k,l])=>`<button class="chip${C.recheck===k?' on':''}" onclick="F.close.recheck='${k}';render()">${l}</button>`).join('')}</div>`;
+  h+=`<p class="secs" style="margin-top:8px">A reminder to see whether they've reopened, or where they've moved to.</p>`}
+ h+=`<div class="fl">NOTE · OPTIONAL</div><textarea class="fta" placeholder="A line for future you.">${F._note||''}</textarea>`;
+ h+=`<div class="plan"><h5>THE RECORD<span class="tk">┆ TODAY</span></h5>${soFar(q,a,[{l:'Closed',d:C.on,c:'close'}])}</div></div>`;
+ // saves
+ const rsn={noreply:'no reply',withdraw:'withdrawn',gone:'closed to queries'}[C.why];
+ saves.push([`Query closed · ${rsn} · ${fmt(C.on)}`,'var(--stone)']);
+ saves.push([`It leaves your active queries and the Birds-eye view; the full history stays on the query`]);
+ if(q.nudgePlan)saves.push([`Your planned nudge (${fmt(q.nudgePlan)}) comes off your to-do`]);
+ if(q.closePlan)saves.push([`“Consider closing” (${fmt(q.closePlan)}) is done — it comes off your to-do`]);
+ if(owe)saves.push([`The ${q.st.toLowerCase()} is dropped from “Your move”`]);
+ if(C.why==='withdraw'&&!C.told&&C.remindTell)saves.push([`“Tell ${a.first} you've withdrawn” on your to-do for ${fmt(offWeekend(add(TODAY,1)))}`,'var(--blush)']);
+ if(C.why==='gone'&&C.recheck!=='no')saves.push([`“Check on ${a.first}” on your to-do in ${C.recheck==='3m'?'3':'6'} months`,'var(--blush)']);
+ saves.push([`${a.first} stays on your Contact list, marked as queried for Murphy's Day Out — free to query with your next book`]);
+ return[h,saves,true,'Close query']}
+
+/* ---------- layouts: sections / accordion / journey ---------- */
+function layout(){const b=$('mBody'),lay=document.body.dataset.lay;const secs=[...b.querySelectorAll(':scope > .sec')];const saves=b.querySelector(':scope > .saves');
+ const n=secs.length;F.open=Math.min(F.open,n-1);const last=n;
+ F.seen=F.seen||new Set();
+ const blocked=secs.findIndex(s=>s.dataset.f==='block');
+ if(F.step>n)F.step=n;
+ if(lay==='jour'&&blocked>=0&&F.step>blocked&&F.step===last&&!F._reviewOk){} // review can show blocks
+ if(lay==='jour')F.seen.add(F.step);
+ const dir=F._lastStep===undefined||F._lastStep===F.step?0:(F.step>F._lastStep?1:-1);const moved=dir!==0;const fromS=F._lastStep;F._lastStep=F.step;
+ const state=i=>{const f=secs[i].dataset.f;if(f==='block')return'blk';if(f==='check')return'chk';return F.seen.has(i)?'done':'auto'};
+ secs.forEach((s,i)=>{const hd=document.createElement('div');hd.className='shd';
+  const done=lay==='jour'?i<F.step:lay==='acc'?i<F.open:false;
+  hd.innerHTML=`<span class="num${done?' done':''}">${done?'✓':i+1}</span><b>${s.dataset.t||''}</b><span class="sum">${s.dataset.s||''}</span><span class="ed">EDIT</span>`;
+  s.prepend(hd);
+  if(lay==='jour'&&s.dataset.f==='check'&&i===F.step&&!s.querySelector('.note.warn')){const nb=document.createElement('div');nb.className='note warn';nb.innerHTML=`<span class="ni">WORTH A LOOK</span><span>${s.dataset.fm}. You can still carry on.</span>`;hd.after(nb)}
+  if(lay==='acc'){const shut=i!==F.open;s.classList.toggle('shut',shut);if(shut)hd.onclick=()=>{F.open=i;render()};
+   else if(i<n-1&&F._ok){const c=document.createElement('button');c.className='cont';c.innerHTML=`Continue · ${secs[i+1].dataset.t}`;c.onclick=()=>{F.open=i+1;render()};s.appendChild(c)}}
+  if(lay==='jour'){s.classList.toggle('hidden',i!==F.step);if(moved&&i===F.step)s.classList.add(dir>0?'in-f':'in-b')}});
+ if(lay==='jour'){
+  // move the plan to the review step
+  const plans=[...b.querySelectorAll('.sec .plan')];
+  const st=document.createElement('div');st.className='stepper';
+  const VB=verb();const names=secs.map(s=>s.dataset.t).concat(['Check and '+VB]);
+  st.innerHTML=names.map((t,i)=>{const shown=k=>{const x=state(k);return x==='blk'&&!F.seen.has(k)?'auto':x};const cls=i===F.step?'cur':i<n?shown(i):(secs.some((z,k)=>z.dataset.f==='block'&&F.seen.has(k)&&k!==F.step)?'blk':'');const ic=i===F.step?i+1:cls==='done'?'✓':cls==='blk'||cls==='chk'?'!':i+1;
+   return`<span class="stp ${cls}${i===F.step&&moved?' pop':''} go" data-i="${i}"><i>${ic}</i><em>${t}</em></span>`}).map((x,i,arr)=>i<arr.length-1?x+`<span class="stl${i<F.step?(moved&&dir>0&&i>=fromS&&i<F.step?' done fill':' done'):''}"></span>`:x).join('');
+  st.querySelectorAll('.stp').forEach(x=>x.onclick=()=>{if(!F._ok&&+x.dataset.i>0)return;F.step=+x.dataset.i;F._jump=true;render()});
+  b.prepend(st);
+  if(saves)saves.classList.toggle('hidden',F.step!==last);
+  if(F.step===last){
+   const rc=document.createElement('div');rc.className='recap'+(moved?' in-f':'');
+   const nb=secs.filter(s=>s.dataset.f==='block').length,nc=secs.filter(s=>s.dataset.f==='check').length;
+   let top='';if(nb)top=`<div class="gate blk"><b>${nb===1?'One thing':nb+' things'} to fix before this can be logged</b></div>`;
+   else if(nc)top=`<div class="gate chk"><b>Ready to ${VB}</b><span>${nc===1?'One thing looks':nc+' things look'} different from usual — worth a glance, but it won't stop you.</span></div>`;
+   else top=`<div class="gate ok"><b>Ready to ${VB}</b><span>Nothing looks out of place.</span></div>`;
+   rc.innerHTML=top+`<h5>YOUR ANSWERS</h5>`+secs.map((s,i)=>{const stt=state(i);
+    return`<div class="rr ${stt}" onclick="F.step=${i};F._jump=true;render()"><b>${s.dataset.t}</b><span>${s.dataset.s||'—'}${stt==='blk'||stt==='chk'?`<small class="fm">${s.dataset.fm}</small>`:''}${stt==='auto'?'<small class="au">SUGGESTED · NOT OPENED</small>':''}</span><u>${stt==='blk'?'FIX':'EDIT'}</u></div>`}).join('');
+   b.insertBefore(rc,saves||null);
+   if(plans.length){const pl=plans[plans.length-1];if(moved)pl.classList.add('rv');else pl.classList.add('rvs');pl.style.marginTop='20px';b.insertBefore(pl,saves||null);pl.querySelectorAll('.pt,.lab').forEach((e,k)=>e.style.animationDelay=`calc(var(--t2) + ${Math.floor(k/2)*90}ms*var(--k))`)}
+  }
+ }
+ // footer
+ const sv=$('mSave'),bk=$('mBack'),sk=$('mSkip');
+ const curBlocked=lay==='jour'&&F.step<last&&secs[F.step]&&secs[F.step].dataset.f==='block';
+ if(lay==='jour'&&F.step<last){sv.textContent=`Next · ${F.step+1<n?secs[F.step+1].dataset.t:'Check and '+verb()}`;sv.disabled=!F._ok||curBlocked}
+ else{sv.textContent=F._btn;sv.disabled=!F._ok||(lay==='jour'&&blocked>=0)}
+ bk.classList.toggle('hidden',!(lay==='jour'&&F.step>0));
+ sk.classList.toggle('hidden',!(lay==='jour'&&F._ok&&F.step<last-1&&!curBlocked));
+ $('dfoot').classList.toggle('confirm',!!F._conf);$('cfT').textContent=F._leave?'Leave this query to make a package?':'Discard this query?';$('cfS').textContent=F._leave?'What you’ve entered here won’t be kept.':'What you’ve entered will be lost.';$('cfB').textContent=F._leave?'Leave':'Discard';
+}
+function review(){F.step=$('mBody').querySelectorAll(':scope > .sec').length;F._jump=true;render()}
+function primary(){if(document.body.dataset.lay==='jour'){const n=$('mBody').querySelectorAll(':scope > .sec').length;if(F.step<n){F.step++;F._jump=true;render();return}}save()}
+function go(d){F.step=Math.max(0,F.step+d);F._jump=true;render()}
+
+/* ---------- save ---------- */
+let UNDO=null,tTimer=null,tDeadline=0,tLeft=0;
+function save(){const sv=$('mSave');if(sv.classList.contains('busy'))return;sv.classList.add('busy');sv.textContent=F.mode==='log'?'Logging':'Saving';
+ setTimeout(commit,420*K())}
+function commit(){const q=cur!==null?Q[cur]:null;let msg='',sub='',hit=null,kind='changed';
+ const snap=structuredClone(Q);
+ if(F.mode==='log'){const L=F.log,a=AG[L.ag];const nq={_new:true,id:'q'+Date.now(),ag:L.ag,st:'Queried',sent:L.sent,nudges:[],tl:[['Queried',L.sent,(L.pkg!=='custom'?PKGS.find(p=>p.k===L.pkg).n+' package: ':'')+pkgName(L.mat)+(Q.find(q=>q.ag===L.ag&&!LIVE(q))?' · requery':''),true]]};nq.window=L.expect;if(L.ifNo==='nudge')nq.nudgePlan=L.nudgeDate;Q.unshift(nq);hit=nq.id;kind='arrive';msg=`Query logged · ${a.n}`;sub=L.ifNo==='nudge'?`NUDGE REMINDER ${up(L.nudgeDate)} ADDED TO YOUR TO-DO`:`REPLY EXPECTED ${up(L.expect)}`}
+ if(F.mode==='resp'&&q&&q.st==='Closed'&&q.tl[0][0]==='Query closed')q.tl.shift();
+ if(F.mode==='resp'&&q){const R=F.resp,lab={partial:'Partial requested',full:'Full requested',rr:'Revise & resubmit',pass:'Passed',offer:'Offer'}[R.type];
+  q.tl.unshift([lab,R.recv,R.type==='partial'?`${R.syn?'Synopsis, ':''}${sampleName(R.s)}${R.sendByMode!=='none'?` · send by ${R.sendBy.getDate()} ${MON[R.sendBy.getMonth()]}`:''}`:R.type==='offer'?`answer by ${R.offerBy.getDate()} ${MON[R.offerBy.getMonth()]}`:'',true]);
+  const hadPlan=q.nudgePlan;q.st=lab;q.sendBy=R.sendByMode==='none'?offWeekend(add(TODAY,3)):R.sendBy;q.nudgePlan=null;hit=q.id;msg=`${lab} · ${AG[q.ag].n}`;sub=['partial','full','rr'].includes(R.type)?`SEND BY ${up(q.sendBy)}${hadPlan?' · PLANNED NUDGE CANCELLED':''}`:R.type==='offer'?`ANSWER BY ${up(R.offerBy)}`:'CLOSED AS PASSED'}
+ if(F.mode==='nudge'&&q){const N=F.nudge;hit=q.id;if(N.tab==='sent'){q.nudges.push(N.sent);q.tl.unshift(['Nudge sent',N.sent,N.via,true]);q.nudgePlan=null;q.closePlan=N.then;msg=`Nudge logged · ${AG[q.ag].n}`;sub=`CONSIDER CLOSING ${up(N.then)}`}
+  else{q.nudgePlan=N.when;msg=`Nudge planned · ${AG[q.ag].n}`;sub=`REMINDER ON ${up(N.when)}`}}
+ if(F.mode==='close'&&q){q.tl.unshift(['Query closed',F.close.on,({noreply:'No reply',withdraw:'Withdrawn',gone:'Closed to queries'})[F.close.why],true]);q.closePlan=null;q.st='Closed';q.nudgePlan=null;hit=q.id;msg=`Query closed · ${AG[q.ag].n}`;sub='AGENT STAYS ON YOUR CONTACT LIST'}
+ if(F.mode==='matsent'&&q){const M=F.ms;const kind=q.st==='Full requested'?'full':q.st==='Revise & resubmit'?'rr':'partial';const lab=kind==='full'?'Full sent':kind==='rr'?'Resubmitted':'Partial sent';
+  q.tl.unshift([lab,M.sent,kind==='partial'?`${M.syn?'Synopsis, ':''}${sampleName(M.s)}`:(kind==='rr'?'Revised manuscript ':'Full manuscript ')+M.ver,true]);q.st=lab;q.fullSent=M.sent;q.sentLabel=lab;q.window=M.exp;q.nudgePlan=M.ifNo==='nudge'?offWeekend(add(M.exp,7)):null;q.sendBy=null;hit=q.id;msg=`${lab} · ${AG[q.ag].n}`;sub=`REPLY EXPECTED ${up(M.exp)}`}
+ if(F.mode==='offer'&&q){const O=F.of;q.others=O.others;q.call=O.call;hit=q.id;
+  if(O.call==='booked'&&q.call!=='booked-logged'){q.tl.unshift(['Offer call',O.callOn,'booked',true])}
+  if(O.dec==='wait'){msg=`Offer progress saved · ${AG[q.ag].n}`;sub=`ANSWER BY ${up(q.offerBy)}`}
+  if(O.dec==='accept'){q.st='Signed';q.tl.unshift(['Offer accepted',TODAY,'',true]);let n=0;Q.forEach(x=>{if(x!==q&&LIVE(x)&&O.withdraw[x.id]!==false){x.tl.unshift(['Query closed',TODAY,'Withdrawn — accepted an offer']);x.st='Closed';x.nudgePlan=null;n++}});msg=`Signed with ${AG[q.ag].n}`;sub=`${n} OTHER QUERIES WITHDRAWN`}
+  if(O.dec==='decline'){q.st='Closed';q.tl.unshift(['Offer declined',TODAY,'',true]);msg=`Offer declined · ${AG[q.ag].n}`;sub='YOUR OTHER QUERIES CARRY ON'}}
+ if(F.mode==='edit'&&q){const e=q.tl[F.edit.k];const was=e[1];e[1]=F.edit.d;e[2]=F._note!==undefined?F._note:e[2];e[3]=true;if(e[0]==='Queried'){q.sent=F.edit.d;q.window=add(q.window,diff(F.edit.d,was))}hit=q.id;msg=`Entry corrected · ${AG[q.ag].n}`;sub=same(was,F.edit.d)?'NOTE UPDATED':`${e[0].toUpperCase()} NOW ${up(F.edit.d)}`}
+ if(F.mode==='log'){LASTLOG={sent:F.log.sent,via:F.log.via,pkg:F.log.pkg,mat:structuredClone(F.log.mat)}}else LASTLOG=null;
+ const fc=fromCard,cardAt=cur;
+ UNDO={snap,hit,kind,fc,msg};
+ document.body.classList.remove('s-drawer');F=null;$('mSave').classList.remove('busy');
+ const land=()=>{rows();const el=document.querySelector(`.qrow[data-id="${hit}"]`);if(el){el.classList.add(kind);el.scrollIntoView({block:'nearest',behavior:document.body.classList.contains('rm')?'auto':'smooth'})}};
+ if(fc){document.body.classList.remove('s-docked');setTimeout(()=>{openCard(Q.findIndex(x=>x.id===hit));rows()},200*K())}
+ else{document.body.classList.remove('s-dim','s-card','s-docked');setTimeout(land,160*K())}
+ showToast(msg,sub,true)}
+function showToast(msg,sub,undoable){const t=$('toast');clearTimeout(tTimer);$('tAgain').style.display=LASTLOG&&undoable?'':'none';
+ $('tMsg').textContent=msg;$('tSub').textContent=sub||'';t.classList.toggle('done',!undoable);
+ const dur=(undoable?8000:2200)*K();t.style.setProperty('--dur',dur+'ms');
+ t.classList.remove('on');void t.offsetWidth;t.classList.add('on');
+ $('tView').onclick=()=>{const x=Q.findIndex(q=>q.id===(UNDO&&UNDO.hit));hideToast(true);if(x>=0)openCard(x)};
+ tLeft=dur;tDeadline=Date.now()+dur;tTimer=setTimeout(()=>hideToast(),dur)}
+function hideToast(keep){$('toast').classList.remove('on');clearTimeout(tTimer);if(!keep)UNDO=null}
+function toastPause(p){if(!$('toast').classList.contains('on'))return;if(p){clearTimeout(tTimer);tLeft=tDeadline-Date.now()}else{tDeadline=Date.now()+tLeft;tTimer=setTimeout(()=>hideToast(),tLeft)}}
+function undo(){if(!UNDO)return;const U=UNDO;UNDO=null;
+ const cardOpen=document.body.classList.contains('s-card');
+ const restore=()=>{Q.splice(0,Q.length,...U.snap);rows();const el=document.querySelector(`.qrow[data-id="${U.hit}"]`);if(el)el.classList.add('undone');
+  if(cardOpen){const x=Q.findIndex(q=>q.id===U.hit);if(x>=0)openCard(x);else closeCard()}};
+ const el=document.querySelector(`.qrow[data-id="${U.hit}"]`);
+ if(U.kind==='arrive'&&el){el.classList.remove('arrive');el.classList.add('leave');setTimeout(restore,280*K())}else restore();
+ showToast('Undone',U.msg.replace(' · ',' — ').toUpperCase(),false)}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&UNDO&&$('toast').classList.contains('on')&&!(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName))){e.preventDefault();undo()}});
+$('scrim').onclick=()=>{if(document.body.classList.contains('s-drawer'))cancelDrawer();else closeCard()};
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;
+ if(F&&F.cal){F.cal=null;render();return}
+ if(document.body.classList.contains('s-drawer'))cancelDrawer();else if(document.body.classList.contains('s-card'))closeCard()});
+</script></body></html>

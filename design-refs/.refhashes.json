@@ -94,7 +94,9 @@
     "design-refs/query-actions-v11.html": "e5d48dedb2f05624e594015202d600b71e730ae3f304d79d9938d614a0f0d672",
     "design-refs/materials/packages-v2-1.html": "f005cf457efd4b633421a27883c562130842523f9adf628a1e044ccff6cdf58f",
     "design-refs/materials/packages-hero-boxes.png": "aee79d51a1895a6323470e849f5def37ba1549efd98aeb294bb99c7cc5f0e611",
-    "design-refs/materials/materials-tray-pile.png": "47929d27871dda4f12bf776bb5acfe6d04ca879734e3407f450d666998e9f50b"
+    "design-refs/materials/materials-tray-pile.png": "47929d27871dda4f12bf776bb5acfe6d04ca879734e3407f450d666998e9f50b",
+    "design-refs/packages-journey/log-query-packages-v2.html": "3d6e7e26bf26485a51fd4cec1585fee94f3f3315f1a9c6a13a9fb65c895736d0",
+    "design-refs/packages-journey/package-tracking-v1.html": "00eee592e3b782c8f1abbf0afb5f0badaa832cec613057ba2e3789d2f28bba7d"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
