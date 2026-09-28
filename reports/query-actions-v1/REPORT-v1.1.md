@@ -3,18 +3,18 @@
 Attended follow-up to v1, run 28 Sep under the same standing rules.
 
 - **Commits on `main`:**
-  - `7c5a4389`: items 1, 2, 5 and 6
-  - `f5a49e16`: item 3 (the helper's work, cherry-picked)
-  - `__C3__`: the v1.1 fixes, the locks and this report
-  - `__C4__`: CLAUDE.md
-- **Deployed to dev:** `__BUNDLE__`.
+  - `ab514740`: items 1, 2, 5 and 6
+  - `4eae6e71`: item 3 (the helper's work, cherry-picked)
+  - `f0a78c4d`: the v1.1 fixes, the locks and this report
+  - `3422ac80`: CLAUDE.md
+- **Deployed to dev** from a clean worktree of `3422ac80`, which includes the Contact list session's `5a9956aa`: **`index-BQFNYxFv.js` · `index-CmsyJ7TK.css`**, checked with curl. The packages and Contact list sessions were told first and both cleared it.
 
 ## Gates
 - **tsc:** 0 errors.
 - **Production `vite build`:** exit 0, no CSS diagnostics.
 - **Vitest:** 498 files, 8,173 passed (3 skipped), 0 failed. v1 ended at 8,204; the difference is the tests of the deleted surfaces: TaskModal, the weekly review, FocusFlow's query sheets and RecordResponseScreen.
 - **Rendered locks (local build):** **29 passed.** That is v1's 25 plus v1.1's new ones: delete-entry, first entry, picker, and mobile at 390 and 768. The account diff against the run's baseline is empty.
-- **Rendered locks (deployed build):** __DEVLOCKS__
+- **Rendered locks (deployed build, `SA_E2E_BASE_URL=dev`):** **31 passed, 0 failed**. The six files are qaV11, qaJourneys, qaLocks, qaSnapshot, queryActions and qaDeploySmoke; the last smokes the packages page. The account diff afterwards is empty. `/agents` rendered 37 rows with no page errors. The mobile screenshots below are from this run.
 
 **Proved red** (in the measurement worktree; backups are path-derived; the account was repaired to its baseline after each):
 
