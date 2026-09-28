@@ -489,3 +489,78 @@ test.describe("phase 6 — the desk", () => {
     await expect(page.locator(nb).getByText(text)).toBeVisible({ timeout: 20000 }); bump();
   });
 });
+
+test.describe("phase 7 — one door per row, and no door writes", () => {
+  const clean = () => {
+    const out = execSync("node tests/e2e/cleanupTodoV2Probe.mjs", { encoding: "utf8" });
+    expect(out).toMatch(/cleanupTodoV2Probe: deleted \d+ task/);
+  };
+  test.beforeAll(() => { clean(); });
+  test.afterAll(() => { clean(); });
+
+  /** Every Firestore WRITE the page sends from now on. The listen channel (reads) is separate. */
+  const watchWrites = (page: import("@playwright/test").Page) => {
+    const writes: string[] = [];
+    page.on("request", (r) => { if (r.method() === "POST" && /Firestore\/Write\/channel/.test(r.url())) writes.push(r.url()); });
+    return writes;
+  };
+  const drawerOpen = (page: import("@playwright/test").Page) => page.evaluate(() => {
+    const root = document.querySelector(".qad-root.is-open");
+    const scrim = root?.querySelector(".qad-scrim") as HTMLElement | null;
+    const r = scrim?.getBoundingClientRect();
+    return { open: !!root, scrimCovers: !!r && r.width >= window.innerWidth - 1 && r.height >= window.innerHeight - 1, scrimBg: scrim ? getComputedStyle(scrim).backgroundColor : null };
+  });
+  const paneOpen = (page: import("@playwright/test").Page) => page.evaluate(() => {
+    const d = [...document.querySelectorAll('.slo[data-on="true"]')].find((e) => e.getBoundingClientRect().width > 0);
+    const scrim = [...document.querySelectorAll('.slo-scrim[data-on="true"]')][0] as HTMLElement | undefined;
+    const r = scrim?.getBoundingClientRect();
+    return { open: !!d, scrimCovers: !!r && r.width >= window.innerWidth - 1 && r.height >= window.innerHeight - 1 };
+  });
+
+  test("a query task: the tick, the row and the action all open the query drawer over a dimmed screen, and write nothing", async ({ page }) => {
+    const scope = await openV2(page, 1440, 900);
+    await page.click(`${scope} .tdv2-tile[data-tile="chase"]`);
+    const row = page.locator(`${scope} [data-todo-v2="row"]`).first();
+    expect(await row.count(), "no Chase or close row to open").toBe(1); bump();
+    const writes = watchWrites(page);
+    for (const how of ["tick", "act", "row"] as const) {
+      if (how === "row") await row.locator(".tdv2-deed").click();
+      else await row.locator(`[data-todo-v2="${how}"]`).click();
+      await page.waitForFunction(() => !!document.querySelector(".qad-root.is-open"), undefined, { timeout: 10000 });
+      const d = await drawerOpen(page);
+      expect(d.open, `${how}: the drawer did not open`).toBe(true); bump();
+      expect(d.scrimCovers, `${how}: the screen is not dimmed`).toBe(true); bump();
+      await page.keyboard.press("Escape");
+      await page.waitForFunction(() => !document.querySelector(".qad-root.is-open"), undefined, { timeout: 10000 });
+    }
+    await page.waitForTimeout(800);
+    expect(writes, "opening a task wrote to the store").toEqual([]); bump();
+  });
+
+  test("your own task: the tick and the rail row open the task over a dimmed screen, and write nothing", async ({ page }) => {
+    const scope = await openV2(page, 1440, 900);
+    const text = `Zz v2 probe door ${Date.now()}`;
+    await page.fill(`${scope} [data-todo-v2="capture"]`, text);
+    await page.click(`${scope} [data-todo-v2="add"]`);
+    const row = page.locator(`${scope} [data-todo-v2="row"]`, { hasText: text });
+    await expect(row).toHaveCount(1, { timeout: 15000 }); bump();
+    await page.waitForTimeout(1200); // the add's own write settles before counting
+    const writes = watchWrites(page);
+    await row.locator('[data-todo-v2="tick"]').click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.slo[data-on="true"]')].some((e) => e.getBoundingClientRect().width > 0), undefined, { timeout: 10000 });
+    const p = await paneOpen(page);
+    expect(p.open, "the tick did not open the task").toBe(true); bump();
+    expect(p.scrimCovers, "the screen is not dimmed").toBe(true); bump();
+    await page.waitForTimeout(800);
+    expect(writes, "the tick wrote to the store").toEqual([]); bump();
+    /* the row is still on the list, undone — the tick finished nothing */
+    await page.keyboard.press("Escape");
+    await expect(row).toHaveCount(1); bump();
+    /* and the rail row is the same door */
+    await page.click(`${scope} [data-todo-v2="rail-row"]:has-text("${text}")`);
+    await page.waitForFunction(() => [...document.querySelectorAll('.slo[data-on="true"]')].some((e) => e.getBoundingClientRect().width > 0), undefined, { timeout: 10000 });
+    expect((await paneOpen(page)).open).toBe(true); bump();
+    await page.waitForTimeout(600);
+    expect(writes, "the rail row wrote to the store").toEqual([]); bump();
+  });
+});

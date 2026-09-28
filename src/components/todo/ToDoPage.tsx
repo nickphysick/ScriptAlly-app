@@ -1840,9 +1840,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* ⚠️ ASSIGNED HERE, LAST — after every declaration `groupsForList` transitively reads (the
      hoisted-helper TDZ rule: a render-time read is declared above its reader, and this is the
      reader). The same visible set the list draws: collapsed sections contribute nothing. */
-  visibleFlatRef.current = groupsForList()
-    .filter((g) => !collapsedGroups.includes(g.id))
-    .flatMap((g) => g.cards);
+  /* ⚠️ THE KEYS WALK THE ROWS ON SCREEN (to-do list v2): j/k and Enter follow v2's groups, never the
+     retired list's order — a key that moved focus through cards nobody can see would open a task
+     the reader never pointed at. */
+  visibleFlatRef.current = v2Groups.flatMap((g) => g.rows.map((r) => r.card));
   openDockRef.current = openDock;
 
   return (

@@ -51,3 +51,23 @@ describe("every press opens; nothing on the row writes", () => {
     }
   });
 });
+
+describe("the page's one door (Phase 7)", () => {
+  const page = readFileSync(join(__dirname, "..", "ToDoPage.tsx"), "utf8");
+  it("a row opens the query drawer when it has a journey, the task pane otherwise — and writes nothing", () => {
+    const a = page.indexOf("const openV2Row = (r: V2Row) => {");
+    expect(a, "openV2Row").toBeGreaterThan(-1);
+    const b = page.indexOf("\n  };\n", a);
+    expect(b).toBeGreaterThan(a);
+    const fn = page.slice(a, b);
+    expect(fn).toContain("drawerDoorForTask(c.taskType, c.relatedRecordId");
+    expect(fn).toContain("if (door) { openQueryDrawer(door); return; }");
+    expect(fn).toContain("openDockRef.current(c.key);");
+    for (const w of ["addUserTask", "updateUserTask", "quickDone", "commitFromPane", "dismissTask", "upsertTaskFlag", "updateQuery"]) {
+      expect(fn, `the door reaches a write: ${w}`).not.toContain(w);
+    }
+    /* every door on the page is that one function */
+    expect(page).toContain("onOpen={openV2Row}");
+    expect(page).toContain("onOpenRow={openV2Row}");
+  });
+});
