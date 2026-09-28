@@ -9,7 +9,10 @@
 .qcd {
   /* 460 since the respond-nudge run — ONE host for corrections and the three verbs, so the ref's
      wider card becomes everyone's width rather than a per-tenant fork. */
-  position: fixed; top: 0; bottom: 0; right: 592px; width: 460px; z-index: 71;
+  /* ⚠️ 81, ABOVE THE QUERY MODAL (`.qcv-qm` is 80). The desk was built beside the slide-over panel
+     at 70; v65.6 moved an open query into the modal, and at 71 the fork opened BEHIND it, so ⋯ →
+     correct / append / move / delete could not be clicked from the one place a query opens (v1.1). */
+  position: fixed; top: 0; bottom: 0; right: 592px; width: 460px; z-index: 81;
   pointer-events: none;
 }
 .qcd-card {

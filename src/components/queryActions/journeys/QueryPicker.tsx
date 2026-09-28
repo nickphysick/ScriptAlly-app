@@ -38,10 +38,11 @@ export function QueryPicker({ onPick, children }: { onPick: (queryId: string) =>
     .map((q) => {
       const a = db.agents.find((x) => x.id === q.agentId);
       const m = db.manuscripts.find((x) => x.id === q.manuscriptId);
-      return { q, a, m, name: a?.name || a?.agency || "Agent not recorded", agency: a?.agency || "" };
+      return { q, a, m, known: !!(a?.name || a?.agency), name: a?.name || a?.agency || "Agent not recorded", agency: a?.agency || "" };
     })
     .filter((r) => !t || r.name.toLowerCase().includes(t) || r.agency.toLowerCase().includes(t))
-    .sort((x, y) => x.name.localeCompare(y.name))
+    /* real agents first, by name; a query whose agent record is gone sorts last, never ahead of them */
+    .sort((x, y) => (x.known === y.known ? x.name.localeCompare(y.name) : x.known ? -1 : 1))
     .slice(0, 8), [live, db.agents, db.manuscripts, t]);
 
   const body = (
@@ -76,7 +77,7 @@ export function QueryPicker({ onPick, children }: { onPick: (queryId: string) =>
   return children({
     eyebrow: "RECORD A RESPONSE",
     title: "Record a response",
-    verb: "save", verbDone: "saved", button: "Save", ok: false,
+    verb: "save", verbDone: "saved", button: "Save", ok: false, pickOnly: true,
     steps: [{ title: "The query", summary: "", body }],
     saves: [],
     dirty: t.length > 0,

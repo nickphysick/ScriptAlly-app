@@ -108,7 +108,7 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
     try { await onSave(); } finally { setBusy(false); }
   }
 
-  const names = view.steps.map((s) => s.title).concat([`Check and ${view.verb}`]);
+  const names = view.pickOnly ? view.steps.map((s) => s.title) : view.steps.map((s) => s.title).concat([`Check and ${view.verb}`]);
   const stepperCls = (i: number): string => {
     if (i === cur) return "cur";
     if (i < n) { const x = state(i); return x === "blk" && !seen.has(i) ? "auto" : x; }
@@ -167,7 +167,7 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
                   );
                 })}
               </div>
-              <div className="qad-stepper-sm" data-qad-stepper-sm>Step {cur + 1} of {names.length} · {names[cur]}</div>
+              <div className="qad-stepper-sm" data-qad-stepper-sm>{view.pickOnly ? "Choose the query" : <>Step {cur + 1} of {names.length} · {names[cur]}</>}</div>
             </>
           ) : null}
 
@@ -220,7 +220,7 @@ export function DrawerShell({ view, mode, open, initialStep, onCancel, onSave }:
 
         <div className="qad-foot" data-qad-foot>
           {cur > 0 ? <button type="button" className="qad-back" onClick={() => go(cur - 1)}>‹ Back</button> : null}
-          <button type="button" className={`qad-save${busy ? " busy" : ""}`} disabled={primaryDisabled} onClick={primary} data-qad-primary>{primaryLabel}</button>
+          {view.pickOnly ? null : <button type="button" className={`qad-save${busy ? " busy" : ""}`} disabled={primaryDisabled} onClick={primary} data-qad-primary>{primaryLabel}</button>}
           {view.ok && cur < last - 1 && !curBlocked ? <button type="button" className="qad-skip" onClick={() => go(last)}>Review</button> : null}
           <button type="button" className="qad-cancel" onClick={requestClose}>Cancel</button>
           {confirm ? (

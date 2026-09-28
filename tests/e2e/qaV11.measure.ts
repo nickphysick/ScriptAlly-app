@@ -219,24 +219,34 @@ for (const [w, h] of [[390, 844], [768, 1024]] as const) {
   test(`mobile ${w}: every journey is a full-screen sheet with the step bar; nothing overflows or clips`, async ({ page }) => {
     test.setTimeout(600_000);
     await ensureSignedIn(page);
-    await openRoute(page, "/queries", { width: w, height: h });
+    /* ⚠️ NOT `openRoute`: it waits for the desktop shell's panels, which the phone layout does not
+       draw. The drawer only needs the app mounted, and its dev hook proves that. */
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto("/queries");
+    await page.waitForFunction(() => !!(window as unknown as { __saQueryDrawer?: unknown }).__saQueryDrawer, null, { timeout: 60_000 });
+    await page.waitForTimeout(1500);
     await liftMotionSuppression(page);
     const { qs, ags } = await all();
+    const need = <T,>(v: T | undefined, what: string): T => { expect(v, `the fixture has no ${what}`).toBeTruthy(); return v as T; };
     const msId = String(qs[0]?.manuscriptId);
     const liveAg = new Set(qs.filter((q) => q.manuscriptId === msId && !TERMINAL.has(String(q.status))).map((q) => String(q.agentId)));
-    const free = ags.find((a) => !liveAg.has(a.id) && !a.setAside)!;
-    const pr = qs.find((q) => q.status === "Partial Requested")!;
-    const firstRung = (await rungs(pr.id))[0];
+    const free = need(ags.find((a) => !liveAg.has(a.id) && !a.setAside), "agent free to query");
+    let pr: (typeof qs)[number] | undefined; let firstRung: { id: string } | undefined;
+    for (const q of qs.filter((x) => x.status === "Partial Requested")) { const r = await rungs(q.id); if (r.length) { pr = q; firstRung = r[0]; break; } }
+    need(pr, "Partial Requested query with a status rung");
+    const queried = need(qs.find((q) => q.status === "Queried"), "Queried query");
+    const closed = need(qs.find((q) => q.status === "No Response"), "No Response query");
+    const offer = need(qs.find((q) => q.status === "Offer"), "Offer query");
     const journeys: [string, Record<string, unknown>][] = [
       ["log", { mode: "log", agentId: free.id, manuscriptId: msId }],
-      ["resp", { mode: "resp", queryId: qs.find((q) => q.status === "Queried")!.id }],
+      ["resp", { mode: "resp", queryId: queried.id }],
       ["pick", { mode: "resp" }],
-      ["late", { mode: "resp", queryId: qs.find((q) => q.status === "No Response")!.id }],
-      ["sent", { mode: "sent", queryId: pr.id }],
-      ["nudge", { mode: "nudge", queryId: qs.find((q) => q.status === "Queried")!.id }],
-      ["close", { mode: "close", queryId: qs.find((q) => q.status === "Queried")!.id }],
-      ["offer", { mode: "offer", queryId: qs.find((q) => q.status === "Offer")!.id }],
-      ["edit", { mode: "edit", queryId: pr.id, entryId: firstRung.id }],
+      ["late", { mode: "resp", queryId: closed.id }],
+      ["sent", { mode: "sent", queryId: pr!.id }],
+      ["nudge", { mode: "nudge", queryId: queried.id }],
+      ["close", { mode: "close", queryId: queried.id }],
+      ["offer", { mode: "offer", queryId: offer.id }],
+      ["edit", { mode: "edit", queryId: pr!.id, entryId: firstRung!.id }],
     ];
     const problems: string[] = [];
     let measured = 0;
@@ -245,6 +255,7 @@ for (const [w, h] of [[390, 844], [768, 1024]] as const) {
       await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
       await page.waitForTimeout(500);
       for (const phase of ["first", "review"] as const) {
+        if (phase === "review" && name === "pick") break; /* a picker has no review: the pick moves it on */
         if (phase === "review") { const ok = await walkToReview(page); if (!ok && name !== "pick") problems.push(`${name}: could not reach the review`); if (!ok) break; await page.waitForTimeout(500); }
         await page.screenshot({ path: `${SHOTS}/${w}-${name}-${phase}.png` });
         const a = await sheetAudit(page);
@@ -252,7 +263,7 @@ for (const [w, h] of [[390, 844], [768, 1024]] as const) {
         const tag = `${w} ${name} ${phase}`;
         if (Math.abs(a.rect.l) > 0.5 || Math.abs(a.rect.r - a.vw) > 0.5 || Math.abs(a.rect.t) > 0.5 || Math.abs(a.rect.b - a.vh) > 0.5) problems.push(`${tag}: not full-screen ${JSON.stringify(a.rect)}`);
         if (a.bigShown) problems.push(`${tag}: the desktop stepper is showing`);
-        if (a.bar !== null && !/^Step \d+ of \d+/i.test(a.bar)) problems.push(`${tag}: the step bar reads "${a.bar}"`);
+        if (a.bar !== null && !(name === "pick" ? /^Choose the query$/i.test(a.bar) : /^Step \d+ of \d+/i.test(a.bar))) problems.push(`${tag}: the step bar reads "${a.bar}"`);
         if (a.bar === null && phase === "first" && name !== "pick") problems.push(`${tag}: no step bar`);
         if (a.docOverflow > 0.5) problems.push(`${tag}: the page scrolls sideways by ${a.docOverflow}`);
         if (a.sheetOverflow > 0.5) problems.push(`${tag}: the sheet scrolls sideways by ${a.sheetOverflow}`);
