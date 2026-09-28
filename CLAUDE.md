@@ -629,6 +629,26 @@
   `offer_send_full`, `withdraw_tell`, `signed_tell`, `agent_recheck`) derive from the flat fields.
   `logNudge` writes a task flag, which is why the drawer never calls it.
 - **⚠️ QueryHawk never writes for the writer — `nudgeDraft.ts` and every draft UI it fed are deleted.**
+- **⚠️ `agent_recheck` HAS NO DRAWER JOURNEY, AND THAT IS A DECISION, NOT A GAP (v1.1, Nick).** It is about an
+  AGENT (their door reopened, their wish list may be stale), not about a query, and the drawer is for
+  what a writer does TO a query. `drawerDoorForTask` returns null for it, so its card keeps the board's
+  own route to the agent. Do not add a journey for it.
+- **v1.1 (28 Sep) — what moved:**
+  - **Deleting a history entry is the mock's inline confirm ON THE ROW**, then the drawer's Undo bar
+    (snapshot). The first entry asks "Delete this whole query?"; a request whose send answers it is
+    named and removed with it. Both stores are cleared directly (`deleteActivity` misses a heal rung),
+    and any `act-status-…` rung the heal re-creates in the race is removed again. The correction
+    fork gains "It never happened" (Delete) beside Move, which stays.
+  - **"Record a response" with no query opens the drawer on a picker of LIVE queries** (`QueryPicker`,
+    `pickOnly` view: no review step, no primary, phone bar "Choose the query"); a pick remounts the
+    response journey via the drawer's `pickQuery`. `RecordResponseScreen` is retired. The Pro
+    paste-an-email lane that lived only there is a link in the picker, and App opens the EXISTING
+    `PasteEmailFlow` (`PASTE_RESPONSE_EVENT`).
+  - **`TaskModal` is deleted, the Sunday weekly review is deleted, and FocusFlow is
+    `HousekeepingSweep`** — "Start the sweep" unchanged; query cards reaching it go to the drawer.
+  - **The drawer is a full-screen sheet at ≤768px** with the "Step N of M" bar.
+  - **The correction desk is `z-index: 81`**, above the query modal (80). At 71 — right for the
+    retired slide-over — the fork opened BEHIND the modal and could not be clicked.
 
 ## Finishing a task — THE PANE READS, THE MODAL FINISHES (⚠️ SUPERSEDED by "Query actions v1" above, 27 Sep — kept as history. task-modal round, 21 Sep; ref `task-modal.html`)
 
