@@ -219,6 +219,28 @@ if (arg("--apply-1b")) {
   process.exit(0);
 }
 
+/* Nick's ruling (28 Sep): the nine HELD steps are flagged, not removed. Flagging can move nothing —
+   proved here, not assumed: the derivation with the flag must equal the derivation without it, field
+   by field, and the stored query must not change. Either difference is a STOP before any write. */
+if (arg("--flag-held")) {
+  const held = plan1b.filter((b) => b.kind === "hold" && !b.flagged);
+  const changes: Change[] = [];
+  for (const b of held) {
+    const log = logs.get(b.qid)!;
+    const data = log.find((d) => d.id === b.stepId)!.data;
+    const after = { ...data, reconstructed: true, ...(STATUS_KEY[b.stepStatus] && !data.eventKey ? { eventKey: STATUS_KEY[b.stepStatus] } : {}) };
+    const d = diff(computeRecomputedFields(log), computeRecomputedFields(log.map((x) => (x.id === b.stepId ? { id: x.id, data: after } : x))));
+    if (d.length) { console.error(`STOP: flagging ${b.stepId} would change ${d.join("; ")}`); process.exit(1); }
+    changes.push({ path: `users/${uid}/queries/${b.qid}/activity/${b.stepId}`, before: data, after });
+  }
+  const before = new Map(held.map((b) => [b.qid, guarded(queries.find((q) => q.id === b.qid)!.data)]));
+  save("flag-held", changes);
+  for (const c of changes) await setDoc(doc(db, c.path), c.after!);
+  await guardQueries(held.map((b) => b.qid), before);
+  console.log(`flag-held: flagged ${changes.length}; the derivation is identical with and without each flag, and no stored status or date moved`);
+  process.exit(0);
+}
+
 if (arg("--apply-1e")) {
   const changes: Change[] = [];
   /* ⚠️ THE PACKAGES SESSION'S `pkg21-` DATA IS NEVER TOUCHED (standing rule) — its orphaned rows are

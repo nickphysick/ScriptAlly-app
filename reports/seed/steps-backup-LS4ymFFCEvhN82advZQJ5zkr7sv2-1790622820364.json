@@ -1,0 +1,1968 @@
+{
+ "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+ "at": "2026-09-28T19:13:40.364Z",
+ "removed": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-1/activity/act-k573jqxoj",
+   "data": {
+    "note": "No response received from Elinor Hale at Cavendish & Roe",
+    "type": "No Response",
+    "createdAt": {
+     "__ts": 1787325573050
+    },
+    "resultingStatus": "No Response",
+    "queryId": "seed-query-1",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Elinor Hale"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-2/activity/act-2mytwmzx9",
+   "data": {
+    "createdAt": "2026-08-21T15:27:43.424Z",
+    "note": "Follow-up reminder set for 4 Sept 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-query-2",
+    "agentName": "Tom Ellery",
+    "reminderDate": "2026-09-04T11:00:00.000Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-nzp3h5dee",
+   "data": {
+    "agentName": "Marcus Reed",
+    "type": "Nudge sent",
+    "reminderDate": "2026-09-04T11:00:00.000Z",
+    "note": "Follow-up reminder set for 4 Sept 2026",
+    "queryId": "seed-query-3",
+    "createdAt": "2026-08-21T15:29:34.178Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-4/activity/act-rgeuy9noh",
+   "data": {
+    "agentName": "Priya Nair",
+    "queryId": "seed-query-4",
+    "resultingStatus": "No Response",
+    "note": "No response received from Priya Nair at Northbank Literary",
+    "createdAt": {
+     "__ts": 1787325939708
+    },
+    "type": "No Response",
+    "manuscriptTitle": "The Smoke Test"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-5/activity/act-2avdph0n2",
+   "data": {
+    "reminderDate": "2026-09-04T11:00:00.000Z",
+    "agentName": "Joan Whitfield",
+    "queryId": "seed-query-5",
+    "createdAt": "2026-08-21T15:33:38.918Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Sept 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-7fuojlqcy",
+   "data": {
+    "createdAt": {
+     "__ts": 1704196800000
+    },
+    "note": "note only, no consequences",
+    "type": "Holding reply",
+    "agentName": "Sam Okoro",
+    "queryId": "seed-query-6"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-gg73z4b46",
+   "data": {
+    "agentName": "Sam Okoro",
+    "queryId": "seed-query-6",
+    "reminderDate": "2026-09-04T11:00:00.000Z",
+    "createdAt": "2026-08-21T15:35:51.450Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Sept 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-p5divna87",
+   "data": {
+    "agentName": "Sam Okoro",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-query-6",
+    "reminderDate": "2026-10-04T16:13:50.637Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:13:50.637Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/CidPzv0NvON0yT0gbDNi",
+   "data": {
+    "resultingStatus": "Partial Sent",
+    "queryId": "seed-query-7",
+    "type": "Partial Sent",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1787332949380
+    },
+    "note": "Partial manuscript sent to Rachel Lin at Lin Literary",
+    "agentName": "Rachel Lin"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-61i4gdkvh",
+   "data": {
+    "createdAt": {
+     "__ts": 1787333111623
+    },
+    "type": "No Response",
+    "note": "No response received from Rachel Lin at Lin Literary",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-7",
+    "agentName": "Rachel Lin",
+    "resultingStatus": "No Response"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-partial-requested-seed-query-7",
+   "data": {
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Partial manuscript requested",
+    "createdAt": {
+     "__ts": 1779926400000
+    },
+    "type": "Partial Requested",
+    "reconstructed": true,
+    "resultingStatus": "Partial Requested",
+    "eventKey": "partial_requested",
+    "queryId": "seed-query-7",
+    "agentName": "Rachel Lin"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-sent-seed-query-8",
+   "data": {
+    "eventKey": "partial_sent",
+    "type": "Partial Sent",
+    "createdAt": {
+     "__ts": 1780272000000
+    },
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "agentName": "David Marsh",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-8",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/dcoJfMx5ZabTcsRedp7u",
+   "data": {
+    "note": "Query closed — no response",
+    "type": "No Response",
+    "createdAt": {
+     "__ts": 1786924800000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "resultingStatus": "No Response",
+    "agentName": "David Marsh",
+    "queryId": "seed-query-8"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-ofej7l4ut",
+   "data": {
+    "queryId": "seed-query-9",
+    "agentName": "Ana Duarte",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Sept 2026",
+    "createdAt": "2026-08-21T15:42:19.939Z",
+    "reminderDate": "2026-09-04T11:00:00.000Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-full-requested-seed-query-9",
+   "data": {
+    "reconstructed": true,
+    "type": "Full Requested",
+    "queryId": "seed-query-9",
+    "agentName": "Ana Duarte",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1780617600000
+    },
+    "eventKey": "full_requested",
+    "resultingStatus": "Full Requested",
+    "note": "Full manuscript requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/bh9NEzFKi7ubhq0O04wC",
+   "data": {
+    "resultingStatus": "Full Sent",
+    "note": "Full manuscript sent to Ana Duarte at Duarte Words",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Ana Duarte",
+    "type": "Full Sent",
+    "queryId": "seed-query-9",
+    "createdAt": {
+     "__ts": 1787326070587
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/xRskWXnsPnFMs1PD1ELF",
+   "data": {
+    "agentName": "Marcus Reed",
+    "resultingStatus": "Partial Sent",
+    "createdAt": {
+     "__ts": 1787512687647
+    },
+    "queryId": "cor-move-a",
+    "note": "Partial manuscript sent to Marcus Reed at Reed & Partners",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-sent-seed-query-10",
+   "data": {
+    "eventKey": "full_sent",
+    "note": "Full manuscript sent",
+    "agentName": "Peter Vance",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-10",
+    "createdAt": {
+     "__ts": 1780963200000
+    },
+    "reconstructed": true,
+    "type": "Full Sent",
+    "resultingStatus": "Full Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/kaA1eZNGcyocKQ13UzyW",
+   "data": {
+    "resultingStatus": "No Response",
+    "agentName": "Peter Vance",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-10",
+    "note": "Query closed — no response",
+    "createdAt": {
+     "__ts": 1786924800000
+    },
+    "type": "No Response"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/MMfUqACKV3ELhcb7TDWL",
+   "data": {
+    "createdAt": {
+     "__ts": 1787517420234
+    },
+    "note": "Revised manuscript (v2) resubmitted to Iris Kwan at Kwan & Hall",
+    "type": "Full Sent",
+    "resultingStatus": "Full Sent",
+    "agentName": "Iris Kwan",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-11"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-revise-resubmit-seed-query-11",
+   "data": {
+    "queryId": "seed-query-11",
+    "agentName": "Iris Kwan",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Revise & resubmit requested",
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1781308800000
+    },
+    "eventKey": "rr_requested",
+    "resultingStatus": "Revise & Resubmit",
+    "type": "Revise & Resubmit"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-offer-seed-query-12",
+   "data": {
+    "queryId": "seed-query-12",
+    "manuscriptTitle": "The Smoke Test",
+    "eventKey": "offer",
+    "createdAt": {
+     "__ts": 1781654400000
+    },
+    "type": "Offer",
+    "resultingStatus": "Offer",
+    "agentName": "Noah Bright",
+    "reconstructed": true,
+    "note": "Offer of representation received"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-rejected-seed-query-13",
+   "data": {
+    "createdAt": {
+     "__ts": 1782000000000
+    },
+    "reconstructed": true,
+    "queryId": "seed-query-13",
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "manuscriptTitle": "The Smoke Test",
+    "eventKey": "pass",
+    "note": "Rejection received",
+    "agentName": "Elinor Hale"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-rejected-seed-query-14",
+   "data": {
+    "createdAt": {
+     "__ts": 1782345600000
+    },
+    "reconstructed": true,
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-14",
+    "type": "Rejected",
+    "eventKey": "pass",
+    "agentName": "Tom Ellery",
+    "resultingStatus": "Rejected",
+    "note": "Rejection received"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-rejected-seed-query-15",
+   "data": {
+    "reconstructed": true,
+    "eventKey": "pass",
+    "type": "Rejected",
+    "queryId": "seed-query-15",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Marcus Reed",
+    "createdAt": {
+     "__ts": 1782691200000
+    },
+    "note": "Rejection received",
+    "resultingStatus": "Rejected"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-rejected-seed-query-16",
+   "data": {
+    "resultingStatus": "Rejected",
+    "agentName": "Priya Nair",
+    "note": "Rejection received",
+    "reconstructed": true,
+    "queryId": "seed-query-16",
+    "createdAt": {
+     "__ts": 1783036800000
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Rejected",
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-withdrawn-seed-query-17",
+   "data": {
+    "reconstructed": true,
+    "eventKey": "withdrawn",
+    "queryId": "seed-query-17",
+    "note": "Query withdrawn",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1783382400000
+    },
+    "agentName": "Joan Whitfield",
+    "resultingStatus": "Withdrawn",
+    "type": "Withdrawn"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-no-response-seed-query-18",
+   "data": {
+    "reconstructed": true,
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Sam Okoro",
+    "type": "No Response",
+    "eventKey": "closed_no_reply",
+    "note": "Query closed — no response",
+    "resultingStatus": "No Response",
+    "createdAt": {
+     "__ts": 1783728000000
+    },
+    "queryId": "seed-query-18"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-19/activity/act-h7hii9393",
+   "data": {
+    "reminderDate": "2026-10-04T16:22:32.703Z",
+    "agentName": "Rachel Lin",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:22:32.703Z",
+    "queryId": "seed-query-19"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/1s7SH8i7ELgc6IaB7hI6",
+   "data": {
+    "note": "Query closed — no response",
+    "type": "No Response",
+    "createdAt": {
+     "__ts": 1786579200002
+    },
+    "queryId": "seed-query-20",
+    "manuscriptTitle": "The Smoke Test",
+    "resultingStatus": "No Response",
+    "agentName": "David Marsh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/2Lppf7CwmAJeooa6cs3o",
+   "data": {
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1786492800000
+    },
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-20",
+    "feedbackType": "standard",
+    "agentName": "David Marsh",
+    "note": "Partial declined — standard rejection",
+    "type": "Rejected"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/CAf2RMrxQ03UyNG4XJSy",
+   "data": {
+    "queryId": "seed-query-20",
+    "resultingStatus": "No Response",
+    "createdAt": {
+     "__ts": 1786492800002
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "type": "No Response",
+    "note": "Query closed — no response",
+    "agentName": "David Marsh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/JI7etJkFasVLW8004Fmy",
+   "data": {
+    "type": "No Response",
+    "resultingStatus": "No Response",
+    "note": "Query closed — no response",
+    "queryId": "seed-query-20",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "David Marsh",
+    "createdAt": {
+     "__ts": 1786579200001
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/MBv5C3rHA27Mi4Saqhrp",
+   "data": {
+    "manuscriptTitle": "The Smoke Test",
+    "resultingStatus": "No Response",
+    "agentName": "David Marsh",
+    "note": "Query closed — no response",
+    "queryId": "seed-query-20",
+    "createdAt": {
+     "__ts": 1786492800005
+    },
+    "type": "No Response"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/c8X7b1VFMatFJsOF46Lb",
+   "data": {
+    "type": "No Response",
+    "createdAt": {
+     "__ts": 1786492800001
+    },
+    "note": "Query closed — no response",
+    "resultingStatus": "No Response",
+    "queryId": "seed-query-20",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "David Marsh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/cmWC3Js6t5rIFeCZFVN8",
+   "data": {
+    "resultingStatus": "No Response",
+    "agentName": "David Marsh",
+    "manuscriptTitle": "The Smoke Test",
+    "queryId": "seed-query-20",
+    "note": "Query closed — no response",
+    "createdAt": {
+     "__ts": 1786492800004
+    },
+    "type": "No Response"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/dMcoUSxiwTC3VwbGgnI1",
+   "data": {
+    "agentName": "David Marsh",
+    "queryId": "seed-query-20",
+    "resultingStatus": "No Response",
+    "type": "No Response",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Query closed — no response",
+    "createdAt": {
+     "__ts": 1786579200003
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/fSAjRk7fdsTxVDfLqORN",
+   "data": {
+    "agentName": "David Marsh",
+    "type": "No Response",
+    "queryId": "seed-query-20",
+    "resultingStatus": "No Response",
+    "note": "Query closed — no response",
+    "createdAt": {
+     "__ts": 1786492800003
+    },
+    "manuscriptTitle": "The Smoke Test"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/stQ1DxIWcVkWXuNMNHZ5",
+   "data": {
+    "resultingStatus": "No Response",
+    "agentName": "David Marsh",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "No Response",
+    "note": "Query closed — no response",
+    "queryId": "seed-query-20",
+    "createdAt": {
+     "__ts": 1786579200004
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/zrQkJBxCKK79L876DYft",
+   "data": {
+    "queryId": "seed-query-20",
+    "agentName": "David Marsh",
+    "manuscriptTitle": "The Smoke Test",
+    "resultingStatus": "No Response",
+    "note": "Query closed — no response",
+    "type": "No Response",
+    "createdAt": {
+     "__ts": 1786579200000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-sent-seed-query-21",
+   "data": {
+    "type": "Full Sent",
+    "createdAt": {
+     "__ts": 1779148800000
+    },
+    "queryId": "seed-query-21",
+    "resultingStatus": "Full Sent",
+    "agentName": "Ana Duarte",
+    "note": "Full manuscript sent",
+    "reconstructed": true,
+    "eventKey": "full_sent",
+    "manuscriptTitle": "The Smoke Test"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-sent-seed-query-23",
+   "data": {
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1783987200000
+    },
+    "eventKey": "partial_sent",
+    "type": "Partial Sent",
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "agentName": "Rufus Oyelaran",
+    "queryId": "seed-query-23",
+    "manuscriptTitle": "The Smoke Test"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-07bk1a955",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:49.287Z",
+    "reminderDate": "2026-10-04T16:12:49.287Z",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-0pomb4spr",
+   "data": {
+    "createdAt": "2026-09-20T16:12:50.968Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:50.968Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-1f5ycp7n2",
+   "data": {
+    "createdAt": "2026-09-20T16:12:50.593Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:50.593Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-1ngvzaa6y",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:46.040Z",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:46.040Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-23h375inf",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:50.042Z",
+    "reminderDate": "2026-10-04T16:12:50.041Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-2nehuy709",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:46.768Z",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:46.768Z",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-44pkas4qv",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:51.879Z",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:51.879Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-4aak22thq",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:51.527Z",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:51.527Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-5mql3jfrg",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:45.833Z",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:45.833Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-5rgas7909",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:50.878Z",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:50.878Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-63kibj079",
+   "data": {
+    "createdAt": "2026-09-20T16:12:51.126Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:51.126Z",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-77ysmw47u",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:46.848Z",
+    "createdAt": "2026-09-20T16:12:46.848Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-7dqbhce1f",
+   "data": {
+    "createdAt": "2026-09-20T16:12:49.818Z",
+    "reminderDate": "2026-10-04T16:12:49.818Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-8k2lxfbx0",
+   "data": {
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:48.415Z",
+    "createdAt": "2026-09-20T16:12:48.415Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-91swr3ufp",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:48.560Z",
+    "reminderDate": "2026-10-04T16:12:48.560Z",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-929azny85",
+   "data": {
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:49.147Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:49.147Z",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-an5akore0",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:48.646Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:48.646Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-bm3qqrh2w",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:48.243Z",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:48.243Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-diqqaphkp",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:50.246Z",
+    "reminderDate": "2026-10-04T16:12:50.246Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-dudxxmftv",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "createdAt": "2026-09-20T16:12:46.968Z",
+    "reminderDate": "2026-10-04T16:12:46.968Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-e06513dzn",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:47.109Z",
+    "agentName": "Cormac Bligh",
+    "createdAt": "2026-09-20T16:12:47.109Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-epvl70urn",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:50.155Z",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:50.155Z",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-er6hsyecr",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:47.418Z",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:47.418Z",
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-fxullhue1",
+   "data": {
+    "createdAt": "2026-09-20T16:12:47.780Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:47.780Z",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-hzjcvo1qc",
+   "data": {
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:48.739Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:48.739Z",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-iiukyls6s",
+   "data": {
+    "createdAt": "2026-09-20T16:12:47.277Z",
+    "reminderDate": "2026-10-04T16:12:47.277Z",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-j30kp6n4k",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:51.977Z",
+    "createdAt": "2026-09-20T16:12:51.977Z",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-ja963qidk",
+   "data": {
+    "createdAt": "2026-09-20T16:12:51.247Z",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:51.246Z",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-k2nzehk6z",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:46.253Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:46.253Z",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-khhpiamca",
+   "data": {
+    "createdAt": "2026-09-20T16:12:49.488Z",
+    "reminderDate": "2026-10-04T16:12:49.488Z",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-kkl5ruhjf",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:47.189Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:47.189Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-l8mbpzz2i",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:49.716Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:49.716Z",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-lw9wa0znw",
+   "data": {
+    "createdAt": "2026-09-20T16:12:48.118Z",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:48.118Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-n08dtl6oj",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:46.362Z",
+    "reminderDate": "2026-10-04T16:12:46.362Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-n0ngvl1hf",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:47.704Z",
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:47.704Z",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-n9k2uinf1",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:46.576Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:46.576Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-oel12ihb3",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:49.382Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:49.382Z",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-pj5yu9t6e",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:46.118Z",
+    "createdAt": "2026-09-20T16:12:46.118Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-pliseap33",
+   "data": {
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:51.612Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:51.612Z",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-pyl2u7ryd",
+   "data": {
+    "createdAt": "2026-09-20T16:12:49.042Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:49.042Z",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-qyld3yyxx",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:47.945Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:47.945Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-r0q8rbdhp",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:51.721Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:51.721Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-saokicjuk",
+   "data": {
+    "createdAt": "2026-09-20T16:12:49.635Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:49.635Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-t0hpsspgy",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:46.651Z",
+    "reminderDate": "2026-10-04T16:12:46.651Z",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-ti35bezyt",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:48.325Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:48.325Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-tp6bjsv5k",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:48.939Z",
+    "reminderDate": "2026-10-04T16:12:48.939Z",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-uf2xtdbw3",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:47.589Z",
+    "reminderDate": "2026-10-04T16:12:47.589Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-uji035gko",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:51.339Z",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:51.339Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-un5uu8vth",
+   "data": {
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:50.758Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:50.758Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-wf2gtlhe9",
+   "data": {
+    "createdAt": "2026-09-20T16:12:47.502Z",
+    "queryId": "seed-cal-passed20-q",
+    "reminderDate": "2026-10-04T16:12:47.502Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Cormac Bligh"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-xe7mtj4tv",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:50.395Z",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:50.395Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-xtjki85c6",
+   "data": {
+    "createdAt": "2026-09-20T16:12:46.482Z",
+    "reminderDate": "2026-10-04T16:12:46.482Z",
+    "type": "Nudge sent",
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-passed20-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-y2h1qt120",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:50.498Z",
+    "queryId": "seed-cal-passed20-q",
+    "createdAt": "2026-09-20T16:12:50.498Z",
+    "agentName": "Cormac Bligh",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-zszb1ijtn",
+   "data": {
+    "agentName": "Cormac Bligh",
+    "reminderDate": "2026-10-04T16:12:52.070Z",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-passed20-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:52.070Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-zu0o96ptq",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "agentName": "Cormac Bligh",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:48.033Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:48.033Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-8qsnqf7ku",
+   "data": {
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-cal-passed865-q",
+    "agentName": "Ottoline Frayn",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Full manuscript sent to Ottoline Frayn at Frayn Agency",
+    "type": "Full Sent",
+    "createdAt": {
+     "__ts": 1789921432116
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-full-requested-seed-cal-passed865-q",
+   "data": {
+    "agentName": "Ottoline Frayn",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Full Requested",
+    "reconstructed": true,
+    "queryId": "seed-cal-passed865-q",
+    "eventKey": "full_requested",
+    "note": "Full manuscript requested",
+    "createdAt": {
+     "__ts": 1710633600000
+    },
+    "resultingStatus": "Full Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-09n9mlx24",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:14.641Z",
+    "reminderDate": "2026-10-04T16:12:14.641Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-4994j44e9",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "createdAt": "2026-09-20T16:12:16.349Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:16.349Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-52jnm9thz",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:13.413Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:13.413Z",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-5k9otlrty",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:15.361Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:15.361Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-5teiss56l",
+   "data": {
+    "createdAt": "2026-09-20T16:12:17.237Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:17.237Z",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-72sc2ntv8",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:12.942Z",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:12.942Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-7c2btpneh",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:17.461Z",
+    "reminderDate": "2026-10-04T16:12:17.461Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-7gknokjoi",
+   "data": {
+    "createdAt": "2026-09-20T16:12:14.294Z",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:14.294Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-7q0vdgdge",
+   "data": {
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:15.600Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:15.600Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-7s1ah4py0",
+   "data": {
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:17.677Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "createdAt": "2026-09-20T16:12:17.677Z",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-83s5etsxa",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:12.066Z",
+    "reminderDate": "2026-10-04T16:12:12.066Z",
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-8n345wnyh",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe",
+    "createdAt": "2026-09-20T16:12:11.784Z",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:11.784Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-918ik4xx1",
+   "data": {
+    "createdAt": "2026-09-20T16:12:14.538Z",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:14.538Z",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-91rrk039y",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:16.729Z",
+    "reminderDate": "2026-10-04T16:12:16.729Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-9bvbzdnf7",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:13.570Z",
+    "agentName": "Alasdair Crewe",
+    "createdAt": "2026-09-20T16:12:13.570Z",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-9ck75skyo",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:14.097Z",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:14.097Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-a6ksmbz9u",
+   "data": {
+    "createdAt": "2026-09-20T16:12:13.287Z",
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:13.287Z",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-a8tlhwwbh",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:11.976Z",
+    "createdAt": "2026-09-20T16:12:11.976Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-ajafsvyne",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:12.144Z",
+    "createdAt": "2026-09-20T16:12:12.145Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-b8j3kjcw8",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:15.181Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:15.181Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-bcygioa2c",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:18.048Z",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:18.048Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-dywh9ecd5",
+   "data": {
+    "createdAt": "2026-09-20T16:12:15.448Z",
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:15.448Z",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-e4ism7nuq",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:16.584Z",
+    "createdAt": "2026-09-20T16:12:16.584Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-egav2p6c8",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:12.328Z",
+    "createdAt": "2026-09-20T16:12:12.328Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-eppqukoau",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:11.597Z",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:11.597Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-fdptjeh2h",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:13.762Z",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:13.762Z",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-fg932bj6v",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:17.879Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:17.879Z",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-ftk63p5jm",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:14.198Z",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:14.198Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-gcdyhxsb8",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:15.044Z",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:15.044Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-gd644rm4f",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:13.024Z",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:13.024Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-gk2jbwj0n",
+   "data": {
+    "createdAt": "2026-09-20T16:12:14.734Z",
+    "reminderDate": "2026-10-04T16:12:14.734Z",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-h7hnhvwxp",
+   "data": {
+    "createdAt": "2026-09-20T16:12:16.215Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:16.215Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-hjvpy0f1c",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:16.979Z",
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:16.979Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-hv40v1nm3",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:12.421Z",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:12.421Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-i7x7853n8",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:17.063Z",
+    "reminderDate": "2026-10-04T16:12:17.063Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-k5vsuts2n",
+   "data": {
+    "createdAt": "2026-09-20T16:12:14.955Z",
+    "reminderDate": "2026-10-04T16:12:14.955Z",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-kzf1eqzy9",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:14.437Z",
+    "createdAt": "2026-09-20T16:12:14.437Z",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-lfu5kt6dh",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:12.613Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:12.613Z",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-lnc76jtm9",
+   "data": {
+    "createdAt": "2026-09-20T16:12:17.763Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:17.763Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-lq8oi5gel",
+   "data": {
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:15.283Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:15.283Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-msnfnczc5",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:12.865Z",
+    "createdAt": "2026-09-20T16:12:12.865Z",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "note": "Follow-up reminder set for 4 Oct 2026"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-mvdj92c45",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:12.796Z",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:12.796Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-nhevubx33",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:16.495Z",
+    "createdAt": "2026-09-20T16:12:16.495Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-p1obc593p",
+   "data": {
+    "createdAt": "2026-09-20T16:12:13.503Z",
+    "reminderDate": "2026-10-04T16:12:13.502Z",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-pra0a8bdh",
+   "data": {
+    "createdAt": "2026-09-20T16:12:16.846Z",
+    "reminderDate": "2026-10-04T16:12:16.846Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-puf2vhkxq",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:13.968Z",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:13.968Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-qcu01bwsk",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:12.692Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:12.692Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-qel2hb4kk",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:14.861Z",
+    "reminderDate": "2026-10-04T16:12:14.861Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-qpglb2ycz",
+   "data": {
+    "queryId": "seed-cal-bang-q",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:13.132Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "createdAt": "2026-09-20T16:12:13.132Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-rga82cff9",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:17.370Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:17.370Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-rjducmft2",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:13.212Z",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:13.212Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-scvtyb3js",
+   "data": {
+    "type": "Nudge sent",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:12.261Z",
+    "createdAt": "2026-09-20T16:12:12.261Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-solv7ngws",
+   "data": {
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:16.141Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:16.142Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-t7nnmt7rg",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "reminderDate": "2026-10-04T16:12:16.045Z",
+    "createdAt": "2026-09-20T16:12:16.045Z",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-tvpv5nbi4",
+   "data": {
+    "createdAt": "2026-09-20T16:12:15.693Z",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:15.693Z",
+    "agentName": "Alasdair Crewe"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-tx7uzlikj",
+   "data": {
+    "createdAt": "2026-09-20T16:12:13.876Z",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:13.875Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-txg2vucyj",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "queryId": "seed-cal-bang-q",
+    "reminderDate": "2026-10-04T16:12:13.677Z",
+    "createdAt": "2026-09-20T16:12:13.677Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-x6i2y2pke",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:15.933Z",
+    "queryId": "seed-cal-bang-q",
+    "type": "Nudge sent",
+    "createdAt": "2026-09-20T16:12:15.933Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-x9ktb71jm",
+   "data": {
+    "reminderDate": "2026-10-04T16:12:15.762Z",
+    "agentName": "Alasdair Crewe",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "type": "Nudge sent",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:15.762Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-xtjx3a9i9",
+   "data": {
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "agentName": "Alasdair Crewe",
+    "type": "Nudge sent",
+    "reminderDate": "2026-10-04T16:12:12.533Z",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:12.533Z"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-zqymyuw9u",
+   "data": {
+    "agentName": "Alasdair Crewe",
+    "queryId": "seed-cal-bang-q",
+    "createdAt": "2026-09-20T16:12:11.840Z",
+    "note": "Follow-up reminder set for 4 Oct 2026",
+    "reminderDate": "2026-10-04T16:12:11.840Z",
+    "type": "Nudge sent"
+   }
+  }
+ ],
+ "wrote": [
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-1/activity/act-status-queried-seed-query-1",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-2/activity/act-status-queried-seed-query-2",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-status-queried-seed-query-3",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-4/activity/act-status-queried-seed-query-4",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-5/activity/act-status-queried-seed-query-5",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-status-queried-seed-query-6",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-queried-seed-query-7",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-partial-requested-seed-query-7",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-queried-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-requested-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-sent-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-queried-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-requested-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-sent-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-full-requested-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-queried-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-requested-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-sent-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-requested-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-sent-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-queried-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-requested-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-sent-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-revise-resubmit-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-queried-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-requested-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-sent-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-requested-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-sent-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-offer-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-queried-seed-query-13",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-rejected-seed-query-13",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-queried-seed-query-14",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-rejected-seed-query-14",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-queried-seed-query-15",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-rejected-seed-query-15",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-queried-seed-query-16",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-rejected-seed-query-16",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-queried-seed-query-17",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-withdrawn-seed-query-17",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-queried-seed-query-18",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-no-response-seed-query-18",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-19/activity/act-status-queried-seed-query-19",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-queried-seed-query-20",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-partial-requested-seed-query-20",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-queried-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-requested-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-sent-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-requested-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-sent-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-22/activity/act-status-queried-seed-query-22",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-queried-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-requested-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-sent-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-near-q/activity/act-status-queried-seed-cal-near-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-status-queried-seed-cal-passed20-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-queried-seed-cal-passed865-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-full-requested-seed-cal-passed865-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-soon-q/activity/act-status-queried-seed-cal-soon-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-status-queried-seed-cal-bang-q"
+ ]
+}

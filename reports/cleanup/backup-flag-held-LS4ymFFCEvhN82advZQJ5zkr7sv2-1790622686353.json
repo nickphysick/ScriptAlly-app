@@ -1,0 +1,250 @@
+{
+ "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+ "at": "2026-09-28T19:11:26.353Z",
+ "mode": "flag-held",
+ "changes": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/rj-dupe/activity/act-status-full-requested-rj-dupe",
+   "before": {
+    "agentName": "Tobias Hark",
+    "note": "Full manuscript requested",
+    "queryId": "rj-dupe",
+    "resultingStatus": "Full Requested",
+    "createdAt": {
+     "__ts": 1788902423179
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Full Requested"
+   },
+   "after": {
+    "agentName": "Tobias Hark",
+    "note": "Full manuscript requested",
+    "queryId": "rj-dupe",
+    "resultingStatus": "Full Requested",
+    "createdAt": {
+     "__ts": 1788902423179
+    },
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Full Requested",
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-full-requested-seed-cal-passed865-q",
+   "before": {
+    "resultingStatus": "Full Requested",
+    "note": "Full manuscript requested",
+    "agentName": "Ottoline Frayn",
+    "type": "Full Requested",
+    "queryId": "seed-cal-passed865-q",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1710633600000
+    }
+   },
+   "after": {
+    "resultingStatus": "Full Requested",
+    "note": "Full manuscript requested",
+    "agentName": "Ottoline Frayn",
+    "type": "Full Requested",
+    "queryId": "seed-cal-passed865-q",
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1710633600000
+    },
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3/activity/act-status-full-requested-seed-pkgq-3",
+   "before": {
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1781913600000
+    },
+    "type": "Full Requested",
+    "note": "Full manuscript requested",
+    "resultingStatus": "Full Requested",
+    "agentName": "Marcus Reed",
+    "queryId": "seed-pkgq-3"
+   },
+   "after": {
+    "manuscriptTitle": "The Smoke Test",
+    "createdAt": {
+     "__ts": 1781913600000
+    },
+    "type": "Full Requested",
+    "note": "Full manuscript requested",
+    "resultingStatus": "Full Requested",
+    "agentName": "Marcus Reed",
+    "queryId": "seed-pkgq-3",
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-4/activity/act-status-partial-requested-seed-pkgq-4",
+   "before": {
+    "note": "Partial manuscript requested",
+    "agentName": "Priya Nair",
+    "queryId": "seed-pkgq-4",
+    "resultingStatus": "Partial Requested",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Requested",
+    "createdAt": {
+     "__ts": 1782345600000
+    }
+   },
+   "after": {
+    "note": "Partial manuscript requested",
+    "agentName": "Priya Nair",
+    "queryId": "seed-pkgq-4",
+    "resultingStatus": "Partial Requested",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Requested",
+    "createdAt": {
+     "__ts": 1782345600000
+    },
+    "reconstructed": true,
+    "eventKey": "partial_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-sent-seed-query-10",
+   "before": {
+    "createdAt": {
+     "__ts": 1780963200000
+    },
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-query-10",
+    "note": "Full manuscript sent",
+    "agentName": "Peter Vance",
+    "type": "Full Sent",
+    "manuscriptTitle": "The Smoke Test"
+   },
+   "after": {
+    "createdAt": {
+     "__ts": 1780963200000
+    },
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-query-10",
+    "note": "Full manuscript sent",
+    "agentName": "Peter Vance",
+    "type": "Full Sent",
+    "manuscriptTitle": "The Smoke Test",
+    "reconstructed": true,
+    "eventKey": "full_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-revise-resubmit-seed-query-11",
+   "before": {
+    "note": "Revise & resubmit requested",
+    "queryId": "seed-query-11",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Iris Kwan",
+    "resultingStatus": "Revise & Resubmit",
+    "type": "Revise & Resubmit",
+    "createdAt": {
+     "__ts": 1781308800000
+    }
+   },
+   "after": {
+    "note": "Revise & resubmit requested",
+    "queryId": "seed-query-11",
+    "manuscriptTitle": "The Smoke Test",
+    "agentName": "Iris Kwan",
+    "resultingStatus": "Revise & Resubmit",
+    "type": "Revise & Resubmit",
+    "createdAt": {
+     "__ts": 1781308800000
+    },
+    "reconstructed": true,
+    "eventKey": "rr_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-partial-requested-seed-query-7",
+   "before": {
+    "createdAt": {
+     "__ts": 1779926400000
+    },
+    "note": "Partial manuscript requested",
+    "queryId": "seed-query-7",
+    "resultingStatus": "Partial Requested",
+    "agentName": "Rachel Lin",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Requested"
+   },
+   "after": {
+    "createdAt": {
+     "__ts": 1779926400000
+    },
+    "note": "Partial manuscript requested",
+    "queryId": "seed-query-7",
+    "resultingStatus": "Partial Requested",
+    "agentName": "Rachel Lin",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Requested",
+    "reconstructed": true,
+    "eventKey": "partial_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-sent-seed-query-8",
+   "before": {
+    "queryId": "seed-query-8",
+    "agentName": "David Marsh",
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Sent",
+    "createdAt": {
+     "__ts": 1780272000000
+    }
+   },
+   "after": {
+    "queryId": "seed-query-8",
+    "agentName": "David Marsh",
+    "resultingStatus": "Partial Sent",
+    "note": "Partial manuscript sent",
+    "manuscriptTitle": "The Smoke Test",
+    "type": "Partial Sent",
+    "createdAt": {
+     "__ts": 1780272000000
+    },
+    "reconstructed": true,
+    "eventKey": "partial_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-full-requested-seed-query-9",
+   "before": {
+    "queryId": "seed-query-9",
+    "createdAt": {
+     "__ts": 1780617600000
+    },
+    "resultingStatus": "Full Requested",
+    "type": "Full Requested",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Full manuscript requested",
+    "agentName": "Ana Duarte"
+   },
+   "after": {
+    "queryId": "seed-query-9",
+    "createdAt": {
+     "__ts": 1780617600000
+    },
+    "resultingStatus": "Full Requested",
+    "type": "Full Requested",
+    "manuscriptTitle": "The Smoke Test",
+    "note": "Full manuscript requested",
+    "agentName": "Ana Duarte",
+    "reconstructed": true,
+    "eventKey": "full_requested"
+   }
+  }
+ ]
+}

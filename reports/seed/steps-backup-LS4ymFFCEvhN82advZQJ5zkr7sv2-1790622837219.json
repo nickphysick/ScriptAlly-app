@@ -1,0 +1,908 @@
+{
+ "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+ "at": "2026-09-28T19:13:57.219Z",
+ "removed": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-1/activity/act-status-queried-seed-query-1",
+   "data": {
+    "queryId": "seed-query-1",
+    "type": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1789556400000
+    },
+    "resultingStatus": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-2/activity/act-status-queried-seed-query-2",
+   "data": {
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1788260400000
+    },
+    "reconstructed": true,
+    "type": "Queried",
+    "eventKey": "query_sent",
+    "resultingStatus": "Queried",
+    "queryId": "seed-query-2"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-status-queried-seed-query-3",
+   "data": {
+    "reconstructed": true,
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1786273200000
+    },
+    "queryId": "seed-query-3",
+    "type": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-4/activity/act-status-queried-seed-query-4",
+   "data": {
+    "queryId": "seed-query-4",
+    "type": "Queried",
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1786014000000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-5/activity/act-status-queried-seed-query-5",
+   "data": {
+    "note": "Queried",
+    "resultingStatus": "Queried",
+    "reconstructed": true,
+    "eventKey": "query_sent",
+    "type": "Queried",
+    "createdAt": {
+     "__ts": 1785322800000
+    },
+    "queryId": "seed-query-5"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-status-queried-seed-query-6",
+   "data": {
+    "note": "Queried",
+    "queryId": "seed-query-6",
+    "eventKey": "query_sent",
+    "createdAt": {
+     "__ts": 1784372400000
+    },
+    "resultingStatus": "Queried",
+    "reconstructed": true,
+    "type": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-partial-requested-seed-query-7",
+   "data": {
+    "queryId": "seed-query-7",
+    "eventKey": "partial_requested",
+    "note": "Partial Requested",
+    "reconstructed": true,
+    "resultingStatus": "Partial Requested",
+    "type": "Partial Requested",
+    "createdAt": {
+     "__ts": 1787137200000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-queried-seed-query-7",
+   "data": {
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "type": "Queried",
+    "queryId": "seed-query-7",
+    "eventKey": "query_sent",
+    "resultingStatus": "Queried",
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-requested-seed-query-8",
+   "data": {
+    "createdAt": {
+     "__ts": 1786186800000
+    },
+    "note": "Partial Requested",
+    "queryId": "seed-query-8",
+    "reconstructed": true,
+    "type": "Partial Requested",
+    "resultingStatus": "Partial Requested",
+    "eventKey": "partial_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-sent-seed-query-8",
+   "data": {
+    "note": "Partial Sent",
+    "createdAt": {
+     "__ts": 1787396400000
+    },
+    "type": "Partial Sent",
+    "eventKey": "partial_sent",
+    "resultingStatus": "Partial Sent",
+    "reconstructed": true,
+    "queryId": "seed-query-8"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-queried-seed-query-8",
+   "data": {
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1784977200000
+    },
+    "eventKey": "query_sent",
+    "queryId": "seed-query-8",
+    "resultingStatus": "Queried",
+    "type": "Queried",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-full-requested-seed-query-9",
+   "data": {
+    "reconstructed": true,
+    "resultingStatus": "Full Requested",
+    "note": "Full Requested",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "eventKey": "full_requested",
+    "queryId": "seed-query-9",
+    "type": "Full Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-requested-seed-query-9",
+   "data": {
+    "reconstructed": true,
+    "resultingStatus": "Partial Requested",
+    "note": "Partial Requested",
+    "queryId": "seed-query-9",
+    "eventKey": "partial_requested",
+    "type": "Partial Requested",
+    "createdAt": {
+     "__ts": 1784718000000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-sent-seed-query-9",
+   "data": {
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "eventKey": "partial_sent",
+    "type": "Partial Sent",
+    "queryId": "seed-query-9",
+    "reconstructed": true,
+    "note": "Partial Sent",
+    "resultingStatus": "Partial Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-queried-seed-query-9",
+   "data": {
+    "type": "Queried",
+    "queryId": "seed-query-9",
+    "note": "Queried",
+    "eventKey": "query_sent",
+    "createdAt": {
+     "__ts": 1783508400000
+    },
+    "resultingStatus": "Queried",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-requested-seed-query-10",
+   "data": {
+    "createdAt": {
+     "__ts": 1774180800000
+    },
+    "type": "Full Requested",
+    "eventKey": "full_requested",
+    "resultingStatus": "Full Requested",
+    "queryId": "seed-query-10",
+    "note": "Full Requested",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-sent-seed-query-10",
+   "data": {
+    "type": "Full Sent",
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1775386800000
+    },
+    "note": "Full Sent",
+    "resultingStatus": "Full Sent",
+    "queryId": "seed-query-10",
+    "eventKey": "full_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-requested-seed-query-10",
+   "data": {
+    "eventKey": "partial_requested",
+    "note": "Partial Requested",
+    "queryId": "seed-query-10",
+    "createdAt": {
+     "__ts": 1771761600000
+    },
+    "type": "Partial Requested",
+    "reconstructed": true,
+    "resultingStatus": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-sent-seed-query-10",
+   "data": {
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1772971200000
+    },
+    "note": "Partial Sent",
+    "eventKey": "partial_sent",
+    "resultingStatus": "Partial Sent",
+    "queryId": "seed-query-10",
+    "type": "Partial Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-queried-seed-query-10",
+   "data": {
+    "queryId": "seed-query-10",
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1770552000000
+    },
+    "resultingStatus": "Queried",
+    "type": "Queried",
+    "reconstructed": true,
+    "eventKey": "query_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-requested-seed-query-11",
+   "data": {
+    "type": "Partial Requested",
+    "createdAt": {
+     "__ts": 1784718000000
+    },
+    "queryId": "seed-query-11",
+    "reconstructed": true,
+    "eventKey": "partial_requested",
+    "resultingStatus": "Partial Requested",
+    "note": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-sent-seed-query-11",
+   "data": {
+    "note": "Partial Sent",
+    "queryId": "seed-query-11",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "resultingStatus": "Partial Sent",
+    "type": "Partial Sent",
+    "eventKey": "partial_sent",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-queried-seed-query-11",
+   "data": {
+    "type": "Queried",
+    "createdAt": {
+     "__ts": 1783508400000
+    },
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "note": "Queried",
+    "resultingStatus": "Queried",
+    "queryId": "seed-query-11"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-revise-resubmit-seed-query-11",
+   "data": {
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "eventKey": "rr_requested",
+    "type": "Revise & Resubmit",
+    "queryId": "seed-query-11",
+    "reconstructed": true,
+    "resultingStatus": "Revise & Resubmit",
+    "note": "Revise & Resubmit"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-requested-seed-query-12",
+   "data": {
+    "createdAt": {
+     "__ts": 1784718000000
+    },
+    "reconstructed": true,
+    "eventKey": "full_requested",
+    "note": "Full Requested",
+    "type": "Full Requested",
+    "resultingStatus": "Full Requested",
+    "queryId": "seed-query-12"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-sent-seed-query-12",
+   "data": {
+    "queryId": "seed-query-12",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "reconstructed": true,
+    "type": "Full Sent",
+    "eventKey": "full_sent",
+    "resultingStatus": "Full Sent",
+    "note": "Full Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-offer-seed-query-12",
+   "data": {
+    "note": "Offer",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "resultingStatus": "Offer",
+    "queryId": "seed-query-12",
+    "reconstructed": true,
+    "type": "Offer",
+    "eventKey": "offer"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-requested-seed-query-12",
+   "data": {
+    "queryId": "seed-query-12",
+    "reconstructed": true,
+    "eventKey": "partial_requested",
+    "note": "Partial Requested",
+    "resultingStatus": "Partial Requested",
+    "createdAt": {
+     "__ts": 1782298800000
+    },
+    "type": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-sent-seed-query-12",
+   "data": {
+    "queryId": "seed-query-12",
+    "eventKey": "partial_sent",
+    "createdAt": {
+     "__ts": 1783508400000
+    },
+    "type": "Partial Sent",
+    "resultingStatus": "Partial Sent",
+    "reconstructed": true,
+    "note": "Partial Sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-queried-seed-query-12",
+   "data": {
+    "queryId": "seed-query-12",
+    "resultingStatus": "Queried",
+    "note": "Queried",
+    "reconstructed": true,
+    "eventKey": "query_sent",
+    "createdAt": {
+     "__ts": 1781089200000
+    },
+    "type": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-queried-seed-query-13",
+   "data": {
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "queryId": "seed-query-13",
+    "note": "Queried",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "type": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-rejected-seed-query-13",
+   "data": {
+    "note": "Rejected",
+    "eventKey": "pass",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "type": "Rejected",
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-13",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-queried-seed-query-14",
+   "data": {
+    "queryId": "seed-query-14",
+    "note": "Queried",
+    "resultingStatus": "Queried",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "eventKey": "query_sent",
+    "type": "Queried",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-rejected-seed-query-14",
+   "data": {
+    "resultingStatus": "Rejected",
+    "type": "Rejected",
+    "queryId": "seed-query-14",
+    "note": "Rejected",
+    "eventKey": "pass",
+    "reconstructed": true,
+    "createdAt": {
+     "__ts": 1787137200000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-queried-seed-query-15",
+   "data": {
+    "queryId": "seed-query-15",
+    "type": "Queried",
+    "reconstructed": true,
+    "note": "Queried",
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "createdAt": {
+     "__ts": 1785927600000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-rejected-seed-query-15",
+   "data": {
+    "note": "Rejected",
+    "eventKey": "pass",
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-15",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "type": "Rejected",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-queried-seed-query-16",
+   "data": {
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "type": "Queried",
+    "queryId": "seed-query-16",
+    "reconstructed": true,
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-rejected-seed-query-16",
+   "data": {
+    "reconstructed": true,
+    "note": "Rejected",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "resultingStatus": "Rejected",
+    "queryId": "seed-query-16",
+    "type": "Rejected",
+    "eventKey": "pass"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-queried-seed-query-17",
+   "data": {
+    "note": "Queried",
+    "queryId": "seed-query-17",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "reconstructed": true,
+    "type": "Queried",
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-withdrawn-seed-query-17",
+   "data": {
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "resultingStatus": "Withdrawn",
+    "reconstructed": true,
+    "note": "Withdrawn",
+    "eventKey": "withdrawn",
+    "type": "Withdrawn",
+    "queryId": "seed-query-17"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-no-response-seed-query-18",
+   "data": {
+    "resultingStatus": "No Response",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "eventKey": "closed_no_reply",
+    "type": "No Response",
+    "reconstructed": true,
+    "note": "No Response",
+    "queryId": "seed-query-18"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-queried-seed-query-18",
+   "data": {
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "queryId": "seed-query-18",
+    "resultingStatus": "Queried",
+    "type": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-19/activity/act-status-queried-seed-query-19",
+   "data": {
+    "type": "Queried",
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "note": "Queried",
+    "queryId": "seed-query-19",
+    "createdAt": {
+     "__ts": 1767614400000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-partial-requested-seed-query-20",
+   "data": {
+    "reconstructed": true,
+    "resultingStatus": "Partial Requested",
+    "type": "Partial Requested",
+    "queryId": "seed-query-20",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "eventKey": "partial_requested",
+    "note": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-queried-seed-query-20",
+   "data": {
+    "type": "Queried",
+    "resultingStatus": "Queried",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "note": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "queryId": "seed-query-20"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-requested-seed-query-21",
+   "data": {
+    "eventKey": "full_requested",
+    "type": "Full Requested",
+    "createdAt": {
+     "__ts": 1783508400000
+    },
+    "resultingStatus": "Full Requested",
+    "reconstructed": true,
+    "queryId": "seed-query-21",
+    "note": "Full Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-sent-seed-query-21",
+   "data": {
+    "note": "Full Sent",
+    "resultingStatus": "Full Sent",
+    "eventKey": "full_sent",
+    "type": "Full Sent",
+    "createdAt": {
+     "__ts": 1784718000000
+    },
+    "reconstructed": true,
+    "queryId": "seed-query-21"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-requested-seed-query-21",
+   "data": {
+    "note": "Partial Requested",
+    "reconstructed": true,
+    "queryId": "seed-query-21",
+    "resultingStatus": "Partial Requested",
+    "eventKey": "partial_requested",
+    "createdAt": {
+     "__ts": 1781089200000
+    },
+    "type": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-sent-seed-query-21",
+   "data": {
+    "reconstructed": true,
+    "queryId": "seed-query-21",
+    "note": "Partial Sent",
+    "resultingStatus": "Partial Sent",
+    "eventKey": "partial_sent",
+    "type": "Partial Sent",
+    "createdAt": {
+     "__ts": 1782298800000
+    }
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-queried-seed-query-21",
+   "data": {
+    "createdAt": {
+     "__ts": 1779879600000
+    },
+    "note": "Queried",
+    "queryId": "seed-query-21",
+    "resultingStatus": "Queried",
+    "reconstructed": true,
+    "eventKey": "query_sent",
+    "type": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-22/activity/act-status-queried-seed-query-22",
+   "data": {
+    "reconstructed": true,
+    "eventKey": "query_sent",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "type": "Queried",
+    "resultingStatus": "Queried",
+    "queryId": "seed-query-22",
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-requested-seed-query-23",
+   "data": {
+    "note": "Partial Requested",
+    "reconstructed": true,
+    "eventKey": "partial_requested",
+    "queryId": "seed-query-23",
+    "createdAt": {
+     "__ts": 1785927600000
+    },
+    "type": "Partial Requested",
+    "resultingStatus": "Partial Requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-sent-seed-query-23",
+   "data": {
+    "note": "Partial Sent",
+    "eventKey": "partial_sent",
+    "resultingStatus": "Partial Sent",
+    "type": "Partial Sent",
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "reconstructed": true,
+    "queryId": "seed-query-23"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-queried-seed-query-23",
+   "data": {
+    "queryId": "seed-query-23",
+    "type": "Queried",
+    "eventKey": "query_sent",
+    "resultingStatus": "Queried",
+    "createdAt": {
+     "__ts": 1784718000000
+    },
+    "reconstructed": true,
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-near-q/activity/act-status-queried-seed-cal-near-q",
+   "data": {
+    "resultingStatus": "Queried",
+    "eventKey": "query_sent",
+    "reconstructed": true,
+    "type": "Queried",
+    "createdAt": {
+     "__ts": 1786273200000
+    },
+    "queryId": "seed-cal-near-q",
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-status-queried-seed-cal-passed20-q",
+   "data": {
+    "queryId": "seed-cal-passed20-q",
+    "note": "Queried",
+    "reconstructed": true,
+    "resultingStatus": "Queried",
+    "createdAt": {
+     "__ts": 1786446000000
+    },
+    "type": "Queried",
+    "eventKey": "query_sent"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-full-requested-seed-cal-passed865-q",
+   "data": {
+    "queryId": "seed-cal-passed865-q",
+    "note": "Full Requested",
+    "createdAt": {
+     "__ts": 1713438060000
+    },
+    "reconstructed": true,
+    "type": "Full Requested",
+    "resultingStatus": "Full Requested",
+    "eventKey": "full_requested"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-queried-seed-cal-passed865-q",
+   "data": {
+    "type": "Queried",
+    "createdAt": {
+     "__ts": 1713438000000
+    },
+    "queryId": "seed-cal-passed865-q",
+    "eventKey": "query_sent",
+    "note": "Queried",
+    "resultingStatus": "Queried",
+    "reconstructed": true
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-soon-q/activity/act-status-queried-seed-cal-soon-q",
+   "data": {
+    "createdAt": {
+     "__ts": 1788865200000
+    },
+    "type": "Queried",
+    "reconstructed": true,
+    "resultingStatus": "Queried",
+    "queryId": "seed-cal-soon-q",
+    "eventKey": "query_sent",
+    "note": "Queried"
+   }
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-status-queried-seed-cal-bang-q",
+   "data": {
+    "createdAt": {
+     "__ts": 1787137200000
+    },
+    "eventKey": "query_sent",
+    "type": "Queried",
+    "reconstructed": true,
+    "resultingStatus": "Queried",
+    "note": "Queried",
+    "queryId": "seed-cal-bang-q"
+   }
+  }
+ ],
+ "wrote": [
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-1/activity/act-status-queried-seed-query-1",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-2/activity/act-status-queried-seed-query-2",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-status-queried-seed-query-3",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-4/activity/act-status-queried-seed-query-4",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-5/activity/act-status-queried-seed-query-5",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-6/activity/act-status-queried-seed-query-6",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-queried-seed-query-7",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-7/activity/act-status-partial-requested-seed-query-7",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-queried-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-requested-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-status-partial-sent-seed-query-8",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-queried-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-requested-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-partial-sent-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-9/activity/act-status-full-requested-seed-query-9",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-queried-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-requested-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-partial-sent-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-requested-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-10/activity/act-status-full-sent-seed-query-10",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-queried-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-requested-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-partial-sent-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-11/activity/act-status-revise-resubmit-seed-query-11",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-queried-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-requested-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-partial-sent-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-requested-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-full-sent-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-12/activity/act-status-offer-seed-query-12",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-queried-seed-query-13",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-13/activity/act-status-rejected-seed-query-13",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-queried-seed-query-14",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-14/activity/act-status-rejected-seed-query-14",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-queried-seed-query-15",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-15/activity/act-status-rejected-seed-query-15",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-queried-seed-query-16",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-16/activity/act-status-rejected-seed-query-16",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-queried-seed-query-17",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-17/activity/act-status-withdrawn-seed-query-17",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-queried-seed-query-18",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-18/activity/act-status-no-response-seed-query-18",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-19/activity/act-status-queried-seed-query-19",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-queried-seed-query-20",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-20/activity/act-status-partial-requested-seed-query-20",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-queried-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-requested-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-partial-sent-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-requested-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-21/activity/act-status-full-sent-seed-query-21",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-22/activity/act-status-queried-seed-query-22",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-queried-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-requested-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-status-partial-sent-seed-query-23",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-near-q/activity/act-status-queried-seed-cal-near-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed20-q/activity/act-status-queried-seed-cal-passed20-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-queried-seed-cal-passed865-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-passed865-q/activity/act-status-full-requested-seed-cal-passed865-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-soon-q/activity/act-status-queried-seed-cal-soon-q",
+  "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-cal-bang-q/activity/act-status-queried-seed-cal-bang-q"
+ ]
+}

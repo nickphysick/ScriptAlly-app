@@ -2,6 +2,8 @@
 
 28 Sep 2026. Worktree off main at `599a468d`; direct to main, one commit per item (item 1 is two: the code, then its migration results). Dev only.
 
+> **⚠️ THE FORTNIGHT VIEW IS NOT ON ANY LIVE PAGE.** No route in the app renders it. `DeskBelow`, its only real host, is mounted nowhere, and `DiaryCarousel` appears only in the dev-server lab `#/diary-lab`, which is given no activities. Anything said below about the Fortnight view is held by a unit test (`addedRowsAgree.test.ts`), never by a screenshot of the app.
+
 ## Commits and the deployed build
 
 | Item | Commit | What |
@@ -177,3 +179,67 @@ Both were already done in **`949e8f25b`**: the unreachable note sheet in `Housek
 
 - Unit gates for every commit: tsc, the production build and full Vitest were green (8,243 tests at `aac4507c`).
 - Every planted fixture was removed in its own run. One residue row was found and removed: `act-added-agent-rq-agent`, which the before build's runtime repair wrote for the screenshot fixture after it had been removed. No `rc-`, `me-` or `rq-` data remains.
+
+---
+
+# Follow-up on Nick's rulings (28 Sep)
+
+## 1 · The nine held steps are flagged
+
+- `migrateRecordCleanup.mts --flag-held` adds `reconstructed: true` (and its `eventKey`) to the nine, and removes nothing.
+- **Before each write it proves the flag moves nothing.** The app's derivation with and without the flag must agree on every field, or it stops. After the writes, the stored query is re-read, and a change to any status or date stops it.
+- **Result:** 9 flagged. The derivation was identical for each, and no stored status or date moved. A second run flagged 0.
+- **All 31 reconstructed steps on the account are now flagged.** The backup is `backup-flag-held-*.json`.
+- Six of the nine were on queries `seed.mjs` writes (`seed-query-7…11`, `seed-cal-passed865-q`), so the re-seed below replaced them with its own flagged steps. The other three (`rj-dupe`, `seed-pkgq-3`, `seed-pkgq-4`) keep their flagged step.
+
+## 2 · `seed.mjs` writes each query's history instead of an empty log
+
+- **What it writes.** Every query the seeder writes gets dated steps, one for each stage the seeder already dates on the document:
+  - the send;
+  - each request and each send;
+  - the closing.
+
+  They are flagged `reconstructed`, because a seeded history stands in for one exactly as an imported history does. **This is a deliberate step past the ruling's "first step".** With a single step, the next recalculation would have erased the fixture's other stage dates (a Full Sent query's `partialRequestedDate`, for example). With one step per dated stage, a recalculation reproduces the document's status **and** its stage dates.
+- **The Calendar fixtures** date only the send, so their status step is placed a minute after it, which keeps the order unambiguous.
+- **Reversible.** The seeder clears only the seeded queries' own logs, and writes a backup of every document it removes to `reports/seed/steps-backup-*.json` **before** deleting anything. `node tests/e2e/seed.mjs --revert-steps <backup>` removes the steps and restores the old documents.
+- **Test: `tests/e2e/seedCheck.mts`.** Seed, then derive exactly what a recalculation would write:
+  - no status may change;
+  - no log may be empty;
+  - no stored stage date may change.
+
+  | State | Result |
+  |---|---|
+  | The account as it stood | **Red:** 3 empty logs, 9 statuses would change (e.g. `seed-query-7` Partial Requested → No Response). Logs had drifted through earlier test runs. |
+  | After seeding | **Green:** 28 seeded queries, 0 empty, 0 status changes, 0 stage-date changes. The seeder replaced 160 accumulated log documents with 60 dated steps. |
+  | After `--revert-steps` | **Red again**, with exactly the original 3 and 9. The revert restored the account exactly. |
+  | After seeding again, and a second time | **Green** both times. |
+
+- **⚠️ One other change in `seed.mjs`, flagged because the ruling said nothing else would change.** The seeder could not run at all: its no-window agents batch recomputed the immutable `dateAdded` from today, so every run after the first day was refused. The unmodified seeder fails the same way today. It now keeps the stored value where there is one, which is the same fix the file's other agent batches already carry. Without it the steps could not be tested.
+
+## 3 · The stray-import accident — confirmed clean
+
+- **The import line across the whole tree** (`git grep`, CSS included):
+  - 24 files import `MONTHS_SHORT`, and every one uses it beyond the import. They are the 24 month tables.
+  - Every one of those import lines sits among its file's imports.
+  - The only other files that mention it are `lib/dates.ts`, `lib/dates.test.ts`, `Queries.tsx` (a local alias of the same table), and these two reports.
+  - **No CSS file mentions it.**
+- **`git diff ef455fb0 aac4507c`** (the commit before item 4, to the end of the pass):
+  - **96 files, exactly the intended set, with none outside it and none missing:**
+    - the 60 codemod files;
+    - the 24 month tables;
+    - `dates.ts` and `dates.test.ts`;
+    - `noSept`;
+    - `packageResults`, `EmailImportReview`, `queryEmptyCopy` and `boardWindow`;
+    - the 4 retargeted tests;
+    - `dates-changes.md`;
+    - item 5's three comment files.
+  - All 96 have a real, non-whitespace change.
+  - `src/lib/brand.tsx` and `queryCentreGrid.css`, the two files the accident actually damaged, are **unchanged** across that range.
+
+## 4 · The Fortnight view
+
+Stated at the top of this report. The unit test stands.
+
+## 5 · The Tracking ordering quirk
+
+Left as it is, as ruled.

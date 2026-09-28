@@ -31,7 +31,9 @@ describe("formatDate", () => {
   });
 });
 
-/* ── the lock: nothing in src/ formats a short month any other way ── */
+/* ── the lock: nothing in src/ formats a short month any other way ──
+   ⚠️ THE TWO SCANS PARSE EVERY SOURCE FILE, so they carry a 60s budget: under load one took 12.5s
+   and hit the 5s default, which reports a TIMEOUT that reads like a red (28 Sep). */
 const SRC = join(__dirname, "..");
 const files: string[] = [];
 (function walk(d: string) {
@@ -65,7 +67,7 @@ describe("the one formatter is the only way a short month is made", () => {
       visit(sf);
     }
     expect(offenders).toEqual([]);
-  });
+  }, 60_000);
   it("no string in the code says Sept (comments may quote the old bug), and there is one month table", () => {
     const sept: string[] = []; const tables: string[] = [];
     for (const f of files) {
@@ -80,5 +82,5 @@ describe("the one formatter is the only way a short month is made", () => {
     }
     expect(sept).toEqual([]);
     expect(tables).toEqual(["lib/dates.ts"]);
-  });
+  }, 60_000);
 });
