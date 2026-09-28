@@ -237,3 +237,39 @@ export function piecesChanged(base: PackageCard, now: PieceIds & { qlVersion: st
 export function exactPackage(live: PackageCard[], now: PieceIds): PackageCard | null {
   return live.find((p) => p.qlId === now.qlId && p.synId === now.synId && (p.other ?? null) === (now.other ?? null)) ?? null;
 }
+
+/* ---------- correcting what was sent (§A4) ---------- */
+
+/** One edition that could have gone out on a given day — a row in the correction's package list. */
+export interface EditionChoice extends PackageCard { retired: boolean; key: string }
+
+/**
+ * EVERY EDITION THAT EXISTED ON THE QUERY'S DATE, RETIRED PACKAGES INCLUDED (§A4) — "because that's
+ * what could have gone out that day". An edition existed if it had started by then; a later edition
+ * of the same package is not offered, and a superseded one still is.
+ *
+ * ⚠️ UNTIL PART B, A PACKAGE IS ITS 1ST EDITION, STARTED ON ITS createdDate (§C5). When the model
+ * carries `editions`, each `{ n, startedAt }` is read here instead; the pieces of a past edition are
+ * then that edition's own record, which is Part B's to supply — until it does, an edition's pieces
+ * are the package's live ones, which for a 1st edition is the same thing.
+ */
+export function editionsOn(manuscriptId: string, dayIso: string, packages: SubmissionPackage[] | undefined, versions: ManuscriptVersion[] | undefined, bookVersions?: { id: string; name: string }[]): EditionChoice[] {
+  const day = dayIso.slice(0, 10);
+  const all = (packages ?? []).filter((p) => p && p.manuscriptId === manuscriptId);
+  const cards = new Map(packagesFor(manuscriptId, all.map((p) => ({ ...p, status: "Active", retiredAt: undefined } as SubmissionPackage)), versions, bookVersions).map((c) => [c.id, c]));
+  const out: EditionChoice[] = [];
+  for (const p of all) {
+    const card = cards.get(p.id);
+    if (!card) continue;
+    const retired = !isLive(p);
+    const eds = (p as { editions?: { n?: unknown; startedAt?: unknown }[] }).editions;
+    const list = Array.isArray(eds) && eds.length
+      ? eds.map((e) => ({ n: typeof e.n === "number" ? e.n : 1, start: String(e.startedAt ?? "").slice(0, 10) }))
+      : [{ n: 1, start: String(p.createdDate ?? "").slice(0, 10) }];
+    for (const e of list) {
+      if (e.start && e.start > day) continue;
+      out.push({ ...card, edition: e.n, retired, key: `${p.id}#${e.n}` });
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name) || a.edition - b.edition);
+}

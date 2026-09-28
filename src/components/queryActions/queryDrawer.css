@@ -405,3 +405,4 @@ body.qad-docked .qcv-qm, body.qad-docked .qcv-open {
 /* the review's "What you sent" wears the chip (§A3) */
 .qad-sentsum { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
 .qad-sentsum .sh-chip { margin-top: 0; }
+.qad-ptags em.w { background: #f3eee7; color: var(--qad-ink70); }

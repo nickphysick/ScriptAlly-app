@@ -15,7 +15,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
-import { collection, doc, getDoc, getDocs, updateDoc, deleteField } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc, deleteField, deleteDoc, query as fsQuery, where } from "firebase/firestore";
 import { openQueryById, openTab } from "./openQuery";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
@@ -264,4 +264,58 @@ test("LP9 — the six cases: solid ink for a package, dashed for individually, q
     await page.waitForTimeout(400);
   }
   console.log("SIX CASES:", JSON.stringify(seen));
+});
+
+/* ─────────────── LP10 · correcting what was sent moves the credit; Undo restores it (§A4) ─────────────── */
+async function removeQuery(qid: string) {
+  const { db, uid } = await harnessDb();
+  for (const d of (await getDocs(collection(db, "users", uid, "queries", qid, "activity"))).docs) await deleteDoc(d.ref);
+  for (const d of (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", qid)))).docs) await deleteDoc(d.ref);
+  await deleteDoc(doc(db, "users", uid, "queries", qid));
+}
+
+test("LP10 — correcting a query from one package to another moves its credit, shows the corrected line, and Undo restores it", async ({ page }) => {
+  test.setTimeout(400_000);
+  page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") console.log("CONSOLE", m.type(), m.text().slice(0, 400)); });
+  await start(page);
+  const { db, uid } = await harnessDb();
+  const agent = await freeAgentFor(MS);
+  const before = new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id));
+  await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: UNSENT });
+  await toStep2(page);
+  await toReview(page);
+  await page.locator("[data-qad-primary]").click();
+  await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 20_000 });
+  const qid = (await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id).find((id) => !before.has(id))!;
+  let failure: unknown = null;
+  try {
+    ok(!!qid, "a query was logged to correct");
+    const acts = (await getDocs(collection(db, "users", uid, "queries", qid, "activity"))).docs;
+    const queried = acts.find((d) => /Queried/.test(String(d.data().resultingStatus ?? d.data().type ?? "")));
+    ok(!!queried, "the logged query has a Queried entry");
+    await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 10_000 });
+    await openDrawer(page, { mode: "edit", queryId: qid, entryId: queried!.id });
+    await expect(page.locator('[data-qad-how="package"]')).toBeVisible({ timeout: 15_000 });
+    ok(await page.locator(`.qad-prow[data-qad-pkg="${UNSENT}"] em.w`).count() === 1, "the recorded edition is tagged AS RECORDED");
+    ok(await page.locator(`.qad-prow[data-qad-pkg="${RETIRED}"]`).count() === 1, "a retired package is offered in the correction");
+    await page.locator(`.qad-prow[data-qad-pkg="${ACTIVE}"]`).click();
+    await shot(page, "correction-journey");
+    await toReview(page);
+    ok((await page.locator("[data-qad-saves]").innerText()).includes("What was sent changes from"), "the review says what changes");
+    await shot(page, "correction-review");
+    await page.locator("[data-qad-primary]").click();
+    /* the LOG's toast may still be up — wait for the correction's own */
+    await expect(page.locator('[data-qad-toast="on"]').filter({ hasText: "Entry corrected" })).toBeVisible({ timeout: 20_000 });
+    const after = (await getDoc(doc(db, "users", uid, "queries", qid))).data()!;
+    ok(after.sentPackageId === ACTIVE && after.packageId === ACTIVE, `LP10: credit moved to ${ACTIVE} (got ${after.sentPackageId})`);
+    ok(typeof after.sentCorrectedAt === "string" && String(after.sentCorrectedFrom).startsWith("Winter draft package:"), `the correction is recorded (${after.sentCorrectedFrom})`);
+    ok(/^Autumn round package: /.test(String(after.sentMaterials)), `the snapshot is replaced (${after.sentMaterials})`);
+    await page.locator("[data-qad-undo]").click();
+    await expect(page.locator('[data-qad-toast="done"]'), "UNDO DID NOT COMPLETE — the account has been changed").toBeVisible({ timeout: 20_000 });
+    const undone = (await getDoc(doc(db, "users", uid, "queries", qid))).data()!;
+    ok(undone.sentPackageId === UNSENT && !("sentCorrectedAt" in undone), `LP10: Undo restores ${UNSENT} exactly (got ${undone.sentPackageId}, corrected ${"sentCorrectedAt" in undone})`);
+  } catch (e) { failure = e; } finally {
+    if (qid) await removeQuery(qid);
+  }
+  if (failure) throw failure;
 });

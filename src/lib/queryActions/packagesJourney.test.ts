@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
-  exactPackage, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, readSummary, sentPieces, summaryOf, summaryWith,
+  editionsOn, exactPackage, openingPackage, packageToAttach, packagesFor, piecesChanged, piecesOf, readSummary, sentPieces, summaryOf, summaryWith,
   type PackageCard,
 } from "./packages";
 import { ComponentType, type ManuscriptVersion, type SubmissionPackage } from "../../types";
@@ -103,5 +103,28 @@ describe("LP8 · exact match", () => {
   it("pieces exactly a live package's are found; one piece different is not", () => {
     expect(exactPackage(pkgs, { qlId: "ql3", synId: null, other: null })?.id).toBe("p3");
     expect(exactPackage(pkgs, { qlId: "ql4", synId: null, other: null })).toBeNull();
+  });
+});
+
+describe("§A4 · the correction offers every edition that existed on the query's date", () => {
+  const all = [
+    P("p1", "Standard", { createdDate: "2026-06-01" }),
+    P("pr", "Opening pages", { status: "Retired", createdDate: "2026-05-01" } as Partial<SubmissionPackage>),
+    P("late", "Made later", { createdDate: "2026-09-20" }),
+    { ...P("pe", "Edited", { createdDate: "2026-05-01" }), editions: [{ n: 1, startedAt: "2026-05-01" }, { n: 2, startedAt: "2026-09-02" }] } as SubmissionPackage,
+  ];
+  const on = editionsOn("ms", "2026-08-14", all, versions);
+  it("includes a retired package, marked retired", () => {
+    expect(on.find((c) => c.id === "pr")?.retired).toBe(true);
+  });
+  it("leaves out a package made after that day, and an edition started after it", () => {
+    expect(on.some((c) => c.id === "late")).toBe(false);
+    expect(on.filter((c) => c.id === "pe").map((c) => c.edition)).toEqual([1]);
+  });
+  it("a later day offers the later edition too — a superseded edition still existed", () => {
+    expect(editionsOn("ms", "2026-09-10", all, versions).filter((c) => c.id === "pe").map((c) => c.edition)).toEqual([1, 2]);
+  });
+  it("each row is keyed by package and edition, which is how AS RECORDED is found", () => {
+    expect(on.map((c) => c.key)).toContain("p1#1");
   });
 });

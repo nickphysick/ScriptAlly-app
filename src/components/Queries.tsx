@@ -5068,9 +5068,13 @@ export const Queries: React.FC<{
                    entry is one of the two treatments — the ink band for a package, the dashed box for
                    individually, the quiet one for not recorded — read from the query's own frozen
                    record (SentHow). `SentMaterials` still serves the three-column arm below. */
+                /* §A4 — "Add what you sent ›" opens the correction on the Queried entry, the one door
+                   that edits what was sent. Offered only where that entry is a real activity. */
+                const queriedAct = (trackingEvents as { id: string; type?: string }[]).find((e) => (e.type as QueryStatus) === QueryStatus.QUERIED);
                 const sentExtra = (
                   <SentBox q={activeQuery} packages={packages}
-                    onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")} />
+                    onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
+                    onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
                 );
                 const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
                 /**
