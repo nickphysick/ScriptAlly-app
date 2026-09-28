@@ -136,9 +136,8 @@ describe("C2 — families across every mode; ceremony D; the manifest; mobile", 
     expect(flow).toContain('band("sage", "Ready to save"');
     /* ⚠️ THE JOURNEY TAKEOVER OBEYS THE SAME FAMILY LAW (journeys pack, Phase 2). `journeyBand`
        goes through the same `.tdb-fband` shell, so the journeys are covered here rather than in a
-       second table that could disagree with this one: coffee for the hand-off, paper for the
-       writer's own note. */
-    expect(flow).toContain('journeyBand("paper", "Crossing it off"');
+       second table that could disagree with this one: coffee for the hand-off. (Paper was the
+       writer's own note, a journey deleted in v1.2 — the pane finishes a note itself.) */
     expect(flow).toContain('journeyBand("cof", "Tidying the record"');
       expect(tags).toContain('<div className="tdb-fband paper">');
     // no step composes its own kicker outside a band any more (uniform reach — halt (f) clear)

@@ -2297,7 +2297,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <HousekeepingSweep items={flow.items} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} quickDone={quickDone} />}
+      {flow && <HousekeepingSweep items={flow.items} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} />}
       {/* ⚠️ FocusedSession IS RETIRED (board+dock P4). It was a SECOND work surface, and two of
           them would have had to agree about what "done" means — the first time they disagreed,
           one would have been silently wrong. The dock is the one surface, and "Focused session"

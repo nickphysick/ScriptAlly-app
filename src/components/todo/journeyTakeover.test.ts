@@ -30,7 +30,6 @@ import { fileURLToPath } from "url";
 import { cardJourney, CLOSE_REASONS, isSendTask } from "../../lib/todoJourneys";
 import { journeyMaterials, journeySummary } from "../../lib/journeyMaterials";
 import { cardBucket, Bucket } from "../../lib/todoBuckets";
-import { canStep, monthCells, outOfRange, shortDate, boundsNote, WEEKDAY_INITIALS } from "../../lib/recordingCalendar";
 import type { BoardCard } from "../../lib/todoBoard";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -39,7 +38,6 @@ const read = (p: string) => readFileSync(join(here, p), "utf8");
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 const flow = decls(read("HousekeepingSweep.tsx"));
-const cal = decls(read("RecordingCalendar.tsx"));
 const css = decls(read("todo.css"));
 
 const card = (over: Partial<BoardCard>): BoardCard =>
@@ -100,14 +98,15 @@ describe("⚠️ EACH BUCKET OPENS ITS OWN JOURNEY", () => {
       expect(isSendTask(t), `${t} is treated as a send`).toBe(false);
     }
     /* ⚠️ AND THE SWEEP HAS NO SEND SHEET AT ALL (27 Sep): a send opens the query drawer, so the
-       sweep's fall-through is the hand-off, reached after the note and agent-gap journeys */
+       sweep's fall-through is the hand-off, reached after the agent-gap journey. The note journey
+       was a third and is deleted (v1.2): the task pane finishes a note itself, so no note card
+       could ever reach this sheet. */
     expect(flow, "a send sheet came back to the sweep").not.toContain("sendSheet");
+    expect(flow, "a note sheet came back to the sweep").not.toContain("noteSheet");
     const dq = flow.indexOf('if (j === "dq") return dqSheet(it.card);');
-    const note = flow.indexOf('if (j === "note") return noteSheet(it.card);');
     const hand = flow.indexOf("return handoffSheet(it.card);");
     expect(dq, "the agent-gap journey is no longer routed").toBeGreaterThan(-1);
-    expect(note, "the note journey is no longer routed").toBeGreaterThan(dq);
-    expect(hand, "the fall-through is no longer the hand-off").toBeGreaterThan(note);
+    expect(hand, "the fall-through is no longer the hand-off").toBeGreaterThan(dq);
   });
 });
 
@@ -166,7 +165,7 @@ describe("⚠️ ESCAPE AND CANCEL ABANDON A PART-FILLED JOURNEY WITH NO WRITE",
     const anchor = "const resetScratch = () => {";
     expect(flow.indexOf(anchor), "resetScratch is gone or renamed").toBeGreaterThan(-1);
     const body = flow.slice(flow.indexOf(anchor), flow.indexOf("};", flow.indexOf(anchor)));
-    for (const setter of ["setRows({})", "setNoMeansNo({})", "setFound({})", "setNotFound(new Set())", "setAssistAt(null)", "setAssistMsg(null)", "setAssisting(false)", "setShowMuted(false)", "setNoteText(null)"]) {
+    for (const setter of ["setRows({})", "setNoMeansNo({})", "setFound({})", "setNotFound(new Set())", "setAssistAt(null)", "setAssistMsg(null)", "setAssisting(false)", "setShowMuted(false)"]) {
       expect(body, `resetScratch does not clear ${setter}`).toContain(setter);
     }
   });
@@ -180,7 +179,7 @@ describe("⚠️ ESCAPE AND CANCEL ABANDON A PART-FILLED JOURNEY WITH NO WRITE",
     const at = flow.indexOf("}, [atReview, qi, step, items,");
     expect(at, "the content memo's dep array moved").toBeGreaterThan(-1);
     const deps = flow.slice(at, flow.indexOf("]", at));
-    for (const dep of ["rows", "noMeansNo", "found", "notFound", "assistAt", "assisting", "assistMsg", "showMuted", "noteText", "staged"]) {
+    for (const dep of ["rows", "noMeansNo", "found", "notFound", "assistAt", "assisting", "assistMsg", "showMuted", "staged"]) {
       expect(deps, `${dep} is read by a journey but missing from the memo deps`).toContain(dep);
     }
   });
@@ -261,100 +260,6 @@ describe("⚠️ THE SUMMARY STRIP READS LIVE FORM STATE, AND IS MANDATORY", () 
   });
 });
 
-/* ── 5 · the calendar ───────────────────────────────────────────────────────────────────────── */
-
-describe("⚠️ RecordingCalendar NAMES A DATE INSIDE A RANGE, AND ASSUMES NOTHING", () => {
-  const MAX = "2026-08-15";
-
-  it("it respects max — nothing beyond it is selectable", () => {
-    expect(outOfRange("2026-08-16", { max: MAX })).toBe(true);
-    expect(outOfRange(MAX, { max: MAX })).toBe(false);
-    const cells = monthCells(2026, 7, { max: MAX }, MAX); // August 2026
-    expect(cells.find((c) => c.ymd === "2026-08-14")!.disabled).toBe(false);
-    expect(cells.find((c) => c.ymd === "2026-08-16")!.disabled).toBe(true);
-  });
-
-  it("it respects min just as readily — this is NOT a past-only picker", () => {
-    expect(outOfRange("2026-08-14", { min: MAX })).toBe(true);
-    expect(outOfRange("2026-08-16", { min: MAX })).toBe(false);
-    /* unbounded in both directions is a legitimate caller */
-    expect(outOfRange("1999-01-01", {})).toBe(false);
-  });
-
-  it("the forward arrow is disabled AT the max month, and live before it", () => {
-    expect(canStep(2026, 7, 1, { max: MAX })).toBe(false); // Aug 2026 → Sep is past max
-    expect(canStep(2026, 6, 1, { max: MAX })).toBe(true);  // Jul 2026 → Aug still holds days
-    /* ⚠️ IT ASKS WHETHER ANY DAY IS REACHABLE, not whether the bound sits in the next month */
-    expect(canStep(2026, 3, 1, { max: MAX })).toBe(true);  // Apr → May, months short of max
-    expect(canStep(2026, 7, -1, {})).toBe(true);
-    expect(canStep(2026, 7, -1, { min: "2026-08-01" })).toBe(false);
-  });
-
-  it("Monday-first, with the leading blanks that align the 1st", () => {
-    expect(WEEKDAY_INITIALS[0]).toBe("M");
-    expect(WEEKDAY_INITIALS[6]).toBe("S");
-    /* 1 August 2026 is a Saturday → six leading blanks in a Monday-first grid */
-    const cells = monthCells(2026, 7, {}, MAX);
-    expect(cells.filter((c) => c.ymd == null)).toHaveLength(5);
-    expect(cells.find((c) => c.day === 1)!.ymd).toBe("2026-08-01");
-    /* ⚠️ NO TRAILING BLANKS — a grid padded to six rows changes height between months */
-    expect(cells[cells.length - 1].ymd).toBe("2026-08-31");
-  });
-
-  it("today is marked, and the footer states the bound until a day is picked", () => {
-    const cells = monthCells(2026, 7, { max: MAX }, MAX);
-    expect(cells.filter((c) => c.isToday)).toHaveLength(1);
-    expect(boundsNote({ max: MAX }, MAX)).toBe("Nothing after today");
-    expect(boundsNote({ max: "2026-08-20" }, MAX)).toBe("Nothing after 20 Aug");
-    /* an unbounded calendar makes no claim about what it will not accept */
-    expect(boundsNote({}, MAX)).toBeNull();
-  });
-
-  it("today is a RING, never a fill — a fill is what chosen means", () => {
-    expect(css).toMatch(/\.cal-d\.today \{[^}]*box-shadow: inset/);
-    const today = css.slice(css.indexOf(".cal-d.today {"), css.indexOf("}", css.indexOf(".cal-d.today {")));
-    expect(today.length, "the .cal-d.today slice came out empty").toBeGreaterThan(20);
-    expect(today).not.toMatch(/background:/);
-    /* ⚠️ THE CHOSEN DAY IS INK NOW, NOT BURGUNDY — the standing "no burgundy button fills" rule.
-       This case's own point is unchanged and is the half above: today is a RING and a fill is what
-       CHOSEN means. What chosen looks like moved to the black-primary grammar. */
-    expect(css).toMatch(/\.cal-d\.on \{[^}]*background: var\(--ink-strong/);
-    expect(css).not.toMatch(/\.cal-d\.on \{[^}]*--burg/);
-  });
-
-  /* its anchor-relabelling caller was the sweep's `When` step, which moved to the query drawer with
-     the recording journeys (27 Sep); the date's own phrasing is what survives here */
-  it("the chosen date reads in the app's own short form", () => {
-    expect(shortDate("2026-08-12")).toBe("12 Aug");
-  });
-
-  /**
-   * ⚠️ PORTALLED, BECAUSE `position: fixed` ALONE WOULD NOT HAVE DONE. The anchor sits inside
-   * `.tdb-ffsheet`, which clips with `overflow: hidden` and animates with a transform — and a
-   * transformed ancestor is the containing block for `fixed`.
-   */
-  it("it portals to document.body and reuses the shared placement, flip and all", () => {
-    expect(cal).toContain("createPortal(");
-    expect(cal).toContain("document.body,");
-    expect(cal).toContain("placeMenu(");
-    expect(cal).not.toContain("function placeMenu"); // reused, never re-derived
-    expect(css).toMatch(/\.cal \{[^}]*position: fixed/);
-  });
-
-  it("Escape is consumed on the capture phase so it cannot abandon the form behind it", () => {
-    expect(cal).toContain("stopImmediatePropagation()");
-    expect(cal).toContain('window.addEventListener("keydown", onKey, true)');
-  });
-
-  /* ⚠️ THREE DATE SURFACES, EACH STATING ITS REASON IN ITS OWN HEADER. */
-  it("its header names the other two surfaces and defers the question about them", () => {
-    const raw = read("RecordingCalendar.tsx");
-    expect(raw).toContain("SnoozeDial");
-    expect(raw).toContain("BrandDatePicker");
-    expect(raw).toMatch(/DELIBERATELY DEFERRED/);
-  });
-});
-
 /* ── 6 · the layout signal ──────────────────────────────────────────────────────────────────── */
 
 describe("⚠️ THE JOURNEY GOES SINGLE-COLUMN ON ITS CONTAINER, NOT ON THE VIEWPORT", () => {
@@ -421,14 +326,14 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
    * itself, and it still logs nothing against a query.** Both halves are asserted, because
    * "no inline completion" alone would pass on a sheet that had stopped completing at all.
    */
-  it("a note completes through the primitive, writes no `done` of its own, and logs nothing against a query", () => {
-    const body = slice("function noteSheet(c: BoardCard) {", "const stagedDetail");
-    expect(body, "the note journey writes a completion in place again").not.toMatch(/done:\s*true/);
-    expect(body, "the note journey stopped reaching the completion primitive").toContain("await quickDone(c)");
-    /* the edit survives as its own write — silent, and the same one "Keep it" makes */
-    expect(body, "the note's edit is no longer saved on its own").toContain("updateUserTask(c.userTaskId, { text: text.trim() })");
+  /* v1.2 — the note journey is deleted: the task pane finishes a note through `quickDone` itself,
+     so no note card could reach the sweep. What this case guarded survives as the law about the
+     SWEEP: it completes nothing in place and writes no query event. */
+  it("the sweep has no note journey, writes no `done` of its own, and logs nothing against a query", () => {
+    expect(flow, "the note journey came back to the sweep").not.toContain("function noteSheet");
+    expect(flow, "the sweep writes a completion in place").not.toMatch(/done:\s*true/);
     for (const w of ["recordMaterialsSent", "logNudge", "updateQueryStatus", "recordOfferDecision"]) {
-      expect(body, `the note journey reached for ${w}`).not.toContain(w);
+      expect(flow, `the sweep reached for ${w}`).not.toContain(w);
     }
   });
 

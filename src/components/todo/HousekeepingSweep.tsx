@@ -9,9 +9,11 @@
  *
  * ⚠️ NOTHING HERE FINISHES A QUERY. Every task that finishes a query — a send, a nudge, a close, an
  * offer, a materials gap — opens the query drawer (`drawerDoorForTask`), and the host routes it
- * there before this mounts. The single cards that still arrive are the three that are not about a
- * query's progress: the writer's own note (crossed off through `quickDone`), one agent's record
- * gaps (`updateAgent`), and a card with no journey of its own (a hand-off that writes nothing).
+ * there before this mounts. The single cards that still arrive are the two that are not about a
+ * query's progress: one agent's record gaps (`updateAgent`), and a card with no journey of its own
+ * (a hand-off that writes nothing — `agent_recheck` lands here, by decision). The writer's own note
+ * used to be a third; the task pane finishes a note itself, so that sheet was unreachable and is
+ * deleted (v1.2).
  *
  * Surface choice (recon): a fixed full-viewport overlay hosted by ToDoPage, NOT a route — the flow
  * needs the board's live data/handlers, exit is a state flip, and a transient route would have to
@@ -84,8 +86,6 @@ export interface JourneySpec {
    *  written — composed off the LIVE form state, never off the string it composes. */
   summary: string;
   commit: { label: string; hint?: string; onCommit: () => void; disabled?: boolean };
-  /** A secondary footer action, beside Cancel. Only the note journey uses it — see `noteSheet`. */
-  extraFoot?: React.ReactNode;
 }
 
 export interface HousekeepingSweepProps {
@@ -93,24 +93,12 @@ export interface HousekeepingSweepProps {
   onClose: () => void;
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
   onToast: (msg: string, action?: { label: string; fn: () => void }) => void;
-  /**
-   * ⚠️ THE COMPLETION PRIMITIVE, SUPPLIED BY THE HOST (completion-paths Phase 1). The note is
-   * crossed off through the same `useTaskCommit` the board uses, so a task ticked here and a task
-   * ticked on the board go through ONE function — CLAUDE.md's law, and the reason this sheet must
-   * not write `{ done: true }` of its own: *"an inline completion is how the undo was bypassed once
-   * already. One primitive, four entrances."*
-   *
-   * Required rather than optional, deliberately. An optional primitive is one a future mount can
-   * forget to pass, and the fallback would have to be an inline completion — which is the thing
-   * being removed.
-   */
-  quickDone: (c: BoardCard) => Promise<boolean>;
 }
 
-export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onClose, onNavigate, onToast, quickDone }) => {
+export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onClose, onNavigate, onToast }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, currentUser,
-    upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, resolveTaskFlag,
+    upsertTaskFlag, updateUserProfile, updateAgent, resolveTaskFlag,
   } = useScriptAllyDb();
 
   const [qi, setQi] = useState(0);
@@ -129,7 +117,6 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
   const [assisting, setAssisting] = useState(false);
   const [assistMsg, setAssistMsg] = useState<string | null>(null);
   const [showMuted, setShowMuted] = useState(false);
-  const [noteText, setNoteText] = useState<string | null>(null);
 
   const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   // P3 — the dim-scrim presentation: the board stays mounted beneath; scroll locks for the
@@ -166,7 +153,7 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
        the stale RESPONSE: a resolving fetch still calls `setFound` against whichever item is on
        screen. That needs a generation guard, and half-fixing it would be worse than leaving it
        named — see `reports/activity-event-date.md`'s closing note. */
-    setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setAssisting(false); setShowMuted(false); setNoteText(null);
+    setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setAssisting(false); setShowMuted(false);
   };
 
   /** Animate the sheet away, then run the transition. */
@@ -453,79 +440,6 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
     );
   }
 
-  /**
-   * ⚠️ THE WRITER'S OWN NOTE, AND NOTHING IS LOGGED AGAINST A QUERY. It is the one journey whose
-   * commit is the completion itself — there is no event to record, because the note was never an
-   * exchange with an agent. Which is exactly why the reference panel says so: this surface looks
-   * like the five that DO write, and the only thing distinguishing it is that it says it doesn't.
-   */
-  function noteSheet(c: BoardCard) {
-    const text = noteText ?? c.title;
-    const dirty = text.trim() !== c.title && text.trim().length > 0;
-    return journeySheet({
-      steps: [{
-        id: "note",
-        name: "Your note",
-        body: (
-          <>
-            {/* the Caveat hand — a note the writer wrote to themselves stays in their handwriting */}
-            <div className="tdb-ffalso">
-              <textarea className="tdb-fffree tdb-jnbignote" value={text} aria-label="Your note"
-                onChange={(e) => setNoteText(e.target.value)} />
-            </div>
-            {c.record && <div className="tdb-ffsmall">Attached to <b>{c.record.replace(/^On /, "")}</b>.</div>}
-          </>
-        ),
-      }],
-      reference: {
-        heading: "Your own task",
-        body: <>Ticking it is what finishes it. <b>Nothing is logged against a query.</b></>,
-        meta: c.due || undefined,
-      },
-      /* the summary reads the live field, like every other journey — an emptied note says so */
-      summary: text.trim() ? `Crossing off: ${text.trim()}` : "Nothing selected yet.",
-      commit: {
-        label: "Cross it off",
-        hint: "Nothing is logged against a query.",
-        disabled: !text.trim(),
-        /**
-         * ⚠️ TWO WRITES, EACH UNDOABLE BY ITS OWN PRIMITIVE (completion-paths Phase 3). This was
-         * ONE write — `{ done: true, completedAt, ...saveText }` — and its Undo restored
-         * `{ done: false }` alone. So a writer who edited the note and crossed it off, then
-         * pressed Undo, got the task back UNCROSSED WITH THE EDIT STILL APPLIED, and no way to the
-         * original from that toast. One write made two changes and the inverse undid one.
-         *
-         * The edit is now its own write — the same `updateUserTask({ text })` the "Keep it" button
-         * ten lines below already makes, so this composes writes that existed rather than adding
-         * one — and the completion goes through `quickDone`, whose Undo is the completion's own.
-         * Undo now un-crosses the note and leaves the edit standing, which is what the writer did.
-         *
-         * ⚠️ ORDER MATTERS: text first, completion second. The reverse would leave a completed task
-         * carrying its old words if the second write failed, which is the worse half to lose.
-         * ⚠️ AND ONE TOAST, not two: the text save is silent, exactly as "Keep it" is silent, and
-         * `quickDone` raises the only receipt.
-         * ⚠️ AND THE ADVANCE IS GATED ON THE COMPLETION, as the sweep arm's is. A refused write
-         * leaves the writer on the sheet with the edit saved and the Try-again toast up, rather
-         * than moved on and told it was done.
-         */
-        onCommit: () => void (async () => {
-          if (!c.userTaskId) { advance(); return; }
-          if (dirty) await updateUserTask(c.userTaskId, { text: text.trim() });
-          if (await quickDone(c)) advance();
-        })(),
-      },
-      /* ⚠️ "Keep it" SURVIVES AS A SECOND FOOTER ACTION, deliberately beyond the ref's three. The
-         note is EDITABLE here, so without it an edit could only be saved by also completing the
-         task — and Cancel must write nothing, which is the rule that would otherwise eat the edit. */
-      extraFoot: (
-        <button type="button" className="tdb-ffskip"
-          onClick={() => { if (dirty && c.userTaskId) updateUserTask(c.userTaskId, { text: text.trim() }); advance(); }}>
-          Keep it
-        </button>
-      ),
-    }, journeyBand("paper", "Crossing it off", cardAgent(c, cardQuery(c)), c.initials, "note"));
-  }
-
   // ── review + done ─────────────────────────────────────────────────────────
   /* the one staged kind is the rule mute — "never ask", noted */
   const stagedDetail = (): string => "never ask";
@@ -696,7 +610,6 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
         {step > 0 && <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>}
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={() => requestExit()}>Cancel</button>
-        {spec.extraFoot}
         <button type="button" className="tdb-ffpri" disabled={spec.commit.disabled} onClick={spec.commit.onCommit}>{spec.commit.label}</button>
         {spec.commit.hint && <span className="tdb-jnhint">{spec.commit.hint}</span>}
       </>,
@@ -722,18 +635,16 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
     if (it.kind === "group") return groupSheet(it.group);
     /* ⚠️ A QUERY CARD NEVER REACHES THIS SHEET. Every task that finishes a query opens the query
        drawer (`drawerDoorForTask`), and the host routes it there before this mounts. What arrives
-       as a single card is one of the three that are not about finishing a query: the writer's own
-       note, one agent's record gaps, or a card with no journey of its own (a hand-off that writes
-       nothing). */
+       as a single card is one of the two that are not about finishing a query: one agent's record
+       gaps, or a card with no journey of its own (a hand-off that writes nothing). */
     const j = cardJourney(it.card);
     if (j === "dq") return dqSheet(it.card);
-    if (j === "note") return noteSheet(it.card);
     return handoffSheet(it.card);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     /* ⚠️ THE JOURNEY STATE BELONGS IN THESE DEPS OR THE SHEET DOES NOT REDRAW. `content` is memoised
        over every piece of scratch it reads, so a new one that is left out renders as a control that
        visibly does nothing. */
-  }, [atReview, qi, step, items, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+  }, [atReview, qi, step, items, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, staged, savedN, saving, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
 
   const remaining = items.length - qi - 1;
