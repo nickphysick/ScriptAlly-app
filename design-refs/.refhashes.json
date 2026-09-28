@@ -98,7 +98,8 @@
     "design-refs/packages-journey/log-query-packages-v2.html": "3d6e7e26bf26485a51fd4cec1585fee94f3f3315f1a9c6a13a9fb65c895736d0",
     "design-refs/packages-journey/package-tracking-v1.html": "00eee592e3b782c8f1abbf0afb5f0badaa832cec613057ba2e3789d2f28bba7d",
     "design-refs/shell/quiet-bar-v1.html": "84adcc6a6e3d64ebda99a581275b135ed6efe0d2c51e013000be6ce4b1a65f4a",
-    "design-refs/shell/manuscript-switcher-v2.html": "2920685e32d0bd201e6f924d5e7d513c3e55ec06bcaf77637c8e6d12e5586315"
+    "design-refs/shell/manuscript-switcher-v2.html": "2920685e32d0bd201e6f924d5e7d513c3e55ec06bcaf77637c8e6d12e5586315",
+    "design-refs/todo-list-v2.html": "67da1fb43ca9b170f985b6eb71806f9c1ec8296237f475cf458d880e1dd7992e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
