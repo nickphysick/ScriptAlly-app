@@ -391,10 +391,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      */
     <header className="ph ph--full" data-probe="page-header" data-size="full">
       {/**
-        * §2 (page header v2) — THE HERO FRAME. The header spans the whole content column and its rule
-        * runs the column's full width; the text and the drawing sit in a narrower frame inside it,
-        * `max-width: 920px`, centred — or the full column where the column is narrower. The art is
-        * anchored to the FRAME's right and to the rule, so it moves with the frame, not the column.
+        * THE HERO FRAME. The header spans the whole content column and its rule runs the column's full
+        * width. Since the quiet bar the frame IS the column (page header v2's centred 920 is gone): the
+        * text starts on the column's left edge, level with the cards below, and the drawing is
+        * anchored to the frame's right and to the rule, so it ends at the column's right edge.
         */}
       <div className="ph-hin" data-probe="hero-frame">
       <div className="ph-text">

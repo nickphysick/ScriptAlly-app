@@ -85,3 +85,47 @@ export async function readBar(page: Page) {
 }
 
 export const transparent = (c: string) => /rgba\([^)]*,\s*0\)$/.test(c) || c === "transparent";
+
+/**
+ * Q8 · the header's text left, its drawing's drawn right, the column's right (the header spans the
+ * column), and the first content card below the rule — a visible element that paints a surface
+ * (background or shadow), the topmost then leftmost, so a wrapper that paints nothing cannot stand in.
+ */
+export async function readLeft(page: Page) {
+  return page.evaluate(() => {
+    const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+    const hd = [...document.querySelectorAll<HTMLElement>('[data-probe="page-header"]')].find(vis);
+    if (!hd) return null;
+    const h = hd.getBoundingClientRect();
+    const text = hd.querySelector(".ph-text") as HTMLElement | null;
+    const img = hd.querySelector('[data-probe="art"] img') as HTMLImageElement | null;
+    let drawnR: number | null = null;
+    if (img) {
+      const b = img.getBoundingClientRect();
+      const ar = (img.naturalWidth || 1) / (img.naturalHeight || 1);
+      const w = Math.min(b.width, b.height * ar);
+      drawnR = b.right; void w; // object-position: right — the drawn right is the box's right
+    }
+    const sc = hd.closest(".wpg-scroll, #app-stage-scroll") ?? document.body;
+    const rule = h.bottom;
+    const surfaces = [...sc.querySelectorAll<HTMLElement>("*")].filter((e) => {
+      if (hd.contains(e)) return false;
+      const r = e.getBoundingClientRect();
+      /* a full-bleed band (wider than the header, e.g. `.wpg-toolband`) is a ground, not a card */
+      if (r.top < rule - 0.5 || r.top > rule + 400 || r.width < 60 || r.height < 30 || r.width > h.width + 2) return false;
+      const s = getComputedStyle(e);
+      const bg = s.backgroundColor;
+      const paints = (bg && !/rgba\([^)]*,\s*0\)$/.test(bg) && bg !== "transparent") || (s.boxShadow && s.boxShadow !== "none");
+      return !!paints && s.visibility !== "hidden";
+    }).map((e) => ({ e, r: e.getBoundingClientRect() }));
+    surfaces.sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
+    const first = surfaces[0];
+    return {
+      size: hd.dataset.size ?? null,
+      textL: text ? text.getBoundingClientRect().left : null,
+      headerL: h.left, headerR: h.right,
+      drawnR,
+      card: first ? { l: first.r.left, t: first.r.top, cls: first.e.className.toString().slice(0, 60) } : null,
+    };
+  });
+}

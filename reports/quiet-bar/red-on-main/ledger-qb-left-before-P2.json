@@ -1,0 +1,314 @@
+[
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/queries",
+  "size": "1280",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":304,\"headerL\":288.953125,\"headerR\":1239.046875,\"drawnR\":1224,\"card\":{\"l\":288.953125,\"t\":414.171875,\"cls\":\"qcv-court qcv-court--you\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/queries",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "text 304.0 card 289.0 (qcv-court qcv-court--you)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/queries",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1224.0 column 1239.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/queries/analytics",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 289.0 header 289.0"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/agents",
+  "size": "1280",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":304,\"headerL\":288.953125,\"headerR\":1239.046875,\"drawnR\":1224,\"card\":{\"l\":288.953125,\"t\":413.171875,\"cls\":\"clv-kt\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/agents",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "text 304.0 card 289.0 (clv-kt)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/agents",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1224.0 column 1239.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/agents/discover",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 289.0 header 289.0"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/manuscripts/comps",
+  "size": "1280",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":304,\"headerL\":288.953125,\"headerR\":1239.046875,\"drawnR\":null,\"card\":{\"l\":288.953125,\"t\":413.171875,\"cls\":\"cpv-qcard\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/manuscripts/comps",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "text 304.0 card 289.0 (cpv-qcard)"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":304,\"headerL\":288.953125,\"headerR\":1239.046875,\"drawnR\":1224,\"card\":{\"l\":288.953125,\"t\":410.625,\"cls\":\"ppv-band\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "text 304.0 card 289.0 (ppv-band)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1224.0 column 1239.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 289.0 header 289.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo/calendar",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 289.0 header 289.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo/noteboard",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 289.0 header 289.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/import",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 332.0 header 332.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/plans",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 382.0 header 382.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/help",
+  "size": "1280",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 382.0 header 382.0"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/queries",
+  "size": "1440",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":384,\"headerL\":294.078125,\"headerR\":1393.921875,\"drawnR\":1304,\"card\":{\"l\":294.078125,\"t\":420.171875,\"cls\":\"qcv-court qcv-court--you\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "text 384.0 card 294.1 (qcv-court qcv-court--you)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1304.0 column 1393.9"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/queries/analytics",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 294.1 header 294.1"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/agents",
+  "size": "1440",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":384,\"headerL\":294.078125,\"headerR\":1393.921875,\"drawnR\":1304,\"card\":{\"l\":294.078125,\"t\":419.171875,\"cls\":\"clv-kt\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/agents",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "text 384.0 card 294.1 (clv-kt)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/agents",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1304.0 column 1393.9"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/agents/discover",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 294.1 header 294.1"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":384,\"headerL\":294.078125,\"headerR\":1393.921875,\"drawnR\":null,\"card\":{\"l\":294.078125,\"t\":419.171875,\"cls\":\"cpv-qcard\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/manuscripts/comps",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "text 384.0 card 294.1 (cpv-qcard)"
+ },
+ {
+  "lock": "Q8 · a content card was found below the rule",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "full",
+  "ok": true,
+  "detail": "{\"size\":\"full\",\"textL\":384,\"headerL\":294.078125,\"headerR\":1393.921875,\"drawnR\":1304,\"card\":{\"l\":294.078125,\"t\":416.625,\"cls\":\"ppv-band\"}}"
+ },
+ {
+  "lock": "Q8 · full: the text's left = the first card's left (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "text 384.0 card 294.1 (ppv-band)"
+ },
+ {
+  "lock": "Q8 · full: the drawing's right = the column's right (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "full",
+  "ok": false,
+  "detail": "drawn 1304.0 column 1393.9"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 294.1 header 294.1"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo/calendar",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 294.1 header 294.1"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/todo/noteboard",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 294.1 header 294.1"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/import",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 412.0 header 412.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/plans",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 462.0 header 462.0"
+ },
+ {
+  "lock": "Q8 · compact: the text starts on the header's left (±1) — confirmed",
+  "route": "/help",
+  "size": "1440",
+  "state": "compact",
+  "ok": true,
+  "detail": "text 462.0 header 462.0"
+ },
+ {
+  "lock": "population · full and compact headers both measured, and every drawing",
+  "route": "*",
+  "size": "*",
+  "state": "tally",
+  "ok": true,
+  "detail": "full 8 compact 16 drawn 6"
+ }
+]

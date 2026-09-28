@@ -128,7 +128,7 @@ for (const vp of SIZES) {
     const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
     L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 20 : 17);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 19 : 17);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }

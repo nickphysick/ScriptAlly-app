@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
 import { BAR_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
-import { readBar, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
+import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
 
 test.describe.configure({ timeout: Number(process.env.QB_TIMEOUT ?? 900_000) });
 const SIZES = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const;
@@ -130,4 +130,44 @@ test("Q9 · reduced motion makes both changes instant", async ({ browser }) => {
   L.write();
   expect(L.rows.length).toBe(4);
   expect(L.failures().map((f) => `${f.lock} · ${f.state} — ${f.detail}`)).toEqual([]);
+});
+
+test("Q8 · every full header starts on the column's left, level with the first card; the drawing ends on its right", async ({ page }) => {
+  const L = new Ledger("qb-left");
+  let full = 0, compact = 0, drawn = 0;
+  for (const vp of SIZES) {
+    for (const route of BAR_ROUTES) {
+      await openApp(page, route, vp);
+      await suppressMotion(page);
+      /* a route that has a header must be read with it rendered — /agents at 1280 once read before it was */
+      await page.locator('[data-probe="page-header"]').filter({ visible: true }).first().waitFor({ timeout: 8000 }).catch(() => {});
+      const r = await readLeft(page);
+      if (!r) continue;
+      const ctx = { route, size: `${vp.width}`, state: r.size ?? "?" };
+      if (r.textL === null) continue;
+      if (r.size === "full") L.check("Q8 · a content card was found below the rule", ctx, !!r.card, JSON.stringify(r));
+      if (r.size === "full" && !r.card) continue;
+      if (r.size === "full") {
+        full++;
+        L.check("Q8 · full: the text's left = the first card's left (±1)", ctx, !!r.card && near(r.textL, r.card.l, 1), `text ${r.textL.toFixed(1)} card ${r.card?.l.toFixed(1)} (${r.card?.cls})`);
+        /* Comparable titles passes no art — nothing to anchor; the tally below counts the drawings measured */
+        if (r.drawnR !== null) {
+          drawn++;
+          L.check("Q8 · full: the drawing's right = the column's right (±1)", ctx, near(r.drawnR, r.headerR, 1), `drawn ${r.drawnR.toFixed(1)} column ${r.headerR.toFixed(1)}`);
+        }
+      } else {
+        compact++;
+        /* confirmed, not changed: the compact header was already left-aligned — its text starts on the
+           header's own left, and the header spans the column. (A "first card" is not a fair witness on
+           compact pages: Import's first surface is a tab button, Help's a search field in a centred
+           panel.) */
+        L.check("Q8 · compact: the text starts on the header's left (±1) — confirmed", ctx, near(r.textL, r.headerL, 1), `text ${r.textL.toFixed(1)} header ${r.headerL.toFixed(1)}`);
+      }
+    }
+  }
+  const all = { route: "*", size: "*", state: "tally" };
+  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6, `full ${full} compact ${compact} drawn ${drawn}`);
+  L.write();
+  console.log(`Q8 tally: full ${full} compact ${compact} drawn ${drawn}`);
+  expect(L.failures().map((f) => `${f.lock} · ${f.route} ${f.size} — ${f.detail}`)).toEqual([]);
 });
