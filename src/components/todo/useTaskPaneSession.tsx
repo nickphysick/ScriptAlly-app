@@ -29,6 +29,7 @@
 import { useNavigate } from "react-router-dom";
 import { requeryLine } from "../../lib/requery";
 import { SendExtras } from "../queryActions/SendExtras";
+import { SentBox, SentChip } from "../queryActions/SentHow";
 import React from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { BoardCard } from "../../lib/todoBoard";
@@ -197,13 +198,19 @@ export function useTaskPaneSession(
   /** this mount's section-id prefix — see `TaskPaneBody`'s `idPrefix` for why it exists */
   idPrefix = "",
 ): TaskPaneSession {
-  const { queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser } = useScriptAllyDb();
+  const { queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser, packages } = useScriptAllyDb();
   const navigateTo = useNavigate();
   /* item 2 (clean-up pass, 28 Sep): the send rung explains a requery, and the link opens the earlier query */
   const sendExtraFor = (card: BoardCard): React.ReactNode => {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    const rq = q ? requeryLine(q, queries) : null;
-    return rq ? <SendExtras requery={rq} onOpenQuery={(id) => navigateTo(`/queries?q=${encodeURIComponent(id)}`)} /> : null;
+    if (!q) return null;
+    const rq = requeryLine(q, queries);
+    /* item 3: the shared materials box rides the send rung, beneath any requery line */
+    return (
+      <SendExtras requery={rq} onOpenQuery={(id) => navigateTo(`/queries?q=${encodeURIComponent(id)}`)}>
+        <SentBox q={q} packages={packages} />
+      </SendExtras>
+    );
   };
   const now = Date.now();
   /* ⚠️ ONE BUNDLE, memoised on the five arrays the lifted derivations read — the same shape the
@@ -425,8 +432,10 @@ export function useTaskPaneSession(
         initials: agentInitials(ag),
         ...(host.openAgent ? { onOpen: () => host.openAgent!(ag.id) } : {}),
       } : undefined,
+      /* item 3 (clean-up pass, 28 Sep): how the materials were recorded, beneath the agent */
+      sentHow: <SentChip q={q} packages={packages} />,
     };
-  }, [card, queries, agents, host]);
+  }, [card, queries, agents, host, packages]);
 
   /**
    * ⚠️ THE FORK'S DERIVATIONS SIT ABOVE `paneWill`, AND THAT IS LOAD-BEARING (journey round, found

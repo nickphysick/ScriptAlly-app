@@ -88,6 +88,8 @@ export interface QueryPanelProps {
   initials: string;
   sentLabel: string;
   viaLabel: string;
+  /** how the materials were recorded — the shared SentChip, under the name (clean-up pass item 3) */
+  sentChip?: React.ReactNode;
   manuscriptTitle?: string | null;
   /** Mono `{genre} · {words} words`, beside the title on the header's manuscript line. */
   manuscriptMeta?: string | null;
@@ -151,7 +153,7 @@ const Icon: React.FC<{ d: string; size?: number; stroke?: string; width?: number
 
 export const QueryPanel: React.FC<QueryPanelProps> = ({
   open, mode = "detail", form,
-  facts, status, name, agency, initials, sentLabel, viaLabel,
+  facts, status, name, agency, initials, sentLabel, viaLabel, sentChip,
   manuscriptTitle, manuscriptMeta, versionLabel,
   position, primaryLabel, onPrimary, onNudge, liveAction = null, onMarkClosed, onSnooze, onClose, onStep,
   elapsed, expectedLabel, reminderLabel, tracking, agentTab, notesTab, noteCount,
@@ -287,6 +289,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
             <div className="qpn-headtx">
               <div className="qpn-nm">{name}</div>
               <div className="qpn-ag">{agency}</div>
+              {sentChip ? <div className="qpn-how">{sentChip}</div> : null}
             </div>
             {/* §3 (drawer-3) — the stage-family illustration slot: one image per FAMILY (out / in /
                 offer / closed), keyed off the same stage the band wears. STAGE_ART holds the

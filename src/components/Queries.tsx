@@ -127,7 +127,7 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
-import { SentBox, FromPackageTag } from "./queryActions/SentHow";
+import { SentBox, SentChip, FromPackageTag } from "./queryActions/SentHow";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
@@ -6523,7 +6523,11 @@ export const Queries: React.FC<{
                      withdrawal is accounted for out loud rather than silently dropped. */
                   withdrawnNote={wd > 0 ? `+${wd} withdrawn, not shown` : null}
                   origin={qcFan.origin}
-                  model={(row) => fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {})}
+                  model={(row) => ({
+                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {}),
+                    /* item 3 (28 Sep): the header chip — the fan draws no tabs, so the chip is all it can carry */
+                    sentHow: { chip: <SentChip q={row.query} packages={packages} />, box: null },
+                  })}
                   onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
                   onSeeAll={() => {
                     setQcFan(null);
@@ -6705,6 +6709,7 @@ export const Queries: React.FC<{
           {panelRow && activeQuery && urlSelectedId && qcDocked === false && (
             <QueryPanel
               open
+              sentChip={<SentChip q={activeQuery} packages={packages} />}
               facts={panelRow.facts}
               status={panelRow.status}
               name={panelRow.name}

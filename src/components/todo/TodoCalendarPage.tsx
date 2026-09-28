@@ -20,6 +20,7 @@
  * collapse chevron, the month jump, the `Upcoming only` mode and the event-kind vocabulary that
  * served it. A row grows to hold what it holds — there is nothing left to overflow.
  */
+import { SentBox, SentChip } from "../queryActions/SentHow";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -239,7 +240,7 @@ import {
 export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
-    updateUserTask,
+    updateUserTask, packages,
   } = useScriptAllyDb();
   const now = Date.now();
   const today = localYMD(now);
@@ -721,6 +722,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     primaryDeed: string | null; primaryCv: string | null;
   };
   const [drawer, setDrawer] = useState<DrawerData | null>(null);
+  /* item 3: the drawer's query, for the shared materials treatment (a task row has none) */
+  const drawerQuery = drawer?.queryId && !drawer.isTask ? queries.find((q) => q.id === drawer.queryId) : undefined;
   const [drawerTab, setDrawerTab] = useState<"view" | "actions">("view");
   const closeDrawer = () => setDrawer(null);
   /* the drawer's rows name their kind directly — a row labelled "Log a nudge" IS the nudge kind,
@@ -2066,6 +2069,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               <>
                 <div className="tl-dwnm">{drawer.name}</div>
                 {drawer.agency && <div className="tl-dwag">{drawer.agency}</div>}
+                {/* item 3 (clean-up pass, 28 Sep): how the materials were recorded — the shared chip */}
+                {drawerQuery ? <div className="tl-dwhow"><SentChip q={drawerQuery} packages={packages} /></div> : null}
                 {(drawer.fact || drawer.tail) && (
                   <div className="tl-dwfact">{drawer.fact}<span className="tl-feb">{drawer.tail}</span></div>
                 )}
@@ -2074,7 +2079,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   {drawer.journey.map((j, i) => (
                     <div key={i} className={`tl-dwjr${j.now ? " now" : ""}`}>
                       <span className="d" aria-hidden />
-                      <span><span className="t">{j.t}</span><span className="s">{j.s}</span></span>
+                      <span><span className="t">{j.t}</span><span className="s">{j.s}</span>
+                        {/* the send carries the shared materials box, as it does on every rail */}
+                        {i === 0 && drawerQuery ? <span className="tl-dwbox"><SentBox q={drawerQuery} packages={packages} /></span> : null}
+                      </span>
                     </div>
                   ))}
                 </div>

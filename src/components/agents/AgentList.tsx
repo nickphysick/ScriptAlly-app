@@ -94,7 +94,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      the same path — and that key is what the scope reads on. Memoised on `manuscripts` alone, the
      page went on stating the old book's facts after the bar had changed book. */
   const { key: locationKey } = useLocation();
-  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady, userTasks, addUserTask, resolveTaskFlag } =
+  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady, userTasks, addUserTask, resolveTaskFlag, packages } =
     useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -878,6 +878,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           genrePool={genrePool}
           editCtx={editCtx}
           notes={profileNotes}
+          packages={packages}
           editAt={editAt}
           savedLine={savedNote}
           onClose={clearEditor}

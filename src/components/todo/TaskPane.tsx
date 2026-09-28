@@ -168,6 +168,8 @@ export interface TaskPaneJourney {
   since?: string;
   /** the agent behind the query — the column's one row about a person, and its one outward link */
   agent?: { name: string; agency?: string; initials: string; onOpen?: () => void };
+  /** how the materials were recorded — the shared SentChip (clean-up pass, item 3, 28 Sep) */
+  sentHow?: React.ReactNode;
   /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
   bulk?: { count: number; touched: number };
   /**
@@ -686,6 +688,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                           )}
                         </div>
                       )}
+                      {d.sentHow ? <div className="how">{d.sentHow}</div> : null}
                       {/* the facts, as a definition list: a 78px mono label column and the value
                           beside it, with the secondary line beneath where there is one */}
                       {d.tiles && d.tiles.length > 0 && (

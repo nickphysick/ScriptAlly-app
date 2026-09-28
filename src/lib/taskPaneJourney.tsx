@@ -62,6 +62,8 @@ export interface JourneyInputs {
   status?: QueryStatus;
   since?: string;
   agent?: { name: string; agency?: string; initials: string; onOpen?: () => void };
+  /** how the materials were recorded — the shared SentChip, beneath the agent (item 3, 28 Sep) */
+  sentHow?: React.ReactNode;
   /** a note's own added date, for the form's meta line — "18 Aug" */
   noteAddedDate?: string;
   /** what is still unanswered — the ONE list the chip, the line and the square all read */
@@ -352,6 +354,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     status: input.status,
     since: input.since,
     agent: input.agent,
+    ...(input.sentHow ? { sentHow: input.sentHow } : {}),
     bulk: input.bulk,
     missing: input.missing,
     showMissing: input.showMissing,

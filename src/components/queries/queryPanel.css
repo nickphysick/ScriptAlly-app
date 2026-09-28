@@ -250,6 +250,8 @@
 .qpn-headtx { min-width: 0; }
 .qpn-nm { font-family: var(--font-serif); font-weight: 500; font-size: 27px; line-height: 1.3; color: var(--ink, #1c130f); }
 .qpn-ag { font-family: var(--font-serif); font-style: italic; font-size: 14px; line-height: 1.3; color: #6a5a50; margin-top: 5px; }
+/* how the materials were recorded (clean-up pass item 3) */
+.qpn-how { margin-top: 8px; }
 /**
  * ⚠️ THE VERB ROW CLOSES THE STAGE BLOCK (v14 §3), so it wears the block's own ground — the same
  * `--band-a` the band, the identity row and the manuscript line read. A row on a different fill

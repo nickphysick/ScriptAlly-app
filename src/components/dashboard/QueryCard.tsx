@@ -61,6 +61,12 @@ export interface QueryCardModel {
   agentFacts: { k: string; v: string }[];
   /** the Materials tab: what went, and what was asked for */
   materials: { k: string; v: string }[];
+  /**
+   * HOW THE MATERIALS WERE RECORDED (clean-up pass, item 3, 28 Sep) — the shared SentHow treatments:
+   * `chip` beside the status in the header, `box` at the top of the Materials tab. The Tracking tab's
+   * send rung carries the same box through its event's `extra`. Absent in a model that has none.
+   */
+  sentHow?: { chip: React.ReactNode; box: React.ReactNode };
   /** the foot's left line — the window, and whose figure it is */
   window: string;
   /**
@@ -155,6 +161,7 @@ export const QueryCard: React.FC<{
           {model.statusWord}
         </span>
       </div>
+      {model.sentHow ? <div className="qcard-how">{model.sentHow.chip}</div> : null}
 
       {model.ms && (
         <div className="qcard-ms">
@@ -178,7 +185,8 @@ export const QueryCard: React.FC<{
 
       {rows ? (
         <div className="qcard-facts" role="tabpanel">
-          {rows.length === 0
+          {tab === "materials" && model.sentHow ? <div className="qcard-mbox">{model.sentHow.box}</div> : null}
+          {rows.length === 0 && tab === "materials" && model.sentHow ? null : rows.length === 0
             ? <p className="qcard-none">Nothing recorded.</p>
             : rows.map((f) => (
               <div className="qcard-fact" key={f.k}><span className="qcard-k">{f.k}</span><span>{f.v}</span></div>

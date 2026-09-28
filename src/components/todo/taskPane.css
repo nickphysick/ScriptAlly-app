@@ -1255,3 +1255,5 @@
   background: #fdf9f5;
   box-shadow: -12px 0 40px rgba(28, 19, 15, 0.14);
 }
+/* how the materials were recorded, beneath the agent (clean-up pass item 3) */
+.tpn .how { margin-top: 8px; }
