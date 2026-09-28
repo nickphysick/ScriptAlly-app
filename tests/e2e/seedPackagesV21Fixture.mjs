@@ -122,6 +122,10 @@ async function clearAll() {
     await deleteDoc(msRef(ms));
   }
   for (const a of AGENTS) await deleteDoc(doc(db, "users", uid, "agents", a.id));
+  /* The app's self-heal writes an "Agent Added" feed row for every agent it finds without one
+     (`act-added-agent-<agentId>`, no manuscriptId), so the per-manuscript sweep above cannot reach it.
+     Left behind, it is a feed line naming an agent that no longer exists (found 28 Sep: three). */
+  for (const a of AGENTS) await deleteDoc(doc(db, "users", uid, "activities", `act-added-agent-${a.id}`));
 }
 
 if (process.argv.includes("--dump")) {
