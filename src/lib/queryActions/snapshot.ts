@@ -62,6 +62,26 @@ async function readSet(uid: string, queryIds: string[]): Promise<Map<string, Doc
   return out;
 }
 
+/** The packages a snapshot's queries point at — `packageId` or `sentPackageId` (Part B's stamp rule). */
+export function packagesIn(s: Snapshot): string[] {
+  const out = new Set<string>();
+  for (const qid of s.queryIds) {
+    const d = s.docs.get(`users/${s.uid}/queries/${qid}`);
+    for (const k of ["packageId", "sentPackageId"]) if (typeof d?.[k] === "string" && d[k]) out.add(d[k]);
+  }
+  return [...out];
+}
+
+/** The packages these queries point at NOW, read from the server — the after-state an undo reverses. */
+export async function packagesHeldBy(uid: string, queryIds: string[]): Promise<string[]> {
+  const out = new Set<string>();
+  await Promise.all(queryIds.map(async (qid) => {
+    const d = (await getDoc(doc(db, "users", uid, "queries", qid))).data();
+    for (const k of ["packageId", "sentPackageId"]) if (typeof d?.[k] === "string" && d[k]) out.add(d[k]);
+  }));
+  return [...out];
+}
+
 export async function takeSnapshot(uid: string, queryIds: string[]): Promise<Snapshot> {
   const ids = [...new Set(queryIds.filter(Boolean))];
   return { uid, queryIds: ids, docs: await readSet(uid, ids) };

@@ -103,7 +103,7 @@ export const isSent = (p: Pick<SubmissionPackage, "firstSentAt">): boolean => !!
 
 /** The copy the card's lock line shows — kept in step with packageMetrics.LOCKED_WHY. */
 export const lockLine = (sentAt: string): string =>
-  `Letter, synopsis and version fixed since first sent on ${shortDate(sentAt)}, so your records stay true. Duplicate it to try a different mix.`;
+  `First sent on ${shortDate(sentAt)}, so what went out stays as it went. Editing it starts a new edition; queries already sent keep theirs.`;
 
 /**
  * The hero art (v2.1, E3) — Nick's boxes image: the Archivist carrying a tall stack of archive boxes.

@@ -232,6 +232,7 @@ export function EditJourney({ req, today, children }: JourneyProps) {
           packageId: next.id ?? "",
           sentPackageId: next.id ?? none,
           sentPackageEdition: next.edition ?? none,
+          sentPackageName: next.id ? (next.name ?? none) : none,
           basedOnPackageId: none, basedOnPackageEdition: none, sentChanges: none,
           sentMaterials: next.summary,
           sentVersions: next.versions,
@@ -240,6 +241,9 @@ export function EditJourney({ req, today, children }: JourneyProps) {
         });
       }
       if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>, sentChanged && next?.id ? { stampPackage: next.id } : undefined);
+      /* the stale-stamp rule (Nick, 28 Sep): the package this query WAS sent with may now have none */
+      const oldPkg = q.sentPackageId || q.packageId;
+      if (sentChanged && oldPkg && oldPkg !== next?.id) await db.reconcileStamps([oldPkg]);
       return { queryId: q.id, message: `Entry corrected · ${agentName(agent)}`, sub: sentChanged && next ? `NOW ${next.name ? `${next.name.toUpperCase()}, ${ordinal(next.edition ?? 1).toUpperCase()} EDITION` : "CHOSEN INDIVIDUALLY"}` : moved ? `${e.name.toUpperCase()} NOW ${up(day)}` : "NOTE UPDATED", touched: [q.id] };
     },
   };

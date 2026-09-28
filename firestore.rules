@@ -285,6 +285,11 @@ service cloud.firestore {
         // ⚠️ FREE TEXT, OPTIONAL, AND ABSENT WHEN EMPTY. `hasAny` rather than `is string` because an
         // unanswered question has no key at all; a stored `""` would claim the writer answered it.
         && (!data.keys().hasAny(['otherMaterials']) || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
+        // PACKAGE EDITIONS (Part B, 28 Sep): the current edition from 1, the list of every edition,
+        // and when it was retired. All optional — a package written before editions is its 1st.
+        && (!data.keys().hasAny(['edition']) || (data.edition is int && data.edition >= 1 && data.edition <= 1000))
+        && (!data.keys().hasAny(['editions']) || (data.editions is list && data.editions.size() <= 200))
+        && (!data.keys().hasAny(['retiredAt']) || (data.retiredAt is string && data.retiredAt.size() <= 64))
         && data.status is string && (data.status == 'Active' || data.status == 'Retired')
         && data.createdDate is string && data.createdDate.size() <= 64;
     }
@@ -505,6 +510,8 @@ service cloud.firestore {
         // defaults by sentRecordOf.
         && (data.get('sentHow', null) == null || data.sentHow in ['package', 'individual', 'unrecorded'])
         && (data.get('sentPackageEdition', null) == null || (data.sentPackageEdition is int && data.sentPackageEdition >= 1 && data.sentPackageEdition <= 1000))
+        // Part B (28 Sep): the package's name as it was on the day it went out.
+        && (data.get('sentPackageName', null) == null || (data.sentPackageName is string && data.sentPackageName.size() <= 256))
         && (data.get('basedOnPackageId', null) == null || (data.basedOnPackageId is string && data.basedOnPackageId.size() <= 128))
         && (data.get('basedOnPackageEdition', null) == null || (data.basedOnPackageEdition is int && data.basedOnPackageEdition >= 1 && data.basedOnPackageEdition <= 1000))
         && (data.get('sentChanges', null) == null || (data.sentChanges is list && data.sentChanges.size() <= 10))
@@ -874,7 +881,7 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
             // ⚠️ THE VERSION JOINS THE FROZEN SET, and it is the same argument as the other three:
@@ -882,7 +889,26 @@ service cloud.firestore {
             // the book it carried is part of that record. Left mutable, a writer could retro-fit a
             // version onto a sent package and every scorecard reading it would silently re-attribute
             // requests that arrived on something else.
-            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'])
+            // ⚠️ AND THE OTHER MATERIALS AND THE EDITION FIELDS JOIN IT (Part B): they are contents,
+            // so outside an edition bump they are as fixed as the slots.
+            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions'])
+            // ⚠️ THE NEXT EDITION (Part B §B1). A sent package's contents change ONLY by starting its
+            // next edition: the number goes up by exactly one and the list grows by exactly one, so
+            // every earlier edition — what the agents received — is kept. The stamp and the sample
+            // slot (not content, Nick 28 Sep) still never move here.
+            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
+                && incoming().get('edition', 1) == existing().get('edition', 1) + 1
+                && incoming().get('editions', []).size() == existing().get('editions', [0]).size() + 1)
+            // THE UNDO OF THAT EDIT: back by exactly one, the list shorter by exactly one — the edition it
+            // removes is seconds old, and the client refuses once any query has gone out with it.
+            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
+                && incoming().get('edition', 1) == existing().get('edition', 1) - 1
+                && incoming().get('editions', [0]).size() == existing().get('editions', []).size() - 1)
+            // ⚠️ THE STALE-STAMP LIFT (Nick, 28 Sep): removing the stamp, and nothing else, when undo or a
+            // correction has left no query pointing at the package. A rule cannot QUERY for those queries,
+            // so the client decides; what the rule holds is that the lift carries no other change.
+            || (incoming().diff(existing()).affectedKeys().hasOnly(['firstSentAt'])
+                && !incoming().keys().hasAny(['firstSentAt']))
           );
       }
 
@@ -981,7 +1007,7 @@ service cloud.firestore {
             'withdrawTold', 'agentRecheckOn',
             // Package editions (§C3, 28 Sep) — how the materials were recorded.
             'sentHow', 'sentPackageEdition', 'basedOnPackageId', 'basedOnPackageEdition',
-            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom'
+            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom', 'sentPackageName'
           ])
         );
 

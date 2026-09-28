@@ -19,7 +19,7 @@ import { countWords } from "../../lib/materialDraft";
 const PLURAL: Record<MatKind, string> = { letter: "Query letters", synopsis: "Synopses", version: "Versions" };
 const LABEL: Record<MatKind, string> = { letter: "Query letter", synopsis: "Synopsis", version: "Version" };
 
-export type MatAct = "open" | "rename" | "away";
+export type MatAct = "open" | "edit" | "rename" | "away";
 
 export interface PkgMaterialsProps {
   mats: Record<MatKind, MaterialItem[]>;
@@ -38,8 +38,8 @@ export interface PkgMaterialsProps {
 }
 
 /** E5: book versions have no retired field, so they can be opened and renamed but never put away. */
-export const menuActs = (k: MatKind): MatAct[] => (k === "version" ? ["open", "rename"] : ["open", "rename", "away"]);
-const ACT_LABEL: Record<MatAct, string> = { open: "Open", rename: "Rename", away: "Put away" };
+export const menuActs = (k: MatKind): MatAct[] => (k === "version" ? ["open", "rename"] : ["open", "edit", "rename", "away"]);
+const ACT_LABEL: Record<MatAct, string> = { open: "Open", edit: "Edit", rename: "Rename", away: "Put away" };
 
 export const PkgMaterials: React.FC<PkgMaterialsProps> = ({ mats, metaOf, composing, inPkg, onChip, onDragStart, onDragEnd, onAdd, onMenu, putAway = [], onRestore }) => {
   const [menuFor, setMenuFor] = useState<string | null>(null);
@@ -152,12 +152,17 @@ export interface MatModalProps {
   onClose: () => void;
   /** resolves false when the write did not land — the modal stays open */
   onSave: (d: { name: string; text: string; note: string }) => Promise<boolean>;
+  /**
+   * Editing a letter or synopsis (Part B §B2). `locked` is the sentence a SENT version shows —
+   * "v3 has been sent, so your changes become v4." — and the name then starts as the next version's.
+   */
+  editing?: { from: string; name: string; text: string; locked: string | null };
 }
 
-export const PkgMaterialModal: React.FC<MatModalProps> = ({ kind, onClose, onSave }) => {
+export const PkgMaterialModal: React.FC<MatModalProps> = ({ kind, onClose, onSave, editing }) => {
   const isV = kind === "version";
-  const [name, setName] = useState("");
-  const [text, setText] = useState("");
+  const [name, setName] = useState(editing?.name ?? "");
+  const [text, setText] = useState(editing?.text ?? "");
   const [note, setNote] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -191,8 +196,9 @@ export const PkgMaterialModal: React.FC<MatModalProps> = ({ kind, onClose, onSav
     <div className="ppv-scrim" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="ppv-modal" role="dialog" aria-modal="true" aria-labelledby="ppv-m-title" data-ppv="modal" ref={modalRef} onKeyDown={onKey}>
         <div className="mh">
-          <h3 id="ppv-m-title">Add {isV ? "a version" : `a ${LABEL[kind].toLowerCase()}`}</h3>
+          <h3 id="ppv-m-title">{editing ? `Edit ${editing.from}` : `Add ${isV ? "a version" : `a ${LABEL[kind].toLowerCase()}`}`}</h3>
           <p>{isV ? "Name it for the edit it represents, like “Fast-paced opening”." : "Paste the text so its word count is kept with it."}</p>
+          {editing?.locked ? <div className="ppv-lockedit" data-ppv="lockedit" role="status">{editing.locked}</div> : null}
         </div>
         <div className="mb">
           <div className="ppv-f w">
@@ -217,7 +223,7 @@ export const PkgMaterialModal: React.FC<MatModalProps> = ({ kind, onClose, onSav
         </div>
         <div className="mf">
           <button type="button" className="ppv-btn" onClick={onClose}>Cancel</button>
-          <button type="button" className="ppv-btn ppv-btn--dark" data-ppv="m-save" disabled={busy} onClick={() => void save()}>Add {isV ? "version" : LABEL[kind].toLowerCase()}</button>
+          <button type="button" className="ppv-btn ppv-btn--dark" data-ppv="m-save" disabled={busy} onClick={() => void save()}>{editing ? (editing.locked ? `Save as ${name.trim() || editing.name}` : "Save") : `Add ${isV ? "version" : LABEL[kind].toLowerCase()}`}</button>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ import type { ManuscriptVersion } from "../../../types";
 
 export interface MaterialWriters {
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
-  updateVersion: (id: string, fields: Partial<Record<string, unknown>>) => Promise<void>;
+  updateVersion: (id: string, fields: Partial<Record<string, unknown>>) => Promise<unknown>;
 }
 
 export const applyMaterialDraft = async (

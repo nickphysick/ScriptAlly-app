@@ -64,6 +64,8 @@ import {
   collection,
   onSnapshot,
   getDocs,
+  query as fsQuery,
+  where,
   deleteField,
   writeBatch as _writeBatch,
   Timestamp,
@@ -114,6 +116,8 @@ import { computeResponseDeadline } from "./responseDeadline";
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
+import { nextEdition, contentsChanged, summaryFrom } from "./packageEditions";
+import { isVersionSent } from "./versionLock";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -287,7 +291,7 @@ interface DbContextType {
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
-  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<void>;
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<string | null>;
   /**
    * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
    *
@@ -336,6 +340,10 @@ interface DbContextType {
    */
   setQueryPackage: (queryId: string, packageId: string) => Promise<string | null>;
   retirePackage: (id: string) => Promise<void>;
+  /** Puts a package back exactly as it was before an edit that started an edition (the edit's undo). */
+  revertPackageEdition: (prev: SubmissionPackage) => Promise<string | null>;
+  /** Lifts the first-sent lock from each package no query points at, and restores it on one that is. */
+  reconcileStamps: (pkgIds: string[]) => Promise<{ lifted: string[]; stamped: string[] }>;
   /** Bring an archived package back. Its scorecard and history were never touched. */
   restorePackage: (id: string) => Promise<void>;
   /**
@@ -1929,12 +1937,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount",
       unknown
     >>,
-  ) => {
-    if (!currentUser) return;
+  ): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    /* ⚠️ A SENT VERSION'S CONTENT NEVER CHANGES (Part B §B2). An edit makes the next version — the
+       caller's job, through `addVersion`; this refusal is the backstop that says so rather than
+       rewriting what an agent received. A rename and the writer's note are labels, not content. */
+    const content = (["contentDraft", "fileAttached", "fileName", "contentType", "contentLink", "wordCount"] as const).some((k) => k in fields);
+    if (content && isVersionSent(id, queries, packages)) {
+      return "This version has been sent, so its content stays as it went. Edit it to make the next version.";
+    }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "versions", id), fields);
+      return null;
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+      return "Couldn't save that change.";
     }
   };
 
@@ -2007,7 +2024,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       id,
       userId: currentUser.id,
       status: "Active",
-      createdDate: new Date().toISOString()
+      createdDate: new Date().toISOString(),
+      /* Every package starts at its 1st edition. The list itself is written at the first bump —
+         until then `editionsOf` synthesises it from the live slots, which an unsent draft may still
+         change without starting anything. */
+      edition: 1,
     };
     if (!other) delete (newPkg as { otherMaterials?: string }).otherMaterials;
 
@@ -2036,8 +2057,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
-    if (live && isPackageLocked(live) && LOCKED_PACKAGE_FIELDS.some((k) => k in fields)) {
-      return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+    /* ⚠️ A SENT PACKAGE'S CONTENTS NO LONGER REFUSE — THEY START ITS NEXT EDITION (Part B §B1).
+       The queries already sent keep the edition they went out as, so the record stays true; what
+       changes is the package from now on. Only the sample slot, which is not content (Nick, 28 Sep),
+       still refuses on a sent package: it is the `""` sentinel everywhere today. */
+    let bump: ReturnType<typeof nextEdition> = null;
+    if (live && isPackageLocked(live)) {
+      if ("samplePagesVersionId" in fields && (fields.samplePagesVersionId ?? "") !== (live.samplePagesVersionId ?? "")) {
+        return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+      }
+      const ms = manuscripts.find((m) => m.id === live.manuscriptId);
+      bump = nextEdition(live, { ...live, ...fields }, new Date().toISOString(),
+        summaryFrom(versions, ms?.bookVersions ?? []));
     }
     /* ⚠️ CLEARING A FREE-TEXT FIELD IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
        input holds; the conversion lives here so no caller can drift. The three version slots use
@@ -2052,6 +2083,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const t = (fields[k] as string | undefined)?.trim();
       payload[k] = t ? t : deleteField();
       if (k === "note" && !t) payload.noteEditedAt = deleteField();
+    }
+    if (bump) {
+      payload.edition = bump.edition;
+      payload.editions = bump.editions;
+    } else if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
+      /* an unsent draft changed: a stored 1st edition would now describe contents nobody received */
+      payload.editions = deleteField();
     }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "packages", id), payload);
@@ -2112,19 +2150,92 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const restorePackage = async (id: string) => {
     if (!currentUser) return;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Active" });
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Active", retiredAt: deleteField() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
   };
 
+  /**
+   * THE UNDO OF AN EDIT THAT STARTED AN EDITION. Writing the old slots back through `updatePackage`
+   * would be another contents change and start a THIRD edition; this puts the package back exactly —
+   * slots, number and list — so the edition the undo removes never existed. Refused once any query has
+   * gone out with that edition, because then it did exist.
+   */
+  const revertPackageEdition = async (prev: SubmissionPackage): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    const live = packages.find((p) => p.id === prev.id);
+    const liveEd = typeof live?.edition === "number" ? live.edition : 1;
+    if (queries.some((q) => (q.sentPackageId || q.packageId) === prev.id && (q.sentPackageEdition ?? 1) === liveEd && liveEd > (prev.edition ?? 1))) {
+      return `A query has already gone out with this edition, so it stays.`;
+    }
+    const payload: Record<string, unknown> = {
+      packageName: prev.packageName,
+      queryLetterVersionId: prev.queryLetterVersionId,
+      synopsisVersionId: prev.synopsisVersionId,
+      bookVersionId: prev.bookVersionId || deleteField(),
+      otherMaterials: prev.otherMaterials?.trim() || deleteField(),
+      note: prev.note?.trim() || deleteField(),
+      noteEditedAt: prev.noteEditedAt || deleteField(),
+      edition: prev.edition ?? deleteField(),
+      editions: prev.editions?.length ? prev.editions : deleteField(),
+    };
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "packages", prev.id), payload);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${prev.id}`);
+      return "Couldn't undo that change.";
+    }
+  };
+
+  /** Retire instead of Delete (Part B §B3): the queries sent with it go on pointing here. */
   const retirePackage = async (id: string) => {
     if (!currentUser) return;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Retired" });
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Retired", retiredAt: new Date().toISOString() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
+  };
+
+  /**
+   * THE STALE-STAMP RULE (Nick, 28 Sep). A package's first-sent lock is a fact about a query that
+   * went out with it; when undo or a correction leaves NO query pointing at it — `packageId` or
+   * `sentPackageId` — the lock is lifted. Read from the SERVER, never local state, which may not yet
+   * hold the undo that made it stale. A based-on query never sent the package and does not hold it.
+   *
+   * ⚠️ AND THE OTHER DIRECTION TOO: undoing a correction puts a query back on a package whose stamp
+   * the correction lifted, so a package that IS pointed at and is unstamped is stamped again. One
+   * reconciliation, both ways, so no undo can leave a sent package editable. Returns what moved.
+   */
+  const reconcileStamps = async (pkgIds: string[]): Promise<{ lifted: string[]; stamped: string[] }> => {
+    if (!currentUser) return { lifted: [], stamped: [] };
+    const lifted: string[] = [];
+    const stamped: string[] = [];
+    for (const id of [...new Set(pkgIds.filter(Boolean))]) {
+      try {
+        const snap = await getDoc(doc(db, "users", currentUser.id, "packages", id));
+        if (!snap.exists()) continue;
+        const stampedNow = !!(snap.data() as SubmissionPackage).firstSentAt;
+        const col = collection(db, "users", currentUser.id, "queries");
+        const [a, b] = await Promise.all([
+          getDocs(fsQuery(col, where("packageId", "==", id))),
+          getDocs(fsQuery(col, where("sentPackageId", "==", id))),
+        ]);
+        const held = !a.empty || !b.empty;
+        if (stampedNow && !held) {
+          await updateDoc(doc(db, "users", currentUser.id, "packages", id), { firstSentAt: deleteField() });
+          lifted.push(id);
+        } else if (!stampedNow && held) {
+          await updateDoc(doc(db, "users", currentUser.id, "packages", id), { firstSentAt: new Date().toISOString() });
+          stamped.push(id);
+        }
+      } catch (e) {
+        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      }
+    }
+    return { lifted, stamped };
   };
 
   // Agent Actions with Free limits
@@ -3937,6 +4048,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updatePackage,
         setQueryPackage,
         retirePackage,
+        reconcileStamps,
+        revertPackageEdition,
         deletePackage,
         restoreVersion,
         restorePackage,

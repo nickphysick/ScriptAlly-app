@@ -271,26 +271,37 @@ export interface EditionChoice extends PackageCard { retired: boolean; key: stri
  * what could have gone out that day". An edition existed if it had started by then; a later edition
  * of the same package is not offered, and a superseded one still is.
  *
- * ⚠️ UNTIL PART B, A PACKAGE IS ITS 1ST EDITION, STARTED ON ITS createdDate (§C5). When the model
- * carries `editions`, each `{ n, startedAt }` is read here instead; the pieces of a past edition are
- * then that edition's own record, which is Part B's to supply — until it does, an edition's pieces
- * are the package's live ones, which for a 1st edition is the same thing.
+ * ⚠️ A PACKAGE WITH NO `editions` IS ITS 1ST EDITION, STARTED ON ITS createdDate (§C5). With a
+ * list, each edition is offered with ITS OWN pieces — the slots recorded when it started — so a
+ * correction onto a superseded edition records what that edition held, never the package's live
+ * contents (Part B, 28 Sep).
  */
 export function editionsOn(manuscriptId: string, dayIso: string, packages: SubmissionPackage[] | undefined, versions: ManuscriptVersion[] | undefined, bookVersions?: { id: string; name: string }[]): EditionChoice[] {
   const day = dayIso.slice(0, 10);
   const all = (packages ?? []).filter((p) => p && p.manuscriptId === manuscriptId);
-  const cards = new Map(packagesFor(manuscriptId, all.map((p) => ({ ...p, status: "Active", retiredAt: undefined } as SubmissionPackage)), versions, bookVersions).map((c) => [c.id, c]));
+  const cardFor = (p: SubmissionPackage) =>
+    packagesFor(manuscriptId, [{ ...p, status: "Active", retiredAt: undefined } as SubmissionPackage], versions, bookVersions)[0] ?? null;
   const out: EditionChoice[] = [];
   for (const p of all) {
-    const card = cards.get(p.id);
-    if (!card) continue;
     const retired = !isLive(p);
-    const eds = (p as { editions?: { n?: unknown; startedAt?: unknown }[] }).editions;
-    const list = Array.isArray(eds) && eds.length
-      ? eds.map((e) => ({ n: typeof e.n === "number" ? e.n : 1, start: String(e.startedAt ?? "").slice(0, 10) }))
-      : [{ n: 1, start: String(p.createdDate ?? "").slice(0, 10) }];
+    const eds = Array.isArray(p.editions) ? p.editions : [];
+    const list = eds.length
+      ? eds.map((e) => ({
+          n: typeof e.n === "number" ? e.n : 1,
+          start: String(e.startedAt ?? "").slice(0, 10),
+          pkg: {
+            ...p,
+            queryLetterVersionId: e.queryLetterVersionId ?? "",
+            synopsisVersionId: e.synopsisVersionId ?? "",
+            bookVersionId: e.bookVersionId,
+            otherMaterials: e.otherMaterials,
+          } as SubmissionPackage,
+        }))
+      : [{ n: 1, start: String(p.createdDate ?? "").slice(0, 10), pkg: p }];
     for (const e of list) {
       if (e.start && e.start > day) continue;
+      const card = cardFor(e.pkg);
+      if (!card) continue;
       out.push({ ...card, edition: e.n, retired, key: `${p.id}#${e.n}` });
     }
   }

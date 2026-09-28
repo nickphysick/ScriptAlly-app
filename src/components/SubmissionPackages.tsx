@@ -22,7 +22,7 @@
  * `PACKAGES_OPEN_TO_ALL`.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../lib/db";
 import { useToast } from "./toast/ToastProvider";
@@ -31,15 +31,20 @@ import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { PageHeader } from "./shell/PageHeader";
 import { PageRail } from "./containers/PageRail";
 import { appendBookVersion, bookVersionsOf, newBookVersionId, renameBookVersion } from "../lib/bookVersions";
-import { createPayload } from "../lib/materialDraft";
+import { countWords, createPayload } from "../lib/materialDraft";
+import { isVersionSent, lockedEditLine, nextVersionName } from "../lib/versionLock";
 import { duplicateOf } from "../lib/buildRow";
 import { duplicateName, resolveActivePackage } from "../lib/packageMetrics";
-import { initialsOf, packageUsageCounts } from "../lib/manuscriptSummary";
+import { initialsOf } from "../lib/manuscriptSummary";
 import {
   isSent, MATERIALS_PILE, MatKind, MaterialItem, materialMeta, materialsFor, offered, PACKAGES_HERO, sideBySide,
   suggestPackageName, usesOf,
 } from "../lib/packagesPage";
-import { PkgCard } from "./packages/PkgCard";
+import { PkgAct, PkgCard } from "./packages/PkgCard";
+import { buildRows } from "../lib/analytics";
+import { packageResults } from "../lib/packageResults";
+import { editionNumber, editionWarning, editionsOf, ordinal, summaryFrom } from "../lib/packageEditions";
+import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { CompState, EMPTY_COMP, PkgComposer } from "./packages/PkgComposer";
 import { MatAct, PkgMaterialModal, PkgMaterials } from "./packages/PkgMaterials";
 import { DrawerItem, PkgMaterialDrawer, PkgRenameModal } from "./packages/PkgMaterialDrawer";
@@ -47,6 +52,8 @@ import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
 const KEY = "scriptally_active_manuscript_id";
+/** The example card is never sent, so it draws no results; this satisfies the prop and nothing reads it. */
+const EXAMPLE_RESULTS = () => packageResults("example", null, [], new Map());
 
 /** The empty state's example card — a picture of a package, never a record (P8). */
 const EXAMPLE: SubmissionPackage = {
@@ -57,10 +64,11 @@ const EXAMPLE: SubmissionPackage = {
 
 export const SubmissionPackages: React.FC = () => {
   const {
-    manuscripts, versions, packages, queries, agents, addPackage, updatePackage, retirePackage,
+    manuscripts, versions, packages, queries, agents, activities, addPackage, updatePackage, retirePackage,
     restorePackage, deletePackage, setActivePackage, addVersion, deleteVersion, restoreVersion, updateManuscript,
-    updateVersion, archiveVersion,
+    updateVersion, archiveVersion, revertPackageEdition,
   } = useScriptAllyDb();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const location = useLocation();
 
@@ -105,7 +113,7 @@ export const SubmissionPackages: React.FC = () => {
   const dragId = useRef<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [showRetired, setShowRetired] = useState(false);
-  const [modal, setModal] = useState<{ kind: MatKind; opener: HTMLElement | null } | null>(null);
+  const [modal, setModal] = useState<{ kind: MatKind; opener: HTMLElement | null; edit?: MaterialItem } | null>(null);
   const sbsRef = useRef<HTMLDivElement | null>(null);
   const scrollerOf = () => (compRef.current ?? sbsRef.current)?.closest(".wpg-scroll") as HTMLElement | null;
 
@@ -152,18 +160,30 @@ export const SubmissionPackages: React.FC = () => {
   /* ── derived per-card facts ── */
   const matName = (k: MatKind, id: string | undefined) => (id ? allMats[k].find((m) => m.id === id) ?? null : null);
   const metaOf = (m: MaterialItem) => materialMeta(m, usesOf(m, msPkgs));
+  /* §C4 — every result is worked out from the queries through Analytics' own rows, so this page
+     and Analytics cannot disagree about what a query's first answer was */
+  const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
+  const rowsById = useMemo(
+    () => new Map(buildRows(msQueries, activities, agents, Date.now()).map((r) => [r.id, r])),
+    [msQueries, activities, agents],
+  );
+  const summaryFor = useMemo(() => summaryFrom(versions, bookVersions), [versions, bookVersions]);
+  const who = (queryId: string) => {
+    const q = queries.find((x) => x.id === queryId);
+    const row = rowsById.get(queryId);
+    const name = row?.agentName ?? agents.find((a) => a.id === q?.agentId)?.name ?? "Unknown agent";
+    return { name, initials: initialsOf(name) };
+  };
   const cardProps = (p: SubmissionPackage) => {
-    const mine = queries.filter((q) => q.packageId === p.id);
-    const agentIds = [...new Set(mine.map((q) => q.agentId).filter(Boolean))];
     const l = matName("letter", p.queryLetterVersionId);
     const s = matName("synopsis", p.synopsisVersionId);
     return {
       letter: l ? { name: l.name, words: l.words } : null,
       synopsis: s ? { name: s.name, words: s.words } : null,
       version: matName("version", p.bookVersionId)?.name ?? null,
-      counts: packageUsageCounts(p.id, queries),
-      agents: agentIds.length,
-      discs: agentIds.map((id) => initialsOf(agents.find((a) => a.id === id)?.name)),
+      editions: editionsOf(p, summaryFor),
+      results: (ed: number | null) => packageResults(p.id, ed, msQueries, rowsById),
+      who,
     };
   };
 
@@ -184,6 +204,7 @@ export const SubmissionPackages: React.FC = () => {
     setComp(null);
     if (c.editId) {
       const prev = msPkgs.find((p) => p.id === c.editId);
+      const starts = prev ? editionWarning(prev, { queryLetterVersionId: c.letter, synopsisVersionId: c.synopsis, bookVersionId: c.version, otherMaterials: c.other }) : null;
       const err = await updatePackage(c.editId, {
         packageName: name, queryLetterVersionId: c.letter, synopsisVersionId: c.synopsis,
         bookVersionId: (c.version || deleteField()) as unknown as string, otherMaterials: c.other, note: c.note,
@@ -191,6 +212,15 @@ export const SubmissionPackages: React.FC = () => {
       });
       if (err) { setComp(c); showToast({ message: err }); return; }
       flashCard(c.editId);
+      /* ⚠️ AN EDIT THAT STARTED AN EDITION IS UNDONE EXACTLY, never by writing the old slots back —
+         that would be another contents change and start a third (revertPackageEdition) */
+      if (starts && prev) {
+        showToast({
+          message: `Saved ${name}. Its ${ordinal(editionNumber(prev) + 1)} edition starts now.`,
+          undo: async () => { const e = await revertPackageEdition(prev); if (e) showToast({ message: e }); },
+        });
+        return;
+      }
       showToast({
         message: `Saved ${name}.`,
         undo: prev ? async () => { await updatePackage(prev.id, {
@@ -214,10 +244,14 @@ export const SubmissionPackages: React.FC = () => {
     showToast({ message: `Created ${name}.`, undo: async () => { if (becameActive) await clearActive(); await deletePackage(id); } });
   };
 
-  const onAct = (p: SubmissionPackage) => async (a: "use" | "edit" | "dup" | "retire" | "delete" | "restore") => {
+  const onAct = (p: SubmissionPackage) => async (a: PkgAct) => {
     const wasActive = active?.id === p.id;
     const prevActive = activeMs?.activePackageId ?? "";
     switch (a) {
+      case "log":
+        /* §C5 — the drawer opens with this package attached (an explicit preset beats "used for new queries") */
+        openQueryDrawer({ mode: "log", manuscriptId: p.manuscriptId, packageId: p.id });
+        return;
       case "use":
         await setActivePackage(msId, p.id); flashCard(p.id);
         showToast({ message: `${p.packageName} will be filled in when you log a new query.`, undo: () => setActivePackage(msId, prevActive) });
@@ -231,7 +265,7 @@ export const SubmissionPackages: React.FC = () => {
       case "retire":
         if (wasActive) await clearActive();
         await retirePackage(p.id);
-        showToast({ message: `Retired ${p.packageName}. Its history stays.`, undo: async () => { await restorePackage(p.id); if (wasActive) await setActivePackage(msId, p.id); } });
+        showToast({ message: wasActive ? `Retired ${p.packageName}. Its history stays, and new queries no longer start from it.` : `Retired ${p.packageName}. Its history stays.`, undo: async () => { await restorePackage(p.id); if (wasActive) await setActivePackage(msId, p.id); } });
         return;
       case "restore":
         /* an UNTOUCHED composer closes — restoring returns the page to the filled state (E4) */
@@ -271,6 +305,37 @@ export const SubmissionPackages: React.FC = () => {
   const onChip = (m: MaterialItem) => {
     if (!shown) { openComp({ [m.kind]: m.id } as Partial<CompState>); return; }
     patch({ [m.kind]: shown[m.kind] === m.id ? "" : m.id } as Partial<CompState>);
+  };
+  /**
+   * EDITING A LETTER OR SYNOPSIS (Part B §B2). A version that has gone out — in any query's snapshot,
+   * or the slots of a package an older query points at — is never rewritten: the edit is saved as the
+   * NEXT version and the sent one stays byte-identical. An unsent version is edited in place.
+   */
+  const editState = (m: MaterialItem) => {
+    const v = versions.find((x) => x.id === m.id);
+    const locked = isVersionSent(m.id, queries, packages);
+    const next = locked ? nextVersionName(m.name, versions.filter((x) => x.manuscriptId === msId).map((x) => x.versionName)) : m.name;
+    return { from: m.name, name: next, text: v?.contentDraft ?? "", locked: locked ? lockedEditLine(m.name, next) : null };
+  };
+  const saveEdit = async (m: MaterialItem, d: { name: string; text: string }): Promise<boolean> => {
+    if (!activeMs) return false;
+    const type = m.kind === "letter" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS;
+    if (isVersionSent(m.id, queries, packages)) {
+      let id: string | null = null;
+      try { id = await addVersion(createPayload({ type, name: d.name, mode: "paste", text: d.text, refName: "" }, activeMs.id) as Parameters<typeof addVersion>[0]); } catch { return false; }
+      if (!id) return false;
+      const vid = id;
+      const o = modal?.opener; setModal(null); focusBack(o);
+      showToast({ message: `Saved as ${d.name}. ${m.name} stays as it went.`, undo: async () => { await deleteVersion(vid); } });
+      return true;
+    }
+    const v = versions.find((x) => x.id === m.id);
+    const prev = { versionName: m.name, contentDraft: v?.contentDraft ?? "", wordCount: v?.wordCount ?? countWords(v?.contentDraft ?? "") };
+    const err = await updateVersion(m.id, { versionName: d.name, contentDraft: d.text, wordCount: countWords(d.text), contentType: "text", fileName: deleteField() });
+    if (err) { showToast({ message: err }); return false; }
+    const o = modal?.opener; setModal(null); focusBack(o);
+    showToast({ message: `Saved ${d.name}.`, undo: async () => { await updateVersion(m.id, prev); } });
+    return true;
   };
   const saveMaterial = async (kind: MatKind, d: { name: string; text: string; note: string }): Promise<boolean> => {
     if (!activeMs) return false;
@@ -338,7 +403,7 @@ export const SubmissionPackages: React.FC = () => {
       message: `Renamed to ${name}.`,
       undo: () => (m.kind === "version"
         ? updateManuscript(activeMs.id, { bookVersions: renameBookVersion(bookVersionsOf(activeMs), m.id, old, bookVersions.find((b) => b.id === m.id)?.note ?? "") })
-        : updateVersion(m.id, { versionName: old })),
+        : updateVersion(m.id, { versionName: old }).then(() => undefined)),
     });
     return true;
   };
@@ -351,6 +416,7 @@ export const SubmissionPackages: React.FC = () => {
   };
   const onMenu = (act: MatAct, m: MaterialItem, more: HTMLElement | null) => {
     if (act === "open") setDrawer({ item: drawerItem(m), more });
+    else if (act === "edit") setModal({ kind: m.kind, opener: more, edit: m });
     else if (act === "rename") setRenaming({ m, more });
     else void putAwayMaterial(m);
   };
@@ -371,7 +437,8 @@ export const SubmissionPackages: React.FC = () => {
     [matName("letter", p.queryLetterVersionId)?.name, matName("synopsis", p.synopsisVersionId)?.name, matName("version", p.bookVersionId)?.name].filter(Boolean).join(" · ");
 
   const card = (p: SubmissionPackage) => (
-    <PkgCard key={p.id} pkg={p} active={active?.id === p.id} flash={flash === p.id} {...cardProps(p)} onAct={onAct(p)} onSaveNote={saveNote(p)} />
+    <PkgCard key={p.id} pkg={p} active={active?.id === p.id} flash={flash === p.id} {...cardProps(p)} onAct={onAct(p)} onSaveNote={saveNote(p)}
+      onOpenQuery={(id) => navigate(`/queries?q=${encodeURIComponent(id)}`)} />
   );
 
   return (
@@ -405,7 +472,9 @@ export const SubmissionPackages: React.FC = () => {
                 <PkgComposer comp={shown} mats={mats} metaOf={metaOf}
                   editName={editing ? msPkgs.find((p) => p.id === editing)?.packageName ?? null : null}
                   suggestion={suggestPackageName(matName("letter", shown.letter)?.name ?? null, matName("synopsis", shown.synopsis)?.name ?? null)}
-                  dupe={dupe} dragKind={dragKind} accepts={() => dragKindRef.current}
+                  dupe={dupe}
+                  warning={(() => { const prev = editing ? msPkgs.find((p) => p.id === editing) : null; return prev ? editionWarning(prev, { queryLetterVersionId: shown.letter, synopsisVersionId: shown.synopsis, bookVersionId: shown.version, otherMaterials: shown.other }) : null; })()}
+                  dragKind={dragKind} accepts={() => dragKindRef.current}
                   onChange={patch}
                   onDropMat={(k) => { const id = dragId.current; if (id) patch({ [k]: id } as Partial<CompState>); }}
                   onShowDup={flashCard} onCancel={cancelComp} onCreate={() => void create()} />
@@ -418,7 +487,7 @@ export const SubmissionPackages: React.FC = () => {
                   <span className="ppv-ex" data-ppv="ex-tag">Example</span>
                   <div className="ppv-ghost">
                     <PkgCard pkg={EXAMPLE} active ghost letter={{ name: "Query letter v3", words: 310 }} synopsis={{ name: "Synopsis, 1 page", words: 480 }}
-                      version="Fast-paced opening" counts={[]} agents={0} discs={[]} />
+                      version="Fast-paced opening" editions={[]} results={EXAMPLE_RESULTS} who={() => ({ name: "", initials: "" })} />
                   </div>
                 </div>
                 {noneLive ? (
@@ -497,7 +566,11 @@ export const SubmissionPackages: React.FC = () => {
             ) : null}
           </PageRail>
         </div>
-        {modal ? <PkgMaterialModal key={modal.kind} kind={modal.kind} onClose={closeModal} onSave={(d) => saveMaterial(modal.kind, d)} /> : null}
+        {modal ? (
+          <PkgMaterialModal key={`${modal.kind}${modal.edit?.id ?? ""}`} kind={modal.kind} onClose={closeModal}
+            editing={modal.edit ? editState(modal.edit) : undefined}
+            onSave={(d) => (modal.edit ? saveEdit(modal.edit, d) : saveMaterial(modal.kind, d))} />
+        ) : null}
         <PkgMaterialDrawer item={drawer?.item ?? null} onClose={closeDrawer}
           onRename={(d) => {
             const m = [...allMats.letter, ...allMats.synopsis, ...allMats.version].find((x) => x.id === d.id);

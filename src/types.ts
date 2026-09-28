@@ -477,6 +477,22 @@ export interface ManuscriptVersion {
  */
 export type RecordStatus = "Active" | "Retired";
 
+/** One edition of a package, as it was: what it contained and when it started. */
+export interface PackageEdition {
+  n: number;
+  /** Date-time the edition started (its package's createdDate for the 1st). */
+  startedAt: string;
+  /** Readable contents, e.g. "Query letter v3 · Synopsis v2 · Fast-paced opening". */
+  summary: string;
+  /** The material version ids it held — letter, then synopsis. */
+  versions: string[];
+  /** The slots themselves, so a past edition can be offered exactly (§A4). */
+  queryLetterVersionId: string;
+  synopsisVersionId: string;
+  bookVersionId?: string;
+  otherMaterials?: string;
+}
+
 export interface SubmissionPackage {
   id: string;
   manuscriptId: string;
@@ -548,6 +564,18 @@ export interface SubmissionPackage {
    * is a proposal in the report rather than a decision taken here.
    */
   firstSentAt?: string;
+  /**
+   * PACKAGE EDITIONS (docs/contracts/package-editions.md §C2, Part B 28 Sep). `edition` is the
+   * current one, from 1; `editions` keeps every one oldest first, for ever, so a past edition can be
+   * shown and offered in corrections. A change to a SENT package's contents — its letter, its
+   * synopsis, its book version or its other materials — starts the next edition; a rename, the note,
+   * or which package is "used for new queries" never does. Absent on a package written before
+   * editions: read through `lib/packageEditions`, which treats it as its 1st edition.
+   */
+  edition?: number;
+  editions?: PackageEdition[];
+  /** When it was retired. `status` stays the switch; this is the date the card states. */
+  retiredAt?: string;
   /**
    * ⚠️ FREE TEXT, AND DELIBERATELY NOT A FOURTH SLOT. One line per package for whatever an agency
    * asks for that is not one of the three above — a chapter outline, a pitch document, a writing CV.
@@ -816,6 +844,9 @@ export interface Query {
   /** Set when the writer corrected what was sent; `sentCorrectedFrom` is the old summary. */
   sentCorrectedAt?: string;
   sentCorrectedFrom?: string;
+  /** The package's name as it was on the day it was sent — set only when `sentHow === 'package'`
+      (Part B; before it the name rode in `sentMaterials`' prefix, which readers fall back to). */
+  sentPackageName?: string;
   /** The label of the last materials sent, e.g. "First 50 pages" — the date is the rung's. */
   lastSentLabel?: string;
   /** Logged as a second query to an agent this book was sent to before. */

@@ -98,7 +98,9 @@ describe("every entry point names its type (D3)", () => {
   it("every + Add names its kind, and the modal is keyed on it", () => {
     const rail = decls(read("../components/packages/PkgMaterials.tsx"));
     expect(rail).toContain("data-add={k} onClick={(e) => onAdd(k, e.currentTarget)}");
-    expect(decls(page)).toContain("<PkgMaterialModal key={modal.kind} kind={modal.kind}");
+    /* retargeted (Part B, 28 Sep): the key also carries the material being EDITED, so opening Edit on
+       a second letter remounts the modal with that letter's text — the law (keyed on its kind) holds */
+    expect(decls(page)).toContain("<PkgMaterialModal key={`${modal.kind}${modal.edit?.id ?? \"\"}`} kind={modal.kind}");
   });
 });
 

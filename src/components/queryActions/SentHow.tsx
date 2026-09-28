@@ -24,7 +24,7 @@ import { readSummary, type SentPiece } from "../../lib/queryActions/packages";
 import { formatQueryMaterial } from "../../lib/materials";
 import "./sentHow.css";
 
-type Q = Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "basedOnPackageId" | "basedOnPackageEdition"
+type Q = Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "sentPackageName" | "basedOnPackageId" | "basedOnPackageEdition"
   | "sentChanges" | "sentMaterials" | "sentVersions" | "sentCorrectedAt" | "sentCorrectedFrom" | "materialsWanted">>;
 
 const PKI = (
@@ -90,7 +90,7 @@ export function sentView(q: Q, packages: readonly SubmissionPackage[] = []): Sen
   }
   return {
     how: r.how,
-    name: sum.packageName ?? sum.basedOnName ?? live?.packageName ?? null,
+    name: r.packageName ?? sum.basedOnName ?? live?.packageName ?? null,
     edition: r.edition ?? r.basedOnEdition,
     basedOn: r.how === "individual" && !!r.basedOnId,
     retired: isRetired(live),

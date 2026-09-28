@@ -240,20 +240,24 @@ test("P3 · the letter is required; the rest are optional", async ({ page }) => 
 });
 
 /* ══ P4 · sent lock / duplicate (red-first + mutation) ══ */
-test("P4 · a sent package is fixed; Duplicate & edit makes a new one; the note still saves", async ({ page }) => {
+/* ⚠️ RETARGETED (Part B of "Packages through the journey", 28 Sep). A sent package now OFFERS Edit —
+   the edit starts its next edition, so the queries already sent keep the one they went with (the
+   record stays true, which is what "fixed" protected) — and never Delete. Duplicate is its own action
+   and still makes a NEW, unsent document; that half of the law is unchanged and asserted as before. */
+test("P4 · a sent package is never deleted; Duplicate makes a new one; the note still saves", async ({ page }) => {
   const L = new PLedger("pkg-P4");
   const ctx = { route: ROUTE, size: W, state: "filled" };
   await fresh(page);
   let r = await read(page);
   const autumn = r?.cards.find((c) => c.name === "Autumn round");
   const winter = r?.cards.find((c) => c.name === "Winter draft");
-  L.check("P4 · a sent package offers no Edit, and offers Duplicate & edit", ctx, !!autumn && !autumn.acts.includes("edit") && autumn.acts.includes("dup"), JSON.stringify(autumn?.acts));
+  L.check("P4 · a sent package offers Edit (a new edition) and Duplicate, never Delete", ctx, !!autumn && autumn.acts.includes("edit") && autumn.acts.includes("dup") && !autumn.acts.includes("delete"), JSON.stringify(autumn?.acts));
   L.check("P4 · an unsent package offers Edit and Delete", ctx, !!winter && winter.acts.includes("edit") && winter.acts.includes("delete"), JSON.stringify(winter?.acts));
   const before = dump().packages.find((p) => p.id === "pv2-p1");
   const dup = card(page, "Autumn round").locator('[data-act="dup"]');
   if (await dup.count()) await dup.click();
   const nm = page.locator("#ppv-c-name:visible");
-  L.check("P4 · Duplicate & edit opens a new package named by duplicateName", ctx, (await nm.count()) > 0 && (await nm.inputValue()) === "Autumn round v2", (await nm.count()) ? await nm.inputValue() : "no composer");
+  L.check("P4 · Duplicate opens a new package named by duplicateName", ctx, (await nm.count()) > 0 && (await nm.inputValue()) === "Autumn round v2", (await nm.count()) ? await nm.inputValue() : "no composer");
   const create = on(page, '[data-ppv="create"]');
   if (await create.count()) await create.click();
   await expect.poll(() => dump().packages.some((p) => p.name === "Autumn round v2"), { timeout: 12_000 }).toBe(true).catch(() => {});

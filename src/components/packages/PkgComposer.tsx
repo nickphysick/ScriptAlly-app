@@ -33,6 +33,8 @@ export interface PkgComposerProps {
   editName: string | null;
   suggestion: string;
   dupe: SubmissionPackage | null;
+  /** Editing a SENT package whose contents now differ: the edition it starts (§B1). */
+  warning?: string | null;
   dragKind: MatKind | null;
   /** the kind being dragged NOW, read at the event — the prop above is only for the outline */
   accepts: () => MatKind | null;
@@ -43,7 +45,7 @@ export interface PkgComposerProps {
   onCreate: () => void;
 }
 
-export const PkgComposer: React.FC<PkgComposerProps> = ({ comp, mats, metaOf, editName, suggestion, dupe, dragKind, accepts, onChange, onDropMat, onShowDup, onCancel, onCreate }) => {
+export const PkgComposer: React.FC<PkgComposerProps> = ({ comp, mats, metaOf, editName, suggestion, dupe, warning, dragKind, accepts, onChange, onDropMat, onShowDup, onCancel, onCreate }) => {
   const [over, setOver] = React.useState<MatKind | null>(null);
   const blocked = !comp.letter;
   const title = comp.editId ? `Edit ${editName ?? ""}` : comp.dupFrom ? `New package from ${comp.dupFrom}` : "New package";
@@ -104,6 +106,11 @@ export const PkgComposer: React.FC<PkgComposerProps> = ({ comp, mats, metaOf, ed
         <div className="ppv-dupe" data-ppv="dupe">
           <span>Same letter, synopsis and version as <b>{dupe.packageName}</b>.</span>
           <button type="button" className="ppv-mini" onClick={() => onShowDup(dupe.id)}>Show me</button>
+        </div>
+      ) : null}
+      {warning ? (
+        <div className="ppv-edwarn" data-ppv="edwarn" role="status">
+          <span className="ni">New edition</span><span>{warning}</span>
         </div>
       ) : null}
       <div className="ppv-cfoot">

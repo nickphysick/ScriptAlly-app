@@ -510,7 +510,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       const summary = summaryWith(pieces, pkCard?.name ?? null, !pkCard && basedOn && changes.length ? basedOn.name : null);
       const versionIds = [pieceV.qlId, pieceV.synId].filter((x): x is string => !!x);
       const record: Record<string, unknown> = pkCard
-        ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition }
+        ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition, sentPackageName: pkCard.name }
         : { sentHow: "individual", ...(basedOn && changes.length ? { basedOnPackageId: basedOn.id, basedOnPackageEdition: basedOn.edition, sentChanges: changes } : {}) };
       const writerExpected = !wks || expectMode !== "usual";
       const payload: Record<string, unknown> = {

@@ -16,7 +16,7 @@ import {
   closeQueryDrawer, showUndoBar, subscribeDrawer, currentDrawerRequest,
   type DrawerMode, type DrawerPreset, type OpenRequest,
 } from "../../lib/queryActions/drawerStore";
-import { restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
+import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
 import { todayDay } from "../../lib/queryActions/dates";
 import { DrawerContext, initialsOf } from "./controls";
 import { DrawerShell } from "./DrawerShell";
@@ -103,7 +103,13 @@ export function QueryDrawer() {
     try {
       const snap = await takeSnapshot(uid, view.touched());
       const out = await view.commit();
-      const undo = async () => { await restoreSnapshot(snap); };
+      /* the stale-stamp rule (Nick, 28 Sep): after an undo, every package the query pointed at before
+         OR after the save is reconciled — lifted if nothing points at it now, stamped if something does */
+      const undo = async () => {
+        const after = await packagesHeldBy(uid, snap.queryIds);
+        await restoreSnapshot(snap);
+        await db.reconcileStamps([...packagesIn(snap), ...after]);
+      };
       setOpen(false);
       window.setTimeout(() => closeQueryDrawer(), 240);
       if (r.receipt && r.onSaved) {

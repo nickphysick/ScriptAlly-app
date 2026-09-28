@@ -25,6 +25,8 @@ export interface SentRecord {
   /** The attached package — only when `how === "package"`. */
   packageId: string | null;
   edition: number | null;
+  /** The package's name as it was on the day — `sentPackageName`, else the summary's prefix (Part B). */
+  packageName: string | null;
   /** The package the writer started from before changing a piece — only when `how === "individual"`. */
   basedOnId: string | null;
   basedOnEdition: number | null;
@@ -40,7 +42,7 @@ export interface SentRecord {
 
 const edition = (n: unknown): number => (typeof n === "number" && Number.isInteger(n) && n >= 1 ? n : 1);
 
-export function sentRecordOf(q: Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "basedOnPackageId" | "basedOnPackageEdition" | "sentChanges" | "sentMaterials" | "sentVersions" | "sentCorrectedAt" | "sentCorrectedFrom">>): SentRecord {
+export function sentRecordOf(q: Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "sentPackageName" | "basedOnPackageId" | "basedOnPackageEdition" | "sentChanges" | "sentMaterials" | "sentVersions" | "sentCorrectedAt" | "sentCorrectedFrom">>): SentRecord {
   const inferred = q.sentHow == null;
   /* The migration's defaults (Nick, 28 Sep): a packageId is a package; a snapshot with no package
      is INDIVIDUAL — a v1 "Custom" log recorded what went piece by piece; only a query with no
@@ -52,6 +54,8 @@ export function sentRecordOf(q: Partial<Pick<Query, "packageId" | "sentHow" | "s
     how,
     packageId: pkgId,
     edition: pkgId ? edition(q.sentPackageEdition) : null,
+    /* the field first, then the prefix older queries carry in their summary */
+    packageName: pkgId ? (q.sentPackageName?.trim() || readSummary(q.sentMaterials ?? "").packageName || null) : null,
     basedOnId,
     basedOnEdition: basedOnId ? edition(q.basedOnPackageEdition) : null,
     changes: basedOnId ? (q.sentChanges ?? []) : [],
@@ -76,7 +80,7 @@ export function creditedTo(q: Parameters<typeof sentRecordOf>[0], packageId: str
 export function sentHowWords(q: Parameters<typeof sentRecordOf>[0], liveName?: string | null): string {
   const r = sentRecordOf(q);
   const sum = readSummary(r.materials);
-  if (r.how === "package") return `Sent as the ${sum.packageName ?? liveName ?? "attached"} package`;
+  if (r.how === "package") return `Sent as the ${r.packageName ?? liveName ?? "attached"} package`;
   if (r.how === "individual") return `Materials logged individually${r.basedOnId && sum.basedOnName ? `, based on ${sum.basedOnName}` : ""}`;
   return "Materials not recorded";
 }

@@ -121,12 +121,45 @@
 .ppv-slots dd.none { color: var(--ppv-muted); }
 .ppv-lockline { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ppv-muted); border-top: 1px solid var(--ppv-hair); padding-top: 9px; margin-top: 2px; }
 .ppv-pf { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.ppv-counts { display: flex; gap: 12px; align-items: center; font-family: var(--ppv-mono); font-size: 10.5px; flex-wrap: wrap; }
-.ppv-counts > span { display: inline-flex; align-items: center; gap: 5px; }
 .ppv-sentline { font-size: 13.5px; color: var(--ppv-muted); font-family: var(--ppv-serif); }
-.ppv-discs { display: flex; }
-.ppv-disc { width: 22px; height: 22px; border-radius: 50%; background: var(--ppv-btn); color: var(--ppv-parch-1); font-family: var(--ppv-mono); font-size: 8px; font-weight: 600; display: grid; place-items: center; flex: none; box-shadow: 0 0 0 2px #fff; }
-.ppv-discs .ppv-disc + .ppv-disc { margin-left: -6px; }
+
+/* ── a package's results (Part B §B4; ref package-tracking-v1 `.eds` · `.edline` · `.stats` · `.pq`) ──
+   The card is a size container so the six tiles fall to three a row when the card is narrow, whatever
+   the window — the rail beside it decides the card's width, not the viewport. */
+.ppv-pkg { container-type: inline-size; }
+.ppv-btn--pri { height: 32px; margin-left: 6px; background: var(--ppv-btn); color: var(--ppv-parch-1); font-size: 12.5px; }
+.ppv-btn--pri:hover { background: #34476a; }
+.ppv-res { display: flex; flex-direction: column; gap: 12px; }
+.ppv-eds { display: flex; gap: 6px; flex-wrap: wrap; }
+.ppv-eds button { border: 0; background: var(--ppv-parch-3); border-radius: 10px; padding: 6px 11px; font-family: var(--ppv-type); font-size: 12.5px; color: var(--ppv-muted); cursor: pointer; }
+.ppv-eds button.on { background: var(--ppv-ink); color: #fff; }
+.ppv-edline { font-family: var(--ppv-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ppv-muted); line-height: 1.5; }
+.ppv-edline--note { margin-top: -8px; }
+.ppv-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@container (max-width: 560px) { .ppv-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ppv-st { background: var(--ppv-parch-2); border-radius: 12px; padding: 12px 12px 10px; min-width: 0; }
+.ppv-st--key { background: var(--ppv-requested); }
+.ppv-st small { display: block; font-family: var(--ppv-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ppv-muted); }
+.ppv-st b { display: block; font-family: var(--ppv-serif); font-weight: 600; font-size: 26px; line-height: 1; margin-top: 6px; }
+.ppv-st span { display: block; font-family: var(--ppv-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ppv-muted); margin-top: 5px; overflow-wrap: anywhere; }
+.ppv-rfoot { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ppv-muted); }
+.ppv-rfoot b { font-family: var(--ppv-type); font-weight: 400; color: var(--ppv-ink); }
+.ppv-link { border: 0; background: none; padding: 0; font-family: var(--ppv-type); font-size: 13px; color: var(--ppv-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ppv-more { align-self: flex-start; font-size: 12.5px; }
+.ppv-rq { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ppv-hair); }
+.ppv-rq li { border-bottom: 1px solid var(--ppv-hair); }
+.ppv-rq button { width: 100%; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 9px 2px; border: 0; background: none; text-align: left; font-family: var(--ppv-serif); font-size: 14px; color: var(--ppv-ink); cursor: pointer; }
+.ppv-rq button:hover { background: var(--ppv-parch-1); }
+.ppv-rq .a { width: 26px; height: 26px; border-radius: 50%; background: var(--ppv-btn); color: #fff; font-family: var(--ppv-mono); font-size: 7.5px; font-weight: 700; display: grid; place-items: center; }
+.ppv-rq .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ppv-rq .s { display: inline-flex; align-items: center; gap: 6px; font-family: var(--ppv-type); font-size: 13px; }
+.ppv-rq small { font-family: var(--ppv-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ppv-muted); white-space: nowrap; }
+.ppv-retline { font-size: 13px; color: var(--ppv-muted); }
+.ppv-retline b { font-family: var(--ppv-type); font-weight: 400; color: var(--ppv-ink); }
+/* the composer's edition warning, and the locked-version sentence in the material modal */
+.ppv-edwarn, .ppv-lockedit { display: flex; gap: 10px; align-items: baseline; border-radius: 10px; padding: 10px 12px; background: var(--ppv-parch-2); font-size: 13.5px; line-height: 1.45; }
+.ppv-edwarn .ni { font-family: var(--ppv-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: #fff; color: var(--ppv-muted); border-radius: 5px; padding: 3px 6px; flex: none; }
+.ppv-lockedit { margin-top: 10px; }
 .ppv-pnote { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.45; }
 .ppv-pnote .ppv-lbl { padding-top: 3px; flex: none; }
 .ppv-pnote .tx { font-style: italic; }
