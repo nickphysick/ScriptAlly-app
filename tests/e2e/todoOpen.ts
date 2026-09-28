@@ -79,8 +79,9 @@ export async function selectTodoView(page: Page, view: TodoView): Promise<string
     return "";
   }, view);
   if (picked) {
-    throw new Error(`selectTodoView("${view}"): ${picked}. The switch offers Grid, List and Board; ` +
-      "a suite that cannot find its subject has FAILED, not skipped.");
+    throw new Error(`selectTodoView("${view}"): ${picked}. The Grid/List/Board switch was RETIRED by to-do list v2 ` +
+      "(28 Sep) — the page draws one body of row cards; see tests/e2e/RETIRED-todo-v2.md. " +
+      "A suite that cannot find its subject has FAILED, not skipped.");
   }
   await page.waitForTimeout(600);
   return scope;
