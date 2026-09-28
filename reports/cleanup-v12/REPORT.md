@@ -2,7 +2,7 @@
 
 Your rulings: keep the sweep's agent-details and hand-off screens; delete the note screen; delete `RecordingCalendar` and the unused CSS in one cleanup commit, proved by tsc, the production build and before/after screenshots of every route; leave the review's stored settings in user data.
 
-- **Commit:** `__COMMIT__`. **Deployed to dev:** `__BUNDLE__`.
+- **Commit:** `949e8f25`. **Deployed to dev:** `index-CltPxfwe.js` · `index-DNBykCGe.css` (from a clean worktree of `949e8f25`, checked with curl).
 - **Gates:**
   - tsc: 0 errors
   - production `vite build`: exit 0, no CSS diagnostics
