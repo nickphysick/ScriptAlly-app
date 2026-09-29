@@ -40,9 +40,19 @@ export interface PageRailProps {
   /** Probe hooks the page's measurements read. */
   dataAttrs?: Record<string, string>;
   trayDataAttrs?: Record<string, string>;
+  /**
+   * ADDITIVE (Analytics v2a, 29 Sep) — the card FILLS the room from its CURRENT top to the fold,
+   * rather than capping at the height it has when stuck. At rest a stuck-height card runs past the
+   * fold by the header's height; a page whose rail must be whole on load (the story rail) asks for
+   * this instead, and the card grows as the page scrolls until it sticks. Off by default, so every
+   * existing rail renders exactly as before.
+   */
+  fill?: boolean;
+  /** ADDITIVE — a pinned foot below the scrolling body (the story rail's closing line). */
+  foot?: React.ReactNode;
 }
 
-export const PageRail: React.FC<PageRailProps> = ({ label, tray, trayClassName, children, className, dataAttrs, trayDataAttrs }) => {
+export const PageRail: React.FC<PageRailProps> = ({ label, tray, trayClassName, children, className, dataAttrs, trayDataAttrs, fill = false, foot }) => {
   const ref = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
@@ -58,23 +68,33 @@ export const PageRail: React.FC<PageRailProps> = ({ label, tray, trayClassName, 
       if (!(top > 0)) return;
       const h = railHeight(top + RAIL_TOP_GAP, window.innerHeight);
       if (h != null) el.style.maxHeight = `${h}px`;
+      if (fill) {
+        /* from the card's own top while it sits below the header; the stuck top once it has stuck */
+        const own = el.getBoundingClientRect().top;
+        const f = railHeight(Math.max(own, top + RAIL_TOP_GAP), window.innerHeight);
+        if (f != null) el.style.height = `${f}px`;
+      }
     };
     const ask = () => { if (!raf) raf = requestAnimationFrame(put); };
     put();
     window.addEventListener("resize", ask);
+    /* the fill height follows the card's own top, which moves as the page scrolls */
+    if (fill) scroller?.addEventListener("scroll", ask, { passive: true });
     const ro = new ResizeObserver(ask);
     ro.observe(document.documentElement);
     return () => {
       window.removeEventListener("resize", ask);
+      if (fill) scroller?.removeEventListener("scroll", ask);
       ro.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [fill]);
 
   return (
     <aside ref={ref} className={`sa-prail${className ? ` ${className}` : ""}`} aria-label={label} {...dataAttrs}>
       <div className={`sa-prail-tray${trayClassName ? ` ${trayClassName}` : ""}`} {...trayDataAttrs}>{tray}</div>
       <div className="sa-prail-body">{children}</div>
+      {foot != null && <div className="sa-prail-foot">{foot}</div>}
     </aside>
   );
 };

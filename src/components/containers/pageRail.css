@@ -36,3 +36,8 @@
   min-height: 0;
   overflow: auto;
 }
+
+/* ADDITIVE (Analytics v2a) — a pinned foot below the scrolling body; absent unless a page passes one */
+.sa-prail-foot {
+  flex: none;
+}

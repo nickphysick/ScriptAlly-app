@@ -40,10 +40,11 @@
 /* Comparable titles joined on 27 Sep (comps v2; Nick: "Comparable titles and Submission packages take
    full headers") — its full header is the first row of its own group, so the grid's masthead is null. */
 /* Submission packages joined the same day (packages v2), under the same ruling and in the same shape. */
-export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles", "Submission packages"];
+/* Analytics joined on 29 Sep (analytics v2a) — the same shape: full header as its group's first row. */
+export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles", "Submission packages", "Analytics"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/queries/analytics"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);
