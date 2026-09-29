@@ -68,14 +68,9 @@ export interface PageHeaderOverflowItem {
   disabled?: boolean;
 }
 
-/**
- * LIVING HEADERS (living-headers v2) — a run of the subline: plain text, a bold name, or a manuscript
- * title in the typewriter face. Copy functions return runs, never markup, so they stay pure and the
- * header decides how each run is drawn.
- */
-export type LivingRun = string | { b: string } | { ms: string };
-/** The two lines that change with the count. Everything else in the hero is fixed. */
-export interface LivingLine { headline: string; subline: readonly LivingRun[] }
+import type { LivingLine, LivingRun } from "../../lib/livingLine";
+import { runsText } from "../../lib/livingLine";
+export type { LivingLine, LivingRun };
 /**
  * A page opts in by passing this. `count` is `null` until the page's count is SETTLED: the fixed
  * shape renders with both lines empty but holding their space, so the page name is never flashed
@@ -456,7 +451,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {living ? (() => {
           /* ⚠️ UNSETTLED = EMPTY, NEVER THE PAGE NAME. The lines keep their space by min-height. */
           const line = living.count === null ? null : living.copy(living.count);
-          const subText = line ? line.subline.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : r.ms)).join("") : "";
+          const subText = line ? runsText(line.subline) : "";
           return (
             <>
               <h1 className="ph-title" data-probe="title" data-page-title="">
