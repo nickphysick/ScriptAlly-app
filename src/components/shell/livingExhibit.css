@@ -24,3 +24,13 @@
 }
 .lh-hint { margin: 20px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, 0.45); }
 .lh-hint-link { color: rgba(28, 19, 15, 0.7); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+
+/* the page inside the band: its main column and its rail, the page's own 28px apart. The ref's
+   `.pg` reads an undefined `--rgap` and so draws no gap at all; the page's own gap is used instead. */
+.lh-expg { display: grid; grid-template-columns: minmax(0, 1fr) 336px; column-gap: 28px; align-items: start; }
+.lh-expg > .lh-exmc { padding-bottom: 0; min-width: 0; }
+/* ⚠️ THE RAIL NEVER SETS THE BAND'S HEIGHT. On the page it is a fixed-height scroller; here it is a
+   picture, and at its natural length (every sample row) it stood 1,348px tall and pushed the band's
+   fade off the screen. `contain: size` gives it no intrinsic height, so the main column sizes the
+   row and the rail stretches to it and clips — the ref's rail is as tall as the column beside it. */
+.lh-expg > .lh-exrail { position: static; height: auto; align-self: stretch; contain: size; overflow: hidden; }

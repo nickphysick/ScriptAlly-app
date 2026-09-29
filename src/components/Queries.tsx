@@ -87,6 +87,7 @@ import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpt
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
+import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
@@ -5866,6 +5867,8 @@ export const Queries: React.FC<{
               onLog={() => openCreate()}
               onRecord={() => onNavigate?.("queries", "Record a response")}
               onImport={() => onNavigate?.("import")}
+              /* §4 — the page's own components over a sample constant, mounted ONLY here */
+              exhibition={<QcExhibit />}
             />
           </div>
         ) : (

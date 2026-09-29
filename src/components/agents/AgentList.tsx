@@ -31,6 +31,7 @@ import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { ContactEmpty } from "./contact/ContactEmpty";
+import { ContactExhibit } from "./contact/ContactExhibit";
 import { contactHeaderCopy } from "../../lib/livingHeaders";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import type { LivingHeader } from "../shell/PageHeader";
@@ -723,6 +724,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onPaste={() => { setQuickOpen(false); setAdding("link"); }}
             /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
+            /* §4 — the page's own components over a sample constant, mounted ONLY on the empty page */
+            exhibition={<ContactExhibit />}
             actionsPopover={quickOpen ? (
               <ContactQuickAdd
                 anchorRef={addBtnRef}

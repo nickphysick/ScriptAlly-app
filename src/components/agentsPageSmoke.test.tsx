@@ -47,7 +47,12 @@ describe("/agents renders", () => {
 
   it("…and that state suppresses the toolbar, which has nothing to act on", () => {
     const html = renderPage(list(), "/agents");
-    expect(html).not.toContain("Filter");
+    /* ⚠️ RETARGETED (living headers §4): the empty page now EXHIBITS the populated page — its own
+       controls among them, inert and aria-hidden, over a sample. The law is about the LIVE page: no
+       toolbar outside the band, and the band present to hold the picture. */
+    const band = html.indexOf('data-lh="exhibition"');
+    expect(band).toBeGreaterThan(-1);
+    expect(html.slice(0, band)).not.toContain("Filter");
   });
 
   /**
