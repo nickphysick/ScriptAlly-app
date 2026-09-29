@@ -31,6 +31,7 @@
  * contracts — the completion path, snooze, dismiss, open query, task navigation — and nothing else
  * crossed over: no styles, no layout, no markup.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
@@ -413,8 +414,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
     const onKey = (e: KeyboardEvent) => {
       const fork = forkRef.current;
       if (!fork) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (!/^[1-9]$/.test(e.key)) return;
+      if (!matchesShortcut(SHORTCUTS.taskChoice, e)) return; /* the key is the registry's (lib/shortcuts.ts) */
       const t = e.target as HTMLElement | null;
       if (t && t.closest("input, textarea, select, [contenteditable]")) return;
       const o = fork.options[Number(e.key) - 1];

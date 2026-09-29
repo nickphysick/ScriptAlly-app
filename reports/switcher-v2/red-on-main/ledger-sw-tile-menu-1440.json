@@ -1,0 +1,106 @@
+[
+ {
+  "lock": "S1 · the tile is 44 tall and at most 280 wide",
+  "route": "/queries",
+  "size": "1440",
+  "state": "closed",
+  "ok": false,
+  "detail": "40 × 214.859375"
+ },
+ {
+  "lock": "S1 · the full title is in the accessible name",
+  "route": "/queries",
+  "size": "1440",
+  "state": "closed",
+  "ok": true,
+  "detail": "Manuscript: Harbour of Glass / Harbour of Glass"
+ },
+ {
+  "lock": "S1 · the second line is the status, then 'N with you' when there are live queries",
+  "route": "/queries",
+  "size": "1440",
+  "state": "closed",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "S2 · no coverUrl: a tile in --o-ms, no book-outline icon",
+  "route": "/queries",
+  "size": "1440",
+  "state": "closed",
+  "ok": false,
+  "detail": "null svg false bg null vs #8a4a3c"
+ },
+ {
+  "lock": "S3 · the menu is 340 wide, 8 below the tile, anchored to its right",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": false,
+  "detail": "w 300 dy 8 dr 0"
+ },
+ {
+  "lock": "S3 · 'YOUR MANUSCRIPTS' heads the list",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": true,
+  "detail": "[\"YOUR MANUSCRIPTS\"]"
+ },
+ {
+  "lock": "S3 · '0 words' never appears",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S3 · every row states its facts line",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": false,
+  "detail": "[\"\",\"\",\"\",\"\",\"\"]"
+ },
+ {
+  "lock": "S3 · population: at least one shelved book, under a SHELVED heading",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": false,
+  "detail": "shelved 0 heading at -1"
+ },
+ {
+  "lock": "S3 · shelved books sit under SHELVED and nowhere else",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": false,
+  "detail": "[[1,false],[2,false],[3,false],[4,false],[5,false]]"
+ },
+ {
+  "lock": "S3 · shelved rows are faded to 60%",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "S3 · exactly one aria-checked='true', and it is the tile's book",
+  "route": "/queries",
+  "size": "1440",
+  "state": "open",
+  "ok": true,
+  "detail": "[\"true\",\"false\",\"false\",\"false\",\"false\"]"
+ },
+ {
+  "lock": "S1 · the tile's second line is not the genre or word count (they are in the menu)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "closed",
+  "ok": true,
+  "detail": "tile  / row meta null"
+ }
+]

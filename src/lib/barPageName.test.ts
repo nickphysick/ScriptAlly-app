@@ -7,7 +7,8 @@
 import { describe, it, expect } from "vitest";
 import { barPageName, shellHitFor, OFF_NAV_NAMES } from "./workspaceShell";
 import { workspaceSections } from "./workspaceNav";
-import { switcherMeta, switcherRowMeta, coverTint } from "../components/shell/BarSwitcher";
+import { switcherMeta, switcherStanding, switcherFacts } from "../components/shell/BarSwitcher";
+import { ManuscriptStatus, QueryStatus } from "../types";
 
 const SECTIONS = workspaceSections({ todo: 0 });
 const name = (p: string) => barPageName(SECTIONS, shellHitFor(SECTIONS, p), p);
@@ -34,13 +35,20 @@ describe("the switcher's lines — only the parts the record has", () => {
     expect(switcherMeta({ genre: "Mystery", wordCount: 0 })).toBe("Mystery");
     expect(switcherMeta({})).toBe("");
   });
-  it("the menu row adds the query count only when there are queries", () => {
-    expect(switcherRowMeta({ genre: "Thriller", wordCount: 50000 }, 26)).toBe("Thriller · 50,000 words · 26 queries");
-    expect(switcherRowMeta({ genre: "Literary", wordCount: 92000 }, 1)).toBe("Literary · 92,000 words · 1 query");
-    expect(switcherRowMeta({ genre: "Mystery" }, 0)).toBe("Mystery");
+  /* ⚠️ RETIRED BY SWITCHER v2: "the menu row adds the query count…" (`switcherRowMeta`) and "the active
+     book is always the rust tint" (`coverTint`). The row's meta and its facts are separate lines now,
+     and every cover is the manuscript's object colour (`--o-ms`) or its own `coverUrl`. */
+  it("the tile's standing: the status, then 'N with you' only when the book has live queries", () => {
+    const q = (status: QueryStatus) => ({ status });
+    expect(switcherStanding({ status: ManuscriptStatus.QUERYING }, [q(QueryStatus.FULL_REQUESTED), q(QueryStatus.QUERIED), q(QueryStatus.REJECTED)]))
+      .toEqual({ status: "Querying", withYou: 1 });
+    expect(switcherStanding({ status: ManuscriptStatus.QUERYING }, [q(QueryStatus.QUERIED)])).toEqual({ status: "Querying", withYou: 0 });
+    expect(switcherStanding({ status: ManuscriptStatus.REVISING }, [])).toEqual({ status: "Revising", withYou: null });
+    expect(switcherStanding({ status: ManuscriptStatus.SHELVED }, [q(QueryStatus.REJECTED)])).toEqual({ status: "Shelved", withYou: null });
   });
-  it("the active book is always the rust tint; the rest alternate", () => {
-    expect(coverTint(true, 3)).toBe("a");
-    expect([0, 1, 2].map((i) => coverTint(false, i))).toEqual(["b", "c", "b"]);
+  it("the row's facts: since and count, the count alone, or no queries yet", () => {
+    expect(switcherFacts([{ dateSent: "2025-12-05" }, { dateSent: "2026-01-02" }])).toMatch(/^Querying since 5 DEC · 2 queries$/i);
+    expect(switcherFacts([{ dateSent: "" }])).toBe("1 query");
+    expect(switcherFacts([])).toBe("No queries yet");
   });
 });

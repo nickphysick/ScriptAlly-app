@@ -274,7 +274,8 @@ describe("both shells mount ONE palette", () => {
   it("the hook is the only place the corpus and ⌘K are wired", () => {
     const hook = read("usePalette.tsx");
     expect(hook).toContain("buildCorpus");
-    expect(hook).toContain('e.key.toLowerCase() === "k"');
+    /* retargeted by the shortcuts registry: the key is read from `SHORTCUTS.search`, never spelled here */
+    expect(hook).toContain("matchesShortcut(SHORTCUTS.search, e)");
     for (const host of ["AppShell.tsx", "TopNavHost.tsx"]) {
       expect(read(host), host).toContain("usePalette");
       expect(read(host), `${host} must not build its own corpus`).not.toContain("buildCorpus");

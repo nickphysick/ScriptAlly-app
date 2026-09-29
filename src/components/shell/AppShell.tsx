@@ -17,6 +17,7 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
+import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -74,6 +75,17 @@ export const StagePage: React.FC<{
   React.useEffect(() => {
     if (active && !prevActive.current) setEntering(true);
     prevActive.current = active;
+  }, [active]);
+  /* ⚠️ A MANUSCRIPT SWITCH REPLAYS THIS ENTRANCE (switcher v2). The switch re-opens the same path, so
+     the slot never stops being active and the effect above cannot see it; the switcher announces
+     the switch and the ACTIVE slot answers with the entrance it already has — the same class, the
+     same keyframe, the same 250ms guarantee. Off → on across one frame, so a replay mid-entrance
+     restarts rather than being absorbed. */
+  React.useEffect(() => {
+    if (!active) return undefined;
+    const replay = () => { setEntering(false); requestAnimationFrame(() => setEntering(true)); };
+    window.addEventListener(STAGE_REPLAY_EVENT, replay);
+    return () => window.removeEventListener(STAGE_REPLAY_EVENT, replay);
   }, [active]);
   // animationend is the fast path; the timeout is the guarantee (reduced-motion and lost/frozen
   // animation clocks never fire the event, and the transform must not outlive the entry).

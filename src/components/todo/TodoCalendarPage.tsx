@@ -20,6 +20,7 @@
  * collapse chevron, the month jump, the `Upcoming only` mode and the event-kind vocabulary that
  * served it. A row grows to hold what it holds — there is nothing left to overflow.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import { SentBox, SentChip } from "../queryActions/SentHow";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -426,9 +427,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       /* ⚠️ A STEP IS A WEEK (v58), not a window. The ref shifts `SH` by seven and redraws; a
          whole-window jump lands the reader somewhere with no overlap to orient by. */
-      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, -1)); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, 1)); }
-      else if (e.key === "t" || e.key === "T") { e.preventDefault(); setWinStart(today); }
+      /* the keys are the registry's (lib/shortcuts.ts) */
+      if (matchesShortcut(SHORTCUTS.calBack, e)) { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, -1)); }
+      else if (matchesShortcut(SHORTCUTS.calForward, e)) { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, 1)); }
+      else if (matchesShortcut(SHORTCUTS.calToday, e)) { e.preventDefault(); setWinStart(today); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

@@ -1,0 +1,162 @@
+[
+ {
+  "lock": "S4 · Enter opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after Enter)",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Space opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after Space)",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · ArrowDown opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after ArrowDown)",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Home is the first item, End the last",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": false,
+  "detail": "Harbour of GlassThriller · 50,000 words / Harbour of GlassThriller · 50,000 words of 6"
+ },
+ {
+  "lock": "S4 · ↑ from the first wraps to the last",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": true,
+  "detail": "Harbour of GlassThriller · 50,000 words vs Harbour of GlassThriller · 50,000 words"
+ },
+ {
+  "lock": "S4 · ↓ from the last wraps to the first",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": true,
+  "detail": "Harbour of GlassThriller · 50,000 words vs Harbour of GlassThriller · 50,000 words"
+ },
+ {
+  "lock": "S4 · Tab closes without trapping focus",
+  "route": "/queries",
+  "size": "1280",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-it on\",\"checked\":\"true\",\"text\":\"Harbour of GlassThriller · 50,000 words \",\"isTile\":false,\"inMenu\":true}"
+ },
+ {
+  "lock": "S4 · Enter opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after Enter)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Space opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after Space)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · ArrowDown opens, with focus on the active book",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Escape closes and returns focus to the tile (after ArrowDown)",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": true,
+  "detail": "{\"cls\":\"ws-ms-btn\",\"checked\":null,\"text\":\"Harbour of GlassThriller · 50,000 words\",\"isTile\":true,\"inMenu\":false}"
+ },
+ {
+  "lock": "S4 · Home is the first item, End the last",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": false,
+  "detail": "Harbour of GlassThriller · 50,000 words / Harbour of GlassThriller · 50,000 words of 6"
+ },
+ {
+  "lock": "S4 · ↑ from the first wraps to the last",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": true,
+  "detail": "Harbour of GlassThriller · 50,000 words vs Harbour of GlassThriller · 50,000 words"
+ },
+ {
+  "lock": "S4 · ↓ from the last wraps to the first",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": true,
+  "detail": "Harbour of GlassThriller · 50,000 words vs Harbour of GlassThriller · 50,000 words"
+ },
+ {
+  "lock": "S4 · Tab closes without trapping focus",
+  "route": "/queries",
+  "size": "1440",
+  "state": "keys",
+  "ok": false,
+  "detail": "{\"cls\":\"ws-ms-it on\",\"checked\":\"true\",\"text\":\"Harbour of GlassThriller · 50,000 words \",\"isTile\":false,\"inMenu\":true}"
+ }
+]

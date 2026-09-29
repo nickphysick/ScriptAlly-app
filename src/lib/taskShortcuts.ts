@@ -18,6 +18,8 @@
  */
 
 /** The parts of a keydown this decision reads — a plain shape, so a test needs no DOM. */
+import { SHORTCUTS, matchesShortcut } from "./shortcuts";
+
 export interface ShortcutKey {
   key: string;
   metaKey?: boolean;
@@ -40,8 +42,10 @@ export interface ShortcutKey {
  * regardless of modifiers would take all of them.
  */
 export function focusesSearch(e: ShortcutKey, typing: boolean): boolean {
-  if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) return true;
-  return e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
+  /* the keys are the registry's (lib/shortcuts.ts). ⚠️ ⌘K is the palette's chord too, and both fire on
+     the To-do page — a standing overlap the shortcuts pass recorded rather than changed. */
+  if (matchesShortcut(SHORTCUTS.search, e)) return true;
+  return matchesShortcut(SHORTCUTS.todoSearch, e) && !typing && !e.shiftKey;
 }
 
 /** The DOM half, kept beside its decision: which elements own the keystroke while focused. */
@@ -88,20 +92,17 @@ export type ListAction =
  */
 export function listKey(e: ShortcutKey, typing: boolean): ListAction | null {
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return null;
-  switch (e.key) {
-    case "j": case "J": case "ArrowDown": return "down";
-    case "k": case "K": case "ArrowUp": return "up";
-    case "Enter": return "primary";
-    case "s": case "S": return "snooze";
-    /* ⚠️ `d` DISMISSES NOW (tightened round, Phase 2) — the contract's key, printed in the list
-       footer. `x` is UNBOUND again: its claim to the key was the icon cluster's tooltip, the
-       cluster is gone, and a destructive key nothing on the page teaches is a stumble hazard.
-       The SELECTION note below is amended in the same commit — the mail-client convention is
-       available again. */
-    case "d": case "D": return "dismiss";
-    case "Escape": return "close";
-    default: return null;
-  }
+  /* the keys are the registry's (lib/shortcuts.ts) — the shortcuts sheet lists what this reads.
+     ⚠️ `d` DISMISSES (tightened round, Phase 2) — the contract's key, printed in the list footer.
+     `x` is UNBOUND: its claim to the key was the icon cluster's tooltip, the cluster is gone, and a
+     destructive key nothing on the page teaches is a stumble hazard. */
+  if (matchesShortcut(SHORTCUTS.todoDown, e)) return "down";
+  if (matchesShortcut(SHORTCUTS.todoUp, e)) return "up";
+  if (matchesShortcut(SHORTCUTS.todoOpen, e)) return "primary";
+  if (matchesShortcut(SHORTCUTS.todoSnooze, e)) return "snooze";
+  if (matchesShortcut(SHORTCUTS.todoDismiss, e)) return "dismiss";
+  if (matchesShortcut(SHORTCUTS.todoClose, e)) return "close";
+  return null;
 }
 
 /**

@@ -20,6 +20,7 @@
  * ⚠️ SCOPE IS THE BAR SWITCHER'S, READ EVERY RENDER — never latched in state. The switcher writes
  * `scriptally_active_manuscript_id` and re-opens the route.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompTitle } from "../../types";
@@ -106,7 +107,7 @@ export const ComparableTitlesPage: React.FC<{
   /* `N` opens the add form — never from inside a field, never over an open form */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== "n" || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!matchesShortcut(SHORTCUTS.compAdd, e)) return; /* the key is the registry's (lib/shortcuts.ts) */
       const el = e.target as HTMLElement | null;
       if (el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable)) return;
       if (formOpenRef.current) return;

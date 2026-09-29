@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "S6 · picking another book writes the shared key",
+  "route": "/queries",
+  "size": "1440",
+  "state": "switch",
+  "ok": true,
+  "detail": "null → seed-ms-1"
+ },
+ {
+  "lock": "S6 · …shows 'Now showing {title}'",
+  "route": "/queries",
+  "size": "1440",
+  "state": "switch",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "S6 · …and replays the stage page's entrance",
+  "route": "/queries",
+  "size": "1440",
+  "state": "switch",
+  "ok": false,
+  "detail": "0 class changes to stage-page-on"
+ },
+ {
+  "lock": "S6 · picking the active book closes the menu, with no toast",
+  "route": "/queries",
+  "size": "1440",
+  "state": "switch",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S6 · …and no entrance",
+  "route": "/queries",
+  "size": "1440",
+  "state": "switch",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -78,6 +78,12 @@ export function useToast(): NotifyApi {
   return ctx;
 }
 
+/** The same API, or null outside a provider — for chrome that also renders in bare unit harnesses
+ *  (the bar's switcher). Inside the app every surface is under the one provider. */
+export function useOptionalToast(): NotifyApi | null {
+  return useContext(NotifyContext);
+}
+
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);

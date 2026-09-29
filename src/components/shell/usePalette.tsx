@@ -15,6 +15,7 @@
  * routing, not of this file — if both shells ever render together, this is where the double
  * registration will come from.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
@@ -61,7 +62,8 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery }: UsePa
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
+      /* the key is the registry's (lib/shortcuts.ts) — the sheet lists what this reads */
+      if (!matchesShortcut(SHORTCUTS.search, e)) return;
       // ⌘K WORKS FROM ANYWHERE, INCLUDING INSIDE A TEXT FIELD — deliberately no editable-target
       // guard. It is the one shortcut that should never be swallowed by whatever has focus.
       e.preventDefault();

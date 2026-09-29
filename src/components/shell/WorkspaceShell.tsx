@@ -40,7 +40,7 @@ import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
-import { manuscriptViewPath } from "./manuscriptScope";
+import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -746,6 +746,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 activeId={activeMs?.id ?? null}
                 onPick={pickMs}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                /* the active book's own page — the existing route and its `?m=` view param */
+                onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
               />
               {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
                   settings mode takes its space with it rather than leaving a gap behind. */}

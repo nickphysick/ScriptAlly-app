@@ -195,8 +195,9 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
     expect(rule(".ws-glabel")).toContain("font-size: 8.5px");     // section labels
     /* page header v2: the manuscript title and sub-line left the sidebar with the card; they are the
        bar switcher's now (`.ws-ms-t` 15px Special Elite, `.ws-ms-m` 8.5px mono) */
-    expect(rule(".ws-ms-t")).toContain("font-size: 15px");        // switcher title
-    expect(rule(".ws-ms-m")).toContain("font-size: 8.5px");       // switcher sub-line
+    /* retargeted by switcher v2: the ref's tile title is 14px and its standing line 8px */
+    expect(rule(".ws-ms-t")).toContain("font-size: 14px");        // switcher title
+    expect(rule(".ws-ms-m")).toContain("font-size: 8px");         // switcher standing line
     expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
     expect(rule(".ws-pl")).toContain("font-size: 11.5px");        // plan line
     // ⚠️ `.ws-upgrow` since Option D — the pill left the account ROW to become a full-width
