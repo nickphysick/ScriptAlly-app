@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "LH8 population",
+  "route": "/queries",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[{\"page\":\"Queries / Query Centre\",\"living\":\"pending\",\"h1\":\"\"},{\"page\":\"Queries / Query Centre\",\"living\":\"settled\",\"h1\":\"83 queries out\"}]"
+ },
+ {
+  "lock": "LH8 never the page name",
+  "route": "/queries",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[\"83 queries out\"]"
+ },
+ {
+  "lock": "LH8 one headline, the settled one",
+  "route": "/queries",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[\"83 queries out\"]"
+ },
+ {
+  "lock": "LH8 pending draws no text",
+  "route": "/queries",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[{\"page\":\"Queries / Query Centre\",\"living\":\"pending\",\"h1\":\"\"}]"
+ },
+ {
+  "lock": "LH8 population",
+  "route": "/agents",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[{\"page\":\"Agents / Contact list\",\"living\":\"pending\",\"h1\":\"\"},{\"page\":\"Agents / Contact list\",\"living\":\"settled\",\"h1\":\"37 agents\"}]"
+ },
+ {
+  "lock": "LH8 never the page name",
+  "route": "/agents",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[\"37 agents\"]"
+ },
+ {
+  "lock": "LH8 one headline, the settled one",
+  "route": "/agents",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[\"37 agents\"]"
+ },
+ {
+  "lock": "LH8 pending draws no text",
+  "route": "/agents",
+  "size": "1440",
+  "state": "load",
+  "ok": true,
+  "detail": "[{\"page\":\"Agents / Contact list\",\"living\":\"pending\",\"h1\":\"\"}]"
+ }
+]

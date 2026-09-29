@@ -1,0 +1,2498 @@
+[
+ {
+  "lock": "LH0 population",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,437,49.7] vs [0,36.3,437,49.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,100.1,437,52.2] vs [0,100.1,437,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,174.3,350.6,48] vs [0,174.3,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,174.3,150.1,48] vs [0,174.3,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[160.1,174.3,190.5,48] vs [160.1,174.3,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one·header",
+  "ok": true,
+  "detail": "255 vs 255"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,437,49.7] vs [0,36.3,437,49.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,100.1,437,52] vs [0,100.1,437,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,174.1,350.6,48] vs [0,174.3,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,174.1,150.1,48] vs [0,174.3,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[160.1,174.1,190.5,48] vs [160.1,174.3,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1280",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "255 vs 255"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1280",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One query out\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1280",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 queries out\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1280",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 queries out\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 queries out\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1280",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 queries out\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/queries",
+  "size": "1280",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "289 289 289 289 289 289"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "1239 vs 1239"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,437,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "\"QUERIES / QUERY CENTRE\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,158.8,150.1,48] vs [0,174.3,150.1,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[160.1,158.8,190.5,48] vs [160.1,174.3,190.5,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[513.1,-18,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1280",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "49.7 vs ref 49.7"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs ref 437"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/queries",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,437,49.7] vs [0,36.3,437,49.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,100.1,437,52] vs [0,100.1,437,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,174.1,311.9,48] vs [0,174.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,174.1,158.6,48] vs [0,174.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[168.6,174.1,143.3,48] vs [168.6,174.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one·header",
+  "ok": true,
+  "detail": "255 vs 255"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,437,49.7] vs [0,36.3,437,49.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,100.1,437,52] vs [0,100.1,437,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,174.1,311.9,48] vs [0,174.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,174.1,158.6,48] vs [0,174.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[168.6,174.1,143.3,48] vs [168.6,174.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1280",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "255 vs 255"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1280",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One agent\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1280",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 agents\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1280",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 agents\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 agents\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1280",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 agents\" scroll 437 client 437"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/agents",
+  "size": "1280",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "289 289 289 289 289 289"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "1239 vs 1239"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,437,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0",
+  "ok": true,
+  "detail": "\"AGENTS / CONTACT LIST\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,163.8,158.6,48] vs [0,174.1,158.6,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[168.6,163.8,143.3,48] vs [168.6,174.1,143.3,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[513.1,-18,437,264] vs [513.1,-10,437,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "49.7 vs ref 49.7"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs ref 437"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/agents",
+  "size": "1280",
+  "state": "27",
+  "ok": true,
+  "detail": "[513.1,-10,437,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,505.9,55.9] vs [0,36.3,505.9,55.9]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,106.3,505.9,52.2] vs [0,106.3,505.9,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,180.5,350.6,48] vs [0,180.5,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,180.5,150.1,48] vs [0,180.5,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[160.1,180.5,190.5,48] vs [160.1,180.5,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[593.9,-9.5,505.9,264] vs [593.9,-9.5,505.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one·header",
+  "ok": true,
+  "detail": "255.5 vs 255.5"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,505.9,55.9] vs [0,36.3,505.9,55.9]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,106.3,505.9,52] vs [0,106.3,505.9,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,180.3,350.6,48] vs [0,180.5,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,180.3,150.1,48] vs [0,180.5,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[160.1,180.3,190.5,48] vs [160.1,180.5,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[593.9,-9.7,505.9,264] vs [593.9,-9.5,505.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1440",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "255.3 vs 255.5"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1440",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One query out\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1440",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 queries out\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1440",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 queries out\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 queries out\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1440",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 queries out\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/queries",
+  "size": "1440",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "294.1 294.1 294.1 294.1 294.1 294.1"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "1393.9 vs 1393.9"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,505.9,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "\"QUERIES / QUERY CENTRE\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,158.8,150.1,48] vs [0,180.5,150.1,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[160.1,158.8,190.5,48] vs [160.1,180.5,190.5,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[593.9,-18,505.9,264] vs [593.9,-9.5,505.9,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "55.9 vs ref 55.9"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "[593.9,-9.5,505.9,264] vs ref 505.9"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/queries",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "[593.9,-9.5,505.9,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,505.9,55.9] vs [0,36.3,505.9,55.9]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,106.3,505.9,52] vs [0,106.3,505.9,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,180.3,311.9,48] vs [0,180.3,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,180.3,158.6,48] vs [0,180.3,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[168.6,180.3,143.3,48] vs [168.6,180.3,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[593.9,-9.7,505.9,264] vs [593.9,-9.7,505.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one·header",
+  "ok": true,
+  "detail": "255.3 vs 255.3"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,505.9,55.9] vs [0,36.3,505.9,55.9]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,106.3,505.9,52] vs [0,106.3,505.9,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,180.3,311.9,48] vs [0,180.3,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,180.3,158.6,48] vs [0,180.3,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[168.6,180.3,143.3,48] vs [168.6,180.3,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[593.9,-9.7,505.9,264] vs [593.9,-9.7,505.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1440",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "255.3 vs 255.3"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1440",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One agent\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1440",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 agents\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1440",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 agents\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 agents\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1440",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 agents\" scroll 506 client 506"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/agents",
+  "size": "1440",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "294.1 294.1 294.1 294.1 294.1 294.1"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "1393.9 vs 1393.9"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,505.9,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "\"AGENTS / CONTACT LIST\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,161.3,158.6,48] vs [0,180.3,158.6,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[168.6,161.3,143.3,48] vs [168.6,180.3,143.3,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[593.9,-18,505.9,264] vs [593.9,-9.7,505.9,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "55.9 vs ref 55.9"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "[593.9,-9.7,505.9,264] vs ref 505.9"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/agents",
+  "size": "1440",
+  "state": "27",
+  "ok": true,
+  "detail": "[593.9,-9.7,505.9,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,536.9,58.7] vs [0,36.3,536.9,58.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,109.1,536.9,52.2] vs [0,109.1,536.9,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,183.3,350.6,48] vs [0,183.3,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,183.3,150.1,48] vs [0,183.3,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[160.1,183.3,190.5,48] vs [160.1,183.3,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[630.3,-6.7,536.9,264] vs [630.3,-6.7,536.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one·header",
+  "ok": true,
+  "detail": "258.3 vs 258.3"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,536.9,58.7] vs [0,36.3,536.9,58.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,109.1,536.9,52] vs [0,109.1,536.9,52.2]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,183.1,350.6,48] vs [0,183.3,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,183.1,150.1,48] vs [0,183.3,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[160.1,183.1,190.5,48] vs [160.1,183.3,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[630.3,-6.9,536.9,264] vs [630.3,-6.7,536.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1512",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "258.1 vs 258.3"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1512",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One query out\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1512",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 queries out\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1512",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 queries out\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 queries out\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1512",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 queries out\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/queries",
+  "size": "1512",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "296.4 296.4 296.4 296.4 296.4 296.4"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "1463.6 vs 1463.6"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,536.9,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "\"QUERIES / QUERY CENTRE\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,158.8,150.1,48] vs [0,183.3,150.1,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[160.1,158.8,190.5,48] vs [160.1,183.3,190.5,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[630.3,-18,536.9,264] vs [630.3,-6.7,536.9,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1512",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "58.7 vs ref 58.7"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "[630.3,-6.7,536.9,264] vs ref 536.9"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/queries",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "[630.3,-6.7,536.9,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,536.9,58.7] vs [0,36.3,536.9,58.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,109.1,536.9,52] vs [0,109.1,536.9,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,183.1,311.9,48] vs [0,183.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,183.1,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[168.6,183.1,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[630.3,-6.9,536.9,264] vs [630.3,-6.9,536.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,536.9,58.7] vs [0,36.3,536.9,58.7]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,109.1,536.9,52] vs [0,109.1,536.9,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,183.1,311.9,48] vs [0,183.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,183.1,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[168.6,183.1,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[630.3,-6.9,536.9,264] vs [630.3,-6.9,536.9,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1512",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1512",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One agent\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1512",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 agents\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1512",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 agents\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 agents\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1512",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 agents\" scroll 537 client 537"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/agents",
+  "size": "1512",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "296.4 296.4 296.4 296.4 296.4 296.4"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "1463.6 vs 1463.6"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,536.9,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0",
+  "ok": true,
+  "detail": "\"AGENTS / CONTACT LIST\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,161.3,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[168.6,161.3,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[630.3,-18,536.9,264] vs [630.3,-6.9,536.9,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1512",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "58.7 vs ref 58.7"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "[630.3,-6.9,536.9,264] vs ref 536.9"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/agents",
+  "size": "1512",
+  "state": "27",
+  "ok": true,
+  "detail": "[630.3,-6.9,536.9,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,577.8,58.8] vs [0,36.3,577.8,58.8]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,109.1,577.8,52] vs [0,109.1,577.8,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,183.1,350.6,48] vs [0,183.1,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,183.1,150.1,48] vs [0,183.1,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[160.1,183.1,190.5,48] vs [160.1,183.1,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,577.8,58.8] vs [0,36.3,577.8,58.8]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,109.1,577.8,52] vs [0,109.1,577.8,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,183.1,350.6,48] vs [0,183.1,350.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,183.1,150.1,48] vs [0,183.1,150.1,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[160.1,183.1,190.5,48] vs [160.1,183.1,190.5,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/queries",
+  "size": "1920",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1920",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One query out\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1920",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 queries out\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1920",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 queries out\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 queries out\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/queries",
+  "size": "1920",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 queries out\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/queries",
+  "size": "1920",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "456 456 456 456 456 456"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "1712 vs 1712"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,577.8,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "\"QUERIES / QUERY CENTRE\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,158.8,150.1,48] vs [0,183.1,150.1,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[160.1,158.8,190.5,48] vs [160.1,183.1,190.5,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[678.3,-18,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/queries",
+  "size": "1920",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "58.8 vs ref 58.8"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs ref 577.8"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/queries",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs ref h 286"
+ },
+ {
+  "lock": "LH0 population",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "living settled"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·h1",
+  "ok": true,
+  "detail": "[0,36.3,577.8,58.8] vs [0,36.3,577.8,58.8]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·intro",
+  "ok": true,
+  "detail": "[0,109.1,577.8,52] vs [0,109.1,577.8,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·acts",
+  "ok": true,
+  "detail": "[0,183.1,311.9,48] vs [0,183.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·b1",
+  "ok": true,
+  "detail": "[0,183.1,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·b2",
+  "ok": true,
+  "detail": "[168.6,183.1,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·art",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·h1",
+  "ok": true,
+  "detail": "[0,36.3,577.8,58.8] vs [0,36.3,577.8,58.8]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·intro",
+  "ok": true,
+  "detail": "[0,109.1,577.8,52] vs [0,109.1,577.8,52]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·acts",
+  "ok": true,
+  "detail": "[0,183.1,311.9,48] vs [0,183.1,311.9,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·b1",
+  "ok": true,
+  "detail": "[0,183.1,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·b2",
+  "ok": true,
+  "detail": "[168.6,183.1,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·art",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH1 boxes identical",
+  "route": "/agents",
+  "size": "1920",
+  "state": "one-line subline·header",
+  "ok": true,
+  "detail": "258.1 vs 258.1"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1920",
+  "state": "1",
+  "ok": true,
+  "detail": "\"One agent\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1920",
+  "state": "9",
+  "ok": true,
+  "detail": "\"9 agents\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1920",
+  "state": "13",
+  "ok": true,
+  "detail": "\"13 agents\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "\"27 agents\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH2 headline fits",
+  "route": "/agents",
+  "size": "1920",
+  "state": "148",
+  "ok": true,
+  "detail": "\"148 agents\" scroll 578 client 578"
+ },
+ {
+  "lock": "LH4 only text differs",
+  "route": "/agents",
+  "size": "1920",
+  "state": "1 vs 27",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "LH3 one left x",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "456 456 456 456 456 456"
+ },
+ {
+  "lock": "LH3 hero right = rail right",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "1712 vs 1712"
+ },
+ {
+  "lock": "LH5 empty mode",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "living empty h1 null h2 [0,36.3,577.8,34.2]"
+ },
+ {
+  "lock": "LH5 no rule",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "rule 0 (populated 1)"
+ },
+ {
+  "lock": "LH5 eyebrow kept",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0",
+  "ok": true,
+  "detail": "\"AGENTS / CONTACT LIST\""
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·b1",
+  "ok": true,
+  "detail": "[0,161.3,158.6,48] vs [0,183.1,158.6,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·b2",
+  "ok": true,
+  "detail": "[168.6,161.3,143.3,48] vs [168.6,183.1,143.3,48]"
+ },
+ {
+  "lock": "LH5 same x and size",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·art",
+  "ok": true,
+  "detail": "[678.3,-18,577.8,264] vs [678.3,-6.9,577.8,264]"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·heading under eyebrow",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·subline under heading",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·buttons under subline",
+  "ok": true,
+  "detail": "22 vs ref 22"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·art from content box",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH5 the ref's spacing",
+  "route": "/agents",
+  "size": "1920",
+  "state": "0·art from content box (27)",
+  "ok": true,
+  "detail": "26 vs ref 26"
+ },
+ {
+  "lock": "LH0 ref: title under eyebrow",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "22.3 vs ref 23"
+ },
+ {
+  "lock": "LH0 ref: title box",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "58.8 vs ref 58.8"
+ },
+ {
+  "lock": "LH0 ref: subline under title",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "14 vs ref 14"
+ },
+ {
+  "lock": "LH0 ref: art width",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs ref 577.8"
+ },
+ {
+  "lock": "LH0 ref: art no taller, and clear of the bar",
+  "route": "/agents",
+  "size": "1920",
+  "state": "27",
+  "ok": true,
+  "detail": "[678.3,-6.9,577.8,264] vs ref h 286"
+ }
+]

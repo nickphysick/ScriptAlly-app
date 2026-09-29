@@ -275,15 +275,30 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   } else {
     L.check("§4.3 · no art slot on a WITHOUT_ART page", ctx, !r.art, JSON.stringify(r.art));
   }
-  L.check("§2 · eyebrow at header + 26, title at eyebrow + 24", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 24, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
+  /* ⚠️ RETARGETED BY LIVING HEADERS (29 Sep): the Query Centre and the Contact list take the living ref
+     (living-headers-v2.html) — a 14px top pad, the title at eyebrow + 23, and a clamped headline — where the
+     other full pages keep v2's. The living values are also held against that ref in livingHeaders.measure. */
+  const living = LIVING_ROUTES.includes(ctx.route);
+  if (living) {
+    L.check("§2 · (living) eyebrow at header + 14, title at eyebrow + 23", ctx, n(r.eyebrowT, 14, 1) && n(r.titleT, 23, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
+  } else {
+    L.check("§2 · eyebrow at header + 26, title at eyebrow + 24", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 24, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
+  }
   L.check("§2 · the title is Special Elite", ctx, /^"?Special Elite"?/.test(r.titleFam ?? ""), `${r.titleFam}`);
-  L.check("§2 · …at 56px (50 at 1360 and below)", ctx, r.titleSize === (Number(ctx.size) <= 1360 ? "50px" : "56px"), `${r.titleSize}`);
+  if (living) {
+    const want = Math.min(56, Math.max(40, Number(ctx.size) * 0.037));
+    L.check("§2 · (living) …at clamp(40px, 3.7vw, 56px)", ctx, n(parseFloat(r.titleSize ?? ""), want, 0.5), `${r.titleSize} vs ${want.toFixed(2)}px`);
+  } else {
+    L.check("§2 · …at 56px (50 at 1360 and below)", ctx, r.titleSize === (Number(ctx.size) <= 1360 ? "50px" : "56px"), `${r.titleSize}`);
+  }
   /* ⚠️ BOTH HEADERS ARE HELD TO THE RENDERED MOCK (271.7 / 265.7 at 1440 / 1280). The brief's
      267 / 261 were the same header with v1's eyebrow gap (title at eyebrow + 22); the v5 ref draws
      eyebrow + 24, and the first version of this lock blamed the difference on the intro's Special
      Elite run — measured, the intro's line boxes are identical to the mock's (54.73 both). The
      height is still content: a third intro line would fail this, which is the point. */
-  if (mock) {
+  /* the v5 mock governs the header's height on the NON-living full pages only; the living pair is held to
+     the living ref's geometry in livingHeaders.measure (LH0) */
+  if (mock && !living) {
     L.check("§4.3 · the header's height is the mock's ±2", ctx, n(r.hdH, mock.hdH, 2), `app ${r.hdH.toFixed(1)} mock ${mock.hdH.toFixed(1)}`);
     /* ⚠️ RETIRED BY THE QUIET BAR: "the frame sits where the mock's does ±1" — the v5 mock draws the
        centred 920 frame the quiet bar reverses; the mock still governs the header's height (above) */
@@ -292,6 +307,9 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
 
 
 /* ══ §4 · the Contact list ══ */
+
+/** The two pages opted into living headers (their full header takes the living ref's geometry). */
+export const LIVING_ROUTES = ["/queries", "/agents"];
 
 /** The header's three tops, absolute, for the §4.4 comparison between pages. */
 export async function readTops(page: Page) {

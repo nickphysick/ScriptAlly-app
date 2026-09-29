@@ -1,0 +1,130 @@
+[
+ {
+  "lock": "LH6 population",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "[\"Fenella Stroud\",\"Tomasz Wolski\",\"Harriet Vane-Coe\"]"
+ },
+ {
+  "lock": "LH6 inert",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "inert true aria-hidden true pe none"
+ },
+ {
+  "lock": "LH6 no links",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "LH6 not hit-testable",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "elementFromPoint inside: false"
+ },
+ {
+  "lock": "LH6 names from the constant",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "[\"Fenella Stroud\",\"Tomasz Wolski\",\"Harriet Vane-Coe\"] stray []"
+ },
+ {
+  "lock": "LH6 not in the tab order",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "tabbed in false"
+ },
+ {
+  "lock": "LH6 no data read while shown",
+  "route": "/queries",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LH6 absent with data",
+  "route": "/queries",
+  "size": "1440",
+  "state": "data",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "LH6 population",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "[\"Sophie Dunn\",\"Daniel Osei\",\"Aisha Kapoor\"]"
+ },
+ {
+  "lock": "LH6 inert",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "inert true aria-hidden true pe none"
+ },
+ {
+  "lock": "LH6 no links",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "LH6 not hit-testable",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "elementFromPoint inside: false"
+ },
+ {
+  "lock": "LH6 names from the constant",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "[\"Sophie Dunn\",\"Daniel Osei\",\"Aisha Kapoor\"] stray []"
+ },
+ {
+  "lock": "LH6 not in the tab order",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": "tabbed in false"
+ },
+ {
+  "lock": "LH6 no data read while shown",
+  "route": "/agents",
+  "size": "1440",
+  "state": "0",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LH6 absent with data",
+  "route": "/agents",
+  "size": "1440",
+  "state": "data",
+  "ok": true,
+  "detail": "0"
+ }
+]

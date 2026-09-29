@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "LH7 population",
+  "route": "/queries",
+  "size": "1440",
+  "state": "filtered-empty",
+  "ok": true,
+  "detail": "picked With you\n0 no-match shown true"
+ },
+ {
+  "lock": "LH7 hero kept",
+  "route": "/queries",
+  "size": "1440",
+  "state": "filtered-empty",
+  "ok": true,
+  "detail": "living settled \"2 queries out\" rule 1"
+ },
+ {
+  "lock": "LH7 population",
+  "route": "/agents",
+  "size": "1440",
+  "state": "find-empty",
+  "ok": true,
+  "detail": "no-match block true"
+ },
+ {
+  "lock": "LH7 hero kept",
+  "route": "/agents",
+  "size": "1440",
+  "state": "find-empty",
+  "ok": true,
+  "detail": "living settled \"37 agents\" rule 1"
+ }
+]

@@ -128,7 +128,9 @@ for (const vp of SIZES) {
     const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
     L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 19 : 17);
+    /* living headers (29 Sep): the Contact list is a living page, so the v5 mock's header-height row is not
+       asserted here (the living ref holds its geometry in livingHeaders.measure) — one row fewer with a mock */
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 18 : 17);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -176,15 +178,24 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
     const ctx = { route: "/queries vs /agents vs /manuscripts/comps vs /manuscripts/packages", size: `${vp.width}`, state: "expanded" };
     for (const k of ["header", "eyebrow", "title"] as const) {
       L.check(`§4.4 · the ${k}'s top is the same on both`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - c[k]) <= 0.5, `qc ${q[k].toFixed(1)} contact ${c[k].toFixed(1)}`);
-      L.check(`§4.4 · the ${k}'s top is the same on Comparable titles`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - m[k]) <= 0.5, `qc ${q[k].toFixed(1)} comps ${m[k].toFixed(1)}`);
-      L.check(`§4.4 · the ${k}'s top is the same on Submission packages`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - pk[k]) <= 0.5, `qc ${q[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
+      /* ⚠️ RETARGETED BY LIVING HEADERS (29 Sep): the header's top is still one line across all four; the
+         eyebrow and title sit 12px higher on the two living pages (14px top pad against v2's 26), so
+         those two are compared within each pair — the living pair above, the v2 pair here. */
+      if (k === "header") {
+        L.check(`§4.4 · the header's top is the same on Comparable titles`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - m[k]) <= 0.5, `qc ${q[k].toFixed(1)} comps ${m[k].toFixed(1)}`);
+        L.check(`§4.4 · the header's top is the same on Submission packages`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - pk[k]) <= 0.5, `qc ${q[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
+      } else {
+        L.check(`§4.4 · the ${k}'s top is the same on the two v2 pages`, ctx, Number.isFinite(m[k]) && Math.abs(m[k] - pk[k]) <= 0.5, `comps ${m[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
+      }
     }
     L.check("§4.4 · the Contact list's eyebrow is its sidebar section", ctx, (c.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "AGENTS / CONTACT LIST", `${c.eyebrowText}`);
     L.check("§4.4 · Submission packages' eyebrow is its sidebar section", ctx, (pk.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / SUBMISSION PACKAGES", `${pk.eyebrowText}`);
     L.check("§4.4 · Comparable titles' eyebrow is its sidebar section", ctx, (m.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / COMPARABLE TITLES", `${m.eyebrowText}`);
   }
   L.write();
-  expect(L.rows.length).toBe(SIZES.length * 12);
+  /* 10 per size since living headers: for the eyebrow and the title, the two cross-pair comparisons became
+     one within the v2 pair (the living pair's own is the "same on both" row) — an exact count, not a floor */
+  expect(L.rows.length).toBe(SIZES.length * 10);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 
