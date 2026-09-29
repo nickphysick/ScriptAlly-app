@@ -33,9 +33,15 @@ function check(lock: string, size: string, ok: boolean, detail: string) {
   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
 }
 
+/**
+ * ⚠️ ONE FILE PER WORKER. A failing case makes Playwright discard its worker and start another, so a
+ * single ledger file is overwritten by the next worker's rows and a red case vanishes from the
+ * record — the mutation runner read "no failures" off a run whose first case had failed. Each worker
+ * writes `ledger/<pid>.json`; readers merge the directory.
+ */
 test.afterAll(() => {
-  mkdirSync(OUT, { recursive: true });
-  writeFileSync(`${OUT}/measure-ledger.json`, JSON.stringify({ ran, rows: ledger }, null, 1));
+  mkdirSync(`${OUT}/ledger`, { recursive: true });
+  writeFileSync(`${OUT}/ledger/${process.pid}.json`, JSON.stringify({ ran, rows: ledger }, null, 1));
   console.log(`LEDGER analyticsV2a: ${ran} checks, ${ledger.filter((r) => !r.ok).length} failed`);
 });
 

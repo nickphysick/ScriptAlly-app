@@ -26,7 +26,7 @@ export const AnvSkeleton: React.FC = () => (
           </div>
         </div>
         <div className="anv-controls"><Sk w={330} h={36} /></div>
-        <div className="anv-card">
+        <div className="anv-card" data-anv="journey-sk">
           <div className="anv-cap"><Sk w={180} h={18} /></div>
           <div className="anv-inner anv-jgrid anv-jgrid--sk">
             {[0, 1, 2, 3].map((i) => (

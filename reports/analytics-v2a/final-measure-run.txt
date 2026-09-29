@@ -1,0 +1,9 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [measure] › tests/e2e/analyticsV2a.measure.ts:133:3 › frame, funnel, charts, rail and caveats @ 1440×900 (6.0s)
+  ✓  2 [measure] › tests/e2e/analyticsV2a.measure.ts:133:3 › frame, funnel, charts, rail and caveats @ 1920×1080 (5.2s)
+LEDGER analyticsV2a: 73 checks, 0 failed
+  ✓  3 [measure] › tests/e2e/analyticsV2a.measure.ts:240:1 › the range control filters the whole page (5.5s)
+
+  3 passed (17.2s)
