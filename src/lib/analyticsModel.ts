@@ -37,6 +37,9 @@ import {
   whenMs,
 } from "./analytics";
 
+/** The volume chart draws at most this many months. */
+export const VOLUME_MAX_MONTHS = 24;
+
 /** Below this, a figure states its population. */
 export const THIN_SAMPLE = 5;
 
@@ -359,7 +362,7 @@ export interface AnalyticsModel {
   reply: { rows: ReplyRow[]; withoutWindow: number; maxWeeks: number; figure: Figure };
   endings: { lanes: EndingLane[]; closed: number; undatedClosed: number; maxWeeks: number; figure: Figure };
   stages: { rows: StageGap[]; maxDays: number };
-  volume: { months: VolumeMonth[]; max: number; undated: number };
+  volume: { months: VolumeMonth[]; max: number; undated: number; omittedMonths: number; omittedQueries: number };
   story: { events: StoryEvent[]; foot: string | null };
   caveats: { lead: string; notes: { title: string; text: string }[] };
 }
@@ -636,6 +639,11 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       vMonths.push({ key: k, label: monthShort(k), counts, total: list.length });
     }
   }
+  /* ⚠️ AT MOST 24 BARS. A three-year history drawn as 36 slivers says nothing about any month; the
+     earlier months are counted and said, never silently dropped. */
+  const vOmitted = Math.max(0, vMonths.length - VOLUME_MAX_MONTHS);
+  const vOmittedQueries = vMonths.slice(0, vOmitted).reduce((n, m) => n + m.total, 0);
+  vMonths.splice(0, vOmitted);
   const vMax = Math.max(0, ...vMonths.map((m) => m.total));
 
   /* ── the story so far ── */
@@ -688,7 +696,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
     reply: { rows: replyRows, withoutWindow, maxWeeks: replyMax, figure: replyFig },
     endings: { lanes, closed: ended, undatedClosed, maxWeeks: endMax, figure: endFig },
     stages: { rows: gapRows, maxDays: stageMax },
-    volume: { months: vMonths, max: vMax, undated },
+    volume: { months: vMonths, max: vMax, undated, omittedMonths: vOmitted, omittedQueries: vOmittedQueries },
     story: { events, foot },
     caveats: {
       lead: `Every figure on this page rests on ${plural(sent, "query", "queries")} and ${plural(replies, "dated reply", "dated replies")}.`,

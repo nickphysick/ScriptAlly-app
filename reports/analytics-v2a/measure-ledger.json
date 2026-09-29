@@ -1,0 +1,389 @@
+{
+ "ran": 64,
+ "rows": [
+  {
+   "lock": "page-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "a visible [data-anv=page] is rendered on /queries/analytics"
+  },
+  {
+   "lock": "population",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "the active manuscript has queries in range (sent=8) — every lock below depends on it"
+  },
+  {
+   "lock": "header-full-width",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "header 1099.8 vs group 1099.8"
+  },
+  {
+   "lock": "header-above-group",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "header bottom 356.8 · main top 356.8 · rail top 380.8"
+  },
+  {
+   "lock": "group-centred",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "left margin 46.1 · right margin 46.1"
+  },
+  {
+   "lock": "group-max-width",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "group 1099.8 ≤ 1480"
+  },
+  {
+   "lock": "rail-340",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "rail 340.0"
+  },
+  {
+   "lock": "rail-sticky-declared",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "rail position sticky"
+  },
+  {
+   "lock": "rail-fits-on-load",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "rail bottom 854.0 ≤ viewport 900"
+  },
+  {
+   "lock": "scroll-precondition",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "the page scrolled (scrollTop=700) — without it the stuck reading proves nothing"
+  },
+  {
+   "lock": "rail-stuck",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "after scrolling 700px the rail's top is 121.8 against the scroller's top + 16 = 121.8 (was 380.8)"
+  },
+  {
+   "lock": "funnel-stages",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "4 stages"
+  },
+  {
+   "lock": "funnel-links",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "3 connectors"
+  },
+  {
+   "lock": "funnel-dots",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "4 glyphs in the stages"
+  },
+  {
+   "lock": "funnel-counts",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "counts [\"8\",\"3\",\"2\",\"0\"]"
+  },
+  {
+   "lock": "funnel-ref-height",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "journey card 495.2 vs ref 464.4 at column 731.8 (ref column 732.0)"
+  },
+  {
+   "lock": "ref-column-matched",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "ref column 732.0 vs app 731.8"
+  },
+  {
+   "lock": "chart-reply-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "reply card 192.8px"
+  },
+  {
+   "lock": "chart-reply-marks",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "reply: population 1, 1 visible marks"
+  },
+  {
+   "lock": "chart-endings-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "endings card 413.4px"
+  },
+  {
+   "lock": "chart-endings-marks",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "endings: population 1, 1 visible marks"
+  },
+  {
+   "lock": "chart-stages-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "stages card 413.4px"
+  },
+  {
+   "lock": "chart-stages-marks",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "stages: population 4, 2 visible marks"
+  },
+  {
+   "lock": "chart-volume-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "volume card 275.8px"
+  },
+  {
+   "lock": "chart-volume-marks",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "volume: population 8, 5 visible marks"
+  },
+  {
+   "lock": "charts-populated",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "4 of 4 charts have a non-zero population on this account"
+  },
+  {
+   "lock": "story-population",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "7 events"
+  },
+  {
+   "lock": "story-date-order",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "dates [1772528400000,1773133200000,1782896400000,1784538000000,1788858000000,1789808400000]"
+  },
+  {
+   "lock": "story-ends-today",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "last event today"
+  },
+  {
+   "lock": "caveats-last",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "last element in the main column is caveats"
+  },
+  {
+   "lock": "page-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "a visible [data-anv=page] is rendered on /queries/analytics"
+  },
+  {
+   "lock": "population",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "the active manuscript has queries in range (sent=8) — every lock below depends on it"
+  },
+  {
+   "lock": "header-full-width",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "header 1256.0 vs group 1256.0"
+  },
+  {
+   "lock": "header-above-group",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "header bottom 356.8 · main top 356.8 · rail top 380.8"
+  },
+  {
+   "lock": "group-centred",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "left margin 208.0 · right margin 208.0"
+  },
+  {
+   "lock": "group-max-width",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "group 1256.0 ≤ 1480"
+  },
+  {
+   "lock": "rail-340",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "rail 340.0"
+  },
+  {
+   "lock": "rail-sticky-declared",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "rail position sticky"
+  },
+  {
+   "lock": "rail-fits-on-load",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "rail bottom 1034.0 ≤ viewport 1080"
+  },
+  {
+   "lock": "scroll-precondition",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "the page scrolled (scrollTop=700) — without it the stuck reading proves nothing"
+  },
+  {
+   "lock": "rail-stuck",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "after scrolling 700px the rail's top is 121.8 against the scroller's top + 16 = 121.8 (was 380.8)"
+  },
+  {
+   "lock": "funnel-stages",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "4 stages"
+  },
+  {
+   "lock": "funnel-links",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "3 connectors"
+  },
+  {
+   "lock": "funnel-dots",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "4 glyphs in the stages"
+  },
+  {
+   "lock": "funnel-counts",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "counts [\"8\",\"3\",\"2\",\"0\"]"
+  },
+  {
+   "lock": "funnel-ref-height",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "journey card 489.0 vs ref 429.8 at column 888.0 (ref column 888.0)"
+  },
+  {
+   "lock": "ref-column-matched",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "ref column 888.0 vs app 888.0"
+  },
+  {
+   "lock": "chart-reply-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "reply card 192.8px"
+  },
+  {
+   "lock": "chart-reply-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "reply: population 1, 1 visible marks"
+  },
+  {
+   "lock": "chart-endings-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "endings card 354.2px"
+  },
+  {
+   "lock": "chart-endings-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "endings: population 1, 1 visible marks"
+  },
+  {
+   "lock": "chart-stages-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "stages card 354.2px"
+  },
+  {
+   "lock": "chart-stages-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "stages: population 4, 2 visible marks"
+  },
+  {
+   "lock": "chart-volume-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "volume card 275.8px"
+  },
+  {
+   "lock": "chart-volume-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "volume: population 8, 5 visible marks"
+  },
+  {
+   "lock": "charts-populated",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "4 of 4 charts have a non-zero population on this account"
+  },
+  {
+   "lock": "story-population",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "7 events"
+  },
+  {
+   "lock": "story-date-order",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "dates [1772528400000,1773133200000,1782896400000,1784538000000,1788858000000,1789808400000]"
+  },
+  {
+   "lock": "story-ends-today",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "last event today"
+  },
+  {
+   "lock": "caveats-last",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "last element in the main column is caveats"
+  },
+  {
+   "lock": "range-population",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "sent in all time = 8"
+  },
+  {
+   "lock": "range-control-present",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "1 \"Last 3 months\" buttons"
+  },
+  {
+   "lock": "range-changes-sent",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "sent 8 → 5"
+  },
+  {
+   "lock": "range-reaches-charts",
+   "size": "1440×900",
+   "ok": true,
+   "detail": "chart populations 1,1,4,8 → 1,0,4,5; events 7 → 5"
+  }
+ ]
+}

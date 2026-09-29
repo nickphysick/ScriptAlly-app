@@ -36,6 +36,7 @@ import { StoryRail } from "./analytics/StoryRail";
 import { AnvHero, AnvJourney, AnvRange } from "./analytics/AnvJourney";
 import { AnvFacts, AnvReplyChart } from "./analytics/AnvFacts";
 import { AnvEndings, AnvStages } from "./analytics/AnvTwoUp";
+import { AnvCaveats, AnvVolume } from "./analytics/AnvVolume";
 import "./analytics/anvFrame.css";
 import "./analytics/anvRail.css";
 import "./analytics/anvJourney.css";
@@ -138,6 +139,9 @@ export const QueryAnalytics: React.FC = () => {
             <AnvEndings model={model} />
             <AnvStages model={model} />
           </div>
+          <AnvVolume model={model} />
+          {/* ⚠️ THE CAVEATS ARE THE LAST THING ON THE PAGE — measured (analyticsV2a "caveats-last") */}
+          <AnvCaveats model={model} />
         </div>
         <StoryRail events={model.story.events} foot={model.story.foot} />
       </>

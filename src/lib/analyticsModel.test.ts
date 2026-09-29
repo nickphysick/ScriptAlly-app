@@ -307,6 +307,17 @@ describe("volume", () => {
   });
 });
 
+describe("volume over a long history", () => {
+  it("draws at most 24 months and counts the earlier ones", () => {
+    const A = agent();
+    const parts = [walk(A, 1000), walk(A, 900), walk(A, 20)];
+    const m = model(parts, [A]);
+    expect(m.volume.months.length).toBe(24);
+    expect(m.volume.omittedQueries).toBe(2);
+    expect(m.volume.omittedMonths).toBeGreaterThan(0);
+  });
+});
+
 describe("the story so far", () => {
   const A = agent({ name: "Ada Ayres", agency: "Ayres & Colt" });
   const B = agent({ name: "Bo Hollis", agency: "The Hollis Agency" });
