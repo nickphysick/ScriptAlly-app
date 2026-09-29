@@ -33,8 +33,10 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { AnvSkeleton } from "./analytics/AnvSkeleton";
 import { AnvEmpty, AnvEmptyRow } from "./analytics/AnvEmpty";
 import { StoryRail } from "./analytics/StoryRail";
+import { AnvHero, AnvJourney, AnvRange } from "./analytics/AnvJourney";
 import "./analytics/anvFrame.css";
 import "./analytics/anvRail.css";
+import "./analytics/anvJourney.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const NO_SECTION = { section: null };
@@ -44,6 +46,12 @@ const NO_SECTION = { section: null };
  * Order: the funnel, the reply window, the story — the three the go-ahead names.
  */
 const EMPTY_ROWS: AnvEmptyRow[] = [
+  {
+    key: "journey",
+    heading: "The journey so far",
+    sub: "How far your queries reached — asked for more, read in full, an offer — and where each stage's queries stand today.",
+    art: (m) => <AnvJourney model={m} example />,
+  },
   {
     key: "story",
     heading: "The story so far",
@@ -61,7 +69,7 @@ export const QueryAnalytics: React.FC = () => {
    * queries into a place the shell has to model; a persisted one would have a writer return next
    * week to a three-month window they set once and forgot.
    */
-  const [range] = React.useState<AnalyticsRange>("all");
+  const [range, setRange] = React.useState<AnalyticsRange>("all");
 
   /* Read every render — see the scope note above. */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -103,7 +111,11 @@ export const QueryAnalytics: React.FC = () => {
   } else {
     body = (
       <>
-        <div className="anv-main" data-anv="main" />
+        <div className="anv-main" data-anv="main">
+          <AnvHero model={model} />
+          <AnvRange value={range} onChange={setRange} />
+          <AnvJourney model={model} />
+        </div>
         <StoryRail events={model.story.events} foot={model.story.foot} />
       </>
     );

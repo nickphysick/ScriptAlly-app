@@ -228,6 +228,12 @@ export interface JourneyStage {
   dotStatus: QueryStatus;
   name: string;
   count: number;
+  /**
+   * The count as the page states it — "—" when the stage before it is empty, because a stage whose
+   * population is zero has no count, it has nothing to count (the thin-sample rule). A zero over a
+   * real population ("0 offers from 2 fulls") is a true count and stays a 0.
+   */
+  display: string;
   description: string;
   /** What became of the queries that reached this stage: where they stand today. */
   split: SplitRow[];
@@ -380,6 +386,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       dotStatus: QueryStatus.QUERIED,
       name: "Queried",
       count: sent,
+      display: "",
       description: "Letter, synopsis and opening chapters out with agents",
       split: splitOf(items),
     },
@@ -388,6 +395,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       dotStatus: QueryStatus.PARTIAL_REQUESTED,
       name: "Material requested",
       count: requests,
+      display: "",
       description: requests
         ? `Asked to read more — ${partialFirst} partial, ${straightToFull} straight to full`
         : "No agent has asked to read more yet",
@@ -398,6 +406,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       dotStatus: QueryStatus.FULL_REQUESTED,
       name: "Full manuscript",
       count: fulls,
+      display: "",
       description: fulls ? "Asked to read the whole book" : "No full manuscript requested yet",
       split: splitOf(fullSet),
     },
@@ -406,10 +415,15 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       dotStatus: QueryStatus.OFFER,
       name: "Offer",
       count: offers,
+      display: "",
       description: offers ? "Offers of representation" : "No offer yet",
       split: splitOf(offerSet),
     },
   ];
+  stagesOut.forEach((st, i) => {
+    const population = i === 0 ? sent : stagesOut[i - 1].count;
+    st.display = population === 0 ? DASH : String(st.count);
+  });
   const links: JourneyLink[] = [];
   for (let i = 0; i < stagesOut.length - 1; i++) {
     const from = stagesOut[i].count;
@@ -637,7 +651,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
 function splitLabel(b: StateBucket, n: number): string {
   switch (b) {
     case "queried": return `${n} still out`;
-    case "requested": return `${n} material requested`;
+    case "requested": return `${n} requested`;
     case "sent": return `${n} being read`;
     case "offer": return `${n} ${n === 1 ? "offer" : "offers"}`;
     case "closed": return `${n} closed`;

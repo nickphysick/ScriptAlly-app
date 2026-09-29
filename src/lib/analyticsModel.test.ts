@@ -111,6 +111,8 @@ describe("the journey", () => {
     expect(empty.journey.stages[1].count).toBe(0);
     expect(empty.journey.stages[1].split).toEqual([]);
     expect(empty.journey.links[1].label).toBe(DASH);
+    /* a zero over a real population is a count; a stage after an empty one has nothing to count */
+    expect(empty.journey.stages.map((s) => s.display)).toEqual(["1", "0", DASH, DASH]);
   });
 
   it("the percentage appears once the denominator can carry one", () => {
