@@ -31,11 +31,26 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { AnalyticsRange } from "../lib/analytics";
 import { analyticsModel } from "../lib/analyticsModel";
 import { AnvSkeleton } from "./analytics/AnvSkeleton";
-import { AnvEmpty } from "./analytics/AnvEmpty";
+import { AnvEmpty, AnvEmptyRow } from "./analytics/AnvEmpty";
+import { StoryRail } from "./analytics/StoryRail";
 import "./analytics/anvFrame.css";
+import "./analytics/anvRail.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const NO_SECTION = { section: null };
+
+/**
+ * The empty state's rows, each illustrated with the page's own component populated from the example.
+ * Order: the funnel, the reply window, the story — the three the go-ahead names.
+ */
+const EMPTY_ROWS: AnvEmptyRow[] = [
+  {
+    key: "story",
+    heading: "The story so far",
+    sub: "Every first — the first request, the first full, an offer — dated as it happened, with the gaps between them.",
+    art: (m) => <StoryRail events={m.story.events} foot={m.story.foot} example />,
+  },
+];
 
 export const QueryAnalytics: React.FC = () => {
   const { queries, activities, agents, manuscripts, packages, versions, collectionsReady, activitiesReady } = useScriptAllyDb();
@@ -84,9 +99,14 @@ export const QueryAnalytics: React.FC = () => {
       </div>
     );
   } else if (model.total === 0) {
-    body = <AnvEmpty title={title} />;
+    body = <AnvEmpty title={title} rows={EMPTY_ROWS} />;
   } else {
-    body = <div className="anv-main" data-anv="main" />;
+    body = (
+      <>
+        <div className="anv-main" data-anv="main" />
+        <StoryRail events={model.story.events} foot={model.story.foot} />
+      </>
+    );
   }
 
   return (

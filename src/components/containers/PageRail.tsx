@@ -69,9 +69,12 @@ export const PageRail: React.FC<PageRailProps> = ({ label, tray, trayClassName, 
       const h = railHeight(top + RAIL_TOP_GAP, window.innerHeight);
       if (h != null) el.style.maxHeight = `${h}px`;
       if (fill) {
-        /* from the card's own top while it sits below the header; the stuck top once it has stuck */
+        /* from the card's own top while it sits below the header; the stuck top once it has stuck.
+           ⚠️ AND TO THE SCROLLER'S BOTTOM, NOT THE WINDOW'S: the scroller ends above the viewport by
+           the window's own inset, so a height reaching `innerHeight` puts the foot under its edge. */
         const own = el.getBoundingClientRect().top;
-        const f = railHeight(Math.max(own, top + RAIL_TOP_GAP), window.innerHeight);
+        const floor = scroller?.getBoundingClientRect().bottom ?? window.innerHeight;
+        const f = railHeight(Math.max(own, top + RAIL_TOP_GAP), floor);
         if (f != null) el.style.height = `${f}px`;
       }
     };
