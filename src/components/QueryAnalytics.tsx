@@ -151,7 +151,7 @@ export const QueryAnalytics: React.FC = () => {
   return (
     <div className="qa-wrap">
       <WorkspacePageGrid className="qa-wpg" scrollLabel="Analytics" masthead={null}>
-        <div className={pageClass} data-anv="page" data-sent={model.sent} data-phase={load.phase}>
+        <div className={pageClass} data-anv="page" data-sent={model.sent} data-since={model.sinceMs ?? ""} data-range={range} data-phase={load.phase}>
           <div className="anv-group" data-anv="group">
             <div className="anv-head" data-anv="head">
               {/* ⚠️ NO EYEBROW (the ref's header has none, and the go-ahead says so). The shared

@@ -95,6 +95,9 @@ async function readPage(page: Page) {
       lastMainKid: mainKids.length ? (mainKids[mainKids.length - 1] as HTMLElement).dataset.anv ?? mainKids[mainKids.length - 1].className : null,
       caveats: box(q('[data-anv="caveats"]')),
       sent: Number((pageEl as HTMLElement).dataset.sent ?? "-1"),
+      since: Number((pageEl as HTMLElement).dataset.since || "NaN"),
+      range: (pageEl as HTMLElement).dataset.range ?? "",
+      pressed: [...pageEl.querySelectorAll('[data-anv="range"] button[aria-pressed="true"]')].map((b) => b.textContent?.trim() ?? ""),
     };
   });
 }
@@ -173,6 +176,20 @@ for (const vp of SIZES) {
     check("funnel-links", size, r.links === 3, `${r.links} connectors`);
     check("funnel-dots", size, r.stageDots >= 4, `${r.stageDots} glyphs in the stages`);
     check("funnel-counts", size, r.stageCounts.length === 4 && r.stageCounts.every((c) => c !== ""), `counts ${JSON.stringify(r.stageCounts)}`);
+    /* read BEFORE the ref comparison below navigates the page away to the ref file */
+    const neg = await page.evaluate(() => {
+      const el = [...document.querySelectorAll('[data-anv="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+      const all = [el, ...el.querySelectorAll("*")];
+      const burg: string[] = [];
+      for (const n of all) {
+        const cs = getComputedStyle(n);
+        for (const p of ["color", "backgroundColor", "borderTopColor", "borderLeftColor", "fill", "stroke"] as const) {
+          const v = cs[p];
+          if (/rgba?\(124,\s*58,\s*42/.test(v)) burg.push(`${(n as HTMLElement).className || n.tagName} ${p}`);
+        }
+      }
+      return { swept: all.length, eyebrow: el.querySelectorAll('[data-probe="eyebrow"]').length, burg };
+    });
     const column = r.main?.w ?? 0;
     const ref = await readRef(page, column, vp.height);
     /* the split rows are data — the ref draws two per stage, a live account one to five — so the
@@ -205,7 +222,12 @@ for (const vp of SIZES) {
     /* 6 · the caveats close the page */
     check("caveats-last", size, r.lastMainKid === "caveats", `last element in the main column is ${r.lastMainKid}`);
 
-    expect(ran - before, "assertion floor").toBeGreaterThanOrEqual(24);
+
+    /* 7 · negative space: no eyebrow in the header, and no burgundy painted anywhere on the page */
+    check("no-eyebrow", size, neg.eyebrow === 0, `${neg.eyebrow} eyebrows in the page`);
+    check("no-burgundy-population", size, neg.swept > 200, `${neg.swept} elements swept`);
+    check("no-burgundy", size, neg.burg.length === 0, `burgundy on: ${neg.burg.slice(0, 5).join("; ") || "nothing"}`);
+    expect(ran - before, "assertion floor").toBeGreaterThanOrEqual(27);
   });
 }
 
@@ -218,13 +240,19 @@ test("the range control filters the whole page", async ({ page }) => {
   if (!all) return;
   const btn = page.locator('[data-anv="page"]:visible [data-anv="range"] button', { hasText: "Last 3 months" });
   check("range-control-present", size, (await btn.count()) === 1, `${await btn.count()} "Last 3 months" buttons`);
+  /* ⚠️ THE PRECONDITION THAT MAKES "IT CHANGED" A CLAIM: a query older than three months exists.
+     Without it an inert control and a working one both leave the count alone, and `<=` passed both. */
+  const older = Number.isFinite(all.since) && all.since < Date.now() - 92 * 86400000;
+  check("range-precondition", size, older, `the first query (${new Date(all.since).toISOString().slice(0, 10)}) is older than three months`);
   await btn.click();
   await page.waitForTimeout(300);
   const three = await readPage(page);
-  check("range-changes-sent", size, !!three && three.sent <= all.sent, `sent ${all.sent} → ${three?.sent}`);
+  check("range-pressed", size, !!three && three.range === "3m" && three.pressed.join() === "Last 3 months", `range ${three?.range}, pressed ${JSON.stringify(three?.pressed)}`);
+  check("range-changes-sent", size, !!three && three.sent < all.sent, `sent ${all.sent} → ${three?.sent}`);
   const a = all.charts.map((c) => c.population).join(",");
   const b = three?.charts.map((c) => c.population).join(",") ?? "";
-  check("range-reaches-charts", size, three?.sent === all.sent || a !== b || three!.events.length !== all.events.length,
-    `chart populations ${a} → ${b}; events ${all.events.length} → ${three?.events.length}`);
-  expect(ran - before, "assertion floor").toBeGreaterThanOrEqual(4);
+  check("range-reaches-charts", size, a !== b, `chart populations ${a} → ${b}`);
+  check("range-reaches-story", size, !!three && three.events.length > 0 && three.events.length !== all.events.length,
+    `events ${all.events.length} → ${three?.events.length}`);
+  expect(ran - before, "assertion floor").toBeGreaterThanOrEqual(7);
 });
