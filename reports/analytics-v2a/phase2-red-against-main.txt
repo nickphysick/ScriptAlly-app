@@ -1,0 +1,86 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+LEDGER analyticsV2a: 1 checks, 1 failed
+  ✘  2 [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1440×900 (25.9s)
+LEDGER analyticsV2a: 1 checks, 1 failed
+  ✘  3 [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1920×1080 (25.2s)
+LEDGER analyticsV2a: 1 checks, 1 failed
+  ✘  4 [measure] › tests/e2e/analyticsV2a.measure.ts:212:1 › the range control filters the whole page (25.5s)
+
+
+  1) [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1440×900 
+
+    Error: page-present @ 1440×900: a visible [data-anv=page] is rendered on /queries/analytics
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      31 |   ran++;
+      32 |   ledger.push({ lock, size, ok, detail });
+    > 33 |   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
+         |                                              ^
+      34 | }
+      35 |
+      36 | test.afterAll(() => {
+        at check (/Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:33:46)
+        at /Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:128:5
+
+    Error Context: test-results/analyticsV2a.measure.ts-fr-d81ec-s-rail-and-caveats-1440×900-measure/error-context.md
+
+    Error Context: test-results/analyticsV2a.measure.ts-fr-d81ec-s-rail-and-caveats-1440×900-measure/error-context.md
+
+  2) [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1920×1080 
+
+    Error: page-present @ 1920×1080: a visible [data-anv=page] is rendered on /queries/analytics
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      31 |   ran++;
+      32 |   ledger.push({ lock, size, ok, detail });
+    > 33 |   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
+         |                                              ^
+      34 | }
+      35 |
+      36 | test.afterAll(() => {
+        at check (/Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:33:46)
+        at /Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:128:5
+
+    Error Context: test-results/analyticsV2a.measure.ts-fr-08a90--rail-and-caveats-1920×1080-measure/error-context.md
+
+    Error Context: test-results/analyticsV2a.measure.ts-fr-08a90--rail-and-caveats-1920×1080-measure/error-context.md
+
+  3) [measure] › tests/e2e/analyticsV2a.measure.ts:212:1 › the range control filters the whole page 
+
+    Error: range-population @ 1440×900: sent in all time = undefined
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      31 |   ran++;
+      32 |   ledger.push({ lock, size, ok, detail });
+    > 33 |   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
+         |                                              ^
+      34 | }
+      35 |
+      36 | test.afterAll(() => {
+        at check (/Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:33:46)
+        at /Users/nickphysick/ScriptAlly-analytics-v2a/tests/e2e/analyticsV2a.measure.ts:217:3
+
+    Error Context: test-results/analyticsV2a.measure.ts-th-42984-trol-filters-the-whole-page-measure/error-context.md
+
+    Error Context: test-results/analyticsV2a.measure.ts-th-42984-trol-filters-the-whole-page-measure/error-context.md
+
+  3 failed
+    [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1440×900 
+    [measure] › tests/e2e/analyticsV2a.measure.ts:124:3 › frame, funnel, charts, rail and caveats @ 1920×1080 
+    [measure] › tests/e2e/analyticsV2a.measure.ts:212:1 › the range control filters the whole page ─
+  1 passed (1.6m)
