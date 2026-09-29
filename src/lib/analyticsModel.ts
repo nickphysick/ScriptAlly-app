@@ -188,7 +188,15 @@ export function stageDates(row: AnalyticsRow, q: Query): StageDates {
   const offer = firstOf(row, [QueryStatus.OFFER], [whenMs(q.offerDate)]);
   let closed: number | null = null;
   if (stateBucket(row.status) === "closed") {
-    closed = row.stageMs[row.status] ?? (row.status === QueryStatus.REJECTED ? whenMs(q.rejectedDate) : null) ?? whenMs(q.lastStatusChange);
+    closed = row.stageMs[row.status] ?? (row.status === QueryStatus.REJECTED ? whenMs(q.rejectedDate) : null);
+    if (closed === null) {
+      /* ⚠️ `lastStatusChange` LAST, AND NOT WHEN IT EQUALS THE SEND DATE. Legacy stamped values
+         survive on documents not recomputed since (types.ts says so), and one equal to `dateSent`
+         would draw a query that "ended" the day it went out — measured on the harness account as a
+         No-response marker at 0 weeks. Undated is the honest reading. */
+      const lsc = whenMs(q.lastStatusChange);
+      closed = lsc !== null && lsc !== row.sentMs ? lsc : null;
+    }
   }
   return { sent: row.sentMs, partialRequested, partialSent, fullRequested, fullSent, offer, closed };
 }

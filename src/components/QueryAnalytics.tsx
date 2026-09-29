@@ -35,6 +35,7 @@ import { AnvEmpty, AnvEmptyRow } from "./analytics/AnvEmpty";
 import { StoryRail } from "./analytics/StoryRail";
 import { AnvHero, AnvJourney, AnvRange } from "./analytics/AnvJourney";
 import { AnvFacts, AnvReplyChart } from "./analytics/AnvFacts";
+import { AnvEndings, AnvStages } from "./analytics/AnvTwoUp";
 import "./analytics/anvFrame.css";
 import "./analytics/anvRail.css";
 import "./analytics/anvJourney.css";
@@ -133,6 +134,10 @@ export const QueryAnalytics: React.FC = () => {
             </span>
           </div>
           <AnvReplyChart model={model} />
+          <div className="anv-twoup" data-anv="twoup">
+            <AnvEndings model={model} />
+            <AnvStages model={model} />
+          </div>
         </div>
         <StoryRail events={model.story.events} foot={model.story.foot} />
       </>

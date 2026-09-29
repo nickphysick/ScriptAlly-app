@@ -54,3 +54,32 @@
   border: 1.6px solid var(--anv-ink);
   transform: translate(-50%, -50%);
 }
+
+/* ── the two-up: two cards side by side, one under a 620px column ── */
+.anv-twoup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.anv-twoup > .anv-card { margin-bottom: 24px; }
+@container anv-main (max-width: 620px) {
+  .anv-twoup { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+.anv-lnone { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11.5px; color: var(--anv-ink-55); white-space: nowrap; }
+.anv-med { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--anv-ink); pointer-events: none; }
+
+/* weeks to an ending: a lane per outcome, one marker per query */
+.anv-lanes { display: grid; grid-template-columns: minmax(64px, max-content) minmax(0, 1fr); column-gap: 12px; row-gap: 10px; align-items: center; }
+.anv-lname, .anv-sname { font-size: 12.5px; line-height: 1.3; color: var(--anv-ink-70); overflow-wrap: anywhere; }
+.anv-lane { position: relative; height: 30px; border-radius: 8px; background: var(--anv-lane); }
+.anv-lmk {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.4px solid var(--anv-ink);
+  transform: translate(-50%, -50%);
+}
+
+/* stage to stage: a bar per transition, fastest to slowest */
+.anv-stg { display: grid; grid-template-columns: minmax(96px, 12ch) minmax(0, 1fr); column-gap: 12px; row-gap: 16px; align-items: center; }
+.anv-strack { position: relative; height: 17px; }
+.anv-sbarr { position: absolute; top: 2px; height: 13px; border-radius: 6.5px; border: 1px solid var(--anv-hair); }
+.anv-med--s { top: -2px; bottom: -2px; }

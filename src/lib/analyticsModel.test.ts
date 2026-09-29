@@ -235,6 +235,12 @@ describe("weeks to an ending", () => {
     expect(by.offer.bucket).toBe("offer");
     expect(m.endings.closed).toBe(5);
   });
+  it("⚠️ a close dated only by a lastStatusChange equal to the send date is undated, not a 0-week ending", () => {
+    const q = query(A.id, { status: QueryStatus.NO_RESPONSE, dateSent: ago(50), lastStatusChange: ago(50) });
+    const m = model([{ q, acts: [rung(q.id, QueryStatus.QUERIED, ago(50))] }], [A]);
+    expect(m.endings.lanes.find((l) => l.key === "noresponse")!.weeks).toEqual([]);
+    expect(m.endings.undatedClosed).toBe(1);
+  });
   it("with nothing closed, is a dash", () => {
     const m = model([walk(A, 10)], [A]);
     expect(m.endings.figure.value).toBe(DASH);
