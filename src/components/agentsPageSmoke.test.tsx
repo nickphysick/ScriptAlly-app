@@ -31,16 +31,18 @@ describe("/agents renders", () => {
    * account's is the editorial empty state that replaced the dashed box. Asserting the old pair
    * here would be asserting the opposite of the behaviour.
    */
-  it("…and a blank account produces the feature-led empty state, not an empty shell", () => {
+  it("…and a blank account produces the empty state, not an empty shell", () => {
     const html = renderPage(list(), "/agents");
-    expect(html).toContain("These are the people who will champion your words.");
+    /* ⚠️ RETARGETED (living headers §3): the feature-led page is retired for the shared header's
+       empty state. Same two jobs — the opening, and a block only a whole render reaches. */
+    expect(html).toContain("No agents on your list yet");
     /* ⚠️ RETARGETED (empty-states pack, Phase 3). The six-row "What makes a strong agent record?"
        band is retired; the ref's "Fill the gaps." row replaces it. The second assertion's job here
        is unchanged — prove the page is the WHOLE empty state and not a hero that lost its body —
        so it names the LAST block, which is what a truncated render loses first.
 
        ⚠️ AND A SMOKE PINS THE MINIMUM, NOT THE APPEARANCE. Two strings: the opening and the close. */
-    expect(html).toContain("Add the first name.");
+    expect(html).toContain("+ Add an agent");
   });
 
   it("…and that state suppresses the toolbar, which has nothing to act on", () => {

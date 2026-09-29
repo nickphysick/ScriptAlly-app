@@ -96,7 +96,9 @@ describe("the hook", () => {
   it("the page's readiness includes the ACTIVITY FEED — the gauges and the calendar are dated from it", () => {
     const page = strip(readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8"));
     expect(page).toContain("const qcLoad = useQcLoad(collectionsReady && activitiesReady);");
-    expect(page, "the first-run branch must not answer while the page is still loading").toContain('{!qcLoad.loading && emptyKind === "first" ? (');
+    expect(page, "the first-run branch must not answer while the page is still loading").toContain('{!qcLoad.loading && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (');
+    /* ⚠️ RETARGETED (living headers §3): the dev count override can also ask for the empty page, and
+       it waits for the load exactly as the real condition does — the guard is outside both. */
     for (const gone of ["useSkeleton(", "<QueryCentreSkeleton", "SKELETON_FLOOR_MS);"]) expect(page, `${gone} — a second loading model on this page`).not.toContain(gone);
   });
 });

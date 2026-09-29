@@ -1,0 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The Query Centre with nothing in it: the header takes row 1 across both tracks (as on the
+ * populated page), and the exhibition and the hint take row 2 across both.
+ */
+.qcv-group > .qcv-empty-below { grid-column: 1 / -1; grid-row: 2; min-width: 0; }

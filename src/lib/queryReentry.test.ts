@@ -97,7 +97,8 @@ describe("a first-run draft actually renders", () => {
        both empty states at once. Asserted in both halves, because either alone passes on a page that
        stopped honouring it — the page must branch on the selector AND hand it `creating`, and the
        selector must yield to create mode when there are no queries. */
-    expect(queries).toContain('emptyKind === "first" ? (');
+    /* ⚠️ RETARGETED (living headers §3): the branch also honours the dev count override */
+    expect(queries).toContain('(lhOverride === null && emptyKind === "first")');
     expect(queries).toMatch(/gridEmptyKind\(\{[\s\S]{0,200}\bcreating,/);
     const sel = read("./queryGridEmpty.ts");
     expect(sel).toContain('if (i.total === 0) return i.creating ? null : "first";');

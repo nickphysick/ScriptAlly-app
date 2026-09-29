@@ -51,7 +51,8 @@ describe("the list → detail push", () => {
   it("the empty state is not inside the pusher at all", () => {
     expect(hub).not.toContain("f12-body-empty");
     expect(css).not.toContain("f12-body-empty");
-    expect(hub, "the feature-led empty state is not mounted").toMatch(/<QueryEmptyFeatures[\s/>]/);
+    /* ⚠️ RETARGETED (living headers §3): the feature-led page became `QcEmpty` — the third swap, same law */
+    expect(hub, "the empty state is not mounted").toMatch(/<QcEmpty[\s/>]/);
   });
 });
 

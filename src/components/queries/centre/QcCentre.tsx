@@ -16,7 +16,7 @@
  */
 import React, { useLayoutEffect, useRef } from "react";
 import "../../shell/primitives.css";
-import { PageHeader } from "../../shell/PageHeader";
+import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { HERO_COURIER_MAP } from "./qcArt";
 import "./qcvPage.css";
 import "./qcvEnter.css";
@@ -62,6 +62,8 @@ export const QcCentre: React.FC<{
   /** The first 150ms of a load: the real frames with nothing in them. */
   blank?: boolean;
   headLine: React.ReactNode;
+  /** Living headers — the count and the copy function; when set, the hero's two lines follow them. */
+  living?: LivingHeader;
   onLog: () => void;
   /** The global Record-a-response flow, opened with no query chosen (the dashboard tile's). */
   onRecord: () => void;
@@ -100,7 +102,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -144,6 +146,7 @@ export const QcCentre: React.FC<{
         variant="full"
         title="Query Centre"
         description={headLine}
+        living={living}
         primaryRef={logRef}
         primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled || loading }}
         secondary={{ label: "Record a response", onClick: onRecord, disabled: loading }}

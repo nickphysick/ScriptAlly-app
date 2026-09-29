@@ -107,8 +107,8 @@
    * ⚠️ THE APP'S NEAR-BLACK BUTTON, AS ONE TOKEN, BECAUSE IT WAS TWO LITERALS ONE UNIT APART.
    * The top bar's `+ New` was `#1c130e` and the masthead's new primary is specified as `#1c130f` —
    * a difference nobody can see and nobody could have found, on two buttons whose whole rationale is
-   * that they are the SAME button. There was no token to reuse; `.agl-btn-dark` uses a third value
-   * (`--agl-ink: #311e19`, browner) which is that page's own ink rather than a button fill.
+   * that they are the SAME button. There was no token to reuse; the retired `.agl-btn-dark` used a third value
+   * (`--agl-ink: #311e19`, browner), that page's own ink rather than a button fill.
    *
    * ⚠️ THE FOREGROUND TOKEN IS GONE WITH THE MASTHEAD'S CTA. `--btn-ink-on` had exactly one reader —
    * that button — and the button is deleted: the toolbar beneath already carried the page's action,

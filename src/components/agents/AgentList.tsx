@@ -30,7 +30,10 @@ import { prefersReducedMotion } from "../../lib/agentMotion";
 import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
-import { ContactListEmptyState } from "./ContactListEmptyState";
+import { ContactEmpty } from "./contact/ContactEmpty";
+import { contactHeaderCopy } from "../../lib/livingHeaders";
+import { useLivingCountOverride } from "../../lib/livingHeaderReview";
+import type { LivingHeader } from "../shell/PageHeader";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
@@ -297,6 +300,24 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     agentCount: agents.length,
     adding: false, /* the in-grid draft retired with the flip editor; P5's add card is an overlay */
   });
+
+  /* ⚠️ LIVING HEADERS (§1–§3). The headline is the scale and the subline the one thing that needs the
+     writer next, both DERIVED here from the QC's own rows and never stored. While the page settles
+     the header renders its fixed shape with both lines empty (count null) — never the page name.
+     The dev review aid (`__SA_LH_COUNT`) fabricates the COUNT only; gated at the call site so a
+     production build never reaches the module. */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
+  const showList = pageState === "list" && !showEmpty;
+  const living = useMemo<LivingHeader>(() => {
+    const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
+    const agentsById = new Map(agents.map((a) => [a.id, a]));
+    return {
+      count: pageState === "list" ? (lhOverride ?? agents.length) : null,
+      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents }),
+    };
+  }, [pageState, lhOverride, agents, qcRows, scoped]);
 
   /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
      Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
@@ -693,16 +714,35 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             own discipline (`.qcv-group` is the precedent). The rail renders only over a LIST —
             a blank account's pitch and the settling beat are single-column, and a grid with an
             absent second child would hold a 340px hole open for nothing. */}
-        <div className={pageState === "list" ? "clv-group" : undefined}>
+        {showEmpty ? (
+          <ContactEmpty
+            manuscriptTitle={scoped?.title?.trim() || null}
+            genre={scoped?.genre ?? null}
+            addRef={addBtnRef}
+            onAdd={() => setQuickOpen((o) => !o)}
+            onPaste={() => { setQuickOpen(false); setAdding("link"); }}
+            /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
+            actionsPopover={quickOpen ? (
+              <ContactQuickAdd
+                anchorRef={addBtnRef}
+                onClose={closeQuick}
+                onOpen={(focus) => { setQuickOpen(false); setAdding(focus); }}
+              />
+            ) : null}
+          />
+        ) : (
+        <div className="clv-group">
         {/* ⚠️ THE SHARED FULL HEADER (page header v2 §4): the Query Centre's component, frame and rule.
             It spans the whole group — column AND rail — so the Housekeeping rail starts below the
             rule, as the Birds-eye rail does. It renders over a LIST only: the blank account's pitch
             is its own page, and a header stating figures about nothing would be the empty-desk fault. */}
-        {pageState === "list" && (
+        {(showList || pageState === "settling") && (
           <PageHeader
             variant="full"
             title="Contact list"
             description={<ContactIntro f={facts} />}
+            living={living}
             primaryRef={addBtnRef}
             primary={{ label: "+ Add an agent", onClick: () => setQuickOpen((o) => !o) }}
             secondary={{ label: "Paste a link", onClick: () => { setQuickOpen(false); setAdding("link"); } }}
@@ -716,37 +756,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             ) : null}
           />
         )}
-        <div className={pageState === "list" ? "clv-main" : undefined} ref={mainColRef}>
+        <div className="clv-main" ref={mainColRef}>
 
-        {/* ⚠️ THE BLANK ACCOUNT IS ITS OWN PAGE, NOT A DASHED BOX IN THE GRID. What it replaces —
-            `.agl-empty`'s welcome branch — is DELETED rather than demoted: two doorways for one
-            state is one of them to keep in step, and this one has three of the other's words in
-            it. The filtered "No agents match." branch below survives and is now unreachable
-            except with agents on file, which is the only way it was ever true.
-            ⚠️ AND `settling` RENDERS NOTHING AT ALL. The alternative to a blank frame here is a
-            skeleton, and this page has none to borrow; a beat of empty scroller is honest, where
-            a first-run pitch shown to somebody with forty agents on file is not. */}
-        {pageState === "blank" ? (
-          <ContactListEmptyState
-            onAddAgent={onAddAgent}
-            /* the bridge App.tsx already maps to `/agents/discover` — not a second router call */
-            onDiscover={() => DISCOVER && onNavigate?.(DISCOVER.tab, DISCOVER.sub)}
-            /* ⚠️ THE SAME ROUTE EVERY OTHER SURFACE USES — `onNavigate("import")`, the bridge that
-               also clears the global search query. The hero OMITS the link when this is absent
-               rather than disabling it, so a page mounted without the bridge advertises no route
-               it cannot take. */
-            onImport={() => onNavigate?.("import")}
-          />
-        ) : pageState === "settling" ? null : (
+        {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
+            `settling` draws the header's fixed shape with both lines empty and nothing below it. The
+            filtered "No agents match." branch below is reachable only with agents on file. */}
+        {!showList ? null : (
         <>
 
         {/* ⚠️ THE COUNT CARDS ARE THE FIRST THING BELOW THE RULE (page header v2 §4), a row of three
             at the top of the page column — moved out of the retired hero, not restyled. */}
-        {pageState === "list" && (
+        {showList && (
           <CountCards cards={census.cards} sel={cardSel} onToggle={toggleCard} row />
         )}
         {/* the v11 header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}
-        {pageState === "list" && (
+        {showList && (
           <ContactControls
             shownCount={visible.length}
             total={agents.length}
@@ -767,7 +791,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
             default selector, so a filter change still animates the reflow. */}
-        {pageState === "list" && (
+        {showList && (
         <div ref={gridRef}>
           {visible.length === 0 ? (
             <div className="agl-empty">
@@ -792,7 +816,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         </>
         )}
         {/* the floating active-filter bar (§5.4): everything narrowing the list, spelled out */}
-        {pageState === "list" && (
+        {showList && (
           <ContactBar
             anchor={mainColRef}
             onClearAll={resetList}
@@ -836,7 +860,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </div>
         )}
         </div>
-        {pageState === "list" && (
+        {showList && (
           <ContactRail counts={hk.countsLine}>
             <ContactHousekeeping
               model={hk}
@@ -849,6 +873,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </ContactRail>
         )}
         </div>
+        )}
        </div>
        </WorkspacePageGrid>
       </div>

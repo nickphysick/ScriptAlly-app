@@ -10,7 +10,7 @@
  * puts it only in the slot the selector names.
  *
  * ⚠️ WHERE THE `first` CASES WENT, NAMED, so none of them lapses into a gap nobody owns.
- * `queryEmptyFeatures.test.tsx` carries all five: the ref-verbatim words (now read from the v3
+ * the empty page's own locks (`QcEmpty`, living headers §3) carries all five: the ref-verbatim words (now read from the v3
  * feature-led ref), the "draws its own moment and not the other's" pair, the import-template route,
  * and the page mounting the right thing in the selector's `first` slot.
  *
@@ -81,18 +81,19 @@ describe("the card draws its own moment", () => {
 
   it("the import template's constant survives the retirement — its consumer moved, it did not go", () => {
     /* ⚠️ ASSERTED HERE BECAUSE THIS FILE IS WHERE THE CONSTANT LIVES; that the HERO renders it is
-       `queryEmptyFeatures.test.tsx`'s claim. Two halves of one route, each asserted where it is. */
+       the empty page's own locks (`QcEmpty`, living headers §3)'s claim. Two halves of one route, each asserted where it is. */
     expect(TEMPLATE_HREF).toBe("/QueryHawk-pipeline-import-template.xlsx");
   });
 });
 
 describe("the page puts each card only in the slot the selector names", () => {
   it("the empty-database branch no longer draws this card at all", () => {
-    const branch = sliceBetween(page, 'emptyKind === "first" ? (', ") : (");
+    /* ⚠️ RETARGETED (living headers §3): the branch also honours the dev count override */
+    const branch = sliceBetween(page, 'emptyKind === "first") || lhOverride === 0) ? (', ") : (");
     expect(branch).not.toContain("QueryEmptyCard");
-    /* what it draws instead is `queryEmptyFeatures.test.tsx`'s claim, not this file's — bounded,
+    /* what it draws instead is the empty page's own locks (`QcEmpty`, living headers §3)'s claim, not this file's — bounded,
        because a tag name is a prefix of every longer one */
-    expect(branch).toMatch(/<QueryEmptyFeatures[\s/>]/);
+    expect(branch).toMatch(/<QcEmpty[\s/>]/);
   });
 
   it("the view slot is the selector's `filtered`, then `nomatch` — the card, then the plain line", () => {

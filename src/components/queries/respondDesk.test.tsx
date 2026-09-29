@@ -894,8 +894,13 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
     const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8");
     expect(page, "the wrapper chooses a ground again").not.toContain('gridView === "board" || gridView === "calendar" ? "qcc-plain"');
     expect(page, "the retired well is emitted again").not.toMatch(/["'`]qcc-well["'`]/);
-    const open = page.indexOf('className="qcc-plain"');
-    expect(open, "the wrapper is gone").toBeGreaterThan(-1);
+    /* ⚠️ RETARGETED (living headers §3): the wrapper's last emitter was the first-run branch, and
+       the empty page now renders in the populated page's own `.qcv-group` box — a padded wrapper
+       around it would move the header's buttons and art off the boxes they hold on the populated
+       page (LH5). So the claim inverts: the empty page carries no wrapper of its own. The
+       `.qcc-plain` rule is left for the CSS pass, with the rest of the retired toolbar's rules. */
+    expect(page).toMatch(/<QcEmpty[\s/>]/);
+    expect(page, "the empty page is wrapped again").not.toContain('className="qcc-plain"');
   });
 
   /* §2 — the toolbar's three tracks */

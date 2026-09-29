@@ -650,3 +650,8 @@
    motion the shell's one `.ws-app *` rule makes it instant. */
 .ph-swap { display: inline-block; animation: phSwap 0.34s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes phSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* THE EMPTY STATE: no page title and no rule — the eyebrow carries the name. The heading is the
+   situation; the buttons and the art keep their places. */
+.ph--living.ph--empty { border-bottom: 0; min-height: 0; padding-bottom: 6px; }
+.ph--living.ph--empty .ph-hin { min-height: 206px; }
+.ph--empty .ph-eh2 { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 29px; line-height: 1.18; color: var(--sp-ink); }

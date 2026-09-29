@@ -11,9 +11,8 @@
  *   · `.aglist` root + `.agl-page` / `.agl-wpg` / `.agl-inner` — the grid plumbing AgentList.tsx
  *     mounts (the scroll row, the foot-gutter contribution);
  *   · `.agl-notice` — the save notice beneath the list;
- *   · `.agl-btn` / `.agl-btn-dark` — the empty state's CTAs (ContactListEmptyState.tsx);
  *   · `.agl-empty` — the "No agents match" filtered-empty block;
- *   · the `--agl-*` ink/paper tokens that those rules and `contactListEmpty.css` still read.
+ *   · the `--agl-*` ink/paper tokens that those rules still read.
  *
  * ⚠️ THE PORTAL-SCOPE LESSON OUTLIVES THE RULES THAT TAUGHT IT. Every rule here is `.aglist …`
  * and every token is declared on `.aglist`, so anything that portals to `document.body` leaves
@@ -24,28 +23,20 @@
  */
 
 .aglist {
-  /* ink + paper — the read set: this sheet's own rules plus contactListEmpty.css */
+  /* ink + paper — the read set: this sheet's own rules and the Contact list's (living headers retired
+     the old empty page and, with it, the tokens only it read) */
   --agl-ink: #311e19;
   --agl-ink-head: #2b2017;
   --agl-ink-body: #48443f;
   --agl-ink-muted: #786a60;
-  --agl-ink-label: #8a7d6e;
-  --agl-cream: #f5efe7;
-  --agl-paper: #ffffff;
-  --agl-hair: rgba(49, 30, 25, 0.14);
 
   /* chrome surfaces */
   --agl-card: #fdfaf5;
   --agl-line: #e3d9cf;
-  --agl-linesoft: #ece3da;
   --agl-muted: #9c8878;
   --agl-pink: #f5e2da;
   --agl-pinkline: #e8c8bc;
   --agl-burg: #7c3a2a;
-
-  /* the empty state's ghost-card strips (contactListEmpty.css) */
-  --agl-sage-band: #dce0d9; --agl-sage-rule: #8a9e88;
-  --agl-pink-band: #f5e2da;
 
   height: 100%;
   /* ⚠️ THE ROOT DOES NOT SCROLL. The grid's scroll row (`.wpg-scroll`) is the page's one
@@ -103,19 +94,6 @@
 .aglist .agl-notice-in { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 @media (prefers-reduced-motion: reduce) {
   .aglist .agl-notice-in { animation: none; }
-}
-
-/* ── buttons — the empty state's CTAs ───────────────────────────────────── */
-.aglist .agl-btn {
-  font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 999px;
-  padding: 8px 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-  transition: all .15s;
-}
-.aglist .agl-btn-dark { background: var(--agl-ink); color: var(--agl-cream); border: 1.5px solid var(--agl-ink); }
-.aglist .agl-btn-dark:not([disabled]):hover { background: #443027; }
-.aglist .agl-btn[disabled] {
-  background: var(--agl-paper); border: 1px solid var(--agl-hair); color: #c3b6a6;
-  box-shadow: none; cursor: not-allowed;
 }
 
 /* ── the filtered-empty block ───────────────────────────────────────────── */

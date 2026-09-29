@@ -42,16 +42,18 @@ describe("zero queries → the first-query card (the ghost preview is retired)",
    * rather than over a number: one `onLog`, wired to `openCreate()`, and both buttons on it.
    */
   it("every primary enters create mode, through one handler", () => {
-    /* bounded: a tag name is a prefix of every longer one — see `queryEmptyFeatures.test.tsx` */
-    expect(code, "the feature-led empty state is not mounted").toMatch(/<QueryEmptyFeatures[\s/>]/);
+    /* ⚠️ RETARGETED (living headers §3): the feature-led page is retired; the empty page is
+       `QcEmpty`, and the law — every CTA through one handler — is unchanged. Bounded, because a tag
+       name is a prefix of every longer one. */
+    expect(code, "the empty state is not mounted").toMatch(/<QcEmpty[\s/>]/);
     expect(code).toContain("onLog={() => openCreate()}");
     /* the component routes both of its CTAs through that one prop — asserted at the component, so
        a third CTA cannot arrive with a handler of its own */
-    const feat = readFileSync(new URL("../components/queries/QueryEmptyFeatures.tsx", import.meta.url), "utf8")
+    const feat = readFileSync(new URL("../components/queries/centre/QcEmpty.tsx", import.meta.url), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     const clicks = feat.match(/onClick=\{([^}]*)\}/g) ?? [];
     expect(clicks.length).toBeGreaterThan(0);
-    for (const c of clicks) expect(c, `a CTA has a handler of its own: ${c}`).toMatch(/onLog|onImport/);
+    for (const c of clicks) expect(c, `a CTA has a handler of its own: ${c}`).toMatch(/onLog|onImport|onRecord/);
   });
 
   it("the old welcome pane's routes survive as quiet alternatives, not deletions", () => {

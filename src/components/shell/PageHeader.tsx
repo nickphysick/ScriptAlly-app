@@ -80,6 +80,12 @@ export type { LivingLine, LivingRun };
 export interface LivingHeader {
   count: number | null;
   copy: (count: number) => LivingLine;
+  /**
+   * THE EMPTY STATE (count 0, a page with nothing in it — never a filtered one). No `<h1>` and no
+   * rule: the eyebrow carries the page's name. The heading is the situation (Special Elite 29px) and
+   * the subline says what will happen; the buttons and the art stay exactly where they are.
+   */
+  empty?: { heading: string; subline: readonly LivingRun[] };
 }
 
 export function LivingRuns({ runs }: { runs: readonly LivingRun[] }) {
@@ -438,7 +444,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * line in it is the rule beneath. What this replaces had a fill and a shadow, and the header
      * read as a card sitting on the page rather than as the page's own opening.
      */
-    <header className={`ph ph--full${living ? " ph--living" : ""}`} data-probe="page-header" data-size="full" data-living={living ? (living.count === null ? "pending" : "settled") : undefined}>
+    <header
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}`}
+      data-probe="page-header" data-size="full"
+      data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
+    >
       {/**
         * THE HERO FRAME. The header spans the whole content column and its rule runs the column's full
         * width. Since the quiet bar the frame IS the column (page header v2's centred 920 is gone): the
@@ -448,7 +458,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="ph-hin" data-probe="hero-frame">
       <div className="ph-text">
         {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
-        {living ? (() => {
+        {living && living.count === 0 && living.empty ? (
+          <>
+            <h2 className="ph-eh2" data-probe="empty-heading">{living.empty.heading}</h2>
+            <p className="ph-intro" data-probe="intro"><LivingRuns runs={living.empty.subline} /></p>
+          </>
+        ) : living ? (() => {
           /* ⚠️ UNSETTLED = EMPTY, NEVER THE PAGE NAME. The lines keep their space by min-height. */
           const line = living.count === null ? null : living.copy(living.count);
           const subText = line ? runsText(line.subline) : "";

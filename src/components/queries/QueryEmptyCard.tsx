@@ -6,7 +6,7 @@
  * `design-refs/query-grid-enhancements-v1.html`, section 4).
  *
  * ⚠️ ONE CARD NOW, AND THE `first` VARIANT IS RETIRED (empty-states pack, Phase 2). The blank
- * account is the feature-led page — `QueryEmptyFeatures` — so the card that used to answer it is
+ * account is the empty page — `QcEmpty` (living headers §3; the feature-led page is retired) — so the card that used to answer it is
  * DELETED rather than left reachable: a replacement that is added keeps its original alive, and
  * the two would have read almost the same. `gridEmptyKind` still decides which empty moment it is
  * and still returns "first"; the PAGE now branches on that ahead of this component.

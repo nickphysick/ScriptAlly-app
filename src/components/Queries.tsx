@@ -82,11 +82,14 @@ import "./queries/queryCentreGrid.css";
 import "./queries/queryStatTiles.css";
 import type { GridCard } from "./queries/QueryCentreGrid";
 import { QueryEmptyCard, TEMPLATE_HREF } from "./queries/QueryEmptyCard";
-import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
+import { QcEmpty } from "./queries/centre/QcEmpty";
+import { qcHeaderCopy } from "../lib/livingHeaders";
+import { useLivingCountOverride } from "../lib/livingHeaderReview";
+import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcRail } from "./queries/centre/QcRail";
@@ -2275,6 +2278,11 @@ export const Queries: React.FC<{
      and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
   const qcLoad = useQcLoad(collectionsReady && activitiesReady);
+  /* LIVING HEADERS — a DEV-ONLY review aid (lib/livingHeaderReview): render the hero as if the page
+     held n queries. Gated on the build mode HERE so a production build folds the branch away and never
+     reaches the module; the condition is a build-time constant, so the hook order cannot vary. */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const qcRows = useMemo(
     /* ⚠️ THE MODE CHECK IS HERE, NOT ONLY INSIDE THE AID, SO THE BUNDLER CAN DROP IT. With the gate
        only in `qcReviewAid` the guard folded correctly (`num = () => 0`, provably inert) and the
@@ -3540,6 +3548,18 @@ export const Queries: React.FC<{
     || (qcMsTitle.get(r.manuscriptId) ?? "").toLowerCase().includes(qcTerm));
   /* the scope: a manuscript, or the queries that name none that exists (so they stay findable) */
   const qcScoped = qcSearched.filter((r) => (qcScope === QC_UNASSIGNED ? !qcMsTitle.has(r.manuscriptId) : inScope(r, qcScope)));
+  /**
+   * LIVING HEADERS — the headline's count is the MANUSCRIPT SCOPE'S, never the searched or filtered
+   * view: a search or a filter narrows the list, and the scale of the pipeline does not change with
+   * it. Unsettled (the collections or the activity log still loading) is `null`, which renders the
+   * hero's fixed shape with both lines empty — never the page name first.
+   */
+  const qcLivingRows = qcRows.filter((r) => (qcScope === QC_UNASSIGNED ? !qcMsTitle.has(r.manuscriptId) : inScope(r, qcScope)));
+  const qcLivingAgents = new Map(agents.map((a) => [a.id, a]));
+  const qcLiving: LivingHeader = {
+    count: lhOverride ?? (collectionsReady && activitiesReady ? qcLivingRows.length : null),
+    copy: (n) => qcHeaderCopy(n, { rows: qcLivingRows, agentsById: qcLivingAgents, nowMs: Date.now() }),
+  };
   const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter)), qcSort);
   const qcById = new Map(qcRows.map((r) => [r.id, r]));
   const sortedList = qcVisible.map((r) => r.query);
@@ -5831,34 +5851,21 @@ export const Queries: React.FC<{
             REAL page is drawn — `QcCentre` with placeholders inside its cards — so the first-run branch
             must not answer until the data has: `queries` is `[]` during the load, and "No queries yet"
             would be the page stating a fact about an account it has not read. */}
-        {!qcLoad.loading && emptyKind === "first" ? (
+        {!qcLoad.loading && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
           /**
-           * §6 (Grid pass) — THE FIRST-QUERY CARD, AND NOTHING ELSE ON THE PAGE. The ref's
-           * section-4 card replaces the split this branch used to draw (a placeholder list beside a
-           * ghost of the pane, behind a welcome card). It sits in the view's own frame — the box the
-           * grid and the filtered card sit in — so the two empty moments land in one place.
-           *
-           * ⚠️ NO TILES AND NO TOOLBAR ABOVE IT, DELIBERATELY. Five zeros and a Filter over nothing
-           * are controls with nothing to act on; the masthead above still names the page.
+           * LIVING HEADERS §3 — THE EMPTY PAGE: the shared header with no page title and no rule, the
+           * same two buttons and the same courier in the same places, then the exhibition of what the
+           * page looks like once it has something in it, and one quiet line to the spreadsheet import.
+           * ⚠️ SWAPPED, NOT ADDED: `QueryEmptyFeatures` is retired in the same commit rather than left
+           * reachable (this repo's replacement rule).
            */
-          <div data-qc-fade={fadeIn ? "in" : undefined} className="qcc-plain">
-            {/**
-              * ⚠️ SWAPPED, NOT ADDED (empty-states pack, Phase 2). `QueryEmptyCard`'s `first`
-              * variant is RETIRED in the same commit rather than left reachable — this repo has
-              * three recorded cases of a replacement that was added and left the original alive,
-              * and the camouflage is always that the two read almost the same. The `filtered`
-              * variant is untouched and still answers a view narrowed to zero, further down.
-              *
-              * ⚠️ AND THE NOTE ABOVE THIS BRANCH STILL HOLDS: no tiles and no toolbar over it. The
-              * feature-led page is longer than the card was, which makes five zeros and a Filter
-              * over nothing worse, not better.
-              */}
-            <QueryEmptyFeatures
+          <div data-qc-fade={fadeIn ? "in" : undefined}>
+            <QcEmpty
               logRef={logTriggerRef}
-              onLog={() => openCreate()}
-              onImport={() => onNavigate?.("import")}
               manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
-              templateHref={TEMPLATE_HREF}
+              onLog={() => openCreate()}
+              onRecord={() => onNavigate?.("queries", "Record a response")}
+              onImport={() => onNavigate?.("import")}
             />
           </div>
         ) : (
@@ -6444,6 +6451,7 @@ export const Queries: React.FC<{
             blank={qcLoad.blank}
             entering={qcLoad.entering}
             headLine={qcHeadLine}
+            living={qcLiving}
             onLog={() => onNavigate?.("queries", "Log a query")}
             /* the app-level Record-a-response host in App.tsx — an interception, never a navigation */
             onRecord={() => onNavigate?.("queries", "Record a response")}

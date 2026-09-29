@@ -1604,3 +1604,7 @@
   font-size: 13px;
   color: var(--clv-ink-70);
 }
+
+/* living headers §3 — the empty account: the header takes row 1 across both tracks, as on the
+   populated page, and the exhibition and the hint take row 2 across both */
+.clv-group > .clv-empty-below { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
