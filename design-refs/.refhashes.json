@@ -100,7 +100,8 @@
     "design-refs/shell/quiet-bar-v1.html": "84adcc6a6e3d64ebda99a581275b135ed6efe0d2c51e013000be6ce4b1a65f4a",
     "design-refs/shell/manuscript-switcher-v2.html": "2920685e32d0bd201e6f924d5e7d513c3e55ec06bcaf77637c8e6d12e5586315",
     "design-refs/todo-list-v2.html": "67da1fb43ca9b170f985b6eb71806f9c1ec8296237f475cf458d880e1dd7992e",
-    "design-refs/analytics-v2a.html": "66c208d5db0f6e984829f8b08ed5af3b0f5a06bfff3bac41c4461bbc7592cbce"
+    "design-refs/analytics-v2a.html": "66c208d5db0f6e984829f8b08ed5af3b0f5a06bfff3bac41c4461bbc7592cbce",
+    "design-refs/page-header/living-headers-v2.html": "f0976dfcf817b48f1a5db32d3b163481024ba48c7ae88039c640a59d52c5a266"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."

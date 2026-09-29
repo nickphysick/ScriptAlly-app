@@ -68,7 +68,60 @@ export interface PageHeaderOverflowItem {
   disabled?: boolean;
 }
 
+/**
+ * LIVING HEADERS (living-headers v2) — a run of the subline: plain text, a bold name, or a manuscript
+ * title in the typewriter face. Copy functions return runs, never markup, so they stay pure and the
+ * header decides how each run is drawn.
+ */
+export type LivingRun = string | { b: string } | { ms: string };
+/** The two lines that change with the count. Everything else in the hero is fixed. */
+export interface LivingLine { headline: string; subline: readonly LivingRun[] }
+/**
+ * A page opts in by passing this. `count` is `null` until the page's count is SETTLED: the fixed
+ * shape renders with both lines empty but holding their space, so the page name is never flashed
+ * and then replaced. `copy` is the page's own formula, derived from the count (and whatever facts
+ * the page closes over) — never stored.
+ */
+export interface LivingHeader {
+  count: number | null;
+  copy: (count: number) => LivingLine;
+}
+
+export function LivingRuns({ runs }: { runs: readonly LivingRun[] }) {
+  return (
+    <>
+      {runs.map((r, i) =>
+        typeof r === "string" ? <React.Fragment key={i}>{r}</React.Fragment>
+          : "b" in r ? <b key={i}>{r.b}</b>
+          : <span key={i} className="ph-ms">{r.ms}</span>)}
+    </>
+  );
+}
+
+/**
+ * The line that changes: re-keyed by its own text, so a CHANGE of text remounts the span and runs the
+ * cross-fade — and the first render does not (nothing has changed yet). `delay` staggers the subline.
+ */
+function LivingText({ text, children, delay = 0 }: { text: string; children: React.ReactNode; delay?: number }) {
+  const first = React.useRef(true);
+  const was = React.useRef(text);
+  const changed = !first.current && was.current !== text;
+  React.useEffect(() => { first.current = false; was.current = text; }, [text]);
+  return (
+    <span key={text} className={`ph-live${changed ? " ph-swap" : ""}`} style={changed && delay ? { animationDelay: `${delay}ms` } : undefined}>
+      {children}
+    </span>
+  );
+}
+
 export interface PageHeaderProps {
+  /**
+   * LIVING HEADERS — opt in by passing the count and the page's copy function (`full` only). The
+   * hero then takes the fixed shape (§1 of the brief) and only the headline's and subline's TEXT
+   * follow the count; `title` stays the page's name for the eyebrow. Every page that does not pass
+   * this renders exactly as it did.
+   */
+  living?: LivingHeader;
   /**
    * The page's own mark, as an imported asset URL — 72px, on the page ground, no tile.
    *
@@ -205,6 +258,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   illo,
   actionsSlot,
   overflow,
+  living,
 }) => {
   /**
    * §3.1/§3.2 — THE EYEBROW'S SECTION ARRIVES BY CONTEXT, never as a prop.
@@ -389,7 +443,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * line in it is the rule beneath. What this replaces had a fill and a shadow, and the header
      * read as a card sitting on the page rather than as the page's own opening.
      */
-    <header className="ph ph--full" data-probe="page-header" data-size="full">
+    <header className={`ph ph--full${living ? " ph--living" : ""}`} data-probe="page-header" data-size="full" data-living={living ? (living.count === null ? "pending" : "settled") : undefined}>
       {/**
         * THE HERO FRAME. The header spans the whole content column and its rule runs the column's full
         * width. Since the quiet bar the frame IS the column (page header v2's centred 920 is gone): the
@@ -399,8 +453,26 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="ph-hin" data-probe="hero-frame">
       <div className="ph-text">
         {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
-        <h1 className="ph-title" data-probe="title" data-page-title="">{title}{titleAdornment}</h1>
-        {description && <p className="ph-intro" data-probe="intro">{description}</p>}
+        {living ? (() => {
+          /* ⚠️ UNSETTLED = EMPTY, NEVER THE PAGE NAME. The lines keep their space by min-height. */
+          const line = living.count === null ? null : living.copy(living.count);
+          const subText = line ? line.subline.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : r.ms)).join("") : "";
+          return (
+            <>
+              <h1 className="ph-title" data-probe="title" data-page-title="">
+                {line && <LivingText text={line.headline}>{line.headline}</LivingText>}
+              </h1>
+              <p className="ph-intro" data-probe="intro">
+                {line && <LivingText text={subText} delay={60}><LivingRuns runs={line.subline} /></LivingText>}
+              </p>
+            </>
+          );
+        })() : (
+          <>
+            <h1 className="ph-title" data-probe="title" data-page-title="">{title}{titleAdornment}</h1>
+            {description && <p className="ph-intro" data-probe="intro">{description}</p>}
+          </>
+        )}
         {(primary || secondary) && (
           <div className="ph-acts" data-probe="actions">
             {primary && (

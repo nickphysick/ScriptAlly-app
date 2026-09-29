@@ -631,3 +631,22 @@
    than disappearing. */
 .ph--compact .ph-intro { margin-top: 8px; max-width: 460px; font-size: 16px; line-height: 1.45; }
 .ph--compact .ph-acts { grid-column: 2; }
+
+/* ══ LIVING HEADERS (ref design-refs/page-header/living-headers-v2.html) — the fixed shape ══
+   A page opts in (`living`), and then NOTHING in the hero moves as the page fills: only the headline's
+   and the subline's text change. Every value below is the ref's, measured; the rule is untouched. */
+.ph--living.ph--full { padding: 14px 0 var(--ph-pad-y); min-height: 250px; }
+.ph--living .ph-hin { min-height: 214px; }
+.ph--living .ph-text { max-width: 46%; }
+.ph--living .ph-eyebrow { font-size: 9.5px; margin-bottom: 10px; }
+/* ⚠️ ONE LINE AT EVERY WIDTH: the clamp tops out at 56 (1514px) and the formulas are short so it never
+   needs to wrap. `min-height` holds the line while the count is unsettled and the text is empty. */
+.ph--living.ph--full .ph-title { font-size: clamp(40px, 3.7vw, 56px); line-height: 1.02; min-height: 1.05em; white-space: nowrap; }
+/* two lines or one occupy the same space */
+.ph--living.ph--full .ph-intro { max-width: none; min-height: 52px; }
+.ph--living.ph--full .ph-art { width: 46%; height: 286px; }
+.ph-live { display: inline; }
+/* the text that changed cross-fades in; the subline 60ms behind. Nothing else animates. Under reduced
+   motion the shell's one `.ws-app *` rule makes it instant. */
+.ph-swap { display: inline-block; animation: phSwap 0.34s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes phSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

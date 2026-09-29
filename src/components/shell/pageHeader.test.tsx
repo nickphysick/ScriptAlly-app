@@ -266,7 +266,9 @@ describe("the masthead is content, not chrome", () => {
        differently now, and an anchor that is gone makes `sliceBetween` fail LOUDLY rather than
        silently widening to the rest of the file — which is what it is for. Bounded on the compact
        branch's own closing instead. */
-    const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', 'className="ph ph--full"');
+    /* retargeted by living headers: the full branch's class is a template now (`ph--living` is opt-in),
+       so the anchor is its probe attribute, which does not vary */
+    const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', 'data-probe="page-header" data-size="full"');
     /* ⚠️ `wsh-cta` LEAVES THIS LIST — the masthead carries exactly one primary again, which is the
        third and final form of that guard and the reason the format exists. `wsh-mark` STAYS: the
        icon is `ph-art` on the page ground, not the registry's monoline glyph in a plate. */
