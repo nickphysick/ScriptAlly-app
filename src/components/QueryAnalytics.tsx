@@ -34,9 +34,11 @@ import { AnvSkeleton } from "./analytics/AnvSkeleton";
 import { AnvEmpty, AnvEmptyRow } from "./analytics/AnvEmpty";
 import { StoryRail } from "./analytics/StoryRail";
 import { AnvHero, AnvJourney, AnvRange } from "./analytics/AnvJourney";
+import { AnvFacts, AnvReplyChart } from "./analytics/AnvFacts";
 import "./analytics/anvFrame.css";
 import "./analytics/anvRail.css";
 import "./analytics/anvJourney.css";
+import "./analytics/anvCharts.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const NO_SECTION = { section: null };
@@ -51,6 +53,12 @@ const EMPTY_ROWS: AnvEmptyRow[] = [
     heading: "The journey so far",
     sub: "How far your queries reached — asked for more, read in full, an offer — and where each stage's queries stand today.",
     art: (m) => <AnvJourney model={m} example />,
+  },
+  {
+    key: "reply",
+    heading: "When replies arrived",
+    sub: "Each reply drawn against the response window its agency states — the window from the Contact list, the reply from your record.",
+    art: (m) => <AnvReplyChart model={m} example />,
   },
   {
     key: "story",
@@ -115,6 +123,16 @@ export const QueryAnalytics: React.FC = () => {
           <AnvHero model={model} />
           <AnvRange value={range} onChange={setRange} />
           <AnvJourney model={model} />
+          <AnvFacts model={model} />
+          <div className="anv-sec" data-anv="sec-timings">
+            <h2 className="anv-tw">Timings</h2>
+            <span className="anv-note">
+              {model.replies === 0
+                ? "No query has a dated reply yet"
+                : `Based on the ${model.replies} ${model.replies === 1 ? "query that has" : "queries that have"} had a reply`}
+            </span>
+          </div>
+          <AnvReplyChart model={model} />
         </div>
         <StoryRail events={model.story.events} foot={model.story.foot} />
       </>

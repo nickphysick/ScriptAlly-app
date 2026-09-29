@@ -27,6 +27,7 @@ import {
   AnalyticsRange,
   AnalyticsRow,
   DAY_MS,
+  MIN_SAMPLE,
   buildRows,
   median,
   monthKey,
@@ -213,6 +214,37 @@ export interface Enriched {
   q: Query;
   dates: StageDates;
   bucket: StateBucket;
+  /** Days from send to the agent's first reply, or null. See `firstReply`. */
+  replyDays: number | null;
+  /** What that first reply was. */
+  replyStatus: QueryStatus | null;
+}
+
+/**
+ * The agent's first reply — the log's first incoming rung (`buildRows`), and ONLY WHERE THE LOG HAS
+ * NONE, the query document's own dated incoming rungs.
+ *
+ * ⚠️ WHY THE FALLBACK, AND WHY IT IS NOT `responseReceivedAt`. `buildRows` refuses the stored
+ * `responseReceivedAt` because legacy stamped values equal the send date and read as nought-day
+ * waits. The pipeline dates (`partialRequestedDate`, `fullRequestedDate`, `offerDate`,
+ * `rejectedDate`) are a different thing: `recomputeQuery` derives them from the same log, and the
+ * Query Centre treats the document as the authority for stage dates. Without this the page stated
+ * a dated "first request" in the story rail and "no dated replies" in the fact line three inches
+ * away — two sources disagreeing on one page, measured on the harness account.
+ */
+function firstReply(row: AnalyticsRow, dates: StageDates): { days: number | null; status: QueryStatus | null } {
+  if (row.replyDays !== null) return { days: row.replyDays, status: row.respondedStatus };
+  const candidates: [number | null, QueryStatus][] = [
+    [dates.partialRequested, QueryStatus.PARTIAL_REQUESTED],
+    [dates.fullRequested, QueryStatus.FULL_REQUESTED],
+    [dates.offer, QueryStatus.OFFER],
+    [row.status === QueryStatus.REJECTED ? dates.closed : null, QueryStatus.REJECTED],
+  ];
+  let best: { t: number; s: QueryStatus } | null = null;
+  for (const [t, st] of candidates) if (t !== null && (best === null || t < best.t)) best = { t, s: st };
+  if (!best) return { days: null, status: null };
+  const g = gapDays(row.sentMs, best.t);
+  return g === null ? { days: null, status: null } : { days: g, status: best.s };
 }
 
 export interface SplitRow {
@@ -335,7 +367,9 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
   const byId = new Map(queries.map((q) => [q.id, q]));
   const items: Enriched[] = rows.map((row) => {
     const q = byId.get(row.id)!;
-    return { row, q, dates: stageDates(row, q), bucket: stateBucket(row.status) };
+    const dates = stageDates(row, q);
+    const reply = firstReply(row, dates);
+    return { row, q, dates, bucket: stateBucket(row.status), replyDays: reply.days, replyStatus: reply.status };
   });
 
   const sent = items.length;
@@ -344,7 +378,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
   const offers = items.filter((e) => e.row.reachedOffer).length;
   const openOffers = items.filter((e) => e.row.status === QueryStatus.OFFER).length;
   const stillOut = items.filter((e) => e.row.status === QueryStatus.QUERIED).length;
-  const waits = items.map((e) => e.row.replyDays).filter((d): d is number => d !== null);
+  const waits = items.map((e) => e.replyDays).filter((d): d is number => d !== null);
   const replies = waits.length;
   const undated = items.filter((e) => e.row.sentMs === null).length;
   const sentDates = items.map((e) => e.row.sentMs).filter((t): t is number => t !== null);
@@ -432,7 +466,14 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
   }
 
   /* ── fact line ── */
-  const requestRate = figure(sent, () => safePct(requests, sent), `${requests} of ${sent} ${sent === 1 ? "query" : "queries"}`, "no queries sent yet");
+  /* below the guard the value IS the fraction, so the note says when a percentage will appear
+     instead of stating the same fraction twice */
+  const requestRate = figure(
+    sent,
+    () => safePct(requests, sent),
+    sent < MIN_SAMPLE ? `A percentage from ${MIN_SAMPLE} queries up` : `${requests} of ${sent} queries`,
+    "no queries sent yet",
+  );
   const outDates = items.filter((e) => e.row.status === QueryStatus.QUERIED).map((e) => e.row.sentMs).filter((t): t is number => t !== null);
   /* ⚠️ ITS POPULATION IS THE QUERIES SENT, NOT THE ONES STILL OUT: "0 still out" of 12 sent is a
      true count, while "0" of nothing sent is the zero the thin-sample rule forbids. */
@@ -474,16 +515,16 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
   const replyRows: ReplyRow[] = [];
   let withoutWindow = 0;
   for (const e of items) {
-    if (e.row.replyDays === null) continue;
+    if (e.replyDays === null) continue;
     if (e.row.windowWeeks === null) { withoutWindow++; continue; }
     replyRows.push({
       id: e.row.id,
       name: e.row.agentName,
       sub: e.row.agentSub,
       windowWeeks: e.row.windowWeeks,
-      replyWeeks: e.row.replyDays / 7,
-      replyDays: e.row.replyDays,
-      bucket: stateBucket(e.row.respondedStatus ?? e.row.status),
+      replyWeeks: e.replyDays / 7,
+      replyDays: e.replyDays,
+      bucket: stateBucket(e.replyStatus ?? e.row.status),
     });
   }
   replyRows.sort((a, b) => a.name.localeCompare(b.name) || a.replyDays - b.replyDays);

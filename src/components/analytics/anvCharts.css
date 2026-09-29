@@ -1,0 +1,56 @@
+/**
+ * Analytics v2a — the fact line and the charts.
+ *
+ * ⚠️ THE FIVE STATE FILLS ARE THE ONLY COLOURS THAT ENCODE STATE, and they arrive inline from
+ * `STATE_FILL` (each a `var(--state-…)`), never as a hex. Everything else here is ink at an alpha,
+ * a hairline, or a lane — no burgundy anywhere, no red, nothing that grades a figure.
+ *
+ * ⚠️ THE CHARTS ARE HTML ON A PERCENTAGE TRACK, not fixed-viewBox SVG: a row's label wraps instead
+ * of being clipped, and a mark sits at the same share of the track at every width.
+ */
+
+/* ── the fact line: four ruled cells on cream ── */
+.anv-facts {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--anv-cream);
+  border: 1px solid var(--anv-hair);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 0 24px;
+}
+.anv-fact { padding: 12px 20px; border-right: 1px solid var(--anv-hair); flex: 1; min-width: 158px; }
+.anv-fact:last-child { border-right: 0; }
+.anv-fk { font-size: 10px; line-height: 1.5; letter-spacing: 0.12em; text-transform: uppercase; color: var(--anv-ink-55); }
+.anv-fv { font-size: 24px; line-height: 1.3; margin-top: 3px; }
+.anv-fs { font-size: 12px; line-height: 1.4; color: var(--anv-ink-55); margin-top: 2px; }
+.anv-fact .anv-chip { margin-top: 6px; }
+
+/* ── shared chart furniture ── */
+.anv-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--anv-hair-soft); }
+.anv-legend > span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; line-height: 1.4; color: var(--anv-ink-70); }
+.anv-sw { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--anv-hair); display: inline-block; flex: none; }
+.anv-sw--dot { border-radius: 50%; border: 1.5px solid var(--anv-ink); }
+.anv-sw--tick { width: 2px; height: 14px; border: 0; border-radius: 0; background: var(--anv-ink); }
+.anv-none { margin: 6px 0 4px; font-size: 14px; color: var(--anv-ink-55); }
+.anv-dash { font-size: 20px; color: var(--anv-ink); margin-right: 6px; }
+.anv-foot { margin: 10px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--anv-ink-55); }
+.anv-tick { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--anv-hair-soft); pointer-events: none; }
+.anv-axis { position: relative; height: 18px; margin-top: 4px; }
+.anv-axis > span { position: absolute; top: 0; transform: translateX(-50%); font-size: 10.5px; line-height: 1.5; color: var(--anv-ink-55); white-space: nowrap; }
+
+/* ── when replies arrived: one row per replied query ── */
+.anv-rw { display: grid; grid-template-columns: minmax(64px, max-content) minmax(0, 1fr); column-gap: 14px; row-gap: 7px; align-items: center; }
+/* ⚠️ A NAME WRAPS AND IS NEVER CUT — no ellipsis, no fixed label width */
+.anv-rwname { font-size: 12.5px; line-height: 1.3; color: var(--anv-ink-70); max-width: 22ch; overflow-wrap: anywhere; }
+.anv-rwtrack { position: relative; height: 15px; }
+.anv-rwwin { position: absolute; left: 0; top: 1px; height: 13px; border-radius: 6.5px; background: var(--anv-sand); min-width: 6px; }
+.anv-rwmk {
+  position: absolute;
+  top: 7.5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.6px solid var(--anv-ink);
+  transform: translate(-50%, -50%);
+}

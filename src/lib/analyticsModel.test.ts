@@ -156,6 +156,23 @@ describe("median wait", () => {
   });
 });
 
+describe("a reply with no rung in the log", () => {
+  it("⚠️ falls back to the document's dated incoming rung, so the fact line and the story agree", () => {
+    const A = agent();
+    const q = query(A.id, { status: QueryStatus.FULL_REQUESTED, dateSent: ago(100), fullRequestedDate: ago(60) });
+    const m = model([{ q, acts: [rung(q.id, QueryStatus.QUERIED, ago(100))] }], [A]);
+    expect(m.facts.medianWait.value).toBe("40 days");
+    expect(m.reply.rows[0].bucket).toBe("requested");
+    expect(m.story.events.find((e) => e.kind === "request")!.gap).toBe("40 days after the first query");
+  });
+  it("never reads a legacy stamped responseReceivedAt as a reply", () => {
+    const A = agent();
+    const q = query(A.id, { status: QueryStatus.QUERIED, dateSent: ago(100), responseReceivedAt: ago(100) } as Partial<Query>);
+    const m = model([{ q, acts: [rung(q.id, QueryStatus.QUERIED, ago(100))] }], [A]);
+    expect(m.facts.medianWait.value).toBe(DASH);
+  });
+});
+
 describe("stage to stage", () => {
   const A = agent();
 
