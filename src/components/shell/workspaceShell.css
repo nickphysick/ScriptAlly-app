@@ -656,25 +656,28 @@
   --ws-bright-gap: 4px;
   box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 12px;
   height: var(--shell-top-h); padding: 0 24px;
-  /* ⚠️ PAGE HEADER v2: THE BAR IS THE SIDEBAR'S COLOUR, READ FROM THE SIDEBAR'S OWN TOKEN. The design is
-     "the bar is the sidebar's colour", not a number — so the two cannot drift apart, and a theme that
-     retones the sidebar retones the bar with it. Flat: no radius anywhere, including where it meets
-     the sidebar. The lock asserts the two computed backgrounds are EQUAL, never a literal. */
-  background: var(--shell-side);
+  /* ⚠️ THE QUIET BAR (quiet-bar v1): THE BAR IS THE PAGE GROUND, and this REVERSES page header v2's
+     "the bar is the sidebar's colour". It reads `--ws-page`, which the routes retone on `.ws-main`
+     (the dashboard and the ground-mode pages), so the bar and the ground below it cannot disagree on
+     any route. The lock asserts the two computed backgrounds are EQUAL, never a literal. Flat: no
+     radius, and NO SHADOW in either state — the one edge is the hairline below, and only once the
+     page has scrolled. */
+  position: relative;
+  background: var(--ws-page);
   border-radius: 0;
-  box-shadow: inset 0 -1px 0 var(--shell-rule);
+  box-shadow: none;
 }
-/**
- * §1 (page header v1) — ONCE THE PAGE HAS SCROLLED, a soft shadow beneath the bar; at rest the
- * hairline alone.
- *
- * ⚠️ THE HAIRLINE IS RESTATED HERE, and it has to be: `box-shadow` is one property, so a rule that
- * named only the new shadow would drop the inset hairline and the bar would lose its edge the
- * moment a reader scrolled. Two shadows, one declaration.
- */
-.ws-pagebar--scrolled {
-  box-shadow: inset 0 -1px 0 var(--shell-rule), 0 8px 16px -14px rgba(28, 19, 15, 0.35);
+/* THE ONE HAIRLINE, faded in once the page scrolls. A pseudo-element rather than an inset shadow so it
+   can fade: `opacity` transitions cleanly where a shadow's colour does not.
+   ⚠️ A PSEUDO-ELEMENT KEEPS ITS OWN TRANSITION, so the reduced-motion rule below names it directly. */
+.ws-pagebar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--shell-rule); opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
 }
+.ws-pagebar--scrolled::after { opacity: 1; }
+/* ⚠️ THE SCROLLED SHADOW IS RETIRED (quiet-bar v1). `.ws-pagebar--scrolled` now only fades the hairline
+   in (above); a shadow under a bar that is the page's own ground reads as the bar lifting off it. */
 .ws-grow { flex: 1 1 auto; min-width: 0; }
 /* ⚠️ v3: THE DASHBOARD'S BAR IS NO LONGER LAID OVER ITS SCROLLER — `--dash-bar-h`, the absolute
    placement, the measure-padding and the transparent-until-scrolled ground are retired together.
@@ -699,46 +702,104 @@
 /* THE PAGE NAME — the sidebar section as an eyebrow 5px above, then the name in the typewriter face on
    one line. With no section the name stands alone, and the bar's `align-items: center` centres it. */
 .ws-pname { flex: none; display: block; min-width: 0; white-space: nowrap; font-family: var(--sp-type); font-size: 22px; line-height: 1; color: var(--sp-ink); }
+/* THE QUIET BAR: the name and its divider are laid out at rest and invisible; they fade and rise into
+   place once the page's title has gone up behind the bar, and reverse the same way. They keep their
+   boxes in both states, so nothing else in the bar moves (Q7). */
+.ws-pagebar .ws-pname, .ws-pagebar .ws-bvr {
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(.22, .8, .3, 1), transform 0.28s cubic-bezier(.22, .8, .3, 1);
+}
+.ws-pagebar--named .ws-pname, .ws-pagebar--named .ws-bvr { opacity: 1; transform: none; }
+.ws-pagebar--named .ws-pname { pointer-events: auto; }
+/* ⚠️ REDUCED MOTION IS THE SHELL'S ONE RULE, NOT A SECOND ONE HERE: `.ws-app *, *::before, *::after`
+   take `transition-duration: 0.01ms !important` under `prefers-reduced-motion: reduce` (the foot of
+   this sheet), which reaches the bar's hairline and the name. A local `transition: none` beside it was
+   measured to change nothing — deleting it left every duration at 0.01ms. */
 .ws-pname-n { font-family: inherit; display: block; }
 .ws-pname-s { display: block; margin-bottom: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-ink-45); }
 
-/* ══ THE MANUSCRIPT SWITCHER (page header v2 §1; ref `.ms`) — moved here from the sidebar's card ══ */
-.ws-ms { position: relative; flex: none; }
+/* ══ THE MANUSCRIPT SWITCHER — v2 (ref design-refs/shell/manuscript-switcher-v2.html `.ms`) ══
+   The tile is 44 tall and at most 280 wide; the menu is 340, anchored to the tile's right edge, 8px
+   below it. Every text element NAMES its face: brand.tsx gives bare spans and buttons the sans at
+   runtime, which a class outranks. */
+.ws-ms { position: relative; flex: none; min-width: 0; }
 .ws-ms-btn {
   box-sizing: border-box; display: flex; align-items: center; gap: 10px;
-  height: 40px; padding: 0 12px 0 6px; border: 0; border-radius: 12px;
+  height: 44px; max-width: 280px; padding: 0 10px 0 6px; border: 0; border-radius: 12px;
   background: var(--shell-control-bg);
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), inset 0 0 0 1px var(--shell-rule);
+  box-shadow: inset 0 0 0 1px var(--shell-rule), 0 1px 2px rgba(28, 19, 15, 0.04);
   color: var(--sp-ink); cursor: pointer; white-space: nowrap; text-align: left; font: inherit;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
 }
-.ws-ms-cov { flex: none; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: var(--sp-type); }
-.ws-ms-cov--a { background: var(--shell-cover-a-bg); color: var(--shell-cover-a-ink); }
-.ws-ms-cov--b { background: var(--shell-cover-b-bg); color: var(--shell-cover-b-ink); }
-.ws-ms-cov--c { background: var(--shell-cover-c-bg); color: var(--shell-cover-c-ink); }
-.ws-ms-tx { display: block; min-width: 0; }
-.ws-ms-t { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 15px; line-height: 1.1; color: var(--sp-ink); }
-.ws-ms-m { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 8.5px; line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-ink-45); }
-.ws-ms-chev { display: flex; color: var(--shell-ink-45); }
-/* the menu: 8px below the button, right-aligned to it, 300 wide */
+.ws-ms-btn:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22), 0 2px 6px rgba(28, 19, 15, 0.06); }
+.ws-ms-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.ws-ms.is-open .ws-ms-btn { box-shadow: inset 0 0 0 1.5px var(--sp-ink), 0 2px 6px rgba(28, 19, 15, 0.06); }
+/* the book: `coverUrl` when set, else a tile in the manuscript's object colour — no outline icon */
+.ws-ms-cov {
+  position: relative; box-sizing: border-box; flex: none; display: block; overflow: hidden;
+  border-radius: 2px 4px 4px 2px; background: var(--o-ms);
+  box-shadow: inset 2px 0 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(28, 19, 15, 0.18);
+}
+.ws-ms-cov:not(.ws-ms-cov--img)::after {
+  content: ""; position: absolute; left: 5px; right: 4px; top: 8px; height: 1.5px;
+  background: rgba(255, 255, 255, 0.7); box-shadow: 0 4px 0 rgba(255, 255, 255, 0.45);
+}
+.ws-ms-cov--tile { width: 24px; height: 32px; }
+.ws-ms-cov--row { width: 28px; height: 38px; }
+.ws-ms-cov--img { object-fit: cover; }
+.ws-ms-cov--add { display: grid; place-items: center; color: #fff; font-family: var(--sp-type); font-size: 16px; }
+.ws-ms-cov--add::after { display: none; }
+.ws-ms-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ws-ms-t {
+  display: block; min-width: 0; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.1;
+  color: var(--sp-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ws-ms-m {
+  display: block; min-width: 0; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--shell-ink-45);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ws-ms-m em { font-style: normal; color: var(--sp-ink); }
+.ws-ms-chev { flex: none; width: 18px; height: 18px; display: grid; place-items: center; color: var(--sp-ink); transition: transform 0.2s cubic-bezier(.22, .8, .3, 1); }
+.ws-ms.is-open .ws-ms-chev { transform: rotate(180deg); }
+/* the menu: 340 wide, 8px below the tile, right-aligned to it; fades and drops in over ~0.18s */
 .ws-ms-menu {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 40;
-  box-sizing: border-box; width: 300px; padding: 8px;
+  box-sizing: border-box; width: 340px; padding: 8px;
   background: var(--shell-control-bg); border-radius: 14px;
-  box-shadow: 0 18px 40px -16px rgba(28, 19, 15, 0.4), 0 0 0 1px var(--shell-rule);
+  box-shadow: 0 0 0 1px var(--shell-rule), 0 16px 40px rgba(28, 19, 15, 0.16);
+  opacity: 0; transform: translateY(-4px) scale(.99); transform-origin: top right;
+  visibility: hidden; pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.18s cubic-bezier(.22, .8, .3, 1), visibility 0s linear 0.18s;
 }
-.ws-ms-h { margin: 6px 10px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.2; letter-spacing: 0.16em; color: var(--shell-ink-45); }
+.ws-ms.is-open .ws-ms-menu {
+  opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+  transition: opacity 0.16s ease, transform 0.18s cubic-bezier(.22, .8, .3, 1), visibility 0s;
+}
+.ws-ms-h { margin: 6px 10px; font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 8.5px; line-height: 1.2; letter-spacing: 0.18em; color: var(--shell-ink-45); }
+.ws-ms-h--shelved { margin-top: 10px; }
 .ws-ms-it {
-  box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 8px 10px; border: 0; border-radius: 10px; background: transparent;
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 10px; background: transparent;
   cursor: pointer; text-align: left; font: inherit; color: var(--sp-ink);
 }
-.ws-ms-it:hover, .ws-ms-it.on { background: var(--shell-menu-on); }
-.ws-ms-ck { margin-left: auto; font-family: var(--sp-serif); }
-.ws-ms-add {
-  box-sizing: border-box; display: block; width: 100%; margin-top: 6px; padding: 10px 10px 4px;
-  border: 0; border-top: 1px solid var(--shell-rule); background: transparent;
-  text-align: left; cursor: pointer; font-family: var(--sp-type); font-size: 14px; color: var(--sp-ink);
+.ws-ms-it .ws-ms-tx { flex: 1; gap: 4px; }
+.ws-ms-it .ws-ms-t { font-size: 15px; }
+.ws-ms-it:hover, .ws-ms-it:focus-visible { background: var(--shell-menu-on); outline: none; }
+.ws-ms-it:focus-visible, .ws-ms-act:focus-visible { box-shadow: inset 0 0 0 1.5px var(--sp-anthracite); }
+.ws-ms-rm { display: block; font-family: var(--sp-serif); font-size: 13px; line-height: 1.25; color: rgba(28, 19, 15, 0.66); }
+.ws-ms-rf { display: block; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.2; letter-spacing: 0.13em; text-transform: uppercase; color: var(--shell-ink-45); }
+.ws-ms-it--shelved .ws-ms-cov, .ws-ms-it--shelved .ws-ms-tx { opacity: 0.6; }
+.ws-ms-ck { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--sp-anthracite); color: #fff; display: grid; place-items: center; }
+.ws-ms-sep { height: 1px; background: var(--shell-rule); margin: 6px 10px; }
+.ws-ms-act {
+  box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 10px; background: transparent;
+  cursor: pointer; text-align: left; font-family: var(--sp-serif); font-size: 14.5px; color: var(--sp-ink);
 }
+.ws-ms-act:hover, .ws-ms-act:focus-visible { background: var(--shell-menu-on); outline: none; }
+.ws-ms-act svg { flex: none; }
+.ws-ms-hint { margin: 6px 10px 2px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.3; letter-spacing: 0.12em; color: var(--shell-ink-45); }
 .sb-toggle svg { display: block; }
 /* v3: the ref's `.crumb` — Source Serif 4 at 15px, 6px apart, centred; ancestors muted, slashes at
    45%, the current page ink at 600. Every element NAMES its face: brand.tsx gives bare spans and

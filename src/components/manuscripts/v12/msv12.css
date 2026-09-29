@@ -356,7 +356,7 @@
 .msv12-ghost.msv12-pgrid { grid-template-columns: minmax(0, 1fr); }
 .msv12-sec--e { padding-bottom: 18px; }
 
-/* ── the edit-details dialog (the page's own; TaskModal keeps its own chrome) ──────────────── */
+/* ── the edit-details dialog (the page's own) ────────────────────────────────────────────── */
 .msv12-scrim {
   position: fixed; inset: 0; background: rgba(28, 19, 15, 0.38); display: grid; place-items: center;
   z-index: 80;

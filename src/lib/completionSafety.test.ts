@@ -89,7 +89,7 @@ describe("⚠️ which kinds may write to a query", () => {
   });
 
   it("housekeeping and prompt kinds write nothing", () => {
-    for (const t of ["data_quality_poor", "querying_unstarted", "dream_agent_unqueried", "weekly_review"] as TaskType[]) {
+    for (const t of ["data_quality_poor", "querying_unstarted", "dream_agent_unqueried"] as TaskType[]) {
       expect(WRITES_TO_QUERY.has(completionVia(card(t))), `${t} can write`).toBe(false);
     }
   });

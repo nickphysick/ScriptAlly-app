@@ -19,8 +19,8 @@ export interface Guard { level: GuardLevel; msg: string }
 export interface JourneyStep {
   /** Stepper label, step heading and review row label. */
   title: string;
-  /** The review row's value. */
-  summary: string;
+  /** The review row's value — a node where the answer wears a treatment (Log's "What you sent", §A3). */
+  summary: React.ReactNode;
   guard?: Guard | null;
   /** The step draws its own warning note, so the shell adds no WORTH A LOOK. */
   ownWarn?: boolean;
@@ -58,6 +58,19 @@ export interface JourneyView {
   saves: SaveLine[];
   /** The agent card under the title. */
   who?: React.ReactNode;
+  /**
+   * v1.1 — the view only CHOOSES (the query picker): no review step, no primary button — the choice
+   * itself moves the drawer on — and the phone bar names the task rather than a step count that
+   * would be wrong the moment a query is picked.
+   */
+  pickOnly?: boolean;
+  /** A box the review shows under its verdict, above YOUR ANSWERS — Log's "This is exactly your ‹name› package" (§A2). */
+  reviewNote?: React.ReactNode;
+  /**
+   * The journey asks to LEAVE rather than to discard — "Leave this query to make a package?" (§A1).
+   * The shell draws its own confirm bar with this wording; Leave closes the drawer and then calls `go`.
+   */
+  leave?: { title: string; sub: string; button: string; cancel: () => void; go: () => void } | null;
   /** The writer has entered something — a scrim click shakes rather than closes. */
   dirty: boolean;
   /** Closing asks first ("Discard this query?") — Log a query once an agent is chosen. */

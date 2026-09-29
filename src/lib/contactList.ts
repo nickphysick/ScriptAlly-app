@@ -169,10 +169,11 @@ export function heroFacts(
 /* ══ phase 3 — the list: row facts, the date line, filters, groups and sorts (v11 §4–6) ═════ */
 import { STAGE_NAME } from "./qcSummary";
 import { countryName } from "./territory";
+import { formatDate } from "./dates";
 
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  formatDate(new Date(ms), { day: "numeric", month: "short" });
 
 /** The agent's STANDING QUERY — what the row's right column speaks about. The furthest-along
  *  live one (the board's own law), else the latest close, else null. One rule, stated once. */

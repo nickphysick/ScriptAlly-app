@@ -11,20 +11,20 @@
  * by construction (recon gate b).
  *
  * Offers is the ONLY ALWAYS-ON row (no key — never a stored-but-ignored flag); everything else,
- * incl. "Your turn to send" (the send-family key), toggles. The Sunday-review key gates the CARD
- * only; the torn scrap ignores it.
+ * incl. "Your turn to send" (the send-family key), toggles.
  */
 import { Agent, Query, TaskFlag } from "../types";
 import { MUTED_UNTIL } from "./taskFlags";
 import { agentPrimary } from "./agentDisplay";
+import { formatDate } from "./dates";
 
 /** The keys a switch can toggle — each an existing `mutedTaskRules` entry the engine already honours
- *  (dq_* & no_response_close via visibleAgentNeeds/isRuleMuted) or a new one (nudge_overdue,
- *  sunday_review) wired in this pack. */
+ *  (dq_* & no_response_close via visibleAgentNeeds/isRuleMuted) or a new one (nudge_overdue)
+ *  wired in this pack. (`sunday_review` went with the weekly review, 27 Sep.) */
 export type TaskSettingKey =
-  | "send" | "nudge_overdue" | "dq_materials" | "dq_mswl" | "no_response_close" | "sunday_review";
+  | "send" | "nudge_overdue" | "dq_materials" | "dq_mswl" | "no_response_close";
 
-export type TaskSettingGroup = "urgent" | "housekeeping" | "rituals";
+export type TaskSettingGroup = "urgent" | "housekeeping";
 
 export interface TaskSettingRow {
   key?: TaskSettingKey; // absent = locked ALWAYS ON (no preference exists at all)
@@ -34,8 +34,8 @@ export interface TaskSettingRow {
   locked?: boolean;
 }
 
-/** Rows + copy verbatim from the ref (§2), plus the RITUALS row the pack specifies (absent from
- *  the reused ref file — added per the pack's explicit Phase 1/2/3 instruction). */
+/** Rows + copy verbatim from the ref (§2). (The RITUALS row — the Sunday review — went with the
+ *  weekly review, 27 Sep.) */
 export const TASK_SETTING_ROWS: TaskSettingRow[] = [
   { group: "urgent", title: "Offers", sub: "An offer of representation always reaches your desk.", locked: true },
   { group: "urgent", key: "send", title: "Your turn to send", sub: "Requested fulls, partials, and R&R resubmissions waiting on you." },
@@ -43,13 +43,11 @@ export const TASK_SETTING_ROWS: TaskSettingRow[] = [
   { group: "urgent", key: "no_response_close", title: "Stale queries", sub: "Queries silent well past the agent’s usual reply time." },
   { group: "housekeeping", key: "dq_materials", title: "Missing materials lists", sub: "Agents whose submission requirements you haven’t recorded." },
   { group: "housekeeping", key: "dq_mswl", title: "Missing wish lists", sub: "Agents without a recorded wish list." },
-  { group: "rituals", key: "sunday_review", title: "The Sunday review", sub: "The Sunday invitation card. The quiet “Last week in review” scrap stays either way." },
 ];
 
 export const GROUP_LABEL: Record<TaskSettingGroup, string> = {
   urgent: "The work itself",
   housekeeping: "Housekeeping",
-  rituals: "Rituals",
 };
 
 /* ⚠️ `typeIsOn` AND `setTypeMute` ARE GONE. They were the retired settings sheet's switch ↔
@@ -62,7 +60,7 @@ export const GROUP_LABEL: Record<TaskSettingGroup, string> = {
 // ── HIDDEN RIGHT NOW (Phase 3) ──────────────────────────────────────────────
 
 /** The rule keys that appear in the hidden list as "MUTED AS A RULE" — the fork-created housekeeping
- *  + stale rule-mutes (dq_* & no_response_close). nudge_overdue / sunday_review are settings-only
+ *  + stale rule-mutes (dq_* & no_response_close). nudge_overdue (and a legacy sunday_review) are settings-only
  *  preferences (no board "set aside" path) and are NOT listed — their switch is their control. */
 const HIDDEN_RULE_KEYS: ReadonlySet<string> = new Set(["dq_materials", "dq_mswl", "dq_responseTime", "no_response_close"]);
 const RULE_TITLE: Record<string, string> = {
@@ -84,7 +82,7 @@ export interface HiddenItem {
 
 const shortDate = (iso: string): string => {
   const ms = Date.parse(iso);
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 
 const flagSubject = (f: TaskFlag, agents: Agent[], queries: Query[]): string => {

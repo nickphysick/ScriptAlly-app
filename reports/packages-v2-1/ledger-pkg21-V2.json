@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "V2 · the tray's text is exactly \"Materials\"",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Materials"
+ },
+ {
+  "lock": "V2 · the tray is 80 tall (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "80"
+ },
+ {
+  "lock": "V2 · the pile art is inside the tray and clipped by it",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"text\":\"Materials\",\"h\":80,\"pileIn\":true,\"clip\":\"hidden\",\"pileOverflows\":true,\"pileSrc\":\"/images/packages/materials-tray-pile.png?v=47929d27\",\"hawk\":false}"
+ },
+ {
+  "lock": "V2 · no BE_HAWK_HEAD in this rail",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V2 · the tray's text is exactly \"Materials\"",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "Materials"
+ },
+ {
+  "lock": "V2 · the tray is 80 tall (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "80"
+ },
+ {
+  "lock": "V2 · the pile art is inside the tray and clipped by it",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"text\":\"Materials\",\"h\":80,\"pileIn\":true,\"clip\":\"hidden\",\"pileOverflows\":true,\"pileSrc\":\"/images/packages/materials-tray-pile.png?v=47929d27\",\"hawk\":false}"
+ },
+ {
+  "lock": "V2 · no BE_HAWK_HEAD in this rail",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ }
+]

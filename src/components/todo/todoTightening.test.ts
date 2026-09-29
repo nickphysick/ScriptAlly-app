@@ -29,7 +29,8 @@ const rule = (sel: string): string => {
 describe("tightening P1 — the hero on one line + the recessed control strip", () => {
   it("THE HEADER NAMES THE PAGE and carries its one line (amended, corrections fix 3)", () => {
     // tasks-pages P1: the header block is TasksPageLayout's — title + subtitle ride its props
-    const hero = sliceBetween(page, "<TasksPageLayout", "function renderHero");
+    /* ⚠️ RETARGETED (to-do list v2): the shared full header opens the page's own group. */
+    const hero = sliceBetween(page, 'data-todo-v2="page"', 'data-todo-v2="main"');
     /* The no-subtitle rule was written for a hero that named nothing. The page is titled for its
        crumb now, and a bare title with no line under it leaves the page unexplained.
 
@@ -56,7 +57,7 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
   it("SECTION ANATOMY: label · mono count · a hairline rule filling the remaining width — one line", () => {
@@ -102,7 +103,7 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 
   it("the cells: family dot · ellipsised Playfair title over the italic line · squared kind chip · TABULAR figures", () => {
@@ -197,6 +198,6 @@ describe("tightening P4 — the sweep + the record", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });

@@ -29,6 +29,7 @@ import { isSlotFilled } from "./packageMetrics";
 import { bookVersionOf } from "./bookVersions";
 import { MATERIAL_LABEL } from "./manuscriptPackages";
 import { isProUser } from "./suggestComps";
+import { formatDate } from "./dates";
 
 /**
  * ⚠️ THE PROVENANCE LIVES ON THE ITEMS, NOT IN A FIELD BESIDE THEM. A separate stored list of
@@ -497,7 +498,7 @@ export const driftNote = (differing: readonly string[]): string => {
 /** `As sent, 12 Aug` — the meta line's left half once a package has moved on. */
 export const asSentLabel = (dateISO: string | undefined): string => {
   const t = dateISO ? new Date(dateISO).getTime() : NaN;
-  return Number.isNaN(t) ? "As sent" : `As sent, ${new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+  return Number.isNaN(t) ? "As sent" : `As sent, ${formatDate(new Date(t), { day: "numeric", month: "short" })}`;
 };
 
 /* ── §3 · what a package was sent with (ref 177, right panel) ─────────────────────────────── */

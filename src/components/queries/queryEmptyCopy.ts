@@ -214,8 +214,8 @@ export const QCF_CAL: readonly {
   left: number; width: number; top: number;
 }[] = [
   { state: "you", head: "Partial requested", court: "With you", who: "Jonathan Marsh", agency: "The Marsh Agency", line: "Due 3 Oct", note: "3 weeks left", left: 30, width: 52, top: 52 },
-  { state: "queried", head: "Queried", court: "With the agent", who: "Daniel O'Rourke", agency: "Inkwell & Stone", line: "Reply expected 25 Sept", note: "14 days waiting", left: 14, width: 56, top: 136 },
-  { state: "queried", head: "Queried", court: "With the agent", who: "Harriet Vane-Coe", agency: "Stillwater Reps", line: "Reply expected 23 Sept", note: "12 days waiting", left: 4, width: 60, top: 220 },
+  { state: "queried", head: "Queried", court: "With the agent", who: "Daniel O'Rourke", agency: "Inkwell & Stone", line: "Reply expected 25 Sep", note: "14 days waiting", left: 14, width: 56, top: 136 },
+  { state: "queried", head: "Queried", court: "With the agent", who: "Harriet Vane-Coe", agency: "Stillwater Reps", line: "Reply expected 23 Sep", note: "12 days waiting", left: 4, width: 60, top: 220 },
 ];
 
 /* ── which book the hero names ─────────────────────────────────────────────────────────────── */

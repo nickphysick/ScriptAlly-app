@@ -535,21 +535,15 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
 });
 
 describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
-  it("the zone wraps the grid — it does not sit between the body and its cards", () => {
-    /* The pack's own instruction: if the scrollzone changes margin handling, the fix is the
-       scrollzone and never the gap. P6's lane div is the precedent — a wrapper one level too
-       deep killed `.tbd-body > .tbd-card` silently. The zone is OUTSIDE `.tbd` entirely. */
-    const i = board.indexOf("<TaskList");
-    expect(i).toBeGreaterThan(-1);
-    const seg = board.slice(i, i + 500);
-    /* ⚠️ THE BODY CHANGED, THE LAW DID NOT (tasks-consolidation P2, 9 Aug). The zone wraps
-       whatever the body is and introduces nothing inside it — P6's lane div is the precedent: a
-       wrapper one level too deep killed `.tbd-body > .tbd-card` in perfect silence. The list's
-       own equivalent is `.tdg-panel > .tdg-row`, locked in tasksList.test.tsx. */
-    expect(seg).toContain("<TaskList");
-    /* the retired panel's job is the card's own `.l-body` now, and nothing sits between them */
-    expect(seg).not.toContain("tdg-panel");
-    expect(seg, "a wrapper came back between the card and its rows").not.toContain("TplZone");
+  it("the rows sit DIRECTLY in their list — nothing between the group and its cards (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the page no longer mounts `TaskList`. The law survives in
+       the new body — a wrapper one level too deep kills a gap rule in perfect silence — so the row
+       cards are asserted to be the rows container's direct children. */
+    const rows = readFileSync(join(here, "v2", "V2Rows.tsx"), "utf8");
+    const i = rows.indexOf('<div className="tdv2-rows">');
+    expect(i, "the rows container").toBeGreaterThan(-1);
+    expect(rows.slice(i, i + 200)).toMatch(/<div className="tdv2-rows">\s*\{g\.rows\.map\(\(r\) => <V2RowCard/);
+    expect(board).not.toMatch(/<TaskList[\s>]/);
   });
 });
 
@@ -656,7 +650,7 @@ describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () 
      is dropped rather than repointed: what it protected (nothing stranded when the sheet retired)
      is now protected by `boardSettings`'s ledger group, against the surface that renders it. */
   it("every task preference has a home on the page", () => {
-    for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
+    for (const key of ["rollForward", "staleMonths", "types"]) {
       expect(acct, key).toContain(key);
     }
     expect(acct, "hiding is the board's now, all three kinds together").not.toContain("mutedRuleRows");
@@ -696,8 +690,13 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
   it("⚠️ ALL FOUR PAGES WEAR THE SAME COLUMN — including the two with no sidebar", () => {
     /* The old alignment test covered the sidebar pages only, which is precisely why this shipped:
        the two that diverged were the two nobody was checking. */
+    /* ⚠️ THE TO-DO LIST LEFT THIS COLUMN (to-do list v2, 28 Sep): it opens with the shared full header
+       over its own group and wears the shared column the workspace grid pays — asserted here as
+       the absence of the family's layout, and measured in tests/e2e/todoV2.measure.ts. */
+    expect(board).not.toContain("<TasksPageLayout");
+    expect(board).toContain('className="tdv2-wpg"');
     for (const [name, src] of [
-      ["To-do list", board], ["Calendar", cal], ["Noteboard", note],
+      ["Calendar", cal], ["Noteboard", note],
     ] as const) {
       /* ⚠️ RETARGETED by the `calendar` session (journey-bars pack, Phase 2), flagged in
          reports/calendar-bars.md. THE LAW IS UNCHANGED — all four pages wear the same column, and
@@ -959,29 +958,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * record produced a card TALLER than the pane whose band scrolled away with it and whose bottom
    * edge was never on screen.
    */
-  it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES ON THE LIST — and it is pink, not ink", () => {
+  it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES BESIDE THE LIST — the desk's composer (to-do list v2)", () => {
     const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    /* same handler as the bar's copy — a rehoming, not a new entrance */
-    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's filled control —
-       the contract's `.cb.fill`, pink by the stylesheet, labelled with the contract's words. Same
-       opener, task mode, read at each link of the new chain. */
-    /* ⚠️ RETARGETED (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary now —
-       the Query Centre's arrangement, where a page states its creative verb once, in the masthead,
-       and it survives the scroll. It was the card toolbar's filled control; that toolbar is
-       unmounted with the meter beside it. The law is unchanged and stronger: ONE add on the page,
-       reaching the SAME composer in task mode. */
-    expect(page, "the header lost the page's one primary")
-      .toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
-    expect((page.match(/openComposer\("task"\)/g) ?? []).length,
-      "a second Add appeared on the page").toBeLessThanOrEqual(2);
-    /* and the masthead's primary is the app's pink CTA, which `mastheadFormat` owns */
-    const hdrCss = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
-    expect(hdrCss).toMatch(/\.wsh-cta \{/);
-    /* ⚠️ BLACK IS RESERVED FOR "THIS ADVANCES". Adding opens a composer — the start of something,
-       not the end of it — so it wears the page's other colour. */
-    const add = rule(splitCss, ".tdw-add {");
-    expect(add).toContain("var(--pink-btn");
-    expect(add).not.toContain("--ink-strong");
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the header's primary is gone; the desk rail's composer is
+       the one add, and its button is the page's anthracite, the same fill as every other primary on
+       it. The law is unchanged: ONE add, and it writes through the existing `addUserTask`. */
+    expect(page, "the header grew an Add back").not.toContain('primary={{ label: "Add a task"');
+    expect((page.match(/<V2Desk[\s>]/g) ?? []).length, "a second desk").toBe(1);
+    const desk = readFileSync(join(here, "v2", "V2Desk.tsx"), "utf8");
+    expect((desk.match(/data-todo-v2="add"/g) ?? []).length, "a second Add in the desk").toBe(1);
   });
 
   it("⚠️ THE COUNTS ARE ONE LINE IN ONE PLACE, off the derivation the bands read", () => {
@@ -1025,48 +1010,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
   });
 
-  it("⚠️ THE RAIL SCROLLER IS THE EXISTING ZONE RELOCATED, never a second one", () => {
-    /* One overflow primitive on this page family — the fault `.tpl-zone` was extracted to fix.
-       The rail declares no overflow of its own; it is a flex column and the zone inside it
-       scrolls, exactly as `.tpl-body` did before the split. */
-    /* ⚠️ RE-POINTED — THE RAIL IS NOT A CARD ANY MORE, AND IT WAS ONE TOO MANY (drawer round,
-       Phase 1). It carried the border, the 14px radius and the clip from when it WAS the bare
-       column; the ported `.tlc` then brought its own 1px, 12px and shadow, so the page drew two
-       hairlines a pixel apart and clipped the inner card's lift away. Measured at 1440: rail left
-       282 · card left 283 · rail right 1382 · card right 1381.
-
-       ⚠️ THE CASE'S OWN CLAIM IS UNCHANGED AND IS NOW STATED WITHOUT AN EXCEPTION. It is about
-       there being ONE overflow primitive on this page family: the rail declares no overflow of
-       its own and the zone inside it scrolls. That used to need a carve-out for the card's edge;
-       with the frame on `.tlc`, where it belongs, the rule holds flat. */
-    expect(rule(splitCss, ".tdw-rail {"), "the rail is clipping again")
-      .not.toContain("overflow");
-    expect(drawsAnEdge(rule(splitCss, ".tdw-rail {")), "the rail grew a frame again").toEqual([]);
-    /* ⚠️ AND THE CARD STILL HAS ONE — the frame MOVED, it was not deleted. Asserting only the
-       absence would pass on a page with no card at all, which is the vacuous half of every
-       retirement lock. */
-    /* ⚠️ RETARGETED TO THE CLAIM, NOT THE NUMBER (three-views round, Phase 2). The law is that the
-       list card HAS the frame the rail gave up; the radius was a spelling standing in for it, and
-       the contract's `.listv` draws 16 where this pinned 12. A lock that fails on a legitimate
-       retone trains the next reader to rebaseline it without looking. */
-    expect(listCardCss, "the list card lost the frame the rail gave up").toMatch(/border-radius:\s*\d+px/);
-    expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
-    /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
-       one relocated scroller, which is what this case is about */
-    expect(board).toContain('<div className="tdw-rail">');
-    /* ⚠️ ON DECLARATIONS. The note explaining the retirement NAMES `renderRailTools`, so a raw read
-       goes red on a correct file — this repo's most-repeated lock fault, met again. */
-    expect(board.replace(/\/\*[\s\S]*?\*\//g, ""), "the rail grew a toolbar again")
-      .not.toContain("renderRailTools");
-    /* ⚠️ RETARGETED FROM THE SPELLING TO THE CLAIM (corrections 2.1). This pinned the literal
-       `) : renderList()}`, which stopped existing when the grid and the board became SIBLINGS of the
-       list on the page ground rather than a `body` inside its card. The claim is that the rail's
-       narrowed-to-nothing branch falls through to a rendered view — not which view, and not how the
-       ternary is spelled. */
-    expect(board.replace(/\s+/g, " "), "the rail's empty branch no longer falls through to a view")
-      .toMatch(/\) : todoView === "grid" \? renderGrid\(\)/);
-    expect(board, "the list is no longer one of the views the rail can fall through to")
-      .toContain("renderList()");
+  it("⚠️ THE RAIL SCROLLER IS RETIRED WITH THE SPLIT (to-do list v2) — the page has one scroller", () => {
+    /* ⚠️ RETIRED (to-do list v2, 28 Sep). This held that the split's rail declared no overflow of its
+       own and the zone inside it scrolled — one overflow primitive for the family. The To-do list
+       no longer renders the split; it scrolls in the workspace grid's own `.wpg-scroll`, which is
+       measured in tests/e2e/todoV2.measure.ts. The claim that survives is that the page does not
+       bring a scroller of its own back. */
+    const b = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(b).not.toContain('className="tdw-rail"');
+    expect(b).not.toContain('className="tpl-zone"');
   });
 
   /**
@@ -1106,23 +1058,14 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * thing without hiding what you were reading. `openDock` is still the one entrance and the dock
    * is still the one recording surface — nothing in the rail records anything.
    */
-  it("the dock mounts INSIDE the workspace pane, and the list keeps the rail", () => {
-    /* ⚠️ THE SPLIT'S CLASS IS A TEMPLATE NOW (drawer round, Phase 1) — `tdw-split` plus `open`
-       when a task is docked — so its literal stopped matching an element that had not moved. The
-       claim is the ORDER of three mounts, which is a fact about the tree and not about how a
-       class string is assembled; the other two are still literals because they still are. */
-    const splitAt = board.search(/className=\{?[`"]tdw-split/);
-    expect(splitAt, "the split's opening element").toBeGreaterThan(-1);
-    for (const anchor of ['className="tdw-rail"', 'className="tdw-work"', "<TaskPane"]) {
-      expect(board, anchor).toContain(anchor);
-    }
-    expect(splitAt).toBeLessThan(board.indexOf('className="tdw-rail"'));
-    expect(board.indexOf('className="tdw-rail"')).toBeLessThan(board.indexOf('className="tdw-work"'));
-    expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TaskPane"));
-    /* still exactly one dock mount and one entrance function */
-    /* ⚠️ BOUNDED — `<TaskPane` is a PREFIX of `<TaskPaneBody`, which the mount also renders, and the
-       unbounded form counted two mounts of one component. The house rule about prefix-matching a
-       class name applies to a component name identically. */
+  it("the dock mounts in ONE host — the drawer over the list (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the split, its rail and its workspace column are retired
+       with the views. The pane has one host, the drawer, and the order that matters is the body
+       first and the drawer after it. Still exactly one mount and one entrance function. */
+    expect(board).not.toMatch(/className=\{?[`"]tdw-split/);
+    const body = board.indexOf('className="tdv2-body"');
+    expect(body, "the v2 body").toBeGreaterThan(-1);
+    expect(body).toBeLessThan(board.indexOf("<SlideOver"));
     expect(board.match(/<TaskPane[\s>]/g) ?? []).toHaveLength(1);
     expect(board.match(/function openDock/g) ?? []).toHaveLength(1);
   });
@@ -1178,8 +1121,9 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
        HELD card, which is the whole claim — but the spelling could not say so.
        Asserted as: every host gates on `paneCard`, and NONE of them gates on `docked.card`, which
        is the fault the case exists for (a narrowing would blank the workspace). */
-    expect(board, "the split's host no longer gates on the held card")
-      .toContain("todoView === \"list\" && paneCard ? (");
+    /* ⚠️ ONE HOST SINCE TO-DO LIST v2 (28 Sep): the split is retired with the views, so the pane
+       has exactly one host — the drawer — and it still gates on the HELD card. */
+    expect(board, "the retired split host came back").not.toContain('todoView === "list" && paneCard');
     expect(board, "the drawer's host no longer gates on the held card")
       .toContain("open={!!paneCard}");
     expect(board, "a host gates on docked.card, so a narrowing would blank the workspace")
@@ -1221,20 +1165,14 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
     expect(board).toContain("const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? \"\"}`;");
   });
 
-  it("⚠️ THE EMPTY MESSAGE IS INSIDE THE RAIL, and the workspace column renders beside it", () => {
-    const ra = board.indexOf('className="tdw-rail"');
-    const rb = board.indexOf('className="tdw-work"');
-    expect(ra, "the rail marker is gone").toBeGreaterThan(-1);
-    expect(rb, "the workspace marker is gone").toBeGreaterThan(ra);
-    const rail = board.slice(ra, rb);
-    expect(rail).toContain("tdw-empty");
-    expect(rail).toContain("renderList()");
-    /* and it is read from the groups the rail actually draws — not a parallel predicate */
-    expect(board).toContain("const railEmpty = railGroups().length === 0;");
-    /* ⚠️ ON DECLARATIONS, NOT ON PROSE — this file's own helper carries the reason: these rules
-       explain themselves by QUOTING what they replaced, so a raw substring match reads the
-       comment and fails a file that is correct. It caught me on this very line. */
-    expect(board.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("anyVisible");
+  it("⚠️ THE EMPTY MESSAGE IS THE LIST'S, and the drawer cannot see it (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the split and its rail are retired with the views. The
+       law is unchanged — a narrowing that matches nothing is a LIST fact and must never blank the
+       workspace — and it now holds by construction: the empty state is `V2Rows`' own, and the
+       drawer is a sibling that reads only the held card. */
+    expect(board).toContain("<V2Rows");
+    expect(board).toContain("open={!!paneCard}");
+    expect(board).not.toContain('className="tdw-rail"');
   });
 
   it("⚠️ THE PANE'S QUEUE IS THE NARROWED SET, so ↑↓ never walk onto a card the rail is hiding", () => {
@@ -1393,13 +1331,16 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
    * that wrote 34 would be two statements of one scope — and the button's is the one nobody
    * checks until the file is open. Both read `railGroups()`.
    */
-  it("the footer's count and its export read one derivation", () => {
+  it("the export writes the rows the list renders — one derivation (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the rail footer and `exportRail` are retired. The claim is
+       unchanged — the file cannot disagree with the list — and it is `v2Shown` on both sides:
+       the groups the page draws are `groupRows(v2Shown, …)` and the CSV is `rowsCsv(v2Shown)`. */
     expect(board, "the two-number footer came back").not.toContain("showingLine(");
-    expect(board).toContain("function railShown()");
-    expect(board).toContain("return railGroups().reduce(");
-    const ex = board.indexOf("function exportRail()");
+    expect(board).not.toContain("function exportRail()");
+    const ex = board.indexOf("function exportV2()");
     expect(ex, "the export is gone — this case would read nothing").toBeGreaterThan(-1);
-    expect(board.slice(ex, ex + 900)).toContain("railGroups().flatMap");
+    expect(board.slice(ex, ex + 700)).toContain("rowsCsv(v2Shown)");
+    expect(board).toContain("groupRows(v2Shown, v2Group)");
   });
 
   /**
@@ -1536,20 +1477,14 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * button's ink fill is the ONLY thing left that can say a filter is on — so that fill is not
    * decoration and not optional.
    */
-  it("the filter button takes the active fill whenever the chip is not `all`", () => {
-    /* the narrowed-state marker is the card's `filterActive` now — same fact, the card's clothing */
-    /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, not from whether the menu is open (frame round). A menu
-       being open says nothing about whether the list is narrowed; `isFiltered(view)` compares to
-       the default, so a list that was filtered and then unfiltered stops wearing the marker. */
-    /* ⚠️ RETARGETED (QC-chassis round, Phase 1): the funnel is the PAGE's toolbar button, and its
-       active state is a COUNT rather than a fill — the Query Centre's own `.qcc-tb-cnt` badge,
-       which says HOW MANY choices are narrowing rather than merely that something is. The claim
-       is unchanged: a narrowed list is never silently narrowed. */
-    expect(board, "the toolbar's Filter stopped stating its count")
-      .toContain("count={filterBadge(view)}");
-    const on = rule(splitCss, ".tdw-cbic.on {");
-    expect(on).toContain("background: #2b2118");
-    expect(on).toContain("color: #fdfaf5");
+  it("the filter button states its count whenever a filter is on (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the button is `V2Controls`' own, and a narrowed list is stated
+       TWICE, deliberately — the count on the button where the hand is, and the floating bar that
+       names every active filter. The claim is unchanged: a narrowed list is never silently narrowed. */
+    const ctl = readFileSync(join(here, "v2", "V2Controls.tsx"), "utf8");
+    expect(ctl).toContain('className={`tdv2-ctl${n ? " has" : ""}`}');
+    expect(ctl).toContain('{n > 0 && <span className="tdv2-badge">{n}</span>}');
+    expect(ctl).toContain('className={`tdv2-activebar${chips.length ? " show" : ""}`}');
   });
 
   it("…and it states WHAT it is narrowed to, beneath the row", () => {
@@ -1566,25 +1501,12 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * menu row and the section band it names cannot state different figures — which is the whole
    * reason the chips could be folded away at all.
    */
-  it("the filter menu reads `railChips`, the same derivation the bands read", () => {
-    const at = board.indexOf("function renderList");
-    expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
-    /* bounded by the next function, not by a guessed length — the 3200-char window silently
-       stopped short of the FilterMenu block the moment the chips grew above it */
-    /* ⚠️ THE SLICE FOLLOWED THE PANEL (QC-chassis round, Phase 1). It bounded `renderList`,
-       because the filter panel was passed INTO the list card as a prop; the panel hangs off the
-       page's own toolbar trigger now, so the anchors are the toolbar row's. Both anchors are
-       asserted before slicing — a missing one silently widens the slice to the rest of the file,
-       which is the fault `sliceBetween` exists for. */
-    const fn = sliceBetween(board, 'className="tdb-qtool"', "THE BRIEFING SLOT");
-    /* ⚠️ RE-POINTED AGAIN (drawer round, Phase 6), AND THE CLAIM SHARPENED WITH IT. The sort-filter
-       contract's counts are CONDITIONAL — "what this choice would leave, given the others" — so
-       the one derivation both readers share is now `viewLeaving`: the view re-run with the
-       option's own facet lifted. A raw-board count here would promise rows the other filters have
-       already hidden, which is the disagreement this case exists to forbid, wearing a new face. */
-    expect(fn, "the type counts stopped being conditional").toContain('viewFacts, "types")');
-    expect(fn, "the agent counts stopped being conditional").toContain('viewFacts, "agents")');
-    expect(fn, "a raw-board count crept back in").not.toContain("viewTypeCounts(railGroupsAll())");
+  it("the filter panel counts the rows the list filters — one derivation (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): the panel's numbers are `facetCounts(v2TileRows)` and the list is
+       `applyFilters(searchRows(v2TileRows, …))` — the same array on both sides, so a row in the
+       panel and the rows it leaves cannot state different figures. */
+    expect(board).toContain("facetCounts(v2TileRows, v2StatusName)");
+    expect(board).toContain("applyFilters(searchRows(v2TileRows, search), v2Filters, v2StatusName)");
   });
 
   /**
@@ -1593,34 +1515,16 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * something you have to escape from. Escape is deliberately NOT captured or stopped: this page
    * has its own Escape business, and swallowing the key here would reach past these menus.
    */
-  it("the two menus dismiss the same three ways, and neither traps focus", () => {
-    const at = board.indexOf("if (!filterOpen && !sortOpen) return;");
-    expect(at, "the dismissal effect is gone").toBeGreaterThan(-1);
-    const eff = board.slice(at, at + 700);
-    expect(eff).toContain('document.addEventListener("pointerdown", close)');
-    expect(eff).toContain('if (e.key === "Escape") close();');
-    /* not captured, not stopped — the page's own Escape still reaches past them */
-    expect(eff).not.toContain("true)");
-    expect(eff).not.toContain("stopPropagation");
-    /* mutually exclusive: opening one shuts the other */
-    /* the same two-menu exclusivity, now handed to the card as `onFilter` */
-    /* the same two-menu exclusivity, now also handing the trigger element up so the menu can anchor */
-    /* ⚠️ RETARGETED WITH THE TRIGGERS (QC-chassis round, Phase 1) — the two menus are the page's
-       toolbar buttons now, and there are THREE of them (Group joined, per the chassis contract).
-       The claim is unchanged and now covers one more: opening any of them shuts the others, so a
-       page can never show two panels at once. */
-    for (const [own, others] of [
-      ["setFilterOpen", ["setSortOpen(false)", "setAsideOpen(false)"]],
-      ["setGroupOpen", ["setFilterOpen(false)", "setSortOpen(false)"]],
-      ["setSortOpen", ["setFilterOpen(false)", "setGroupOpen(false)"]],
-    ] as const) {
-      const i = board.indexOf(own + "((o) => !o)");
-      expect(i, own + " lost its toggle").toBeGreaterThan(-1);
-      const line = board.slice(board.lastIndexOf("onClick", i), i);
-      for (const other of others) {
-        expect(line, own + " stopped shutting " + other).toContain(other);
-      }
-    }
+  it("the three panels are ONE state, and dismiss by a press outside or Escape (to-do list v2)", () => {
+    /* ⚠️ RETARGETED (to-do list v2): Filter, Group and Sort are one `open` state in `V2Controls`, so
+       "opening one shuts the others" is structural rather than three booleans agreeing. Dismissal is
+       the house idiom — a capture-phase press outside, or Escape — and nothing is stopped, so the
+       page's own Escape still reaches past it. */
+    const ctl = readFileSync(join(here, "v2", "V2Controls.tsx"), "utf8");
+    expect(ctl).toContain('type Open = null | "filter" | "group" | "sort";');
+    expect(ctl).toContain('document.addEventListener("pointerdown", onDown, true);');
+    expect(ctl).toContain('if (e.key === "Escape") setOpen(null);');
+    expect(ctl).not.toContain("stopPropagation");
   });
 });
 

@@ -20,10 +20,11 @@
  * draw. Deleted rather than left unmounted — a derivation with no reader is the next surface's
  * accidental source, and the grid card's verb (Phase 4) is its own derivation over its own words.
  */
+import { MONTHS_SHORT } from "./dates";
 import { overdueDays, type DueFact } from "./taskDue";
 
 /** the contract's own month table — the chip's CSS uppercases it, so the DOM holds "Sep" */
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON = MONTHS_SHORT;
 
 export interface OverdueFigure {
   /** "13" · "7" · "1½" — never contains a space */

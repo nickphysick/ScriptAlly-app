@@ -24,6 +24,7 @@
  * (44px) sizes are forced via scoped overrides in whatsLive.css — the shared component is left
  * untouched.
  */
+import { MONTHS_SHORT } from "../../lib/dates";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Query, Agent, Manuscript, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
@@ -52,7 +53,7 @@ const REST_MS = 5000; // dwell on each populated stage
 const FADE_MS = 550; // list crossfade (opacity only) on stage change
 const SCROLL_DUR = REST_MS - FADE_MS - 700; // list reaches the bottom before the next fade-out (~3.75s)
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 const coerceMs = (v: any): number | null => {
   if (!v) return null;
   if (typeof v === "string") { const t = Date.parse(v); return isNaN(t) ? null : t; }

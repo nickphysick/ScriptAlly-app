@@ -28,6 +28,8 @@ export interface DrawerPreset {
 export interface LogAgain {
   sent: Date;
   via: string;
+  /** How the last log was recorded — "Log another" repeats it as it was (Nick, 28 Sep). */
+  how?: "package" | "individual";
   pkg: string;
   mat: unknown;
   manuscriptId: string;
@@ -118,3 +120,6 @@ export function subscribeUndoBar(l: ToastListener): () => void {
   toastListeners.add(l);
   return () => toastListeners.delete(l);
 }
+
+/** v1.1 — the drawer's query picker asks App to open the Pro paste-an-email flow. */
+export const PASTE_RESPONSE_EVENT = "sa:paste-response-email";

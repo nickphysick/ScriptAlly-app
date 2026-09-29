@@ -13,7 +13,6 @@ import { resolve } from "node:path";
 
 const hub = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 const css = readFileSync(resolve(__dirname, "../components/shell/f12.css"), "utf8");
-const rrs = readFileSync(resolve(__dirname, "../components/RecordResponseScreen.tsx"), "utf8");
 
 const MEDIA = "@media (max-width: 767.98px)";
 
@@ -110,11 +109,4 @@ describe("touch + chassis rules", () => {
     expect(css).toContain(".f12-root .qn-acts { opacity: 1; }");
   });
 
-  it("the guided response flow presents in the sheet chassis below md — flow untouched", () => {
-    expect(rrs).toContain("useIsMobile()");
-    expect(rrs).toContain("<MobileSheet open onClose={onClose}");
-    expect(rrs).toContain("<EmailOverlay onClose={onClose} maxWidth={560}>");
-    // one body, two chassis — the flow renders identical content in both
-    expect(rrs).toContain("const body = (");
-  });
 });

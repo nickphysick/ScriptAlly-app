@@ -34,6 +34,7 @@ import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
 import { flagSleeps } from "./taskFlags";
 import { resolveExpectedDate } from "./expectedDate";
 import { queryBucket } from "./queryAmbient";
+import { formatDate } from "./dates";
 
 export type CalFamily = "agent" | "task" | "snoozed" | "done";
 
@@ -540,7 +541,7 @@ export function dedupeAgainstRecord(
  *
  * ⚠️ SUMMARISATION IS A GRID-RENDER CONCERN, AND THIS IS THE ONLY FUNCTION THAT DOES IT.
  * Nothing upstream is shortened: `calendarDays` and `recordDays` keep full labels, the day panel
- * reads them unchanged, and `FocusFlow` receives the same card it always did. The design ref makes
+ * reads them unchanged, and the pane receives the same card it always did. The design ref makes
  * the opposite choice — it shortens at the data layer — and copying that here would degrade the
  * TO-DO LIST, which reads the same `assembleBoardColumns` output. One vocabulary, applied at one
  * call site, on one surface.
@@ -711,7 +712,7 @@ export function carriedLine(rolledFrom: string, today: string, turn = "Your turn
  */
 export function shortCalDate(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
-  const base = `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+  const base = `${d.getDate()} ${formatDate(d, { month: "short" }, "en-GB", true)}`;
   return d.getFullYear() === new Date().getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }
 

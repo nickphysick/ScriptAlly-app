@@ -29,7 +29,11 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
        and the columns both live inside it by construction, so the page needs no hand wrapper. */
     const layout = readFileSync(join(__dirname, "TasksPageLayout.tsx"), "utf8");
     expect(layout).toContain('className="tdb-col tpl"');
-    expect(page).toContain("<TasksPageLayout");
+    /* ⚠️ THE TO-DO LIST LEFT THE FAMILY LAYOUT (to-do list v2, 28 Sep) — it opens with the shared full
+       header over its own group in the grid's own column. `.tdb-col` still governs the Calendar and
+       the Noteboard, so its rule is still held below; the page's own column is measured in
+       tests/e2e/todoV2.measure.ts. */
+    expect(page).not.toContain("<TasksPageLayout");
     const c = rule(".tdb-col");
     expect(c).toContain("max-width: var(--tdb-col-max)");
     /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
@@ -151,7 +155,7 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -179,7 +183,7 @@ describe("shell polish P5 — the sweep + the record", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
 });
 
@@ -370,7 +374,7 @@ describe("centring fix P2 — the big search in the panel header", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("the field derives from the container, never from vw", () => {
     expect(rule(".tdb-bsearch")).not.toContain("vw");
@@ -383,7 +387,7 @@ describe("centring fix P2 — the big search in the panel header", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
+    expect(page).toContain("<V2Rows"); // ⚠️ RETIRED A THIRD TIME: the grouped list → v2 row cards (to-do list v2)
   });
   it("session: the search leaves with the panel (EXIT_FADE), no orphaned bar-clearing target", () => {
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");

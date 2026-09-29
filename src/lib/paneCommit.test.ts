@@ -283,8 +283,8 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
 /**
  * ⚠️ WHAT DIED AND WHAT SURVIVED (popup round, Phase 2).
  *
- * The takeover is NOT pane-only, so it does not die: `FocusFlow` is the Calendar's item sheet, the
- * Sunday review's engine and the sweep's. What died is the page's own orphans — functions the pane
+ * The takeover is NOT pane-only, so it does not die: it survives as `HousekeepingSweep` (renamed
+ * from `FocusFlow`, 27 Sep, when every query task moved to the query drawer), the sweep's engine. What died is the page's own orphans — functions the pane
  * path was built around, left with no caller when `PaneJourney.tsx` was deleted.
  */
 describe("⚠️ the takeover survives; the pane's orphans do not", () => {
@@ -298,13 +298,14 @@ describe("⚠️ the takeover survives; the pane's orphans do not", () => {
    * "somebody mounts it" would go quietly green the day the To-do page dropped it as well and
    * some third page picked it up by accident; naming both sides states what the app actually is.
    */
-  it("FocusFlow keeps a caller that is not the pane, and is named here so no sweep takes it", () => {
+  it("HousekeepingSweep keeps a caller that is not the pane, and is named here so no sweep takes it", () => {
     const todo = read("../components/todo/ToDoPage.tsx");
-    expect(todo, "the To-do page stopped mounting FocusFlow — it may now look dead").toContain("<FocusFlow");
-    expect(todo).toContain('from "./FocusFlow"');
+    expect(todo, "the To-do page stopped mounting HousekeepingSweep — it may now look dead").toContain("<HousekeepingSweep");
+    expect(todo).toContain('from "./HousekeepingSweep"');
     const cal = read("../components/todo/TodoCalendarPage.tsx");
-    expect(cal, "the Calendar mounts FocusFlow again — v65 §A retired that surface")
-      .not.toContain("<FocusFlow");
+    expect(cal, "the Calendar mounts the sweep again — v65 §A retired that surface")
+      .not.toContain("<HousekeepingSweep");
+    expect(cal).not.toContain("<FocusFlow");
   });
 
   /**
@@ -320,6 +321,19 @@ describe("⚠️ the takeover survives; the pane's orphans do not", () => {
     expect(hook, "the pane lost its hand-off entirely").toContain("host.openFlow(card)");
     expect(page, "the page stopped wiring the hand-off to the takeover")
       .toMatch(/openFlow: \(c\) => openFlowCards\(\[c\]\)/);
+  });
+
+  /* ⚠️ A QUERY CARD NEVER REACHES THE SWEEP (27 Sep). The hand-off asks `drawerDoorForTask` first
+     and opens the query drawer when there is a door; only a card with no query journey falls
+     through to `HousekeepingSweep`. Asserted as ORDER inside `openFlowCards`, both anchors first. */
+  it("the hand-off opens the query drawer for a query card before anything reaches the sweep", () => {
+    const at = page.indexOf("const openFlowCards");
+    expect(at, "openFlowCards is gone").toBeGreaterThan(-1);
+    const end = page.indexOf("setFlow({ items: rest", at);
+    expect(end, "the sweep fallback is gone").toBeGreaterThan(at);
+    const body = page.slice(at, end);
+    expect(body).toContain("drawerDoorForTask(card.taskType, card.relatedRecordId");
+    expect(body).toMatch(/if \(door\) \{ openQueryDrawer\(door\); return; \}/);
   });
 
   it.each(["commitSendMaterials", "commitSweep", "dismissRecordSweep", "leaveMaterialsUnrecorded"])(

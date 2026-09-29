@@ -1,0 +1,5 @@
+/* SendExtras — portal-safe literals (see the component's header) */
+.sx { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; min-width: 0; }
+.sx-rq { align-self: flex-start; border: 0; background: none; padding: 0; font: 400 8.5px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(28, 19, 15, .7); text-align: left; }
+button.sx-rq { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+button.sx-rq:hover { color: #1c130f; }

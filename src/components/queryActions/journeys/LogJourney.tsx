@@ -10,11 +10,13 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
-import React, { useMemo, useRef, useState } from "react";
+import { previousQueryFor } from "../../../lib/requery";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { collection, doc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
+import { ComponentType, QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
 import {
   addDays, dayDiff, dayIso, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
@@ -22,9 +24,11 @@ import {
   bookOf, capFirst, materialsName, sameSample, sampleName, type Materials, type Sample,
 } from "../../../lib/queryActions/sample";
 import {
-  currentVersion, guidelineAsk, packageMatches, packagesFor, sentSnapshot, type PackageCard,
+  activePackageId, currentVersion, exactPackage, guidelineAsk, openingChoice, openingPackage, packageMatches, packageToAttach, packagesFor,
+  piecesChanged, sentPieces, summaryOf, summaryWith, type PackageCard,
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { SentChip } from "../SentHow";
 import { buildAgentMaterials, emptyMaterials } from "../../../lib/agentMaterials";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
@@ -74,7 +78,29 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const [requery, setRequery] = useState(false);
   const [sent, setSent] = useState<Date>(again?.sent ?? today);
   const [via, setVia] = useState<SubmissionMethod>((again?.via as SubmissionMethod) ?? SubmissionMethod.EMAIL);
-  const [pkg, setPkg] = useState<string>(again?.pkg ?? req.packageId ?? "custom");
+  /* ---------- step 2: a package, or individually (§A1) ---------- */
+  const orderFor = (id: string) => {
+    const live = packagesFor(id, packages, versions, manuscripts.find((m) => m.id === id)?.bookVersions);
+    return { live, ...openingChoice(live, req.packageId, again, activePackageId(manuscripts.find((m) => m.id === id), packages)) };
+  };
+  const [how, setHow] = useState<"package" | "individual">(() => orderFor(msId).how);
+  const [pkg, setPkg] = useState<string | null>(() => orderFor(msId).pkg);
+  /** The writer chose an option or a package themselves: nothing re-applies the order after that. */
+  const [pkgTouched, setPkgTouched] = useState(false);
+  /** The package the writer started from before switching to individually — the "based on" (§A2). */
+  const [basedOn, setBasedOn] = useState<PackageCard | null>(null);
+  /** "Leave this query to make a package?" is up. */
+  const [leaving, setLeaving] = useState(false);
+  const navigate = useNavigate();
+  /** The order again, for a new manuscript or for packages that arrived after the drawer opened. */
+  function applyOrder(id: string) {
+    const { how: opened, pkg: openedPkg, live } = orderFor(id);
+    setHow(opened);
+    setPkg(openedPkg);
+    setBasedOn(null);
+    const card = openedPkg ? live.find((p) => p.id === openedPkg) : null;
+    if (card) setMat((m) => ({ ...m, ql: card.ql, syn: card.syn }));
+  }
   const [mat, setMat] = useState<Materials>(() => (again?.mat as Materials) ?? { ql: true, syn: true, s: { unit: "chapters", amt: 3, from: 1, sect: false, fu: null } });
   const [expectMode, setExpectMode] = useState<string>("usual");
   const [expectCustom, setExpectCustom] = useState<Date | null>(null);
@@ -87,7 +113,15 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const newId = useRef<string>(doc(collection(fsdb, "users", db.currentUser?.id || "_", "queries")).id);
 
   const agent = agents.find((a) => a.id === agentId) || null;
-  const pkgs = useMemo(() => packagesFor(msId, packages, versions), [msId, packages, versions]);
+  const pkgs = useMemo(() => packagesFor(msId, packages, versions, ms?.bookVersions), [msId, packages, versions, ms?.bookVersions]);
+  /* Packages that arrive after the drawer opened re-apply the order, unless the writer has chosen. */
+  const pkgKey = pkgs.map((p) => p.id).join(",");
+  const lastKey = useRef(pkgKey);
+  useEffect(() => {
+    if (lastKey.current === pkgKey) return;
+    lastKey.current = pkgKey;
+    if (!pkgTouched) applyOrder(msId);
+  }, [pkgKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const ask = useMemo(() => guidelineAsk(agent), [agent]);
   const qlV = currentVersion(msId, versions, ComponentType.QUERY_LETTER);
   const synV = currentVersion(msId, versions, ComponentType.SYNOPSIS);
@@ -99,9 +133,13 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     setRequery(false);
     setVia((a.submissionMethod as SubmissionMethod) || SubmissionMethod.EMAIL);
     if (!again) {
+      /* ⚠️ A GUIDELINE MATCH NEVER CHANGES THE PACKAGE (§A1, LP2). It fills the sample's portion —
+         the agent's to set (D2) — and, when the writer is choosing individually, the ticks. */
       const fresh: Materials = g.stated ? { ql: g.ql, syn: g.syn, s: g.sample.unit === "none" ? noSample() : g.sample } : mat;
-      const match = packagesFor(msId, packages, versions).find((p) => packageMatches(p, g));
-      if (match) { setPkg(match.id); setMat({ ...fresh, ql: match.ql, syn: match.syn }); } else { setPkg(req.packageId ?? "custom"); setMat(fresh); }
+      const card = how === "package" ? pkgs.find((p) => p.id === pkg) : null;
+      if (card) setMat({ ...fresh, ql: card.ql, syn: card.syn });
+      else if (how === "individual" && !basedOn) setMat(fresh);
+      else setMat({ ...mat, s: fresh.s });
     }
     setExpectMode("usual");
     setExpectCustom(null);
@@ -116,12 +154,44 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const seeded = useRef(false);
   if (!seeded.current && req.agentId && agent) { seeded.current = true; pickAgent(agent); }
 
-  const touchMat = (m: Materials) => { setMat(m); setPkg("custom"); setTouched(true); };
+  /** A tick or the sample: in package mode only the portion can change, and it stays a package (D2). */
+  const touchMat = (m: Materials) => { setMat(m); setTouched(true); };
+  function chooseHow(k: "package" | "individual") {
+    setPkgTouched(true);
+    setTouched(true);
+    if (k === "individual") {
+      if (how === "package") {
+        const card = pkgs.find((p) => p.id === pkg) || null;
+        setBasedOn(card);
+        if (card) setMat({ ...mat, ql: card.ql, syn: card.syn });
+      }
+      setHow("individual");
+      return;
+    }
+    if (!pkgs.length) return;
+    const id = packageToAttach(pkgs, openingPackage(pkgs, req.packageId, again?.pkg, activePackageId(ms, packages)), agent ? ask : null);
+    attach(id);
+  }
+  function attach(id: string | null) {
+    const card = pkgs.find((p) => p.id === id);
+    if (!card) return;
+    setPkgTouched(true);
+    setTouched(true);
+    setHow("package");
+    setPkg(card.id);
+    setBasedOn(null);
+    setMat({ ...mat, ql: card.ql, syn: card.syn });
+  }
 
   /* ---------- the facts the guards read ---------- */
   const forBook = queries.filter((q) => q.manuscriptId === msId);
   const dup = agent ? forBook.find((q) => q.agentId === agent.id && isLive(q)) : null;
-  const prev = agent && !dup ? forBook.find((q) => q.agentId === agent.id && !isLive(q)) : null;
+  /* ⚠️ THE ONE REQUERY CHECK (lib/requery, clean-up pass 28 Sep): same agent, same book, closed, and
+     sent strictly BEFORE the date being logged — the latest such. It was the first closed match in
+     list order, with no date test, so a later closed query could be named as the "previous" one. */
+  const prev = agent && !dup
+    ? previousQueryFor({ id: "__new__", agentId: agent.id, manuscriptId: msId, status: QueryStatus.QUERIED, dateSent: "" }, forBook, sent.getTime())
+    : null;
   const sameAg = agent
     ? forBook.find((q) => q.agentId !== agent.id && isLive(q) && (() => {
         const o = agents.find((x) => x.id === q.agentId);
@@ -174,7 +244,19 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const g3: Guard | null = nothing ? { level: "block", msg: "Nothing is marked as sent" } : issues.length ? { level: "check", msg: `Different from ${first}'s guidelines: ${issues.join("; ")}` } : null;
   const g5: Guard | null = nudgeDate && dayDiff(nudgeDate, expect) < 0 ? { level: "check", msg: `The nudge is before ${first}'s reply window closes` } : null;
 
-  const pkCard = pkgs.find((p) => p.id === pkg) || null;
+  const pkCard = how === "package" ? pkgs.find((p) => p.id === pkg) || null : null;
+  /* The pieces going out, and their versions. Individually, a piece still ticked from the package
+     the writer started from keeps THAT package's version, so switching changes nothing by itself. */
+  const indQl = basedOn?.qlId && mat.ql ? { id: basedOn.qlId, name: basedOn.qlVersion } : { id: qlV?.id ?? null, name: qlV?.versionName ?? null };
+  const indSyn = basedOn?.synId && mat.syn ? { id: basedOn.synId, name: basedOn.synVersion } : { id: synV?.id ?? null, name: synV?.versionName ?? null };
+  const pieceV = pkCard
+    ? { qlId: pkCard.qlId, synId: pkCard.synId, qlVersion: pkCard.qlVersion, synVersion: pkCard.synVersion, bookVersion: pkCard.bookVersion, other: pkCard.other }
+    : { qlId: mat.ql ? indQl.id : null, synId: mat.syn ? indSyn.id : null, qlVersion: mat.ql ? indQl.name : null, synVersion: mat.syn ? indSyn.name : null, bookVersion: basedOn?.bookVersion ?? null, other: basedOn?.other ?? null };
+  const pieces = sentPieces(mat, pieceV);
+  const changes = !pkCard && basedOn ? piecesChanged(basedOn, pieceV) : [];
+  /** Chosen individually yet exactly a live package: the review asks, never converts (§A2, LP8). */
+  const exact = !pkCard ? (basedOn && !changes.length ? basedOn : exactPackage(pkgs, pieceV)) : null;
+  const [exactDeclined, setExactDeclined] = useState<string | null>(null);
   const ok = !!agent;
 
   /* ---------- the steps ---------- */
@@ -212,14 +294,14 @@ export function LogJourney({ req, today, children }: JourneyProps) {
           </>
         ) : (
           <>
-            {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>Same day, same way and the same package as your last query. Just choose the agent.</Note> : null}
+            {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>{again.how === "individual" || again.pkg === "custom" ? "Same day, same way and the same pieces as your last query." : "Same day, same way and the same package as your last query."} Just choose the agent.</Note> : null}
             <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} book={book} />
           </>
         )}
         <Fl>MANUSCRIPT</Fl>
         <div className="qad-chips">
           {(liveMss.length ? liveMss : manuscripts).map((m) => (
-            <Chip key={m.id} on={m.id === msId} onClick={() => { setMsId(m.id); setPkg("custom"); }}>{m.title}</Chip>
+            <Chip key={m.id} on={m.id === msId} onClick={() => { setMsId(m.id); if (!pkgTouched) applyOrder(m.id); else { setHow("individual"); setPkg(null); setBasedOn(null); } }}>{m.title}</Chip>
           ))}
         </div>
       </>
@@ -241,42 +323,100 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     });
 
     const askLine = ask.stated ? `${first.toUpperCase()} ASKS FOR: ${materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).toUpperCase()}` : undefined;
+    const match = agent && ask.stated ? pkgs.find((p) => packageMatches(p, ask)) ?? null : null;
+    const bookTitle = ms?.title ?? "this book";
     steps.push({
       title: "What you sent",
-      summary: `${pkCard ? `${pkCard.name} package · ` : ""}${materialsName(mat)}`,
+      /* ⚠️ THE REVIEW WEARS THE SAME PAIR AS THE CARD AND TRACKING (§A3): the chip is SentChip
+         itself, fed the record this save will write, so the three cannot disagree. */
+      summary: (
+        <span className="qad-sentsum" data-qad-sentsum={pkCard ? "package" : "individual"}>
+          <SentChip q={pkCard
+            ? { sentHow: "package", sentPackageId: pkCard.id, sentMaterials: summaryWith(pieces, pkCard.name, null) }
+            : { sentHow: "individual", basedOnPackageId: basedOn && changes.length ? basedOn.id : undefined, sentMaterials: summaryWith(pieces, null, basedOn && changes.length ? basedOn.name : null) }} />
+          <span>{pkCard ? `${pkCard.name} package` : `Chosen individually · ${summaryOf(pieces).replace(/^./, (c) => c.toLowerCase()) || "nothing ticked"}`}</span>
+        </span>
+      ),
       guard: g3,
-      ownWarn: issues.length > 0,
+      ownWarn: true,
       body: (
         <>
-          {pkgs.length ? (
+          <div className="qad-hows" role="radiogroup" aria-label="How you record what you sent">
+            <button type="button" role="radio" aria-checked={how === "package"} className={`qad-how${how === "package" ? " on" : ""}${pkgs.length ? "" : " dis"}`}
+              disabled={!pkgs.length} data-qad-how="package" onClick={() => chooseHow("package")}>
+              <i /><span><b>Attach a submission package</b><small>{pkgs.length ? `${pkgs.length} ready for ${bookTitle}` : "None made yet"}</small></span>
+            </button>
+            <button type="button" role="radio" aria-checked={how === "individual"} className={`qad-how${how === "individual" ? " on" : ""}`}
+              data-qad-how="individual" onClick={() => chooseHow("individual")}>
+              <i /><span><b>Choose materials individually</b><small>Tick what you sent, piece by piece</small></span>
+            </button>
+          </div>
+          {!pkgs.length ? (
+            <div className="qad-nopkg" data-qad-nopkg>No packages yet. <a role="button" tabIndex={0} onClick={() => setLeaving(true)} onKeyDown={(e) => { if (e.key === "Enter") setLeaving(true); }}>Make one in Submission packages ›</a></div>
+          ) : null}
+          {how === "package" && pkCard ? (
             <>
-              <Fl right="FROM YOUR MANUSCRIPT'S MATERIALS">SUBMISSION PACKAGE</Fl>
-              <div className="qad-pkgs">
+              <Fl right={askLine}>WHICH PACKAGE</Fl>
+              <div className="qad-plist" role="radiogroup" aria-label="Which package">
                 {pkgs.map((p) => (
-                  <button type="button" key={p.id} className={`qad-pkg${pkg === p.id ? " on" : ""}`} data-qad-pkg={p.id}
-                    onClick={() => { setPkg(p.id); setMat({ ...mat, ql: p.ql, syn: p.syn }); setTouched(true); }}>
-                    <b>{p.name}{packageMatches(p, ask) ? <em>MATCHES {first.toUpperCase()}</em> : null}</b>
-                    <small>{p.summary}</small>
+                  <button type="button" role="radio" aria-checked={pkg === p.id} key={p.id} className={`qad-prow${pkg === p.id ? " on" : ""}`} data-qad-pkg={p.id} onClick={() => attach(p.id)}>
+                    <i />
+                    <span><b>{p.name}</b><small>{p.summary}{p.bookVersion ? ` · ${p.bookVersion}` : ""}</small></span>
+                    <span className="qad-ptags">
+                      {p.id === activePackageId(ms, packages) ? <em className="u">USED FOR NEW QUERIES</em> : null}
+                      {agent && packageMatches(p, ask) ? <em className="m">MATCHES {first.toUpperCase()}</em> : null}
+                    </span>
                   </button>
                 ))}
-                <button type="button" className={`qad-pkg${pkg === "custom" ? " on" : ""}`} data-qad-pkg="custom" onClick={() => setPkg("custom")}>
-                  <b>Custom</b><small>Choose the pieces yourself</small>
-                </button>
               </div>
+              <div className="qad-inpk" data-qad-inpk>
+                <h5>IN THIS PACKAGE</h5>
+                {sentPieces({ ...mat, ql: pkCard.ql, syn: pkCard.syn, s: noSample() }, pieceV).map((x) => (
+                  <div key={x.key}><b>{x.label}</b><span>{x.value || "—"}</span></div>
+                ))}
+                <p>Sent something slightly different? <a role="button" tabIndex={0} onClick={() => chooseHow("individual")}>Choose individually</a>, starting from this package.</p>
+              </div>
+              {/* ⚠️ THE PORTION IS THE QUERY'S, NOT THE PACKAGE'S (D2): a package names the book version,
+                  and how much of it went is the agent's to set. The mock draws packages that state a
+                  sample; the model does not, so the portion keeps its own control here. */}
+              <Fl right={agent && ask.sample.unit !== "none" ? `${first.toUpperCase()} ASKS FOR THE ${sampleName(ask.sample).toUpperCase()}` : undefined}>HOW MUCH OF THE BOOK</Fl>
+              <SampleControl name="log" sample={mat.s} book={book} allowNone onChange={(s) => touchMat({ ...mat, s })} />
+              {agent && ask.stated ? (
+                !packageMatches(pkCard, ask) ? (
+                  <Note kind="warn" tag="CHECK">
+                    {first} asks for the {materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).replace(/^Q/, "q")}.{" "}
+                    {match ? <NoteLink onClick={() => attach(match.id)}>Attach {match.name} instead</NoteLink>
+                      : <NoteLink onClick={() => { chooseHow("individual"); setMat({ ql: ask.ql, syn: ask.syn, s: ask.sample.unit === "none" ? noSample() : ask.sample }); }}>Choose individually to match</NoteLink>}
+                  </Note>
+                ) : issues.length ? (
+                  <Note kind="warn" tag="CHECK">{matchSentences(first, ask, mat).join(". ")}.</Note>
+                ) : <Note kind="ok" tag="MATCH">Matches what {first} asks for.</Note>
+              ) : null}
             </>
-          ) : null}
-          <Fl right={askLine}>{""}</Fl>
-          <Toggle testId="ql" on={mat.ql} onClick={() => touchMat({ ...mat, ql: !mat.ql })} small={mat.ql ? versionTag(pkCard?.qlVersion ?? qlV?.versionName) : ""}>Query letter</Toggle>
-          <Toggle testId="syn" on={mat.syn} onClick={() => touchMat({ ...mat, syn: !mat.syn })} small={mat.syn ? versionTag(pkCard?.synVersion ?? synV?.versionName) : ""}>Synopsis</Toggle>
-          <SampleControl name="log" sample={mat.s} book={book} allowNone onChange={(s) => touchMat({ ...mat, s })} />
-          <SampleLine label={materialsName(mat)} sample={mat.s} book={book} />
-          {agent && ask.stated ? (
-            issues.length || (ask.syn === false && mat.syn) || (ask.sample.unit === "none" && mat.s.unit !== "none") ? (
-              <Note kind="warn" tag="CHECK">
-                {matchSentences(first, ask, mat).join(". ")}. <NoteLink onClick={() => { setMat({ ql: ask.ql, syn: ask.syn, s: ask.sample.unit === "none" ? noSample() : ask.sample }); setPkg("custom"); }}>Use {first}'s list</NoteLink>
-              </Note>
-            ) : <Note kind="ok" tag="MATCH">Matches what {first} asks for.</Note>
-          ) : null}
+          ) : (
+            <>
+              <Fl right={askLine}>WHAT YOU SENT</Fl>
+              <Toggle testId="ql" on={mat.ql} onClick={() => touchMat({ ...mat, ql: !mat.ql })} small={mat.ql ? versionTag(indQl.name, !basedOn || indQl.id === qlV?.id) : ""}>Query letter</Toggle>
+              <Toggle testId="syn" on={mat.syn} onClick={() => touchMat({ ...mat, syn: !mat.syn })} small={mat.syn ? versionTag(indSyn.name, !basedOn || indSyn.id === synV?.id) : ""}>Synopsis</Toggle>
+              <SampleControl name="log" sample={mat.s} book={book} allowNone onChange={(s) => touchMat({ ...mat, s })} />
+              <SampleLine label={materialsName(mat)} sample={mat.s} book={book} />
+              {basedOn && changes.length ? (
+                <Note kind="info" tag="BASED ON">
+                  Started from <b>{basedOn.name}</b>, {ordinal(basedOn.edition)} edition. You changed {changes.map((c) => c.replace(/:.*→\s*/, " to ").toLowerCase()).join("; ")}. It'll be recorded as <em>based on {basedOn.name}</em>, and won't count towards {basedOn.name}'s results.
+                </Note>
+              ) : null}
+              {agent && ask.stated ? (
+                issues.length || (ask.syn === false && mat.syn) || (ask.sample.unit === "none" && mat.s.unit !== "none") ? (
+                  <Note kind="warn" tag="CHECK">
+                    {matchSentences(first, ask, mat).join(". ")}. <NoteLink onClick={() => { setMat({ ql: ask.ql, syn: ask.syn, s: ask.sample.unit === "none" ? noSample() : ask.sample }); setTouched(true); }}>Use {first}'s list</NoteLink>
+                  </Note>
+                ) : <Note kind="ok" tag="MATCH">Matches what {first} asks for.</Note>
+              ) : null}
+              {match ? (
+                <Note kind="info" tag="PACKAGE">Your <b>{match.name}</b> package matches what {first} asks for. <NoteLink onClick={() => attach(match.id)}>Attach it</NoteLink></Note>
+              ) : null}
+            </>
+          )}
         </>
       ),
     });
@@ -331,7 +471,10 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   /* ---------- when you save ---------- */
   const saves: SaveLine[] = agent ? [
     { text: <><b>Queried</b> {agentName(agent)}, {fmt(sent)}, via {viaLabel(via)}</>, dot: "var(--qad-sand)" },
-    { text: `${materialsName(mat)} recorded as sent` },
+    pkCard
+      ? { text: <><b>{pkCard.name} package</b> recorded as sent ({ordinal(pkCard.edition)} edition), and counted in its results</>, dot: "var(--qad-btn, #2a3a52)" }
+      : { text: <>What was sent: {summaryOf(pieces).replace(/^./, (c) => c.toLowerCase()) || "nothing"}{basedOn && changes.length ? <> · <em>based on {basedOn.name} ({ordinal(basedOn.edition)} ed.), {changes.map((c) => c.split(":")[0].toLowerCase()).join(" and ")} changed</em></> : null}</> },
+    ...(!pkCard && basedOn && changes.length ? [{ text: <>{basedOn.name}'s page lists it under “sent with changes”; it won't count towards {basedOn.name}'s results</> }] : []),
     { text: `Reply expected by ${fmt(expect)}` },
     ...(ifNo === "nudge" && nudgeDate ? [{ text: `“Nudge ${first}” lands on your to-do on ${fmt(nudgeDate)}; if still quiet, “Consider closing” four weeks after`, dot: "var(--qad-blush)" }] : []),
     ...(ifNo === "close" ? [{ text: `Closes itself on ${fmt(addDays(expect, 1))} if nothing comes back — you'll see it in the Query Centre first`, dot: "var(--qad-stone)" }] : []),
@@ -347,38 +490,61 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     steps,
     preNote: !agent ? <Note kind="info" tag="NEXT" style={{ marginTop: 22 }}>Choose the agent first. Their reply time, how they take queries and what they ask for fill in the rest.</Note> : undefined,
     saves,
+    reviewNote: exact && exact.id !== exactDeclined ? (
+      <div className="qad-exact" data-qad-exact>
+        <b>This is exactly your {exact.name} package</b>
+        <p>{summaryOf(pieces)}: the same pieces as {exact.name}'s {ordinal(exact.edition)} edition. Record it as that package, so it counts towards {exact.name}'s results?</p>
+        <div>
+          <button type="button" className="rec" onClick={() => attach(exact.id)}>Record as {exact.name}</button>
+          <button type="button" className="keep" onClick={() => setExactDeclined(exact.id)}>Keep as chosen individually</button>
+        </div>
+      </div>
+    ) : undefined,
+    leave: leaving ? {
+      title: "Leave this query to make a package?",
+      sub: "What you've entered here won't be kept.",
+      button: "Leave",
+      cancel: () => setLeaving(false),
+      go: () => navigate("/manuscripts/packages"),
+    } : null,
     dirty: touched || !!agent || typed.trim() !== "",
     guardDiscard: !!agent,
     touched: () => [newId.current],
     commit: async () => {
       if (!agent) throw new Error("No agent chosen");
-      const snap = sentSnapshot(pkCard, mat, qlV?.versionName ?? null, synV?.versionName ?? null);
+      /* §C3 — how the materials were recorded, frozen here and never read back from a live package. */
+      const summary = summaryWith(pieces, pkCard?.name ?? null, !pkCard && basedOn && changes.length ? basedOn.name : null);
+      const versionIds = [pieceV.qlId, pieceV.synId].filter((x): x is string => !!x);
+      const record: Record<string, unknown> = pkCard
+        ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition, sentPackageName: pkCard.name }
+        : { sentHow: "individual", ...(basedOn && changes.length ? { basedOnPackageId: basedOn.id, basedOnPackageEdition: basedOn.edition, sentChanges: changes } : {}) };
       const writerExpected = !wks || expectMode !== "usual";
       const payload: Record<string, unknown> = {
         id: newId.current,
         manuscriptId: msId,
         agentId: agent.id,
+        /* kept in step with sentPackageId for older readers — empty when not a package (§C3) */
         packageId: pkCard ? pkCard.id : "",
         materialsWanted: materialsToQuery(mat),
         personalisationNotes: "",
         sendMethod: via,
         dateSent: dayIso(sent),
         ifNoResponse: IF_NO_STORED[ifNo],
-        sentPackageId: snap.sentPackageId,
-        sentMaterials: snap.sentMaterials,
-        sentVersions: snap.sentVersions,
+        ...record,
+        sentMaterials: summary,
+        sentVersions: versionIds,
         ...(nudgeDate ? { nudgeDate: dayIso(nudgeDate) } : {}),
         ...(writerExpected ? { writerExpectedDate: dayIso(expect), writerExpectedSetAt: new Date().toISOString() } : {}),
         ...(prev || (dup && requery) ? { requery: true } : {}),
         ...(nrmnNow !== !!agent.noResponseMeansNo ? { nrmnOverride: nrmnNow } : {}),
       };
-      const details = [snap.sentMaterials, ...snap.sentVersions].join(" · ");
-      const res = await db.addQuery(payload as never, false, { eventKey: prev || (dup && requery) ? "requery_sent" : "query_sent", details });
+      const details = summary;
+      const res = await db.addQuery(payload as never, false, { eventKey: prev || (dup && requery) ? "requery_sent" : "query_sent", details, stampPackage: !!pkCard });
       if (!res.success) throw new Error(res.error || "Couldn't log the query");
       /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the
          writer's choice writes that date, and only that choice does. */
       if (ifNo === "close") await db.updateQuery(newId.current, { responseDeadline: dayIso(expect) });
-      const keep = { sent, via, pkg, mat, manuscriptId: msId };
+      const keep = { sent, via, how: (pkCard ? "package" : "individual") as "package" | "individual", pkg: pkCard ? pkCard.id : "custom", mat, manuscriptId: msId };
       return {
         queryId: newId.current,
         message: `Query logged · ${agentName(agent)}`,
@@ -395,7 +561,8 @@ const dayOr = (v: unknown, fallback: Date): Date => {
   const x = v ? new Date(v as string) : null;
   return x && !isNaN(x.getTime()) ? new Date(x.getFullYear(), x.getMonth(), x.getDate()) : fallback;
 };
-const versionTag = (name: string | null | undefined): string => (name ? `${name.toUpperCase()} · CURRENT` : "");
+const versionTag = (name: string | null | undefined, current = true): string => (name ? `${name.toUpperCase()}${current ? " · CURRENT" : ""}` : "");
+const ordinal = (n: number): string => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
 
 function matchSentences(first: string, ask: ReturnType<typeof guidelineAsk>, m: Materials): string[] {
   const out: string[] = [];

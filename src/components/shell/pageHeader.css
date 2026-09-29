@@ -571,11 +571,13 @@
 /* ── §3.1 · full — page header v2 §2: across the column, with a centred 920 hero frame ── */
 .ph--full { --ph-pad-y: 26px; padding: var(--ph-pad-y) 0; min-height: 232px; }
 /**
- * THE HERO FRAME. `max-width: 920px; margin: 0 auto` — centred in the column, and the column's own
- * width where that is narrower. `min-height: 180px` so a short text block still gives the drawing
- * its ground. The header keeps the column's width; only its contents narrow.
+ * THE HERO FRAME — THE COLUMN ITSELF SINCE THE QUIET BAR (28 Sep). Its `max-width: 920px; margin: 0
+ * auto` is gone: the text starts on the content column's left edge, level with the cards below it,
+ * and the drawing — anchored bottom-right, standing on the rule — ends at the column's right edge.
+ * `min-height: 180px` stays, so a short text block still gives the drawing its ground. The element
+ * survives as the drawing's positioning context and as `data-probe="hero-frame"`.
  */
-.ph-hin { position: relative; box-sizing: border-box; max-width: 920px; margin: 0 auto; min-height: 180px; }
+.ph-hin { position: relative; box-sizing: border-box; min-height: 180px; }
 /* ⚠️ AT MOST 55% OF THE FRAME — the art takes 48% from the other side; a text block past its share
    would run under the drawing. */
 .ph--full .ph-text { max-width: 55%; }

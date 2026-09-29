@@ -23,6 +23,7 @@
 import type { Agent } from "../types";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { isDoorOpen } from "./agentList";
+import { formatDate } from "./dates";
 
 const DAY = 86_400_000;
 export const STALE_DAYS = 180;
@@ -184,5 +185,5 @@ export const remindLabel = (a: Agent): string => {
   if (!d) return "REMIND ME";
   const ms = Date.parse(d);
   if (Number.isNaN(ms)) return "REMIND ME";
-  return `REMIND ME ${new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+  return `REMIND ME ${formatDate(new Date(ms), { day: "numeric", month: "short" }).toUpperCase()}`;
 };

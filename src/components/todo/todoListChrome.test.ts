@@ -47,9 +47,11 @@ const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/
    spelling-versus-claim fault: the anchor's claim is "the page's body opens here", and how its
    class is assembled is no part of it. The pattern accepts a literal or a template and is what
    this anchor should have been the first time it moved. */
+/* ⚠️ AND A FIFTH (to-do list v2, 28 Sep): the split is retired with the views; the body opens at
+   `.tdv2-body`. Same claim — everything above the body is the chrome. */
 const chrome = (() => {
-  const i = page.search(/<div className=\{?[`"]tdw-split/);
-  expect(i, "the split — the page's body — must exist for this slice to mean anything").toBeGreaterThan(-1);
+  const i = page.search(/<div className=\{?[`"]tdv2-body/);
+  expect(i, "the body must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();
 
@@ -57,7 +59,9 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   it("the page names itself for its breadcrumb", () => {
     /* ⚠️ Re-anchored (tasks-pages P1): the header block is TasksPageLayout's now — the page hands
        it the title/subtitle and renderTools feeds its tool row. Same law, new home. */
-    expect(chrome).toContain("<TasksPageLayout");
+    /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the header is the SHARED full header now, the first row of
+       the page's own group — same law, the page names itself in the crumb's words. */
+    expect(chrome).toContain('variant="full"');
     expect(chrome).toContain('title="To-do list"');
     /* ⚠️ THE PROSE SUBTITLE IS RETIRED (tasks-consolidation P2) AND THE STAT CHIPS SAY IT NOW.
        `boardSubtitleCopy(boardFigures(boardCols))` and `taskStats(boardCols, …)` state the same
@@ -68,7 +72,7 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     /* Scoped to the LIVE chrome: `renderHero` is the dormant bespoke hero, kept whole behind its
        red gate, and it legitimately still carries the old wording. Asserting over the whole file
        would fail on a thing that is deliberately preserved. */
-    expect(chrome.slice(chrome.indexOf("<TasksPageLayout"))).not.toContain("What’s on your desk?");
+    expect(chrome.slice(chrome.indexOf('data-todo-v2="page"'))).not.toContain("What’s on your desk?");
   });
 
   /* ⚠️ THE SIDE CONTAINER'S MOUNT IS RETIRED (tasks-consolidation P2, 9 Aug), AND THE TRIPWIRE
@@ -107,26 +111,28 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).not.toContain("function groupCard");
     /* the retired board was a COMPONENT, so its absence is asserted where it can actually be seen */
     expect(page).not.toContain("<TodoBoard");
-    /* and the list is still reachable as a body — Phase 4 is what made that worth asserting */
-    expect(page).toContain("function renderList");
-    // the slice above already proves the call is reached from the chrome, not from a view branch
-    expect(page).toContain("<TaskList");
+    /* ⚠️ AND THE THREE-VIEW BODIES ARE RETIRED TOO (to-do list v2, 28 Sep): the page draws ONE body,
+       v2's row cards, and none of the grid, the board or the list. */
+    expect(page).not.toContain("function renderList");
+    expect(page).not.toMatch(/<TaskList[\s>]/);
+    expect(page).toContain("<V2Rows");
   });
 
-  it("⚠️ THE ADD IS THE CONTROL BAR'S NOW, and still the only creation action", () => {
-    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4). The Add moved into the control bar as the
-       one list-level action there; the session launcher stays extinct. */
-    /* ⚠️ RETARGETED AGAIN (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary
-       now — the Query Centre's arrangement, where a page states its creative verb once in the
-       masthead. Same opener, same task mode; the law survives every move. */
-    expect(page).toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
+  it("⚠️ THE ADD IS THE DESK'S NOW (to-do list v2), and still the only creation action", () => {
+    /* ⚠️ RETARGETED A THIRD TIME (to-do list v2, 28 Sep): "Add a task" LEFT the header — the desk's
+       composer replaces it, beside the list it adds to. The law survives the move: ONE place to
+       add on this page, writing through the existing `addUserTask`. */
+    expect(page).not.toContain('primary={{ label: "Add a task"');
+    expect((page.match(/<V2Desk[\s>]/g) ?? []).length).toBe(1);
+    expect(page).toContain("const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate");
     expect(page).not.toContain("tdb-ghb");
     expect(page).not.toContain("function renderTools");
   });
 
-  it("the briefing seat still renders above the groups — it is what the pill pointed at", () => {
-    expect(chrome).toContain("tdb-brief");
-    expect(chrome).toContain("LAST WEEK IN REVIEW");
+  /* the briefing seat went with the weekly review (27 Sep) — deleted, not unmounted */
+  it("the briefing seat is gone with the weekly review", () => {
+    expect(chrome).not.toContain("tdb-brief");
+    expect(chrome).not.toContain("LAST WEEK IN REVIEW");
   });
 });
 
@@ -183,8 +189,13 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
        ⚠️ SUPERSEDED A THIRD TIME, and this one ends the sequence: the chips are retired and the
        control bar's figure is `railShown()`, which SUMS THE RENDERED GROUPS rather than deriving
        a parallel total. There is no longer a second tally to keep in step with the first. */
-    expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
+    /* ⚠️ AND A FOURTH (to-do list v2, 28 Sep): the figures are the THREE TILES', off `v2Live` — the
+       sidebar badge's own population — and the Filter panel's numbers are `facetCounts` over the very
+       rows the list filters, never the raw board. */
+    expect(page).toContain("const v2Live = useMemo(() => [...boardCols.todo, ...boardCols.today], [boardCols]);");
+    expect(page).toContain("tileCounts(v2Live)");
     expect(code(page)).not.toContain("taskStats(");
-    expect(page).not.toContain("facetCounts(");
+    expect((page.match(/facetCounts\(/g) ?? []).length, "a second tally").toBe(1);
+    expect(page).toContain("facetCounts(v2TileRows, v2StatusName)");
   });
 });

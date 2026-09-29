@@ -15,7 +15,7 @@ import { dirname, join } from "path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "todo.css"), "utf8");
-const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+const flow = readFileSync(join(here, "HousekeepingSweep.tsx"), "utf8");
 /* ⚠️ THE OVERLAY OBLIGATIONS LEFT THIS FILE (§3). The focus capture and return, the stage-scroll
    lock and the Tab trap were the same twenty lines here and in TaskSettingsSheet.tsx; they are one
    primitive now. This file keeps asserting them — a guarantee does not stop mattering because it

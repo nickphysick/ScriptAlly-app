@@ -8,6 +8,7 @@
  * design — "overdue / due today" is a plain STRING compare against today's LOCAL date string, never
  * Date maths, so there's no timezone/time-of-day drift.
  */
+import { MONTHS_SHORT } from "../../lib/dates";
 import type { Note } from "../../types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -32,8 +33,6 @@ export const isDueOrOverdue = (dueDate: string | null | undefined, today: string
 /** Strictly in the past. */
 export const isOverdue = (dueDate: string | null | undefined, today: string = todayLocalISO()): boolean =>
   !!dueDate && dueDate < today;
-
-const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /**
  * Human due label for the chip: "Due today" / "Due tomorrow" / "Due 28 Jun" (mock wording).

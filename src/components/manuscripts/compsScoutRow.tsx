@@ -17,6 +17,7 @@ import React from "react";
 import { Check, Plus, X } from "lucide-react";
 import { CompSuggestion, factsChip } from "../../lib/suggestComps";
 import { compFacets } from "../../lib/compsPage";
+import { formatDate } from "../../lib/dates";
 
 /**
  * The returned-run status — "Returned 21 Aug · 3 titles".
@@ -32,7 +33,7 @@ export function returnedLine(runAt: string, shown: number): string {
   const titles = `${shown} ${shown === 1 ? "title" : "titles"}`;
   const d = new Date(runAt);
   if (!runAt || Number.isNaN(d.getTime())) return `Returned · ${titles}`;
-  return `Returned ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${titles}`;
+  return `Returned ${formatDate(d, { day: "numeric", month: "short" })} · ${titles}`;
 }
 
 export const ScoutRow: React.FC<{

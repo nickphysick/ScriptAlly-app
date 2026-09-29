@@ -237,7 +237,10 @@ describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is free for it again",
     /* ⚠️ RE-ANCHORED (P5): the pane no longer stores a queue, so there is no `dock` object to
        read a key off. The mark is the RESOLVED card's key — the same value the pane is showing,
        resolved from the live list — which is a stronger tie than before, not a weaker one. */
-    expect(pageSrc).toContain("selectedKey={docked.card?.key}");
+    /* ⚠️ THE PAGE NO LONGER MOUNTS `TaskList` (to-do list v2, 28 Sep) — its body is v2's row cards, and
+       the open task is the drawer's. The component keeps its producer (asserted above); the page
+       asserts it does not mount it, so the `.sel` rule cannot be orphaned by a half-return. */
+    expect(pageSrc).not.toMatch(/<TaskList[\s>]/);
   });
 });
 

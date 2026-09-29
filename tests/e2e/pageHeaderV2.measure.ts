@@ -6,7 +6,22 @@
  * a plain module: importing a `.measure.ts` executes its `test()` calls in the importer.
  */
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
+
+/** An outside press on something inert: the bar's own empty middle, between the toggle and the
+ *  switcher. (The page name was the target until the quiet bar made it `pointer-events: none` at
+ *  rest; the spacer has no height, so it is never "visible" to a locator.) */
+async function pressBarGap(page: Page) {
+  const at = await page.evaluate(() => {
+    const bar = [...document.querySelectorAll<HTMLElement>('[data-probe="navrow"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+    const t = bar.querySelector('[aria-controls="ws-sidebar"]')!.getBoundingClientRect();
+    const sw = bar.querySelector('[data-shell="switcher"]')!.getBoundingClientRect();
+    const b = bar.getBoundingClientRect();
+    return { x: (t.right + sw.left) / 2, y: b.top + b.height / 2 };
+  });
+  await page.mouse.click(at.x, at.y);
+}
 import { BAR_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
@@ -25,12 +40,16 @@ for (const vp of SIZES) {
       L.check("§1 bar · box: left = main, right = window, 64 tall", ctx,
         Math.abs(r.barL - r.mainL) <= 0.5 && Math.abs(r.barR - r.winR) <= 0.5 && Math.abs(r.barH - 64) <= 0.5,
         `l ${r.barL}/${r.mainL} r ${r.barR}/${r.winR} h ${r.barH}`);
-      L.check("§1 bar · background = the sidebar's", ctx, r.barBg === r.sideBg && !/rgba\([^)]*,\s*0\)$/.test(r.barBg), `bar ${r.barBg} side ${r.sideBg}`);
+      /* ⚠️ RETARGETED BY THE QUIET BAR: the bar is the PAGE GROUND now, reversing page header v2's "the
+         sidebar's colour" — the claim is still an equality of two computed backgrounds, never a literal */
+      L.check("§1 bar · background = the page ground", ctx, r.barBg === r.groundBg && !/rgba\([^)]*,\s*0\)$/.test(r.barBg), `bar ${r.barBg} ground ${r.groundBg}`);
       L.check("§1 bar · no radius", ctx, r.radii.every((x) => parseFloat(x) === 0), r.radii.join("/"));
       L.check("§1 bar · the sidebar has a 1px right hairline", ctx, r.sideRule, r.sideShadow);
       L.check("§1 bar · toggle at left + 24", ctx, r.toggleL != null && Math.abs(r.toggleL - 24) <= 1, `${r.toggleL}`);
       L.check("§1 bar · Help at right − 24", ctx, r.helpR != null && Math.abs(r.helpR - 24) <= 1, `${r.helpR}`);
-      L.check("§1 bar · the page name is visible, one line", ctx, r.nameShown && r.nameLines === 1, `${JSON.stringify(r.eyebrow)} / ${JSON.stringify(r.nameText)} lines ${r.nameLines}`);
+      /* ⚠️ RETARGETED BY THE QUIET BAR: at rest the name is laid out (one line, so it arrives without
+         moving anything) and HIDDEN; its arrival is quietBar.measure.ts Q4 */
+      L.check("§1 bar · the page name is laid out on one line, and hidden at rest", ctx, r.nameHidden && r.nameLines === 1, `${JSON.stringify(r.eyebrow)} / ${JSON.stringify(r.nameText)} lines ${r.nameLines} hidden ${r.nameHidden}`);
       L.check("§1 bar · exactly one visible switcher, none in the sidebar", ctx, r.switchers === 1 && r.inSidebar === 0, `visible ${r.switchers} sidebar ${r.inSidebar}`);
       L.check("§1 bar · no item overlaps another", ctx, r.items >= 5 && r.overlaps.length === 0, `items ${r.items} overlaps ${JSON.stringify(r.overlaps)}`);
       const s = await scrollAndRead(page, 800);
@@ -55,8 +74,9 @@ test("§4.5 · the switcher", async ({ page }) => {
   L.check("§4.5 · a click opens the menu", ctx, await menu.isVisible(), "");
   const n = await page.locator(".ws-ms-it").count();
   L.check("§4.5 · one row per manuscript, and more than one to choose", ctx, n > 1, `${n} rows`);
-  /* an outside press on something inert — the bar's page name; a press on the page could open a row */
-  await page.locator('[data-shell="pagename"]').click();
+  /* an outside press on something inert — the bar's spacer (the page name is `pointer-events: none` at rest
+     since the quiet bar); a press on the page could open a row */
+  await pressBarGap(page);
   await page.waitForTimeout(150);
   L.check("§4.5 · an outside press closes it", ctx, !(await menu.isVisible()), "");
   await btn.click();
@@ -108,7 +128,7 @@ for (const vp of SIZES) {
     const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
     L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 20 : 17);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 19 : 17);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -192,7 +212,7 @@ test("§4.6 · the quick-add card", async ({ page }) => {
   L.check("§4.6 · its header is anthracite and says Add new agent", ctx, open.head?.bg === "rgb(42, 58, 82)" && open.head?.text === "Add new agent", JSON.stringify(open.head));
   L.check("§4.6 · it is painted over the page, not under the count cards", ctx, open.onTop, "");
   L.check("§4.6 · the count cards did not move", ctx, !!before.tiles && !!open.tiles && Math.abs(before.tiles.t - open.tiles.t) <= 0.5, `${before.tiles?.t} → ${open.tiles?.t}`);
-  await page.locator('[data-shell="pagename"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
+  await pressBarGap(page); await page.waitForTimeout(150);
   L.check("§4.6 · an outside press closes it", ctx, !(await readQuick(page)).qa, "");
   await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(100); await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
   L.check("§4.6 · + Add an agent toggles it shut", ctx, !(await readQuick(page)).qa, "");

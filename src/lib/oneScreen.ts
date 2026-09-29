@@ -11,12 +11,13 @@
  * ⚠️ THE GOAL IS NO LONGER ONE OF THEM. §6 moved out whole to `lib/queryingGoals.ts`; the two
  * stored fields this file used to name (`goalTarget`/`goalPeriod`) are read by nothing now.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Query, QueryStatus } from "../types";
 import { isoWeekStart } from "./dashboardStats";
 
 const WEEK_MS = 7 * 86400000;
 const DAY_MS = 86400000;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 const MONTHS_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const parseWhen = (v: unknown): number | null => {

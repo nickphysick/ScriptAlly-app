@@ -15,15 +15,13 @@
  * optimistic path only runs when the guard passes.
  *
  * ⚠️ THE DRAFT IS NOT `JourneySendValues`. It is the four or five things this editor can actually
- * change; `draftToValues` widens it at the point of commit. A component holding the pane's whole
- * value object would be a second place that has to know what every journey needs.
+ * change. A component holding the pane's whole value object would be a second place that has to
+ * know what every journey needs.
  */
 import React from "react";
-import { DEFAULT_CHECKBACK_DAYS } from "../../lib/todoWalk";
-import { CLOSE_REASONS } from "../../lib/todoJourneys";
-import { defaultSentMaterials } from "../../lib/journeyMaterials";
-import type { JourneySendValues, SendMethod } from "../../lib/paneJourney";
+import type { SendMethod } from "../../lib/paneJourney";
 import type { TodoRow } from "../../lib/dashTodo";
+import { formatDate } from "../../lib/dates";
 
 /** the day the editor calls "today", as `YYYY-MM-DD` in the reader's own zone */
 const ymd = (d: Date): string =>
@@ -33,7 +31,7 @@ const shift = (days: number): string => { const d = new Date(); d.setDate(d.getD
 /** "31 Oct" — the app's own short date, never a second format */
 export const shortDate = (iso: string): string => {
   const t = new Date(iso);
-  return Number.isNaN(t.getTime()) ? "" : t.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(t.getTime()) ? "" : formatDate(t, { day: "numeric", month: "short" });
 };
 
 export interface RowDraft {
@@ -49,50 +47,6 @@ export interface RowDraft {
   remind: string;
   note: string;
 }
-
-/**
- * The defaults the tick committed with, so `Change` opens showing what was actually written.
- *
- * ⚠️ THE REPLY WINDOW IS THE AGENCY'S OWN WHERE THEY STATE ONE. `row.window` carries
- * `replyWindow`'s answer including whether it was STATED; an unstated window still fills the field
- * — the writer is allowed a date — but nothing here claims the agency gave it.
- */
-export const blankDraft = (row: TodoRow): RowDraft => ({
-  materials: defaultSentMaterials(row.taskType, row.title.who || "the agent"),
-  also: "",
-  sentDate: shift(0),
-  method: "Email",
-  expected: shift(row.windowDays),
-  remind: shift(row.windowDays + 14),
-  note: "",
-});
-
-/** the editor's draft → the one shape `useTaskCommit` reads */
-export const draftToValues = (d: RowDraft, mode: "sent" | "nudge" | "close"): JourneySendValues => ({
-  materials: d.materials,
-  also: d.also,
-  method: d.method,
-  sentDate: d.sentDate,
-  note: d.note,
-  /* a nudge's "next nudge" is a lead in days from today — empty means the writer said don't */
-  checkBackDays: d.remind ? Math.max(0, Math.round((new Date(d.remind).getTime() - Date.now()) / 86400000)) : DEFAULT_CHECKBACK_DAYS,
-  noCheckIn: !d.remind,
-  /* ⚠️ `no_reply` IS `CLOSE_REASONS[0]`, READ RATHER THAN SPELLED — the same reason the pane's own
-     close journey uses, so "Close it, no reply" lands under No reply in Closed on both surfaces. */
-  reason: mode === "close" ? CLOSE_REASONS[0].key : null,
-  fixResponseWeeks: "",
-  fixNoMeansNo: false,
-  fixMaterials: [],
-  fixMswl: "",
-  recordRows: [],
-  branch: null,
-  decision: null,
-  remindDate: d.remind,
-  notifySel: {},
-  notifyHolding: [],
-  ...(mode === "sent" && d.expected ? { writerExpectedDate: d.expected } : {}),
-  ...(mode === "nudge" && d.remind ? { nudgeDate: d.remind } : {}),
-});
 
 /**
  * The strip's sentence — what was logged, and the one date that follows from it.

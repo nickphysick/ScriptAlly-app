@@ -183,7 +183,7 @@ test("L3 one-edge (rendered counts)", async () => {
   ck(6);
 });
 
-/* ══ L4 · status-modal — Send opens TaskModal; dismissing writes nothing ══════════════════════ */
+/* ══ L4 · status-modal — Send opens the query drawer (TaskModal deleted, 27 Sep); dismissing writes nothing ══ */
 test("L4 status-modal", async () => {
   const pre = await openMs(page, { width: 1440, height: 800 });
   const rows = page.locator(`${pre}[data-msv12="owed-row"]`);
@@ -193,8 +193,8 @@ test("L4 status-modal", async () => {
   expect(firstText, "the newest request first").toMatch(/full manuscript/i);
   ck(1);
   await rows.first().locator('[data-msv12="owed-send"]').click();
-  const modal = page.locator(".tm-dim");
-  await expect(modal, "TaskModal opens").toBeVisible({ timeout: 10_000 });
+  const modal = page.locator('.qad-drawer[data-qad-drawer="sent"]');
+  await expect(modal, "the query drawer's I've-sent-it journey opens").toBeVisible({ timeout: 10_000 });
   ck(1);
   await page.keyboard.press("Escape");
   await expect(modal).toHaveCount(0, { timeout: 10_000 });

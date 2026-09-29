@@ -32,13 +32,20 @@ export async function openQueryById(page: Page, id: string): Promise<QueryHost> 
   await expect(row, `no row for ${id} — is it on the current manuscript scope and filter?`).toBeVisible({ timeout: 20_000 });
   await row.click();
   /* the docked card and the drawer are mutually exclusive; wait for whichever arrives */
-  const docked = page.locator('.qcv-page [data-qcv="open"]');
+  /* ⚠️ v65 moved the open query into the RAIL (`[data-qcv="rail"]`), a track of `.qcv-group` beside
+     the page rather than inside it — so `.qcv-page [data-qcv="open"]` matched nothing from then on. */
+  /* ⚠️ …and v65.6 moved it again, into the query MODAL (`[data-qcv="qm"]`): "one way to open a query
+     now, and it is the modal". All three are tried, newest first. */
+  const docked = page.locator('[data-qcv="qm"] [data-qcv="open"], [data-qcv="rail"] [data-qcv="open"], .qcv-page [data-qcv="open"]');
   const drawer = page.locator(".qpn");
   await expect
     .poll(async () => (await docked.count()) > 0 || (await drawer.count()) > 0, { timeout: 20_000, message: `${id} opened neither the docked card nor the drawer` })
     .toBe(true);
   const isDocked = (await docked.count()) > 0;
-  return { root: isDocked ? '.qcv-page [data-qcv="open"]' : ".qpn", docked: isDocked };
+  const where = ['[data-qcv="qm"] [data-qcv="open"]', '[data-qcv="rail"] [data-qcv="open"]', '.qcv-page [data-qcv="open"]'];
+  let root = ".qpn";
+  if (isDocked) for (const w of where) if ((await page.locator(w).count()) > 0) { root = w; break; }
+  return { root, docked: isDocked };
 }
 
 /** Select one of the three tabs inside whichever host is open. */

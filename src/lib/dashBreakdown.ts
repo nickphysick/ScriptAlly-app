@@ -18,13 +18,14 @@
  * reuses it rather than restating it: a count that included undated imports would disagree with the
  * line it sits above the moment one existed.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { sentAt } from "./oneScreen";
 import { resolveExpectedDate } from "./expectedDate";
 import { getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 
 const DAY_MS = 86400000;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 
 /** The seven statuses a live query can hold — everything but a pass, a withdrawal or silence. */
 export const LIVE_STATUSES: readonly QueryStatus[] = [

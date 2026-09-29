@@ -12,6 +12,7 @@
  * labels out of this view is carrying the exception with them.
  */
 import { QueryStatus } from "../types";
+import { sentHowWords } from "./queryActions/sentRecord";
 import { STAGE_NAME, shortDay, tileCourt, type QcRow } from "./qcSummary";
 
 const DAY = 86_400_000;
@@ -201,7 +202,8 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
         id: r.id, row: r, group: attentionGroup(r, nowMs), prog: eyeProgress(r, nowMs), day, due, stage,
         court: tileCourt(r.status) === "you" ? "you" : "agent",
         yourMove: tileCourt(r.status) === "you" || due.kind === "past",
-        title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}`,
+        /* line two is how the materials went (§A3) — the same words as the card's chip */
+        title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}\n${sentHowWords(r.query)}`,
       };
     })
     .sort((a, b) => {

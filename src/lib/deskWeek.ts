@@ -12,6 +12,7 @@
  *
  * Pure, so the week maths is unit-testable without a calendar in front of a browser.
  */
+import { MONTHS_SHORT } from "./dates";
 import { FEvent, REMINDER_TYPES, dayDiff, startOfDay } from "../components/dashboard/fortnightEvents";
 
 export interface DiaryDay {
@@ -35,7 +36,7 @@ export const weekStartOf = (d: Date): Date => {
 };
 
 const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 
 /**
  * The seven rows of the current week.

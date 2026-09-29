@@ -36,6 +36,7 @@ import {
   safePct,
   whenMs,
 } from "./analytics";
+import { MONTHS_SHORT } from "./dates";
 
 /** The volume chart draws at most this many months. */
 export const VOLUME_MAX_MONTHS = 24;
@@ -129,7 +130,9 @@ export function figure(population: number, value: () => string, note: string, mi
 
 /* ────────────────────────────────── dates ────────────────────────────────── */
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/* ⚠️ THE ONE SHORT-MONTH TABLE IS `lib/dates.ts`'s — a second copy is what `dates.test.ts` exists to
+   refuse ("Sept" was the bug a second table produced). */
+const MONTHS: readonly string[] = MONTHS_SHORT;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /** "4 Nov 2025" */

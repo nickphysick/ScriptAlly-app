@@ -1,0 +1,309 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Package tracking</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c130f;--ink70:rgba(28,19,15,.7);--ink45:rgba(28,19,15,.45);--hair:rgba(28,19,15,.1);--btn:#2a3a52;--frame:#7c3a2a;--page:#f5f1eb;--side:#e7e3dc;--rust:#8a4a3c;
+ --sand:#f7efe3;--rose:#f5e6df;--sage:#e0e5dd;--offer:#d7e0e8;--stone:#e4e1db;--blush:#e9c9b8;
+ --machine:'Special Elite',monospace;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--serif)}
+button{font:inherit;color:inherit}
+.top{position:sticky;top:0;z-index:20;background:var(--side);border-bottom:1px solid var(--hair);padding:14px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.top h1{margin:0;font-family:var(--machine);font-weight:400;font-size:22px}
+.tabs{display:flex;gap:4px;background:#fff;border-radius:14px;padding:4px;box-shadow:inset 0 0 0 1px var(--hair)}
+.tabs button{border:0;background:none;padding:8px 14px;border-radius:10px;font-family:var(--machine);font-size:14px;cursor:pointer;color:var(--ink70)}
+.tabs button.on{background:var(--btn);color:#fff}
+.wrap{max-width:1200px;margin:0 auto;padding:28px}
+.pane{display:none}.pane.on{display:block}
+.lede{font-size:15px;color:var(--ink70);max-width:760px;margin:0 0 20px}
+.lede b{font-family:var(--machine);font-weight:400;color:var(--ink)}
+.cols{display:grid;grid-template-columns:minmax(0,580px) minmax(0,1fr);gap:28px;align-items:start}
+.sub{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.sub button{border:0;background:#fff;border-radius:16px;padding:7px 12px;font-family:var(--machine);font-size:13px;cursor:pointer;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.2)}
+.sub button.on{background:var(--ink);color:#fff;box-shadow:none}
+.notes{background:#fff;border-radius:16px;padding:18px 20px;box-shadow:0 0 0 1px var(--hair)}
+.notes h4{margin:0 0 8px;font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.notes p,.notes li{font-size:14px;line-height:1.5;color:var(--ink70)}
+.notes ul{margin:0;padding-left:18px}
+.notes b{color:var(--ink);font-weight:600}
+/* query card */
+.card{background:#fff;border-radius:16px;box-shadow:0 30px 70px -30px rgba(28,19,15,.45),0 0 0 1px var(--hair);overflow:hidden}
+.card header{display:flex;align-items:center;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--hair)}
+.av{width:42px;height:42px;border-radius:50%;background:var(--btn);color:#f5f1eb;font:700 11px var(--mono);display:flex;align-items:center;justify-content:center;flex:none}
+.card header b{display:block;font-family:var(--machine);font-weight:400;font-size:22px;line-height:1.1}
+.card header small{display:block;font:400 8.5px var(--mono);letter-spacing:.12em;color:var(--ink45);margin-top:4px}
+.card header small em{font-style:normal;color:var(--ink);font-weight:700}
+.chipst{display:inline-flex;align-items:center;gap:7px;font-family:var(--machine);font-size:13px;padding:5px 12px;border-radius:12px;margin-left:auto;white-space:nowrap}
+.chipst i{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18)}
+.ctabs{display:flex;gap:2px;padding:0 22px;border-bottom:1px solid var(--hair)}
+.ctabs span{font:400 9px var(--mono);letter-spacing:.14em;padding:12px 12px;color:var(--ink45)}
+.ctabs span.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
+.tl{padding:14px 22px 20px}
+.ev{display:flex;gap:12px;padding:12px 4px;border-bottom:1px solid var(--hair);align-items:flex-start}
+.ev>i{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18);margin-top:5px}
+.ev .bd{flex:1;min-width:0}
+.ev .hd{display:flex;align-items:baseline;gap:8px}
+.ev .hd b{font-family:var(--machine);font-weight:400;font-size:15px}
+.ev .hd small{margin-left:auto;font:400 8.5px var(--mono);letter-spacing:.1em;color:var(--ink45);white-space:nowrap}
+.ev .ln{font-size:13.5px;color:var(--ink70);margin-top:2px}
+.from{display:inline-flex;align-items:center;gap:6px;font:700 7.5px var(--mono);letter-spacing:.1em;background:#f3eee7;color:var(--ink70);padding:3px 7px;border-radius:5px;margin-top:6px}
+.from svg{width:10px;height:10px}
+.pk{margin-top:8px;border-radius:12px;background:#faf7f2;padding:10px 12px}
+.pk .pt{display:flex;align-items:baseline;gap:8px}
+.pk .pt b{font-family:var(--machine);font-weight:400;font-size:14px}
+.pk .pt em{font-style:normal;font:700 7px var(--mono);letter-spacing:.1em;padding:2px 6px;border-radius:4px;background:var(--btn);color:#fff}
+.pk .pt em.ret{background:var(--stone);color:var(--ink70)}
+.pk .pt a{margin-left:auto;font:400 8px var(--mono);letter-spacing:.1em;color:var(--ink70);text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap}
+.pk .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:4px 0;border-top:1px dashed rgba(28,19,15,.12)}
+.pk .row:first-of-type{margin-top:6px}
+.pk .row span:first-child{font-family:var(--machine);font-size:13px}
+.pk .row span:last-child{color:var(--ink70)}
+.pk .row.chg span:last-child{color:var(--rust)}
+.pk .row.chg span:last-child s{color:var(--ink45)}
+.pk .cor{margin-top:8px;font:400 8px var(--mono);letter-spacing:.1em;color:var(--rust)}
+.ev.plan>i{background:#fff!important;box-shadow:inset 0 0 0 1.4px var(--ink45)}
+.ev.plan .hd b{color:var(--ink70)}
+/* packages page */
+.pgrid{display:grid;grid-template-columns:1fr;gap:16px}
+.pcard{background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(28,19,15,.05),0 12px 30px -22px rgba(28,19,15,.3);padding:20px 22px}
+.pcard.ret{background:#fbfaf8}
+.ph{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ph h3{margin:0;font-family:var(--machine);font-weight:400;font-size:22px}
+.tag{font-style:normal;font:700 7.5px var(--mono);letter-spacing:.1em;padding:3px 7px;border-radius:5px}
+.tag.u{background:var(--btn);color:#fff}.tag.r{background:var(--stone);color:var(--ink70)}
+.ph .act{margin-left:auto;display:flex;gap:8px}
+.ph .act button{border:0;border-radius:16px;padding:7px 12px;font-family:var(--machine);font-size:13px;cursor:pointer;background:#fff;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.22)}
+.ph .act button.pri{background:var(--btn);color:#fff;box-shadow:none}
+.pcont{font-size:13.5px;color:var(--ink70);margin:6px 0 14px}
+.eds{display:flex;gap:6px;margin-bottom:12px}
+.eds button{border:0;background:#f3eee7;border-radius:10px;padding:6px 11px;font-family:var(--machine);font-size:12.5px;cursor:pointer;color:var(--ink70)}
+.eds button.on{background:var(--ink);color:#fff}
+.edline{font:400 8.5px var(--mono);letter-spacing:.08em;color:var(--ink45);margin:-4px 0 12px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.st{background:#faf7f2;border-radius:12px;padding:12px 12px 10px}
+.st small{display:block;font:400 7.5px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.st b{display:block;font-family:var(--serif);font-weight:600;font-size:26px;margin-top:6px;line-height:1}
+.st span{display:block;font:400 8px var(--mono);letter-spacing:.06em;color:var(--ink45);margin-top:5px}
+.st.key{background:var(--rose)}
+.pfoot{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink70)}
+.pfoot b{font-family:var(--machine);font-weight:400;color:var(--ink)}
+.pfoot a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--machine)}
+.pq{margin-top:14px;border-top:1px solid var(--hair)}
+.pq div{display:grid;grid-template-columns:30px 1fr auto auto;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--hair);font-size:14px}
+.pq .a{width:26px;height:26px;border-radius:50%;background:var(--btn);color:#fff;font:700 7.5px var(--mono);display:flex;align-items:center;justify-content:center}
+.pq .s{display:flex;align-items:center;gap:6px;font-family:var(--machine);font-size:13px}.pq .s i{width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(28,19,15,.2)}
+.pq small{font:400 8px var(--mono);letter-spacing:.08em;color:var(--ink45)}
+/* drawer bits */
+.drawer{width:500px;background:#fff;border-radius:16px;box-shadow:0 30px 70px -30px rgba(28,19,15,.45),0 0 0 1px var(--hair);overflow:hidden}
+.dh{background:var(--btn);color:#fff;padding:18px 24px}
+.dh small{font:400 9px var(--mono);letter-spacing:.16em;color:rgba(255,255,255,.6)}
+.dh h2{margin:4px 0 0;font-family:var(--machine);font-weight:400;font-size:22px}
+.db{padding:18px 24px 22px}
+.db h3{margin:0 0 10px;font-family:var(--machine);font-weight:400;font-size:22px}
+.gate{border-radius:14px;padding:14px 16px;margin:0 0 16px;background:var(--sand)}
+.gate b{display:block;font-family:var(--machine);font-weight:400;font-size:18px}
+.gate span{display:block;font-size:13.5px;color:var(--ink70);margin-top:3px}
+.exact{border-radius:14px;box-shadow:inset 0 0 0 2px var(--btn);padding:14px 16px;background:#f7f9fb}
+.exact b{font-family:var(--machine);font-weight:400;font-size:16px;display:block}
+.exact p{font-size:13.5px;color:var(--ink70);margin:4px 0 12px}
+.exact .bt{display:flex;gap:8px}
+.exact button{border:0;border-radius:18px;height:36px;padding:0 14px;font-family:var(--machine);font-size:13.5px;cursor:pointer;background:#fff;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.25)}
+.exact button.pri{background:var(--btn);color:#fff;box-shadow:none}
+.rr{display:grid;grid-template-columns:140px 1fr auto;gap:12px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--hair)}
+.rr b{font-family:var(--machine);font-weight:400;font-size:14.5px}.rr span{font-size:14px}.rr u{text-decoration:none;font:700 8px var(--mono);letter-spacing:.12em;color:var(--ink45)}
+.fl{font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45);margin:16px 0 8px}
+.hows{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.how{display:flex;gap:10px;align-items:flex-start;text-align:left;border:0;background:#fff;border-radius:14px;padding:12px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.16)}
+.how.on{box-shadow:inset 0 0 0 2px var(--btn);background:#f7f9fb}
+.how i,.prow i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink45);flex:none;margin-top:1px}
+.how.on i,.prow.on i{box-shadow:inset 0 0 0 4.5px var(--btn)}
+.how b{font-family:var(--machine);font-weight:400;font-size:14px;line-height:1.2}
+.plist{border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);overflow:hidden}
+.prow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--hair)}
+.prow:first-child{border-top:0}.prow.on{background:#f7f9fb}
+.prow b{display:block;font-family:var(--machine);font-weight:400;font-size:14.5px}.prow small{font-size:12.5px;color:var(--ink70)}
+.prow .was{margin-left:auto;font:700 7px var(--mono);letter-spacing:.1em;background:#f3eee7;color:var(--ink70);padding:3px 6px;border-radius:4px}
+.note{margin-top:12px;border-radius:12px;padding:11px 14px;font-size:13.5px;line-height:1.45;display:flex;gap:10px;background:var(--page)}
+.note .ni{font:700 8px var(--mono);letter-spacing:.1em;padding:3px 6px;border-radius:5px;background:#fff;color:var(--ink70);flex:none;height:fit-content}
+.sv{margin-top:16px;border-radius:14px;box-shadow:inset 0 0 0 1.2px rgba(28,19,15,.14);padding:12px 16px}
+.sv h5{margin:0 0 6px;font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--ink45)}
+.sv li{font-size:13.5px;padding:3px 0}.sv ul{margin:0;padding-left:16px}
+
+/* how the materials were recorded: two unmistakable treatments */
+.how-chip{display:inline-flex;align-items:center;gap:6px;font:700 7.5px var(--mono);letter-spacing:.1em;padding:4px 8px;border-radius:6px;margin-top:7px}
+.how-chip svg{width:11px;height:11px}
+.how-chip.pk{background:var(--btn);color:#fff}
+.how-chip.in{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.2px var(--ink);}
+.how-chip.no{background:#f3eee7;color:var(--ink70)}
+.mt{margin-top:10px;border-radius:12px;overflow:hidden}
+.mt .mth{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.mt .mth .ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.mt .mth .ic svg{width:15px;height:15px}
+.mt .mth small{display:block;font:700 7.5px var(--mono);letter-spacing:.12em}
+.mt .mth b{display:block;font-family:var(--machine);font-weight:400;font-size:16px;margin-top:2px}
+.mt .mth .r{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.mt .mth .r em{font-style:normal;font:700 7px var(--mono);letter-spacing:.1em;padding:2px 6px;border-radius:4px}
+.mt .mth .r a{font:400 8px var(--mono);letter-spacing:.1em;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap}
+.mt .mtb{padding:4px 12px 10px}
+.mt .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:5px 0;border-top:1px dashed rgba(28,19,15,.12)}
+.mt .row:first-child{border-top:0}
+.mt .row span:first-child{font-family:var(--machine);font-size:13px;display:flex;align-items:center;gap:7px}
+.mt .row span:last-child{color:var(--ink70);text-align:right}
+.mt .row.chg span:last-child{color:var(--rust)}.mt .row.chg s{color:var(--ink45)}
+.mt .tk{width:13px;height:13px;border-radius:3px;background:var(--ink);color:#fff;font-size:9px;display:inline-flex;align-items:center;justify-content:center}
+/* package attached: a solid ink band */
+.mt.pk{box-shadow:inset 0 0 0 1.5px var(--btn);background:#f7f9fb}
+.mt.pk .mth{background:var(--btn);color:#fff}
+.mt.pk .mth .ic{background:rgba(255,255,255,.14)}
+.mt.pk .mth small{color:rgba(255,255,255,.65)}
+.mt.pk .mth .r em{background:#fff;color:var(--btn)}
+.mt.pk .mth .r em.ret{background:var(--stone);color:var(--ink70)}
+.mt.pk .mth .r a{color:rgba(255,255,255,.85)}
+/* logged individually: a dashed, open outline with ticks */
+.mt.in{box-shadow:none;border:1.5px dashed rgba(28,19,15,.35);background:#fff}
+.mt.in .mth{border-bottom:1.5px dashed rgba(28,19,15,.18)}
+.mt.in .mth .ic{background:#f3eee7;color:var(--ink)}
+.mt.in .mth small{color:var(--ink45)}
+.mt.in .mth .r em{background:#f3eee7;color:var(--ink70)}
+.mt.no{border:1.5px dashed rgba(28,19,15,.2);background:#faf7f2}
+.mt.no .mth small{color:var(--ink45)}
+.mt .cor{padding:0 12px 10px;font:400 8px var(--mono);letter-spacing:.1em;color:var(--rust)}
+@media (max-width:1000px){.cols{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<div class="top"><h1>Packages through the journey</h1>
+ <div class="tabs"><button data-p="card" class="on">On the query</button><button data-p="pkgs">On the Packages page</button><button data-p="log">When logging</button><button data-p="fix">Correcting it</button></div></div>
+<div class="wrap">
+
+<!-- ============ 1 · the query ============ -->
+<section class="pane on" id="p-card">
+ <p class="lede">A query remembers the <b>package edition</b> it went out with, for life. Every result, whether a request, a pass, silence or an offer, counts towards that edition. Later sends (a partial, the full) show their own draft. Choose a case:</p>
+ <div class="sub" id="cases"><button data-c="pkg" class="on">Sent with a package</button><button data-c="ind">Logged individually</button><button data-c="based">Individually, based on a package</button><button data-c="ret">Package since retired</button><button data-c="cor">Corrected afterwards</button><button data-c="imp">Imported, no record</button></div>
+ <div class="cols">
+  <div class="card"><header><span class="av">AK</span><span><b>Aisha Kapoor</b><small id="csub"></small><span id="chow"></span></span><span class="chipst" style="background:var(--sage)"><i></i>Full sent</span></header>
+   <div class="ctabs"><span>OVERVIEW</span><span class="on">TRACKING</span><span>MATERIALS</span><span>NOTES</span></div>
+   <div class="tl" id="ctl"></div></div>
+  <div class="notes" id="cnote"></div>
+ </div>
+</section>
+
+<!-- ============ 2 · packages page ============ -->
+<section class="pane" id="p-pkgs">
+ <p class="lede">Each package's results come straight from its queries, so undo, edits, deletes and late replies keep them right. <b>A change to a package's contents starts a new edition</b>, so results from different contents are never mixed. The request rate only counts queries that have had an answer.</p>
+ <div class="cols" style="grid-template-columns:minmax(0,1fr) 320px">
+ <div class="pgrid">
+  <div class="pcard"><div class="ph"><h3>Standard</h3><i class="tag u">USED FOR NEW QUERIES</i><span class="act"><button>Edit</button><button class="pri">Log a query with this</button></span></div>
+   <div class="pcont">Query letter v4 · synopsis v2 · first 3 chapters · Fast-paced opening</div>
+   <div class="eds" id="eds"><button data-e="all">All editions</button><button data-e="2" class="on">2nd edition · current</button><button data-e="1">1st edition</button></div>
+   <div class="edline" id="edline"></div>
+   <div class="stats" id="stats"></div>
+   <div class="pfoot" id="pfoot"></div>
+   <div class="pq" id="pq"></div></div>
+  <div class="pcard ret"><div class="ph"><h3>Opening pages</h3><i class="tag r">RETIRED 12 SEP</i><span class="act"><button>Reuse as new</button></span></div>
+   <div class="pcont">Query letter v3 · synopsis v2 · first 10 pages · Fast-paced opening</div>
+   <div class="stats">
+    <div class="st"><small>SENT</small><b>9</b><span>JUN – AUG</span></div><div class="st"><small>STILL OUT</small><b>1</b><span>&nbsp;</span></div>
+    <div class="st key"><small>REQUESTS</small><b>1</b><span>1 IN 8 ANSWERED</span></div><div class="st"><small>OFFERS</small><b>0</b><span>&nbsp;</span></div>
+    <div class="st"><small>PASSES</small><b>5</b><span>&nbsp;</span></div><div class="st"><small>NO REPLY</small><b>2</b><span>&nbsp;</span></div></div>
+   <div class="pfoot"><span>Retired, not deleted: it's been sent, so its <b>9 queries</b> still point here.</span></div></div>
+ </div>
+ <div class="notes"><h4>THE RULES BEHIND THIS PAGE</h4><ul>
+  <li><b>Editions.</b> Changing what's in a package starts a new edition. Renaming it, or changing which one is "used for new queries", doesn't.</li>
+  <li><b>Sent versions are locked.</b> Once query letter v3 has gone out, editing it makes v4. The words in v3 never change.</li>
+  <li><b>Retire, don't delete.</b> A package that's been sent can only be retired. It leaves the choices but keeps its results. One that was never sent can be deleted.</li>
+  <li><b>Fair rates.</b> "1 in 3 answered" counts only queries with an answer (a request, a pass, an offer or closed as no reply). Queries still out are shown separately.</li>
+  <li><b>Sent with changes</b> (based on the package, then altered) are listed, but not counted in its results.</li>
+  <li><b>No colour-coded chart:</b> six plain numbers read faster and survive every screen.</li></ul></div>
+ </div>
+</section>
+
+<!-- ============ 3 · logging ============ -->
+<section class="pane" id="p-log">
+ <p class="lede">Two moments while logging protect the record. <b>Left:</b> the writer chose individually but ticked exactly what's in a package, so the review offers to record it as that package (one tap, never done silently). <b>Right:</b> they attached a package, then switched to individually and changed one thing, so it's saved as <b>based on</b> the package.</p>
+ <div class="cols" style="grid-template-columns:500px 500px">
+  <div class="drawer"><div class="dh"><small>LOG A QUERY</small><h2>Log a query</h2></div><div class="db">
+   <div class="gate"><b>Ready to log</b><span>One thing worth a glance, but it won't stop you.</span></div>
+   <div class="exact"><b>This is exactly your Standard package</b><p>Query letter v4, synopsis v2 and the first 3 chapters: the same pieces as Standard's 2nd edition. Record it as that package, so it counts towards Standard's results?</p><div class="bt"><button class="pri">Record as Standard</button><button>Keep as chosen individually</button></div></div>
+   <div class="fl">YOUR ANSWERS</div>
+   <div class="rr"><b>Agent and book</b><span>Sophie Dunn · Murphy's Day Out</span><u>EDIT</u></div>
+   <div class="rr"><b>What you sent</b><span>Chosen individually · query letter, synopsis and first 3 chapters</span><u>EDIT</u></div></div></div>
+  <div class="drawer"><div class="dh"><small>LOG A QUERY</small><h2>Log a query</h2></div><div class="db">
+   <h3>What you sent</h3>
+   <div class="hows"><div class="how"><i></i><b>Attach a submission package</b></div><div class="how on"><i></i><b>Choose materials individually</b></div></div>
+   <div class="note"><span class="ni">BASED ON</span><span>Started from <b style="font-family:var(--machine);font-weight:400">Standard</b>, 2nd edition. You changed the sample to the first 10 pages. It'll be recorded as <i>based on Standard</i>, and won't count towards Standard's results.</span></div>
+   <div class="sv"><h5>WHEN YOU SAVE</h5><ul><li>Queried Tom Hartley, Mon 28 Sep</li><li>What was sent: query letter v4, synopsis v2, first 10 pages · <i>based on Standard (2nd ed.), sample changed</i></li><li>Standard's page lists it under “sent with changes”</li></ul></div></div></div>
+ </div>
+</section>
+
+<!-- ============ 4 · correcting ============ -->
+<section class="pane" id="p-fix">
+ <p class="lede">Attached the wrong package, or forgot to? Editing the <b>Queried</b> entry lets you change what was sent. Results move to the right package, and the entry keeps a visible note that it was corrected.</p>
+ <div class="cols" style="grid-template-columns:500px minmax(0,1fr)">
+  <div class="drawer"><div class="dh"><small>CORRECT THE RECORD</small><h2>Edit an entry</h2></div><div class="db">
+   <h3>Queried</h3>
+   <div class="fl">DATE</div><div style="font-family:var(--machine);font-size:17px;padding:6px 2px;border-bottom:1.5px dashed rgba(28,19,15,.25)">Fri 14 Aug 2026</div>
+   <div class="fl">WHAT YOU SENT</div>
+   <div class="hows"><div class="how on"><i></i><b>Attach a submission package</b></div><div class="how"><i></i><b>Choose materials individually</b></div></div>
+   <div class="plist" style="margin-top:10px"><div class="prow"><i></i><span><b>Opening pages</b><small>Retired · first 10 pages</small></span><span class="was">AS RECORDED</span></div>
+    <div class="prow on"><i></i><span><b>Standard · 1st edition</b><small>Query letter v3 · synopsis v2 · first 3 chapters</small></span></div>
+    <div class="prow"><i></i><span><b>Standard · 2nd edition</b><small>Query letter v4 · synopsis v2 · first 3 chapters</small></span></div></div>
+   <div class="note"><span class="ni">EDITIONS</span><span>Every edition that existed on 14 Aug is offered, including retired ones, because that's what could have gone out that day.</span></div>
+   <div class="sv"><h5>WHEN YOU SAVE</h5><ul><li>What was sent changes from <i>Opening pages</i> to <i>Standard, 1st edition</i></li><li>Aisha's partial request and full request move to Standard's results</li><li>The entry shows “Corrected 28 Sep”, and the original stays in its history</li></ul></div></div></div>
+  <div class="notes"><h4>WHY IT'S SAFE</h4><ul>
+   <li>Credit is worked out from the query, never stored on each entry. Correct the query's package, and every result moves with it.</li>
+   <li>The snapshot is replaced by the corrected one, but the entry keeps a "corrected" marker and the original in its history, so nothing silently rewrites itself.</li>
+   <li>Undo works as usual.</li>
+   <li>The same edit can remove a package ("it was actually chosen individually") or attach one to an imported query that had no record.</li></ul></div>
+ </div>
+</section>
+</div>
+
+<script>
+const ICON='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3" width="9" height="7" rx="1.5"/><path d="M4 3V2h4v1"/></svg>';
+const PKI='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 5.2 8 2.5l5.5 2.7v5.6L8 13.5l-5.5-2.7z"/><path d="M2.5 5.2 8 8l5.5-2.8M8 8v5.5"/></svg>';
+const LSI='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6.5 4h7M6.5 8h7M6.5 12h7"/><path d="m2 4 1 1 1.8-2M2 8l1 1 1.8-2M2 12l1 1 1.8-2"/></svg>';
+const chipPk=n=>`<span class="how-chip pk">${PKI}${n} PACKAGE</span>`,chipIn=x=>`<span class="how-chip in">${LSI}MATERIALS LOGGED INDIVIDUALLY${x||''}</span>`;
+const rows=r=>r.map(([k,v,c])=>`<div class="row${c?' chg':''}"><span><i class="tk">✓</i>${k}</span><span>${v}</span></div>`).join('');
+const pkBox=(n,ed,rs,{ret,cor}={})=>`<div class="mt pk"><div class="mth"><span class="ic">${PKI}</span><span><small>SUBMISSION PACKAGE ATTACHED</small><b>${n}</b></span><span class="r"><em class="${ret?'ret':''}">${ret?'RETIRED':ed}</em><a>${ret?'SEE ITS RESULTS ›':'OPEN PACKAGE ›'}</a></span></div><div class="mtb">${rows(rs)}</div>${cor?`<div class="cor">${cor}</div>`:''}</div>`;
+const inBox=(rs,based)=>`<div class="mt in"><div class="mth"><span class="ic">${LSI}</span><span><small>MATERIALS LOGGED INDIVIDUALLY</small><b>${based?'Based on a package':'No package attached'}</b></span>${based?`<span class="r"><em>BASED ON ${based}</em></span>`:''}</div><div class="mtb">${rows(rs)}</div></div>`;
+const STD=[['Query letter','v3'],['Synopsis','v2'],['Sample','First 3 chapters · Fast-paced opening']];
+const CASES={
+ pkg:{sub:'THE LANTERN AGENCY',how:chipPk('STANDARD'),q:pkBox('Standard','1ST EDITION',STD),from:'FROM THE STANDARD PACKAGE',
+  note:`<h4>PACKAGE ATTACHED</h4><ul><li><b>Card header:</b> a solid ink chip, "STANDARD PACKAGE", visible before you open anything.</li><li><b>Queried:</b> a solid ink band, "SUBMISSION PACKAGE ATTACHED", with the package's name large and its edition. What was in it is frozen underneath.</li><li><b>Requests</b> carry "from the Standard package", because they're results the package earned.</li><li><b>Sends</b> (the partial, the full) show their own draft.</li><li>Rule of thumb: <b>solid ink = a package</b>, <b>dashed outline = logged individually</b>. It's the same everywhere: card, Tracking, Birds-eye tooltip, review.</li></ul>`},
+ based:{sub:'THE LANTERN AGENCY',how:chipIn(' · BASED ON STANDARD'),q:inBox([['Query letter','v3'],['Synopsis','v2'],['Sample','<s>First 3 chapters</s> First 10 pages',1]],'STANDARD · 1ST ED.'),from:null,
+  note:`<h4>LOGGED INDIVIDUALLY, BASED ON A PACKAGE</h4><ul><li>Same dashed treatment as any individually logged query: <b>no package was attached</b>.</li><li>A tag records where it started ("BASED ON STANDARD · 1ST ED.") and the changed piece shows in rust.</li><li>No "from the package" tag on requests, and it doesn't count in Standard's results.</li></ul>`},
+ ind:{sub:'THE LANTERN AGENCY',how:chipIn(),q:inBox([['Query letter','v3'],['Sample','First 5,000 words']]),from:null,
+  note:`<h4>LOGGED INDIVIDUALLY</h4><ul><li><b>Card header:</b> an outlined chip, "MATERIALS LOGGED INDIVIDUALLY".</li><li><b>Queried:</b> a dashed box headed "MATERIALS LOGGED INDIVIDUALLY · No package attached", with each piece ticked and versioned.</li><li>Nothing is credited to a package.</li></ul>`},
+ ret:{sub:'THE LANTERN AGENCY',how:chipPk('OPENING PAGES'),q:pkBox('Opening pages','',[['Query letter','v3'],['Synopsis','v2'],['Sample','First 10 pages · Fast-paced opening']],{ret:1}),from:'FROM THE OPENING PAGES PACKAGE',
+  note:`<h4>PACKAGE SINCE RETIRED</h4><ul><li>Still the solid "package attached" treatment. It was attached, and retiring it later doesn't change that.</li><li>A RETIRED tag replaces the edition, and the link goes to its results.</li></ul>`},
+ cor:{sub:'THE LANTERN AGENCY',how:chipPk('STANDARD'),q:pkBox('Standard','1ST EDITION',STD,{cor:'CORRECTED 28 SEP · WAS RECORDED AS “OPENING PAGES”'}),from:'FROM THE STANDARD PACKAGE',
+  note:`<h4>CORRECTED AFTERWARDS</h4><ul><li>The writer fixed the package by editing the Queried entry.</li><li>A rust line under the box says so, and what it was before. Results moved to Standard automatically.</li></ul>`},
+ imp:{sub:'THE LANTERN AGENCY',how:'<span class="how-chip no">MATERIALS NOT RECORDED</span>',q:`<div class="mt no"><div class="mth"><span><small>MATERIALS NOT RECORDED</small><b style="font-size:14px">Brought in by Smart Import</b></span><span class="r"><a style="color:var(--ink)">ADD WHAT YOU SENT ›</a></span></div></div>`,from:null,
+  note:`<h4>IMPORTED</h4><ul><li>A third, quieter treatment: neither a package nor individually logged, just <b>not recorded</b>.</li><li>"Add what you sent" opens the correction, and the writer picks one of the two ways.</li></ul>`}
+};
+function showCase(k){const c=CASES[k];document.getElementById('csub').innerHTML=c.sub;document.getElementById('chow').innerHTML=c.how;
+ const tag=c.from?`<span class="from">${ICON}${c.from}</span>`:'';
+ document.getElementById('ctl').innerHTML=`
+  <div class="ev plan"><i></i><div class="bd"><div class="hd"><b>Reply expected</b><small>11 DEC 2026</small></div><div class="ln">12-week reading window</div></div></div>
+  <div class="ev"><i style="background:var(--sage)"></i><div class="bd"><div class="hd"><b>Full sent</b><small>18 SEP 2026</small></div><div class="ln">Full manuscript · Draft 4 · 50,000 words</div></div></div>
+  <div class="ev"><i style="background:var(--rose)"></i><div class="bd"><div class="hd"><b>Full requested</b><small>10 SEP 2026</small></div>${tag}</div></div>
+  <div class="ev"><i style="background:var(--sage)"></i><div class="bd"><div class="hd"><b>Partial sent</b><small>28 AUG 2026</small></div><div class="ln">First 50 pages · Draft 4</div></div></div>
+  <div class="ev"><i style="background:var(--rose)"></i><div class="bd"><div class="hd"><b>Partial requested</b><small>21 AUG 2026</small></div><div class="ln">First 50 pages</div>${tag}</div></div>
+  <div class="ev"><i style="background:var(--sand)"></i><div class="bd"><div class="hd"><b>Queried</b><small>14 AUG 2026</small></div>${c.q}</div></div>`;
+ document.getElementById('cnote').innerHTML=c.note;
+ document.querySelectorAll('#cases button').forEach(b=>b.classList.toggle('on',b.dataset.c===k))}
+document.querySelectorAll('#cases button').forEach(b=>b.onclick=()=>showCase(b.dataset.c));showCase('pkg');
+const ED={
+ '2':{line:'2ND EDITION · QUERY LETTER V4 · SYNOPSIS V2 · FIRST 3 CHAPTERS · SINCE 2 SEP',s:[['SENT','6','SINCE 2 SEP'],['STILL OUT','4',''],['REQUESTS','1','1 IN 2 ANSWERED',1],['OFFERS','0',''],['PASSES','1',''],['NO REPLY','0','']],with:1,
+  q:[['SD','Sophie Dunn','Queried','var(--sand)','SENT 25 SEP'],['WT','William Tan','Partial requested','var(--rose)','REQUEST 20 SEP'],['PA','Priya Anand','Passed','var(--stone)','PASSED 18 SEP']]},
+ '1':{line:'1ST EDITION · QUERY LETTER V3 · SYNOPSIS V2 · FIRST 3 CHAPTERS · 12 JUN – 1 SEP',s:[['SENT','8','12 JUN – 1 SEP'],['STILL OUT','2',''],['REQUESTS','2','2 IN 6 ANSWERED',1],['OFFERS','1',''],['PASSES','2',''],['NO REPLY','2','']],with:1,
+  q:[['AK','Aisha Kapoor','Full sent','var(--sage)','FULL SENT 18 SEP'],['PA','Priya Anand','Offer','var(--offer)','OFFER 22 SEP'],['EW','Eleanor Whitfield','No reply','var(--stone)','CLOSED 14 SEP']]},
+ 'all':{line:'BOTH EDITIONS TOGETHER · FOR THE BIG PICTURE, NOT FOR COMPARING',s:[['SENT','14','SINCE 12 JUN'],['STILL OUT','6',''],['REQUESTS','3','3 IN 8 ANSWERED',1],['OFFERS','1',''],['PASSES','3',''],['NO REPLY','2','']],with:2,q:[]}
+};
+function showEd(e){const d=ED[e];document.getElementById('edline').textContent=d.line;
+ document.getElementById('stats').innerHTML=d.s.map(([k,v,sub,key])=>`<div class="st${key?' key':''}"><small>${k}</small><b>${v}</b><span>${sub||'&nbsp;'}</span></div>`).join('');
+ document.getElementById('pfoot').innerHTML=`<span><b>${d.with}</b> sent with changes, based on this edition · <a>see them</a></span><span>Undo, corrections and late replies keep these numbers right.</span>`;
+ document.getElementById('pq').innerHTML=d.q.map(([i,n,s,c,w])=>`<div><span class="a">${i}</span><span>${n}</span><span class="s"><i style="background:${c}"></i>${s}</span><small>${w}</small></div>`).join('');
+ document.querySelectorAll('#eds button').forEach(b=>b.classList.toggle('on',b.dataset.e===e))}
+document.querySelectorAll('#eds button').forEach(b=>b.onclick=()=>showEd(b.dataset.e));showEd('2');
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p))});
+</script></body></html>

@@ -16,6 +16,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { useToast } from "./toast/ToastProvider";
+import { formatDate } from "../lib/dates";
 import "./shell/f12.css";
 
 export type TasksScope = { queryId: string } | { agentId: string };
@@ -23,7 +24,7 @@ export type TasksScope = { queryId: string } | { agentId: string };
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmtDue = (iso: string): string => {
   const d = new Date(iso);
-  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+  return isNaN(d.getTime()) ? "" : formatDate(d, { day: "numeric", month: "short" }).toUpperCase();
 };
 
 export const TasksPopover: React.FC<{

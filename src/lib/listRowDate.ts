@@ -10,11 +10,12 @@
  * Pure + Firebase-free so tests can import it without dragging in the app's firebase init
  * (the searchSuggestionsCore lesson). `now` is injectable for deterministic tests.
  */
+import { formatDate } from "./dates";
 export function formatListRowDate(dateSent: unknown, now: Date = new Date()): string | null {
   if (dateSent == null || dateSent === "") return null;
   if (typeof dateSent !== "string" && typeof dateSent !== "number" && !(dateSent instanceof Date)) return null;
   const d = new Date(dateSent as string | number | Date);
   if (isNaN(d.getTime())) return null;
-  const base = `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+  const base = `${d.getDate()} ${formatDate(d, { month: "short" }, "en-GB", true)}`;
   return d.getFullYear() === now.getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }

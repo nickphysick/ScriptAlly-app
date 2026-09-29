@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk — To-do list v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c130f;
+  --ink-soft:#5c5048;
+  --ink-faint:#8a7f76;
+  --anthracite:#2a3a52;
+  --page:#fbf8f2;
+  --stone:#e7e3dc;
+  --stone-edge:#d8d2c8;
+  --card:#ffffff;
+  --hair:#e6e0d6;
+  --hair-soft:#efeae1;
+
+  /* locked query-state fills */
+  --st-queried:#f7efe3;
+  --st-sent:#e0e5dd;
+  --st-requested:#f5e6df;
+  --st-offer:#d7e0e8;
+  --st-closed:#e4e1db;
+
+  --blush:#f5e2da;
+  --blush-deep:#e8c8bc;
+  --slate:#6A89A7;
+
+  --shadow-card:0 1px 2px rgba(28,19,15,.04), 0 6px 18px rgba(28,19,15,.06);
+  --shadow-lift:0 2px 6px rgba(28,19,15,.06), 0 18px 44px rgba(28,19,15,.14);
+  --r-row:14px;
+  --r-card:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--stone);color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+
+/* ─────────────── enclosed-card shell ─────────────── */
+.shell{height:100vh;display:grid;grid-template-columns:232px minmax(0,1fr);
+  background:var(--page);overflow:hidden}
+.sidebar{background:var(--stone);border-right:1px solid var(--stone-edge);display:flex;
+  flex-direction:column;padding:14px 12px;font-family:'Source Serif 4',Georgia,serif}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 20px}
+.brand .mark{width:32px;height:32px;border-radius:9px;background:var(--anthracite);
+  display:grid;place-items:center}
+.brand .mark svg{width:20px;height:20px}
+.brand .name{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.navgroup{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-faint);padding:14px 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;
+  font-size:15px;color:var(--ink);text-decoration:none;position:relative}
+.nav svg{width:17px;height:17px;flex:none;opacity:.72}
+.nav:hover{background:#00000008}
+.nav.on{background:var(--anthracite);color:#fdf9f2}
+.nav.on svg{opacity:1}
+.nav .count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:#ffffff2e;padding:1px 6px;border-radius:20px}
+.who{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 8px 4px;
+  border-top:1px solid var(--stone-edge)}
+.who .av{width:30px;height:30px;border-radius:50%;background:var(--anthracite);color:#fdf9f2;
+  display:grid;place-items:center;font-family:Inter;font-size:11px;font-weight:600}
+.who b{display:block;font-size:14px;font-weight:600}
+.who span{font-size:12px;color:var(--ink-faint)}
+
+.main{display:flex;flex-direction:column;min-width:0;background:var(--page)}
+.topbar{height:58px;flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;
+  background:var(--stone);border-bottom:1px solid var(--stone-edge)}
+.iconbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;opacity:.62}
+.iconbtn:hover{background:#00000008;opacity:1}
+.iconbtn svg{width:17px;height:17px}
+.pagename{font-family:'Source Serif 4',serif;font-size:15px;font-weight:600}
+.switcher{margin-left:auto;display:flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--hair);border-radius:10px;padding:6px 12px 6px 8px;
+  box-shadow:0 1px 2px rgba(28,19,15,.04)}
+.switcher .bk{width:26px;height:26px;border-radius:6px;background:var(--st-queried);
+  display:grid;place-items:center}
+.switcher b{display:block;font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;line-height:1.2}
+.switcher span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-faint)}
+
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+
+/* ─────────────── page header ─────────────── */
+.pagehead{padding:34px 22px 0}
+.pagehead .inner{max-width:1330px;margin:0 auto;display:flex;align-items:flex-end;gap:28px}
+.pagehead h1{font-family:'Special Elite',cursive;font-weight:400;font-size:52px;line-height:1;
+  margin:0 0 10px;letter-spacing:-.005em}
+.pagehead p{margin:0;font-size:16px;color:var(--ink-soft);max-width:52ch}
+.headtext{flex:1;min-width:0;padding-bottom:14px}
+.headactions{display:flex;gap:10px;align-items:center;padding-bottom:18px}
+.art{flex:none;width:250px;align-self:flex-end;position:relative}
+.art svg{display:block;width:100%;height:auto}
+.rule{max-width:1330px;margin:0 auto;border-top:1px solid var(--hair)}
+
+.btn{background:var(--anthracite);color:#fdf9f2;border-radius:10px;padding:11px 20px;
+  font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(28,19,15,.10)}
+.btn:hover{background:#223044}
+.btn:disabled{opacity:.42;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--hair);
+  box-shadow:none;font-weight:500}
+.btn.ghost:hover{background:#00000006}
+
+/* ─────────────── centred group ─────────────── */
+.group{max-width:1330px;margin:0 auto;padding:22px 22px 60px;display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+@media (max-width:1180px){ .group{grid-template-columns:minmax(0,1fr)} .rail{display:none} }
+
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.tile{background:var(--card);border-radius:var(--r-row);box-shadow:var(--shadow-card);
+  padding:0;overflow:hidden;text-align:left;border:1.5px solid transparent;
+  transition:box-shadow .16s, border-color .16s, transform .16s}
+.tile:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}
+.tile.on{border-color:var(--anthracite)}
+.tile .band{height:5px}
+.tile .body{padding:14px 16px 13px;display:flex;align-items:flex-start;gap:12px}
+.tile .num{font-family:'Special Elite',cursive;font-size:34px;line-height:.92}
+.tile .lab{flex:1;min-width:0}
+.tile .lab b{display:block;font-family:'Source Serif 4',serif;font-size:15.5px;font-weight:600;margin-bottom:3px}
+.tile .lab .sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;
+  color:var(--ink-faint);line-height:1.5}
+.tile .gl{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;margin-top:2px}
+.tile .gl svg{width:17px;height:17px}
+
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search{flex:1;min-width:210px;display:flex;align-items:center;gap:9px;background:var(--card);
+  border:1px solid var(--hair);border-radius:11px;padding:9px 12px;box-shadow:0 1px 2px rgba(28,19,15,.03)}
+.search input{border:0;outline:0;background:none;flex:1;font:inherit;font-size:13.5px}
+.search input::placeholder{color:var(--ink-faint)}
+.search .slash{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint);
+  border:1px solid var(--hair);border-radius:5px;padding:1px 5px}
+.ctl{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--hair);
+  border-radius:11px;padding:9px 13px;font-size:13.5px;box-shadow:0 1px 2px rgba(28,19,15,.03);position:relative}
+.ctl:hover{border-color:var(--stone-edge)}
+.ctl .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-faint)}
+.ctl .v{font-weight:600}
+.ctl svg{width:13px;height:13px;opacity:.5}
+.ctl.quiet{background:none;border-color:transparent;box-shadow:none;color:var(--ink-faint);font-size:12.5px}
+.ctl.quiet:hover{color:var(--ink);background:#00000006}
+
+.panelwrap{position:relative}
+.panel{position:absolute;top:calc(100% + 8px);left:0;width:330px;z-index:40;background:var(--card);
+  border:1px solid var(--hair);border-radius:14px;box-shadow:var(--shadow-lift);display:none;overflow:hidden}
+.panel.open{display:block}
+.panel .scrollbox{max-height:340px;overflow-y:auto;padding:4px 0}
+.psec{padding:12px 16px;border-bottom:1px solid var(--hair-soft)}
+.psec:last-child{border-bottom:0}
+.psec h4{margin:0 0 9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.opt{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13.5px;cursor:pointer}
+.opt .box{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--stone-edge);flex:none;
+  display:grid;place-items:center}
+.opt.sel .box{background:var(--anthracite);border-color:var(--anthracite)}
+.opt.sel .box svg{display:block}
+.opt .box svg{width:9px;height:9px;display:none}
+.opt .tail{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint)}
+.pfoot{padding:10px 14px;background:#faf7f1;display:flex;gap:8px;align-items:center}
+
+.activebar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);
+  background:var(--anthracite);color:#fdf9f2;border-radius:999px;padding:9px 10px 9px 18px;
+  display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-lift);z-index:60;opacity:0;
+  pointer-events:none;transition:opacity .18s,transform .18s}
+.activebar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.activebar .chips{display:flex;gap:7px}
+.chip{background:#ffffff26;border-radius:999px;padding:3px 10px;font-size:12px}
+.activebar .clear{background:#fdf9f2;color:var(--anthracite);border-radius:999px;padding:5px 13px;
+  font-size:12.5px;font-weight:600}
+
+.ghead{position:sticky;top:0;z-index:20;margin:0 0 12px;background:var(--anthracite);color:#fdf9f2;
+  border-radius:9px;padding:7px 14px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 1px 2px rgba(28,19,15,.10)}
+.ghead b{font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;letter-spacing:.01em}
+.ghead .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.75}
+.gsec{margin-bottom:26px}
+.gsec:last-child{margin-bottom:0}
+
+/* ─────────────── task row-cards ─────────────── */
+.rows{display:flex;flex-direction:column;gap:11px}
+.row{background:var(--card);border-radius:var(--r-row);box-shadow:var(--shadow-card);overflow:hidden;
+  cursor:pointer;transition:box-shadow .16s, transform .16s;text-align:left;width:100%;display:block}
+.row:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}
+.row .band{height:5px}
+.row .inner{display:grid;grid-template-columns:22px minmax(0,1.5fr) minmax(0,1fr) 128px 116px;
+  gap:16px;align-items:center;padding:13px 16px 13px 14px}
+.tick{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--stone-edge);
+  background:var(--card);display:grid;place-items:center;flex:none}
+.tick:hover{border-color:var(--anthracite)}
+.tick svg{width:10px;height:10px;opacity:0}
+.tick:hover svg{opacity:.45}
+.deedwrap{min-width:0}
+.tagline{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ttag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  padding:2px 8px;border-radius:5px;background:var(--st-closed);color:var(--ink-soft)}
+.yourmove{background:var(--anthracite);color:#fdf9f2}
+.deed{font-family:'Source Serif 4',serif;font-size:17px;font-weight:600;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agentcell{display:flex;align-items:center;gap:10px;min-width:0}
+.av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--anthracite);color:#fdf9f2;
+  display:grid;place-items:center;font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.agentcell .t{min-width:0}
+.agentcell b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agentcell span{display:block;font-size:12px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.datecell .k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+.datecell .v{font-size:13.5px;font-weight:500}
+.datecell .v em{font-style:normal;color:var(--ink-soft)}
+.actcell{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.statuspill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.act{border:1px solid var(--hair);border-radius:9px;padding:7px 14px;font-size:13px;font-weight:600;
+  background:var(--card);white-space:nowrap}
+.act:hover{background:var(--anthracite);color:#fdf9f2;border-color:var(--anthracite)}
+.row.past{position:relative}
+.row.past::after{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  background:var(--ink);border-radius:0 3px 3px 0}
+
+/* arriving from the desk */
+@keyframes landed{
+  0%{box-shadow:0 0 0 2px #2a3a52, 0 2px 6px rgba(28,19,15,.06)}
+  100%{box-shadow:0 0 0 0 rgba(42,58,82,0), 0 1px 2px rgba(28,19,15,.04), 0 6px 18px rgba(28,19,15,.06)}
+}
+.row.landed{animation:landed 1.5s ease-out}
+
+/* ─────────────── right rail: Your desk ─────────────── */
+.rail{position:sticky;top:16px;max-height:calc(100vh - 92px);display:flex;flex-direction:column}
+.railcard{background:var(--card);border-radius:var(--r-row);box-shadow:var(--shadow-card);
+  overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.railhead{background:var(--blush);padding:14px 16px 0;position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;min-height:72px;flex:none}
+.railhead h3{font-family:'Special Elite',cursive;font-weight:400;font-size:23px;margin:0 0 12px;
+  line-height:1;position:relative;z-index:2}
+.railhead .hawk{position:absolute;right:4px;bottom:-8px;width:92px;z-index:1}
+
+/* composer */
+.composer{padding:13px 14px 12px;border-bottom:1px solid var(--hair-soft);flex:none}
+.ctoggle{display:flex;gap:3px;background:#f4f0e8;border-radius:9px;padding:3px;margin-bottom:10px}
+.cseg{flex:1;padding:6px 0;border-radius:7px;font-size:12.5px;font-weight:500;color:var(--ink-faint);
+  text-align:center}
+.cseg.on{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(28,19,15,.07)}
+#capture{
+  width:100%;border:1px solid var(--hair);border-radius:10px;padding:10px 11px;resize:none;
+  font:inherit;font-size:13.5px;outline:0;background:#fdfbf7;min-height:58px;line-height:1.45;
+}
+#capture:focus{border-color:var(--anthracite);background:var(--card)}
+#capture::placeholder{color:var(--ink-faint)}
+#capture.note{font-family:Caveat,cursive;font-size:18px;line-height:1.35}
+.cmeta{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.pill{border:1px solid var(--hair);border-radius:999px;padding:4px 11px;font-size:11.5px;
+  color:var(--ink-soft);background:var(--card)}
+.pill:hover{border-color:var(--stone-edge)}
+.pill.on{background:var(--anthracite);border-color:var(--anthracite);color:#fdf9f2;font-weight:500}
+.cfoot{display:flex;align-items:center;gap:10px;margin-top:10px}
+.linkish{font-size:12.5px;color:var(--ink-faint);text-decoration:underline;text-underline-offset:3px}
+.linkish:hover{color:var(--ink)}
+.addbtn{margin-left:auto;padding:8px 18px;font-size:13px;border-radius:9px}
+.said{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;
+  color:var(--ink-faint);margin-top:9px;height:12px;opacity:0;transition:opacity .2s}
+.said.show{opacity:1}
+
+.railbody{overflow-y:auto;padding:2px 0 10px;min-height:0}
+.rgh{position:sticky;top:0;z-index:5;background:var(--card);font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);
+  padding:12px 16px 7px;display:flex;align-items:center;gap:8px}
+.rgh .n{margin-left:auto;opacity:.8}
+.rrow{display:block;width:100%;text-align:left;padding:8px 16px;position:relative}
+.rrow:hover{background:#00000005}
+.rrow .l1{display:flex;align-items:baseline;gap:8px}
+.rrow .nm{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.rrow .dt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint);flex:none}
+.rrow .sub{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+.notecard{margin:0 14px 9px;background:#fdf6e9;border-radius:10px;padding:11px 13px;
+  box-shadow:0 1px 2px rgba(28,19,15,.05);position:relative}
+.notecard p{margin:0;font-family:Caveat,cursive;font-size:17.5px;line-height:1.3;color:var(--ink)}
+.notecard .meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-faint);margin-top:7px}
+.railfoot{padding:10px 14px;border-top:1px solid var(--hair-soft);background:#faf7f1;flex:none}
+.railfoot a{font-size:12.5px;color:var(--ink-soft);text-decoration:none;display:flex;
+  align-items:center;gap:6px}
+.railfoot a:hover{color:var(--ink)}
+.empty{padding:14px 16px;font-size:12.5px;color:var(--ink-faint)}
+
+/* ─────────────── modal ─────────────── */
+.dim{position:fixed;inset:0;background:rgba(28,19,15,.55);z-index:100;display:grid;place-items:center;
+  padding:28px;opacity:0;pointer-events:none;transition:opacity .16s}
+.dim.open{opacity:1;pointer-events:auto}
+.qcard{width:min(560px,100%);max-height:86vh;overflow-y:auto;background:var(--card);
+  border-radius:var(--r-card);box-shadow:var(--shadow-lift);transform:translateY(8px);transition:transform .18s}
+.dim.open .qcard{transform:translateY(0)}
+.qcard .band{height:6px}
+.qhead{padding:18px 22px 0;display:flex;align-items:flex-start;gap:14px}
+.qhead .av{width:40px;height:40px;font-size:13px}
+.qhead b{font-family:'Source Serif 4',serif;font-size:18px;font-weight:600;display:block}
+.qhead span{font-size:13px;color:var(--ink-faint)}
+.qhead .x{margin-left:auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;opacity:.5}
+.qhead .x:hover{background:#00000008;opacity:1}
+.qdeed{padding:16px 22px 0}
+.qdeed h2{font-family:'Special Elite',cursive;font-weight:400;font-size:26px;margin:0 0 6px;line-height:1.1}
+.qdeed p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.5}
+.qms{margin:16px 22px 0;background:#faf7f1;border-radius:10px;padding:12px 14px;display:flex;
+  align-items:center;gap:12px}
+.qms .k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint)}
+.qms b{font-family:'Source Serif 4',serif;font-size:15px;font-style:italic}
+.qtabs{display:flex;gap:2px;margin:18px 22px 0;border-bottom:1px solid var(--hair)}
+.qtab{padding:8px 14px;font-size:13.5px;color:var(--ink-faint);border-bottom:2px solid transparent;margin-bottom:-1px}
+.qtab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--anthracite)}
+.qtl{padding:16px 22px 4px;display:flex;flex-direction:column;gap:0}
+.tl{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:start;padding:7px 0;position:relative}
+.tl .gl{display:grid;place-items:center;padding-top:1px}
+.tl::before{content:'';position:absolute;left:10.5px;top:22px;bottom:-7px;width:1px;background:var(--hair)}
+.tl:last-child::before{display:none}
+.tl .w b{display:block;font-size:13.5px;font-weight:600}
+.tl .w span{font-size:12px;color:var(--ink-faint)}
+.tl .d{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);padding-top:2px}
+.qfoot{margin-top:6px;padding:16px 22px 20px;border-top:1px solid var(--hair-soft);display:flex;
+  align-items:center;gap:12px;background:#fdfbf7}
+
+.menu{position:absolute;top:calc(100% + 8px);left:0;min-width:200px;z-index:40;background:var(--card);
+  border:1px solid var(--hair);border-radius:12px;box-shadow:var(--shadow-lift);padding:5px;display:none}
+.menu.open{display:block}
+.mi{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13.5px;
+  width:100%;text-align:left}
+.mi:hover{background:#00000006}
+.mi.on{font-weight:600}
+.mi .dot{width:6px;height:6px;border-radius:50%;background:var(--anthracite);margin-left:auto;opacity:0}
+.mi.on .dot{opacity:1}
+.note{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;
+  color:var(--ink-faint);text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 14c3-1 5-4 6-7 1 3 3 6 6 7-2 3-4 5-6 6-2-1-4-3-6-6Z"/><circle cx="10" cy="9" r=".7" fill="#fdf9f2"/>
+        </svg>
+      </div>
+      <div class="name">QueryHawk</div>
+    </div>
+
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+
+    <div class="navgroup">Queries</div>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m3 12 18-8-7 18-2.5-7.5L3 12Z"/></svg>Query Centre</a>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-6 4 4 4-7 5 5"/></svg>Analytics</a>
+
+    <div class="navgroup">Agents</div>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.2 6-5.2S14.4 16.6 15 20"/><path d="M17 8.2a3 3 0 0 1 0 5.6"/></svg>Contact list</a>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m15 9-2.2 4.8L8 16l2.2-4.8L15 9Z"/></svg>Discover</a>
+
+    <div class="navgroup">Materials</div>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4v16M9.5 4v16M14 5l4 15"/></svg>Manuscripts</a>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="13" height="16" rx="1.6"/><path d="M19 7v13"/></svg>Comparable titles</a>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16"/></svg>Submission packages</a>
+
+    <div class="navgroup">Tasks</div>
+    <a class="nav on" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2.5 2.5L10 5"/><path d="m3 16 2.5 2.5L10 14"/><path d="M13 8h8M13 17h8"/></svg>To-do list<span class="count" id="navCount">19</span></a>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Noteboard</a>
+
+    <div class="navgroup">Account</div>
+    <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></svg>Settings</a>
+
+    <div class="who">
+      <div class="av">BC</div>
+      <div><b>Bethany Carter</b><span>Pro plan</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <button class="iconbtn" title="Collapse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+      <div class="pagename">To-do list</div>
+      <div class="switcher">
+        <div class="bk"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7a6a5c" stroke-width="1.7"><path d="M5 4h11a2 2 0 0 1 2 2v14l-6-3-6 3V4Z"/></svg></div>
+        <div><b>Murphy's Day Out</b><span>Thriller · 50,000 words</span></div>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <button class="iconbtn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      <button class="iconbtn" title="Give feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></button>
+      <button class="iconbtn" title="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4"/><circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/></svg></button>
+    </div>
+
+    <div class="scroll" id="scroll">
+
+      <div class="pagehead">
+        <div class="inner">
+          <div class="headtext">
+            <h1>To-do list</h1>
+            <p>Everything that's yours to do, and everything worth a look.</p>
+          </div>
+          <div class="headactions">
+            <button class="btn ghost">Set aside <span class="note" style="margin-left:4px">2</span></button>
+          </div>
+          <div class="art" title="Illustration placeholder — the Archivist with his ledger">
+            <svg viewBox="0 0 250 132" fill="none">
+              <path d="M8 118c40-16 96-20 150-12 30 4 58 6 84 4v14H8v-6Z" fill="#f5e2da"/>
+              <g opacity=".33" fill="#1c130f">
+                <path d="M96 118c-3-12-2-26 4-36 5-9 14-15 24-15 11 0 20 6 25 16 5 9 6 22 3 35H96Z"/>
+                <path d="M124 67c-9 0-16-7-16-16 0-10 7-17 16-17 5 0 9 2 12 5l14-6-9 12c1 2 2 4 2 6 0 9-7 16-19 16Z"/>
+                <path d="M143 88c9 2 17 8 21 17 2 4 3 9 3 13h-14c0-11-4-22-10-30Z"/>
+                <rect x="60" y="76" width="40" height="50" rx="3"/>
+              </g>
+              <g stroke="#fff" stroke-width="2" opacity=".9"><path d="M67 88h26M67 97h26M67 106h18"/></g>
+              <g opacity=".33" fill="none" stroke="#1c130f" stroke-width="2.4">
+                <circle cx="118" cy="49" r="6"/><circle cx="133" cy="49" r="6"/><path d="M124 49h3"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="rule"></div>
+      </div>
+
+      <div class="group">
+
+        <div class="content">
+
+          <div class="tiles">
+            <button class="tile on" data-tile="move">
+              <div class="band" style="background:var(--st-requested)"></div>
+              <div class="body">
+                <div class="gl" style="background:var(--st-requested)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.7" stroke-linejoin="round"><path d="m3 12 18-8-7 18-2.5-7.5L3 12Z"/></svg>
+                </div>
+                <div class="lab"><b>Your move</b><div class="sub" id="subMove">4 agent requests · 3 yours</div></div>
+                <div class="num" id="numMove">7</div>
+              </div>
+            </button>
+            <button class="tile" data-tile="chase">
+              <div class="band" style="background:var(--st-queried)"></div>
+              <div class="body">
+                <div class="gl" style="background:var(--st-queried)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>
+                </div>
+                <div class="lab"><b>Chase or close</b><div class="sub">3 nudges · 7 gone quiet</div></div>
+                <div class="num">10</div>
+              </div>
+            </button>
+            <button class="tile" data-tile="house">
+              <div class="band" style="background:var(--st-sent)"></div>
+              <div class="body">
+                <div class="gl" style="background:var(--st-sent)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+                </div>
+                <div class="lab"><b>Housekeeping</b><div class="sub">gaps worth filling in</div></div>
+                <div class="num">3</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="controls">
+            <div class="search">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#8a7f76" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input placeholder="Search tasks, agents or agencies">
+              <span class="slash">/</span>
+            </div>
+
+            <div class="panelwrap">
+              <button class="ctl" id="filterBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+                <span class="v">Filter</span>
+              </button>
+              <div class="panel" id="filterPanel">
+                <div class="scrollbox">
+                  <div class="psec">
+                    <h4>Task type</h4>
+                    <div class="opt" data-f="Agent request"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Agent request<span class="tail">3</span></div>
+                    <div class="opt" data-f="Nudge"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Nudge<span class="tail">3</span></div>
+                    <div class="opt" data-f="Gone quiet"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Gone quiet<span class="tail">7</span></div>
+                    <div class="opt" data-f="Housekeeping"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Housekeeping<span class="tail">3</span></div>
+                    <div class="opt" data-f="Your task"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Your task<span class="tail">3</span></div>
+                  </div>
+                  <div class="psec">
+                    <h4>Status</h4>
+                    <div class="opt" data-f="Queried"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Queried<span class="tail">9</span></div>
+                    <div class="opt" data-f="Partial requested"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Partial requested<span class="tail">2</span></div>
+                    <div class="opt" data-f="Full sent"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Full sent<span class="tail">3</span></div>
+                    <div class="opt" data-f="Offer"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Offer<span class="tail">1</span></div>
+                  </div>
+                  <div class="psec">
+                    <h4>Submission package</h4>
+                    <div class="opt" data-f="Standard query"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Standard query<span class="tail">14</span></div>
+                    <div class="opt" data-f="First 50 pages"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>First 50 pages<span class="tail">5</span></div>
+                  </div>
+                  <div class="psec">
+                    <h4>Set aside</h4>
+                    <div class="opt" data-f="Show set aside"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fdf9f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>Show tasks I've set aside<span class="tail">2</span></div>
+                  </div>
+                </div>
+                <div class="pfoot">
+                  <button class="btn ghost" style="padding:7px 14px" id="clearPanel">Clear</button>
+                  <span class="note" id="panelCount">no filters</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panelwrap">
+              <button class="ctl" id="groupBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>
+                <span class="k">Group</span><span class="v" id="groupVal">When</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="groupMenu">
+                <button class="mi on" data-g="When">When<span class="dot"></span></button>
+                <button class="mi" data-g="Task type">Task type<span class="dot"></span></button>
+                <button class="mi" data-g="Agent">Agent<span class="dot"></span></button>
+                <button class="mi" data-g="Submission package">Submission package<span class="dot"></span></button>
+                <button class="mi" data-g="None">None<span class="dot"></span></button>
+              </div>
+            </div>
+
+            <div class="panelwrap">
+              <button class="ctl" id="sortBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M17 20V4M17 4l3 3"/></svg>
+                <span class="k">Sort</span><span class="v" id="sortVal">Date on the task</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="sortMenu">
+                <button class="mi on" data-s="Date on the task">Date on the task<span class="dot"></span></button>
+                <button class="mi" data-s="Time past the date">Time past the date<span class="dot"></span></button>
+                <button class="mi" data-s="Agent">Agent<span class="dot"></span></button>
+                <button class="mi" data-s="Task type">Task type<span class="dot"></span></button>
+              </div>
+            </div>
+
+            <button class="ctl quiet">Export CSV</button>
+          </div>
+
+          <div id="list"></div>
+
+        </div>
+
+        <!-- ───────── right rail: Your desk ───────── -->
+        <aside class="rail">
+          <div class="railcard">
+
+            <div class="railhead">
+              <h3>Your desk</h3>
+              <svg class="hawk" viewBox="0 0 120 70" fill="none">
+                <g fill="#1c130f" opacity=".82">
+                  <path d="M60 70c-18 0-32-13-32-30 0-9 4-17 11-22 4 5 12 8 21 8s17-3 21-8c7 5 11 13 11 22 0 17-14 30-32 30Z"/>
+                </g>
+                <g fill="#f5e2da"><circle cx="47" cy="40" r="9"/><circle cx="73" cy="40" r="9"/></g>
+                <g fill="none" stroke="#1c130f" stroke-width="2.4" opacity=".9">
+                  <circle cx="47" cy="40" r="9"/><circle cx="73" cy="40" r="9"/><path d="M56 40h8"/>
+                  <path d="M38 38 26 33M82 38l12-5"/>
+                </g>
+                <circle cx="47" cy="40" r="3" fill="#1c130f"/><circle cx="73" cy="40" r="3" fill="#1c130f"/>
+                <path d="M60 50l-5 7h10l-5-7Z" fill="#c9622f"/>
+              </svg>
+            </div>
+
+            <div class="composer">
+              <div class="ctoggle">
+                <button class="cseg on" data-mode="task">Task</button>
+                <button class="cseg" data-mode="note">Note</button>
+              </div>
+              <textarea id="capture" placeholder="What needs doing?"></textarea>
+
+              <div class="cmeta" id="taskMeta">
+                <button class="pill on" data-when="This week">This week</button>
+                <button class="pill" data-when="Next week">Next week</button>
+                <button class="pill" data-when="Later">Later</button>
+                <button class="pill" data-when="No date">No date</button>
+              </div>
+
+              <div class="cfoot">
+                <button class="linkish" id="attachBtn">+ Attach an agent</button>
+                <button class="btn addbtn" id="addBtn" disabled>Add</button>
+              </div>
+              <div class="said" id="said"></div>
+            </div>
+
+            <div class="railbody" id="railBody"></div>
+
+            <div class="railfoot">
+              <a href="#" id="footLink">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                Open the Noteboard
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto"><path d="m9 6 6 6-6 6"/></svg>
+              </a>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="activebar" id="activebar">
+  <div class="chips" id="chips"></div>
+  <button class="clear" id="clearAll">Clear all</button>
+</div>
+
+<div class="dim" id="dim"><div class="qcard" id="qcard"></div></div>
+
+<script>
+/* ---------- status dots (locked ring set) ---------- */
+function dot(kind, size){
+  size = size || 13;
+  const s = 'width:'+size+'px;height:'+size+'px;vertical-align:-1px';
+  const R = 'stroke="#1c130f" stroke-width="1.7" fill="none"';
+  const F = 'fill="#1c130f"';
+  const map = {
+    'Queried': `<circle cx="12" cy="12" r="8" ${R}/>`,
+    'Partial requested': `<circle cx="12" cy="12" r="8" ${R} stroke-dasharray="3 2.6"/><path d="M12 6.5a5.5 5.5 0 0 0 0 11Z" ${F}/>`,
+    'Partial sent': `<circle cx="12" cy="12" r="8" ${R}/><path d="M12 6.5a5.5 5.5 0 0 0 0 11Z" ${F}/>`,
+    'Full requested': `<circle cx="12" cy="12" r="8" ${R} stroke-dasharray="3 2.6"/><circle cx="12" cy="12" r="5.5" ${F}/>`,
+    'Full sent': `<circle cx="12" cy="12" r="8" ${R}/><circle cx="12" cy="12" r="5.5" ${F}/>`,
+    'Revise & Resubmit': `<circle cx="12" cy="12" r="8" ${R} stroke-dasharray="3 2.6"/>`,
+    'Offer': `<path d="M7.5 4.5h6.6L17 7.8v11.7H7.5V4.5Z" ${R} stroke-linejoin="round"/><path d="M13.8 4.6v3.4h3.1" ${R}/>`,
+    'Closed': `<circle cx="12" cy="12" r="8" ${R}/><path d="M7.5 12h9" ${R}/>`
+  };
+  return '<svg viewBox="0 0 24 24" style="'+s+'">'+(map[kind]||map['Queried'])+'</svg>';
+}
+const FILL = {
+  'Queried':'var(--st-queried)',
+  'Partial requested':'var(--st-requested)','Full requested':'var(--st-requested)','Revise & Resubmit':'var(--st-requested)',
+  'Partial sent':'var(--st-sent)','Full sent':'var(--st-sent)',
+  'Offer':'var(--st-offer)','Closed':'var(--st-closed)'
+};
+
+/* ---------- data ---------- */
+let nextId = 100;
+const T = [
+  {id:1, type:'Agent request', yours:true, deed:'Send your partial', status:'Partial requested',
+   agent:'Greg Panetta', agency:'Curtis Vane', k1:'Asked on', v1:'28 June', k2:'Waiting', v2:'3 months',
+   when:'Past the date', past:true, act:'Mark sent', pkg:'First 50 pages'},
+  {id:2, type:'Agent request', yours:true, deed:'Send your full', status:'Full requested',
+   agent:'Marisa Oduya', agency:'Halloway & Finch', k1:'Asked on', v1:'12 September', k2:'Waiting', v2:'2 weeks',
+   when:'This week', past:false, act:'Mark sent', pkg:'Standard query'},
+  {id:3, type:'Nudge', yours:true, deed:'Worth a nudge', status:'Full sent',
+   agent:'Sophie Dunn', agency:'Curtis Vane', k1:'Sent on', v1:'23 July', k2:'Since', v2:'9 weeks',
+   when:'This week', past:false, act:'Nudge', pkg:'Standard query'},
+  {id:4, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Queried',
+   agent:'Eleanor Whitfield', agency:'Greenfield Literary', k1:'Quiet since', v1:'14 March', k2:"That's", v2:'2½ years',
+   when:'Past the date', past:true, act:'Decide', pkg:'Standard query'},
+  {id:5, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Queried',
+   agent:'Penhallow Literary', agency:'Penhallow Literary', k1:'Quiet since', v1:'14 March', k2:"That's", v2:'2½ years',
+   when:'Past the date', past:true, act:'Decide', pkg:'Standard query'},
+  {id:6, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Queried',
+   agent:'Aisha Kapoor', agency:'The Lantern Agency', k1:'Quiet since', v1:'3 April', k2:"That's", v2:'2½ years',
+   when:'Past the date', past:true, act:'Decide', pkg:'Standard query'},
+  {id:7, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Full sent',
+   agent:'Jonathan Marsh', agency:'The Marsh Agency', k1:'Quiet since', v1:'9 April', k2:"That's", v2:'2½ years',
+   when:'Past the date', past:true, act:'Decide', pkg:'First 50 pages'},
+  {id:8, type:'Your task', yours:true, deed:'Polish the opening 50 pages', status:'Queried',
+   agent:'—', agency:'No agent attached', k1:'Due', v1:'1 October', k2:'In', v2:'3 days',
+   when:'This week', past:false, act:'Open', pkg:'First 50 pages'},
+  {id:9, type:'Nudge', yours:true, deed:'Worth a nudge', status:'Queried',
+   agent:'Thomas Vale', agency:'Vale & Rook', k1:'Queried on', v1:'2 July', k2:'Since', v2:'12 weeks',
+   when:'Next week', past:false, act:'Nudge', pkg:'Standard query'},
+  {id:10, type:'Agent request', yours:true, deed:'Reply to the offer', status:'Offer',
+   agent:'Iris Callahan', agency:'Northgate Literary', k1:'Offered on', v1:'24 September', k2:'Reply by', v2:'8 October',
+   when:'Next week', past:false, act:'Open', pkg:'Standard query'},
+  {id:11, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Queried',
+   agent:'Marcus Reed', agency:'Bloomsbury Quill', k1:'Quiet since', v1:'11 June', k2:"That's", v2:'2¼ years',
+   when:'Later', past:false, act:'Decide', pkg:'Standard query'},
+  {id:12, type:'Gone quiet', yours:false, deed:'Consider closing', status:'Queried',
+   agent:'William Tan', agency:'Foxglove Literary', k1:'Quiet since', v1:'30 June', k2:"That's", v2:'2¼ years',
+   when:'Later', past:false, act:'Decide', pkg:'Standard query'},
+  {id:13, type:'Housekeeping', yours:true, deed:'Add a response time for Curtis Vane', status:'Queried',
+   agent:'Curtis Vane', agency:'2 agents affected', k1:'Added', v1:'18 September', k2:'Helps with', v2:'Reminders',
+   when:'No date', past:false, act:'Fill in', pkg:'—'},
+  {id:14, type:'Housekeeping', yours:true, deed:'Add what Aisha Kapoor is looking for', status:'Queried',
+   agent:'Aisha Kapoor', agency:'The Lantern Agency', k1:'Added', v1:'20 September', k2:'Helps with', v2:'Suggestions',
+   when:'No date', past:false, act:'Fill in', pkg:'—'},
+  {id:15, type:'Your task', yours:true, deed:'Rewrite the synopsis to one page', status:'Queried',
+   agent:'—', agency:'No agent attached', k1:'Due', v1:'No date set', k2:'', v2:'',
+   when:'No date', past:false, act:'Open', pkg:'Standard query'}
+];
+
+let NOTES = [
+  {id:'n1', text:"Curtis Vane want the first 3 chapters as one file — not separate.", at:'Yesterday'},
+  {id:'n2', text:"Ask Thomas Vale about the Irongate sequel when he replies.", at:'24 Sep'}
+];
+
+const TILE = {
+  move:  t => t.type==='Agent request' || t.type==='Your task',
+  chase: t => t.type==='Nudge' || t.type==='Gone quiet',
+  house: t => t.type==='Housekeeping'
+};
+const ORDER = ['Past the date','This week','Next week','Later','No date'];
+
+let activeTile = 'move', filters = [], grouping = 'When';
+let mode = 'task', chosenWhen = 'This week', justAdded = null;
+
+function initials(n){
+  if(n==='—') return '··';
+  const p = n.trim().split(' ');
+  return (p[0][0] + (p[1]?p[1][0]:'')).toUpperCase();
+}
+
+function rowHTML(t){
+  const yours = t.yours;
+  return `
+  <div class="row ${t.past?'past':''} ${t.id===justAdded?'landed':''}" data-id="${t.id}">
+    <div class="band" style="background:${FILL[t.status]}"></div>
+    <div class="inner">
+      <button class="tick" data-tick="${t.id}" title="Finish this task">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>
+      </button>
+      <div class="deedwrap">
+        <div class="tagline">
+          <span class="ttag ${yours?'yourmove':''}">${yours?'Your move':t.type}</span>
+          ${yours?`<span class="ttag">${t.type}</span>`:''}
+        </div>
+        <div class="deed">${t.deed}</div>
+      </div>
+      <div class="agentcell">
+        <div class="av">${initials(t.agent)}</div>
+        <div class="t"><b>${t.agent}</b><span>${t.agency}</span></div>
+      </div>
+      <div class="datecell">
+        <div class="k">${t.k1}</div>
+        <div class="v">${t.v1}${t.v2?` <em>· ${t.v2}</em>`:''}</div>
+      </div>
+      <div class="actcell">
+        <span class="statuspill">${dot(t.status)} ${t.status}</span>
+        <button class="act" data-open="${t.id}">${t.act}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const items = T.filter(t => TILE[activeTile](t));
+  const box = document.getElementById('list');
+  if(!items.length){
+    box.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-faint)">Nothing here right now.</div>';
+  } else if(grouping === 'None'){
+    box.innerHTML = `<div class="rows">${items.map(rowHTML).join('')}</div>`;
+  } else {
+    const key = grouping==='When' ? (t=>t.when)
+              : grouping==='Task type' ? (t=>t.type)
+              : grouping==='Agent' ? (t=>t.agent)
+              : (t=>t.pkg);
+    const groups = {};
+    items.forEach(t => { (groups[key(t)] = groups[key(t)] || []).push(t); });
+    const keys = Object.keys(groups).sort((a,b)=>{
+      const ia = ORDER.indexOf(a), ib = ORDER.indexOf(b);
+      if(ia>-1 || ib>-1) return (ia<0?99:ia)-(ib<0?99:ib);
+      return a.localeCompare(b);
+    });
+    box.innerHTML = keys.map(k => `
+      <div class="gsec">
+        <div class="ghead"><b>${k}</b><span class="n">${groups[k].length}</span></div>
+        <div class="rows">${groups[k].map(rowHTML).join('')}</div>
+      </div>`).join('');
+  }
+
+  const mine = T.filter(t=>t.type==='Your task').length;
+  const reqs = T.filter(t=>t.type==='Agent request').length;
+  document.getElementById('numMove').textContent = reqs + mine;
+  document.getElementById('subMove').textContent = `${reqs} agent requests · ${mine} yours`;
+  document.getElementById('navCount').textContent = T.length + 4;
+  renderRail();
+}
+
+/* ---------- the desk ---------- */
+function renderRail(){
+  const mine = T.filter(t => t.type === 'Your task');
+  let html = `<div class="rgh">Yours on the list<span class="n">${mine.length}</span></div>`;
+  html += mine.length ? mine.map(t => `
+    <button class="rrow" data-open="${t.id}">
+      <div class="l1"><span class="nm">${t.deed}</span><span class="dt">${t.when}</span></div>
+      <div class="sub">${t.agent==='—' ? 'No agent attached' : t.agent}</div>
+    </button>`).join('')
+    : `<div class="empty">Nothing of your own yet — add one above.</div>`;
+
+  html += `<div class="rgh">Notes<span class="n">${NOTES.length}</span></div>`;
+  html += NOTES.length ? NOTES.map(n => `
+    <div class="notecard"><p>${n.text}</p><div class="meta">${n.at}</div></div>`).join('')
+    : `<div class="empty">No notes yet.</div>`;
+
+  document.getElementById('railBody').innerHTML = html;
+}
+
+const capture = document.getElementById('capture');
+const addBtn  = document.getElementById('addBtn');
+const said    = document.getElementById('said');
+
+capture.addEventListener('input', () => { addBtn.disabled = !capture.value.trim(); });
+capture.addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter' && capture.value.trim()) commit();
+});
+
+document.querySelectorAll('.cseg').forEach(seg => {
+  seg.onclick = () => {
+    document.querySelectorAll('.cseg').forEach(x=>x.classList.remove('on'));
+    seg.classList.add('on');
+    mode = seg.dataset.mode;
+    capture.classList.toggle('note', mode==='note');
+    capture.placeholder = mode==='task' ? 'What needs doing?' : 'Jot something down…';
+    document.getElementById('taskMeta').style.display = mode==='task' ? 'flex' : 'none';
+    document.getElementById('attachBtn').style.display = mode==='task' ? 'block' : 'none';
+    document.getElementById('footLink').lastElementChild.previousSibling;
+  };
+});
+
+document.querySelectorAll('#taskMeta .pill').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('#taskMeta .pill').forEach(x=>x.classList.remove('on'));
+    p.classList.add('on');
+    chosenWhen = p.dataset.when;
+  };
+});
+
+function flash(msg){
+  said.textContent = msg;
+  said.classList.add('show');
+  clearTimeout(flash._t);
+  flash._t = setTimeout(()=>said.classList.remove('show'), 3200);
+}
+
+function commit(){
+  const text = capture.value.trim();
+  if(!text) return;
+
+  if(mode === 'note'){
+    NOTES.unshift({id:'n'+(nextId++), text, at:'Just now'});
+    capture.value = ''; addBtn.disabled = true;
+    renderRail();
+    flash('Saved — it\'s on your Noteboard too');
+    return;
+  }
+
+  const id = nextId++;
+  T.push({
+    id, type:'Your task', yours:true, deed:text, status:'Queried',
+    agent:'—', agency:'No agent attached',
+    k1:'Due', v1: chosenWhen==='No date' ? 'No date set' : chosenWhen, k2:'', v2:'',
+    when: chosenWhen, past:false, act:'Open', pkg:'Standard query'
+  });
+  capture.value = ''; addBtn.disabled = true;
+  justAdded = id;
+
+  if(!TILE[activeTile]({type:'Your task'})){
+    document.querySelectorAll('.tile').forEach(x=>x.classList.remove('on'));
+    document.querySelector('[data-tile="move"]').classList.add('on');
+    activeTile = 'move';
+  }
+  render();
+  flash('Added to the list under ' + chosenWhen);
+  setTimeout(()=>{ justAdded = null; }, 1600);
+}
+addBtn.onclick = commit;
+document.getElementById('attachBtn').onclick = () => flash('Agent picker opens here');
+
+/* ---------- modal ---------- */
+function openCard(id){
+  const t = T.find(x=>x.id===id); if(!t) return;
+  const own = t.type === 'Your task';
+  document.getElementById('qcard').innerHTML = `
+    <div class="band" style="background:${FILL[t.status]}"></div>
+    <div class="qhead">
+      <div class="av">${initials(t.agent)}</div>
+      <div><b>${t.agent==='—' ? 'Your own task' : t.agent}</b><span>${t.agency}</span></div>
+      <button class="x" id="closeCard"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="qdeed">
+      <h2>${t.deed}</h2>
+      <p>${t.k1} ${t.v1}${t.v2?`, ${t.v2.toLowerCase()} ${t.k2.toLowerCase()}`:''}.</p>
+    </div>
+    <div class="qms">
+      <span class="k">${own ? 'For' : 'Querying'}</span>
+      <b>Murphy's Day Out</b>
+      <span class="k" style="margin-left:auto">${t.pkg}</span>
+    </div>
+    ${own ? '' : `
+    <div class="qtabs"><div class="qtab on">Tracking</div><div class="qtab">Agent</div><div class="qtab">Notes</div></div>
+    <div class="qtl">
+      <div class="tl"><div class="gl">${dot('Queried',15)}</div><div class="w"><b>Queried</b><span>Query letter, synopsis, first 10 pages</span></div><div class="d">14 Mar</div></div>
+      <div class="tl"><div class="gl">${dot('Partial requested',15)}</div><div class="w"><b>Partial requested</b><span>First 50 pages asked for</span></div><div class="d">28 Jun</div></div>
+      <div class="tl"><div class="gl">${dot(t.status,15)}</div><div class="w"><b>${t.status}</b><span>Where this stands today</span></div><div class="d">Now</div></div>
+    </div>`}
+    <div class="qfoot">
+      <span class="note" style="flex:1">Nothing is recorded until you finish here</span>
+      <button class="btn ghost" id="closeCard2">Cancel</button>
+      <button class="btn">${own ? 'Mark done' : t.act}</button>
+    </div>`;
+  document.getElementById('dim').classList.add('open');
+  ['closeCard','closeCard2'].forEach(i=>{
+    const el = document.getElementById(i); if(el) el.onclick = closeCard;
+  });
+}
+function closeCard(){ document.getElementById('dim').classList.remove('open'); }
+document.getElementById('dim').addEventListener('click', e => { if(e.target.id==='dim') closeCard(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeCard(); closeAllMenus(); } });
+
+/* ---------- wiring ---------- */
+document.getElementById('list').addEventListener('click', e => {
+  const tick = e.target.closest('[data-tick]');
+  const open = e.target.closest('[data-open]');
+  const row  = e.target.closest('.row');
+  if(tick){ openCard(+tick.dataset.tick); return; }   /* the tick never writes */
+  if(open){ openCard(+open.dataset.open); return; }
+  if(row){ openCard(+row.dataset.id); }
+});
+document.getElementById('railBody').addEventListener('click', e => {
+  const open = e.target.closest('[data-open]');
+  if(open) openCard(+open.dataset.open);
+});
+
+document.querySelectorAll('.tile').forEach(tile => {
+  tile.onclick = () => {
+    document.querySelectorAll('.tile').forEach(x=>x.classList.remove('on'));
+    tile.classList.add('on');
+    activeTile = tile.dataset.tile;
+    render();
+  };
+});
+
+function closeAllMenus(){ document.querySelectorAll('.menu,.panel').forEach(m=>m.classList.remove('open')); }
+function toggle(btnId, boxId){
+  document.getElementById(btnId).onclick = e => {
+    e.stopPropagation();
+    const box = document.getElementById(boxId);
+    const was = box.classList.contains('open');
+    closeAllMenus();
+    if(!was) box.classList.add('open');
+  };
+}
+toggle('filterBtn','filterPanel');
+toggle('groupBtn','groupMenu');
+toggle('sortBtn','sortMenu');
+document.addEventListener('click', closeAllMenus);
+['filterPanel','groupMenu','sortMenu'].forEach(id =>
+  document.getElementById(id).addEventListener('click', e => e.stopPropagation()));
+
+document.querySelectorAll('.opt').forEach(o => {
+  o.onclick = () => {
+    o.classList.toggle('sel');
+    const f = o.dataset.f;
+    filters = o.classList.contains('sel') ? filters.concat(f) : filters.filter(x=>x!==f);
+    paintFilters();
+  };
+});
+function paintFilters(){
+  document.getElementById('chips').innerHTML = filters.map(f=>`<span class="chip">${f}</span>`).join('');
+  document.getElementById('panelCount').textContent = filters.length ? filters.length+' filters' : 'no filters';
+  document.getElementById('activebar').classList.toggle('show', filters.length>0);
+}
+function clearFilters(){
+  filters = [];
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  paintFilters();
+}
+document.getElementById('clearAll').onclick = clearFilters;
+document.getElementById('clearPanel').onclick = e => { e.stopPropagation(); clearFilters(); };
+
+document.querySelectorAll('#groupMenu .mi').forEach(mi => {
+  mi.onclick = () => {
+    document.querySelectorAll('#groupMenu .mi').forEach(x=>x.classList.remove('on'));
+    mi.classList.add('on');
+    grouping = mi.dataset.g;
+    document.getElementById('groupVal').textContent = grouping;
+    closeAllMenus(); render();
+  };
+});
+document.querySelectorAll('#sortMenu .mi').forEach(mi => {
+  mi.onclick = () => {
+    document.querySelectorAll('#sortMenu .mi').forEach(x=>x.classList.remove('on'));
+    mi.classList.add('on');
+    document.getElementById('sortVal').textContent = mi.dataset.s;
+    closeAllMenus();
+  };
+});
+
+render();
+</script>
+</body>
+</html>

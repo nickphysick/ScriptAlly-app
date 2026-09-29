@@ -17,7 +17,9 @@
 import { dropSupersededProvisional } from "./queryDerivation";
 import { activityEventLabel } from "./activityEvent";
 import { collapseTimelineDuplicates } from "./todoDock";
+import { RECONSTRUCTED_TITLE, isReconstructed } from "./reconstructed";
 import type { DockTimelineEvent } from "../components/todo/timelineEvent";
+import { formatDate } from "./dates";
 
 /**
  * ⚠️ `createdAt` IS A FIRESTORE TIMESTAMP ON THESE ROWS, not the ISO string the global feed carries —
@@ -72,14 +74,27 @@ export function dockTimeline(
     .map((r: any, i: number) => ({
       r, i,
       label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }, { includeSend: true }),
+      recon: isReconstructed(r),
     }))
     .filter((x) => x.label !== null)
     .map((x) => {
       const ms = msOf(x.r.createdAt ?? x.r.date);
+      /* ⚠️ A RECONSTRUCTION READS AS ONE (28 Sep): the fixed words, the status it stands for as the
+         sub-line, no channel — nobody sent anything on the day it carries. */
+      if (x.recon) {
+        return {
+          key: x.r.id ?? `ev-${x.i}`,
+          label: RECONSTRUCTED_TITLE,
+          when: Number.isFinite(ms) ? formatDate(new Date(ms), { day: "numeric", month: "short" }) : "",
+          reconstructed: true,
+          note: x.label as string,
+          ...((st: unknown) => (st ? { status: String(st) } : {}))(x.r.resultingStatus ?? x.r.type),
+        } as DockTimelineEvent;
+      }
       return {
         key: x.r.id ?? `ev-${x.i}`,
         label: x.label as string,
-        when: Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
+        when: Number.isFinite(ms) ? formatDate(new Date(ms), { day: "numeric", month: "short" }) : "",
         /* absent where the record is silent — never inferred */
         ...(x.r.via
           ? { via: String(x.r.via) }

@@ -38,10 +38,15 @@ export interface CorrectionForkProps {
    * an entry to (the writer's only query) would otherwise show a control that can never do anything.
    */
   onMove?: () => void;
+  /**
+   * Query actions v1.1 — the entry never happened: delete it. One choice away, as the mock's row
+   * has it, and it hands over to the row's inline confirm. Optional and absent means absent.
+   */
+  onDelete?: () => void;
   onCancel: () => void;
 }
 
-export const CorrectionFork: React.FC<CorrectionForkProps> = ({ subject, onCorrect, onAppend, onMove, onCancel }) => (
+export const CorrectionFork: React.FC<CorrectionForkProps> = ({ subject, onCorrect, onAppend, onMove, onDelete, onCancel }) => (
   <div className="cor-sheet" role="dialog" aria-modal="true" aria-label="What would you like to do?">
     <div className="cor-top" aria-hidden="true" />
     <div className="cor-body">
@@ -72,6 +77,15 @@ export const CorrectionFork: React.FC<CorrectionForkProps> = ({ subject, onCorre
           <span className="cor-btx">
             <b>It belongs to a different query</b>
             <i>This happened, but with another agent. Move it — the event keeps its date and its note.</i>
+          </span>
+        </button>
+      )}
+      {onDelete && (
+        <button type="button" className="cor-branch cor-branch--minor" onClick={onDelete} data-cor-delete>
+          <span className="cor-bglyph" aria-hidden="true">✕</span>
+          <span className="cor-btx">
+            <b>It never happened</b>
+            <i>Delete this entry. The status goes back to the entry before it, and you can undo.</i>
           </span>
         </button>
       )}

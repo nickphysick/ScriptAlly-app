@@ -11,6 +11,7 @@
  * offer's "tell the others" marks) and, for a late reply to a query closed as no reply, removes the
  * closure entry first so Analytics counts the reply (ruling: the ending is REPLACED, not appended to).
  */
+import { QueryPicker } from "./QueryPicker";
 import React, { useMemo, useState } from "react";
 import { collection, deleteDoc, deleteField, doc, getDocs, query as fsQuery, where } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
@@ -35,7 +36,16 @@ const DOT: Record<RType, string> = { partial: "var(--qad-rose)", full: "var(--qa
 const KEY: Record<RType, EventKey> = { partial: "partial_requested", full: "full_requested", rr: "rr_requested", pass: "pass", offer: "offer" };
 const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2], ["1d", "The day before", -1], ["0", "On the day", 0], ["no", "No reminder", null]];
 
-export function ResponseJourney({ req, today, children }: JourneyProps) {
+/**
+ * v1.1 — opened with no query at all (the sidebar's "Record a response"), the first step is
+ * choosing one. A wrapper rather than a branch inside the journey, so no hook is ever conditional.
+ */
+export function ResponseJourney(props: JourneyProps) {
+  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery}>{(v) => props.children(v)}</QueryPicker>;
+  return <ResponseJourneyForQuery {...props} />;
+}
+
+function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
   const db = useScriptAllyDb();
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
@@ -222,11 +232,11 @@ export function ResponseJourney({ req, today, children }: JourneyProps) {
       };
       await recordQueryResponse({ userId: db.currentUser.id, query: q, agent, manuscript: ms }, data);
       /* A late reply to a query closed as NO REPLY replaces that ending.
-         ⚠️ AFTER THE REPLY, NEVER BEFORE IT. A closure rung often carries the SELF-HEAL's id
-         (`act-status-no-response-<qid>`), and the heal re-creates it the instant the query reads No
-         Response with no such rung — so removing it first loses a race to the heal and the ending
-         survives (caught on `msv12-q-8`). Once the reply is recorded the query no longer reads No
-         Response, and the rung can go. The status is unchanged by its going: the reply is the last rung.
+         AFTER THE REPLY, NEVER BEFORE IT, so the query never reads No Response with no closure step
+         in between. (That order once also beat the runtime repair to the rung; the repair is deleted,
+         28 Sep, and the order is kept because it is still the one that never leaves a gap.) A closure
+         step may be a reconstructed one (`act-status-no-response-<qid>`). The status is unchanged by
+         its going: the reply is the last rung.
          ⚠️ NOT `db.deleteActivity`: it finds its target in the FEED, and a closure written only to the
          query's own log has no feed row. Both stores are cleared here, by id and by the projection's
          status; the undo snapshot holds every document either delete touches. */

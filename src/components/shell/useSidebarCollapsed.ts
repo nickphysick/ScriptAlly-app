@@ -15,6 +15,7 @@
  * ⚠️ THE KEY DIVERGES FROM THE HOUSE `sa.` PREFIX by the pack's explicit instruction — the pack
  * names `scriptally:sidebar-collapsed` verbatim, and a stated name beats a convention.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const SIDEBAR_COLLAPSED_KEY = "scriptally:sidebar-collapsed";
@@ -57,8 +58,10 @@ export function sidebarShortcut(e: {
   altKey: boolean;
   target: EventTarget | null;
 }): "toggle" | null {
-  if ((e.metaKey || e.ctrlKey) && e.key === "\\") return "toggle";
-  if (e.key === "[" && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditableTarget(e.target)) return "toggle";
+  /* the keys are the registry's (lib/shortcuts.ts): the ⌘\\ chord works anywhere, `[` stands down in a field */
+  const [chord, bare] = SHORTCUTS.sidebar.chords;
+  if (matchesShortcut({ ...SHORTCUTS.sidebar, chords: [chord] }, e)) return "toggle";
+  if (matchesShortcut({ ...SHORTCUTS.sidebar, chords: [bare] }, e) && !isEditableTarget(e.target)) return "toggle";
   return null;
 }
 

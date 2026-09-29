@@ -11,7 +11,7 @@
  *
  * ⚠️ IT SPENDS NO FIXTURE. The task is one this file creates.
  *
- * ⚠️ AND IT TESTS THE LIVE PATH, WHICH IS THE PANE — not `noteSheet`. `FocusFlow`'s note sheet is
+ * ⚠️ AND IT TESTS THE LIVE PATH, WHICH IS THE PANE — not `noteSheet`. `HousekeepingSweep`'s (formerly `FocusFlow`'s) note sheet is
  * unreachable from the UI (`paneCommits("note")` is true, so a note never hands off), so the
  * completion a writer can actually reach is the pane's primary → `commitFromPane`'s note arm →
  * `quickDone`. That is the same primitive the split now calls, which is what makes this evidence

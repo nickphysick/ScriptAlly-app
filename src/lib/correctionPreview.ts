@@ -28,6 +28,7 @@ import { computeRecomputedFields, type RawActivityDoc, type RecomputedFields } f
 import { chapterise, type ChapterableRow } from "./timelineChapters";
 import { waitAnchor, type StoredHoldingReply } from "./holdingReply";
 import { resolveExpectedDate, type ExpectedSource } from "./expectedDate";
+import { formatDate } from "./dates";
 
 /** The minimum a timeline row must expose for the preview to compare two of them. */
 export interface PreviewRow extends ChapterableRow {
@@ -85,7 +86,7 @@ const asStored = (docs: RawActivityDoc[]): StoredHoldingReply[] =>
   docs.map((d) => ({ type: d.data.type, createdAt: d.data.createdAt, replyWeeks: d.data.replyWeeks }));
 
 const fmt = (ms: number | null): string =>
-  ms == null ? "none" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  ms == null ? "none" : formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
 
 const SOURCE_WORD: Record<Exclude<ExpectedSource, null>, string> = {
   agent: "the agency's window",

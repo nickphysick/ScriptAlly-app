@@ -12,6 +12,7 @@
  * derived from its code (queryReasonText / statusDirectionChoices) so copy stays consistent
  * run-to-run and the function payload stays tiny.
  */
+import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
 import { ParsedAgent, ParsedQuery, SmartImportResult, ReviewReasonCode, REVIEW_REASON_CODES } from "../types/smartImport";
 import { normaliseGenres } from "./manuscripts";
@@ -143,7 +144,7 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
 };
 
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 /** Format an ISO date for display; null → "date needed" (never a fabricated date). */
 export const fmtDate = (iso: string | null): string => {
   if (!iso) return "date needed";

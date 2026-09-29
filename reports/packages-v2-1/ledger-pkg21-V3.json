@@ -1,0 +1,114 @@
+[
+ {
+  "lock": "V3 · pk is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"DIV\"}"
+ },
+ {
+  "lock": "V3 · sbs is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"DIV\"}"
+ },
+ {
+  "lock": "V3 · ret is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"BUTTON\"}"
+ },
+ {
+  "lock": "V3 · Your packages' top = the tray's top (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "416.625 416.625"
+ },
+ {
+  "lock": "V3 · the hint names the package used for new queries",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Autumn round is used for new queries"
+ },
+ {
+  "lock": "V3 · pk is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"DIV\"}"
+ },
+ {
+  "lock": "V3 · sbs is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"DIV\"}"
+ },
+ {
+  "lock": "V3 · ret is a band: rgb(42, 58, 82), 52 tall",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"h\":52,\"tag\":\"BUTTON\"}"
+ },
+ {
+  "lock": "V3 · Your packages' top = the tray's top (±1)",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "410.625 410.625"
+ },
+ {
+  "lock": "V3 · the hint names the package used for new queries",
+  "route": "/manuscripts/packages",
+  "size": "1280",
+  "state": "filled",
+  "ok": true,
+  "detail": "Autumn round is used for new queries"
+ },
+ {
+  "lock": "V3 · Retired is a collapsed button",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V3 · toggling sets aria-expanded and shows the list; focus stays on the band",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "true retired"
+ },
+ {
+  "lock": "V3 · the band's hint reads Hide when open",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "Hide"
+ },
+ {
+  "lock": "V3 · with none in use the hint says so",
+  "route": "/manuscripts/packages",
+  "size": "1440",
+  "state": "filled",
+  "ok": true,
+  "detail": "No package is used for new queries"
+ }
+]

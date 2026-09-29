@@ -63,8 +63,9 @@
 
 /* ══ THE `cal-` COLLISION, NOW MOSTLY WITHOUT A SUBJECT ═════════════════════════════════════
  *
- * `todo.css` declares `.cal-d`, `.cal-dow`, `.cal-f`, `.cal-grid`, `.cal-h` and `.cal-nav` for the
- * RecordingCalendar, and a CSS import is global whatever mounts — so this page used to fight three
+ * `todo.css` declared `.cal-d`, `.cal-dow`, `.cal-f`, `.cal-grid`, `.cal-h` and `.cal-nav` for the
+ * RecordingCalendar (deleted 28 Sep; only `.cal-nav` remains, as shared chrome), and a CSS import
+ * is global whatever mounts — so this page used to fight three
  * of them with an ancestor scope and an explicit property reset. The timeline's classes are all
  * `tl-`, so five of the six collisions have nothing left to collide with and their resets are
  * retired rather than carried forward as decoration.
@@ -2101,6 +2102,9 @@ button.tl-tchip { cursor: pointer; }
 .tl-dwb { padding: 18px; overflow: auto; flex: 1; }
 .tl-dwnm { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--tl-nearblack); }
 .tl-dwag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #8a7a6c; margin-top: 2px; }
+/* how the materials were recorded (clean-up pass item 3): the chip under the agency, the box under the send */
+.tl-dwhow { margin-top: 8px; }
+.tl-dwbox { display: block; margin-top: 6px; }
 .tl-dwfact { margin-top: 14px; font-size: 13px; color: #3a1c14; display: flex; align-items: baseline; gap: 10px; }
 .tl-dwsec { margin-top: 22px; }
 .tl-dwsec h5 {

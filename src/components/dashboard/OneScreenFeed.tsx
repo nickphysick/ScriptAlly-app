@@ -23,6 +23,7 @@
  * Special Elite. Finding either inside a finished sentence would mean parsing a name back out of
  * prose, which this codebase forbids everywhere it has tried it.
  */
+import { SendExtras } from "../queryActions/SendExtras";
 import React from "react";
 import type { Activity, Agent, Manuscript, Query } from "../../types";
 import { FEED_DAYS, feedDays, feedEntries, type FeedEntry, type FeedSeg } from "../../lib/dashFeed";
@@ -118,6 +119,12 @@ export const OneScreenFeed: React.FC<{
                     <Say say={e.say} />
                     {e.provenance ? <small className="os-fprov">{e.provenance}</small> : null}
                   </p>
+                  {/* item 2 (28 Sep): a requery says why, and the link opens the EARLIER query's
+                      card — through the same peek, so it is the same card a row opens */}
+                  {e.requery ? (
+                    <SendExtras requery={e.requery}
+                      onOpenQuery={onPeek ? (id, at) => onPeek({ ...e, queryId: id }, at) : undefined} />
+                  ) : null}
                 </div>
                 {/* ⚠️ THE EXPLICIT LINK IS THE SHORTCUT PAST THE PEEK, so it must not also open it —
                     `stopPropagation` is what keeps one press from doing two things. A row with no

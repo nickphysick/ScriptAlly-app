@@ -14,6 +14,7 @@
  * headings and the card band all partition on the same function; a second status→bucket table
  * anywhere on this page is how two counts of the same thing come to disagree.
  */
+import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
 import { turnFor, turnWordFor, stateFor, type Turn, type Stage, type State } from "./queryCardFacts";
 
@@ -129,7 +130,7 @@ export const GRID_GROUPS: readonly { key: GroupKey; label: string }[] = [
   { key: "month", label: "Month sent" },
 ];
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON: readonly string[] = MONTHS_SHORT;
 
 export interface GridRow {
   id: string;

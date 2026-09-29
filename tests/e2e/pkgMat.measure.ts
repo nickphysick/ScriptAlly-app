@@ -130,7 +130,8 @@ test("S1–S7 · the shell conformance, once (1440, expanded, filled)", async ({
   await openPkgs(page, FILLED, { width: 1440, height: 900 });
   judge(L, await probeShell(page), { ...ctx, route: "Submission packages" }, false, false);
   const b = await readBar(page);
-  L.check("S1 · the bar is the sidebar's colour, 64 tall", ctx, !!b && b.barBg === b.sideBg && n(b.barH, 64, 0.5), JSON.stringify(b && { bg: b.barBg, h: b.barH }));
+  /* retargeted by the quiet bar: the bar is the page ground, not the sidebar */
+  L.check("S1 · the bar is the page ground, 64 tall", ctx, !!b && b.barBg === b.groundBg && n(b.barH, 64, 0.5), JSON.stringify(b && { bg: b.barBg, ground: b.groundBg, h: b.barH }));
   const r = await page.evaluate(() => {
     const vis = (s: string, root: ParentNode = document) => [...root.querySelectorAll(s)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
     const pageEl = vis('[data-ppv="page"]'); const sc = pageEl?.closest(".wpg-scroll") as HTMLElement | null;
@@ -166,9 +167,9 @@ test("S1–S7 · the shell conformance, once (1440, expanded, filled)", async ({
   await page.waitForTimeout(250);
   const stuck = await page.evaluate(() => { const r = [...document.querySelectorAll('[data-ppv="rail"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement; return r.getBoundingClientRect().top; });
   L.check("S4 · sticky at the window's top + 16 after scrolling (not fixed)", ctx, did === Math.min(600, max) && did > 0 && n(stuck, r.scTop + 16, 1) && r.railPos === "sticky", `did ${did}/${max} top ${stuck} sc ${r.scTop} ${r.railPos}`);
-  const changed = execFileSync("git", ["diff", "--name-only", "5d2a46e8"], { encoding: "utf8" }).split("\n").filter(Boolean);
-  const G4 = ["WorkspaceShell.tsx", "workspaceShell.css", "AppShell.tsx", "BarSwitcher.tsx", "SidebarNav.tsx", "ShellSidebar.tsx", "ShellV2.tsx", "TopNavShell.tsx", "TopNavHost.tsx", "PageHeader.tsx", "pageHeader.css", "WorkspacePageGrid.tsx", "workspacePageGrid.css", "contentColumn.css", "f12.css", "lib/workspaceShell.ts", "lib/workspaceNav.ts", "QcRail.tsx", "ContactRail.tsx"];
-  L.check("S7 · no G4 file changed (illustratedMasthead.css is the one exception)", ctx, !changed.some((f) => G4.some((g) => f.endsWith(g))), JSON.stringify(changed.filter((f) => G4.some((g) => f.endsWith(g)))));
+  /* ⚠️ RETIRED (quiet bar, 28 Sep): "no G4 file changed (illustratedMasthead.css is the one exception)".
+     It diffed the WORKING TREE against 5d2a46e8, so it failed on every later shell change however
+     legitimate — the claim belongs to the Packages pass, and git history records it. */
   let css = ""; try { css = readFileSync("src/components/packages/packagesV2.css", "utf8").replace(/\/\*[\s\S]*?\*\//g, ""); } catch { /* absent on main */ }
   L.check("S7 · the page's sheet exists and names no shell/header/grid selector", ctx, css.length > 0 && !/(^|[\s,}>+~])\.(ws-[\w-]+|ph(?:-[\w-]+|--[\w-]+)?|wpg(?:-[\w-]+)?)(?=[\s,{.:>[])/m.test(css), `${css.length}`);
   close(L, 40);
@@ -240,20 +241,24 @@ test("P3 · the letter is required; the rest are optional", async ({ page }) => 
 });
 
 /* ══ P4 · sent lock / duplicate (red-first + mutation) ══ */
-test("P4 · a sent package is fixed; Duplicate & edit makes a new one; the note still saves", async ({ page }) => {
+/* ⚠️ RETARGETED (Part B of "Packages through the journey", 28 Sep). A sent package now OFFERS Edit —
+   the edit starts its next edition, so the queries already sent keep the one they went with (the
+   record stays true, which is what "fixed" protected) — and never Delete. Duplicate is its own action
+   and still makes a NEW, unsent document; that half of the law is unchanged and asserted as before. */
+test("P4 · a sent package is never deleted; Duplicate makes a new one; the note still saves", async ({ page }) => {
   const L = new PLedger("pkg-P4");
   const ctx = { route: ROUTE, size: W, state: "filled" };
   await fresh(page);
   let r = await read(page);
   const autumn = r?.cards.find((c) => c.name === "Autumn round");
   const winter = r?.cards.find((c) => c.name === "Winter draft");
-  L.check("P4 · a sent package offers no Edit, and offers Duplicate & edit", ctx, !!autumn && !autumn.acts.includes("edit") && autumn.acts.includes("dup"), JSON.stringify(autumn?.acts));
+  L.check("P4 · a sent package offers Edit (a new edition) and Duplicate, never Delete", ctx, !!autumn && autumn.acts.includes("edit") && autumn.acts.includes("dup") && !autumn.acts.includes("delete"), JSON.stringify(autumn?.acts));
   L.check("P4 · an unsent package offers Edit and Delete", ctx, !!winter && winter.acts.includes("edit") && winter.acts.includes("delete"), JSON.stringify(winter?.acts));
   const before = dump().packages.find((p) => p.id === "pv2-p1");
   const dup = card(page, "Autumn round").locator('[data-act="dup"]');
   if (await dup.count()) await dup.click();
   const nm = page.locator("#ppv-c-name:visible");
-  L.check("P4 · Duplicate & edit opens a new package named by duplicateName", ctx, (await nm.count()) > 0 && (await nm.inputValue()) === "Autumn round v2", (await nm.count()) ? await nm.inputValue() : "no composer");
+  L.check("P4 · Duplicate opens a new package named by duplicateName", ctx, (await nm.count()) > 0 && (await nm.inputValue()) === "Autumn round v2", (await nm.count()) ? await nm.inputValue() : "no composer");
   const create = on(page, '[data-ppv="create"]');
   if (await create.count()) await create.click();
   await expect.poll(() => dump().packages.some((p) => p.name === "Autumn round v2"), { timeout: 12_000 }).toBe(true).catch(() => {});
@@ -312,7 +317,7 @@ test("P6 · Side by side: only with ≥2 sent; no row distinguished; no rank or 
   close(L, 5);
 });
 
-/* ══ P7 · deep links ══ */
+/* ══ P7 · deep links ══ (v2.1: Side by side is a band now — read by data-band) */
 test("P7 · ?tab=builder opens the composer; ?tab=tracking scrolls to Side by side", async ({ page }) => {
   const L = new PLedger("pkg-P7");
   const ctx = { route: ROUTE, size: W, state: "filled" };
@@ -320,7 +325,7 @@ test("P7 · ?tab=builder opens the composer; ?tab=tracking scrolls to Side by si
   L.check("P7 · ?tab=builder opens the composer", ctx, (await read(page))?.composer === true, "");
   await openPkgs(page, FILLED, VP, "?tab=tracking");
   await page.waitForTimeout(800);
-  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="sbs-h"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop, max: sc.scrollHeight - sc.clientHeight, ch: sc.clientHeight } : null; });
+  const t = await page.evaluate(() => { const s = [...document.querySelectorAll('[data-ppv="band"][data-band="sbs"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined; const sc = s?.closest(".wpg-scroll") as HTMLElement | null; return s && sc ? { top: s.getBoundingClientRect().top - sc.getBoundingClientRect().top, st: sc.scrollTop, max: sc.scrollHeight - sc.clientHeight, ch: sc.clientHeight } : null; });
   /* ⚠️ "TO THE TOP" OR AS FAR AS THE SCROLLER GOES: a section near the page's end cannot reach the top */
   L.check("P7 · ?tab=tracking scrolls to Side by side (at the top, or at max scroll with it in view)", ctx, !!t && t.st > 0 && t.top >= -2 && (t.top < 80 || (Math.abs(t.st - t.max) <= 1 && t.top < t.ch - 60)), JSON.stringify(t));
   await openPkgs(page, FILLED, VP, "?tab=packages");
@@ -343,7 +348,7 @@ test(`P8 · empty · ${W}`, async ({ page }) => {
       exTag: ex?.querySelector('[data-ppv="ex-tag"]')?.textContent?.trim() ?? null,
       exControls: ex ? [...ex.querySelectorAll("button, a[href], input, select, textarea")].filter((c) => !c.closest("[inert]")).length : -1,
       exClickable: ex ? getComputedStyle(ex.querySelector(".ppv-ghost") ?? ex).pointerEvents !== "none" : true,
-      sbs: !!root?.querySelector('[data-ppv="sbs"]'), retired: !!root?.querySelector('[data-ppv="retired-toggle"]'), lede,
+      sbs: !!root?.querySelector('[data-ppv="sbs"]'), retired: !!root?.querySelector('[data-ppv="band"][data-band="retired"]'), lede,
     };
   });
   L.check("P8 · the composer is open by default", ctx, r.composer, "");

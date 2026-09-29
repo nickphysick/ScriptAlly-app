@@ -73,7 +73,7 @@ export function railActiveKey(pathname: string): string | null {
 
 /** The three capture actions — each invokes an EXISTING flow via the navigate bridge. */
 export const RAIL_CAPTURES = {
-  /** Full-width top button — the app-level RecordResponseScreen host's interception. */
+  /** Full-width top button — opens the query drawer with no query (v1.1): its first step picks one. */
   record: { label: "+ Record a response", tab: "queries", sub: "Record a response" },
   /** Compact pair — the existing Log-a-query and Add-an-agent overlay interceptions. */
   query: { label: "+ Query", tab: "queries", sub: "Log a query" },

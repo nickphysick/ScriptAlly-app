@@ -19,6 +19,22 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
+import { PageHeader } from "../shell/PageHeader";
+import { PageRail } from "../containers/PageRail";
+import { useQcLoad } from "../queries/centre/useQcLoad";
+import { V2Popover } from "./v2/V2Popover";
+import { V2Skeleton } from "./v2/V2Skeleton";
+import { V2Tiles } from "./v2/V2Tiles";
+import { V2Rows } from "./v2/V2Rows";
+import {
+  DEFAULT_TILE, EMPTY_FILTERS, applyFilters, buildRow, facetCounts, groupRows, rowsCsv, searchRows, sortRows, tileCounts,
+  type GroupKey as V2GroupKey, type SortKey as V2SortKey, type Tile as V2Tile, type V2Filters, type V2Row,
+} from "../../lib/todoV2";
+import { V2Controls } from "./v2/V2Controls";
+import { V2Desk } from "./v2/V2Desk";
+import { STAGE_NAME } from "../../lib/qcSummary";
+import "./v2/todoV2.css";
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
 import { agentPrimary } from "../../lib/agentDisplay";
@@ -31,9 +47,9 @@ import { useTaskPaneSession, paneJourneyKind, type TaskPaneHost } from "./useTas
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import {
-  assembleBoard, todaySplit, ribbonTiles, reviewWeek, reviewCompletionSnooze, weekReviewStats,
-  briefingCleared, briefingFigures, briefingHeadline, briefingNarrative,
+  assembleBoard, todaySplit, ribbonTiles,
   BoardCard, USER_TASK_FLAG_TYPE,
+  isNoteTask,
 } from "../../lib/todoBoard";
 import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
@@ -45,8 +61,6 @@ import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/tod
 import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
-// VI P2 — the review cup (original QueryHawk artwork; currentColor → inlined so it inherits ink)
-import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
@@ -62,7 +76,9 @@ import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality
 import { SweepMember } from "./PaneSweep";
 import { SweepRow, SweepRule, emptySweepRow, isSweepRule, sweepFields, sweepOutcome } from "../../lib/paneSweep";
 import { BrandDatePicker } from "../forms";
-import { FocusFlow, FocusItem } from "./FocusFlow";
+import { HousekeepingSweep, SweepItem } from "./HousekeepingSweep";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { drawerDoorForTask } from "../../lib/queryActions/entry";
 import {
   TODO_OPEN_COMPOSER, TODO_ADD_TO_TODAY,
 } from "../../lib/todoRoutes";
@@ -78,9 +94,7 @@ import { SlideOver } from "../shared/SlideOver";
 import { ticketFacts, ticketVerb } from "../../lib/ticketFacts";
 import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
-import { StatTiles, type StatTile } from "../shared/StatTiles";
 import { ToolbarButton, ToolbarIcon, ToolbarSearch } from "../shared/ToolbarButton";
-import { QueryViewSwitch, type QueryView } from "../queries/QueryViewSwitch";
 import { IlloSlot } from "../queries/IlloSlot";
 import {
   CATEGORIES, CATEGORY_LABEL, CATEGORY_FAMILY, taskCategory, isUrgentCard,
@@ -169,6 +183,7 @@ import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
 } from "../../lib/todoListPage";
 import { ToastAction, useTodoToast, WITH_UNDO_MS } from "./useTodoToast";
+import { formatDate } from "../../lib/dates";
 import "./todo.css";
 import "./todoGroups.css";
 import "./todoSplit.css";
@@ -186,12 +201,12 @@ const localYMD = (ms: number): string => {
 };
 /** The ink header's date line — "Thu 16 Jul" (design-refs/todo-header-ink.html). */
 const shortHeaderDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  formatDate(new Date(ms), { weekday: "short", day: "numeric", month: "short" });
 // VI P1 — the ghost rows' faded text-bar widths (the ref's 64/78/52), cycled by index.
 // ⚠ MODULE scope on purpose: the render helpers live BELOW the component's return statement
 // (hoisted function declarations), where a component-body `const` is dead code — never
 // initialised — and a hoisted reader hits the TDZ at first render (the crash class that took
-// the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
+// the whole app down twice: a since-deleted review opener `4d4fbed`, GHOST_BARS this fix). The regression
 /* ⚠️ `VERB_LABELS` IS RETIRED WITH THE ROW/REEL CLUSTER (15 Aug). All four members —
    action · todayAdd · todayRemove · later — were consumed only by `rowActionLane`, `renderCard`,
    `runBatchRow`, `renderGroupCard` and `laterMenu`, every one of which was unreachable. The CARD
@@ -202,15 +217,6 @@ const shortHeaderDate = (ms: number): string =>
 // follows TypeGlyph's exact grammar (currentColor stroke SVG, viewBox 24, aria-hidden, size
 // prop) as a page-scoped sibling — TypeGlyph itself is LOCKED to the three material
 // ComponentTypes and cannot carry a clock verbatim.
-const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (
-  // hero-pair P2 — the ↺ rewind (todo-hero-pair.html): the review chip's glyph, seated
-  // exactly as Begin's play (same flex seat, the button's own gap).
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
-    <path d="M3.5 8 A 9.5 9.5 0 1 1 3 13.5" />
-    <path d="M3.5 3.5 v4.5 h4.5" />
-  </svg>
-);
-
 const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
     <circle cx="12" cy="12" r="9" />
@@ -319,17 +325,6 @@ export const PANE_ID_PREFIX = "";
 /** ⚠️ TWO SEGMENTS, NAMED HERE RATHER THAN INLINE, so the switch's list and anything measuring it
  *  read one array. The Query Centre's own four are its default; this page has a Grid and a Board
  *  and no List or Calendar, and a segment for a view that does not exist would be a dead control. */
-/** ⚠️ THE TILE DISCS WEAR THE CATEGORY'S FAMILY PAPER — the same three the pane's hero and the
- *  card tags use, so a category is one colour wherever it appears. Read from the family map
- *  rather than restated per tile: a fourth paper would have to be declared once. */
-const FAMILY_PAPER: Record<Family, string> = {
-  now: "#f6e3da", house: "#dde4db", yours: "#f7efe0",
-};
-const TILE_SWATCH: Record<Category, string> = {
-  req: FAMILY_PAPER[CATEGORY_FAMILY.req], nudge: FAMILY_PAPER[CATEGORY_FAMILY.nudge],
-  quiet: FAMILY_PAPER[CATEGORY_FAMILY.quiet], house: FAMILY_PAPER[CATEGORY_FAMILY.house],
-  yours: FAMILY_PAPER[CATEGORY_FAMILY.yours],
-};
 
 /**
  * ⚠️ THREE VIEWS, AND THE THIRD IS A DELIBERATE DEPARTURE FROM THE CONTRACT (QC-chassis round,
@@ -348,11 +343,6 @@ const TILE_SWATCH: Record<Category, string> = {
  * report rather than quietly, because a reader diffing the contract will count two buttons and
  * find three.
  */
-const TODO_VIEWS: readonly { key: QueryView; label: string }[] = [
-  { key: "grid", label: "Grid" },
-  { key: "list", label: "List" },
-  { key: "board", label: "Board" },
-];
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
@@ -403,8 +393,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [composerAt]);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
-  // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
-  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
+  // the housekeeping sweep — "Start the sweep" on a grouped card, or a single non-query card handed off.
+  const [flow, setFlow] = useState<{ items: SweepItem[] } | null>(null);
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   /* (showDone was the corner panel's done-row toggle — retired with it in workspace P3.) */
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
@@ -543,6 +533,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      none. Hoisted beside the trigger so the toolbar button and the panel read one expression. */
   const asideN = hiddenItems(
     currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length;
+  /* v2 — the Query Centre's loading clock: nothing for 150ms, the cover for at least 400ms, one
+     entrance. Called here, unconditionally, above every early exit. */
+  const v2Load = useQcLoad(collectionsReady);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   /* ⚠️ THE FOCUSED ROW AND THE COLLAPSED SECTIONS (tightened round, Phase 2) — both the PAGE's
      state, because the key effect and the list must read one truth: j/k walk exactly the rows a
@@ -584,9 +577,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   const plus7iso = () => new Date(Date.now() + 7 * 86400000).toISOString();
+  /**
+   * ⚠️ A QUERY CARD OPENS THE QUERY DRAWER, NEVER THE SWEEP. Every task that finishes a query has a
+   * drawer door (`drawerDoorForTask`), and only the drawer writes. What is left for the sweep is a
+   * card with no query journey: the writer's own note, one agent's record gaps, or a hand-off.
+   */
   const openFlowCards = (cards: BoardCard[]) => {
-    // III P1 — the board is review-free by construction (the banner/bar own the review's entry)
-    if (cards.length) setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
+    const rest: BoardCard[] = [];
+    for (const card of cards) {
+      const door = drawerDoorForTask(card.taskType, card.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
+      if (door) { openQueryDrawer(door); return; }
+      rest.push(card);
+    }
+    if (rest.length) setFlow({ items: rest.map((card) => ({ kind: "card", card })) });
   };
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
@@ -652,15 +655,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
-  // "Opened" reads the only stored review record — the completion sentinel finishReview
-  // writes — and composes into the frame-P3 seen flag (a completed week never re-shows the
-  // banner, on any device).
-  const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
-  const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   /* ⚠️ THE ONE DERIVATION (tasks-pages P2): assemble → groups → sweeps → columns, through the
      SAME assembleBoardColumns every Tasks surface and the sidebar badge use — identically scoped,
      so no two counts can disagree again. save-and-today P1's in-flight hide rides the input
-     (hiddenUserTaskId); the Sunday CARD's mutedTaskRules dep is unchanged. */
+     (hiddenUserTaskId). */
   const assembled = useMemo(
     () => assembleBoardColumns({
       tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now,
@@ -771,8 +769,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
-  // ── Phase 4: search + filters compose AND-wise over BOTH views. The review entry card is
-  // furniture — it renders only while nothing is filtered/searched (it would dilute matches).
+  // ── Phase 4: search + filters compose AND-wise over BOTH views.
   const sctx = { queries, agents, manuscripts };
   /* (`active` and `anyVisible` are DELETED with the body branch they served — Phase 4. They
      answered "is a narrowing hiding everything" over four `v*` sets built with a filter model the
@@ -878,7 +875,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      which view is showing are ways of READING the list, not facts about it, and a stored one
      would greet the writer in a state they last left rather than in the page's own. */
   const [tile, setTile] = useState<string>("all");
-  const [todoView, setTodoView] = useState<QueryView>("grid");
+  /* ⚠️ THE VIEW STATE IS RETIRED (to-do list v2): one body, row cards, and the task opens in the
+     drawer — so the pane's hero is always the drawer's fixed one. */
   const [groupOpen, setGroupOpen] = useState(false);
   const filterTrigRef = React.useRef<HTMLButtonElement>(null);
   const groupTrigRef = React.useRef<HTMLButtonElement>(null);
@@ -941,6 +939,108 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     due: dueOf,
     today,
   }), [listRowInputs, dueOf, today]);
+
+  /* ══ TO-DO LIST v2 — the rows (declared BELOW every accessor they read: the order rule) ══════
+     The population is the BADGE's — `boardCols.todo + boardCols.today`, cards as the unit — so the
+     sidebar count, the three tiles and the list cannot disagree about how many tasks there are.
+     Set-aside cards (snoozed and dismissed) ride along flagged, shown only when the filter asks. */
+  const [v2Tile, setV2Tile] = useState<V2Tile>(DEFAULT_TILE);
+  const [v2Landed, setV2Landed] = useState<string | null>(null);
+  const v2Live = useMemo(() => [...boardCols.todo, ...boardCols.today], [boardCols]);
+  const v2Counts = useMemo(() => tileCounts(v2Live), [v2Live]);
+  const v2AllRows = useMemo(() => {
+    const pkgName = (c: BoardCard): string | null => {
+      const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+      const pid = q?.sentPackageId || q?.packageId;
+      return pid ? (packages.find((p) => p.id === pid)?.packageName ?? null) : null;
+    };
+    const one = (c: BoardCard, setAside: boolean): V2Row => {
+      const inp = listRowInputs(c);
+      const f = ticketFacts(c, {
+        days: inp.days,
+        dateLabel: inp.anchorDate,
+        elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
+      });
+      return buildRow(c, {
+        deed: listTaskText({ card: c, ...inp }),
+        agency: inp.agency,
+        dateKey: f.dateKey,
+        dateValue: f.dateValue,
+        spanValue: f.spanValue && f.spanValue !== "—" ? f.spanValue : null,
+        dueYmd: dueOf(c).ymd,
+        pkg: pkgName(c),
+        setAside,
+        /* a writer's own task names its attached agent by id only (`userCard` leaves `who` empty) */
+        who: !(c.who || "").trim()
+          ? (() => {
+            const aid = c.agentId ?? (c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.agentId : undefined);
+            const ag = aid ? agents.find((a) => a.id === aid) : undefined;
+            return ag ? agentPrimary(ag) : null;
+          })()
+          : null,
+      }, today);
+    };
+    return [
+      ...v2Live.map((c) => one(c, false)),
+      ...[...boardCols.snoozed, ...boardCols.dismissed].map((c) => one(c, true)),
+    ];
+  }, [v2Live, boardCols, listRowInputs, dueOf, queries, packages, agents, userTasks, today]);
+  const [v2Filters, setV2Filters] = useState<V2Filters>(EMPTY_FILTERS);
+  const [v2Group, setV2Group] = useState<V2GroupKey>("when");
+  const [v2Sort, setV2Sort] = useState<V2SortKey>("date");
+  const v2StatusName = React.useCallback(
+    (c: BoardCard): string | null => (c.status ? (STAGE_NAME[c.status as QueryStatus] ?? String(c.status)) : null),
+    [],
+  );
+  /* the tile's rows, set-aside included — what the Filter panel counts over */
+  const v2TileRows = useMemo(() => v2AllRows.filter((r) => r.tile === v2Tile), [v2AllRows, v2Tile]);
+  const v2Facets = useMemo(() => facetCounts(v2TileRows, v2StatusName), [v2TileRows, v2StatusName]);
+  const v2StatusOrder = useMemo(
+    () => Object.values(STAGE_NAME).filter((n) => v2Facets.statuses.has(n) || v2Filters.statuses.includes(n)),
+    [v2Facets, v2Filters.statuses],
+  );
+  const v2Shown = useMemo(
+    () => sortRows(applyFilters(searchRows(v2TileRows, search), v2Filters, v2StatusName), v2Sort),
+    [v2TileRows, search, v2Filters, v2StatusName, v2Sort],
+  );
+  const v2Groups = useMemo(() => groupRows(v2Shown, v2Group), [v2Shown, v2Group]);
+  /* ── the desk rail (Phase 6) — views of the SAME store the list reads, never a second one ── */
+  const v2Yours = useMemo(() => sortRows(v2AllRows.filter((r) => r.cat === "yours" && !r.setAside), "date"), [v2AllRows]);
+  const v2Notes = useMemo(
+    () => userTasks.filter(isNoteTask).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")),
+    [userTasks],
+  );
+  const addV2Task = async (f: { text: string; dueDate: string; agentId?: string }): Promise<boolean> => {
+    const id = "task-" + Math.random().toString(36).slice(2, 11);
+    const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate, ...(f.agentId ? { agentId: f.agentId } : {}) });
+    if (!got) return false;
+    /* ⚠️ IF THE TILE WOULD HIDE IT, SHOW IT: an own task is Your move, so a writer on another tile is
+       switched to it — a task added and then invisible is a task the writer thinks failed. The
+       search and the filters stay as they are; the arrival ring says where it landed. */
+    if (v2Tile !== "move") setV2Tile("move");
+    setV2Landed(got);
+    window.setTimeout(() => setV2Landed((k) => (k === got ? null : k)), 1600);
+    return true;
+  };
+  const addV2Note = async (f: { text: string }): Promise<boolean> => !!(await addUserTask({ text: f.text }));
+  /* bring the arrival into view once the board holds it */
+  useEffect(() => {
+    if (!v2Landed) return;
+    const el = document.querySelector(`.tdv2-wpg [data-row-key="${v2Landed}"][data-todo-v2="row"]`) as HTMLElement | null;
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [v2Landed, v2Shown]);
+  /**
+   * ⚠️ ONE DOOR PER ROW, AND NO DOOR WRITES. A query task opens the QUERY DRAWER on its journey
+   * (Query actions v1: every page finishes in the drawer); anything with no drawer journey — your
+   * own tasks, housekeeping — opens the task pane. `TaskModal`, which the brief named, was deleted on
+   * 27 Sep; these two are what finishes a task now.
+   */
+  const openV2Row = (r: V2Row) => {
+    const c = r.card;
+    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
+    if (door) { openQueryDrawer(door); return; }
+    openDockRef.current(c.key);
+  };
 
   /* ⚠️ `nudgedBefore` IS GONE, AND ITS ABSENCE IS PHASE 2 (QC-chassis round). It was a callback
      that reached into `queries` to work out whether a nudge task had been chased before, and TWO
@@ -1267,24 +1367,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * column is a value the row already renders — nothing is re-derived for the file, so a CSV
    * cannot disagree with the list it came from.
    */
-  function exportRail() {
-    /* ⚠️ EVERY COLUMN IS A VALUE THE ROW ALREADY RENDERS — nothing is re-derived for the file, so
-       a CSV cannot disagree with the list it came from. (Phase 2 repoints `bucket` and `deed` at
-       the bucket derivations when they exist; the fields it reads today are the ones the row
-       reads today, which is the same rule.) */
-    const rows = railGroups().flatMap((g) => g.cards.map((c) => ({
-      bucket: c.kind ?? "",
-      deed: c.title,
-      agent: c.who ?? "",
-      agency: c.record ?? "",
-      figureLabel: g.label,
-      figure: c.due ?? "",
-    })));
-    const blob = new Blob([tasksCsv(rows)], { type: "text/csv;charset=utf-8;" });
+  function exportV2() {
+    /* ⚠️ THE FILE IS THE LIST YOU ARE LOOKING AT — the rows the tile, the search and the filters
+       leave, in the order the sort gives — so the CSV cannot disagree with the page it came from. */
+    const blob = new Blob([rowsCsv(v2Shown)], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.setAttribute("download", "scriptally-tasks.csv");
+    a.setAttribute("download", "queryhawk-tasks.csv");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1297,37 +1387,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // driven by the FocusedSession through this ONE lifted view-model (the hero stays a real
   // stacked flow — nothing absolutely positioned over the board).
   const [heroSession, setHeroSession] = useState<HeroSession>({ clearing: false, slot: null });
-  // frame P3 — the review's AFTERLIFE: opening or dismissing the banner collapses it for the
-  // week (per-week sa. prefs; recon found no existing seen/dismissed flags — the completion
-  // sentinel is the one stored "opened" record, and it composes into seen below). The rail's
-  // REVIEW row is then the sole entry point; a new week resets both.
-  const [reviewSeenWk, setReviewSeenWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewSeen"); } catch { return null; } });
-  const [reviewDismissedWk, setReviewDismissedWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewDismissed"); } catch { return null; } });
-  const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;
-  const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;
-  const markReviewSeen = () => {
-    if (!reviewWin) return;
-    setReviewSeenWk(reviewWin.key);
-    try { localStorage.setItem("sa.todoReviewSeen", reviewWin.key); } catch { /* private mode */ }
-  };
-  const dismissReviewWeek = () => {
-    if (!reviewWin) return;
-    setReviewDismissedWk(reviewWin.key);
-    try { localStorage.setItem("sa.todoReviewDismissed", reviewWin.key); } catch { /* private mode */ }
-  };
-  const openReview = () => { markReviewSeen(); openSundayReview(); };
-  // THE BRIEFING'S FIGURES — derived from the existing review data, never hardcoded. FOCUSED
-  // has no source anywhere in the app (no time is recorded), so that column always drops; a
-  // zero cleared/replies drops its column too rather than showing a nought.
-  const briefStats = useMemo(
-    () => (reviewWin ? weekReviewStats({ activities, queries, agents }, reviewWin) : null),
-    [activities, queries, agents, reviewWin?.key], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-  const briefCleared = reviewWin ? briefingCleared(userTasks, reviewWin) : 0;
-  const briefReplies = briefStats ? briefStats.back.length : 0;
-  const briefFigures = briefingFigures(briefCleared, briefReplies);
-  const briefNarrative = briefStats ? briefingNarrative(briefStats) : null;
-
   /* (The corner pop-up and ALL its state went in workspace P3 — todayActive / todayShown /
      todayLeaving / todayMin, the slide effect and the help-FAB clearance. Today is a route now,
      and the only reason any of this existed was to float a copy of it over this page.) */
@@ -1774,64 +1833,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // styles live on in the trimmed todoShell.css.
   /* ⚠️ NARROWED TO NOTHING — a RAIL fact, and the rail alone says it (Phase 4). Read from the
      groups the rail actually draws, so the message and the list cannot disagree. */
-  /**
-   * ⚠️ THE SEVEN TILES, COUNTED FROM THE ONE ARRAY THE VIEWS RENDER FROM (QC-chassis round,
-   * Phase 1). `railGroupsAll()` is that array — the board after narrowing, before the view's own
-   * filters — so the five categories PARTITION it and their sum is All structurally rather than
-   * by two derivations agreeing. A tile counting what it would show after clicking would read 0
-   * for every category you are not in, which is the one number nobody needs: the same law the
-   * Query Centre's own tiles have carried since they replaced its chips.
-   *
-   * ⚠️ URGENT IS A LENS AND IS NOT IN THE SUM. It counts sends whose clock is running, which are
-   * already counted under Agent requests; adding it would make the row's figures stop adding up
-   * and make a task change category as time passed.
-   *
-   * ⚠️ ASSIGNED HERE, after everything `railGroupsAll` transitively reads — the hoisted-helper
-   * TDZ rule, which this page has been bitten by once already.
-   *
-   * ⚠️ AND THE CLEARED GROUP IS DROPPED, BECAUSE THE LIST DROPS IT. `railGroupsAll()` keeps `done`
-   * and `railGroups()` filters it out, so counting the raw array made the tiles state a population
-   * the list can never show: **29 in the tile beside "27 tasks" in the card's own footer**, and a
-   * Housekeeping tile reading 3 that narrowed to two rows. Both numbers were right about their own
-   * set, which is precisely the two-numbers-both-called-To-do fault this page has closed once
-   * before. The footer's own `totalUnfiltered` already filtered `done` for exactly this reason —
-   * the page knew the right population and the tiles were the one surface that missed it.
-   *
-   * ⚠️ IT IS NOT THE SAME EXCLUSION AS THE VIEW'S. The tiles must still count the WHOLE board
-   * before the tile, the chip's view filters and the sort — that is the paragraph above. Dropping
-   * `done` is a statement about what counts as a task at all, not about what is currently selected,
-   * which is why it belongs here and the view's filters do not.
-   */
-  const tileCards = tileScope().flatMap((g) => g.cards);
-  const tileCounts = React.useMemo(() => {
-    const out: Record<string, number> = { all: tileCards.length, urgent: 0 };
-    for (const c of CATEGORIES) out[c] = 0;
-    for (const card of tileCards) {
-      out[taskCategory(card)] += 1;
-      if (isUrgentCard(card, listRowInputs(card).days)) out.urgent += 1;
-    }
-    return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tileCards, listRowInputs]);
-  const tileRow: StatTile[] = [
-    { key: "all", label: "All tasks", count: tileCounts.all, glyph: "✎" },
-    { key: "urgent", label: "Urgent", count: tileCounts.urgent, mark: "!" },
-    ...CATEGORIES.map((c) => ({
-      key: c as string,
-      label: CATEGORY_LABEL[c],
-      count: tileCounts[c] ?? 0,
-      swatch: TILE_SWATCH[c],
-    })),
-  ];
+  /* ⚠️ THE SEVEN TILES ARE RETIRED (to-do list v2) — three tiles over the badge's population now
+     (`v2Counts`). `tileScope` survives for the Filter panel's conditional counts until Phase 4. */
 
-  const railEmpty = railGroups().length === 0;
 
   /* ⚠️ ASSIGNED HERE, LAST — after every declaration `groupsForList` transitively reads (the
      hoisted-helper TDZ rule: a render-time read is declared above its reader, and this is the
      reader). The same visible set the list draws: collapsed sections contribute nothing. */
-  visibleFlatRef.current = groupsForList()
-    .filter((g) => !collapsedGroups.includes(g.id))
-    .flatMap((g) => g.cards);
+  /* ⚠️ THE KEYS WALK THE ROWS ON SCREEN (to-do list v2): j/k and Enter follow v2's groups, never the
+     retired list's order — a key that moved focus through cards nobody can see would open a task
+     the reader never pointed at. */
+  visibleFlatRef.current = v2Groups.flatMap((g) => g.rows.map((r) => r.card));
   openDockRef.current = openDock;
 
   return (
@@ -1860,12 +1872,36 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             THREE things: a subtitle, one primary and the illustration slot. `mark` goes with the
             picture arriving, for the reason the Query Centre records at its own header: a glyph
             beside a commissioned illustration is a second picture competing with the first. */}
-        <TasksPageLayout
-          title="To-do list"
-          subtitle="Everything that's yours to do, and everything worth a look."
-          primary={{ label: "Add a task", onClick: () => openComposer("task") }}
-          illo={<IlloSlot className="tdb-illo" name="page · to-do" width={132} height={72} />}
+        {/* ══ TO-DO LIST v2 (design-refs/todo-list-v2.html) ══════════════════════════════════════
+            The page opts out of the grid's masthead and opens with the SHARED full header as the first
+            row of its own group — the Contact list's and the Query Centre's arrangement — so the desk
+            rail starts below the rule. The group is a page that SCROLLS (not the Tasks family's fill
+            layout): rows flow down the page and the rail sticks beside them. */}
+        <WorkspacePageGrid className="tdv2-wpg" scrollLabel="To-do list" masthead={null}>
+        <div
+          className={`tdv2-group${v2Load.loading ? " tdv2--loading" : ""}${v2Load.blank ? " tdv2--blank" : ""}${v2Load.entering ? " tdv2--enter" : ""}`}
+          data-todo-v2="page"
+          aria-busy={v2Load.loading || undefined}
         >
+          <PageHeader
+            variant="full"
+            title="To-do list"
+            description="Everything that's yours to do, and everything worth a look."
+            /* ⚠️ NO "Add a task" HERE (to-do list v2, Phase 6): the desk's composer replaces it — one way
+               to add, beside the list it adds to. "Set aside" stays in the header. */
+            secondary={{ label: asideN ? `Set aside · ${asideN}` : "Set aside", onClick: () => setAsideOpen((o) => !o) }}
+            actionsPopover={asideOpen ? (
+              <V2Popover className="tdv2-asidepop" label="Set aside and tags" onClose={() => setAsideOpen(false)}>
+                <SetAsidePanel />
+              </V2Popover>
+            ) : null}
+            /* ⚠️ THE ART SLOT SHIPS EMPTY — the illustration is not ready. A box of the ref's size,
+               standing on the rule, with nothing in it and nothing claiming something is missing: the
+               PNG drops in later without a reflow. */
+            art={<span className="tdv2-artslot" data-todo-v2="art-slot" />}
+          />
+          <div className="tdv2-main" data-todo-v2="main">
+          {v2Load.loading ? <V2Skeleton /> : (
           <div className="tdb-centre">
           {/* ⚠️ SEVEN TILES AND ONE TOOLBAR, BOTH THE QUERY CENTRE'S (QC-chassis round, Phase 1).
               The tiles are `shared/StatTiles` — the markup extracted from `QueryStatTiles`, so
@@ -1879,183 +1915,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               that sum: a send whose clock is running is still an Agent request. */}
           {desk !== "new-desk" && desk !== "desk-cleared" && (
             <>
-              <StatTiles
-                label="Task totals"
-                columns={7}
-                tiles={tileRow}
-                selected={tile}
-                onPick={(k) => setTile(k === tile && k !== "all" ? "all" : k)}
+              {/* ⚠️ THREE TILES, NOT SEVEN (to-do list v2). Your move folds agent requests and your
+                  own tasks, Chase or close folds nudges and gone quiet, Housekeeping is itself —
+                  each sub-line names what it is made of, so no category is lost. The figures come
+                  from `v2Live`, the badge's own population (todo + today, cards as the unit). */}
+              <V2Tiles counts={v2Counts} selected={v2Tile} onPick={setV2Tile} />
+              {/* ⚠️ THE CONTROLS ROW IS THE v2 ONE (to-do list v2, Phase 4): search · Filter · Group ·
+                  Sort · Export CSV. The Grid/List/Board switch is RETIRED with the views; the
+                  Set-aside door moved to the header's action. */}
+              <V2Controls
+                search={search}
+                onSearch={setSearch}
+                searchRef={searchRef}
+                filters={v2Filters}
+                onFilters={setV2Filters}
+                counts={v2Facets}
+                statusOrder={v2StatusOrder}
+                group={v2Group}
+                onGroup={setV2Group}
+                sort={v2Sort}
+                onSort={setV2Sort}
+                onExport={exportV2}
               />
-              <div className="tdb-qtool">
-                <ToolbarSearch
-                  value={search} onChange={setSearch} ref={searchRef}
-                  placeholder="Search tasks, agents or agencies"
-                  ariaLabel="Search tasks, agents or agencies"
-                />
-                <span className="tdb-popwrap">
-                  <ToolbarButton
-                    ref={filterTrigRef} label="Filter" icon={ToolbarIcon.filter}
-                    count={filterBadge(view)} open={filterOpen}
-                    onClick={() => { setSortOpen(false); setAsideOpen(false); setFilterOpen((o) => !o); }}
-                  />
-                </span>
-                <span className="tdb-popwrap">
-                  <ToolbarButton
-                    ref={groupTrigRef} label="Group" icon={ToolbarIcon.group}
-                    value={GROUPING_LABEL[view.grouping]} open={groupOpen}
-                    onClick={() => { setFilterOpen(false); setSortOpen(false); setAsideOpen(false); setGroupOpen((o) => !o); }}
-                  />
-                </span>
-                <span className="tdb-popwrap">
-                  <ToolbarButton
-                    ref={sortTrigRef} label="Sort" icon={ToolbarIcon.sort}
-                    value={SORT_LABEL[view.sort]} open={sortOpen}
-                    onClick={() => { setFilterOpen(false); setGroupOpen(false); setAsideOpen(false); setSortOpen((o) => !o); }}
-                  />
-                </span>
-                {/* ⚠️ THE SET-ASIDE DOOR AND EXPORT LIVE HERE NOW (corrections 2.1). Both were in
-                    the list card's own chrome — the door in `.l-bar`, Export in the footer strip —
-                    and both are PAGE-level acts that apply to whatever body is showing, so the card
-                    was the wrong home for either. The door's own comment had promised Phase 3 would
-                    rehome it and Phase 3 did not; this is that move, three phases late.
-
-                    ⚠️ THE DOOR IS THE ONLY ROUTE TO THE LEDGER AND TAG MANAGEMENT, and this page has
-                    taken both offline once before by unmounting the sheet that held them — which is
-                    why it MOVES rather than going. */}
-                <span className="tdb-popwrap">
-                  <ToolbarButton
-                    ref={asideTrigRef} label="Set aside" icon={ToolbarIcon.filter}
-                    value={asideN ? String(asideN) : ""} open={asideOpen}
-                    onClick={() => { setFilterOpen(false); setGroupOpen(false); setSortOpen(false); setAsideOpen((o) => !o); }}
-                  />
-                </span>
-                <button type="button" className="tdb-export" onClick={exportRail}>Export CSV</button>
-                {asideOpen && asideTrigRef.current && (
-                  <AnchoredPanel anchor={asideTrigRef.current} ariaLabel="Set aside and tags" variant="panel"
-                    onClose={(back) => { setAsideOpen(false); if (back) asideTrigRef.current?.focus(); }}>
-                    <SetAsidePanel />
-                  </AnchoredPanel>
-                )}
-                {/* ⚠️ TWO SEGMENTS, THROUGH THE QUERY CENTRE'S OWN SWITCH — its `views` list is
-                    additive and defaults to that page's four, so this is the same component
-                    rather than a second one drawing two of the same buttons. */}
-                <span className="tdb-views">
-                  <QueryViewSwitch
-                    view={todoView} onView={(v) => setTodoView(v)}
-                    views={TODO_VIEWS}
-                  />
-                </span>
-              </div>
-              {/* ⚠️ THE TWO PANELS HANG OFF THE PAGE'S OWN TRIGGERS NOW (QC-chassis round, Phase 1)
-                  — they were passed INTO the list card as `filterMenu`/`sortMenu` because its bar
-                  held the buttons. The card no longer has them, so a panel routed through it would
-                  be a popover travelling through a component that has nothing to do with it. Same
-                  panels, same `AnchoredPanel`, same conditional counts. */}
-              {filterOpen && filterTrigRef.current ? (
-
-        /* ⚠️ RE-HOSTED, NOT REBUILT (QC-chassis round, Phase 1). The panel is the drawer round's
-           own `FilterMenu` with its conditional counts intact; what changed is the TRIGGER it
-           hangs off — the page's toolbar button rather than the list card's icon. Anchoring stays
-           `AnchoredPanel`'s, which is this page's one popover mechanism. */
-        <AnchoredPanel anchor={filterTrigRef.current} ariaLabel="Filter tasks"
-          onClose={(back) => { setFilterOpen(false); if (back) filterTrigRef.current?.focus(); }}>
-          <FilterMenu
-            view={view}
-            /* ⚠️ CONDITIONAL COUNTS (Phase 6) — each facet's numbers come from the view re-run
-               with that facet's OWN choices lifted, so the panel answers "what would this leave,
-               given the others". `viewLeaving` is the one derivation; counting the raw board here
-               would promise rows the other filters have already hidden. */
-            typeCounts={(() => {
-              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
-                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
-                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
-                done: narrowCards(boardCols.done),
-              }), chip)), view, viewFacts, "types");
-              const out = Object.fromEntries(TYPE_ORDER.map((t) => [t, 0])) as Record<Bucket, number>;
-              for (const c of left) out[cardBucket(c)] += 1;
-              return out;
-            })()}
-            agentRows={(() => {
-              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
-                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
-                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
-                done: narrowCards(boardCols.done),
-              }), chip)), view, viewFacts, "agents");
-              const rows = new Map<string, { id: string; name: string; count: number }>();
-              for (const c of left) {
-                if (!c.agentId || !(c.who || "").trim()) continue;
-                const r = rows.get(c.agentId) ?? { id: c.agentId, name: (c.who || "").trim(), count: 0 };
-                r.count += 1; rows.set(c.agentId, r);
-              }
-              /* ⚠️ A TICKED AGENT NEVER VANISHES FROM THE PANEL — an active filter must stay
-                 removable where it was set, even when the other filters have taken its count to
-                 zero. Absent rows for ticked ids are re-added at 0. */
-              for (const id of view.agents) {
-                if (!rows.has(id)) {
-                  const name = agents.find((a) => a.id === id);
-                  rows.set(id, { id, name: name ? agentPrimary(name) : "(agent)", count: 0 });
-                }
-              }
-              return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
-            })()}
-            snoozedCount={narrowCards(boardCols.snoozed).length}
-            dismissedCount={narrowCards(boardCols.dismissed).length}
-            onChange={setView}
-          />
-        </AnchoredPanel>
-              ) : null}
-              {groupOpen && groupTrigRef.current ? (
-                /* the same panel, its GROUP half — see SortMenu's own note on why one component
-                   serves two buttons rather than two components serving one law */
-                <AnchoredPanel anchor={groupTrigRef.current} ariaLabel="Group tasks"
-                  onClose={(back) => { setGroupOpen(false); if (back) groupTrigRef.current?.focus(); }}>
-                  <SortMenu view={view} onChange={setView} section="group"
-                    showManuscript={showsManuscriptColumn(manuscripts.length)} />
-                </AnchoredPanel>
-              ) : null}
-              {sortOpen && sortTrigRef.current ? (
-
-        <AnchoredPanel anchor={sortTrigRef.current} ariaLabel="Sort tasks"
-          onClose={(back) => { setSortOpen(false); if (back) sortTrigRef.current?.focus(); }}>
-          <SortMenu view={view} onChange={setView} section="order" />
-        </AnchoredPanel>
-              ) : null}
             </>
           )}
-          {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
-              SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
-              filter row, rendering the review briefing and nothing else.
-
-              THE COLLAPSE LAW: dismissed, or no fresh review, and the slot renders NOTHING — no
-              node, no margin, no reserved height, so the filter row moves straight up under the
-              hero. That is why the whole block sits inside this one condition and why the slot
-              owns no wrapper of its own. Dismissal is already per-review-period
-              (sa.todoReviewDismissed keyed on reviewWin.key), so a new review brings it back. */}
-          {/**
-            * ⚠️ THE WEEKLY REVIEW BANNER IS UNMOUNTED, NOT DELETED — it comes back deliberately.
-            *
-            * The `.tdb-brief` card rendered here: the review masthead art, `↺ LAST WEEK IN REVIEW`,
-            * the headline, the narrative, the figures, `Read the review` and the ✕. Every one of
-            * its inputs is still computed a few hundred lines up and still correct — `reviewWin`,
-            * `reviewSeen`, `reviewDismissed`, `briefCleared`, `briefReplies`, `briefNarrative`,
-            * `briefFigures`, `markReviewSeen`, `dismissReviewWeek`, `openReview` — and
-            * `openSundayReview` still opens the review with the live Urgent cards as its seed.
-            *
-            * ⚠️ SO NOTHING HERE IS ORPHANED BY THIS COMMIT, and that is deliberate rather than
-            * untidy: a derivation deleted now is one that has to be rebuilt from the git history
-            * when the banner returns, and the reasoning that produced `briefingHeadline`'s copy is
-            * not recoverable from its call site. Restoring the card is putting this block back.
-            *
-            * ⚠️ WHAT THIS CHANGES BESIDES THE BANNER, stated because it is not obvious: the tool
-            * row's `.tdb-revlink` renders only when `reviewSeen || reviewDismissed`, and the ONLY
-            * thing that set `reviewSeen` was this card being opened or dismissed. With the card
-            * gone, a fresh account never sets either — so the link does not appear, and the weekly
-            * review has no entry point on this page at all. An account whose localStorage already
-            * carries `sa.todoReviewSeen` for the current week WILL still see the link. That is a
-            * consequence of unmounting, not a second decision, and it is reported rather than
-            * worked around.
-            */}
-
           {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
               view toggle fold into the header's tool row, which is now the page's single
               instrument — one place to look for anything that changes what the list shows. Two
@@ -2205,74 +2088,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               Gated on `paneCard` alone, opening a ticket squeezed the grid to a single column behind
               a drawer that had not taken any of its width. Measured, not reasoned: the screenshot is
               what showed it. */}
-          <div className={`tdw-split${todoView === "list" && paneCard ? " open" : ""}`}>
-            {/* the frame contract's command bar, above the split */}
-            <div className="tdw-rail">
-              {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
-                  It used to replace the whole body, which meant a search that matched nothing took
-                  the workspace with it — the pane cleared because a search box narrowed, which is
-                  the one behaviour this page must not have. The pane HOLDS; only the rail says so.
-                  ⚠️ It names WHAT you searched for — a bare "nothing matches" leaves you wondering
-                  whether the page heard you — and states the size of the set you get back, which
-                  is what makes clearing an informed choice rather than a guess. */}
-              {/* ⚠️ THE GRID AND THE BOARD RENDER ON THE PAGE GROUND (corrections 2.1). They used to
-                  ride inside `TaskList`'s card as its `body`, so the Query Centre's own layout arrived
-                  wrapped in a white, 1px-bordered, 12px-radius, shadowed box whose `.l-body` was an
-                  INNER scroller — the page looked pinched, the board's horizontal scroll happened
-                  inside a rounded box that clipped its last column, and a footer strip beneath it
-                  restated a count the tiles already give.
-
-                  Measured against `/queries` first: its chain from card to `.wpg-scroll` is
-                  transparent, borderless, unrounded and unshadowed the whole way, and only
-                  `.wpg-scroll` scrolls. This is that shape.
-
-                  ⚠️ THE LIST KEEPS ITS CARD, which is not an inconsistency — `.tlc listcard` IS the
-                  list's own contract, rows and all. What left it is everything that was never the
-                  list's: the count, Export and the set-aside door, all page-level acts. */}
-              {railEmpty ? (
-                <div className="tdg-empty tdw-empty">
-                  <h3>{search.trim() ? `Nothing matches “${search.trim()}”` : "Nothing in this filter"}</h3>
-                  <p>Clear it to see all {allDockable.length}.</p>
-                  <button type="button" className="tdg-emptyact" onClick={clearNarrowing}>
-                    {search.trim() ? "Clear search" : "Show all"}
-                  </button>
-                </div>
-              ) : todoView === "grid" ? renderGrid()
-                : todoView === "board" ? renderBoard()
-                : renderList()}
-              {/* ⚠️ THE FOOTER CLOSES THE CARD, and it states the scope the EXPORT writes. A count
-                  saying "12 of 34" beside a button that wrote 34 would be two statements of one
-                  scope, and the button's is the one nobody checks until the file is open. */}
-              {/* ⚠️ THE RAIL'S TOOLBAR AND FOOTER ARE RETIRED — the ported card renders its own,
-                  because the contract draws toolbar, body and footer as ONE object. Leaving these
-                  would have given the page two toolbars and two footers, and the second footer was
-                  the one saying "showing 13 of 12". One surface, one count.
-
-                  ⚠️ AND THE BRACES ARE LOAD-BEARING. In JSX CHILDREN a bare slash-star comment is
-                  literal TEXT — the first form of this note rendered on the page, under the list, in
-                  full. It is the mirror of the trap at EXPRESSION position, where the braced form
-                  parses as a block instead: same characters, opposite rule, decided by where it
-                  sits. (And the braced form cannot be quoted inside a comment either — its closing
-                  sequence ends the comment early, which is how the second attempt at this failed.) */}
-            </div>
-            {/* ⚠️ THE SPLIT HOSTS THE PANE ONLY IN LIST VIEW (QC-chassis round, Phase 5). The grid
-                and the board fill the width, so there is no second track to dock into — the
-                contract opens the task as a DRAWER over them, which is what `SlideOver` below is.
-                One `renderPane()`, two hosts: a second copy of that JSX is how the docked pane and
-                the drawer would come to offer different verbs for one card. */}
-            <div className="tdw-work">
-              {todoView === "list" && paneCard ? (
-                /* ⚠️ THE PORTED PANE (`TaskPane`), which replaced `TodoDock` wholesale. The old pane's
-                    markup and stylesheet are deleted in the same commit — leaving both would have given the
-                    page two panes to drift apart, and the class names overlap enough that a stray rule from
-                    one would have reached the other.
-
-                    ⚠️ WHAT CROSSED OVER IS BEHAVIOUR: the completion path (`dockPrimary`), snooze, dismiss,
-                    open query and task navigation. The verbs are the SAME `cardMenu` derivation the ⋯ menu
-                    reads, so the pane and the menu cannot disagree about what applies to a card. */
-                renderPane()
-              ) : null}
-            </div>
+          {/* ⚠️ THE SPLIT IS RETIRED (to-do list v2). The list had the page's width to itself at rest and
+              folded to make room for a docked pane in List view; with the views gone there is one
+              body, and the task opens in the drawer over it (the `SlideOver` below), whatever the
+              row. The page's own empty state is the list's — a narrowing that matches nothing never
+              reaches the drawer, which reads the HELD card (`paneCard`), not the list. */}
+          <div className="tdv2-body">
+              <V2Rows
+                groups={v2Groups}
+                landedKey={v2Landed}
+                onOpen={openV2Row}
+                empty={search.trim() ? `Nothing matches “${search.trim()}”.` : "Nothing here right now."}
+              />
           </div>
           </>
         )}
@@ -2289,8 +2116,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               against an Outstanding of 16 in production. Whoever re-places it fixes the units
               first; the note is in reports/STATE.md. Not fixed here: this pack is four fixes and
               a units change to a Pro surface is neither of them. */}
-          </div>{/* .tdb-centre */}
-        </TasksPageLayout>
+          </div>
+          )}
+          </div>{/* .tdv2-main */}
+          <PageRail
+            className="tdv2-rail"
+            label="Your desk"
+            trayClassName="tdv2-tray"
+            dataAttrs={{ "data-todo-v2": "rail" }}
+            tray={(
+              <>
+                <h3 className="tdv2-deskttl">Your desk</h3>
+                {/* the hawk-head slot — empty, at the ref's size, the same rule as the header's art */}
+                <span className="tdv2-hawkslot" aria-hidden="true" data-todo-v2="hawk-slot" />
+              </>
+            )}
+          >
+            <V2Desk
+              today={today}
+              agents={agents}
+              yours={v2Yours}
+              notes={v2Notes}
+              onAddTask={addV2Task}
+              onAddNote={addV2Note}
+              onOpenRow={openV2Row}
+              onOpenNoteboard={() => navigate("/todo/noteboard")}
+            />
+          </PageRail>
+        </div>{/* .tdv2-group */}
+        </WorkspacePageGrid>
         {/* ⚠️ THE DRAWER IS THE GRID'S AND THE BOARD'S PANE (QC-chassis round, Phase 5), and it is
             the first adopter of `SlideOver` — the app's three other right-hand drawers each own a
             private fixed element, and a primitive nobody mounts is a fourth one wearing a shared
@@ -2300,7 +2154,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ⚠️ IT IS MOUNTED ONLY WHERE THERE IS NO SPLIT. List view docks the pane beside the rows;
             the grid and the board fill the width, so the contract slides the task over them.
             Rendering both at once would put two panes on screen for one card. */}
-        {todoView !== "list" && (
+        {(
           <SlideOver
             open={!!paneCard}
             onClose={closeDock}
@@ -2368,12 +2222,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} quickDone={quickDone} />}
+      {flow && <HousekeepingSweep items={flow.items} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} />}
       {/* ⚠️ FocusedSession IS RETIRED (board+dock P4). It was a SECOND work surface, and two of
           them would have had to agree about what "done" means — the first time they disagreed,
           one would have been silently wrong. The dock is the one surface, and "Focused session"
           and Today's "Work the list" are entrances to it rather than to anything of their own.
-          FocusFlow survives as the per-kind flow engine, which is what it was always good at. */}
+          HousekeepingSweep survives for the grouped housekeeping batch and the non-query cards;
+          every query task finishes in the query drawer. */}
     </div>
   );
 
@@ -2515,12 +2370,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
               Begin focused session
             </button>
-            {reviewWin && (reviewSeen || reviewDismissed) && (
-              <button type="button" className={`tdb-revlink${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-                <RewindGlyph />
-                Last week in review
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -3037,8 +2886,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* (`commitSweep` is deleted — popup round, Phase 2. It was the page's copy of the agent-gaps
      COHORT write, built for a pane sweep that was never drawn, and it had no caller. The grouped
-     housekeeping batch still lives in `FocusFlow`, which the Calendar and the Sunday review both
-     open, so nothing a writer can reach has changed.) */
+     housekeeping batch lives in `HousekeepingSweep`, so nothing a writer can reach has changed.) */
 
 
   /**
@@ -3447,105 +3295,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     });
   }
 
+  /* ⚠️ THE GRID, THE BOARD AND THE LIST BODIES ARE DELETED (to-do list v2, Phase 4) — the page draws
+     one body of row cards (`V2Rows`). `TaskList`, `TaskTicket` and `TaskBoard` survive as
+     components for their own suites and are mounted nowhere on this page. */
   /**
-   * ⚠️ THE GRID IS WHAT MAKES THE VIEW SWITCH REAL (QC-chassis round, Phase 3). Phase 1 mounted
-   * Grid/Board and read `todoView` NOWHERE — a control that looked like a choice and changed
-   * nothing, which this repo already records as worse than no control at all (a dead Undo tells
-   * you it is fixed). Phase 1's own measurement asserted the switch OFFERED two options and never
-   * asked whether either did anything: a lock that counts is not a lock that checks.
-   *
-   * ⚠️ IT WALKS THE SAME GROUPS THE LIST WALKS. `groupsForList()` is already the tile's narrowing,
-   * the view's filters and the sort applied in that order; taking the cards out of it means the
-   * grid and the list cannot show different sets, and the footer's count describes both.
-   *
-   * ⚠️ AND THE FIGURES COME FROM `listRowInputs`, the row's own. A ticket deriving its own date
-   * would be free to name a different day from the row above it.
-   */
-  function renderGrid() {
-    const cards = groupsForList().flatMap((g) => g.cards);
-    return (
-      <div className="tkt-grid">
-        {cards.map((c) => {
-          const inp = listRowInputs(c);
-          return (
-            <TaskTicket
-              key={c.key}
-              card={c}
-              /* ⚠️ THE QUERY CENTRE'S OWN STATE COLOUR, not the ref's `TINT` table. The ref carries
-                 a literal status→hex map because it is a standalone document; this app already has
-                 `stateFor` → `STATE_TOKEN`, which the Query Centre's cards, its stat tiles and its
-                 board rules all read. Copying the ref's hexes would put a SECOND status palette
-                 three inches from the first, free to drift on the next retone. A card with no
-                 query (a note, a housekeeping item) has no state and takes the closed step. */
-              edge={c.status ? STATE_TOKEN[stateFor(c.status)] : STATE_TOKEN.closed}
-              /* ⚠️ THE MANUSCRIPT IS A DISAMBIGUATOR, SO IT IS ABSENT WHERE THERE IS NOTHING TO
-                 DISAMBIGUATE (three-views round, Phase 1). On a one-book account every ticket
-                 carried the same title, which is a column of noise saying nothing. The rule is
-                 `showsManuscriptColumn`, the same predicate the list's own column already reads —
-                 not a second test of the same thing. */
-              {...(showsManuscriptColumn(manuscripts.length) ? { manuscript: c.msTitle } : {})}
-              selected={docked.card?.key === c.key}
-              urgent={isUrgentCard(c, inp.days)}
-              /* ⚠️ THE ACT, THE PERSON AND THE VERB (list round, Phase 4) — the card's title is the
-                 deed the LIST's Task cell prints (one expression, so the two views cannot name one
-                 task two things), the agency is the row's own accessor, and the verb is the
-                 category's word. The agent's name then appears once, in the foot. */
-              deed={listTaskText({ card: c, ...inp })}
-              {...(inp.agency ? { agency: inp.agency } : {})}
-              verb={ticketVerb(c)}
-              facts={ticketFacts(c, {
-                days: inp.days,
-                dateLabel: inp.anchorDate,
-                elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
-              })}
-              onOpen={() => openDock(c.key)}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  /**
-   * ⚠️ THE BOARD IS THE SAME CARDS, COLUMNED (QC-chassis round, Phase 4). It walks
-   * `groupsForList()` exactly as the grid does, so the tile's narrowing, the view's filters and
-   * the sort all reach it — and the card's footer, which counts that same array, describes the
-   * board too.
-   *
-   * ⚠️ ITS FIGURES ARE THE ROW'S OWN, passed in rather than re-derived. `due` is the mono chip the
-   * list already draws; the span and its burgundy come from `elapsedPhrase` and `isUrgentCard`,
-   * the same two the ticket reads. Three surfaces, one set of numbers.
-   */
-  function renderBoard() {
-    return (
-      <TaskBoard
-        cards={groupsForList().flatMap((g) => g.cards)}
-        selectedKey={docked.card?.key}
-        spanOf={(c) => {
-          const inp = listRowInputs(c);
-          /* ⚠️ THE FIGURE AND ITS UNIT FROM THE ONE SPAN DERIVATION — `listFragment`, which the
-             list's stamp and the ticket's figures both read. `elapsedPhrase` returned them joined,
-             and the contract sets the numeral in Playfair over a mono unit, which a single string
-             cannot carry. */
-          const f = listFragment({ card: c, ...inp });
-          return {
-            figure: f.absent ? "" : (f.figure ?? ""),
-            unit: f.absent ? "" : (f.tail ?? ""),
-            late: isUrgentCard(c, inp.days),
-          };
-        }}
-        urgentOf={(c) => isUrgentCard(c, listRowInputs(c).days)}
-        onOpen={(c) => openDock(c.key)}
-      />
-    );
-  }
-
-  /**
-   * ⚠️ ONE PANE, TWO HOSTS (QC-chassis round, Phase 5). In List view it sits in the split's work
-   * column; in Grid and Board — which fill the width and have no second track — it rides a
-   * `SlideOver`, which is what the contract draws. Rendering the JSX twice would be two panes free
-   * to offer different verbs for one card, which is the fault this page closed when `TodoDock` and
-   * `TaskPane` briefly coexisted.
+   * ⚠️ ONE PANE, ONE HOST (to-do list v2). It rides the `SlideOver` over the row list; the split's
+   * work column is retired with the views. Rendering the JSX twice would be two panes free to
+   * offer different verbs for one card.
    */
   function renderPane() {
     if (!paneCard) return null;
@@ -3560,7 +3316,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
            measured, `sheet 404 holding a 0 scroller`, with every element inside it correct. This
            is the one host difference CSS could not express: the reference card's two treatments
            are paint, and this is placement. */
-        heroFixed={todoView !== "list"}
+        heroFixed
         /* the receipt window's flag — while the held task is the open one, the foot
            shows the receipt instead of the primary (Phase 5) */
         committed={!!leaving && !leaving.undone && leaving.card.key === paneCard.key}
@@ -3576,88 +3332,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  function renderList() {
-    /* ⚠️ `railChips` IS NO LONGER THE FILTER'S SOURCE (frame round). The contract's menu counts by
-       GROUP and by TYPE, both from `railGroupsAll()` — the same array the bands and the meter read,
-       so the one-derivation claim the chips carried is unchanged and the artefact moved. */
-    return (
-      <TaskList
-        groups={groupsForList()}
-        leaving={leaving ? { key: leaving.card.key, fading: leavingFading } : undefined}
-        onOpen={(c) => openDock(c.key)}
-        selectedKey={docked.card?.key}
-        rowInputs={listRowInputs}
-        /* ⚠️ THE DUE DAY AND THE ORDER, BOTH THE VIEW'S OWN (list round, Phase 2) — `dueOf` is the
-           accessor the sort reads, so a chip names the day that placed its row; a head click edits
-           the SAME stored view the Sort menu edits. */
-        dueOf={dueOf}
-        today={today}
-        sort={view.sort}
-        direction={view.direction}
-        onSortBy={(k) => setView(sortByHead(view, k))}
-        /* ⚠️ THE SAME EXPRESSION THE SPLIT'S OWN CLASS READS — `!!paneCard`. Two derivations of
-           "is a task open" is how a folded row ends up in a full-width card. */
-        folded={!!paneCard}
-        /* ⚠️ FOCUS, COLLAPSE AND THE STRIP'S DOORS (tightened round, Phase 2) — all the page's
-           state, all one truth with the key effect. The strip's meta is the manuscript name,
-           derived by the SAME row inputs the cells use. */
-        focusedKey={focusKey ?? undefined}
-        onFocusRow={(c) => setFocusKey(c.key)}
-        onStripSnooze={(anchor, card) => setStripSnooze({ anchor, card })}
-        /* (`onStripDismiss` is retired with the row's ×. Dismissal is the `d` key — which still opens
-           the SAME confirm through `setStripDismiss` — and the drawer's own door.) */
-        collapsedGroups={collapsedGroups}
-        onToggleGroup={(id) => setCollapsedGroups((xs) =>
-          xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id])}
-        /* ⚠️ THE CHIPS ARE DERIVED FROM THE SAME VIEW THE PANEL EDITS — remove one and you have
-           edited the view, exactly as unticking it in the panel would. Facet names in mono per the
-           contract; group heads use the family's own labels. */
-        chips={[
-          ...GROUP_IDS.filter((g) => !view.groups.includes(g)).map((g) => ({
-            facet: "hiding", label: ({ urgent: "Needs you now", housekeeping: "Housekeeping", yours: "Your tasks" })[g],
-            onRemove: () => setView({ ...view, groups: [...view.groups, g] }),
-          })),
-          ...(view.types.length !== TYPE_ORDER.length
-            ? view.types.map((t) => ({
-                facet: "type", label: TYPE_LABEL[t],
-                onRemove: () => setView({
-                  ...view,
-                  types: view.types.length > 1 ? view.types.filter((x) => x !== t) : [...TYPE_ORDER],
-                }),
-              }))
-            : []),
-          ...view.agents.map((id) => ({
-            facet: "agent",
-            label: (() => { const a = agents.find((x) => x.id === id); return a ? agentPrimary(a) : "(agent)"; })(),
-            onRemove: () => setView({ ...view, agents: view.agents.filter((x) => x !== id) }),
-          })),
-          ...(view.includeSnoozed ? [{ facet: "also", label: "Snoozed",
-            onRemove: () => setView({ ...view, includeSnoozed: false }) }] : []),
-          ...(view.includeDismissed ? [{ facet: "also", label: "Dismissed",
-            onRemove: () => setView({ ...view, includeDismissed: false }) }] : []),
-        ]}
-        onClearFilters={() => setView({ ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [], includeSnoozed: false, includeDismissed: false })}
-        /* ⚠️ N IS "WHAT WOULD SHOW WITH NOTHING NARROWING" — the same pipeline with the narrowing
-           facets lifted, NOT a raw store count. Search and the chip narrow upstream of the view,
-           so they participate in n and in N alike; the footer's two-number form appears exactly
-           when the view itself is hiding rows, which is the claim the contract makes. */
-        totalUnfiltered={viewTotal(tileScope())}
-        /* ⚠️ THE CARD'S OWN TOOLBAR IS RETIRED (QC-chassis round, Phase 1) — `TodoToolbar`'s meter
-           and its three actions. The meter counted the three FAMILIES; the page's seven tiles
-           count the five CATEGORIES and are the same fact told better, so keeping both would be
-           two statements of one derivation three inches apart. `+ Add a task` is the header's one
-           primary now, `+ Add a note` is the composer's other mode reached from it, and Calendar
-           is a nav row in the sidebar. The component is unmounted, not deleted. */
-        onExport={exportRail}
-        /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, NOT FROM A FLAG. `isFiltered` compares to the default,
-         so toggling something back off turns the light off too — a tracked "touched" boolean would
-         leave a full list wearing the filtered marker. */
-      /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second
-         tally. A door that states a figure the surface behind it disagrees with is worse than a
-         door that states none. */
-    />
-    );
-  }
 
   /* ⚠️ `performBoardPlan` AND `dropPlan` SURVIVE UNMOUNTED — drag was the board's, and the list
      has no drop targets. They are left whole rather than deleted because every verb a drag
@@ -3665,19 +3339,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      own (the house rule on orphans). */
   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,
   // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)
-
-  // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
-  //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
-  // MUST be a hoisted `function` (not a post-return `const`): the banner/bar JSX calls it from
-  // within the component's return — a `const` here sits in the TDZ for the whole render (the
-  // demotion bug's lesson).
-  function openSundayReview() {
-    // board.do is review-free by construction (P1) — no filter needed
-    setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
-  }
-
-
-
 
 };
 

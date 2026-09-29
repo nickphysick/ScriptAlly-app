@@ -12,6 +12,7 @@
 import { flagSleeps, flagReturnedToday } from "./taskFlags";
 import { TaskFlag } from "../types";
 import { TodoListId } from "./todoRoutes";
+import { formatDate } from "./dates";
 
 /**
  * THE THREE TYPE GROUPS (audit item 4's companion: the lists are five, the GROUPS are three).
@@ -94,5 +95,5 @@ export function returnedToday(
 export function returnedChipLabel(snoozedUntilIso: string): string {
   const d = new Date(snoozedUntilIso);
   if (Number.isNaN(d.getTime())) return "Back today";
-  return `Snoozed ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · back today`;
+  return `Snoozed ${formatDate(d, { day: "numeric", month: "short" })} · back today`;
 }

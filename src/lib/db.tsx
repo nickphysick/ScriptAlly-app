@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MONTHS_SHORT } from "./dates";
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import {
   User,
@@ -64,6 +65,8 @@ import {
   collection,
   onSnapshot,
   getDocs,
+  query as fsQuery,
+  where,
   deleteField,
   writeBatch as _writeBatch,
   Timestamp,
@@ -114,6 +117,8 @@ import { computeResponseDeadline } from "./responseDeadline";
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
+import { nextEdition, contentsChanged, summaryFrom } from "./packageEditions";
+import { isVersionSent } from "./versionLock";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -192,7 +197,7 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
   if (isNaN(d.getTime())) return "unknown date";
   
   const day = d.getDate();
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = MONTHS_SHORT;
   const month = months[d.getMonth()];
   const year = d.getFullYear();
   return `${day} ${month} ${year}`;
@@ -209,7 +214,17 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
 export type DismissType = "permanent" | "fixed snooze" | "custom date" | "lift";
 
 /** Query actions v1 — additive options for `addQuery`: the seed's event key and its details line. */
-export interface AddQueryOpts { eventKey?: EventKey; details?: string }
+export interface AddQueryOpts {
+  eventKey?: EventKey;
+  details?: string;
+  /**
+   * Stamp the attached package's `firstSentAt` when it has none — the same lock `setQueryPackage`
+   * sets for the pane (packages-journey §A2, 28 Sep). ⚠️ ONE-WAY UNDER TODAY'S PACKAGE RULES: an
+   * undo of the log cannot lift it. Nick's ruling: stamp now; Part B, which owns package rules,
+   * lets an undo lift a stamp no query still points at.
+   */
+  stampPackage?: boolean;
+}
 
 interface DbContextType {
   currentUser: User | null;
@@ -277,7 +292,7 @@ interface DbContextType {
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
-  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<void>;
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<string | null>;
   /**
    * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
    *
@@ -326,6 +341,10 @@ interface DbContextType {
    */
   setQueryPackage: (queryId: string, packageId: string) => Promise<string | null>;
   retirePackage: (id: string) => Promise<void>;
+  /** Puts a package back exactly as it was before an edit that started an edition (the edit's undo). */
+  revertPackageEdition: (prev: SubmissionPackage) => Promise<string | null>;
+  /** Lifts the first-sent lock from each package no query points at, and restores it on one that is. */
+  reconcileStamps: (pkgIds: string[]) => Promise<{ lifted: string[]; stamped: string[] }>;
   /** Bring an archived package back. Its scorecard and history were never touched. */
   restorePackage: (id: string) => Promise<void>;
   /**
@@ -409,7 +428,7 @@ interface DbContextType {
     input: { repliedOn: string; weeks?: number | null; note?: string },
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
-  updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
+  updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
   deleteQuery: (id: string) => Promise<void>;
   
   // Journal Actions
@@ -1329,159 +1348,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     })();
   }, [currentUser, versions, packages]);
 
-  // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
-  // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
-  useEffect(() => {
-    if (!currentUser || agents.length === 0 || activities.length === 0) return;
-
-    const backfill = async () => {
-      const missingActivities: (Omit<Activity, "id" | "userId"> & { id: string })[] = [];
-
-      // 1. Backfill Agent Added activities
-      for (const ag of agents) {
-        const hasAddActivity = activities.some(act => 
-          (act.id === `act-added-agent-${ag.id}`) ||
-          (act.activityType === ActivityType.AGENT_ADDED && act.description.includes(ag.name))
-        );
-
-        if (!hasAddActivity) {
-          missingActivities.push({
-            id: `act-added-agent-${ag.id}`,
-            activityType: ActivityType.AGENT_ADDED,
-            description: ag.name?.trim()
-              ? `Added ${ag.name} at ${ag.agency}`
-              : `Added ${ag.agency}`,
-            manuscriptId: "",
-            queryId: "",
-            date: ag.dateAdded || new Date().toISOString(),
-            details: ""
-          });
-        }
-      }
-
-      // 2. Backfill Manuscript Added activities
-      for (const ms of manuscripts) {
-        const hasAddActivity = activities.some(act => 
-          (act.id === `act-added-ms-${ms.id}`) ||
-          (act.activityType === ActivityType.MANUSCRIPT_ADDED && act.manuscriptId === ms.id)
-        );
-
-        if (!hasAddActivity) {
-          missingActivities.push({
-            id: `act-added-ms-${ms.id}`,
-            activityType: ActivityType.MANUSCRIPT_ADDED,
-            description: `Added new title ${ms.title} to your manuscripts`,
-            manuscriptId: ms.id,
-            queryId: "",
-            date: ms.createdDate || new Date().toISOString(),
-            details: ""
-          });
-        }
-      }
-
-      // 3. Heal queries whose AUTHORITATIVE per-query activity log is empty.
-      //    "Authoritative" = the per-query `activity` subcollection (the store derivation reads).
-      //    The old check judged against the global feed, so a query with a global-feed row but an
-      //    empty subcollection was skipped — leaving derivation to fall back to Queried. We now
-      //    judge and seed the SAME store, and only stamp activities (never write status;
-      //    recomputeQuery derives it).
-      for (const q of queries) {
-        if (q.status === QueryStatus.QUERIED) continue;
-
-        // Skip very-recently-changed queries — their own writers just logged in real time; the
-        // timer could otherwise race that write and duplicate it.
-        const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
-        let lastChangeMs = 0;
-        if (lastChangeRaw) {
-          if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
-          else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
-          else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
-          else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
-        }
-        if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
-
-        // Already has a status-bearing entry in the authoritative store? Leave it untouched (no dup).
-        let hasStatusBearing: boolean;
-        try {
-          const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
-          hasStatusBearing = sub.docs.some(d => {
-            const data = d.data();
-            return (
-              normalizeResultingStatus(data.resultingStatus) !== null ||
-              normalizeResultingStatus(data.type) !== null
-            );
-          });
-        } catch (err) {
-          // Never heal blind on a read error — that could create a duplicate.
-          console.error("[QueryHawk Backfill] Could not read per-query log; skipping heal:", err);
-          continue;
-        }
-        if (hasStatusBearing) continue;
-
-        // Seed one entry stamped with the CURRENT stored status, dated from the best available
-        // signal, so derivation reproduces exactly what the user already sees.
-        let dateVal = Date.now();
-        const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
-        if (rawDate) {
-          if (typeof rawDate === "string") dateVal = new Date(rawDate).getTime();
-          else if ((rawDate as any).seconds) dateVal = (rawDate as any).seconds * 1000;
-          else if (typeof (rawDate as any).toDate === "function") dateVal = (rawDate as any).toDate().getTime();
-          else if (rawDate instanceof Date) dateVal = rawDate.getTime();
-        }
-        const note = statusReconstructionNote(q.status);
-        /**
-         * ⚠️ THE ID IS SANITISED TO THE CHARSET THE RULES ACCEPT, AND IT WAS NOT.
-         *
-         * `isValidId` requires `^[a-zA-Z0-9_-]+$`. This id is built from the STATUS, and one status
-         * contains an ampersand — "Revise & Resubmit" produced
-         * `act-status-revise-&-resubmit-<qid>`, which the rule rejects. So the heal for EVERY R&R
-         * query was denied, permanently and silently: its per-query log was never seeded, so its
-         * derived state never computed, and the only trace was one console line.
-         *
-         * ⚠️ NO OTHER STATUS IS AFFECTED and no working id changes: every other status is letters
-         * and spaces, so the collapse below is a no-op for them. The R&R ids this replaces never
-         * existed to migrate, because none of those writes ever landed.
-         */
-        const healId = `act-status-${q.status.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${q.id}`;
-
-        try {
-          const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
-          const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
-          await setDoc(
-            doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
-            {
-              type: q.status,
-              resultingStatus: q.status,
-              createdAt: Timestamp.fromMillis(dateVal),
-              note,
-              queryId: q.id,
-              agentName,
-              manuscriptTitle,
-            },
-            { merge: true }
-          );
-          // Log changed → derive status/dates/flags from it. Stored status is unchanged.
-          await recomputeQueryOnline(currentUser.id, q.id);
-          console.log(`[QueryHawk Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
-        } catch (err) {
-          console.error("[QueryHawk Backfill] Online heal failed for query:", q.id, err);
-        }
-      }
-
-      if (missingActivities.length > 0) {
-        console.log(`[QueryHawk Backfill] Auto-healing ${missingActivities.length} missing activities.`);
-        for (const act of missingActivities) {
-          await addActivity(act);
-        }
-      }
-    };
-
-    const timer = setTimeout(() => {
-      backfill().catch(err => console.error("Error running database backfill", err));
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [currentUser, agents, activities, manuscripts, queries]);
+  /* ⚠️ THE RUNTIME REPAIR THAT LIVED HERE IS DELETED (clean-up pass, 28 Sep; Nick: "nothing is written
+     behind the writer's back after every change"). It re-ran 1.5s after ANY change to agents,
+     activities, manuscripts or queries, read every closed query's log each time, and wrote three
+     things: an "Added" row for an agent matched by NAME (so a renamed agent got a second one), an
+     "Added" row for a manuscript, and a status step for any query whose log had none — which
+     re-created steps the writer had just deleted.
+     - New records carry their own history: adding an agent writes `act-added-agent-<id>`, adding a
+       manuscript writes its row with the manuscript's id, and imports seed their starting status.
+     - The historical gaps are closed ONCE, by tests/e2e/migrateRecordCleanup.mts (reversible,
+       counted): a starting step flagged `reconstructed` for an empty log, and "Added" rows by id.
+     - Nothing remains to run "once per session": any backfill that ran on a reload would bring back
+       an "Added" row the writer deleted, which the ruling forbids. */
 
   // The timer-based "cleanupCorruptedData" self-healing script that used to live here is
   // retired. Status, the pipeline dates, revisionRound, and hasAgentResponded are now DERIVED
@@ -1919,12 +1797,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount",
       unknown
     >>,
-  ) => {
-    if (!currentUser) return;
+  ): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    /* ⚠️ A SENT VERSION'S CONTENT NEVER CHANGES (Part B §B2). An edit makes the next version — the
+       caller's job, through `addVersion`; this refusal is the backstop that says so rather than
+       rewriting what an agent received. A rename and the writer's note are labels, not content. */
+    const content = (["contentDraft", "fileAttached", "fileName", "contentType", "contentLink", "wordCount"] as const).some((k) => k in fields);
+    if (content && isVersionSent(id, queries, packages)) {
+      return "This version has been sent, so its content stays as it went. Edit it to make the next version.";
+    }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "versions", id), fields);
+      return null;
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+      return "Couldn't save that change.";
     }
   };
 
@@ -1997,7 +1884,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       id,
       userId: currentUser.id,
       status: "Active",
-      createdDate: new Date().toISOString()
+      createdDate: new Date().toISOString(),
+      /* Every package starts at its 1st edition. The list itself is written at the first bump —
+         until then `editionsOf` synthesises it from the live slots, which an unsent draft may still
+         change without starting anything. */
+      edition: 1,
     };
     if (!other) delete (newPkg as { otherMaterials?: string }).otherMaterials;
 
@@ -2026,8 +1917,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
-    if (live && isPackageLocked(live) && LOCKED_PACKAGE_FIELDS.some((k) => k in fields)) {
-      return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+    /* ⚠️ A SENT PACKAGE'S CONTENTS NO LONGER REFUSE — THEY START ITS NEXT EDITION (Part B §B1).
+       The queries already sent keep the edition they went out as, so the record stays true; what
+       changes is the package from now on. Only the sample slot, which is not content (Nick, 28 Sep),
+       still refuses on a sent package: it is the `""` sentinel everywhere today. */
+    let bump: ReturnType<typeof nextEdition> = null;
+    if (live && isPackageLocked(live)) {
+      if ("samplePagesVersionId" in fields && (fields.samplePagesVersionId ?? "") !== (live.samplePagesVersionId ?? "")) {
+        return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+      }
+      const ms = manuscripts.find((m) => m.id === live.manuscriptId);
+      bump = nextEdition(live, { ...live, ...fields }, new Date().toISOString(),
+        summaryFrom(versions, ms?.bookVersions ?? []));
     }
     /* ⚠️ CLEARING A FREE-TEXT FIELD IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
        input holds; the conversion lives here so no caller can drift. The three version slots use
@@ -2042,6 +1943,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const t = (fields[k] as string | undefined)?.trim();
       payload[k] = t ? t : deleteField();
       if (k === "note" && !t) payload.noteEditedAt = deleteField();
+    }
+    if (bump) {
+      payload.edition = bump.edition;
+      payload.editions = bump.editions;
+    } else if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
+      /* an unsent draft changed: a stored 1st edition would now describe contents nobody received */
+      payload.editions = deleteField();
     }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "packages", id), payload);
@@ -2102,19 +2010,92 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const restorePackage = async (id: string) => {
     if (!currentUser) return;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Active" });
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Active", retiredAt: deleteField() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
   };
 
+  /**
+   * THE UNDO OF AN EDIT THAT STARTED AN EDITION. Writing the old slots back through `updatePackage`
+   * would be another contents change and start a THIRD edition; this puts the package back exactly —
+   * slots, number and list — so the edition the undo removes never existed. Refused once any query has
+   * gone out with that edition, because then it did exist.
+   */
+  const revertPackageEdition = async (prev: SubmissionPackage): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    const live = packages.find((p) => p.id === prev.id);
+    const liveEd = typeof live?.edition === "number" ? live.edition : 1;
+    if (queries.some((q) => (q.sentPackageId || q.packageId) === prev.id && (q.sentPackageEdition ?? 1) === liveEd && liveEd > (prev.edition ?? 1))) {
+      return `A query has already gone out with this edition, so it stays.`;
+    }
+    const payload: Record<string, unknown> = {
+      packageName: prev.packageName,
+      queryLetterVersionId: prev.queryLetterVersionId,
+      synopsisVersionId: prev.synopsisVersionId,
+      bookVersionId: prev.bookVersionId || deleteField(),
+      otherMaterials: prev.otherMaterials?.trim() || deleteField(),
+      note: prev.note?.trim() || deleteField(),
+      noteEditedAt: prev.noteEditedAt || deleteField(),
+      edition: prev.edition ?? deleteField(),
+      editions: prev.editions?.length ? prev.editions : deleteField(),
+    };
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "packages", prev.id), payload);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${prev.id}`);
+      return "Couldn't undo that change.";
+    }
+  };
+
+  /** Retire instead of Delete (Part B §B3): the queries sent with it go on pointing here. */
   const retirePackage = async (id: string) => {
     if (!currentUser) return;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Retired" });
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Retired", retiredAt: new Date().toISOString() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
+  };
+
+  /**
+   * THE STALE-STAMP RULE (Nick, 28 Sep). A package's first-sent lock is a fact about a query that
+   * went out with it; when undo or a correction leaves NO query pointing at it — `packageId` or
+   * `sentPackageId` — the lock is lifted. Read from the SERVER, never local state, which may not yet
+   * hold the undo that made it stale. A based-on query never sent the package and does not hold it.
+   *
+   * ⚠️ AND THE OTHER DIRECTION TOO: undoing a correction puts a query back on a package whose stamp
+   * the correction lifted, so a package that IS pointed at and is unstamped is stamped again. One
+   * reconciliation, both ways, so no undo can leave a sent package editable. Returns what moved.
+   */
+  const reconcileStamps = async (pkgIds: string[]): Promise<{ lifted: string[]; stamped: string[] }> => {
+    if (!currentUser) return { lifted: [], stamped: [] };
+    const lifted: string[] = [];
+    const stamped: string[] = [];
+    for (const id of [...new Set(pkgIds.filter(Boolean))]) {
+      try {
+        const snap = await getDoc(doc(db, "users", currentUser.id, "packages", id));
+        if (!snap.exists()) continue;
+        const stampedNow = !!(snap.data() as SubmissionPackage).firstSentAt;
+        const col = collection(db, "users", currentUser.id, "queries");
+        const [a, b] = await Promise.all([
+          getDocs(fsQuery(col, where("packageId", "==", id))),
+          getDocs(fsQuery(col, where("sentPackageId", "==", id))),
+        ]);
+        const held = !a.empty || !b.empty;
+        if (stampedNow && !held) {
+          await updateDoc(doc(db, "users", currentUser.id, "packages", id), { firstSentAt: deleteField() });
+          lifted.push(id);
+        } else if (!stampedNow && held) {
+          await updateDoc(doc(db, "users", currentUser.id, "packages", id), { firstSentAt: new Date().toISOString() });
+          stamped.push(id);
+        }
+      } catch (e) {
+        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      }
+    }
+    return { lifted, stamped };
   };
 
   // Agent Actions with Free limits
@@ -2158,7 +2139,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     if (writeSuccess) {
+      /* ⚠️ KEYED BY THE AGENT'S ID (clean-up pass, 28 Sep): the row is found by id, never by the name
+         in its sentence, so renaming the agent can never make it look missing and grow a second. */
       await addActivity({
+        id: `act-added-agent-${id}`,
         activityType: ActivityType.AGENT_ADDED,
         description: newAg.name?.trim()
           ? `Added ${newAg.name} at ${newAg.agency}`
@@ -2456,8 +2440,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     try {
-      await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
-
       const seeded = seedActivities();
       const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
       /**
@@ -2466,14 +2448,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * the task pane's story column reads. This loop wrote every entry to the feed and only the
        * ADVANCED one to the log — so `QUERY_SENT` reached the projection and never the record.
        *
-       * Measured on dev: a chase card for a query sent in July rendered a story column containing
-       * nothing but its "Your turn · Today" terminus, beside tiles stating that query's own dates
-       * correctly. The panel was right and the filter was right; the rung it was looking for had
-       * never been written. The Query Centre reads the feed, which is why the same query looked
-       * complete three inches away — the disagreement `useDockActivity`'s own header describes.
-       *
        * ⚠️ THE TWO SHAPES ARE NOT THE SAME DOCUMENT, which is why this is a builder rather than a
-       * second `setDoc` of `act`. The log keys on `type`/`createdAt`/`note`; the feed keeps the
+       * second write of `act`. The log keys on `type`/`createdAt`/`note`; the feed keeps the
        * `Activity` shape. Writing one into the other's collection would produce a row that parses
        * and renders as nothing.
        */
@@ -2487,10 +2463,36 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         manuscriptTitle,
         ...(act.eventKey ? { eventKey: act.eventKey } : {}),
       });
+      /**
+       * ⚠️ ONE BATCH: THE QUERY, EVERY SEEDED ROW IN BOTH STORES, AND THE PACKAGE STAMP — ALL OR
+       * NOTHING (packages-journey Part B, Nick's ruling 28 Sep). These were separate writes, so a
+       * failure after the query landed left a query with no activity and no Undo: the drawer said
+       * "Couldn't save" about a save that had half happened. Now a refusal anywhere writes nothing,
+       * and "Try again" writes the same id from scratch.
+       *
+       * The stamp rides the same batch (the packageLock law): a package is never locked with nothing
+       * sent. Asked for only when unstamped — a re-stamp is denied by the rules, and a denial fails
+       * the whole batch, the query with it.
+       */
+      const batch = writeBatch(db);
+      batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
       for (const act of seeded) {
-        await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
-        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
+        batch.set(doc(db, "users", currentUser.id, "activities", act.id), act);
+        batch.set(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
       }
+      const stampTarget = opts?.stampPackage && q.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
+      }
+      /* A DEV-ONLY way to make the batch fail PARTWAY — after the query and its rows are queued — so
+         the all-or-nothing lock can be proved on a rendered page. The hook is read only outside
+         production builds, so a production bundle carries no way to reach it. */
+      if (import.meta.env.MODE !== "production" && (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE) {
+        (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE = false;
+        batch.set(doc(db, "users", currentUser.id, "no-such-collection", "refused"), { refused: true });
+      }
+      await batch.commit();
+
       /* the derived status still follows an advanced seed, and only an advanced seed — a query born
          at Queried is already at its derived status and has nothing to recompute towards */
       if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
@@ -3183,9 +3185,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (estimateMin !== undefined) patch.estimateMin = estimateMin === null ? deleteField() : estimateMin;
     /* ⚠️ `null` CLEARS THE COMPLETION STAMP, and un-ticking must use it. A task that is not done
        has no time at which it was done: leaving `completedAt` behind is an INCOHERENT RECORD, and
-       the trap is that it reads perfectly — `briefingCleared` counts the weekly review's cleared
-       tasks by this field, correctly, because it is the field that records when a thing was
-       completed. Guarding that consumer on `done` would paper over the incoherence and leave it
+       the trap is that it reads perfectly, because it is the field that records when a thing was
+       completed (the since-deleted weekly review counted cleared tasks by it). Guarding a
+       consumer on `done` would paper over the incoherence and leave it
        for the next reader who reasonably trusts the stamp. Found by the harness's first
        stored-field Undo assertion (completion-paths). */
     if (completedAt !== undefined) patch.completedAt = completedAt === null ? deleteField() : completedAt;
@@ -3250,13 +3252,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const updateQuery = async (queryId: string, fields: Partial<Query>) => {
+  const updateQuery = async (queryId: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => {
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
+      /* A correction onto a never-sent package stamps its first-sent lock in the SAME batch as the
+         query update — the packageLock law, as logging does (Nick, 28 Sep). */
+      const stampTarget = opts?.stampPackage ? packages.find((p) => p.id === opts.stampPackage) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "users", currentUser.id, "queries", queryId), fields);
+        batch.update(doc(db, "users", currentUser.id, "packages", stampTarget.id), { firstSentAt: new Date().toISOString() });
+        await batch.commit();
+      } else {
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
@@ -3899,6 +3911,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updatePackage,
         setQueryPackage,
         retirePackage,
+        reconcileStamps,
+        revertPackageEdition,
         deletePackage,
         restoreVersion,
         restorePackage,

@@ -170,8 +170,8 @@ export function clampSnooze(card: SnoozeSubject, days: number, when: string, day
 }
 
 /**
- * ⚠️ THE SAME CEILING, FOR CALLERS THAT HOLD A TASK TYPE RATHER THAN A CARD. FocusFlow's staged
- * runner and its sweep snooze both had their OWN copy of the offer cap — so the rule lived in
+ * ⚠️ THE SAME CEILING, FOR CALLERS THAT HOLD A TASK TYPE RATHER THAN A CARD. The old takeover's
+ * staged runner and its sweep snooze both had their OWN copy of the offer cap — so the rule lived in
  * three places at once, which is three chances to disagree about a cap that has already shipped
  * wrong. One ceiling, two shapes of caller.
  */
@@ -230,7 +230,6 @@ export const TASK_TYPES = [
   "dream_agent_unqueried",
   "materials_unrecorded",
   "materials_unrecorded_bulk",
-  "weekly_review",
   /* Query actions v1 (K3) — derived from the drawer's flat fields; each opens its journey. */
   "offer_tell",
   "offer_send_full",
@@ -302,7 +301,6 @@ export function completionVia(card: BoardCard): CompletionVia {
     case "data_quality_poor":
     case "querying_unstarted":
     case "dream_agent_unqueried":
-    case "weekly_review":
       return "none";
 
     /* Query actions v1 (K3) — each of these finishes in the query drawer; the tick opens it and

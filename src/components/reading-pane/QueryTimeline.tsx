@@ -14,6 +14,7 @@
 import React, { useState, useRef } from "react";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { StatusDot } from "../StatusDot";
+import { RECONSTRUCTED_TITLE } from "../../lib/reconstructed";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus } from "../../lib/queryAmbient";
@@ -45,6 +46,7 @@ import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy
  */
 const TL_MARK = 27;
 import { F12Menu } from "../shell/F12Shell";
+import { formatDate } from "../../lib/dates";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
 export interface TimelineEntryRef { activityId: string; status: QueryStatus; label: string; dateISO: string; note: string; }
@@ -95,13 +97,13 @@ const getTime = (val: any): number => {
 const fmtDay = (ms: number): string => {
   const d = new Date(ms);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(d, { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
 };
 /** Mockup timeline dates: "1 MAY" — day + short month, uppercased, no year. */
 const fmtShort = (ms: number): string => {
   const d = new Date(ms);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+  return formatDate(d, { day: "numeric", month: "short" }).toUpperCase();
 };
 
 // ── the outline materials pill (mockup .pill) ─────────────────────────────────────
@@ -123,6 +125,12 @@ export interface RowSpec {
   /* ⚠️ NON-STATUS FAMILIES. Both borrow a glyph decoratively and neither enters the status dedupe:
      a nudge is the writer touching the agent, a holding reply is the agent touching back. */
   kind?: "nudge" | "holding";
+  /**
+   * A RECONSTRUCTION, NEVER A REAL EVENT (clean-up pass, 28 Sep): a starting step the migration
+   * wrote for a query whose log was empty. It reads "Recorded from the imported status", its mark
+   * is the drained ghost ring with no status fill, and the status it carries sits in row 2.
+   */
+  reconstructed?: boolean;
   status: QueryStatus;
   title: string;
   date?: string;
@@ -264,22 +272,26 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
   const statusRows: RowSpec[] = statusEvents.map((evt, i) => {
     const status = evt.type as QueryStatus;
     const baseTitle = TL_TITLES[status] || status;
-    const title = status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
+    const reconstructed = evt?.reconstructed === true;
+    const title = reconstructed ? RECONSTRUCTED_TITLE
+      : status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
     let sub: string | undefined;
     /* ⚠️ §3 · `Email`, NOT `via Email`. The qualifier already sits behind a `·` in row 1 — "Query
        sent · via Email" says the same thing twice, and the preposition was left over from the
        retired "Sent by …" line, where it was mid-sentence. `sendMethodLabel` capitalises for the
        same reason: the word is a method's NAME here, not a word in a clause. */
-    if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";
+    if (reconstructed) sub = baseTitle;
+    else if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";
     else if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED) sub = `${agent?.name?.split(" ")[0] || "The agent"} asked for ${status === QueryStatus.PARTIAL_REQUESTED ? "a partial" : "the full"}`;
     return {
       key: `s-${status}-${i}`,
+      ...(reconstructed ? { reconstructed: true } : {}),
       status,
       title,
       date: fmtShort(getTime(evt.createdAt)),
       sub,
       pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined,
-      subEditable: status === QueryStatus.QUERIED,
+      subEditable: status === QueryStatus.QUERIED && !reconstructed,
       activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",
@@ -383,6 +395,9 @@ const TlEvent: React.FC<{ last?: boolean; minor?: boolean; target?: boolean; gho
   </div>
 );
 
+/** The rungs on which an agent ASKED — the package's results, so they carry its tag (§A3). */
+const REQUEST_RUNGS = new Set<QueryStatus>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
+
 export const TimelineRows: React.FC<{
   rows: RowSpec[];
   /**
@@ -411,6 +426,8 @@ export const TimelineRows: React.FC<{
    * nothing, so it keeps the rung it has always had.
    */
   sentExtra?: React.ReactNode;
+  /** Packages-journey §A3: under each REQUEST rung (partial, full, R&R) — "from the ‹name› package". */
+  requestExtra?: React.ReactNode;
   /**
    * §1 — group the rows into rounds and head each with its own label.
    *
@@ -433,12 +450,22 @@ export const TimelineRows: React.FC<{
   ghostId?: string | null;
   /** §2 — the just-saved rung's one pulse, additive like the rest. */
   freshId?: string | null;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null }) => {
+  /**
+   * Query actions v1.1 — the inline delete confirm. The row whose `activityId` is `confirmFor` is
+   * REPLACED by `confirmNode` (the mock swaps the row's own markup for the ink confirm), so the
+   * question sits exactly where the entry was. Additive and defaulted off: To-do is untouched.
+   */
+  confirmFor?: string | null;
+  confirmNode?: React.ReactNode;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, requestExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null, confirmFor = null, confirmNode = null }) => {
   /* ⚠️ THE GROUPING IS THE PURE `chapterise`, INCLUDING ITS THRESHOLD. Nothing here decides when a
      heading is worth drawing — `labelled` is the derivation's own answer, so a second surface
      cannot apply a different figure. */
   const book = chaptered ? chapterise(rows) : null;
   const render = (row: RowSpec, isLast: boolean) => {
+      if (confirmFor && row.activityId === confirmFor && confirmNode) {
+        return <div key={row.key} className="tl-delrow" data-qcv="entry-delc">{confirmNode}</div>;
+      }
       /* the caller's materials list for this row, if it has one — see the note at its render */
       const showsExtra = !!sentExtra && row.status === QueryStatus.QUERIED && !row.kind;
       /**
@@ -489,8 +516,8 @@ export const TimelineRows: React.FC<{
       return (
         <TlEvent key={row.key} last={isLast} target={!!highlightId && row.activityId === highlightId}
           ghost={!!ghostId && row.activityId === ghostId} fresh={!!freshId && row.activityId === freshId}
-          mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
-          <div className="tl-rowbody">
+          mark={<StatusDot status={row.status} overrideSize={TL_MARK} ghost={!!row.reconstructed} />}>
+          <div className={`tl-rowbody${row.reconstructed ? " tl-recon" : ""}`} data-tl-reconstructed={row.reconstructed ? "" : undefined}>
             <div className="tl-r1">
               {/* ⚠️ §1 · THE TITLE IS PLAYFAIR AT `--tl-title`, THE ONE SIZE EVERY EVENT USES. It was
                   Inter 14/600 in a hardcoded near-black here, muted Inter in the projection and 12px
@@ -546,11 +573,11 @@ export const TimelineRows: React.FC<{
               * materials twice, three lines apart, the first time without any of the information
               * the second one adds.
               *
-              * ⚠️ THE PILLS ARE NOT DELETED, BECAUSE THEY ARE STILL RENDERED ELSEWHERE. To-do's
-              * focus sheet (`FocusFlow.sheetTimeline`) mounts `<TimelineRows rows={rows} />` with no
-              * `sentExtra` — a condensed, read-only view with no attach control and no manuscript
-              * name — so `row.pills` is its only materials list. Removing them from the row spec
-              * would have taken the materials off that surface to fix a duplicate on this one.
+              * ⚠️ THE PILLS WERE NOT DELETED, BECAUSE THEY WERE RENDERED ELSEWHERE: To-do's focus
+              * sheet (`FocusFlow.sheetTimeline`) mounted `<TimelineRows rows={rows} />` with no
+              * `sentExtra`, so `row.pills` was its only materials list. That sheet went with the
+              * query journeys (27 Sep, HousekeepingSweep); whether the pills still have a reader
+              * is unchecked here, not assumed.
               * Traced to a rendered root before touching it, in both directions.
               *
               * ⚠️ SO IT IS "SUPERSEDED WHERE BOTH EXIST", not "removed": the caller that supplies
@@ -561,6 +588,7 @@ export const TimelineRows: React.FC<{
             )}
             {/* the send's own materials — rendered by the caller, on the send rung only */}
             {showsExtra && sentExtra}
+            {requestExtra && !row.kind && REQUEST_RUNGS.has(row.status as QueryStatus) ? requestExtra : null}
             </div>
           </div>
         </TlEvent>
@@ -731,6 +759,8 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
 
 export const QueryTimeline: React.FC<QueryTimelineProps & {
   sentExtra?: React.ReactNode;
+  /** Packages-journey §A3: under each REQUEST rung (partial, full, R&R) — "from the ‹name› package". */
+  requestExtra?: React.ReactNode;
   /** §2 (correction pass 3): carries the clicked control so the desk can notch to it. */
   onMarkClosed?: (anchor: HTMLElement) => void;
   /** §5d — "Keep tracking". Absent ⇒ the offer renders no dismissal, never a dead button. */
@@ -741,7 +771,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   onOpenReminder?: () => void;
   /** §6c — create the reminder task through the existing task-creation path. */
   onRemindLater?: () => void;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
+  /** v1.1 — the inline delete confirm, passed straight to `TimelineRows`. */
+  confirmFor?: string | null;
+  confirmNode?: React.ReactNode;
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, requestExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater, confirmFor = null, confirmNode = null }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef } | null>(null);
   /* §1 — anchored, flipping and constrained like every other popover on this page. The trigger is
      assigned on open (the rows are many; a ref per row would be a ref per rung). */
@@ -820,6 +853,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         freshId={freshId}
         continues={ballHolder === "agent" && !!waiting}
         sentExtra={sentExtra}
+        requestExtra={requestExtra}
+        confirmFor={confirmFor}
+        confirmNode={confirmNode}
       />
 
       {/**

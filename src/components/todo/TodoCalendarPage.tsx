@@ -20,6 +20,8 @@
  * collapse chevron, the month jump, the `Upcoming only` mode and the event-kind vocabulary that
  * served it. A row grows to hold what it holds — there is nothing left to overflow.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
+import { SentBox, SentChip } from "../queryActions/SentHow";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -89,9 +91,8 @@ import {
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
-/* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
-   from the To-do world (`FocusFlow.tsx:33`), so the precedent and the shape are both established;
-   building a calendar-local conversation would be the second implementation this repo forbids. */
+/* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. Building a calendar-local
+   conversation would be the second implementation this repo forbids. */
 import { StatusDot } from "../StatusDot";
 import { formatQueryMaterial } from "../../lib/materials";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -231,6 +232,7 @@ import { useSegHover } from "../shared/timeline/useSegHover";
 import {
   todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
 } from "../shared/timeline/boardWindow";
+import { formatDate } from "../../lib/dates";
 
 /* ⚠️ `TbMenu` AND `TbOpt` ARE DELETED WITH THE TOOLBAR ERA (v64 §E). The winbar's controls are a
    segmented pair and plain buttons; the sidebar's are the Notion panel's own rows. A dropdown
@@ -240,7 +242,7 @@ import {
 export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
-    updateUserTask,
+    updateUserTask, packages,
   } = useScriptAllyDb();
   const now = Date.now();
   const today = localYMD(now);
@@ -406,8 +408,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const colLabel = (ymd: string, grain: "day" | "week" | "month") => {
     const d = new Date(`${ymd}T12:00:00`);
     if (grain === "day") return String(d.getDate());
-    if (grain === "week") return `${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}`;
-    return d.toLocaleDateString("en-GB", { month: "short" });
+    if (grain === "week") return `${d.getDate()} ${formatDate(d, { month: "short" })}`;
+    return formatDate(d, { month: "short" });
   };
   /* ⚠️ A PAST WEEK IS A PROPERTY OF THE WINDOW, not of a row — nothing in it is provisional any
      more, so the dashes go solid, the waypoints render as passed, and the pulse stops. */
@@ -425,9 +427,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       /* ⚠️ A STEP IS A WEEK (v58), not a window. The ref shifts `SH` by seven and redraws; a
          whole-window jump lands the reader somewhere with no overlap to orient by. */
-      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, -1)); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, 1)); }
-      else if (e.key === "t" || e.key === "T") { e.preventDefault(); setWinStart(today); }
+      /* the keys are the registry's (lib/shortcuts.ts) */
+      if (matchesShortcut(SHORTCUTS.calBack, e)) { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, -1)); }
+      else if (matchesShortcut(SHORTCUTS.calForward, e)) { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, 1)); }
+      else if (matchesShortcut(SHORTCUTS.calToday, e)) { e.preventDefault(); setWinStart(today); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -722,6 +725,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     primaryDeed: string | null; primaryCv: string | null;
   };
   const [drawer, setDrawer] = useState<DrawerData | null>(null);
+  /* item 3: the drawer's query, for the shared materials treatment (a task row has none) */
+  const drawerQuery = drawer?.queryId && !drawer.isTask ? queries.find((q) => q.id === drawer.queryId) : undefined;
   const [drawerTab, setDrawerTab] = useState<"view" | "actions">("view");
   const closeDrawer = () => setDrawer(null);
   /* the drawer's rows name their kind directly — a row labelled "Log a nudge" IS the nudge kind,
@@ -2067,6 +2072,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               <>
                 <div className="tl-dwnm">{drawer.name}</div>
                 {drawer.agency && <div className="tl-dwag">{drawer.agency}</div>}
+                {/* item 3 (clean-up pass, 28 Sep): how the materials were recorded — the shared chip */}
+                {drawerQuery ? <div className="tl-dwhow"><SentChip q={drawerQuery} packages={packages} /></div> : null}
                 {(drawer.fact || drawer.tail) && (
                   <div className="tl-dwfact">{drawer.fact}<span className="tl-feb">{drawer.tail}</span></div>
                 )}
@@ -2075,7 +2082,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   {drawer.journey.map((j, i) => (
                     <div key={i} className={`tl-dwjr${j.now ? " now" : ""}`}>
                       <span className="d" aria-hidden />
-                      <span><span className="t">{j.t}</span><span className="s">{j.s}</span></span>
+                      <span><span className="t">{j.t}</span><span className="s">{j.s}</span>
+                        {/* the send carries the shared materials box, as it does on every rail */}
+                        {i === 0 && drawerQuery ? <span className="tl-dwbox"><SentBox q={drawerQuery} packages={packages} /></span> : null}
+                      </span>
                     </div>
                   ))}
                 </div>

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SendExtras } from "./queryActions/SendExtras";
+import { requeryLine } from "../lib/requery";
 import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,7 +19,10 @@ import {
   onSnapshot,
   query,
   orderBy,
-  limit
+  limit,
+  deleteDoc,
+  getDoc,
+  getDocs
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 /* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
@@ -122,6 +127,7 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
+import { SentBox, SentChip, FromPackageTag } from "./queryActions/SentHow";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
@@ -137,6 +143,7 @@ import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
 import { openQueryDrawer, showUndoBar } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
+import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
@@ -305,6 +312,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { csvCell } from "../lib/csvCell";
+import { formatDate } from "../lib/dates";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -312,7 +320,7 @@ import { csvCell } from "../lib/csvCell";
 function formatWhatsAppDate(dateString: string): string {
   const d = new Date(dateString);
   const day = d.getDate();
-  const month = d.toLocaleString("en-GB", { month: "short" });
+  const month = formatDate(d, { month: "short" }, "en-GB", true);
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day} ${month}, ${time}`;
 }
@@ -983,7 +991,7 @@ export const Queries: React.FC<{
       await updateQuery(q.id, { nudgeDate: next } as Partial<Query>);
       await dismissTask("nudge_overdue", q.id, "fixed snooze", days);
       showToast({
-        message: `Nudge moved to ${new Date(next).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`,
+        message: `Nudge moved to ${formatDate(new Date(next), { day: "numeric", month: "short" })}`,
         /* ⚠️ THE UNDO RESTORES, IT DOES NOT COMPENSATE — the prior date back on the query, and the
            suppression lifted. An undo that merely snoozed by a negative number would leave a
            second dismissal behind. */
@@ -1535,7 +1543,7 @@ export const Queries: React.FC<{
   /** The subject line's date — the app's short spelling, so the sheet names the event as the row does. */
   const fmtShortISO = (iso: string): string => {
     const t = new Date(iso).getTime();
-    return Number.isNaN(t) ? "" : new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return Number.isNaN(t) ? "" : formatDate(new Date(t), { day: "numeric", month: "short", year: "numeric" });
   };
 
   const onEditEntry = (entry: TimelineEntryRef) => {
@@ -1638,46 +1646,81 @@ export const Queries: React.FC<{
    * answers would strand the send; removing both is usually what is meant, and editing instead is
    * what is meant when only a detail was wrong.
    */
+  /**
+   * Query actions v1.1 — DELETING AN ENTRY IS THE MOCK'S INLINE CONFIRM ON THE ROW, then the Undo
+   * bar. The row itself turns into the ink confirm: "Delete “Nudge sent”? The status goes back to
+   * the entry before it." · Keep · Delete. The old guarded sheet with its consequence preview is
+   * retired; its two guards are not.
+   *
+   * ⚠️ THE ROOT IS THE WHOLE QUERY, as the mock has it: the first entry cannot be removed on its own,
+   * so its confirm asks "Delete this whole query?" and runs Delete query (snapshot + Undo bar).
+   *
+   * ⚠️ THE DEPENDENCY GUARD STILL OFFERS BOTH — a request whose send answers it goes with that send,
+   * and the confirm names both, because removing one would strand the other.
+   *
+   * ⚠️ BOTH STORES ARE CLEARED DIRECTLY, NOT THROUGH `deleteActivity`. That finds its target in the
+   * FEED, and a reconstructed step (`act-status-…`) lives only in the query's own log — the fault
+   * v1 met on the late reply. The undo is the drawer's SNAPSHOT, so it puts back exactly the
+   * documents that were there, whichever store held them.
+   */
+  const [entryDel, setEntryDel] = useState<null | { activityId: string; ids: string[]; labels: string[]; whole: boolean }>(null);
+  /* the confirm belongs to the query it was asked on — opening another query drops it */
+  useEffect(() => { setEntryDel(null); }, [selectedQueryId]);
   const onDeleteEntry = (entry: TimelineEntryRef) => {
     if (!activeQuery) return;
+    setCorrecting(null);
     const evts = guardEvents();
     const me = evts.find((e) => e.activityId === entry.activityId);
     if (!me) return;
-
-    /* the root is editable and never removable — the path out is deleting the query itself */
     const root = rootGuard(me, evts);
     if (root.kind === "route") {
-      showConfirm({
-        title: "This is the first entry",
-        body: <p style={{ margin: 0 }}>{root.message}</p>,
-        confirmLabel: "Close",
-        onConfirm: async () => {},
-      });
+      setEntryDel({ activityId: entry.activityId, ids: [entry.activityId], labels: [entry.label], whole: true });
       return;
     }
-
     const dep = dependencyGuard(me, evts);
-    const doomed = new Set<string>([entry.activityId, ...(dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [])]);
-    const proposed = trackingEvents.filter((e: any) => !doomed.has(e.id));
-    const diff = previewFor(proposed);
-
-    const commit = async () => {
-      /* ⚠️ ONE CALL, HOWEVER MANY DOCUMENTS MOVED — and it hands back the closure that reverses it.
-         The undo contract (Phase 4) is one toast per operation; a loop of single deletes would have
-         no inverse to give it, which is how the first wiring came to offer an Undo that did nothing. */
-      const restore = await deleteActivities(Array.from(doomed));
-      await finishCorrection(undoMessage(entry.label, agentPrimary(activeAgent), doomed.size), restore, activeQuery?.id);
-    };
-
-    setCorrecting({
-      step: "sheet",
-      entry,
-      question: doomed.size > 1 ? "Remove both entries?" : "Remove this entry?",
-      diff,
-      commit,
-      partners: dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [],
+    const partners = dep.kind === "cascade" ? dep.partners : [];
+    setEntryDel({
+      activityId: entry.activityId,
+      ids: [entry.activityId, ...partners.map((p) => p.activityId!)],
+      labels: [entry.label, ...partners.map((p) => String(p.status))],
+      whole: false,
     });
   };
+  const confirmEntryDelete = async () => {
+    const d = entryDel;
+    const q = activeQuery;
+    setEntryDel(null);
+    if (!d || !q || !currentUser) return;
+    if (d.whole) { await deleteQueryWithUndo(q.id); return; }
+    const uid = currentUser.id;
+    const snap = await takeSnapshot(uid, [q.id]);
+    for (const id of d.ids) {
+      await deleteDoc(doc(db, "users", uid, "queries", q.id, "activity", id));
+      await deleteDoc(doc(db, "users", uid, "activities", id));
+    }
+    await recomputeQueryById(uid, q.id);
+    /* The re-delete that stood here is gone with the runtime repair it chased (clean-up pass,
+       28 Sep): nothing writes a step behind the writer's back now, so a deleted step stays deleted. */
+    const after = await getDoc(doc(db, "users", uid, "queries", q.id));
+    const status = String(after.data()?.status ?? "");
+    const ag = agents.find((a) => a.id === q.agentId);
+    const gone = d.labels.map((l) => `“${l.toUpperCase()}”`).join(" AND ");
+    showUndoBar({
+      message: `${d.ids.length > 1 ? "Entries" : "Entry"} deleted · ${ag?.name || ag?.agency || "The agent"}`,
+      sub: `${gone} REMOVED${status ? ` · STATUS NOW ${status.toUpperCase()}` : ""}`,
+      undo: async () => { await restoreSnapshot(snap); },
+    });
+  };
+  const entryConfirmNode = entryDel ? (
+    <div className="qcv-open-delc qcv-entry-delc" role="alertdialog" aria-label={entryDel.whole ? "Delete this whole query?" : `Delete ${entryDel.labels[0]}?`}>
+      <span>
+        <b>{entryDel.whole ? "Delete this whole query?" : entryDel.labels.length > 1 ? `Delete “${entryDel.labels[0]}” and “${entryDel.labels[1]}”?` : `Delete “${entryDel.labels[0]}”?`}</b>
+        {entryDel.whole ? "Its history and reminders go too." : `The status goes back to the entry before ${entryDel.labels.length > 1 ? "them" : "it"}.`}
+      </span>
+      <button type="button" data-qcv="entry-keep" onClick={() => setEntryDel(null)}>Keep</button>
+      <button type="button" className="d" data-qcv="entry-del-go" onClick={() => { void confirmEntryDelete(); }}>Delete</button>
+    </div>
+  ) : null;
 
   /* ⚠️ THE ANCHORED CLOSE MENU IS RETIRED (§2, correction pass 3). Its trigger ref lived only in
      the dead browsing branch, so the live drawer opened it with an EMPTY menuStyle and the
@@ -4108,7 +4151,7 @@ export const Queries: React.FC<{
       try {
         const d = new Date(isoString);
         if (isNaN(d.getTime())) return "";
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const months = MONTHS_SHORT;
         return `${d.getDate()} ${months[d.getMonth()]}`;
       } catch (e) {
         return "";
@@ -4345,7 +4388,7 @@ export const Queries: React.FC<{
       timelineEvents.push({
         title: "Query sent",
         date: activeQuery.dateSent,
-        formattedDate: new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        formattedDate: formatDate(new Date(activeQuery.dateSent), { day: "numeric", month: "short", year: "numeric" }),
         detail: `via ${rawSendMethod}`,
         materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
         expectedDate: null,
@@ -4374,7 +4417,7 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: act.type,
           date: act.date,
-          formattedDate: new Date(act.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(act.date), { day: "numeric", month: "short", year: "numeric" }),
           detail: displayedDetail,
           materials: materialsSent,
           expectedDate: null,
@@ -4394,11 +4437,11 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: "Waiting to hear back",
           date: deadlineDate,
-          formattedDate: new Date(deadlineDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(deadlineDate), { day: "numeric", month: "short", year: "numeric" }),
           detail: null,
           materials: null,
-          expectedDate: resolvedExp.ms ? new Date(resolvedExp.ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "None set",
-          nudgeDate: activeQuery.nudgeDate ? new Date(activeQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null
+          expectedDate: resolvedExp.ms ? formatDate(new Date(resolvedExp.ms), { day: "numeric", month: "short", year: "numeric" }) : "None set",
+          nudgeDate: activeQuery.nudgeDate ? formatDate(new Date(activeQuery.nudgeDate), { day: "numeric", month: "short", year: "numeric" }) : null
         });
       } else {
         let finalLabel = "Final Decision Outcome Marker Logged";
@@ -4410,7 +4453,7 @@ export const Queries: React.FC<{
         timelineEvents.push({
           title: finalLabel,
           date: lastActivityDate,
-          formattedDate: new Date(lastActivityDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          formattedDate: formatDate(new Date(lastActivityDate), { day: "numeric", month: "short", year: "numeric" }),
           detail: activeQuery.status === QueryStatus.REJECTED ? "Pipeline archived. We keep tracking performance metrics on packages." : null,
           materials: null,
           expectedDate: null,
@@ -4423,7 +4466,7 @@ export const Queries: React.FC<{
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
         .map(entry => ({
           text: entry.entryText,
-          formattedDate: new Date(entry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+          formattedDate: formatDate(new Date(entry.createdAt), { day: "numeric", month: "short", year: "numeric" })
         }));
 
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -4478,7 +4521,7 @@ export const Queries: React.FC<{
       doc.line(margin, y, pageWidth - margin, y); y += 8;
 
       const statusLabel = status;
-      const exportedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const exportedDate = formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' });
       const headerStartY = y;
 
       doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(58, 28, 20);
@@ -4572,7 +4615,7 @@ export const Queries: React.FC<{
       checkPageBreak(10); y += 4; addLine(y); y += 6;
       doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
       doc.text('QueryHawk', margin, y);
-      doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
+      doc.text(`Generated ${formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
 
       const pdfFilename = `${(agentName || 'agent').toLowerCase().replace(/\s+/g, '-')}-${(manuscriptTitle || 'manuscript').toLowerCase().replace(/\s+/g, '-')}-query.pdf`;
       doc.save(pdfFilename);
@@ -5018,15 +5061,23 @@ export const Queries: React.FC<{
                  * evidence of what went. The fallback survives only where the query carries
                  * nothing at all — where it answers "what does this agency ask for".
                  */
+                /* ⚠️ PACKAGES-JOURNEY §A3 (28 Sep) SUPERSEDES THE STRIP ABOVE FOR THIS CARD: the Queried
+                   entry is one of the two treatments — the ink band for a package, the dashed box for
+                   individually, the quiet one for not recorded — read from the query's own frozen
+                   record (SentHow). `SentMaterials` still serves the three-column arm below. */
+                /* §A4 — "Add what you sent ›" opens the correction on the Queried entry, the one door
+                   that edits what was sent. Offered only where that entry is a real activity. */
+                const queriedAct = (trackingEvents as { id: string; type?: string }[]).find((e) => (e.type as QueryStatus) === QueryStatus.QUERIED);
+                /* item 2 (clean-up pass, 28 Sep): a requery says why, above the materials, and the link
+                   opens the earlier query in this same view */
                 const sentExtra = (
-                  <SentMaterials
-                    query={activeQuery}
-                    base={activeQuery.packageId ? ((activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[]) : baseMaterialsFor(activeQuery, activeAgent)}
-                    packages={packages}
-                    portion={queryPortion(activeQuery, activeAgent)}
-                    onViewPackages={() => onNavigate?.("manuscripts", "Submission packages")}
-                  />
+                  <SendExtras requery={requeryLine(activeQuery, queries)} onOpenQuery={(id) => pickRow(id)}>
+                    <SentBox q={activeQuery} packages={packages}
+                      onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
+                      onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
+                  </SendExtras>
                 );
+                const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
                 /**
                  * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
                  * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
@@ -5055,6 +5106,8 @@ export const Queries: React.FC<{
                       setCorrecting({ step: "fork", entry });
                     }}
                     highlightId={correcting?.entry.activityId ?? null}
+                    confirmFor={entryDel?.activityId ?? null}
+                    confirmNode={entryConfirmNode}
                     /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
                        that asked (the same anchor contract as the fork's ⋯). The modal it used to
                        open survives only as the mobile surface below. */
@@ -5071,6 +5124,7 @@ export const Queries: React.FC<{
                       if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
                     } : undefined}
                     sentExtra={sentExtra}
+                    requestExtra={requestExtra}
                   />
                 );
               })()) : null;
@@ -5083,7 +5137,7 @@ export const Queries: React.FC<{
                       if (q.id === activeQuery.id) return "this query";
                       const iso = q.lastStatusChange || q.dateSent;
                       if (!iso) return "";
-                      return new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                      return formatDate(new Date(iso), { month: "short", year: "numeric" });
                     })();
                     return {
                       queryId: q.id,
@@ -5128,6 +5182,7 @@ export const Queries: React.FC<{
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
       nowMs={Date.now()}
+      packages={packages}
       /* §1 — the ✕, Escape and the scrim are ONE act, and it knows which door opened the card:
          a query opened inside the calendar is the calendar's, one from the ledger or `?q` is the
          page's. Clearing both would drop the page's selection for a click made in an overlay. */
@@ -6023,7 +6078,7 @@ export const Queries: React.FC<{
             kind={quick.kind}
             title={agentPrimary(agents.find((a) => a.id === quickQuery.agentId) ?? ({} as never)) || "this query"}
             dueLabel={quickQuery.nudgeDate
-              ? new Date(quickQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+              ? formatDate(new Date(quickQuery.nudgeDate), { day: "numeric", month: "short" })
               : null}
             style={quickStyle}
             panelRef={quickPanelRef}
@@ -6148,7 +6203,13 @@ export const Queries: React.FC<{
                   onCorrect={() => setCorrecting({ step: "edit", entry: correcting.entry })}
                   /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
                      flow that appends already exists. No third way to record a response. */
-                  onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
+                  onAppend={() => {
+                    setCorrecting(null);
+                    /* v1.1 — what happened next is a response, and responses finish in the drawer. */
+                    if (activeQuery && DRAWER_LIVE.resp) { openQueryDrawer({ mode: "resp", queryId: activeQuery.id }); return; }
+                    setIsRecordResponseFocusFormOpen(true);
+                  }}
+                  onDelete={() => onDeleteEntry(correcting.entry)}
                   /* ⚠️ MOVE IS RESTORED (log-sheet run, ruling 1 — reversing decision 5). It sits
                      ON the correction branch, as before: filing an event under the wrong agent IS
                      the record being wrong. The pick and move steps already rendered inside the
@@ -6463,7 +6524,11 @@ export const Queries: React.FC<{
                      withdrawal is accounted for out loud rather than silently dropped. */
                   withdrawnNote={wd > 0 ? `+${wd} withdrawn, not shown` : null}
                   origin={qcFan.origin}
-                  model={(row) => fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {})}
+                  model={(row) => ({
+                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {}),
+                    /* item 3 (28 Sep): the header chip — the fan draws no tabs, so the chip is all it can carry */
+                    sentHow: { chip: <SentChip q={row.query} packages={packages} />, box: null },
+                  })}
                   onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
                   onSeeAll={() => {
                     setQcFan(null);
@@ -6645,6 +6710,7 @@ export const Queries: React.FC<{
           {panelRow && activeQuery && urlSelectedId && qcDocked === false && (
             <QueryPanel
               open
+              sentChip={<SentChip q={activeQuery} packages={packages} />}
               facts={panelRow.facts}
               status={panelRow.status}
               name={panelRow.name}
@@ -6666,7 +6732,7 @@ export const Queries: React.FC<{
                   ?? openingRead(activeQuery, packages, versions, activeBookVersions);
                 if (!v) return null;
                 const m = /^(\d{4})-(\d{2})/.exec(v.createdDate);
-                const when = m ? new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : null;
+                const when = m ? formatDate(new Date(Number(m[1]), Number(m[2]) - 1, 1), { month: "short", year: "numeric" }) : null;
                 return when ? `${v.name} · ${when}` : v.name;
               })()}
               position={{ index: panelIndex, total: gridRows.length }}
@@ -6725,8 +6791,8 @@ export const Queries: React.FC<{
               expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
               /**
                * ⚠️ THE TRACKING TAB IS THE SHARED TIMELINE — the same `QueryTimeline` the record
-               * view rendered and FocusFlow condenses, never a drawer-local imitation. The ⋯ is ON
-               * here (onEditEntry/onDeleteEntry) and off in FocusFlow, which renders the bare rows.
+               * view rendered, never a drawer-local imitation. The ⋯ is ON here
+               * (onEditEntry/onDeleteEntry).
                * §2 wires the send-rung extras; this mount is the chassis.
                */
               tracking={qpTracking}
@@ -8278,6 +8344,8 @@ export const Queries: React.FC<{
                               })()}
                               onEditEntry={onEditEntry}
                               onDeleteEntry={onDeleteEntry}
+                              confirmFor={entryDel?.activityId ?? null}
+                              confirmNode={entryConfirmNode}
                               onNudge={() => setIsNudgeOpen(true)}
                               /* §4c — the offer beneath a no-reply event opens the same close flow
                                  the bar's `Mark closed` does. One home for the act. */

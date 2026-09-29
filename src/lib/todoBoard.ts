@@ -22,8 +22,7 @@ import { agentPrimary, agentInitials } from "./agentDisplay";
 import { elapsedPhrase, elapsedWhole } from "./elapsed";
 import { flagMatchesTask, isFlagSuppressing } from "./taskFlags";
 import { clearedTodayItems } from "./clearedToday";
-import { isoWeekStart } from "./dashboardStats";
-import { replyTask } from "./taskPrecedence";
+import { formatDate } from "./dates";
 
 /** The stance-store taskType for a note (UserTask) snooze/mute — the quick rail's ⏸ writes a
  *  TaskFlag with this type + the task id in queryId. Notes have no engine task, so the lane filters
@@ -150,7 +149,7 @@ export interface BoardInput {
   activities: Activity[];
   today: string; // "YYYY-MM-DD" local
   now: number;
-  mutedTaskRules?: string[]; // Task Settings — the Sunday CARD reads "sunday_review" here (engine tasks are already mute-filtered upstream)
+  mutedTaskRules?: string[]; // Task Settings (engine tasks are already mute-filtered upstream)
 }
 
 /** Defensive ms from a Timestamp | ISO string | Date (the audit fields are `any`). */
@@ -166,7 +165,7 @@ const auditMs = (v: unknown): number | null => {
 const requestedFigures = (q: Query | undefined): string => {
   const ms = auditMs(q?.lastStatusChange);
   if (ms == null) return "";
-  return `REQUESTED ${new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+  return `REQUESTED ${formatDate(new Date(ms), { day: "numeric", month: "short" }).toUpperCase()}`;
 };
 
 const dqLabel = (gap?: string) =>
@@ -356,7 +355,7 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
 const shortDate = (iso?: string): string => {
   if (!iso) return "";
   const ms = new Date(iso).getTime();
-  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
 };
 
 /**
@@ -445,7 +444,7 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
 
 /** Do-next ordering: Offer pinned top; then warn-first; stable otherwise. */
 function orderDoNext(cards: BoardCard[]): BoardCard[] {
-  const rank = (c: BoardCard) => (c.taskType === "offer_received" ? 0 : c.taskType === "weekly_review" ? 1 : c.warn ? 2 : 3);
+  const rank = (c: BoardCard) => (c.taskType === "offer_received" ? 0 : c.warn ? 2 : 3);
   return [...cards].sort((a, b) => rank(a) - rank(b));
 }
 
@@ -598,129 +597,6 @@ export function ribbonTiles(board: AssembledBoard, housekeepingGaps: number): { 
 
 
 
-/* ══════════ THE SUNDAY REVIEW (finishing pack P3; ref todo-sunday-review.html) ══════════
-   Pure derivations only: the reviewed week (the ISO week containing the most recent Sunday — on
-   Monday the review still closes LAST week), the four honest aggregates from the activity log,
-   and the derived dismissible entry card. The week number reuses dashboardStats' exported
-   isoWeekStart + the same earliest-dateSent anchor as weekOfQuerying; "went quiet" mirrors the
-   task engine via the SAME replyTask precedence fn, evaluated at both window edges. */
-
-const DAY_MS = 86400000;
-const WEEK_MS = 7 * DAY_MS;
-
-export interface ReviewWeek { key: string; startMs: number; endMs: number; weekNumber: number }
-
-export function reviewWeek(queries: Query[], nowMs: number): ReviewWeek {
-  const now = new Date(nowMs);
-  // The MOST RECENT COMPLETED week, from any weekday: Sunday (day 0) sits at the END of its ISO
-  // week → review THIS week; every other day (Mon–Sat) reviews the week that ended the previous
-  // Sunday. (The demotion pack's recon fix — Tue–Sat previously keyed the RUNNING week.)
-  const start = now.getDay() === 0 ? isoWeekStart(now).getTime() : isoWeekStart(now).getTime() - WEEK_MS;
-  const times = queries.map((q) => (q.dateSent ? Date.parse(q.dateSent) : NaN)).filter((t) => !Number.isNaN(t));
-  const earliest = times.length ? isoWeekStart(new Date(Math.min(...times))).getTime() : start;
-  const weekNumber = Math.max(1, Math.round((start - earliest) / WEEK_MS) + 1);
-  const d = new Date(start);
-  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  return { key, startMs: start, endMs: start + WEEK_MS, weekNumber };
-}
-
-export interface ReviewRow { label: string; meta: string; badge: string; star?: boolean }
-export interface ReviewQuietRow { queryId: string; name: string; agency?: string; daysSilent: number | null; prevStatus: QueryStatus }
-export interface ReviewStats { sent: ReviewRow[]; back: ReviewRow[]; offers: number; quiet: ReviewQuietRow[] }
-
-const WEEKDAY = (iso: string): string => new Date(iso).toLocaleDateString("en-GB", { weekday: "long" }).toUpperCase();
-const AGENT_RESPONSES: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
-]);
-
-export function weekReviewStats(input: Pick<BoardInput, "activities" | "queries" | "agents">, win: ReviewWeek): ReviewStats {
-  const inWin = (iso?: string) => { const t = iso ? Date.parse(iso) : NaN; return !Number.isNaN(t) && t >= win.startMs && t < win.endMs; };
-  const agentFor = (a: Activity) => { const q = input.queries.find((x) => x.id === a.queryId); return q ? input.agents.find((x) => x.id === q.agentId) : undefined; };
-  const acts = input.activities.filter((a) => inWin(a.date));
-
-  const sent: ReviewRow[] = acts
-    .filter((a) => a.activityType === ActivityType.QUERY_SENT || a.activityType === ActivityType.MATERIALS_SENT || a.activityType === ActivityType.NUDGE_SENT)
-    .map((a) => {
-      const ag = agentFor(a);
-      const badge = a.activityType === ActivityType.NUDGE_SENT ? "NUDGE" : a.resultingStatus === QueryStatus.PARTIAL_SENT ? "PARTIAL" : a.activityType === ActivityType.QUERY_SENT ? "QUERY" : "FULL";
-      return { label: terseDoneLabel(a, ag ? agentPrimary(ag) : undefined), meta: [ag?.agency?.toUpperCase(), WEEKDAY(a.date)].filter(Boolean).join(" · "), badge };
-    });
-
-  const back: ReviewRow[] = acts
-    .filter((a) => a.resultingStatus && AGENT_RESPONSES.has(a.resultingStatus as QueryStatus))
-    .map((a) => {
-      const ag = agentFor(a);
-      const who = ag ? agentPrimary(ag) : "An agent";
-      const rs = a.resultingStatus as QueryStatus;
-      const star = rs === QueryStatus.OFFER;
-      const label = star ? `${who} offered representation`
-        : rs === QueryStatus.PARTIAL_REQUESTED ? `${who} requested a partial`
-        : rs === QueryStatus.FULL_REQUESTED ? `${who} requested the full`
-        : rs === QueryStatus.REVISE_RESUBMIT ? `${who} asked for revisions`
-        : `${who} passed`;
-      const q = input.queries.find((x) => x.id === a.queryId);
-      const reply = star && q?.responseDeadline ? ` · REPLY BY ${new Date(q.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}` : "";
-      return { label, meta: [ag?.agency?.toUpperCase(), WEEKDAY(a.date)].filter(Boolean).join(" · ") + reply, badge: star ? "★ OFFER" : rs === QueryStatus.REJECTED ? "PASS" : rs === QueryStatus.REVISE_RESUBMIT ? "R&R" : rs === QueryStatus.FULL_REQUESTED ? "FULL REQ" : "PARTIAL REQ", star };
-    });
-
-  const quiet: ReviewQuietRow[] = input.queries
-    .filter((q) => {
-      const ag = input.agents.find((x) => x.id === q.agentId);
-      const base = { status: q.status as QueryStatus, dateSent: q.dateSent, responseDeadline: q.responseDeadline, responseTimeWeeks: ag?.responseTimeWeeks, noResponseMeansNo: !!ag?.noResponseMeansNo, lastNudgeSentDate: q.lastNudgeSentDate };
-      return replyTask({ ...base, now: win.endMs }) === "close" && replyTask({ ...base, now: win.startMs }) !== "close";
-    })
-    .map((q) => {
-      const ag = input.agents.find((x) => x.id === q.agentId);
-      const a = queryAmbientStatus(q, "agent", undefined, win.endMs);
-      return { queryId: q.id, name: ag ? agentPrimary(ag) : "An agent", ...(ag?.agency ? { agency: ag.agency } : {}), daysSilent: a && a.sentMs != null ? a.nDays : null, prevStatus: q.status as QueryStatus };
-    });
-
-  return { sent, back, offers: back.filter((r) => r.star).length, quiet };
-}
-
-
-export interface SeedCandidate {
-  key: string; label: string; meta: string; preTicked: boolean;
-  userTaskId?: string; taskType?: string; relatedRecordId?: string;
-}
-
-/** Monday's candidates from the live Urgent lane: dated items (the offer reply, linked reminders)
- *  pre-ticked; top undated candidates offered unticked; capped at the Today's-list five. */
-export function reviewSeedCandidates(doCards: BoardCard[], queries: Query[], nowMs: number, cap = 5): SeedCandidate[] {
-  const dated: SeedCandidate[] = [];
-  const undated: SeedCandidate[] = [];
-  for (const c of doCards) {
-    if (c.taskType === "weekly_review") continue;
-    if (c.taskType === "offer_received" && c.relatedRecordId) {
-      const q = queries.find((x) => x.id === c.relatedRecordId);
-      const days = q?.responseDeadline ? Math.max(0, Math.ceil((Date.parse(q.responseDeadline) - nowMs) / DAY_MS)) : null;
-      dated.push({ key: c.key, label: `Reply to ${c.who}’s offer`, meta: days != null ? `${days} DAY${days === 1 ? "" : "S"} LEFT ON THE WINDOW` : "OFFER ON THE TABLE", preTicked: true, taskType: c.taskType, relatedRecordId: c.relatedRecordId });
-    } else if (c.userTaskId) {
-      // linked reminders reach the do lane only WITH a deadline — dated by construction
-      dated.push({ key: c.key, label: c.title, meta: `REMINDER · ${c.due}`, preTicked: true, userTaskId: c.userTaskId });
-    } else if (c.taskType && c.relatedRecordId) {
-      undated.push({ key: c.key, label: c.title, meta: `${c.due || "NO DATE"}`, preTicked: false, taskType: c.taskType, relatedRecordId: c.relatedRecordId });
-    }
-  }
-  return [...dated, ...undated].slice(0, cap);
-}
-
-
-/**
- * The completion sentinel for a week's review flag — the EXACT `snoozedUntil` finishReview writes
- * on completion (`win.endMs + 2 days`). Single-sourced here so the scrap's read (below) and the
- * write (FocusFlow.finishReview) can never drift: completion is the ONLY handler that writes THIS
- * value; a mere dismissal writes `now + 3d`, which this never equals in practice.
- */
-export function reviewCompletionSnooze(win: ReviewWeek): string {
-  return new Date(win.endMs + 2 * DAY_MS).toISOString();
-}
-
-/* Deck v2 P1: reviewSurface is RETIRED — the banner is a permanent strip resident with one
-   derived boolean (the completion sentinel, read in ToDoPage). reviewWeek/weekReviewStats/
-   reviewSeedCandidates/reviewCompletionSnooze stay (the mode + the sentinel). */
-
-
 /**
  * The done band's TERSE grammar (popup-notify-scrim P1): done rows use the committed rows' title
  * vocabulary — "Full sent to {agent}", never a journey's celebration copy. Derived at THE label
@@ -770,51 +646,4 @@ function clearedFlagCard(f: TaskFlag, i: number, input: BoardInput): BoardCard {
   const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
   const agent2 = q ? input.agents.find((x) => x.id === q.agentId) : ag;
   return { ...blankDone(`done-flag-${f.id ?? i}`), title: agent2 ? `${agentPrimary(agent2)} — sorted` : "Sorted", record: "Housekeeping", whenMs: msOf(f.resolvedAt), due: doneClock(msOf(f.resolvedAt)) };
-}
-
-/* ── THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1) ─────
-   The region between the hero rule and the filter row. Every figure and every line DERIVES from
-   the existing review data — nothing is hardcoded, and a figure with no source DROPS its column
-   rather than showing a zero. ── */
-
-export interface BriefingFigure { key: "cleared" | "replies" | "focused"; value: string; label: string }
-
-/** Numbers ≤ twelve read as words in prose (the dashboard eyebrow's convention). */
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
-const spell = (n: number): string => (n <= 12 ? WORDS[n] : String(n));
-
-/** Tasks the writer ticked off inside the review window (UserTask.completedAt is the stamp). */
-export function briefingCleared(userTasks: UserTask[], win: ReviewWeek): number {
-  return userTasks.filter((t) => {
-    const t0 = t.completedAt ? Date.parse(t.completedAt) : NaN;
-    return !Number.isNaN(t0) && t0 >= win.startMs && t0 < win.endMs;
-  }).length;
-}
-
-/** The three columns, in order — each present ONLY when it has a real figure behind it.
- *  FOCUSED always drops: the app records no time data anywhere, so it can never be honest. */
-export function briefingFigures(cleared: number, replies: number): BriefingFigure[] {
-  const out: BriefingFigure[] = [];
-  if (cleared > 0) out.push({ key: "cleared", value: String(cleared), label: "CLEARED" });
-  if (replies > 0) out.push({ key: "replies", value: String(replies), label: "REPLIES" });
-  return out;
-}
-
-/** The Playfair headline — the week summarised from the same two figures. */
-export function briefingHeadline(cleared: number, replies: number): string {
-  const parts: string[] = [];
-  if (cleared > 0) parts.push(`${spell(cleared)} ${cleared === 1 ? "task" : "tasks"} cleared`);
-  if (replies > 0) parts.push(`${spell(replies)} ${replies === 1 ? "agent" : "agents"} replied`);
-  if (!parts.length) return "A quiet week on the desk";
-  const sentence = parts.join(", ");
-  return `${cleared + replies >= 5 ? "A good week" : "Last week"}: ${sentence}`;
-}
-
-/** The grey supporting sentence — omitted entirely when nothing is worth saying. */
-export function briefingNarrative(stats: ReviewStats): string | null {
-  const bits: string[] = [];
-  if (stats.offers > 0) bits.push(stats.offers === 1 ? "An offer arrived." : `${spell(stats.offers)} offers arrived.`);
-  if (stats.sent.length > 0) bits.push(`${spell(stats.sent.length)} ${stats.sent.length === 1 ? "query" : "queries"} went out.`);
-  if (stats.quiet.length > 0) bits.push(`${spell(stats.quiet.length)} ${stats.quiet.length === 1 ? "query has" : "queries have"} gone quiet.`);
-  return bits.length ? bits.join(" ") : null;
 }

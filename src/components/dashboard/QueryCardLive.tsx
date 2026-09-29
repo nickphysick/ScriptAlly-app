@@ -20,11 +20,14 @@ import React, { useMemo } from "react";
 import { QueryCard, type QueryCardModel } from "./QueryCard";
 import { useDockActivity } from "../todo/useDockActivity";
 import { dockTimeline } from "../../lib/dockTimeline";
-import { toEntry, withTerminus } from "../../lib/taskPaneJourney";
+import { toEntry, withSendExtra, withTerminus } from "../../lib/taskPaneJourney";
+import { useScriptAllyDb } from "../../lib/db";
+import { requeryLine } from "../../lib/requery";
+import { SendExtras } from "../queryActions/SendExtras";
+import { SentBox, SentChip } from "../queryActions/SentHow";
 import { replyWindow } from "../../lib/dashTodo";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { getStatusLabel } from "../StatusPill";
-import { formatQueryMaterials } from "../../lib/materials";
 import { agentInitials, agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { daysBetween } from "../../lib/elapsed";
 import { QueryStatus, type Agent, type Manuscript, type Query } from "../../types";
@@ -39,16 +42,27 @@ export const QueryCardLive: React.FC<{
   onOpenQuery: (queryId: string) => void;
 }> = ({ uid, query, agent, manuscript, anchor, onClose, onOpenQuery }) => {
   const rows = useDockActivity(uid, query.id);
+  const { queries, packages } = useScriptAllyDb();
   const status = query.status as QueryStatus;
+  /* item 2 (28 Sep): a requery says why — the earlier query's outcome and date, opening that query */
+  const requery = useMemo(() => requeryLine(query, queries), [query, queries]);
 
   const model = useMemo<QueryCardModel>(() => {
     const act = getPrimaryAction(status);
 
-    const rungs = dockTimeline(rows, { sendMethod: query.sendMethod ? String(query.sendMethod) : undefined })
-      .map((e) => toEntry({
+    const inputs = dockTimeline(rows, { sendMethod: query.sendMethod ? String(query.sendMethod) : undefined })
+      .map((e) => ({
         key: e.key, label: e.label, when: e.when, via: e.via, status: e.status as string | undefined,
         incoming: /requested|offer|rejected|response|reply/i.test(e.label),
+        ...(e.reconstructed ? { reconstructed: true } : {}),
       }));
+    /* item 3 (28 Sep): the shared materials treatment rides the send rung, beneath any requery line */
+    const extra = (
+      <SendExtras requery={requery} onOpenQuery={onOpenQuery}>
+        <SentBox q={query} packages={packages} />
+      </SendExtras>
+    );
+    const rungs = withSendExtra(inputs, extra).map(toEntry);
 
     /**
      * ⚠️ THE TERMINUS ONLY APPEARS WHERE THE BALL IS ACTUALLY WITH THE WRITER. The task pane appends
@@ -116,16 +130,19 @@ export const QueryCardLive: React.FC<{
         { k: "Email", v: agent?.email || "—" },
         { k: "Queried", v: query.dateSent ? new Date(query.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—" },
       ],
+      /* ⚠️ THE "SENT" ROW IS THE BOX NOW (item 3, 28 Sep). It read `materialsWanted`, which a
+         package-linked query clears, so a query sent with a package said "Nothing recorded" beside
+         a header naming the package. The box reads the query's own frozen record instead. */
       materials: [
-        { k: "Sent", v: formatQueryMaterials(query.materialsWanted) || "Nothing recorded" },
         { k: "How", v: query.sendMethod ? String(query.sendMethod) : "—" },
       ],
+      sentHow: { chip: <SentChip q={query} packages={packages} />, box: <SentBox q={query} packages={packages} /> },
       /* ⚠️ "THEIR window" ONLY WHERE THE AGENCY STATED ONE — the house assumption is labelled as
          the house's, because printing it under their name puts words in their mouth. */
       window: w.stated ? `Their window · ${weeks} weeks` : `House window · ${weeks} weeks`,
       onOpenQuery: () => onOpenQuery(query.id),
     };
-  }, [rows, query, agent, manuscript, status, onOpenQuery]);
+  }, [rows, query, agent, manuscript, status, onOpenQuery, requery, packages]);
 
   return <QueryCard model={model} anchor={anchor} onClose={onClose} />;
 };

@@ -166,12 +166,20 @@ export async function probeShell(page: Page) {
       if (el.matches(".ws-backapp")) return "back";
       return null;
     };
+    /* ⚠️ THE QUIET BAR (28 Sep): the page name and its divider are LAID OUT and invisible at rest — they
+       keep their boxes so nothing moves when they arrive (quietBar Q7). The order and the geometry
+       are claims about the layout, so those two are read by their boxes, not their opacity. */
+    const quietSlot = (k: string) => k === "vr" || k === "pagename";
+    const laidOut = (e: Element) => {
+      const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
+      return r.width > 0.5 && r.height > 0.5 && s.visibility !== "hidden" && s.display !== "none";
+    };
     const seq: string[] = [];
     if (bar) {
       const walk = (el: Element) => {
         for (const c of Array.from(el.children)) {
           const k = classify(c);
-          if (k) { if (k === "spacer" ? (c.getBoundingClientRect().width > 0) : shown(c)) seq.push(k); continue; }
+          if (k) { if (k === "spacer" ? (c.getBoundingClientRect().width > 0) : quietSlot(k) ? laidOut(c) : shown(c)) seq.push(k); continue; }
           walk(c);
         }
       };
@@ -180,7 +188,7 @@ export async function probeShell(page: Page) {
     const find = (k: string) => {
       if (!bar) return null;
       const all = Array.from(bar.querySelectorAll("*"));
-      return all.find((e) => classify(e) === k && shown(e)) ?? null;
+      return all.find((e) => classify(e) === k && (quietSlot(k) ? laidOut(e) : shown(e))) ?? null;
     };
     const collapseBtn = find("collapse");
     /* page header v2: no breadcrumb — the page name is what sits after the toggle and its divider */
@@ -212,7 +220,7 @@ export async function probeShell(page: Page) {
         navScrolls: (() => { const n = side.querySelector("nav.ws-nav"); return n ? n.scrollHeight > n.clientHeight + 1 : null; })(),
       },
       main: main && { box: box(main), bg: cs(main).backgroundColor },
-      bar: bar && { box: box(bar), bg: cs(bar).backgroundColor, shadows: shadows(cs(bar).boxShadow), borders: borders(bar) },
+      bar: bar && { box: box(bar), bg: cs(bar).backgroundColor, shadows: shadows(cs(bar).boxShadow), borders: borders(bar), after: surfaceOf(bar).after },
       frame: [winwrap, win, wbody, work].map((el) => el && { cls: (el.className || "").toString().split(" ")[0], box: box(el), ...surfaceOf(el) }),
       seq,
       collapse: box(collapseBtn), crumb: box(crumb), search: box(search), feedback: box(feedback), help: box(help),
@@ -259,17 +267,19 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
   /* L2 one-divide */
   const sr = oneRule(p.side, "Right");
   c("L2 one-divide · sidebar edge", sr.ok, sr.why);
-  const br = oneRule(p.bar, "Bottom");
-  c("L2 one-divide · top-bar edge", br.ok, br.why);
+  /* ⚠️ RETARGETED BY THE QUIET BAR (28 Sep): at rest the top bar has NO edge — its one hairline fades
+     in only once the page scrolls, which quietBar.measure.ts Q2/Q3 own. This probe reads at rest. */
+  c("L2 one-divide · top-bar edge (none at rest)", !!p.bar && p.bar.borders.length === 0 && p.bar.shadows.length === 0 && p.bar.after.length === 0,
+    `borders=${JSON.stringify(p.bar?.borders)} shadows=${JSON.stringify(p.bar?.shadows)} after=${JSON.stringify(p.bar?.after)}`);
   const pageBg = p.main?.bg ?? "";
   for (const f of p.frame) {
     if (!f) { c("L2 one-divide · frame", false, "frame element missing"); continue; }
     c(`L2 one-divide · ${f.cls} unframed`, f.borders.length === 0 && f.shadows.length === 0 && f.after.length === 0,
       `borders=${JSON.stringify(f.borders)} shadows=${JSON.stringify(f.shadows)} after=${JSON.stringify(f.after)}`);
   }
-  /* ⚠️ RETARGETED (page header v2, 27 Sep): the bar is the SIDEBAR'S colour now, read from its token —
-     pageHeaderV2 §1 owns the claim; this keeps the one-divide lock honest about what the bar paints. */
-  c("L2 one-divide · bar bg = the sidebar's", !!p.bar && !!p.side && p.bar.bg === p.side.bg && !/rgba\([^)]*,\s*0\)$/.test(p.bar.bg),
+  /* ⚠️ RETARGETED BY THE QUIET BAR (28 Sep): the bar is the PAGE GROUND, reversing page header v2's
+     "the sidebar's colour" — quietBar Q1 owns the claim on every route */
+  c("L2 one-divide · bar bg = the page ground", !!p.bar && !!p.main && p.bar.bg === p.main.bg && !/rgba\([^)]*,\s*0\)$/.test(p.bar.bg),
     `bar ${p.bar?.bg} · page ${pageBg}`);
 
   /* L3 active */

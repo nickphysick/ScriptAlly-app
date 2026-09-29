@@ -37,7 +37,7 @@ describe("PageHeader — full", () => {
     );
     /* the eyebrow is SECTION / PAGE, and the page's own name is the darker half */
     expect(out).toContain('<p class="ph-eyebrow" data-probe="eyebrow"><span>Queries</span> / <b>Query Centre</b></p>');
-    expect(out).toContain('<h1 class="ph-title" data-probe="title">Query Centre</h1>');
+    expect(out).toContain('<h1 class="ph-title" data-probe="title" data-page-title="">Query Centre</h1>');
     expect(out).toContain('<p class="ph-intro" data-probe="intro">Every query.</p>');
     expect(out).toContain('<button type="button" class="ph-primary">+ Log a query</button>');
     expect(out).toContain('<button type="button" class="ph-secondary">Record a response</button>');

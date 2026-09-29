@@ -1,0 +1,130 @@
+# Item 4 — every date change (clean-up pass, 28 Sep)
+
+## 92 calls routed through lib/dates formatDate (toLocaleDateString / toLocaleString with month: "short"), by file:line
+- src/components/Dashboard.tsx:1441
+- src/components/Dashboard.tsx:1082
+- src/components/Dashboard.tsx:1021
+- src/components/EditQueryDrawer.tsx:613
+- src/components/EditQueryDrawer.tsx:60
+- src/components/Queries.tsx:6734
+- src/components/Queries.tsx:6080
+- src/components/Queries.tsx:5139
+- src/components/Queries.tsx:4617
+- src/components/Queries.tsx:4523
+- src/components/Queries.tsx:4468
+- src/components/Queries.tsx:4455
+- src/components/Queries.tsx:4443
+- src/components/Queries.tsx:4442
+- src/components/Queries.tsx:4439
+- src/components/Queries.tsx:4419
+- src/components/Queries.tsx:4390
+- src/components/Queries.tsx:1545
+- src/components/Queries.tsx:993
+- src/components/Queries.tsx:322
+- src/components/RecordResponseFocusForm.tsx:33
+- src/components/RecordResponseModal.tsx:121
+- src/components/TasksPopover.tsx:26
+- src/components/agents/contact/ContactProfile.tsx:41
+- src/components/agents/contact/ContactProfile.tsx:40
+- src/components/analytics/chartPlumbing.tsx:132
+- src/components/analytics/chartPlumbing.tsx:128
+- src/components/dashboard/DashboardStatsRow.tsx:310
+- src/components/dashboard/DashboardStatsRow.tsx:137
+- src/components/dashboard/DeskStats.tsx:48
+- src/components/dashboard/TodoRowEditor.tsx:33
+- src/components/emailImport/EmailImportReview.tsx:49
+- src/components/forms/CheckBackSlider.tsx:44
+- src/components/manuscripts/ScoutPanel.tsx:46
+- src/components/manuscripts/compsScoutRow.tsx:35
+- src/components/manuscripts/v12/Msv12Sections.tsx:22
+- src/components/queries/MarkClosedDesk.tsx:46
+- src/components/queries/MarkSentDesk.tsx:54
+- src/components/queries/NudgeDesk.tsx:37
+- src/components/queries/QueryLogSheet.tsx:87
+- src/components/queries/RespondDesk.tsx:125
+- src/components/reading-pane/QueryTimeline.tsx:105
+- src/components/reading-pane/QueryTimeline.tsx:99
+- src/components/todo/HousekeepingSweep.tsx:49
+- src/components/todo/SnoozeDial.tsx:66
+- src/components/todo/ToDoPage.tsx:188
+- src/components/todo/TodoCalendarPage.tsx:410
+- src/components/todo/TodoCalendarPage.tsx:409
+- src/components/todo/TodoFrameMenus.tsx:210
+- src/components/todo/TodoNoteboardPage.tsx:565
+- src/components/todo/TodoNoteboardPage.tsx:332
+- src/components/todo/TodoNoteboardPage.tsx:61
+- src/components/todo/useTaskPaneSession.tsx:716
+- src/components/todo/useTaskPaneSession.tsx:706
+- src/lib/activityUtils.ts:128
+- src/lib/activityUtils.ts:116
+- src/lib/agentsPage.ts:390
+- src/lib/agentsPage.ts:206
+- src/lib/bookFigures.ts:39
+- src/lib/contactEdit.ts:29
+- src/lib/contactHousekeeping.ts:187
+- src/lib/contactList.ts:175
+- src/lib/correctionPreview.ts:88
+- src/lib/createSummary.ts:26
+- src/lib/dashboardStats.ts:591
+- src/lib/dashboardStats.ts:407
+- src/lib/discoverAgents.ts:280
+- src/lib/dockTimeline.ts:96
+- src/lib/dockTimeline.ts:87
+- src/lib/listRowDate.ts:18
+- src/lib/logNudge.ts:90
+- src/lib/manuscriptPlate.ts:36
+- src/lib/manuscriptProfile.ts:53
+- src/lib/offerNotify.ts:45
+- src/lib/packageAttach.ts:500
+- src/lib/packagesPage.ts:38
+- src/lib/paneJourney.ts:343
+- src/lib/qcFanModel.ts:26
+- src/lib/queryAmbient.ts:672
+- src/lib/queryAmbient.ts:100
+- src/lib/queryDraft.ts:179
+- src/lib/recordResponse.ts:442
+- src/lib/sessionContext.ts:40
+- src/lib/taskSettings.ts:84
+- src/lib/todoBoard.ts:357
+- src/lib/todoBoard.ts:167
+- src/lib/todoCalendar.ts:714
+- src/lib/todoColumns.ts:132
+- src/lib/todoLedger.ts:36
+- src/lib/todoListPage.ts:97
+- src/lib/todoWalk.ts:276
+- src/lib/todoWalk.ts:84
+
+## 24 local month tables now read MONTHS_SHORT from lib/dates
+- src/components/Queries.tsx
+- src/components/dashboard/OneScreenClosed.tsx
+- src/components/dashboard/WhatsLivePanel.tsx
+- src/components/dashboard/fortnightEvents.ts
+- src/components/notes/notesUtils.ts
+- src/components/queries/centre/QcList.tsx
+- src/components/shared/timeline/boardWindow.ts
+- src/lib/agentBoard.ts
+- src/lib/agentList.ts
+- src/lib/analytics.ts
+- src/lib/dashBreakdown.ts
+- src/lib/dashChart.ts
+- src/lib/dashFeed.ts
+- src/lib/dashPins.ts
+- src/lib/dashWindow.ts
+- src/lib/db.tsx
+- src/lib/deskWeek.ts
+- src/lib/listCells.ts
+- src/lib/oneScreen.ts
+- src/lib/qcSummary.ts
+- src/lib/qcTimeline.ts
+- src/lib/queryActions/dates.ts
+- src/lib/queryCardFacts.ts
+- src/lib/queryCentreGrid.ts
+- src/lib/smartImportReviewModel.ts
+
+## Hard-coded "Sept"
+- src/components/shared/timeline/boardWindow.ts:35, :65 — its own month table said "Sept" (the Calendar's month band)
+- src/components/queries/queryEmptyCopy.ts:217, :218 — sample copy "Reply expected 25 Sept" / "23 Sept"
+
+## The packages page (told the packages session first)
+- src/lib/packagesPage.ts shortDate — the material line "saved 2 Sept" (packagesPage.ts:73's caller) now goes through formatDate; lockLine already used dayMonth
+- src/lib/packageResults.ts dayMonth now re-exports lib/dates' dayMonth

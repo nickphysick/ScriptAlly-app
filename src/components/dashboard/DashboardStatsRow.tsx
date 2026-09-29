@@ -54,6 +54,7 @@ import { StatusDot } from "../StatusDot";
 import { StatTooltip } from "./StatTooltip";
 import { PanelAlign, StatHoverPanel } from "./StatHoverPanel";
 import type { FocusKey } from "./focusSlot";
+import { formatDate } from "../../lib/dates";
 
 /* ── hover-panel content templates (locked S1·A·A·A). Panels are non-interactive
    (pointer-events:none); "click row → agent/query" is logged as a possible follow-up. ── */
@@ -134,7 +135,7 @@ const AgentProfilePanel: React.FC<{ s: AgentStatusSummary }> = ({ s }) => (
     <span className="sa-hp-pill">
       {s.status && <StatusDot status={s.status} overrideSize={12} decorative />}
       {s.status
-        ? `${String(s.status).toUpperCase()}${s.respondBy ? ` · RESPOND BY ${new Date(s.respondBy).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}` : ""}`
+        ? `${String(s.status).toUpperCase()}${s.respondBy ? ` · RESPOND BY ${formatDate(new Date(s.respondBy), { day: "numeric", month: "short" }).toUpperCase()}` : ""}`
         : "NO ACTIVE QUERIES"}
     </span>
   </>
@@ -307,7 +308,7 @@ const AgentIconGrid: React.FC<{ summaries: AgentStatusSummary[] }> = ({ summarie
   const cells: React.ReactNode[] = summaries.slice(0, shown).map((s, i) => (
     <StatHoverPanel
       key={s.id}
-      label={`${agentTooltip(s.name, s.status)}${s.status && s.respondBy ? ` · respond by ${new Date(s.respondBy).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`}
+      label={`${agentTooltip(s.name, s.status)}${s.status && s.respondBy ? ` · respond by ${formatDate(new Date(s.respondBy), { day: "numeric", month: "short" })}` : ""}`}
       align={slotAlign(i % AGENT_GRID_MAX_PER_ROW, AGENT_GRID_MAX_PER_ROW)}
       panel={<AgentProfilePanel s={s} />}
     >

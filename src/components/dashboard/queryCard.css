@@ -142,6 +142,12 @@
    branch — a rung with no status (a nudge), which takes a plain mark rather than a status glyph. */
 .qcard-g i { width: 7px; height: 7px; border-radius: 50%; display: block; background: var(--qcard-ink-45); }
 .qcard-ev b { font-size: 14px; font-weight: 600; }
+/* the send rung's extras (clean-up pass, 28 Sep): the requery line and the materials box span the
+   title and date columns, beneath them */
+.qcard-x { grid-column: 2 / -1; min-width: 0; }
+/* the header chip and the Materials tab's box (item 3) */
+.qcard-how { padding: 0 16px 8px; }
+.qcard-mbox { margin-bottom: 10px; }
 .qcard-d {
   font-family: "JetBrains Mono", monospace;
   font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;

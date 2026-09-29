@@ -14,6 +14,7 @@ import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { createPortal } from "react-dom";
 import { todayInputDate } from "../../lib/queryDraft";
+import { formatDate } from "../../lib/dates";
 
 export interface NudgeDeskDraft {
   nudgeDate: string;           /* YYYY-MM-DD, default today */
@@ -34,7 +35,7 @@ export interface NudgeDeskProps {
   onCancel: () => void;
 }
 
-const fmt1 = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const fmt1 = (iso: string) => formatDate(new Date(`${iso}T12:00:00`), { day: "numeric", month: "short" });
 const plusWeeks = (iso: string, w: number) => {
   const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + w * 7);
   return d.toISOString().slice(0, 10);

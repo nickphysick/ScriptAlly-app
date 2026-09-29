@@ -23,6 +23,7 @@ import {
   type SampleUnit,
 } from "./agentMaterials";
 import { elapsedLabel, DAY } from "./queryAmbient";
+import { formatDate } from "./dates";
 
 /** The three send methods create mode offers (ref). Query Manager is reachable after save via
  *  the reading pane's click-to-pick method control — deliberately not a fourth segment here. */
@@ -176,7 +177,7 @@ export function reminderChipLabel(dateISO: string, fromISO: string): string {
   const to = new Date(dateISO).getTime();
   const from = new Date(fromISO).getTime();
   if (Number.isNaN(to)) return "";
-  const day = new Date(to).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const day = formatDate(new Date(to), { day: "numeric", month: "short" });
   if (Number.isNaN(from)) return day;
   const days = Math.max(0, Math.round((to - from) / DAY));
   return `${day} · in ${elapsedLabel(days)}`;

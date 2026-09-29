@@ -159,7 +159,7 @@
 .qpn-track { margin-top: 18px; --tl-title: 19px; }
 /* ⚠️ THE 19px IS THE DRAWER'S RHYTHM FOR THE SHARED RENDERER — the ref draws event titles at 19
    where the retired record view set the :root 16. A token override at the use site: TimelineRows
-   is untouched, FocusFlow's condensed copy keeps the :root value, and retuning the drawer is one
+   is untouched, every other mount keeps the :root value, and retuning the drawer is one
    line here rather than an edit to a renderer three surfaces share. */
 .qpn-chip { cursor: default; }
 .qpn-hint {
@@ -250,6 +250,8 @@
 .qpn-headtx { min-width: 0; }
 .qpn-nm { font-family: var(--font-serif); font-weight: 500; font-size: 27px; line-height: 1.3; color: var(--ink, #1c130f); }
 .qpn-ag { font-family: var(--font-serif); font-style: italic; font-size: 14px; line-height: 1.3; color: #6a5a50; margin-top: 5px; }
+/* how the materials were recorded (clean-up pass item 3) */
+.qpn-how { margin-top: 8px; }
 /**
  * ⚠️ THE VERB ROW CLOSES THE STAGE BLOCK (v14 §3), so it wears the block's own ground — the same
  * `--band-a` the band, the identity row and the manuscript line read. A row on a different fill

@@ -22,6 +22,7 @@
  * they change it. Where nobody has stated anything the resolver returns null and NO event is
  * pushed — the house 8/12/12-week assumption stays out of a panel that names dates.
  */
+import { MONTHS_SHORT } from "../../lib/dates";
 import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from "../../types";
 import { extractAgentFromText } from "../../lib/activityUtils";
 import { resolveExpectedDate } from "../../lib/expectedDate";
@@ -31,7 +32,7 @@ export const FORTNIGHT_FUTURE_DAYS = 7;
 /** Index of today in the 15-card strip. */
 export const FORTNIGHT_TODAY_IDX = FORTNIGHT_PAST_DAYS;
 
-export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const MONTHS = MONTHS_SHORT;
 
 export const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 export const dayDiff = (a: Date, b: Date) => Math.round((startOfDay(a).getTime() - startOfDay(b).getTime()) / 86400000);
@@ -269,19 +270,17 @@ export const deriveFortnightEvents = (
   });
 
   // Agent + manuscript added markers from the activity log (Fortnight intentionally shows
-  // these; only Story-so-far cuts housekeeping). Agent-added events are collected first and
-  // deduplicated by description (addAgent + backfill can both emit one), preferring the
-  // stable-id backfill entry so the agents-array lookup resolves agency-only names.
-  const agentAddedByDesc = new Map<string, Activity>();
+  // these; only Story-so-far cuts housekeeping). ONE ROW, ONE EVENT (clean-up pass, 28 Sep): the
+  // duplicate-hiding that stood here existed because addAgent and the runtime repair could both
+  // write an "Added" row for one agent. The repair is deleted, addAgent keys its row by the agent's
+  // id, and the one-off clean-up removed the duplicates — so the feed and this view read the same
+  // rows the same way.
+  const agentAdded: Activity[] = [];
   activities.forEach((act) => {
     const d = coerceDate(act.date);
     if (!inWindow(d) || !d) return;
     if (act.activityType === ActivityType.AGENT_ADDED) {
-      const isStable = act.id.startsWith("act-added-agent-");
-      const prev = agentAddedByDesc.get(act.description);
-      if (!prev || (isStable && !prev.id.startsWith("act-added-agent-"))) {
-        agentAddedByDesc.set(act.description, act);
-      }
+      agentAdded.push(act);
     } else if (act.activityType === ActivityType.MANUSCRIPT_ADDED) {
       const title = manuscripts.find((m) => m.id === act.manuscriptId)?.title || "New manuscript";
       out.push({
@@ -295,7 +294,7 @@ export const deriveFortnightEvents = (
       });
     }
   });
-  for (const act of agentAddedByDesc.values()) {
+  for (const act of agentAdded) {
     const d = coerceDate(act.date)!;
     const stableMatch = act.id.match(/^act-added-agent-(.+)$/);
     const agentId = stableMatch?.[1] ?? null;

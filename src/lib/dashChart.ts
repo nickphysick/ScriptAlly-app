@@ -23,6 +23,7 @@
  * three gridlines, the hatch, the first-point marker, the request/pass dots and their nudge, and the
  * by-width label thinning (the axis thins itself with a container query now).
  */
+import { MONTHS_SHORT } from "./dates";
 import { hermiteCoeffs, LedgerPoint, monotonePath } from "./oneScreen";
 
 export type LineMode = "smooth" | "stepped";
@@ -146,7 +147,7 @@ export interface WeekSlot {
   atMs: number;
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 const mondayOf = (d: Date): Date => {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   x.setDate(x.getDate() - ((x.getDay() + 6) % 7));

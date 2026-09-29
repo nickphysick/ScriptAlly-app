@@ -97,3 +97,6 @@
 }
 .qcv-open-x:hover { background: #ffffff; }
 .qcv-open-x:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 2px; }
+/* v1.1 — the same ink confirm, in place of a timeline row (the mock swaps the row for it) */
+.tl-delrow { margin: 4px 0 12px; }
+.tl-delrow .qcv-open-delc { box-sizing: border-box; }

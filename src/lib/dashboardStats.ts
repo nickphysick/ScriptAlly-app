@@ -22,6 +22,7 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "./agentDisplay";
 import { STATUS_ORDER } from "./statusOrder";
 import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
 import { resolveExpectedDate } from "./expectedDate";
+import { formatDate } from "./dates";
 
 /** Monday 00:00 (local) of the ISO week containing `d`. */
 export const isoWeekStart = (d: Date): Date => {
@@ -404,7 +405,7 @@ export const weekQueryRows = (queries: Query[], agents: Agent[], weekStart: Date
         agentName: agent ? agentPrimary(agent) : AGENT_NOT_SPECIFIED,
         agency: agent && agent.name?.trim() ? agent.agency || "" : "",
         status: q.status,
-        sentLabel: new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+        sentLabel: formatDate(new Date(t), { day: "numeric", month: "short" }),
       };
     });
 };
@@ -588,7 +589,7 @@ export const agentGridLayout = (count: number, boxW: number, boxH: number, gap =
 
 /** "W/C 23 JUN" — week-commencing label, en-GB, uppercase, no year. */
 export const wcLabel = (weekStart: Date): string =>
-  `W/C ${weekStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+  `W/C ${formatDate(weekStart, { day: "numeric", month: "short" }).toUpperCase()}`;
 
 export const sentTooltip = (weekStart: Date, n: number): string =>
   `${wcLabel(weekStart)} · ${n} SENT`;

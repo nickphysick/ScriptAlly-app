@@ -124,7 +124,6 @@ export function taskCategory(card: BoardCard): Category {
     case "dream_agent_unqueried":
     case "materials_unrecorded":
     case "materials_unrecorded_bulk":
-    case "weekly_review":
     /* Query actions v1 (K3): courtesy and follow-up, not an agent's request. */
     case "withdraw_tell":
     case "signed_tell":

@@ -1,0 +1,66 @@
+[
+ {
+  "lock": "S5 · M from the page opens it, focus on the active book",
+  "route": "/agents",
+  "size": "1280",
+  "state": "M",
+  "ok": false,
+  "detail": "{\"cls\":\"\",\"checked\":null,\"text\":\"BetaYou're using QueryHawk before it's f\",\"isTile\":false,\"inMenu\":false}"
+ },
+ {
+  "lock": "S5 · M in an input does nothing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 · M in a textarea does nothing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 · M with a modal open does nothing",
+  "route": "/agents",
+  "size": "1280",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 · M from the page opens it, focus on the active book",
+  "route": "/agents",
+  "size": "1440",
+  "state": "M",
+  "ok": false,
+  "detail": "{\"cls\":\"\",\"checked\":null,\"text\":\"BetaYou're using QueryHawk before it's f\",\"isTile\":false,\"inMenu\":false}"
+ },
+ {
+  "lock": "S5 · M in an input does nothing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 · M in a textarea does nothing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 · M with a modal open does nothing",
+  "route": "/agents",
+  "size": "1440",
+  "state": "M",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -2,21 +2,26 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages v2 — one package card (ref design-refs/materials/packages-v2.html, `pkgCard`).
+ * Submission packages v2 — one package card (ref design-refs/materials/packages-v2.html, `pkgCard`),
+ * with Part B of "Packages through the journey" (ref design-refs/packages-journey/package-tracking-v1.html,
+ * 28 Sep): the edition switch, the six results tiles and the queries behind them.
  *
- * ⚠️ THE ACTIONS FOLLOW THE STATE, AND "SENT" IS THE LOCK (D4). A sent package offers Duplicate &
- * edit, never Edit; Delete is offered on UNSENT packages only, because a sent one has queries
- * recording what went out and `deletePackage` refuses it anyway. Retired offers Restore and
- * Duplicate & edit.
+ * ⚠️ A SENT PACKAGE IS EDITABLE NOW, AND THE EDIT STARTS ITS NEXT EDITION (§B1). The queries already
+ * sent keep the edition they went with, so the record stays true; Duplicate makes a separate package.
+ * Delete is offered on UNSENT packages only — a sent one is retired, never deleted (§B3).
+ *
+ * ⚠️ THE RESULTS ARE WORKED OUT, NEVER STORED (§C4): `results(edition)` reads the queries on every
+ * render, so undo, corrections and late replies move the tiles by themselves.
  *
  * ⚠️ THE NOTE IS ALWAYS EDITABLE, LOCKED OR NOT — `note` is not in `LOCKED_PACKAGE_FIELDS`.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { SubmissionPackage } from "../../types";
+import { PackageEdition, SubmissionPackage } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { STAGE_NAME } from "../../lib/qcSummary";
-import { CountEntry } from "../../lib/manuscriptSummary";
-import { lockLine, shortDate } from "../../lib/packagesPage";
+import { lockLine } from "../../lib/packagesPage";
+import { editionNumber, ordinal } from "../../lib/packageEditions";
+import { EditionResults, dayMonth, rateLine, rowWord, sentSpan } from "../../lib/packageResults";
 
 export interface SlotView { name: string; words: number | null }
 
@@ -26,38 +31,56 @@ export interface PkgCardProps {
   letter: SlotView | null;
   synopsis: SlotView | null;
   version: string | null;
-  counts: CountEntry[];
-  agents: number;
-  discs: string[];
+  /** every edition, oldest first (`editionsOf`) */
+  editions: PackageEdition[];
+  /** the results for one edition, or null for all of them — worked out from the queries */
+  results: (edition: number | null) => EditionResults;
+  /** a query's agent, for the list */
+  who: (queryId: string) => { name: string; initials: string };
   flash?: boolean;
   /** the empty state's example — no actions, no note controls */
   ghost?: boolean;
-  onAct?: (act: "use" | "edit" | "dup" | "retire" | "delete" | "restore") => void;
+  onAct?: (act: PkgAct) => void;
+  onOpenQuery?: (queryId: string) => void;
   onSaveNote?: (note: string) => void;
 }
 
+export type PkgAct = "log" | "use" | "edit" | "dup" | "retire" | "delete" | "restore";
+
+/** How many rows the list shows before "Show all". */
+const LIST_CAP = 5;
+
 const num = (n: number) => n.toLocaleString("en-GB");
 
-export const PkgCard: React.FC<PkgCardProps> = ({ pkg, active, letter, synopsis, version, counts, agents, discs, flash, ghost, onAct, onSaveNote }) => {
+export const PkgCard: React.FC<PkgCardProps> = ({ pkg, active, letter, synopsis, version, editions, results, who, flash, ghost, onAct, onOpenQuery, onSaveNote }) => {
   const sent = !!pkg.firstSentAt;
   const retired = pkg.status === "Retired";
+  const current = editionNumber(pkg);
+  const [ed, setEd] = useState<number | null>(current);
+  const [list, setList] = useState<"credited" | "changes">("credited");
+  const [all, setAll] = useState(false);
+  /* a new edition arriving (this card's own edit) moves the switch to it */
+  useEffect(() => { setEd(current); setList("credited"); setAll(false); }, [current]);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(pkg.note ?? "");
   const edRef = useRef<HTMLTextAreaElement | null>(null);
   const noteBtnRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => { if (editing) edRef.current?.focus(); }, [editing]);
 
-  const act = (a: Parameters<NonNullable<PkgCardProps["onAct"]>>[0], label: string, quiet = false) => (
+  const act = (a: PkgAct, label: string, quiet = false) => (
     <button type="button" className={`ppv-txt${quiet ? " ppv-txt--quiet" : ""}`} data-act={a} onClick={() => onAct?.(a)}>{label}</button>
   );
+  /* ⚠️ EDIT ON A SENT PACKAGE STARTS ITS NEXT EDITION; Delete only while unsent (§B1, §B3) */
   const acts = ghost ? null : retired ? (
-    <>{act("restore", "Restore")}{act("dup", "Duplicate & edit")}</>
+    <>{act("dup", "Reuse as new")}{act("restore", "Restore", true)}{sent ? null : act("delete", "Delete", true)}</>
   ) : (
     <>
       {active ? null : act("use", "Use for new queries")}
-      {sent ? act("dup", "Duplicate & edit") : act("edit", "Edit")}
+      {act("edit", "Edit")}
+      {act("dup", "Duplicate")}
       {act("retire", "Retire", true)}
       {sent ? null : act("delete", "Delete", true)}
+      <button type="button" className="ppv-btn ppv-btn--pri" data-act="log" onClick={() => onAct?.("log")}>Log a query with this</button>
     </>
   );
 
@@ -85,6 +108,83 @@ export const PkgCard: React.FC<PkgCardProps> = ({ pkg, active, letter, synopsis,
     </div>
   );
 
+  /* ── the results (§B4) ── */
+  const byN = new Map(editions.map((e) => [e.n, e]));
+  const past = ed != null && ed !== current;
+  const r = results(ed);
+  const eAt = ed != null ? byN.get(ed) : undefined;
+  const nextAt = ed != null ? byN.get(ed + 1)?.startedAt : undefined;
+  const edLine = ed == null
+    ? `All ${editions.length} editions together · for the big picture, not for comparing`
+    : [`${ordinal(ed)} edition`, eAt?.summary, eAt?.startedAt ? (past && nextAt ? `${dayMonth(eAt.startedAt)} – ${dayMonth(nextAt)}` : `since ${dayMonth(eAt.startedAt)}`) : ""].filter(Boolean).join(" · ");
+  const tile = (key: string, label: string, n: number, sub = "", hi = false) => (
+    <div className={`ppv-st${hi ? " ppv-st--key" : ""}`} data-st={key}><small>{label}</small><b>{n}</b><span>{sub || "\u00a0"}</span></div>
+  );
+  const credited = r.rows;
+  const rowsShown = list === "changes"
+    ? r.withChanges.map((id) => ({ id, status: null as null | EditionResults["rows"][number]["status"], latestMs: null as number | null }))
+    : credited;
+  const cut = all ? rowsShown : rowsShown.slice(0, LIST_CAP);
+  const results_block = (
+    <div className="ppv-res" data-ppv="results">
+      {editions.length > 1 ? (
+        <div className="ppv-eds" role="group" aria-label={`Editions of ${pkg.packageName}`}>
+          <button type="button" data-ed="all" aria-pressed={ed == null} className={ed == null ? "on" : ""} onClick={() => { setEd(null); setList("credited"); setAll(false); }}>All editions</button>
+          {[...editions].reverse().map((e) => (
+            <button type="button" key={e.n} data-ed={e.n} aria-pressed={ed === e.n} className={ed === e.n ? "on" : ""} onClick={() => { setEd(e.n); setList("credited"); setAll(false); }}>
+              {ordinal(e.n)} edition{e.n === current ? " · current" : ""}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="ppv-edline" data-ppv="edline">{edLine}</div>
+      {r.onlyMigrated ? <div className="ppv-edline ppv-edline--note" data-ppv="migrated">Results from queries logged before editions</div> : null}
+      <div className="ppv-stats">
+        {tile("sent", "Sent", r.sent, sentSpan(r, past))}
+        {tile("out", "Still out", r.out)}
+        {tile("requests", "Requests", r.requests, rateLine(r), true)}
+        {tile("offers", "Offers", r.offers)}
+        {tile("passes", "Passes", r.passes)}
+        {tile("noreply", "No reply", r.noReply)}
+      </div>
+      {r.withChanges.length || r.withdrawnEarly ? (
+        <div className="ppv-rfoot" data-ppv="rfoot">
+          {r.withChanges.length ? (
+            <span data-ppv="withchanges"><b>{r.withChanges.length}</b> sent with changes, based on {ed == null ? "this package" : "this edition"} ·{" "}
+              <button type="button" className="ppv-link" aria-pressed={list === "changes"} onClick={() => { setList(list === "changes" ? "credited" : "changes"); setAll(false); }}>
+                {list === "changes" ? "back to its results" : "see them"}
+              </button>
+            </span>
+          ) : null}
+          {r.withdrawnEarly ? <span data-ppv="withdrawn">{r.withdrawnEarly} withdrawn before any answer, not counted</span> : null}
+        </div>
+      ) : null}
+      {cut.length ? (
+        <ul className="ppv-rq" aria-label={list === "changes" ? "Sent with changes" : `Queries sent with ${pkg.packageName}`}>
+          {cut.map((row) => {
+            const w = who(row.id);
+            return (
+              <li key={row.id}>
+                <button type="button" data-q={row.id} onClick={() => onOpenQuery?.(row.id)}>
+                  <span className="a" aria-hidden="true">{w.initials}</span>
+                  <span className="n">{w.name}</span>
+                  {row.status ? <span className="s"><StatusDot status={row.status} overrideSize={12} decorative />{STAGE_NAME[row.status]}</span> : <span className="s">Based on it</span>}
+                  <small>{row.status ? `${rowWord(row.status)} ${dayMonth(row.latestMs)}`.trim() : ""}</small>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+      {rowsShown.length > LIST_CAP ? (
+        <button type="button" className="ppv-link ppv-more" onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show all ${rowsShown.length}`}</button>
+      ) : null}
+      {retired ? (
+        <div className="ppv-retline" data-ppv="retline">Retired, not deleted: it's been sent, so its <b>{results(null).sent} {results(null).sent === 1 ? "query" : "queries"}</b> still point here.</div>
+      ) : null}
+    </div>
+  );
+
   return (
     <article className={`ppv-pkg${active ? " is-active" : ""}${retired ? " is-retired" : ""}${flash ? " flash" : ""}`}
       data-ppv="pkg" data-name={pkg.packageName} data-id={pkg.id}>
@@ -94,7 +194,7 @@ export const PkgCard: React.FC<PkgCardProps> = ({ pkg, active, letter, synopsis,
           <h3>{pkg.packageName}</h3>
           {active ? <span className="ppv-tag ppv-tag--och" data-tag="active">Used for new queries</span> : null}
           {sent ? null : <span className="ppv-tag ppv-tag--plain">Not sent</span>}
-          {retired ? <span className="ppv-tag ppv-tag--plain">Retired</span> : null}
+          {retired ? <span className="ppv-tag ppv-tag--plain" data-tag="retired">{pkg.retiredAt ? `Retired ${dayMonth(pkg.retiredAt)}` : "Retired"}</span> : null}
         </div>
         {acts ? <div className="ppv-pacts">{acts}</div> : null}
       </div>
@@ -114,21 +214,7 @@ export const PkgCard: React.FC<PkgCardProps> = ({ pkg, active, letter, synopsis,
           </div>
         ) : null}
       </dl>
-      {sent ? (
-        <div className="ppv-pf">
-          <div className="ppv-counts" aria-label="Queries by status">
-            {counts.map((c) => {
-              const label = c.closed ? "Closed" : STAGE_NAME[c.status];
-              return <span key={`${c.status}${c.closed ? "c" : ""}`} title={label}><StatusDot status={c.status} overrideSize={12} decorative />{c.n}<span className="sr-only"> {label}</span></span>;
-            })}
-            <span className="ppv-sentline">Sent to {agents} agent{agents === 1 ? "" : "s"} since {shortDate(pkg.firstSentAt)}</span>
-          </div>
-          <div className="ppv-discs" aria-hidden="true">
-            {discs.slice(0, 4).map((d, i) => <span className="ppv-disc" key={i}>{d}</span>)}
-            {discs.length > 4 ? <span className="ppv-disc">+{discs.length - 4}</span> : null}
-          </div>
-        </div>
-      ) : (
+      {sent && !ghost ? results_block : sent ? null : (
         <div className="ppv-pf"><span className="ppv-sentline">Not sent yet. Choose it when you log a query and it's recorded against that agent.</span></div>
       )}
       {note}

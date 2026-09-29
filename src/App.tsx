@@ -32,7 +32,8 @@ import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
-import { RecordResponseScreen } from "./components/RecordResponseScreen";
+import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
+import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
@@ -66,7 +67,7 @@ import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
 // TEMP: duplicate-query reconcile card dev preview (#/reconcile-card) — remove after sign-off.
 import { ReconcileCardDevPreview } from "./components/onboarding/ReconcileCard";
-import { QueryStatus, SubmissionStatus, SubmissionMethod } from "./types";
+import { QueryStatus, SubmissionStatus, SubmissionMethod, UserPlan } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
 import { EditAgentDrawer } from "./components/EditAgentDrawer";
@@ -395,10 +396,14 @@ function AppContent() {
   const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
-  // Rail "+ Record a response": app-level host for the existing RecordResponseScreen (the
-  // dashboard keeps its own local instance — the component is self-contained, both hosts are
-  // independent). Interception, never a navigation — same contract as the other captures.
-  const [isRecordResponseOpen, setIsRecordResponseOpen] = useState<boolean>(false);
+  // Query actions v1.1 — the Pro paste-an-email lane, opened from the drawer's query picker. It
+  // lived in RecordResponseScreen (retired); App hosts the EXISTING flow so it sits above everything.
+  const [isPasteResponseOpen, setIsPasteResponseOpen] = useState<boolean>(false);
+  useEffect(() => {
+    const open = () => setIsPasteResponseOpen(true);
+    window.addEventListener(PASTE_RESPONSE_EVENT, open);
+    return () => window.removeEventListener(PASTE_RESPONSE_EVENT, open);
+  }, []);
 
   useEffect(() => {
     if (successToast) {
@@ -434,7 +439,8 @@ function AppContent() {
       return;
     }
     if (subPageName === "Record a response") {
-      setIsRecordResponseOpen(true);
+      /* Query actions v1.1 — the drawer, opened with no query: its first step is choosing one. */
+      openQueryDrawer({ mode: "resp" });
       return;
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {
@@ -858,14 +864,15 @@ function AppContent() {
       <QueryDrawer />
       <UndoBar />
 
-      {/* Rail capture host — the existing RecordResponseScreen (same mount pattern as the
-          dashboard's own instance; both are self-contained and independent). */}
-      <RecordResponseScreen
-        isOpen={isRecordResponseOpen}
-        onClose={() => setIsRecordResponseOpen(false)}
-        onNavigate={handleNavigate}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
+      {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}
+      {currentUser?.plan === UserPlan.PRO && (
+        <PasteEmailFlow
+          isOpen={isPasteResponseOpen}
+          onClose={() => setIsPasteResponseOpen(false)}
+          onNavigate={handleNavigate}
+          onSuccessToast={(msg) => setSuccessToast(msg)}
+        />
+      )}
 
       {/* Toast Notification HUD */}
       <AnimatePresence>

@@ -33,6 +33,7 @@ import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { attachablePackages } from "../../lib/packageAttach";
 import type { Agent, Manuscript, Query, SubmissionPackage } from "../../types";
+import { formatDate } from "../../lib/dates";
 
 export interface NewAgentFields {
   name: string;
@@ -84,7 +85,7 @@ const SheetPop: React.FC<{ style: React.CSSProperties; className?: string; label
 
 const fmt1 = (iso: string) => {
   const d = new Date(`${iso.slice(0, 10)}T12:00:00`);
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return formatDate(d, { day: "numeric", month: "short" });
 };
 
 export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({

@@ -10,11 +10,13 @@
  * ⚠️ FACTS ONLY (D6): nothing here ranks, orders by outcome or names a best package. The Side by side
  * rows keep the packages' own list order.
  */
+import { dayMonth } from "./packageResults";
 import { BookVersion, ComponentType, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 import { isRequest, isResponse, medianReplyDays } from "./packageMetrics";
 import { countWords } from "./materialDraft";
 import { latestVersion } from "./bookVersions";
 import { suggestedName } from "./buildRow";
+import { formatDate } from "./dates";
 
 export type MatKind = "letter" | "synopsis" | "version";
 
@@ -34,7 +36,7 @@ export interface MaterialItem {
 export const shortDate = (iso: string | undefined | null): string => {
   if (!iso) return "";
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(d.getTime()) ? "" : formatDate(d, { day: "numeric", month: "short" });
 };
 
 const newestFirst = <T extends { createdDate: string }>(xs: T[]): T[] =>
@@ -102,12 +104,19 @@ export function sideBySide(sent: SubmissionPackage[], queries: Query[]): SideRow
 export const isSent = (p: Pick<SubmissionPackage, "firstSentAt">): boolean => !!p.firstSentAt;
 
 /** The copy the card's lock line shows — kept in step with packageMetrics.LOCKED_WHY. */
+/* the date through a fixed month table — en-GB's short month renders "Sept" in some engines */
 export const lockLine = (sentAt: string): string =>
-  `Letter, synopsis and version fixed since first sent on ${shortDate(sentAt)}, so your records stay true. Duplicate it to try a different mix.`;
+  `First sent on ${dayMonth(sentAt)}, so what went out stays as it went. Editing it starts a new edition; queries already sent keep theirs.`;
 
 /**
- * The hero art (D8) — Nick's supplied PNG, PADDED ON PURPOSE (transparent space above the figure) so
- * `object-fit: contain` draws it small enough to clear the one-line title. A sized copy of the
- * 2791×2633 source at the same aspect, never trimmed; `version` is the copy's sha256 prefix.
+ * The hero art (v2.1, E3) — Nick's boxes image: the Archivist carrying a tall stack of archive boxes.
+ * Supplied transparent and TRIMMED at 560×696; it draws about 276 tall and clears the one-line title
+ * without the v2 art's padding (S6). `version` is the file's sha256 prefix.
  */
-export const PACKAGES_HERO = { src: "/images/packages/packages-hero-archivist.png", version: "e3775bcb", width: 600, height: 566 } as const;
+export const PACKAGES_HERO = {
+  src: "/images/packages/packages-hero-boxes.png", version: "aee79d51", width: 560, height: 696,
+  alt: "The Archivist carrying a tall stack of archive boxes",
+} as const;
+
+/** The Materials tray's art (v2.1, E2): the talon and the pile. Decorative; the tray clips it. */
+export const MATERIALS_PILE = { src: "/images/packages/materials-tray-pile.png", version: "47929d27", width: 400, height: 403 } as const;

@@ -40,10 +40,10 @@
  *
  *   node tests/e2e/seed.mjs
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, collection, getDocs, getDoc, writeBatch, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, collection, getDocs, getDoc, writeBatch, deleteDoc, Timestamp } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -73,6 +73,38 @@ const db = getFirestore(app);
 const { user } = await signInWithEmailAndPassword(getAuth(app), EMAIL, PASSWORD);
 const uid = user.uid;
 console.log(`signed in as ${EMAIL} on ${PROJECT}`);
+
+/* ⚠️ `--revert-steps <backup>` PUTS BACK THE LOGS THIS SEEDER REPLACED (clean-up pass, 28 Sep): every
+   per-query log document it deleted is restored, and every step it wrote is removed. Nothing else. */
+{
+  const ri = process.argv.indexOf("--revert-steps");
+  if (ri > 0) {
+    const plan = JSON.parse(readFileSync(process.argv[ri + 1], "utf8"));
+    if (plan.uid !== uid) throw new Error(`Backup is for ${plan.uid}, signed in as ${uid}.`);
+    for (const w of plan.wrote) await deleteDoc(doc(db, w));
+    for (const r of plan.removed) {
+      const data = Object.fromEntries(Object.entries(r.data).map(([k, v]) => [k, v && typeof v === "object" && typeof v.__ts === "number" ? Timestamp.fromMillis(v.__ts) : v]));
+      await setDoc(doc(db, r.path), data);
+    }
+    console.log(`reverted: removed ${plan.wrote.length} seeded step(s), restored ${plan.removed.length} log document(s)`);
+    process.exit(0);
+  }
+}
+
+/**
+ * ⚠️ EVERY SEEDED QUERY GETS ITS STEPS WRITTEN HERE, NEVER AN EMPTY LOG (clean-up pass, 28 Sep).
+ * The app's runtime repair used to fill an empty log behind the writer's back; it is deleted, so a
+ * query seeded with a status and no log would drop to Queried the first time anything recalculated
+ * it. Each block below records the stages it dates in SEEDED_STEPS, and the steps block at the foot
+ * of the file writes one step per stage — flagged `reconstructed`, because a seeded history is a
+ * stand-in exactly as an imported one is — so a recalculation reproduces the status the document
+ * states. `tests/e2e/seedCheck.mts` is the proof: seed, then derive, and no status may differ.
+ */
+const SEEDED_STEPS = [];
+const STAGE_OF = {
+  dateSent: "Queried", partialRequestedDate: "Partial Requested", partialSentDate: "Partial Sent",
+  fullRequestedDate: "Full Requested", fullSentDate: "Full Sent", offerDate: "Offer", rejectedDate: "Rejected",
+};
 
 /**
  * A date N days before today, as the APP would name it.
@@ -201,6 +233,15 @@ const AGENT_IDS = [];
  */
 const NO_WINDOW_IDS = ["seed-agent-nowin-1", "seed-agent-nowin-2"];
 {
+  /* ⚠️ `dateAdded` IS IMMUTABLE, AND THIS BATCH RECOMPUTED IT (fixed in the clean-up pass, 28 Sep —
+     the one change here outside the steps, because without it the seeder could not run at all): a
+     value recomputed from today enters the update diff on every later run and the batch is refused.
+     The stored value wins where there is one — the same fix the agents batch above already carries. */
+  const keptNoWin = new Map();
+  for (const id of NO_WINDOW_IDS) {
+    const snap = await getDoc(doc(db, "users", uid, "agents", id));
+    if (snap.exists() && typeof snap.data().dateAdded === "string") keptNoWin.set(id, snap.data().dateAdded);
+  }
   const batch = writeBatch(db);
   [["Bea Halloran", "Halloran & Fitch"], ["Rufus Oyelaran", "Oyelaran Books"]].forEach(([name, agency], i) => {
     batch.set(doc(db, "users", uid, "agents", NO_WINDOW_IDS[i]), {
@@ -213,7 +254,7 @@ const NO_WINDOW_IDS = ["seed-agent-nowin-1", "seed-agent-nowin-2"];
       starRating: 3, noResponseMeansNo: false,
       setAside: false, importedNeedsReview: false,
       materialsWanted: ["Query letter"],
-      dateAdded: iso(60), lastCheckedDate: iso(10),
+      dateAdded: keptNoWin.get(NO_WINDOW_IDS[i]) ?? iso(60), lastCheckedDate: iso(10),
     });
   });
   await batch.commit();
@@ -312,6 +353,7 @@ const QUERIES = [
     const anchor = anchorDaysAgo(q.at, WEEKS);
     const dates = {};
     chain.forEach((key, j) => { dates[key] = iso(anchor + (chain.length - 1 - j) * 14); });
+    SEEDED_STEPS.push({ qid: id, steps: chain.map((key) => ({ status: STAGE_OF[key] ?? q.status, day: dates[key] })) });
     batch.set(doc(db, "users", uid, "queries", id), {
       id, userId: uid,
       agentId,
@@ -425,6 +467,10 @@ const QUERIES = [
          diff on every later run and the whole batch is refused, atomically and silently. */
       dateAdded: kept.get(c.id) ?? iso(200), lastCheckedDate: iso(5),
     });
+    /* only the send is dated here; a later status is placed a minute after it, so the order of the
+       two steps is never left to a tie */
+    SEEDED_STEPS.push({ qid: `${c.id}-q`, steps: [{ status: "Queried", day: iso(c.sentDaysAgo) },
+      ...(c.status !== "Queried" ? [{ status: c.status, day: iso(c.sentDaysAgo), plusMinutes: 1 }] : [])] });
     batch.set(doc(db, "users", uid, "queries", `${c.id}-q`), {
       id: `${c.id}-q`, userId: uid,
       agentId: c.id, manuscriptId: MS_ID,
@@ -476,6 +522,40 @@ const QUERIES = [
     updatedAt: new Date().toISOString(),
   });
   console.log("wrote 2 dated tasks (one due ahead, one carried)");
+}
+
+/* ── the steps (see SEEDED_STEPS above): each seeded query's log is replaced by its dated stages ── */
+{
+  const KEY = { "Queried": "query_sent", "Partial Requested": "partial_requested", "Full Requested": "full_requested",
+    "Revise & Resubmit": "rr_requested", "Partial Sent": "partial_sent", "Full Sent": "full_sent", "Offer": "offer",
+    "Rejected": "pass", "Withdrawn": "withdrawn", "No Response": "closed_no_reply" };
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const removed = [], wrote = [];
+  for (const { qid } of SEEDED_STEPS) {
+    for (const d of (await getDocs(collection(db, "users", uid, "queries", qid, "activity"))).docs) {
+      const data = Object.fromEntries(Object.entries(d.data()).map(([k, v]) => [k, v instanceof Timestamp ? { __ts: v.toMillis() } : v]));
+      removed.push({ path: d.ref.path, data });
+    }
+  }
+  /* the backup is written BEFORE anything is deleted, so a run that dies midway can still be reverted */
+  mkdirSync("reports/seed", { recursive: true });
+  const file = `reports/seed/steps-backup-${uid}-${Date.now()}.json`;
+  const planned = SEEDED_STEPS.flatMap(({ qid, steps }) => steps.map((s) => `users/${uid}/queries/${qid}/activity/act-status-${slug(s.status)}-${qid}`));
+  writeFileSync(file, JSON.stringify({ uid, at: new Date().toISOString(), removed, wrote: planned }, null, 1));
+  for (const r of removed) await deleteDoc(doc(db, r.path));
+  for (const { qid, steps } of SEEDED_STEPS) {
+    for (const s of steps) {
+      const [y, m, d] = s.day.slice(0, 10).split("-").map(Number);
+      const at = new Date(y, m - 1, d, 12, s.plusMinutes ?? 0).getTime();
+      const id = `act-status-${slug(s.status)}-${qid}`;
+      await setDoc(doc(db, "users", uid, "queries", qid, "activity", id), {
+        type: s.status, resultingStatus: s.status, createdAt: Timestamp.fromMillis(at),
+        note: s.status, queryId: qid, reconstructed: true, ...(KEY[s.status] ? { eventKey: KEY[s.status] } : {}),
+      });
+      wrote.push(id);
+    }
+  }
+  console.log(`steps: replaced ${removed.length} log document(s) on ${SEEDED_STEPS.length} seeded queries with ${wrote.length} dated step(s) · backup ${file}`);
 }
 
 for (const c of ["manuscripts", "agents", "queries"]) {

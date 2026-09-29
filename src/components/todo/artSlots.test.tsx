@@ -31,7 +31,7 @@ const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
    committed at public/todo-seize-the-day.png. The census stays exhaustive so a slot cannot be
    added without a brief, which is the whole point of this list. */
 const NAMES: ArtSlotName[] = [
-  "desk-clear", "noteboard-empty", "done-empty", "dock-seal", "review-masthead", "first-run-board",
+  "desk-clear", "noteboard-empty", "done-empty", "dock-seal", "first-run-board",
   "seize-the-day",
   // Query Centre's agent context panel with nothing on file — the first slot outside /todo.
   "agent-unknown",
@@ -43,7 +43,7 @@ const NAMES: ArtSlotName[] = [
   "package-mark",
 ];
 
-describe("⚠️ ONE component, ELEVEN slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {
@@ -63,7 +63,6 @@ describe("⚠️ ONE component, ELEVEN slots — the briefs are the contract", (
     expect([ART_SLOTS["noteboard-empty"].w, ART_SLOTS["noteboard-empty"].h]).toEqual([380, 200]);
     expect([ART_SLOTS["done-empty"].w, ART_SLOTS["done-empty"].h]).toEqual([240, 150]);
     expect([ART_SLOTS["dock-seal"].w, ART_SLOTS["dock-seal"].h]).toEqual([120, 120]);
-    expect([ART_SLOTS["review-masthead"].w, ART_SLOTS["review-masthead"].h]).toEqual([640, 90]);
     expect([ART_SLOTS["first-run-board"].w, ART_SLOTS["first-run-board"].h]).toEqual([460, 260]);
   });
 
@@ -206,19 +205,11 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     expect(ART_SLOTS["first-run-board"].caption).not.toBe(ART_SLOTS["desk-clear"].caption);
   });
 
-  /**
-   * ⚠️ THE BRIEFING CARD IS UNMOUNTED FROM THE TO-DO PAGE, so its art slot goes with it — and the
-   * rule this case protects is unchanged rather than relaxed. `review-masthead` is the ONE place a
-   * header illustration earns its keep BECAUSE the card is temporary and celebratory; a slot that
-   * outlived its card would be a permanent page illustration, which is exactly what the trigger
-   * list forbids. So the assertion inverts: no card, no slot.
-   *
-   * The slot's own definition is untouched and the card returns with it.
-   */
-  it("review-masthead does not render while the briefing card is unmounted", () => {
-    expect(listPage).not.toContain('<ArtSlot name="review-masthead"');
-    /* and the reason is stated at the unmount site, so restoring one restores both */
-    expect(listPage).toContain("THE WEEKLY REVIEW BANNER IS UNMOUNTED");
+  /* the weekly review — and with it the briefing card and its `review-masthead` slot — is deleted
+     (27 Sep); the slot is gone from the brief table, so it cannot be mounted again by accident. */
+  it("review-masthead is gone from the slot table and the page", () => {
+    expect(Object.keys(ART_SLOTS)).not.toContain("review-masthead");
+    expect(listPage).not.toContain("review-masthead");
   });
 });
 

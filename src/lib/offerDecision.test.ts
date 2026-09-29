@@ -62,14 +62,13 @@ describe("hasOfferDecision — the offer task's death condition (the approved en
 });
 
 describe("the journey's write surface — source locks", () => {
-  const flow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/todo/FocusFlow.tsx"), "utf8");
-  it("the offer re-log path is GONE (RecordResponseFocusForm no longer mounted by the flow)", () => {
+  /* the To-do takeover's offer journey went to the query drawer (27 Sep); the takeover survives as
+     `HousekeepingSweep` and must never grow an offer path back */
+  const flow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/todo/HousekeepingSweep.tsx"), "utf8");
+  it("the sweep records no offer decision and re-logs no offer", () => {
     expect(flow).not.toContain("RecordResponseFocusForm");
-  });
-  it("need-time writes only the existing snooze flag; the notify step's outputs are user tasks only (popup-notify-scrim P2)", () => {
-    expect(flow).toContain('flagKeyForTask("offer_received"');
-    expect(flow).toContain("reminderFields(selRows, q.id, replyBy)");
-    expect(flow).toContain("await addUserTask(f)");
-    expect(flow).not.toContain("offer-notify-"); // the staged-nudge notify path is retired
+    expect(flow).not.toContain("recordOfferDecision");
+    expect(flow).not.toContain("offerSheet");
+    expect(flow).not.toContain("offer-notify-");
   });
 });

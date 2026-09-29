@@ -1,0 +1,548 @@
+{
+  "uid": "LS4ymFFCEvhN82advZQJ5zkr7sv2",
+  "at": "2026-09-28T12:38:29.516Z",
+  "counts": {
+    "scanned": 83,
+    "alreadySet": 0,
+    "package": 19,
+    "unrecorded": 64
+  },
+  "changes": [
+    {
+      "id": "cor-closed",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "cor-move-a",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "cor-move-b",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "cor-move-c",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "cor-pair",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "cor-undo",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "msv12-q-1",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-2",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-3",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-4",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-5",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-6",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-7",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "msv12-q-8",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "probe-dangling-pkg",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "probe-goalstress-today",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "probe-un-both",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "probe-un-noagent",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "probe-un-noms",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-1nzp7z3h7",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-3b8hlr7rl",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-4u80p5qkj",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-7bqjoai77",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-9t5ko5nxs",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-c7o0wqrf1",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-iacnspgnz",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-isbu9huiz",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-wt6ykzcn0",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "q-imported-zaxipj83o",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "rej-query-1",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "rj-dupe",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "rj-nudge",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "rj-send",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-cal-bang-q",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-cal-near-q",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-cal-passed20-q",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-cal-passed865-q",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-cal-soon-q",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-pkgq-1",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-10",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-2",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-3",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-4",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-5",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-6",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-7",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-8",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-pkgq-9",
+      "added": [
+        "sentHow",
+        "sentPackageEdition",
+        "sentPackageId"
+      ]
+    },
+    {
+      "id": "seed-query-1",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-10",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-11",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-12",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-13",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-14",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-15",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-16",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-17",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-18",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-19",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-2",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-20",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-21",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-22",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-23",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-3",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-4",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-5",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-6",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-7",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-8",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-9",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-ms2-a",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "seed-query-ms2-b",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-chase",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-close",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-1",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-2",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-3",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-4",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-5",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-cohort-6",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-gap-solo",
+      "added": [
+        "sentHow"
+      ]
+    },
+    {
+      "id": "thin-q-remind",
+      "added": [
+        "sentHow"
+      ]
+    }
+  ]
+}

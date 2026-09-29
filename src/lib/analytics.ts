@@ -18,6 +18,7 @@
  * transition as, and it is deliberately written so that it says the same thing whatever the numbers
  * are. A verdict word (`good`, `slow`, `only`, `still`) belongs nowhere in this file.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Query, Activity, Agent, QueryStatus } from "../types";
 import { AGENT_RESPONSE_STATUSES, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
@@ -531,7 +532,7 @@ export const monthKey = (ms: number): number => {
 };
 
 export const monthLabel = (key: number): string =>
-  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
+  MONTHS_SHORT[
     ((key % 12) + 12) % 12
   ];
 

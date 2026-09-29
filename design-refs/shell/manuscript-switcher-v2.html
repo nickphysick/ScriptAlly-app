@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuscript switcher v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--page:#f5f1eb;--ink:#1c130f;--muted:rgba(28,19,15,.58);--hair:rgba(28,19,15,.12);--rule:rgba(28,19,15,.10);--btn:#2a3a52;
+--type:'Special Elite','Courier New',monospace;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,.8,.3,1)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--serif);min-height:100vh}
+button{font:inherit;color:inherit;border:0;background:transparent;padding:0;cursor:pointer}
+.stage{max-width:1192px;margin:0 auto}
+.bar{height:64px;display:flex;align-items:center;gap:14px;padding:0 24px;box-shadow:inset 0 -1px 0 var(--rule)}
+.grow{flex:1}
+.tb{width:34px;height:34px;border-radius:50%;display:grid;place-items:center}.tb:hover{background:rgba(28,19,15,.05)}
+.tb svg{width:17px;height:17px;fill:none;stroke:var(--ink);stroke-width:1.6}
+.crumb{display:flex;flex-direction:column;gap:3px;padding-left:14px;border-left:1px solid rgba(28,19,15,.14)}
+.crumb small{font:8.5px var(--mono);letter-spacing:.18em;color:var(--muted)}.crumb span{font:22px/1 var(--type)}
+.fb{height:36px;display:flex;align-items:center;gap:8px;padding:0 8px;font:13.5px var(--type)}
+
+/* ── the switcher ── */
+.ms{position:relative}
+.ms-btn{display:flex;align-items:center;gap:10px;height:44px;max-width:280px;padding:0 10px 0 6px;border-radius:12px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--hair),0 1px 2px rgba(28,19,15,.04);text-align:left;transition:box-shadow .15s ease,background-color .15s ease}
+.ms-btn:hover{box-shadow:inset 0 0 0 1px rgba(28,19,15,.22),0 2px 6px rgba(28,19,15,.06)}
+.ms-btn:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
+.ms.open .ms-btn{box-shadow:inset 0 0 0 1.5px var(--ink),0 2px 6px rgba(28,19,15,.06)}
+.cov{position:relative;width:24px;height:32px;flex:none;border-radius:2px 4px 4px 2px;box-shadow:inset 2px 0 0 rgba(0,0,0,.18),0 1px 2px rgba(28,19,15,.18);overflow:hidden}
+.cov::after{content:"";position:absolute;left:5px;right:4px;top:8px;height:1.5px;background:rgba(255,255,255,.7);box-shadow:0 4px 0 rgba(255,255,255,.45)}
+.c1{background:#8a4a3c}.c2{background:#2a3a52}.c3{background:#8a9e88}.c4{background:#b8b1a4}
+.tx{min-width:0;display:flex;flex-direction:column;gap:3px}
+.tx b{font:400 14px/1.1 var(--type);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx small{font:8px/1 var(--mono);letter-spacing:.13em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx small em{font-style:normal;color:var(--ink)}
+.chev{flex:none;width:18px;height:18px;display:grid;place-items:center;transition:transform .2s var(--ease)}
+.ms.open .chev{transform:rotate(180deg)}
+.chev svg{width:12px;height:12px;fill:none;stroke:var(--ink);stroke-width:2}
+
+.menu{position:absolute;right:0;top:calc(100% + 8px);width:340px;background:#fff;border-radius:14px;padding:8px;
+  box-shadow:0 0 0 1px var(--hair),0 16px 40px rgba(28,19,15,.16);opacity:0;transform:translateY(-4px) scale(.99);transform-origin:top right;
+  pointer-events:none;transition:opacity .16s ease,transform .18s var(--ease);z-index:10}
+.ms.open .menu{opacity:1;transform:none;pointer-events:auto}
+.mh{margin:6px 10px 6px;font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--muted)}
+.it{width:100%;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;text-align:left}
+.it .cov{width:28px;height:38px}
+.it:hover,.it:focus-visible{background:#f5f1eb;outline:none}
+.it:focus-visible{box-shadow:inset 0 0 0 1.5px var(--btn)}
+.it .tx{flex:1;gap:4px}
+.it .tx b{font-size:15px}
+.it .tx .meta{font:13px var(--serif);letter-spacing:0;color:rgba(28,19,15,.66)}
+.it .tx .fact{font:8px var(--mono);letter-spacing:.13em;color:var(--muted)}
+.it[aria-checked="true"] .tx b::after{content:"";}
+.ck{flex:none;width:22px;height:22px;border-radius:50%;background:var(--btn);display:grid;place-items:center;opacity:0}
+.ck svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2.4}
+.it[aria-checked="true"] .ck{opacity:1}
+.it.shelved .cov,.it.shelved .tx{opacity:.6}
+.sep{height:1px;background:var(--hair);margin:6px 10px}
+.foot{display:flex;flex-direction:column;gap:2px}
+.act{width:100%;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:14.5px;text-align:left}
+.act:hover,.act:focus-visible{background:#f5f1eb;outline:none}.act:focus-visible{box-shadow:inset 0 0 0 1.5px var(--btn)}
+.act svg{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.7;flex:none}
+.act kbd{margin-left:auto;font:9px var(--mono);color:var(--muted);letter-spacing:.06em}
+.hint{margin:6px 10px 2px;font:8px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,12px);background:var(--ink);color:#fdf9f5;border-radius:10px;padding:10px 16px;font-size:14px;opacity:0;transition:opacity .2s ease,transform .2s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.note{max-width:1192px;margin:28px auto 0;padding:0 24px;font-size:15px;color:rgba(28,19,15,.66)}
+.page{max-width:1192px;margin:0 auto;padding:40px 46px;transition:opacity .18s ease}
+.page h1{margin:0;font:400 56px/1 var(--type)}.page p{margin:14px 0 0;font-size:18px;color:rgba(28,19,15,.72)}
+.page.dim{opacity:.35}
+@media (prefers-reduced-motion:reduce){.menu,.chev,.toast,.page{transition:none}}
+</style>
+</head>
+<body>
+<div class="stage">
+<header class="bar">
+<button class="tb" aria-label="Collapse sidebar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+<div class="crumb"><small>QUERIES</small><span>Query Centre</span></div>
+<div class="grow"></div>
+
+<div class="ms" id="ms">
+<button class="ms-btn" id="msBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="msMenu" title="Switch manuscript (M)">
+<span class="cov c1" id="btnCov" aria-hidden="true"></span>
+<span class="tx"><b id="btnTitle">Murphy's Day Out</b><small id="btnFact">QUERYING · <em>4 WITH YOU</em></small></span>
+<span class="chev" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg></span>
+</button>
+<div class="menu" id="msMenu" role="menu" aria-label="Your manuscripts">
+<p class="mh">YOUR MANUSCRIPTS</p>
+<button class="it" role="menuitemradio" aria-checked="true" data-id="a" data-cov="c1" data-title="Murphy's Day Out" data-fact="QUERYING · <em>4 WITH YOU</em>">
+<span class="cov c1" aria-hidden="true"></span>
+<span class="tx"><b>Murphy's Day Out</b><span class="meta">Thriller · 50,000 words</span><span class="fact">QUERYING SINCE 5 DEC · 26 QUERIES</span></span>
+<span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span>
+</button>
+<button class="it" role="menuitemradio" aria-checked="false" data-id="b" data-cov="c2" data-title="Salt and Tide" data-fact="REVISING · NO QUERIES YET">
+<span class="cov c2" aria-hidden="true"></span>
+<span class="tx"><b>Salt and Tide</b><span class="meta">Literary · 82,000 words</span><span class="fact">REVISING · NO QUERIES YET</span></span>
+<span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span>
+</button>
+<p class="mh" style="margin-top:10px">SHELVED</p>
+<button class="it shelved" role="menuitemradio" aria-checked="false" data-id="c" data-cov="c4" data-title="The Winter Clock" data-fact="SHELVED · 12 QUERIES CLOSED">
+<span class="cov c4" aria-hidden="true"></span>
+<span class="tx"><b>The Winter Clock</b><span class="meta">Fantasy · 96,000 words</span><span class="fact">SHELVED MAR 2025 · 12 QUERIES</span></span>
+<span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span>
+</button>
+<div class="sep"></div>
+<div class="foot">
+<button class="act" role="menuitem"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg>Open this manuscript</button>
+<button class="act" role="menuitem"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a manuscript</button>
+</div>
+<p class="hint">↑ ↓ TO MOVE · ↵ TO SWITCH · M TO OPEN THIS MENU</p>
+</div>
+</div>
+
+<button class="tb" aria-label="Search (⌘K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+<button class="fb"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.6"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Give feedback</button>
+<button class="tb" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.8 9.6a2.3 2.3 0 1 1 3.1 2.2c-.6.3-.9.8-.9 1.4v.6"/></svg></button>
+</header>
+<main class="page" id="page"><h1>Query Centre</h1><p id="pageLine">All your queries for Murphy's Day Out, and where they stand.</p></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  var ms=document.getElementById('ms'), btn=document.getElementById('msBtn'), menu=document.getElementById('msMenu');
+  var items=[].slice.call(menu.querySelectorAll('[role^="menuitem"]'));
+  function open(focusActive){ ms.classList.add('open'); btn.setAttribute('aria-expanded','true');
+    var t = focusActive ? (menu.querySelector('[aria-checked="true"]')||items[0]) : items[0]; setTimeout(function(){ t.focus(); }, 20); }
+  function close(ret){ ms.classList.remove('open'); btn.setAttribute('aria-expanded','false'); if(ret) btn.focus(); }
+  btn.addEventListener('click', function(){ ms.classList.contains('open') ? close(true) : open(true); });
+  btn.addEventListener('keydown', function(e){ if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){ e.preventDefault(); open(true);} });
+  menu.addEventListener('keydown', function(e){
+    var i=items.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){ e.preventDefault(); items[(i+1)%items.length].focus(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); items[(i-1+items.length)%items.length].focus(); }
+    else if(e.key==='Home'){ e.preventDefault(); items[0].focus(); }
+    else if(e.key==='End'){ e.preventDefault(); items[items.length-1].focus(); }
+    else if(e.key==='Escape'){ e.preventDefault(); close(true); }
+    else if(e.key==='Tab'){ close(false); }
+  });
+  document.addEventListener('pointerdown', function(e){ if(!ms.contains(e.target)) close(false); }, true);
+  document.addEventListener('keydown', function(e){
+    var t=e.target.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
+    if((e.key==='m'||e.key==='M') && !e.metaKey && !e.ctrlKey && !e.altKey && !ms.classList.contains('open')){ e.preventDefault(); open(true); }
+  });
+  var toast=document.getElementById('toast'), tt;
+  menu.querySelectorAll('[role="menuitemradio"]').forEach(function(it){
+    it.addEventListener('click', function(){
+      if(it.getAttribute('aria-checked')==='true'){ close(true); return; }
+      menu.querySelectorAll('[role="menuitemradio"]').forEach(function(o){ o.setAttribute('aria-checked','false'); });
+      it.setAttribute('aria-checked','true');
+      document.getElementById('btnTitle').textContent=it.dataset.title;
+      document.getElementById('btnFact').innerHTML=it.dataset.fact;
+      document.getElementById('btnCov').className='cov '+it.dataset.cov;
+      btn.title='Switch manuscript (M)';
+      var pg=document.getElementById('page'); pg.classList.add('dim');
+      setTimeout(function(){ document.getElementById('pageLine').textContent='All your queries for '+it.dataset.title+', and where they stand.'; pg.classList.remove('dim'); }, 180);
+      close(true);
+      toast.textContent='Now showing '+it.dataset.title; toast.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+    });
+  });
+})();
+</script>
+</body>
+</html>

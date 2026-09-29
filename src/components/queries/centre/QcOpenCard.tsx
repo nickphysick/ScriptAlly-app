@@ -28,6 +28,8 @@ import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
 import { cardDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
+import { SentChip } from "../../queryActions/SentHow";
+import type { SubmissionPackage } from "../../../types";
 import "./qcvPage.css";
 import "./qcvOpen.css";
 
@@ -36,6 +38,8 @@ export type OpenAction = "nudge" | "snooze" | "closed";
 export const QcOpenCard: React.FC<{
   row: QcRow;
   nowMs: number;
+  /** The live packages — for a retired tag and a migrated query's name only; what went is the query's. */
+  packages?: readonly SubmissionPackage[];
   /** Clear the selection — the view goes back to full width. */
   onClose?: () => void;
   manuscriptTitle: string | null;
@@ -56,7 +60,7 @@ export const QcOpenCard: React.FC<{
   onDoor?: (mode: DrawerMode, anchor: HTMLElement) => void;
   /** Query actions v1 (D7) — the quiet "Delete query" at the footer's right, behind an inline confirm. */
   onDeleteQuery?: () => void;
-}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery }) => {
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
@@ -97,6 +101,8 @@ export const QcOpenCard: React.FC<{
           <div className="qcv-open-whotx">
             <h2 className="qcv-open-nm">{row.agentName}</h2>
             <span className="qcv-open-ag">{row.agency}</span>
+            {/* §A3 — how the materials went, visible before anything is opened */}
+            <SentChip q={row.query} packages={packages} />
           </div>
           <span className="qcv-open-pill"><StatusDot status={row.status} overrideSize={14} decorative />{STAGE_NAME[row.status]}</span>
         </div>

@@ -15,6 +15,7 @@
  * a row selects, and that is all it does. `display: contents` is never used on a row — it fractures
  * the hover and selection backgrounds.
  */
+import { MONTHS_SHORT } from "../../../lib/dates";
 import React, { useEffect, useRef } from "react";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -24,7 +25,7 @@ import { STAGE_NAME, factLine, type QcRow } from "../../../lib/qcSummary";
 import "./qcvPage.css";
 import "./qcvList.css";
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON = MONTHS_SHORT;
 
 /** The four icons. Sent = ink at 80%; not sent = ink at 16%, so the columns line up. */
 export const SentSoFar: React.FC<{ row: QcRow }> = ({ row }) => (

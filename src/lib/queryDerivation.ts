@@ -31,6 +31,23 @@ export interface DerivableActivity {
   date: unknown;
   /** Import flag: the date is only an ordering key, not a real date (smart/email-import rungs). */
   dateProvisional?: boolean;
+  /**
+   * A RECONSTRUCTION, NOT AN EVENT (clean-up pass, 28 Sep): a starting step written by a migration
+   * for a query whose log was empty, stamped with the status the query already carried. It stands
+   * in for history nobody recorded, so it may decide the status only while nothing real can.
+   */
+  reconstructed?: boolean;
+}
+
+/**
+ * ⚠️ A RECONSTRUCTED STEP NEVER OUTRANKS A REAL EVENT (Nick, 28 Sep). It sorts by its date like any
+ * row, but when the status — or the moment it last changed — is worked out, it counts only while
+ * the log holds no real status-bearing step. Only the explicit flag counts: an `act-status-…` id
+ * alone does not, because a row the migration held back for a ruling must go on behaving as before.
+ */
+function statusDeciders(activities: DerivableActivity[]): DerivableActivity[] {
+  const real = activities.filter((a) => !a.reconstructed && normalizeResultingStatus(a.resultingStatus) !== null);
+  return real.length ? activities.filter((a) => !a.reconstructed) : activities;
 }
 
 /**
@@ -144,7 +161,7 @@ export function orderedStatusBearing(activities: DerivableActivity[]): {
 
 /** The status the log produces: the most recent status-bearing activity's resultingStatus, else QUERIED. */
 export function deriveStatus(activities: DerivableActivity[]): QueryStatus {
-  const ordered = orderedStatusBearing(activities);
+  const ordered = orderedStatusBearing(statusDeciders(activities));
   return ordered.length > 0 ? ordered[ordered.length - 1].status : QueryStatus.QUERIED;
 }
 
@@ -197,7 +214,7 @@ export function deriveRejectedDate(activities: DerivableActivity[]): string | nu
  * derived set, so no close path can disagree about it).
  */
 export function deriveLastStatusChange(activities: DerivableActivity[]): string | null {
-  const ordered = orderedStatusBearing(activities);
+  const ordered = orderedStatusBearing(statusDeciders(activities));
   const last = ordered[ordered.length - 1];
   if (!last) return null;
   return last.provisional ? null : new Date(last.time).toISOString();

@@ -13,6 +13,7 @@
  * A new save REPLACES the bar and the earlier save stays committed — there is one undo, and it is
  * always the latest.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { hideUndoBar, subscribeUndoBar, type UndoToast } from "../../lib/queryActions/drawerStore";
@@ -64,7 +65,8 @@ export function UndoBar() {
   useEffect(() => {
     if (!t?.undo || t.done) return;
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+      /* the key is the registry's (lib/shortcuts.ts) */
+      if (!matchesShortcut(SHORTCUTS.undo, e)) return;
       const a = document.activeElement as HTMLElement | null;
       if (a && (/INPUT|TEXTAREA|SELECT/.test(a.tagName) || a.isContentEditable)) return;
       e.preventDefault();

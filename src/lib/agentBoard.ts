@@ -22,6 +22,7 @@
  * push the live journey off the right-hand edge. It is the same aggregation the manuscript
  * journey draws for the same reason.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../types";
 import { STATUS_ORDER } from "./statusOrder";
 import { isTerminalStatus, queriesForAgent, isDoorOpen, methodShort } from "./agentList";
@@ -118,7 +119,7 @@ export function replyBucket(weeks: number | undefined): string {
 export const historyBucket = (s: AgentStanding): string =>
   s.kind === "none" ? "Never queried" : s.kind === "closed" ? "Closed" : "Active queries";
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 export function monthAdded(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "Not recorded" : `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;

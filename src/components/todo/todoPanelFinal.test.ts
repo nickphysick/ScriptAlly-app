@@ -59,9 +59,10 @@ describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", ()
 
 /* ⚠️ AMENDED (corrections fix 3) — the header changed on purpose, so its lock changes with it. */
 describe("the To-do PAGE HEADER — it names the page, and carries ONE action", () => {
-  /* tasks-pages P1: the header block is TasksPageLayout's; the page's tools live in renderTools.
-     The slice spans the layout mount through the tools so title + controls stay covered. */
-  const hero = sliceBetween(page, "<TasksPageLayout", "function renderHero");
+  /* ⚠️ RETARGETED (to-do list v2, 28 Sep): the header is the SHARED full header, opening the page's
+     own group — the slice runs from the group's mount to the main column, which is exactly the
+     header. The law is unchanged: it names the page and carries no tool row. */
+  const hero = sliceBetween(page, 'data-todo-v2="page"', 'data-todo-v2="main"');
 
   it("titles itself 'To-do list' — the same words as the breadcrumb", () => {
     /* "What's on your desk?" named nothing and disagreed with the crumb, which reads "To-do

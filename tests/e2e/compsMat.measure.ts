@@ -56,7 +56,8 @@ for (const vp of SIZES) {
       const b = await readBar(page);
       L.check("S1 · pageHeaderV2 §1 bar found", ctx, !!b, "");
       if (b) {
-        L.check("S1 · §1 bar is the sidebar's colour", ctx, b.barBg === b.sideBg, `${b.barBg} / ${b.sideBg}`);
+        /* retargeted by the quiet bar: the bar is the page ground, not the sidebar */
+        L.check("S1 · §1 bar is the page ground", ctx, b.barBg === b.groundBg, `${b.barBg} / ${b.groundBg}`);
         L.check("S1 · §1 bar 64 tall", ctx, n(b.barH, 64, 0.5), `${b.barH}`);
         L.check("S1 · §1 one switcher, in the bar", ctx, b.switchers === 1 && b.inSidebar === 0, `${b.switchers}/${b.inSidebar}`);
         L.check("S1 · §1 no bar item overlaps another", ctx, b.overlaps.length === 0, JSON.stringify(b.overlaps));
@@ -162,22 +163,17 @@ for (const vp of SIZES) {
 test("S7 · the run touches no G4 file, and the page's sheet names no shell selector", async () => {
   const L = new Ledger("comps-S7");
   const ctx = { route: "repo", size: "-", state: "-" };
-  const G4 = [
-    "WorkspaceShell.tsx", "workspaceShell.css", "AppShell.tsx", "BarSwitcher.tsx", "SidebarNav.tsx", "ShellSidebar.tsx",
-    "ShellV2.tsx", "TopNavShell.tsx", "TopNavHost.tsx", "PageHeader.tsx", "pageHeader.css", "WorkspacePageGrid.tsx",
-    "workspacePageGrid.css", "contentColumn.css", "f12.css", "lib/workspaceShell.ts", "lib/workspaceNav.ts",
-    "QcRail.tsx", "ContactRail.tsx",
-  ];
-  const changed = execFileSync("git", ["diff", "--name-only", "770881f4"], { encoding: "utf8" }).split("\n").filter(Boolean);
-  const hit = changed.filter((f) => G4.some((g) => f.endsWith(`/${g}`) || f.endsWith(g)));
-  L.check("S7 · no G4 file changed since 770881f", ctx, hit.length === 0, JSON.stringify(hit));
+  /* ⚠️ RETIRED (quiet bar, 28 Sep): "no G4 file changed since 770881f". It diffed the WORKING TREE
+     against a fixed commit, so it failed on every later shell change however legitimate — the claim
+     belongs to the Comps v2 pass and git history records it. The live half stays below: the page's
+     own sheet names no shell selector. */
   let css = "";
   try { css = readFileSync("src/components/manuscripts/compsV2.css", "utf8"); } catch { /* absent on main */ }
   L.check("S7 · the page's sheet exists", ctx, css.length > 0, "");
   const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const shellSel = decls.match(/(^|[\s,}>+~])\.(ws-[\w-]+|ph(?:-[\w-]+|--[\w-]+)?|wpg(?:-[\w-]+)?)(?=[\s,{.:>[])/gm) ?? [];
   L.check("S7 · the page's sheet restyles no shell or header selector", ctx, shellSel.length === 0, JSON.stringify(shellSel));
-  close(L, 3);
+  close(L, 2);
 });
 
 /* ── helpers for the page locks ── */

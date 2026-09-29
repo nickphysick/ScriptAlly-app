@@ -18,6 +18,7 @@
  * not say `still`, `already`, `only` or `overdue`. `queryCardFacts.test.ts` asserts the absence of
  * that vocabulary, because the temptation arrives one adverb at a time.
  */
+import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
 import type { Query } from "../types";
 import { resolveExpectedDate, type ExpectedSource } from "./expectedDate";
@@ -28,7 +29,7 @@ import { formatQueryMaterial } from "./materials";
 const DAY = 86_400_000;
 /** ⚠️ EXPORTED (v14 §2) so the list's Sent leaf builds its month strip from the SAME table the
  *  card's leaf does — a second array of month names is a second thing to keep in step. */
-export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+export const MON = MONTHS_SHORT;
 
 /**
  * ⚠️ HOW LONG A REQUEST MAY SIT BEFORE THE CARD MARKS IT — Nick's call, and a NAMED constant so it
@@ -177,7 +178,7 @@ export interface CardFactsInput {
    *
    * `src/lib/offerDecision.ts` has recorded offer decisions since July: `OFFER_ACCEPTED` /
    * `OFFER_DECLINED` activities, built by `buildOfferDecisionWrites`, collected by the To-do
-   * board's `FocusFlow` and written through `db.tsx`. The brief proposed an optional `decision`
+   * board's old takeover (`FocusFlow`, retired for the query drawer) and written through `db.tsx`. The brief proposed an optional `decision`
    * field on the Offer activity "written by the existing Record decision surface IF ONE EXISTS" —
    * one does, and it expresses the decision as the activity's TYPE. Adding the field would be a
    * SECOND way to record one fact, which is the shape this repo has an audit about.

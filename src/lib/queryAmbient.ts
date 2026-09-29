@@ -21,6 +21,7 @@ import { getPrimaryAction } from "./queryPrimaryAction";
    stored flag cannot disagree about what counts as a reply. */
 import { AGENT_RESPONSE_STATUSES, normalizeResultingStatus } from "./queryDerivation";
 import { isRequestStatus } from "./timelineChapters";
+import { formatDate } from "./dates";
 
 /**
  * Filter-bar STATUS bucket — the derived state the CTA engine (getPrimaryAction, Queries.tsx)
@@ -97,7 +98,7 @@ const fmtShort = (ms: number | null): string => {
   if (ms == null || Number.isNaN(ms)) return "";
   const d = new Date(ms);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return formatDate(d, { day: "numeric", month: "short" });
 };
 
 export interface AmbientStatus {
@@ -669,7 +670,7 @@ const splitPhrase = (p: string): { value: string; unit?: string } => {
   return i < 0 ? { value: p } : { value: p.slice(0, i), unit: p.slice(i + 1) };
 };
 const STAT_DAY = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric" });
-const STAT_MON = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { month: "short" });
+const STAT_MON = (ms: number) => formatDate(new Date(ms), { month: "short" });
 
 export function trackingStatCells(a: AmbientStatus): TrackingStatCell[] {
   /* ⚠️ SCOPED TO THE STATE THE FIGURES DESCRIBE. Both are about waiting on an agent, and every

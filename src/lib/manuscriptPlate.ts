@@ -18,6 +18,7 @@
 import { Query } from "../types";
 import { isResponse } from "./packageMetrics";
 import { lastActivityMs } from "./manuscriptPage";
+import { formatDate } from "./dates";
 
 export interface PlateStats {
   /** Queries sent for this manuscript. Zero is a true count and is stated as `0`. */
@@ -33,7 +34,7 @@ export interface PlateStats {
  * and the full date lives on the query itself.
  */
 export function formatPlateDate(ms: number): string {
-  return new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return formatDate(new Date(ms), { day: "numeric", month: "short" });
 }
 
 /**

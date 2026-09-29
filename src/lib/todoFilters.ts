@@ -165,7 +165,7 @@ export function filterCounts(input: {
   ntCards: BoardCard[];
   committedCount: number;
 }): FilterCounts {
-  const doReal = input.doCards.filter((c) => c.taskType !== "weekly_review");
+  const doReal = input.doCards;
   const all = [...doReal, ...input.staleCards, ...input.ntCards];
   return {
     offers: doReal.filter((c) => c.taskType === "offer_received").length,

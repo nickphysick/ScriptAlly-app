@@ -78,7 +78,7 @@ test("Pack C Phase 3 — the pane over the calendar, at three widths", async ({ 
     console.log(`\n[${width}] nudge → ${JSON.stringify(st)}`);
     expect(st.win, `[${width}] the pane did not open`).toBe(1);
     expect(st.tpn, `[${width}] the window holds no TaskPane`).toBe(1);
-    expect(st.ffSheet, `[${width}] a FocusFlow sheet opened — the nudge sheet is back`).toBe(0);
+    expect(st.ffSheet, `[${width}] a takeover sheet opened — the nudge sheet is back`).toBe(0);
     expect(st.receiptTiles, `[${width}] a card receipt was drawn on the calendar`).toBe(0);
     expect(st.width, `[${width}] the window is not the pane's measure`).toBeLessThanOrEqual(440);
     expect(st.width, `[${width}] the window collapsed`).toBeGreaterThan(300);

@@ -23,7 +23,7 @@ export function shortDate(iso: string, now: number = Date.now()): string {
   const d = new Date(iso + (iso.length === 10 ? "T00:00:00" : ""));
   if (Number.isNaN(d.getTime())) return "";
   const day = d.getDate();
-  const month = d.toLocaleString("en-GB", { month: "short" });
+  const month = formatDate(d, { month: "short" }, "en-GB", true);
   return d.getFullYear() === new Date(now).getFullYear() ? `${day} ${month}` : `${day} ${month} ${d.getFullYear()}`;
 }
 
@@ -93,6 +93,7 @@ export function stepSummaries(
    render anyway. No new Firestore read, no new listener, no denormalised count. */
 import { queriesForAgent, isTerminalStatus } from "./agentList";
 import type { Query } from "../types";
+import { formatDate } from "./dates";
 
 export interface DuplicateNotice { count: number; latest: Query; sentOn: string }
 

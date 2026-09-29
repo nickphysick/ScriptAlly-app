@@ -5,7 +5,7 @@
  * useOverlay — the shell's ONE set of overlay obligations (§3).
  *
  * ⚠️ THIS IS AN EXTRACTION, NOT A NEW MECHANISM. Every line here already existed, twice, copied
- * verbatim between `todo/FocusFlow.tsx` and `todo/TaskSettingsSheet.tsx`: the same focus capture,
+ * verbatim between `todo/FocusFlow.tsx` (now `HousekeepingSweep.tsx`) and `todo/TaskSettingsSheet.tsx`: the same focus capture,
  * the same `lockStageScroll`, the same Tab trap walking DOM order, the same scrim-class click test.
  * A third copy was the alternative, and a third copy is how three overlays end up with three
  * slightly different ideas of what Tab does.
@@ -19,7 +19,7 @@
  *
  * ⚠️ THE TWO EXISTING CALL SITES DIFFERED IN ONE REAL WAY AND ONE ACCIDENTAL ONE, and the
  * difference between those is the whole reason this is parameterised rather than fixed:
- *   · REAL: FocusFlow's backdrop click NUDGES the sheet (it holds a staged model that a stray click
+ *   · REAL: HousekeepingSweep's backdrop click NUDGES the sheet (it holds a staged model that a stray click
  *     must not discard); TaskSettingsSheet's CLOSES (every switch has already been written, so
  *     there is nothing to lose). Both are correct for what they hold. `onScrimClick` is the seam.
  *   · ACCIDENTAL: one selector list included `select` and `textarea` and the other did not, so Tab

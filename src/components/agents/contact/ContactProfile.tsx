@@ -22,7 +22,8 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Agent, QueryStatus } from "../../../types";
+import { Agent, QueryStatus, type SubmissionPackage } from "../../../types";
+import { SentBox, SentChip } from "../../queryActions/SentHow";
 import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { STAGE_NAME } from "../../../lib/qcSummary";
@@ -35,9 +36,10 @@ import { hrefFor } from "../../../lib/quickAdd";
 import { parseAgentMaterials, MAT_QTY } from "../../../lib/agentMaterials";
 import { AgentNote } from "../../../lib/agentNotes";
 import { ContactAgentForm, FormSection } from "./ContactAgentForm";
+import { formatDate } from "../../../lib/dates";
 
-const dmy = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-const monthYear = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+const dmy = (ms: number) => formatDate(new Date(ms), { day: "numeric", month: "short" });
+const monthYear = (iso: string) => formatDate(new Date(iso), { month: "short", year: "numeric" });
 
 export interface ContactProfileProps {
   agent: Agent;
@@ -50,6 +52,8 @@ export interface ContactProfileProps {
   editCtx: EditCtx;
   /** the committed notes for THIS agent (the page's one-open-agent listener) */
   notes: AgentNote[];
+  /** for the shared materials treatment (clean-up pass item 3); absent in a host that has none */
+  packages?: readonly SubmissionPackage[];
   /** open straight into edit at a section (a slip's or Housekeeping's door) */
   editAt?: FormSection | null;
   savedLine: string | null;
@@ -82,7 +86,7 @@ const verbFor = (q: QcRow): string | null => {
 };
 
 export const ContactProfile: React.FC<ContactProfileProps> = ({
-  agent, facts, nowMs, msGenre, msTitle, genreHit, genrePool, editCtx, notes,
+  agent, facts, nowMs, msGenre, msTitle, genreHit, genrePool, editCtx, notes, packages = [],
   editAt = null, savedLine, onClose, onSave, onAddNote, onOpenQuery, onRecordResponse, onLogQuery,
 }) => {
   const [editing, setEditing] = useState<boolean>(editAt != null);
@@ -276,6 +280,10 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
                   <h5>Your query{msTitle ? <> · <i className="clv-msname">{msTitle}</i></> : null}</h5>
                   {q ? (
                     <>
+                      {/* item 3 (clean-up pass, 28 Sep): how the materials were recorded, above the
+                          trail — the chip names it, the box shows what went */}
+                      <div className="clv-how"><SentChip q={q.query} packages={packages} /></div>
+                      <div className="clv-hbox"><SentBox q={q.query} packages={packages} /></div>
                       <ul className="clv-trail" data-clv="trail">
                         {q.history.spans.map((s) => (
                           <li key={`${s.status}-${s.startMs}`}>

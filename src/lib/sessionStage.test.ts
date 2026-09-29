@@ -71,7 +71,7 @@ describe("the gather's spine", () => {
     expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // the search moved to the bar
     expect(EXIT_FADE).toContain(".tdb-heroright"); // the CTA pair fades
     expect(EXIT_FADE).toContain(".tdb-herosub"); // the subtitle fades (the progress row takes its slot)
-    expect(EXIT_FADE).toContain(".tdb-brief"); // briefing-slot P3: the review surface it fades
+    expect(EXIT_FADE).not.toContain(".tdb-brief"); // the briefing went with the weekly review (27 Sep)
     // The lane header bars went with the To-do rebuild, so they are dropped rather than kept as
     // selectors that can never match. NOTE (reported, not swept): EXIT_BAR and DISSOLVE below
     // still name .tdb-dochead / .tdb-mainc, which are also extinct — they belong to the focused

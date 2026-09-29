@@ -122,7 +122,9 @@ describe("the copy states the fact and offers the way on", () => {
     expect(LOCKED_NOTE).toBe("Locked — this package has been sent");
     /* rewritten (packages v2): LOCKED_WHY follows the card's lock line */
     expect(LOCKED_WHY).toContain("so your records stay true");
-    expect(LOCKED_WHY).toContain("Duplicate it to try a different mix.");
+    /* retargeted (Part B, 28 Sep): the way on is no longer "duplicate it" — an edit to a sent
+       package starts its next edition, so that is what the reason says */
+    expect(LOCKED_WHY).toContain("starts a new edition");
   });
 });
 
@@ -131,7 +133,9 @@ describe("the client refuses the write, and says why", () => {
   const db = decls(read("src/lib/db.tsx"));
 
   it("updatePackage checks the lock before writing", () => {
-    expect(db).toContain("isPackageLocked(live) && LOCKED_PACKAGE_FIELDS.some((k) => k in fields)");
+    /* retargeted (Part B, 28 Sep): a sent package's contents no longer refuse — they START ITS NEXT
+       EDITION, worked out before the write; only the sample slot (not content) still refuses */
+    expect(db).toMatch(/if \(live && isPackageLocked\(live\)\) \{[\s\S]{0,500}samplePagesVersionId[\s\S]{0,400}nextEdition\(live,/);
   });
 
   it("it RETURNS the reason rather than throwing or shrugging", () => {
@@ -161,6 +165,14 @@ describe("the client refuses the write, and says why", () => {
     expect(stamps.length, "no stamp writer in db.tsx").toBeGreaterThan(0);
     for (const m of stamps) {
       const before = db.slice(0, m.index ?? 0);
+      /* ⚠️ THE ONE STAMP OUTSIDE A BATCH IS THE STALE-STAMP RECONCILIATION (Part B, 28 Sep): it
+         re-stamps a package only after a SERVER read proves a query points at it, so it cannot leave
+         a package locked with nothing sent — the law this case exists for. */
+      const fn = before.lastIndexOf("const reconcileStamps = async");
+      if (fn > before.lastIndexOf("writeBatch(db)")) {
+        expect(before.slice(fn), "the re-stamp is not gated on a query holding the package").toMatch(/else if \(!stampedNow && held\) \{\s*await updateDoc\([^;]*\{\s*$/);
+        continue;
+      }
       const batchAt = before.lastIndexOf("writeBatch(db)");
       const commitAt = before.lastIndexOf("batch.commit()");
       expect(batchAt, "a stamp is written outside any batch").toBeGreaterThan(-1);
@@ -183,8 +195,10 @@ describe("the rule — proven against the deployed database by rulesProbe, asser
        sent package could gain would re-attribute every request that arrived on something else. */
     expect(rules).toContain(
       "!existing().keys().hasAny(['firstSentAt'])");
+    /* retargeted (Part B, 28 Sep): the other materials and the edition fields JOIN the frozen set —
+       outside an edition bump (asserted in packageEditions.test.ts) they are as fixed as the slots */
     expect(rules).toMatch(
-      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'\]\)/);
+      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions'\]\)/);
   });
 
   it("the stamp is write-once — it is in the SAME forbidden set", () => {
@@ -241,8 +255,12 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     const edit = page.slice(page.indexOf('case "edit":'), page.indexOf('case "dup":'));
     expect(edit).toContain("editId: p.id");
     expect(edit, "an edit also claims to be a duplicate").not.toContain("dupFrom");
-    /* and Edit is offered only on UNSENT packages — the lock's visible half */
-    expect(decls(read("src/components/packages/PkgCard.tsx"))).toMatch(/sent \? act\("dup", "Duplicate & edit"\) : act\("edit", "Edit"\)/);
+    /* retargeted (Part B, 28 Sep): Edit is offered on EVERY live package now — on a sent one it
+       starts the next edition — and Duplicate is its own action, never the way round the lock */
+    const card = decls(read("src/components/packages/PkgCard.tsx"));
+    expect(card).toContain('{act("edit", "Edit")}');
+    expect(card).toContain('{act("dup", "Duplicate")}');
+    expect(card).not.toMatch(/sent \? act\("dup"/);
   });
 
 

@@ -18,12 +18,13 @@ import { QueryStatus } from "../types";
 import type { QueryCardModel } from "../components/dashboard/QueryCard";
 import type { TaskPaneEvent } from "../components/todo/TaskPane";
 import { STAGE_NAME, primaryActionLabel, standLine, type QcRow } from "./qcSummary";
+import { formatDate } from "./dates";
 
 /** The three terminal states, named so a tenth status lands on the live side and is visible. */
 const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED];
 
 const shortDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  formatDate(new Date(ms), { day: "numeric", month: "short" });
 
 /**
  * The card's band.

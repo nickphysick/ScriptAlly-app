@@ -1,0 +1,34 @@
+[
+ {
+  "lock": "Q6 · precondition: the Query Centre's bar is awake",
+  "route": "/queries → /agents",
+  "size": "1280",
+  "state": "after nav",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "Q6 · the new page's bar is at rest",
+  "route": "/queries → /agents",
+  "size": "1280",
+  "state": "after nav",
+  "ok": false,
+  "detail": "hairline 0 {\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "Q6 · precondition: the Query Centre's bar is awake",
+  "route": "/queries → /agents",
+  "size": "1440",
+  "state": "after nav",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "Q6 · the new page's bar is at rest",
+  "route": "/queries → /agents",
+  "size": "1440",
+  "state": "after nav",
+  "ok": false,
+  "detail": "hairline 0 {\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ }
+]

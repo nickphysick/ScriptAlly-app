@@ -6,13 +6,13 @@
  * design-refs/todo-journey-in-pane.html).
  *
  * ⚠️ THE JOURNEY RENDERS INSIDE THE CARD, AND THAT IS THE WHOLE POINT OF THE MOVE. It was a
- * full-viewport takeover mounted from `FocusFlow`; the card's body becomes the form instead, so
+ * full-viewport takeover mounted from `FocusFlow` (now `HousekeepingSweep`); the card's body becomes the form instead, so
  * nothing overlays and nothing has to be dismissed. The band stays above it the entire time, so the
  * writer never loses who they are recording against.
  *
  * ⚠️ AND IT REMOVES THE `inert` SEAL RATHER THAN PATCHING IT. `useOverlay`'s `sealBackground()`
- * puts `inert` on `#root` on the stated premise that overlays portal to `document.body`; `FocusFlow`
- * does not portal, so the takeover sealed ITSELF and every control inside it was unreachable by
+ * puts `inert` on `#root` on the stated premise that overlays portal to `document.body`; the takeover
+ * did not portal, so the takeover sealed ITSELF and every control inside it was unreachable by
  * pointer and by keyboard — measured, `elementsFromPoint` at the primary's own centre returning
  * `[body, html]`. A journey that is not an overlay cannot have that fault.
  *
@@ -28,6 +28,7 @@
    exists to avoid. `agentMaterials` is pure — no firebase — so nothing about the module's
    testability changes. */
 import { materialRowsFromAgent, willRecordText, type MaterialRow } from "./agentMaterials";
+import { formatDate } from "./dates";
 
 /**
  * ⚠️ THE STEPS ARE DECLARED PER JOURNEY, AND THE STACKS ARE DELIBERATELY DIFFERENT LENGTHS.
@@ -340,7 +341,7 @@ export function whenMode(sentDate: string, now: Date): WhenMode {
 /** "12 Aug" — the chosen day on the relabelled segment. */
 export function shortDay(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
-  return Number.isNaN(d.getTime()) ? ymd : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return Number.isNaN(d.getTime()) ? ymd : formatDate(d, { day: "numeric", month: "short" });
 }
 
 /**

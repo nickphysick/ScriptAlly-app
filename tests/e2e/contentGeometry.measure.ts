@@ -44,7 +44,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-  { name: "To-do list",          route: "/todo",                 cls: "tpl-wpg"  },
+  { name: "To-do list",          route: "/todo",                 cls: "tdv2-wpg"  },
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
 ];

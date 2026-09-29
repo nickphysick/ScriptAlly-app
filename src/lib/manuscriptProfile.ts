@@ -16,6 +16,7 @@
  * clause below decides which it is.
  */
 import { Query } from "../types";
+import { formatDate } from "./dates";
 
 /** ISO / Timestamp / Date → epoch ms, or null. Mirrors `manuscriptPage.toMs`, kept local so this
  *  module can be read without following an import for a two-line coercion. */
@@ -50,7 +51,7 @@ export const queryingSinceMs = (queries: readonly Query[]): number | null => {
 
 /** `14 Jan 2026` — the facts line's format. Day, short month, full year: this one IS a record. */
 export const profileDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
 
 export interface HeroFigure {
   key: string;

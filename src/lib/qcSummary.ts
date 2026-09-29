@@ -17,6 +17,7 @@
  * else. Offer: `offerResponseDeadline`. `namedEndFor` is deliberately not used: it prefers a nudge
  * reminder, and a reminder is not an expected date.
  */
+import { MONTHS_SHORT } from "./dates";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { agentAgencyLine, agentInitials, agentPrimary } from "./agentDisplay";
 import { buildRows as analyticsRows } from "./analytics";
@@ -159,7 +160,7 @@ export function buildQcRows(queries: readonly Query[], agents: readonly Agent[],
 
 /* ── durations, in the mockup's words ── */
 export const spanWords = (days: number): string => (days >= 35 ? `${Math.round(days / 7)} weeks` : `${days} ${days === 1 ? "day" : "days"}`);
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON = MONTHS_SHORT;
 export const shortDay = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
 const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
 

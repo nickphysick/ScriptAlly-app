@@ -31,6 +31,7 @@
  * contracts — the completion path, snooze, dismiss, open query, task navigation — and nothing else
  * crossed over: no styles, no layout, no markup.
  */
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
@@ -64,6 +65,13 @@ interface RungBase {
 export interface TaskPaneStatusEvent extends RungBase {
   kind: "status";
   status: QueryStatus;
+  /** a reconstruction (28 Sep): the drained mark, and the rung reads "Recorded from the imported status" */
+  reconstructed?: boolean;
+  /**
+   * What the send rung carries beneath it (clean-up pass, 28 Sep): the requery's explanation and the
+   * materials treatment. One slot, filled by `withSendExtra`, so every rail draws them in one place.
+   */
+  extra?: React.ReactNode;
 }
 /** A rung that is NOT a status — today a nudge; a note kind arriving later needs no new branch. */
 export interface TaskPaneMarkEvent extends RungBase {
@@ -161,6 +169,8 @@ export interface TaskPaneJourney {
   since?: string;
   /** the agent behind the query — the column's one row about a person, and its one outward link */
   agent?: { name: string; agency?: string; initials: string; onOpen?: () => void };
+  /** how the materials were recorded — the shared SentChip (clean-up pass, item 3, 28 Sep) */
+  sentHow?: React.ReactNode;
   /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
   bulk?: { count: number; touched: number };
   /**
@@ -245,9 +255,10 @@ function rung(e: TaskPaneEvent): React.ReactNode {
         <div className="tl-e" key={e.key}>
           {/* the real dot, at the dense-timeline size `QueryTimeline` already uses; decorative
               because the event's own title sits beside it and states the same thing in words */}
-          <span className="sd"><StatusDot status={e.status} overrideSize={12} decorative /></span>
+          <span className="sd"><StatusDot status={e.status} overrideSize={12} decorative ghost={!!e.reconstructed} /></span>
           <div className="t">{e.t}</div>
           <div className="d">{e.d}</div>
+          {e.extra ? <div className="x">{e.extra}</div> : null}
         </div>
       );
     case "mark":
@@ -403,8 +414,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
     const onKey = (e: KeyboardEvent) => {
       const fork = forkRef.current;
       if (!fork) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (!/^[1-9]$/.test(e.key)) return;
+      if (!matchesShortcut(SHORTCUTS.taskChoice, e)) return; /* the key is the registry's (lib/shortcuts.ts) */
       const t = e.target as HTMLElement | null;
       if (t && t.closest("input, textarea, select, [contenteditable]")) return;
       const o = fork.options[Number(e.key) - 1];
@@ -678,6 +688,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                           )}
                         </div>
                       )}
+                      {d.sentHow ? <div className="how">{d.sentHow}</div> : null}
                       {/* the facts, as a definition list: a 78px mono label column and the value
                           beside it, with the secondary line beneath where there is one */}
                       {d.tiles && d.tiles.length > 0 && (

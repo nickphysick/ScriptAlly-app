@@ -21,6 +21,7 @@
  * safe home, and the timeline renders it beneath the node.
  */
 import { Activity, ActivityType, Query, Agent } from "../types";
+import { formatDate } from "./dates";
 
 const DESC_MAX = 512; // firestore.rules isValidActivity: description size limit
 const DETAILS_MAX = 4096; // firestore.rules isValidActivity: details size limit
@@ -87,7 +88,7 @@ export const NUDGE_NESTED_TYPE = "Nudge sent" as const;
 
 /** Human-readable check-back date for the timeline `details` line. */
 export const formatCheckBack = (dateISO: string): string =>
-  new Date(dateISO).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  formatDate(new Date(dateISO), { day: "numeric", month: "short", year: "numeric" });
 
 /**
  * Build every write a "Log nudge" produces, as plain data. Side-effect-free and clock-injected

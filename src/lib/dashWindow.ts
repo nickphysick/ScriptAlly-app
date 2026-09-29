@@ -17,6 +17,7 @@
  * Twelve is one and a half times the default window: the first time the minimap appears, its window
  * is visibly smaller than its track.
  */
+import { MONTHS_SHORT } from "./dates";
 import { LedgerPoint, aggregateLedger } from "./oneScreen";
 
 export const WINDOW_DAYS = 56;
@@ -31,7 +32,7 @@ export const campaignStage = (daily: readonly LedgerPoint[]): CampaignStage =>
 export const sinceLabel = (daily: readonly LedgerPoint[]): string | null =>
   daily.length ? `since ${daily[0].label}` : null;
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = MONTHS_SHORT;
 /** "DEC 2023" — the minimap's left label */
 export const firstMonthLabel = (daily: readonly LedgerPoint[]): string | null =>
   daily.length ? `${MONTHS[daily[0].start.getMonth()]} ${daily[0].start.getFullYear()}` : null;

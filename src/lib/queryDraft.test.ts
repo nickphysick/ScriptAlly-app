@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { formatDate } from "./dates";
 import {
   HOUSE_NUDGE_WEEKS,
   initialReminder,
@@ -85,10 +86,10 @@ describe("the nudge reminder — derived from the agent's stated turnaround", ()
     expect(suggestedReminderDate("2026-07-29", 0)).toBeNull();
   });
   it("labels the chip date + relative distance, in the page-wide elapsed vocabulary", () => {
-    // The day-month half comes from the same toLocaleDateString("en-GB", short) call every other
-    // date on the page uses, so the expectation is built the same way rather than pinning a CLDR
-    // spelling ("Sep" vs "Sept" moves with the ICU version).
-    const day = new Date("2026-09-09").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    // retargeted (clean-up pass item 4, 28 Sep): the day-month half comes from lib/dates' one
+    // formatter, as every date on the page does now — "9 Sep", never the platform's "9 Sept".
+    const day = formatDate(new Date("2026-09-09"), { day: "numeric", month: "short" });
+    expect(day).toBe("9 Sep");
     expect(reminderChipLabel("2026-09-09", "2026-07-29")).toBe(`${day} · in 6 weeks`);
     expect(reminderChipLabel("2026-09-09", "2026-07-29")).toMatch(/· in 6 weeks$/);
   });

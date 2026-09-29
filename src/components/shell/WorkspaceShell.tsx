@@ -40,7 +40,8 @@ import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
-import { manuscriptViewPath } from "./manuscriptScope";
+import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
+import { ShortcutsSheet } from "./ShortcutsSheet";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -382,24 +383,72 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * on every frame.
    */
   const winWrapRef = useRef<HTMLDivElement | null>(null);
+  const barRef = useRef<HTMLElement | null>(null);
   const [barScrolled, setBarScrolled] = useState(false);
+  /**
+   * THE QUIET BAR (quiet-bar v1): the page name appears only once the page's own title has scrolled
+   * up behind the bar — its rendered bottom at or above the bar's bottom. A route with no marked
+   * title shows its name with the hairline, at `scrollTop > 2`.
+   */
+  const [barNamed, setBarNamed] = useState(false);
   useEffect(() => {
     const wrap = winWrapRef.current;
     if (!wrap) return undefined;
     let frame = 0;
+    let last: HTMLElement | null = null;
+    /**
+     * ⚠️ THE PAGE'S SCROLLER IS THE OUTERMOST OVERFLOWING SCROLLER BETWEEN THE EVENT'S TARGET AND THE
+     * WRAP — never the target itself. Inner panels scroll too (the Birds-eye rail, the Housekeeping
+     * rail, the dashboard's lists, the comps rail), and the capture listener hears them all: read off
+     * the target, a rail scrolled with the page at the top woke the bar, and — having no title — showed
+     * the page's name through the no-title fallback. The page is what wakes the bar.
+     */
+    const pageScroller = (t: HTMLElement): HTMLElement => {
+      let sc = t;
+      for (let p = t.parentElement; p && p !== wrap; p = p.parentElement) {
+        if (p.scrollHeight > p.clientHeight + 2 && /(auto|scroll)/.test(getComputedStyle(p).overflowY)) sc = p;
+      }
+      return sc;
+    };
+    /**
+     * ⚠️ THE TITLE IS LOOKED UP FROM THE SCROLLER'S PAGE, NEVER THE DOCUMENT, AND ONLY A VISIBLE ONE
+     * COUNTS. Every page stays mounted, so the document holds several `[data-page-title]`s. The page
+     * root (`.wpg`) is where to look rather than the scroller alone: on Calendar and Noteboard the
+     * scrolling zone sits BELOW the header, so a lookup inside the scroller finds no title and the
+     * fallback would name the page while its title was still in plain view. On the stage-scrolled
+     * routes (Import, Plans, Help) the scroller holds other mounted pages too — hence visible only.
+     */
+    const titleFor = (sc: HTMLElement): HTMLElement | null => {
+      const root = (sc.closest(".wpg") as HTMLElement | null) ?? sc;
+      return ([...root.querySelectorAll<HTMLElement>("[data-page-title]")].find((e) => e.getBoundingClientRect().height > 0)) ?? null;
+    };
+    /* derived from the measured values on every read — never an observer, whose missed event is permanent */
+    const measure = () => {
+      frame = 0;
+      const sc = last;
+      const bar = barRef.current;
+      if (!sc || !bar) return;
+      const top = sc.scrollTop;
+      const title = titleFor(sc);
+      const named = title ? title.getBoundingClientRect().bottom <= bar.getBoundingClientRect().bottom : top > 2;
+      setBarScrolled((was) => (was === top > 2 ? was : top > 2));
+      setBarNamed((was) => (was === named ? was : named));
+    };
     const read = (e: Event) => {
       const t = e.target as HTMLElement | null;
-      const top = t && typeof t.scrollTop === "number" ? t.scrollTop : 0;
-      if (frame) return;
-      frame = requestAnimationFrame(() => { frame = 0; setBarScrolled((was) => (was === top > 2 ? was : top > 2)); });
+      if (!t || typeof t.scrollTop !== "number" || !(t instanceof HTMLElement)) return;
+      last = pageScroller(t);
+      if (!frame) frame = requestAnimationFrame(measure);
     };
+    const onResize = () => { if (last && !frame) frame = requestAnimationFrame(measure); };
     wrap.addEventListener("scroll", read, true);
-    return () => { wrap.removeEventListener("scroll", read, true); if (frame) cancelAnimationFrame(frame); };
+    window.addEventListener("resize", onResize);
+    return () => { wrap.removeEventListener("scroll", read, true); window.removeEventListener("resize", onResize); if (frame) cancelAnimationFrame(frame); };
   }, []);
-  /* ⚠️ A ROUTE CHANGE STARTS A NEW PAGE AT THE TOP, and its scroller is a new element that will
-     never announce the position the old one was left in. Without this the shadow survives into a
-     page that has not been scrolled. */
-  useEffect(() => { setBarScrolled(false); }, [pathname]);
+  /* ⚠️ A ROUTE CHANGE STARTS A NEW PAGE AT REST, and its scroller is a new element that will never
+     announce the position the old one was left in. Without this the hairline and the old page's
+     name survive into a page that has not been scrolled. */
+  useEffect(() => { setBarScrolled(false); setBarNamed(false); }, [pathname]);
 
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
@@ -656,7 +705,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
-          <header className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
+          <header ref={barRef} className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}${barNamed ? " ws-pagebar--named" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"}>
               {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
                   move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
               {/* the sidebar toggle — first in the bar, 24px in from its left, and it does not move
@@ -682,7 +731,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 * the name alone. The header below repeats the name as its title, by design.
                 */}
               {pageName && (
-                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}`} data-shell="pagename">
+                /* ⚠️ ALWAYS LAID OUT, ONLY HIDDEN: the slot keeps its box at rest so nothing in the bar moves
+                   when the name arrives (Q7). Hidden is `aria-hidden` plus `pointer-events: none` (CSS). */
+                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}`} data-shell="pagename" aria-hidden={barNamed ? undefined : true}>
                   {pageName.section && <small className="ws-pname-s">{pageName.section}</small>}
                   <span className="ws-pname-n">{pageName.name}</span>
                 </span>
@@ -696,6 +747,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 activeId={activeMs?.id ?? null}
                 onPick={pickMs}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                /* the active book's own page — the existing route and its `?m=` view param */
+                onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
               />
               {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
                   settings mode takes its space with it rather than leaving a gap behind. */}
@@ -801,6 +854,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           </div>
           </div>
       </div>
+      {/* the keyboard shortcuts sheet: `?` or the Help centre opens it; it portals to the body */}
+      <ShortcutsSheet />
 
     </div>
   );

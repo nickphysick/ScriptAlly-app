@@ -16,7 +16,7 @@ import {
   closeQueryDrawer, showUndoBar, subscribeDrawer, currentDrawerRequest,
   type DrawerMode, type DrawerPreset, type OpenRequest,
 } from "../../lib/queryActions/drawerStore";
-import { restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
+import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
 import { todayDay } from "../../lib/queryActions/dates";
 import { DrawerContext, initialsOf } from "./controls";
 import { DrawerShell } from "./DrawerShell";
@@ -37,6 +37,8 @@ export interface JourneyProps {
   children: (view: JourneyView, initialStep?: number) => React.ReactElement;
   /** Swap to another journey in place, keeping the same query. */
   switchTo: (mode: DrawerMode, preset?: DrawerPreset) => void;
+  /** v1.1 — a journey opened with no query (the sidebar's "Record a response") picks one. */
+  pickQuery: (queryId: string) => void;
 }
 
 const JOURNEYS: Partial<Record<DrawerMode, React.ComponentType<JourneyProps>>> = {
@@ -77,11 +79,18 @@ export function QueryDrawer() {
   const close = useCallback(() => {
     const r = currentDrawerRequest();
     setOpen(false);
-    window.setTimeout(() => { closeQueryDrawer(); r?.onCancel?.(); }, 240);
+    /* ⚠️ ONLY THE REQUEST THAT ASKED TO CLOSE IS CLOSED. The slide-out takes 240ms, and a drawer
+       opened inside that window (a door clicked straight after Cancel) is a NEW request: closing
+       whatever is current then shut the new one as it arrived (packages-journey, 28 Sep). */
+    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, 240);
   }, []);
 
   const switchTo = useCallback((mode: DrawerMode, preset?: DrawerPreset) => {
     setReq((r) => (r ? { ...r, mode, preset } : r));
+    setGen((g) => g + 1);
+  }, []);
+  const pickQuery = useCallback((queryId: string) => {
+    setReq((r) => (r ? { ...r, queryId } : r));
     setGen((g) => g + 1);
   }, []);
 
@@ -94,7 +103,13 @@ export function QueryDrawer() {
     try {
       const snap = await takeSnapshot(uid, view.touched());
       const out = await view.commit();
-      const undo = async () => { await restoreSnapshot(snap); };
+      /* the stale-stamp rule (Nick, 28 Sep): after an undo, every package the query pointed at before
+         OR after the save is reconciled — lifted if nothing points at it now, stamped if something does */
+      const undo = async () => {
+        const after = await packagesHeldBy(uid, snap.queryIds);
+        await restoreSnapshot(snap);
+        await db.reconcileStamps([...packagesIn(snap), ...after]);
+      };
       setOpen(false);
       window.setTimeout(() => closeQueryDrawer(), 240);
       if (r.receipt && r.onSaved) {
@@ -133,7 +148,7 @@ export function QueryDrawer() {
   return createPortal(
     <DrawerContext.Provider value={{ today, openCal, setOpenCal }}>
       <div className={`qad-root${open ? " is-open" : ""}`} data-qad-root style={hidden ? { display: "none" } : undefined}>
-        <J key={`${req.mode}-${gen}`} req={req} today={today} switchTo={switchTo}>
+        <J key={`${req.mode}-${gen}`} req={req} today={today} switchTo={switchTo} pickQuery={pickQuery}>
           {(view, initialStep) => (
             <DrawerShell view={view} mode={req.mode} open={open && !hidden} initialStep={initialStep ?? req.preset?.step}
               onCancel={close} onSave={() => runSave(view)} />

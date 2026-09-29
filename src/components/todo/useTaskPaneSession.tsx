@@ -17,8 +17,8 @@
  *
  * ⚠️ THE HOST KEEPS SEVEN CALLBACKS, EACH FOR A REASON A HOOK CANNOT ARGUE WITH: three open
  * surfaces the PAGE renders (`onSnooze`'s `AnchoredPanel`, `onDismiss`'s dialog, `openQuery`'s
- * navigation), one reaches the DOM (`jumpToSection`), one is the `offer`/`fix` hand-off to
- * `FocusFlow`, one is the commit family that writes and toasts, and one moves the dock cursor. A
+ * navigation), one reaches the DOM (`jumpToSection`), one is the hand-off (`openFlow` — a query
+ * card goes to the query drawer, anything else to `HousekeepingSweep`), one is the commit family that writes and toasts, and one moves the dock cursor. A
  * hook cannot own a node it does not render, and it must not own navigation.
  *
  * ⚠️ THE BODIES BELOW MOVED VERBATIM from `ToDoPage`. Every comment came with its code, because the
@@ -26,10 +26,14 @@
  * revealed-but-empty date. Only the references changed: captured page scope became hook state, the
  * three lifted derivations became lib calls, and seven became host callbacks.
  */
+import { useNavigate } from "react-router-dom";
+import { requeryLine } from "../../lib/requery";
+import { SendExtras } from "../queryActions/SendExtras";
+import { SentBox, SentChip } from "../queryActions/SentHow";
 import React from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { BoardCard } from "../../lib/todoBoard";
-import { buildJourney } from "../../lib/taskPaneJourney";
+import { buildJourney, withSendExtra } from "../../lib/taskPaneJourney";
 import type { TaskPaneJourney } from "./TaskPane";
 import { Agent, QueryStatus } from "../../types";
 import { DockTimelineEvent } from "./timelineEvent";
@@ -78,6 +82,7 @@ import { elapsedParts } from "../../lib/elapsed";
 import { localYMD } from "../../lib/shellSidebar";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { drawerDoorForTask } from "../../lib/queryActions/entry";
+import { formatDate } from "../../lib/dates";
 
 /**
  * ⚠️ MODULE-LEVEL AND TAKING `agents`, BECAUSE IT HAS TWO CONSUMERS AND MUST STAY ONE TABLE. The
@@ -194,7 +199,20 @@ export function useTaskPaneSession(
   /** this mount's section-id prefix — see `TaskPaneBody`'s `idPrefix` for why it exists */
   idPrefix = "",
 ): TaskPaneSession {
-  const { queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser } = useScriptAllyDb();
+  const { queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser, packages } = useScriptAllyDb();
+  const navigateTo = useNavigate();
+  /* item 2 (clean-up pass, 28 Sep): the send rung explains a requery, and the link opens the earlier query */
+  const sendExtraFor = (card: BoardCard): React.ReactNode => {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q) return null;
+    const rq = requeryLine(q, queries);
+    /* item 3: the shared materials box rides the send rung, beneath any requery line */
+    return (
+      <SendExtras requery={rq} onOpenQuery={(id) => navigateTo(`/queries?q=${encodeURIComponent(id)}`)}>
+        <SentBox q={q} packages={packages} />
+      </SendExtras>
+    );
+  };
   const now = Date.now();
   /* ⚠️ ONE BUNDLE, memoised on the five arrays the lifted derivations read — the same shape the
      page uses, so neither can drift onto different data. */
@@ -415,8 +433,10 @@ export function useTaskPaneSession(
         initials: agentInitials(ag),
         ...(host.openAgent ? { onOpen: () => host.openAgent!(ag.id) } : {}),
       } : undefined,
+      /* item 3 (clean-up pass, 28 Sep): how the materials were recorded, beneath the agent */
+      sentHow: <SentChip q={q} packages={packages} />,
     };
-  }, [card, queries, agents, host]);
+  }, [card, queries, agents, host, packages]);
 
   /**
    * ⚠️ THE FORK'S DERIVATIONS SIT ABOVE `paneWill`, AND THAT IS LOAD-BEARING (journey round, found
@@ -684,7 +704,7 @@ export function useTaskPaneSession(
   function noteAddedDate(c: BoardCard): string {
     const t = c.userTaskId ? userTasks.find((x) => x.id === c.userTaskId) : undefined;
     const iso = isoOf(t?.createdAt);
-    return iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
+    return iso ? formatDate(new Date(iso), { day: "numeric", month: "short" }) : "—";
   }
 
   /* ⚠️ THE DAY, NOT THE INSTANT. Two rungs of one status seconds apart are the duplicate; two on
@@ -694,7 +714,7 @@ export function useTaskPaneSession(
   /** "2 Apr" — the rung's day, for a line that states a fact rather than quotes a person. */
   function dayLabel(raw: any): string {
     const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
-    return Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+    return Number.isFinite(ms) ? formatDate(new Date(ms), { day: "numeric", month: "short" }) : "";
   }
 
   /**
@@ -774,13 +794,12 @@ export function useTaskPaneSession(
    * The standing law in this file is that the action button never completes directly — it opens
    * the journey, and the journey commits. The pane contract puts a form and a `Will record:` strip
    * in front of that button, which is easy to read as "this records", and building it that way
-   * would give one act two write paths that could disagree. `FocusFlow` already accepts a
-   * `prefill`, so the pane's answers ARRIVE at the one commit path as its opening values, and the
-   * writer sees them again before anything is written.
+   * would give one act two write paths that could disagree. (The pane's answers once travelled to
+   * the takeover as its opening values; every query task now finishes in the query drawer.)
    *
    * ⚠️ WHAT DOES NOT TRAVEL YET, STATED PLAINLY: the expectation dates. `recordMaterialsSent`
    * accepts `writerExpectedDate` and `nudgeDate` and the rules allow both, but `markSentWriteArgs`
-   * (lib/todoWalk.ts) does not pass them and `FocusFlow`'s prefill has no field for them. The
+   * (lib/todoWalk.ts) does not pass them. The
    * `.expect` block is therefore ASKED and not yet STORED — see the run report; it is the
    * remaining half of Phase 4, and half a write path is worse than none.
    */
@@ -1097,8 +1116,9 @@ export function useTaskPaneSession(
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return formatQueryMaterials(q?.materialsWanted);
                     })(),
-                    events: dockTimelineFor(card).map((e) => ({
+                    events: withSendExtra(dockTimelineFor(card).map((e) => ({
                       key: e.key, label: e.label, when: e.when, via: e.via,
+                      ...(e.reconstructed ? { reconstructed: true } : {}),
                       /* ⚠️ THE LOG'S OWN STATUS, CARRIED WHOLE (Phase 8). `dockTimeline` already
                          sets it from `resultingStatus ?? type` — the same pair the derivation
                          reads — and a nudge has none. The pane decides what that means; this
@@ -1106,7 +1126,7 @@ export function useTaskPaneSession(
                       status: e.status,
                       /* the mockup's `in` rung — an event the AGENT caused */
                       incoming: /requested|offer|rejected|response|reply/i.test(e.label),
-                    })),
+                    })), sendExtraFor(card)),
                     primaryLabel: rowPrimaryLabel(card, groupColumn(cardBucket(card) === "note" ? "yours" : "urgent")),
                     ...(card.userTaskId ? { noteAdded: noteAgo(card) } : {}),
                     /* ⚠️ THROUGH THE APP'S ONE STATUS-WORD FUNCTION. `getStatusLabel` is what the

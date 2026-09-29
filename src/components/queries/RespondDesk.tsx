@@ -27,6 +27,7 @@ import { SAMPLE_UNITS, snapToUnit, type SampleUnit } from "../../lib/agentMateri
 import { OUTCOME_STATUS, type DecidingOutcome, type ResponseDraft } from "../../lib/responseDraft";
 import { todayInputDate } from "../../lib/queryDraft";
 import { QueryStatus } from "../../types";
+import { formatDate } from "../../lib/dates";
 
 /** The desk's six choices — each carrying the `StatusDot` it will earn. */
 const KINDS: readonly { key: DecidingOutcome; title: string; sub: string }[] = [
@@ -122,7 +123,7 @@ export const RespondDesk: React.FC<RespondDeskProps> = ({
           <label className="qrd-l">When</label>
           <button type="button" className="qrd-fld" ref={dateRef as React.RefObject<HTMLButtonElement>} onClick={() => setDateOpen((o) => !o)}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 9h18M8 3v4M16 3v4" /></svg>
-            {new Date(`${draft.dateArrived}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            {formatDate(new Date(`${draft.dateArrived}T12:00:00`), { day: "numeric", month: "short", year: "numeric" })}
             {draft.dateArrived === todayInputDate() && <span className="qrd-sub">today</span>}
           </button>
           {dateOpen && pop(dateStyle, datePanelRef, "When it arrived", (

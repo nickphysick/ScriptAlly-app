@@ -18,6 +18,7 @@
 import { Query, QueryStatus } from "../types";
 import { isResponse } from "./packageMetrics";
 import { TERMINAL_STATUSES } from "./agentList";
+import { formatDate } from "./dates";
 
 export interface BookFigure {
   key: string;
@@ -36,7 +37,7 @@ const toMs = (d: unknown): number | null => {
 
 /** `8 Aug` — a glance, not a record, so no year. Matches the plate's own format. */
 const shortDate = (ms: number): string =>
-  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  formatDate(new Date(ms), { day: "numeric", month: "short" });
 
 /**
  * ⚠️ `0` IS WRITTEN WHERE ZERO IS TRUE AND `—` WHERE NOTHING HAPPENED. A count of nought queries is

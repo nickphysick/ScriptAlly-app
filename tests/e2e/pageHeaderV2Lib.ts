@@ -83,7 +83,8 @@ export async function readBar(page: Page) {
     const switchers = [...document.querySelectorAll('[data-shell="switcher"], .sv2-scope, .ws-mspill')].filter(shown);
     return {
       barL: b.left, barR: b.right, barT: b.top, barH: b.height, mainL: m.left, winR: window.innerWidth,
-      barBg: bs.backgroundColor, sideBg: ss.backgroundColor,
+      barBg: bs.backgroundColor, sideBg: ss.backgroundColor, groundBg: getComputedStyle(main).backgroundColor,
+      nameHidden: !!name && parseFloat(getComputedStyle(name).opacity) === 0 && name.getAttribute("aria-hidden") === "true",
       radii: [bs.borderTopLeftRadius, bs.borderTopRightRadius, bs.borderBottomLeftRadius, bs.borderBottomRightRadius],
       sideRule, sideShadow: ss.boxShadow,
       toggleL: toggle ? toggle.l - b.left : null, helpR: help ? b.right - help.r : null,
@@ -261,8 +262,9 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   } else {
     L.check("§4.2 · the side panel was found", ctx, false, "no panel");
   }
-  const fw = Math.min(920, r.colW);
-  L.check("§4.3 · the frame is min(920, column) wide", ctx, !!r.frame && n(r.frame.w, fw, 1), `frame ${r.frame?.w.toFixed(1)} want ${fw.toFixed(1)}`);
+  /* ⚠️ RETARGETED BY THE QUIET BAR (28 Sep): the frame IS the column now — page header v2's centred 920
+     is reversed, so the text starts on the column's left, level with the cards (quietBar Q8) */
+  L.check("§4.3 · the frame is the column's width, starting on its left", ctx, !!r.frame && n(r.frame.w, r.colW, 1) && n(r.frame.l, r.colL, 1), `frame ${r.frame?.l.toFixed(1)}+${r.frame?.w.toFixed(1)} column ${r.colL.toFixed(1)}+${r.colW.toFixed(1)}`);
   L.check("§4.3 · …and centred in the column", ctx, !!r.frame && n((r.frame.l + r.frame.r) / 2, (r.colL + r.colR) / 2, 1), `frame ${r.frame?.l.toFixed(1)}→${r.frame?.r.toFixed(1)}`);
   L.check("§4.3 · the text block is ≤ 55% of the frame", ctx, !!r.frame && r.textW <= r.frame.w * 0.55 + 0.5, `text ${r.textW.toFixed(1)} of ${r.frame?.w.toFixed(1)}`);
   if (withArt) {
@@ -283,7 +285,8 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
      height is still content: a third intro line would fail this, which is the point. */
   if (mock) {
     L.check("§4.3 · the header's height is the mock's ±2", ctx, n(r.hdH, mock.hdH, 2), `app ${r.hdH.toFixed(1)} mock ${mock.hdH.toFixed(1)}`);
-    L.check("§4.3 · the frame sits where the mock's does ±1", ctx, !!r.frame && n(r.frame.l, mock.frame.l, 1) && n(r.frame.r, mock.frame.r, 1), `app ${r.frame?.l.toFixed(1)}→${r.frame?.r.toFixed(1)} mock ${mock.frame.l.toFixed(1)}→${mock.frame.r.toFixed(1)}`);
+    /* ⚠️ RETIRED BY THE QUIET BAR: "the frame sits where the mock's does ±1" — the v5 mock draws the
+       centred 920 frame the quiet bar reverses; the mock still governs the header's height (above) */
   }
 }
 
