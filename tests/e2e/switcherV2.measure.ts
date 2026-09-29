@@ -14,6 +14,7 @@ import { Ledger } from "./shellV3Lib";
 import { openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
 import { ManuscriptStatus } from "../../src/types";
+import { SHORTCUTS, keycaps, type ShortcutId } from "../../src/lib/shortcuts";
 
 test.describe.configure({ timeout: Number(process.env.SW_TIMEOUT ?? 900_000) });
 const SIZES = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const;
@@ -233,4 +234,44 @@ test("S8 · motion: stated durations, instant under reduced motion", async ({ br
   L.write();
   expect(L.rows.length).toBe(4);
   expect(L.failures().map((f) => `${f.lock} · ${f.state} — ${f.detail}`)).toEqual([]);
+});
+
+test("S7 · the shortcuts sheet: ? and the Help centre open it, and it lists the registry", async ({ page }) => {
+  const L = new Ledger("sw-sheet");
+  const ids = Object.keys(SHORTCUTS) as ShortcutId[];
+  const sheetOpen = () => page.evaluate(() => !!document.querySelector('[data-shell="shortcuts"]'));
+  for (const vp of SIZES) {
+    const ctx = { route: "/queries", size: `${vp.width}`, state: "sheet" };
+    await openApp(page, "/queries", vp);
+    const tile = page.locator(TILE).first();
+    await tile.focus();
+    await page.keyboard.press("Shift+Slash"); await page.waitForTimeout(250);
+    L.check("S7 · ? opens the sheet", ctx, await sheetOpen(), "");
+    const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-shell="shortcuts"] [data-shortcut]')].map((r) => ({
+      id: r.dataset.shortcut ?? "", label: r.querySelector(".sks-label")?.textContent ?? "", caps: [...r.querySelectorAll(".sks-cap")].map((c) => c.textContent ?? ""),
+      scope: (r.closest("[data-scope]") as HTMLElement | null)?.dataset.scope ?? "" })));
+    const mac = await page.evaluate(() => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || ""));
+    L.check("S7 · every registry entry is listed once, and nothing else is", ctx, rows.length === ids.length && ids.every((id) => rows.filter((r) => r.id === id).length === 1), `${rows.length} rows / ${ids.length} entries`);
+    const wrong = rows.filter((r) => {
+      const sc = SHORTCUTS[r.id as ShortcutId]; if (!sc) return true;
+      const want = r.id === "taskChoice" ? [`${keycaps(sc.chords[0], mac)[0]}–${keycaps(sc.chords[1], mac)[0]}`] : sc.chords.flatMap((c) => keycaps(c, mac));
+      return r.label !== sc.label || r.scope !== sc.scope || JSON.stringify(r.caps) !== JSON.stringify(want);
+    });
+    L.check("S7 · each row's label, scope and keycaps are the registry's", ctx, wrong.length === 0, JSON.stringify(wrong.slice(0, 3)));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+    const back = await focused(page);
+    L.check("S7 · Escape closes it and focus returns to where it was", ctx, !(await sheetOpen()) && back.isTile, JSON.stringify(back));
+    await page.evaluate(() => { const t = document.createElement("input"); t.id = "sw-probe-in"; t.style.cssText = "position:fixed;left:10px;bottom:10px;z-index:9999"; document.body.appendChild(t); t.focus(); });
+    await page.keyboard.press("Shift+Slash"); await page.waitForTimeout(200);
+    L.check("S7 · ? in a field does nothing", ctx, !(await sheetOpen()), "");
+    await page.evaluate(() => document.getElementById("sw-probe-in")?.remove());
+  }
+  await openApp(page, "/help", { width: 1440, height: 900 });
+  await page.locator('[data-probe="page-header"] .ph-secondary').filter({ hasText: "Keyboard shortcuts" }).first().click();
+  await page.waitForTimeout(250);
+  L.check("S7 · the Help centre's 'Keyboard shortcuts' opens it", { route: "/help", size: "1440", state: "sheet" }, await sheetOpen(), "");
+  await page.keyboard.press("Escape");
+  L.write();
+  expect(L.rows.length).toBe(SIZES.length * 5 + 1);
+  expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });

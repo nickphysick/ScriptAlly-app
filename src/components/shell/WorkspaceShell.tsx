@@ -41,6 +41,7 @@ import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
+import { ShortcutsSheet } from "./ShortcutsSheet";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -853,6 +854,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           </div>
           </div>
       </div>
+      {/* the keyboard shortcuts sheet: `?` or the Help centre opens it; it portals to the body */}
+      <ShortcutsSheet />
 
     </div>
   );

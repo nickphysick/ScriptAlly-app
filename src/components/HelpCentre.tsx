@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PageHeader } from "./shell/PageHeader";
+import { OPEN_SHORTCUTS_EVENT } from "./shell/ShortcutsSheet";
 import { 
   BookOpen, 
   Search, 
@@ -176,6 +177,9 @@ export function HelpCentre() {
         variant="workspace"
         title="QueryHawk Help Centre"
         description="Welcome to your querying command centre manual. Discover expert tips and tools for tracking submissions, discovering literary representation, and moving closer to publication."
+        /* switcher v2 Part B — the second door to the shortcuts sheet. The bar's Help control has no
+           menu (its one action is this page), so the item lives where that action lands. */
+        secondary={{ label: "Keyboard shortcuts", onClick: () => window.dispatchEvent(new Event(OPEN_SHORTCUTS_EVENT)) }}
       />
 
       {/* Styled search engine bar */}
