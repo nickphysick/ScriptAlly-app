@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk — Analytics A · Journey, rebuilt big</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c130f; --ink-70:rgba(28,19,15,.70); --ink-55:rgba(28,19,15,.55);
+  --ink-40:rgba(28,19,15,.40); --ink-12:rgba(28,19,15,.12); --ink-08:rgba(28,19,15,.08);
+  --parchment:#fdfaf5; --cream:#f8f4ec; --stone:#e7e3dc;
+  --anthracite:#2a3a52; --burgundy:#7c3a2a;
+  --sand:#f7efe3; --sage:#e0e5dd; --blush:#f5e6df; --slate:#d7e0e8; --greyf:#e4e1db;
+  --shadow-card:0 1px 2px rgba(28,19,15,.05), 0 8px 24px rgba(28,19,15,.06);
+  --shadow-soft:0 1px 2px rgba(28,19,15,.04), 0 4px 14px rgba(28,19,15,.05);
+  --r-card:14px; --r-inner:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--parchment);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.tw{font-family:"Special Elite",'Courier New',monospace}
+.eyebrow{font-family:"Special Elite",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-55)}
+
+.shell{display:grid;grid-template-columns:238px minmax(0,1fr);height:100vh;overflow:hidden}
+.sidebar{background:var(--stone);border-right:1px solid var(--ink-12);display:flex;flex-direction:column;padding:16px 12px 12px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.brand .mark{width:30px;height:30px;border-radius:50%;background:var(--anthracite);display:grid;place-items:center;color:#fff;font-size:13px}
+.brand .name{font-family:"Special Elite",monospace;font-size:19px}
+.navgroup{margin-top:14px}
+.navgroup>.eyebrow{padding:0 10px 6px;font-size:10px}
+.navitem{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:9px;color:var(--ink);text-decoration:none;font-size:15px;cursor:pointer}
+.navitem:hover{background:rgba(28,19,15,.05)}
+.navitem.active{background:var(--anthracite);color:#fff}
+.navitem.active svg{stroke:#fff}
+.navitem svg{width:17px;height:17px;flex:none;stroke:var(--ink-70);stroke-width:1.6;fill:none}
+.navitem .count{margin-left:auto;font-size:12px;color:var(--ink-55);display:flex;align-items:center;gap:5px}
+.navitem .count .dot{width:6px;height:6px;border-radius:50%;background:var(--blush);border:1px solid rgba(28,19,15,.2)}
+.sidefoot{margin-top:auto;padding:12px 8px 4px;border-top:1px solid var(--ink-12);display:flex;gap:10px;align-items:center}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--slate);display:grid;place-items:center;font-size:12px;color:var(--anthracite)}
+.sidefoot .who{font-size:14px;line-height:1.2}.sidefoot .plan{font-size:12px;color:var(--ink-55)}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;height:56px;background:var(--stone);border-bottom:1px solid var(--ink-12)}
+.topbar .pagename{font-size:15px;color:var(--ink-70)}
+.topbar .spacer{flex:1}
+.msswitch{display:flex;align-items:center;gap:10px;background:var(--parchment);border:1px solid var(--ink-12);border-radius:11px;padding:6px 12px 6px 8px;cursor:pointer;box-shadow:var(--shadow-soft)}
+.msswitch .bk{width:26px;height:26px;border-radius:6px;background:var(--blush);display:grid;place-items:center}
+.msswitch .t{font-size:14px;line-height:1.15}
+.msswitch .s{font-family:"Special Elite",monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-55)}
+.ghostbtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer}
+.ghostbtn:hover{background:rgba(28,19,15,.06)}
+.ghostbtn svg{width:17px;height:17px;stroke:var(--ink-70);stroke-width:1.6;fill:none}
+.feedback{display:flex;align-items:center;gap:7px;border:1px solid var(--ink-12);background:transparent;border-radius:9px;padding:6px 12px;font-family:"Source Serif 4",serif;font-size:14px;cursor:pointer;color:var(--ink)}
+.scroller{flex:1;overflow-y:auto}
+
+.mocktag{position:fixed;right:14px;bottom:12px;z-index:60;background:var(--anthracite);color:#fff;border-radius:999px;padding:6px 14px;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+
+.pagehead{padding:34px 24px 0}
+.pagehead-in{max-width:1400px;margin:0 auto;display:flex;align-items:flex-end;gap:28px}
+.pagehead h1{font-family:"Special Elite",monospace;font-size:52px;line-height:1;margin:0 0 10px;font-weight:400}
+.pagehead .sub{font-size:17px;color:var(--ink-70);margin:0;max-width:48ch}
+.pagehead .art{flex:none;width:250px;height:132px;border-radius:12px;background:rgba(245,230,223,.6);display:grid;place-items:center;text-align:center;color:var(--ink-40);font-size:12px;padding:10px;line-height:1.35}
+.rule{max-width:1400px;margin:18px auto 0;border-top:1px solid var(--ink-12)}
+
+.group{max-width:1480px;margin:0 auto;padding:22px 24px 90px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+@media (max-width:1180px){.group{grid-template-columns:minmax(0,1fr)}.rail{position:static !important;height:auto !important}}
+
+.seg{display:inline-flex;background:var(--cream);border:1px solid var(--ink-12);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;cursor:pointer;border-radius:8px;padding:6px 13px;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-70)}
+.seg button[aria-pressed="true"]{background:var(--anthracite);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ink-12);background:#fff;border-radius:10px;padding:8px 14px;font-size:14px;cursor:pointer;color:var(--ink);box-shadow:var(--shadow-soft);font-family:"Source Serif 4",serif}
+.btn svg{width:15px;height:15px;stroke:var(--ink-70);stroke-width:1.6;fill:none}
+.btn:hover{background:var(--cream)}
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+
+.card{background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:24px}
+.card>.cap{padding:15px 22px 0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.card>.cap h3{font-family:"Special Elite",monospace;font-weight:400;font-size:17px;margin:0}
+.card>.cap .sub{font-size:13px;color:var(--ink-55)}
+.card .inner{padding:14px 22px 22px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--ink-08)}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-70)}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(28,19,15,.14);display:inline-block}
+svg text{font-family:"Source Serif 4",serif}
+.axlab{font-size:10.5px;fill:rgba(28,19,15,.5)}
+.rowlab{font-size:11.5px;fill:rgba(28,19,15,.78)}
+.tick{stroke:rgba(28,19,15,.08);stroke-width:1}
+.twoup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:900px){.twoup{grid-template-columns:minmax(0,1fr)}}
+.sampnote{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-70);background:var(--sand);border:1px solid rgba(28,19,15,.10);border-radius:999px;padding:2px 10px}
+.sampnote svg{width:11px;height:11px;stroke:var(--ink-70);stroke-width:1.8;fill:none}
+.sec{margin:34px 0 14px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec h2{font-family:"Special Elite",monospace;font-weight:400;font-size:24px;margin:0}
+.sec .note{font-size:13px;color:var(--ink-55)}
+
+/* closing caveats block (A & C) */
+.caveats{background:var(--cream);border:1px solid var(--ink-12);border-radius:var(--r-card);padding:20px 24px;margin-top:8px}
+.caveats h3{font-family:"Special Elite",monospace;font-weight:400;font-size:19px;margin:0 0 4px}
+.caveats .lead{font-size:14px;color:var(--ink-55);margin:0 0 16px}
+.caveats .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px}
+@media (max-width:820px){.caveats .grid{grid-template-columns:minmax(0,1fr)}}
+.caveats h4{font-family:"Special Elite",monospace;font-weight:400;font-size:13.5px;margin:0 0 4px}
+.caveats p{margin:0;font-size:13.5px;color:var(--ink-70);line-height:1.45}
+
+/* hero A */
+.heroA{background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:26px 28px;margin-bottom:24px;display:flex;align-items:center;gap:26px}
+.heroA .said{font-family:"Special Elite",monospace;font-size:31px;line-height:1.3;margin:0;max-width:20ch}
+.heroA .said b{font-weight:400;background:var(--blush);padding:0 7px;border-radius:5px}
+.heroA .under{margin-top:14px;font-size:14px;color:var(--ink-70)}
+.heroA .artslot{flex:none;width:230px;height:158px;border-radius:12px;background:rgba(224,229,221,.55);display:grid;place-items:center;text-align:center;font-size:12px;color:var(--ink-40);padding:10px;line-height:1.35}
+.journeyBig{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:start;padding:10px 4px 0}
+.jstage{text-align:center;padding:10px 12px 14px;border-radius:12px}
+.jstage:hover{background:var(--cream)}
+.jstage .ring{height:96px;display:grid;place-items:center}
+.jstage .n{font-family:"Special Elite",monospace;font-size:56px;line-height:1}
+.jstage .k{font-family:"Special Elite",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-55);margin-top:8px}
+.jstage .d{font-size:13px;color:var(--ink-70);margin-top:8px;line-height:1.4;min-height:54px}
+.jstage .split{margin-top:10px;border-top:1px solid var(--ink-08);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.jstage .srow{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-70)}
+.jstage .srow .bar{flex:1;height:7px;border-radius:4px;background:var(--greyf);overflow:hidden}
+.jstage .srow .bar i{display:block;height:100%;border-radius:4px}
+.jarrow{padding-top:44px;min-width:104px;text-align:center}
+.jarrow .pct{font-family:"Special Elite",monospace;font-size:19px;font-style:italic}
+.jarrow .lab{font-family:"Special Elite",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55)}
+.jarrow svg{width:100%;height:12px;stroke:var(--ink-40);stroke-width:1.4;fill:none;margin-top:4px}
+.factline{display:flex;flex-wrap:wrap;background:var(--cream);border:1px solid var(--ink-12);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.factline div{padding:12px 20px;border-right:1px solid var(--ink-12);flex:1;min-width:158px}
+.factline div:last-child{border-right:0}
+.factline .k{font-family:"Special Elite",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55)}
+.factline .v{font-family:"Special Elite",monospace;font-size:24px;margin-top:3px}
+.factline .s{font-size:12px;color:var(--ink-55);margin-top:2px}
+
+/* B question sections */
+.qsec{margin-bottom:40px}
+.qsec .qhead{display:flex;align-items:flex-start;gap:22px;margin-bottom:16px}
+.qsec .qart{flex:none;width:124px;height:100px;border-radius:12px;background:rgba(245,230,223,.55);display:grid;place-items:center;text-align:center;font-size:10.5px;color:var(--ink-40);padding:8px;line-height:1.3}
+.qsec h2{font-family:"Special Elite",monospace;font-weight:400;font-size:28px;margin:0 0 9px;line-height:1.15}
+.qsec .answer{font-size:18px;line-height:1.5;margin:0;max-width:58ch}
+.qsec .answer b{font-weight:600}
+.qsec .caveat{margin-top:11px}
+.qrule{border-top:1px solid var(--ink-12);margin:0 0 34px}
+
+/* C strip */
+.stripfun{display:flex;align-items:stretch;background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow-card);margin-bottom:24px;overflow:hidden}
+.stripfun .sf{flex:1;padding:15px 18px;display:flex;align-items:center;gap:13px;border-right:1px solid var(--ink-08)}
+.stripfun .sf:last-child{border-right:0}
+.stripfun .sf .g{flex:none;width:36px;height:36px}
+.stripfun .sf .n{font-family:"Special Elite",monospace;font-size:27px;line-height:1}
+.stripfun .sf .k{font-family:"Special Elite",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55);margin-top:3px}
+.stripfun .sf .pct{margin-left:auto;font-family:"Special Elite",monospace;font-size:12px;font-style:italic;color:var(--ink-55)}
+
+/* rail */
+.rail{position:sticky;top:16px;height:calc(100vh - 88px);display:flex;flex-direction:column;background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow-card);overflow:hidden}
+.rail .head{background:var(--blush);padding:12px 18px 10px;position:relative;flex:none;min-height:68px;display:flex;align-items:center}
+.rail .head h2{font-family:"Special Elite",monospace;font-weight:400;font-size:21px;margin:0;line-height:1.1;max-width:62%}
+.rail .head .bird{position:absolute;right:14px;bottom:0;width:76px;height:58px;border-radius:8px 8px 0 0;background:rgba(255,255,255,.5);display:grid;place-items:center;text-align:center;font-size:9.5px;color:var(--ink-40);padding:4px;line-height:1.2}
+.rail .scroll{overflow-y:auto;padding:16px 18px 20px}
+.tl{position:relative;padding-left:26px}
+.tl:before{content:"";position:absolute;left:7px;top:6px;bottom:18px;width:1px;background:var(--ink-12)}
+.ev{position:relative;padding-bottom:20px}
+.ev .mk{position:absolute;left:-26px;top:2px;width:15px;height:15px}
+.ev .date{font-family:"Special Elite",monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-55)}
+.ev .what{font-size:14.5px;line-height:1.35;margin-top:2px}
+.ev .who{font-size:13px;color:var(--ink-55);margin-top:1px}
+.ev.now .what{font-family:"Special Elite",monospace;font-size:14px}
+.ev .gap{display:inline-block;font-size:11.5px;color:var(--ink-40);margin-top:5px}
+.railfoot{border-top:1px solid var(--ink-08);padding:12px 18px;font-size:12.5px;color:var(--ink-55);flex:none;background:var(--cream)}
+</style>
+</head>
+<body>
+<div class="mocktag">A · Journey, rebuilt big</div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="mark tw">Q</div><div class="name">QueryHawk</div></div>
+    <a class="navitem"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+    <div class="navgroup"><div class="eyebrow">Queries</div>
+      <a class="navitem"><svg viewBox="0 0 24 24"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3z"/></svg>Query Centre</a>
+      <a class="navitem active"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 5-8 4 5"/></svg>Analytics</a></div>
+    <div class="navgroup"><div class="eyebrow">Agents</div>
+      <a class="navitem"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5S15 16.7 15 20M17 11h4M19 9v4"/></svg>Contact list</a>
+      <a class="navitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-5 2 2-5 5-2z"/></svg>Discover</a></div>
+    <div class="navgroup"><div class="eyebrow">Materials</div>
+      <a class="navitem"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 5l4 15M18 6l3 13"/></svg>Manuscripts</a>
+      <a class="navitem"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v12"/></svg>Comparable titles</a>
+      <a class="navitem"><svg viewBox="0 0 24 24"><path d="M5 4h11l4 4v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 12h8M8 16h5"/></svg>Submission packages</a></div>
+    <div class="navgroup"><div class="eyebrow">Tasks</div>
+      <a class="navitem"><svg viewBox="0 0 24 24"><path d="m3 7 2.5 2.5L10 5M3 17l2.5 2.5L10 15M13 8h8M13 17h8"/></svg>To-do list<span class="count"><span class="dot"></span>19</span></a>
+      <a class="navitem"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</a>
+      <a class="navitem"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>Noteboard</a></div>
+    <div class="navgroup"><div class="eyebrow">Account</div>
+      <a class="navitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8a2 2 0 1 1-2.8 2.8a1.6 1.6 0 0 0-2.7 1.1a2 2 0 1 1-4 0a1.6 1.6 0 0 0-2.7-1.1a2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 3 14.9a2 2 0 1 1 0-4a1.6 1.6 0 0 0 1.6-2.6a2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0a1.6 1.6 0 0 0 2.8 1.2a2 2 0 1 1 2.8 2.8a1.6 1.6 0 0 0 1.1 2.7a2 2 0 1 1 0 4a1.6 1.6 0 0 0-1.3 1.3z"/></svg>Settings</a></div>
+    <div class="sidefoot"><div class="avatar tw">BC</div><div><div class="who">Bethany Carter</div><div class="plan">Pro plan</div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="ghostbtn"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+      <div class="pagename">Analytics</div><div class="spacer"></div>
+      <div class="msswitch"><div class="bk"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#1c130f;stroke-width:1.5;fill:none"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h5"/></svg></div>
+        <div><div class="t">Murphy's Day Out</div><div class="s">Thriller · 50,000 words</div></div>
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:rgba(28,19,15,.5);stroke-width:1.6;fill:none"><path d="m6 9 6 6 6-6"/></svg></div>
+      <button class="ghostbtn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      <button class="feedback"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:rgba(28,19,15,.6);stroke-width:1.6;fill:none"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"/></svg>Give feedback</button>
+      <button class="ghostbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.2 2.5c-.6.2-.7.7-.7 1.3M12 17h.01"/></svg></button>
+    </div>
+
+    <div class="scroller">
+      <div class="pagehead">
+        <div class="pagehead-in">
+          <div style="flex:1;min-width:0">
+            <h1>Analytics</h1>
+            <p class="sub">How <em>Murphy's Day Out</em> is going with agents — and what the numbers can't tell you.</p>
+          </div>
+          <div class="art">Illustration slot<br>the Archivist<br>with his tally</div>
+        </div>
+        <div class="rule"></div>
+      </div>
+
+      <div class="group">
+        <div>
+
+<div class="heroA">
+  <div style="flex:1;min-width:0">
+    <p class="said"><b>27</b> queries out.<br><b>10</b> agents asked to read more.<br><b>1</b> offer.</p>
+    <div class="under">Since 4 November 2025 · 13 still awaiting a first reply</div>
+  </div>
+  <div class="artslot">Illustration slot<br>Archivist at his ledger,<br>counting the tally</div>
+</div>
+<div class="controls">
+  <div class="seg"><button aria-pressed="true">All time</button><button>Last 6 months</button><button>Last 3 months</button></div>
+  <span style="flex:1"></span>
+  <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Share card</button>
+  <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>Export</button>
+</div>
+<div class="card">
+  <div class="cap"><h3>The journey so far</h3><span class="sub">Where 27 submissions reached</span></div>
+  <div class="inner">
+    <div class="journeyBig">
+      <div class="jstage">
+        <div class="ring"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="29" fill="none" stroke="#1c130f" stroke-width="4.2"/></svg></div>
+        <div class="n">27</div><div class="k">Queried</div>
+        <div class="d">Letter, synopsis and opening chapters out with agents</div>
+        <div class="split">
+          <div class="srow"><span class="bar"><i style="width:48%;background:#f7efe3"></i></span>13 still out</div>
+          <div class="srow"><span class="bar"><i style="width:52%;background:#e4e1db"></i></span>14 answered</div>
+        </div>
+      </div>
+      <div class="jarrow"><div class="pct">37%</div><div class="lab">went on</div>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6h88" stroke-dasharray="3 4"/><path d="m88 2 5 4-5 4"/></svg></div>
+      <div class="jstage">
+        <div class="ring"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="29" fill="none" stroke="#1c130f" stroke-width="4.2" stroke-dasharray="8 6.5"/><path d="M40 17a23 23 0 0 1 0 46z" fill="#1c130f"/></svg></div>
+        <div class="n">10</div><div class="k">Material requested</div>
+        <div class="d">Asked to read more — 5 partial, 5 straight to full</div>
+        <div class="split">
+          <div class="srow"><span class="bar"><i style="width:50%;background:#f5e6df"></i></span>5 partials</div>
+          <div class="srow"><span class="bar"><i style="width:50%;background:#e0e5dd"></i></span>5 to full</div>
+        </div>
+      </div>
+      <div class="jarrow"><div class="pct">5 of 10</div><div class="lab">went on</div>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6h88" stroke-dasharray="3 4"/><path d="m88 2 5 4-5 4"/></svg></div>
+      <div class="jstage">
+        <div class="ring"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="29" fill="none" stroke="#1c130f" stroke-width="4.2" stroke-dasharray="8 6.5"/><circle cx="40" cy="40" r="19" fill="#1c130f"/></svg></div>
+        <div class="n">5</div><div class="k">Full manuscript</div>
+        <div class="d">Reading the whole book</div>
+        <div class="split">
+          <div class="srow"><span class="bar"><i style="width:60%;background:#f5e6df"></i></span>3 still reading</div>
+          <div class="srow"><span class="bar"><i style="width:40%;background:#e4e1db"></i></span>2 answered</div>
+        </div>
+      </div>
+      <div class="jarrow"><div class="pct">1 of 5</div><div class="lab">went on</div>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6h88" stroke-dasharray="3 4"/><path d="m88 2 5 4-5 4"/></svg></div>
+      <div class="jstage">
+        <div class="ring"><svg width="80" height="80" viewBox="0 0 80 80"><path d="M24 15h22l11 11v39H24z" fill="none" stroke="#1c130f" stroke-width="4" stroke-linejoin="round"/><path d="M33 36h18M33 45h18M33 54h11" stroke="#1c130f" stroke-width="3.6" stroke-linecap="round"/></svg></div>
+        <div class="n">1</div><div class="k">Offer</div>
+        <div class="d">Offers of representation</div>
+        <div class="split"><div class="srow"><span class="bar"><i style="width:100%;background:#d7e0e8"></i></span>Open, undecided</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="factline">
+  <div><div class="k">Request rate</div><div class="v">37%</div><div class="s">10 of 27 queries</div></div>
+  <div><div class="k">Still out</div><div class="v">13</div><div class="s">Oldest sent 4 Nov</div></div>
+  <div><div class="k">Median wait</div><div class="v">62 days</div><div class="s">From 12 dated replies</div></div>
+  <div><div class="k">Busiest month</div><div class="v">June</div><div class="s">4 queries sent</div></div>
+</div>
+
+<div class="sec"><h2>Timings</h2><span class="note">Based on the 12 queries that have had a reply</span></div>
+
+<div class="card">
+  <div class="cap"><h3>When replies arrived</h3><span class="sub">Against the response window each agent states</span></div>
+  <div class="inner"><svg viewBox="0 0 760 330" data-chart="reply" data-lab="58" width="100%"></svg><div class="legend"><span><i class="sw" style="background:#f7efe3"></i>The window the agent states</span><span><i class="sw" style="background:#e0e5dd;border-radius:50%"></i>Asked for more</span><span><i class="sw" style="background:#f5e6df;border-radius:50%"></i>Went to full</span><span><i class="sw" style="background:#d7e0e8;border-radius:50%"></i>Offer</span><span><i class="sw" style="background:#e4e1db;border-radius:50%"></i>Closed</span></div></div>
+</div>
+
+<div class="twoup">
+  <div class="card"><div class="cap"><h3>Weeks to an ending</h3><span class="sub">How long each closed query ran</span></div>
+    <div class="inner"><svg viewBox="0 0 400 200" data-chart="weeks" data-lab="88" width="100%"></svg>
+      <div class="legend"><span><i class="sw" style="width:2px;height:14px;background:#1c130f;border:0"></i>Median</span><span>One marker = one query</span></div></div></div>
+  <div class="card"><div class="cap"><h3>Stage to stage</h3><span class="sub">The gap between each step</span></div>
+    <div class="inner"><svg viewBox="0 0 400 200" data-chart="stage" data-lab="158" width="100%"></svg>
+      <div class="legend"><span>Bar = fastest to slowest</span><span class="sampnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5"/></svg>Last two rows rest on 5 and 1 queries</span></div></div></div>
+</div>
+
+<div class="sec"><h2>Volume</h2><span class="note">Queries sent each month, and where they stand today</span></div>
+<div class="card">
+  <div class="inner" style="padding-top:20px"><svg viewBox="0 0 760 230" data-chart="vol" width="100%"></svg><div class="legend"><span><i class="sw" style="background:#f7efe3"></i>Still queried</span><span><i class="sw" style="background:#f5e6df"></i>Material requested</span><span><i class="sw" style="background:#e0e5dd"></i>Material sent</span><span><i class="sw" style="background:#d7e0e8"></i>Offer</span><span><i class="sw" style="background:#e4e1db"></i>Closed</span></div></div>
+</div>
+<div class="caveats">
+  <h3>What these numbers can't tell you</h3>
+  <p class="lead">Every figure on this page rests on 27 queries and 12 replies.</p>
+  <div class="grid">
+    <div><h4>Rates move on one reply</h4><p>The request rate shifts by roughly four percentage points each time one more agent answers. Read it as a shape, not a score.</p></div>
+    <div><h4>Silence isn't a no</h4><p>13 queries are still out. They sit outside the request rate until they close, so it can move in either direction.</p></div>
+    <div><h4>Median, not average</h4><p>One reply after two years would drag an average out of shape. The median shows the middle of the pack.</p></div>
+    <div><h4>None of this is about the book alone</h4><p>How full an agent's list is, what sold last season, who's on leave, whether it landed on the right desk in the right week — none of it is visible from your side.</p></div>
+  </div>
+</div>
+        </div>
+
+        <aside class="rail">
+          <div class="head">
+            <h2>The story so far</h2>
+            <div class="bird">Archivist<br>head, peeking</div>
+          </div>
+          <div class="scroll">
+            <div class="tl">
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#fff" stroke="#1c130f" stroke-width="2"/></svg>
+                <div class="date">4 Nov 2025</div>
+                <div class="what">First query went out</div>
+                <div class="who">Ayres · Ayres &amp; Colt</div>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#fff" stroke="#1c130f" stroke-width="2" stroke-dasharray="2.4 2"/><path d="M8 2a6 6 0 0 1 0 12z" fill="#1c130f"/></svg>
+                <div class="date">12 Dec 2025</div>
+                <div class="what">First request for material</div>
+                <div class="who">Cheng · Dunhill Literary — partial</div>
+                <span class="gap">38 days after the first query</span>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#fff" stroke="#1c130f" stroke-width="2"/><circle cx="8" cy="8" r="3.4" fill="#1c130f"/></svg>
+                <div class="date">3 Feb 2026</div>
+                <div class="what">First full manuscript requested</div>
+                <div class="who">Hollis · The Hollis Agency</div>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><path d="M4 2h6l3 3v9H4z" fill="#fff" stroke="#1c130f" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                <div class="date">17 Mar 2026</div>
+                <div class="what">An offer of representation</div>
+                <div class="who">Hollis · The Hollis Agency — still open</div>
+                <span class="gap">134 days from first request</span>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f7efe3" stroke="#1c130f" stroke-width="2"/></svg>
+                <div class="date">Apr 2026</div>
+                <div class="what">Version 3 of the query letter</div>
+                <div class="who">Used for every query since</div>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f7efe3" stroke="#1c130f" stroke-width="2"/></svg>
+                <div class="date">June 2026</div>
+                <div class="what">Busiest month — 4 queries out</div>
+                <div class="who">Three still awaiting a reply</div>
+              </div>
+              <div class="ev">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#fff" stroke="#1c130f" stroke-width="2" stroke-dasharray="2.4 2"/><circle cx="8" cy="8" r="3.4" fill="#1c130f"/></svg>
+                <div class="date">2 Sep 2026</div>
+                <div class="what">Most recent full requested</div>
+                <div class="who">Okonjo · Marsh &amp; Okonjo</div>
+              </div>
+              <div class="ev now">
+                <svg class="mk" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="#1c130f" stroke-width="2" stroke-dasharray="1.6 2.4"/></svg>
+                <div class="date">Today</div>
+                <div class="what">13 queries still out · 3 fulls being read</div>
+              </div>
+            </div>
+          </div>
+          <div class="railfoot">329 days of querying this book, from the first letter to today.</div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(t,a){var e=document.createElementNS(NS,t);for(var k in a){e.setAttribute(k,a[k]);}return e;}
+  function box(s){var v=s.getAttribute('viewBox').split(' ');return {W:+v[2],H:+v[3]};}
+  function labw(s){return +(s.getAttribute('data-lab')||60);}
+
+  var replies=[
+    {n:'Ayres',   win:6,  at:6.3, st:'#e0e5dd'},
+    {n:'Bell',    win:8,  at:10,  st:'#f5e6df'},
+    {n:'Cheng',   win:4,  at:2,   st:'#f5e6df'},
+    {n:'Duarte',  win:8,  at:8,   st:'#e4e1db'},
+    {n:'Feld',    win:6,  at:13,  st:'#e4e1db'},
+    {n:'Grant',   win:12, at:11,  st:'#e4e1db'},
+    {n:'Hollis',  win:10, at:7,   st:'#d7e0e8'},
+    {n:'Jarrow',  win:8,  at:15,  st:'#e4e1db'},
+    {n:'Lowe',    win:6,  at:9,   st:'#e4e1db'},
+    {n:'Okonjo',  win:4,  at:3,   st:'#e0e5dd'},
+    {n:'Reeve',   win:6,  at:17,  st:'#e4e1db'},
+    {n:'Usher',   win:8,  at:5,   st:'#f5e6df'}
+  ];
+
+  document.querySelectorAll('[data-chart="reply"]').forEach(function(s){
+    var b=box(s),x0=labw(s),x1=b.W-14,per=(x1-x0)/20,rowH=(b.H-40)/replies.length;
+    [4,8,12,16,20].forEach(function(w){
+      s.appendChild(el('line',{'class':'tick',x1:x0+w*per,y1:6,x2:x0+w*per,y2:b.H-30}));
+      var t=el('text',{'class':'axlab',x:x0+w*per,y:b.H-14,'text-anchor':'middle'});t.textContent=w+'w';s.appendChild(t);
+    });
+    replies.forEach(function(r,i){
+      var y=10+i*rowH;
+      var t=el('text',{'class':'rowlab',x:4,y:y+11});t.textContent=r.n;s.appendChild(t);
+      s.appendChild(el('rect',{x:x0,y:y+1,width:Math.max(6,r.win*per),height:13,rx:6.5,fill:'#f7efe3'}));
+      s.appendChild(el('circle',{cx:x0+r.at*per,cy:y+7.5,r:5.5,fill:r.st,stroke:'#1c130f','stroke-width':1.6}));
+    });
+  });
+
+  document.querySelectorAll('[data-chart="weeks"]').forEach(function(s){
+    var b=box(s),lanes=[{k:'Rejected',pts:[5,9,10.5,15,12],med:10.5,c:'#e4e1db'},
+      {k:'No response',pts:[16,19,23],med:19,c:'#e4e1db'},
+      {k:'Withdrawn',pts:[12],med:12,c:'#e4e1db'},
+      {k:'Offer',pts:[21],med:21,c:'#d7e0e8'}];
+    var x0=labw(s),x1=b.W-14,per=(x1-x0)/26;
+    [8,16,24].forEach(function(w){
+      s.appendChild(el('line',{'class':'tick',x1:x0+w*per,y1:8,x2:x0+w*per,y2:b.H-32}));
+      var t=el('text',{'class':'axlab',x:x0+w*per,y:b.H-16,'text-anchor':'middle'});t.textContent=w+'w';s.appendChild(t);
+    });
+    lanes.forEach(function(l,i){
+      var y=14+i*40;
+      s.appendChild(el('rect',{x:x0,y:y,width:x1-x0,height:30,rx:8,fill:'#faf7f1'}));
+      var t=el('text',{'class':'rowlab',x:4,y:y+19});t.textContent=l.k;s.appendChild(t);
+      l.pts.forEach(function(p){s.appendChild(el('circle',{cx:x0+p*per,cy:y+15,r:6,fill:l.c,stroke:'#1c130f','stroke-width':1.4}));});
+      s.appendChild(el('line',{x1:x0+l.med*per,y1:y-2,x2:x0+l.med*per,y2:y+32,stroke:'#1c130f','stroke-width':2}));
+    });
+  });
+
+  document.querySelectorAll('[data-chart="stage"]').forEach(function(s){
+    var b=box(s),rows=[{k:'Queried → requested',lo:12,hi:52,med:26,c:'#f5e6df'},
+      {k:'Requested → material sent',lo:1,hi:11,med:4,c:'#e0e5dd'},
+      {k:'Sent → full requested',lo:18,hi:66,med:44,c:'#f5e6df'},
+      {k:'Full → offer',lo:44,hi:84,med:66,c:'#d7e0e8'}];
+    var x0=labw(s),x1=b.W-14,per=(x1-x0)/95;
+    [30,60,90].forEach(function(d){
+      s.appendChild(el('line',{'class':'tick',x1:x0+d*per,y1:8,x2:x0+d*per,y2:b.H-32}));
+      var t=el('text',{'class':'axlab',x:x0+d*per,y:b.H-16,'text-anchor':'middle'});t.textContent=d+'d';s.appendChild(t);
+    });
+    rows.forEach(function(r,i){
+      var y=20+i*40;
+      var t=el('text',{'class':'rowlab',x:4,y:y+12});t.textContent=r.k;s.appendChild(t);
+      s.appendChild(el('rect',{x:x0+r.lo*per,y:y+2,width:Math.max(8,(r.hi-r.lo)*per),height:13,rx:6.5,fill:r.c}));
+      s.appendChild(el('line',{x1:x0+r.med*per,y1:y-2,x2:x0+r.med*per,y2:y+19,stroke:'#1c130f','stroke-width':2}));
+    });
+  });
+
+  document.querySelectorAll('[data-chart="vol"]').forEach(function(s){
+    var b=box(s);
+    var months=[['Nov',[['#e4e1db',2]]],['Dec',[['#e4e1db',2],['#f5e6df',1]]],['Jan',[['#e4e1db',3]]],
+      ['Feb',[['#e4e1db',2],['#f5e6df',2]]],['Mar',[['#e4e1db',1],['#d7e0e8',1]]],['Apr',[['#f7efe3',2],['#f5e6df',1]]],
+      ['May',[['#f7efe3',2]]],['Jun',[['#f7efe3',3],['#e0e5dd',1]]],['Jul',[['#f7efe3',3]]],
+      ['Aug',[['#f7efe3',2]]],['Sep',[['#f7efe3',1]]]];
+    var base=b.H-48,unit=26,x=42,gap=17,bw=(b.W-42-14-gap*10)/11;
+    [0,2,4].forEach(function(v){
+      s.appendChild(el('line',{'class':'tick',x1:34,y1:base-v*unit,x2:b.W-14,y2:base-v*unit}));
+      var t=el('text',{'class':'axlab',x:28,y:base-v*unit+4,'text-anchor':'end'});t.textContent=v;s.appendChild(t);
+    });
+    months.forEach(function(m){
+      var y=base;
+      m[1].forEach(function(seg){var h=seg[1]*unit;y-=h;
+        s.appendChild(el('rect',{x:x,y:y,width:bw,height:h,rx:4,fill:seg[0],stroke:'rgba(28,19,15,.12)'}));});
+      var t=el('text',{'class':'axlab',x:x+bw/2,y:base+18,'text-anchor':'middle'});t.textContent=m[0];s.appendChild(t);
+      x+=bw+gap;
+    });
+  });
+
+  document.querySelectorAll('[data-chart="funnel"]').forEach(function(s){
+    var b=box(s),st=[{n:27,k:'Queried',c:'#f7efe3'},{n:10,k:'Material requested',c:'#f5e6df'},
+      {n:5,k:'Full manuscript',c:'#e0e5dd'},{n:1,k:'Offer',c:'#d7e0e8'}];
+    var pcts=['37%','5 of 10','1 of 5'];
+    var gaps=3,gapw=44,avail=b.W-28-gaps*gapw,x=14;
+    var ws=[0.38,0.26,0.20,0.16].map(function(f){return avail*f;});
+    st.forEach(function(d,i){
+      var w=ws[i],y=26,h=104;
+      s.appendChild(el('rect',{x:x,y:y,width:w,height:h,rx:12,fill:d.c,stroke:'rgba(28,19,15,.12)'}));
+      var n=el('text',{x:x+20,y:y+58,fill:'#1c130f','font-size':40,'font-family':'Special Elite, monospace'});n.textContent=d.n;s.appendChild(n);
+      var k=el('text',{x:x+20,y:y+84,fill:'rgba(28,19,15,.6)','font-size':11.5,'font-family':'Special Elite, monospace','letter-spacing':'1.3'});k.textContent=d.k.toUpperCase();s.appendChild(k);
+      if(i<3){
+        var px=x+w+6;
+        s.appendChild(el('path',{d:'M'+px+' 78 h'+(gapw-14),stroke:'rgba(28,19,15,.4)','stroke-width':1.4,'stroke-dasharray':'3 4',fill:'none'}));
+        s.appendChild(el('path',{d:'M'+(px+gapw-18)+' 74 l5 4 l-5 4',stroke:'rgba(28,19,15,.4)','stroke-width':1.4,fill:'none'}));
+        var p=el('text',{x:px+(gapw-14)/2,y:66,'text-anchor':'middle',fill:'rgba(28,19,15,.6)','font-size':12.5,'font-family':'Special Elite, monospace','font-style':'italic'});
+        p.textContent=pcts[i];s.appendChild(p);
+      }
+      x+=w+gapw;
+    });
+  });
+
+  document.querySelectorAll('[data-chart="lanes"]').forEach(function(s){
+    var b=box(s);
+    var names=['Ayres','Bell','Cheng','Duarte','Feld','Grant','Hollis','Ives','Jarrow','Keeble','Lowe','Mbeki','Norris','Okonjo','Pike','Quill','Reeve','Sands','Tait','Usher','Vance','Ward','Xiao','Yates','Zane','Ashby','Blythe'];
+    var starts=[0,3,9,14,22,36,48,55,70,84,96,110,118,133,147,160,174,188,196,210,224,238,252,266,280,295,309];
+    var ends=[220,140,96,180,300,null,null,null,255,null,200,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
+    var cols=['#e4e1db','#e4e1db','#f5e6df','#e4e1db','#e4e1db','#f7efe3','#d7e0e8','#f7efe3','#e4e1db','#f7efe3','#e4e1db','#f7efe3','#f7efe3','#e0e5dd','#f7efe3','#f7efe3','#e4e1db','#f7efe3','#f7efe3','#f5e6df','#f7efe3','#f7efe3','#f7efe3','#e0e5dd','#f7efe3','#f7efe3','#f7efe3'];
+    var x0=labw(s),x1=b.W-16,total=332,per=(x1-x0)/total,top=30,rowH=(b.H-top-30)/27;
+    var ms=[[0,'Nov'],[30,'Dec'],[61,'Jan'],[92,'Feb'],[120,'Mar'],[151,'Apr'],[181,'May'],[212,'Jun'],[242,'Jul'],[273,'Aug'],[304,'Sep']];
+    ms.forEach(function(m){
+      s.appendChild(el('line',{'class':'tick',x1:x0+m[0]*per,y1:18,x2:x0+m[0]*per,y2:top+27*rowH+4}));
+      var t=el('text',{'class':'axlab',x:x0+m[0]*per+4,y:13});t.textContent=m[1];s.appendChild(t);
+    });
+    names.forEach(function(n,i){
+      var y=top+i*rowH,a=starts[i],e2=ends[i]===null?total:ends[i];
+      var t=el('text',{'class':'rowlab',x:4,y:y+11});t.textContent=n;s.appendChild(t);
+      s.appendChild(el('rect',{x:x0+a*per,y:y+2,width:Math.max(4,(e2-a)*per),height:12,rx:6,fill:cols[i],stroke:'rgba(28,19,15,.12)'}));
+      if(ends[i]!==null){s.appendChild(el('path',{d:'M'+(x0+e2*per)+' '+(y+1)+' v14',stroke:'rgba(28,19,15,.45)','stroke-width':1.4}));}
+    });
+    s.appendChild(el('line',{x1:x1,y1:18,x2:x1,y2:top+27*rowH+4,stroke:'#1c130f','stroke-width':2}));
+    var td=el('text',{'class':'axlab',x:x1-3,y:top+27*rowH+18,'text-anchor':'end',fill:'#1c130f'});td.textContent='today';s.appendChild(td);
+  });
+
+  document.querySelectorAll('.seg').forEach(function(seg){
+    seg.addEventListener('click',function(e){var bt=e.target.closest('button');if(!bt)return;
+      seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false')});
+      bt.setAttribute('aria-pressed','true');});
+  });
+})();
+</script>
+</body>
+</html>
