@@ -113,7 +113,11 @@ export function qcHeaderCopy(count: number, ctx: PressingContext): LivingLine {
     }
     return { headline: "One query out", subline: pressingSentence(ctx) };
   }
-  return { headline: count === 1 ? "One query out" : `${count} queries out`, subline: pressingSentence(ctx) };
+  /* ⚠️ ZERO IS REACHABLE ON A POPULATED ACCOUNT — scoped to a book with nothing out yet. The empty
+     STATE is only for an account with no queries (the page decides that); here the scale is simply
+     none, said in words rather than as a figure. */
+  const headline = count === 0 ? "No queries out" : count === 1 ? "One query out" : `${count} queries out`;
+  return { headline, subline: pressingSentence(ctx) };
 }
 
 export interface ContactCopyContext extends PressingContext {

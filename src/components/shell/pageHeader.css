@@ -644,11 +644,25 @@
 .ph--living.ph--full .ph-title { font-size: clamp(40px, 3.7vw, 56px); line-height: 1.02; min-height: 1.05em; white-space: nowrap; }
 /* two lines or one occupy the same space */
 .ph--living.ph--full .ph-intro { max-width: none; min-height: 52px; }
-.ph--living.ph--full .ph-art { width: 46%; height: 286px; }
-.ph-live { display: inline; }
+/* ⚠️ 286 IS THE REF'S HEIGHT, AND THE REF'S PAGE HAS ROOM ABOVE ITS HEADER THAT OURS DOES NOT. Its drawing
+   rises 40px above the header; here the header sits 18px under the bar and `.ws-window` clips, so a 286
+   box put the top 14px of the Contact list's hawk (the quill's tip) under the window's edge. The box is
+   therefore capped at what fits under the SMALLEST frame — the empty state's 206 + the 26 it hangs below
+   the frame + the 14 of top padding + the header's 18px below the bar = 264 — and `object-fit: contain`
+   scales the drawing rather than cropping it (the brief's "never cropped" outranks the ref's 286 where
+   the two cannot both hold). A CONSTANT, not a share of the frame: a percentage made the art 264 on the
+   empty page and 272–275 on the populated one, so the drawing changed size between states (LH5 caught
+   it); the ref moves its art between states and never resizes it. */
+.ph--living.ph--full .ph-art { width: 46%; height: min(286px, calc(206px + var(--ph-pad-y) + 14px + 18px)); }
+/* ⚠️ THE LIVE LINES' SPANS TAKE THEIR PARENT'S FACE. brand.tsx names bare `span`s as the body sans on
+   every route, so without this the Contact list's headline rendered in Source Sans 3 inside a Special
+   Elite h1 — measured 61.3px against the ref's 55.9, the sans line box being the taller. (The Query
+   Centre escaped it only because `.qcv-own` resets spans.) A class beats the blanket element rule. */
+.ph-live, .ph-swap { display: inline; font-family: inherit; }
 /* the text that changed cross-fades in; the subline 60ms behind. Nothing else animates. Under reduced
    motion the shell's one `.ws-app *` rule makes it instant. */
-.ph-swap { display: inline-block; animation: phSwap 0.34s cubic-bezier(.2, .8, .2, 1) both; }
+.ph-live.ph-swap { display: inline-block; }
+.ph-swap { animation: phSwap 0.34s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes phSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 /* THE EMPTY STATE: no page title and no rule — the eyebrow carries the name. The heading is the
    situation; the buttons and the art keep their places. */

@@ -93,6 +93,11 @@ describe("the Query Centre's two lines", () => {
   it("one query that is with the writer falls back to the pressing sentence", () => {
     expect(sub(qcHeaderCopy(1, ctxOf([partialDue(14)])))).toBe("Marcus Reed’s partial is due Sat 3 Oct.");
   });
+  it("none, on a populated account scoped to an empty book: in words, never '0 queries out'", () => {
+    const l = qcHeaderCopy(0, ctxOf([]));
+    expect(l.headline).toBe("No queries out");
+    expect(sub(l)).toBe("Nothing needs you today.");
+  });
   it("many: the count in the headline, the pressing sentence below", () => {
     const l = qcHeaderCopy(27, ctxOf([partialDue(14), nudgeDue()]));
     expect(l.headline).toBe("27 queries out");
