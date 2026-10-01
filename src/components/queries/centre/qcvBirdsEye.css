@@ -225,7 +225,19 @@
   .qcv-be-row { transition: none; }
 }
 
-.qcv-be-foot-ex { vertical-align: -1px; }
+/**
+ * ⚠️ `display: inline-block` IS LOAD-BEARING, AND IT IS SCOPED BECAUSE A 0-1-0 RULE LOSES HERE.
+ * Found in a screenshot rather than in a measurement (1 Oct). The mark and its words sit inside a
+ * `white-space: nowrap` span expressly so the pair cannot be split — and `nowrap` governs where a
+ * line may BREAK, never whether a child is a block box. Two rules make every `svg` a block on this
+ * page: Tailwind's preflight (`img,svg,video,… { display: block }`, 0-0-1, and LAYERED, so an
+ * unlayered rule of any specificity beats it) and the legacy **`.f12-root svg { display: block }`**,
+ * which is **0-1-1** — so the first attempt, a bare `.qcv-be-foot-ex`, measured `display: block`
+ * with the declaration reading perfectly correctly. `.qcv-be-foot .qcv-be-foot-ex` is 0-2-0 and
+ * wins honestly; never `!important`, and never by moving the rule. The lock is in QC9: the tail is
+ * ONE line tall, which is the claim rather than the spelling.
+ */
+.qcv-be-foot .qcv-be-foot-ex { display: inline-block; vertical-align: -1px; }
 
 /**
  * ⚠️ RESTORED AFTER A REMOVAL TOOK IT OUT WITH THE ROWS (§4, v95). Rewriting this sheet's row block

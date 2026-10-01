@@ -182,11 +182,18 @@
  *
  *     1280 → 582 · 1440 → 732 · 1512 → 799 · 1920 → 888   (the reference: 578 · 728 · 795 · 884)
  *
- * which is 0.935px of column per px of viewport between 1280 and 1512. The reference's 1460 is
- * therefore 750px of column and its 1366 is 662 — so the rendering is reproduced exactly in the
- * state the reference draws, and stays right in the state it cannot draw.
+ * ⚠️ AND THE TWO NUMBERS ARE MEASURED AT THE BOUNDARY ITSELF, NOT INTERPOLATED. The slope between
+ * 1280 and 1512 is 0.935px of column per px of viewport, which puts 1460 at 750 and 1366 at 662 —
+ * and both were one pixel short. Measured at the four viewports that matter:
+ *
+ *     1460 → 750.5625   1461 → 751.5      1366 → 662.59375   1367 → 663.53125
+ *
+ * so a `max-width: 750` does NOT fire at 1460, which is where the reference folds. 751 and 663 are
+ * the only values that fold at the reference's widths and not one pixel earlier. QC5 asserts 1460
+ * and 1366 themselves for exactly this reason: an interpolated threshold is right about the slope
+ * and wrong about the edge, and the edge is the whole claim.
  */
-@container (max-width: 750px) {
+@container (max-width: 751px) {
   /* ⚠️ THE RATIO INVERTS HERE, AT THE FOLD THAT CAUSES IT. This fold MOVES the "ago" into the
      agency line, so from here down the Agent column carries two facts where Where-it-stands carries
      one. At 1 : 1.15 the agent had 164px at a 1440 viewport and clipped "Cavendish & Roe · 9 weeks
@@ -196,7 +203,7 @@
   .qcv-qd, .qcv-cols span:nth-child(3) { display: none; }
   .qcv-ag-ago { display: inline; }
 }
-@container (max-width: 662px) {
+@container (max-width: 663px) {
   .qcv-list { --qcv-tpl: 34px minmax(0, 1.15fr) minmax(0, 1fr) 160px; }
   .qcv-ws, .qcv-cols span:nth-child(4) { display: none; }
 }
