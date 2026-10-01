@@ -10,6 +10,7 @@
  * Nothing here slices the markup: every assertion is a whole-string `toContain`/`toMatch`, per
  * the house rule about specs that slice on a marker they never asserted.
  */
+import { isLivingRoute } from "../../lib/livingRoutes";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { readFileSync } from "node:fs";
@@ -334,13 +335,29 @@ describe("the breadcrumb is chrome", () => {
        */
       const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
       const words = bar.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-      expect(words, `${route}'s bar carries a separator`).not.toContain("/");
+      /* ⚠️ RETARGETED (living headers v3, §2): on the six LIVING routes the bar carries the page's
+         breadcrumb — exactly ONE separator, after the section (`QUERIES /`), and nothing else of a trail.
+         Every other route still carries none (asserted below). */
+      const seps = (words.match(/\//g) ?? []).length;
+      if (isLivingRoute(route) && /ws-pname-s/.test(bar)) {
+        expect(seps, `${route}'s breadcrumb has exactly one separator`).toBe(1);
+        expect(bar, `${route}'s separator follows the section`).toMatch(/class="ws-pname-s">[^<]+ \/</);
+      } else {
+        expect(words, `${route}'s bar carries a separator`).not.toContain("/");
+      }
       expect(words, `${route}'s bar names no product root`).not.toContain("QueryHawk");
       /* the name comes from the NAV the shell is given; this file's fixture has no Agents section, so
          `/agents` is a page the bar cannot name, and it must then say nothing rather than guess */
       const pname = ({ "/queries/analytics": "Analytics", "/todo": "To-do list", "/agents": null } as Record<string, string | null>)[route];
       if (pname) expect(html, `${route}'s bar names the page`).toMatch(new RegExp(`class="ws-pname-n">${pname}<`));
       else expect(html, `${route} is in no section of this nav, so the bar names nothing`).not.toContain("ws-pname-n");
+    }
+    /* a route that is NOT living keeps the quiet bar: no separator, the eyebrow-and-name layout */
+    {
+      const html = at("/todo/calendar");
+      const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
+      expect(bar.replace(/<[^>]*>/g, " ")).not.toContain("/");
+      expect(bar).not.toContain("ws-pname--crumb");
     }
     /* …and the styling went with it, so nothing can quietly render the trail again and look right */
     for (const sel of [".ws-crumb", ".ws-seg", ".ws-sep", ".ws-cur"]) {

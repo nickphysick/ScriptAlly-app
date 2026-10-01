@@ -752,6 +752,16 @@
    measured to change nothing — deleting it left every duration at 0.01ms. */
 .ws-pname-n { font-family: inherit; display: block; }
 .ws-pname-s { display: block; margin-bottom: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-ink-45); }
+/* ══ LIVING HEADERS v3 §2 — THE BREADCRUMB (ref design-refs/page-header/living-headers-v3.html `.tbc`) ══
+   On the six living routes (lib/livingRoutes) the page's name is said here and nowhere else, so it is
+   VISIBLE FROM FIRST PAINT, at rest and in every state — the quiet bar's fade does not apply. One
+   baseline: `SECTION /` in mono 9.5px, letter-spaced, uppercase, at 45% ink; then the name in the
+   typewriter face at 21px. It is route-only, so it is right before any count has arrived. */
+.ws-pagebar--crumb .ws-pname, .ws-pagebar--crumb .ws-bvr { opacity: 1; transform: none; }
+.ws-pagebar--crumb .ws-pname { pointer-events: auto; }
+.ws-pname--crumb { display: flex; align-items: baseline; gap: 9px; font-size: 21px; }
+.ws-pname--crumb .ws-pname-s { display: inline; margin: 0; font-size: 9.5px; letter-spacing: 0.16em; }
+.ws-pname--crumb .ws-pname-n { display: inline; }
 
 /* ══ THE MANUSCRIPT SWITCHER — v2 (ref design-refs/shell/manuscript-switcher-v2.html `.ms`) ══
    The tile is 44 tall and at most 280 wide; the menu is 340, anchored to the tile's right edge, 8px

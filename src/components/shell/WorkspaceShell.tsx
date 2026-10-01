@@ -22,6 +22,7 @@
  *
  * ⚠️ THE IA IS A PROP. This component owns the grammar and no section list.
  */
+import { isLivingRoute } from "../../lib/livingRoutes";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MastheadSectionContext } from "./mastheadSection";
@@ -366,7 +367,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     () => (hit ? sections.find((sx) => sx.id === hit.section)?.label ?? null : null),
     [sections, hit],
   );
-  const mastheadSection = useMemo(() => ({ section: sectionLabel }), [sectionLabel]);
+  /**
+   * LIVING HEADERS v3 §2 — ON THE SIX LIVING ROUTES THE BAR CARRIES THE PAGE'S NAME, so the header's
+   * eyebrow is withheld here, at its one source: the name is said once. Every other route keeps its
+   * eyebrow. The decision is the route alone (`isLivingRoute`), the same call the bar makes below.
+   */
+  const crumbRoute = isLivingRoute(pathname);
+  const mastheadSection = useMemo(() => ({ section: crumbRoute ? null : sectionLabel }), [sectionLabel, crumbRoute]);
   /**
    * §1 (page header v1) — THE BAR GAINS A SHADOW ONCE THE PAGE HAS SCROLLED, and nothing else.
    *
@@ -746,7 +753,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
-          <header ref={barRef} className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}${barNamed ? " ws-pagebar--named" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"}>
+          <header ref={barRef} className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}${barNamed ? " ws-pagebar--named" : ""}${crumbRoute ? " ws-pagebar--crumb" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"} data-crumb={crumbRoute ? "true" : undefined}>
               {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
                   move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
               {/* the sidebar toggle — first in the bar, 24px in from its left, and it does not move
@@ -774,8 +781,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               {pageName && (
                 /* ⚠️ ALWAYS LAID OUT, ONLY HIDDEN: the slot keeps its box at rest so nothing in the bar moves
                    when the name arrives (Q7). Hidden is `aria-hidden` plus `pointer-events: none` (CSS). */
-                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}`} data-shell="pagename" aria-hidden={barNamed ? undefined : true}>
-                  {pageName.section && <small className="ws-pname-s">{pageName.section}</small>}
+                /* LIVING HEADERS v3 §2 — on a living route the name is a BREADCRUMB, shown from first paint:
+                   `SECTION /` in mono, then the name in the typewriter face, on one baseline. */
+                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}${crumbRoute ? " ws-pname--crumb" : ""}`} data-shell="pagename" aria-hidden={barNamed || crumbRoute ? undefined : true}>
+                  {pageName.section && <small className="ws-pname-s">{crumbRoute ? `${pageName.section} /` : pageName.section}</small>}
                   <span className="ws-pname-n">{pageName.name}</span>
                 </span>
               )}
