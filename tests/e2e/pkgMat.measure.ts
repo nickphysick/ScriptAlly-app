@@ -156,7 +156,7 @@ test("S1–S7 · the shell conformance, once (1440, expanded, filled)", async ({
     };
   });
   const tops = await readTops(page);
-  L.check("S1 · the bar reads MATERIALS above Submission packages", ctx, /^materials\s*submission packages$/i.test(r.pname ?? ""), `${r.pname}`);
+  L.check("S1 · the bar reads MATERIALS above Submission packages", ctx, /^materials\s*\/?\s*submission packages$/i.test(r.pname ?? ""), `${r.pname}`);
   L.check("S1 · the page root paints no surface", ctx, /rgba\(\d+, \d+, \d+, 0\)|transparent/.test(r.bg ?? ""), `${r.bg}`);
   L.check("S2 · full PageHeader, top = the Query Centre's (±1)", ctx, r.size === "full" && n(tops.header, qc.header, 1) && n(tops.title, qc.title, 1), `${r.size} ${tops.header}/${qc.header}`);
   L.check("S2 · the title is Special Elite, one line", ctx, /^"?Special Elite/.test(r.titleFam ?? "") && r.titleLines === 1, `${r.titleFam} ${r.titleLines}`);
@@ -341,20 +341,21 @@ test(`P8 · empty · ${W}`, async ({ page }) => {
   await fresh(page, EMPTY);
   const r = await page.evaluate(() => {
     const root = [...document.querySelectorAll('[data-ppv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-    const ex = root?.querySelector('[data-ppv="example"]') as HTMLElement | null;
+    /* living headers v3 §5: the example is the exhibition band now (its label, not an Example tag) */
+    const ex = root?.querySelector('[data-lh="band"]') as HTMLElement | null;
     const lede = root?.querySelector(".ph-intro")?.textContent?.replace(/\s+/g, " ").trim();
     return {
       composer: !!root?.querySelector('[data-ppv="composer"]'), exHidden: ex?.getAttribute("aria-hidden") === "true", exInert: ex?.hasAttribute("inert") ?? false,
-      exTag: ex?.querySelector('[data-ppv="ex-tag"]')?.textContent?.trim() ?? null,
+      exTag: root?.querySelector('[data-lh="exhibition"] .lh-exl')?.textContent?.trim() ?? null,
       exControls: ex ? [...ex.querySelectorAll("button, a[href], input, select, textarea")].filter((c) => !c.closest("[inert]")).length : -1,
-      exClickable: ex ? getComputedStyle(ex.querySelector(".ppv-ghost") ?? ex).pointerEvents !== "none" : true,
+      exClickable: ex ? getComputedStyle(ex).pointerEvents !== "none" : true,
       sbs: !!root?.querySelector('[data-ppv="sbs"]'), retired: !!root?.querySelector('[data-ppv="band"][data-band="retired"]'), lede,
     };
   });
   L.check("P8 · the composer is open by default", ctx, r.composer, "");
-  L.check("P8 · one example card: aria-hidden, inert, tagged Example, not clickable", ctx, r.exHidden && r.exInert && r.exTag === "Example" && r.exControls === 0 && !r.exClickable, JSON.stringify(r));
+  L.check("P8 · the exhibition: aria-hidden, inert, labelled, not clickable", ctx, r.exHidden && r.exInert && r.exTag === "HOW THE PAGE LOOKS ONCE YOU’VE MADE ONE" && r.exControls === 0 && !r.exClickable, JSON.stringify(r));
   L.check("P8 · no Side by side, no Retired", ctx, !r.sbs && !r.retired, "");
-  L.check("P8 · the empty lede", ctx, r.lede === "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received.", `${r.lede}`);
+  L.check("P8 · the empty lede", ctx, r.lede === "Build one package — the letter, the synopsis, the sample — and attach it to a query in one go, with a record of exactly what went.", `${r.lede}`);
   const sel = on(page, '[data-well="letter"] select');
   if (await sel.count()) { await sel.selectOption("pv2e-l1"); await on(page, '[data-ppv="create"]').click(); }
   await expect.poll(async () => (await read(page))?.cards.length ?? 0, { timeout: 12_000 }).toBe(1).catch(() => {});
