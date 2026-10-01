@@ -111,6 +111,8 @@ import {
 import type { EyeFocus } from "../lib/qcBirdsEye";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
+import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
+import { cardsByQuery, comingUp, type ComingUp } from "../lib/qcComingUp";
 import { QcFan } from "./queries/centre/QcFan";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -440,6 +442,8 @@ export const Queries: React.FC<{
     activities,
     journalEntries,
     tasks,
+    /* §3 (v95) — the To-do board's own inputs, so the row's Coming-up verb IS the To-do list's. */
+    taskFlags,
     addJournalEntry,
     addQuery,
     addAgent,
@@ -2270,6 +2274,34 @@ export const Queries: React.FC<{
   const [qcEyeFocus, setQcEyeFocus] = useState<EyeFocus>("all");
   /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
   const [qcGroup, setQcGroup] = useState<GroupBy>("none");
+
+  /**
+   * §3 (v95) · WHAT IS NEXT ON EACH QUERY, from the To-do list's own derivation.
+   *
+   * ⚠️ THE BOARD IS BUILT, NOT RE-DERIVED. `assembleBoardColumns` is the To-do page's one
+   * assembler; this reads it and indexes its cards by `relatedRecordId` — the same key
+   * `queryTaskBadge` uses two hundred lines below, so the row's verb and the page's own task count
+   * cannot be looking at different cards. A second rule for "what is next on this query" is exactly
+   * how a row and a to-do come to disagree, which is what §3 forbids.
+   *
+   * ⚠️ AND IT IS MEMOISED ON THE DATA, not on the clock. `Date.now()` written inline would be a new
+   * value every render and rebuild the whole board each time — the shape that froze the expanded
+   * view's placement effect once already.
+   */
+  const qcPackageName = useCallback((id: string) => packages.find((pk) => pk.id === id)?.packageName ?? null, [packages]);
+  const qcBoardCards = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const { cols } = assembleBoardColumns({
+      tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
+      today, now: Date.now(), mutedTaskRules: currentUser?.mutedTaskRules,
+    });
+    /* ⚠️ `liveBoardCards`, WHICH INCLUDES SNOOZED — and that is right for this column where it is
+       wrong for the badge. The badge counts what the To-do page SHOWS and snoozed is not on it; a
+       query whose task is snoozed still has something coming up, and saying nothing about it here
+       would make the column quietly disagree with the query's own state. */
+    return cardsByQuery(liveBoardCards(cols));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* null until the page has measured its own column — see QcCentre */
@@ -3574,6 +3606,17 @@ export const Queries: React.FC<{
     copy: (n) => qcHeaderCopy(n, { rows: qcLivingRows, agentsById: qcLivingAgents, nowMs: Date.now() }),
   };
   const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter)), qcSort);
+  /** §3 · what is next on each VISIBLE query — the board's card, turned into the column's words. */
+  const qcComing = useMemo(() => {
+    const now = Date.now();
+    const out = new Map<string, ComingUp>();
+    for (const r of qcVisible) {
+      const c = comingUp(qcBoardCards.get(r.id), r, now);
+      if (c) out.set(r.id, c);
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qcVisible, qcBoardCards]);
   const qcById = new Map(qcRows.map((r) => [r.id, r]));
   const sortedList = qcVisible.map((r) => r.query);
   /* ── the head's line, and the sentence's manuscript scope ──
@@ -6659,8 +6702,17 @@ export const Queries: React.FC<{
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
                      sort applies WITHIN each group for free (§2). A grouping that re-ordered would
                      be a second ordering pass disagreeing with the sort control. */
-                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), (id) => packages.find((pk) => pk.id === id)?.packageName ?? null)}
-                  selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
+                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
+                  selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()}
+                  coming={qcComing}
+                  packageName={qcPackageName}
+                  /* ⚠️ THE TRAY'S PRIMARY IS THE PAGE'S OWN ACTION ENGINE, never a second write
+                     path: it opens the query and offers its verb, exactly as pressing the row and
+                     then the card's primary does. Nothing in the tray is destructive in one click —
+                     `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
+                  onAct={(id) => onOpenQuery?.(id)}
+                  onSnooze={(id) => onOpenQuery?.(id)}
+                  onMore={(id) => onOpenQuery?.(id)} />
               )
             }
           />

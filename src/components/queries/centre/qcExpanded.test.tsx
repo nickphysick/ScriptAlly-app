@@ -815,13 +815,21 @@ describe("the dev review — d, e, f (v65.1)", () => {
     expect(slice).toMatch(/stroke="currentColor"/);
   });
 
-  it("f · an undated ledger tile is blank with a dash — not a dash over a dot", () => {
+  /**
+   * ⚠️ RETARGETED FROM THE DATE TILE, WHICH §3 (v95) RETIRED WITH THE FOUR-COLUMN ROW. The finding
+   * it came from stands and is why the case is kept: the tile used to draw an em dash where the
+   * month goes and an interpunct where the day goes — two marks, neither of which is a date,
+   * reading as a tile whose contents failed to load. The v95 row has a Queried COLUMN instead, two
+   * tiers of text, and the same rule applies to it: an undated query says so in words, in both
+   * tiers, and never draws a date-shaped blank.
+   */
+  it("f · an undated query says so in words — never a date-shaped blank", () => {
     const list = read("src/components/queries/centre/QcList.tsx");
-    expect(list, "an em dash where the month goes and an interpunct where the day goes is two marks, neither a date").not.toMatch(/\{sent \? MON\[sent\.getMonth\(\)\] : "—"\}/);
-    expect(list).toMatch(/sent \? <><u>\{MON\[sent\.getMonth\(\)\]\}<\/u><b>\{sent\.getDate\(\)\}<\/b><\/> : <i aria-hidden="true">–<\/i>/);
-    expect(list).toMatch(/data-dated=\{sent \? "true" : "false"\}/);
-    const listCss = read("src/components/queries/centre/qcvList.css");
-    expect(listCss).toMatch(/\.qcv-date--none \{[^}]*justify-content: center/);
+    expect(list, "the retired date tile is back").not.toMatch(/qcv-date/);
+    /* both tiers state the absence, and neither is a mark standing in for a date */
+    expect(list).toMatch(/\{ago \?\? "Not dated"\}/);
+    expect(list).toMatch(/sentMs != null \? queriedDate\(sentMs, nowMs\) : "SEND DATE NOT RECORDED"/);
+    expect(list, "a dash or an interpunct is standing in for a date again").not.toMatch(/>[–—·]</);
   });
 });
 

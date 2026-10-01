@@ -50,13 +50,26 @@ export const RAIL_INSET_X = 22;
  * stacked the card at a 1440 viewport, where this app's window measures 1128 — the everyday case.
  *
  * So it is DERIVED from what has to fit rather than copied: the card's reserved column (384) plus
- * the ledger's own four-column floor (536, `qcvList.css`'s container threshold + 1). Below that the
- * ledger would be dropping its date tile to make room for a card, which is the wrong way round.
+ * the narrowest the ledger is allowed to be (536).
+ *
+ * ⚠️ 536 STOPPED BEING THE FOUR-COLUMN FLOOR IN v95 §3, AND THE VALUE IS UNCHANGED ON PURPOSE. It
+ * used to be `qcvList.css`'s container threshold + 1 — the width at which the row dropped its date
+ * tile — and the argument was that the ledger must not shed a column to make room for a card. The
+ * v95 row has no track floors at all (its flexible tracks are `minmax(0, …)`) and it FOLDS BY
+ * DESIGN, twice, at 750 and 662 of column, both of them widths where the rail is plainly still
+ * beside the list. So the number is now a stated minimum rather than a derived one: at the narrowest
+ * fold the row is the disc, the agent, where-it-stands and coming-up — about 256px of fixed parts,
+ * leaving ~280 for the two flexible columns, which is a name and a status without an ellipsis.
+ *
+ * ⚠️ DERIVING IT FROM THE SECOND FOLD INSTEAD WOULD STACK THE RAIL AT 1280. 384 + 663 is 1047
+ * against a window of 968 at that viewport — so the rail would leave the page at the everyday
+ * laptop width, where the design plainly wants it beside a folded list.
  *
  * ⚠️ AND IT IS A WIDTH OF THE WINDOW, NOT OF THE VIEWPORT, because the sidebar collapses: the same
  * 1440 window gives 1128 of room open and 1312 shut, and only one of those has space for a card.
  */
 export const RAIL_RESERVE = RAIL_W + RAIL_INSET_X * 2;
+/** The narrowest the ledger is allowed to be — a stated minimum since v95 §3; see above. */
 export const LEDGER_MIN = 536;
 export const RAIL_STACK_BELOW = RAIL_RESERVE + LEDGER_MIN;
 

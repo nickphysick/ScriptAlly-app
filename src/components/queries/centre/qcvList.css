@@ -1,102 +1,214 @@
 /**
- * Query Centre v11 — the List. The template is stated ONCE and read by the head and every row.
+ * Query Centre v95 §3 — THE ROW. One card per query, 80px, five columns plus the disc.
  *
- * ⚠️ FLOORS, CEILINGS, AND THE SPARE IN THE GAPS. `minmax(floor, ceiling)` tracks share the width
- * between their limits; past the ceilings `justify-content: space-between` puts what is left into
- * the three gaps, equally. A flexible Agent column ballooned on a wide window; fixed side columns
- * ended up crushed against the right edge. Tracks are sized by these rules alone, never by content
- * — every row is its own grid, and a content-sized track is a column that moves row to row.
- */
-/**
- * ⚠️ v65 §5 · THE ROWS ARE THE CARDS, AND THE LEDGER IS NOT ONE. There is no header row and no
- * ruled frame: a flex column of white cards 10px apart, each with its own shadow and corners. The
- * column headings went with the frame — a heading strip floating above detached cards labels a
- * table that is not there.
+ * ⚠️ WRITTEN AS ONE AUTHORITATIVE BLOCK rather than patched. The v11 row's rules — the four-column
+ * template, the rounded chip, the calendar date tile, the 15px material icons — are DELETED rather
+ * than left inert: a rule the component emits no class for is a rule with no subject, and the next
+ * reader finds it and builds a class back from it.
  *
- * ⚠️ AND THE TRACKS ARE THE REF'S LAST DECLARATION, `minmax(166px,1fr) 170px 78px 46px`. The ref
- * states this template FOUR times across its stacked version blocks; this is the one at the end
- * (its line 1282) and the only one that renders. The brief's prose says a fixed `280px` first
- * track, which is that template's older sibling — a fixed first column cannot give the spare back
- * to the name on a wide page.
+ * ⚠️ THE TEMPLATE IS STATED ONCE, ON `.qcv-list`, AND READ BY THE LABELS AND EVERY ROW. Every row
+ * is its own grid, so a track sized by content would put each row's columns somewhere different —
+ * and the labels and the rows must move together at a fold or the labels name the wrong columns.
+ *
+ * ⚠️ ONE RULE PER SELECTOR, WHICH IS THIS SHEET'S OWN INVARIANT rather than tidiness. A lock three
+ * files over finds its rule by first match, so a second base rule silently repoints every assertion
+ * at whichever block comes first — which is exactly what happened when `.qcv-row` was written as
+ * two (the grid, then the card), and the card's own properties reported as absent.
  */
-.qcv-list { --qcv-tpl: minmax(166px, 1fr) 170px 78px 46px; --qcv-tpl-gap: 14px; display: flex; flex-direction: column; }
+.qcv-list {
+  --qcv-tpl: 34px minmax(0, 1fr) 110px 112px minmax(0, 1.15fr) 160px;
+  --qcv-tpl-gap: 10px;
+  display: flex; flex-direction: column;
+}
 .qcv-rows { display: flex; flex-direction: column; gap: 10px; }
+
+/* the mono column labels, on the row's own template so a fold moves both */
+.qcv-cols {
+  display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap);
+  padding: 0 16px 10px;
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 7.5px; line-height: 1.4;
+  letter-spacing: 0.14em; color: var(--qcv-ink-45);
+}
+.qcv-cols span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /**
- * ⚠️ ONE RULE FOR `.qcv-row`, AND THAT IS THIS SHEET'S OWN INVARIANT rather than tidiness. A lock
- * three files over finds its rule by first match, so a second base rule silently repoints every
- * assertion at whichever block comes first — which is exactly what happened when this was written
- * as two (the grid, then the card), and the card's own properties reported as absent.
- *
  * ⚠️ THE SELECTED RING IS AN INSET SHADOW BESIDE THE BASE ONE, not a border and not a fill. A
  * border would change the card's box by 1.6px on every edge and shuffle every track; a fill would
- * make the chosen row the one card on the page wearing a colour, which is the band's job elsewhere.
+ * make the chosen row the one card on the page wearing a colour, which is the left edge's job.
  * Both shadows are restated together because `box-shadow` has no way to add one.
+ *
+ * ⚠️ `overflow: hidden` IS WHAT CLIPS THE LEFT EDGE TO THE CARD'S CORNERS, and it is also why the
+ * tray is placed inside the card rather than hanging off it.
  */
 .qcv-row {
   display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap); align-items: center;
-  box-sizing: border-box; padding: 12px 18px 12px 16px;
-  position: relative; min-height: 69px; cursor: pointer; outline: none;
-  background: #fff; border-radius: 14px;
+  box-sizing: border-box; padding: 13px 16px;
+  position: relative; overflow: hidden; min-height: 80px; cursor: pointer; outline: none;
+  background: #fff; border-radius: 12px;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
 }
-.qcv-row:hover { background: var(--qcv-parchment); }
+.qcv-row:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 16px 30px -18px rgba(28, 19, 15, 0.3); }
 .qcv-row[aria-selected="true"] { box-shadow: 0 0 0 1.6px var(--qcv-ink) inset, 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22); }
+.qcv-row:focus-visible::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-navy); border-radius: 9px; pointer-events: none; }
 .qcv-row--sk { cursor: default; }
-.qcv-row--sk:hover { background: #fff; }
-/* the chip and the name are ONE column, so a widening gap never separates them */
-.qcv-row-agent { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.qcv-chip { flex: none; box-sizing: border-box; width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(28, 19, 15, 0.08); background: var(--qcv-state, var(--state-closed)); display: flex; align-items: center; justify-content: center; }
-.qcv-row-who { min-width: 0; flex: 1 1 auto; }
-/* ⚠️ 1.3, NOT THE REF'S 1.2: the name is mixed-case Playfair on ONE clipped line (`overflow: hidden`
-   for the ellipsis), and under 1.3 that crops descenders. The pair is 21 + 19 = 40 in a 45px row body. */
-.qcv-row-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 16.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-row-ag { display: block; font-family: var(--qcv-serif); font-style: italic; font-size: 13.5px; line-height: 1.35; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-row-st { min-width: 0; }
-.qcv-row-stn { display: block; font-family: var(--qcv-type); font-weight: 400; font-size: 14.5px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-row-fact { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 8.5px; line-height: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.qcv-mat { display: flex; align-items: center; gap: 6px; }
-.qcv-mat-i { display: block; width: 15px; height: 15px; color: var(--qcv-ink); opacity: 0.16; font-style: normal; }
-.qcv-mat-i--on { opacity: 0.8; }
-.qcv-mat-i svg { display: block; width: 15px; height: 15px; }
-
-.qcv-date { box-sizing: border-box; width: 46px; height: 45px; border: 1px solid var(--qcv-hair); border-radius: 7px; background: #ffffff; overflow: hidden; text-align: center; }
-.qcv-date u { display: block; text-decoration: none; padding: 3px 0 2px; background: var(--qcv-state, var(--state-closed)); border-bottom: 1px solid var(--qcv-hair); font-family: var(--qcv-mono); font-size: 8px; line-height: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
-.qcv-date b { display: block; padding: 5px 0; font-family: var(--qcv-serif); font-weight: 600; font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums lining-nums; }
-/* ⚠️ AN UNDATED TILE IS BLANK WITH A DASH — no month band, no numeral, and nothing pretending to be
-   either. The dash is centred in the whole tile rather than in the numeral's half, because there is
-   no band above it to sit under. */
-.qcv-date--none { display: flex; align-items: center; justify-content: center; }
-.qcv-date--none i { font-style: normal; font-family: var(--qcv-serif); font-size: 17px; line-height: 1; color: var(--qcv-ink-45); }
-
-/* a row where the move is the writer's: a 3px rust rule down its left edge, inset 12 top and bottom.
-   `isWithYou` decides it — partial requested, full requested, R&R; never an offer. */
-/* the rust rail rides the card's own left edge, inside its corners */
-.qcv-row--you::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; background: var(--qcv-rust); border-radius: 0 2px 2px 0; }
-/* selected: an inset ink ring, 3px in — never a fill */
-/* ⚠️ THE SELECTED RING MOVED INTO `box-shadow` (above) AND THE `::after` IS FOCUS'S ALONE. Two
-   rings drawn by two mechanisms on one element is how a focused-and-selected row ends up wearing
-   a double outline 3px apart. */
-.qcv-row:focus-visible::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-navy); border-radius: 11px; pointer-events: none; }
+.qcv-row--sk:hover { transform: none; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22); }
 
 /**
- * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING, AND EVERY TERM IS MEASURED RATHER THAN
- * REASONED. The container is `.qcv-ledger` now (the ledger's `FramedCard` went with the frame, so
- * the ledger is the size container itself), and an inline-size query reads its CONTENT box. A row
- * is a card in that box, so it loses only its OWN padding — 16 + 18 — and no longer two frame
- * borders: the width the tracks actually share is `container - 34`.
+ * §3 · THE LEFT EDGE — 6px of the status fill down the card's left side, and nothing else tinted.
  *
- *   floors 166 + 170 + 78 + 46 = 460, plus three 14px gaps = 502, plus that 34 = 536.
- *
- * ⚠️ THE THRESHOLD IS DERIVED FROM THE FLOORS IN THE LOCK, NEVER RESTATED THERE. Two numbers that
- * agree with each other and with nothing else is what this pair was the last time somebody typed
- * both; `qcList.test.tsx` reads `--qcv-tpl` and requires the value below to be their sum minus one.
- *
- * Under 536 the row is three columns: the icons stay, the date goes, and the skeleton follows.
+ * ⚠️ A `::before` ACROSS THE WHOLE CARD WITH A HARD-STOPPED GRADIENT, not a 6px box. The gradient
+ * is the reference's own, and the reason it beats a narrow element is `border-radius`: a 6px child
+ * at `left: 0` squares off the card's corners unless it carries the corner radii itself, and then
+ * the two radii have to be kept in step by hand.
  */
-@container (max-width: 535px) {
-  .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
-  .qcv-date, .qcv-date-sk { display: none; }
+.qcv-row::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, var(--qcv-state, var(--state-closed)) 0, var(--qcv-state, var(--state-closed)) 6px, rgba(255, 255, 255, 0) 6px);
+}
+.qcv-row > * { position: relative; }
+
+/* ⚠️ A STATED HEIGHT ON THE CELL, so a one-line column and a two-line column are the same box and
+   the row's own height does not depend on which columns are showing. 22 + 3 + 16 is the two tiers. */
+.qcv-c { display: flex; flex-direction: column; justify-content: center; height: 41px; min-width: 0; }
+.qcv-t1 { display: block; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-t2 {
+  display: block; margin-top: 3px; line-height: 16px; font-style: normal;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* the disc, with the glyph on its bottom-right corner */
+.qcv-av {
+  box-sizing: border-box; width: 34px; height: 34px; border-radius: 50%; position: relative;
+  background: var(--qcv-navy); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 10px; line-height: 1; letter-spacing: 0.04em;
+  display: flex; align-items: center; justify-content: center;
+}
+/* ⚠️ THE 2px WHITE RING IS AN OUTER SHADOW, so the glyph reads as sitting ON the disc at any card
+   colour without the disc having to know what is behind it. */
+.qcv-av-g {
+  position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; box-shadow: inset 0 0 0 1.6px var(--qcv-ink), 0 0 0 2px #fff;
+}
+.qcv-av-g--half { background: linear-gradient(90deg, var(--qcv-ink) 50%, #fff 50%); }
+.qcv-av-g--full { background: var(--qcv-ink); }
+
+/* Agent */
+.qcv-ag .qcv-t1 { font-family: var(--qcv-serif); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+/* ⚠️ 1.3 ON A CLIPPED MIXED-CASE PLAYFAIR LINE: under it the descenders crop, and `overflow: hidden`
+   is what makes that a crop rather than an overhang. 15 × 1.3 = 19.5 inside the 22px line box. */
+.qcv-ag-2 { font-family: var(--qcv-serif); font-style: italic; font-size: 13px; letter-spacing: 0; text-transform: none; }
+/* the "ago" joins the agency line only once the Queried column has folded away */
+.qcv-ag-ago { display: none; text-decoration: none; color: var(--qcv-ink-45); }
+
+/* Queried */
+.qcv-qd .qcv-t1 { font-family: var(--qcv-serif); font-weight: 400; font-size: 13.5px; color: var(--qcv-ink); }
+
+/* What you sent */
+.qcv-ws { align-items: flex-start; padding-right: 8px; }
+.qcv-pk {
+  display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; max-width: 100%; height: 24px;
+  padding: 0 8px 0 7px; border-radius: 7px;
+  background: var(--state-queried); color: var(--qcv-ink);
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
+  font-family: var(--qcv-type); font-weight: 400; font-size: 12px; line-height: 1;
+  white-space: nowrap; overflow: hidden;
+}
+.qcv-pk svg { flex: none; width: 14px; height: 14px; stroke: var(--qcv-ink); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.qcv-pk-n { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.qcv-pk em { flex: none; font-style: normal; font-family: var(--qcv-mono); font-weight: 700; font-size: 7px; letter-spacing: 0.1em; opacity: 0.6; margin-left: 2px; }
+.qcv-mi { display: flex; align-items: center; gap: 6px; height: 22px; }
+.qcv-mi-i { display: block; width: 17px; height: 17px; color: var(--qcv-ink); font-style: normal; }
+.qcv-mi-i svg { display: block; width: 17px; height: 17px; }
+.qcv-mi-i--off { color: rgba(28, 19, 15, 0.22); }
+.qcv-nr { font-family: var(--qcv-serif); font-style: italic; font-weight: 400; font-size: 13px; color: var(--qcv-ink-45); }
+.qcv-nr u { text-decoration-style: dashed; text-underline-offset: 3px; }
+
+/* Where it stands */
+.qcv-st .qcv-t1 { font-family: var(--qcv-type); font-weight: 400; font-size: 13.5px; }
+.qcv-ym {
+  display: inline-block; margin-right: 4px; vertical-align: 1px; padding: 2px 5px 1px; border-radius: 5px;
+  background: var(--state-you); color: var(--qcv-rust);
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 7px; line-height: 1; letter-spacing: 0.1em; font-style: normal;
+}
+
+/* Coming up, and the tray that replaces it */
+.qcv-nx .qcv-t1 { font-family: var(--qcv-type); font-weight: 400; font-size: 13.5px; color: var(--qcv-ink); transition: opacity 0.12s; }
+/* the NUMBER is what takes the rust; over its date, the whole line goes to ink */
+.qcv-nx .qcv-t1 em { font-style: normal; font-weight: 400; color: var(--qcv-rust); }
+.qcv-nx--over .qcv-t1 em { color: var(--qcv-ink); }
+.qcv-nx--over .qcv-t1::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--qcv-ink); margin-right: 8px; vertical-align: 2px;
+}
+/**
+ * ⚠️ THE TRAY IS ABSOLUTE, SO SHOWING IT CHANGES NO HEIGHT AND NO OTHER COLUMN'S BOX — which is
+ * QC6's claim made structural rather than measured. In the flow it would widen the Coming-up track
+ * and move every row's grid, and a tray that pushes its row is the one mutation QC6 names.
+ */
+.qcv-qa {
+  position: absolute; right: 16px; top: 50%; z-index: 3;
+  transform: translateY(-50%) translateX(6px);
+  display: flex; align-items: center; gap: 6px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.12s, transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.qcv-row:hover .qcv-nx .qcv-t1, .qcv-row:focus-within .qcv-nx .qcv-t1 { opacity: 0; }
+.qcv-row:hover .qcv-qa, .qcv-row:focus-within .qcv-qa { opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(0); }
+.qcv-qa-b {
+  display: inline-flex; align-items: center; box-sizing: border-box; height: 30px; padding: 0 13px;
+  margin: 0; border: 0; border-radius: 15px; cursor: pointer; white-space: nowrap;
+  background: var(--qcv-navy); color: #f5f1eb;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 13.5px; line-height: 1;
+}
+.qcv-qa-q { background: #fff; color: var(--qcv-ink); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.25); }
+.qcv-qa-m { width: 30px; padding: 0; justify-content: center; background: #fff; color: var(--qcv-ink-70); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.25); font-size: 16px; letter-spacing: 1px; }
+.qcv-qa-b1:hover { background: var(--qcv-navy-hov); }
+.qcv-qa-q:hover, .qcv-qa-m:hover { background: var(--state-queried); }
+.qcv-qa-b:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+
+/**
+ * §3 · THE TWO FOLDS, ON THE ROW'S OWN CONTAINER RATHER THAN THE VIEWPORT.
+ *
+ * ⚠️ THE REFERENCE USES `@media (max-width: 1460px)` AND `1366px`, AND A VIEWPORT QUERY IS WRONG
+ * HERE. The reference reproduces this app's frame exactly — a 248px sidebar, the same content cap —
+ * so its two numbers are right for the one state it draws; but this sidebar COLLAPSES, and at 68px
+ * the row gains 180px at the same viewport. A media query would then hide the Queried column at a
+ * 1440 viewport on a row with ample room for it. The fold is a fact about the ROW's width.
+ *
+ * ⚠️ THE THRESHOLDS ARE THE REFERENCE'S OWN VALUES, MEASURED ACROSS. The container is `.qcv-ledger`
+ * and its width is the page column, measured at the tip with the sidebar at rest:
+ *
+ *     1280 → 582 · 1440 → 732 · 1512 → 799 · 1920 → 888   (the reference: 578 · 728 · 795 · 884)
+ *
+ * which is 0.935px of column per px of viewport between 1280 and 1512. The reference's 1460 is
+ * therefore 750px of column and its 1366 is 662 — so the rendering is reproduced exactly in the
+ * state the reference draws, and stays right in the state it cannot draw.
+ */
+@container (max-width: 750px) {
+  /* ⚠️ THE RATIO INVERTS HERE, AT THE FOLD THAT CAUSES IT. This fold MOVES the "ago" into the
+     agency line, so from here down the Agent column carries two facts where Where-it-stands carries
+     one. At 1 : 1.15 the agent had 164px at a 1440 viewport and clipped "Cavendish & Roe · 9 weeks
+     ago" on FIFTY rows — measured over the whole fixture, which a probe reading the first row could
+     not see. Swapped, the column that gained the content gets the room. */
+  .qcv-list { --qcv-tpl: 34px minmax(0, 1.15fr) 112px minmax(0, 1fr) 160px; }
+  .qcv-qd, .qcv-cols span:nth-child(3) { display: none; }
+  .qcv-ag-ago { display: inline; }
+}
+@container (max-width: 662px) {
+  .qcv-list { --qcv-tpl: 34px minmax(0, 1.15fr) minmax(0, 1fr) 160px; }
+  .qcv-ws, .qcv-cols span:nth-child(4) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠️ FADE ONLY (§3): the tray still appears and still disappears — it is how the row is acted on —
+     and only its 6px slide goes. `transition: none` would take the fade with it and make the
+     Coming-up line snap out from under the pointer. */
+  .qcv-row { transition: none; }
+  .qcv-row:hover { transform: none; }
+  .qcv-qa { transform: translateY(-50%); transition: opacity 0.12s; }
+  .qcv-row:hover .qcv-qa, .qcv-row:focus-within .qcv-qa { transform: translateY(-50%); }
 }
 
 /* ── §2 (v95) · the group headings ──

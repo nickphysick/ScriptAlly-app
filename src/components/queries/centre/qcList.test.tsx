@@ -48,47 +48,66 @@ describe("the list's columns — one template, floors and ceilings, the spare in
        ROW alone, and `justify-content: space-between` went with the head: a single `1fr` track takes
        the spare itself, and putting it in the gaps instead would move the three right-hand columns
        away from the date tile they are read against. */
-    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*minmax\(\d+px, 1fr\) \d+px \d+px \d+px\s*;/);
+    /* §3 (v95) — the disc, two flexible columns and three fixed ones. The shape, not the numbers:
+       pinning the values made this go red on a retune that changed nothing about the law. */
+    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*34px minmax\(0, 1fr\) \d+px \d+px minmax\(0, [\d.]+fr\) \d+px\s*;/);
     const shared = rule(listCss, ".qcv-row");
     expect(shared).toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
     expect(shared).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
-    expect(listCss, "the head row is retired; a rule for it is what the next reader mounts").not.toMatch(/\.qcv-cols/);
+    /**
+     * ⚠️ THE HEAD ROW IS BACK, AND THIS ASSERTION IS ITS INVERSE NOW. It used to read
+     * `not.toMatch(/\.qcv-cols/)` — "a heading strip floating above detached cards labels a table
+     * that is not there" — which was right for v65's four unlabelled columns and is reversed by §2:
+     * the mono labels are "the only explanation of the second tiers, so they stay". What must still
+     * be true is the thing that made the old strip wrong, which is that the labels and the rows
+     * cannot disagree: BOTH read `var(--qcv-tpl)`, so one container query moves both.
+     */
+    expect(rule(listCss, ".qcv-cols"), "the labels state their own template and can drift from the rows").toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
+    expect(rule(listCss, ".qcv-cols")).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
     expect(listCss.split("grid-template-columns").length - 1, "a second template somewhere would let rows disagree").toBe(2);
     expect(listCss).not.toMatch(/grid-template-columns:[^;]*(auto|max-content|min-content|fit-content)/);
     expect(listCss, "display: contents fractures a row's hover and selection").not.toMatch(/display:\s*contents/);
   });
-  it("⚠️ the date tile goes where the four FLOORS stop fitting, and the threshold is DERIVED from them rather than restated", () => {
-    /* ⚠️ THE FLOORS ARE READ OUT OF THE SHEET, NOT TYPED HERE. Restating them made this a pair of
-       literals that agree with each other and with nothing else — it passed while the tile was
-       dropping at the window it was written to protect. Both sides now come from `--qcv-tpl`, so a
-       floor that moves without its threshold fails here, which is the only thing this can usefully
-       say. The 34 is the row's own 16 + 18 of padding and NOTHING ELSE: the ledger's FramedCard went
-       with the frame in v65 §5, so there are no longer two borders to subtract. The container is
-       `.qcv-ledger` and an inline-size query reads its CONTENT box (measured, not assumed). */
-    const tpl = /--qcv-tpl:\s*([^;]+);/.exec(listCss)?.[1] ?? "";
-    const floors = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
-    const fixed = [...tpl.replace(/minmax\([^)]*\)/g, "").matchAll(/(\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
-    const gap = +(/--qcv-tpl-gap:\s*(\d+(?:\.\d+)?)px/.exec(listCss)?.[1] ?? 0);
-    expect(floors.length, "one flexible track").toBe(1);
-    expect(fixed.length, "three fixed tracks — where it stands, sent so far, the date tile").toBe(3);
-    expect(gap).toBeGreaterThan(0);
-    const boundary = [...floors, ...fixed].reduce((a, b) => a + b, 0) + 3 * gap + 34;
-    const declared = +(/@container \(max-width: (\d+)px\)/.exec(listCss)?.[1] ?? -1);
-    expect(declared, `the four columns need ${boundary}px of container, so the tile drops below it`).toBe(boundary - 1);
-    /* and it must still clear a 1280 window, which is what this pass was for: 540 of container */
-    expect(boundary, "the four-column row no longer fits a 1280 window's 540px container").toBeLessThanOrEqual(540);
-    expect(listCss).toMatch(/@container \(max-width: \d+px\) \{\s*\.qcv-row \{ grid-template-columns: minmax\(166px, 1fr\) 160px 78px; column-gap: 14px; \}/);
-    expect(listCss).toMatch(/\.qcv-date, \.qcv-date-sk \{ display: none; \}/);
-    /* ⚠️ THE CONTAINER MOVED RATHER THAN MULTIPLYING. `.qcv-ledger` is the size container now (the
-       frame that used to be it is gone); the list must still not be a second one, or the query
-       answers at the wrong box. */
+  /**
+   * ⚠️ RETARGETED FROM THE DATE TILE'S SINGLE THRESHOLD (v95 §3), AND THE ARITHMETIC IT CHECKED NO
+   * LONGER EXISTS. It derived one container threshold from the four tracks' FLOORS — "the four
+   * columns need N px, so the tile drops below it" — and the v95 row's flexible tracks are
+   * `minmax(0, …)`: their floors are zero, so there is no sum to derive from. The row FOLDS BY
+   * DESIGN instead, twice, at widths taken from the reference.
+   *
+   * What is assertable, and is what the folds are for: each fold removes a column AND its label
+   * together, they are ordered, and the thresholds are the reference's own viewport numbers carried
+   * across at this app's measured column-per-viewport slope — which the comment at the rule states
+   * and this reads back, so a fold that moved without its reason fails here.
+   */
+  it("⚠️ each fold drops a column AND its label, and the two are ordered", () => {
+    const folds = [...listCss.matchAll(/@container \(max-width: (\d+)px\) \{([\s\S]*?)\n\}/g)]
+      .map((m) => ({ at: +m[1], body: m[2] }));
+    expect(folds.length, "two folds").toBe(2);
+    expect(folds[0].at, "the folds are not in order, widest first").toBeGreaterThan(folds[1].at);
+    /* the wider fold: Queried goes, and the "ago" joins the agency line in its place */
+    /* ⚠️ THE WIDER FOLD ALSO SWAPS THE TWO FLEXIBLE TRACKS' RATIO, and that is the fold's own logic
+       rather than a tuning: it moves the "ago" INTO the agency line, so from here down the Agent
+       column carries two facts where Where-it-stands carries one. Measured before the swap: fifty
+       clipped agency lines at a 1440 viewport. */
+    expect(folds[0].body).toMatch(/--qcv-tpl:\s*34px minmax\(0, 1\.15fr\) \d+px minmax\(0, 1fr\) \d+px/);
+    expect(folds[0].body, "the Queried column and its label do not go together").toMatch(/\.qcv-qd, \.qcv-cols span:nth-child\(3\) \{ display: none; \}/);
+    expect(folds[0].body, "nothing replaces the date it removed").toMatch(/\.qcv-ag-ago \{ display: inline; \}/);
+    /* the narrower fold: What you sent goes too */
+    expect(folds[1].body).toMatch(/--qcv-tpl:\s*34px minmax\(0, 1\.15fr\) minmax\(0, 1fr\) \d+px/);
+    expect(folds[1].body, "the What-you-sent column and its label do not go together").toMatch(/\.qcv-ws, \.qcv-cols span:nth-child\(4\) \{ display: none; \}/);
+    /* ⚠️ AND THE "AGO" IS RENDERED ALWAYS AND SHOWN BY THE QUERY — never mounted conditionally, or
+       the fold reflows the row at the threshold and changes its height mid-scroll. */
+    expect(rule(listCss, ".qcv-ag-ago"), "the ago is not hidden at rest, so it is in the agency line twice").toMatch(/display:\s*none/);
+    /* ⚠️ THE CONTAINER IS `.qcv-ledger` AND THE LIST MUST NOT BE A SECOND ONE, or the query answers
+       at the wrong box. */
     expect(rule(listCss, ".qcv-list"), "a second container answers the query at the wrong box").not.toMatch(/container-type/);
     expect(sheet("qcvPage.css"), "the ledger stopped being the size container").toMatch(/\.qcv-ledger \{[^}]*container-type:\s*inline-size/);
   });
-  it("§5 · a row is a CARD — 69 tall, 14px corners, its own shadow, 10px from the next", () => {
+  it("§3 · a row is a CARD — 80 tall, 12px corners, its own shadow, 10px from the next", () => {
     const row = rule(listCss, ".qcv-row");
-    expect(row).toMatch(/min-height:\s*69px/);
-    expect(row).toMatch(/border-radius:\s*14px/);
+    expect(row).toMatch(/min-height:\s*80px/);
+    expect(row).toMatch(/border-radius:\s*12px/);
     expect(row).toMatch(/background:\s*#fff/);
     expect(row).toMatch(/box-shadow:\s*0 1px 2px rgba\(28, 19, 15, 0\.05\), 0 10px 24px -18px rgba\(28, 19, 15, 0\.22\)/);
     expect(rule(listCss, ".qcv-rows")).toMatch(/gap:\s*10px/);
@@ -100,17 +119,39 @@ describe("the list's columns — one template, floors and ceilings, the spare in
     expect(sel, "the ring must keep the card's own shadow, not replace it").toMatch(/0 10px 24px -18px/);
     expect(listCss).not.toMatch(/\[aria-selected="true"\][^{]*\{[^}]*background/);
     expect(listCss, "the ring must not also be drawn as a pseudo-element").not.toMatch(/\[aria-selected="true"\]::after/);
-    expect(rule(listCss, ".qcv-row:hover")).toMatch(/background:\s*var\(--qcv-parchment\)/);
-    expect(rule(listCss, ".qcv-row-nm")).toMatch(/line-height:\s*1\.3/);
+    /* §3 (v95) — the row LIFTS on hover; the parchment wash went with the v11 card, because a tint
+       on the row is the one thing §3 reserves for the status edge. */
+    expect(rule(listCss, ".qcv-row:hover")).toMatch(/transform:\s*translateY\(-1px\)/);
+    expect(rule(listCss, ".qcv-row:hover"), "the wash is back, beside the edge that is meant to be the only tint").not.toMatch(/background:/);
+    expect(rule(listCss, ".qcv-ag-2"), "mixed-case Playfair on a clipped line crops below 1.3").toMatch(/font-size:\s*13px/);
   });
 });
 
 describe("the rows, rendered", () => {
-  it("⚠️ NO ROW BUTTONS — a row selects and nothing else, and there is no head row to name columns", () => {
-    const html = renderToStaticMarkup(<QcList groups={one(rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
-    expect(html).not.toContain("<button");
-    expect(html, "the retired head row is rendered again").not.toContain("qcv-cols");
-    expect(html.split('role="option"').length - 1).toBe(2);
+  /**
+   * ⚠️ BOTH HALVES OF THIS CASE ARE REVERSED BY v95, AND IT IS KEPT RATHER THAN DELETED because
+   * what replaced them still needs saying. "No row buttons" was v11's — actions lived in the open
+   * card's footer — and §3 gives the row a hover tray of exactly three. "No head row to name
+   * columns" was right while the columns were unlabelled and is reversed by §2's mono labels.
+   *
+   * So: the tray's three and NOTHING else, and the labels present but hidden from the tree.
+   */
+  it("⚠️ the row's buttons are the tray's THREE, and the column labels are drawn but not read", () => {
+    const rows = rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })]);
+    const bare = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    /* with nothing coming up there is no tray, so a row still has no buttons at all */
+    expect(bare, "a row with nothing coming up draws a tray").not.toContain("<button");
+    expect(bare.split('role="option"').length - 1).toBe(2);
+    /* the labels are rendered and hidden — every cell beneath carries its own text or label */
+    expect(bare).toContain("qcv-cols");
+    expect(bare).toMatch(/class="qcv-cols" data-qcv="cols" aria-hidden="true"/);
+    for (const w of ["AGENT", "QUERIED", "WHAT YOU SENT", "WHERE IT STANDS", "COMING UP"]) expect(bare).toContain(w);
+    /* and with something coming up: three buttons per row, no more */
+    const coming = new Map(rows.map((r) => [r.id, { bucket: "chase" as const, verb: "Nudge", tail: null, over: false, action: "Nudge now" }]));
+    const trayed = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} coming={coming} />);
+    expect(trayed.split("<button").length - 1, "the tray is three controls: the verb, Snooze and ⋯").toBe(6);
+    expect(trayed).toContain("Nudge now");
+    expect(trayed).toContain("Snooze");
   });
   it("⚠️ RUST FOLLOWS `isWithYou` EXACTLY — for every status, and never an offer", () => {
     const rows = rowsOf(ALL.map((s) => q({ status: s })));
@@ -121,8 +162,16 @@ describe("the rows, rendered", () => {
       expect(m![1], s).toBe(String(isWithYou(s)));
     }
     expect(html.split("qcv-row--you").length - 1).toBe(3);
-    expect(rule(listCss, ".qcv-row--you::before")).toMatch(/width:\s*3px;\s*background:\s*var\(--qcv-rust\)/);
-    expect(rule(listCss, ".qcv-row--you::before")).toMatch(/top:\s*12px;\s*bottom:\s*12px/);
+    /**
+     * ⚠️ THE MARKER IS THE `YOUR MOVE` TAG NOW, NOT A RUST RAIL — §6 retires the side accent in as
+     * many words ("no rust side accent"), because §3 gives the left edge to the STATUS fill and
+     * "nothing else tinted". The claim this case exists for is unchanged and is the one above: WHICH
+     * statuses are with you. What it watches has moved from a `::before` to a tag.
+     */
+    expect(listCss, "the rust rail is back beside the status edge").not.toMatch(/\.qcv-row--you::before/);
+    expect(html.split("qcv-ym").length - 1, "the YOUR MOVE tag does not follow isWithYou").toBe(3);
+    expect(html).toContain(">YOUR MOVE<");
+    expect(rule(listCss, ".qcv-ym")).toMatch(/color:\s*var\(--qcv-rust\)/);
   });
   it("one tab stop: the selected row, or the first when nothing is; the chip and the tile wear the row's STATE token", () => {
     const rows = rowsOf([q({}), q({}), q({ status: QueryStatus.OFFER })]);
@@ -133,21 +182,44 @@ describe("the rows, rendered", () => {
     expect(html).toContain("--qcv-state:var(--state-queried)");
     expect(html).toContain("--qcv-state:var(--state-offer)");
   });
-  it("⚠️ 'sent so far' says NOT SENT only where something was recorded — nothing recorded is not nothing sent", () => {
+  /**
+   * §3 (v95) · WHAT YOU SENT HAS THREE TREATMENTS AND THEY ARE `sentRecordOf`'s THREE ANSWERS.
+   *
+   * ⚠️ THE OLD CASE'S "nothing recorded" BRANCH IS NOW THE `Add` BRANCH, which is the change rather
+   * than a loosening: it used to draw four quiet icons whose titles said "not recorded", and §3
+   * replaces that with one word. The claim it protected — that "not sent" is never said of a query
+   * nobody recorded anything for — is asserted here on both of the branches that can still say it.
+   */
+  it("⚠️ what you sent: a package chip, the four icons, or `Add` — and NOT SENT only where something was recorded", () => {
     const some = renderToStaticMarkup(<QcList groups={one(rowsOf([q({ materialsWanted: ["Query letter"] })]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     /* ⚠️ THE NAMES ARE THE APP'S OWN DISPLAY MAP, NOT TYPED HERE: the stored token "Query letter" is
        shown as "Covering letter" app-wide (`materialLabel`), and this list must not be the one place
-       that says otherwise. The brief lists the four rows by their stored names. */
+       that says otherwise. */
     const NAME = MATERIAL_SLOTS.map((k) => MATERIAL_ROW_NAMES[k]);
     expect(NAME).toEqual(["Covering letter", "Synopsis", "Opening sample", "Other"]);
     expect(some).toContain(`title="${NAME[0]} sent"`);
     expect(some).toContain(`title="${NAME[1]} not sent"`);
-    expect(some.split("qcv-mat-i--on").length - 1).toBe(1);
-    const none = renderToStaticMarkup(<QcList groups={one(rowsOf([q({})]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
-    expect(none).toContain(`title="${NAME[0]} not recorded"`);
-    expect(none).not.toContain("not sent");
+    /* the ghosted ones carry the modifier; the sent one does not */
+    expect(some.split("qcv-mi-i--off").length - 1, "three of the four are ghosted").toBe(3);
+    expect(some.split('class="qcv-mi-i"').length - 1, "one is sent").toBe(1);
     /* four slots, in the Materials tab's order, and no fifth */
-    expect([...some.matchAll(/class="qcv-mat-i[^"]*" title="([^"]+?) (?:sent|not sent)"/g)].map((m) => m[1])).toEqual(NAME);
+    expect([...some.matchAll(/class="qcv-mi-i[^"]*" title="([^"]+?) (?:sent|not sent)"/g)].map((m) => m[1])).toEqual(NAME);
+
+    /* ⚠️ NOTHING RECORDED IS NOT NOTHING SENT — one word, and no icons to read "not sent" from. */
+    const none = renderToStaticMarkup(<QcList groups={one(rowsOf([q({})]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    expect(none, "the unrecorded cell draws icons again").not.toContain("qcv-mi-i");
+    expect(none).toContain('data-qcv="row-add"');
+    expect(none).toContain(">Add<");
+    expect(none, "a query nobody recorded anything for is told what it did not send").not.toContain("not sent");
+
+    /* a package is ONE chip with its name, never the icons */
+    const pkg = renderToStaticMarkup(
+      <QcList groups={one(rowsOf([q({ sentHow: "package", sentPackageId: "p1", sentPackageName: "Standard" })]))}
+        selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    expect(pkg).toContain('data-qcv="row-pkg"');
+    expect(pkg).toContain("Standard");
+    expect(pkg, "a package also draws the individual icons").not.toContain("qcv-mi-i");
+    expect(pkg, "a package also draws Add").not.toContain('data-qcv="row-add"');
   });
   it("the skeleton is eight rows at the real row's class, so nothing jumps", () => {
     const html = renderToStaticMarkup(<QcListSkeleton />);

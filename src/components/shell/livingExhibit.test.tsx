@@ -39,7 +39,9 @@ describe("LH6 · the exhibition reads nothing but its constant (render)", () => 
     const want = sortRows(QC_SAMPLE_ROWS, DEFAULT_SORT).slice(0, QC_EXHIBIT_ROWS).map((r) => r.agentName);
     const ledger = qc.slice(qc.indexOf('data-qcv="list"'), qc.indexOf('data-qcv="railcal"'));
     expect(qc.indexOf('data-qcv="list"')).toBeGreaterThan(-1);
-    const drawn = [...ledger.matchAll(/class="qcv-row-nm">([^<]+)</g)].map((m) => m[1]);
+    /* §3 (v95) — the name is the Agent column's first tier: `.qcv-ag > .qcv-t1`. It was
+       `.qcv-row-nm`, which the row rebuild retired with the four-column template. */
+    const drawn = [...ledger.matchAll(/data-qcv="row-agent"><b class="qcv-t1"[^>]*>([^<]+)</g)].map((m) => m[1]);
     expect(drawn).toEqual(want);
     for (const nm of drawn) expect(QC_SAMPLE_AGENTS.map((a) => a.name)).toContain(nm);
   });

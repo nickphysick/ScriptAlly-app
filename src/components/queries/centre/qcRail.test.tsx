@@ -64,11 +64,29 @@ describe("⚠️ the rail is placed from the WINDOW's measured box, never the vi
     expect(railBox(WIN, 1440), "the app's own 1440 window must hold the card").not.toBeNull();
     expect(railBox({ ...WIN, width: RAIL_STACK_BELOW }, 1440), "exactly at the threshold the card is still fixed").not.toBeNull();
     expect(railBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, 1440), "below it the card stacks").toBeNull();
-    /* ⚠️ AND THE LEDGER'S FLOOR IS THE ONE `qcvList.css` STATES, read rather than restated: below
-       it the ledger would be dropping its date tile to make room for a card, which is backwards. */
+    /**
+     * ⚠️ THE LEDGER'S MINIMUM IS A STATED VALUE SINCE v95 §3, AND THIS ASSERTION CHANGED WITH IT.
+     * It used to be read out of `qcvList.css` — the container threshold + 1, the width at which the
+     * row dropped its date tile — and the claim was that the ledger must not shed a column to make
+     * room for a card. The v95 row has no track floors (its flexible tracks are `minmax(0, …)`) and
+     * FOLDS BY DESIGN at 750 and 662, both widths where the rail is still beside the list, so there
+     * is no threshold left for the minimum to be derived from.
+     *
+     * What is still assertable, and is the thing that matters: the minimum must sit BELOW the
+     * narrowest fold, or the rail would stack while the list still had a column in hand — and it
+     * must leave the two flexible columns enough to hold a name and a status. Both read from the
+     * sheet, neither restated here.
+     */
     const listCss = read("src/components/queries/centre/qcvList.css");
-    const declared = +(/@container \(max-width: (\d+)px\)/.exec(listCss)?.[1] ?? -1);
-    expect(LEDGER_MIN, "the ledger's floor and the rail's threshold disagree").toBe(declared + 1);
+    const folds = [...listCss.matchAll(/@container \(max-width: (\d+)px\)/g)].map((m) => +m[1]).sort((a, b) => a - b);
+    expect(folds.length, "the row's two folds").toBe(2);
+    expect(LEDGER_MIN, `the minimum (${LEDGER_MIN}) is not below the narrowest fold (${folds[0]})`).toBeLessThan(folds[0]);
+    /* the fixed parts of the narrowest fold: the disc, Coming up, three gaps and the row's padding */
+    const tpl = /--qcv-tpl:\s*([^;]+);/.exec(listCss)?.[1] ?? "";
+    const gap = +(/--qcv-tpl-gap:\s*(\d+)px/.exec(listCss)?.[1] ?? 0);
+    const fixed = 34 + 160 + gap * 3 + 32;
+    expect(tpl, "the disc is still 34px").toMatch(/^34px /);
+    expect(LEDGER_MIN - fixed, "the two flexible columns are left less than a name and a status").toBeGreaterThan(260);
   });
 });
 
