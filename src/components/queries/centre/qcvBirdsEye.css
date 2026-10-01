@@ -1,34 +1,25 @@
 /**
  * Query Centre v65 §6 — the rail's Birds-eye view.
  *
- * ⚠️ THE COLUMN IS head · focus · axis · ROWS (the only thing that scrolls) · legend, and the card
+ * ⚠️ THE COLUMN IS head · focus · key · ROWS (the only thing that scrolls) · foot, and the card
  * never changes height. `min-height: 0` on the scroller is what makes that true: without it a flex
  * child's floor is its CONTENT, so the rows push the card past the window instead of scrolling
  * inside it — the fault this repo has measured on four different surfaces.
+ *
+ * ⚠️ v95 §4 REBUILT THE ROWS AND LEFT THE HEAD ALONE. The head's tray, its counts, the expand
+ * button, the hawk and the tab pill are exactly as built, and QC10 photographs them to prove it.
  */
 @import "./qcvPage.css";
 
-/**
- * ⚠️ ONE RULE FOR `.qcv-be`, TOKENS AND ALL. Written as two — a flex column here and the track's
- * geometry two hundred lines down — the lock that reads this rule takes whichever comes FIRST and
- * reported the tokens as absent. One rule per selector is this repo's own invariant, and the reason
- * is exactly that: a reader takes the first block, the cascade takes the last.
- *
- * ⚠️ AND THE TRACK'S GEOMETRY IS STATED HERE AND NOWHERE ELSE. The line, the ticks and every row's
- * bar sit in the same horizontal space; three rules each computing it is three chances for one to
- * be a pixel out, on the one element whose whole job is to line up.
- */
 .qcv-be {
   display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;
   --qcv-be-pad: 22px;
-  --qcv-be-who: 160px;
-  /* §5 — the right column is 52 and the columns do not gap: the axis shares this grid, so a gap
-     here would move the DUE pill off the line the rows are measured against. */
-  --qcv-be-day: 52px;
-  --qcv-be-gap: 0px;
-  /* the track's own left edge and width, inside the row's grid */
-  --qcv-be-tl: calc(var(--qcv-be-pad) + var(--qcv-be-who) + var(--qcv-be-gap));
-  --qcv-be-tw: calc(100% - var(--qcv-be-pad) * 2 - var(--qcv-be-who) - var(--qcv-be-day) - var(--qcv-be-gap) * 2);
+  /* ⚠️ `--qcv-be-who`, `--qcv-be-day`, `--qcv-be-gap`, `--qcv-be-tl` AND `--qcv-be-tw` ARE DELETED
+     WITH THE THREE-COLUMN ROW (§4, v95). They were the columns a shared vertical axis had to be
+     computed against; the row is a stack now and the bar takes the row's own width, so there is no
+     axis and nothing to compute. A token read by nothing is a knob the next reader goes looking
+     for, and the comment above this rule — which explained why three rules must not each compute
+     the same offset — went with them. */
 }
 
 /**
@@ -147,180 +138,106 @@
 
 .qcv-be-rows { position: relative; }
 
-/* ⚠️ THE ROW IS A BUTTON (§6.4), so it states everything a button brings with it: no border, no
-   background, the page's own text alignment. A row that inherited the UA's button chrome would be
-   a grey box with centred text, which is the sort of thing that gets "fixed" by making it a div. */
+/**
+ * §4 (v95) · THE ROW IS A STACK, NOT A THREE-COLUMN GRID: the name line, the bar, the ends.
+ *
+ * ⚠️ WRITTEN AS ONE AUTHORITATIVE BLOCK. The v65.3 row's rules — the 160px `who` column, the day
+ * column, the allowance/overrun/notch geometry, the overdue wash and the watch fade — are DELETED
+ * rather than left inert. `--qcv-be-who`, `--qcv-be-day`, `--qcv-be-tl` and `--qcv-be-tw` go with
+ * them: a token read by nothing is a knob the next reader goes looking for.
+ *
+ * ⚠️ AN OVERDUE ROW HAS NO WASH, NO EDGE AND NO HIGHLIGHT (§4). The bar IS the mark — a full one,
+ * in solid ink — and a second mark beside it would say the same thing twice and make the row that
+ * most needs reading the hardest to read.
+ */
 .qcv-be-row {
-  appearance: none; -webkit-appearance: none; border: 0; background: none; text-align: left;
-  font: inherit; color: inherit; width: 100%; cursor: pointer;
-  display: grid; grid-template-columns: var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day);
-  column-gap: var(--qcv-be-gap); align-items: center;
-  box-sizing: border-box; height: 40px; padding: 0 var(--qcv-be-pad);
-  border-bottom: 1px solid var(--qcv-hair);
+  display: block; width: 100%; box-sizing: border-box;
+  margin: 0; border: 0; border-top: 1px solid var(--qcv-hair); border-radius: 0;
+  padding: 13px 22px; background: none; cursor: pointer; text-align: left;
+  transition: background 0.14s ease, opacity 0.14s ease;
 }
-.qcv-be-rows > .qcv-be-row:last-child { border-bottom: 0; }
-/* §6.1 — the focus fades the other court; hover brings it most of the way back */
+.qcv-be-rows > .qcv-be-row:first-child { border-top: 0; }
 .qcv-be-row--fade { opacity: 0.22; }
 .qcv-be-row--fade:hover { opacity: 0.6; }
 .qcv-be-row:hover { background: var(--qcv-parchment); }
 .qcv-be-row:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: -2px; }
 
-.qcv-be-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.qcv-be-ini {
-  flex: none; width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  /* §1.6 — anthracite with cream initials, everywhere initials appear; the shell's token */
-  background: var(--sp-anthracite); color: #f5f1eb;
-  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; line-height: 1; font-style: normal; letter-spacing: 0.02em;
+/* the name line: who, what stage, and how far away — all on one baseline */
+.qcv-be-nm { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; white-space: nowrap; min-width: 0; }
+.qcv-be-nm b {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--qcv-serif); font-weight: 600; font-size: 14px; line-height: 1.3; color: var(--qcv-ink);
 }
-.qcv-be-wtx { min-width: 0; }
-.qcv-be-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12.5px; line-height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-be-st {
-  display: flex; align-items: center; gap: 5px; min-width: 0;
-  font-family: var(--qcv-type); font-weight: 400; font-size: 10px; line-height: 13px; color: var(--qcv-ink-70);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.qcv-be-nm small {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 12px; line-height: 1.3; color: var(--qcv-ink-70);
 }
-.qcv-be-st svg { flex: none; }
+.qcv-be-nm em {
+  flex: none; margin-left: auto; font-style: normal;
+  font-family: var(--qcv-serif); font-weight: 400; font-size: 12.5px; line-height: 1.3; color: var(--qcv-ink-70);
+}
+.qcv-be-nm em.qcv-be-over { font-weight: 600; color: var(--qcv-ink); }
+.qcv-be-nm em u { text-decoration-style: dashed; text-underline-offset: 2px; }
 
 /**
- * §3.2 — THE PROGRESS BAR. The middle cell holds one track: 8px tall, 4px corners, inset 4 from the
- * cell's left and 10 from its right so the date column beside it never crowds it. [84 × 8 at 1280,
- * with a 70px track — the mock's own geometry, measured rather than read.]
- */
-.qcv-be-pg { position: relative; display: block; height: 8px; min-width: 0; }
-.qcv-be-track {
-  position: absolute; left: 4px; right: 10px; top: 0; height: 8px;
-  border-radius: 4px; overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
-}
-/**
- * ⚠️ NOTHING DATES IT: an EMPTY WHITE TRACK with the ring and nothing in it, rather than a bar
- * placed against a date nobody promised.
+ * §4 · ONE UNIVERSAL BAR — 10px, a stone track, and a fill that is how far through the window the
+ * query is.
  *
- * §B3 — THE DASHED PATTERN IS GONE. A pattern is a mark, and a mark is something to read; the fact
- * here is that there is nothing to read, and an empty track says that with no vocabulary at all.
- * The ring is a touch heavier so an empty track still reads as a track rather than as a gap.
+ * ⚠️ A DATELESS QUERY KEEPS ITS TRACK AND DRAWS NO FILL. An empty track is a window nobody has
+ * stated the end of, which is true; hiding the track would make the row a different shape from its
+ * neighbours for a reason the reader cannot see.
  */
-.qcv-be-track--none {
-  background: #fff;
-  box-shadow: inset 0 0 0 1.2px rgba(28, 19, 15, 0.12);
+.qcv-be-pb {
+  position: relative; display: block; height: 10px; border-radius: 5px;
+  background: var(--qcv-track); overflow: hidden;
 }
-/* the allowance: the window the agency asked for, in white, with its own ring */
-.qcv-be-allow {
-  position: absolute; left: 0; top: 0; bottom: 0; background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
-}
-/**
- * ⚠️ THE FILL IS THE STATUS'S OWN COLOUR AND NEVER A DEEPENED ONE (decision 2). `--state-queried`
- * #f7efe3 · `--state-you` #f5e6df · `--state-agent` #e0e5dd · `--state-offer` #d7e0e8 ·
- * `--state-closed` #e4e1db — the app's one status palette, which §3.2's table restates exactly.
- */
-.qcv-be-fill {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  background: var(--qcv-state, var(--state-closed));
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
-}
-/* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
-/* §C1 — NO RUST. The rail says your move with the anthracite dot after the due date (§C2), once. */
-.qcv-be-track--you .qcv-be-fill { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
-/**
- * §3.2 — PAST THE DATE, THE REST OF THE TRACK IS INK, with the track's own right-end corners. It is
- * ink at full opacity, as the expanded view's is: the two draw the same fact and a tint in one of
- * them would make it two facts.
- */
-.qcv-be-over {
-  position: absolute; top: 0; bottom: 0; background: var(--qcv-ink);
-  border-top-right-radius: 4px; border-bottom-right-radius: 4px;
-}
-/* the due date itself, standing 3px proud above and below so it reads as a mark, not a seam */
-.qcv-be-notch {
-  position: absolute; top: -3px; height: 14px; width: 2px; margin-left: -1px;
-  background: #fff; text-decoration: none;
-}
-/* §6.2 — watch-and-wait bars sit back until the row is under the pointer */
-.qcv-be-row--watch .qcv-be-track { opacity: 0.72; }
-.qcv-be-row--watch:hover .qcv-be-track { opacity: 1; }
+.qcv-be-pbf { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--qcv-ink-45); }
+.qcv-be-pbf--near { background: var(--qcv-ink-70); }
+/* at the date the bar is full and solid, which is the whole of §4's "FULL BAR = DATE REACHED" */
+.qcv-be-pbf--over { right: 0; background: var(--qcv-ink); }
 
-/**
- * §5 — the right column: the due date over how far away it is, right-aligned.
- *
- * ⚠️ THE DISTANCE IS UPPERCASED BY THE SHEET, NOT BY THE STRING. A screen reader should not be
- * shouted at because a design wanted small capitals.
- */
-.qcv-be-due { display: block; text-align: right; min-width: 0; }
-/**
- * §C2 — YOUR MOVE, IN THE RAIL, IS A 6px ANTHRACITE DOT AFTER THE DUE DATE. The rail is a glance at
- * the shape of everything, so it takes the quietest mark that still reads: a word here would be the
- * longest thing in a 52px column, and the rust edge it replaces had to be learnt before it meant
- * anything. The expanded view — a working surface — says it in words instead (§C2, §C3).
- */
-.qcv-be-due--ym b::after {
-  content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 5px; vertical-align: 1px;
-  border-radius: 50%; background: var(--sp-anthracite);
+.qcv-be-ends {
+  display: flex; justify-content: space-between; gap: 10px; margin-top: 5px;
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 7.5px; line-height: 1.3;
+  letter-spacing: 0.08em; color: var(--qcv-ink-45);
 }
-.qcv-be-due b {
-  display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12px; line-height: 1.1;
-  color: var(--qcv-ink); white-space: nowrap;
-}
-.qcv-be-due u {
-  display: block; margin-top: 2px; text-decoration: none;
-  font-family: var(--qcv-mono); font-weight: 400; font-size: 7px; line-height: 1.1;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
-}
-.qcv-be-due--late u { font-weight: 700; color: var(--qcv-ink); }
-/* a date nobody promised: the em dash is muted too, so the column does not read as a stated day */
-.qcv-be-due[data-due="none"] b { color: var(--qcv-ink-45); }
+.qcv-be-ends span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qcv-be-ends b { font-weight: 700; color: var(--qcv-ink-70); }
 
-/**
- * §5 — AN OVERDUE ROW IS WASHED ACROSS THE WHOLE CARD, not just its content box: a wash that
- * stopped at the 22px gutter would read as a box drawn round the text rather than as a state the
- * row is in.
- *
- * ⚠️ AND IT NEEDS NO BLEED HERE, WHICH THE MOCK DOES. Its rows sit in a container inset by the
- * gutter, so its overdue row carries `margin: 0 -22px` to reach the card's edges; ours span the
- * card already and hold the gutter as their own padding. Carrying the mock's negative margin
- * across therefore overshot by exactly that gutter — measured, the row's left edge landed 22px
- * OUTSIDE the card (1034 against 1056). A value taken from a ref is a value about the ref's own
- * frame until the structure underneath it has been checked.
- */
-/**
- * §3.3 — AND IT IS AN INSET CARD NOW, not a full-width wash: 12px clear of the card's edges, 10px
- * corners, no bottom border. [Row 930 → 1246 in a 918 → 1258 card.]
- *
- * ⚠️ THE MOCK WRITES `margin: 0 -10px; padding: 0 10px` AND THAT IS ITS FRAME, NOT OURS. Its rows
- * sit in a container inset by the gutter, so a negative margin is how its row reaches OUT toward
- * the card. Ours span the card already and hold the gutter as padding, so the same inset is a
- * POSITIVE 12px margin paid back as 10px of padding — 12 + 10 = the 22px gutter, so the ink lands
- * exactly where every other row's does and only the background moved.
- */
-.qcv-be-row--late {
-  /**
-   * ⚠️ THE WIDTH IS STATED, AND NEITHER `100%` NOR `auto` WILL DO. The row states `width: 100%`, so
-   * a margin does not inset it — it makes it 24px WIDER than the card and hangs it off both edges
-   * (measured: 12px clear on the left and 12px PAST the right, from a margin that reads as
-   * symmetrical). And `auto` is worse: the row is a `<button>`, so it SHRINK-TO-FITS — measured at
-   * 232 against the card's 340, with the bar's whole column computing to `0px`. The subtraction is
-   * the honest form, and it names the margin it is paying for.
-   */
-  width: calc(100% - 24px); margin: 0 12px 4px; padding: 0 10px; border-radius: 10px;
-  background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); border-bottom: 0;
-}
-.qcv-be-row--late:hover { background: #f5e3d9; }
-
-/* §6.3 — the legend */
+/* §4 · the key above the groups, and the foot under them */
 .qcv-be-key {
-  flex: none; display: flex; align-items: center; gap: 5px; height: 36px; box-sizing: border-box;
-  padding: 0 var(--qcv-be-pad); border-top: 1px solid var(--qcv-hair);
-  font-family: var(--qcv-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45);
+  flex: none;
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 10px 22px 2px; border-top: 1px solid var(--qcv-hair);
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 7.5px; line-height: 1.3;
+  letter-spacing: 0.1em; color: var(--qcv-ink-45);
 }
-.qcv-be-key i { display: inline-block; width: 14px; height: 6px; border-radius: 3px; margin-left: 8px; }
-.qcv-be-key i:first-child { margin-left: 0; }
-.qcv-be-k1 { background: var(--state-queried); }
-.qcv-be-k2 { background: rgba(28, 19, 15, 0.55); }
-.qcv-be-k3 { background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 3px, transparent 3px 6px); }
-
-.qcv-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* ⚠️ `flex: none` ON BOTH, or the card's one scroller stops being the only thing that gives. The
+   column is head · focus · key · rows · foot and only the rows may shrink. */
+.qcv-be-foot {
+  flex: none;
+  padding: 12px 22px; border-top: 1px solid var(--qcv-hair);
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 7.5px; line-height: 1.4;
+  letter-spacing: 0.1em; color: var(--qcv-ink-45);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .qcv-be-row--fade, .qcv-be-row--watch .qcv-be-track { transition: none; }
+  .qcv-be-row { transition: none; }
 }
+
+.qcv-be-foot-ex { vertical-align: -1px; }
+
+/**
+ * ⚠️ RESTORED AFTER A REMOVAL TOOK IT OUT WITH THE ROWS (§4, v95). Rewriting this sheet's row block
+ * as one authoritative block truncated everything after it, and this rule sat at the end — so the
+ * view's screen-reader count rendered as VISIBLE text under the card, "69 queries out", on the page.
+ * The house rule is that a removal is verified against the post-edit FILE rather than the diff, and
+ * a rendered screenshot is what found it: a rule serving something the rewrite was not about.
+ */
+.qcv-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ⚠️ THE MARK IS BOUND TO THE WORDS IT BELONGS TO. At 340px the foot wraps, and an inline mark
+   breaks wherever the line happens to end — it landed alone at the head of the second line, reading
+   as a bullet rather than as part of "⤢ FOR THE TIMELINE". A `nowrap` span makes the line break in
+   FRONT of both, which is the same rule this repo already applies to a mark beside a headline. */
+.qcv-be-foot-tail { white-space: nowrap; }

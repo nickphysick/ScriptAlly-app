@@ -178,7 +178,52 @@ export interface EyeRow {
    * — the focus toggle still fades it with the agent's rows, because that is where the query IS.
    */
   yourMove: boolean;
+  /** §4 (v95) — the two ends the bar runs between, in the mono caps the row prints them in. */
+  ends: { from: BarEnd | null; to: BarEnd | null };
+  /** §4 (v95) — how far the bar has gone, as a tone rather than a number. */
+  tone: BarTone;
   title: string;
+}
+
+/** One end of the bar: what happened, and when. */
+export interface BarEnd { label: string; date: string }
+export type BarTone = "flat" | "near" | "over";
+/** Past three-quarters the fill deepens; at the date it is solid ink. */
+export const BAR_NEAR = 0.75;
+
+/**
+ * §4 (v95) · the bar's TONE — grey, then ink70 past three-quarters, then solid ink once the date is
+ * reached.
+ *
+ * ⚠️ THIS REVERSES v65.3's "THE FILL IS THE TRUE STATUS COLOUR AND IS NEVER DEEPENED", and the
+ * reason that rule gave no longer applies. It was written against a bar whose fill WAS the status
+ * colour: deepening it then meant one channel saying two things at once — which status, and how
+ * urgent. The v95 bar has no colour at all; the status is named in words on the line above it, so
+ * value is the only channel the bar uses and it says one thing.
+ */
+export const barTone = (p: EyeProgress): BarTone =>
+  !p.dated || p.f == null ? "flat" : p.f >= 1 ? "over" : p.f > BAR_NEAR ? "near" : "flat";
+
+/**
+ * §4 (v95) · what the bar runs BETWEEN, in words.
+ *
+ * ⚠️ THE LEFT END IS NAMED BY WHAT PUT THE QUERY HERE, not by the stage it is in: an agent's-turn
+ * query got here by being SENT, a with-you one by being ASKED for something, and an offer by the
+ * offer arriving. ⚠️ AND THE RIGHT END IS `expectedKind`'s OWN THREE — the same field the desk and
+ * the expanded view read, so three surfaces cannot disagree about what the date is for.
+ *
+ * ⚠️ EITHER END MAY BE ABSENT AND IS THEN OMITTED RATHER THAN GUESSED. A label over a date nobody
+ * recorded is the fault this file already closed with the em dash.
+ */
+export function barEnds(r: QcRow): { from: BarEnd | null; to: BarEnd | null } {
+  const court = tileCourt(r.status);
+  const fromLabel = r.status === QueryStatus.OFFER ? "OFFER" : court === "you" ? "ASKED" : "SENT";
+  const start = r.stageStartMs ?? r.sentMs;
+  const toLabel = r.expectedKind === "sendBy" ? "SEND BY" : r.expectedKind === "offer" ? "DECIDE BY" : "REPLY BY";
+  return {
+    from: start != null ? { label: fromLabel, date: shortDay(start).toUpperCase() } : null,
+    to: r.expectedMs != null ? { label: toLabel, date: shortDay(r.expectedMs).toUpperCase() } : null,
+  };
 }
 export interface EyeGroup { key: Attention; label: string; count: number; rows: EyeRow[] }
 
@@ -201,6 +246,8 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
       return {
         id: r.id, row: r, group: attentionGroup(r, nowMs), prog: eyeProgress(r, nowMs), day, due, stage,
         court: tileCourt(r.status) === "you" ? "you" : "agent",
+        ends: barEnds(r),
+        tone: barTone(eyeProgress(r, nowMs)),
         yourMove: tileCourt(r.status) === "you" || due.kind === "past",
         /* line two is how the materials went (§A3) — the same words as the card's chip */
         title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}\n${sentHowWords(r.query)}`,

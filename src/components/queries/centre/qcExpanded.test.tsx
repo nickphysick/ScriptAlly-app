@@ -896,12 +896,22 @@ describe("§7 · the rows", () => {
    * lock on one is how the other drifts.
    */
   it("§1.9 · the overrun is ink at full opacity — in the expanded view AND the rail", () => {
-    for (const [sheet, sel] of [[tl, ".qcv-tl-over"], [read("src/components/queries/centre/qcvBirdsEye.css"), ".qcv-be-over"]] as const) {
+    /* ⚠️ THE RAIL'S HALF RETIRES WITH ITS OVERRUN (§4, v95) and the expanded view's stands. The
+       rail's bar has no overrun any more — it clamps at its own track and goes solid ink at the
+       date — so there is no second element to compare. What the pair was FOR is still asserted on
+       both: full ink, no alpha. The rail's is `.qcv-be-pbf--over`, checked below. */
+    for (const [sheet, sel] of [[tl, ".qcv-tl-over"]] as const) {
       const m = sheet.match(new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`));
       expect(m, `${sel} has no rule`).toBeTruthy();
       expect(m![1], `${sel} is a tint of ink rather than ink`).toMatch(/background: var\(--qcv-ink\)/);
       expect(m![1], `${sel} still carries an alpha`).not.toMatch(/rgba\(28, 19, 15, 0\.\d+\)\s*;?\s*(?:border|$)/);
     }
+    /* the rail's own "past the date": the fill goes solid ink and fills the track */
+    const be95 = read("src/components/queries/centre/qcvBirdsEye.css");
+    const over = be95.match(/(?:^|\n)\s*\.qcv-be-pbf--over\s*\{([^}]*)\}/);
+    expect(over, ".qcv-be-pbf--over has no rule").toBeTruthy();
+    expect(over![1], "the rail's reached bar is a tint of ink rather than ink").toMatch(/background: var\(--qcv-ink\)/);
+    expect(over![1], "a reached bar that does not reach the end of its track").toMatch(/right: 0/);
   });
   /**
    * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR. A bar beginning off-screen left
@@ -1250,7 +1260,9 @@ describe("§C1–§C3 · your move", () => {
      * Your move is said ONCE now, in words (§C2) or as a dot (§C2 rail).
      */
     expect(r(tl, ".qcv-tl-bar--you"), "the bar's rust edge is back").not.toMatch(/--qcv-rust|8a4a3c/);
-    expect(r(be, ".qcv-be-track--you .qcv-be-fill"), "the rail fill's rust edge is back").not.toMatch(/--qcv-rust|8a4a3c/);
+    /* ⚠️ THE RAIL'S FILL HAS NO your-move VARIANT ANY MORE (§4) — one universal bar — so the claim
+       is stated over the whole bar instead, which is stronger: no rust anywhere on it. */
+    expect(be, "the rail's bar is back in rust").not.toMatch(/\.qcv-be-pb[^{]*\{[^}]*(--qcv-rust|8a4a3c)/);
     const ghost = r(tl, ".qcv-tl-ghost");
     expect(ghost, "the next-step ring is rust again").not.toMatch(/--qcv-rust|8a4a3c/);
     expect(ghost, "§C1 · the ring is a 1.4px dashed ink at 55%").toMatch(/border: 1\.4px dashed rgba\(28, 19, 15, 0\.55\)/);
@@ -1275,16 +1287,21 @@ describe("§C1–§C3 · your move", () => {
     expect(tlSrc).toContain("qcv-tl-ghost qcv-tl-ghost--you");
   });
 
-  it("§C2 · the rail says it with a 6px anthracite dot after the due date", () => {
-    const dot = r(be, ".qcv-be-due--ym b::after");
-    expect(dot).toMatch(/width: 6px/);
-    expect(dot).toMatch(/height: 6px/);
-    expect(dot).toMatch(/border-radius: 50%/);
-    expect(dot).toMatch(/background: var\(--sp-anthracite\)/);
-    /* …after the DATE, which is what `b::after` says: the distance beneath it is a second line */
-    expect(read("src/components/queries/centre/QcBirdsEye.tsx")).toMatch(/r\.yourMove \? " qcv-be-due--ym" : ""/);
+  /**
+   * ⚠️ RETIRED WITH THE DUE CELL IT SAT IN (§4, v95). "Your move" in the rail was a 6px anthracite
+   * dot after the due date — the quietest mark that still read, in a 52px column. The v95 row has
+   * no due column: the name line states the STAGE in words ("Partial requested", "Full requested"),
+   * which is the same fact said plainly, and §4 specifies nothing else for it.
+   *
+   * ⚠️ AND THE EXPANDED VIEW'S HALF IS UNTOUCHED — it says it in words and that case still runs.
+   * What this asserts now is that the retired dot did not come back somewhere else.
+   */
+  it("§C2 · the rail's your-move dot is retired, and the stage says it in words", () => {
+    expect(be, "the dot is back").not.toMatch(/qcv-be-due--ym/);
+    expect(read("src/components/queries/centre/QcBirdsEye.tsx"), "the dot's class is still emitted").not.toMatch(/qcv-be-due--ym/);
+    /* the name line carries the stage, which is where the fact lives now */
+    expect(read("src/components/queries/centre/QcBirdsEye.tsx")).toMatch(/data-qcv="be-stage">\{r\.stage\}/);
   });
-
   it("§C3 · an overdue agent-side row carries the tag 8px after its nudge chip", () => {
     const tag = r(tl, ".qcv-tl-nudge--ym::after");
     expect(tag).toMatch(/content: "YOUR MOVE"/);
