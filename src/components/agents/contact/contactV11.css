@@ -277,9 +277,12 @@
     inset 0 0 0 1.5px var(--clv-ink);
 }
 .clv-kh { display: flex; align-items: center; gap: 12px; padding: 0 14px 0 22px; width: 100%; min-width: 0; }
-.clv-kh b { font-family: var(--clv-serif); font-size: 26px; font-weight: 600; line-height: 1; min-width: 26px; }
-.clv-kh .clv-kn { min-width: 0; }
-.clv-kh span { display: block; font-family: var(--clv-type); font-size: 14.5px; white-space: nowrap; }
+/* ⚠️ LIVING HEADERS v3 §1 — A TILE ROW NEVER GROWS: the number takes its own width (`flex: none`), the
+   label and its sub-line each hold ONE line and truncate, so a one-digit and a three-digit count give
+   the same tile. (The tile's height is fixed at 54 here; this is what stops a long label overflowing it.) */
+.clv-kh b { flex: none; font-family: var(--clv-serif); font-size: 26px; font-weight: 600; line-height: 1; min-width: 26px; }
+.clv-kh .clv-kn { min-width: 0; overflow: hidden; }
+.clv-kh span { display: block; font-family: var(--clv-type); font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .clv-kh small {
   display: block;
   margin-top: 3px;
@@ -289,6 +292,8 @@
   text-transform: uppercase;
   color: var(--clv-ink-45);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .clv-kh small.clv-pd { color: var(--clv-ink); font-weight: 700; }
 

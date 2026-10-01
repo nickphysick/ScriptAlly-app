@@ -311,14 +311,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
   const showList = pageState === "list" && !showEmpty;
-  const living = useMemo<LivingHeader>(() => {
-    const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
-    const agentsById = new Map(agents.map((a) => [a.id, a]));
-    return {
-      count: pageState === "list" ? (lhOverride ?? agents.length) : null,
-      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents }),
-    };
-  }, [pageState, lhOverride, agents, qcRows, scoped]);
 
   /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
      Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
@@ -656,6 +648,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     ),
     [agents, hkLiveById, hkReopenTaskById, nowMs],
   );
+  /* ⚠️ DECLARED BELOW `hk`, NOT BESIDE `pageState` — it reads the Housekeeping model's gap count, and a
+     render-time read of a `const` declared further down is the TDZ shape this repo has shipped before
+     (tsc cannot see it through a memo callback). The JSX reads `living` long after both. */
+  const living = useMemo<LivingHeader>(() => {
+    const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
+    const agentsById = new Map(agents.map((a) => [a.id, a]));
+    return {
+      count: pageState === "list" ? (lhOverride ?? agents.length) : null,
+      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, gaps: hk.counts.gaps }),
+    };
+  }, [pageState, lhOverride, agents, qcRows, scoped, hk]);
 
   /* the three direct fixes — through the CONTEXT writers (the hkSave discipline, lib/hkSave.ts):
      the same updateAgent To-do's rail writes with, and the dq flag resolved when this was the
