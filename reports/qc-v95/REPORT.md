@@ -97,6 +97,9 @@ settled (`--shell-side-w` 248, collapsed 68, nothing pending).
 | `f0099c43` | **2/4** — the list head: one line, and Group arrives |
 | `9d9ac8cc` | **3/4** — the rows: five columns, the disc's glyph, the hover tray |
 | `e38d372a` | **4/4** — the rail: one universal progress bar per query |
+| `82c570b6` | **5/6** — two fixes the measurement found: the folds measured at the edge, the foot's mark bound to its words |
+| `c6880434` | **6/6** — the eleven locks, the red-first evidence, the screenshots and this report |
+| *(this one)* | **7/7** — the commit list, which could not name its own last two rows |
 
 Each commit message carries its own reasoning; what follows is only what a reader of the diff could
 not work out.
