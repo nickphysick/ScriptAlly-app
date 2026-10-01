@@ -4,7 +4,7 @@
  *
  * A DEV-ONLY REVIEW AID for living headers: `window.__SA_LH_COUNT = n` (then dispatch
  * `sa:lh-count`) makes the Query Centre and the Contact list render their hero as if the page held
- * `n` items — 0 shows the empty state and its exhibition. It FABRICATES INPUT (the count), never
+ * `n` items — 0 shows the empty state and its exhibition, and −1 the To-do list's "all caught up". It FABRICATES INPUT (the count), never
  * output: the copy functions, the empty state and the exhibition all run for real on it, so a
  * measurement taken under it is evidence about the pages, not about this file.
  *
@@ -20,7 +20,8 @@ export const LH_COUNT_EVENT = "sa:lh-count";
 const read = (): number | null => {
   if (typeof window === "undefined") return null;
   const v = (window as unknown as { __SA_LH_COUNT?: unknown }).__SA_LH_COUNT;
-  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.floor(v) : null;
+  /* −1 asks a page for its CAUGHT-UP state (the To-do list: queries out, nothing due) — v3 §6 */
+  return typeof v === "number" && Number.isFinite(v) && v >= -1 ? Math.floor(v) : null;
 };
 
 /** The overriding count, or null when none is set. Re-reads on `sa:lh-count`. */

@@ -843,8 +843,12 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("<V2Rows");
     const bodyAt = page.indexOf('className="tdv2-body"');
     expect(bodyAt, "the v2 body's element").toBeGreaterThan(-1);
-    expect(page.indexOf('desk === "new-desk"')).toBeGreaterThan(-1);
-    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(bodyAt);
+    /* ⚠️ RETARGETED (living headers v3 §6): the desk states are `tdState`'s now — "nothing yet" and
+       "all caught up" — and both still sit ABOVE the body, which is the claim */
+    expect(page.indexOf('tdState === "nothing"')).toBeGreaterThan(-1);
+    expect(page.indexOf('tdState === "nothing"')).toBeLessThan(bodyAt);
+    expect(page.indexOf('tdState === "caught"')).toBeGreaterThan(-1);
+    expect(page.indexOf('tdState === "caught"')).toBeLessThan(bodyAt);
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move

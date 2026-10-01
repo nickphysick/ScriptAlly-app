@@ -196,12 +196,12 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
      re-earns it, and its three-way AND (nothing committed ∧ nothing urgent ∧ nothing suggested,
      read UNFILTERED so a filter cannot fake a clear desk) is the rule to rebuild against. */
 
+  /* ⚠️ RETARGETED (living headers v3 §6): the list page's first run is the shared header's empty
+     state now, and its art is the header's (the page's own slot) — so neither desk slot is mounted on
+     the list page. Both stay in the census, still distinct briefs, for whichever surface earns them. */
   it("first-run-board is DISTINCT from desk-clear — not yet versus well done", () => {
-    expect(listPage).toContain('<ArtSlot name="first-run-board"');
-    // the new-desk state is the trigger; the two never share an asset or a slot name
-    const newDesk = listPage.slice(listPage.indexOf("function renderNewDesk"), listPage.indexOf("function renderNewDesk") + 900);
-    expect(newDesk).toContain("first-run-board");
-    expect(newDesk).not.toContain("desk-clear");
+    expect(listPage).not.toContain('<ArtSlot name="first-run-board"');
+    expect(listPage).not.toContain("function renderNewDesk");
     expect(ART_SLOTS["first-run-board"].caption).not.toBe(ART_SLOTS["desk-clear"].caption);
   });
 

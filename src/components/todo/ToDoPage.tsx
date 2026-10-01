@@ -33,7 +33,11 @@ import {
 } from "../../lib/todoV2";
 import { V2Controls } from "./v2/V2Controls";
 import { V2Desk } from "./v2/V2Desk";
-import { STAGE_NAME } from "../../lib/qcSummary";
+import { STAGE_NAME, buildQcRows } from "../../lib/qcSummary";
+import { todoHeaderCopy, todoCaughtUpLine } from "../../lib/livingHeaders";
+import { useLivingCountOverride } from "../../lib/livingHeaderReview";
+import type { LivingHeader } from "../shell/PageHeader";
+import { TodoExhibit } from "./v2/TodoExhibit";
 import "./v2/todoV2.css";
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
@@ -256,6 +260,10 @@ const G3_COPY: Record<string, { rest: (n: number) => string; sub: string }> = {
  *
  *  Deliberately absent (and reported): the lane play button ("Focus on {label}") and the Notes
  *  ＋ went with the header bar — a heading is a heading. No "Clear this section": not built. */
+
+/* living headers v3 §4 — the To-do list's empty state, the ref's words */
+const TODO_EMPTY_HEADING = "Nothing to do yet";
+const TODO_EMPTY_SUBLINE = "Your list builds itself from your queries — nudges due, partials owed, replies gone quiet — and you can add your own tasks and notes alongside.";
 export const SectionHead: React.FC<{
   cls: string; // "do" | "hk" | "nt" — kept for the Lane ids; the heading itself is family-neutral now
   label: string;
@@ -1010,6 +1018,40 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     () => userTasks.filter(isNoteTask).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")),
     [userTasks],
   );
+  /**
+   * ══ LIVING HEADERS v3 §6 — THE TO-DO LIST HAS THREE STATES, NOT TWO ══
+   * Zero items means two different things here, and they need opposite pages:
+   *  · NOTHING YET — no queries AND no tasks or notes of the writer's own: the empty state, with the
+   *    exhibition of what the page will look like.
+   *  · ALL CAUGHT UP — there are queries (or own tasks), and nothing is to do: NOT an empty state. The
+   *    full hero, the rule, the tiles at their real values, the rail, and one dashed panel.
+   *  · the list.
+   * ⚠️ THE ITEMS STAY DERIVED — `v2Live` is the badge's own population, unchanged by this. The dev
+   * review aid fabricates the COUNT only (0 = nothing yet, −1 = caught up), gated at the call site.
+   */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  const tdState: "loading" | "nothing" | "caught" | "list" = v2Load.loading ? "loading"
+    : lhOverride === 0 ? "nothing"
+    : lhOverride === -1 ? "caught"
+    : lhOverride != null ? "list"
+    : queries.length === 0 && userTasks.length === 0 ? "nothing"
+    : v2Live.length === 0 ? "caught"
+    : "list";
+  /* the oldest or soonest item, by the page's own date sort, set-aside excluded */
+  const tdFirst = useMemo(() => {
+    const r = sortRows(v2AllRows.filter((x) => !x.setAside), "date")[0];
+    return r ? { deed: r.deed, dueYmd: r.dueYmd } : null;
+  }, [v2AllRows]);
+  /* the caught-up line's next expected reply — the Query Centre's own rows, never a recount */
+  const tdQcRows = useMemo(() => (tdState === "caught" ? buildQcRows(queries, agents, activities, Date.now()) : []), [tdState, queries, agents, activities]);
+  const tdLiving: LivingHeader = {
+    count: tdState === "loading" ? null : tdState === "list" ? (lhOverride != null && lhOverride > 0 ? lhOverride : v2Live.length) : 0,
+    copy: (n) => (n === 0
+      ? todoCaughtUpLine({ rows: tdQcRows, agentsById: new Map(agents.map((a) => [a.id, a])), nowMs: Date.now() })
+      : todoHeaderCopy(n, { first: tdFirst, todayYmd: today })),
+    empty: tdState === "nothing" ? { heading: TODO_EMPTY_HEADING, subline: [TODO_EMPTY_SUBLINE] } : undefined,
+  };
   const addV2Task = async (f: { text: string; dueDate: string; agentId?: string }): Promise<boolean> => {
     const id = "task-" + Math.random().toString(36).slice(2, 11);
     const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate, ...(f.agentId ? { agentId: f.agentId } : {}) });
@@ -1887,6 +1929,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             variant="full"
             title="To-do list"
             description="Everything that's yours to do, and everything worth a look."
+            living={tdLiving}
             /* ⚠️ NO "Add a task" HERE (to-do list v2, Phase 6): the desk's composer replaces it — one way
                to add, beside the list it adds to. "Set aside" stays in the header. */
             secondary={{ label: asideN ? `Set aside · ${asideN}` : "Set aside", onClick: () => setAsideOpen((o) => !o) }}
@@ -1900,6 +1943,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                PNG drops in later without a reflow. */
             art={<span className="tdv2-artslot" data-todo-v2="art-slot" />}
           />
+          {tdState === "nothing" ? (
+            /* NOTHING YET (§4/§6): no page title, no rule — the bar carries the name. The exhibition,
+               then nothing: the ref's quiet line ("See what QueryHawk keeps track of") has no route
+               in this app, so it is OMITTED rather than pointed somewhere invented. */
+            <div className="tdv2-empty-below" data-todo-v2="empty-below">
+              <TodoExhibit />
+            </div>
+          ) : (
+          <>
           <div className="tdv2-main" data-todo-v2="main">
           {v2Load.loading ? <V2Skeleton /> : (
           <div className="tdb-centre">
@@ -1913,7 +1965,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               partition it — so their sum IS All, structurally, rather than by two derivations
               happening to agree. Urgent is a LENS over the same array and is deliberately not in
               that sum: a send whose clock is running is still an Agent request. */}
-          {desk !== "new-desk" && desk !== "desk-cleared" && (
+          {(tdState === "list" || tdState === "caught") && (
             <>
               {/* ⚠️ THREE TILES, NOT SEVEN (to-do list v2). Your move folds agent requests and your
                   own tasks, Chase or close folds nudges and gone quiet, Housekeeping is itself —
@@ -1923,7 +1975,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {/* ⚠️ THE CONTROLS ROW IS THE v2 ONE (to-do list v2, Phase 4): search · Filter · Group ·
                   Sort · Export CSV. The Grid/List/Board switch is RETIRED with the views; the
                   Set-aside door moved to the header's action. */}
-              <V2Controls
+              {tdState === "list" && <V2Controls
                 search={search}
                 onSearch={setSearch}
                 searchRef={searchRef}
@@ -1936,7 +1988,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 sort={v2Sort}
                 onSort={setV2Sort}
                 onExport={exportV2}
-              />
+              />}
             </>
           )}
           {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
@@ -1975,7 +2027,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ⚠️ BOTH DESK STATES READ UNFILTERED — `deskState` takes the raw lanes, never the
             searched ones, so a search that happens to match nothing can never fake a clear desk.
             Copy verbatim from todo-empty-states.html. ── */}
-        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
+        {tdState === "caught" ? (
+          /* ALL CAUGHT UP (§6) — NOT an empty state. Where the list would be, one dashed panel; the
+             tiles above stay at their real values and the rail beside stays untouched. No exhibition:
+             the writer already knows what this page does. */
+          <div className="tdv2-caught" data-todo-v2="caught">
+            <b>Nothing is waiting on you</b>
+            <p>When a nudge falls due, a partial is owed or a reply goes quiet, it appears here on its own.</p>
+          </div>
+        ) : (
           /**
            * ⚠️ THE SPLIT (Phase 2). The list is the RAIL and the dock is the WORKSPACE, standing
            * side by side instead of taking turns.
@@ -2143,6 +2203,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onOpenNoteboard={() => navigate("/todo/noteboard")}
             />
           </PageRail>
+          </>
+          )}
         </div>{/* .tdv2-group */}
         </WorkspacePageGrid>
         {/* ⚠️ THE DRAWER IS THE GRID'S AND THE BOARD'S PANE (QC-chassis round, Phase 5), and it is
@@ -2232,60 +2294,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     </div>
   );
 
-  // ── State A: the new desk (zero queries AND zero agents) — one welcome card replaces the three
-  // reels; the two real doorways in; the ghost stack is decoration (CSS only). Copy verbatim. ──
-  function renderNewDesk() {
-    return (
-      <div className="tdb-newdesk">
-        {/* ⚠️ ART · FIRST-RUN-BOARD (board-optimise P3) — the board before the first query.
-            DISTINCT FROM DESK-CLEAR, and the distinction is the whole point: this one is NOT
-            YET, that one is WELL DONE. Same page, opposite meanings — so they are two briefs,
-            never one asset reused. Once per manuscript, by the desk state's own derivation. */}
-        <ArtSlot name="first-run-board" className="tdb-ndart" />
-        <div className="tdb-ndtxt">
-          <h2>A clean desk — <em>for now.</em></h2>
-          <p>Once you’re querying, this page fills itself: requests and deadlines land in <b>Urgent</b>, record tidy-ups gather in <b>Housekeeping</b>, and your own reminders live in <b>Notes to self</b>. Nothing to track by hand.</p>
-          <div className="tdb-ndacts">
-            <button type="button" className="tdb-ndpri" onClick={() => onNavigate("queries", "Log a query")}>Start your first query →</button>
-            <button type="button" className="tdb-ndsec" onClick={() => onNavigate("agents")}>Add agents to your contact list</button>
-          </div>
-        </div>
-        <div className="tdb-ghoststack" aria-hidden>
-          <div className="tdb-gc g1"><div className="tdb-gl gtag" /><div className="tdb-gl w85" /><div className="tdb-gl w60" /></div>
-          <div className="tdb-gc g2"><div className="tdb-gl gtag" /><div className="tdb-gl w85" /><div className="tdb-gl w40" /></div>
-          <div className="tdb-handnote">— your future to-dos</div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── State E: "Desk cleared." — all three sets empty AND the done-log is non-empty (earned,
-  // never default: with nothing cleared today the per-reel states render instead). ──
-  function renderDeskCleared() {
-    const { visible, more } = clearedListCap(doneCards);
-    return (
-      <div className="tdb-walked">
-        {/* ⚠️ ART · DESK-CLEAR — RE-EARNED (tasks-consolidation P2). Its mount went with the Today
-            page in P1; the slot itself never left the census. It belongs HERE, and only here,
-            because this state is WELL DONE where the new desk's slot is NOT YET — same page,
-            opposite meanings, so they stay two briefs and never one asset reused.
-            ⚠️ THE TRIGGER READS UNFILTERED: `deskState` takes the raw lanes (nothing urgent ∧ no
-            housekeeping ∧ no notes) plus a non-empty cleared log, so a search can never fake it. */}
-        <ArtSlot name="desk-clear" className="tdb-clrart" />
-        <div className="tdb-clric big" aria-hidden>✓</div>
-        <h2>Desk cleared.</h2>
-        <p>Nothing needs you, the records are spotless, and today you cleared:</p>
-        <span className="tdb-strike">
-          {visible.map((c) => (
-            <span key={c.key} className="tdb-strow"><span className="tdb-stick" aria-hidden>✓</span><span className="tdb-sdx">{c.title}</span></span>
-          ))}
-          {more > 0 && <span className="tdb-smore">and {more} more</span>}
-        </span>
-        <br />
-        <span className="tdb-clrhand big" aria-hidden>— the waiting is the work. Go write.</span>
-      </div>
-    );
-  }
+  /* ⚠️ RETIRED (living headers v3 §6): `renderNewDesk` and `renderDeskCleared`. The new desk was keyed
+     on no queries AND no agents; the v3 "nothing yet" is no queries AND no tasks or notes of the
+     writer's own, and is the shared header's empty state with the exhibition. "Desk cleared." was the
+     state for nothing left with something cleared today; v3 shows "All caught up" for nothing due
+     whenever the writer has queries. Recover both from 9c0373a8. */
 
   // ── Final Shape P1: the hero + the floating search. The hero carries NOTHING else — no
   // date, no counts, no census squares (the counts live on the rail's pills; focus-art.png is

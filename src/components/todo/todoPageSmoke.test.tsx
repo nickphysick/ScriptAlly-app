@@ -80,7 +80,11 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4) — the eyebrow, the tag dropdown, the
        count pills and `Work the list` all came out; search and sort are the list card's and
        `Add task or note` is the control bar's. */
-    expect(html).toContain("tdb-centre");          // the page's own content column
+    /* ⚠️ RETARGETED (living headers v3 §6): with no data this render is "NOTHING YET" — the shared
+       header's empty state and the exhibition replace the body, so the content column is legitimately
+       absent here; the populated smoke below is the one that reaches `tdb-centre`. */
+    expect(html).toContain("Nothing to do yet");   // the empty state's heading
+    expect(html).toContain('data-lh="exhibition"'); // the exhibition, not an empty shell
     /* ⚠️ THE SIDE CONTAINER'S "Filters" WENT WITH THE SIDEBAR (tasks-consolidation P2, 9 Aug).
        The point of this smoke is that the page is not an empty shell that merely did not crash,
        so it anchors on chrome the CONSOLIDATED page produces in EVERY state — the mono eyebrow
