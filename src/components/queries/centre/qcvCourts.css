@@ -59,8 +59,9 @@
  * agreeing with the count would crop it.
  */
 .qcv-court-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; height: 36px; }
-.qcv-court-n { font-family: var(--qcv-serif); font-weight: 600; font-size: 36px; line-height: 1; color: var(--qcv-ink); }
-.qcv-court-lbl { font-family: var(--qcv-type); font-size: 17px; line-height: 1.2; color: var(--qcv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* living headers v3 §1 — the number takes its own width so a three-digit count never squeezes the label onto two lines */
+.qcv-court-n { flex: none; font-family: var(--qcv-serif); font-weight: 600; font-size: 36px; line-height: 1; color: var(--qcv-ink); }
+.qcv-court-lbl { min-width: 0; font-family: var(--qcv-type); font-size: 17px; line-height: 1.2; color: var(--qcv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /**
  * ⚠️ THE LINE-HEIGHT IS STATED, AND THAT IS WHAT MAKES THE TILE'S HEIGHT A CONSTANT. Left at
  * `normal` it comes from the FONT's own metrics — so the box is one height while the mono face is
