@@ -31,6 +31,8 @@ const AGENTS = [
   ag("a2", "Marcus Reed", "Bloomsbury Quill"),
   ag("a3", "Aisha Kapoor", "The Lantern Agency"),
 ];
+/** n agents, the first three the named cast — so a count and its list agree, as on the page */
+const agentsN = (n: number): Agent[] => Array.from({ length: n }, (_, i) => AGENTS[i] ?? ag(`x${i}`, `Agent ${i}`, `Agency ${i}`));
 const ctxOf = (qs: Query[], agents: Agent[] = AGENTS): PressingContext => ({
   rows: buildQcRows(qs, agents, [], NOW), agentsById: new Map(agents.map((a) => [a.id, a])), nowMs: NOW,
 });
@@ -120,10 +122,17 @@ describe("the Contact list's two lines", () => {
     const solo = ag("a9", "Greg Panetta", "");
     expect(sub(contactHeaderCopy(1, { ...ctxOf([], [solo]), agents: [solo] }))).toBe("Greg Panetta, and you haven’t queried them yet.");
   });
-  it("many: 'n agents', and the pressing sentence", () => {
-    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS });
+  /* ⚠️ RETARGETED (living headers v3): the many-case is what is missing and who is left — the ref's
+     sentence — not the pressing sentence */
+  it("many: 'n agents', who is queried, who is left, and the gaps", () => {
+    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, gaps: 46 });
     expect(l.headline).toBe("16 agents");
-    expect(sub(l)).toBe("Jonathan Marsh has had it 8 weeks. A nudge is due.");
+    expect(sub(l)).toBe("1 queried, and 2 still to go. 46 details are missing across them.");
+  });
+  it("many: none queried, all queried, one gap, no gaps", () => {
+    expect(sub(contactHeaderCopy(3, { ...ctxOf([]), agents: AGENTS }))).toBe("None queried yet.");
+    const all = [q({ agentId: "a1" }), q({ agentId: "a2" }), q({ agentId: "a3" })];
+    expect(sub(contactHeaderCopy(3, { ...ctxOf(all), agents: AGENTS, gaps: 1 }))).toBe("All of them queried. 1 detail is missing across them.");
   });
 });
 
@@ -131,7 +140,8 @@ describe("LH9 · the rules that hold everywhere", () => {
   const counts = [1, 2, 9, 13, 27, 148];
   const lines = counts.flatMap((c) => [
     qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue(), q({ agentId: "a3", dateSent: ago(57) })])),
-    contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : AGENTS }),
+    /* the Contact list's count IS its agent list's length — a fixture where they differ is one no page builds */
+    contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c) }),
   ]);
   it("the headline is the count alone: 'One …' at 1, the figure otherwise", () => {
     counts.forEach((c, i) => {
@@ -154,5 +164,113 @@ describe("LH9 · the rules that hold everywhere", () => {
     expect(dayDate(sep)).toBe("Sat 26 Sep");
     const all = [...lines.map(sub), s([q({ agentId: "a3", status: QueryStatus.OFFER, offerResponseDeadline: ahead(7) })])];
     for (const t of all) expect(t).not.toMatch(/Sept\b/);
+  });
+});
+
+/* ══ living headers v3 — the four new pages and the To-do list's caught-up line ══════════════════ */
+import { packagesHeaderCopy, compsHeaderCopy, analyticsHeaderCopy, todoHeaderCopy, todoCaughtUpLine, ANALYTICS_MIN_ANSWERED, TOO_EARLY } from "./livingHeaders";
+
+describe("Submission packages' two lines", () => {
+  const lead = { name: "Standard", sent: 11, answered: 8, requests: 3 };
+  it("many: the most-used live package and its record", () => {
+    const l = packagesHeaderCopy(4, { lead, firstLiveName: "Standard" });
+    expect(l.headline).toBe("4 packages");
+    expect(sub(l)).toBe("Standard is out on 11 queries — 3 requests from 8 answered.");
+  });
+  it("singulars, nothing back yet, nothing sent, nothing in use", () => {
+    expect(sub(packagesHeaderCopy(2, { lead: { name: "S", sent: 1, answered: 1, requests: 1 }, firstLiveName: "S" }))).toBe("S is out on 1 query — 1 request from 1 answered.");
+    expect(sub(packagesHeaderCopy(2, { lead: { name: "S", sent: 3, answered: 0, requests: 0 }, firstLiveName: "S" }))).toBe("S is out on 3 queries, and none has come back yet.");
+    expect(sub(packagesHeaderCopy(2, { lead: null, firstLiveName: "Short" }))).toBe("Short is ready, and hasn’t been sent with a query yet.");
+    expect(sub(packagesHeaderCopy(2, { lead: null, firstLiveName: null }))).toBe("Nothing is in use right now.");
+  });
+  it("one: ready and not sent", () => {
+    const l = packagesHeaderCopy(1, { lead: { name: "Standard", sent: 0, answered: 0, requests: 0 }, firstLiveName: "Standard" });
+    expect(l.headline).toBe("One package");
+    expect(sub(l)).toBe("Standard is ready, and hasn’t been sent with a query yet.");
+  });
+});
+
+describe("Comparable titles' two lines", () => {
+  it("many: what stops them being letter-ready, in words", () => {
+    const l = compsHeaderCopy(11, { missing: 3, inLetter: ["The Dry", "Snap"], firstTitle: "The Dry" });
+    expect(l.headline).toBe("11 comp titles");
+    expect(sub(l)).toBe("Three are missing a publisher or a year, so they’re not letter-ready.");
+    expect(sub(compsHeaderCopy(4, { missing: 1, inLetter: [], firstTitle: "x" }))).toBe("One is missing a publisher or a year, so it’s not letter-ready.");
+  });
+  it("many, none missing: the titles in the letter", () => {
+    expect(sub(compsHeaderCopy(4, { missing: 0, inLetter: ["The Dry", "Snap"], firstTitle: "x" }))).toBe("The Dry and Snap are in your letter.");
+    expect(sub(compsHeaderCopy(4, { missing: 0, inLetter: ["The Dry"], firstTitle: "x" }))).toBe("The Dry is in your letter.");
+    expect(sub(compsHeaderCopy(4, { missing: 0, inLetter: [], firstTitle: "x" }))).toBe("None is in your letter yet.");
+  });
+  it("one: saved, in the letter or not", () => {
+    const l = compsHeaderCopy(1, { missing: 0, inLetter: [], firstTitle: "The Dry" });
+    expect(l.headline).toBe("One comp title");
+    expect(sub(l)).toBe("The Dry is saved, and not in your letter yet.");
+    expect(sub(compsHeaderCopy(1, { missing: 0, inLetter: ["The Dry"], firstTitle: "The Dry" }))).toBe("The Dry is saved, and in your letter.");
+  });
+});
+
+describe("Analytics' two lines — never a rate from fewer than five answered", () => {
+  it("many: the requests, the answered, the typical reply", () => {
+    const l = analyticsHeaderCopy(27, { answered: 24, requests: 3, medianDays: 31 });
+    expect(l.headline).toBe("27 queries in");
+    expect(sub(l)).toBe("Three requests from 24 answered, and agents take 31 days to reply.");
+    expect(sub(analyticsHeaderCopy(27, { answered: 6, requests: 0, medianDays: null }))).toBe("No requests from 6 answered.");
+    expect(sub(analyticsHeaderCopy(27, { answered: 9, requests: 1, medianDays: 1 }))).toBe("One request from 9 answered, and agents take 1 day to reply.");
+  });
+  it("below five answered, and at one, it is too early", () => {
+    expect(ANALYTICS_MIN_ANSWERED).toBe(5);
+    expect(sub(analyticsHeaderCopy(27, { answered: 4, requests: 3, medianDays: 20 }))).toBe(TOO_EARLY);
+    const one = analyticsHeaderCopy(1, { answered: 9, requests: 2, medianDays: 10 });
+    expect(one.headline).toBe("One query in");
+    expect(sub(one)).toBe(TOO_EARLY);
+  });
+});
+
+describe("the To-do list's two lines, and all caught up", () => {
+  const today = "2026-09-19";
+  it("many: the oldest or soonest, by its own deed, in the right tense", () => {
+    const l = todoHeaderCopy(9, { first: { deed: "Send Marcus Reed the partial", dueYmd: "2026-10-03" }, todayYmd: today });
+    expect(l.headline).toBe("9 things to do");
+    expect(sub(l)).toBe("The oldest of them is Send Marcus Reed the partial, and it is due on Sat 3 Oct.");
+    expect(sub(todoHeaderCopy(9, { first: { deed: "Nudge Aisha Kapoor", dueYmd: "2026-09-12" }, todayYmd: today }))).toBe("The oldest of them is Nudge Aisha Kapoor, and it was due on Sat 12 Sep.");
+    expect(sub(todoHeaderCopy(9, { first: { deed: "Polish the synopsis", dueYmd: null }, todayYmd: today }))).toBe("The oldest of them is Polish the synopsis, and it has no date set.");
+  });
+  it("one: that one thing", () => {
+    const l = todoHeaderCopy(1, { first: { deed: "Nudge Aisha Kapoor", dueYmd: "2026-09-26" }, todayYmd: today });
+    expect(l.headline).toBe("One thing to do");
+    expect(sub(l)).toBe("Nudge Aisha Kapoor. It is due on Sat 26 Sep.");
+  });
+  it("all caught up: the next reply, or nothing at all", () => {
+    const c = todoCaughtUpLine(ctxOf([waiting()]));
+    expect(c.headline).toBe("All caught up");
+    expect(sub(c)).toBe("Nothing needs you today. The next reply is expected 21 Oct, from Aisha Kapoor.");
+    expect(sub(todoCaughtUpLine(ctxOf([])))).toBe("Nothing needs you today.");
+  });
+});
+
+describe("LH12 · the v3 rules across all six", () => {
+  const counts = [1, 2, 9, 13, 27, 148];
+  const all = counts.flatMap((c) => [
+    { c, l: qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue()])) },
+    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), gaps: 46 }) },
+    { c, l: packagesHeaderCopy(c, { lead: { name: "Standard", sent: 11, answered: 8, requests: 3 }, firstLiveName: "Standard" }) },
+    { c, l: compsHeaderCopy(c, { missing: 3, inLetter: ["The Dry"], firstTitle: "The Dry" }) },
+    { c, l: analyticsHeaderCopy(c, { answered: 24, requests: 3, medianDays: 31 }) },
+    /* a SEPTEMBER date, so the "Sept" sweep below has something to catch (an October-only fixture cannot) */
+    { c, l: todoHeaderCopy(c, { first: { deed: "Send the partial", dueYmd: "2026-09-26" }, todayYmd: "2026-09-19" }) },
+  ]);
+  it("every headline is non-empty and states the scale alone", () => {
+    for (const { c, l } of all) {
+      expect(l.headline.length).toBeGreaterThan(0);
+      if (c === 1) expect(l.headline).toMatch(/^One /);
+      else expect(l.headline.startsWith(`${c} `)).toBe(true);
+    }
+  });
+  it("no subline restates the page's own count, and none says Sept", () => {
+    for (const { c, l } of all) {
+      if (c > 1) expect(sub(l), `${l.headline}: ${sub(l)}`).not.toMatch(new RegExp(`(^|\\D)${c}(\\D|$)`));
+      expect(sub(l)).not.toMatch(/Sept\b/);
+    }
   });
 });
