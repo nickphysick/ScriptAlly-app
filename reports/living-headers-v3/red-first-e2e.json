@@ -1,0 +1,94 @@
+[
+ [
+  "LH1",
+  "build 0 exit 1",
+  [
+   "\u2717 LH1 no movement \u00b7 /queries \u00b7 1440 \u00b7 one-line subline\u00b7intro \u2014 [0,91.9,505.9,26.1] vs [0,91.9,505.9,52.2]",
+   "\u2717 LH1 no movement \u00b7 /queries \u00b7 1440 \u00b7 one-line subline\u00b7acts \u2014 [0,140,350.6,48] vs [0,166.1,350.6,48]"
+  ],
+  "restored"
+ ],
+ [
+  "LH2",
+  "build 0 exit 1",
+  [
+   "\u2717 LH2 one line \u00b7 /queries \u00b7 1280 \u00b7 1 \u2014 \"One query out\" lines 3 scroll 145 client 145",
+   "\u2717 LH2 one line \u00b7 /queries \u00b7 1280 \u00b7 9 \u2014 \"9 queries out\" lines 3 scroll 188 client 145"
+  ],
+  "restored"
+ ],
+ [
+  "LH3",
+  "build 0 exit 1",
+  [
+   "\u2717 LH3 same height, 1 vs 148 \u00b7 /todo \u00b7 1280 \u00b7 tiles \u2014 [122.3,122.3,122.3] vs [172.4,172.4,172.4]"
+  ],
+  "restored"
+ ],
+ [
+  "LH4",
+  "build 0 exit 1",
+  [
+   "\u2717 LH4 one left x \u00b7 /queries \u00b7 1440 \u00b7 data \u2014 300.1 300.1 300.1 294.1 294.1"
+  ],
+  "restored"
+ ],
+ [
+  "LH5",
+  "build 0 exit 1",
+  [
+   "\u2717 LH5 crumb on first paint \u00b7 /queries \u00b7 1440 \u00b7 first paint \u2014 {\"route\":\"/queries\",\"headerFirst\":true,\"crumb\":\"Queries /Query Centre\",\"op\":\"0\"}",
+   "\u2717 LH5 crumb settled \u00b7 /queries \u00b7 1440 \u00b7 settled \u2014 {\"sec\":\"QUERIES /\",\"name\":\"Query Centre\",\"op\":\"0\",\"secFs\":\"9.5px\",\"nameFs\":\"21px\",\"nameFam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"eyebrows\":0}"
+  ],
+  "restored"
+ ],
+ [
+  "LH6",
+  "build 0 exit 1",
+  [
+   "\u2717 LH6 only text differs \u00b7 /queries \u00b7 1440 \u00b7 1 vs 27 \u2014 diff at 111"
+  ],
+  "restored"
+ ],
+ [
+  "LH7",
+  "build 0 exit 1",
+  [
+   "\u2717 LH7 no rule \u00b7 /queries \u00b7 1440 \u00b7 0 \u2014 rule 1 (populated 1)"
+  ],
+  "restored"
+ ],
+ [
+  "LH8",
+  "build 0 exit 1",
+  [
+   "\u2717 LH8 inert \u00b7 /queries \u00b7 1440 \u00b7 0 \u2014 inert false aria-hidden true pe none",
+   "\u2717 LH8 not in the tab order \u00b7 /queries \u00b7 1440 \u00b7 0 \u2014 tabbed in true"
+  ],
+  "restored"
+ ],
+ [
+  "LH9",
+  "build 0 exit 1+count",
+  [
+   "\u2717 LH9 hero kept \u00b7 /todo \u00b7 1440 \u00b7 search-empty \u2014 living empty \"\" rule 0"
+  ],
+  "restored"
+ ],
+ [
+  "LH10",
+  "build 0 exit 0",
+  [
+   "NO EXPECTED RED"
+  ],
+  "restored"
+ ],
+ [
+  "LH11",
+  "build 0 exit 1",
+  [
+   "\u2717 LH11 all caught up \u00b7 /todo \u00b7 1440 \u00b7 caught \u2014 {\"tiles\":false,\"rows\":false,\"caught\":false,\"caughtText\":\"\",\"rail\":false,\"band\":true,\"h1\":\"All caught up\",\"intro\":\"Nothing needs you today. The next reply is expected 1 Oct, from Priya Nair.\"}"
+  ],
+  "restored"
+ ]
+]

@@ -1,0 +1,2002 @@
+{
+ "1280 /queries": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    289,
+    123.8,
+    950.1,
+    255
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    289,
+    137.8,
+    437,
+    208.3
+   ]
+  },
+  "eyebrow": "QUERIES / QUERY CENTRE",
+  "h1": {
+   "text": "83 queries out",
+   "fs": "47.36px",
+   "lh": "48.3072px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    160.1,
+    437,
+    49.7
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    289,
+    223.8,
+    437,
+    52.2
+   ],
+   "text": "Rachel Lin’s partial is due Sun 4 Oct, and seven nudges are waiting."
+  },
+  "buttons": [
+   "+ Log a query",
+   "Record a response"
+  ],
+  "art": {
+   "box": [
+    802,
+    113.8,
+    437,
+    264
+   ],
+   "w": "437.031px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "acts": 289,
+   "tile": 289,
+   "row": 289
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": 1239,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Query Centre Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nQuery Centre",
+   "pnVisible": "0"
+  }
+ },
+ "1280 /agents": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    289,
+    123.8,
+    950.1,
+    255
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    289,
+    137.8,
+    437,
+    208.1
+   ]
+  },
+  "eyebrow": "AGENTS / CONTACT LIST",
+  "h1": {
+   "text": "37 agents",
+   "fs": "47.36px",
+   "lh": "48.3072px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    160.1,
+    437,
+    49.7
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    289,
+    223.8,
+    437,
+    52
+   ],
+   "text": "Edda Voss’s partial is waiting on you."
+  },
+  "buttons": [
+   "+ Add an agent",
+   "Paste a link"
+  ],
+  "art": {
+   "box": [
+    802,
+    113.8,
+    437,
+    264
+   ],
+   "w": "437.031px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "acts": 289,
+   "tile": 289,
+   "row": 289
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": 1239,
+   "railW": 340
+  },
+  "bar": {
+   "text": "AGENTS Contact list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "AGENTS\nContact list",
+   "pnVisible": "0"
+  }
+ },
+ "1280 /todo": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    289,
+    123.8,
+    950.1,
+    262.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    289,
+    149.8,
+    522.5,
+    209.9
+   ]
+  },
+  "eyebrow": "TASKS / TO-DO LIST",
+  "h1": {
+   "text": "To-do list",
+   "fs": "50px",
+   "lh": "50px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    173.4,
+    522.5,
+    50
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    289,
+    237.4,
+    460,
+    52.2
+   ],
+   "text": "Everything that's yours to do, and everything worth a look."
+  },
+  "buttons": [
+   "Set aside · 9"
+  ],
+  "art": {
+   "box": [
+    783,
+    109.6,
+    456,
+    276
+   ],
+   "w": "456.031px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": false
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "acts": 289,
+   "tile": 289,
+   "row": 289
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": 1239,
+   "railW": 340
+  },
+  "bar": {
+   "text": "TASKS To-do list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "TASKS\nTo-do list",
+   "pnVisible": "0"
+  }
+ },
+ "1280 /manuscripts/packages": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    289,
+    123.8,
+    950.1,
+    262.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    289,
+    149.8,
+    522.5,
+    209.9
+   ]
+  },
+  "eyebrow": "MATERIALS / SUBMISSION PACKAGES",
+  "h1": {
+   "text": "Submission packages",
+   "fs": "50px",
+   "lh": "50px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    173.4,
+    522.5,
+    50
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    289,
+    237.4,
+    460,
+    52.2
+   ],
+   "text": "A letter, synopsis and version for each round of querying. 3 in use, 7 queries sent."
+  },
+  "buttons": [
+   "+ New package",
+   "Side by side"
+  ],
+  "art": {
+   "box": [
+    783,
+    109.6,
+    456,
+    276
+   ],
+   "w": "456.031px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "acts": 289,
+   "tile": 309,
+   "row": 289
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Submission packages Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nSubmission packages",
+   "pnVisible": "0"
+  }
+ },
+ "1280 /manuscripts/comps": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    289,
+    123.8,
+    950.1,
+    265.4
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    289,
+    149.8,
+    522.5,
+    212.4
+   ]
+  },
+  "eyebrow": "MATERIALS / COMPARABLE TITLES",
+  "h1": {
+   "text": "Comparable titles",
+   "fs": "50px",
+   "lh": "50px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    173.4,
+    522.5,
+    50
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    289,
+    237.4,
+    460,
+    54.7
+   ],
+   "text": "Books, films and shows like Harbour of Glass, and why. 3 on your list, 2 named in your query letter."
+  },
+  "buttons": [
+   "+ Add a comp"
+  ],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "acts": 289,
+   "tile": null,
+   "row": 289
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Comparable titles Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nComparable titles",
+   "pnVisible": "0"
+  }
+ },
+ "1280 /queries/analytics": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    289,
+    123.8,
+    950.1,
+    233
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    289,
+    149.8,
+    522.5,
+    116.2
+   ]
+  },
+  "eyebrow": null,
+  "h1": {
+   "text": "Analytics",
+   "fs": "50px",
+   "lh": "50px",
+   "ws": "nowrap",
+   "box": [
+    289,
+    149.8,
+    522.5,
+    50
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    289,
+    213.8,
+    460,
+    52.2
+   ],
+   "text": "How Harbour of Glass is going with agents — and what the numbers can't tell you."
+  },
+  "buttons": [],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 289,
+   "intro": 289,
+   "tile": 290,
+   "row": null
+  },
+  "rights": {
+   "hero": 1239,
+   "rail": 629,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Analytics Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nAnalytics",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /queries": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    255.5
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    294.1,
+    137.8,
+    505.9,
+    214.5
+   ]
+  },
+  "eyebrow": "QUERIES / QUERY CENTRE",
+  "h1": {
+   "text": "83 queries out",
+   "fs": "53.28px",
+   "lh": "54.3456px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    160.1,
+    505.9,
+    55.9
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    294.1,
+    230,
+    505.9,
+    52.2
+   ],
+   "text": "Rachel Lin’s partial is due Sun 4 Oct, and seven nudges are waiting."
+  },
+  "buttons": [
+   "+ Log a query",
+   "Record a response"
+  ],
+  "art": {
+   "box": [
+    888,
+    114.2,
+    505.9,
+    264
+   ],
+   "w": "505.922px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "acts": 294.1,
+   "tile": 294.1,
+   "row": 294.1
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": 1393.9,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Query Centre Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nQuery Centre",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /agents": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    255.3
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    294.1,
+    137.8,
+    505.9,
+    214.3
+   ]
+  },
+  "eyebrow": "AGENTS / CONTACT LIST",
+  "h1": {
+   "text": "37 agents",
+   "fs": "53.28px",
+   "lh": "54.3456px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    160.1,
+    505.9,
+    55.9
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    294.1,
+    230,
+    505.9,
+    52
+   ],
+   "text": "Edda Voss’s partial is waiting on you."
+  },
+  "buttons": [
+   "+ Add an agent",
+   "Paste a link"
+  ],
+  "art": {
+   "box": [
+    888,
+    114,
+    505.9,
+    264
+   ],
+   "w": "505.922px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "acts": 294.1,
+   "tile": 294.1,
+   "row": 294.1
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": 1393.9,
+   "railW": 340
+  },
+  "bar": {
+   "text": "AGENTS Contact list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "AGENTS\nContact list",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /todo": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    294.1,
+    149.8,
+    604.9,
+    215.9
+   ]
+  },
+  "eyebrow": "TASKS / TO-DO LIST",
+  "h1": {
+   "text": "To-do list",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    173.4,
+    604.9,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    294.1,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "Everything that's yours to do, and everything worth a look."
+  },
+  "buttons": [
+   "Set aside · 9"
+  ],
+  "art": {
+   "box": [
+    866,
+    115.6,
+    527.9,
+    276
+   ],
+   "w": "527.922px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": false
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "acts": 294.1,
+   "tile": 294.1,
+   "row": 294.1
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": 1393.9,
+   "railW": 340
+  },
+  "bar": {
+   "text": "TASKS To-do list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "TASKS\nTo-do list",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /manuscripts/packages": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    294.1,
+    149.8,
+    604.9,
+    215.9
+   ]
+  },
+  "eyebrow": "MATERIALS / SUBMISSION PACKAGES",
+  "h1": {
+   "text": "Submission packages",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    173.4,
+    604.9,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    294.1,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "A letter, synopsis and version for each round of querying. 3 in use, 7 queries sent."
+  },
+  "buttons": [
+   "+ New package",
+   "Side by side"
+  ],
+  "art": {
+   "box": [
+    866,
+    115.6,
+    527.9,
+    276
+   ],
+   "w": "527.922px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "acts": 294.1,
+   "tile": 314.1,
+   "row": 294.1
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Submission packages Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nSubmission packages",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /manuscripts/comps": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    271.4
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    294.1,
+    149.8,
+    604.9,
+    218.4
+   ]
+  },
+  "eyebrow": "MATERIALS / COMPARABLE TITLES",
+  "h1": {
+   "text": "Comparable titles",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    173.4,
+    604.9,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    294.1,
+    243.4,
+    460,
+    54.7
+   ],
+   "text": "Books, films and shows like Harbour of Glass, and why. 3 on your list, 2 named in your query letter."
+  },
+  "buttons": [
+   "+ Add a comp"
+  ],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "acts": 294.1,
+   "tile": null,
+   "row": 294.1
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Comparable titles Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nComparable titles",
+   "pnVisible": "0"
+  }
+ },
+ "1440 /queries/analytics": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    294.1,
+    123.8,
+    1099.8,
+    233
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    294.1,
+    149.8,
+    604.9,
+    122.2
+   ]
+  },
+  "eyebrow": null,
+  "h1": {
+   "text": "Analytics",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    294.1,
+    149.8,
+    604.9,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    294.1,
+    219.8,
+    460,
+    52.2
+   ],
+   "text": "How Harbour of Glass is going with agents — and what the numbers can't tell you."
+  },
+  "buttons": [],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 294.1,
+   "intro": 294.1,
+   "tile": 295.1,
+   "row": null
+  },
+  "rights": {
+   "hero": 1393.9,
+   "rail": 1393.9,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Analytics Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nAnalytics",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /queries": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    258.3
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    296.4,
+    137.8,
+    536.9,
+    217.3
+   ]
+  },
+  "eyebrow": "QUERIES / QUERY CENTRE",
+  "h1": {
+   "text": "83 queries out",
+   "fs": "55.944px",
+   "lh": "57.0629px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    160.1,
+    536.9,
+    58.7
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    296.4,
+    232.8,
+    536.9,
+    52.2
+   ],
+   "text": "Rachel Lin’s partial is due Sun 4 Oct, and seven nudges are waiting."
+  },
+  "buttons": [
+   "+ Log a query",
+   "Record a response"
+  ],
+  "art": {
+   "box": [
+    926.7,
+    117,
+    536.9,
+    264
+   ],
+   "w": "536.922px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "acts": 296.4,
+   "tile": 296.4,
+   "row": 296.4
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": 1463.6,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Query Centre Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nQuery Centre",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /agents": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    258.1
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    296.4,
+    137.8,
+    536.9,
+    217.1
+   ]
+  },
+  "eyebrow": "AGENTS / CONTACT LIST",
+  "h1": {
+   "text": "37 agents",
+   "fs": "55.944px",
+   "lh": "57.0629px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    160.1,
+    536.9,
+    58.7
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    296.4,
+    232.8,
+    536.9,
+    52
+   ],
+   "text": "Edda Voss’s partial is waiting on you."
+  },
+  "buttons": [
+   "+ Add an agent",
+   "Paste a link"
+  ],
+  "art": {
+   "box": [
+    926.7,
+    116.8,
+    536.9,
+    264
+   ],
+   "w": "536.922px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "acts": 296.4,
+   "tile": 296.4,
+   "row": 296.4
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": 1463.6,
+   "railW": 340
+  },
+  "bar": {
+   "text": "AGENTS Contact list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "AGENTS\nContact list",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /todo": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    296.4,
+    149.8,
+    642,
+    215.9
+   ]
+  },
+  "eyebrow": "TASKS / TO-DO LIST",
+  "h1": {
+   "text": "To-do list",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    173.4,
+    642,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    296.4,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "Everything that's yours to do, and everything worth a look."
+  },
+  "buttons": [
+   "Set aside · 9"
+  ],
+  "art": {
+   "box": [
+    903.4,
+    115.6,
+    560.3,
+    276
+   ],
+   "w": "560.266px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": false
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "acts": 296.4,
+   "tile": 296.4,
+   "row": 296.4
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": 1463.6,
+   "railW": 340
+  },
+  "bar": {
+   "text": "TASKS To-do list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "TASKS\nTo-do list",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /manuscripts/packages": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    296.4,
+    149.8,
+    642,
+    215.9
+   ]
+  },
+  "eyebrow": "MATERIALS / SUBMISSION PACKAGES",
+  "h1": {
+   "text": "Submission packages",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    173.4,
+    642,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    296.4,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "A letter, synopsis and version for each round of querying. 3 in use, 7 queries sent."
+  },
+  "buttons": [
+   "+ New package",
+   "Side by side"
+  ],
+  "art": {
+   "box": [
+    903.4,
+    115.6,
+    560.3,
+    276
+   ],
+   "w": "560.266px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "acts": 296.4,
+   "tile": 316.4,
+   "row": 296.4
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Submission packages Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nSubmission packages",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /manuscripts/comps": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    271.4
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    296.4,
+    149.8,
+    642,
+    218.4
+   ]
+  },
+  "eyebrow": "MATERIALS / COMPARABLE TITLES",
+  "h1": {
+   "text": "Comparable titles",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    173.4,
+    642,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    296.4,
+    243.4,
+    460,
+    54.7
+   ],
+   "text": "Books, films and shows like Harbour of Glass, and why. 3 on your list, 2 named in your query letter."
+  },
+  "buttons": [
+   "+ Add a comp"
+  ],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "acts": 296.4,
+   "tile": null,
+   "row": 296.4
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Comparable titles Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nComparable titles",
+   "pnVisible": "0"
+  }
+ },
+ "1512 /queries/analytics": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    296.4,
+    123.8,
+    1167.3,
+    233
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    296.4,
+    149.8,
+    642,
+    122.2
+   ]
+  },
+  "eyebrow": null,
+  "h1": {
+   "text": "Analytics",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    296.4,
+    149.8,
+    642,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    296.4,
+    219.8,
+    460,
+    52.2
+   ],
+   "text": "How Harbour of Glass is going with agents — and what the numbers can't tell you."
+  },
+  "buttons": [],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 296.4,
+   "intro": 296.4,
+   "tile": 297.4,
+   "row": null
+  },
+  "rights": {
+   "hero": 1463.6,
+   "rail": 1463.6,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Analytics Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nAnalytics",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /queries": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    456,
+    123.8,
+    1256,
+    258.1
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    456,
+    137.8,
+    577.8,
+    217.1
+   ]
+  },
+  "eyebrow": "QUERIES / QUERY CENTRE",
+  "h1": {
+   "text": "83 queries out",
+   "fs": "56px",
+   "lh": "57.12px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    160.1,
+    577.8,
+    58.8
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    456,
+    232.9,
+    577.8,
+    52
+   ],
+   "text": "Rachel Lin’s partial is due Sun 4 Oct, and seven nudges are waiting."
+  },
+  "buttons": [
+   "+ Log a query",
+   "Record a response"
+  ],
+  "art": {
+   "box": [
+    1134.3,
+    116.9,
+    577.8,
+    264
+   ],
+   "w": "577.75px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "acts": 456,
+   "tile": 456,
+   "row": 456
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": 1712,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Query Centre Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nQuery Centre",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /agents": {
+  "header": {
+   "cls": "ph ph--full ph--living",
+   "size": "full",
+   "living": "settled",
+   "box": [
+    456,
+    123.8,
+    1256,
+    258.1
+   ],
+   "pad": "14px 0px 26px",
+   "minh": "250px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "214px"
+  },
+  "text": {
+   "maxw": "46%",
+   "box": [
+    456,
+    137.8,
+    577.8,
+    217.1
+   ]
+  },
+  "eyebrow": "AGENTS / CONTACT LIST",
+  "h1": {
+   "text": "37 agents",
+   "fs": "56px",
+   "lh": "57.12px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    160.1,
+    577.8,
+    58.8
+   ]
+  },
+  "intro": {
+   "minh": "52px",
+   "box": [
+    456,
+    232.9,
+    577.8,
+    52
+   ],
+   "text": "Edda Voss’s partial is waiting on you."
+  },
+  "buttons": [
+   "+ Add an agent",
+   "Paste a link"
+  ],
+  "art": {
+   "box": [
+    1134.3,
+    116.9,
+    577.8,
+    264
+   ],
+   "w": "577.75px",
+   "h": "264px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "acts": 456,
+   "tile": 456,
+   "row": 456
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": 1712,
+   "railW": 340
+  },
+  "bar": {
+   "text": "AGENTS Contact list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "AGENTS\nContact list",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /todo": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    456,
+    123.8,
+    1256,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    456,
+    149.8,
+    690.8,
+    215.9
+   ]
+  },
+  "eyebrow": "TASKS / TO-DO LIST",
+  "h1": {
+   "text": "To-do list",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    173.4,
+    690.8,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    456,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "Everything that's yours to do, and everything worth a look."
+  },
+  "buttons": [
+   "Set aside · 9"
+  ],
+  "art": {
+   "box": [
+    1109.1,
+    115.6,
+    602.9,
+    276
+   ],
+   "w": "602.875px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": false
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "acts": 456,
+   "tile": 456,
+   "row": 456
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": 1712,
+   "railW": 340
+  },
+  "bar": {
+   "text": "TASKS To-do list Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "TASKS\nTo-do list",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /manuscripts/packages": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    456,
+    123.8,
+    1256,
+    268.9
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    456,
+    149.8,
+    690.8,
+    215.9
+   ]
+  },
+  "eyebrow": "MATERIALS / SUBMISSION PACKAGES",
+  "h1": {
+   "text": "Submission packages",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    173.4,
+    690.8,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    456,
+    243.4,
+    460,
+    52.2
+   ],
+   "text": "A letter, synopsis and version for each round of querying. 3 in use, 7 queries sent."
+  },
+  "buttons": [
+   "+ New package",
+   "Side by side"
+  ],
+  "art": {
+   "box": [
+    1109.1,
+    115.6,
+    602.9,
+    276
+   ],
+   "w": "602.875px",
+   "h": "276px",
+   "bottom": "-26px",
+   "img": true
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "acts": 456,
+   "tile": 476,
+   "row": 456
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Submission packages Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nSubmission packages",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /manuscripts/comps": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    456,
+    123.8,
+    1256,
+    271.4
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    456,
+    149.8,
+    690.8,
+    218.4
+   ]
+  },
+  "eyebrow": "MATERIALS / COMPARABLE TITLES",
+  "h1": {
+   "text": "Comparable titles",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    173.4,
+    690.8,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    456,
+    243.4,
+    460,
+    54.7
+   ],
+   "text": "Books, films and shows like Harbour of Glass, and why. 3 on your list, 2 named in your query letter."
+  },
+  "buttons": [
+   "+ Add a comp"
+  ],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "acts": 456,
+   "tile": null,
+   "row": 456
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": null,
+   "railW": null
+  },
+  "bar": {
+   "text": "MATERIALS Comparable titles Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "MATERIALS\nComparable titles",
+   "pnVisible": "0"
+  }
+ },
+ "1920 /queries/analytics": {
+  "header": {
+   "cls": "ph ph--full",
+   "size": "full",
+   "living": null,
+   "box": [
+    456,
+    123.8,
+    1256,
+    233
+   ],
+   "pad": "26px 0px",
+   "minh": "232px",
+   "maxw": "none",
+   "rule": "1px solid rgba(28, 19, 15, 0.16)"
+  },
+  "hin": {
+   "maxw": "none",
+   "minh": "180px"
+  },
+  "text": {
+   "maxw": "55%",
+   "box": [
+    456,
+    149.8,
+    690.8,
+    122.2
+   ]
+  },
+  "eyebrow": null,
+  "h1": {
+   "text": "Analytics",
+   "fs": "56px",
+   "lh": "56px",
+   "ws": "nowrap",
+   "box": [
+    456,
+    149.8,
+    690.8,
+    56
+   ]
+  },
+  "intro": {
+   "minh": "0px",
+   "box": [
+    456,
+    219.8,
+    460,
+    52.2
+   ],
+   "text": "How Harbour of Glass is going with agents — and what the numbers can't tell you."
+  },
+  "buttons": [],
+  "art": {
+   "box": null,
+   "w": null,
+   "h": null,
+   "bottom": null,
+   "img": false
+  },
+  "lefts": {
+   "h1": 456,
+   "intro": 456,
+   "tile": 457,
+   "row": null
+  },
+  "rights": {
+   "hero": 1712,
+   "rail": 1712,
+   "railW": 340
+  },
+  "bar": {
+   "text": "QUERIES Analytics Harbour of Glass QUERYING · 2 WITH YOU Give feedback",
+   "pagename": "QUERIES\nAnalytics",
+   "pnVisible": "0"
+  }
+ }
+}
