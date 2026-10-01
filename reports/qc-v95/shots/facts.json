@@ -1,0 +1,45 @@
+{
+ "1-flat-1440": {
+  "groupX": 248,
+  "groupW": 1192
+ },
+ "2-grouped-1440": {
+  "heads": [
+   "Your move\n13\nthe ball is with you",
+   "Waiting on agents\n25\ninside their reply window",
+   "Gone quiet\n31\npast the window, no word",
+   "Closed\n14\nnothing more to do"
+  ]
+ },
+ "3-hover-1440": {
+  "rowY": 733.640625,
+  "rowH": 80,
+  "trayVisible": true
+ },
+ "4-fold-1280": {
+  "columns": [
+   "AGENT\nWHERE IT STANDS\nCOMING UP"
+  ],
+  "rowW": 582.09375
+ },
+ "5-rail-1512": {
+  "kindsInFrame": {
+   "over": 3,
+   "near": 0,
+   "flat": 0,
+   "dateless": 0
+  },
+  "railW": 340,
+  "railH": 498.6875
+ },
+ "5b-rail-dateless-1512": {
+  "kindsInFrame": {
+   "over": 0,
+   "near": 2,
+   "flat": 2,
+   "dateless": 2
+  },
+  "railW": 340,
+  "railH": 498.6875
+ }
+}
