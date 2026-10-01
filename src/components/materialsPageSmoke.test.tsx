@@ -158,7 +158,9 @@ describe("/manuscripts/comps renders", () => {
   it("…and that render is scoped to the active manuscript, not the empty branch", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    expect(html).toContain("The Smoke Test");
+    /* living headers v3: the header no longer restates the manuscript's title — its subline names the
+       active manuscript's comp, which is the same claim (the render is scoped to that manuscript). */
+    expect(html).toContain("The Smoke Comp</b> is saved");
     expect(html).not.toContain("No manuscript to compare yet");
   });
 

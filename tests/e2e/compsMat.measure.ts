@@ -64,7 +64,7 @@ for (const vp of SIZES) {
       }
       const r = await readFrame(page);
       L.check("S1 · the bar reads MATERIALS above the page name", ctx,
-        (r.pnameSection ?? "").toUpperCase() === "MATERIALS" && r.pnameName === "Comparable titles", `${r.pnameSection} / ${r.pnameName}`);
+        (r.pnameSection ?? "").replace(/\s*\/$/, "").toUpperCase() === "MATERIALS" && r.pnameName === "Comparable titles", `${r.pnameSection} / ${r.pnameName}`);
       L.check("S1 · the page was found", ctx, r.found, "");
       /* ⚠️ THE SCROLLER CHILD AND THE PAGE ROOT PAINT NOTHING — the window has dissolved, so a surface
          here is a card the shell does not draw (the mutation: a white background on the child). */
@@ -100,15 +100,17 @@ for (const vp of SIZES) {
         L.check("S2 · the full PageHeader renders", ctx, r.headerSize === "full", `${r.headerSize}`);
         L.check("S2 · its top = the Query Centre's (±1)", ctx, n(tops.header, qc.header, 1), `comps ${f1(tops.header)} qc ${f1(qc.header)}`);
         L.check("S2 · its top = the Contact list's (±1)", ctx, n(tops.header, cl.header, 1), `comps ${f1(tops.header)} contact ${f1(cl.header)}`);
-        L.check("S2 · title and eyebrow tops = the Query Centre's (±1)", ctx, n(tops.title, qc.title, 1) && n(tops.eyebrow, qc.eyebrow, 1), `title ${f1(tops.title)}/${f1(qc.title)} eyebrow ${f1(tops.eyebrow)}/${f1(qc.eyebrow)}`);
-        L.check("S2 · the title is Special Elite, on one line", ctx, /^"?Special Elite"?/.test(r.titleFam ?? "") && r.titleLines === 1, `${r.titleFam} lines ${r.titleLines}`);
-        L.check("S2 · the eyebrow is MATERIALS / COMPARABLE TITLES", ctx, (r.eyebrow ?? "").toUpperCase() === "MATERIALS / COMPARABLE TITLES", `${r.eyebrow}`);
+        /* living headers v3: the page's NAME lives in the bar's crumb and there is no eyebrow; the h1 is the
+           count (filled) and the empty state has none — its heading is the h2 (LH7). */
+        if (which === "filled") L.check("S2 · title top = the Query Centre's (±1)", ctx, n(tops.title, qc.title, 1), `title ${f1(tops.title)}/${f1(qc.title)}`);
+        if (which === "filled") L.check("S2 · the title is Special Elite, on one line, and is the count", ctx, /^"?Special Elite"?/.test(r.titleFam ?? "") && r.titleLines === 1 && r.titleText === "5 comp titles", `${r.titleFam} lines ${r.titleLines} ${r.titleText}`);
+        L.check("S2 · no eyebrow; the bar's crumb is MATERIALS / Comparable titles", ctx, r.eyebrow === null && (r.pnameSection ?? "").toUpperCase() === "MATERIALS /" && r.pnameName === "Comparable titles", `${r.eyebrow} | ${r.pnameSection} ${r.pnameName}`);
         L.check("S2 · the primary reads + Add a comp", ctx, r.primary === "+ Add a comp", `${r.primary}`);
+        /* living headers v3 §3/§4: the subline is the ref's sentence for the state */
         const lede = which === "filled"
-          ? "Books, films and shows like Murphy's Day Out, and why. 5 on your list, 2 named in your query letter."
-          : "Books, films and shows like Murphy's Day Out, with a line on why each compares. The ones you switch on build your query line.";
-        L.check("S2 · the intro is the mock's, the name in .ph-ms", ctx, r.intro === lede && r.introMs === "Murphy's Day Out", `${JSON.stringify(r.intro)} ms ${r.introMs}`);
-        if (which === "filled") L.check("S2 · the counts are <strong>", ctx, JSON.stringify(r.introStrong) === JSON.stringify(["5", "2"]), JSON.stringify(r.introStrong));
+          ? "The Tidewater Line and Salt Road are in your letter."
+          : "Add the books Murphy's Day Out sits beside, and QueryHawk keeps them ready for your letter.";
+        L.check("S2 · the subline is the ref's for the state", ctx, r.intro === lede && (which === "filled" || r.introMs === "Murphy's Day Out"), `${JSON.stringify(r.intro)} ms ${r.introMs}`);
         /* S3 */
         L.check("S3 · the panel starts at the rule + 24 (±1)", ctx, !!r.rail && n(r.rail.t, r.rule + 24, 1), `rail ${f1(r.rail?.t)} rule ${f1(r.rule)}`);
         L.check("S3 · the main column's first box starts at the rule + 24 (±1)", ctx, !!r.first && n(r.first.t, r.rule + 24, 1), `first ${f1(r.first?.t)} rule ${f1(r.rule)}`);
@@ -125,8 +127,9 @@ for (const vp of SIZES) {
         const m = mock[which];
         L.check("mock · the mock rendered with its fonts", ctx, m.fonts, "");
         const barB = await page.evaluate(() => ([...document.querySelectorAll('[data-probe="navrow"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement).getBoundingClientRect().bottom);
-        if (r.header && m.header) L.check("mock · header height ±2", ctx, n(r.header.h, m.header.h, 2), `app ${f1(r.header.h)} mock ${f1(m.header.h)}`);
-        if (r.rail && m.rail) L.check("mock · panel top (bar-relative) ±2", ctx, n(r.rail.t - barB, m.rail.t, 2), `app ${f1(r.rail.t - barB)} mock ${f1(m.rail.t)}`);
+        /* ⚠️ RETIRED (living headers v3): the header's height, and so the panel's top beneath it, now come
+           from design-refs/page-header/living-headers-v3.html — the fixed shape every living page shares —
+           not from comps-v2.html, which drew the old intro. livingHeaders.measure.ts holds them now. */
         console.log(`GEOM ${which} ${vp.width} ${state} ${JSON.stringify({
           app: { header: r.header && { l: r.header.l, t: r.header.t - barB, w: r.header.w, h: r.header.h }, main: r.main && { l: r.main.l, w: r.main.w }, first: r.first && { t: r.first.t - barB }, rail: r.rail && { l: r.rail.l, t: r.rail.t - barB, w: r.rail.w, h: r.rail.h } },
           mock: { header: m.header && { l: m.header.l, t: m.header.t, w: m.header.w, h: m.header.h }, main: m.main && { l: m.main.l, w: m.main.w }, first: m.first && { t: m.first.t }, rail: m.rail && { l: m.rail.l, t: m.rail.t, w: m.rail.w, h: m.rail.h } },
@@ -408,26 +411,27 @@ test("C7 · empty", async ({ page }) => {
   const r = await page.evaluate(() => {
     const root = [...document.querySelectorAll('[data-cpv="page"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
     const main = root?.querySelector('[data-cpv="main"]');
-    const order = main ? [...main.querySelectorAll('[data-cpv="form"], [data-cpv="how"], [data-cpv="ex-line"], [data-cpv="ex-comps"]')].map((e) => e.getAttribute("data-cpv")) : [];
-    const ex = main ? [...main.querySelectorAll('[data-cpv="ex-line"], [data-cpv="ex-comps"]')] as HTMLElement[] : [];
+    /* living headers v3 §5: the examples are ONE exhibition band now ("How your comps work" retired) */
+    const order = main ? [...main.querySelectorAll('[data-cpv="form"], [data-cpv="how"], [data-lh="exhibition"]')].map((e) => e.getAttribute("data-cpv") ?? "exhibition") : [];
+    const ex = main ? [...main.querySelectorAll('[data-lh="band"]')] as HTMLElement[] : [];
     return {
       order,
       focused: (document.activeElement as HTMLElement | null)?.id ?? null,
       exHidden: ex.length > 0 && ex.every((e) => e.getAttribute("aria-hidden") === "true" || !!e.querySelector('[aria-hidden="true"]')),
-      exInert: ex.length > 0 && ex.every((e) => { const g = e.querySelector(".cpv-ghost") ?? e; return getComputedStyle(g).pointerEvents === "none"; }),
-      exTags: main ? main.querySelectorAll('[data-cpv="ex-comps"] [data-cpv="ex-tag"]').length : 0,
+      exInert: ex.length > 0 && ex.every((e) => getComputedStyle(e).pointerEvents === "none" && e.hasAttribute("inert")),
+      exLabel: main?.querySelector('[data-lh="exhibition"] .lh-exl')?.textContent?.trim() ?? null,
       exLineCap: main?.querySelector('[data-cpv="ex-line"] .cpv-qcap')?.textContent?.trim() ?? null,
       exControls: ex.flatMap((e) => [...e.querySelectorAll("button, a[href], input")].filter((c) => !(c as HTMLButtonElement).disabled && !c.closest('[inert]'))).length,
-      exCards: main?.querySelectorAll('[data-cpv="ex-comps"] [data-cpv="comp"]').length ?? 0,
+      exCards: main?.querySelectorAll('[data-lh="band"] [data-cpv="comp"]').length ?? 0,
       oldBlocks: !!document.querySelector(".ct-stages, .ct-feature"),
     };
   });
-  L.check("C7 · order: form, how it works, example line, example comps", ctx, JSON.stringify(r.order) === JSON.stringify(["form", "how", "ex-line", "ex-comps"]), JSON.stringify(r.order));
+  L.check("C7 · order: the form, then the exhibition (no how-it-works block)", ctx, JSON.stringify(r.order) === JSON.stringify(["form", "exhibition"]), JSON.stringify(r.order));
   L.check("C7 · the form is open with the title focused", ctx, r.focused === "cpv-f-title", `${r.focused}`);
   L.check("C7 · examples are aria-hidden and inert", ctx, r.exHidden && r.exInert && r.exControls === 0, JSON.stringify(r));
   /* the mock's marking: an Example tag on the example comps, and the example line's caption */
-  L.check("C7 · examples are marked Example", ctx, r.exTags === 1 && /^Example · /.test(r.exLineCap ?? ""), `tags ${r.exTags} cap ${r.exLineCap}`);
-  L.check("C7 · two example comp cards", ctx, r.exCards === 2, `${r.exCards}`);
+  L.check("C7 · the exhibition carries the ref's label, and the line its Example caption", ctx, r.exLabel === "HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW" && /^Example · /.test(r.exLineCap ?? ""), `label ${r.exLabel} cap ${r.exLineCap}`);
+  L.check("C7 · three example comp cards", ctx, r.exCards === 3, `${r.exCards}`);
   L.check("C7 · the old StagesBlock / FeatureBlock are gone", ctx, !r.oldBlocks, "");
   /* ⚠️ GUARDED: with no open form this must become a red ROW, not a crash at `fill` (it crashed on P5) */
   const titleIn = page.locator("#cpv-f-title:visible");
@@ -438,7 +442,7 @@ test("C7 · empty", async ({ page }) => {
   await expect.poll(async () => (await readList(page))?.cards.map((c) => c.title), { timeout: 10_000 }).toEqual(["First Light"]).catch(() => {});
   const after = await readFrame(page);
   const list = await readList(page);
-  L.check("C7 · the first save flips to filled", ctx, JSON.stringify(list?.cards.map((c) => c.title)) === JSON.stringify(["First Light"]) && (after.intro ?? "").includes("1 on your list"), `${JSON.stringify(list?.cards.map((c) => c.title))} ${after.intro}`);
+  L.check("C7 · the first save flips to filled", ctx, JSON.stringify(list?.cards.map((c) => c.title)) === JSON.stringify(["First Light"]) && /^First Light is saved/.test(after.intro ?? ""), `${JSON.stringify(list?.cards.map((c) => c.title))} ${after.intro}`);
   const flashed = await on(page, '[data-cpv="comp"][data-title="First Light"]').getAttribute("class").catch(() => null);
   L.check("C7 · …with the new card flashed", ctx, /\bflash\b/.test(flashed ?? ""), `${flashed}`);
   close(L, 8);

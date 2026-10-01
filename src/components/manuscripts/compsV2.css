@@ -421,15 +421,10 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
 .cpv-ff .btns { display: flex; gap: 8px; }
 .cpv-full { font-size: 13.5px; color: var(--cpv-muted); padding: 10px 4px; }
 
-/* ── the empty state ── */
-.cpv-how { background: #fff; border-radius: 14px; box-shadow: var(--cpv-shadow); padding: 20px 22px; }
-.cpv-page .cpv-how h2 { margin: 0 0 6px; font-family: var(--cpv-type) !important; font-weight: 400; font-size: 22px; }
-.cpv-how p { margin: 0; font-size: 14.5px; line-height: 1.55; max-width: 62ch; }
-.cpv-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; list-style: none; }
-.cpv-steps li { background: var(--cpv-parch-1); border-radius: 12px; padding: 12px 14px; box-shadow: inset 0 0 0 1px var(--cpv-hair); font-size: 13.5px; line-height: 1.45; }
-.cpv-steps b { display: block; font-family: var(--cpv-type); font-weight: 400; font-size: 15px; margin-bottom: 4px; }
-.cpv-exwrap { position: relative; display: flex; flex-direction: column; gap: 10px; }
-.cpv-exwrap > .cpv-ex { position: absolute; right: 12px; top: -8px; z-index: 2; }
+/* ── the empty state: the exhibition's own stack (living headers v3 §5) — the main column's rhythm.
+   comps v2's "How your comps work" (.cpv-how/.cpv-steps) and the tagged example wrap are retired with
+   the components that drew them; `.cpv-stepn` stays, the Scout rail still numbers its steps with it. ── */
+.cpv-exstack { display: flex; flex-direction: column; gap: 22px; }
 /* ── the rail's contents: the Scout, coming soon (the card itself is PageRail's) ── */
 .cpv-tray { min-height: 188px; padding: 22px 20px 18px; }
 .cpv-page .cpv-tray h2 {

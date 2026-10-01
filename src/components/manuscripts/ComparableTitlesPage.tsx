@@ -25,6 +25,9 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompTitle } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
+import type { LivingHeader } from "../shell/PageHeader";
+import { compsHeaderCopy } from "../../lib/livingHeaders";
+import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import {
@@ -37,11 +40,16 @@ import { CompCard } from "./CompCard";
 import { CompForm } from "./CompForm";
 import { CompsQueryLine } from "./CompsQueryLine";
 import { CompsScoutRail } from "./CompsScoutRail";
-import { CompsExampleCards, CompsHow } from "./CompsEmpty";
+import { CompsExhibit } from "./CompsEmpty";
 import "./compsV2.css";
 
 /** Shared with the bar's switcher and the packages page — the section's one active-manuscript key. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
+/** The empty state's heading (living headers v3 §4) — the ref's. The sentence names the manuscript. */
+export const COMPS_EMPTY_HEADING = "No comp titles yet";
+
+/** Not letter-ready: a book with no publisher, or anything with no year (a film or a show has no publisher). */
+export const compMissingDetails = (c: CompTitle): boolean => !c.year || ((c.media ?? "book") === "book" && !c.publisher?.trim());
 
 type FormState = { mode: "add" } | { mode: "edit"; index: number; focusNote: boolean };
 
@@ -58,7 +66,7 @@ function cardKeys(comps: CompTitle[]): string[] {
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }> = () => {
-  const { currentUser, manuscripts, updateManuscript } = useScriptAllyDb();
+  const { currentUser, manuscripts, updateManuscript, collectionsReady } = useScriptAllyDb();
   const { showToast } = useToast();
 
   /* ⚠️ EVERY HOOK ABOVE THE FIRST EARLY RETURN — the old page declared a `useRef` below
@@ -299,11 +307,20 @@ export const ComparableTitlesPage: React.FC<{
   // ── render ──
   const counts = compCounts(comps);
   const fact = compositionLine(comps, now);
-  const description = !activeMs
-    ? "Add a manuscript to build its comp list."
-    : isEmpty
-      ? <>Books, films and shows like <span className="ph-ms">{activeMs.title}</span>, with a line on why each compares. The ones you switch on build your query line.</>
-      : <>Books, films and shows like <span className="ph-ms">{activeMs.title}</span>, and why. <strong>{counts.total}</strong> on your list, <strong>{counts.inQuery}</strong> named in your query letter.</>;
+  /* ── the living header (living headers v3) — settled on `collectionsReady`, because the comps live
+     on the manuscript and the manuscripts are one of the three collections it waits for. ── */
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  const compCount = lhOverride != null && lhOverride >= 0 ? lhOverride : comps.length;
+  const exhibit = !!activeMs && compCount === 0;
+  const living: LivingHeader | undefined = activeMs ? {
+    count: collectionsReady ? compCount : null,
+    copy: (n) => compsHeaderCopy(n, {
+      missing: comps.filter(compMissingDetails).length,
+      inLetter: comps.filter((c) => c.inQuery).map((c) => c.title),
+      firstTitle: comps[0]?.title ?? null,
+    }),
+    empty: { heading: COMPS_EMPTY_HEADING, subline: ["Add the books ", { ms: activeMs.title }, " sits beside, and QueryHawk keeps them ready for your letter."] },
+  } : undefined;
 
   const formEl = (f: FormState) => (
     <CompForm
@@ -330,7 +347,8 @@ export const ComparableTitlesPage: React.FC<{
             <PageHeader
               variant="full"
               title="Comparable titles"
-              description={description}
+              description={activeMs ? undefined : "Add a manuscript to build its comp list."}
+              living={living}
               primaryRef={primaryRef}
               primary={activeMs ? { label: full ? "This list is full" : "+ Add a comp", onClick: openAdd, disabled: full } : undefined}
             />
@@ -339,12 +357,10 @@ export const ComparableTitlesPage: React.FC<{
           <div className="cpv-main" data-cpv="main">
             {!activeMs ? (
               <p className="cpv-hint">No manuscript to compare yet.</p>
-            ) : isEmpty ? (
+            ) : exhibit ? (
               <>
                 {liveForm && formEl(liveForm)}
-                <CompsHow />
-                <CompsQueryLine comps={[]} msTitle={activeMs.title} format="readers" onFormat={() => {}} example />
-                <CompsExampleCards now={now} />
+                <CompsExhibit msTitle={activeMs.title} now={now} />
               </>
             ) : (
               <>
