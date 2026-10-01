@@ -362,6 +362,8 @@ export interface AnalyticsModel {
   hero: { sent: number; requests: number; offers: number; since: string | null; under: string | null };
   journey: { stages: JourneyStage[]; links: JourneyLink[] };
   facts: { requestRate: Figure; stillOut: Figure; medianWait: Figure; busiestMonth: Figure };
+  /** The median wait's own number, in days — what `facts.medianWait` displays; null with no dated reply. */
+  medianWaitDays: number | null;
   reply: { rows: ReplyRow[]; withoutWindow: number; maxWeeks: number; figure: Figure };
   endings: { lanes: EndingLane[]; closed: number; undatedClosed: number; maxWeeks: number; figure: Figure };
   stages: { rows: StageGap[]; maxDays: number };
@@ -696,6 +698,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
     hero,
     journey: { stages: stagesOut, links },
     facts: { requestRate, stillOut: stillOutFig, medianWait, busiestMonth },
+    medianWaitDays: replies > 0 && medWait != null ? (medWait as number) : null,
     reply: { rows: replyRows, withoutWindow, maxWeeks: replyMax, figure: replyFig },
     endings: { lanes, closed: ended, undatedClosed, maxWeeks: endMax, figure: endFig },
     stages: { rows: gapRows, maxDays: stageMax },

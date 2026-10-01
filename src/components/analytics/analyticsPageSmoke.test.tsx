@@ -51,6 +51,15 @@ describe("/queries/analytics renders", () => {
     expect(html).not.toContain('data-anv-state="empty"');
   });
 
+  /* living headers v3 §3: one query in, and never a rate from fewer than five answered */
+  it("the header is the living pair — one query in, too early to say", () => {
+    setActiveManuscript();
+    const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
+    expect(html).toContain('data-living="settled"');
+    expect(html).toContain("One query in");
+    expect(html).toContain("Too early to tell you anything. Come back once a few more are out.");
+  });
+
   it("draws no Share card and no Export — neither has a mechanism behind it", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);

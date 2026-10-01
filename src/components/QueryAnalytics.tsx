@@ -23,6 +23,10 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { PageHeader } from "./shell/PageHeader";
+import type { LivingHeader } from "./shell/PageHeader";
+import { analyticsHeaderCopy } from "../lib/livingHeaders";
+import { useLivingCountOverride } from "../lib/livingHeaderReview";
+import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { MastheadSectionContext } from "./shell/mastheadSection";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../lib/db";
@@ -31,7 +35,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { AnalyticsRange } from "../lib/analytics";
 import { analyticsModel } from "../lib/analyticsModel";
 import { AnvSkeleton } from "./analytics/AnvSkeleton";
-import { AnvEmpty, AnvEmptyRow } from "./analytics/AnvEmpty";
+import { AnalyticsExhibit } from "./analytics/AnalyticsExhibit";
 import { StoryRail } from "./analytics/StoryRail";
 import { AnvHero, AnvJourney, AnvRange } from "./analytics/AnvJourney";
 import { AnvFacts, AnvReplyChart } from "./analytics/AnvFacts";
@@ -45,30 +49,9 @@ import "./analytics/anvCharts.css";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const NO_SECTION = { section: null };
 
-/**
- * The empty state's rows, each illustrated with the page's own component populated from the example.
- * Order: the funnel, the reply window, the story — the three the go-ahead names.
- */
-const EMPTY_ROWS: AnvEmptyRow[] = [
-  {
-    key: "journey",
-    heading: "The journey so far",
-    sub: "How far your queries reached — asked for more, read in full, an offer — and where each stage's queries stand today.",
-    art: (m) => <AnvJourney model={m} example />,
-  },
-  {
-    key: "reply",
-    heading: "When replies arrived",
-    sub: "Each reply drawn against the response window its agency states — the window from the Contact list, the reply from your record.",
-    art: (m) => <AnvReplyChart model={m} example />,
-  },
-  {
-    key: "story",
-    heading: "The story so far",
-    sub: "Every first — the first request, the first full, an offer — dated as it happened, with the gaps between them.",
-    art: (m) => <StoryRail events={m.story.events} foot={m.story.foot} example />,
-  },
-];
+/** The empty state's two lines (living headers v3 §4) — the ref's, verbatim. */
+export const ANALYTICS_EMPTY_HEADING = "Nothing to measure yet";
+export const ANALYTICS_EMPTY_SUBLINE = "Once your queries start coming back, this page shows how the querying is going — what became of each one, how long agents take, and whether it’s changing.";
 
 export const QueryAnalytics: React.FC = () => {
   const { queries, activities, agents, manuscripts, packages, versions, collectionsReady, activitiesReady } = useScriptAllyDb();
@@ -98,6 +81,22 @@ export const QueryAnalytics: React.FC = () => {
   const load = useQcLoad(collectionsReady && activitiesReady);
   const title = manuscript?.title ?? "";
 
+  /* ── the living header (living headers v3) ── the count is every query on the manuscript, and the
+     subline reads the ALL-TIME model, so moving the range control never rewrites the header. */
+  const allModel = React.useMemo(() => {
+    if (range === "all") return model;
+    const scoped = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
+    return analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs: Date.now() });
+  }, [model, range, queries, activities, agents, packages, versions, manuscript]);
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  const anCount = lhOverride != null && lhOverride >= 0 ? lhOverride : allModel.total;
+  const exhibit = !load.loading && manuscript !== null && anCount === 0;
+  const living: LivingHeader | undefined = manuscript ? {
+    count: load.loading ? null : anCount,
+    copy: (n) => analyticsHeaderCopy(n, { answered: allModel.replies, requests: allModel.requests, medianDays: allModel.medianWaitDays }),
+    empty: { heading: ANALYTICS_EMPTY_HEADING, subline: [ANALYTICS_EMPTY_SUBLINE] },
+  } : undefined;
+
   const pageClass = [
     "anv-page",
     load.loading ? "anv-page--loading" : "",
@@ -116,8 +115,16 @@ export const QueryAnalytics: React.FC = () => {
         </p>
       </div>
     );
-  } else if (model.total === 0) {
-    body = <AnvEmpty title={title} rows={EMPTY_ROWS} />;
+  } else if (exhibit) {
+    body = (
+      <div className="anv-exbelow" data-anv="empty">
+        <AnalyticsExhibit />
+        {/* the ref's one quiet link — a real route: the log-a-query journey */}
+        <p className="lh-hint" data-lh="hint">
+          <button type="button" className="lh-hint-link" onClick={() => openQueryDrawer({ mode: "log", manuscriptId: manuscript?.id })}>Log your first query ›</button>
+        </p>
+      </div>
+    );
   } else {
     body = (
       <>
@@ -162,11 +169,8 @@ export const QueryAnalytics: React.FC = () => {
               <PageHeader
                 variant="full"
                 title="Analytics"
-                description={
-                  manuscript
-                    ? <>How <em>{title}</em> is going with agents — and what the numbers can't tell you.</>
-                    : "How your querying is going — and what the numbers can't tell you."
-                }
+                description={manuscript ? undefined : "How your querying is going — and what the numbers can't tell you."}
+                living={living}
               />
               </MastheadSectionContext.Provider>
             </div>

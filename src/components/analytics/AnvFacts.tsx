@@ -56,13 +56,13 @@ const ticks = (max: number, step: number) => {
   return out;
 };
 
-export const AnvReplyChart: React.FC<{ model: AnalyticsModel; example?: boolean }> = ({ model, example }) => {
+export const AnvReplyChart: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   const { rows, maxWeeks, withoutWindow, figure } = model.reply;
   const pct = (w: number) => `${Math.min(100, (w / maxWeeks) * 100)}%`;
   const seen = [...new Set(rows.map((r) => r.bucket))];
   const step = maxWeeks > 40 ? 8 : 4;
   return (
-    <div className="anv-card" data-anv={example ? "chart-reply-example" : "chart-reply"} data-population={rows.length}>
+    <div className="anv-card" data-anv="chart-reply" data-population={rows.length}>
       <div className="anv-cap">
         <h3 className="anv-tw">When replies arrived</h3>
         <span className="anv-sub">Against the response window each agent states</span>

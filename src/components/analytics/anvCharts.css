@@ -25,6 +25,8 @@
 .anv-fv { font-size: 24px; line-height: 1.3; margin-top: 3px; }
 .anv-fs { font-size: 12px; line-height: 1.4; color: var(--anv-ink-55); margin-top: 2px; }
 .anv-fact .anv-chip { margin-top: 6px; }
+/* living headers v3 §1: a tile never grows with its figure — each line is one line, truncated */
+.anv-fk, .anv-fv, .anv-fs { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── shared chart furniture ── */
 .anv-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--anv-hair-soft); }

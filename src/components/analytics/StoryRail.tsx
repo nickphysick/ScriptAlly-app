@@ -28,43 +28,47 @@ const Marker: React.FC<{ e: StoryEvent }> = ({ e }) => {
   return <span className="anv-mk anv-mk--plain" aria-hidden="true" />;
 };
 
-export const StoryRail: React.FC<{ events: StoryEvent[]; foot: string | null; example?: boolean }> = ({ events, foot, example }) => (
+/**
+ * The rail's list on its own (living headers v3 §5): the exhibition draws it inside a STATIC box with the
+ * rail's own classes, because `PageRail` listens to the window to size itself — page behaviour, not a
+ * picture of it. One list, two hosts, so the picture cannot drift from the rail.
+ */
+export const StoryRailBody: React.FC<{ events: StoryEvent[] }> = ({ events }) => (
+  <div className="anv-railbody">
+    {events.length === 0 ? (
+      <p className="anv-railnone">Nothing has happened in this period yet.</p>
+    ) : (
+      <ol className="anv-tl" data-anv="timeline">
+        {events.map((e, i) => (
+          <li
+            key={`${e.kind}-${i}`}
+            className={`anv-ev${e.kind === "today" ? " anv-ev--now" : ""}`}
+            data-anv="event"
+            data-kind={e.kind}
+            data-at={e.atMs}
+          >
+            <span className="anv-evmk"><Marker e={e} /></span>
+            <div className="anv-tw anv-evdate">{e.date}</div>
+            <div className={`anv-evwhat${e.kind === "today" ? " anv-tw" : ""}`}>{e.what}</div>
+            {e.who ? <div className="anv-evwho">{e.who}</div> : null}
+            {e.gap ? <span className="anv-evgap">{e.gap}</span> : null}
+          </li>
+        ))}
+      </ol>
+    )}
+  </div>
+);
+
+export const StoryRail: React.FC<{ events: StoryEvent[]; foot: string | null }> = ({ events, foot }) => (
   <PageRail
     label="The story so far"
     className="anv-rail"
     trayClassName="anv-railtray"
-    fill={!example}
-    dataAttrs={{ "data-anv": example ? "rail-example" : "rail" }}
-    tray={
-      <>
-        <h2 className="anv-tw anv-railtitle">The story so far</h2>
-        {example ? <span className="anv-extag anv-railtag">Example</span> : null}
-      </>
-    }
+    fill
+    dataAttrs={{ "data-anv": "rail" }}
+    tray={<h2 className="anv-tw anv-railtitle">The story so far</h2>}
     foot={foot ? <p className="anv-railfoot" data-anv="railfoot">{foot}</p> : undefined}
   >
-    <div className="anv-railbody">
-      {events.length === 0 ? (
-        <p className="anv-railnone">Nothing has happened in this period yet.</p>
-      ) : (
-        <ol className="anv-tl" data-anv="timeline">
-          {events.map((e, i) => (
-            <li
-              key={`${e.kind}-${i}`}
-              className={`anv-ev${e.kind === "today" ? " anv-ev--now" : ""}`}
-              data-anv="event"
-              data-kind={e.kind}
-              data-at={e.atMs}
-            >
-              <span className="anv-evmk"><Marker e={e} /></span>
-              <div className="anv-tw anv-evdate">{e.date}</div>
-              <div className={`anv-evwhat${e.kind === "today" ? " anv-tw" : ""}`}>{e.what}</div>
-              {e.who ? <div className="anv-evwho">{e.who}</div> : null}
-              {e.gap ? <span className="anv-evgap">{e.gap}</span> : null}
-            </li>
-          ))}
-        </ol>
-      )}
-    </div>
+    <StoryRailBody events={events} />
   </PageRail>
 );

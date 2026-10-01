@@ -95,10 +95,10 @@ const Link: React.FC<{ label: string }> = ({ label }) => (
   </div>
 );
 
-export const AnvJourney: React.FC<{ model: AnalyticsModel; example?: boolean }> = ({ model, example }) => {
+export const AnvJourney: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   const { stages, links } = model.journey;
   return (
-    <div className="anv-card" data-anv={example ? "journey-example" : "journey"}>
+    <div className="anv-card" data-anv="journey">
       <div className="anv-cap">
         <h3 className="anv-tw">The journey so far</h3>
         <span className="anv-sub">

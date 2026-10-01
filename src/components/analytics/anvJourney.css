@@ -35,7 +35,7 @@
 /* ── the journey: four stages, three connectors ──
    ⚠️ THE CARD IS ITS OWN CONTAINER, not the column: the empty state draws the same journey inside a
    row about 60% of the column wide, and a query on the column left its last stage clipped there. */
-.anv-page [data-anv="journey"], .anv-page [data-anv="journey-example"] { container-type: inline-size; container-name: anv-j; }
+.anv-page [data-anv="journey"] { container-type: inline-size; container-name: anv-j; }
 /* the loading cover draws four stages and no connectors, so it has four tracks, not seven */
 .anv-jgrid.anv-jgrid--sk { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .anv-jgrid {
