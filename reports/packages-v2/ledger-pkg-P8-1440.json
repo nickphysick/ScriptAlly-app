@@ -8,12 +8,12 @@
   "detail": ""
  },
  {
-  "lock": "P8 · one example card: aria-hidden, inert, tagged Example, not clickable",
+  "lock": "P8 · the exhibition: aria-hidden, inert, labelled, not clickable",
   "route": "/manuscripts/packages",
   "size": "1440",
   "state": "empty",
   "ok": true,
-  "detail": "{\"composer\":true,\"exHidden\":true,\"exInert\":true,\"exTag\":\"Example\",\"exControls\":0,\"exClickable\":false,\"sbs\":false,\"retired\":false,\"lede\":\"Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received.\"}"
+  "detail": "{\"composer\":true,\"exHidden\":true,\"exInert\":true,\"exTag\":\"HOW THE PAGE LOOKS ONCE YOU’VE MADE ONE\",\"exControls\":0,\"exClickable\":false,\"sbs\":false,\"retired\":false,\"lede\":\"Build one package — the letter, the synopsis, the sample — and attach it to a query in one go, with a record of exactly what went.\"}"
  },
  {
   "lock": "P8 · no Side by side, no Retired",
@@ -29,7 +29,7 @@
   "size": "1440",
   "state": "empty",
   "ok": true,
-  "detail": "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received."
+  "detail": "Build one package — the letter, the synopsis, the sample — and attach it to a query in one go, with a record of exactly what went."
  },
  {
   "lock": "P8 · the first create flips to filled",
@@ -37,6 +37,6 @@
   "size": "1440",
   "state": "empty",
   "ok": true,
-  "detail": "[{\"name\":\"Query letter v1\",\"active\":false,\"acts\":[\"use\",\"edit\",\"retire\",\"delete\",\"note\"]}]"
+  "detail": "[{\"name\":\"Query letter v1\",\"active\":false,\"acts\":[\"use\",\"edit\",\"dup\",\"retire\",\"delete\",\"log\",\"note\"]}]"
  }
 ]

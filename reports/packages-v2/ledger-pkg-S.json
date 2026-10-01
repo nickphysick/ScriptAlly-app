@@ -16,12 +16,12 @@
   "detail": "rules=1 others=0 shadows=[{\"color\":\"rgba(28, 19, 15, 0.1)\",\"nums\":[-1,0,0,0],\"inset\":true}] borders=[]"
  },
  {
-  "lock": "L2 one-divide · top-bar edge",
+  "lock": "L2 one-divide · top-bar edge (none at rest)",
   "route": "Submission packages",
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "rules=1 others=0 shadows=[{\"color\":\"rgba(28, 19, 15, 0.1)\",\"nums\":[0,-1,0,0],\"inset\":true}] borders=[]"
+  "detail": "borders=[] shadows=[] after=[]"
  },
  {
   "lock": "L2 one-divide · ws-winwrap unframed",
@@ -56,12 +56,12 @@
   "detail": "borders=[] shadows=[] after=[]"
  },
  {
-  "lock": "L2 one-divide · bar bg = the sidebar's",
+  "lock": "L2 one-divide · bar bg = the page ground",
   "route": "Submission packages",
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "bar rgb(231, 227, 220) · page rgb(247, 244, 238)"
+  "detail": "bar rgb(247, 244, 238) · page rgb(247, 244, 238)"
  },
  {
   "lock": "L3 active · exactly one",
@@ -288,12 +288,12 @@
   "detail": "unnamed 0/12"
  },
  {
-  "lock": "S1 · the bar is the sidebar's colour, 64 tall",
+  "lock": "S1 · the bar is the page ground, 64 tall",
   "route": "/manuscripts/packages",
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "{\"bg\":\"rgb(231, 227, 220)\",\"h\":64}"
+  "detail": "{\"bg\":\"rgb(247, 244, 238)\",\"ground\":\"rgb(247, 244, 238)\",\"h\":64}"
  },
  {
   "lock": "S1 · the bar reads MATERIALS above Submission packages",
@@ -301,7 +301,7 @@
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "MaterialsSubmission packages"
+  "detail": "Materials /Submission packages"
  },
  {
   "lock": "S1 · the page root paints no surface",
@@ -333,7 +333,7 @@
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "{\"railT\":416.625,\"firstT\":416.625,\"rule\":391.625,\"w\":340,\"gap\":28}"
+  "detail": "{\"railT\":410.75,\"firstT\":410.75,\"rule\":385.75,\"w\":340,\"gap\":28}"
  },
  {
   "lock": "S5 · one gutter: the root pays it, the header and column start on it",
@@ -349,7 +349,7 @@
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "drawn 1011.4204946996467 title 981.734375"
+  "detail": "drawn 1175.0713002873563 title 583.828125"
  },
  {
   "lock": "S4 · sticky at the window's top + 16 after scrolling (not fixed)",
@@ -357,15 +357,7 @@
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "did 600/1021 top 121.75 sc 105.75 sticky"
- },
- {
-  "lock": "S7 · no G4 file changed (illustratedMasthead.css is the one exception)",
-  "route": "/manuscripts/packages",
-  "size": "1440",
-  "state": "expanded filled",
-  "ok": true,
-  "detail": "[]"
+  "detail": "did 600/1802 top 121.75 sc 105.75 sticky"
  },
  {
   "lock": "S7 · the page's sheet exists and names no shell/header/grid selector",
@@ -373,6 +365,6 @@
   "size": "1440",
   "state": "expanded filled",
   "ok": true,
-  "detail": "16899"
+  "detail": "24535"
  }
 ]

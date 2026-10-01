@@ -1,11 +1,11 @@
 [
  {
-  "lock": "P4 · a sent package offers no Edit, and offers Duplicate & edit",
+  "lock": "P4 · a sent package offers Edit (a new edition) and Duplicate, never Delete",
   "route": "/manuscripts/packages",
   "size": "1440",
   "state": "filled",
   "ok": true,
-  "detail": "[\"dup\",\"retire\",\"note\"]"
+  "detail": "[\"edit\",\"dup\",\"retire\",\"log\",\"note\"]"
  },
  {
   "lock": "P4 · an unsent package offers Edit and Delete",
@@ -13,10 +13,10 @@
   "size": "1440",
   "state": "filled",
   "ok": true,
-  "detail": "[\"use\",\"edit\",\"retire\",\"delete\",\"note\"]"
+  "detail": "[\"use\",\"edit\",\"dup\",\"retire\",\"delete\",\"log\",\"note\"]"
  },
  {
-  "lock": "P4 · Duplicate & edit opens a new package named by duplicateName",
+  "lock": "P4 · Duplicate opens a new package named by duplicateName",
   "route": "/manuscripts/packages",
   "size": "1440",
   "state": "filled",
@@ -29,7 +29,7 @@
   "size": "1440",
   "state": "filled",
   "ok": true,
-  "detail": "{\"id\":\"pkg-8oorzqdpw\",\"name\":\"Autumn round v2\",\"ql\":\"pv2-l3\",\"syn\":\"pv2-s1\",\"bv\":\"pv2-v3\",\"status\":\"Active\",\"sent\":false,\"note\":null}"
+  "detail": "{\"id\":\"pkg-z4hfck4tb\",\"name\":\"Autumn round v2\",\"ql\":\"pv2-l3\",\"syn\":\"pv2-s1\",\"bv\":\"pv2-v3\",\"status\":\"Active\",\"sent\":false,\"note\":null}"
  },
  {
   "lock": "P4 · …and the original is untouched",
