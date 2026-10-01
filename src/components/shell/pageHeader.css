@@ -632,10 +632,12 @@
 .ph--compact .ph-intro { margin-top: 8px; max-width: 460px; font-size: 16px; line-height: 1.45; }
 .ph--compact .ph-acts { grid-column: 2; }
 
-/* ══ LIVING HEADERS (ref design-refs/page-header/living-headers-v2.html) — the fixed shape ══
+/* ══ LIVING HEADERS (ref design-refs/page-header/living-headers-v3.html; v2 before it) — the fixed shape ══
    A page opts in (`living`), and then NOTHING in the hero moves as the page fills: only the headline's
-   and the subline's text change. Every value below is the ref's, measured; the rule is untouched. */
-.ph--living.ph--full { padding: 14px 0 var(--ph-pad-y); min-height: 250px; }
+   and the subline's text change. Every value below is the ref's, measured; the rule is untouched.
+   v3: 22px on top (the ref's `.hd`), because the page's name is in the bar's breadcrumb now and the
+   in-page eyebrow that used to stand above the title is gone. */
+.ph--living.ph--full { padding: 22px 0 var(--ph-pad-y); min-height: 250px; }
 .ph--living .ph-hin { min-height: 214px; }
 .ph--living .ph-text { max-width: 46%; }
 .ph--living .ph-eyebrow { font-size: 9.5px; margin-bottom: 10px; }
@@ -648,12 +650,12 @@
    rises 40px above the header; here the header sits 18px under the bar and `.ws-window` clips, so a 286
    box put the top 14px of the Contact list's hawk (the quill's tip) under the window's edge. The box is
    therefore capped at what fits under the SMALLEST frame — the empty state's 206 + the 26 it hangs below
-   the frame + the 14 of top padding + the header's 18px below the bar = 264 — and `object-fit: contain`
+   the frame + the 22 of top padding (v3; 14 under v2) + the header's 18px below the bar = 272 — and `object-fit: contain`
    scales the drawing rather than cropping it (the brief's "never cropped" outranks the ref's 286 where
    the two cannot both hold). A CONSTANT, not a share of the frame: a percentage made the art 264 on the
    empty page and 272–275 on the populated one, so the drawing changed size between states (LH5 caught
    it); the ref moves its art between states and never resizes it. */
-.ph--living.ph--full .ph-art { width: 46%; height: min(286px, calc(206px + var(--ph-pad-y) + 14px + 18px)); }
+.ph--living.ph--full .ph-art { width: 46%; height: min(286px, calc(206px + var(--ph-pad-y) + 22px + 18px)); }
 /* ⚠️ THE LIVE LINES' SPANS TAKE THEIR PARENT'S FACE. brand.tsx names bare `span`s as the body sans on
    every route, so without this the Contact list's headline rendered in Source Sans 3 inside a Special
    Elite h1 — measured 61.3px against the ref's 55.9, the sans line box being the taller. (The Query
