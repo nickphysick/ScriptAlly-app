@@ -196,6 +196,17 @@ describe("/manuscripts/packages renders", () => {
     setActiveManuscript();
     expect(() => renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages")).not.toThrow();
   });
+
+  /* living headers v3 §4/§5: a manuscript with no packages is the empty state — the heading, no h1,
+     the exhibition — and the ref's sentence, verbatim. */
+  it("…and with no packages it is the empty state, with the exhibition beneath", () => {
+    setActiveManuscript();
+    const html = renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages");
+    expect(html).toContain('data-living="empty"');
+    expect(html).toContain("No packages yet");
+    expect(html).toContain('data-lh="exhibition"');
+    expect(html).not.toContain("<h1");
+  });
 });
 
 describe("/import renders", () => {

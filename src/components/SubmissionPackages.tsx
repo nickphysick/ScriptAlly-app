@@ -29,6 +29,10 @@ import { useToast } from "./toast/ToastProvider";
 import { ComponentType, SubmissionPackage } from "../types";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { PageHeader } from "./shell/PageHeader";
+import type { LivingHeader } from "./shell/PageHeader";
+import { packagesHeaderCopy, type PackageLead } from "../lib/livingHeaders";
+import { useLivingCountOverride } from "../lib/livingHeaderReview";
+import { PackagesExhibit } from "./packages/PackagesExhibit";
 import { PageRail } from "./containers/PageRail";
 import { appendBookVersion, bookVersionsOf, newBookVersionId, renameBookVersion } from "../lib/bookVersions";
 import { countWords, createPayload } from "../lib/materialDraft";
@@ -52,6 +56,9 @@ import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
 const KEY = "scriptally_active_manuscript_id";
+/** The empty state's two lines (living headers v3 §4) — the ref's, verbatim. */
+export const PACKAGES_EMPTY_HEADING = "No packages yet";
+export const PACKAGES_EMPTY_SUBLINE = "Build one package — the letter, the synopsis, the sample — and attach it to a query in one go, with a record of exactly what went.";
 /** The example card is never sent, so it draws no results; this satisfies the prop and nothing reads it. */
 const EXAMPLE_RESULTS = () => packageResults("example", null, [], new Map());
 
@@ -66,7 +73,7 @@ export const SubmissionPackages: React.FC = () => {
   const {
     manuscripts, versions, packages, queries, agents, activities, addPackage, updatePackage, retirePackage,
     restorePackage, deletePackage, setActivePackage, addVersion, deleteVersion, restoreVersion, updateManuscript,
-    updateVersion, archiveVersion, revertPackageEdition,
+    updateVersion, archiveVersion, revertPackageEdition, collectionsReady,
   } = useScriptAllyDb();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -422,10 +429,27 @@ export const SubmissionPackages: React.FC = () => {
   };
 
   /* ── header ── */
-  const sentQueries = queries.filter((q) => msPkgs.some((p) => p.id === q.packageId)).length;
-  const description = empty
-    ? "Bundle a letter, synopsis and version for each round. Pick the package when you log a query, and you'll know what each agent received."
-    : <>A letter, synopsis and version for each round of querying. <strong>{live.length}</strong> in use, <strong>{sentQueries}</strong> queries sent.</>;
+  /* ── the living header (living headers v3) ──
+     ⚠️ SETTLED ON `collectionsReady`, the only readiness the store offers: packages carry no flag of
+     their own and db.tsx is not this pass's to change. Until then both lines are empty and keep their
+     space, so the page never states "No packages yet" over an account still loading. The lead is the
+     LIVE package with the most queries sent with it, by package-editions §C4 — never a retired one. */
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  const pkgCount = lhOverride != null && lhOverride >= 0 ? lhOverride : msPkgs.length;
+  const exhibit = !!activeMs && pkgCount === 0;
+  const lead: PackageLead | null = (() => {
+    let best: PackageLead | null = null;
+    for (const p of live) {
+      const r = packageResults(p.id, null, msQueries, rowsById);
+      if (r.sent > 0 && (!best || r.sent > best.sent)) best = { name: p.packageName, sent: r.sent, answered: r.answered, requests: r.requests };
+    }
+    return best;
+  })();
+  const living: LivingHeader | undefined = activeMs ? {
+    count: collectionsReady ? pkgCount : null,
+    copy: (n) => packagesHeaderCopy(n, { lead, firstLiveName: (active && active.status !== "Retired" ? active : live[0])?.packageName ?? null }),
+    empty: { heading: PACKAGES_EMPTY_HEADING, subline: [PACKAGES_EMPTY_SUBLINE] },
+  } : undefined;
   const editing = shown?.editId ?? null;
   const dupe = shown && shown.letter
     ? duplicateOf({
@@ -449,8 +473,9 @@ export const SubmissionPackages: React.FC = () => {
             <PageHeader
               variant="full"
               title="Submission packages"
-              description={activeMs ? description : "No manuscript yet."}
-              primary={activeMs && !empty && !noneLive ? { label: "+ New package", onClick: () => openComp() } : undefined}
+              description={activeMs ? undefined : "No manuscript yet."}
+              living={living}
+              primary={activeMs && !noneLive ? { label: "+ New package", onClick: () => openComp() } : undefined}
               secondary={sent.length >= 2 && !noneLive ? { label: "Side by side", onClick: () => sbsRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }) } : undefined}
               art={<img src={`${PACKAGES_HERO.src}?v=${PACKAGES_HERO.version}`} width={PACKAGES_HERO.width} height={PACKAGES_HERO.height} alt={PACKAGES_HERO.alt} />}
             />
@@ -481,7 +506,9 @@ export const SubmissionPackages: React.FC = () => {
               </div>
             ) : null}
 
-            {!activeMs ? null : empty || noneLive ? (
+            {!activeMs ? null : exhibit ? (
+              <PackagesExhibit />
+            ) : empty || noneLive ? (
               <>
                 <div className="ppv-exwrap" data-ppv="example" aria-hidden="true" inert>
                   <span className="ppv-ex" data-ppv="ex-tag">Example</span>
