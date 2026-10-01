@@ -1,0 +1,512 @@
+[
+ {
+  "lock": "fonts",
+  "ok": true,
+  "detail": "serif/mono loaded: true,true"
+ },
+ {
+  "lock": "SB1 one control",
+  "ok": true,
+  "detail": "capture controls: [true]"
+ },
+ {
+  "lock": "SB1 between brand and nav",
+  "ok": true,
+  "detail": "brand.b 87.75 cap 99.75–135.75 nav 147.75"
+ },
+ {
+  "lock": "SB1 named Log a query",
+  "ok": true,
+  "detail": "main segment: Log a query"
+ },
+ {
+  "lock": "SB1 the bar holds none",
+  "ok": true,
+  "detail": "capture in bar: false"
+ },
+ {
+  "lock": "SB1 accessible name",
+  "ok": true,
+  "detail": "in the sidebar: 1, in the bar: 0"
+ },
+ {
+  "lock": "SB1 no + New in the bar",
+  "ok": true,
+  "detail": "+ New in bar: 0"
+ },
+ {
+  "lock": "SB3 button 36 tall",
+  "ok": true,
+  "detail": "capb.h 36"
+ },
+ {
+  "lock": "SB3 chevron 32 wide",
+  "ok": true,
+  "detail": "capr.w 32"
+ },
+ {
+  "lock": "SB3 rows populated",
+  "ok": true,
+  "detail": "rows 11"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Dashboard: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Query Centre: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Analytics: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Contact list: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Discover: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Manuscripts: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Comparable titles: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Submission packages: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "To-do list34: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Calendar: 32"
+ },
+ {
+  "lock": "SB3 row 32",
+  "ok": true,
+  "detail": "Noteboard: 32"
+ },
+ {
+  "lock": "SB3 eyebrow 6 below",
+  "ok": true,
+  "detail": "Workspace: margin 6, rendered 8 (6 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 eyebrow 20 above",
+  "ok": true,
+  "detail": "Queries: margin 20, rendered 22 (20 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 eyebrow 6 below",
+  "ok": true,
+  "detail": "Queries: margin 6, rendered 8 (6 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "Query Centre→Analytics: 2"
+ },
+ {
+  "lock": "SB3 eyebrow 20 above",
+  "ok": true,
+  "detail": "Agents: margin 20, rendered 22 (20 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 eyebrow 6 below",
+  "ok": true,
+  "detail": "Agents: margin 6, rendered 8 (6 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "Contact list→Discover: 2"
+ },
+ {
+  "lock": "SB3 eyebrow 20 above",
+  "ok": true,
+  "detail": "Materials: margin 20, rendered 22 (20 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 eyebrow 6 below",
+  "ok": true,
+  "detail": "Materials: margin 6, rendered 8 (6 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "Manuscripts→Comparable titles: 2"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "Comparable titles→Submission packages: 2"
+ },
+ {
+  "lock": "SB3 eyebrow 20 above",
+  "ok": true,
+  "detail": "Tasks: margin 20, rendered 22 (20 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 eyebrow 6 below",
+  "ok": true,
+  "detail": "Tasks: margin 6, rendered 8 (6 + the 2px row gap)"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "To-do list34→Calendar: 2"
+ },
+ {
+  "lock": "SB3 row gap 2",
+  "ok": true,
+  "detail": "Calendar→Noteboard: 2"
+ },
+ {
+  "lock": "SB3 button → first eyebrow 22",
+  "ok": true,
+  "detail": "capb.b 135.75 first label 157.75 → 22"
+ },
+ {
+  "lock": "SB4 labels",
+  "ok": true,
+  "detail": "labels Workspace|Queries|Agents|Materials|Tasks"
+ },
+ {
+  "lock": "SB4 label + hairline",
+  "ok": true,
+  "detail": "Workspace: ::after {\"content\":\"\\\"\\\"\",\"w\":136.328,\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.1)\"}"
+ },
+ {
+  "lock": "SB4 label + hairline",
+  "ok": true,
+  "detail": "Queries: ::after {\"content\":\"\\\"\\\"\",\"w\":149.578,\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.1)\"}"
+ },
+ {
+  "lock": "SB4 label + hairline",
+  "ok": true,
+  "detail": "Agents: ::after {\"content\":\"\\\"\\\"\",\"w\":156.219,\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.1)\"}"
+ },
+ {
+  "lock": "SB4 label + hairline",
+  "ok": true,
+  "detail": "Materials: ::after {\"content\":\"\\\"\\\"\",\"w\":136.328,\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.1)\"}"
+ },
+ {
+  "lock": "SB4 label + hairline",
+  "ok": true,
+  "detail": "Tasks: ::after {\"content\":\"\\\"\\\"\",\"w\":162.844,\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.1)\"}"
+ },
+ {
+  "lock": "SB4 WORKSPACE over Dashboard",
+  "ok": true,
+  "detail": "Workspace → Dashboard"
+ },
+ {
+  "lock": "SB5 no Settings row",
+  "ok": true,
+  "detail": "nav rows have no Settings"
+ },
+ {
+  "lock": "SB5 no Account section",
+  "ok": true,
+  "detail": "labels have no Account"
+ },
+ {
+  "lock": "SB5 gear present",
+  "ok": true,
+  "detail": "gear {\"x\":200,\"y\":814.265625,\"w\":30,\"h\":30,\"r\":230,\"b\":844.265625} Settings"
+ },
+ {
+  "lock": "SB5 gear is a sibling of the user row",
+  "ok": true,
+  "detail": "sibling: true"
+ },
+ {
+  "lock": "SB5 user row opens the account menu",
+  "ok": true,
+  "detail": "account menu visible: true"
+ },
+ {
+  "lock": "SB6 closed at rest",
+  "ok": true,
+  "detail": "{\"open\":false,\"vis\":\"hidden\",\"expanded\":\"false\"}"
+ },
+ {
+  "lock": "SB6 opens on Enter",
+  "ok": true,
+  "detail": "{\"open\":true,\"vis\":\"visible\",\"expanded\":\"true\"} focus Record a response"
+ },
+ {
+  "lock": "SB6 Escape closes, focus to the chevron",
+  "ok": true,
+  "detail": "{\"open\":false,\"vis\":\"hidden\",\"expanded\":\"false\"} focus ws-capr"
+ },
+ {
+  "lock": "SB6 opens on Space",
+  "ok": true,
+  "detail": "{\"open\":true,\"vis\":\"visible\",\"expanded\":\"true\"} focus Record a response"
+ },
+ {
+  "lock": "SB6 Escape closes, focus to the chevron",
+  "ok": true,
+  "detail": "{\"open\":false,\"vis\":\"hidden\",\"expanded\":\"false\"} focus ws-capr"
+ },
+ {
+  "lock": "SB6 opens on ArrowDown",
+  "ok": true,
+  "detail": "{\"open\":true,\"vis\":\"visible\",\"expanded\":\"true\"} focus Record a response"
+ },
+ {
+  "lock": "SB6 Escape closes, focus to the chevron",
+  "ok": true,
+  "detail": "{\"open\":false,\"vis\":\"hidden\",\"expanded\":\"false\"} focus ws-capr"
+ },
+ {
+  "lock": "SB6 ArrowDown",
+  "ok": true,
+  "detail": "ArrowDown → Add an agent (want Add an agent)"
+ },
+ {
+  "lock": "SB6 ArrowDown",
+  "ok": true,
+  "detail": "ArrowDown → Add a manuscript (want Add a manuscript)"
+ },
+ {
+  "lock": "SB6 ArrowDown",
+  "ok": true,
+  "detail": "ArrowDown → Record a response (want Record a response)"
+ },
+ {
+  "lock": "SB6 ArrowUp",
+  "ok": true,
+  "detail": "ArrowUp → Add a manuscript (want Add a manuscript)"
+ },
+ {
+  "lock": "SB6 Home",
+  "ok": true,
+  "detail": "Home → Record a response (want Record a response)"
+ },
+ {
+  "lock": "SB6 End",
+  "ok": true,
+  "detail": "End → Add a manuscript (want Add a manuscript)"
+ },
+ {
+  "lock": "SB6 chevron 180° open",
+  "ok": true,
+  "detail": "transform matrix(-1, 0, 0, -1, 0, 0)"
+ },
+ {
+  "lock": "SB6 menu full width, 6 below",
+  "ok": true,
+  "detail": "menu {\"x\":14,\"y\":141.75,\"width\":220,\"height\":125} button {\"x\":14,\"y\":99.75,\"w\":220,\"h\":36,\"r\":234,\"b\":135.75}"
+ },
+ {
+  "lock": "SB6 menu rows 34",
+  "ok": true,
+  "detail": "rows 34,34,34"
+ },
+ {
+  "lock": "SB9 no keycaps in the menu",
+  "ok": true,
+  "detail": "keycaps 0"
+ },
+ {
+  "lock": "SB6 Tab closes, no trap",
+  "ok": true,
+  "detail": "{\"open\":false,\"vis\":\"hidden\",\"expanded\":\"false\"} focus ws-ni on"
+ },
+ {
+  "lock": "SB6 click opens",
+  "ok": true,
+  "detail": "after click"
+ },
+ {
+  "lock": "SB6 outside pointerdown closes",
+  "ok": true,
+  "detail": "after outside click"
+ },
+ {
+  "lock": "SB8 row out 160ms",
+  "ok": true,
+  "detail": "{\"prop\":\"background-color\",\"dur\":\"0.16s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 row in 120ms",
+  "ok": true,
+  "detail": "{\"prop\":\"background-color\",\"dur\":\"0.12s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 active row instant",
+  "ok": true,
+  "detail": "{\"prop\":\"none\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 button ring 120ms",
+  "ok": true,
+  "detail": "{\"prop\":\"box-shadow, transform\",\"dur\":\"0.12s, 0.12s\",\"delay\":\"0s, 0s\",\"fn\":\"ease, ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 chevron 200ms house",
+  "ok": true,
+  "detail": "{\"prop\":\"transform\",\"dur\":\"0.2s\",\"delay\":\"0s\",\"fn\":\"cubic-bezier(0.22, 0.8, 0.3, 1)\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 menu out 120ms fade only",
+  "ok": true,
+  "detail": "{\"prop\":\"opacity, transform, visibility\",\"dur\":\"0.12s, 0s, 0s\",\"delay\":\"0s, 0.12s, 0.12s\",\"fn\":\"ease, linear, linear\",\"transform\":\"matrix(1, 0, 0, 1, 0, -4)\"}"
+ },
+ {
+  "lock": "SB8 menu in 170 (opacity 150) house",
+  "ok": true,
+  "detail": "{\"prop\":\"opacity, transform, visibility\",\"dur\":\"0.15s, 0.17s, 0s\",\"delay\":\"0s, 0s, 0s\",\"fn\":\"ease, cubic-bezier(0.22, 0.8, 0.3, 1), ease\",\"transform\":\"matrix(1, 0, 0, 1, 0, -4)\"}"
+ },
+ {
+  "lock": "SB8 pressed 70ms, .5px, no drop shadow",
+  "ok": true,
+  "detail": "{\"prop\":\"box-shadow, transform\",\"dur\":\"0.07s, 0.07s\",\"delay\":\"0s, 0s\",\"fn\":\"ease, ease\",\"transform\":\"matrix(1, 0, 0, 1, 0, 0.5)\"} shadow rgba(28, 19, 15, 0.22) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.07) 0px 1px 3px 0px"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": "#ws-sidebar .ws-ni:not(.on): {\"prop\":\"background-color\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-capb: {\"prop\":\"box-shadow, transform\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease, ease\",\"transform\":\"matrix(1, 0, 0, 1, 0, 0.266442)\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-capl: {\"prop\":\"background-color\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-capr svg: {\"prop\":\"transform\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"cubic-bezier(0.22, 0.8, 0.3, 1)\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-capm: {\"prop\":\"opacity, transform, visibility\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease, linear, linear\",\"transform\":\"matrix(1, 0, 0, 1, 0, -4)\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-capi: {\"prop\":\"background-color\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB8 reduced motion 0s",
+  "ok": true,
+  "detail": ".ws-gear: {\"prop\":\"background-color\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB2 Log a query → the drawer, on /queries",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4411/queries drawer 1"
+ },
+ {
+  "lock": "SB5 gear → /account",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4411/account/profile"
+ },
+ {
+  "lock": "SB7 tile 40×36",
+  "ok": true,
+  "detail": "{\"x\":14,\"y\":99.75,\"w\":40,\"h\":36,\"cx\":34,\"r\":54}"
+ },
+ {
+  "lock": "SB7 tile centred",
+  "ok": true,
+  "detail": "tile cx 34 panel centre 34"
+ },
+ {
+  "lock": "SB7 one control collapsed",
+  "ok": true,
+  "detail": "captures 1"
+ },
+ {
+  "lock": "SB5 gear absent collapsed",
+  "ok": true,
+  "detail": "gear false user true"
+ },
+ {
+  "lock": "SB7 rail tip Log a query",
+  "ok": true,
+  "detail": "tip Log a query"
+ },
+ {
+  "lock": "SB7 flyout portalled",
+  "ok": true,
+  "detail": "{\"inBody\":true,\"inPanel\":false}"
+ },
+ {
+  "lock": "SB7 flyout open and visible",
+  "ok": true,
+  "detail": "{\"open\":true,\"vis\":\"visible\"}"
+ },
+ {
+  "lock": "SB7 flyout fully on screen",
+  "ok": true,
+  "detail": "{\"x\":62,\"y\":99.75,\"w\":228,\"h\":159,\"r\":290,\"b\":258.75}"
+ },
+ {
+  "lock": "SB7 flyout not clipped (the browser paints it)",
+  "ok": true,
+  "detail": "elementFromPoint inside: true"
+ },
+ {
+  "lock": "SB7 flyout at the tile's right edge, 228 wide",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":62,\"y\":99.75,\"w\":228,\"h\":159,\"r\":290,\"b\":258.75},\"tileR\":54}"
+ },
+ {
+  "lock": "SB7 Log a query first",
+  "ok": true,
+  "detail": "Log a query|Record a response|Add an agent|Add a manuscript"
+ },
+ {
+  "lock": "SB7 tip and flyout never together",
+  "ok": true,
+  "detail": "tip showing: false"
+ },
+ {
+  "lock": "SB8 flyout in 170 house",
+  "ok": true,
+  "detail": "{\"dur\":\"0.15s, 0.17s, 0s\",\"fn\":\"ease, cubic-bezier(0.22, 0.8, 0.3, 1), ease\"}"
+ },
+ {
+  "lock": "SB8 flyout reduced motion 0s",
+  "ok": true,
+  "detail": "{\"prop\":\"opacity, transform, visibility\",\"dur\":\"0s\",\"delay\":\"0s\",\"fn\":\"ease, cubic-bezier(0.22, 0.8, 0.3, 1), ease\",\"transform\":\"none\"}"
+ },
+ {
+  "lock": "SB7 no tip over an open flyout",
+  "ok": true,
+  "detail": "tip count after re-hover"
+ },
+ {
+  "lock": "SB7 Escape closes, focus to the tile",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"ws-capb ws-captile\"}"
+ }
+]

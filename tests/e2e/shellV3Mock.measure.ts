@@ -29,6 +29,7 @@ const EXPLAINED: Record<string, string> = {
   "switcher.h": "the app's switcher carries a real cover mark and a two-line title at the ref's type; the fixture's manuscript meta line differs",
   "user.y": "the user row is pinned to the sidebar's foot, and the app's foot carries the Upgrade control for a free fixture account",
   "user.h": "the app's user row is a single interactive row; the ref's is a plain block",
+  "user.w": "the sidebar metrics pass (ref design-refs/shell/sidebar-metrics-states.html) put the Settings gear back in the foot as a SIBLING of the user row — 30px plus its 2px gap and 4px inset — so the row gives up that width to it",
   "crumb.w": "the crumb's text differs: the ref draws Materials / Manuscripts with the same root, the app's page names come from the live nav",
   "feedback.w": "Special Elite's advance: identical label and padding, measured widths within the face's rounding",
 };
