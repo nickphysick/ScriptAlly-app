@@ -18,7 +18,7 @@
  */
 import { QueryStatus } from "../types";
 import { ATTENTION_LABEL, ATTENTION_ORDER, eyeRows, type Attention, type EyeFocus, type EyeRow } from "./qcBirdsEye";
-import { STAGE_NAME, stageOrder, type QcRow } from "./qcSummary";
+import { STAGE_NAME, stageOrder, tileCourt, type QcRow } from "./qcSummary";
 
 export type GroupBy = "attention" | "status" | "action" | "package" | "none";
 export type SortBy = "queried" | "changed" | "due";
@@ -58,10 +58,19 @@ export const CAL_DEFAULT: CalView = {
   groupBy: "attention", sortBy: "due", asc: true,
 };
 
-export const GROUP_BY_OPTIONS: readonly { key: GroupBy; label: string }[] = [
-  { key: "attention", label: "Urgency" }, { key: "status", label: "Status" },
-  { key: "action", label: "Next action" },
-  { key: "package", label: "Submission package" }, { key: "none", label: "No grouping" },
+/**
+ * ⚠️ `label` IS THE MENU'S AND `short` IS THE CONTROL'S, from ONE table — the list head draws the
+ * chosen value inside the control (`group urgency ⌄`), where the menu's own words do not fit the
+ * sentence: "group no grouping" reads as a stammer, and the v95 reference draws `none`. A second
+ * table would be two vocabularies free to drift; a field on this one cannot be forgotten, because
+ * the type requires it.
+ */
+export const GROUP_BY_OPTIONS: readonly { key: GroupBy; label: string; short: string }[] = [
+  { key: "attention", label: "Urgency", short: "urgency" },
+  { key: "status", label: "Status", short: "status" },
+  { key: "action", label: "Next action", short: "next action" },
+  { key: "package", label: "Submission package", short: "package" },
+  { key: "none", label: "No grouping", short: "none" },
 ];
 export const SORT_BY_OPTIONS: readonly { key: SortBy; label: string }[] = [
   { key: "queried", label: "Date queried" }, { key: "changed", label: "Status changed" }, { key: "due", label: "Next action due" },
@@ -391,5 +400,102 @@ export function groupRows(
 export function attentionCounts(rows: readonly QcRow[], nowMs: number): Record<Attention, number> {
   const out: Record<Attention, number> = { overdue: 0, upcoming: 0, watch: 0 };
   for (const r of eyeRows(rows, nowMs)) out[r.group] += 1;
+  return out;
+}
+
+
+/* ── §2 (v95) · the LIST's grouping ─────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ "URGENCY" MEANS SOMETHING DIFFERENT HERE FROM THE EXPANDED VIEW'S, AND THAT IS A DIVERGENCE
+ * TO KNOW ABOUT RATHER THAN A SLIP.
+ *
+ * The expanded view's Group option labelled "Urgency" is `attention` — `attentionGroup()` →
+ * **Overdue / Upcoming / Watch and wait**. The v95 reference renders **Your move / Waiting on
+ * agents / Gone quiet** with the glosses below, and the brief names all three verbatim; it also
+ * says "the grouping rule is the Birds-eye view's", which contradicts them. They are genuinely
+ * different partitions: a with-you query whose date has gone is `overdue` to the expanded view and
+ * *Your move* here, and an agent's-turn query sixty days into a sixteen-week window is `watch`
+ * there and *Waiting on agents* here. The reference is the oracle, so these three win — and the
+ * two senses of the word now differ on two surfaces, which is Nick's to settle, because unifying
+ * them means editing the expanded view.
+ *
+ * ⚠️ NO NEW RULE IS WRITTEN FOR IT. `tileCourt` is the page's own three-way fold — the one the desk
+ * counts with — and `pastExpected` is already defined as "agent's turn, a date promised, and that
+ * date gone". The grouping is those two existing derivations and nothing else.
+ *
+ * ⚠️ AND IT PARTITIONS EVERY ROW, WHERE THE DESK'S SECTIONS DO NOT. `tileCourt` returns null for
+ * Withdrawn and Signed, so those queries sit in no desk section; a grouping has to place every row
+ * it draws, and "Closed" is the honest home for both.
+ *
+ * ⚠️ KNOWN IMPRECISION, STATED RATHER THAN ENGINEERED AROUND: an agent's-turn query whose agency
+ * states no reply window has no expected date, so it is not `pastExpected` and lands in *Waiting on
+ * agents* — where the group's NAME is true of it and the gloss "inside their reply window"
+ * slightly overclaims, there being no window. A fourth live group would be inventing one the
+ * reference does not have.
+ */
+export type UrgencyKey = "you" | "waiting" | "quiet" | "closed";
+export const URGENCY_GROUPS: readonly { key: UrgencyKey; label: string; hint: string }[] = [
+  { key: "you", label: "Your move", hint: "the ball is with you" },
+  { key: "waiting", label: "Waiting on agents", hint: "inside their reply window" },
+  { key: "quiet", label: "Gone quiet", hint: "past the window, no word" },
+  { key: "closed", label: "Closed", hint: "nothing more to do" },
+];
+export function urgencyGroup(r: QcRow): UrgencyKey {
+  const c = tileCourt(r.status);
+  if (c === "you") return "you";
+  if (c === "agent") return r.pastExpected ? "quiet" : "waiting";
+  return "closed";
+}
+
+export interface ListGroup { key: string; label: string; hint?: string; rows: QcRow[] }
+
+/**
+ * §2 · the list's groups, in the order they are drawn. An EMPTY group is never drawn — the same
+ * rule `groupRows` applies, and the reason is the same: a heading over nothing states a category
+ * the reader does not have.
+ *
+ * ⚠️ IT TAKES ROWS ALREADY FILTERED AND SORTED, and partitions them in place, so the sort applies
+ * WITHIN each group for free. A second ordering pass inside the grouping is how a list comes to
+ * disagree with its own sort control.
+ */
+export function listGroups(
+  rows: readonly QcRow[],
+  groupBy: GroupBy,
+  nowMs: number,
+  packageName?: (id: string) => string | null,
+): ListGroup[] {
+  const mk = (key: string, label: string, mine: QcRow[], hint?: string): ListGroup => ({ key, label, hint, rows: mine });
+  if (groupBy === "none") return rows.length ? [mk("all", "", [...rows])] : [];
+
+  if (groupBy === "attention") {
+    return URGENCY_GROUPS
+      .map((g) => mk(g.key, g.label, rows.filter((r) => urgencyGroup(r) === g.key), g.hint))
+      .filter((g) => g.rows.length > 0);
+  }
+  if (groupBy === "action") {
+    /* the expanded view's own next-action groups, most pressing first — §2 asks for the same ones */
+    return ACTION_GROUPS
+      .map((g) => mk(g.key, g.label, rows.filter((r) => nextAction(r, nowMs) === g.key), g.hint))
+      .filter((g) => g.rows.length > 0);
+  }
+  if (groupBy === "status") {
+    /* PIPELINE order, never alphabetical and never by count */
+    return stageOrder([...rows])
+      .map((st: QueryStatus) => mk(String(st), STAGE_NAME[st], rows.filter((r) => r.status === st)))
+      .filter((g) => g.rows.length > 0);
+  }
+  /* packages A–Z, with "No package" LAST however its name would sort */
+  const named = new Map<string, QcRow[]>();
+  const none: QcRow[] = [];
+  for (const r of rows) {
+    const name = r.query.packageId ? packageName?.(r.query.packageId) ?? null : null;
+    if (!name) { none.push(r); continue; }
+    const list = named.get(name) ?? [];
+    list.push(r);
+    named.set(name, list);
+  }
+  const out = [...named.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([name, mine]) => mk(`pkg:${name}`, name, mine));
+  if (none.length) out.push(mk("pkg:none", "No package", none));
   return out;
 }

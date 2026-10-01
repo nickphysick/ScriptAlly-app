@@ -2,44 +2,82 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QcSentence — "All 26 queries, latest activity first". The two phrases are the ONLY filter and sort
- * controls on the page: the first opens the filter (and, with more than one manuscript, the scope);
- * the second opens the sort. On the Calendar the second phrase is hidden — that view orders itself.
+ * QcSentence — THE LIST HEAD (v95 §2). One line, directly on the page with no container: the count
+ * on the left in the typewriter, and three dashed typewriter controls on the right on the same
+ * baseline — `filter ⌄` · `group none ⌄` · `sort latest activity ⌄`.
+ *
+ * It was a SENTENCE: "All 26 queries, latest activity first", where the two phrases WERE the filter
+ * and sort controls. The head states how much of the list you are looking at and the controls say
+ * what is narrowing it, so the two halves no longer both describe the filter.
+ *
+ * ⚠️ NO PILLS, NO SECOND LINE, AND THE SORT IS NAMED ONCE. §6's baked decisions.
+ *
+ * ⚠️ THE FILTER CONTROL NAMES ITS VALUE WHERE THERE IS ONE — `filter with you ⌄` — and counts them
+ * where there is more than one: `filter 2 on ⌄`. §2 specifies the second form and says the active
+ * filters "show in the floating bar the app already has"; **there is no such bar on this page**.
+ * `filterPills` exists, and only the EXPANDED view renders it. So the value goes where the other
+ * two controls put theirs — inside the control, in ink — which is the reference's own grammar for
+ * `group` and `sort`, loses nothing, and needs neither the second line §2 forbids nor a bar this
+ * pack is not building.
  */
 import React, { useCallback, useRef, useState } from "react";
-import { SORT_OPTIONS, filterPhrase, type FilterOption, type QcFilter, type QcSort } from "../../../lib/qcSummary";
+import {
+  SORT_OPTIONS, listTitle,
+  type FilterOption, type QcFilter, type QcSort,
+} from "../../../lib/qcSummary";
+import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import { QcMenu, type QcMenuGroup } from "./QcMenu";
 import "./qcvPage.css";
 
 export interface ScopeOption { id: string; title: string; count: number }
 
+type Open = "filter" | "group" | "sort" | null;
+
 export const QcSentence: React.FC<{
   loading: boolean;
   calendar: boolean;
   filter: QcFilter;
+  /** How many rows the list is showing, and how many the manuscript scope holds. */
   count: number;
+  total: number;
   options: readonly FilterOption[];
   onFilter: (f: QcFilter) => void;
   sort: QcSort;
   onSort: (s: QcSort) => void;
+  group: GroupBy;
+  onGroup: (g: GroupBy) => void;
   /** Present only when the account has more than one manuscript. `null` is All. */
   scope?: { current: string | null; total: number; options: readonly ScopeOption[]; onScope: (id: string | null) => void } | null;
   scopeTitle: string | null;
-}> = ({ loading, calendar, filter, count, options, onFilter, sort, onSort, scope, scopeTitle }) => {
-  const [open, setOpen] = useState<"filter" | "sort" | null>(null);
+}> = ({ loading, calendar, filter, count, total, options, onFilter, sort, onSort, group, onGroup, scope, scopeTitle }) => {
+  const [open, setOpen] = useState<Open>(null);
   const filterRef = useRef<HTMLButtonElement>(null);
+  const groupRef = useRef<HTMLButtonElement>(null);
   const sortRef = useRef<HTMLButtonElement>(null);
   const close = useCallback(() => setOpen(null), []);
+  const toggle = (k: Exclude<Open, null>) => setOpen((o) => (o === k ? null : k));
 
   if (loading) {
-    return <h2 className="qcv-sentence" data-qcv="sentence">{/* ⚠️ `0.7em` AND `vertical-align: middle`, NOT A PIXEL HEIGHT ON THE BASELINE. An inline-block
-            sits ON the baseline, so its height is added to the line box's descent and a 24px pill
-            made this h2 33.4 against a loaded 27.4 — a 6px jump at the instant the cover lifts. Sized
-            in the sentence's OWN em and centred on the line, the h2 keeps the height its type gives
-            it at every width, which is the whole job of a placeholder. */}
-      <span className="qcv-sk" style={{ width: 420, height: "0.7em", display: "inline-block", verticalAlign: "middle" }} /></h2>;
+    return (
+      <div className="qcv-lhead" data-qcv="sentence">
+        {/* ⚠️ `0.7em` AND `vertical-align: middle`, NOT A PIXEL HEIGHT ON THE BASELINE. An
+            inline-block sits ON the baseline, so its height is added to the line box's descent and a
+            24px pill made the old h2 33.4 against a loaded 27.4 — a 6px jump at the instant the
+            cover lifts. Sized in the title's OWN em and centred on the line, the box keeps the
+            height its type gives it at every width, which is the whole job of a placeholder. */}
+        <h2 className="qcv-lh-ttl"><span className="qcv-sk" style={{ width: 260, height: "0.7em", display: "inline-block", verticalAlign: "middle" }} /></h2>
+        <div className="qcv-lh-ops"><span className="qcv-sk" style={{ width: 300, height: "0.7em", display: "inline-block", verticalAlign: "middle" }} /></div>
+      </div>
+    );
   }
-  const phrase = filterPhrase(filter, count, { manuscriptTitle: scopeTitle, calendar });
+
+  /* the scope narrows exactly as the filter does, so it counts towards "how many are on" */
+  const facets = (filter === "all" ? 0 : 1) + (scope?.current ? 1 : 0);
+  const chosen = options.find((o) => o.key === filter);
+  const filterValue = facets === 0 ? null : facets === 1
+    ? (filter === "all" ? scopeTitle : chosen?.label ?? null)
+    : `${facets} on`;
+
   const filterGroups: QcMenuGroup[] = [
     { current: filter, items: options.map((o) => ({ key: o.key, label: o.label, count: o.count, swatch: o.swatch })), onPick: (k) => onFilter(k as QcFilter) },
     ...(scope ? [{
@@ -48,22 +86,38 @@ export const QcSentence: React.FC<{
       onPick: (k: string) => scope.onScope(k || null),
     }] : []),
   ];
+
   return (
-    <h2 className="qcv-sentence" data-qcv="sentence">
-      <button ref={filterRef} type="button" className="qcv-pk" data-qcv="pk-filter" aria-haspopup="menu" aria-expanded={open === "filter"}
-        onClick={() => setOpen((o) => (o === "filter" ? null : "filter"))}>{phrase}</button>
-      {!calendar && (
-        <>
-          <span>, </span>
-          <button ref={sortRef} type="button" className="qcv-pk" data-qcv="pk-sort" aria-haspopup="menu" aria-expanded={open === "sort"}
-            onClick={() => setOpen((o) => (o === "sort" ? null : "sort"))}>{SORT_OPTIONS.find((o) => o.key === sort)?.label}</button>
-        </>
-      )}
+    <div className="qcv-lhead" data-qcv="sentence">
+      <h2 className="qcv-lh-ttl" data-qcv="lh-title">{listTitle(count, total)}</h2>
+      <div className="qcv-lh-ops">
+        <button ref={filterRef} type="button" className="qcv-op" data-qcv="pk-filter" aria-haspopup="menu" aria-expanded={open === "filter"}
+          onClick={() => toggle("filter")}>
+          filter{filterValue && <> <i>{filterValue}</i></>} <span aria-hidden="true">⌄</span>
+        </button>
+        {/* ⚠️ GROUP IS NEW ON THIS PAGE AND IS THE EXPANDED VIEW'S OWN CONTROL — the same five
+            options and the same next-action groups, read from `GROUP_BY_OPTIONS` rather than
+            restated. Only "Urgency" differs in what it partitions; see the note at `URGENCY_GROUPS`. */}
+        <button ref={groupRef} type="button" className="qcv-op" data-qcv="pk-group" aria-haspopup="menu" aria-expanded={open === "group"}
+          onClick={() => toggle("group")}>
+          group <i>{GROUP_BY_OPTIONS.find((o) => o.key === group)?.short ?? "none"}</i> <span aria-hidden="true">⌄</span>
+        </button>
+        {!calendar && (
+          <button ref={sortRef} type="button" className="qcv-op" data-qcv="pk-sort" aria-haspopup="menu" aria-expanded={open === "sort"}
+            onClick={() => toggle("sort")}>
+            sort <i>{SORT_OPTIONS.find((o) => o.key === sort)?.short}</i> <span aria-hidden="true">⌄</span>
+          </button>
+        )}
+      </div>
       {open === "filter" && <QcMenu anchor={filterRef.current} label="Which queries" groups={filterGroups} onClose={close} />}
+      {open === "group" && (
+        <QcMenu anchor={groupRef.current} label="How to group them" onClose={close}
+          groups={[{ current: group, items: GROUP_BY_OPTIONS.map((o) => ({ key: o.key, label: o.label })), onPick: (k) => onGroup(k as GroupBy) }]} />
+      )}
       {open === "sort" && !calendar && (
         <QcMenu anchor={sortRef.current} label="In what order" onClose={close}
           groups={[{ current: sort, items: SORT_OPTIONS.map((o) => ({ key: o.key, label: o.label.replace(/^./, (c) => c.toUpperCase()) })), onPick: (k) => onSort(k as QcSort) }]} />
       )}
-    </h2>
+    </div>
   );
 };

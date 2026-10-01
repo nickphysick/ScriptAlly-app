@@ -109,6 +109,8 @@ import {
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 import type { EyeFocus } from "../lib/qcBirdsEye";
+/* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
+import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { QcFan } from "./queries/centre/QcFan";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -2266,6 +2268,8 @@ export const Queries: React.FC<{
    * value is the fault. The rail's header is untouched — only where the value lives moved.
    */
   const [qcEyeFocus, setQcEyeFocus] = useState<EyeFocus>("all");
+  /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
+  const [qcGroup, setQcGroup] = useState<GroupBy>("none");
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* null until the page has measured its own column — see QcCentre */
@@ -6495,6 +6499,9 @@ export const Queries: React.FC<{
                 /* Birds-eye is the rail's view, not a state this sentence can be in (v65 §1) */
                 calendar={false}
                 filter={qcFilter}
+                total={qcScoped.length}
+                group={qcGroup}
+                onGroup={setQcGroup}
                 count={qcVisible.length}
                 options={filterOptions(qcScoped)}
                 onFilter={pickQcFilter}
@@ -6648,7 +6655,12 @@ export const Queries: React.FC<{
                   <button type="button" onClick={clearQcFilter}>Show all queries</button>
                 </p>
               ) : (
-                <QcList rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
+                <QcList
+                  /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
+                     sort applies WITHIN each group for free (§2). A grouping that re-ordered would
+                     be a second ordering pass disagreeing with the sort control. */
+                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), (id) => packages.find((pk) => pk.id === id)?.packageName ?? null)}
+                  selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               )
             }
           />

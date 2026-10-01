@@ -13,11 +13,18 @@ import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Agent, Query, QueryStatus } from "../../../types";
-import { buildQcRows, isWithYou } from "../../../lib/qcSummary";
+import { buildQcRows, isWithYou, type QcRow } from "../../../lib/qcSummary";
 import { MATERIAL_ROW_NAMES } from "../../../lib/agentMaterials";
 import { MATERIAL_SLOTS } from "../../../lib/queryCardFacts";
 import { QcList, QcListSkeleton } from "./QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./QcOpenCard";
+
+/**
+ * §2 (v95) — the list takes GROUPS now, and `No grouping` is one group with no label. These cases
+ * are about the ROW, so they wrap in the ungrouped shape rather than restating a grouping each
+ * time; the grouped shape has its own cases.
+ */
+const one = (rows: QcRow[]) => [{ key: "all", label: "", rows }];
 
 const DAY = 86_400_000, NOW = Date.UTC(2026, 8, 19, 12);
 const ago = (d: number) => new Date(NOW - d * DAY).toISOString();
@@ -100,14 +107,14 @@ describe("the list's columns — one template, floors and ceilings, the spare in
 
 describe("the rows, rendered", () => {
   it("⚠️ NO ROW BUTTONS — a row selects and nothing else, and there is no head row to name columns", () => {
-    const html = renderToStaticMarkup(<QcList rows={rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })])} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const html = renderToStaticMarkup(<QcList groups={one(rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     expect(html).not.toContain("<button");
     expect(html, "the retired head row is rendered again").not.toContain("qcv-cols");
     expect(html.split('role="option"').length - 1).toBe(2);
   });
   it("⚠️ RUST FOLLOWS `isWithYou` EXACTLY — for every status, and never an offer", () => {
     const rows = rowsOf(ALL.map((s) => q({ status: s })));
-    const html = renderToStaticMarkup(<QcList rows={rows} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const html = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     for (const s of ALL) {
       const m = html.match(new RegExp(`data-status="${s.replace(/&/g, "&amp;")}" data-you="(true|false)"`));
       expect(m, `${s} rendered no row`).toBeTruthy();
@@ -119,15 +126,15 @@ describe("the rows, rendered", () => {
   });
   it("one tab stop: the selected row, or the first when nothing is; the chip and the tile wear the row's STATE token", () => {
     const rows = rowsOf([q({}), q({}), q({ status: QueryStatus.OFFER })]);
-    const html = renderToStaticMarkup(<QcList rows={rows} selectedId={rows[1].id} onOpen={() => {}} nowMs={NOW} />);
+    const html = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={rows[1].id} onOpen={() => {}} nowMs={NOW} />);
     expect([...html.matchAll(/aria-selected="(true|false)" tabindex="(-?\d)"/g)].map((m) => `${m[1]}:${m[2]}`)).toEqual(["false:-1", "true:0", "false:-1"]);
-    const none = renderToStaticMarkup(<QcList rows={rows} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const none = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     expect([...none.matchAll(/tabindex="(-?\d)"/g)].map((m) => m[1])).toEqual(["0", "-1", "-1"]);
     expect(html).toContain("--qcv-state:var(--state-queried)");
     expect(html).toContain("--qcv-state:var(--state-offer)");
   });
   it("⚠️ 'sent so far' says NOT SENT only where something was recorded — nothing recorded is not nothing sent", () => {
-    const some = renderToStaticMarkup(<QcList rows={rowsOf([q({ materialsWanted: ["Query letter"] })])} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const some = renderToStaticMarkup(<QcList groups={one(rowsOf([q({ materialsWanted: ["Query letter"] })]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     /* ⚠️ THE NAMES ARE THE APP'S OWN DISPLAY MAP, NOT TYPED HERE: the stored token "Query letter" is
        shown as "Covering letter" app-wide (`materialLabel`), and this list must not be the one place
        that says otherwise. The brief lists the four rows by their stored names. */
@@ -136,7 +143,7 @@ describe("the rows, rendered", () => {
     expect(some).toContain(`title="${NAME[0]} sent"`);
     expect(some).toContain(`title="${NAME[1]} not sent"`);
     expect(some.split("qcv-mat-i--on").length - 1).toBe(1);
-    const none = renderToStaticMarkup(<QcList rows={rowsOf([q({})])} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const none = renderToStaticMarkup(<QcList groups={one(rowsOf([q({})]))} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     expect(none).toContain(`title="${NAME[0]} not recorded"`);
     expect(none).not.toContain("not sent");
     /* four slots, in the Materials tab's order, and no fifth */

@@ -22,6 +22,7 @@ import { Mark } from "../QueryCard";
 import { MATERIAL_SLOTS } from "../../../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES } from "../../../lib/agentMaterials";
 import { STAGE_NAME, factLine, type QcRow } from "../../../lib/qcSummary";
+import type { ListGroup } from "../../../lib/qcCalView";
 import "./qcvPage.css";
 import "./qcvList.css";
 
@@ -42,11 +43,17 @@ export const SentSoFar: React.FC<{ row: QcRow }> = ({ row }) => (
 );
 
 export const QcList: React.FC<{
-  rows: readonly QcRow[];
+  /**
+   * §2 (v95) — THE ROWS ARRIVE GROUPED, always, and `No grouping` is one group with no label. A
+   * `rows` prop beside a `groups` prop would be two shapes for one list and a branch in every
+   * consumer; one shape means the ungrouped case is not a special case.
+   */
+  groups: readonly ListGroup[];
   selectedId: string | null;
   onOpen: (id: string) => void;
   nowMs: number;
-}> = ({ rows, selectedId, onOpen, nowMs }) => {
+}> = ({ groups, selectedId, onOpen, nowMs }) => {
+  const rows = groups.flatMap((g) => g.rows);
   const boxRef = useRef<HTMLDivElement>(null);
   /* selection follows the keyboard: when the open query changes while focus is IN the rows, focus
      goes with it (one tab stop, roving). Never steals focus from anywhere else. */
@@ -56,41 +63,72 @@ export const QcList: React.FC<{
     const el = box.querySelector<HTMLElement>(`[data-id="${CSS.escape(selectedId)}"]`);
     if (el && el !== document.activeElement) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest" }); }
   }, [selectedId]);
+  /**
+   * ⚠️ DECLARED ABOVE THE RETURN, which is the house law rather than a preference: a `const` the
+   * render reads, declared BELOW it, is a temporal-dead-zone throw that `tsc` cannot see through a
+   * helper and that this page has fallen into its error boundary over once already.
+   */
+  const renderRow = (r: QcRow) => {
+        const sent = r.sentMs != null ? new Date(r.sentMs) : null;
+    const on = r.id === selectedId;
+    return (
+      <div key={r.id} id={`query-row-${r.id}`} className={`qcv-row${r.withYou ? " qcv-row--you" : ""}`} data-qcv="row" data-id={r.id} data-status={r.status} data-you={r.withYou ? "true" : "false"}
+        role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
+        style={{ ["--qcv-state" as string]: `var(--state-${r.state})` }}
+        onClick={() => onOpen(r.id)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(r.id); } }}>
+        <div className="qcv-row-agent">
+      <span className="qcv-chip" data-qcv="row-chip"><StatusDot status={r.status} overrideSize={16} decorative /></span>
+      <div className="qcv-row-who">
+        <b className="qcv-row-nm">{r.agentName}</b>
+        <i className="qcv-row-ag">{r.agency}</i>
+      </div>
+        </div>
+        <div className="qcv-row-st" data-qcv="row-stand">
+      <b className="qcv-row-stn">{STAGE_NAME[r.status]}</b>
+      {/* one line, with an ellipsis where the column is narrow — so the whole line is also its title */}
+      <small className="qcv-row-fact" title={factLine(r, nowMs)}>{factLine(r, nowMs)}</small>
+        </div>
+        <SentSoFar row={r} />
+        {/* ⚠️ AN UNDATED TILE IS BLANK WITH A DASH, NOT A DASH OVER A DOT (v65.1). It drew an em
+        dash where the month goes and an interpunct where the day goes — two marks, neither
+        of which is a date, read as a tile whose contents failed to load. One dash says the
+        one thing there is to say, and the tooltip says it in words. */}
+        <div className={`qcv-date${sent ? "" : " qcv-date--none"}`} data-qcv="row-date" data-dated={sent ? "true" : "false"} title={sent ? sent.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "Send date not recorded"}>
+      {sent ? <><u>{MON[sent.getMonth()]}</u><b>{sent.getDate()}</b></> : <i aria-hidden="true">–</i>}
+        </div>
+      </div>
+    );
+  };
+
   return (
   <div className="qcv-list" data-qcv="list">
     <div ref={boxRef} role="listbox" aria-label="Queries" className="qcv-rows">
-      {rows.map((r) => {
-        const sent = r.sentMs != null ? new Date(r.sentMs) : null;
-        const on = r.id === selectedId;
-        return (
-          <div key={r.id} id={`query-row-${r.id}`} className={`qcv-row${r.withYou ? " qcv-row--you" : ""}`} data-qcv="row" data-id={r.id} data-status={r.status} data-you={r.withYou ? "true" : "false"}
-            role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
-            style={{ ["--qcv-state" as string]: `var(--state-${r.state})` }}
-            onClick={() => onOpen(r.id)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(r.id); } }}>
-            <div className="qcv-row-agent">
-              <span className="qcv-chip" data-qcv="row-chip"><StatusDot status={r.status} overrideSize={16} decorative /></span>
-              <div className="qcv-row-who">
-                <b className="qcv-row-nm">{r.agentName}</b>
-                <i className="qcv-row-ag">{r.agency}</i>
-              </div>
+      {groups.map((g) => (
+        /**
+         * ⚠️ A HEADING IS NOT AN OPTION, so it cannot be a bare child of the listbox — a listbox's
+         * children are its options, and a div between them is invalid ARIA that silently changes
+         * what a screen reader counts. The group is `role="group"` carrying the heading's own words
+         * as its accessible name, and the drawn heading is hidden from the tree so it is not read
+         * twice.
+         *
+         * ⚠️ AND AN UNGROUPED LIST GETS NO WRAPPER AT ALL — a group of one, named "", would
+         * announce an unnamed grouping around every query on the page.
+         */
+        g.label ? (
+          <div key={g.key} role="group" className="qcv-sect"
+            aria-label={`${g.label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}${g.hint ? `, ${g.hint}` : ""}`}>
+            <div className="qcv-grp" data-qcv="grp" data-group={g.key} aria-hidden="true">
+              {g.label}
+              <em className="qcv-grp-n" data-qcv="grp-count">{g.rows.length}</em>
+              {g.hint && <small className="qcv-grp-h">{g.hint}</small>}
             </div>
-            <div className="qcv-row-st" data-qcv="row-stand">
-              <b className="qcv-row-stn">{STAGE_NAME[r.status]}</b>
-              {/* one line, with an ellipsis where the column is narrow — so the whole line is also its title */}
-              <small className="qcv-row-fact" title={factLine(r, nowMs)}>{factLine(r, nowMs)}</small>
-            </div>
-            <SentSoFar row={r} />
-            {/* ⚠️ AN UNDATED TILE IS BLANK WITH A DASH, NOT A DASH OVER A DOT (v65.1). It drew an em
-                dash where the month goes and an interpunct where the day goes — two marks, neither
-                of which is a date, read as a tile whose contents failed to load. One dash says the
-                one thing there is to say, and the tooltip says it in words. */}
-            <div className={`qcv-date${sent ? "" : " qcv-date--none"}`} data-qcv="row-date" data-dated={sent ? "true" : "false"} title={sent ? sent.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "Send date not recorded"}>
-              {sent ? <><u>{MON[sent.getMonth()]}</u><b>{sent.getDate()}</b></> : <i aria-hidden="true">–</i>}
-            </div>
+            {g.rows.map(renderRow)}
           </div>
-        );
-      })}
+        ) : (
+          <React.Fragment key={g.key}>{g.rows.map(renderRow)}</React.Fragment>
+        )
+      ))}
     </div>
   </div>
   );

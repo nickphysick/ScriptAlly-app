@@ -323,7 +323,10 @@ describe("the sheet", () => {
     expect(rule(":root"), "the palette is at :root so the portalled card can read it").toMatch(/--qcv-type:\s*var\(--sp-type\)/);
     /* brand.tsx forces h1:not(.wsh-title) with !important at 0-1-1: two classes AND !important, or Playfair */
     expect(rule(".qcv-page .qcv-title")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
-    expect(rule(".qcv-page .qcv-sentence")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
+    /* §2 (v95) — the sentence became the LIST HEAD's title, and it is still an `<h2>`, so it still
+       needs `!important` to beat brand.tsx. Retargeted, claim unchanged — and it went red on the
+       rewritten head, which is what it is for. */
+    expect(rule(".qcv-lhead .qcv-lh-ttl")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
   });
   /**
    * ⚠️ THE PALETTE IS AT `:root` AND THE LOCK IS STATED OVER EVERY SHEET, which is the repair of a

@@ -103,7 +103,7 @@ describe("the page puts each card only in the slot the selector names", () => {
     expect(card).toContain("onClear={clearQcFilter}");
     /* ⚠️ RETARGETED (v65 §1): the end anchor was the view fork, and there is one view. The ledger
        is what follows the no-match line now, so the slice ends where it begins. */
-    const none = sliceBetween(page, 'emptyKind === "nomatch" ? (', "<QcList rows={qcVisible}");
+    const none = sliceBetween(page, 'emptyKind === "nomatch" ? (', "<QcList");
     expect(none).toContain('className="qcv-none"');
     expect(none).not.toContain("QueryEmptyCard");
   });

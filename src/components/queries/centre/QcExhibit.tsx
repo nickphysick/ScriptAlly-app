@@ -107,12 +107,12 @@ export const QcExhibit: React.FC = () => {
         <div className="qcv-page lh-exmc">
           <QcCourts tiles={courtTiles(QC_SAMPLE_ROWS)} onCourt={noop} />
           <div className="qcv-ctl">
-            <QcSentence loading={false} calendar={false} filter="all" count={ledger.length} options={filterOptions(QC_SAMPLE_ROWS)}
+            <QcSentence loading={false} calendar={false} filter="all" total={QC_SAMPLE_ROWS.length} group="none" onGroup={() => {}} count={ledger.length} options={filterOptions(QC_SAMPLE_ROWS)}
               onFilter={noop} sort={DEFAULT_SORT} onSort={noop} scope={null} scopeTitle={null} />
           </div>
           <div className="qcv-stage">
             <section className="qcv-ledger">
-              <QcList rows={ledger.slice(0, QC_EXHIBIT_ROWS)} selectedId={null} onOpen={noop} nowMs={QC_SAMPLE_NOW} />
+              <QcList groups={[{ key: "all", label: "", rows: ledger.slice(0, QC_EXHIBIT_ROWS) }]} selectedId={null} onOpen={noop} nowMs={QC_SAMPLE_NOW} />
             </section>
           </div>
         </div>

@@ -422,6 +422,22 @@ export function filterOptions(scoped: readonly QcRow[]): FilterOption[] {
     { key: "closed", label: "Closed", count: n("closed"), swatch: sw("closed") },
   ];
 }
+/**
+ * §2 (v95) · the list head's title — `All 83 queries` at rest, `21 of 83 queries` with a filter on.
+ *
+ * ⚠️ IT IS A COUNT, NOT THE FILTER'S PHRASE. The sentence used to BE the filter control and said
+ * "13 with you"; the head states how much of the list you are looking at and the three controls
+ * beside it say what is doing the narrowing, so the two halves do not both describe the filter.
+ *
+ * ⚠️ AND THE MANUSCRIPT SCOPE IS A NARROWING LIKE ANY OTHER. With one chosen the total is the
+ * scoped total, so "21 of 24" is 24 queries on THIS manuscript — the number the desk above is also
+ * counting. A total of every query on the account would make the two disagree.
+ */
+export const listTitle = (visible: number, total: number): string =>
+  visible === total
+    ? `All ${total} ${total === 1 ? "query" : "queries"}`
+    : `${visible} of ${total} ${total === 1 ? "query" : "queries"}`;
+
 /** The first phrase. It rewrites itself; with a manuscript chosen it carries the title. */
 export function filterPhrase(f: QcFilter, count: number, opts: { manuscriptTitle?: string | null; calendar?: boolean } = {}): string {
   const base =
@@ -440,13 +456,19 @@ export function filterPhrase(f: QcFilter, count: number, opts: { manuscriptTitle
 export type QcSort = "activity" | "newest" | "reply" | "you" | "agent" | "agency";
 export const DEFAULT_SORT: QcSort = "activity";
 /** No appraisal wording: "with you first" says where the rows go, not what they are. */
-export const SORT_OPTIONS: readonly { key: QcSort; label: string }[] = [
-  { key: "activity", label: "latest activity first" },
-  { key: "newest", label: "newest query first" },
-  { key: "reply", label: "next reply date first" },
-  { key: "you", label: "with you first" },
-  { key: "agent", label: "agents A to Z" },
-  { key: "agency", label: "agencies A to Z" },
+/**
+ * ⚠️ `label` IS THE MENU'S AND `short` IS THE CONTROL'S, from ONE table (§2, v95). The head draws
+ * the chosen value inside the control — `sort latest activity ⌄`, which is what the reference
+ * renders — while the menu names the whole thing, "Latest activity first", because a menu is a
+ * list of alternatives and needs to say in what sense. One table, so the two cannot drift.
+ */
+export const SORT_OPTIONS: readonly { key: QcSort; label: string; short: string }[] = [
+  { key: "activity", label: "latest activity first", short: "latest activity" },
+  { key: "newest", label: "newest query first", short: "newest query" },
+  { key: "reply", label: "next reply date first", short: "next reply date" },
+  { key: "you", label: "with you first", short: "with you" },
+  { key: "agent", label: "agents A to Z", short: "agents A–Z" },
+  { key: "agency", label: "agencies A to Z", short: "agencies A–Z" },
 ];
 const FAR = Number.MAX_SAFE_INTEGER;
 const attentionRow = (r: QcRow): AttentionRow => ({

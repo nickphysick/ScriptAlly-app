@@ -25,7 +25,7 @@
 /* the ink overrun follows at 420ms over 220ms; the notch fades in at 300ms over 200ms */
 
 /* names and counts, band titles, the closed grid, the sentence, the open card's contents */
-.qcv-page--enter .qcv-keyline, .qcv-page--enter .qcv-sentence, .qcv-page--enter .qcv-open-fr > * { animation: qcv-show 0.22s backwards; }
+.qcv-page--enter .qcv-keyline, .qcv-page--enter .qcv-lhead, .qcv-page--enter .qcv-open-fr > * { animation: qcv-show 0.22s backwards; }
 
 /* rows, tiles, lanes: a 5px rise, staggered 30ms for the first seven; the rest share the seventh's delay */
 .qcv-page--enter .qcv-row, .qcv-page--enter .qcv-tile, .qcv-page--enter .qcv-cal-lane { animation: qcv-arrive 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }

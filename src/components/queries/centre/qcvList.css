@@ -98,3 +98,28 @@
   .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
   .qcv-date, .qcv-date-sk { display: none; }
 }
+
+/* ── §2 (v95) · the group headings ──
+   ⚠️ `align-items: baseline`, so the 19px typewriter heading, the 9px mono pill and the 12.5px
+   italic gloss sit on ONE line however any of the three is retuned. */
+.qcv-grp {
+  display: flex; align-items: baseline; gap: 10px;
+  margin: 22px 0 10px;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 19px; line-height: 1.2;
+  color: var(--qcv-ink);
+}
+/* the first heading sits under the column labels, not 22px below them */
+.qcv-sect:first-child .qcv-grp { margin-top: 0; }
+.qcv-grp-n {
+  flex: none;
+  padding: 3px 8px; border-radius: 9px;
+  background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 9px; line-height: 1.2; letter-spacing: 0.06em;
+  font-style: normal;
+}
+.qcv-grp-h {
+  min-width: 0;
+  font-family: var(--qcv-serif); font-weight: 400; font-style: italic; font-size: 12.5px; line-height: 1.3;
+  color: var(--qcv-ink-45);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
