@@ -71,8 +71,15 @@ export const QcBirdsEye: React.FC<{
    * row does not do.
    */
   onExpand: (focusId: string | null) => void;
-}> = ({ rows, nowMs, loading = false, onExpand }) => {
-  const [focus, setFocus] = useState<EyeFocus>("all");
+  /**
+   * §1 (v95) · QC3 — the focus is CONTROLLED, because pressing a desk section has to set it. It was
+   * local state here, which is right for a control nothing else touches and wrong the moment the
+   * desk above became one of the things that touches it: two owners of one value is the fault this
+   * repo keeps closing, and lifting it changes nothing in the header's DOM or its computed styles.
+   */
+  focus: EyeFocus;
+  onFocus: (f: EyeFocus) => void;
+}> = ({ rows, nowMs, loading = false, onExpand, focus, onFocus }) => {
   const groups: EyeGroup[] = loading ? [] : eyeGroups(rows, nowMs);
   const total = groups.reduce((n, g) => n + g.count, 0);
   const counts = attentionCounts(loading ? [] : rows, nowMs);
@@ -122,7 +129,7 @@ export const QcBirdsEye: React.FC<{
           sentence's, and the two would disagree about how many queries there are. */}
       <div className="qcv-be-focus" role="group" aria-label="Focus" data-qcv="be-focus">
         {EYE_FOCUS.map((f) => (
-          <button key={f.key} type="button" aria-pressed={focus === f.key} disabled={loading} onClick={() => setFocus(f.key)} data-f={f.key}>
+          <button key={f.key} type="button" aria-pressed={focus === f.key} disabled={loading} onClick={() => onFocus(f.key)} data-f={f.key}>
             {f.label}
           </button>
         ))}

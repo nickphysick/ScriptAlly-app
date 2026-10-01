@@ -161,7 +161,17 @@ export function buildQcRows(queries: readonly Query[], agents: readonly Agent[],
 /* ── durations, in the mockup's words ── */
 export const spanWords = (days: number): string => (days >= 35 ? `${Math.round(days / 7)} weeks` : `${days} ${days === 1 ? "day" : "days"}`);
 const MON = MONTHS_SHORT;
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const shortDay = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+/**
+ * The same date with its weekday — "Fri 31 Jul".
+ *
+ * ⚠️ IT IS THE WITH-YOU COURT'S ALONE, and that is the reference's own distinction rather than a
+ * decorative one: a thing you must DO is planned into a week, so the weekday is the useful half of
+ * the date; a reply you are waiting for arrives when it arrives, and the weekday it lands on is not
+ * a fact about anything you can act on.
+ */
+export const shortWeekDay = (ms: number): string => { const d = new Date(ms); return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`; };
 const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
 
 /**
@@ -245,12 +255,81 @@ export interface CourtTile {
   key: TileCourt;
   name: string;
   count: number;
-  /** The one mono line under the count. */
+  /** The one italic line under the count. */
   fact: string;
   /** The fact is a count of queries past their date: ink, weight 600, rather than 45%. */
   urgent: boolean;
   /** The rust dot at the band's right — the court where the move is yours. */
   rust: boolean;
+  /** §1 · the foot's left half: the agents in this court, in date order, at most `FOOT_DISCS`. */
+  who: readonly CourtDisc[];
+  /** How many further AGENTS the discs stand for — see `courtFoot`. Zero draws no `+N`. */
+  more: number;
+  /** §1 · the foot's right half, or null where there is no date this court can honestly state. */
+  when: CourtWhen | null;
+}
+
+/** One overlapping initials disc in a desk section's foot. */
+export interface CourtDisc { initials: string; name: string }
+/** The foot's right-hand fact: a label and a formatted date, never one without the other. */
+export interface CourtWhen { label: string; date: string }
+
+/** The discs a section shows before it starts counting. */
+export const FOOT_DISCS = 4;
+
+/**
+ * §1 · the foot of one desk section.
+ *
+ * ⚠️ THE DISCS ARE AGENTS, SO `+N` COUNTS AGENTS AND NOT QUERIES. An initials disc is a person; two
+ * discs reading RV for the same Rosalind Vale would say there are two of her. The reference's own
+ * demo has one query per agent, so there the two readings coincide and it cannot settle the
+ * question — on a real account they differ by a lot (56 agent's-turn queries over about twenty
+ * agents), and the count has to mean the same thing as the thing it is counting.
+ *
+ * ⚠️ THE RIGHT-HAND FACT IS THE NEXT FUTURE DATE, AND WHERE THERE IS NONE IT IS OMITTED. "next
+ * reply expected" over a date that has already gone is false, and an em dash under that label is a
+ * label with nothing to label. The italic line above already carries the pressing fact, so the foot
+ * saying only who is in the court is a smaller loss than the foot stating something untrue.
+ *
+ * ⚠️ AND CLOSED RUNS THE OTHER WAY. There is no date due on a finished query, so its order is the
+ * most recently closed first and its fact is the LAST close — the one date a closed court has. The
+ * day it closed is `stageStartMs`, the day it reached the stage, never `lastMs`, which is the last
+ * thing that happened to the query and moves whenever anyone adds a note to it.
+ */
+export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number): Pick<CourtTile, "who" | "more" | "when"> {
+  const closed = key === "closed";
+  /* undated last in either direction — a missing date is not a position on the scale */
+  const at = (r: QcRow): number | null => (closed ? r.stageStartMs : r.expectedMs);
+  const ordered = [...rows].sort((a, b) => {
+    const x = at(a);
+    const y = at(b);
+    if (x == null) return y == null ? 0 : 1;
+    if (y == null) return -1;
+    return closed ? y - x : x - y;
+  });
+  const seen = new Set<string>();
+  const who: CourtDisc[] = [];
+  let agents = 0;
+  for (const r of ordered) {
+    const id = r.query.agentId || `row:${r.id}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    agents += 1;
+    if (who.length < FOOT_DISCS) who.push({ initials: r.initials, name: r.agentName });
+  }
+  let when: CourtWhen | null = null;
+  if (closed) {
+    const last = ordered.find((r) => r.stageStartMs != null)?.stageStartMs;
+    if (last != null) when = { label: "last closed", date: shortDay(last) };
+  } else {
+    const next = ordered.find((r) => r.expectedMs != null && r.expectedMs >= nowMs)?.expectedMs;
+    if (next != null) {
+      when = key === "you"
+        ? { label: "next due", date: shortWeekDay(next) }
+        : { label: "next reply expected", date: shortDay(next) };
+    }
+  }
+  return { who, more: Math.max(0, agents - who.length), when };
 }
 
 /**
@@ -260,7 +339,7 @@ export interface CourtTile {
  * is two facts about an empty set, and "your move on these" about nothing is an instruction with no
  * object — the same rule the Overview's cards were written to.
  */
-export function courtTiles(rows: readonly QcRow[]): CourtTile[] {
+export function courtTiles(rows: readonly QcRow[], nowMs: number = Date.now()): CourtTile[] {
   const you = rowsForTile(rows, "you");
   const agent = rowsForTile(rows, "agent");
   const closed = rowsForTile(rows, "closed");
@@ -273,16 +352,19 @@ export function courtTiles(rows: readonly QcRow[]): CourtTile[] {
       key: "you", name: COURT_LABEL.you, count: you.length,
       fact: you.length === 0 ? "none yet" : offers > 0 ? `${offers} offer${offers === 1 ? "" : "s"} to decide` : "your move on these",
       urgent: false, rust: you.length > 0,
+      ...courtFoot(you, "you", nowMs),
     },
     {
       key: "agent", name: COURT_LABEL.agent, count: agent.length,
       fact: agent.length === 0 ? "none yet" : past > 0 ? `${past} past the date` : "all in the window",
       urgent: past > 0, rust: false,
+      ...courtFoot(agent, "agent", nowMs),
     },
     {
       key: "closed", name: COURT_LABEL.closed, count: closed.length,
       fact: closed.length === 0 ? "none yet" : `${passed} passed · ${noReply} no reply`,
       urgent: false, rust: false,
+      ...courtFoot(closed, "closed", nowMs),
     },
   ];
 }
@@ -290,8 +372,24 @@ export function courtTiles(rows: readonly QcRow[]): CourtTile[] {
 export const tileHand = (rows: readonly QcRow[], tile: TileCourt): FanHand => handOf(rowsForTile(rows, tile));
 
 /* ── the sentence: one filter, one manuscript scope, one sort ── */
-export type QcFilter = "all" | "you" | "agent" | "offers" | "past" | "closed" | `stage:${QueryStatus}`;
+export type QcFilter = "all" | "you" | "agent" | "offers" | "past" | "closed" | `stage:${QueryStatus}` | `court:${TileCourt}`;
 export const stageFilter = (s: QueryStatus): QcFilter => `stage:${s}`;
+/**
+ * §1 · the filter a DESK SECTION applies — its own membership, so a section and the list it
+ * produces cannot disagree.
+ *
+ * ⚠️ IT IS NOT `"you"` / `"agent"` / `"closed"`, AND THE DIFFERENCE IS MEASURABLE. The menu's
+ * `"you"` reads `withYou` (`court === "you"`), which EXCLUDES an offer, while the with-you SECTION
+ * counts offers in — `tileCourt` folds them there. And the menu's `"closed"` reads `court`, which
+ * INCLUDES Withdrawn so those queries stay findable, while `tileCourt` returns null for Withdrawn
+ * and Signed so the closed section does not count them. Measured on the harness account: pressing
+ * the two sections with the menu's keys gave 12 rows under a section saying 13, and 14 under a
+ * section saying 13. One function counts a section and filters to it; the menu keeps its own finer
+ * options, which are a different and deliberate question.
+ */
+export const courtFilter = (t: TileCourt): QcFilter => `court:${t}`;
+export const courtOfFilter = (f: QcFilter): TileCourt | null =>
+  f.startsWith("court:") ? (f.slice("court:".length) as TileCourt) : null;
 export function matchesFilter(row: QcRow, f: QcFilter): boolean {
   switch (f) {
     case "all": return true;
@@ -300,7 +398,11 @@ export function matchesFilter(row: QcRow, f: QcFilter): boolean {
     case "offers": return row.court === "offer";
     case "past": return row.pastExpected;
     case "closed": return row.court === "closed"; /* Withdrawn included, so those queries stay findable */
-    default: return row.status === (f.slice("stage:".length) as QueryStatus);
+    default: {
+      const court = courtOfFilter(f);
+      if (court) return tileCourt(row.status) === court;
+      return row.status === (f.slice("stage:".length) as QueryStatus);
+    }
   }
 }
 export const inScope = (row: QcRow, manuscriptId: string | null): boolean => manuscriptId == null || row.manuscriptId === manuscriptId;
@@ -329,7 +431,9 @@ export function filterPhrase(f: QcFilter, count: number, opts: { manuscriptTitle
           : f === "offers" ? `${count} ${count === 1 ? "offer" : "offers"}`
             : f === "past" ? `${count} past expected`
               : f === "closed" ? `${count} closed`
-                : `${count} ${STAGE_NAME[f.slice("stage:".length) as QueryStatus].toLowerCase()}`;
+                /* a desk section's own phrasing — the section's name, lower-cased into the sentence */
+                : courtOfFilter(f) ? `${count} ${COURT_LABEL[courtOfFilter(f) as TileCourt].toLowerCase()}`
+                  : `${count} ${STAGE_NAME[f.slice("stage:".length) as QueryStatus].toLowerCase()}`;
   return `${base}${opts.manuscriptTitle ? ` for ${opts.manuscriptTitle}` : ""}${opts.calendar ? " on the calendar" : ""}`;
 }
 

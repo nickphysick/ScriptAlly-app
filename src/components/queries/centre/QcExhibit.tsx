@@ -117,7 +117,7 @@ export const QcExhibit: React.FC = () => {
           </div>
         </div>
         <aside className="qcv-rail lh-exrail">
-          <QcBirdsEye rows={QC_SAMPLE_ROWS} nowMs={QC_SAMPLE_NOW} onExpand={noop} />
+          <QcBirdsEye rows={QC_SAMPLE_ROWS} nowMs={QC_SAMPLE_NOW} focus="all" onFocus={() => {}} onExpand={noop} />
         </aside>
       </div>
     </LivingExhibition>

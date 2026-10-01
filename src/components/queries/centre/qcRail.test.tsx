@@ -74,7 +74,7 @@ describe("⚠️ the rail is placed from the WINDOW's measured box, never the vi
 
 describe("the card, rendered", () => {
   const rail = (over: Partial<React.ComponentProps<typeof QcRail>> = {}) =>
-    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEye rows={[]} nowMs={Date.now()} onExpand={() => {}} />} {...over} />);
+    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEye rows={[]} nowMs={Date.now()} focus="all" onFocus={() => {}} onExpand={() => {}} />} {...over} />);
 
   it("⚠️ it renders UNPLACED before the first measurement, and that state must look finished", () => {
     /* server-rendered, so no layout effect has run: this is the one frame a reader can see */
@@ -184,7 +184,7 @@ describe("the court tiles", () => {
     /* …and the visible text is hidden, or a reader hears the court's name twice per tile */
     expect(html.split('aria-hidden="true"').length - 1, "the drawn text is not hidden from the label").toBeGreaterThanOrEqual(6);
     /* singular agrees with its verb */
-    const one = renderToStaticMarkup(<QcCourts tiles={[{ key: "you", name: "With you", count: 1, fact: "your move on these", urgent: false, rust: true }]} onCourt={() => {}} />);
+    const one = renderToStaticMarkup(<QcCourts tiles={[{ key: "you", name: "With you", count: 1, fact: "your move on these", urgent: false, rust: true, who: [], more: 0, when: null }]} onCourt={() => {}} />);
     expect(one).toContain("1 query.");
   });
   /**
@@ -198,31 +198,63 @@ describe("the court tiles", () => {
     const css = read("src/components/queries/centre/qcvCourts.css");
     /* ⚠️ "or states a height" is the honest form: the band is 26px whatever its text does, so its
        line box cannot move the tile. Anything that is sized BY its text must state the leading. */
-    for (const sel of [".qcv-court-n", ".qcv-court-lbl", ".qcv-court-fact", ".qcv-court-band"]) {
-      const m = css.match(new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`));
-      expect(m, `${sel} has no rule`).toBeTruthy();
+    /* §1 (v95) — RETARGETED TO THE DESK'S OWN CLASSES. The claim is unchanged and is the reason
+       the case exists; the tiles' `-n`/`-lbl`/`-fact`/`-band` are gone with the band. */
+    for (const sel of [".qcv-half-num", ".qcv-half-lab", ".qcv-half-note", ".qcv-half-when", ".qcv-half-who i"]) {
+      /**
+       * ⚠️ EVERY RULE WHOSE SELECTOR *IS* THIS ELEMENT, NOT THE FIRST ONE THAT LOOKS LIKE IT.
+       * The claim is about the rule that APPLIES rather than about its spelling, and these
+       * selectors carry scopes for two different reasons: `.qcv-half-num` is written
+       * `.qcv-desk .qcv-half-num` because the page's 0-1-0 font reset wins the tie on source order
+       * in the built bundle (see the note at that rule), and `.qcv-half-who i` also appears as
+       * `.qcv-half--closed .qcv-half-who i`. A regex with an optional scope prefix matched that
+       * CLOSED variant first — it is earlier in the file — and reported that the disc states no
+       * leading, about a disc that states one. First-match slicing, wearing an optional group.
+       */
+      const bodies = [...css.matchAll(/(?:^|\n)\s*([^{}\n]+?)\s*\{([^}]*)\}/g)]
+        .filter(([, sels]) => sels.split(",").map((x) => x.trim()).some((x) => x === sel || x.endsWith(` ${sel}`)))
+        .map(([, , body]) => body);
+      expect(bodies.length, `${sel} has no rule`).toBeGreaterThan(0);
+      const m = [null, bodies.join(";")] as [null, string];
       const ok = /line-height:\s*[\d.]+(px)?/.test(m![1]) || /\bheight:\s*[\d.]+px/.test(m![1]);
       expect(ok, `${sel} is sized by its text and leaves the line box to the font's metrics`).toBe(true);
     }
   });
   /**
-   * ⚠️ THE HEAD'S HEIGHT AND THE COUNT'S LINE BOX ARE AN ARTEFACT-LOCKED PAIR. The head states a
-   * height because a baseline-aligned row's own height comes from FONT METRICS, and until both
-   * faces have loaded those are the fallback's — measured, the tile was 109.4 before the fonts
-   * landed and 111.4 after, so the page moved 2px under the reader as the cover lifted. Stating the
-   * height fixes the box; the two numbers must then agree, or the stated height crops the count.
+   * ⚠️ RETIRED, AND REPLACED BY ITS INVERSE (§1, v95). The tiles' head was a baseline-aligned row
+   * whose own height came from FONT METRICS — measured, 109.4 before the faces landed and 111.4
+   * after, which the page showed as the sentence below moving 2px as the cover lifted — so it
+   * stated a height, and the pair "the stated height IS the count's line box" is what stopped the
+   * stated height cropping the count. There is no head on the desk: the numeral spans two grid rows
+   * and the name sits in the first at `align-self: end`, so the baseline row has no box of its own.
+   *
+   * ⚠️ WHAT MUST BE TRUE INSTEAD IS THAT NOTHING STATES A HEIGHT AT ALL, which is QC1's source half.
+   * The foot is pinned by the `1fr` spacer row, and a `min-height` or a `height` anywhere in the
+   * desk would pin it by arithmetic instead — satisfying QC1 today and failing silently the next
+   * time anyone retunes the type. The discs are the one exception and they are a drawn circle, not
+   * a line of text.
    */
-  it("⚠️ the head's stated height IS the count's line box — read from the sheet on both sides", () => {
+  it("⚠️ the desk pins its foot with a `1fr` row and states no height — QC1's source half", () => {
     const css = read("src/components/queries/centre/qcvCourts.css");
-    const head = css.match(/(?:^|\n)\s*\.qcv-court-head\s*\{([^}]*)\}/)![1];
-    const n = css.match(/(?:^|\n)\s*\.qcv-court-n\s*\{([^}]*)\}/)![1];
-    const stated = +(/height:\s*(\d+(?:\.\d+)?)px/.exec(head)?.[1] ?? -1);
-    const size = +(/font-size:\s*(\d+(?:\.\d+)?)px/.exec(n)?.[1] ?? -1);
-    const lh = /line-height:\s*([\d.]+)(px)?/.exec(n);
-    expect(stated, "the head states no height, so its box is the fonts'").toBeGreaterThan(0);
-    expect(lh, "the count states no line-height").toBeTruthy();
-    const box = lh![2] === "px" ? +lh![1] : size * +lh![1];
-    expect(stated, `the head is ${stated} and the count's line box is ${box}`).toBe(box);
+    const half = css.match(/(?:^|\n)\s*\.qcv-half\s*\{([^}]*)\}/)![1];
+    /* the four rows, and the third of them is the spacer that does the pinning */
+    expect(half, "the section is not a four-row grid").toMatch(/grid-template-rows:\s*auto auto 1fr auto/);
+    const foot = css.match(/(?:^|\n)\s*\.qcv-half-foot\s*\{([^}]*)\}/)![1];
+    expect(foot, "the foot is not placed in the fourth row").toMatch(/grid-row:\s*4/);
+    expect(foot, "the foot does not sit at the bottom of its row").toMatch(/align-self:\s*end/);
+    /* ⚠️ EVERY RULE IN THE SHEET, not just the section's — a height on the note or the foot pins the
+       box just as hard. `.qcv-half-who i` is the circle and is named as the one exception. */
+    /* ⚠️ THE PROPERTY IS SPLIT OUT AND COMPARED, NEVER PATTERN-MATCHED. `/\b(min-)?height:/` was
+       the first cut and it matched INSIDE `line-height:` — a hyphen is a word boundary — so it
+       reported four offenders on a sheet with none, which is this repo's own
+       lookahead-is-not-a-filter fault wearing `\b`. */
+    const states = (body: string): boolean => body.split(";")
+      .map((d) => d.split(":")[0].trim())
+      .some((prop) => prop === "height" || prop === "min-height");
+    const offenders = [...css.matchAll(/(?:^|\n)\s*(\.qcv-[\w-]+(?: i)?)[^{]*\{([^}]*)\}/g)]
+      .filter(([, sel, body]) => sel !== ".qcv-half-who i" && states(body))
+      .map(([, sel]) => sel);
+    expect(offenders, `the desk states a height: ${offenders.join(", ")}`).toEqual([]);
   });
   it("the three tiles are buttons, and a disabled one cannot deal", async () => {
     const { QcCourts, QcCourtsSkeleton } = await import("./QcCourts");

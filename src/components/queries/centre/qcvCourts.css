@@ -1,84 +1,153 @@
 /**
- * Query Centre v65 §4 — the three court tiles.
+ * Query Centre v95 §1 — THE DESK: one white frame across the column, three equal sections.
  *
- * ⚠️ THE FRAMED TREATMENT IS THIS PAGE'S ONE EXCEPTION (§1.5) and is spelled out here rather than
- * shared: a white rim and a burgundy line, drawn as two inset shadows so the tile's box is exactly
- * its stated size and the band inside can run edge to edge. A border would push the band in by its
- * own width and the band would stop meeting the corners.
+ * ⚠️ WRITTEN AS ONE AUTHORITATIVE BLOCK rather than patched, which is the only form that cannot
+ * accumulate a second declaration of a selector. The v65 tiles' rules — the 14px rim-and-frame
+ * shadow pair, the blush band, `see all →`, the rust dot — are DELETED rather than left inert: a
+ * rule the component no longer emits a class for is a rule with no subject, and a later reader
+ * finds it and builds a class back from it.
+ *
+ * ⚠️ THE FRAME IS A 1px BORDER, NOT THE TILES' TWO INSET SHADOWS. The tiles used shadows so a band
+ * could run to the corners inside a rim; the desk has no band, so a border is the honest form — and
+ * `overflow: hidden` is what lets the hairline dividers meet the rounded corners.
  */
 @import "./qcvPage.css";
 
-.qcv-courts {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
-  /* page header v2 §2: the page body starts at the rule + 24, level with the rail beside it */
-  margin-top: 24px;
+/* the 26px the reference puts between the header's rule and the desk */
+.qcv-deskw { padding-top: 26px; }
+
+.qcv-desk {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--qcv-ink-45);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
 }
 
-.qcv-court {
-  display: flex; flex-direction: column; align-items: stretch;
-  margin: 0; padding: 0; border: 0; text-align: left; cursor: pointer;
-  background: #fff; border-radius: 14px; overflow: hidden;
-  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame);
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
-}
-.qcv-court:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -14px rgba(28, 19, 15, 0.3), 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame); }
-.qcv-court:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 3px; }
-.qcv-court:disabled { cursor: default; transform: none; }
-.qcv-court--sk { cursor: default; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame); }
-
-/* ⚠️ THE BAND SITS INSIDE THE FRAME, which is what the 7px margin is: the rim is 6 and the line is
-   the seventh pixel, so a band inset by 7 starts exactly where the line ends. */
-.qcv-court-band {
-  display: flex; align-items: center; gap: 6px;
-  margin: 7px 7px 0; padding: 0 11px; height: 26px; border-radius: 7px 7px 0 0;
-  font-family: var(--qcv-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--qcv-ink-70);
-}
-.qcv-court--you .qcv-court-band { background: #f5e6df; }
-.qcv-court--agent .qcv-court-band { background: #f7efe3; }
-.qcv-court--closed .qcv-court-band { background: #e4e1db; }
-.qcv-court-nm { white-space: nowrap; }
-.qcv-court-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--qcv-rust); margin-left: auto; flex: none; }
-/* ⚠️ `margin-left: auto` ON WHICHEVER OF THE TWO COMES FIRST, so the dot and the affordance cannot
-   both claim the spare and push each other about. The dot claims it when present; otherwise the
-   affordance does. */
-.qcv-court-see { margin-left: auto; font-style: normal; font-size: 8px; letter-spacing: 0.14em; color: var(--qcv-ink-45); white-space: nowrap; opacity: 0; transition: opacity 0.15s ease; }
-.qcv-court-dot + .qcv-court-see { margin-left: 6px; }
-.qcv-court:hover .qcv-court-see { opacity: 1; }
-
-.qcv-court-body { display: block; padding: 8px 18px 14px; }
 /**
- * ⚠️ THE HEIGHT IS STATED, BECAUSE A BASELINE-ALIGNED ROW'S HEIGHT COMES FROM FONT METRICS. The row
- * holds a 36px serif count and a 17px typewriter label aligned on their baselines, so its box is
- * `max(baseline offset) + max(below it)` across two faces — and until both have LOADED those are
- * the fallback's. Measured: the tile was 109.4 before the fonts landed and 111.4 after, so the page
- * moved 2px under the reader at the moment the loading cover lifted, and no amount of matching the
- * ghost to the real tile could fix it: the two were identical, and both were 2px short.
+ * ⚠️ FOUR ROWS, AND THE THIRD IS A `1fr` SPACER. That row is the whole mechanism behind QC1: the
+ * foot is placed in row 4 at `align-self: end`, so it sits at the bottom of whichever section is
+ * tallest — and because the three sections are one grid row of `.qcv-desk` they are all that
+ * height. A section whose italic line wraps therefore cannot put its own foot lower than its
+ * neighbours'. A matched `min-height` would do the same until somebody changed the type.
  *
- * ⚠️ 36 IS THE COUNT'S OWN LINE BOX — `--qcv-court-n` is 36px at `line-height: 1` — and the two are
- * an artefact-locked pair (`qcRail.test.tsx` reads both out of this sheet). A height that stopped
- * agreeing with the count would crop it.
+ * ⚠️ `align-items: baseline` IS WHAT SETS THE NUMERAL AGAINST ITS NAME. The 64px numeral spans
+ * rows 1–2 and the 19px name sits in row 1 at `align-self: end`, so the two sit on one line without
+ * either knowing the other's size.
  */
-.qcv-court-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; height: 36px; }
-/* living headers v3 §1 — the number takes its own width so a three-digit count never squeezes the label onto two lines */
-.qcv-court-n { flex: none; font-family: var(--qcv-serif); font-weight: 600; font-size: 36px; line-height: 1; color: var(--qcv-ink); }
-.qcv-court-lbl { min-width: 0; font-family: var(--qcv-type); font-size: 17px; line-height: 1.2; color: var(--qcv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-half {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr auto;
+  column-gap: 18px;
+  align-items: baseline;
+  min-width: 0;
+  margin: 0;
+  padding: 18px 22px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--qcv-ink);
+  font-family: var(--qcv-serif);
+  text-align: left;
+  cursor: pointer;
+}
+.qcv-half + .qcv-half { border-left: 1px solid var(--qcv-hair); }
+/* ⚠️ NO FILL ON HOVER OR ON THE PRESSED STATE — §1 is explicit that emphasis is type only, and a
+   tinted third of the desk would be the loudest thing on the page. The affordance is the ink. */
+.qcv-half:hover .qcv-half-lab,
+.qcv-half.is-on .qcv-half-lab { color: var(--qcv-ink); }
+.qcv-half.is-on .qcv-half-num { color: var(--qcv-ink); }
+.qcv-half:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: -3px; }
+.qcv-half:disabled { cursor: default; }
+.qcv-half--sk { cursor: default; }
+
 /**
- * ⚠️ THE LINE-HEIGHT IS STATED, AND THAT IS WHAT MAKES THE TILE'S HEIGHT A CONSTANT. Left at
- * `normal` it comes from the FONT's own metrics — so the box is one height while the mono face is
- * still loading and another once it lands, and the ghost measured 2px short of the real tile for
- * exactly as long as the fonts took. Every other line in this tile already states one (36/1 and
- * 17/1.2); this was the one that did not, and it was the one that moved.
+ * ⚠️ SCOPED TO `.qcv-desk`, AND THE EXTRA CLASS IS LOAD-BEARING (measured, not reasoned).
+ * `qcvPage.css`'s `.qcv-own :where(span, p, div, label)` reset is 0-1-0 and so is a bare
+ * `.qcv-half-num`, so the tie is settled by SOURCE ORDER — and that sheet's own comment says it is
+ * emitted first, "every v11 component imports this sheet before its own". **In the built bundle it
+ * is not**: `dist/assets/index-*.css` puts the reset at byte 782,751 and these rules at 745,696, so
+ * the reset wins and the numeral rendered in Playfair with `font-family: var(--qcv-type)` reading
+ * perfectly correctly. Nothing else on the page is affected only because every other face rule in
+ * these sheets happens to sit on a `<b>`, which the reset's element list does not name.
+ *
+ * Scoping, not `!important` and not reordering: 0-2-0 wins honestly and keeps winning if the
+ * bundle's order changes again.
  */
-.qcv-court-fact { display: block; margin-top: 7px; font-family: var(--qcv-mono); font-size: 8px; line-height: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-court-fact--urgent { color: var(--qcv-ink); font-weight: 600; }
+.qcv-desk .qcv-half-num {
+  grid-row: 1 / 3;
+  font-family: var(--qcv-type);
+  font-size: 64px;
+  /* stated, so the numeral's box does not change height when Special Elite arrives */
+  line-height: 0.9;
+}
+.qcv-desk .qcv-half-lab {
+  align-self: end;
+  font-family: var(--qcv-type);
+  font-size: 19px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.qcv-half-note {
+  grid-column: 2;
+  margin-top: 4px;
+  font-size: 15.5px;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--qcv-ink-70);
+}
+/* the offer clause, and nothing else on the desk, is rust */
+.qcv-half-note em { font-style: italic; color: var(--qcv-rust); }
+.qcv-half-note--urgent { color: var(--qcv-ink-70); }
+
+/* ⚠️ CLOSED IS QUIETENED BY ITS NUMERAL AND ITS NAME, not by a fill — §1's `ink45`. */
+.qcv-half--closed .qcv-half-num { color: var(--qcv-ink-45); }
+.qcv-half--closed .qcv-half-lab { color: var(--qcv-ink-70); }
+.qcv-half--closed .qcv-half-who i { background: var(--qcv-ink-45); }
+
+.qcv-half-foot {
+  grid-column: 1 / 3;
+  grid-row: 4;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(28, 19, 15, 0.22);
+}
+/* ⚠️ THE DISCS OVERLAP BY A NEGATIVE MARGIN AND A WHITE RING, which is what reads as a stack
+   rather than a row of buttons. The ring is the desk's own white, so it cannot be a token that a
+   tint on the section would need to follow — there is no tint. */
+.qcv-half-who { display: flex; }
+.qcv-half-who i {
+  width: 24px;
+  height: 24px;
+  margin-left: -7px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--qcv-navy);
+  color: #f5f1eb;
+  font-family: var(--qcv-mono);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qcv-half-who i:first-child { margin-left: 0; }
+.qcv-half-when {
+  margin-left: auto;
+  font-size: 13.5px;
+  line-height: 1.2;
+  color: var(--qcv-ink-70);
+  white-space: nowrap;
+}
+.qcv-half-when b { font-weight: 600; color: var(--qcv-ink); }
 
 @media (prefers-reduced-motion: reduce) {
-  .qcv-court, .qcv-court-see { transition: none; }
-  .qcv-court:hover { transform: none; }
+  .qcv-half { transition: none; }
 }
-
-/* ⚠️ THE GHOST IS THE REAL TYPE WITH ITS INK HIDDEN — see `QcCourtsSkeleton`. Painting a block the
-   right height is arithmetic ABOUT a line box; this IS the line box. */
-.qcv-court--sk .qcv-court-n,
-.qcv-court--sk .qcv-court-lbl,
-.qcv-court--sk .qcv-court-fact { color: transparent; background: #efe9e0; border-radius: 5px; }

@@ -135,10 +135,15 @@
   min-width: 0;
 }
 .qcv-group[data-rail="stacked"] { grid-template-columns: minmax(0, 1fr); }
-/* §2 (page header v2): the header takes row 1 across BOTH tracks; the page and the rail share row 2,
-   so the rail starts below the header's rule instead of beside it. */
+/* §2 (page header v2) + §1 (v95): the header takes row 1 across BOTH tracks and the DESK takes row
+   2 across both; the page and the rail share row 3, so the rail starts below the desk instead of
+   beside the header. Three explicit placements rather than two, because CSS grid auto-placement
+   never overlaps — an explicitly-placed newcomer pushes an auto-placed sibling into an implicit new
+   COLUMN, silently, and the grid grows sideways. */
 .qcv-group > .ph { grid-column: 1 / -1; grid-row: 1; }
-.qcv-group > .qcv-page { grid-column: 1; grid-row: 2; }
+.qcv-group > .qcv-deskw { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+.qcv-group > .qcv-page { grid-column: 1; grid-row: 3; }
+.qcv-group > .qcv-rail { grid-column: 2; grid-row: 3; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at

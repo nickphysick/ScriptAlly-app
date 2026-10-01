@@ -36,12 +36,12 @@ const mkQ = (over: Partial<Query> = {}): Query => ({
 });
 const agent = (over: Partial<Agent> = {}): Agent => ({ id: "a1", userId: "u", name: "Jonathan Marsh", agency: "The Marsh Agency", responseTimeWeeks: 8, ...over } as Agent);
 const rowsOf = (qs: Query[]) => buildQcRows(qs, [agent()], [], NOW);
-const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} onExpand={() => {}} />);
+const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} focus="all" onFocus={() => {}} onExpand={() => {}} />);
 /* §B3 — an agency that states NO reply window, so the query has no expected date and nothing dates
    its track. `responseTimeWeeks` is OMITTED rather than zeroed: absence is the app's own "not
    stated", and `agentWindowMs` then returns null rather than guessing a window. */
 const undatedView = (qs: Query[]) => renderToStaticMarkup(
-  <QcBirdsEye rows={buildQcRows(qs, [{ ...agent(), responseTimeWeeks: undefined } as Agent], [], NOW)} nowMs={NOW} onExpand={() => {}} />,
+  <QcBirdsEye rows={buildQcRows(qs, [{ ...agent(), responseTimeWeeks: undefined } as Agent], [], NOW)} nowMs={NOW} focus="all" onFocus={() => {}} onExpand={() => {}} />,
 );
 
 describe("the view, rendered", () => {
@@ -140,7 +140,7 @@ describe("the view, rendered", () => {
   it("⚠️ nothing out with an agent says so, rather than drawing an empty track", () => {
     expect(view([])).toContain("Nothing is out with an agent.");
     /* …and while it is loading it says nothing at all, rather than claiming the account is empty */
-    expect(renderToStaticMarkup(<QcBirdsEye rows={[]} nowMs={NOW} loading onExpand={() => {}} />)).not.toContain("Nothing is out");
+    expect(renderToStaticMarkup(<QcBirdsEye rows={[]} nowMs={NOW} loading focus="all" onFocus={() => {}} onExpand={() => {}} />)).not.toContain("Nothing is out");
   });
 });
 

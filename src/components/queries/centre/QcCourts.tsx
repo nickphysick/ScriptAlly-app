@@ -2,18 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QcCourts — the three court tiles (v65 §4): With you · With the agent · Closed.
+ * QcCourts — THE DESK (v95 §1): one white frame across the whole column, three equal sections.
+ * With you · With the agent · Closed.
  *
- * They replace the Overview's seven-or-eight stat cards with the three questions a writer actually
- * asks of a pipeline: what is mine to do, what am I waiting on, and what is finished. Each is a
- * button that fans its own queries.
+ * It answers the three questions a writer asks of a pipeline — what is mine to do, what am I
+ * waiting on, what is finished — and it replaced seven stat cards to do it. v95 takes the three
+ * separate framed tiles and makes them three sections of ONE frame, because three boxes in a row
+ * read as three more rows of the ledger beneath them, and one frame divided by hairlines reads as
+ * a desk.
  *
- * ⚠️ THE TILES ARE THE ONE FRAMED THING LEFT ON THIS PAGE (§1.5). Every other card here wears the
- * landing page's clothes — white, a soft shadow, a band flush at the top, 12px corners, no rim and
- * no burgundy line. The tiles keep the rim-and-frame treatment precisely so they do NOT read as
- * three more rows of the ledger beneath them.
+ * ⚠️ NO FILLS: EMPHASIS IS TYPE ONLY. The reference offers a sand with-you section and a stone
+ * closed one behind `body[data-d]` variants and §1 chooses the frame, where both are white. A tint
+ * on one section would make it the loudest thing on a page whose whole top band is already the
+ * loudest thing; the closed section is quietened by taking its numeral to ink45 instead.
  *
- * ⚠️ AND THEY HOLD NO ROWS. The ledger below is the preview; a tile that listed its first few
+ * ⚠️ THE FOOT IS PINNED BY A `1fr` GRID ROW, NOT BY A HEIGHT. Each section is a four-row grid
+ * whose third row is the spacer, so the foot sits at the bottom of whichever section is tallest and
+ * all three agree whatever their italic lines do. A wrapped line in one section therefore cannot
+ * put its own foot lower than its neighbours' — which is QC1, and which a matched `min-height`
+ * would satisfy only until someone changed the type.
+ *
+ * ⚠️ AND THEY HOLD NO ROWS. The ledger below is the list; a section that named its first few
  * queries would be a second, shorter list of the same things, disagreeing with the first the moment
  * a filter moved.
  */
@@ -21,76 +30,92 @@ import React from "react";
 import type { CourtTile, TileCourt } from "../../../lib/qcSummary";
 import "./qcvCourts.css";
 
+/**
+ * ⚠️ THE SECTION'S COUNT AND ITS FILTER ARE ONE FUNCTION (`courtFilter` → `tileCourt`). Pressing a
+ * section cannot show a number of rows that differs from the number the section states — see the
+ * note at `courtFilter`, where the menu's own `"you"` and `"closed"` were measured disagreeing with
+ * these counts by one and two rows.
+ */
 export const QcCourts: React.FC<{
   tiles: readonly CourtTile[];
-  /** A tile deals its hand. The element is captured so the fan deals FROM it and focus returns TO it. */
-  onCourt: (key: TileCourt, el: HTMLElement) => void;
+  /** Which section is currently filtering the list, if any — pressing it again clears. */
+  active?: TileCourt | null;
+  onCourt: (key: TileCourt) => void;
   loading?: boolean;
-}> = ({ tiles, onCourt, loading = false }) => (
-  <div className="qcv-courts" data-qcv="courts">
-    {tiles.map((t) => (
-      <button
-        key={t.key}
-        type="button"
-        className={`qcv-court qcv-court--${t.key}`}
-        data-qcv="court"
-        data-court={t.key}
-        disabled={loading}
-        /**
-         * ⚠️ THE NAME IS STATED ONCE TO A READER AND TWICE ON THE PAGE, deliberately. §4 puts the
-         * court's name in the band AND beside the count, which is right typographically and reads
-         * as "With you 11 With you 1 offer to decide" to a screen reader. So the button carries its
-         * own name and everything inside it is hidden: a label built from the parts the design
-         * happens to repeat is not the sentence a reader needs.
-         */
-        aria-label={`${t.name}: ${t.count} ${t.count === 1 ? "query" : "queries"}. ${t.fact}.`}
-        onClick={(e) => onCourt(t.key, e.currentTarget)}
-      >
-        <span className="qcv-court-band" data-qcv="court-band" aria-hidden="true">
-          <span className="qcv-court-nm">{t.name}</span>
-          {/* ⚠️ THE RUST DOT IS THE WITH-YOU TILE'S AND NO OTHER — the same mark, meaning the same
-              thing, as the rust rule on a ledger row: this is yours to move. */}
-          {t.rust && <i className="qcv-court-dot" aria-hidden="true" />}
-          {/* the hover affordance rides the band's right end rather than taking a row of its own */}
-          <i className="qcv-court-see" aria-hidden="true">see all →</i>
-        </span>
-        <span className="qcv-court-body" aria-hidden="true">
-          <span className="qcv-court-head">
-            <b className="qcv-court-n" data-qcv="court-count">{t.count}</b>
-            <span className="qcv-court-lbl">{t.name}</span>
+}> = ({ tiles, active = null, onCourt, loading = false }) => (
+  <div className="qcv-deskw" data-qcv="deskw">
+    <div className="qcv-desk" data-qcv="courts">
+      {tiles.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          className={`qcv-half qcv-half--${t.key}${active === t.key ? " is-on" : ""}`}
+          data-qcv="court"
+          data-court={t.key}
+          aria-pressed={active === t.key}
+          disabled={loading}
+          /**
+           * ⚠️ THE NAME IS STATED ONCE TO A READER AND TWICE ON THE PAGE, deliberately. §1 puts the
+           * court's name beside the count and the count is a numeral, which reads as
+           * "4 with you one of them is an offer to decide" to a screen reader. So the button
+           * carries its own sentence and everything inside it is hidden.
+           */
+          aria-label={`${t.name}: ${t.count} ${t.count === 1 ? "query" : "queries"}. ${t.fact}.${
+            t.when ? ` ${t.when.label} ${t.when.date}.` : ""
+          }`}
+          onClick={() => onCourt(t.key)}
+        >
+          <span className="qcv-half-num" data-qcv="court-count" aria-hidden="true">{t.count}</span>
+          <span className="qcv-half-lab" aria-hidden="true">{t.name}</span>
+          {/* ⚠️ THE RUST IS THE OFFER PHRASE'S AND NO OTHER — the same mark, meaning the same
+              thing, as the rust on a ledger row: this is yours to move. §1 names it for the offer
+              clause alone, so the fact is split rather than coloured whole. */}
+          <span className={`qcv-half-note${t.urgent ? " qcv-half-note--urgent" : ""}`} data-qcv="court-fact" aria-hidden="true">
+            {t.key === "you" && /offer/.test(t.fact) ? <em>{t.fact}</em> : t.fact}
           </span>
-          <small className={`qcv-court-fact${t.urgent ? " qcv-court-fact--urgent" : ""}`} data-qcv="court-fact">{t.fact}</small>
-        </span>
-      </button>
-    ))}
+          <span className="qcv-half-foot" data-qcv="court-foot" aria-hidden="true">
+            <span className="qcv-half-who" data-qcv="court-who">
+              {t.who.map((d) => <i key={d.name + d.initials} title={d.name}>{d.initials}</i>)}
+              {t.more > 0 && <i className="qcv-half-more">+{t.more}</i>}
+            </span>
+            {/* a court with no date it can honestly state says nothing here — never an em dash
+                under a label, which is a label with nothing to label */}
+            {t.when && (
+              <span className="qcv-half-when" data-qcv="court-when">{t.when.label} <b>{t.when.date}</b></span>
+            )}
+          </span>
+        </button>
+      ))}
+    </div>
   </div>
 );
 
 /**
- * The same three tiles at the same height, with nothing readable in them.
+ * The same desk at the same height, with nothing readable in it.
  *
- * ⚠️ IT RENDERS THE REAL MARKUP AND THE REAL STRINGS, AND HIDES THE INK. Sized by hand — a 30px
- * block for the count, 9px for the line — the tile came out 102 against the loaded 112 and the
- * sentence below jumped 10px when the cover lifted. Sized in `em` it came within 1.3px, which is
- * the same mistake wearing a smaller number: both are arithmetic ABOUT a line box rather than the
- * line box. With the real elements carrying real text, the heights are identical by construction
- * and stay identical through any retune of the type.
+ * ⚠️ IT RENDERS THE REAL MARKUP AND THE REAL STRINGS, AND HIDES THE INK. Sized by hand the tile
+ * came out 102 against the loaded 112 and the sentence below jumped 10px when the cover lifted;
+ * sized in `em` it came within 1.3px, which is the same mistake wearing a smaller number — both are
+ * arithmetic ABOUT a line box rather than the line box. With the real elements carrying real text
+ * the heights are identical by construction and stay identical through any retune of the type.
  *
- * The strings are the court names because they are the right LENGTH; nothing can read them.
+ * The strings are the court names because they are the right LENGTH; nothing can read them. The
+ * foot draws its four discs for the same reason — a skeleton with no foot is 38px short.
  */
 export const QcCourtsSkeleton: React.FC = () => (
-  <div className="qcv-courts" data-qcv="courts" aria-hidden="true">
-    {[["you", "With you"], ["agent", "With the agent"], ["closed", "Closed"]].map(([k, name]) => (
-      <div key={k} className={`qcv-court qcv-court--${k} qcv-court--sk`} data-qcv="sk-court">
-        <span className="qcv-court-band" />
-        <span className="qcv-court-body">
-          <span className="qcv-court-head">
-            <b className="qcv-court-n qcv-skw">00</b>
-            <span className="qcv-court-lbl qcv-skw">{name}</span>
+  <div className="qcv-deskw" data-qcv="deskw" aria-hidden="true">
+    <div className="qcv-desk" data-qcv="courts">
+      {[["you", "With you", "one of them is an offer"], ["agent", "With the agent", "none past the date"], ["closed", "Closed", "none passed · none no reply"]].map(([k, name, fact]) => (
+        <div key={k} className={`qcv-half qcv-half--${k} qcv-half--sk`} data-qcv="sk-court">
+          <span className="qcv-half-num qcv-skw">00</span>
+          <span className="qcv-half-lab qcv-skw">{name}</span>
+          <span className="qcv-half-note qcv-skw">{fact}</span>
+          <span className="qcv-half-foot">
+            <span className="qcv-half-who">{["AA", "BB", "CC", "DD"].map((i) => <i key={i} className="qcv-skw">{i}</i>)}</span>
+            <span className="qcv-half-when qcv-skw">next due <b>00 Xxx</b></span>
           </span>
-          <small className="qcv-court-fact qcv-skw">none yet</small>
-        </span>
-      </div>
-    ))}
+        </div>
+      ))}
+    </div>
   </div>
 );

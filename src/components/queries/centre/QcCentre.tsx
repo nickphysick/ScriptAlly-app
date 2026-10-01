@@ -152,11 +152,20 @@ export const QcCentre: React.FC<{
         secondary={{ label: "Record a response", onClick: onRecord, disabled: loading }}
         art={<img src={`${HERO_COURIER_MAP.src}?v=${HERO_COURIER_MAP.version}`} width={HERO_COURIER_MAP.width} height={HERO_COURIER_MAP.height} alt="" />}
       />
+    {/**
+      * §1 (v95) — THE DESK IS A FULL-SPAN BAND, like the header above it, and the rail starts in
+      * the row BELOW it. It used to render inside `.qcv-page`, in the first track only, which is
+      * why the three tiles were 799px wide where the reference draws a 1167px desk — and at a third
+      * of 799 a section is 266px, which will not hold a 64px numeral beside a 19px name above an
+      * italic line above a foot of four discs and a date. The reference's own sections are 388px.
+      *
+      * ⚠️ IT TOUCHES THE HERO NOT AT ALL. The header already spanned both tracks (page header v2),
+      * so this adds a third row to a grid that already had two; the hero's width, type, art and
+      * copy are the living-headers pack's and are unchanged.
+      */}
+    {courts}
     <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
-
-      {/* §4 — the three courts, 18px under the pills */}
-      {courts}
 
       {/* ⚠️ THERE IS NO VIEW SWITCH AND NOTHING TO SWITCH (v65 §1). The ledger IS the page; the
           calendar is the rail's Birds-eye view. A segmented control here would offer a state the

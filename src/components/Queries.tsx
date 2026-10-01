@@ -104,10 +104,11 @@ import { QcQueryModal } from "./queries/centre/QcQueryModal";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, courtTiles, filterForStatusParam, filterOptions, inScope, matchesFilter,
-  rowsWithdrawn, sortRows, tileHand,
+  DEFAULT_SORT, buildQcRows, courtFilter, courtOfFilter, courtTiles, filterForStatusParam, filterOptions,
+  inScope, matchesFilter, rowsWithdrawn, sortRows, tileHand,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
+import type { EyeFocus } from "../lib/qcBirdsEye";
 import { QcFan } from "./queries/centre/QcFan";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -2258,6 +2259,13 @@ export const Queries: React.FC<{
      reads it; nothing the reader can reach does. */
   const QC_UNASSIGNED = "__unassigned__";
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
+  /**
+   * §1 (v95) · QC3 — THE RAIL'S FOCUS LIVES HERE, because a desk section sets it as well as the
+   * rail's own tabs. It was `useState` inside `QcBirdsEye`, which is right for a control nothing
+   * else touches; the moment the desk became a second thing that touches it, two owners of one
+   * value is the fault. The rail's header is untouched — only where the value lives moved.
+   */
+  const [qcEyeFocus, setQcEyeFocus] = useState<EyeFocus>("all");
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* null until the page has measured its own column — see QcCentre */
@@ -3598,6 +3606,26 @@ export const Queries: React.FC<{
   const pickQcFilter = (f: QcFilter) => {
     setQcFilter(f);
     releaseIfHidden((id) => { const r = qcById.get(id); return !!r && qcScoped.includes(r) && matchesFilter(r, f); });
+  };
+  /**
+   * §1 (v95) · QC3 — pressing a desk section filters the list to that section and moves the rail's
+   * control with it; pressing the same one again clears BOTH. One handler, so the two cannot come
+   * apart: a version that set the filter and left the rail alone would leave the page saying "13
+   * with you" in the list and "Everything" in the rail, which are two answers to one question.
+   *
+   * ⚠️ THE FILTER IS `courtFilter(key)`, NOT the menu's `"you"` / `"agent"` / `"closed"`. See the
+   * note at `courtFilter`: the menu's `"you"` excludes an offer the section counts and its
+   * `"closed"` includes a Withdrawn the section does not, so the two measurably disagreed by one
+   * row and two rows on the harness account. One function counts a section and filters to it.
+   *
+   * ⚠️ AND CLOSED HANDS THE RAIL BACK TO "Everything" rather than reaching for a focus of its own —
+   * the rail's control is a three-way `all / you / agent` and has no closed state, so the honest
+   * move is to stop focusing rather than to invent one.
+   */
+  const pickCourt = (key: TileCourt) => {
+    const on = courtOfFilter(qcFilter) === key;
+    pickQcFilter(on ? "all" : courtFilter(key));
+    setQcEyeFocus(on || key === "closed" ? "all" : key === "you" ? "you" : "agent");
   };
   const pickQcScope = (id: string | null) => {
     setQcScope(id);
@@ -6478,10 +6506,15 @@ export const Queries: React.FC<{
             }
             courts={showGridSkeleton ? <QcCourtsSkeleton /> : (
               <QcCourts
-                tiles={courtTiles(qcScoped)}
-                /* ⚠️ A COURT TILE DEALS; IT DOES NOT FILTER. The element it was pressed from is
-                   captured so the hand deals FROM it and focus returns TO it. */
-                onCourt={(key, el) => setQcFan({ key, origin: el })}
+                tiles={courtTiles(qcScoped, Date.now())}
+                /* ⚠️ THE COUNTS READ `qcScoped`, THE MANUSCRIPT-SCOPED SET, AND NEVER `qcVisible`
+                   (§1, QC2). The desk counts the manuscript; a desk that counted the filtered list
+                   would answer the question a reader has already narrowed rather than the one they
+                   are using it to decide. */
+                active={courtOfFilter(qcFilter)}
+                /* ⚠️ A SECTION FILTERS NOW; IT NO LONGER DEALS A HAND. The fan was the tiles'
+                   affordance and `see all` inside it did this, one click further away. */
+                onCourt={pickCourt}
               />
             )}
             overlay={beOpen ? (
@@ -6543,10 +6576,12 @@ export const Queries: React.FC<{
                   onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
                   onSeeAll={() => {
                     setQcFan(null);
-                    /* ⚠️ THE SENTENCE HAS A FILTER FOR EACH COURT ALREADY — "With you", "With the
-                       agent", "Closed" — so "see all" narrows the ledger to exactly the set the
-                       tile counted, rather than to a stage the tile never named. */
-                    setQcFilter(qcFan.key === "you" ? "you" : qcFan.key === "agent" ? "agent" : "closed");
+                    /* ⚠️ `courtFilter`, NOT THE MENU'S KEYS. This comment used to claim it
+                       narrowed "to exactly the set the tile counted" while reaching for `"you"` and
+                       `"closed"`, which measurably do not: the menu's `"you"` drops the offer the
+                       tile counts and its `"closed"` adds a Withdrawn the tile does not. The claim
+                       is true now — one function counts the court and filters to it. */
+                    setQcFilter(courtFilter(qcFan.key));
                   }}
                   onClose={() => setQcFan(null)}
                 />
@@ -6582,7 +6617,7 @@ export const Queries: React.FC<{
              */
             rail={(
               <QcRail
-                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} onExpand={openBirdsEye} />}
+                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} focus={qcEyeFocus} onFocus={setQcEyeFocus} onExpand={openBirdsEye} />}
                 /**
                  * §2 (v65.6) — THE RAIL IS ALWAYS THE BIRDS-EYE VIEW. It used to swap to the open
                  * query for clicks on the page, so the same act had two outcomes depending on which
