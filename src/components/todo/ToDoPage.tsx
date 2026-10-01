@@ -355,7 +355,7 @@ export const PANE_ID_PREFIX = "";
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const {
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady,
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady, activitiesReady,
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile, recordOfferDecision,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, updateQuery, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
@@ -1031,12 +1031,26 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  /* ⚠️ THE BOARD'S DERIVED CARDS LAND A RENDER LATE. `tasks` is computed by an effect in the store
+     from the collections, so the frame in which `collectionsReady` turns true still carries the
+     previous (empty) `tasks` — measured on load: "2 things to do" (the writer's own two), then "34".
+     The headline therefore waits for `tasks` to change once after the data is ready, with a short
+     fallback so an account whose derivation produces the same array can never hold it pending. */
+  const tasksAtReady = useRef<unknown>(null);
+  const [tasksSettled, setTasksSettled] = useState(false);
+  useEffect(() => {
+    if (!collectionsReady || tasksSettled) return undefined;
+    if (tasksAtReady.current === null) { tasksAtReady.current = tasks; }
+    else if (tasks !== tasksAtReady.current) { setTasksSettled(true); return undefined; }
+    const t = window.setTimeout(() => setTasksSettled(true), 600);
+    return () => window.clearTimeout(t);
+  }, [collectionsReady, tasks, tasksSettled]);
   const tdState: "loading" | "nothing" | "caught" | "list" = v2Load.loading ? "loading"
     : lhOverride === 0 ? "nothing"
     : lhOverride === -1 ? "caught"
     : lhOverride != null ? "list"
     : queries.length === 0 && userTasks.length === 0 ? "nothing"
-    : v2Live.length === 0 ? "caught"
+    : v2Live.length === 0 && activitiesReady && tasksSettled ? "caught"
     : "list";
   /* the oldest or soonest item, by the page's own date sort, set-aside excluded */
   const tdFirst = useMemo(() => {
@@ -1046,7 +1060,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* the caught-up line's next expected reply — the Query Centre's own rows, never a recount */
   const tdQcRows = useMemo(() => (tdState === "caught" ? buildQcRows(queries, agents, activities, Date.now()) : []), [tdState, queries, agents, activities]);
   const tdLiving: LivingHeader = {
-    count: tdState === "loading" ? null : tdState === "list" ? (lhOverride != null && lhOverride > 0 ? lhOverride : v2Live.length) : 0,
+    /* ⚠️ AND THE HEADLINE WAITS FOR THE ACTIVITY FEED. `v2Load` follows `collectionsReady` (queries,
+       agents, manuscripts); the board's derived cards also read the feed, and measured on load the
+       headline said "2 things to do" and then "34" — a wrong count, flashed. Until the feed lands both
+       lines stay empty and keep their space (LH10), and "all caught up" is never decided without it.
+       "Nothing yet" needs no feed — it is decided by queries and the writer's own items alone. */
+    count: tdState === "loading" || (tdState !== "nothing" && (!activitiesReady || !tasksSettled) && lhOverride == null) ? null : tdState === "list" ? (lhOverride != null && lhOverride > 0 ? lhOverride : v2Live.length) : 0,
     copy: (n) => (n === 0
       ? todoCaughtUpLine({ rows: tdQcRows, agentsById: new Map(agents.map((a) => [a.id, a])), nowMs: Date.now() })
       : todoHeaderCopy(n, { first: tdFirst, todayYmd: today })),

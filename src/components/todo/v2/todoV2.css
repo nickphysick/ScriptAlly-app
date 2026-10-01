@@ -150,7 +150,11 @@
 .tdv2-lab { flex: 1; min-width: 0; display: block; }
 .tdv2-lab b { display: block; font-family: var(--tdv2-serif); font-size: 15.5px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
 .tdv2-sub { display: block; font-family: var(--tdv2-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--tdv2-ink-faint); line-height: 1.5; }
-.tdv2-num { font-family: var(--sp-type); font-size: 34px; line-height: 0.92; }
+.tdv2-num { flex: none; font-family: var(--sp-type); font-size: 34px; line-height: 0.92; }
+/* living headers v3 §1: a tile row never grows — the number takes its own width, the label and the
+   sub-line are one line each and truncate. Measured before: a three-digit figure took a 1280 tile from
+   122px to 172px as the label wrapped to make room. */
+.tdv2-lab b, .tdv2-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tdv2-empty { padding: 40px; text-align: center; color: var(--tdv2-ink-faint); }
 
 /* ══ the controls row (ref `.controls`) ═══════════════════════════════════════════════════════ */

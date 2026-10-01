@@ -214,6 +214,7 @@ export async function readFull(page: Page, sidePanelSel: string) {
       frame: frame && { l: frame.left, r: frame.right, w: frame.width },
       textW: tb?.width ?? NaN, textR,
       art, eyebrowT: eyebrow ? eyebrow.top - h.top : NaN, titleT: tr && eyebrow ? tr.top - eyebrow.top : NaN,
+      titleH: tr ? tr.top - h.top : NaN,
       titleFam: title ? getComputedStyle(title).fontFamily : null, titleSize: title ? getComputedStyle(title).fontSize : null,
       panel: pr && { t: pr.top, l: pr.left, r: pr.right, b: pr.bottom, w: pr.width },
       hdBox: { l: h.left, r: h.right, t: h.top, b: h.bottom },
@@ -275,12 +276,12 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   } else {
     L.check("§4.3 · no art slot on a WITHOUT_ART page", ctx, !r.art, JSON.stringify(r.art));
   }
-  /* ⚠️ RETARGETED BY LIVING HEADERS (29 Sep): the Query Centre and the Contact list take the living ref
-     (living-headers-v2.html) — a 14px top pad, the title at eyebrow + 23, and a clamped headline — where the
-     other full pages keep v2's. The living values are also held against that ref in livingHeaders.measure. */
+  /* ⚠️ RETARGETED BY LIVING HEADERS v3 (1 Oct): every full page with a header here is living — no eyebrow
+     (the name is the bar's crumb), the title at the header's 22px top padding, and a clamped headline. The
+     living values are also held against living-headers-v3.html in livingHeadersV3.measure (LH0). */
   const living = LIVING_ROUTES.includes(ctx.route);
   if (living) {
-    L.check("§2 · (living) eyebrow at header + 14, title at eyebrow + 23", ctx, n(r.eyebrowT, 14, 1) && n(r.titleT, 23, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
+    L.check("§2 · (living v3) no eyebrow, title at header + 22", ctx, !Number.isFinite(r.eyebrowT) && n(r.titleH, 22, 1), `eyebrow ${r.eyebrowT} title ${r.titleH.toFixed(1)}`);
   } else {
     L.check("§2 · eyebrow at header + 26, title at eyebrow + 24", ctx, n(r.eyebrowT, 26, 1) && n(r.titleT, 24, 1), `${r.eyebrowT.toFixed(1)} / ${r.titleT.toFixed(1)}`);
   }
@@ -297,7 +298,7 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
      Elite run — measured, the intro's line boxes are identical to the mock's (54.73 both). The
      height is still content: a third intro line would fail this, which is the point. */
   /* the v5 mock governs the header's height on the NON-living full pages only; the living pair is held to
-     the living ref's geometry in livingHeaders.measure (LH0) */
+     the living ref's geometry in livingHeadersV3.measure (LH0) */
   if (mock && !living) {
     L.check("§4.3 · the header's height is the mock's ±2", ctx, n(r.hdH, mock.hdH, 2), `app ${r.hdH.toFixed(1)} mock ${mock.hdH.toFixed(1)}`);
     /* ⚠️ RETIRED BY THE QUIET BAR: "the frame sits where the mock's does ±1" — the v5 mock draws the
@@ -308,8 +309,10 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
 
 /* ══ §4 · the Contact list ══ */
 
-/** The two pages opted into living headers (their full header takes the living ref's geometry). */
-export const LIVING_ROUTES = ["/queries", "/agents"];
+/** The six living routes (living headers v3; src/lib/livingRoutes.ts — restated, because a Playwright file
+ *  cannot import a module tree that reaches CSS). Their full header takes the v3 ref's geometry, has no
+ *  eyebrow, and the bar carries their name from first paint. */
+export const LIVING_ROUTES: readonly string[] = ["/queries", "/agents", "/todo", "/manuscripts/packages", "/manuscripts/comps", "/queries/analytics"];
 
 /** The header's three tops, absolute, for the §4.4 comparison between pages. */
 export async function readTops(page: Page) {

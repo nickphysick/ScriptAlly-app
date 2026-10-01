@@ -8,7 +8,7 @@
  * app reaches data (the store hook, Firestore, fetch, a listener) in the two exhibit modules and in
  * the band wrapper; the RENDER half renders each band and requires that every name it draws is one
  * the constant declares, that the band is `inert` and `aria-hidden`, and that nothing in it is a
- * link. The rendered page repeats the check in the browser (livingHeaders.measure.ts), with the
+ * link. The rendered page repeats the check in the browser (livingHeadersV3.measure.ts), with the
  * network watched.
  */
 import { describe, it, expect } from "vitest";

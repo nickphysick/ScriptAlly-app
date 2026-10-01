@@ -14,6 +14,10 @@ const src = (p: string) => readFileSync(join(process.cwd(), p), "utf8").replace(
 const FILES = [
   "src/components/queries/centre/QcExhibit.tsx",
   "src/components/agents/contact/ContactExhibit.tsx",
+  "src/components/todo/v2/TodoExhibit.tsx",
+  "src/components/packages/PackagesExhibit.tsx",
+  "src/components/manuscripts/CompsEmpty.tsx",
+  "src/components/analytics/AnalyticsExhibit.tsx",
   "src/components/shell/LivingExhibition.tsx",
 ];
 const DATA_PATHS = [/useScriptAllyDb/, /from "[^"]*lib\/db"/, /firebase/, /\bfetch\(/, /onSnapshot/, /getDocs?\(/, /useContext\(/];
@@ -35,5 +39,23 @@ describe("LH6 · the exhibition reads nothing but its constant (source)", () => 
     expect(cl.slice(cl.indexOf("<ContactEmpty"), cl.indexOf("<ContactExhibit"))).not.toContain("</ContactEmpty>");
     expect(qc.indexOf("<QcEmpty")).toBeGreaterThan(-1);
     expect(cl.indexOf("<ContactEmpty")).toBeGreaterThan(-1);
+  });
+
+  /* living headers v3: the four new exhibits — each mounted exactly once, by its page, and only in
+     the branch the page reaches when its count is zero (never caught-up, never a filtered list) */
+  it("the v3 exhibits are each mounted once, behind the page's empty branch", () => {
+    const mounts: [string, string, string][] = [
+      ["src/components/todo/ToDoPage.tsx", "<TodoExhibit", 'tdState === "nothing"'],
+      ["src/components/SubmissionPackages.tsx", "<PackagesExhibit", "exhibit ?"],
+      ["src/components/manuscripts/ComparableTitlesPage.tsx", "<CompsExhibit", "exhibit ?"],
+      ["src/components/QueryAnalytics.tsx", "<AnalyticsExhibit", "(exhibit)"],
+    ];
+    for (const [file, tag, gate] of mounts) {
+      const s = src(file);
+      expect(s.split(tag).length - 1, `${file} mounts ${tag}`).toBe(1);
+      const g = s.indexOf(gate);
+      expect(g, `${file} has no empty gate ${gate}`).toBeGreaterThan(-1);
+      expect(s.indexOf(tag)).toBeGreaterThan(g);
+    }
   });
 });

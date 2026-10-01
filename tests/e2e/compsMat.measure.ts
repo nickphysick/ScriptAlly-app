@@ -129,7 +129,7 @@ for (const vp of SIZES) {
         const barB = await page.evaluate(() => ([...document.querySelectorAll('[data-probe="navrow"]')].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement).getBoundingClientRect().bottom);
         /* ⚠️ RETIRED (living headers v3): the header's height, and so the panel's top beneath it, now come
            from design-refs/page-header/living-headers-v3.html — the fixed shape every living page shares —
-           not from comps-v2.html, which drew the old intro. livingHeaders.measure.ts holds them now. */
+           not from comps-v2.html, which drew the old intro. livingHeadersV3.measure.ts holds them now. */
         console.log(`GEOM ${which} ${vp.width} ${state} ${JSON.stringify({
           app: { header: r.header && { l: r.header.l, t: r.header.t - barB, w: r.header.w, h: r.header.h }, main: r.main && { l: r.main.l, w: r.main.w }, first: r.first && { t: r.first.t - barB }, rail: r.rail && { l: r.rail.l, t: r.rail.t - barB, w: r.rail.w, h: r.rail.h } },
           mock: { header: m.header && { l: m.header.l, t: m.header.t, w: m.header.w, h: m.header.h }, main: m.main && { l: m.main.l, w: m.main.w }, first: m.first && { t: m.first.t }, rail: m.rail && { l: m.rail.l, t: m.rail.t, w: m.rail.w, h: m.rail.h } },

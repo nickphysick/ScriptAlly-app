@@ -7,7 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
-import { BAR_ROUTES, openApp } from "./pageHeaderV2Lib";
+import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
 import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
 
@@ -18,7 +18,7 @@ const near = (a: number, b: number, t: number) => Number.isFinite(a) && Math.abs
 for (const vp of SIZES) {
   test(`Q1–Q5, Q7 · the quiet bar on every route at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`qb-bar-${vp.width}`);
-    const tally = { titled: 0, untitled: 0, fixedTitle: 0, still: 0 };
+    const tally = { titled: 0, untitled: 0, fixedTitle: 0, still: 0, living: 0 };
     for (const route of BAR_ROUTES) {
       await openApp(page, route, vp);
       await page.evaluate(() => document.fonts.ready);
@@ -31,6 +31,19 @@ for (const vp of SIZES) {
       if (!rest) continue;
       L.check("Q1 · at rest the bar's ground is the page's", ctx, rest.barBg === rest.groundBg && !transparent(rest.barBg), `bar ${rest.barBg} ground ${rest.groundBg}`);
       L.check("Q2 · at rest no hairline and no shadow", ctx, rest.shadow === "none" && rest.hairline === 0, `shadow ${rest.shadow} hairline ${rest.hairline}`);
+      /* ⚠️ LIVING HEADERS v3 (1 Oct): on the six living routes the bar carries the page's crumb from first
+         paint — shown at rest and at every scroll; only the hairline still wakes. The quiet bar's naming
+         rule (Q2–Q4, Q6) governs every other route, unchanged. */
+      if (LIVING_ROUTES.includes(route)) {
+        tally.living++;
+        L.check("Q2 · (living) at rest the crumb is shown", ctx, !!rest.name && rest.name.opacity === 1 && rest.name.ariaHidden === null, JSON.stringify(rest.name));
+        if (!sc || sc.max < 3) continue;
+        await scrollTo(page, 3);
+        const l3 = await readBar(page);
+        L.check("Q3 · (living) at 3 the hairline wakes and the crumb stays", { ...ctx, state: "scrollTop 3" }, !!l3 && l3.hairline === 1 && l3.shadow === "none" && !!l3.name && l3.name.opacity === 1, `hairline ${l3?.hairline} ${JSON.stringify(l3?.name)}`);
+        await scrollTo(page, 0);
+        continue;
+      }
       L.check("Q2 · at rest the name is hidden and aria-hidden", ctx, !!rest.name && rest.name.opacity === 0 && rest.name.ariaHidden === "true" && rest.name.pe === "none", JSON.stringify(rest.name));
       if (!sc || sc.max < 3) { tally.still++; continue; }
       await scrollTo(page, 3);
@@ -76,10 +89,10 @@ for (const vp of SIZES) {
       L.check("Q4 · back at 0, the bar is at rest again", { ...ctx, state: "back to 0" }, !!back?.name && back.name.opacity === 0 && back.name.ariaHidden === "true" && back.hairline === 0, `${JSON.stringify(back?.name)} hairline ${back?.hairline}`);
     }
     const all = { route: "*", size: `${vp.width}`, state: "tally" };
-    L.check("population · each branch entered", all, tally.titled >= 5 && tally.untitled >= 1 && tally.fixedTitle >= 1, JSON.stringify(tally));
+    L.check("population · each branch entered", all, tally.titled >= 3 && tally.untitled >= 1 && tally.fixedTitle >= 1 && tally.living === LIVING_ROUTES.length, JSON.stringify(tally));
     L.write();
     console.log(`QB tally ${vp.width}: ${JSON.stringify(tally)}`);
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(BAR_ROUTES.length * 3 + 30);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(BAR_ROUTES.length * 3 + 12);
     expect(L.failures().map((f) => `${f.lock} · ${f.route} ${f.state} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -87,15 +100,17 @@ for (const vp of SIZES) {
 test("Q6 · a route change starts the new page's bar at rest", async ({ page }) => {
   const L = new Ledger("qb-route");
   for (const vp of SIZES) {
-    const ctx = { route: "/queries → /agents", size: `${vp.width}`, state: "after nav" };
+    /* ⚠️ RETARGETED BY LIVING HEADERS v3: /agents is living (its crumb shows from first paint), so the
+       destination that still rests is a non-living page — Calendar, a sidebar row away */
+    const ctx = { route: "/queries → /todo/calendar", size: `${vp.width}`, state: "after nav" };
     await openApp(page, "/queries", vp);
     await suppressMotion(page);
     const sc = await tagScroller(page);
     await scrollTo(page, Math.min(800, sc?.max ?? 0));
     const deep = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-probe="navrow"]')].find((e) => e.getBoundingClientRect().height > 0)?.dataset.scrolled);
     L.check("Q6 · precondition: the Query Centre's bar is awake", ctx, deep === "true", `${deep}`);
-    await page.locator("#ws-sidebar a, #ws-sidebar button").filter({ hasText: "Contact list" }).first().click();
-    await page.waitForURL(/\/agents/);
+    await page.locator("#ws-sidebar a, #ws-sidebar button").filter({ hasText: "Calendar" }).first().click();
+    await page.waitForURL(/\/todo\/calendar/);
     await page.waitForTimeout(400);
     const r = await readBar(page);
     L.check("Q6 · the new page's bar is at rest", ctx, !!r && r.hairline === 0 && !!r.name && r.name.opacity === 0 && r.name.ariaHidden === "true", `hairline ${r?.hairline} ${JSON.stringify(r?.name)}`);

@@ -22,7 +22,7 @@ async function pressBarGap(page: Page) {
   });
   await page.mouse.click(at.x, at.y);
 }
-import { BAR_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
+import { BAR_ROUTES, LIVING_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
 
@@ -48,8 +48,10 @@ for (const vp of SIZES) {
       L.check("§1 bar · toggle at left + 24", ctx, r.toggleL != null && Math.abs(r.toggleL - 24) <= 1, `${r.toggleL}`);
       L.check("§1 bar · Help at right − 24", ctx, r.helpR != null && Math.abs(r.helpR - 24) <= 1, `${r.helpR}`);
       /* ⚠️ RETARGETED BY THE QUIET BAR: at rest the name is laid out (one line, so it arrives without
-         moving anything) and HIDDEN; its arrival is quietBar.measure.ts Q4 */
-      L.check("§1 bar · the page name is laid out on one line, and hidden at rest", ctx, r.nameHidden && r.nameLines === 1, `${JSON.stringify(r.eyebrow)} / ${JSON.stringify(r.nameText)} lines ${r.nameLines} hidden ${r.nameHidden}`);
+         moving anything) and HIDDEN; its arrival is quietBar.measure.ts Q4. ⚠️ AND BY LIVING HEADERS v3: on
+         the six living routes the bar carries the page's crumb from first paint, so there it is SHOWN. */
+      if (LIVING_ROUTES.includes(route)) L.check("§1 bar · (living) the crumb is laid out on one line, and shown at rest", ctx, !r.nameHidden && r.nameLines === 1, `${JSON.stringify(r.eyebrow)} / ${JSON.stringify(r.nameText)} lines ${r.nameLines} hidden ${r.nameHidden}`);
+      else L.check("§1 bar · the page name is laid out on one line, and hidden at rest", ctx, r.nameHidden && r.nameLines === 1, `${JSON.stringify(r.eyebrow)} / ${JSON.stringify(r.nameText)} lines ${r.nameLines} hidden ${r.nameHidden}`);
       L.check("§1 bar · exactly one visible switcher, none in the sidebar", ctx, r.switchers === 1 && r.inSidebar === 0, `visible ${r.switchers} sidebar ${r.inSidebar}`);
       L.check("§1 bar · no item overlaps another", ctx, r.items >= 5 && r.overlaps.length === 0, `items ${r.items} overlaps ${JSON.stringify(r.overlaps)}`);
       const s = await scrollAndRead(page, 800);
@@ -129,7 +131,7 @@ for (const vp of SIZES) {
     L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
     L.write();
     /* living headers (29 Sep): the Contact list is a living page, so the v5 mock's header-height row is not
-       asserted here (the living ref holds its geometry in livingHeaders.measure) — one row fewer with a mock */
+       asserted here (the living ref holds its geometry in livingHeadersV3.measure) — one row fewer with a mock */
     expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 18 : 17);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
@@ -176,26 +178,20 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
     await openApp(page, "/manuscripts/comps", vp); const m = await readTops(page);
     await openApp(page, "/manuscripts/packages", vp); const pk = await readTops(page);
     const ctx = { route: "/queries vs /agents vs /manuscripts/comps vs /manuscripts/packages", size: `${vp.width}`, state: "expanded" };
-    for (const k of ["header", "eyebrow", "title"] as const) {
-      L.check(`§4.4 · the ${k}'s top is the same on both`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - c[k]) <= 0.5, `qc ${q[k].toFixed(1)} contact ${c[k].toFixed(1)}`);
-      /* ⚠️ RETARGETED BY LIVING HEADERS (29 Sep): the header's top is still one line across all four; the
-         eyebrow and title sit 12px higher on the two living pages (14px top pad against v2's 26), so
-         those two are compared within each pair — the living pair above, the v2 pair here. */
-      if (k === "header") {
-        L.check(`§4.4 · the header's top is the same on Comparable titles`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - m[k]) <= 0.5, `qc ${q[k].toFixed(1)} comps ${m[k].toFixed(1)}`);
-        L.check(`§4.4 · the header's top is the same on Submission packages`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - pk[k]) <= 0.5, `qc ${q[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
-      } else {
-        L.check(`§4.4 · the ${k}'s top is the same on the two v2 pages`, ctx, Number.isFinite(m[k]) && Math.abs(m[k] - pk[k]) <= 0.5, `comps ${m[k].toFixed(1)} packages ${pk[k].toFixed(1)}`);
+    /* ⚠️ RETARGETED BY LIVING HEADERS v3 (1 Oct): all four full headers are living, so they are ONE header
+       again — the header's and the title's tops agree across all four, and none carries an eyebrow (the
+       section is the bar's crumb; livingHeadersV3.measure LH5 holds its words). */
+    for (const k of ["header", "title"] as const) {
+      for (const [nm, o] of [["the Contact list", c], ["Comparable titles", m], ["Submission packages", pk]] as const) {
+        L.check(`§4.4 · the ${k}'s top is the Query Centre's on ${nm}`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - o[k]) <= 0.5, `qc ${q[k].toFixed(1)} ${nm} ${o[k].toFixed(1)}`);
       }
     }
-    L.check("§4.4 · the Contact list's eyebrow is its sidebar section", ctx, (c.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "AGENTS / CONTACT LIST", `${c.eyebrowText}`);
-    L.check("§4.4 · Submission packages' eyebrow is its sidebar section", ctx, (pk.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / SUBMISSION PACKAGES", `${pk.eyebrowText}`);
-    L.check("§4.4 · Comparable titles' eyebrow is its sidebar section", ctx, (m.eyebrowText ?? "").replace(/\s+/g, " ").trim().toUpperCase() === "MATERIALS / COMPARABLE TITLES", `${m.eyebrowText}`);
+    L.check("§4.4 · no full header carries an eyebrow", ctx, [q, c, m, pk].every((x) => !Number.isFinite(x.eyebrow) && !x.eyebrowText), JSON.stringify([q, c, m, pk].map((x) => x.eyebrowText)));
   }
   L.write();
-  /* 10 per size since living headers: for the eyebrow and the title, the two cross-pair comparisons became
-     one within the v2 pair (the living pair's own is the "same on both" row) — an exact count, not a floor */
-  expect(L.rows.length).toBe(SIZES.length * 10);
+  /* 7 per size since living headers v3: header and title against the Query Centre on three pages, and the
+     one no-eyebrow row — an exact count, not a floor */
+  expect(L.rows.length).toBe(SIZES.length * 7);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 
