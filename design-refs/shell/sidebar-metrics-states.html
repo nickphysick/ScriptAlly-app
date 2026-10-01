@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The sidebar, measured · width, spacing, type, motion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--stone:#e7e3dc;--page:#f5f1eb;--ink:#1c130f;--muted:rgba(28,19,15,.58);--hair:rgba(28,19,15,.12);--rule:rgba(28,19,15,.10);--btn:#2a3a52;
+--type:'Special Elite','Courier New',monospace;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,.8,.3,1)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#efeae2;color:var(--ink);font-family:var(--serif)}
+button{font:inherit;color:inherit;border:0;background:transparent;padding:0;cursor:pointer}
+a{text-decoration:none;color:inherit}
+#stage{width:1460px;margin:0 auto;transform-origin:top center;padding:44px 30px 80px}
+h1{margin:0 0 4px;font:400 34px/1.1 var(--type)}
+.sub{margin:0 0 30px;font-size:14px;color:var(--muted);max-width:760px;line-height:1.55}
+h2{margin:46px 0 4px;font:400 21px var(--type)}
+.cap{margin:0 0 16px;font-size:12.5px;color:rgba(28,19,15,.62);max-width:720px;line-height:1.55}
+.mono{font-family:var(--mono)}
+
+/* ---------- verdict strip ---------- */
+.verdicts{display:flex;gap:12px;margin:18px 0 6px}
+.v{flex:1;background:#fff;border-radius:12px;padding:13px 15px;box-shadow:0 0 0 1px var(--hair),0 1px 2px rgba(28,19,15,.05)}
+.v small{display:block;font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--muted);margin-bottom:6px}
+.v b{display:block;font-size:17px;line-height:1.15;font-weight:600}
+.v span{display:block;margin-top:4px;font-size:11.5px;color:var(--muted);line-height:1.45}
+
+/* ---------- audit table ---------- */
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--hair),0 1px 2px rgba(28,19,15,.05)}
+th{font:600 8.5px var(--mono);letter-spacing:.16em;color:var(--muted);text-align:left;padding:11px 16px 9px;border-bottom:1px solid var(--hair)}
+td{font-size:13.5px;padding:10px 16px;border-bottom:1px solid rgba(28,19,15,.06);line-height:1.45;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;white-space:nowrap}
+td .m{font:11px var(--mono);color:var(--muted)}
+tr.us td{background:#fbf7f1}
+tr.us td:first-child{color:var(--btn)}
+
+/* ---------- frames with sidebars ---------- */
+.pair{display:flex;gap:40px;align-items:flex-start}
+.frame{width:324px;height:700px;position:relative;overflow:hidden;border-radius:14px;background:var(--page);box-shadow:0 1px 3px rgba(28,19,15,.08),0 14px 34px rgba(28,19,15,.12);flex:none}
+.frame .pgtitle{position:absolute;left:272px;top:78px;font:400 40px/1 var(--type);white-space:nowrap}
+.flab{margin:0 0 10px;font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--muted)}
+
+/* S1 as mocked (old metrics) */
+.sideA{position:absolute;left:0;top:0;width:248px;height:100%;background:var(--stone);box-shadow:inset -1px 0 0 var(--rule);display:flex;flex-direction:column;padding:16px 14px 12px}
+.sideA .nav{display:flex;flex-direction:column;gap:1px;margin-top:14px}
+.sideA .ni{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:9px;font-size:14.5px}
+.sideA .eb{margin:16px 8px 5px}
+
+/* Tuned (new metrics) */
+.sideB{position:absolute;left:0;top:0;width:248px;height:100%;background:var(--stone);box-shadow:inset -1px 0 0 var(--rule);display:flex;flex-direction:column;padding:16px 14px 12px}
+.sideB .nav{display:flex;flex-direction:column;gap:2px;margin-top:0}
+.sideB .ni{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:9px;font-size:14.5px;line-height:1.3;
+  transition:background .12s ease}
+.sideB .ni:not([aria-current]):hover{background:rgba(255,255,255,.45);transition:background .12s ease}
+.sideB .ni:not([aria-current]):not(:hover){transition:background .16s ease}
+.sideB .ni:not([aria-current]):active{background:rgba(255,255,255,.62);transition:none}
+.sideB .ni>svg{transition:opacity .12s ease}
+.sideB .ni:hover>svg{opacity:.95}
+.sideB .eb{margin:20px 8px 6px}
+.sideB .eb.first{margin-top:22px}
+
+/* shared sidebar bits */
+.logo{display:flex;align-items:center;gap:10px;padding:0 2px 0 6px;height:32px;flex:none}
+.logo .mk{width:30px;height:30px;border-radius:50%;background:var(--btn);color:#fdf9f5;display:grid;place-items:center;font:400 15px var(--type);flex:none}
+.logo b{font-weight:600;font-size:20px;letter-spacing:-.01em}
+.ni>svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;opacity:.75;flex:none}
+.sideA .ni:not([aria-current]):hover{background:rgba(255,255,255,.45)}
+.ni[aria-current]{background:var(--btn);color:#fdf9f5;font-weight:600}
+.ni[aria-current]>svg{opacity:1}
+.l{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n{font:10px var(--mono);color:var(--muted);display:flex;align-items:center;gap:6px}
+.ni[aria-current] .n{color:rgba(253,249,245,.75)}
+.d{width:5px;height:5px;border-radius:50%;background:#8a4a3c;display:inline-block}
+.eb{display:flex;align-items:center;gap:8px}
+.eb small{font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--muted);flex:none}
+.eb i{flex:1;height:1px;background:var(--hair)}
+.foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 8px 2px;border-top:1px solid var(--hair);flex:none}
+.foot .av{width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px var(--hair);display:grid;place-items:center;font:10px var(--mono);flex:none}
+.foot .tx{flex:1;min-width:0}.foot b{display:block;font-weight:600;font-size:14px;line-height:1.2}.foot span{font-size:11.5px;color:var(--muted)}
+.foot .gear{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none}
+.foot .gear:hover{background:rgba(255,255,255,.55)}
+.foot .gear svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;opacity:.8}
+
+/* split New button */
+.nw{position:relative;margin-top:14px;flex:none}
+.nwb{display:flex;height:36px;background:#fff;border-radius:10px;box-shadow:inset 0 0 0 1px var(--hair),0 1px 2px rgba(28,19,15,.05);overflow:hidden;transition:box-shadow .12s ease,transform .07s ease}
+.nw:hover .nwb{box-shadow:inset 0 0 0 1px rgba(28,19,15,.22),0 1px 3px rgba(28,19,15,.07)}
+.nw.pressed .nwb,.nwb:active{transform:translateY(.5px);box-shadow:inset 0 0 0 1px rgba(28,19,15,.22)}
+.nw.open .nwb{box-shadow:inset 0 0 0 1.5px var(--ink);transform:none}
+.nwl{flex:1;display:flex;align-items:center;gap:9px;padding:0 12px;font-size:14px;font-weight:600;text-align:left;transition:background .12s ease}
+.nwl:hover{background:#faf6f0}
+.nwl svg{width:15px;height:15px;fill:none;stroke:var(--ink);stroke-width:1.8;flex:none}
+.nwr{width:32px;display:grid;place-items:center;border-left:1px solid var(--hair);transition:background .12s ease}
+.nwr:hover{background:#faf6f0}
+.nwr svg{width:13px;height:13px;fill:none;stroke:var(--ink);stroke-width:2;transition:transform .2s var(--ease)}
+.nw.open .nwr svg{transform:rotate(180deg)}
+.nwm{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border-radius:12px;padding:6px;box-shadow:0 0 0 1px var(--hair),0 14px 34px rgba(28,19,15,.16);opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;z-index:6}
+.nw.open .nwm{opacity:1;transform:none;pointer-events:auto;transition:opacity .15s ease,transform .17s var(--ease)}
+.nwm a{display:flex;align-items:center;gap:10px;height:34px;padding:0 9px;border-radius:8px;font-size:14px;transition:background .12s ease}
+.nwm a:hover,.nwm a.focused{background:#f5f1eb}
+.nwm svg{width:15px;height:15px;fill:none;stroke:var(--ink);stroke-width:1.7;flex:none;opacity:.8}
+.nwm .sep{height:1px;background:var(--hair);margin:5px 8px}
+
+/* focus-visible demo rings */
+.fv-row{box-shadow:0 0 0 2px var(--stone),0 0 0 3.5px rgba(28,19,15,.6)}
+.fv-btn .nwb{box-shadow:inset 0 0 0 1px var(--hair),0 0 0 2px var(--stone),0 0 0 3.5px rgba(28,19,15,.6)!important}
+.sideB .ni:focus-visible{outline:none;box-shadow:0 0 0 2px var(--stone),0 0 0 3.5px rgba(28,19,15,.6)}
+.nwl:focus-visible,.nwr:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(28,19,15,.6)}
+
+/* annotations between frames */
+.ann{flex:1;min-width:0}
+.ann ul{margin:0;padding:0;list-style:none}
+.ann li{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(28,19,15,.08);font-size:13.5px;line-height:1.5}
+.ann li:last-child{border-bottom:0}
+.ann .was{flex:none;width:168px;font:11px var(--mono);color:var(--muted);padding-top:2px}
+.ann .now b{font-weight:600}
+.ann .now .m{font:11px var(--mono);color:var(--muted)}
+
+/* ---------- states board ---------- */
+.board{background:var(--stone);border-radius:14px;padding:22px 24px 26px;box-shadow:0 0 0 1px var(--hair)}
+.board h3{margin:0 0 14px;font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--muted)}
+.srow{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.chip{width:232px}
+.chip .demo{min-height:44px;display:flex;align-items:center}
+.chip .sl{margin:10px 0 3px;font:600 10px var(--mono);letter-spacing:.1em}
+.chip .sd{font:10.5px/1.6 var(--mono);color:var(--muted);white-space:pre-line}
+.chip .ni{width:100%;display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:9px;font-size:14.5px}
+.chip .ni.hov{background:rgba(255,255,255,.45)}
+.chip .ni.hov>svg{opacity:.95}
+.chip .ni.prs{background:rgba(255,255,255,.62)}
+.chip .nw{margin-top:0;width:100%}
+.b2{margin-top:26px}
+.openstatic{position:relative}
+.openstatic .nwm{position:relative;top:auto;left:auto;right:auto;opacity:1;transform:none;pointer-events:auto;margin-top:6px}
+
+/* ---------- motion table ---------- */
+.mt td:first-child{font-weight:600;white-space:nowrap}
+.mt td{font-size:13px}
+.mt .m{font:11px var(--mono)}
+
+/* collapsed rail */
+.railwrap{display:flex;gap:40px;align-items:flex-start}
+.rail{width:68px;height:430px;background:var(--stone);border-radius:14px 0 0 14px;box-shadow:inset -1px 0 0 var(--rule);display:flex;flex-direction:column;align-items:center;padding:16px 0 12px;position:relative;flex:none}
+.rail .mk{width:30px;height:30px;border-radius:50%;background:var(--btn);color:#fdf9f5;display:grid;place-items:center;font:400 15px var(--type)}
+.rnew{width:40px;height:36px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair),0 1px 2px rgba(28,19,15,.05);display:grid;place-items:center;margin-top:14px;position:relative;transition:box-shadow .12s ease}
+.rnew:hover{box-shadow:inset 0 0 0 1px rgba(28,19,15,.22)}
+.rnew svg{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.8}
+.rtile{width:40px;height:34px;border-radius:9px;display:grid;place-items:center;margin-top:2px}
+.rtile svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;opacity:.75}
+.rtile.on{background:var(--btn);color:#fdf9f5;margin-top:14px}
+.rtile.on svg{opacity:1}
+.rtile:not(.on):hover{background:rgba(255,255,255,.45)}
+.flyout{position:absolute;left:calc(100% + 8px);top:0;width:228px;background:#fff;border-radius:12px;padding:6px;box-shadow:0 0 0 1px var(--hair),0 14px 34px rgba(28,19,15,.16);opacity:0;pointer-events:none;transform:translateX(-4px);transition:opacity .12s ease,transform .12s ease;z-index:8}
+.rnew:hover .flyout,.rnew:focus-within .flyout,.rnew:focus .flyout{opacity:1;transform:none;pointer-events:auto;transition:opacity .15s ease,transform .17s var(--ease)}
+.flyout a{display:flex;align-items:center;gap:10px;height:34px;padding:0 9px;border-radius:8px;font-size:14px}
+.flyout a:hover{background:#f5f1eb}
+.flyout svg{width:15px;height:15px;fill:none;stroke:var(--ink);stroke-width:1.7;opacity:.8}
+.flyout .sep{height:1px;background:var(--hair);margin:5px 8px}
+.notes{flex:1;font-size:13.5px;line-height:1.65}
+.notes p{margin:0 0 12px;max-width:620px}
+.notes .m{font:11px var(--mono);color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<h1>The sidebar, measured</h1>
+<p class="sub">Width, line spacing and type, checked against the apps that do sidebars best — then every interaction state and its timing, written down. The “Tuned” sidebar below is live: hover the rows, open the New button, Tab through it for the focus rings.</p>
+
+<div class="verdicts">
+  <div class="v"><small>WIDTH</small><b>248px — keep</b><span>Serif at 14.5px runs wider than Linear’s 13px sans. 248 sits between Notion (240) and Slack (260), and it’s already shipped in shell v3.</span></div>
+  <div class="v"><small>ROW HEIGHT</small><b>32px fixed</b><span>Was padding-derived (~29px, fragile). Fixed 32px flex-centred rows, 2px gap — the Figma/Linear hit-target standard, sized up for serif.</span></div>
+  <div class="v"><small>NAV TYPE</small><b>14.5px — keep</b><span>Source Serif 4 at 14.5 is optically a 13.5px sans, right in the 13–14 band. Active weight 600. Counts stay 10px mono.</span></div>
+  <div class="v"><small>LABELS</small><b>8.5px + more air</b><span>The mono eyebrow is a house signature — keep the size, give it room: 20px above, 6px below (was 16/5), 22px under the New button.</span></div>
+  <div class="v"><small>NEW BUTTON</small><b>36px, 10r</b><span>4px taller than nav rows, so the one action reads bigger than the places. Chevron segment widens to 32px for a square hit.</span></div>
+</div>
+
+<h2>What best-in-class does</h2>
+<p class="cap">Measured from the current builds (sizes are rendered defaults, ±2px). The pattern: ~220–260px wide, 28–32px rows, 13–14px UI type, and the primary action as a distinct control at the top — Linear’s is exactly our split button.</p>
+<table>
+<tr><th>APP</th><th>WIDTH</th><th>ROW HEIGHT</th><th>NAV TYPE</th><th>SECTION LABELS</th><th>PRIMARY ACTION</th></tr>
+<tr><td>Linear</td><td>~220px</td><td>30px</td><td>13px Inter, 500</td><td>13px rows that collapse, not eyebrows</td><td>Split “New issue” button, top left — our pattern B</td></tr>
+<tr><td>Notion</td><td>240px <span class="m">(drag 180–400)</span></td><td>27–28px</td><td>14px sans, 500</td><td>12px grey, hover-revealed</td><td>“New page” pinned row + compose icon</td></tr>
+<tr><td>Slack</td><td>~260px</td><td>28px</td><td>15px Lato</td><td>15px bold collapsible headers</td><td>Compose button in the workspace header</td></tr>
+<tr><td>Things 3</td><td>~220px</td><td>29px</td><td>14px system</td><td>Projects grouped by area, no caps labels</td><td>“+” floating at the foot</td></tr>
+<tr><td>Todoist</td><td>~280px</td><td>32px</td><td>14px sans</td><td>Collapsible, with counts right-aligned</td><td>Red “Add task” as the first row</td></tr>
+<tr class="us"><td>QueryHawk</td><td>248px</td><td>32px, 2px gap</td><td>14.5px Source Serif 4 <span class="m">(≈13.5px sans optically)</span></td><td>8.5px mono + hairline, 20/6 margins</td><td>Split “Log a query”, white on stone, 36px</td></tr>
+</table>
+
+<h2>Before and after</h2>
+<p class="cap">Left: S1 as mocked. Right: the same sidebar on the tuned metrics, with the split New button in place — this one is live.</p>
+<div class="pair">
+
+<div>
+<p class="flab">AS MOCKED — PADDING-DERIVED ROWS, 16/5 EYEBROWS</p>
+<div class="frame">
+<div class="pgtitle">Query Centre</div>
+<nav class="sideA" aria-label="Main">
+  <div class="logo"><span class="mk">Q</span><b>QueryHawk</b></div>
+  <div class="nav">
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="l">Dashboard</span></a>
+    <div class="eb"><small>QUERIES</small><i></i></div>
+    <a class="ni" href="#" aria-current="page"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l5-5"/></svg><span class="l">Query Centre</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M5 16l4.5-5 3.5 3 6-7"/></svg><span class="l">Analytics</span></a>
+    <div class="eb"><small>AGENTS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg><span class="l">Contact list</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span class="l">Discover</span></a>
+    <div class="eb"><small>MATERIALS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg><span class="l">Manuscripts</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="7.5" y="3.5" width="12" height="14" rx="2"/><path d="M4.5 7v11.5a2 2 0 0 0 2 2H15"/></svg><span class="l">Comparable titles</span></a>
+    <div class="eb"><small>TASKS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M9.5 6h11M9.5 12h11M9.5 18h11M3.5 6l1.3 1.3 2-2.3M3.5 12l1.3 1.3 2-2.3"/></svg><span class="l">To-do list</span><span class="n"><span class="d"></span>19</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="l">Calendar</span></a>
+  </div>
+  <div class="foot"><span class="av">BC</span><div class="tx"><b>Bethany Carter</b><span>Pro plan</span></div><button class="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button></div>
+</nav>
+</div>
+</div>
+
+<div>
+<p class="flab">TUNED — 32PX ROWS, 20/6 EYEBROWS, THE NEW BUTTON · LIVE</p>
+<div class="frame">
+<div class="pgtitle">Query Centre</div>
+<nav class="sideB" aria-label="Main">
+  <div class="logo"><span class="mk">Q</span><b>QueryHawk</b></div>
+  <div class="nw" id="nw">
+    <div class="nwb">
+      <button class="nwl" id="nwl"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</button>
+      <button class="nwr" id="nwr" aria-haspopup="menu" aria-expanded="false" aria-label="More ways to add"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+    <div class="nwm" id="nwm" role="menu">
+      <a href="#" role="menuitem"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 13l8-5.5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg>Record a response</a>
+      <div class="sep"></div>
+      <a href="#" role="menuitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg>Add an agent</a>
+      <a href="#" role="menuitem"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg>Add a manuscript</a>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="eb first"><small>WORKSPACE</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="l">Dashboard</span></a>
+    <div class="eb"><small>QUERIES</small><i></i></div>
+    <a class="ni" href="#" aria-current="page"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l5-5"/></svg><span class="l">Query Centre</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M5 16l4.5-5 3.5 3 6-7"/></svg><span class="l">Analytics</span></a>
+    <div class="eb"><small>AGENTS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg><span class="l">Contact list</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span class="l">Discover</span></a>
+    <div class="eb"><small>MATERIALS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg><span class="l">Manuscripts</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="7.5" y="3.5" width="12" height="14" rx="2"/><path d="M4.5 7v11.5a2 2 0 0 0 2 2H15"/></svg><span class="l">Comparable titles</span></a>
+    <div class="eb"><small>TASKS</small><i></i></div>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M9.5 6h11M9.5 12h11M9.5 18h11M3.5 6l1.3 1.3 2-2.3M3.5 12l1.3 1.3 2-2.3"/></svg><span class="l">To-do list</span><span class="n"><span class="d"></span>19</span></a>
+    <a class="ni" href="#"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="l">Calendar</span></a>
+  </div>
+  <div class="foot"><span class="av">BC</span><div class="tx"><b>Bethany Carter</b><span>Pro plan</span></div><button class="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button></div>
+</nav>
+</div>
+</div>
+
+<div class="ann">
+<p class="flab">WHAT CHANGED, AND WHY</p>
+<ul>
+  <li><span class="was">rows: padding 6px 10px (~29px)</span><span class="now"><b>32px fixed height</b>, flex-centred, padding 0 10px. Every row the same height whatever wraps inside it, and a bigger target. <span class="m">height:32px · gap 2px (was 1)</span></span></li>
+  <li><span class="was">eyebrows: margin 16px 8px 5px</span><span class="now"><b>20px above, 6px below.</b> The groups breathe; the hairline keeps doing the separating so the gaps don’t have to be huge. <span class="m">first group sits 22px under the New button</span></span></li>
+  <li><span class="was">nav 14.5px · labels 8.5px</span><span class="now"><b>Unchanged — deliberately.</b> 14.5px Source Serif 4 reads like a 13.5px sans, inside the Linear–Notion band. The 8.5px mono eyebrow is the house label everywhere else; the sidebar shouldn’t fork it.</span></li>
+  <li><span class="was">no capture control</span><span class="now"><b>The split button, 36px.</b> Taller than any row, white against stone — the only raised, lit surface, so the eye lands on the verb. Main segment “Log a query”, 14px/600; chevron 32px for a square hit. <span class="m">radius 10 · hairline inset + 1px 2px shadow</span></span></li>
+  <li><span class="was">Dashboard above the first rule</span><span class="now"><b>Every row sits under an eyebrow</b> once the button takes the top slot — Dashboard gets WORKSPACE, so the rhythm is button, then ruled groups all the way down.</span></li>
+  <li><span class="was">width 248 / 68 collapsed</span><span class="now"><b>Unchanged.</b> “Submission packages” plus icon and count needs ~210px of text room; 248 gives it air without Slack-level sprawl.</span></li>
+</ul>
+</div>
+</div>
+
+<h2>Interaction states</h2>
+<p class="cap">Every state pinned, with its exact numbers. One rule carried through: hovers are quick in (120ms) and slightly slower out (160ms), opening gestures use the house ease, and navigation is instant — an active row never animates into place.</p>
+<div class="board">
+<h3>NAV ROW</h3>
+<div class="srow">
+  <div class="chip"><div class="demo"><a class="ni" href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg><span class="l">Contact list</span></a></div><div class="sl">REST</div><div class="sd">transparent · ink text
+icon opacity .75</div></div>
+  <div class="chip"><div class="demo"><a class="ni hov" href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg><span class="l">Contact list</span></a></div><div class="sl">HOVER</div><div class="sd">bg rgba(255,255,255,.45)
+icon → .95 · in 120ms, out 160ms ease</div></div>
+  <div class="chip"><div class="demo"><a class="ni prs" href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg><span class="l">Contact list</span></a></div><div class="sl">PRESSED</div><div class="sd">bg rgba(255,255,255,.62)
+instant — no transition on press</div></div>
+  <div class="chip"><div class="demo"><a class="ni" aria-current="page" href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg><span class="l">Contact list</span></a></div><div class="sl">ACTIVE</div><div class="sd">anthracite --btn · text #fdf9f5 600
+switches instantly on navigation</div></div>
+  <div class="chip"><div class="demo"><a class="ni fv-row" href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg><span class="l">Contact list</span></a></div><div class="sl">FOCUS-VISIBLE</div><div class="sd">ring: 2px stone gap + 3.5px ink .6
+keyboard only, never on click</div></div>
+</div>
+
+<h3 style="margin-top:30px">SPLIT NEW BUTTON</h3>
+<div class="srow">
+  <div class="chip"><div class="demo"><div class="nw" style="width:100%"><div class="nwb"><span class="nwl" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</span><span class="nwr" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div></div></div><div class="sl">REST</div><div class="sd">white · inset hairline
+shadow 0 1px 2px .05</div></div>
+  <div class="chip"><div class="demo"><div class="nw" style="width:100%"><div class="nwb" style="box-shadow:inset 0 0 0 1px rgba(28,19,15,.22),0 1px 3px rgba(28,19,15,.07)"><span class="nwl" style="background:#faf6f0;pointer-events:none"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</span><span class="nwr" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div></div></div><div class="sl">HOVER</div><div class="sd">ring → .22 · hovered segment #faf6f0
+120ms ease, both</div></div>
+  <div class="chip"><div class="demo"><div class="nw" style="width:100%"><div class="nwb" style="transform:translateY(.5px);box-shadow:inset 0 0 0 1px rgba(28,19,15,.22)"><span class="nwl" style="background:#faf6f0;pointer-events:none"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</span><span class="nwr" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div></div></div><div class="sl">PRESSED</div><div class="sd">translateY(.5px) · drop shadow off
+70ms ease — settles, doesn’t bounce</div></div>
+  <div class="chip"><div class="demo"><div class="nw fv-btn" style="width:100%"><div class="nwb"><span class="nwl" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</span><span class="nwr" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div></div></div><div class="sl">FOCUS-VISIBLE</div><div class="sd">same double ring as the rows
+each segment focusable on its own</div></div>
+  <div class="chip b2" style="margin-top:0"><div class="demo" style="align-items:flex-start"><div class="nw open openstatic" style="width:100%"><div class="nwb"><span class="nwl" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</span><span class="nwr" style="pointer-events:none"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div><div class="nwm"><a href="#" onclick="return false"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 13l8-5.5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg>Record a response</a><div class="sep"></div><a href="#" onclick="return false" class="focused"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg>Add an agent</a><a href="#" onclick="return false"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg>Add a manuscript</a></div></div></div><div class="sl">OPEN</div><div class="sd">ring 1.5px ink · chevron 180° in 200ms house
+menu: fade+drop 4px, in 170ms house, out 120ms
+no stagger — four rows should arrive as one</div></div>
+</div>
+</div>
+
+<h2>Motion, in one table</h2>
+<p class="cap">The grammar: hovers are plain ease and asymmetric (fast in, gentler out); anything that opens uses the house ease and travels at most 4–6px; closing is always faster than opening; navigation never animates. Under reduced motion, every duration is 0.</p>
+<table class="mt">
+<tr><th>WHAT</th><th>IN</th><th>OUT</th><th>EASING</th><th>NOTES</th></tr>
+<tr><td>Row / segment hover wash</td><td class="m">120ms</td><td class="m">160ms</td><td class="m">ease</td><td>Background + icon opacity only. Nothing moves.</td></tr>
+<tr><td>Button ring (hover)</td><td class="m">120ms</td><td class="m">120ms</td><td class="m">ease</td><td>Hairline .12 → .22.</td></tr>
+<tr><td>Pressed</td><td class="m">70ms</td><td class="m">120ms</td><td class="m">ease</td><td>Button: translateY(.5px), drop shadow off. Rows: instant wash .62, no transform.</td></tr>
+<tr><td>Chevron</td><td class="m">200ms</td><td class="m">200ms</td><td class="m">house ease</td><td>rotate(180deg), nothing else.</td></tr>
+<tr><td>Menu open</td><td class="m">170ms <span style="color:var(--muted)">(opacity 150)</span></td><td class="m">120ms, fade only</td><td class="m">house ease</td><td>translateY(-4px) → 0. No scale, no stagger. Closing never travels.</td></tr>
+<tr><td>Active row</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td>Instant. The page navigates; the sidebar states a fact, it doesn’t perform one.</td></tr>
+<tr><td>Collapsed-rail flyout</td><td class="m">170ms</td><td class="m">120ms</td><td class="m">house ease</td><td>Same menu, anchored right of the rail: translateX(-4px) → 0.</td></tr>
+<tr><td>Rail tooltip</td><td class="m">120ms, after 400ms delay</td><td class="m">80ms, no delay</td><td class="m">ease</td><td>Delay once per hover-chain, like macOS — moving along the rail shows them instantly.</td></tr>
+<tr><td>Reduced motion</td><td class="m">0s</td><td class="m">0s</td><td class="m">—</td><td>States still change — only the travel and fades go.</td></tr>
+</table>
+
+<h2>The 68px rail</h2>
+<p class="cap">Collapsed, the button keeps its rank: a white 40×36 tile with the quill — still the only lit surface. The menu becomes a flyout on the rail’s right edge, and the main action moves inside it as the first row, so nothing is lost. <b>Hover the quill tile to see it.</b></p>
+<div class="railwrap">
+<div class="rail">
+  <span class="mk">Q</span>
+  <button class="rnew" aria-label="New">
+    <svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>
+    <div class="flyout">
+      <a href="#" onclick="return false"><svg viewBox="0 0 24 24"><path d="M12 19.5c0-5 2-9.5 8-13-1 6-3.5 10.5-8 13z"/><path d="M12 19.5c-3.5 0-6.5-1-8.5-3"/></svg>Log a query</a>
+      <a href="#" onclick="return false"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 13l8-5.5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg>Record a response</a>
+      <div class="sep"></div>
+      <a href="#" onclick="return false"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg>Add an agent</a>
+      <a href="#" onclick="return false"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg>Add a manuscript</a>
+    </div>
+  </button>
+  <div class="rtile on" title="Query Centre"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l5-5"/></svg></div>
+  <div class="rtile"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></div>
+  <div class="rtile"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg></div>
+  <div class="rtile"><svg viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 4l5 16"/></svg></div>
+</div>
+<div class="notes">
+  <p><b>Keyboard, in full.</b> The chevron opens on <span class="m">Enter / Space / ↓</span> with focus on the first row; <span class="m">↑ ↓</span> move and wrap; <span class="m">Enter</span> picks; <span class="m">Escape</span> closes and returns focus to the chevron; <span class="m">Tab</span> closes without trapping; a pointer press outside closes. The main segment is a plain button — it just logs a query.</p>
+  <p><b>No shortcut hints yet.</b> The menu shows no keycaps and nothing binds a key, until the shortcuts registry from the switcher pass exists. Once it does, “N → open the New menu” is one registry entry away and the sheet picks it up for free.</p>
+  <p><b>Tooltips on the rail</b> name every tile, the New button included, after the 400ms delay. The flyout and the tooltip never show together.</p>
+  <p><b>Reduced motion</b> zeroes every duration in the table — the chevron still flips, the menu still appears, nothing travels.</p>
+</div>
+</div>
+
+</div>
+<script>
+(function(){
+  var W=1460;
+  function fit(){var s=Math.min(1,innerWidth/W);var st=document.getElementById('stage');st.style.transform='scale('+s+')';document.body.style.height=st.getBoundingClientRect().height+80+'px'}
+  addEventListener('resize',fit);addEventListener('load',fit);fit();
+
+  var nw=document.getElementById('nw'),nwr=document.getElementById('nwr'),nwm=document.getElementById('nwm');
+  var rows=[].slice.call(nwm.querySelectorAll('a'));
+  function open(focusFirst){nw.classList.add('open');nwr.setAttribute('aria-expanded','true');if(focusFirst)rows[0].focus()}
+  function close(back){nw.classList.remove('open');nwr.setAttribute('aria-expanded','false');if(back)nwr.focus()}
+  nwr.addEventListener('click',function(){nw.classList.contains('open')?close():open(false)});
+  nwr.addEventListener('keydown',function(e){if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();open(true)}});
+  nwm.addEventListener('keydown',function(e){
+    var i=rows.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){e.preventDefault();rows[(i+1)%rows.length].focus()}
+    else if(e.key==='ArrowUp'){e.preventDefault();rows[(i-1+rows.length)%rows.length].focus()}
+    else if(e.key==='Home'){e.preventDefault();rows[0].focus()}
+    else if(e.key==='End'){e.preventDefault();rows[rows.length-1].focus()}
+    else if(e.key==='Escape'){close(true)}
+    else if(e.key==='Tab'){close(false)}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nw.classList.contains('open'))close(true)});
+  document.addEventListener('pointerdown',function(e){if(nw.classList.contains('open')&&!nw.contains(e.target))close(false)});
+  rows.forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();close(false)})});
+  document.getElementById('nwl').addEventListener('click',function(){close(false)});
+})();
+</script>
+</body>
+</html>
