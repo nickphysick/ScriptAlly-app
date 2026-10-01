@@ -89,12 +89,13 @@ describe("The IA renders what exists — and nothing else", () => {
     const secs = workspaceSections({ todo: 42 });
     /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
        work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
+       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot — until
+       the sidebar metrics pass took it back to the foot as the gear (reversing P5, Nick's call).
        ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -120,12 +121,13 @@ describe("The IA renders what exists — and nothing else", () => {
     const secs = workspaceSections({ todo: 42 });
     /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
        work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
+       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot — until
+       the sidebar metrics pass took it back to the foot as the gear (reversing P5, Nick's call).
        ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -159,12 +161,13 @@ describe("The IA renders what exists — and nothing else", () => {
     const secs = workspaceSections({ todo: 42 });
     /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
        work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
+       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot — until
+       the sidebar metrics pass took it back to the foot as the gear (reversing P5, Nick's call).
        ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -186,12 +189,13 @@ describe("The IA renders what exists — and nothing else", () => {
     const secs = workspaceSections({ todo: 42 });
     /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
        work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
+       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot — until
+       the sidebar metrics pass took it back to the foot as the gear (reversing P5, Nick's call).
        ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);

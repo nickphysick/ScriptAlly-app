@@ -143,22 +143,14 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
       })),
     },
-    /* ⚠️ ACCOUNT IS A SECTION NOW, AND SETTINGS CAME UP OUT OF THE FOOT (audit pack P5).
-       Settings was a lone row pinned below the divider beside the user block — a destination
-       living in the furniture rather than in the navigation, and the only page in the app you
-       could not find by reading down the nav. It is an ordinary row in an ordinary section here.
-
-       ⚠️ THE FOOT IS NOW THE USER ROW AND NOTHING ELSE, which is what makes the divider mean
-       something: everything above it is somewhere to go, everything below it is who you are.
-
-       One child, and that is honest rather than awkward — `/plans` and `/help` are real routes
-       but they are reached from inside Settings and from the help control, so listing them here
-       would be a second door apiece. The section grows when a page genuinely has no other home. */
-    {
-      id: "account",
-      label: "Account",
-      def: "settings",
-      children: [{ id: "settings", label: "Settings", path: "/account", icon: "settings" }],
-    },
+    /* ⚠️ THERE IS NO ACCOUNT SECTION — IT WAS HERE, AND IT WENT BACK TO THE FOOT (sidebar metrics
+       pass, Nick's call, REVERSING audit pack P5). P5 lifted Settings out of the foot into a one-row
+       ACCOUNT section on the argument that a lone row below the divider was "a destination living in
+       the furniture", the one page you could not find by reading down the nav. With the capture
+       button taking the sidebar's top slot every group carries a ruled heading, and a heading over a
+       single Settings row at the foot of the nav labelled nothing. Settings is the account's own
+       furniture: the gear at the user row's right (WorkspaceShell's foot), and still the first row
+       of the account menu the user row opens. The nav renders no Settings row; the bar still names
+       the settings pages (`barPageName`'s account branch). */
   ];
 }

@@ -210,7 +210,9 @@ describe("the properties", () => {
     const pin = cssRules.slice(cssRules.indexOf(".ws-pin {"));
     expect(pin.slice(0, pin.indexOf("}")), "panel padding is a term in the budget").toContain("padding: 16px 14px 12px");
     const ni = cssRules.slice(cssRules.indexOf(".ws-ni {"));
-    expect(ni.slice(0, ni.indexOf("}")), "row padding is a term").toContain("padding: 6px 10px");
+    /* sidebar metrics pass: the row is a fixed 32px with `padding: 0 10px` (was 6px 10px). Only the
+       VERTICAL half moved; the budget is horizontal, so its 10px term is unchanged. */
+    expect(ni.slice(0, ni.indexOf("}")), "row padding is a term").toContain("padding: 0 10px");
     expect(cssRules, "the icon's box is a term").toContain(".ws-ic svg { width: 16px; height: 16px");
     expect(cssRules, "the label's own margin is a term").toContain(".ws-lbl { display: inline-block; margin-left: 10px");
   });

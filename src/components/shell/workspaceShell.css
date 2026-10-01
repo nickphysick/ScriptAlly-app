@@ -176,7 +176,8 @@
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  /* sidebar metrics pass: 2px between rows (was 1) — the ref's Tuned sidebar */
+  gap: 2px;
   scrollbar-width: none;
 }
 .ws-nav::-webkit-scrollbar { width: 0; height: 0; }
@@ -186,9 +187,16 @@
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */
-/* v3: the ref's `.nav h6` — mono 8.5px at .18em, 600, muted, 9/8/3 margin. */
+/* v3: the ref's `.nav h6` — mono 8.5px at .18em, 600, muted.
+   ⚠️ RULED, AND WITH MORE AIR (sidebar metrics pass; ref sidebar-metrics-states.html `.eb`): the
+   label, then a hairline flex-grown to the row's end. 20px above, 6px below (was 9/3); the 8px side
+   insets are unchanged. The hairline is the label's own `::after`, so the markup stays one text node
+   and every reader of the label's text still finds it. */
 .ws-glabel {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: "JetBrains Mono", monospace;
   font-size: 8.5px;
   font-weight: 600;
@@ -196,12 +204,19 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--shell-mute);
-  margin: 9px 8px 3px;
+  margin: 20px 8px 6px;
   padding: 0;
 }
+.ws-glabel::after { content: ""; flex: 1; height: 1px; background: var(--shell-rule); }
+/* ⚠️ BUTTON → FIRST EYEBROW IS 22px, SPLIT AS THE PIN'S 12px GAP + THIS 10px MARGIN. The nav is a
+   flex column, so the first label's margin does not collapse into the gap — the two simply add. */
+.ws-nav > .ws-glabel:first-child { margin-top: 10px; }
 .ws-glabel.first { margin-top: 0; }
-/* v3: the ref's `.nav a` — Source Serif 4 at 14.5px, 6/10 padding, 9px corners, sized by its line
-   box (14.5 × 1.45 + 12 = 33px) rather than a fixed height.
+/* The ref's `.nav a` — Source Serif 4 at 14.5px, 9px corners.
+   ⚠️ A FIXED 32px HEIGHT, FLEX-CENTRED, `padding: 0 10px` (sidebar metrics pass). It used to be sized
+   by its line box (14.5 × 1.45 + 12 = 33px), which made every row's height a function of its type and
+   of whatever wrapped inside it; a stated height is the same for every row and a bigger target.
+   `box-sizing` is DECLARED so the 32 is the border box in a harness without Tailwind's preflight.
    ⚠️ gap 0 + `.ws-lbl { margin-left: 10px }` — the icon–label 10px lives on the label so it
    collapses WITH it (sidebar-collapse pack, Phase 2). A flex gap beside a zero-width child holds
    itself open and parks the icon off the rail's centre. */
@@ -210,7 +225,9 @@
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 6px 10px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -234,7 +251,7 @@
 .ws-ic { display: flex; flex: none; opacity: 0.75; color: inherit; }
 .ws-ic svg { width: 16px; height: 16px; stroke-width: 1.7; }
 .ws-ni:not(.on):hover { background: var(--shell-hover-bg); }
-.ws-ni:hover .ws-ic { opacity: 1; }
+.ws-ni:hover .ws-ic { opacity: 0.95; }
 /* ⚠️ ACTIVE IS ANTHRACITE WITH CREAM TEXT (D3) — never white, never pink, never burgundy. */
 .ws-ni.on { background: var(--shell-active-bg); color: var(--shell-active-fg); font-weight: 600; }
 .ws-ni.on .ws-ic { opacity: 1; }
@@ -301,9 +318,28 @@
 .ws-srow.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
 .ws-srow:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 
-/* foot — the user row alone: avatar, name, plan, Upgrade. Settings left for the ACCOUNT section
-   (audit pack P5), and the old "NO avatar: the rail carries the face" note went with the rail. */
+/* foot — the user row and the gear, then Upgrade. ⚠️ SETTINGS IS BACK IN THE FOOT AS THE GEAR
+   (sidebar metrics pass, Nick's call, reversing audit pack P5's move of it into an ACCOUNT nav
+   section — the reason is at the foot in WorkspaceShell). The old "NO avatar: the rail carries the
+   face" note went with the rail. */
 .ws-pfoot { flex: none; }
+/* ⚠️ THE ROW CARRIES THE HAIRLINE NOW, so the rule runs over the gear as well as the user row (the
+   ref's `.foot`). The user row keeps its own 8px side and 2px foot inset; the 10px from the hairline
+   to the avatar is this row's 4px plus the user row's 6px. */
+.ws-pfrow { display: flex; align-items: center; gap: 2px; padding-top: 4px; border-top: 1px solid var(--shell-hairline); }
+.ws-pfrow > .ws-uacct { flex: 1; min-width: 0; }
+/* the gear: a 30px circle at the row's right, the account's own furniture (the ref's `.gear`) */
+.ws-gear {
+  box-sizing: border-box; flex: none; width: 30px; height: 30px; margin: 4px 4px 0 0;
+  display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--sp-ink); cursor: pointer; outline: none;
+  transition: background-color 0.16s ease;
+}
+.ws-gear svg { opacity: 0.8; transition: opacity 0.12s ease; }
+.ws-gear:hover { background: var(--shell-btn-hover); transition: background-color 0.12s ease; }
+.ws-gear:hover svg { opacity: 0.95; }
+.ws-gear:active { background: rgba(255, 255, 255, 0.62); transition: none; }
+.ws-gear:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 /**
  * ⚠️ ONE RULE FOR THIS ROW, AND THERE USED TO BE TWO (audit P2).
  *
@@ -326,8 +362,7 @@
   /* gap 0 + margins on the text column — the same collapse mechanism as the nav rows (see .ws-ni):
      a flex gap beside zero-width children holds itself open. */
   gap: 0;
-  padding: 10px 8px 2px;
-  border-top: 1px solid var(--shell-hairline);
+  padding: 6px 8px 2px;
   cursor: pointer;
   transition: background 0.13s;
   outline: none;
@@ -897,9 +932,14 @@
    rendered, and the wrapped label would have picked the nudge up as a silent behaviour change.
    The nav is locked: today-exact wins over restoring two-week-old intent. (`.sp-count` in the old
    pair matched nothing — CountChip renders `sp-ct` — recorded in the pack report.) */
-.ws-ni { transition: background-color 0.14s ease, color 0.14s ease; }
-.ws-ni > .sp-ct { transition: transform 0.14s ease; }
-.ws-ni:hover > .sp-ct { transform: translateX(2px); }
+/* ⚠️ SUPERSEDED BY THE SIDEBAR METRICS PASS'S MOTION TABLE: hover is a wash and an icon opacity and
+   NOTHING MOVES — so the count's 2px nudge is retired. The hover wash runs in at 120ms and out at
+   160ms, plain ease; pressed deepens the wash instantly; the active row never animates. */
+.ws-ni { transition: background-color 0.16s ease; }
+.ws-ni:not(.on):hover { transition: background-color 0.12s ease; }
+.ws-ni:not(.on):active { background: rgba(255, 255, 255, 0.62); transition: none; }
+.ws-ni.on { transition: none; }
+.ws-ic { transition: opacity 0.12s ease; }
 
 
 
@@ -999,6 +1039,7 @@
    display — the text keeps its exact box (the 22px-rhythm rule) and stays in the a11y tree. */
 /* v3: section labels become a 28px hairline (the ref's collapsed `h6`). `font-size: 0` rather than
    `display: none`, so the heading stays in the accessibility tree. */
+.sb-collapsed .ws-glabel::after { content: none; }
 .sb-collapsed .ws-glabel { height: 1px; width: 28px; margin: 8px auto; padding: 0; background: var(--shell-hairline); font-size: 0; overflow: hidden; color: transparent; user-select: none; }
 
 
@@ -1008,7 +1049,7 @@
    that kept them would survive as a stray 10px lozenge of border beside the avatar. */
 /* the foot spans the 48px rail so the user row's hairline does (the ref's collapsed `.me`) */
 .sb-collapsed .ws-pfoot { width: 100%; }
-.sb-collapsed .ws-uacct { justify-content: center; padding: 10px 0 2px; width: 100%; box-sizing: border-box; }
+.sb-collapsed .ws-uacct { justify-content: center; padding: 6px 0 2px; width: 100%; box-sizing: border-box; }
 .sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; max-height: 0; opacity: 0; margin-left: 0; }
 /* ⚠️ NO COLLAPSED RULE FOR THE PILL — it is not rendered at 72px at all (Option D), so there is
    nothing to zero. The old rule had to null border AND padding or a collapsed pill survived as a
@@ -1327,6 +1368,91 @@
   .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-search, .ws-fb, .ws-help)::after {
     animation-name: none !important;
     background-image: none;
+  }
+}
+
+/* ══ THE CAPTURE BUTTON — "Log a query", split (sidebar metrics pass; ref
+   design-refs/shell/sidebar-metrics-states.html, the Tuned sidebar, the states board and the motion
+   table). Never called "+ New": that control left the bar for good, and this one is the sidebar's. ══
+   ⚠️ THE WHITE IS `--shell-control-bg`, THE TOKEN THE BAR'S WHITE CONTROLS ALREADY READ (the
+   switcher tile and its menu). It is declared once at `:root` and no theme overrides it, so it is the
+   raised light surface in all three themes — and portal-safe, which the rail's flyout needs. Its
+   rows' wash is `--shell-menu-on`, the switcher menu's own. */
+.ws-cap { position: relative; flex: none; z-index: 3; }
+.ws-capb {
+  box-sizing: border-box; display: flex; height: 36px;
+  background: var(--shell-control-bg); border-radius: 10px; overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--shell-hairline), 0 1px 2px rgba(28, 19, 15, 0.05);
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+/* hover: the ring firms to .22, 120ms both ways */
+.ws-cap:hover .ws-capb { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22), 0 1px 3px rgba(28, 19, 15, 0.07); }
+/* pressed: settles half a pixel and loses its drop shadow, in 70ms — it does not bounce */
+.ws-capb:active { transform: translateY(0.5px); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); transition: box-shadow 0.07s ease, transform 0.07s ease; }
+/* open: a 1.5px ink ring, and nothing pressed about it */
+.ws-cap.is-open .ws-capb { box-shadow: inset 0 0 0 1.5px var(--sp-ink); transform: none; }
+/* the two segments — each a button, each focusable on its own. `font-family` is NAMED on every text
+   element: brand.tsx gives bare buttons and spans the sans at runtime, which a class outranks. */
+.ws-capl, .ws-capr {
+  box-sizing: border-box; display: flex; align-items: center; height: 100%;
+  margin: 0; border: 0; background: transparent; color: var(--sp-ink); cursor: pointer; outline: none;
+  transition: background-color 0.16s ease;
+}
+.ws-capl { flex: 1; min-width: 0; gap: 9px; padding: 0 12px; text-align: left; font-family: var(--sp-serif); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.ws-capr { flex: none; width: 32px; justify-content: center; padding: 0; border-left: 1px solid var(--shell-hairline); }
+.ws-capl:hover, .ws-capr:hover { background: var(--shell-menu-on); transition: background-color 0.12s ease; }
+.ws-capl:focus-visible, .ws-capr:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+.ws-capr svg { transition: transform 0.2s cubic-bezier(.22, .8, .3, 1); }
+.ws-cap.is-open .ws-capr svg { transform: rotate(180deg); }
+.ws-capic { display: flex; flex: none; }
+.ws-capt { font-family: inherit; font-weight: inherit; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── the menu: full button width, 6px below, the switcher menu's grammar ──
+   In: 170ms house ease (opacity 150ms), from 4px above. ⚠️ OUT IS A FADE ONLY, 120ms: the closed
+   state's transform waits out the fade (`transform 0s 0.12s`), so a closing menu never travels — it
+   only returns to its starting offset once it is invisible. No scale, no stagger. */
+.ws-capm {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 6;
+  box-sizing: border-box; padding: 6px; border-radius: 12px;
+  background: var(--shell-control-bg);
+  box-shadow: 0 0 0 1px var(--shell-rule), 0 16px 40px rgba(28, 19, 15, 0.16);
+  opacity: 0; transform: translateY(-4px); visibility: hidden; pointer-events: none;
+  transition: opacity 0.12s ease, transform 0s linear 0.12s, visibility 0s linear 0.12s;
+}
+.ws-capm.is-open {
+  opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+  transition: opacity 0.15s ease, transform 0.17s cubic-bezier(.22, .8, .3, 1), visibility 0s;
+}
+/* the rail's flyout: the same menu, PORTALLED to the body and fixed to the tile's right edge — the
+   panel's `overflow: hidden` would otherwise clip it at 68px — travelling in from 4px to the left */
+.ws-capm--fly { position: fixed; left: 0; top: 0; right: auto; width: 228px; z-index: 85; transform: translateX(-4px); }
+.ws-capm--fly.is-open { transform: none; }
+.ws-capi {
+  box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; height: 34px;
+  margin: 0; padding: 0 9px; border: 0; border-radius: 8px; background: transparent;
+  color: var(--sp-ink); cursor: pointer; text-align: left; outline: none;
+  font-family: var(--sp-serif); font-size: 14px; font-weight: 400; white-space: nowrap;
+  transition: background-color 0.16s ease;
+}
+.ws-capi .ws-capic { opacity: 0.8; }
+.ws-capi:hover, .ws-capi:focus-visible { background: var(--shell-menu-on); transition: background-color 0.12s ease; }
+.ws-capi:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+.ws-capsep { height: 1px; margin: 5px 8px; background: var(--shell-hairline); }
+
+/* ── collapsed: a 40×36 white tile with the quill, centred — the rail's one lit surface ── */
+.ws-captile { width: 40px; justify-content: center; align-items: center; padding: 0; border: 0; color: var(--sp-ink); cursor: pointer; outline: none; }
+.ws-captile:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22), 0 1px 3px rgba(28, 19, 15, 0.07); }
+.ws-captile:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+
+/* ⚠️ REDUCED MOTION: EVERY DURATION THIS PASS STATES IS 0s — states still change, only the travel
+   and the fades go. The shell's own rule above takes the sheet to 0.01ms; these elements are held
+   to 0s outright, at a higher specificity so they win, and the flyout gets its own because it is
+   portalled OUTSIDE `.ws-app` where the shell's rule cannot reach it. */
+@media (prefers-reduced-motion: reduce) {
+  .ws-app .ws-ni, .ws-app .ws-ic, .ws-app .ws-glabel, .ws-app .ws-gear, .ws-app .ws-gear svg,
+  .ws-app .ws-cap, .ws-app .ws-cap *, .ws-capm, .ws-capm * {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
   }
 }
 

@@ -417,31 +417,35 @@ describe("the sidebar", () => {
     expect(rule(".ws-av")).toContain("border-radius: 50%");
   });
 
-  /* ⚠️ RETARGETED (audit pack P5) from "hairline, then the user row, then Settings". Settings has
-     come UP into the ACCOUNT section — as a lone row below the divider it was a destination living
-     in the furniture, and the one page you could not find by reading down the nav.
-
-     What is asserted now is the SHAPE the divider promises: above it, places to go; below it, who
-     you are. So the foot holds the hairline and the user row, and nothing that navigates. */
-  /* ⚠️ THE END ANCHOR MOVED FROM `{accountMenu}` TO `<SettingsRail` (settings-mode pack, Phase 1),
-     AND THE CLAIM IS UNCHANGED. `{accountMenu}` was never the foot's end — it was the next thing
-     that happened to follow it, which is a proxy, and it held only while nothing lived between the
-     two. Settings mode puts a second panel layer there, so the slice grew to cover an element that
-     is not in the foot and the assertion went red over the word "Settings" inside `SettingsRail`.
-     The foot did not change. `sliceBetween` is used rather than two `indexOf`s so a future move of
-     that component fails by NAMING the missing anchor instead of silently widening the slice to
-     the rest of the file. */
-  /* ⚠️ RETARGETED (app shell v3, 26 Sep): the hairline is the user row's OWN `border-top` now (the
-     ref's `.me`), so the separate `.ws-pdiv` element is retired and asserted gone; the claim — a
-     hairline, then who you are, and nothing to go to — is unchanged. */
-  it("⚠️ the foot is the hairline and the user row — no Settings, nothing else to go to", () => {
+  /* ⚠️ RETARGETED, AND THIS ONE REVERSES ITS PREDECESSOR (sidebar metrics pass, Nick's call). Audit
+     pack P5 asserted "the foot is the hairline and the user row — no Settings"; Settings is back in
+     the foot as the GEAR, and the ACCOUNT section it had moved into is gone from the nav. What the
+     foot promises now: a hairline, then who you are and your settings — the user row and the gear as
+     SIBLINGS in one horizontal row, never the gear inside the user row (whose click opens the account
+     menu and would need a stopPropagation to guard it). `sliceBetween` names a missing anchor rather
+     than widening the slice. SB5's rendered half (the gear routes, absent collapsed) is
+     tests/e2e/sidebarCapture.measure.ts. */
+  it("⚠️ SB5 the foot is a hairline over the user row AND the gear, as siblings — and the nav has no Settings", () => {
     const foot = sliceBetween(srcCode, 'className="ws-pfoot"', "<SettingsRail", "the sidebar foot");
+    const row = foot.indexOf('className="ws-pfrow"');
     const user = foot.indexOf('className="ws-uacct"');
-    expect(user).toBeGreaterThan(-1);
-    expect(foot).not.toContain('className="ws-pdiv"');
-    expect(rule(".ws-uacct")).toContain("border-top: 1px solid var(--shell-hairline)");
-    expect(foot).not.toContain("ws-setrow");
-    expect(foot).not.toContain("Settings");
+    const gear = foot.indexOf('className="ws-gear"');
+    expect(row, "the horizontal foot row").toBeGreaterThan(-1);
+    expect(user).toBeGreaterThan(row);
+    expect(gear, "the gear").toBeGreaterThan(user);
+    /* the user row CLOSES before the gear opens — a sibling, not a child */
+    expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*\{!sidebar\.collapsed && \(\s*<button\s+type="button"\s*$/);
+    expect(foot.slice(gear)).toContain('aria-label="Settings"');
+    expect(foot.slice(gear)).toContain('onClick={() => go("/account")}');
+    expect(foot).not.toContain("stopPropagation");
+    expect(rule(".ws-pfrow")).toContain("border-top: 1px solid var(--shell-hairline)");
+    expect(rule(".ws-gear")).toContain("width: 30px; height: 30px");
+    expect(rule(".ws-gear")).toContain("border-radius: 50%");
+    const html = at("/dashboard");
+    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the rendered nav");
+    expect(nav, "the nav renders a Settings row").not.toContain(">Settings<");
+    expect(nav).not.toMatch(/ws-glabel[^>]*>Account</);
+    expect(html).toContain('class="ws-gear" aria-label="Settings"');
   });
 
   /* ⚠️ AND ITS RULE WENT WITH IT — a leftover `.ws-setrow` is how a foot quietly regrows a row. */

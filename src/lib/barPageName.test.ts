@@ -21,7 +21,9 @@ describe("barPageName — the sidebar's own section heading and label", () => {
     expect(name("/todo/calendar")).toEqual({ section: "Tasks", name: "Calendar" });
     expect(name("/account/profile")).toEqual({ section: "Account", name: "Settings" });
   });
-  it("⚠️ the first group has no heading in the sidebar, so the Dashboard's name stands alone", () => {
+  /* ⚠️ THE SIDEBAR HEADS DASHBOARD WITH "WORKSPACE" NOW (sidebar metrics pass); the bar keeps naming it
+     alone — a stated difference, flagged for Nick, not an oversight (see barPageName's note). */
+  it("⚠️ the Dashboard's name stands alone in the bar", () => {
     expect(name("/dashboard")).toEqual({ section: null, name: "Dashboard" });
   });
   it("routes outside the nav name themselves, with no section", () => {

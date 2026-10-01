@@ -42,6 +42,7 @@ import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
 import { ShortcutsSheet } from "./ShortcutsSheet";
+import { SidebarCapture } from "./SidebarCapture";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -85,7 +86,8 @@ export interface WorkspaceShellProps {
   /** Opens the account menu, and hands it the element to anchor against (it is portalled). */
   onOpenAccount?: (anchor: HTMLElement) => void;
   onUpgrade?: () => void;
-  /** The legacy navigate bridge — the + New menu's capture contracts run through it. */
+  /** The legacy navigate bridge — the sidebar's capture button (Log a query and its menu) runs its
+   *  existing contracts through it. */
   onNavigate?: (tab: string, subPageName?: string) => void;
   /* ⚠️ THE CARD OWNS THE APP'S SCROLL CONTAINER NOW (§4). The sticky bar only works if the page
      scrolls beneath it, which means the scroller must be INSIDE the card and ABOVE the content —
@@ -196,13 +198,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      a deep link into `/account/security` from an email is outside the app entirely — and on a
      second visit is the previous settings section, so "Back to app" would walk the mode rather
      than leave it. The desk is where the app starts. */
-  /* ⚠️ FOCUS RETURNS TO THE ACCOUNT ROW, WHICH IS NOT WHAT THE PACK ASKED FOR — because the thing
-     it asked for does not exist. There is no Settings item in the app nav: Settings came out of the
-     sidebar foot deliberately (see the note at `.ws-pfoot`) and is the FIRST ROW of `AccountMenu`,
-     a flyout that is closed by the time anyone leaves the mode. Returning focus into a menu that is
-     not open is not possible, and the nearest honest target is the row that OPENS that menu — the
-     one persistent element that is the door to settings. Substitution recorded rather than made
-     quietly; see the run report. */
+  /* ⚠️ FOCUS RETURNS TO THE ACCOUNT ROW. When this was written there was no Settings item in the
+     sidebar at all — Settings was the FIRST ROW of `AccountMenu`, a flyout closed by the time anyone
+     leaves the mode — so the row that OPENS that menu was the nearest honest target. The foot's
+     gear (sidebar metrics pass) is a Settings door now too, but it is removed while the sidebar is
+     collapsed; the account row is present in both states, so it stays the target. */
   const acctRowRef = useRef<HTMLDivElement>(null);
 
   const leaveSettings = useCallback(() => {
@@ -503,6 +503,18 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           {/* ⚠️ THE MANUSCRIPT CARD HAS MOVED TO THE BAR (page header v2 §1) — `BarSwitcher`. There is
               exactly one switcher on a desktop page, and it is not in the sidebar. */}
 
+          {/* THE CAPTURE BUTTON (sidebar metrics pass; ref design-refs/shell/sidebar-metrics-states.html)
+              — "Log a query", split, between the brand and the nav in the pin's 12px rhythm. The one
+              raised, lit surface in the sidebar. Its rows are existing flows through `onNavigate`;
+              collapsed it is a 40×36 tile whose flyout is portalled past the panel's clip. The tile's
+              rail tip is the shell's own, and stands down while the flyout is open. */}
+          <SidebarCapture
+            collapsed={sidebar.collapsed}
+            onNavigate={onNavigate}
+            tipFor={(when) => railTipFor("Log a query", undefined, undefined, 120, sidebar.collapsed && when)}
+            onOpenMenu={hideTip}
+          />
+
           {/* v3: NO DIVIDER UNDER THE SWITCHER — the ref draws none, and the sidebar's own 12px gap is
               the only separation between the head and the nav. */}
 
@@ -515,12 +527,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               so a screen reader walks the same nav either way; the name must not change with the
               width. */}
           <nav className="ws-nav" aria-label="Main">
-            {sections.map((sec, gi) => (
+            {sections.map((sec) => (
               <React.Fragment key={sec.id}>
-                {/* ⚠️ THE FIRST GROUP GETS NO HEADING (app-shell-v2). "WORKSPACE" sat above a
-                    group of one — Dashboard — and a section header over a single item labels
-                    nothing; it just adds a rung to the ladder. Dashboard stands alone. */}
-                {gi > 0 && <div className="ws-glabel">{sec.label}</div>}
+                {/* ⚠️ EVERY GROUP GETS ITS HEADING NOW, DASHBOARD'S INCLUDED (sidebar metrics pass) —
+                    reversing app-shell-v2's "the first group gets no heading", knowingly. That rule
+                    was right while Dashboard sat at the top of the sidebar: a heading over a group of
+                    one labelled nothing. With the capture button in the top slot the rhythm is
+                    capture, then ruled groups all the way down, and the first rule is what separates
+                    the button from the nav — so WORKSPACE is no longer a heading doing nothing.
+                    The rule is the label's own `::after`, so the markup stays one text node. */}
+                <div className="ws-glabel">{sec.label}</div>
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
                   return (
@@ -562,13 +578,19 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               spacer BESIDE a flex:1 nav is two claimants on the same slack and the browser
               splits it, leaving the last groups below a fold with empty panel beneath. */}
 
-          {/* ── foot: hairline → the user row, and NOTHING ELSE (audit pack P5) ──
-              ⚠️ SETTINGS CAME UP OUT OF HERE and is an ordinary row in the ACCOUNT section now. As
-              a lone row pinned below the divider it was a destination living in the furniture —
-              the one page in the app you could not find by reading down the nav.
+          {/* ── foot: hairline → the user row and the gear ──
+              ⚠️ THE GEAR RETURNS, REVERSING AUDIT PACK P5 (Nick's call, sidebar metrics pass). P5
+              lifted Settings out of the foot into an ACCOUNT section of the nav, on the reasoning
+              that a lone row below the divider was "a destination living in the furniture" and that
+              the divider should mean "above, places to go; below, who you are". That held while
+              the nav was the only way to reach Settings. With the capture button in the top slot,
+              a one-row ACCOUNT section at the bottom of the nav was a heading over a group of one,
+              and Settings is the account's own furniture: a 30px gear at the user row's right, the
+              ref's foot. The divider now reads "below, you and your settings".
 
-              ⚠️ AND THAT IS WHAT MAKES THE DIVIDER MEAN SOMETHING: above it, places to go; below
-              it, who you are. A second navigating row down here would blur that again.
+              ⚠️ THE GEAR IS A SECOND DOOR, ACCEPTED: the user row still opens the account menu,
+              whose first row is Settings. Collapsed, the gear is removed — the avatar's menu keeps
+              Settings reachable at 68px, as it does the upgrade.
 
               ⚠️ THE AVATAR IS BACK. It said "NO avatar (the rail carries the face)" — and the rail
               no longer exists, so nothing carried it. */}
@@ -591,6 +613,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 gains a step rather than a dead end; nothing else in the app relied on this row
                 being a direct link (checked — the other `ws-uacct` references are its stylesheet
                 rules and three tests about position, tooltip gating and initials). */}
+            {/* ⚠️ A HORIZONTAL ROW HOLDING TWO SIBLINGS — the user row and the gear — and never the
+                gear INSIDE the user row. Nested, the gear's click would bubble into the row's
+                account-menu handler and need a `stopPropagation` to guard it; side by side there is
+                no hazard to guard. The Upgrade pill's own precedent. The row carries the hairline. */}
+            <div className="ws-pfrow">
             <div
               ref={acctRowRef}
               className="ws-uacct"
@@ -616,6 +643,20 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <span className="ws-n">{formatSidebarName(name)}</span>
                 <span className="ws-acctline"><span className="ws-pl">{plan.label}</span></span>
               </span>
+            </div>
+            {!sidebar.collapsed && (
+              <button
+                type="button"
+                className="ws-gear"
+                aria-label="Settings"
+                onClick={() => go("/account")}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" />
+                </svg>
+              </button>
+            )}
             </div>
             {/* ⚠️ ROW 2 — A SIBLING OF THE ACCOUNT ROW, NOT A CHILD, and that is the whole fix: a
                 full-width pill beneath cannot compete with the name for a line's width. It is

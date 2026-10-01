@@ -15,11 +15,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
+import { sliceBetween } from "../../test/sliceBetween";
 import { shellCrumb, shellHitFor } from "../../lib/workspaceShell";
 import { PALETTE_PAGES } from "../../lib/searchPalette";
 import { shellCrumbForPath, SHELL_SECTIONS } from "./shellV2Nav";
 
-/* The shell's import chain reaches the db provider (the + New menu's capture contracts); the
+/* The shell's import chain reaches the db provider (the sidebar capture button's contracts); the
    established mock from topNav.test keeps firebase out of the node environment. */
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
@@ -62,13 +63,16 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
          lock kept asserting the pre-`bdf0d83` order because the code had been reverted under it,
          so lock and source agreed about a state neither had been asked for.
      Asserted as the full sequence, so a group appearing, vanishing or moving still fails here. */
-  it("the groups run in the work's order, with Tasks and Account beneath Materials", () => {
+  /* ⚠️ RETARGETED A THIRD TIME (sidebar metrics pass): Dashboard gets its WORKSPACE heading back — the
+     capture button takes the top slot, so the first rule separates it from the nav — and ACCOUNT
+     left the nav: Settings is the foot's gear again (reversing P5, Nick's call). */
+  it("the groups run in the work's order — Workspace first, Tasks last, no Account", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Queries", "Agents", "Materials", "Tasks", "Account"]);
-    // and Dashboard is still there, simply without a heading over it
+    expect(labels).toEqual(["Workspace", "Queries", "Agents", "Materials", "Tasks"]);
     expect(html).toContain(">Dashboard<");
-    // Settings came up out of the foot and is a nav destination now, not a chip
-    expect(html).toContain(">Settings<");
+    // the nav renders no Settings row; the foot's gear is the door (SB5)
+    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the sidebar nav");
+    expect(nav).not.toContain(">Settings<");
   });
 
   it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {

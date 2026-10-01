@@ -87,8 +87,9 @@ describe("the app sidebar's TASKS section", () => {
   const nav = workspaceSections({ todo: 7 });
   const tasks = nav.find((s) => s.id === "tasks")!;
 
-  it("sits below MATERIALS, ahead of ACCOUNT — and no To-do row survives under Workspace", () => {
-    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+  /* sidebar metrics pass: ACCOUNT left the nav (Settings is the foot's gear again), so Tasks is last. */
+  it("sits below MATERIALS, last in the nav — and no To-do row survives under Workspace", () => {
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 

@@ -20,6 +20,7 @@
  * pathname and search, so a link, a back button and a click all agree. `openId` is the ONLY piece
  * of local state, because "which section is expanded" genuinely is not in the URL.
  */
+import { isAccountPath } from "./accountRoutes";
 
 /** A child row — always a real destination. A child with no route is a dead link, so there is no
  *  optional path here: absence is expressed by omitting the child. */
@@ -271,9 +272,16 @@ export function openForHit(hit: ShellHit | null): string | null {
  * heading above it as an eyebrow — or the name alone where the sidebar draws no heading (the first
  * group, the Dashboard's) or the page is in no section.
  *
- * ⚠️ THE EYEBROW IS THE HEADING THE SIDEBAR DRAWS, SO IT FOLLOWS THE SIDEBAR'S OWN RULE: the first
- * group gets no heading (`gi > 0` in WorkspaceShell), and neither does its page here. A table keyed
- * by route would be a second description of the nav, free to disagree with it.
+ * ⚠️ THE EYEBROW IS THE HEADING THE SIDEBAR DRAWS — WITH ONE STATED DIFFERENCE SINCE THE SIDEBAR
+ * METRICS PASS. The sidebar now heads Dashboard with WORKSPACE (the first rule separates the capture
+ * button from the nav), and the bar still names the Dashboard alone: the bar's contents were out of
+ * that pass's scope, and "Workspace / Dashboard" names a group of one. Flagged for Nick in the run
+ * report rather than changed here. A table keyed by route would be a second description of the
+ * nav, free to disagree with it.
+ *
+ * ⚠️ THE SETTINGS PAGES HAVE NO NAV SECTION ANY MORE (the ACCOUNT section went back to the foot's
+ * gear), so they are named by `isAccountPath` — the same predicate the route table reads — with the
+ * words the bar showed while the section existed: `Account / Settings`.
  *
  * Routes outside the nav name themselves from the table below — the words their own headers use.
  */
@@ -292,6 +300,7 @@ export function barPageName(
     if (!sec || !name) return null;
     return { section: gi > 0 ? sec.label : null, name };
   }
+  if (isAccountPath(pathname)) return { section: "Account", name: "Settings" };
   const n = OFF_NAV_NAMES[pathname.replace(/\/+$/, "") || "/"];
   return n ? { section: null, name: n } : null;
 }
