@@ -28,7 +28,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import "./qcvRail.css";
 
 /** The card's own width, and the two insets, stated once (§2). */
-export const RAIL_W = 340;
+export const RAIL_W = 336;
 export const RAIL_INSET_Y = 16;
 /**
  * §2 (page header v1) — THE FOOT'S INSET IS ITS OWN, and 20 rather than 16.
@@ -75,7 +75,7 @@ export const RAIL_STACK_BELOW = RAIL_RESERVE + LEDGER_MIN;
 
 /** §2 — the group the page and the card share: one centred grid, the card in its second column. */
 export const GROUP_MAX = 1480;
-export const GROUP_GAP = 28;
+export const GROUP_GAP = 36;
 
 export interface RailBox { top: number; right: number; height: number }
 /** What a sticky card needs: where to stick, and how tall to be once it has. */

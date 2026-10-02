@@ -301,7 +301,7 @@ describe("the sheet", () => {
    */
   it("§2 · the page is the group's first column, and the card's is a track", () => {
     expect(css, "the reservation is a track now").not.toMatch(/padding-right:\s*var\(--qcv-rail-pad/);
-    expect(rule(".qcv-group")).toMatch(/grid-template-columns: minmax\(0, 1fr\) 340px/);
+    expect(rule(".qcv-group")).toMatch(/grid-template-columns: minmax\(0, 1fr\) var\(--qcv-rail-w\)/);
     /**
      * ⚠️ THE CAP IS THE PAGE'S `--wpg-measure`, NOT A `max-width` ON THE GROUP. The shared grid
      * gives its scroll row's child `min(--wpg-measure, 100% - 2 × --wpg-gutter)` with

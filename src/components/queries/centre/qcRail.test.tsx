@@ -160,8 +160,22 @@ describe("the sheet, and the two shell rules", () => {
      * still answers it, and now publishes the answer as the group's own attribute.
      */
     expect(pageCss, "the reservation is a track now").not.toMatch(/padding-right:\s*var\(--qcv-rail-pad/);
-    expect(pageCss).toMatch(/\.qcv-group \{[^}]*grid-template-columns: minmax\(0, 1fr\) 340px/);
-    expect(pageCss).toMatch(/\.qcv-group \{[^}]*column-gap: 28px/);
+    /**
+     * ⚠️ THE TRACK AND THE GAP ARE TOKENS, AND THE LOCK ASSERTS THE SOURCE RATHER THAN THE NUMBER.
+     * v96 §0 took the rail from 340/28 to the reference's 336/36, and the width is needed in three
+     * places — this grid, `RAIL_W`, and `qcvExpanded.css`'s opening `clip-path`, which cannot read
+     * it from a box. Pinning the literal here would have gone red on a change that made the single
+     * source true; what must not drift is that all three read ONE value, so that is what is read.
+     */
+    expect(pageCss).toMatch(/\.qcv-group \{[^}]*grid-template-columns: minmax\(0, 1fr\) var\(--qcv-rail-w\)/);
+    expect(pageCss).toMatch(/\.qcv-group \{[^}]*column-gap: var\(--qcv-rail-gap\)/);
+    const tok = (name: string) => {
+      const m = pageCss.match(new RegExp(`--${name}:\\s*([0-9.]+)px`));
+      expect(m, `:root declares no --${name}`).toBeTruthy();
+      return Number(m![1]);
+    };
+    expect(tok("qcv-rail-w"), "the CSS token and RAIL_W disagree").toBe(RAIL_W);
+    expect(tok("qcv-rail-gap"), "the CSS token and GROUP_GAP disagree").toBe(GROUP_GAP);
     /**
      * ⚠️ RETARGETED BY §2 (page header v1). The cap was the page's own `--wpg-measure`, because the
      * shared grid computed the cap and the gutter in one `min()` and a second cap here beat the
@@ -177,7 +191,7 @@ describe("the sheet, and the two shell rules", () => {
     expect(rail).toMatch(/group\?\.setAttribute\("data-rail", next \? "beside" : "stacked"\)/);
     /* the group's own numbers are the card's width and the gutter, stated once each */
     expect(GROUP_MAX).toBe(1480);
-    expect(GROUP_GAP).toBe(28);
+    expect(GROUP_GAP).toBe(36);
     expect(RAIL_RESERVE).toBe(RAIL_W + RAIL_INSET_X * 2);
   });
   /* ⚠️ RETIRED (app shell v3, 26 Sep). The Query Centre's narrow-bar variant dropped the save whisper

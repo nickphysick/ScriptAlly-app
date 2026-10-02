@@ -13,15 +13,17 @@
 /**
  * ⚠️ THE REVEAL IS A `clip-path`, NOT A SLIDE OR A FADE. It uncovers the card from the rail's own
  * width, which is what says "this is the same card, grown" — a fade would be a NEW card appearing
- * where the old one was. The 340 is the rail's width and is the one number this sheet restates,
- * because a `clip-path` cannot read it from the element's own box.
+ * where the old one was. The inset is the RAIL'S WIDTH, and a `clip-path` cannot read it from the
+ * element's own box — so it reads `--qcv-rail-w` rather than restating the number. It restated 340
+ * until v96 §0 took the rail to 336, which would have started the grow 4px wide of the card it is
+ * supposed to be growing FROM, with both declarations reading perfectly correctly.
  */
 .qcv-xp-card {
   position: absolute; box-sizing: border-box;
   display: flex; flex-direction: column; min-height: 0; overflow: hidden;
   background: #fff; border: 0; border-radius: 20px;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 24px 60px -24px rgba(28, 19, 15, 0.45);
-  clip-path: inset(0 0 0 calc(100% - 340px) round 20px);
+  clip-path: inset(0 0 0 calc(100% - var(--qcv-rail-w)) round 20px);
   transition: clip-path 380ms cubic-bezier(0.2, 0.75, 0.2, 1);
 }
 .qcv-xp-card--in { clip-path: inset(0 round 20px); }

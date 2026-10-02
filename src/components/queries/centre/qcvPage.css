@@ -31,6 +31,19 @@
  * overrides them per theme — which is what makes `:root` safe as well as necessary.
  */
 :root {
+  /**
+   * §0 · THE RAIL'S WIDTH AND THE GUTTER BESIDE IT, as the reference renders them (336 and 36;
+   * v95 split the same 1167.2px as 340 and 28). They are TOKENS rather than two literals because
+   * three places need the width and one of them cannot read it from a box: `qcvExpanded.css`'s
+   * opening `clip-path` restates it, and its own comment says so. A size one element owns, written
+   * as a number in another element's sheet, is the fault this repo states as a law.
+   *
+   * ⚠️ AND THEY ARE AT `:root`, NOT ON `.qcv-page`. The expanded card portals to `document.body`,
+   * so a page-scoped token resolves to nothing inside it and the clip-path would paint its
+   * fallback — 86 reads went that way once already on this page.
+   */
+  --qcv-rail-w: 336px;
+  --qcv-rail-gap: 36px;
   --qcv-ink: #1c130f;
   --qcv-ink-70: rgba(28, 19, 15, 0.7);
   --qcv-ink-45: rgba(28, 19, 15, 0.45);
@@ -129,8 +142,8 @@
  */
 .qcv-group {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  column-gap: 28px;
+  grid-template-columns: minmax(0, 1fr) var(--qcv-rail-w);
+  column-gap: var(--qcv-rail-gap);
   align-items: start;
   min-width: 0;
 }
@@ -258,7 +271,10 @@
    title's baseline and reads as a mistake at every size.
    ⚠️ AND NO `min-height`: the 42 it used to carry was the RETIRED VIEW SWITCH's height, holding
    15px of air for a control that is not there. The title sizes the row. */
-.qcv-ctl { display: block; margin: 22px 0 0; }
+/* §2 — 44px of air below the desk, as the reference renders it: no rule, no heading. It was 22.
+   The gap is this element's top margin because the group's grid states no row gap, so the desk's
+   row and the page's row meet at a shared edge and the first child's margin IS the distance. */
+.qcv-ctl { display: block; margin: 44px 0 0; }
 .qcv-lhead {
   display: flex; align-items: baseline; justify-content: space-between; gap: 20px;
   padding: 4px 0 14px; min-width: 0;

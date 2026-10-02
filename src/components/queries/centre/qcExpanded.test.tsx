@@ -28,7 +28,7 @@ describe("§7 · the card", () => {
     /* a fade or a slide would be a NEW card appearing where the old one was, which is a different
        thing to say about the same view */
     const card = rule(".qcv-xp-card");
-    expect(card).toMatch(/clip-path:\s*inset\(0 0 0 calc\(100% - 340px\) round 20px\)/);
+    expect(card).toMatch(/clip-path:\s*inset\(0 0 0 calc\(100% - var\(--qcv-rail-w\)\) round 20px\)/);
     expect(rule(".qcv-xp-card--in")).toMatch(/clip-path:\s*inset\(0 round 20px\)/);
     expect(card).toMatch(/transition:\s*clip-path 380ms cubic-bezier\(0\.2, 0\.75, 0\.2, 1\)/);
     expect(card, "an opacity transition would make it a new card").not.toMatch(/transition:[^;]*opacity/);
