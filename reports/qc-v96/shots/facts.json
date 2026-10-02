@@ -1,0 +1,34 @@
+{
+ "bands": [
+  "Your move\n13\nTHE BALL IS WITH YOU",
+  "Waiting on agents\n25\nINSIDE THEIR REPLY WINDOW",
+  "Gone quiet\n31\nPAST THE WINDOW, NO WORD",
+  "Closed\n14\nNOTHING MORE TO DO"
+ ],
+ "hovered": {
+  "move": 1,
+  "wait": 0
+ },
+ "guide": {
+  "w": 380,
+  "h": 174
+ },
+ "foldColumns": [
+  "row-chip",
+  "row-agent",
+  "row-stand",
+  "row-next"
+ ],
+ "railFrame": {
+  "over": 3,
+  "near": 0,
+  "flat": 0,
+  "dateless": 0
+ },
+ "railFrame2": {
+  "over": 0,
+  "near": 2,
+  "flat": 2,
+  "dateless": 2
+ }
+}
