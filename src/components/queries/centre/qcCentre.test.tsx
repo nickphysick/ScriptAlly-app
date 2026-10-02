@@ -74,7 +74,7 @@ describe("⚠️ the views are gone, and `?view=` keeps exactly one meaning (v65
 describe("one derived list, one control that narrows it", () => {
   it("every view's rows come from `sortedList`, and `sortedList` follows the sentence", () => {
     expect(page).toContain("const sortedList = qcVisible.map((r) => r.query);");
-    expect(page).toContain("const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter)), qcSort);");
+    expect(page).toContain("const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind)), qcSort);");
     expect(page).toMatch(/const gridRows: GridCard\[\] = sortedList\.map\(/);
   });
   it("⚠️ the page holds ONE filter, ONE scope and ONE sort — and the retired controls are not mounted", () => {
@@ -323,10 +323,17 @@ describe("the sheet", () => {
     expect(rule(":root"), "the palette is at :root so the portalled card can read it").toMatch(/--qcv-type:\s*var\(--sp-type\)/);
     /* brand.tsx forces h1:not(.wsh-title) with !important at 0-1-1: two classes AND !important, or Playfair */
     expect(rule(".qcv-page .qcv-title")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
-    /* §2 (v95) — the sentence became the LIST HEAD's title, and it is still an `<h2>`, so it still
-       needs `!important` to beat brand.tsx. Retargeted, claim unchanged — and it went red on the
-       rewritten head, which is what it is for. */
-    expect(rule(".qcv-lhead .qcv-lh-ttl")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
+    /**
+     * §2 (v96) — THE HEAD'S TITLE IS THE SERIF NOW, AND THE `!important` IS WHY THIS LOCK EXISTS.
+     * The face changed (measured: the reference's title is Source Serif 4 at 600/28, where v95's
+     * was the typewriter); what did not change is that it is an `<h2>`, and brand.tsx forces `h2`
+     * at runtime with `!important`, injected last, where no specificity reaches it. So the claim is
+     * the `!important`, not the family — and it went red on the rewritten head twice now, which is
+     * exactly what it is for.
+     */
+    expect(rule(".qcv-lhead .qcv-lh-ttl")).toMatch(/font-family:\s*var\(--qcv-serif\)\s*!important/);
+    expect(rule(".qcv-lhead .qcv-lh-ttl"), "the reference's title is 600 at 28px").toMatch(/font-weight:\s*600/);
+    expect(rule(".qcv-lhead .qcv-lh-ttl")).toMatch(/font-size:\s*28px/);
   });
   /**
    * ⚠️ THE PALETTE IS AT `:root` AND THE LOCK IS STATED OVER EVERY SHEET, which is the repair of a

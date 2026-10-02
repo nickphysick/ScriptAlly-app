@@ -107,7 +107,9 @@ export const QcExhibit: React.FC = () => {
         <div className="qcv-page lh-exmc">
           <QcCourts tiles={courtTiles(QC_SAMPLE_ROWS)} onCourt={noop} />
           <div className="qcv-ctl">
-            <QcSentence loading={false} calendar={false} filter="all" total={QC_SAMPLE_ROWS.length} group="none" onGroup={() => {}} count={ledger.length} options={filterOptions(QC_SAMPLE_ROWS)}
+            <QcSentence
+          find=""
+          onFind={() => {}} loading={false} calendar={false} filter="all" total={QC_SAMPLE_ROWS.length} group="none" onGroup={() => {}} count={ledger.length} options={filterOptions(QC_SAMPLE_ROWS)}
               onFilter={noop} sort={DEFAULT_SORT} onSort={noop} scope={null} scopeTitle={null} />
           </div>
           <div className="qcv-stage">

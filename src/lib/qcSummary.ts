@@ -387,6 +387,24 @@ export const stageFilter = (s: QueryStatus): QcFilter => `stage:${s}`;
  * section saying 13. One function counts a section and filters to it; the menu keeps its own finer
  * options, which are a different and deliberate question.
  */
+/**
+ * §2 — the Find field's match: the agent's name or their agency, case- and accent-insensitively.
+ *
+ * ⚠️ IT IS A SEPARATE PASS FROM `matchesFilter`, NOT A SIXTH FACET. The filter answers "which court
+ * / stage / state", and the desk's counts are derived from the UNFILTERED scope precisely so a
+ * narrowing cannot move them; folding a text search into the same function would invite the next
+ * reader to count through it. An empty term matches everything, so the caller needs no branch.
+ */
+export const matchesFind = (row: QcRow, term: string): boolean => {
+  const t = term.trim().toLowerCase();
+  if (!t) return true;
+  /* ⚠️ `agencyKey`, NOT `agency`. The latter is the DISPLAY line and reads "No agency" where there
+     is none — searchable text nobody typed, so "no agency" would find a set of queries by matching
+     words the app wrote about them. The key is what the writer recorded. */
+  const hay = `${row.agentName ?? ""} ${row.agencyKey ?? ""}`.toLowerCase();
+  return hay.includes(t);
+};
+
 export const courtFilter = (t: TileCourt): QcFilter => `court:${t}`;
 export const courtOfFilter = (f: QcFilter): TileCourt | null =>
   f.startsWith("court:") ? (f.slice("court:".length) as TileCourt) : null;

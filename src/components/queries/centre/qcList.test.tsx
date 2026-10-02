@@ -55,16 +55,16 @@ describe("the list's columns — one template, floors and ceilings, the spare in
     expect(shared).toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
     expect(shared).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
     /**
-     * ⚠️ THE HEAD ROW IS BACK, AND THIS ASSERTION IS ITS INVERSE NOW. It used to read
-     * `not.toMatch(/\.qcv-cols/)` — "a heading strip floating above detached cards labels a table
-     * that is not there" — which was right for v65's four unlabelled columns and is reversed by §2:
-     * the mono labels are "the only explanation of the second tiers, so they stay". What must still
-     * be true is the thing that made the old strip wrong, which is that the labels and the rows
-     * cannot disagree: BOTH read `var(--qcv-tpl)`, so one container query moves both.
+     * ⚠️ THE LABEL STRIP IS GONE AGAIN, AND THIS IS THE THIRD SWING — which is why the history is
+     * written down rather than the current state alone. v65 forbade it ("a heading strip floating
+     * above detached cards labels a table that is not there"); v95 §2 brought it back as "the only
+     * explanation of the second tiers"; v96 removes it, because the reference draws the band and
+     * then the cards and §2's line about faint mono labels predates head C. **Ruled by Nick, 2 Oct:
+     * the reference wins.** If a fourth pass wants them back, the thing that made the first strip
+     * wrong is still the test: the labels and the rows must not be able to disagree.
      */
-    expect(rule(listCss, ".qcv-cols"), "the labels state their own template and can drift from the rows").toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
-    expect(rule(listCss, ".qcv-cols")).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
-    expect(listCss.split("grid-template-columns").length - 1, "a second template somewhere would let rows disagree").toBe(2);
+    expect(listCss, "the label strip's rules are back").not.toMatch(/(?:^|\n)\s*\.qcv-cols\s*[,{]/);
+    expect(listCss.split("grid-template-columns").length - 1, "a second template somewhere would let rows disagree").toBe(1);
     expect(listCss).not.toMatch(/grid-template-columns:[^;]*(auto|max-content|min-content|fit-content)/);
     expect(listCss, "display: contents fractures a row's hover and selection").not.toMatch(/display:\s*contents/);
   });
@@ -91,11 +91,11 @@ describe("the list's columns — one template, floors and ceilings, the spare in
        column carries two facts where Where-it-stands carries one. Measured before the swap: fifty
        clipped agency lines at a 1440 viewport. */
     expect(folds[0].body).toMatch(/--qcv-tpl:\s*34px minmax\(0, 1\.15fr\) \d+px minmax\(0, 1fr\) \d+px/);
-    expect(folds[0].body, "the Queried column and its label do not go together").toMatch(/\.qcv-qd, \.qcv-cols span:nth-child\(3\) \{ display: none; \}/);
+    expect(folds[0].body, "the Queried column does not go at the first fold").toMatch(/\.qcv-qd \{ display: none; \}/);
     expect(folds[0].body, "nothing replaces the date it removed").toMatch(/\.qcv-ag-ago \{ display: inline; \}/);
     /* the narrower fold: What you sent goes too */
     expect(folds[1].body).toMatch(/--qcv-tpl:\s*34px minmax\(0, 1\.15fr\) minmax\(0, 1fr\) \d+px/);
-    expect(folds[1].body, "the What-you-sent column and its label do not go together").toMatch(/\.qcv-ws, \.qcv-cols span:nth-child\(4\) \{ display: none; \}/);
+    expect(folds[1].body, "the What-you-sent column does not go at the second fold").toMatch(/\.qcv-ws \{ display: none; \}/);
     /* ⚠️ AND THE "AGO" IS RENDERED ALWAYS AND SHOWN BY THE QUERY — never mounted conditionally, or
        the fold reflows the row at the threshold and changes its height mid-scroll. */
     expect(rule(listCss, ".qcv-ag-ago"), "the ago is not hidden at rest, so it is in the agency line twice").toMatch(/display:\s*none/);
@@ -143,9 +143,11 @@ describe("the rows, rendered", () => {
     expect(bare, "a row with nothing coming up draws a tray").not.toContain("<button");
     expect(bare.split('role="option"').length - 1).toBe(2);
     /* the labels are rendered and hidden — every cell beneath carries its own text or label */
-    expect(bare).toContain("qcv-cols");
-    expect(bare).toMatch(/class="qcv-cols" data-qcv="cols" aria-hidden="true"/);
-    for (const w of ["AGENT", "QUERIED", "WHAT YOU SENT", "WHERE IT STANDS", "COMING UP"]) expect(bare).toContain(w);
+    /* §2 (v96) — no label strip: the band heads the list and the cards follow it. */
+    expect(bare, "the label strip is rendered again").not.toContain("qcv-cols");
+    /* §2 (v96) — the five label words go with the strip. The columns are explained by the cells
+       themselves now; the band is what heads the list. */
+    for (const w of ["AGENT", "QUERIED", "WHAT YOU SENT", "WHERE IT STANDS"]) expect(bare, `${w} is still drawn as a label`).not.toContain(w);
     /* and with something coming up: three buttons per row, no more */
     const coming = new Map(rows.map((r) => [r.id, { bucket: "chase" as const, verb: "Nudge", tail: null, over: false, action: "Nudge now" }]));
     const trayed = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} coming={coming} />);

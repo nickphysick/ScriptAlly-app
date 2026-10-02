@@ -239,26 +239,7 @@ export const QcList: React.FC<{
 
   return (
   <div className="qcv-list" data-qcv="list">
-    {/**
-      * §2 · the column labels — "the only explanation of the second tiers, so they stay".
-      *
-      * ⚠️ THEY SHARE THE ROW'S TEMPLATE THROUGH `--qcv-tpl`, declared once on `.qcv-list`, so the
-      * two cannot come apart at a fold: one container query moves both. Two templates that happened
-      * to agree would be a pair of literals, and a header floating above detached cards labelling a
-      * table that is not there is what this list already learned once.
-      *
-      * ⚠️ AND THEY ARE `aria-hidden`. Every cell beneath carries its own text or its own label; a
-      * row of five words read out before a listbox of eighty options is noise, and these are not a
-      * table's headers — there is no table.
-      */}
-    <div className="qcv-cols" data-qcv="cols" aria-hidden="true">
-      <span />
-      <span>AGENT</span>
-      <span>QUERIED</span>
-      <span>WHAT YOU SENT</span>
-      <span>WHERE IT STANDS</span>
-      <span>COMING UP</span>
-    </div>
+    
     <div ref={boxRef} role="listbox" aria-label="Queries" className="qcv-rows">
       {groups.map((g) => (
         /**
@@ -291,7 +272,7 @@ export const QcList: React.FC<{
 };
 
 /**
- * Eight placeholder rows at the REAL row height, with the real column labels above them.
+ * Eight placeholder rows at the REAL row height.
  *
  * ⚠️ IT RENDERS THE ROW'S OWN MARKUP, so the ghost's grid IS the loaded grid at every width and at
  * both folds — a hand-built placeholder with its own template agrees with the page at exactly the
@@ -299,7 +280,6 @@ export const QcList: React.FC<{
  */
 export const QcListSkeleton: React.FC = () => (
   <div className="qcv-list" aria-hidden="true">
-    <div className="qcv-cols" data-qcv="cols"><span /><span>AGENT</span><span>QUERIED</span><span>WHAT YOU SENT</span><span>WHERE IT STANDS</span><span>COMING UP</span></div>
     <div className="qcv-rows qcv-skw">
       {Array.from({ length: 8 }, (_, i) => (
         <div key={i} className="qcv-row qcv-row--sk" data-qcv="sk-row">

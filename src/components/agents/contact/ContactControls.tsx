@@ -16,31 +16,12 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
+import { FILTER_ICON, GROUP_ICON, RESET_ICON, SORT_ICON } from "../../shared/listControlIcons";
 import {
   ContactFilters, FilterSection, GroupKey, GROUP_OPTIONS, NOT_RECORDED, RatingKey, SORT_OPTIONS,
   SortKey, STAND_LABEL, StandKey, contactFilterCount,
 } from "../../../lib/contactList";
 
-const FILTER_ICON = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <path d="M3 5h18l-7 8v6l-4 2v-8z" />
-  </svg>
-);
-const GROUP_ICON = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <rect x="3" y="4" width="18" height="6" rx="1" /><rect x="3" y="14" width="18" height="6" rx="1" />
-  </svg>
-);
-const SORT_ICON = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <path d="M4 7h13M4 12h9M4 17h5" />
-  </svg>
-);
-const RESET_ICON = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" />
-  </svg>
-);
 
 type Pop = "filter" | "group" | "sort" | null;
 

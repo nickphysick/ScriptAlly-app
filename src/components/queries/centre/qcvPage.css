@@ -265,47 +265,77 @@
 .qcv-ghostpill:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 3px; }
 .qcv-ghostpill:disabled { opacity: 0.5; cursor: default; }
 
-/* ── §2 (v95) · THE LIST HEAD: one line on the page, no container ──
-   ⚠️ `align-items: baseline`, so the 24px title and the 14px controls sit on ONE line however the
-   two are retuned. A `center` would align their BOXES, which puts the controls' x-height above the
-   title's baseline and reads as a mistake at every size.
-   ⚠️ AND NO `min-height`: the 42 it used to carry was the RETIRED VIEW SWITCH's height, holding
-   15px of air for a control that is not there. The title sizes the row. */
 /* §2 — 44px of air below the desk, as the reference renders it: no rule, no heading. It was 22.
    The gap is this element's top margin because the group's grid states no row gap, so the desk's
    row and the page's row meet at a shared edge and the first child's margin IS the distance. */
 .qcv-ctl { display: block; margin: 44px 0 0; }
-.qcv-lhead {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 20px;
-  padding: 4px 0 14px; min-width: 0;
-}
-/* ⚠️ `!important`, BECAUSE brand.tsx FORCES `h2` AT RUNTIME WITH `!important` and this is an `<h2>`.
-   Its rule is `.font-serif, h1:not(.wsh-title), h2, h3, .font-serif-header { font-family: … !important }`
-   injected last, so no amount of specificity reaches it — only `!important` does. The old sentence
-   carried the same declaration for the same reason, and `qcCentre.test.tsx` is the lock that caught
-   this one within a minute of the head being rewritten without it. */
-.qcv-lhead .qcv-lh-ttl {
-  margin: 0; min-width: 0;
-  font-family: var(--qcv-type) !important; font-weight: 400; font-size: 24px; line-height: 1.1;
-  color: var(--qcv-ink); white-space: nowrap;
-}
-/* ⚠️ THE CONTROLS MAY WRAP AND THE TITLE MAY NOT. Below the narrow threshold three controls plus a
-   long title overflow, and the honest give is the controls' row — the title is the one thing on the
-   line a reader is reading. */
-.qcv-lh-ops { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 18px; min-width: 0; }
 
-/* ⚠️ THE VALUE SITS INSIDE THE CONTROL IN INK AND THE LABEL IS INK70 — the reference's own grammar,
-   and the reason there is no second line: a control that names its own value needs no legend. */
-.qcv-op {
-  margin: 0; padding: 0 0 2px; border: 0; border-bottom: 1px dashed rgba(28, 19, 15, 0.35);
-  background: none; cursor: pointer; text-align: left; white-space: nowrap;
-  font-family: var(--qcv-type); font-weight: 400; font-size: 14px; line-height: 1.2;
-  color: var(--qcv-ink-70);
+/**
+ * §2 · THE LIST HEAD — the reference's own, measured at 1512: a three-track grid, `auto 1fr auto`,
+ * gap 24, padding 4px 0 14px. Title and tally left, Find centred, the three controls right.
+ *
+ * ⚠️ THE TITLE IS `!important`, BECAUSE brand.tsx FORCES `h2` AT RUNTIME WITH `!important`. Its
+ * rule is `.font-serif, h1:not(.wsh-title), h2, h3, … { font-family: … !important }`, injected
+ * last, so no amount of specificity reaches it — only `!important` does. `qcCentre.test.tsx` is
+ * the lock that caught this within a minute of the head being rewritten without it once already.
+ *
+ * ⚠️ AND THE TITLE IS THE SERIF AT 600/28, NOT THE TYPEWRITER AT 23. §2 says this is "the Contact
+ * list's head"; measured side by side, that head is Special Elite 23px and the reference's is
+ * Source Serif 4 at 600 28px. Same arrangement, different object — the reference wins.
+ */
+.qcv-lhead {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 4px 0 14px;
+  min-width: 0;
 }
-.qcv-op i { font-style: normal; color: var(--qcv-ink); }
-.qcv-op:hover, .qcv-op[aria-expanded="true"] { border-bottom-color: var(--qcv-ink); color: var(--qcv-ink); }
+.qcv-lhead .qcv-lh-ttl {
+  margin: 0;
+  font-family: var(--qcv-serif) !important;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--qcv-ink);
+}
+.qcv-lhead .qcv-lh-ttl small {
+  font: 400 9px var(--qcv-mono);
+  letter-spacing: 0.14em;
+  color: var(--qcv-ink-45);
+  margin-left: 10px;
+  vertical-align: 4px;
+}
+.qcv-lh-find {
+  display: flex; align-items: center; gap: 8px; justify-self: center; min-width: 0;
+  font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45);
+}
+.qcv-lh-find svg { flex: none; }
+.qcv-lh-find input {
+  min-width: 0; width: 170px; padding: 0; border: 0; outline: none;
+  background: transparent; font: inherit; color: var(--qcv-ink);
+}
+.qcv-lh-find input::placeholder { color: var(--qcv-ink-45); opacity: 1; }
+.qcv-lh-find:focus-within { color: var(--qcv-ink); }
+.qcv-lh-ops {
+  display: flex; align-items: center; gap: 22px; min-width: 0;
+  font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink);
+}
+.qcv-op {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: inherit; cursor: pointer; white-space: nowrap;
+}
+.qcv-op svg { color: var(--qcv-ink-70); }
+.qcv-op:hover svg, .qcv-op[data-on] svg, .qcv-op[aria-expanded="true"] svg { color: var(--qcv-ink); }
 .qcv-op:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 3px; border-radius: 2px; }
-.qcv-op:disabled { cursor: default; border-bottom-color: transparent; }
+.qcv-op:disabled { cursor: default; opacity: 0.5; }
+.qcv-nb {
+  font: 700 9px var(--qcv-mono); letter-spacing: 0.06em;
+  background: var(--qcv-navy); color: #f5f1eb; border-radius: 8px; padding: 2px 6px;
+}
 
 /* ⚠️ `.qcv-pk` IS DELETED WITH THE SENTENCE IT STYLED, not left inert — the head's controls are
    `.qcv-op` and nothing emits the old class. A rule with no subject is what the next reader
@@ -367,7 +397,9 @@
    left inert — a rule with no subject is what the next reader tunes. */
 /* ⚠️ THE HEAD WRAPS, NOT THE ROW. `.qcv-ctl` is a block now, so `flex-wrap` on it addressed
    nothing; the head is the flex container and its controls are what give. */
-.qcv-page--narrow .qcv-lhead { flex-wrap: wrap; }
+/* §2 — at the narrow end the Find gives up its track before the title or the controls wrap. */
+.qcv-page--narrow .qcv-lhead { grid-template-columns: auto 1fr auto; gap: 14px; }
+.qcv-page--narrow .qcv-lh-find input { width: 110px; }
 .qcv-page--narrow .qcv-page .qcv-title, .qcv-page--narrow.qcv-page .qcv-title { font-size: 36px; }
 
 @media (prefers-reduced-motion: reduce) {

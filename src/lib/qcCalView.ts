@@ -466,7 +466,10 @@ export function listGroups(
   packageName?: (id: string) => string | null,
 ): ListGroup[] {
   const mk = (key: string, label: string, mine: QcRow[], hint?: string): ListGroup => ({ key, label, hint, rows: mine });
-  if (groupBy === "none") return rows.length ? [mk("all", "", [...rows])] : [];
+  /* ⚠️ §2 — THE UNGROUPED LIST STILL GETS ONE BAND, and it is named. It used to carry an empty
+     label, which `QcList` read as "draw no heading"; v96 heads the whole list with a band reading
+     `All queries · N`, so the name is the thing that makes it drawable. */
+  if (groupBy === "none") return rows.length ? [mk("all", "All queries", [...rows])] : [];
 
   if (groupBy === "attention") {
     return URGENCY_GROUPS

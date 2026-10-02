@@ -105,7 +105,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtFilter, courtOfFilter, courtTiles, filterForStatusParam, filterOptions,
-  inScope, matchesFilter, rowsWithdrawn, sortRows, tileHand,
+  inScope, matchesFilter, matchesFind, rowsWithdrawn, sortRows, tileHand,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 import type { EyeFocus } from "../lib/qcBirdsEye";
@@ -2274,6 +2274,8 @@ export const Queries: React.FC<{
   const [qcEyeFocus, setQcEyeFocus] = useState<EyeFocus>("all");
   /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
   const [qcGroup, setQcGroup] = useState<GroupBy>("none");
+  /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
+  const [qcFind, setQcFind] = useState("");
 
   /**
    * §3 (v95) · WHAT IS NEXT ON EACH QUERY, from the To-do list's own derivation.
@@ -3605,7 +3607,7 @@ export const Queries: React.FC<{
     count: lhOverride ?? (collectionsReady && activitiesReady ? qcLivingRows.length : null),
     copy: (n) => qcHeaderCopy(n, { rows: qcLivingRows, agentsById: qcLivingAgents, nowMs: Date.now() }),
   };
-  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter)), qcSort);
+  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind)), qcSort);
   /** §3 · what is next on each VISIBLE query — the board's card, turned into the column's words. */
   const qcComing = useMemo(() => {
     const now = Date.now();
@@ -6538,6 +6540,8 @@ export const Queries: React.FC<{
             logRef={logTriggerRef}
             sentence={
               <QcSentence
+                find={qcFind}
+                onFind={setQcFind}
                 loading={showGridSkeleton}
                 /* Birds-eye is the rail's view, not a state this sentence can be in (v65 §1) */
                 calendar={false}
