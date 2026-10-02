@@ -52,6 +52,7 @@ import { UserPlan } from "../../types";
 import { APP_MARK, artUrl } from "../../lib/appArt";
 import "./primitives.css";
 import "./workspaceShell.css";
+import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -255,6 +256,27 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      rail's 72px edge. The pack names this the single most likely thing to get wrong. One tip on
      screen at a time; the anchor rect is measured at open, exactly as the desk's own callers do. */
   const [railTip, setRailTip] = useState<{ anchor: TipRect; title: string; sub?: string; kbd?: string } | null>(null);
+  /**
+   * §4b — the `?`'s menu, and which page (if any) has a guide to offer. The store is READ on
+   * subscribe as well as on notification: React runs a child's effects before its parent's, so the
+   * page registers its guide before this shell subscribes and the notification reaches nobody.
+   */
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
+  const helpWrapRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    setGuidePage(registeredPageGuide());
+    return subscribePageGuide(() => setGuidePage(registeredPageGuide()));
+  }, []);
+  /* the house dismissal idiom: pointerdown outside, Escape, and the trigger counts as inside */
+  useEffect(() => {
+    if (!helpOpen) return;
+    const away = (e: PointerEvent) => { if (!helpWrapRef.current?.contains(e.target as Node)) setHelpOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setHelpOpen(false); };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", key); };
+  }, [helpOpen]);
   const tipTimer = useRef<number | null>(null);
   const hideTip = useCallback(() => {
     if (tipTimer.current !== null) { window.clearTimeout(tipTimer.current); tipTimer.current = null; }
@@ -855,11 +877,36 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     <span className="ws-fb-l">Give feedback</span>
                   </button>
                 )}
-                <button type="button" className="ws-ibtn ws-help" onClick={onOpenHelp} aria-label="Help" title="Help centre">
-                  <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                    <circle cx="10" cy="10" r="7.5" /><path d="M8 8a2 2 0 1 1 2.8 1.8c-.6.3-.8.7-.8 1.4M10 14h.01" />
-                  </svg>
-                </button>
+                {/**
+                  * §4b (Query Centre v96) — THE `?` IS THE WAY BACK TO A PAGE GUIDE, and only on a
+                  * page that has one. Everywhere else it is what it has always been: one click to
+                  * the Help centre. §4b asks for the guide to be "reachable afterwards from the top
+                  * bar's ?" and this is the smallest change that makes that true — the alternative
+                  * was an item in `AppShell`'s help menu, which **nothing opens**: its FAB was
+                  * retired and no control sets `helpMenuOpen`, so the item would have been a
+                  * control nobody could press.
+                  */}
+                <span className="ws-helpwrap" ref={helpWrapRef}>
+                  <button
+                    type="button" className="ws-ibtn ws-help" data-shell="help"
+                    onClick={() => (guidePage ? setHelpOpen((o) => !o) : onOpenHelp())}
+                    aria-label="Help" title={guidePage ? "Help" : "Help centre"}
+                    aria-haspopup={guidePage ? "menu" : undefined}
+                    aria-expanded={guidePage ? helpOpen : undefined}
+                  >
+                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <circle cx="10" cy="10" r="7.5" /><path d="M8 8a2 2 0 1 1 2.8 1.8c-.6.3-.8.7-.8 1.4M10 14h.01" />
+                    </svg>
+                  </button>
+                  {guidePage && helpOpen && (
+                    <div className="ws-helpmenu" role="menu" aria-label="Help">
+                      <button type="button" role="menuitem" data-shell="help-centre"
+                        onClick={() => { setHelpOpen(false); onOpenHelp(); }}>Help centre</button>
+                      <button type="button" role="menuitem" data-shell="guide-again"
+                        onClick={() => { setHelpOpen(false); requestPageGuide(); }}>Show the page guide</button>
+                    </div>
+                  )}
+                </span>
               </div>
           </header>
 

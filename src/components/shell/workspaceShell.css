@@ -502,6 +502,27 @@
 /* The workspace root owns no outer gap: the rail is the leftmost column of the VIEWPORT. */
 .sv2-app.ws-host { padding: 0; gap: 0; }
 
+/**
+ * §4b (Query Centre v96) — THE `?`'s LITTLE MENU, and only on a page that has registered a guide.
+ * Everywhere else the button is what it has always been: one click to the Help centre, no popover,
+ * no `aria-haspopup`. The wrapper exists to anchor the panel and to give the dismissal idiom
+ * something to call "inside".
+ */
+.ws-helpwrap { position: relative; display: inline-flex; }
+.ws-helpmenu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 41; min-width: 186px;
+  box-sizing: border-box; padding: 6px;
+  background: #fffefb; border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(58, 28, 20, 0.16), inset 0 0 0 1px rgba(28, 19, 15, 0.11);
+}
+.ws-helpmenu button {
+  display: block; width: 100%; margin: 0; padding: 9px 12px;
+  border: 0; border-radius: 8px; background: none; cursor: pointer;
+  text-align: left; font: inherit; font-size: 13px; color: inherit; white-space: nowrap;
+}
+.ws-helpmenu button:hover { background: rgba(124, 58, 42, 0.08); }
+.ws-helpmenu button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; }
+
 @media (prefers-reduced-motion: reduce) {
 .ws-panel,
 .ws-sub,
