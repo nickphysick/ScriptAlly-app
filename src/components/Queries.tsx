@@ -6715,8 +6715,9 @@ export const Queries: React.FC<{
                      then the card's primary does. Nothing in the tray is destructive in one click —
                      `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
                   onAct={(id) => onOpenQuery?.(id)}
-                  onSnooze={(id) => onOpenQuery?.(id)}
-                  onMore={(id) => onOpenQuery?.(id)} />
+                  /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
+                  onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
+                  onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
               )
             }
           />

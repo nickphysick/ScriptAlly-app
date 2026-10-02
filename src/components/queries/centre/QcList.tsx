@@ -145,9 +145,9 @@ export const QcList: React.FC<{
   packageName?: (id: string) => string | null;
   /** the tray's three. Absent where the page has not wired one yet; the control is then not drawn. */
   onAct?: (id: string, bucket: Exclude<Bucket, "note">) => void;
-  onSnooze?: (id: string) => void;
-  onMore?: (id: string, anchor: HTMLElement) => void;
-}> = ({ groups, selectedId, onOpen, nowMs, coming, packageName, onAct, onSnooze, onMore }) => {
+  onEdit?: (id: string) => void;
+  onClose?: (id: string) => void;
+}> = ({ groups, selectedId, onOpen, nowMs, coming, packageName, onAct, onEdit, onClose }) => {
   const rows = groups.flatMap((g) => g.rows);
   const boxRef = useRef<HTMLDivElement>(null);
   /* selection follows the keyboard: when the open query changes while focus is IN the rows, focus
@@ -221,18 +221,29 @@ export const QcList: React.FC<{
             </b>
           )}
         </div>
-        {next && (
-          <span className="qcv-qa" data-qcv="row-tray">
+        {/**
+          * ⚠️ §3 · THE TRAY IS THE ACTION, EDIT AND CLOSE — AND IT RENDERS ON EVERY ROW. v95 drew
+          * the relevant action, Snooze and a ⋯, and only on rows that had something coming up; a
+          * row with nothing to do had no tray at all, so a query you simply wanted to correct had
+          * to be opened first. Snooze and the ⋯ are gone: §6 says so, and the reference's rendered
+          * tray reads `Decide on the offer · Edit · Close`. (Its own annotation prose still
+          * describes Snooze and a ⋯ — my harness text, stale; ruled by Nick, 2 Oct.)
+          *
+          * ⚠️ AND NOTHING HERE IS DESTRUCTIVE IN ONE CLICK. `Close` opens the close journey, which
+          * asks; it does not close the query.
+          */}
+        <span className="qcv-qa" data-qcv="row-tray">
+          {next && (
             <button type="button" className="qcv-qa-b qcv-qa-b1" data-qcv="row-act"
               onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next.bucket); }}>{next.action}</button>
-            <button type="button" className="qcv-qa-b qcv-qa-q" data-qcv="row-snooze"
-              onClick={(e) => { e.stopPropagation(); onSnooze?.(r.id); }}>Snooze</button>
-            <button type="button" className="qcv-qa-b qcv-qa-m" data-qcv="row-more"
-              title="More: record a response, correct the record, open"
-              onClick={(e) => { e.stopPropagation(); onMore?.(r.id, e.currentTarget); }}
-              aria-label={`More for ${r.agentName}`}>⋯</button>
-          </span>
-        )}
+          )}
+          <button type="button" className="qcv-qa-b qcv-qa-q" data-qcv="row-edit"
+            onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }}
+            aria-label={`Edit the query to ${r.agentName}`}>Edit</button>
+          <button type="button" className="qcv-qa-b qcv-qa-q" data-qcv="row-close"
+            onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }}
+            aria-label={`Close the query to ${r.agentName}`}>Close</button>
+        </span>
       </div>
     );
   };

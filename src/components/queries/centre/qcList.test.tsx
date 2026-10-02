@@ -134,13 +134,22 @@ describe("the rows, rendered", () => {
    * card's footer — and §3 gives the row a hover tray of exactly three. "No head row to name
    * columns" was right while the columns were unlabelled and is reversed by §2's mono labels.
    *
-   * So: the tray's three and NOTHING else, and the labels present but hidden from the tree.
+   * So (v96): Edit and Close on every row, the action pill where there is one, and NOTHING else.
    */
-  it("⚠️ the row's buttons are the tray's THREE, and the column labels are drawn but not read", () => {
+  it("⚠️ every row's tray is Edit · Close, and the action joins them only when there is one", () => {
     const rows = rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })]);
     const bare = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
-    /* with nothing coming up there is no tray, so a row still has no buttons at all */
-    expect(bare, "a row with nothing coming up draws a tray").not.toContain("<button");
+    /**
+     * §3 (v96) — the tray is on EVERY row, so a row with nothing coming up still has Edit and
+     * Close. v95 drew the tray only where there was an action, which meant a query you simply
+     * wanted to correct had to be opened first. The action pill is the only conditional part.
+     */
+    const buttons = (html: string) => (html.match(/<button/g) ?? []).length;
+    expect(buttons(bare), "two rows with nothing coming up should still have Edit and Close each").toBe(4);
+    expect(bare, "Snooze is back").not.toContain("Snooze");
+    expect(bare, "the ⋯ is back").not.toContain("row-more");
+    expect(bare).toContain('data-qcv="row-edit"');
+    expect(bare).toContain('data-qcv="row-close"');
     expect(bare.split('role="option"').length - 1).toBe(2);
     /* the labels are rendered and hidden — every cell beneath carries its own text or label */
     /* §2 (v96) — no label strip: the band heads the list and the cards follow it. */
@@ -148,12 +157,12 @@ describe("the rows, rendered", () => {
     /* §2 (v96) — the five label words go with the strip. The columns are explained by the cells
        themselves now; the band is what heads the list. */
     for (const w of ["AGENT", "QUERIED", "WHAT YOU SENT", "WHERE IT STANDS"]) expect(bare, `${w} is still drawn as a label`).not.toContain(w);
-    /* and with something coming up: three buttons per row, no more */
+    /* and with something coming up: the action joins Edit and Close, and nothing else does */
     const coming = new Map(rows.map((r) => [r.id, { bucket: "chase" as const, verb: "Nudge", tail: null, over: false, action: "Nudge now" }]));
     const trayed = renderToStaticMarkup(<QcList groups={one(rows)} selectedId={null} onOpen={() => {}} nowMs={NOW} coming={coming} />);
-    expect(trayed.split("<button").length - 1, "the tray is three controls: the verb, Snooze and ⋯").toBe(6);
+    expect(buttons(trayed), "the tray is the action, Edit and Close — three per row, no more").toBe(6);
     expect(trayed).toContain("Nudge now");
-    expect(trayed).toContain("Snooze");
+    expect(trayed, "Snooze is back").not.toContain("Snooze");
   });
   it("⚠️ RUST FOLLOWS `isWithYou` EXACTLY — for every status, and never an offer", () => {
     const rows = rowsOf(ALL.map((s) => q({ status: s })));
