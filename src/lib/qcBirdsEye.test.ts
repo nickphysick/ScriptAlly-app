@@ -9,7 +9,7 @@ import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import {
   ALLOWANCE_FLOOR, ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, PROGRESS_FLOOR, UPCOMING_DAYS,
-  attentionGroup, dayCount, eyeProgress, eyeFaded, eyeGroups, eyeRows,
+  RAIL_ATTENTION_ORDER, attentionGroup, dayCount, eyeProgress, eyeFaded, eyeGroups, eyeRows,
 } from "./qcBirdsEye";
 
 const DAY = 86_400_000;
@@ -157,6 +157,16 @@ describe("the view's rows", () => {
     expect(gs.map((g) => g.key)).toEqual(["overdue", "upcoming"]);
     expect(gs.map((g) => g.count)).toEqual([1, 1]);
     expect(eyeGroups([], NOW)).toEqual([]);
+    /**
+     * §4 (v96) — THE RAIL DRAWS TWO GROUPS AND THE EXPANDED VIEW STILL DRAWS THREE, and the two
+     * orders are asserted AGAINST EACH OTHER rather than against literals: the rail's must be a
+     * prefix of the shared one, so narrowing it can never invent a group or reorder them, and the
+     * shared one must still carry `watch`, because §7 forbids this pack from touching the expanded
+     * view and that is where Watch and wait still belongs.
+     */
+    expect(RAIL_ATTENTION_ORDER).toEqual(ATTENTION_ORDER.slice(0, RAIL_ATTENTION_ORDER.length));
+    expect(RAIL_ATTENTION_ORDER, "the rail is back to three groups, or down to one").toHaveLength(2);
+    expect(ATTENTION_ORDER, "the expanded view lost a group it is meant to keep").toContain("watch");
     /* and the counts add up to what was drawn */
     expect(gs.reduce((a, g) => a + g.count, 0)).toBe(eyeRows(rows, NOW).length);
   });

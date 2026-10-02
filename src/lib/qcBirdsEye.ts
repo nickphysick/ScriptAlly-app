@@ -261,9 +261,29 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
     });
 }
 
+/**
+ * §4 (v96) · THE RAIL DRAWS TWO GROUPS — *Overdue* and *Upcoming* — WHERE THE EXPANDED VIEW DRAWS
+ * THREE, and this is a REVERSAL of a v95 decision, taken because the reference wins.
+ *
+ * The reference's rail renders exactly these two: its header counts `18 OVERDUE · 3 UPCOMING ·
+ * 2 WAITING` and no Waiting section follows. §4 of the pack names the same two.
+ *
+ * ⚠️ AND THE COST IS REAL AND FALLS ON THE CALMEST ACCOUNTS. v95 kept `watch` precisely because
+ * dropping it empties the rail for the writer whose pipeline is healthiest — 21 of 69 on the
+ * harness account sit in it — so a writer with nothing overdue and nothing upcoming now gets a
+ * header, a key line and no body. The counts line still names all three, which is the reference's
+ * own arrangement, so the number is stated even where the rows are not. Flagged in §0 rather than
+ * changed quietly; one entry in this array puts it back.
+ *
+ * ⚠️ IT IS A SEPARATE CONSTANT FROM `ATTENTION_ORDER`, which the EXPANDED view reads and which §7
+ * forbids this pack from touching. Narrowing the shared one would have taken Watch and wait out of
+ * the expanded view too, where the reference plainly keeps it.
+ */
+export const RAIL_ATTENTION_ORDER: readonly Attention[] = ["overdue", "upcoming"];
+
 export function eyeGroups(rows: readonly QcRow[], nowMs: number): EyeGroup[] {
   const all = eyeRows(rows, nowMs);
-  return ATTENTION_ORDER.map((key) => {
+  return RAIL_ATTENTION_ORDER.map((key) => {
     const mine = all.filter((r) => r.group === key);
     return { key, label: ATTENTION_LABEL[key], count: mine.length, rows: mine };
   }).filter((g) => g.count > 0);

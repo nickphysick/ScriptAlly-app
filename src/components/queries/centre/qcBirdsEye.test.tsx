@@ -29,6 +29,7 @@ const rule = (sel: string) => {
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 8, 23, 12);
 const ago = (d: number) => new Date(NOW - d * DAY).toISOString();
+const ahead = (d: number) => new Date(NOW + d * DAY).toISOString();
 let n = 0;
 const mkQ = (over: Partial<Query> = {}): Query => ({
   id: `q${++n}`, userId: "u", manuscriptId: "m1", agentId: "a1", packageId: "", personalisationNotes: "",
@@ -75,11 +76,17 @@ describe("the view, rendered", () => {
    * stay on the date needed three parts; one that clamps at its own track needs one.
    */
   it("§4 · the bar is ONE fill that deepens with the window — grey, ink70 past .75, ink at the date", () => {
-    /* ⚠️ AN AGENT'S-TURN QUERY, because only those have an expected date. A `Full Requested` is the
-       WRITER's turn, whose date comes from `expectedSendDate` and nothing else — so a fixture built
-       from one draws the undated track and an assertion over its fill is about a branch that cannot
-       be entered. Found by this case's ancestor going red on its first run. */
-    const fresh = view([mkQ({ dateSent: ago(5) })]);
+    /**
+     * ⚠️ A WITH-YOU QUERY WITH ITS OWN DATE, AND v96 §4 IS WHY. Only an agent's-turn query takes a
+     * date from the agency's window — but the rail draws `Overdue` and `Upcoming` only now, and an
+     * agent's-turn query reaches Upcoming solely in the last 14 days of a 56-day window, where its
+     * fill is already past .75 and its tone is `near`. So **a flat dated agent's-turn bar can no
+     * longer be drawn at all**, and the fixture for one is a with-you query carrying
+     * `expectedSendDate`: in Upcoming whatever its distance, and far enough out to be flat.
+     * (The ancestor of this case used `dateSent: ago(5)` and went red the moment the rail narrowed
+     * to two groups — the fixture was in `watch`, which is no longer rendered.)
+     */
+    const fresh = view([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2), expectedSendDate: ahead(30) })]);
     const late = view([mkQ({ dateSent: ago(400) })]);
     expect(fresh, "the retired due-line bar").not.toContain("qcv-be-bar");
     expect(fresh, "the retired three-part track").not.toContain('data-qcv="be-track"');
@@ -100,13 +107,16 @@ describe("the view, rendered", () => {
     expect(fresh, "the bar is back in the status vocabulary").not.toMatch(/qcv-be-pb[^"]*"[^>]*--qcv-state/);
   });
   it("§4 · the ends are labelled from the query's own two dates, and omitted where they do not exist", () => {
-    const html = view([mkQ({ dateSent: ago(20) })]);
+    /* §4 (v96) — in a group the rail draws: `ago(55)` puts an 8-week window inside its last 14 days. */
+    const html = view([mkQ({ dateSent: ago(55) })]);
     expect(html).toContain('data-qcv="be-from"');
     expect(html).toContain('data-qcv="be-to"');
     /* the right end's label is `expectedKind`'s own three — the same field the desk reads */
     expect(html).toMatch(/data-qcv="be-to"><b>(REPLY BY|SEND BY|DECIDE BY) /);
     expect(html).toMatch(/data-qcv="be-from">(SENT|ASKED|OFFER) /);
-    const none = undatedView([mkQ({ status: QueryStatus.FULL_SENT })]);
+    /* §4 (v96) — with-you and dateless, so it lands in Upcoming and is drawn. A `Full Sent`
+       with no window is agent's-turn and sits in `watch`, which the rail no longer renders. */
+    const none = undatedView([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })]);
     expect(none, "a label over a date nobody recorded").toMatch(/data-qcv="be-to"><\/span>/);
     expect(none, "a dateless row must say so on its name line").toContain("no date set");
   });
@@ -126,9 +136,11 @@ describe("the view, rendered", () => {
     expect(track, "a pattern is back in the empty track").not.toMatch(/repeating-linear-gradient|dashed/);
     expect(css, "the retired empty-track rule is back").not.toMatch(/\.qcv-be-track--none/);
     /* …and the row really does draw no fill when nothing dates it */
-    expect(undatedView([mkQ({ status: QueryStatus.FULL_SENT })])).toContain('data-dated="no"');
+    expect(undatedView([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })])).toContain('data-dated="no"');
     /* …and the ordinary case really does say the other thing, or the line above proves nothing */
-    expect(view([mkQ()])).toContain('data-dated="yes"');
+    /* §4 (v96) — `ago(55)` puts an 8-week window inside its last 14 days, so the row is in Upcoming
+       and drawn; the default `ago(20)` expects at +36 days, which is `watch` and no longer rendered. */
+    expect(view([mkQ({ dateSent: ago(55) })])).toContain('data-dated="yes"');
   });
   it("§3.4 · ⚠️ a stuck heading is on white, sticky, and states no negative margin", () => {
     /**
@@ -339,9 +351,16 @@ describe("§3.2–§3.3 · the bars and the rows", () => {
    * `dueCell` is still the one derivation behind both, and is still asserted in all four cases.
    */
   it("§4 · every row states its distance AND its date, from the shared derivation", () => {
-    const qs = [mkQ({ dateSent: ago(400) }), mkQ()];
-    const rows = eyeRows(rowsOf(qs), NOW);
-    expect(rows.length).toBeGreaterThan(1);
+    /**
+     * ⚠️ THE ROWS THE RAIL DRAWS, NOT EVERY ROW `eyeRows` BUILDS. §4 (v96) narrowed the rail to
+     * Overdue and Upcoming, so `eyeRows` is a superset of what is rendered and asserting over it
+     * would require the html to contain rows the design deliberately leaves out. The claim is
+     * unchanged — every row the reader can see states its distance and its date — and it is now
+     * asked of exactly those.
+     */
+    const qs = [mkQ({ dateSent: ago(400) }), mkQ({ dateSent: ago(55) })];
+    const rows = eyeGroups(rowsOf(qs), NOW).flatMap((g) => g.rows);
+    expect(rows.length, "the fixture draws fewer than two rows").toBeGreaterThan(1);
     const html = view(qs);
     for (const r of rows) {
       const d = dueCell(r.row, NOW);
@@ -357,7 +376,7 @@ describe("§3.2–§3.3 · the bars and the rows", () => {
     expect([none.date, none.distance, none.kind]).toEqual(["—", "No date", "none"]);
     /* ⚠️ A DATELESS ROW SAYS SO AND OFFERS THE ONE THING THAT FIXES IT — never an em dash under a
        label, which is a label with nothing to label. */
-    expect(undatedView([mkQ({ status: QueryStatus.FULL_SENT })])).toContain("no date set");
+    expect(undatedView([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })])).toContain("no date set");
     /* …and an overdue distance is the only one drawn in ink, which is the row's own mark */
     expect(html).toMatch(/class="qcv-be-over" data-qcv="be-dist" data-due="past"/);
   });
