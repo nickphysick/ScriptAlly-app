@@ -94,6 +94,37 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcRail } from "./queries/centre/QcRail";
+import { PageGuide, type GuideStep } from "./shell/PageGuide";
+
+/**
+ * §4b — THE QUERY CENTRE'S THREE STEPS. Step one's title and both its sentences are the
+ * reference's own, verbatim; the reference draws only that card, so steps two and three are written
+ * to its voice and to §4b's own description of them ("the list and its hover", "the Birds-eye
+ * view"). Nothing here states a number or a name the page does not.
+ */
+const QC_GUIDE: readonly GuideStep[] = [
+  {
+    title: "Your desk, in three bands",
+    body: [
+      "The desk at the top counts what's with you, with the agents, and closed. Click a section to see just those.",
+      "The counts are the whole manuscript, so narrowing the list below never moves them.",
+    ],
+  },
+  {
+    title: "Every query, one row",
+    body: [
+      "The list is every query. Hover a row for its next action; click it for the full record.",
+      "Find, Filter, Group and Sort narrow what you are looking at — the band above the rows says how it is grouped.",
+    ],
+  },
+  {
+    title: "The Birds-eye view",
+    body: [
+      "Each bar runs from the date a query reached its current status to the date it is due. The fuller the bar, the sooner it needs you; a full ink bar is past its date.",
+      "Open it for the whole timeline, where every query sits on one set of dates.",
+    ],
+  },
+];
 import { QcBirdsEye } from "./queries/centre/QcBirdsEye";
 import { QcExpanded } from "./queries/centre/QcExpanded";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
@@ -6722,8 +6753,12 @@ export const Queries: React.FC<{
             }
           />
 
-
-
+          {/**
+            * §4b — THE PAGE GUIDE. Three steps, once per page per writer, bottom right; the help
+            * menu's "Show the page guide" is the way back once it has been dismissed. Its own
+            * placement keeps it off the rail's header, which is what its third step is about.
+            */}
+          {!showGridSkeleton && <PageGuide page="queries" steps={QC_GUIDE} />}
 
           {/* §1 (log-sheet) — FORM MODE: the same drawer, widened, wearing the sheet's chrome.
               The modes are exclusive by construction: openCreate stashes and clears the

@@ -43,6 +43,7 @@ import { planLine } from "../../lib/shellSidebar";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 import "./mobileShell.css";
+import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
@@ -222,6 +223,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // VI P3 — the help FAB's /todo two-item menu returns (the workbench-era route hide is
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
+  /* §4b — which page, if any, currently has a guide to re-show. */
+  const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
+  useEffect(() => subscribePageGuide(() => setGuidePage(registeredPageGuide())), []);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
   // the v2 top bar now carries the <md variant itself — one bar, two breakpoint states — and the
@@ -502,6 +506,17 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
               onClick={() => { setHelpMenuOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>
               Replay the tour
             </button>
+            {/* §4b (Query Centre v96) — the one route back to a page guide once it has been
+                dismissed. It appears only where a page has registered one, so the menu never
+                offers a guide that does not exist. */}
+            {guidePage !== null && (
+              <button type="button" role="menuitem" data-shell="guide-again" style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, color: "inherit" }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(124,58,42,0.08)"; }}
+                onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                onClick={() => { setHelpMenuOpen(false); requestPageGuide(); }}>
+                Show the page guide
+              </button>
+            )}
           </div>
         </>
       )}

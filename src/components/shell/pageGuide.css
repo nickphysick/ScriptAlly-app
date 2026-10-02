@@ -1,0 +1,52 @@
+/**
+ * ⚠️ NO FAMILY IS NAMED HERE — every face is read from its token. `marketingTokens.test.ts` sweeps
+ * the whole tree for a third file naming "Special Elite" and went red on this sheet's `var()`
+ * FALLBACKS, which is the lock working: a fallback is a family name wherever it is written, and the
+ * tokens it was falling back from are at `:root`, so nothing can fail to resolve.
+ *
+ * §4b — the page guide's card. 380px, radius 14, soft shadow, bottom right, above the page and
+ * below the modals (the drawer is 50; this is chrome over a page, not over a journey).
+ */
+.pgd {
+  position: fixed; right: 28px; bottom: 28px; z-index: 30;
+  box-sizing: border-box; width: 380px;
+  background: #fff; border-radius: 14px; padding: 16px 18px 14px;
+  box-shadow: 0 18px 40px -16px rgba(28, 19, 15, 0.45), inset 0 0 0 1px rgba(28, 19, 15, 0.11);
+  color: var(--qcv-ink, #1c130f);
+  animation: pgd-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes pgd-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pgd { animation: none; } }
+
+.pgd-t {
+  display: block; margin-bottom: 6px;
+  font: 400 17px var(--sp-type);
+}
+.pgd p {
+  margin: 0; font-family: var(--font-serif);
+  font-size: 14.5px; line-height: 1.5; color: rgba(28, 19, 15, 0.7);
+}
+.pgd p + p { margin-top: 8px; }
+.pgd-x {
+  position: absolute; top: 8px; right: 10px;
+  margin: 0; padding: 4px 6px; border: 0; background: none; cursor: pointer;
+  font: 400 16px var(--sp-type); line-height: 1;
+  color: rgba(28, 19, 15, 0.45);
+}
+.pgd-x:hover { color: var(--qcv-ink, #1c130f); }
+.pgd-f { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.pgd-f i { display: flex; gap: 5px; }
+.pgd-f em {
+  width: 5px; height: 5px; border-radius: 50%; background: rgba(28, 19, 15, 0.22);
+}
+.pgd-f em.on { background: var(--qcv-ink, #1c130f); }
+.pgd-f span {
+  font: 400 9px var(--font-mono); letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(28, 19, 15, 0.45);
+}
+.pgd-next {
+  margin: 0 0 0 auto; padding: 0; border: 0; background: none; cursor: pointer;
+  font: 400 14px var(--sp-type); color: var(--qcv-ink, #1c130f);
+}
+.pgd-next:hover { text-decoration: underline; }
+.pgd-x:focus-visible, .pgd-next:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
