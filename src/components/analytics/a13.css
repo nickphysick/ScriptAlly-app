@@ -209,3 +209,35 @@
 
 .a13-blank { padding: 40px 0; color: var(--a13-ink70); font-size: 16px; max-width: 52ch; }
 .a13-page :focus-visible { outline: 2px solid var(--a13-btn); outline-offset: 2px; }
+
+/* ── figures: under a single dark rule, a typewriter title and a small grey note — never a card ──
+   ⚠️ the ref names `.fig`, `.fh`, `.key` and `.two` and styles none of them; the prompt's baked
+   decisions (8, the keys, the two-up) are the spec here. */
+.a13-fig { border-top: 1.5px solid var(--a13-ink); padding-top: 12px; min-width: 0; }
+.a13-fig + .a13-fig { margin-top: 30px; }
+.a13-fh { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.a13-page .a13-fh h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+.a13-fh small { font-size: 13px; color: var(--a13-ink45); }
+.a13-key { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 12.5px; color: var(--a13-ink70); }
+.a13-key > span { display: inline-flex; align-items: center; gap: 7px; }
+.a13-sw { width: 13px; height: 13px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--a13-hair2); display: inline-block; flex: none; }
+.a13-sw--dot { border-radius: 50%; box-shadow: inset 0 0 0 1.6px var(--a13-ink); }
+.a13-sw--bar { width: 22px; height: 8px; border-radius: 4px; background: var(--a13-btn); opacity: 0.85; box-shadow: none; }
+.a13-sw--med { width: 3px; height: 14px; border-radius: 0; background: var(--a13-rust); box-shadow: none; }
+.a13-sw--dash { width: 22px; height: 0; border-radius: 0; border-top: 1.4px dashed var(--a13-rust); box-shadow: none; }
+.a13-none { margin: 4px 0 0; font-size: 14px; color: var(--a13-ink45); }
+.a13-dash { font-size: 20px; color: var(--a13-ink); margin-right: 8px; }
+.a13-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; }
+@container a13-flow (max-width: 900px) { .a13-two { grid-template-columns: minmax(0, 1fr); } }
+
+/* the SVG's own type — the ref's `.n`, `.nm` and `.ax`, on the app's faces */
+.a13-svg { display: block; overflow: visible; }
+.a13-svg text { font-family: var(--a13-serif); fill: var(--a13-ink); }
+.a13-svg .n { font-family: var(--a13-type); }
+.a13-svg .nm { font-size: 12.5px; fill: var(--a13-ink70); }
+.a13-svg .ax { font-family: var(--a13-mono); font-size: 10.5px; letter-spacing: 0.04em; fill: var(--a13-ink45); }
+.a13-svg .a13-muted { fill: var(--a13-ink45); }
+.a13-svg .a13-oninverse { fill: var(--a13-on-btn); }
+.a13-svg [data-a13="mark"] { cursor: pointer; transition: transform 0.15s; transform-box: fill-box; transform-origin: center; }
+.a13-svg [data-a13="mark"]:hover { transform: scale(1.25); }
+.a13-svg rect[data-a13="mark"]:hover { transform: scale(1.03); }

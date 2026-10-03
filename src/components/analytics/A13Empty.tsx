@@ -14,6 +14,7 @@ import React from "react";
 import type { AnalyticsModel } from "../../lib/analyticsModel";
 import { exampleModel } from "../../lib/analyticsExample";
 import { ExampleRow, Feature } from "./A13Frame";
+import { Funnel } from "./A13Figures";
 
 export const A13Empty: React.FC<{ model: AnalyticsModel; onGo: () => void }> = ({ model, onGo }) => {
   const ex = React.useMemo(() => exampleModel(Date.now()), []);
@@ -23,7 +24,7 @@ export const A13Empty: React.FC<{ model: AnalyticsModel; onGo: () => void }> = (
       <Feature model={model} onGo={onGo} />
       <ExampleRow heading="Where the book gets to"
         sub="Each stage your queries reach — asked for more, read in full, an offer — and how many went on from the one before.">
-        {null}
+        <Funnel model={ex} />
       </ExampleRow>
       <ExampleRow heading="What agents said, against when they replied"
         sub="The response window each agency states, and when each reply actually arrived.">

@@ -29,6 +29,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { analyticsModel } from "../lib/analyticsModel";
 import { DotNav, Feature, Section, Skeleton, TipProvider, useReveal } from "./analytics/A13Frame";
 import { A13Empty } from "./analytics/A13Empty";
+import { Funnel, Volume } from "./analytics/A13Figures";
 import "./analytics/a13.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -98,9 +99,13 @@ export const QueryAnalytics: React.FC = () => {
         <Feature model={model} onGo={() => go(0)} />
         <Section sec={0} num="Fall-off by stage" headline={v.funnel.headline} artH={140}
           lede="Each row is a stage, and its bar is how many queries reached it. The note beside each bar is how many went on from the stage before."
-          art={["Illustration · letters sorted", "into four trays"]} />
+          art={["Illustration · letters sorted", "into four trays"]}>
+          <Funnel model={model} />
+        </Section>
         <Section sec={1} num="Queries sent" headline={v.sentByMonth.headline} lede={v.sentByMonth.lede} white
-          art={["Illustration · the Courier", "with a bundle of letters"]} readings={v.sentByMonth.readings} />
+          art={["Illustration · the Courier", "with a bundle of letters"]} readings={v.sentByMonth.readings}>
+          <Volume model={model} />
+        </Section>
         <Section sec={2} num="Response rate" headline={v.rate.headline} lede={v.rate.lede} flip
           art={["Illustration · the Archivist", "opening the post"]} readings={v.rate.readings} />
         <Section sec={3} num="Response window honesty" headline="What agents said, against when they replied" lede={v.reply.lede} white
