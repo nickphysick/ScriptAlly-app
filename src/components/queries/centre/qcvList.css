@@ -20,7 +20,16 @@
   --qcv-tpl-gap: 10px;
   display: flex; flex-direction: column;
 }
-.qcv-rows { display: flex; flex-direction: column; gap: 10px; }
+/**
+ * ⚠️ §1 (v96.1) · THE 10px BETWEEN CARDS IS THE ROW'S OWN `margin-bottom`, NOT A GAP ON THIS BOX —
+ * which is what the reference does, and the reason is what went wrong. A `gap` here reaches this
+ * element's CHILDREN, and v96 §2 gave every grouping a band, so the children became SECTIONS: the
+ * gap went on separating sections while the rows inside each one butted together with no space at
+ * all. Measured on dev against the reference: gap 0 against 10, with the radius, the shadow, the
+ * white and the 6px edge all already correct — the cards were right and only the air between them
+ * had quietly moved one level up.
+ */
+.qcv-rows { display: flex; flex-direction: column; }
 
 /**
  * ⚠️ THE SELECTED RING IS AN INSET SHADOW BESIDE THE BASE ONE, not a border and not a fill. A
@@ -38,6 +47,7 @@
   background: #fff; border-radius: 12px;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+  margin-bottom: 10px;
 }
 .qcv-row:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 16px 30px -18px rgba(28, 19, 15, 0.3); }
 .qcv-row[aria-selected="true"] { box-shadow: 0 0 0 1.6px var(--qcv-ink) inset, 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22); }

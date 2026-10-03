@@ -466,10 +466,29 @@ export function listGroups(
   packageName?: (id: string) => string | null,
 ): ListGroup[] {
   const mk = (key: string, label: string, mine: QcRow[], hint?: string): ListGroup => ({ key, label, hint, rows: mine });
-  /* ⚠️ §2 — THE UNGROUPED LIST STILL GETS ONE BAND, and it is named. It used to carry an empty
-     label, which `QcList` read as "draw no heading"; v96 heads the whole list with a band reading
-     `All queries · N`, so the name is the thing that makes it drawable. */
-  if (groupBy === "none") return rows.length ? [mk("all", "All queries", [...rows])] : [];
+  /**
+   * ⚠️ §2 (v96.1) — THE BAND IS THE YOUR-MOVE GROUP'S HEAD, NOT A TITLE FOR THE LIST. v96 made it
+   * read `All queries · N`, which says the same thing as the title one line above it ("Your queries
+   * 83 OF 83") and quietly changed what a band MEANS: the reference's band is
+   * `Your move 〔4〕 · OFFERS, REQUESTS AND NUDGES` and the rows beneath it are the ones it counts.
+   * Changing the words was in scope; changing the claim was not. (Ruled by Nick, 3 Oct.)
+   *
+   * So an ungrouped list is TWO groups: the your-move band and its rows, then the rest with no band
+   * at all — `QcList` draws no heading for a group whose label is empty, which is the branch that
+   * already existed for the ungrouped case.
+   *
+   * ⚠️ THE COUNT IS `tileCourt`, THE DESK'S OWN FIRST SECTION. One classification, asked in two
+   * places, so the band and the desk cannot state different numbers for the same set.
+   */
+  if (groupBy === "none") {
+    if (!rows.length) return [];
+    const mine = rows.filter((r) => tileCourt(r.status) === "you");
+    const rest = rows.filter((r) => tileCourt(r.status) !== "you");
+    return [
+      ...(mine.length ? [mk("you", "Your move", mine, "offers, requests and nudges")] : []),
+      ...(rest.length ? [mk("rest", "", rest)] : []),
+    ];
+  }
 
   if (groupBy === "attention") {
     return URGENCY_GROUPS

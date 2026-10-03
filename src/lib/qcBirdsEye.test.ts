@@ -9,7 +9,7 @@ import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import {
   ALLOWANCE_FLOOR, ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, PROGRESS_FLOOR, UPCOMING_DAYS,
-  RAIL_ATTENTION_ORDER, attentionGroup, dayCount, eyeProgress, eyeFaded, eyeGroups, eyeRows,
+  attentionGroup, dayCount, eyeProgress, eyeFaded, eyeGroups, eyeRows,
 } from "./qcBirdsEye";
 
 const DAY = 86_400_000;
@@ -158,15 +158,15 @@ describe("the view's rows", () => {
     expect(gs.map((g) => g.count)).toEqual([1, 1]);
     expect(eyeGroups([], NOW)).toEqual([]);
     /**
-     * §4 (v96) — THE RAIL DRAWS TWO GROUPS AND THE EXPANDED VIEW STILL DRAWS THREE, and the two
-     * orders are asserted AGAINST EACH OTHER rather than against literals: the rail's must be a
-     * prefix of the shared one, so narrowing it can never invent a group or reorder them, and the
-     * shared one must still carry `watch`, because §7 forbids this pack from touching the expanded
-     * view and that is where Watch and wait still belongs.
+     * §4 (v96.1) — THE RAIL AND THE EXPANDED VIEW DRAW THE SAME THREE GROUPS, IN THE SAME ORDER.
+     * v96 cut the rail to two and this reverses it: the rail's header counts three, so a body of
+     * two contradicts it, and the group it dropped is the only one a calm account has. The claim
+     * is the ORDER itself — Overdue, Upcoming, Watch and wait — because that is what a reader
+     * scans, and an empty group renders nothing, which the `count > 0` filter has always done.
      */
-    expect(RAIL_ATTENTION_ORDER).toEqual(ATTENTION_ORDER.slice(0, RAIL_ATTENTION_ORDER.length));
-    expect(RAIL_ATTENTION_ORDER, "the rail is back to three groups, or down to one").toHaveLength(2);
-    expect(ATTENTION_ORDER, "the expanded view lost a group it is meant to keep").toContain("watch");
+    expect(ATTENTION_ORDER).toEqual(["overdue", "upcoming", "watch"]);
+    expect(eyeGroups(rows, NOW).map((g) => g.key), "the rail draws a different set from the shared order")
+      .toEqual(ATTENTION_ORDER.filter((k) => rows.some((r) => attentionGroup(r, NOW) === k)));
     /* and the counts add up to what was drawn */
     expect(gs.reduce((a, g) => a + g.count, 0)).toBe(eyeRows(rows, NOW).length);
   });

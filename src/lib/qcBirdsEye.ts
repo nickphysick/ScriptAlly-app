@@ -262,28 +262,24 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
 }
 
 /**
- * §4 (v96) · THE RAIL DRAWS TWO GROUPS — *Overdue* and *Upcoming* — WHERE THE EXPANDED VIEW DRAWS
- * THREE, and this is a REVERSAL of a v95 decision, taken because the reference wins.
+ * ⚠️ §4 (v96.1) · THE RAIL DRAWS ALL THREE GROUPS, AND v96's REVERSAL OF THAT IS REVERSED. v96 cut
+ * it to Overdue and Upcoming because §4 named two and the reference renders two — and the reference
+ * renders two because **its sample has no rows in the third**, not because its model has two
+ * outcomes: its own `groupOf` answers `over / up / watch`, and its header counts three
+ * (`18 overdue · 3 upcoming · 2 waiting`).
  *
- * The reference's rail renders exactly these two: its header counts `18 OVERDUE · 3 UPCOMING ·
- * 2 WAITING` and no Waiting section follows. §4 of the pack names the same two.
+ * ⚠️ AND THE COST I RECORDED FOR IT WAS BACKWARDS. v96's note said dropping `watch` "empties the
+ * rail for the writer whose pipeline is healthiest" — which is right, and then drew the wrong
+ * conclusion from it: a calm pipeline IS all watch-and-wait, so a body of two groups contradicts a
+ * header that counts three and hides the only rows a calm account has. (Ruled by Nick, 3 Oct.)
  *
- * ⚠️ AND THE COST IS REAL AND FALLS ON THE CALMEST ACCOUNTS. v95 kept `watch` precisely because
- * dropping it empties the rail for the writer whose pipeline is healthiest — 21 of 69 on the
- * harness account sit in it — so a writer with nothing overdue and nothing upcoming now gets a
- * header, a key line and no body. The counts line still names all three, which is the reference's
- * own arrangement, so the number is stated even where the rows are not. Flagged in §0 rather than
- * changed quietly; one entry in this array puts it back.
- *
- * ⚠️ IT IS A SEPARATE CONSTANT FROM `ATTENTION_ORDER`, which the EXPANDED view reads and which §7
- * forbids this pack from touching. Narrowing the shared one would have taken Watch and wait out of
- * the expanded view too, where the reference plainly keeps it.
+ * An empty group renders nothing — no band, no "nothing here" — which is what the `count > 0`
+ * filter below has always done.
  */
-export const RAIL_ATTENTION_ORDER: readonly Attention[] = ["overdue", "upcoming"];
 
 export function eyeGroups(rows: readonly QcRow[], nowMs: number): EyeGroup[] {
   const all = eyeRows(rows, nowMs);
-  return RAIL_ATTENTION_ORDER.map((key) => {
+  return ATTENTION_ORDER.map((key) => {
     const mine = all.filter((r) => r.group === key);
     return { key, label: ATTENTION_LABEL[key], count: mine.length, rows: mine };
   }).filter((g) => g.count > 0);

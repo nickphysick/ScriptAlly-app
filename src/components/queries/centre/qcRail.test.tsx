@@ -211,12 +211,19 @@ describe("the court tiles", () => {
     const { courtTiles } = await import("../../../lib/qcSummary");
     const html = renderToStaticMarkup(<QcCourts tiles={courtTiles([])} onCourt={() => {}} />);
     /* the label is a sentence, not the visible parts concatenated */
+    /**
+     * §5 (v96.1) — THE EM DASH IS DRAWN AND NOT SPOKEN. The foot's clause renders on every section
+     * now, with an em dash where the court has no date; the accessible name omits the clause
+     * entirely in that case, because "next due em dash" is not something to say out loud. An empty
+     * fixture has no dates at all, so these two labels are exactly the pre-v96.1 sentences.
+     */
     expect(html).toContain('aria-label="With you: 0 queries. none yet."');
     expect(html).toContain('aria-label="Closed: 0 queries. none yet."');
+    expect(html, "the clause is not drawn when there is no date").toContain("—");
     /* …and the visible text is hidden, or a reader hears the court's name twice per tile */
     expect(html.split('aria-hidden="true"').length - 1, "the drawn text is not hidden from the label").toBeGreaterThanOrEqual(6);
     /* singular agrees with its verb */
-    const one = renderToStaticMarkup(<QcCourts tiles={[{ key: "you", name: "With you", count: 1, fact: "your move on these", urgent: false, rust: true, who: [], more: 0, when: null }]} onCourt={() => {}} />);
+    const one = renderToStaticMarkup(<QcCourts tiles={[{ key: "you", name: "With you", count: 1, fact: "your move on these", urgent: false, rust: true, who: [], more: 0, when: { label: "next due", date: null } }]} onCourt={() => {}} />);
     expect(one).toContain("1 query.");
   });
   /**

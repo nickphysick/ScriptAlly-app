@@ -97,7 +97,22 @@ test("QC1 · the desk's three sections are equal, and their feet sit at one y ho
     .toBeGreaterThan(rest.noteH[0]);
   expect(new Set(wrapped.widths).size, `a wrapped line moved the sections: ${wrapped.widths}`).toBe(1);
   expect(new Set(wrapped.feetY).size, `a wrapped line moved the feet: ${wrapped.feetY}`).toBe(1);
-  note("QC1", { rest, wrapped });
+  /**
+   * §5 (v96.1) · EACH SECTION'S FOOT CARRIES A DATE, OR THE WORDS AND AN EM DASH. The discs say
+   * who; the date says when, and a foot with discs alone is half a sentence. Where the app has no
+   * date for a section the phrase still renders — "next due —" — because the absence of a date is
+   * itself worth stating, and a vanishing clause makes three sections three different shapes.
+   */
+  const feet = await page.evaluate((sel) => [...(document.querySelector(sel) as HTMLElement)
+    .querySelectorAll('[data-qcv="court-foot"]')]
+    .map((e) => ({ text: (e as HTMLElement).innerText.replace(/\s+/g, " ").trim(),
+                   when: ((e as HTMLElement).querySelector('[data-qcv="court-when"]') as HTMLElement | null)?.innerText.replace(/\s+/g, " ").trim() ?? null })), G);
+  expect(feet.length, "the desk does not have three feet").toBe(3);
+  for (const f of feet) {
+    expect(f.when, `a foot states no date clause at all: "${f.text}"`).toBeTruthy();
+    expect(f.when, `"${f.when}" names no date and no em dash`).toMatch(/\d|—/);
+  }
+  note("QC1", { rest, wrapped, feet });
 });
 
 /* ── QC2 ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -398,7 +413,31 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
   expect(stated, "the row states no minimum height, so this claim has no floor to check").toBeGreaterThan(0);
   expect(rest.h, `the row is ${rest.h}px against its stated ${stated}px — something in it is taking space`)
     .toBe(stated);
-  note("QC6", { rest, hovered, focused });
+  /**
+   * §1 (v96.1) · THE ROWS ARE FLOATING CARDS, AND THE AIR BETWEEN THEM IS MEASURED. v96 drew them
+   * butted together — gap 0 against the reference's 10 — because the 10px lived as a `gap` on the
+   * rows' container and §2's bands made that container's children SECTIONS rather than rows. The
+   * unit lock stayed green throughout, asserting the declaration where the claim was the distance,
+   * which is why this one measures the pixels between two cards instead.
+   */
+  const cards = await page.evaluate((sel) => {
+    const rows = [...(document.querySelector(sel) as HTMLElement).querySelectorAll('[data-qcv="row"]')] as HTMLElement[];
+    if (rows.length < 3) return null;
+    const cs = getComputedStyle(rows[0]);
+    const edge = getComputedStyle(rows[0], "::before");
+    const gaps = rows.slice(1, 6).map((r, n) => +(r.getBoundingClientRect().top - rows[n].getBoundingClientRect().bottom).toFixed(1));
+    return { gaps, radius: cs.borderRadius, border: cs.borderStyle, shadow: cs.boxShadow,
+             overflow: cs.overflow, bg: cs.backgroundColor, edge: edge.backgroundImage };
+  }, P);
+  expect(cards, "fewer than three rows — the gap between cards is untested").not.toBeNull();
+  expect([...new Set(cards!.gaps)], `the cards are ${cards!.gaps} apart`).toEqual([10]);
+  expect(cards!.border, "a stroke on a floating card").toMatch(/^(none|solid)$/);
+  expect(cards!.radius).toBe("12px");
+  expect(cards!.shadow, "the card has no shadow, so it is not floating").toMatch(/rgba\(28, 19, 15/);
+  expect(cards!.overflow, "the 6px edge escapes the radius without this").toBe("hidden");
+  expect(cards!.bg).toBe("rgb(255, 255, 255)");
+  expect(cards!.edge, "the 6px status edge is not painted").toMatch(/linear-gradient\(90deg[^)]*\)?.*6px/);
+  note("QC6", { rest, hovered, focused, cards });
 });
 
 /* ── QC8, QC9, QC11 ──────────────────────────────────────────────────────────────────────────── */
@@ -478,6 +517,32 @@ test("QC9 · the bars: full ink past the date, part-grey inside the window, an e
       };
     });
   });
+  /**
+   * §4 (v96.1) · THE RAIL'S BODY AND ITS HEADER COUNT THE SAME THREE THINGS. v96 cut the body to
+   * Overdue and Upcoming while the header went on counting `N overdue · N upcoming · N waiting` —
+   * a header that names a group the body does not draw, and the group it dropped is the only one a
+   * calm account has. The claim is the agreement, so neither can move without the other.
+   */
+  const rail = await page.evaluate(() => {
+    const r = (document.querySelector('[data-qcv="group"][data-qc96="on"]') as HTMLElement).querySelector(".qcv-rail") as HTMLElement;
+    const groups = [...r.querySelectorAll('[data-qcv="be-group"]')].map((g) => ({
+      key: (g as HTMLElement).dataset.group ?? "",
+      count: +(((g.querySelector('[data-qcv="be-gcount"]') as HTMLElement)?.innerText ?? "0").trim()),
+      rows: g.querySelectorAll('[data-qcv="be-row"]').length,
+    }));
+    const counts = ((r.querySelector('[data-qcv="be-counts"]') as HTMLElement)?.innerText ?? "")
+      .replace(/\s+/g, " ").trim().toLowerCase();
+    return { groups, counts };
+  });
+  note("QC9rail", rail);
+  expect(rail.groups.map((g) => g.key), "the rail does not draw the three attention groups in order")
+    .toEqual(["overdue", "upcoming", "watch"]);
+  for (const g of rail.groups) {
+    expect(g.rows, `${g.key}: the pill says ${g.count} over ${g.rows} rows`).toBe(g.count);
+    /* …and the header's own figure for that group is the same number */
+    const word = g.key === "watch" ? "waiting" : g.key;
+    expect(rail.counts, `the header does not say ${g.count} ${word}`).toContain(`${g.count} ${word}`);
+  }
   note("QC9", { n: bars.length, over: bars.filter((b) => b.tone === "over").length, sample: bars.slice(0, 4) });
   expect(bars.length, "no bars to read").toBeGreaterThan(5);
 
@@ -525,6 +590,33 @@ test("QC9 · the bars: full ink past the date, part-grey inside the window, an e
 
 test("QC11 · Group = urgency draws the Birds-eye view's own three courts, with its counts", async ({ page }) => {
   await qc(page);
+  /**
+   * §2 (v96.1) · UNGROUPED, THE BAND IS THE YOUR-MOVE GROUP'S HEAD — not a title for the list. v96
+   * made it read `All queries · N`, which repeats the title one line above it and changes what a
+   * band MEANS. Its count is `tileCourt`, the desk's own first section, so the two cannot state
+   * different numbers for the same set; and the rows it counts sit directly beneath it.
+   */
+  const flat = await page.evaluate((sel) => {
+    const pg = document.querySelector(sel) as HTMLElement;
+    const bands = [...pg.querySelectorAll('[data-qcv="grp"]')] as HTMLElement[];
+    const first = bands[0];
+    const sect = first?.parentElement;
+    return {
+      bands: bands.length,
+      label: first ? (first.childNodes[0]?.textContent ?? "").trim() : null,
+      count: first ? +(((first.querySelector('[data-qcv="grp-count"]') as HTMLElement)?.innerText ?? "0").trim()) : null,
+      gloss: first ? ((first.querySelector(".qcv-grp-h") as HTMLElement)?.innerText ?? "").trim() : null,
+      rowsUnder: sect ? sect.querySelectorAll('[data-qcv="row"]').length : -1,
+      deskYou: +(((pg.closest('[data-qcv="group"]') as HTMLElement)
+        ?.querySelector('[data-qcv="court-count"]') as HTMLElement)?.innerText ?? "0"),
+    };
+  }, P);
+  note("QC11flat", flat);
+  expect(flat.label, "the ungrouped band is not the your-move group's head").toBe("Your move");
+  expect(flat.gloss.toUpperCase()).toBe("OFFERS, REQUESTS AND NUDGES");
+  expect(flat.count, "the band's count is not the desk's first section").toBe(flat.deskYou);
+  expect(flat.rowsUnder, "the rows under the band are not the rows it counts").toBe(flat.count);
+  expect(flat.bands, "an ungrouped list draws more than the one band").toBe(1);
   await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
   await page.waitForTimeout(300);
   await page.getByRole("menuitemradio", { name: /^Urgency$/ }).first().click();
@@ -661,6 +753,16 @@ test("QC10 · the rail's header is byte-identical to the build this pack branche
         }
       }
       for (const k of ["w", "dx"] as const) {
+        /**
+         * ⚠️ THE COUNTS LINE'S WIDTH IS DATA, LIKE ITS TEXT. It reads "31 overdue · 18 upcoming ·
+         * 20 waiting", so its box is a function of how many digits those numbers have — of the
+         * account, and of the clock. It went 195.141 → 196.172 between two runs on the same code
+         * because one query crossed a threshold and `17` became `18`. Its text was already excused
+         * for this reason; its width is the same fact wearing a number. Height, vertical offset,
+         * type, colour and every other property stay exact, which is where a real change to this
+         * element would show.
+         */
+        if (DATA.test(String(x.cls)) && k === "w") continue;
         const d = (x.box as Record<string, number>)[k] - (y.box as Record<string, number>)[k];
         if (d !== 0 && !(d > 0 && d <= RAIL_SHRANK)) {
           diffs.push(`${x.path} ${k} ${(x.box as Record<string, number>)[k]} → ${(y.box as Record<string, number>)[k]} (not the rail's ${RAIL_SHRANK}px)`);
@@ -680,6 +782,7 @@ test("QC10 · the rail's header is byte-identical to the build this pack branche
         if (px.test(v) && px.test(w) && Math.abs(parseFloat(v) - parseFloat(w)) < 0.1) continue;
         /* the computed `width` of a box the narrowing reaches — the same allowance, and only there */
         if (k === "width" && px.test(v) && px.test(w)) {
+          if (DATA.test(String(x.cls))) continue;   // the counts line — see the note above
           const d = parseFloat(v) - parseFloat(w);
           if (d > 0 && d <= RAIL_SHRANK + 0.1) continue;
         }
@@ -771,6 +874,38 @@ test("QC13 · the guide shows on first visit, not after ×, and comes back from 
   const afterMenu = await shown();
   const backAt = offered ? await page.locator('[data-qcv="guide-n"]').innerText() : null;
 
+  /**
+   * §3 (v96.1) · THE CARD IS ANCHORED TO THE VIEWPORT AND NEVER TOUCHES THE DESK. v96 lifted it
+   * clear of the rail's header, and at 860 tall that lift put it **over the desk's third section** —
+   * the one thing §4b's "never covers" was about. Checked at three heights, because the fault
+   * existed at one of them and not at the one it was written against.
+   */
+  const places: Record<string, unknown> = {};
+  for (const h of [860, 1000, 1200]) {
+    await page.evaluate((k) => { try { localStorage.removeItem(k as string); } catch { /* ignore */ } }, KEY);
+    await qc(page, 1512, h);
+    places[String(h)] = await page.evaluate((sel) => {
+      const g = document.querySelector('[data-qcv="guide"]') as HTMLElement | null;
+      const desk = (document.querySelector(sel) as HTMLElement).closest('[data-qcv="group"]')!
+        .querySelector('[data-qcv="courts"]') as HTMLElement;
+      if (!g) return null;
+      const c = getComputedStyle(g), r = g.getBoundingClientRect(), d = desk.getBoundingClientRect();
+      return { position: c.position, right: c.right, bottom: c.bottom,
+               overDesk: r.top < d.bottom && r.bottom > d.top && r.left < d.right && r.right > d.left,
+               fromFoot: Math.round(window.innerHeight - r.bottom) };
+    }, P);
+  }
+  note("QC13place", places);
+  for (const [h, p] of Object.entries(places)) {
+    const q = p as { position: string; right: string; bottom: string; overDesk: boolean; fromFoot: number } | null;
+    expect(q, `${h}: the guide did not show`).not.toBeNull();
+    expect(q!.position, `${h}: the card is not fixed to the viewport`).toBe("fixed");
+    expect(q!.right, `${h}: right`).toBe("28px");
+    expect(q!.bottom, `${h}: the card moved off the window's foot`).toBe("28px");
+    expect(q!.fromFoot, `${h}: the card is ${q!.fromFoot}px off the foot`).toBe(28);
+    expect(q!.overDesk, `${h}: the card is sitting on the desk`).toBe(false);
+  }
+
   note("QC13", { first, title, n, afterX, stored, afterReload, offered, afterMenu, backAt });
   expect(first, "the guide did not show on a first visit").toBe(true);
   expect(title, "the first step is not the reference's").toBe("Your desk, in three bands");
@@ -794,7 +929,8 @@ test("QC13 · the guide shows on first visit, not after ×, and comes back from 
 test("the run measured what it claims to have measured", () => {
   const all = JSON.parse(readFileSync(LEDGER, "utf8")) as { n: number; notes: Record<string, unknown> };
   expect(Object.keys(all.notes).sort(), "a lock wrote no reading").toEqual(
-    ["QC1", "QC10", "QC11", "QC12", "QC13", "QC2", "QC3", "QC4", "QC5", "QC6", "QC8", "QC9"],
+    ["QC1", "QC10", "QC11", "QC11flat", "QC12", "QC13", "QC13place", "QC2", "QC3", "QC4", "QC5",
+     "QC6", "QC8", "QC9", "QC9rail"],
   );
-  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(12);
+  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(15);
 });

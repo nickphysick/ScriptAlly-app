@@ -266,13 +266,21 @@ export interface CourtTile {
   /** How many further AGENTS the discs stand for — see `courtFoot`. Zero draws no `+N`. */
   more: number;
   /** §1 · the foot's right half, or null where there is no date this court can honestly state. */
-  when: CourtWhen | null;
+  /** §5 (v96.1) — always present; `date` is `—` where the court has none. */
+  when: CourtWhen;
 }
 
 /** One overlapping initials disc in a desk section's foot. */
 export interface CourtDisc { initials: string; name: string }
-/** The foot's right-hand fact: a label and a formatted date, never one without the other. */
-export interface CourtWhen { label: string; date: string }
+/**
+ * The foot's right-hand fact: a label the COURT owns, and a date that may not exist.
+ *
+ * ⚠️ §5 (v96.1) — `date: null` IS THE ABSENCE, AND THE EM DASH IS THE RENDERER'S. Storing "—" here
+ * would make every consumer compare against a punctuation mark to find out whether there is a date
+ * — and the accessible name needs exactly that question, because an em dash is a convention for
+ * the EYE and "next due em dash" is not something to say out loud.
+ */
+export interface CourtWhen { label: string; date: string | null }
 
 /** The discs a section shows before it starts counting. */
 export const FOOT_DISCS = 4;
@@ -317,18 +325,27 @@ export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number)
     agents += 1;
     if (who.length < FOOT_DISCS) who.push({ initials: r.initials, name: r.agentName });
   }
-  let when: CourtWhen | null = null;
+  /**
+   * ⚠️ §5 (v96.1) · THE CLAUSE ALWAYS RENDERS; THE DATE IS WHAT CAN BE MISSING. It used to be
+   * dropped whole when there was no date, with a note arguing that a label with nothing to label is
+   * worse than nothing — and the cost of that is three sections with three different shapes, where
+   * the one with the least to say looks like the one that failed to load. **Ruled otherwise (Nick,
+   * 3 Oct): the words still render, with an em dash.** The absence of a date is a fact about the
+   * court, and it is the same fact for everyone reading it.
+   *
+   * The LABEL is a property of the court, never of the date — which is what makes this possible at
+   * all: "next due" / "next reply expected" / "last closed" are known before any row is consulted.
+   */
+  const label = closed ? "last closed" : key === "you" ? "next due" : "next reply expected";
+  let date: string | null = null;
   if (closed) {
     const last = ordered.find((r) => r.stageStartMs != null)?.stageStartMs;
-    if (last != null) when = { label: "last closed", date: shortDay(last) };
+    if (last != null) date = shortDay(last);
   } else {
     const next = ordered.find((r) => r.expectedMs != null && r.expectedMs >= nowMs)?.expectedMs;
-    if (next != null) {
-      when = key === "you"
-        ? { label: "next due", date: shortWeekDay(next) }
-        : { label: "next reply expected", date: shortDay(next) };
-    }
+    if (next != null) date = key === "you" ? shortWeekDay(next) : shortDay(next);
   }
+  const when: CourtWhen = { label, date };
   return { who, more: Math.max(0, agents - who.length), when };
 }
 

@@ -110,7 +110,16 @@ describe("the list's columns — one template, floors and ceilings, the spare in
     expect(row).toMatch(/border-radius:\s*12px/);
     expect(row).toMatch(/background:\s*#fff/);
     expect(row).toMatch(/box-shadow:\s*0 1px 2px rgba\(28, 19, 15, 0\.05\), 0 10px 24px -18px rgba\(28, 19, 15, 0\.22\)/);
-    expect(rule(listCss, ".qcv-rows")).toMatch(/gap:\s*10px/);
+    /**
+     * ⚠️ §1 (v96.1) — THE 10px IS THE CARD'S OWN `margin-bottom`, AND IT WAS A `gap` ON THE PARENT.
+     * A gap reaches that element's CHILDREN, and v96 §2 gave every grouping a band, so the children
+     * became sections: the gap went on separating sections while the rows inside each one butted
+     * together at 0. **This lock was green throughout** — `.qcv-rows` really did declare `gap: 10px`
+     * — which is the whole lesson: it asserted the declaration where the claim was the distance.
+     * Measured against the reference, dev had 0 where it has 10.
+     */
+    expect(row, "the card states no margin, so the air between cards is somebody else's").toMatch(/margin-bottom:\s*10px/);
+    expect(rule(listCss, ".qcv-rows"), "a gap on the parent separates sections, not cards").not.toMatch(/gap:/);
     /* ⚠️ SELECTION IS A RING AND NEVER A FILL, and it is now ONE mechanism: an inset shadow beside
        the base one. A border would change the card's box and shuffle every track; two rings drawn
        two ways is how a focused-and-selected row wears a double outline. */

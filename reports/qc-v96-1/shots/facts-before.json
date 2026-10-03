@@ -1,0 +1,32 @@
+{
+ "860": {
+  "gap": 0,
+  "band": "All queries 83",
+  "railGroups": [
+   "Overdue 31",
+   "Upcoming 18"
+  ],
+  "guideBottom": "285px",
+  "guideOverDesk": true,
+  "feet": [
+   "RL IK MR EV +8 next due Sun 4 Oct",
+   "RV RL TQ MK +28 next reply expected 4 Oct",
+   "JW IR TE EH +6 last closed 9 Sep"
+  ]
+ },
+ "1040": {
+  "gap": 0,
+  "band": "All queries 83",
+  "railGroups": [
+   "Overdue 31",
+   "Upcoming 18"
+  ],
+  "guideBottom": "28px",
+  "guideOverDesk": false,
+  "feet": [
+   "RL IK MR EV +8 next due Sun 4 Oct",
+   "RV RL TQ MK +28 next reply expected 4 Oct",
+   "JW IR TE EH +6 last closed 9 Sep"
+  ]
+ }
+}

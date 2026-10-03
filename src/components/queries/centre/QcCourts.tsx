@@ -61,7 +61,8 @@ export const QcCourts: React.FC<{
            * carries its own sentence and everything inside it is hidden.
            */
           aria-label={`${t.name}: ${t.count} ${t.count === 1 ? "query" : "queries"}. ${t.fact}.${
-            t.when ? ` ${t.when.label} ${t.when.date}.` : ""
+            /* §5 — spoken only where there is a date: an em dash is for the eye */
+            t.when.date ? ` ${t.when.label} ${t.when.date}.` : ""
           }`}
           onClick={() => onCourt(t.key)}
         >
@@ -78,11 +79,10 @@ export const QcCourts: React.FC<{
               {t.who.map((d) => <i key={d.name + d.initials} title={d.name}>{d.initials}</i>)}
               {t.more > 0 && <i className="qcv-half-more">+{t.more}</i>}
             </span>
-            {/* a court with no date it can honestly state says nothing here — never an em dash
-                under a label, which is a label with nothing to label */}
-            {t.when && (
-              <span className="qcv-half-when" data-qcv="court-when">{t.when.label} <b>{t.when.date}</b></span>
-            )}
+            {/* §5 (v96.1) — the clause always renders; an em dash is what a court with no date
+                shows. Dropping it whole gave three sections three shapes, and made the one with
+                least to say look like the one that failed to load. */}
+            <span className="qcv-half-when" data-qcv="court-when">{t.when.label} <b>{t.when.date ?? "—"}</b></span>
           </span>
         </button>
       ))}
