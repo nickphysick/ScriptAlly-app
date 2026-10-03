@@ -2,14 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Manuscripts v12 — render smokes and the unit halves of the page's locks.
+ * Manuscripts — render smokes and the unit halves of the page's locks (v12's, carried, and v13's).
  *
- * The rendered halves of L1/L2/L8/L10 (geometry) live in tests/e2e/manuscriptsV12.measure.ts;
- * here are the halves a source render can honestly carry: the page renders in both states, the
- * empty state's five example sections are inert furniture (L6), every status glyph is the real
- * StatusDot and no mock ring was ported (L5), the unset series says "Not recorded" (L9), the
- * page's own words never grade the writer (L11), and the owed row's click path performs NO write
- * (L4's source half — only the modal's commit writes, through DashTaskCommit).
+ * The rendered halves (geometry, the bands, the shelf, the tiles, the activity) live in
+ * tests/e2e/manuscriptsV13.measure.ts; here are the halves a source render can honestly carry: the
+ * page renders in both states, the filled page is one column of five banded cards with no rail, the
+ * empty state's five example sections are inert furniture (L6, unchanged — F8), every status glyph
+ * is the real StatusDot and no mock ring was ported (L5), an unset series reads "Standalone" (v13
+ * Phase 2), the page's own words never grade the writer (L11), the owed row's click path performs
+ * NO write (L4's source half), and the two dialogs carry the mock's fields and write as stated.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
@@ -22,7 +23,7 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { ManuscriptPage } from "./ManuscriptPage";
-import { factPatch } from "./Msv12EditDetails";
+import { Msv12EditDetails, Msv12NewVersion, factPatch } from "./Msv12EditDetails";
 import { SD_VIEWBOX } from "../../../test/statusDotSignature";
 import { sliceBetween } from "../../../test/sliceBetween";
 import { deleteField, type FieldValue } from "firebase/firestore";
@@ -40,11 +41,18 @@ describe("/manuscripts (v12) renders", () => {
     expect(html).toContain('data-msv12="empty-cta"');
   });
 
-  it("filled: the hero states the seeded book", () => {
+  it("filled: the hero states the seeded book, over one column of five banded cards and no rail", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).toContain("The Smoke Test");
     expect(html).toContain('data-msv12="hero"');
-    expect(html).toContain('data-msv12="rail"');
+    expect(html, "v13 retired the rail (F1)").not.toContain('data-msv12="rail"');
+    expect(html).toContain('data-msv13="shelf"');
+    for (const card of ["comps", "materials", "packages", "versions", "activity"]) {
+      /* the band is the card's first child — the anthracite header every container carries (F2) */
+      expect(html, `${card} renders under its band`).toMatch(new RegExp(`data-msv13-card="${card}"[^>]*><div class="msv13-band" data-msv13="band">`));
+    }
+    /* Edit details sits under the facts (Phase 2): the facts list closes, then the button opens */
+    expect(html).toMatch(/<\/dl><button[^>]*data-msv12="edit-details"/);
   });
 
   it("L6 · the empty state's five sections are inert examples", () => {
@@ -74,13 +82,18 @@ describe("/manuscripts (v12) renders", () => {
     expect(wraps).toBeGreaterThan(0);
   });
 
-  it("L9 · an unset series is 'Not recorded' with an Add control, never a dash or a blank", () => {
+  it("an unset series reads 'Standalone', muted — never 'Not recorded', a dash or a blank (v13 Phase 2)", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    const series = /data-msv12="fact-series"[\s\S]*?<\/div>/.exec(html)?.[0] ?? "";
-    expect(series, "the series fact renders").not.toBe("");
-    expect(series).toContain("Not recorded");
-    expect(series).toContain("<button");
+    /* bounded by anchors that cannot nest — the series is the last fact, so the list's close */
+    const series = sliceBetween(html, 'data-msv12="fact-series"', "</dl>", "the series fact");
+    expect(series).toContain('class="msv12-miss">Standalone</dd>');
+    expect(series).not.toContain("Not recorded");
+    expect(series).not.toContain("<button");
     expect(series).not.toContain("—");
+    /* the setting keeps v12's rule (L9): unset is "Not recorded" with an Add control */
+    const setting = sliceBetween(html, 'data-msv12="fact-setting"', 'data-msv12="fact-series"', "the setting fact");
+    expect(setting).toContain("Not recorded");
+    expect(setting).toContain("<button");
   });
 
   it("L11 · no appraisal word in the page's own text, either state", () => {
@@ -155,5 +168,70 @@ describe("the edit dialog's one write", () => {
     const listed = block!.replace(/\/\/[^\n]*/g, "");
     expect(listed, "setting left the allowlist — every setting edit now fails the whole save").toContain("'setting'");
     expect(listed, "series left the allowlist — every series edit now fails the whole save").toContain("'series'");
+  });
+});
+
+/** The seeded manuscript, as the dialogs receive it. */
+const SEEDED_MS = {
+  id: "m1", userId: "u1", title: "The Smoke Test", genre: "Literary Fiction", ageCategory: "Adult",
+  wordCount: 82000, logline: "A page that would not load.", status: "Querying",
+  statusChangedDate: "2026-01-05T00:00:00.000Z",
+} as unknown as React.ComponentProps<typeof Msv12EditDetails>["ms"];
+
+describe("the dialogs carry the mock's fields (v13)", () => {
+  const noop = async () => undefined;
+  const labels = (html: string) => [...html.matchAll(/<label for="[^"]+">([^<]+)/g)].map((m) => m[1].trim());
+
+  it("Edit details: the mock's nine fields in its order, the status as segments, Save details", () => {
+    const html = renderPage(
+      <Msv12EditDetails ms={SEEDED_MS} authorName="Nick Physick" updateManuscript={noop} updateUserProfile={noop} onClose={() => {}} />,
+      "/manuscripts",
+    );
+    expect(labels(html)).toEqual(["Title", "Author name", "Word count", "Genre", "Age category", "Logline", "Setting", "Series"]);
+    expect(html).toContain('id="msv12-f-status">Status</span>');
+    const seg = sliceBetween(html, 'class="msv12-seg"', 'class="msv12-dfoot"', "the status segments");
+    expect([...seg.matchAll(/aria-pressed="(true|false)"[^>]*>([^<]+)</g)].map((m) => [m[2], m[1]]))
+      .toEqual([["Drafting", "false"], ["Querying", "true"], ["On submission", "false"], ["Shelved", "false"]]);
+    expect(html).toContain('value="Nick Physick"');
+    expect(html).toContain(">Save details</button>");
+    expect(html).toContain("One or two sentences. It leads the page and the query line.");
+  });
+
+  it("New version: name and what changed, no kind and no word count (no model field), Save version", () => {
+    const html = renderPage(<Msv12NewVersion ms={SEEDED_MS} editing={null} updateManuscript={noop} onClose={() => {}} />, "/manuscripts");
+    expect(labels(html)).toEqual(["Name", "What changed"]);
+    expect(html).toContain("A new ordering or edit of the book. It becomes the current version.");
+    expect(html).toContain(">Save version</button>");
+    expect(html).not.toMatch(/Kind|Word count/);
+  });
+
+  it("the author name is the account's, written only when it changed and only after the manuscript's write", () => {
+    const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
+    const dialog = sliceBetween(src, "export const Msv12EditDetails", "export const Msv12NewVersion", "the edit dialog");
+    expect(dialog.match(/\bupdateUserProfile\(/g)?.length ?? 0).toBe(1);
+    expect(dialog.indexOf("updateManuscript("), "the manuscript writes first").toBeLessThan(dialog.indexOf("updateUserProfile("));
+    expect(dialog).toMatch(/if \(d\.author\.trim\(\) !== authorName\.trim\(\)\)/);
+  });
+
+  it("both dialogs portal out of #root — useOverlay seals #root inert, so a dialog inside it is dead", () => {
+    /* v12 rendered both inside the page and every field and button in them was inert from the day
+       they shipped (25 Sep) until v13. useOverlay states the contract in a comment; this holds it. */
+    const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
+    expect(src).toMatch(/createPortal\(node, document\.body\)/);
+    for (const [from, to] of [["export const Msv12EditDetails", "export const Msv12NewVersion"], ["export const Msv12NewVersion", "\u0000"]] as const) {
+      const body = to === "\u0000" ? src.slice(src.indexOf(from)) : sliceBetween(src, from, to, from);
+      expect(body, `${from} sits on useOverlay`).toMatch(/useOverlay\(/);
+      expect(body, `${from} renders through the portal`).toMatch(/return toBody\(/);
+      /* the portal leaves .msv12-wpg's token scope — the host carries the class that declares them */
+      expect(body, `${from}'s portal host declares the page's tokens`).toContain('className="msv12-own msv12-layer"');
+    }
+    const css = readFileSync(join(__dirname, "msv12.css"), "utf8");
+    expect(css, "msv12-layer declares the --msv12-* tokens with the grid").toMatch(/\.msv12-wpg, \.msv12-layer \{\s*\n\s*--msv12-page/);
+  });
+
+  it("a new version is dated by the London calendar, never the UTC date", () => {
+    const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
+    expect(src).toContain("createdDate: londonDay(new Date())");
+    expect(src).not.toMatch(/toISOString\(\)\.slice\(0, 10\)/);
   });
 });

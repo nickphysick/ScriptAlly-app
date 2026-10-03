@@ -5,8 +5,9 @@
  * manuscriptSummary — the Manuscripts page's derivations, proved on inputs the system can
  * actually produce (real enum values, real record shapes; no hand-invented buckets).
  *
- * The L3 (one-edge) cases here are the derivation half of the rendered lock in
- * tests/e2e/manuscriptsV12.measure.ts: a query whose package states no version — or which has no
+ * The L3 (one-edge) cases here are the derivation half of a rendered lock — v12's L3, carried since
+ * v13 by M5 in tests/e2e/manuscriptsV13.measure.ts, where the current tile's queried count would read
+ * one higher if the fixture's packageless query were folded in: a query whose package states no version — or which has no
  * package — appears in NO version's usage, and the named mutation (fold unattributed queries into
  * the current version) must turn them red.
  */

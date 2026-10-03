@@ -16,7 +16,7 @@ const noop = () => {};
 
 describe("the empty page", () => {
   const qc = renderToStaticMarkup(<QcEmpty manuscriptTitle="Murphy’s Day Out" onLog={noop} onRecord={noop} onImport={noop} />);
-  const cl = renderToStaticMarkup(<ContactEmpty manuscriptTitle="Murphy’s Day Out" genre="Thriller" onAdd={noop} onDiscover={noop} />);
+  const cl = renderToStaticMarkup(<ContactEmpty manuscriptTitle="Murphy’s Day Out" genre="Thriller" onAdd={noop} onImport={noop} onDiscover={noop} />);
 
   /* the eyebrow's section comes from the route (useMastheadSection) — present on the page, measured
      in LH5; a bare render has no route, so it is not asserted here */
@@ -47,7 +47,7 @@ describe("the empty page", () => {
     expect(cl).toContain('href="/agents/discover"');
     expect(cl).toContain("Find agents who want thrillers ›");
     /* no Discover route: the hint line AND the secondary pill are both omitted (v12 P2) */
-    const bare = renderToStaticMarkup(<ContactEmpty manuscriptTitle={null} genre={null} onAdd={noop} />);
+    const bare = renderToStaticMarkup(<ContactEmpty manuscriptTitle={null} genre={null} onAdd={noop} onImport={noop} />);
     expect(bare).not.toContain('data-lh="hint"');
     expect(bare).not.toContain("Discover agents");
   });

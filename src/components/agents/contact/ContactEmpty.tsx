@@ -13,6 +13,7 @@
  */
 import React from "react";
 import { PageHeader } from "../../shell/PageHeader";
+import { ContactWays } from "./ContactWays";
 import type { LivingRun } from "../../../lib/livingLine";
 import { CONTACT_HAWK } from "./ContactHeader";
 import "../../shell/livingExhibit.css";
@@ -39,6 +40,8 @@ export interface ContactEmptyProps {
   manuscriptTitle: string | null;
   genre: string | null;
   onAdd: () => void;
+  /** Smart Import — the ways' recommended tile (v12 §7). */
+  onImport: () => void;
   /** Discover, when the page can reach it — the line is OMITTED when it cannot (§3). */
   onDiscover?: () => void;
   addRef?: React.Ref<HTMLButtonElement>;
@@ -49,7 +52,7 @@ export interface ContactEmptyProps {
 /* v12 P2 (3 Oct): the "Paste a link" pill retired with the quick-add (the go-ahead's ask 2),
    and the empty state's secondary is the SAME Discover pill the populated header wears —
    LH7's same-size claim is what holds the two states to one shape. */
-export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, genre, onAdd, onDiscover, addRef, actionsPopover, exhibition }) => (
+export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, genre, onAdd, onImport, onDiscover, addRef, actionsPopover, exhibition }) => (
   <div className="clv-group" data-clv-empty="">
     <PageHeader
       variant="full"
@@ -62,6 +65,11 @@ export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, gen
       actionsPopover={actionsPopover}
     />
     <div className="clv-empty-below">
+      {/* v12 §7: the three ways in, FIRST — then the exhibition (banner + the two live
+          previews), then the §3 quiet line. The mock draws the ways inside the header's own
+          card; ours sit just below its rule, because the header is the SHARED living header
+          and LH7 holds the empty and populated states to one shape — a stated deviation. */}
+      <ContactWays onImport={onImport} onAdd={onAdd} />
       {exhibition}
       {onDiscover && (
         <p className="lh-hint" data-lh="hint">
