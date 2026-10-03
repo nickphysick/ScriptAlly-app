@@ -145,7 +145,10 @@
 .a13-cav p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--a13-ink70); }
 
 /* the whole-page empty state: the feature container stays, then example rows */
-.a13-exrow { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr); gap: 32px; align-items: center; padding: 48px 0; border-bottom: 1px solid var(--a13-hair); }
+/* ⚠️ STACKED, copy above and the figure at the column's full width: the figures are SVG whose type
+   scales with their width, and beside the copy (about 60% of the column) their labels drew at ~7px. */
+.a13-exrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 48px 0; border-bottom: 1px solid var(--a13-hair); }
+.a13-exrow > div:first-child { max-width: 62ch; }
 .a13-exrow:last-child { border-bottom: 0; }
 .a13-page .a13-exrow h3 { margin: 6px 0 8px; font-size: 24px; line-height: 1.2; }
 .a13-exrow p { margin: 0; font-size: 15px; color: var(--a13-ink70); }
