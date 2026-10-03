@@ -20,11 +20,10 @@ import { openRoute, visiblePage } from "./measure";
 let asserts = 0;
 let ran = 0;
 const bump = (n = 1) => { asserts += n; };
-/** The add card's door since page header v2 §4: "+ Add an agent" drops the quick-add card, and
- *  clicking into it opens the add card, as the retired hero's blank card did. */
+/** The add card's door since v12 P1 (3 Oct): "+ Add an agent" opens the centred card DIRECTLY —
+ * the quick-add drop and the Paste-a-link pill are retired (the go-ahead's ask 2). */
 const openAddCard = async (page: import("@playwright/test").Page, scope: string) => {
   await page.click(`${scope} [data-probe="page-header"] .ph-primary`);
-  await page.click(`${scope} [data-clv="quickadd"] .clv-qa-go`);
 };
 
 test.beforeAll(async () => { await assertLocalBundleIsDev(); });
@@ -957,4 +956,67 @@ test("Log query opens the query drawer on this page — no navigation, the agent
   expect(two.path).toBe("/agents");
   expect(two.popup, "the pop-up stayed open behind the drawer — two asking surfaces at once").toBe(false);
   bump(5);
+});
+
+
+/* ══════════════════════════ v12 P1 — the hero (§10.1), the pills, and the quick-add's absence ══════════════════════════ */
+
+for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }] as const) {
+  test(`v12 §10.1 — the hero at ${vp.width}: the QC's height, the painting on the column's edge, never over the text`, async ({ page }) => {
+    await openRoute(page, "/queries", vp);
+    const qcH = await page.evaluate(() => {
+      const h = [...document.querySelectorAll(".ph--full")].find((e) => e.getBoundingClientRect().height > 0);
+      return h ? h.getBoundingClientRect().height : null;
+    });
+    expect(qcH, "no QC full header to compare against").not.toBeNull();
+    await openRoute(page, "/agents", vp);
+    const scope = await visiblePage(page, ".agl-wpg");
+    const r = await page.evaluate((scope) => {
+      const hd = [...document.querySelectorAll(`${scope} .ph--full`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!hd) return null;
+      const img = hd.querySelector<HTMLImageElement>(".ph-art img");
+      const title = hd.querySelector('[data-probe="title"]');
+      const sub = hd.querySelector('[data-probe="intro"]');
+      const group = document.querySelector(`${scope} .clv-group`) as HTMLElement;
+      const ir = img?.getBoundingClientRect(); const ar = img?.closest(".ph-art")?.getBoundingClientRect();
+      const tr = title?.getBoundingClientRect(); const sr = sub?.getBoundingClientRect();
+      const overlaps = (a?: DOMRect, b?: DOMRect) => !!a && !!b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      return {
+        h: hd.getBoundingClientRect().height,
+        src: img?.currentSrc ?? "", nat: img?.naturalWidth ?? 0,
+        boxRight: ar?.right ?? NaN, colRight: group.getBoundingClientRect().right,
+        overTitle: overlaps(ir, tr as DOMRect), overSub: overlaps(ir, sr as DOMRect),
+        primary: hd.querySelector(".ph-primary")?.textContent?.trim() ?? "",
+        secondary: hd.querySelector(".ph-secondary")?.textContent?.trim() ?? "",
+      };
+    }, scope);
+    expect(r, "no full header on /agents").not.toBeNull();
+    expect(Math.abs(r!.h - (qcH as number)), `hero height ${r!.h} against the QC's ${qcH}`).toBeLessThanOrEqual(4);
+    expect(r!.src, "the art is not the full painting").toContain("contact-list-hero-archivist-full");
+    expect(r!.nat, "the painting's natural width").toBe(1141);
+    expect(Math.abs(r!.boxRight - r!.colRight), "the art box's right edge is not the column's").toBeLessThanOrEqual(1.5);
+    expect(r!.overTitle, "the art passed behind the title").toBe(false);
+    expect(r!.overSub, "the art passed behind the subline").toBe(false);
+    expect(r!.primary).toContain("+ Add an agent");
+    expect(r!.secondary, "the secondary pill is Discover (the paste pill is retired)").toContain("Discover agents");
+    bump(8);
+  });
+}
+
+test("v12 P1 — + Add an agent opens the centred card directly; no quick-add exists; Discover navigates", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.click(`${scope} [data-probe="page-header"] .ph-primary`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  const state = await page.evaluate(() => ({
+    quick: !!document.querySelector('[data-clv="quickadd"]'),
+    focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-clv") ?? "",
+  }));
+  expect(state.quick, "the quick-add drop came back").toBe(false);
+  expect(state.focused, "the card opens name-focused").toBe("f-name");
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-clv="addcard"]', { state: "detached" });
+  await page.click(`${scope} [data-probe="page-header"] .ph-secondary`);
+  await page.waitForURL(/\/agents\/discover/);
+  bump(3);
 });

@@ -35,6 +35,9 @@ const ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "ei
   "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
 const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 /** A number of things in words, so a sentence never carries a count in figures (LH9). */
+/** v12's rule for the Contact hero: words up to twenty, then digits ("eleven", "23"). */
+export const wordsToTwenty = (n: number): string => (n >= 0 && n <= 20 ? numberWords(n) : String(n));
+
 export function numberWords(n: number): string {
   if (n < 20) return ONES[n];
   if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? "-" + ONES[n % 10] : "");
@@ -129,8 +132,10 @@ export function qcHeaderCopy(count: number, ctx: PressingContext): LivingLine {
 
 export interface ContactCopyContext extends PressingContext {
   agents: readonly Agent[];
-  /** the Housekeeping model's own gap count (lib/contactHousekeeping) — never recounted here */
-  gaps?: number;
+  /** v12: the hero facts the page already derives (want/fresh/genre/msTitle) — never recounted here */
+  facts?: { want: number; fresh: number; genre: string | null; msTitle: string | null } | null;
+  /** v12: `averageReplyWeeks(agents)` — stated windows only; null drops the second sentence */
+  avgReplyWeeks?: number | null;
 }
 
 /** Contact list: "One agent" / "‹n› agents", and the sentence. */
@@ -143,23 +148,41 @@ export function contactHeaderCopy(count: number, ctx: ContactCopyContext): Livin
     const last = theirs.length ? Math.max(...theirs.map((r) => r.sentMs as number)) : null;
     const who: LivingRun[] = agency && agency !== name ? [{ b: name }, ` at ${agency}`] : [{ b: name }];
     return {
-      headline: "One agent",
+      headline: "One agent on file",
       subline: [...who, last != null ? `, and your query went on ${dayMonth(last)}.` : ", and you haven’t queried them yet."],
     };
   }
-  /* v3 — WHAT IS MISSING AND WHO IS LEFT (the ref's sentence): how many have been queried, how many
-     are still to go, and the Housekeeping model's gap count. Queried = an agent with any sent query. */
-  const queried = new Set(ctx.rows.filter((r) => r.sentMs != null).map((r) => r.query.agentId));
-  const nQueried = ctx.agents.filter((a) => queried.has(a.id)).length;
-  const toGo = ctx.agents.length - nQueried;
-  const runs: LivingRun[] = nQueried === 0
-    ? ["None queried yet."]
-    : toGo === 0
-      ? [{ b: "All of them queried" }, "."]
-      : [{ b: `${nQueried} queried` }, `, and ${toGo} still to go.`];
-  const gaps = ctx.gaps ?? 0;
-  if (gaps > 0) runs.push(` ${gaps} ${gaps === 1 ? "detail is" : "details are"} missing across them.`);
-  return { headline: count === 1 ? "One agent" : `${count} agents`, subline: runs };
+  /* v12 — THE CARD INDEX'S SENTENCE (the oracle's own arithmetic): the bold number is the agents
+     who want the manuscript's genre AND haven't been queried (`facts.fresh` — the mock's
+     `hit && st.startsWith('no')`), words up to twenty then digits; the second sentence is the
+     stated-windows mean, dropped when nobody states one. The spec's none-case sentence covers
+     fresh === 0 (the delivered mock cannot reach it, so the text governs that branch). */
+  const headline = count === 1 ? "One agent on file" : `${count} agents on file`;
+  const f = ctx.facts;
+  const runs: LivingRun[] = [];
+  if (f?.genre && f.msTitle) {
+    if (f.fresh > 0) {
+      const w = wordsToTwenty(f.fresh);
+      runs.push({ b: w.charAt(0).toUpperCase() + w.slice(1) }, ` of them want ${f.genre} and haven\u2019t seen `, { ms: f.msTitle }, " yet.");
+    } else {
+      runs.push(`None of them want ${f.genre} yet.`);
+    }
+  } else {
+    /* no manuscript in scope — the queried/to-go line stays, so the subline is never empty */
+    const queried = new Set(ctx.rows.filter((r) => r.sentMs != null).map((r) => r.query.agentId));
+    const nQueried = ctx.agents.filter((a) => queried.has(a.id)).length;
+    const toGo = ctx.agents.length - nQueried;
+    runs.push(...(nQueried === 0
+      ? (["None queried yet."] as LivingRun[])
+      : toGo === 0
+        ? ([{ b: "All of them queried" }, "."] as LivingRun[])
+        : ([{ b: `${nQueried} queried` }, `, and ${toGo} still to go.`] as LivingRun[])));
+  }
+  if (ctx.avgReplyWeeks != null) {
+    const w = wordsToTwenty(ctx.avgReplyWeeks);
+    runs.push(" Across your list a reply takes about ", { b: `${w} week${ctx.avgReplyWeeks === 1 ? "" : "s"}` }, ".");
+  }
+  return { headline, subline: runs };
 }
 
 /* ══ v3 — THE FOUR NEW PAGES ══════════════════════════════════════════════════════════════════

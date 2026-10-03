@@ -110,7 +110,7 @@ describe("the Query Centre's two lines", () => {
 describe("the Contact list's two lines", () => {
   it("one agent, never queried — and 'them', never a guessed pronoun", () => {
     const l = contactHeaderCopy(1, { ...ctxOf([], [AGENTS[2]]), agents: [AGENTS[2]] });
-    expect(l.headline).toBe("One agent");
+    expect(l.headline).toBe("One agent on file");
     expect(sub(l)).toBe("Aisha Kapoor at The Lantern Agency, and you haven’t queried them yet.");
     expect(sub(l)).not.toMatch(/\b(her|his|him|she|he)\b/);
   });
@@ -122,17 +122,33 @@ describe("the Contact list's two lines", () => {
     const solo = ag("a9", "Greg Panetta", "");
     expect(sub(contactHeaderCopy(1, { ...ctxOf([], [solo]), agents: [solo] }))).toBe("Greg Panetta, and you haven’t queried them yet.");
   });
-  /* ⚠️ RETARGETED (living headers v3): the many-case is what is missing and who is left — the ref's
-     sentence — not the pressing sentence */
-  it("many: 'n agents', who is queried, who is left, and the gaps", () => {
-    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, gaps: 46 });
-    expect(l.headline).toBe("16 agents");
-    expect(sub(l)).toBe("1 queried, and 2 still to go. 46 details are missing across them.");
+  /* ⚠️ RETARGETED (Contact list v12 §3): the many-case is the CARD INDEX's sentence — the bold
+     number is want∧not-queried (the oracle's `hit && st.startsWith('no')`), words to twenty then
+     digits; the second sentence is the stated-windows mean, dropped when nobody states one; and
+     the gaps clause left the subline with the v3 copy (Housekeeping's tray still counts them). */
+  it("many: 'n agents on file', the fresh count in words, the title run, the average", () => {
+    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, facts: { want: 12, fresh: 11, genre: "thrillers", msTitle: "Murphy's Day Out" }, avgReplyWeeks: 6 });
+    expect(l.headline).toBe("16 agents on file");
+    expect(sub(l)).toBe("Eleven of them want thrillers and haven’t seen Murphy's Day Out yet. Across your list a reply takes about six weeks.");
+    /* the title is an {ms} RUN (Special Elite), the numbers are {b} runs */
+    expect(l.subline.some((r) => typeof r === "object" && "ms" in r && r.ms === "Murphy's Day Out")).toBe(true);
+    expect(l.subline.some((r) => typeof r === "object" && "b" in r && r.b === "Eleven")).toBe(true);
+    expect(l.subline.some((r) => typeof r === "object" && "b" in r && r.b === "six weeks")).toBe(true);
   });
-  it("many: none queried, all queried, one gap, no gaps", () => {
+  it("past twenty the number is digits; one week is singular", () => {
+    const l = contactHeaderCopy(40, { ...ctxOf([]), agents: AGENTS, facts: { want: 30, fresh: 23, genre: "fantasy", msTitle: "T" }, avgReplyWeeks: 1 });
+    expect(sub(l)).toBe("23 of them want fantasy and haven’t seen T yet. Across your list a reply takes about one week.");
+  });
+  it("nobody matches → the spec's none-case; no stated windows → the second sentence is dropped", () => {
+    const none = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 0, fresh: 0, genre: "thrillers", msTitle: "M" }, avgReplyWeeks: null });
+    expect(sub(none)).toBe("None of them want thrillers yet.");
+    const noAvg = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 3, fresh: 2, genre: "crime", msTitle: "M" }, avgReplyWeeks: null });
+    expect(sub(noAvg)).toBe("Two of them want crime and haven’t seen M yet.");
+  });
+  it("no manuscript in scope → the queried/to-go line stays, so the subline is never empty", () => {
     expect(sub(contactHeaderCopy(3, { ...ctxOf([]), agents: AGENTS }))).toBe("None queried yet.");
     const all = [q({ agentId: "a1" }), q({ agentId: "a2" }), q({ agentId: "a3" })];
-    expect(sub(contactHeaderCopy(3, { ...ctxOf(all), agents: AGENTS, gaps: 1 }))).toBe("All of them queried. 1 detail is missing across them.");
+    expect(sub(contactHeaderCopy(3, { ...ctxOf(all), agents: AGENTS }))).toBe("All of them queried.");
   });
 });
 
@@ -146,7 +162,8 @@ describe("LH9 · the rules that hold everywhere", () => {
   it("the headline is the count alone: 'One …' at 1, the figure otherwise", () => {
     counts.forEach((c, i) => {
       expect(lines[i * 2].headline).toBe(c === 1 ? "One query out" : `${c} queries out`);
-      expect(lines[i * 2 + 1].headline).toBe(c === 1 ? "One agent" : `${c} agents`);
+      /* v12: the Contact list's headline carries "on file" (the oracle's own h1) */
+      expect(lines[i * 2 + 1].headline).toBe(c === 1 ? "One agent on file" : `${c} agents on file`);
     });
   });
   it("no subline carries the page's count, and every count inside a sentence is in words", () => {
@@ -253,7 +270,7 @@ describe("LH12 · the v3 rules across all six", () => {
   const counts = [1, 2, 9, 13, 27, 148];
   const all = counts.flatMap((c) => [
     { c, l: qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue()])) },
-    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), gaps: 46 }) },
+    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), facts: { want: 9, fresh: 7, genre: "crime", msTitle: "M" }, avgReplyWeeks: 8 }) },
     { c, l: packagesHeaderCopy(c, { lead: { name: "Standard", sent: 11, answered: 8, requests: 3 }, firstLiveName: "Standard" }) },
     { c, l: compsHeaderCopy(c, { missing: 3, inLetter: ["The Dry"], firstTitle: "The Dry" }) },
     { c, l: analyticsHeaderCopy(c, { answered: 24, requests: 3, medianDays: 31 }) },

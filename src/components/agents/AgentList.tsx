@@ -51,11 +51,11 @@ import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../lib/computeAgentDeadlineWrites";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CountCards } from "./contact/ContactCounts";
-import { CONTACT_HAWK, ContactIntro, ContactQuickAdd } from "./contact/ContactHeader";
+import { CONTACT_ARCHIVIST, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
   ContactCardKey, ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
+  averageReplyWeeks, contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
   matchesCards, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { isGenreMatch } from "../../lib/genreMatch";
@@ -133,9 +133,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     });
   }, []);
   /* the quick-add card "+ Add an agent" drops beneath the header's actions (page header v2 §4) */
-  const [quickOpen, setQuickOpen] = useState(false);
   const addBtnRef = useRef<HTMLButtonElement>(null);
-  const closeQuick = useCallback(() => setQuickOpen(false), []);
 
   const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -648,17 +646,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     ),
     [agents, hkLiveById, hkReopenTaskById, nowMs],
   );
-  /* ⚠️ DECLARED BELOW `hk`, NOT BESIDE `pageState` — it reads the Housekeeping model's gap count, and a
-     render-time read of a `const` declared further down is the TDZ shape this repo has shipped before
-     (tsc cannot see it through a memo callback). The JSX reads `living` long after both. */
+  /* v12: the subline is the card index's sentence — `facts` (want/fresh/genre/title, the page's
+     own derivation) and the stated-windows mean. The Housekeeping gap count left the sentence
+     with the v3 copy, so the living memo no longer reads `hk` and the old ordering hazard is
+     gone with the read (contactLivingOrder.test retired with a note). */
+  const avgReply = useMemo(() => averageReplyWeeks(agents), [agents]);
   const living = useMemo<LivingHeader>(() => {
     const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
     const agentsById = new Map(agents.map((a) => [a.id, a]));
     return {
       count: pageState === "list" ? (lhOverride ?? agents.length) : null,
-      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, gaps: hk.counts.gaps }),
+      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, facts, avgReplyWeeks: avgReply }),
     };
-  }, [pageState, lhOverride, agents, qcRows, scoped, hk]);
+  }, [pageState, lhOverride, agents, qcRows, scoped, facts, avgReply]);
 
   /* the three direct fixes — through the CONTEXT writers (the hkSave discipline, lib/hkSave.ts):
      the same updateAgent To-do's rail writes with, and the dq flag resolved when this was the
@@ -723,19 +723,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             manuscriptTitle={scoped?.title?.trim() || null}
             genre={scoped?.genre ?? null}
             addRef={addBtnRef}
-            onAdd={() => setQuickOpen((o) => !o)}
-            onPaste={() => { setQuickOpen(false); setAdding("link"); }}
+            /* v12: the quick-add drop is retired app-wide — both pills open the centred card */
+            onAdd={() => setAdding("name")}
+            onPaste={() => setAdding("link")}
             /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             /* §4 — the page's own components over a sample constant, mounted ONLY on the empty page */
             exhibition={<ContactExhibit />}
-            actionsPopover={quickOpen ? (
-              <ContactQuickAdd
-                anchorRef={addBtnRef}
-                onClose={closeQuick}
-                onOpen={(focus) => { setQuickOpen(false); setAdding(focus); }}
-              />
-            ) : null}
           />
         ) : (
         <div className="clv-group">
@@ -743,23 +737,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             It spans the whole group — column AND rail — so the Housekeeping rail starts below the
             rule, as the Birds-eye rail does. It renders over a LIST only: the blank account's pitch
             is its own page, and a header stating figures about nothing would be the empty-desk fault. */}
+        {/* v12 §3: the living header carries the whole sentence (no description line); the
+            anthracite pill opens the centred add card DIRECTLY — the quick-add drop and the
+            "Paste a link" pill are retired (the link door lives inside the card); the art is
+            the full painting, in the shared art box, never behind the text. */}
         {(showList || pageState === "settling") && (
           <PageHeader
             variant="full"
             title="Contact list"
-            description={<ContactIntro f={facts} />}
             living={living}
             primaryRef={addBtnRef}
-            primary={{ label: "+ Add an agent", onClick: () => setQuickOpen((o) => !o) }}
-            secondary={{ label: "Paste a link", onClick: () => { setQuickOpen(false); setAdding("link"); } }}
-            art={<img src={`${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`} width={CONTACT_HAWK.width} height={CONTACT_HAWK.height} alt="" />}
-            actionsPopover={quickOpen ? (
-              <ContactQuickAdd
-                anchorRef={addBtnRef}
-                onClose={closeQuick}
-                onOpen={(focus) => { setQuickOpen(false); setAdding(focus); }}
-              />
-            ) : null}
+            primary={{ label: "+ Add an agent", onClick: () => setAdding("name") }}
+            secondary={{ label: "Discover agents", onClick: () => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); } }}
+            art={<img src={`${CONTACT_ARCHIVIST.src}?v=${CONTACT_ARCHIVIST.version}`} width={CONTACT_ARCHIVIST.width} height={CONTACT_ARCHIVIST.height} alt="" />}
           />
         )}
         <div className="clv-main" ref={mainColRef}>

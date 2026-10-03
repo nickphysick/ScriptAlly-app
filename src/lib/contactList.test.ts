@@ -5,7 +5,7 @@
  * Contact list v11 — locks for the pure derivations (phase 1: the rail's height law).
  */
 import { describe, expect, it } from "vitest";
-import { RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent, railHeight } from "./contactList";
+import { RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, averageReplyWeeks, findDuplicateAgent, railHeight } from "./contactList";
 
 describe("railHeight — the rail derives its height from its own measured top", () => {
   it("at rest the rail runs from its top to 16px above the fold", () => {
@@ -259,5 +259,21 @@ describe("the add card's duplicate check (§8.2)", () => {
   it("does NOT match on agency — proposed in the report, deliberately unbuilt", () => {
     const agencyOnly = A.find((a) => (a.agency ?? "").trim().length > 0)!;
     expect(findDuplicateAgent(agencyOnly.agency, A.filter((x) => (x.name ?? "").trim().toLowerCase() !== agencyOnly.agency.trim().toLowerCase()))).toBeNull();
+  });
+});
+
+describe("v12 · averageReplyWeeks — the stated-windows mean", () => {
+  const A = CONTACT_FIXTURE_AGENTS;
+  it("averages ONLY truthy windows: the stub 0 and the writer's Unknown are outside the set", () => {
+    /* derived from the cast, not typed: fx-stub0 and fx-stub0-live carry 0; several carry none */
+    const stated = A.map((a) => a.responseTimeWeeks).filter((w): w is number => typeof w === "number" && w > 0);
+    expect(stated.length, "population: some stated windows").toBeGreaterThan(3);
+    expect(A.some((a) => a.responseTimeWeeks === 0), "population: a stub exists").toBe(true);
+    expect(A.some((a) => a.responseTimeWeeks === undefined), "population: an Unknown exists").toBe(true);
+    expect(averageReplyWeeks(A)).toBe(Math.round(stated.reduce((s, w) => s + w, 0) / stated.length));
+  });
+  it("null when nobody states one — the sentence is dropped, never a guessed speed", () => {
+    expect(averageReplyWeeks(A.map((a) => ({ ...a, responseTimeWeeks: undefined })))).toBeNull();
+    expect(averageReplyWeeks(A.map((a) => ({ ...a, responseTimeWeeks: 0 })))).toBeNull();
   });
 });

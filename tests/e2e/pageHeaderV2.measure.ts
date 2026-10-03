@@ -128,7 +128,9 @@ for (const vp of SIZES) {
     const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="tiles"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
     if (r) L.check("§4 · the count cards start at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `counts ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
     const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
-    L.check("§4 · the art is the hawk alone, cropped at full resolution", ctx, !!art && /contact-hawk\.webp/.test(art[0] as string) && art[1] === 389, JSON.stringify(art));
+    /* v12 P1 (3 Oct): the hero art is the WHOLE painting now — the hawk-only crop survives in
+       Housekeeping's tray and the (pre-P5) empty state, not here. */
+    L.check("§4 · the art is the full painting at native resolution", ctx, !!art && /contact-list-hero-archivist-full\.png/.test(art[0] as string) && art[1] === 1141, JSON.stringify(art));
     L.write();
     /* living headers (29 Sep): the Contact list is a living page, so the v5 mock's header-height row is not
        asserted here (the living ref holds its geometry in livingHeadersV3.measure) — one row fewer with a mock */
@@ -203,41 +205,37 @@ test("§4.5 · the switcher on the Contact list", async ({ page }) => {
   expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
 });
 
-test("§4.6 · the quick-add card", async ({ page }) => {
+test("§4.6 · the add door (v12 P1: the quick-add drop and the paste pill are retired)", async ({ page }) => {
+  /* ⚠️ RETARGETED 3 Oct (Contact list v12, go-ahead ask 2). The 340px quick-add card and the
+     "Paste a link" secondary were page header v2's; v12's hero opens the CENTRED add card
+     directly from the anthracite pill, and the link door lives inside that card. The old
+     twelve-row ledger described a mechanism that no longer exists; what survives of its law —
+     one add behaviour, name-focused, nothing dropped over the page — is asserted here. */
   const L = new Ledger("v2-quickadd");
-  const ctx = { route: "/agents", size: "1440", state: "quick-add" };
+  const ctx = { route: "/agents", size: "1440", state: "add-door" };
   await openApp(page, "/agents", { width: 1440, height: 900 });
   const add = page.locator('[data-probe="page-header"] .ph-primary').filter({ hasText: "+ Add an agent" }).first();
-  const paste = page.locator('[data-probe="page-header"] .ph-secondary').filter({ hasText: "Paste a link" }).first();
-  const before = await readQuick(page);
-  L.check("§4.6 · closed at rest", ctx, !before.qa, JSON.stringify(before.qa));
-  await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
-  const open = await readQuick(page);
-  L.check("§4.6 · + Add an agent opens it", ctx, !!open.qa, "");
-  L.check("§4.6 · 340 wide, 10 below the actions, on their left", ctx, !!open.qa && !!open.acts && Math.abs(open.qa.w - 340) <= 0.5 && Math.abs(open.qa.t - (open.acts.b + 10)) <= 1 && Math.abs(open.qa.l - open.acts.l) <= 1,
-    JSON.stringify({ qa: open.qa, acts: open.acts }));
-  L.check("§4.6 · its header is anthracite and says Add new agent", ctx, open.head?.bg === "rgb(42, 58, 82)" && open.head?.text === "Add new agent", JSON.stringify(open.head));
-  L.check("§4.6 · it is painted over the page, not under the count cards", ctx, open.onTop, "");
-  L.check("§4.6 · the count cards did not move", ctx, !!before.tiles && !!open.tiles && Math.abs(before.tiles.t - open.tiles.t) <= 0.5, `${before.tiles?.t} → ${open.tiles?.t}`);
-  await pressBarGap(page); await page.waitForTimeout(150);
-  L.check("§4.6 · an outside press closes it", ctx, !(await readQuick(page)).qa, "");
-  await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(100); await add.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(150);
-  L.check("§4.6 · + Add an agent toggles it shut", ctx, !(await readQuick(page)).qa, "");
-  await add.click({ timeout: 5000 }).catch(() => {}); await page.keyboard.press("Escape"); await page.waitForTimeout(150);
-  L.check("§4.6 · Escape closes it", ctx, !(await readQuick(page)).qa, "");
-  await add.click({ timeout: 5000 }).catch(() => {}); await page.locator('[data-clv="quickadd"] .clv-qa-go').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
-  let q = await readQuick(page);
-  L.check("§4.6 · clicking into it opens the add card, name focused", ctx, q.addCard && !q.qa && q.focused === "f-name", JSON.stringify(q));
-  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
-  await add.click({ timeout: 5000 }).catch(() => {}); await page.locator('[data-clv="quickadd"] .clv-qa-ln button').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
-  q = await readQuick(page);
-  L.check("§4.6 · Fill in opens the add card, link focused", ctx, q.addCard && !q.qa && q.focused === "f-link", JSON.stringify(q));
-  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
-  await paste.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
-  q = await readQuick(page);
-  L.check("§4.6 · Paste a link opens the add card, link focused", ctx, q.addCard && q.focused === "f-link", JSON.stringify(q));
-  await page.locator('[data-clv="addcard"] [data-clv="close"]').click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
+  L.check("§4.6 · no quick-add card exists at rest", ctx, (await page.locator('[data-clv="quickadd"]').count()) === 0, "");
+  /* ⚠️ read the VISIBLE header's pill — every page stays mounted, and `.first()` answers for a
+     hidden page's copy (the house hidden-copy law; the old row survived it only via hasText) */
+  const secondaryText = await page.evaluate(() => {
+    const hd = [...document.querySelectorAll(".ph--full")].find((e) => e.getBoundingClientRect().height > 0);
+    return hd?.querySelector(".ph-secondary")?.textContent ?? "";
+  });
+  L.check("§4.6 · no Paste-a-link pill — the secondary is Discover", ctx, secondaryText.includes("Discover agents"), secondaryText);
+  await add.click({ timeout: 5000 }).catch(() => {});
+  await page.waitForSelector('[data-clv="addcard"]', { timeout: 5000 }).catch(() => {});
+  const q = await page.evaluate(() => ({
+    addCard: !!document.querySelector('[data-clv="addcard"]'),
+    quick: !!document.querySelector('[data-clv="quickadd"]'),
+    focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-clv") ?? "",
+  }));
+  L.check("§4.6 · + Add an agent opens the centred card directly, name focused", ctx, q.addCard && q.focused === "f-name", JSON.stringify(q));
+  L.check("§4.6 · and drops no quick-add on the way", ctx, !q.quick, "");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(250);
+  L.check("§4.6 · Escape closes the card", ctx, (await page.locator('[data-clv="addcard"]').count()) === 0, "");
   L.write();
-  expect(L.rows.length).toBe(12);
+  expect(L.rows.length).toBe(5);
   expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
 });
