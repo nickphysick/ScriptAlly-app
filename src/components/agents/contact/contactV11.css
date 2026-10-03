@@ -39,7 +39,6 @@
   --clv-frame: #7c3a2a;
   --clv-rust: #8a4a3c;
   --clv-wash: #f8ebe3;
-  --clv-tray: #e9c9b8;
   --clv-sage: #e0e5dd;
   --clv-soft: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
   /* what the rows sit on — the sticky band's page-coloured shadow must match it exactly */
@@ -116,7 +115,8 @@
   height: 122px;
   margin: 8px 8px 0;
   border-radius: 14px;
-  background: var(--clv-tray);
+  /* v12 P4: the tray takes the accent family's own surface — its first reader */
+  background: var(--clv-slate-tray);
   overflow: hidden;
 }
 .clv-tray-t {
@@ -127,11 +127,15 @@
   margin: 0;
   font-family: var(--clv-type);
   font-weight: 400;
-  font-size: 30px;
+  font-size: 26px;
   letter-spacing: -0.01em;
-  line-height: 1;
+  line-height: 1.05;
   color: var(--clv-ink);
 }
+/* ⚠️ THE TITLE IS AN <h2>, AND brand.tsx FORCES HEADING FACES WITH !important — the recorded
+   claw-back is two classes plus !important, or the tray renders the brand serif while the
+   declared typewriter sits unread (it DID, through all of v11 — seen on the P3 screenshots). */
+.clv-hkrail .clv-tray-t, .lh-exrail .clv-tray-t { font-family: var(--clv-type) !important; }
 .clv-peek {
   position: absolute;
   left: 236px;
@@ -1398,16 +1402,17 @@
 }
 
 /* ── Housekeeping (v11 §9) ────────────────────────────────────────────────────────────────── */
-/* the tray's counts line — mono 8.5 at (20,74), the gap count in ink 700 (§9.2) */
+/* the tray's counts line — SERIF now (v12 P4, the mock's rh small): 10px tracked uppercase at
+   (20,74), the figures bold in ink */
 .clv-tray-c {
   position: absolute;
   left: 20px;
   top: 74px;
   z-index: 2;
   margin: 0;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: rgba(28, 19, 15, 0.62);
+  font-family: var(--clv-serif);
+  font-size: 10px; letter-spacing: .11em; text-transform: uppercase;
+  color: var(--clv-ink-70);
 }
 .clv-tray-c b { font-weight: 700; color: var(--clv-ink); }
 
@@ -1416,29 +1421,33 @@
    court toggle's shape) */
 .clv-hktgl {
   display: flex;
-  width: 312px;
-  height: 28px;
-  margin: 14px auto 12px;
-  padding: 3px;
+  width: 306px;
+  margin: 12px auto 10px;
+  padding: 4px;
   box-sizing: border-box;
-  border-radius: 999px;
-  background: var(--clv-p3);
+  border-radius: 12px;
+  /* the head chips' own parchment (the mock's rtabs) — one dress, two readers */
+  background: #e9e4dc;
 }
 .clv-hktgl button {
   flex: 1;
   border: 0;
-  border-radius: 999px;
+  border-radius: 9px;
   background: none;
   cursor: pointer;
   font-family: var(--clv-type);
-  font-size: 11px;
+  font-size: 12.5px;
+  /* Special Elite's metrics inflate the inline box past its size (the shared header's .ph-ms
+     fix, same face, same cure) — lh 1 is what lands the mock's 37px toggle */
+  line-height: 1;
   color: var(--clv-ink-70);
-  padding: 0;
+  padding: 8px 0;
+  white-space: nowrap;
 }
 .clv-hktgl button[aria-pressed="true"] {
   background: #fff;
   color: var(--clv-ink);
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.10);
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px var(--clv-hair);
 }
 
 .clv-hksec { padding: 10px 4px 4px; border-top: 1px solid var(--clv-hair); margin-top: 8px; }

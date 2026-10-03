@@ -1258,3 +1258,67 @@ test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past)
   expect(nr.minH, "the narrow row floors at 86").toBeGreaterThanOrEqual(85.5);
   bump(3);
 });
+
+/* ══════════════════════════ v12 P4 — Housekeeping's head in the slate (§10.6) ══════════════════════════ */
+
+test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped peek, the mock's toggle", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="tray"]`);
+  const r = await page.evaluate((scope) => {
+    const tray = document.querySelector(`${scope} [data-clv="tray"]`) as HTMLElement;
+    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
+    const title = tray.querySelector(".clv-tray-t") as HTMLElement;
+    const counts = tray.querySelector('[data-clv="hk-counts"]') as HTMLElement;
+    const peek = tray.querySelector(".clv-peek") as HTMLElement;
+    const tgl = document.querySelector(`${scope} [data-clv="hk-toggle"]`) as HTMLElement;
+    const on = tgl?.querySelector('button[aria-pressed="true"]') as HTMLElement | null;
+    const groupChip = document.querySelector(`${scope} [data-clv="btn-group"]`) as HTMLElement;
+    /* every expected value resolved from the page's own tokens — never a literal here */
+    const probe = document.createElement("i");
+    probe.style.cssText = `position:absolute;visibility:hidden;background:${getComputedStyle(main).getPropertyValue("--clv-slate-tray")};font-family:var(--clv-serif)`;
+    main.appendChild(probe);
+    const slateTray = getComputedStyle(probe).backgroundColor;
+    const serif = getComputedStyle(probe).fontFamily;
+    probe.remove();
+    const typeFirst = getComputedStyle(main).getPropertyValue("--sp-type").split(",")[0].trim().replace(/^"|"$/g, "");
+    const trayBox = tray.getBoundingClientRect();
+    const peekBox = peek?.getBoundingClientRect();
+    return {
+      slateTray,
+      trayBg: getComputedStyle(tray).backgroundColor,
+      trayClips: getComputedStyle(tray).overflow,
+      titleFace: getComputedStyle(title).fontFamily,
+      typeFirst,
+      titleSize: getComputedStyle(title).fontSize,
+      countsFace: getComputedStyle(counts).fontFamily,
+      serif,
+      countsUpper: getComputedStyle(counts).textTransform,
+      countsB: counts.querySelector("b") ? getComputedStyle(counts.querySelector("b") as HTMLElement).fontWeight : null,
+      peekPast: peekBox ? Math.round((peekBox.right - trayBox.right) * 10) / 10 : null,
+      tglW: tgl ? tgl.getBoundingClientRect().width : null,
+      tglH: tgl ? tgl.getBoundingClientRect().height : null,
+      tglBg: tgl ? getComputedStyle(tgl).backgroundColor : null,
+      chipBg: getComputedStyle(groupChip).backgroundColor,
+      onBg: on ? getComputedStyle(on).backgroundColor : null,
+      onRing: on ? getComputedStyle(on).boxShadow : null,
+    };
+  }, scope);
+  expect(r.slateTray, "--clv-slate-tray resolves (the two-nothings guard)").not.toBe("rgba(0, 0, 0, 0)");
+  expect(r.trayBg, "the tray wears the accent family's tray").toBe(r.slateTray);
+  expect(r.trayClips, "the tray clips its peek").toBe("hidden");
+  expect(r.titleFace, `the title PAINTS in the typewriter (brand.tsx forces headings) — ${r.titleFace}`).toContain(r.typeFirst);
+  expect(r.titleSize).toBe("26px");
+  expect(r.countsFace, "the counts line is serif").toBe(r.serif);
+  expect(r.countsUpper).toBe("uppercase");
+  expect(r.countsB, "the figures are bold").toBe("700");
+  expect(r.peekPast, "the peek's box runs past the tray's edge — the clip is engaged").not.toBeNull();
+  expect(r.peekPast!).toBeGreaterThan(2);
+  expect(Math.abs((r.tglW ?? 0) - 306), "the toggle is the mock's 306 wide").toBeLessThanOrEqual(1);
+  expect(r.tglH!, "…and ~37 tall").toBeGreaterThanOrEqual(35);
+  expect(r.tglH!).toBeLessThanOrEqual(39);
+  expect(r.tglBg, "the toggle sits on the head chips' own parchment — two readers, one dress").toBe(r.chipBg);
+  expect(r.onBg, "the active segment is white").toBe("rgb(255, 255, 255)");
+  expect(r.onRing, "…held by an inset ring").toContain("inset");
+  bump(15);
+});
