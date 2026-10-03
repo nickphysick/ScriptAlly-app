@@ -227,7 +227,9 @@
 .a13-sw--dash { width: 22px; height: 0; border-radius: 0; border-top: 1.4px dashed var(--a13-rust); box-shadow: none; }
 .a13-none { margin: 4px 0 0; font-size: 14px; color: var(--a13-ink45); }
 .a13-dash { font-size: 20px; color: var(--a13-ink); margin-right: 8px; }
-.a13-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; }
+.a13-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; align-items: start; }
+/* ⚠️ side by side, the second figure is not "below" the first — the stacking gap must not reach it */
+.a13-two > .a13-fig + .a13-fig { margin-top: 0; }
 @container a13-flow (max-width: 900px) { .a13-two { grid-template-columns: minmax(0, 1fr); } }
 
 /* the SVG's own type — the ref's `.n`, `.nm` and `.ax`, on the app's faces */
@@ -238,6 +240,9 @@
 .a13-svg .ax { font-family: var(--a13-mono); font-size: 10.5px; letter-spacing: 0.04em; fill: var(--a13-ink45); }
 .a13-svg .a13-muted { fill: var(--a13-ink45); }
 .a13-svg .a13-oninverse { fill: var(--a13-on-btn); }
+/* ⚠️ a class, never a `fill` attribute: `.a13-svg text { fill }` outranks the presentation attribute,
+   so the median labels and TODAY rendered in ink (measured) */
+.a13-svg .a13-rust { fill: var(--a13-rust); }
 .a13-svg [data-a13="mark"] { cursor: pointer; transition: transform 0.15s; transform-box: fill-box; transform-origin: center; }
 .a13-svg [data-a13="mark"]:hover { transform: scale(1.25); }
 .a13-svg rect[data-a13="mark"]:hover { transform: scale(1.03); }

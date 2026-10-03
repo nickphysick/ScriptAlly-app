@@ -85,7 +85,7 @@ export const Funnel: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
               ) : null}
               {i > 0 && (r.went || r.note) ? (
                 <text x={x0 + (r.count > 0 ? w : 0) + 16} y={cy + 5}>
-                  {r.went ? <tspan className="n" fontSize={15} fill={RUST}>{r.went}</tspan> : null}
+                  {r.went ? <tspan className="n a13-rust" fontSize={15}>{r.went}</tspan> : null}
                   {r.note ? <tspan className="nm a13-muted" dx={r.went ? 12 : 0}>{r.note}</tspan> : null}
                 </text>
               ) : null}
@@ -264,7 +264,7 @@ export const StageGaps: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
                   <rect x={x0 + g.lo * per} y={y - 8} width={Math.max(8, (g.hi - g.lo) * per)} height={16} rx={8} fill={STRUCT} opacity={0.55}
                     {...mark(GAP_LABEL[g.key], [`Fastest ${g.lo} · median ${g.medianDays} · slowest ${g.hi} days`, `${n} ${n === 1 ? "query" : "queries"}`])} />
                   <line x1={x0 + g.medianDays * per} y1={y - 12} x2={x0 + g.medianDays * per} y2={y + 12} stroke={RUST} strokeWidth={2.4} />
-                  <text className="n" x={x0 + g.medianDays * per + 8} y={y - 14} fontSize={13} fill={RUST}>{g.medianDays}d</text>
+                  <text className="n a13-rust" x={x0 + g.medianDays * per + 8} y={y - 14} fontSize={13}>{g.medianDays}d</text>
                   {n < 5 ? <text className="ax" x={x0 + Math.max(g.hi * per, 8) + 10} y={y + 4}>{n} {n === 1 ? "QUERY" : "QUERIES"}</text> : null}
                 </>
               )}
@@ -368,7 +368,7 @@ export const Lanes: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
           );
         })}
         <line x1={x1} y1={16} x2={x1} y2={H - 26} stroke={RUST} strokeWidth={2} />
-        <text className="ax" x={x1 - 4} y={H - 8} textAnchor="end" fill={RUST} style={{ fill: RUST }}>TODAY</text>
+        <text className="ax a13-rust" x={x1 - 4} y={H - 8} textAnchor="end">TODAY</text>
       </svg>
     </Fig>
   );
