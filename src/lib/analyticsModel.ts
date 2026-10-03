@@ -221,6 +221,8 @@ export interface ModelInput {
   versions?: ManuscriptVersion[];
   range: AnalyticsRange;
   nowMs: number;
+  /** The manuscript's title, for the page's sentences. */
+  title?: string;
 }
 
 export interface Enriched {
@@ -300,6 +302,10 @@ export interface ReplyRow {
   replyWeeks: number;
   replyDays: number;
   bucket: StateBucket;
+  /** When the query went out — v13 draws the rows in send order. */
+  sentMs: number | null;
+  /** The reply came inside the window the agency states. */
+  inside: boolean;
 }
 
 export interface EndingLane {
@@ -370,6 +376,8 @@ export interface AnalyticsModel {
   volume: { months: VolumeMonth[]; max: number; undated: number; omittedMonths: number; omittedQueries: number };
   story: { events: StoryEvent[]; foot: string | null };
   caveats: { lead: string; notes: { title: string; text: string }[] };
+  /** Every figure and sentence the v13 page states (design-refs/analytics-v13.html). */
+  v13: V13;
 }
 
 /**
@@ -541,6 +549,8 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
       replyWeeks: e.replyDays / 7,
       replyDays: e.replyDays,
       bucket: stateBucket(e.replyStatus ?? e.row.status),
+      sentMs: e.row.sentMs,
+      inside: e.replyDays / 7 <= e.row.windowWeeks,
     });
   }
   replyRows.sort((a, b) => a.name.localeCompare(b.name) || a.replyDays - b.replyDays);
@@ -683,7 +693,10 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
     text: "How full an agent's list is, what sold last season, who's on leave, whether it landed on the right desk in the right week — none of it is visible from your side.",
   });
 
+  const v13 = buildV13(items, { sent, requests, fulls, offers, stillOut, replies, sinceMs, nowMs, medWait, replyRows, withoutWindow, lanes, gapRows, title: input.title ?? "" });
+
   return {
+    v13,
     range,
     sent,
     total: allRows.length,
@@ -917,4 +930,340 @@ export function storyEvents(
     });
   }
   return ev;
+}
+
+/* ══════════════════════════════════ v13 (design-refs/analytics-v13.html) ══════════════════════════════════
+ *
+ * ⚠️ THE REF'S COPY, VERBATIM, WITH THE LIVE NUMBERS SUBSTITUTED — and where the ref's sentence would be
+ * false of the data, the sentence says what the data says (a cold rejection the ref has no segment for,
+ * a rate that counts still-out queries in its denominator). Every reading obeys the thin-sample rule:
+ * a population of zero is an em dash and what is missing, never a 0.
+ */
+
+/** One query as a v13 mark — every month block, share segment, dot and lane is one of these. */
+export interface V13Query {
+  id: string;
+  agent: string;
+  agency: string;
+  sentMs: number | null;
+  /** The close rung's date for a closed query, the offer's for an offer; null while open. */
+  endMs: number | null;
+  bucket: StateBucket;
+  /** "Still waiting for a first reply" … in the ref's words. */
+  state: string;
+}
+
+export interface V13Reading { value: string; label: string }
+export interface V13Segment { key: string; label: string; count: number; bucket: StateBucket; ids: string[] }
+export interface V13FunnelRow { count: number; display: string; name: string; desc: string; went: string | null; note: string | null }
+
+export interface V13 {
+  title: string;
+  sent: number;
+  replies: number;
+  feature: { eyebrow: string; hint: string };
+  funnel: { headline: string; figNote: string; since: string | null; rows: V13FunnelRow[] };
+  sentByMonth: {
+    headline: string;
+    lede: string;
+    months: { key: number; label: string; items: V13Query[] }[];
+    undated: number;
+    readings: V13Reading[];
+  };
+  rate: {
+    headline: string;
+    lede: string;
+    allTitle: string;
+    reqTitle: string;
+    all: V13Segment[];
+    req: V13Segment[];
+    readings: V13Reading[];
+  };
+  reply: { lede: string; figNote: string; rows: (ReplyRow & { query: V13Query })[]; maxWeeks: number; readings: V13Reading[] };
+  waits: { gaps: StageGap[]; endings: EndingLane[]; endingQueries: Record<string, V13Query[]>; readings: V13Reading[] };
+  lanes: { lede: string; rows: V13Query[]; startMs: number | null; nowMs: number; undated: number; readings: V13Reading[] };
+  caveats: { headline: string; notes: { title: string; text: string }[] };
+}
+
+export const V13_STATE: Record<StateBucket, string> = {
+  queried: "Still waiting for a first reply",
+  requested: "Material requested",
+  sent: "Material sent, being read",
+  offer: "Offer",
+  closed: "Closed",
+};
+
+const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+  "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+/** A count in prose: words up to twenty, digits beyond (the ref's register). */
+export const say = (n: number): string => (n >= 0 && n < WORDS.length ? WORDS[n] : String(n));
+const Say = (n: number): string => { const w = say(n); return w.charAt(0).toUpperCase() + w.slice(1); };
+const qs = (n: number) => (n === 1 ? "query" : "queries");
+const listAnd = (xs: string[]): string => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+
+interface V13Ctx {
+  sent: number; requests: number; fulls: number; offers: number; stillOut: number; replies: number;
+  sinceMs: number | null; nowMs: number; medWait: number | null; replyRows: ReplyRow[]; withoutWindow: number;
+  lanes: EndingLane[]; gapRows: StageGap[]; title: string;
+}
+
+export function buildV13(items: Enriched[], c: V13Ctx): V13 {
+  const { sent, requests, fulls, offers, stillOut, replies, sinceMs, nowMs } = c;
+  const asQuery = (e: Enriched): V13Query => ({
+    id: e.row.id,
+    agent: e.row.agentName,
+    agency: e.row.agentSub,
+    sentMs: e.row.sentMs,
+    endMs: e.bucket === "closed" ? e.dates.closed : null,
+    bucket: e.bucket,
+    state: V13_STATE[e.bucket],
+  });
+  const byId = new Map(items.map((e) => [e.row.id, asQuery(e)]));
+
+  /* ── the feature container ── */
+  const feature = {
+    eyebrow: c.title ? `Analytics · ${c.title}` : "Analytics",
+    hint: sent === 0
+      ? "Nothing recorded yet · updates with every reply you record"
+      : `Based on ${sent} ${qs(sent)} · updates with every reply you record`,
+  };
+
+  /* ── fall-off by stage ── */
+  const closedCold = items.filter((e) => e.bucket === "closed" && !e.row.reachedRequest).length;
+  const counts = [sent, requests, fulls, offers];
+  const NAMES: [string, string][] = [
+    ["Queried", "Letter, synopsis and opening pages"],
+    ["Material requested", "A partial or the full asked for"],
+    ["Full manuscript", "The whole book requested"],
+    ["Offer", "Representation offered"],
+  ];
+  const funnelRows: V13FunnelRow[] = NAMES.map(([name, desc], i) => {
+    const prev = i === 0 ? null : counts[i - 1];
+    const empty = i === 0 ? sent === 0 : prev === 0;
+    let note: string | null = null;
+    if (i === 1 && sent > 0) {
+      const bits: string[] = [];
+      if (stillOut) bits.push(`${stillOut} still waiting`);
+      if (closedCold) bits.push(`${closedCold} closed`);
+      note = bits.join(" · ") || null;
+    } else if (i > 1 && prev !== null && prev > 0) {
+      note = prev - counts[i] > 0 ? `${prev - counts[i]} did not, so far` : null;
+    }
+    return {
+      count: counts[i],
+      display: empty ? DASH : String(counts[i]),
+      name,
+      desc,
+      went: i === 0 || prev === null || prev === 0 ? null : `${counts[i]} of ${prev} went on`,
+      note,
+    };
+  });
+  const sinceDays = sinceMs === null ? null : Math.max(0, Math.floor((nowMs - sinceMs) / DAY_MS));
+  const funnel = {
+    headline: sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`,
+    figNote: sent === 0 ? "no queries yet" : `${sent} ${qs(sent)}, bar length to scale`,
+    since: sinceMs === null ? null : `since ${dayMonthYear(sinceMs)} · ${sinceDays} ${sinceDays === 1 ? "day" : "days"}`,
+    rows: funnelRows,
+  };
+
+  /* ── queries sent, month by month ── */
+  const dated = items.filter((e) => e.row.sentMs !== null);
+  const byMonth = new Map<number, Enriched[]>();
+  for (const e of dated) {
+    const k = monthKey(e.row.sentMs as number);
+    byMonth.set(k, [...(byMonth.get(k) ?? []), e]);
+  }
+  const months: { key: number; label: string; items: V13Query[] }[] = [];
+  if (byMonth.size) {
+    const first = Math.min(...byMonth.keys());
+    const last = monthKey(nowMs);
+    const lo = Math.max(first, last - (VOLUME_MAX_MONTHS - 1));
+    const ORDER: StateBucket[] = ["closed", "queried", "requested", "sent", "offer"];
+    for (let k = lo; k <= last; k++) {
+      const list = (byMonth.get(k) ?? []).slice().sort((a, b) => ORDER.indexOf(a.bucket) - ORDER.indexOf(b.bucket));
+      months.push({ key: k, label: monthShort(k), items: list.map(asQuery) });
+    }
+  }
+  const spanMonths = byMonth.size ? monthKey(nowMs) - Math.min(...byMonth.keys()) + 1 : 0;
+  const max = Math.max(0, ...[...byMonth.values()].map((l) => l.length));
+  const busiest = max >= 2 ? [...byMonth.entries()].filter(([, l]) => l.length === max).map(([k]) => k).sort((a, b) => a - b) : [];
+  const ones = [...byMonth.entries()].filter(([, l]) => l.length === 1).map(([k]) => k).sort((a, b) => a - b);
+  const ledeBits: string[] = [];
+  if (busiest.length) {
+    ledeBits.push(busiest.length === 1
+      ? `${Say(max)} went out in ${monthLong(busiest[0])}`
+      : `${Say(max)} went out in ${monthLong(busiest[0])}${busiest.slice(1).map((k) => ` and ${say(max)} in ${monthLong(k)}`).join("")}`);
+  }
+  if (ones.length >= 2 && busiest.length) ledeBits.push(`${listAnd(ones.map(monthLong))} had one each`);
+  else if (ones.length === 1 && busiest.length) ledeBits.push(`${monthLong(ones[0])} had one`);
+  const sixAgo = (() => { const d = new Date(nowMs); d.setMonth(d.getMonth() - 6); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+  const recent = dated.filter((e) => (e.row.sentMs as number) >= sixAgo);
+  const recentWaiting = recent.filter((e) => e.bucket === "queried").length;
+  const sentByMonth = {
+    headline: sent === 0
+      ? "No queries sent yet"
+      : `${sent} ${qs(sent)} over ${say(spanMonths)} ${spanMonths === 1 ? "month" : "months"}`,
+    lede: `${ledeBits.length ? `${ledeBits.join("; ")}. ` : ""}Each block is one query, in its status colour today.`,
+    months,
+    undated: items.length - dated.length,
+    readings: [
+      sent === 0 ? { value: DASH, label: "no queries sent yet" } : { value: String(sent), label: `${qs(sent)} sent` },
+      busiest.length
+        ? { value: busiest.map(monthShort).join(" · "), label: busiest.length === 1 ? `busiest month, ${say(max)} queries` : `busiest months, ${say(max)} each` }
+        : { value: DASH, label: "no month has more than one query yet" },
+      recent.length
+        ? { value: String(recent.length), label: `sent since ${monthLong(monthKey(sixAgo))} — ${recentWaiting} still waiting` }
+        : { value: DASH, label: `nothing sent since ${monthLong(monthKey(sixAgo))}` },
+    ],
+  };
+
+  /* ── response rate: the two share bars ── */
+  const ids = (f: (e: Enriched) => boolean) => items.filter(f).map((e) => e.row.id);
+  const seg = (key: string, label: string, bucket: StateBucket, f: (e: Enriched) => boolean): V13Segment => {
+    const list = ids(f);
+    return { key, label, bucket, count: list.length, ids: list };
+  };
+  const cold = (st: QueryStatus) => (e: Enriched) => !e.row.reachedRequest && e.row.status === st && !(st === QueryStatus.WITHDRAWN && e.q.closingReason === "offer_declined");
+  const all = [
+    seg("asked", "asked for more", "requested", (e) => e.row.reachedRequest),
+    seg("waiting", "no reply yet", "queried", (e) => e.row.status === QueryStatus.QUERIED),
+    seg("passed", "passed on the letter", "closed", cold(QueryStatus.REJECTED)),
+    seg("silence", "closed for silence", "closed", cold(QueryStatus.NO_RESPONSE)),
+    seg("withdrawn", "withdrawn", "closed", cold(QueryStatus.WITHDRAWN)),
+  ].filter((x) => x.count > 0);
+  const reqd = (e: Enriched) => e.row.reachedRequest;
+  const req = [
+    seg("offer", "offer", "offer", (e) => reqd(e) && e.row.reachedOffer),
+    seg("reading", "still reading", "sent", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "sent"),
+    seg("owed", "requested, not sent yet", "requested", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "requested"),
+    seg("passedAfter", "passed after reading", "closed", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "closed"),
+  ].filter((x) => x.count > 0);
+  const silence = all.find((x) => x.key === "silence")?.count ?? 0;
+  const withdrawn = all.find((x) => x.key === "withdrawn")?.count ?? 0;
+  const passedCold = all.find((x) => x.key === "passed")?.count ?? 0;
+  const pct = safePct(requests, sent);
+  const rateLede: string[] = [];
+  if (sent > 0) {
+    rateLede.push(pct.includes("%") ? `That is a ${pct} request rate.` : `That is ${pct} so far — too few for a percentage, which appears from ${MIN_SAMPLE} queries.`);
+    if (stillOut > 0) rateLede.push(`${Say(stillOut)} ${stillOut === 1 ? "query has" : "queries have"} had no reply yet, so the rate can still move either way.`);
+    const closes: string[] = [];
+    if (passedCold) closes.push(`${say(passedCold)} ${passedCold === 1 ? "was" : "were"} passed on from the letter alone`);
+    if (silence) closes.push(`${say(silence)} ${silence === 1 ? "was" : "were"} closed by you after a long silence`);
+    if (withdrawn) closes.push(`${say(withdrawn)} ${withdrawn === 1 ? "was" : "were"} withdrawn`);
+    if (closes.length) { const t = listAnd(closes); rateLede.push(`${t.charAt(0).toUpperCase()}${t.slice(1)}.`); }
+  }
+  const rate = {
+    headline: sent === 0 ? "No queries yet, so no requests" : `${requests} of ${sent} drew a request for more material`,
+    lede: rateLede.join(" ") || "Once queries go out, this shows how many drew a request for more.",
+    allTitle: `What happened to the ${sent}`,
+    reqTitle: requests === 1 ? "What happened to the one request" : `What happened to the ${requests} requests`,
+    all,
+    req,
+    readings: [
+      sent === 0 ? { value: DASH, label: "no queries sent yet" } : { value: pct, label: `request rate — ${requests} of ${sent}` },
+      requests === 0 ? { value: DASH, label: "no requests yet" } : { value: `${fulls} of ${requests}`, label: `${requests === 1 ? "request" : "requests"} went on to the full manuscript` },
+      fulls === 0 ? { value: DASH, label: "no full manuscript requested yet" } : { value: `${offers} of ${fulls}`, label: `full ${fulls === 1 ? "read" : "reads"} led to an offer` },
+    ],
+  };
+
+  /* ── response window honesty ── */
+  const rows = c.replyRows.slice().sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0)).map((r) => ({ ...r, query: byId.get(r.id)! }));
+  const inside = rows.filter((r) => r.inside).length;
+  const longest = rows.reduce<(typeof rows)[number] | null>((m, r) => (m === null || r.replyDays > m.replyDays ? r : m), null);
+  const replyMax = Math.max(16, Math.ceil(Math.max(0, ...rows.map((r) => Math.max(r.windowWeeks, r.replyWeeks))) / 4) * 4);
+  const reply = {
+    lede: `The bar is the response time each agent states in their guidelines. The dot is when the reply arrived, coloured by what the reply was; a dotted line shows how far past the window it came. ${replies === 0 ? "No agent has replied yet." : `${Say(replies)} ${replies === 1 ? "agent has" : "agents have"} replied so far.`}`,
+    figNote: rows.length === 0
+      ? "no replies against a stated window yet"
+      : `${say(rows.length)} ${rows.length === 1 ? "reply" : "replies"}, in the order the queries were sent${c.withoutWindow ? ` · ${c.withoutWindow} more from agencies that state no window` : ""}`,
+    rows,
+    maxWeeks: replyMax,
+    readings: [
+      c.medWait === null || replies === 0 ? { value: DASH, label: "no dated replies yet" } : { value: `${c.medWait} ${c.medWait === 1 ? "day" : "days"}`, label: `median wait for a reply${replies < THIN_SAMPLE ? ` — ${replies} ${replies === 1 ? "reply" : "replies"}` : ""}` },
+      rows.length === 0 ? { value: DASH, label: "no replies against a stated window yet" } : { value: `${inside} of ${rows.length}`, label: "replied inside their stated window" },
+      longest === null ? { value: DASH, label: "no replies yet" } : { value: `${Math.round(longest.replyDays / 7)} ${Math.round(longest.replyDays / 7) === 1 ? "week" : "weeks"}`, label: `longest wait for a reply, ${longest.sub || longest.name}` },
+    ],
+  };
+
+  /* ── wait times by stage ── */
+  const gap = (k: StageGap["key"]) => c.gapRows.find((g) => g.key === k)!;
+  const qr = gap("q-r"), rs = gap("r-s");
+  const pass = c.lanes.find((l) => l.key === "rejected")!;
+  const daysR = (g: StageGap, label: string, missing: string): V13Reading =>
+    g.medianDays === null ? { value: DASH, label: missing } : { value: `${g.medianDays} ${g.medianDays === 1 ? "day" : "days"}`, label: `${label}${g.days.length < THIN_SAMPLE ? ` — ${g.days.length} ${qs(g.days.length)}` : ""}` };
+  const endingQueries: Record<string, V13Query[]> = {};
+  for (const l of c.lanes) endingQueries[l.key] = [];
+  for (const e of items) {
+    const q = byId.get(e.row.id)!;
+    if (e.row.status === QueryStatus.REJECTED) endingQueries.rejected.push(q);
+    else if (e.row.status === QueryStatus.NO_RESPONSE) endingQueries.noresponse.push(q);
+    else if (e.row.status === QueryStatus.WITHDRAWN && e.q.closingReason !== "offer_declined") endingQueries.withdrawn.push(q);
+    if (e.row.reachedOffer) endingQueries.offer.push(q);
+  }
+  const waits = {
+    gaps: c.gapRows,
+    endings: c.lanes,
+    endingQueries,
+    readings: [
+      daysR(qr, "median from query to a request", "no dated request yet"),
+      daysR(rs, "median for you to send what was asked for", "no requested material sent yet"),
+      pass.medianWeeks === null
+        ? { value: DASH, label: "no dated pass yet" }
+        : { value: `${Math.round(pass.medianWeeks)} ${Math.round(pass.medianWeeks) === 1 ? "week" : "weeks"}`, label: `median time to a pass${pass.weeks.length < THIN_SAMPLE ? ` — ${pass.weeks.length} ${qs(pass.weeks.length)}` : ""}` },
+    ],
+  };
+
+  /* ── how things stand: one line per query ── */
+  const laneRows = dated.map((e) => byId.get(e.row.id)!).sort((a, b) => (a.sentMs as number) - (b.sentMs as number));
+  const reading = items.filter((e) => e.bucket === "requested" || e.bucket === "sent").length;
+  const openOffers = items.filter((e) => e.row.status === QueryStatus.OFFER).length;
+  const waitingOldest = laneRows.filter((q) => q.bucket === "queried")[0] ?? null;
+  const standBits: string[] = [];
+  standBits.push(stillOut ? `${Say(stillOut)} ${stillOut === 1 ? "is" : "are"} still waiting for a first reply` : "None is waiting for a first reply");
+  if (reading) standBits.push(`${say(reading)} ${reading === 1 ? "agent is" : "agents are"} reading material beyond the letter`);
+  if (openOffers) standBits.push(`${say(openOffers)} ${openOffers === 1 ? "offer is" : "offers are"} open`);
+  const lanes = {
+    lede: `One line per query, from the day it went out to today or to the day it ended. ${standBits.join("; ")}.`,
+    rows: laneRows,
+    startMs: laneRows.length ? (laneRows[0].sentMs as number) : null,
+    nowMs,
+    undated: items.length - dated.length,
+    readings: [
+      sent === 0 ? { value: DASH, label: "no queries sent yet" } : { value: String(stillOut), label: "awaiting a first reply" },
+      sent === 0 ? { value: DASH, label: "no queries sent yet" } : { value: String(reading), label: "reading more than the letter" },
+      waitingOldest === null
+        ? { value: DASH, label: "no query is waiting" }
+        : (() => { const d = Math.floor((nowMs - (waitingOldest.sentMs as number)) / DAY_MS); return { value: `${d} ${d === 1 ? "day" : "days"}`, label: `oldest query still waiting, ${waitingOldest.agency || waitingOldest.agent}` }; })(),
+    ],
+  };
+
+  /* ── what the numbers can't tell you ── */
+  const pp = sent > 0 ? Math.max(1, Math.round(100 / sent)) : 0;
+  const caveats = {
+    headline: `Everything on this page rests on ${sent} ${qs(sent)} and ${replies} ${replies === 1 ? "reply" : "replies"}`,
+    notes: [
+      {
+        title: "Small numbers move a lot",
+        text: sent > 0
+          ? `One more reply moves the request rate by about ${say(pp)} percentage ${pp === 1 ? "point" : "points"}. Treat the rates as a rough picture rather than a precise measure.`
+          : "With no queries out there is no rate yet. Once there is one, every reply moves it.",
+      },
+      {
+        title: "No reply is not counted as a no",
+        text: stillOut > 0
+          ? `${Say(stillOut)} ${stillOut === 1 ? "query is" : "queries are"} still waiting. ${stillOut === 1 ? "It counts" : "They count"} as not yet requested rather than as a pass, so the request rate can rise from here without another letter going out.`
+          : "No query is waiting for a first reply, so the request rate will only move when more letters go out.",
+      },
+      {
+        title: "Medians, not averages",
+        text: "A single very slow reply would pull an average a long way. The median is the middle value, so it is less affected by one outlier.",
+      },
+      {
+        title: "What this page cannot see",
+        text: "How full an agent's list is, what they have recently sold, whether they are on leave, and when your query was actually read. None of that is recorded here, and all of it affects the numbers.",
+      },
+    ],
+  };
+
+  return { title: c.title, sent, replies, feature, funnel, sentByMonth, rate, reply, waits, lanes, caveats };
 }
