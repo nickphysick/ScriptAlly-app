@@ -14,11 +14,10 @@ import React from "react";
 import type { AnalyticsModel } from "../../lib/analyticsModel";
 import { exampleModel } from "../../lib/analyticsExample";
 import { ExampleRow, Feature } from "./A13Frame";
-import { Funnel, ReplyWindow } from "./A13Figures";
+import { Funnel, Lanes, ReplyWindow } from "./A13Figures";
 
 export const A13Empty: React.FC<{ model: AnalyticsModel; onGo: () => void }> = ({ model, onGo }) => {
   const ex = React.useMemo(() => exampleModel(Date.now()), []);
-  void ex;
   return (
     <>
       <Feature model={model} onGo={onGo} />
@@ -32,7 +31,7 @@ export const A13Empty: React.FC<{ model: AnalyticsModel; onGo: () => void }> = (
       </ExampleRow>
       <ExampleRow heading="Every query against time"
         sub="One line per query, from the day it went out to today or the day it ended, in its status colour.">
-        {null}
+        <Lanes model={ex} />
       </ExampleRow>
     </>
   );

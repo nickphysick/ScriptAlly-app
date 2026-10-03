@@ -1,0 +1,401 @@
+{
+ "ran": 66,
+ "rows": [
+  {
+   "lock": "page-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "a visible [data-a13=page] on /queries/analytics"
+  },
+  {
+   "lock": "population",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "the active manuscript has queries (sent=8)"
+  },
+  {
+   "lock": "feature-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "feature {\"t\":129.75,\"b\":741.75,\"l\":294.078125,\"r\":1393.921875,\"w\":1099.84375,\"h\":612}"
+  },
+  {
+   "lock": "feature-fits",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "feature 129.8–741.8 in scroller 105.8–790.0"
+  },
+  {
+   "lock": "feature-max-760",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "feature height 612.0"
+  },
+  {
+   "lock": "button-visible",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "button 621.6–669.6 against the hem's top 746.0"
+  },
+  {
+   "lock": "feature-clear-of-hem",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "feature bottom 741.8 against the hem's top 746.0"
+  },
+  {
+   "lock": "no-living-header",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "0 living-header/PageHeader elements on the page"
+  },
+  {
+   "lock": "seven-sections",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "sections 0,1,2,3,4,5,6"
+  },
+  {
+   "lock": "white-containers",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "white sections: 1,3,5"
+  },
+  {
+   "lock": "caveats-last",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "last element in the flow: 6"
+  },
+  {
+   "lock": "figure-0-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "1 figures in section 0: funnel"
+  },
+  {
+   "lock": "figure-0-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "funnel: pop 8, 3 marks"
+  },
+  {
+   "lock": "figure-1-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "1 figures in section 1: volume"
+  },
+  {
+   "lock": "figure-1-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "volume: pop 8, 8 marks"
+  },
+  {
+   "lock": "figure-2-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "2 figures in section 2: share-all,share-req"
+  },
+  {
+   "lock": "figure-2-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "share-all: pop 8, 4 marks; share-req: pop 3, 2 marks"
+  },
+  {
+   "lock": "figure-3-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "1 figures in section 3: reply"
+  },
+  {
+   "lock": "figure-3-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "reply: pop 1, 2 marks"
+  },
+  {
+   "lock": "figure-4-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "2 figures in section 4: stage,endings"
+  },
+  {
+   "lock": "figure-4-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "stage: pop 4, 2 marks; endings: pop 1, 1 marks"
+  },
+  {
+   "lock": "figure-5-present",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "1 figures in section 5: lanes"
+  },
+  {
+   "lock": "figure-5-marks",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "lanes: pop 8, 8 marks"
+  },
+  {
+   "lock": "figures-populated",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "6 of 6 figure sections populated on this account"
+  },
+  {
+   "lock": "nav-seven",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "7 dots"
+  },
+  {
+   "lock": "nav-on-screen",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "nav {\"t\":365.875,\"b\":529.875,\"l\":1390,\"r\":1418,\"w\":28,\"h\":164} inside scroller {\"t\":105.75,\"b\":790,\"l\":248,\"r\":1440,\"w\":1192,\"h\":684.25}"
+  },
+  {
+   "lock": "take-a-look-scrolls",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "after the button the first section's top is 10.0px from the scroller's top"
+  },
+  {
+   "lock": "nav-tracks-0",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "active dot 0 after \"Take a look\""
+  },
+  {
+   "lock": "nav-tracks-3",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "scrolled to section 3 (top 3107), active dot 3"
+  },
+  {
+   "lock": "tooltip-population",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "8 lane marks"
+  },
+  {
+   "lock": "tooltip-on-hover",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "tooltip {\"on\":true,\"text\":\"Rosa Quintana · Quintana Books\\nQueried 3 Mar · Closed · ended 1 May\"}"
+  },
+  {
+   "lock": "no-burgundy-population",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "459 elements swept"
+  },
+  {
+   "lock": "no-burgundy",
+   "size": "1440×820",
+   "ok": true,
+   "detail": "burgundy on: nothing"
+  },
+  {
+   "lock": "page-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "a visible [data-a13=page] on /queries/analytics"
+  },
+  {
+   "lock": "population",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "the active manuscript has queries (sent=8)"
+  },
+  {
+   "lock": "feature-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "feature {\"t\":129.75,\"b\":889.75,\"l\":456,\"r\":1712,\"w\":1256,\"h\":760}"
+  },
+  {
+   "lock": "feature-fits",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "feature 129.8–889.8 in scroller 105.8–1050.0"
+  },
+  {
+   "lock": "feature-max-760",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "feature height 760.0"
+  },
+  {
+   "lock": "button-visible",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "button 767.0–815.0 against the hem's top 1006.0"
+  },
+  {
+   "lock": "feature-clear-of-hem",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "feature bottom 889.8 against the hem's top 1006.0"
+  },
+  {
+   "lock": "no-living-header",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "0 living-header/PageHeader elements on the page"
+  },
+  {
+   "lock": "seven-sections",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "sections 0,1,2,3,4,5,6"
+  },
+  {
+   "lock": "white-containers",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "white sections: 1,3,5"
+  },
+  {
+   "lock": "caveats-last",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "last element in the flow: 6"
+  },
+  {
+   "lock": "figure-0-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "1 figures in section 0: funnel"
+  },
+  {
+   "lock": "figure-0-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "funnel: pop 8, 3 marks"
+  },
+  {
+   "lock": "figure-1-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "1 figures in section 1: volume"
+  },
+  {
+   "lock": "figure-1-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "volume: pop 8, 8 marks"
+  },
+  {
+   "lock": "figure-2-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "2 figures in section 2: share-all,share-req"
+  },
+  {
+   "lock": "figure-2-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "share-all: pop 8, 4 marks; share-req: pop 3, 2 marks"
+  },
+  {
+   "lock": "figure-3-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "1 figures in section 3: reply"
+  },
+  {
+   "lock": "figure-3-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "reply: pop 1, 2 marks"
+  },
+  {
+   "lock": "figure-4-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "2 figures in section 4: stage,endings"
+  },
+  {
+   "lock": "figure-4-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "stage: pop 4, 2 marks; endings: pop 1, 1 marks"
+  },
+  {
+   "lock": "figure-5-present",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "1 figures in section 5: lanes"
+  },
+  {
+   "lock": "figure-5-marks",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "lanes: pop 8, 8 marks"
+  },
+  {
+   "lock": "figures-populated",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "6 of 6 figure sections populated on this account"
+  },
+  {
+   "lock": "nav-seven",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "7 dots"
+  },
+  {
+   "lock": "nav-on-screen",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "nav {\"t\":495.875,\"b\":659.875,\"l\":1870,\"r\":1898,\"w\":28,\"h\":164} inside scroller {\"t\":105.75,\"b\":1050,\"l\":248,\"r\":1920,\"w\":1672,\"h\":944.25}"
+  },
+  {
+   "lock": "take-a-look-scrolls",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "after the button the first section's top is 10.0px from the scroller's top"
+  },
+  {
+   "lock": "nav-tracks-0",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "active dot 0 after \"Take a look\""
+  },
+  {
+   "lock": "nav-tracks-3",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "scrolled to section 3 (top 3698), active dot 3"
+  },
+  {
+   "lock": "tooltip-population",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "8 lane marks"
+  },
+  {
+   "lock": "tooltip-on-hover",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "tooltip {\"on\":true,\"text\":\"Rosa Quintana · Quintana Books\\nQueried 3 Mar · Closed · ended 1 May\"}"
+  },
+  {
+   "lock": "no-burgundy-population",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "459 elements swept"
+  },
+  {
+   "lock": "no-burgundy",
+   "size": "1920×1080",
+   "ok": true,
+   "detail": "burgundy on: nothing"
+  }
+ ]
+}

@@ -29,7 +29,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { analyticsModel } from "../lib/analyticsModel";
 import { DotNav, Feature, Section, Skeleton, TipProvider, useReveal } from "./analytics/A13Frame";
 import { A13Empty } from "./analytics/A13Empty";
-import { Endings, Funnel, ReplyWindow, ShareBars, StageGaps, Volume } from "./analytics/A13Figures";
+import { Endings, Funnel, Lanes, ReplyWindow, ShareBars, StageGaps, Volume } from "./analytics/A13Figures";
 import "./analytics/a13.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -120,7 +120,9 @@ export const QueryAnalytics: React.FC = () => {
           <div className="a13-two"><StageGaps model={model} /><Endings model={model} /></div>
         </Section>
         <Section sec={5} num="How things stand" headline="Every query against time, up to today" lede={v.lanes.lede} white
-          art={["Illustration · the hawk", "over the field"]} readings={v.lanes.readings} />
+          art={["Illustration · the hawk", "over the field"]} readings={v.lanes.readings}>
+          <Lanes model={model} />
+        </Section>
         <section className="a13-chap" data-a13="sec" data-sec={6} id="a13-sec-6">
           <div className="a13-num a13-rv">What the numbers can&apos;t tell you</div>
           <h2 className="a13-big a13-tw a13-rv d1">{v.caveats.headline}</h2>
