@@ -194,64 +194,13 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
    that outlives it, that the three count cards sit as a row between the header and the list, is
    restated below. */
 
-for (const width of [1280, 1440] as const) {
-  test(`the count cards at ${width}: a row of three below the header's rule, above the list`, async ({ page }) => {
-    await openRoute(page, "/agents", { width, height: 900 });
-    const scope = await visiblePage(page, ".agl-wpg");
-    const r = await page.evaluate((scope) => {
-      const row = document.querySelector(`${scope} .clv-tiles--row`) as HTMLElement | null;
-      const hd = document.querySelector(`${scope} [data-probe="page-header"]`) as HTMLElement | null;
-      const grid = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement | null;
-      if (!row || !hd || !grid) return null;
-      return {
-        n: row.querySelectorAll('[data-clv="tile"]').length,
-        belowRule: row.getBoundingClientRect().top >= hd.getBoundingClientRect().bottom - 1,
-        aboveList: row.getBoundingClientRect().bottom <= grid.getBoundingClientRect().top + 1,
-      };
-    }, scope);
-    expect(r, "no count-card row, header or list").not.toBeNull();
-    bump();
-    if (!r) return;
-    expect(r.n).toBe(3);
-    expect(r.belowRule, "the card row sits above the header's rule").toBe(true);
-    expect(r.aboveList, "the card row fell below the list").toBe(true);
-    bump(3);
-  });
-}
-
-test("the count cards filter — populations proved non-zero first, OR on multi-select, dim on the rest", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const counts = await page.evaluate((scope) =>
-    [...document.querySelectorAll(`${scope} [data-clv="tile"]`)].map((t) => ({
-      k: (t as HTMLElement).dataset.k,
-      n: parseInt(t.querySelector("b")?.textContent ?? "0", 10),
-    })), scope);
-  expect(counts.length, "three cards").toBe(3);
-  /* ⚠️ POPULATIONS FIRST (v11 §11.3): a filter proved against zero rows is a vacuous filter */
-  for (const c of counts) expect(c.n, `the seed left the ${c.k} card empty — the filter below would prove nothing`).toBeGreaterThan(0);
-  const total = counts.reduce((a, c) => a + c.n, 0);
-  const gridCount = () => page.evaluate((scope) => document.querySelectorAll(`${scope} [data-agent-card]`).length, scope);
-  expect(await gridCount(), "the three cards partition the whole list").toBe(total);
-  bump(5);
-
-  const tile = (k: string) => page.locator(`${scope} [data-clv="tile"][data-k="${k}"]`);
-  await tile("active").click();
-  expect(await gridCount(), "Active queries filters to its own population").toBe(counts.find((c) => c.k === "active")!.n);
-  const dimmed = await page.evaluate((scope) => {
-    const t = document.querySelector(`${scope} [data-clv="tile"][data-k="never"]`) as HTMLElement;
-    return parseFloat(getComputedStyle(t).opacity);
-  }, scope);
-  expect(dimmed, "an unselected card should dim to .45").toBeCloseTo(0.45, 2);
-  await tile("closed").click();
-  expect(await gridCount(), "multi-select ORs the populations").toBe(
-    counts.find((c) => c.k === "active")!.n + counts.find((c) => c.k === "closed")!.n,
-  );
-  await tile("active").click();
-  await tile("closed").click();
-  expect(await gridCount(), "clearing the cards restores the list").toBe(total);
-  bump(4);
-});
+/* ⚠️ RETIRED BY v12 P2–P3 (3 Oct), each by name: "the count cards at 1280/1440: a row of three
+   below the header's rule, above the list" and "the count cards filter — populations proved
+   non-zero first, OR on multi-select, dim on the rest". Their subject — the CountCards row and
+   its pool narrowing (cardSel, matchesCards, the OR) — left the LIST with the card index: the
+   first thing below the rule is the A–Z strip (§10.2, and pageHeaderV2 §4's retargeted row),
+   and the strip SCROLLS rather than filters, so there is no pool behaviour to restate.
+   `CountCards` survives only in the empty state's exhibit, on a fixture, until P5. */
 
 /* ══ phase 3 — the list: header row, faceted filter, bands, rows, the floating bar ══════════ */
 
@@ -276,8 +225,7 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
         return { over: b.scrollWidth > b.clientWidth + 1 };
       }),
       bands: [...document.querySelectorAll(`${scope} [data-clv="band"]`)].map((b) => ({
-        label: b.querySelector("b")?.textContent, n: b.querySelector("i")?.textContent,
-        extra: b.querySelector("small")?.textContent ?? null,
+        label: b.querySelector("b")?.textContent, n: b.querySelector("small")?.textContent ?? null,
       })),
     };
   }, scope);
@@ -289,8 +237,11 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
   expect(r.hitFirst, "a matched genre chip is not first").toBe(true);
   const over = r.names.filter((n) => n.over).length;
   expect(over, "an agent's name ellipsised at 1440 on this account").toBe(0);
-  expect(r.bands[0]?.label, "the default grouping's first band").toBe("Your move");
-  expect(r.bands[0]?.extra).toBe("Offers, requests and nudges");
+  /* v12 P2 (3 Oct): the page opens on the card index — the first divider is a LETTER tab and
+     its <small> states the section's population ("2 agents"), where the v11 standing band led
+     with "Your move". */
+  expect(r.bands[0]?.label ?? "", "the default grouping's first band is a letter").toMatch(/^[A-Z]$/);
+  expect(r.bands[0]?.n ?? "", "the divider's count small").toMatch(/^\d+ agents?$/);
   bump(8);
 });
 
@@ -374,7 +325,8 @@ test("the floating bar — centred on the list's box, never moving the list (§1
     return { centre: main.getBoundingClientRect().left + main.getBoundingClientRect().width / 2, listTop: list.getBoundingClientRect().top };
   }, scope);
   expect(await page.locator(".clv-fbar").count(), "the bar shows with nothing active").toBe(0);
-  await page.locator(`${scope} [data-clv="tile"][data-k="active"]`).click();
+  /* v12 P2 (3 Oct): the count cards are gone — Find is the cheapest chip-raiser left */
+  await page.fill(`${scope} [data-clv="find"] input`, "an");
   await expect(page.locator(".clv-fbar")).toBeVisible();
   const after = await page.evaluate((scope) => {
     const bar = document.querySelector(".clv-fbar") as HTMLElement;
@@ -392,31 +344,10 @@ test("the floating bar — centred on the list's box, never moving the list (§1
   bump(6);
 });
 
-test("narrow rows at 1280 — two lines, the fit beneath its hairline", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1280, height: 800 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const r = await page.evaluate((scope) => {
-    const rows = [...document.querySelectorAll(`${scope} [data-clv="row"]`)] as HTMLElement[];
-    const withFit = rows.filter((x) => x.querySelector(".clv-rfit .clv-gch, .clv-rfit [data-clv='torn']"));
-    const sample = withFit.slice(0, 6).map((x) => {
-      const who = x.querySelector(".clv-rwho") as HTMLElement;
-      const fit = x.querySelector(".clv-rfit") as HTMLElement;
-      return {
-        h: Math.round(x.getBoundingClientRect().height),
-        fitBelow: fit.getBoundingClientRect().top >= who.getBoundingClientRect().bottom - 1,
-        cols: getComputedStyle(x).gridTemplateColumns.split(" ").length,
-      };
-    });
-    return { n: withFit.length, sample };
-  }, scope);
-  expect(r.n, "population first").toBeGreaterThan(4);
-  for (const s of r.sample) {
-    expect(s.cols, "the narrow template is three tracks").toBe(3);
-    expect(s.fitBelow, "the fit line is not beneath the who block").toBe(true);
-    expect(s.h, "a narrow row should fold to two lines").toBeGreaterThan(100);
-  }
-  bump(1 + r.sample.length * 3);
-});
+/* ⚠️ RETIRED BY v12 P3 (3 Oct), by name: "narrow rows at 1280 — two lines, the fit beneath its
+   hairline". Its subject — the v11 two-deck fold (three tracks, the fit row under its hairline)
+   — is retired by the dossier re-cut: the mock's m4 keeps ONE row of four columns on tighter
+   floors at the narrow container, measured in §10.5's 1280 leg. */
 
 /* v12 P2 (3 Oct): the dividers no longer pin at the scroller's top — they pin BELOW the index
    strip, and the claim is measured as two boxes meeting (the band's top IS the pinned strip
@@ -694,7 +625,7 @@ test("§11.9 the free cap surfaces IN the card — Add refuses, says why, and wr
   bump(5);
 });
 
-test("§11.9 after adding (the lab, over known content) — Not yet queried, centred, ringed", async ({ page }) => {
+test("§11.9 after adding (the lab, over known content) — under its letter, centred, ringed", async ({ page }) => {
   /* the lab mounts the REAL page over the fixture with a local addAgent, no sign-in, no account
      writes — the choreography (band, scroll, ring) is the page's own; only the writer is local */
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -715,17 +646,18 @@ test("§11.9 after adding (the lab, over known content) — Not yet queried, cen
      the same ring statically; either way the CLASS is what carries it) */
   const ringed = await row.evaluate((el) => el.classList.contains("clv-row--new"));
   expect(ringed, "the new row carries no ring").toBe(true);
-  /* the band: the nearest preceding group band names the standing */
+  /* v12 P2 (3 Oct): the page opens on the card index, so the nearest preceding divider names
+     the agent's SURNAME INITIAL — "Zz Probe Agent"'s surname is "Agent", the A divider. */
   const band = await row.evaluate((el) => {
     let n: Element | null = el;
     while (n) {
       let p = n.previousElementSibling;
-      while (p) { if (p.matches('[data-clv="band"]')) return p.textContent ?? ""; p = p.previousElementSibling; }
+      while (p) { if (p.matches('[data-clv="band"]')) return p.getAttribute("data-letter") ?? ""; p = p.previousElementSibling; }
       n = n.parentElement;
     }
     return "";
   });
-  expect(band, "the new agent is not under Not yet queried").toContain("Not yet queried");
+  expect(band, "the new agent is not under its surname's letter").toBe("A");
   /* in view, centred: poll until two reads agree, then judge the rect */
   let last = -1;
   for (let i = 0; i < 30; i++) {
@@ -1051,7 +983,8 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
       for (let el = b.nextElementSibling; el && !el.matches('[data-clv="band"]'); el = el.nextElementSibling) {
         if (el.matches("[data-agent-card]")) n += 1;
       }
-      return { letter: b.dataset.letter ?? "", band: Number((b.querySelector("i")?.textContent ?? "").trim()), rows: n };
+      /* v12 P3: the divider's <i> became the RULE; the count is the <small>'s leading number */
+      return { letter: b.dataset.letter ?? "", band: parseInt(b.querySelector("small")?.textContent ?? "", 10), rows: n };
     });
     const perCell = cells.map((c) => ({
       letter: c.dataset.letter ?? "",
@@ -1106,25 +1039,39 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     const wrap = document.querySelector(`${scope} [data-clv="idxwrap"]`) as HTMLElement;
     const band = document.querySelector(`${scope} [data-clv="band"][data-letter="${target}"]`) as HTMLElement;
     const cell = document.querySelector(`${scope} [data-clv="ixtab"][data-letter="${target}"]`) as HTMLElement;
-    const bandBg = getComputedStyle(band).backgroundColor;
+    /* v12 P3: the divider is ground-coloured now, so the marked cell's ink anchors on the row
+       DISCS — another reader of the same --clv-btn, never a literal */
+    const disc = document.querySelector(`${scope} .clv-ini`) as HTMLElement;
+    const discBg = getComputedStyle(disc).backgroundColor;
     const cellBg = getComputedStyle(cell).backgroundColor;
     return {
       gap: band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom,
       marked: cell.classList.contains("on"),
-      inkMatch: cellBg === bandBg,
-      detail: `gap ${(band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom).toFixed(1)} cell ${cellBg} band ${bandBg}`,
+      inkMatch: cellBg === discBg,
+      detail: `gap ${(band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom).toFixed(1)} cell ${cellBg} disc ${discBg}`,
     };
   }, [scope, target] as const);
   expect(Math.abs(landed.gap - 8), `the divider lands 8px under the strip — ${landed.detail}`).toBeLessThanOrEqual(2);
   expect(landed.marked, "the picked cell is marked").toBe(true);
-  expect(landed.inkMatch, `the marked cell wears the dividers' own ink — ${landed.detail}`).toBe(true);
+  expect(landed.inkMatch, `the marked cell wears the discs' own ink — ${landed.detail}`).toBe(true);
 
-  /* ── All clears the mark and returns to the top of the list ── */
+  /* ── All clears the mark and returns to the top of the list. The SAME settle as the landing:
+     the derivation re-marks letters PASSING the strip mid-scroll (by design — it is a scroll-spy),
+     so the mark is only judged once the scroll has departed and come to rest, plus one rAF pair
+     for the derivation's final read to land in state. ── */
+  const landedTop = await page.evaluate((scope) => (document.querySelector(`${scope} .wpg-scroll`) as HTMLElement).scrollTop, scope);
+  await page.evaluate(() => { const w = window as unknown as { __clvLast?: number; __clvHold?: number }; delete w.__clvLast; delete w.__clvHold; });
   await page.click(`${scope} [data-clv="ixall"]`);
-  await page.waitForFunction((scope) => {
+  await page.waitForFunction(([scope, from]) => {
     const sc = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
-    return sc.scrollTop <= 2 || !document.querySelector(`${scope} [data-clv="ixtab"].on`);
-  }, scope);
+    const w = window as unknown as { __clvLast?: number; __clvHold?: number };
+    if (sc.scrollTop === from) { w.__clvHold = 0; w.__clvLast = sc.scrollTop; return false; }
+    const same = w.__clvLast === sc.scrollTop;
+    w.__clvHold = same ? (w.__clvHold ?? 0) + 1 : 0;
+    w.__clvLast = sc.scrollTop;
+    return same && (w.__clvHold ?? 0) >= 3;
+  }, [scope, landedTop] as const, { timeout: 10000 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const cleared = await page.evaluate((scope) => ({
     marked: !!document.querySelector(`${scope} [data-clv="ixtab"].on`),
   }), scope);
@@ -1176,4 +1123,138 @@ test("v12 §10.3 — the head: dashed-underlined title, a quiet un-underlined ta
   console.log(`[v12 §10.3] 1280: wrapped=${narrow.wrapped} h2 ${narrow.h2} ctlg ${narrow.grp}`);
   expect(narrow.overlap, `the controls never overlap the title — h2 ${narrow.h2} ctlg ${narrow.grp}`).toBe(false);
   bump(2);
+});
+
+/* ══════════════════════════ v12 P3 — the dividers (§10.4) and the dossier rows (§10.5) ══════════════════════════ */
+
+test("v12 §10.4 — the divider: a slate tab SITTING on the rule, the count right, on the ground", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const r = await page.evaluate((scope) => {
+    const bands = [...document.querySelectorAll(`${scope} [data-clv="band"][data-letter]`)] as HTMLElement[];
+    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
+    const tokens = getComputedStyle(main);
+    /* resolve the two slate tokens where they apply, never a literal on both sides */
+    const probe = document.createElement("div");
+    probe.style.cssText = `position:absolute;visibility:hidden;background:${tokens.getPropertyValue("--clv-slate-pale")};color:${tokens.getPropertyValue("--clv-slate-ink")}`;
+    main.appendChild(probe);
+    const slatePale = getComputedStyle(probe).backgroundColor;
+    const slateInk = getComputedStyle(probe).color;
+    probe.remove();
+    const read = bands.map((band) => {
+      const b = band.querySelector("b") as HTMLElement;
+      const i = band.querySelector("i") as HTMLElement;
+      const small = band.querySelector("small") as HTMLElement;
+      const bb = b.getBoundingClientRect(); const ib = i.getBoundingClientRect();
+      const sb = small.getBoundingClientRect(); const db = band.getBoundingClientRect();
+      const bs = getComputedStyle(b);
+      return {
+        tabBg: bs.backgroundColor, tabInk: bs.color, tabRadius: bs.borderRadius,
+        dip: Math.round((bb.bottom - db.bottom) * 10) / 10,
+        ruleH: ib.height, ruleSpans: ib.left > bb.right && ib.right < sb.left,
+        countRight: Math.abs(sb.right - db.right) <= 1,
+        count: (small.textContent ?? "").trim(),
+      };
+    });
+    return { slatePale, slateInk, read };
+  }, scope);
+  expect(r.read.length, "population first").toBeGreaterThan(2);
+  /* ⚠️ THE TOKEN ITSELF IS A PRECONDITION: an undeclared --clv-slate-pale resolves the probe to
+     transparent, and a transparent tab then MATCHES it — two nothings agreeing (found 3 Oct:
+     mutation F stayed green because the family was declared nowhere). */
+  expect(r.slatePale, "--clv-slate-pale resolves to a colour").not.toBe("rgba(0, 0, 0, 0)");
+  expect(r.slateInk, "--clv-slate-ink resolves to a colour").not.toBe("rgba(0, 0, 0, 0)");
+  for (const d of r.read) {
+    expect(d.tabBg, "the tab wears the slate family's pale").toBe(r.slatePale);
+    expect(d.tabInk, "the tab's letter is slate ink").toBe(r.slateInk);
+    expect(d.tabRadius, "top corners only — a TAB, not a pill").toBe("7px 7px 0px 0px");
+    expect(d.dip, "the tab dips 7px to SIT on the rule").toBe(7);
+    expect(d.ruleH, "the rule is a hairline").toBeLessThanOrEqual(1.5);
+    expect(d.ruleSpans, "the rule runs from the tab to the count").toBe(true);
+    expect(d.countRight, "the count sits on the divider's right edge").toBe(true);
+    expect(d.count).toMatch(/^\d+ agents?$/);
+  }
+  bump(1 + r.read.length * 7);
+});
+
+test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past), one italic line, the clamped wishlist", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const read = (w: number) => page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="row"]`)] as HTMLElement[];
+    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
+    const probe = document.createElement("div");
+    probe.style.cssText = `position:absolute;visibility:hidden;background:${getComputedStyle(main).getPropertyValue("--clv-slate-pale")}`;
+    main.appendChild(probe);
+    const slatePale = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    const inkProbe = document.createElement("div");
+    inkProbe.style.cssText = "position:absolute;visibility:hidden;background:var(--clv-ink)";
+    main.appendChild(inkProbe);
+    const ink = getComputedStyle(inkProbe).backgroundColor;
+    inkProbe.remove();
+    const strips = rows.map((row) => ({
+      late: row.classList.contains("clv-row--late"),
+      h: parseFloat(getComputedStyle(row, "::before").height),
+      bg: getComputedStyle(row, "::before").backgroundColor,
+    }));
+    const first = rows[0];
+    const cols = getComputedStyle(first).gridTemplateColumns.split(" ");
+    const q = first.querySelector(".clv-rq") as HTMLElement;
+    const pace = document.querySelectorAll(`${scope} .clv-rloc`).length;
+    const italics = [...document.querySelectorAll(`${scope} .clv-ragy`)].map((e) => getComputedStyle(e).fontStyle);
+    const minH = Math.min(...rows.map((x) => x.getBoundingClientRect().height));
+    return {
+      n: rows.length, cols, firstCol: parseFloat(cols[0] ?? "0"),
+      qRight: Math.round((first.getBoundingClientRect().right - 18 - q.getBoundingClientRect().right) * 10) / 10,
+      strips, slatePale, ink, pace, italics, minH,
+      wishes: [...document.querySelectorAll(`${scope} .clv-rwish`)].length,
+      tornWish: document.querySelectorAll(`${scope} [data-clv="torn-wish"]`).length,
+    };
+  }, scope);
+
+  const r = await read(1440);
+  expect(r.n, "population first").toBeGreaterThan(10);
+  expect(r.slatePale, "--clv-slate-pale resolves to a colour (the two-nothings guard)").not.toBe("rgba(0, 0, 0, 0)");
+  expect(r.cols.length, "four tracks at 1440").toBe(4);
+  expect(r.firstCol, "the disc track").toBe(30);
+  expect(Math.abs(r.qRight), "the query column ends on the row's padding edge").toBeLessThanOrEqual(1);
+  expect(r.pace, "the v11 paceBits line is retired").toBe(0);
+  expect(r.italics.length, "population: the one italic who line renders").toBeGreaterThan(5);
+  for (const f of r.italics) expect(f).toBe("italic");
+  /* the 3px strip, BOTH branches entered (the monoculture law) */
+  const late = r.strips.filter((s) => s.late);
+  const calm = r.strips.filter((s) => !s.late);
+  expect(late.length, "per-branch population: some rows are past their date").toBeGreaterThan(0);
+  expect(calm.length, "per-branch population: some rows are not").toBeGreaterThan(0);
+  for (const sRow of r.strips) {
+    expect(sRow.h, "the strip is 3px").toBe(3);
+    expect(sRow.bg, sRow.late ? "a past row's strip is INK" : "a calm row's strip is the slate pale").toBe(sRow.late ? r.ink : r.slatePale);
+  }
+  expect(r.wishes + r.tornWish, "every row carries a wishlist or its torn slip").toBe(r.n);
+  bump(10 + r.strips.length * 2 + r.italics.length);
+
+  /* the clamp, under STRESS (the house law: growth must push, never overflow) — inject a long
+     wishlist and the box holds at two lines with the clamp visibly engaged */
+  const clamp = await page.evaluate((scope) => {
+    const w = document.querySelector(`${scope} .clv-rwish`) as HTMLElement | null;
+    if (!w) return null;
+    w.textContent = "Dark academia with a conscience, locked-room mysteries on moving vehicles, sisters who ruin each other politely, climate grief with jokes, heists where the real theft is emotional, and any book whose narrator lies to the reader for a structurally good reason.";
+    const cs = getComputedStyle(w);
+    const twoLines = 2 * parseFloat(cs.lineHeight);
+    return { h: w.getBoundingClientRect().height, twoLines, clipped: w.scrollHeight > w.clientHeight + 1 };
+  }, scope);
+  expect(clamp, "no wishlist on the account to stress").not.toBeNull();
+  expect(clamp!.h, `the wish holds at two lines (${clamp!.h} vs ${clamp!.twoLines})`).toBeLessThanOrEqual(clamp!.twoLines + 2);
+  expect(clamp!.clipped, "the clamp visibly engaged on the injected text").toBe(true);
+  bump(3);
+
+  /* 1280: the same four columns on the narrow floors, 86px rows */
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.waitForTimeout(250);
+  const nr = await read(1280);
+  expect(nr.cols.length, "still four tracks at 1280 — the v11 two-deck fold is retired").toBe(4);
+  expect(nr.firstCol).toBe(30);
+  expect(nr.minH, "the narrow row floors at 86").toBeGreaterThanOrEqual(85.5);
+  bump(3);
 });

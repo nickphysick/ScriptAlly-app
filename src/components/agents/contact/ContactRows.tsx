@@ -31,6 +31,8 @@ export interface ContactRowsProps {
   onOpen: (agentId: string) => void;
   onLogQuery: (agentId: string) => void;
   onAddGenres: (agentId: string) => void;
+  /** the wishlist torn slip's door — the profile at its wishlist section (v12 §6) */
+  onAddWishlist: (agentId: string) => void;
 }
 
 const Line2: React.FC<{ line: RowDateLine | null }> = ({ line }) =>
@@ -45,17 +47,21 @@ const Row: React.FC<{
   onOpen: () => void;
   onLogQuery: () => void;
   onAddGenres: () => void;
-}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onLogQuery, onAddGenres }) => {
+  onAddWishlist: () => void;
+}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onLogQuery, onAddGenres, onAddWishlist }) => {
   const a = x.agent;
   const yourMove = x.stand === "you";
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
   /* the manuscript's genre first, ticked (§6.2) */
   const genres = [...x.genres].sort((g1, g2) => Number(genreHit(g2)) - Number(genreHit(g1)));
-  const paceBits = [
-    x.loc ?? "Location ?",
-    a.responseTimeWeeks ? `~${a.responseTimeWeeks} wks` : null,
-    x.door === "closed" ? "Closed" : null,
+  /* v12 §6 (the mock's m4 who): ONE italic line — "Agency · London" — and OMITTED when there is
+     neither. The v11 paceBits line (reply weeks, the door) left the row: those facts live in
+     Housekeeping, the filter and the profile. */
+  const whoBits = [
+    a.agency.trim() && a.name.trim() ? a.agency.trim() : null,
+    x.loc,
   ].filter(Boolean);
+  const wish = (a.mswlNotes ?? "").trim();
 
   return (
     <button
@@ -76,28 +82,42 @@ const Row: React.FC<{
       <span className="clv-ini" aria-hidden="true">{agentInitials(a)}</span>
       <span className="clv-rwho">
         <b>{agentPrimary(a)}</b>
-        {a.agency.trim() && a.name.trim() ? <span className="clv-ragy">{a.agency}</span> : null}
-        <span className="clv-rloc">{paceBits.join(" · ")}</span>
+        {whoBits.length > 0 && <i className="clv-ragy">{whoBits.join(" · ")}</i>}
       </span>
-      <span className="clv-rfit">
-        {x.genres.length > 0 ? (
-          <>
-            <span className="clv-gch" data-clv="gch">
-              {genres.map((g) => (
-                <span key={g} className={genreHit(g) ? "clv-hit" : undefined}>{g}</span>
-              ))}
+      {/* the dossier column (m4's .dos): the wishlist OVER the chips, each with its own torn
+          slip when absent — two gaps, two doors, each into the profile at its own section */}
+      <span className="clv-rfit" data-clv="dos">
+        {wish ? (
+          <span className="clv-rwish">{wish}</span>
+        ) : (
+          <span className="clv-torn" data-clv="torn-wish">
+            <em>No wishlist yet</em>
+            <span
+              className="clv-mini" role="button" tabIndex={0} data-clv="mini-wish"
+              aria-label="Add a manuscript wishlist"
+              onClick={(e) => { e.stopPropagation(); onAddWishlist(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onAddWishlist(); } }}
+            >
+              Add
             </span>
-            {(a.mswlNotes ?? "").trim() && <span className="clv-rwish">{a.mswlNotes.trim()}</span>}
-          </>
+          </span>
+        )}
+        {x.genres.length > 0 ? (
+          <span className="clv-gch" data-clv="gch">
+            {genres.map((g) => (
+              <span key={g} className={genreHit(g) ? "clv-hit" : undefined}>{g}</span>
+            ))}
+          </span>
         ) : (
           <span className="clv-torn" data-clv="torn">
             <em>Genres not recorded</em>
             <span
               className="clv-mini" role="button" tabIndex={0} data-clv="mini-genres"
+              aria-label="Add genres"
               onClick={(e) => { e.stopPropagation(); onAddGenres(); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onAddGenres(); } }}
             >
-              Add genres
+              Add
             </span>
           </span>
         )}
@@ -134,7 +154,7 @@ const Row: React.FC<{
 };
 
 export const ContactRows: React.FC<ContactRowsProps> = ({
-  groups, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres,
+  groups, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres, onAddWishlist,
 }) => (
   <div className="clv-list" data-clv="list">
     {groups.map((g) => (
@@ -146,7 +166,8 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
              can wear the attribute */
           <div className="clv-band2" data-clv="band" data-letter={/^[A-Z#]$/.test(g.label) ? g.label : undefined}>
             <b>{g.label}</b>
-            <i>{String(g.ids.length).padStart(2, "0")}</i>
+            <i aria-hidden="true" />
+            <small>{g.ids.length} {g.ids.length === 1 ? "agent" : "agents"}</small>
             {g.extra && <small>{g.extra}</small>}
           </div>
         ) : null}
@@ -164,6 +185,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
               onOpen={() => onOpen(id)}
               onLogQuery={() => onLogQuery(id)}
               onAddGenres={() => onAddGenres(id)}
+              onAddWishlist={() => onAddWishlist(id)}
             />
           );
         })}

@@ -856,6 +856,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               onOpen={onOpen}
               onLogQuery={(id) => onLogQuery({ id })}
               onAddGenres={(id) => onEditAt(id, "genres")}
+              onAddWishlist={(id) => onEditAt(id, "wishlist")}
             />
           )}
         </div>

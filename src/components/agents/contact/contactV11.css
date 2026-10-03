@@ -17,6 +17,15 @@
   --clv-band-slate: #5f7b93;
   --clv-band-rose: #c09495;
   --clv-band-taupe: #a79f96;
+  /* ⚠️ THE v12 ACCENT FAMILY (the go-ahead's ruling 1). `--slate` at the app's :root is the PRO
+     family and is left untouched; the Contact list's accent is this `--clv-slate*` set, and
+     neither is ever used for status. Read by the divider tab, the rows' 3px strip, and (P4)
+     Housekeeping's tray. Found MISSING on 3 Oct by mutation F going green — the tab and the
+     calm strips had painted transparent through two green runs, the undeclared-var() law live. */
+  --clv-slate: #5f7b93;
+  --clv-slate-pale: #cfd9e2;
+  --clv-slate-tray: #d6dfe6;
+  --clv-slate-ink: #3f566b;
   --clv-serif: "Source Serif 4", Georgia, serif;
   --clv-type: var(--sp-type);
   --clv-ink: #1c130f;
@@ -584,7 +593,10 @@
   cursor: pointer;
 }
 
-/* ── the group bands (§6.1): anthracite, sticky, page-coloured shadows ── */
+/* ── the dividers, re-dressed to the mock's `.div` (v12 §6/P3): a slate TAB sitting on the
+   rule, the count on the right — the v11 anthracite band retires. The STICKY machinery is the
+   build's, not the mock's (§4 says build it), and is unchanged from P2: pin below the strip,
+   both offsets from the strip's three tokens. ── */
 .clv-list { display: flex; flex-direction: column; }
 .clv-band2 {
   position: sticky;
@@ -597,50 +609,61 @@
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 32px;
-  margin: 14px 0 10px;
-  padding: 1px 16px 0;
-  border-radius: 10px;
-  background: var(--clv-btn);
-  color: #fff;
-  /* the page-coloured shadows above and below, so rows never show through at the band's edges */
+  gap: 14px;
+  height: 30px;
+  margin: 26px 0 12px;
+  /* ground-coloured, with the page-coloured shadows above and below — rows slide under the
+     ground, never visibly behind a transparent divider (the v11 band's own trick, kept) */
+  background: var(--clv-ground);
   box-shadow: 0 -14px 0 var(--clv-ground), 0 12px 0 var(--clv-ground);
 }
 .clv-band2:first-child { margin-top: 0; }
-.clv-band2 b { font-family: var(--clv-type); font-weight: 400; font-size: 14px; }
+/* the tab: slate, top corners only, dipped 7px so it SITS on the rule rather than floats */
+.clv-band2 b {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 7px 7px 0 0;
+  background: var(--clv-slate-pale);
+  color: var(--clv-slate-ink);
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: 17px;
+  position: relative;
+  top: 7px;
+}
 .clv-band2 i {
-  font-style: normal;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  background: rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  padding: 2px 7px;
+  flex: 1;
+  height: 1px;
+  background: rgba(28, 19, 15, 0.3);
+  font-size: 0; /* the count moved to <small>; the rule carries no text of its own */
 }
 .clv-band2 small {
-  margin-left: auto;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8px;
+  font: 700 8px var(--font-mono, "JetBrains Mono", monospace);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--clv-ink-45);
 }
 
-/* ── the rows (§6.2): soft cards, profile first, the query on the right ── */
+/* ── the rows, re-cut to the mock's dossier (v12 §6, the oracle's own m4 at data-row="4"):
+   disc · who (name over one italic agency-and-place line) · the dossier column (wishlist over
+   the chips) · the query on the right. The v11 profile row retires with its paceBits line —
+   reply time and the door live in Housekeeping, the filter and the profile now. ── */
 .clv-row {
   position: relative;
   display: grid;
-  grid-template-columns: 30px minmax(160px, 0.9fr) minmax(0, 1.5fr) 206px;
+  grid-template-columns: 30px minmax(170px, 0.8fr) minmax(0, 1.6fr) auto;
   grid-template-areas: "ini who fit q";
   align-items: center;
-  gap: 16px;
-  min-height: 76px;
+  column-gap: 18px;
+  min-height: 74px;
   margin-bottom: 10px;
-  padding: 13px 18px 13px 16px;
+  padding: 12px 18px 12px 16px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 10px;
   box-shadow: var(--clv-soft);
+  overflow: hidden;
   cursor: pointer;
   border: 0;
   text-align: left;
@@ -648,57 +671,45 @@
   color: var(--clv-ink);
   width: 100%;
 }
-.clv-row:hover { background: var(--clv-parchment); }
-.clv-row[aria-current="true"] { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
-.clv-row--late::before {
+/* the 3px top strip: the accent at rest, INK on a row past its expected date — the slate is
+   never a status (the accent law); the past-date mark is ink, as v11's edge was */
+.clv-row::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 4px;
-  border-radius: 0 3px 3px 0;
-  background: var(--clv-ink);
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--clv-slate-pale);
 }
+.clv-row:hover { transform: translateY(-1px); }
+.clv-row[aria-current="true"] { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
+.clv-row--late::before { background: var(--clv-ink); }
 .clv-row > .clv-ini { grid-area: ini; }
 .clv-rwho { grid-area: who; min-width: 0; }
 .clv-rwho b {
   display: block;
-  font-size: 16px;
+  font-size: 16.5px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* ONE italic line — "Agency · London" — allowed to wrap (the mock's m4 who i) */
 .clv-ragy {
   display: block;
   margin-top: 2px;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--clv-ink-70);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.clv-rloc {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 7.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-style: italic;
+  font-size: 13.5px;
   color: var(--clv-ink-45);
-  white-space: nowrap;
 }
-.clv-rfit { grid-area: fit; min-width: 0; }
+.clv-rfit { grid-area: fit; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .clv-rfit .clv-gch { flex-wrap: nowrap; overflow: hidden; }
 .clv-gch span {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 22px;
+  height: 21px;
   padding: 1px 8px 0;
   border-radius: 5px;
   background: var(--clv-p2);
@@ -719,24 +730,25 @@
   border-width: 0 0 1.6px 1.6px;
   transform: rotate(-45deg) translateY(-1px);
 }
+/* the wishlist, CLAMPED to two lines (v12 §6) — the dossier column's gap spaces it */
 .clv-rwish {
-  display: block;
-  margin-top: 6px;
-  font-size: 13.5px;
-  font-style: italic;
-  color: var(--clv-ink-70);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--clv-ink-70);
 }
 .clv-rq { grid-area: q; min-width: 0; justify-self: end; text-align: right; }
 .clv-ql {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
   font-family: var(--clv-type);
-  font-size: 13px;
+  font-size: 13.5px;
   white-space: nowrap;
 }
 .clv-ql--none { color: var(--clv-ink-45); }
@@ -745,41 +757,42 @@
   justify-content: flex-end;
   align-items: center;
   gap: 6px;
-  margin-top: 5px;
+  margin-top: 4px;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 7.5px;
+  font-size: 8px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--clv-ink-45);
   white-space: nowrap;
 }
 .clv-qd--over { color: var(--clv-ink); font-weight: 700; }
+/* the mock's .stamp.ym — ink, unrotated, the one filled stamp */
 .clv-ym {
   display: inline-flex;
   align-items: center;
-  height: 16px;
-  padding: 1px 6px 0;
-  border-radius: 6px;
+  height: 20px;
+  padding: 1px 8px 0;
+  border-radius: 4px;
   background: var(--clv-btn);
   color: #fff;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-weight: 700;
-  font-size: 7.5px;
-  letter-spacing: 0.12em;
+  font-size: 7px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .clv-mini {
   display: inline-flex;
   align-items: center;
-  height: 20px;
-  padding: 1px 8px 0;
+  height: 18px;
+  padding: 1px 7px 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 5px;
   background: #fff;
   box-shadow: inset 0 0 0 1px var(--clv-ink-45);
   font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8px;
+  font-size: 7.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--clv-ink);
@@ -791,8 +804,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 26px;
-  padding: 0 6px 0 14px;
+  height: 22px;
+  padding: 0 6px 0 12px;
   background: var(--clv-p3);
   max-width: 100%;
   -webkit-mask: conic-gradient(from -45deg at left, #0000 25%, #000 0) 0 50%/100% 7px;
@@ -809,18 +822,13 @@
   white-space: nowrap;
 }
 
-/* narrow rows (the mock's own @container col boundary): who and query on top, fit beneath */
-@container col (max-width: 700px) {
+/* the narrow rows (the mock's own 720 container boundary, m4's narrow template): the same
+   four columns on tighter floors, one row — the v11 two-deck fold retires with the paceBits */
+@container col (max-width: 720px) {
   .clv-row {
-    grid-template-columns: 30px minmax(0, 1fr) 206px;
-    grid-template-areas: "ini who q" ". fit fit";
-    row-gap: 10px;
-    align-items: start;
+    grid-template-columns: 30px minmax(150px, 0.8fr) minmax(0, 1.4fr) auto;
+    min-height: 86px;
   }
-  .clv-row > .clv-ini { align-self: center; }
-  .clv-rfit { display: flex; align-items: center; gap: 12px; padding-top: 10px; border-top: 1px solid var(--clv-hair); }
-  .clv-rfit .clv-gch { flex: none; max-width: 55%; }
-  .clv-rfit .clv-rwish { margin-top: 0; flex: 1; min-width: 0; }
 }
 
 /* ── the floating active-filter bar (§5.4): fixed, ink, centred on the LIST's box ── */

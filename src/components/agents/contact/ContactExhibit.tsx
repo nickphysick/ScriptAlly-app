@@ -117,7 +117,7 @@ export const ContactExhibit: React.FC = () => (
           groupKey="stand" onGroup={noop} sortKey="due" onSort={noop} anyActive={false} onReset={noop}
         />
         <ContactRows groups={GROUPS} byId={BY_ID} nowMs={CONTACT_SAMPLE_NOW} genreHit={() => false}
-          openId={null} onOpen={noop} onLogQuery={noop} onAddGenres={noop} />
+          openId={null} onOpen={noop} onLogQuery={noop} onAddGenres={noop} onAddWishlist={noop} />
       </div>
       <aside className="clv-rail lh-exrail">
         <div className="clv-hkrail">
