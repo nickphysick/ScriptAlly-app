@@ -121,3 +121,21 @@ their seeded twins `clv-fx-*` for the real page).
 - **The by-agent reply chip** ("+ Reply time") exists only for the live stub-0 shape — §9.3
   lists no reply chip because the inline box is the fix, but a live stub-0 agent would
   otherwise have a gap with no action in that grouping.
+
+## Retired by v12 (3 Oct)
+
+Each by name, in `contactV11.measure.ts`, with the dated note at the site:
+
+- **"the count cards at 1280/1440: a row of three below the header's rule, above the list"** and
+  **"the count cards filter — populations proved non-zero first, OR on multi-select, dim on the
+  rest"** (P2–P3): their subject — `CountCards`, the cardSel pool and the OR — left with the card
+  index. The strip SCROLLS, it does not filter, so there is no pool behaviour to restate; the
+  first-thing-below-the-rule claim lives on in §10.2 and pageHeaderV2 §4's retargeted row.
+- **"narrow rows at 1280 — two lines, the fit beneath its hairline"** (P3): the v11 two-deck fold
+  (three tracks, the fit row under its hairline) retired by the m4 re-cut — one row of four
+  columns at the narrow container, measured in §10.5's 1280 leg.
+
+Retargeted rather than retired, for the record: the band-sticky case (pins BELOW the strip, the
+divider's top IS the pinned wrapper's bottom); the row census (letter default, the count in the
+divider's <small>); the floating bar (its chip raised through Find); §11.9 (the new agent lands
+under its surname's letter — "Zz Probe Agent" → Agent → A).
