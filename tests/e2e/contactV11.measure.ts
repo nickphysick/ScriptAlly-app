@@ -1322,3 +1322,97 @@ test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped
   expect(r.onRing, "…held by an inset ring").toContain("inset");
   bump(15);
 });
+
+/* ══════════════════════════ v12 P5 — the empty state: the ways, the banner, the previews (§10.7) ══════════════════════════ */
+
+test("v12 §10.7 — the three ways in, the anthracite banner, and the two live previews", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  /* the harness account has agents — the LH review aid holds the COUNT at 0, the page's own
+     empty branch does the rest (the same door LH7/LH8 use) */
+  await page.evaluate(() => {
+    (window as unknown as { __SA_LH_COUNT?: number }).__SA_LH_COUNT = 0;
+    window.dispatchEvent(new Event("sa:lh-count"));
+  });
+  await page.waitForSelector(`${scope} [data-clv="ways"]`);
+
+  const r = await page.evaluate((scope) => {
+    const grp = document.querySelector(`${scope} .clv-group`) as HTMLElement;
+    const probe = document.createElement("i");
+    probe.style.cssText = "position:absolute;visibility:hidden;background:var(--clv-btn);border-color:var(--clv-slate-tray)";
+    grp.appendChild(probe);
+    const btn = getComputedStyle(probe).backgroundColor;
+    const slateTray = getComputedStyle(probe).borderColor;
+    probe.remove();
+    const typeFirst = getComputedStyle(grp).getPropertyValue("--sp-type").split(",")[0].trim().replace(/^"|"$/g, "");
+    const ways = [...document.querySelectorAll(`${scope} [data-clv="ways"] .cd`)] as HTMLElement[];
+    const pri = ways[0];
+    const tpl = document.querySelector(`${scope} [data-clv="way-template"]`) as HTMLAnchorElement | null;
+    const ban = document.querySelector(`${scope} [data-clv="eban"]`) as HTMLElement;
+    const banBox = ban.getBoundingClientRect();
+    const vis = document.querySelector(`${scope} [data-clv="vis"]`) as HTMLElement;
+    const pics = [...vis.querySelectorAll(".clv-pic")] as HTMLElement[];
+    const pv1 = vis.querySelector(".clv-pv1") as HTMLElement;
+    const band = document.querySelector(`${scope} [data-lh="band"]`) as HTMLElement;
+    return {
+      btn, slateTray, typeFirst,
+      n: ways.length,
+      icoBg: ways.map((w) => getComputedStyle(w.querySelector(".clv-ico") as HTMLElement).backgroundColor),
+      icoSize: (pri.querySelector(".clv-ico") as HTMLElement).getBoundingClientRect().width,
+      priGo: getComputedStyle(pri.querySelector(".clv-cdgo") as HTMLElement).backgroundColor,
+      otherGo: getComputedStyle(ways[1].querySelector(".clv-cdgo") as HTMLElement).backgroundColor,
+      priIsImport: pri.getAttribute("data-clv") === "way-import",
+      tplDownload: tpl ? tpl.hasAttribute("download") && (tpl.getAttribute("href") ?? "").endsWith(".xlsx") : false,
+      h3Face: getComputedStyle(pri.querySelector("h3") as HTMLElement).fontFamily,
+      banBg: getComputedStyle(ban).backgroundColor,
+      banFace: getComputedStyle(ban.querySelector("h2") as HTMLElement).fontFamily,
+      banCentred: getComputedStyle(ban).textAlign,
+      banBox: { w: Math.round(banBox.width), h: Math.round(banBox.height) },
+      banInBand: !!band && band.contains(ban),
+      visCols: getComputedStyle(vis).gridTemplateColumns.split(" ").length,
+      picH: pics.map((p) => Math.round(p.getBoundingClientRect().height)),
+      masked: pics.map((p) => (getComputedStyle(p).maskImage ?? "none") !== "none" || ((getComputedStyle(p) as unknown as { webkitMaskImage?: string }).webkitMaskImage ?? "none") !== "none"),
+      pvZoom: pv1 ? String((getComputedStyle(pv1) as unknown as { zoom?: string }).zoom ?? "") : "",
+      pvRows: pv1 ? pv1.querySelectorAll('[data-clv="row"]').length : 0,
+      pvDividers: pv1 ? pv1.querySelectorAll('[data-clv="band"]').length : 0,
+      pvQVisible: pv1 ? [...pv1.querySelectorAll(".clv-rq")].filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length : -1,
+      pvWho: band ? band.querySelectorAll(".clv-rwho").length : 0,
+      railInPv: !!vis.querySelector(".clv-pv2 .clv-tray"),
+    };
+  }, scope);
+
+  expect(r.btn, "--clv-btn resolves (the two-nothings guard)").not.toBe("rgba(0, 0, 0, 0)");
+  expect(r.n, "three ways in").toBe(3);
+  expect(r.priIsImport, "Smart Import leads, recommended").toBe(true);
+  expect(r.icoSize, "the 44px icon circle").toBe(44);
+  for (const bg of r.icoBg) expect(bg, "the icon circles sit on the accent tray").toBe(r.slateTray);
+  expect(r.priGo, "the recommended tile's pill is the ink").toBe(r.btn);
+  expect(r.otherGo, "the other pills stay white").toBe("rgb(255, 255, 255)");
+  expect(r.tplDownload, "the template tile is a real download of the xlsx").toBe(true);
+  expect(r.h3Face, "the tile heading PAINTS machine (brand.tsx forces headings)").toContain(r.typeFirst);
+  expect(r.banBg, "the banner is the ink").toBe(r.btn);
+  expect(r.banFace, "the banner heading PAINTS machine").toContain(r.typeFirst);
+  expect(r.banCentred).toBe("center");
+  expect(r.banInBand, "the banner rides INSIDE the exhibition band (LH8's on-screen claim)").toBe(true);
+  expect(r.banBox.h, `the banner's band (oracle 188 at its width; ours ${JSON.stringify(r.banBox)})`).toBeGreaterThanOrEqual(150);
+  expect(r.banBox.h).toBeLessThanOrEqual(220);
+  expect(r.visCols, "two features side by side").toBe(2);
+  for (const h of r.picH) expect(h, "each preview window is the mock's 320").toBe(320);
+  for (const m of r.masked) expect(m, "the preview's foot dissolves by mask").toBe(true);
+  expect(r.pvZoom, "the previews render at the mock's .82").toBe("0.82");
+  expect(r.pvRows, "the card-index preview renders real rows").toBeGreaterThanOrEqual(3);
+  expect(r.pvDividers, "…under real letter dividers").toBeGreaterThanOrEqual(1);
+  expect(r.pvQVisible, "the query column is HIDDEN in the preview").toBe(0);
+  expect(r.pvWho, "the band feeds LH8 at least one .clv-rwho").toBeGreaterThanOrEqual(1);
+  expect(r.railInPv, "the second feature is the rail, live").toBe(true);
+  bump(21 + r.icoBg.length + r.picH.length + r.masked.length);
+
+  /* the doors: Add opens the centred card (Escape closes); the import tile navigates — last */
+  await page.click(`${scope} [data-clv="way-add"]`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-clv="addcard"]', { state: "detached" });
+  await page.click(`${scope} [data-clv="way-import"]`);
+  await page.waitForURL(/\/import/);
+  bump(2);
+});

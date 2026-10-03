@@ -123,9 +123,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
   const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
   const facts = useMemo(() => heroFacts(agents, census.standing, scoped), [agents, census, scoped]);
-  /* ⚠️ THE COUNT CARDS LEFT THE LIST WITH v12 (the card index): their pool narrowing, the
-     cardSel state and the bar's "Showing" chips went with them. `CountCards` itself survives —
-     the empty state's exhibit still renders it on a fixture, until P5 replaces that surface. */
+  /* ⚠️ THE COUNT CARDS LEFT WITH v12: the card index took the list mount (P2 — their pool
+     narrowing, the cardSel state and the bar's "Showing" chips went with them), and P5's empty
+     state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
   const addBtnRef = useRef<HTMLButtonElement>(null);
 
   const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
@@ -771,6 +771,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                (its link mode survives INSIDE the card), and the secondary is Discover, matching
                the populated header (LH7's same-shape claim) */
             onAdd={() => setAdding("name")}
+            /* the ways' recommended tile — the same bridge the rail's Import entry takes */
+            onImport={() => onNavigate?.("import")}
             /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             /* §4 — the page's own components over a sample constant, mounted ONLY on the empty page */

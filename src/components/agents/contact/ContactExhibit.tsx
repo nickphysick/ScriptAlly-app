@@ -2,30 +2,30 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE CONTACT LIST'S EXHIBITION (living headers §4) — how the page looks once a few agents are on
- * it, drawn by the page's OWN components (the count cards, the header row, the grouped rows and the
- * Housekeeping rail) over a SAMPLE constant declared here and nowhere else.
+ * THE CONTACT LIST'S EXHIBITION (living headers §4, re-cut by v12 P5 to the mock's `.empty`):
+ * the anthracite banner, then TWO features rendered LIVE by the page's own components over the
+ * sample constant — the card index (dividers + dossier rows, the query column hidden, at the
+ * mock's .82 zoom) and the Housekeeping rail at 340. The v11 exhibit's count cards, header row
+ * and side-by-side page replica retired with it — `CountCards` lost its last renderer in the
+ * same commit.
  *
- * ⚠️ THE SAMPLE GOES THROUGH THE PAGE'S OWN PIPELINE at a FIXED clock: `buildQcRows` → `agentFacts`
- * → `sortFacts` → `contactGroups`, `contactCensus` for the cards and `hkModel` for the rail. So the
- * band is what the page would draw for these agents, and it never reads the writer's data — no store,
- * no fetch, no subscription (LH6). The Housekeeping component keeps its own per-viewer grouping
- * preference in sessionStorage, as it does on the page; that is a UI setting, not data.
+ * ⚠️ THE SAMPLE GOES THROUGH THE PAGE'S OWN PIPELINE at a FIXED clock, on the PAGE'S OWN v12
+ * DEFAULTS — surname order, letter grouping — so the preview's dividers are what the page would
+ * draw for these agents. No store, no fetch, no subscription (LH6/LH8).
  *
- * ⚠️ INERT: `LivingExhibition` marks the band `inert` + `aria-hidden` and takes pointer events away,
- * so the handlers below are required props and nothing more. The rail is a STATIC box with the
- * rail's own markup — `ContactRail` measures the window and pins itself, which is the page's
- * behaviour, not a picture of it.
+ * ⚠️ INERT: `LivingExhibition` marks the band `inert` + `aria-hidden` and takes pointer events
+ * away, so the handlers below are required props and nothing more. The pics' feet dissolve by
+ * MASK, never a painted gradient — the band's surface is translucent white over the page
+ * ground, so there is no colour a painted fade could match (the house never-paint-a-rectangle
+ * law's cousin).
  */
 import React from "react";
 import { QueryStatus, SubmissionStatus, type Agent, type Query } from "../../../types";
 import { buildQcRows } from "../../../lib/qcSummary";
-import { agentFacts, contactCensus, contactGroups, emptyContactFilters, facetOptions, sortFacts } from "../../../lib/contactList";
+import { agentFacts, contactGroups, sortFacts } from "../../../lib/contactList";
 import { agentRows } from "../../../lib/contactList";
 import { hkModel } from "../../../lib/contactHousekeeping";
 import { LivingExhibition } from "../../shell/LivingExhibition";
-import { CountCards } from "./ContactCounts";
-import { ContactControls } from "./ContactControls";
 import { ContactRows } from "./ContactRows";
 import { ContactHousekeeping } from "./ContactHousekeeping";
 import "./contactV11.css";
@@ -82,17 +82,15 @@ export const CONTACT_SAMPLE_QUERIES: readonly Query[] = [
   q("c15", QueryStatus.NO_RESPONSE, 200),
 ];
 
-/** How many rows the band shows — the ref draws three and fades the foot. */
+/** How many rows the card-index preview shows — three, as the v11 band did; the mask fades the foot. */
 export const CONTACT_EXHIBIT_ROWS = 3;
 
 const ROWS = buildQcRows([...CONTACT_SAMPLE_QUERIES], [...CONTACT_SAMPLE_AGENTS], [], CONTACT_SAMPLE_NOW);
 const FACTS = CONTACT_SAMPLE_AGENTS.map((a) => agentFacts(a, ROWS, null));
-const ORDERED = sortFacts(FACTS, "due", () => false, CONTACT_SAMPLE_NOW);
+const ORDERED = sortFacts(FACTS, "surname", () => false, CONTACT_SAMPLE_NOW);
 const SHOWN = ORDERED.slice(0, CONTACT_EXHIBIT_ROWS);
-const GROUPS = contactGroups("stand", SHOWN);
+const GROUPS = contactGroups("letter", SHOWN);
 const BY_ID = new Map(SHOWN.map((x) => [x.agent.id, x]));
-const CENSUS = contactCensus(CONTACT_SAMPLE_AGENTS, ROWS, null);
-const OPTIONS = facetOptions(FACTS, emptyContactFilters(), () => true);
 const BAND = new Map(CONTACT_SAMPLE_AGENTS.map((a) => {
   const mine = agentRows(ROWS, a.id, null);
   return [a.id, mine.some((r) => r.court !== "closed") ? "live" as const : mine.length === 0 ? "never" as const : "closed" as const];
@@ -104,33 +102,43 @@ const HK = hkModel(
 );
 
 const noop = () => {};
-const none: ReadonlySet<never> = new Set();
 
 export const ContactExhibit: React.FC = () => (
   <LivingExhibition label={CONTACT_EXHIBIT_LABEL}>
-    <div className="lh-expg">
-      <div className="lh-exmc clv-main">
-        <CountCards cards={CENSUS.cards} sel={none} onToggle={noop} row />
-        <ContactControls
-          shownCount={ORDERED.length} total={CONTACT_SAMPLE_AGENTS.length}
-          find="" onFind={noop} filters={emptyContactFilters()} onFilters={noop} options={OPTIONS}
-          groupKey="stand" onGroup={noop} sortKey="due" onSort={noop} anyActive={false} onReset={noop}
-        />
-        <ContactRows groups={GROUPS} byId={BY_ID} nowMs={CONTACT_SAMPLE_NOW} genreHit={() => false}
-          openId={null} onOpen={noop} onLogQuery={noop} onAddGenres={noop} onAddWishlist={noop} />
-      </div>
-      <aside className="clv-rail lh-exrail">
-        <div className="clv-hkrail">
-          <div className="clv-tray">
-            <img className="clv-peek" src="/images/qc/be-hawk-head.png" alt="" />
-            <h2 className="clv-tray-t">Housekeeping</h2>
-            <p className="clv-tray-c"><b>{HK.countsLine.gaps}</b>{HK.countsLine.rest}</p>
-          </div>
-          <div className="clv-railbody">
-            <ContactHousekeeping model={HK} onOpen={noop} onEditAt={noop} onInlineSave={async () => {}} onChecked={async () => {}} onRemind={noop} />
+    {/* the anthracite banner (the mock's .ban) — the claim the two previews then show */}
+    <div className="clv-eban" data-clv="eban">
+      <h2>A card for every agent.</h2>
+      <p>Everything you know about them, kept in one place and ready the moment you query.</p>
+    </div>
+    <div className="clv-vis" data-clv="vis">
+      <div className="clv-vf" data-clv="vf-index">
+        <div className="clv-pic">
+          <div className="clv-pvw clv-pv1">
+            <ContactRows groups={GROUPS} byId={BY_ID} nowMs={CONTACT_SAMPLE_NOW} genreHit={() => false}
+              openId={null} onOpen={noop} onLogQuery={noop} onAddGenres={noop} onAddWishlist={noop} />
           </div>
         </div>
-      </aside>
+        <h3>The card index.</h3>
+        <p>Every agent as a card: who they are, what they want, how fast they reply, and where your query stands. Click one for the full record.</p>
+      </div>
+      <div className="clv-vf" data-clv="vf-hk">
+        <div className="clv-pic">
+          <div className="clv-pvw clv-pv2">
+            <div className="clv-hkrail">
+              <div className="clv-tray">
+                <img className="clv-peek" src="/images/qc/be-hawk-head.png" alt="" />
+                <h2 className="clv-tray-t">Housekeeping</h2>
+                <p className="clv-tray-c"><b>{HK.countsLine.gaps}</b>{HK.countsLine.rest}</p>
+              </div>
+              <div className="clv-railbody">
+                <ContactHousekeeping model={HK} onOpen={noop} onEditAt={noop} onInlineSave={async () => {}} onChecked={async () => {}} onRemind={noop} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3>Housekeeping.</h3>
+        <p>What’s missing from a profile, and what filling it in would unlock: a reply date, a better match, a reminder when a list reopens.</p>
+      </div>
     </div>
   </LivingExhibition>
 );

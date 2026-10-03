@@ -161,72 +161,9 @@
 
 
 
-/* ── the count cards (v11 §3.3) — 54px compacts with a coloured tab ── */
-.clv-tiles {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  margin: 20px 0 0;
-}
-/* stacked: a row of three at the top of the list area */
-.clv-tiles--row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 22px;
-}
-.clv-kt {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 54px;
-  border: 0;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 22px -16px rgba(28, 19, 15, 0.3);
-  transition: opacity 0.15s;
-  color: var(--clv-ink);
-}
-.clv-kt::before {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  bottom: 6px;
-  width: 5px;
-  border-radius: 3px;
-  background: var(--tc);
-}
-.clv-kt[data-k="active"] { --tc: #e6c5bd; }
-.clv-kt[data-k="never"] { --tc: #bccbd8; }
-.clv-kt[data-k="closed"] { --tc: #cfcac2; }
-.clv-tiles--any .clv-kt[aria-pressed="false"] { opacity: 0.45; }
-.clv-kt[aria-pressed="true"] {
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 22px -16px rgba(28, 19, 15, 0.3),
-    inset 0 0 0 1.5px var(--clv-ink);
-}
-.clv-kh { display: flex; align-items: center; gap: 12px; padding: 0 14px 0 22px; width: 100%; min-width: 0; }
-/* ⚠️ LIVING HEADERS v3 §1 — A TILE ROW NEVER GROWS: the number takes its own width (`flex: none`), the
-   label and its sub-line each hold ONE line and truncate, so a one-digit and a three-digit count give
-   the same tile. (The tile's height is fixed at 54 here; this is what stops a long label overflowing it.) */
-.clv-kh b { flex: none; font-family: var(--clv-serif); font-size: 26px; font-weight: 600; line-height: 1; min-width: 26px; }
-.clv-kh .clv-kn { min-width: 0; overflow: hidden; }
-.clv-kh span { display: block; font-family: var(--clv-type); font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.clv-kh small {
-  display: block;
-  margin-top: 3px;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 7.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--clv-ink-45);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.clv-kh small.clv-pd { color: var(--clv-ink); font-weight: 700; }
+/* ⚠️ RETIRED BY v12 P5 (3 Oct): the count-card block (.clv-tiles/.clv-kt/.clv-kh) went with its
+   last renderer — `CountCards` lost the list mount in P2 and the exhibit mount here, and the
+   component file is deleted in the same commit (the replacement-swapped law). */
 
 /* ── the live Add-new-agent card: the landing card's construction, blank (v11 §3.4) ── */
 .clv-ac {
@@ -1636,3 +1573,186 @@
 @container col (max-width: 720px) {
   .clv-ixtab { font-size: 14px; }
 }
+
+/* ══ v12 P5 — the empty state: the three ways in, the banner, and the two live previews ══════ */
+
+/* the ways (the mock's .ways4/.cd): three doors below the header's rule. The bare `cd` class
+   rides alongside for §10.7, collision-checked against the whole bundle. */
+.clv-ways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 22px 0 0;
+}
+.clv-cd {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgba(28, 19, 15, 0.16);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  font-family: var(--clv-serif);
+  color: var(--clv-ink);
+}
+.clv-cd:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -20px rgba(28, 19, 15, 0.35);
+  border-color: rgba(28, 19, 15, 0.32);
+}
+.clv-cd--pri { border-color: rgba(28, 19, 15, 0.45); }
+.clv-cd .clv-ico {
+  grid-row: 1 / 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--clv-slate-tray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.clv-cd .clv-ico svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--clv-ink);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.clv-cdbody { min-width: 0; }
+.clv-cd h3 {
+  margin: 0;
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.15;
+}
+.clv-cdtag {
+  display: inline-block;
+  vertical-align: 3px;
+  margin-left: 8px;
+  font: 700 7.5px var(--font-mono, "JetBrains Mono", monospace);
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border-radius: 5px;
+  /* the mock's own --rose/--rust pair — a tag tint, never a status (the accent law) */
+  background: #f5e6df;
+  color: #8a4a3c;
+}
+.clv-cd p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--clv-ink-70);
+  min-height: 60px;
+}
+.clv-cdgo {
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  margin-top: 12px;
+  font-family: var(--clv-type);
+  font-size: 13.5px;
+  background: #fff;
+  color: var(--clv-ink);
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
+}
+.clv-cd--pri .clv-cdgo { background: var(--clv-btn); color: #f5f1eb; box-shadow: none; }
+.clv-cd small {
+  grid-column: 2;
+  display: block;
+  margin-top: 9px;
+  font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+
+/* the banner (the mock's .ban), inside the exhibition so the band starts on screen (LH8) */
+.clv-eban {
+  background: var(--clv-btn);
+  color: #f5f1eb;
+  border-radius: 18px;
+  padding: 40px 40px 42px;
+  text-align: center;
+}
+.clv-eban h2 {
+  margin: 0;
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: clamp(30px, 2.6vw, 40px);
+  line-height: 1.1;
+  white-space: nowrap;
+  color: #f5f1eb;
+}
+.clv-eban p {
+  margin: 12px auto 0;
+  font-family: var(--clv-serif);
+  font-size: 17.5px;
+  line-height: 1.5;
+  color: rgba(245, 241, 235, 0.78);
+  max-width: 60ch;
+}
+
+/* the two features (the mock's .vis/.vf): each a 320px live preview over its caption */
+.clv-vis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+  padding: 48px 0 20px;
+}
+.clv-vf { text-align: center; }
+.clv-vf .clv-pic {
+  height: 320px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: 26px;
+  overflow: hidden;
+  /* the foot dissolves by MASK, never a painted gradient — the exhibition band's surface is
+     translucent white over the page ground, so no painted colour could match it */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent);
+}
+.clv-pvw {
+  width: 100%;
+  max-width: 560px;
+  text-align: left;
+  zoom: 0.82;
+}
+.clv-pv2 { width: 340px; margin: 0 auto; }
+/* the index preview hides the query column (the mock's pv1) — three tracks, the dossier wide */
+.clv-pv1 .clv-row { grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1.2fr); }
+.clv-pv1 .clv-rq { display: none; }
+.clv-vf h3 {
+  margin: 0;
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.15;
+}
+.clv-vf p {
+  margin: 12px auto 0;
+  max-width: 38ch;
+  font-family: var(--clv-serif);
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--clv-ink-70);
+}
+
+/* ⚠️ brand.tsx FORCES HEADING FACES (the P4 lesson, measured there): every machine heading in
+   the empty chrome claws its face back at two classes + !important, or it paints the brand
+   serif with the declaration unread. */
+.clv-group .clv-cd h3, .clv-group .clv-eban h2, .clv-group .clv-vf h3 { font-family: var(--clv-type) !important; }
