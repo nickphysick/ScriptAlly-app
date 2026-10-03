@@ -60,3 +60,12 @@ width and the label and sub-line are one line each (LH3).
 
 The art's height is capped at 272px rather than the ref's 286: the ref's drawing rises above its header
 into room our page does not have, so a 286 box would run into the bar.
+
+## Dated amendments
+
+**3 Oct (Contact list v12 P2):** the Contact list's count cards retired with the card index, so the
+`/agents` row in `livingHeadersV3.measure`'s RUN table now reads the INDEX STRIP — `tile: ".clv-ixtab"`
+(the All cell is first in DOM at the column's left edge, which is what keeps LH4's one-left-x honest)
+and `num: "i"` (each lettered cell's count). `contactHeaderCopy`'s subline has carried the v12 sentence
+since P1 — "{N} of them want {genre} and haven't seen {title} yet.", plus the average-reply clause when
+any agent states a window — with the header's `facts`/`avgReplyWeeks` context supplied by the page.

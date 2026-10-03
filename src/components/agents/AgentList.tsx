@@ -50,14 +50,14 @@ import { AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as sav
 import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../lib/computeAgentDeadlineWrites";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CountCards } from "./contact/ContactCounts";
 import { CONTACT_ARCHIVIST, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
-  ContactCardKey, ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
+  ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
   averageReplyWeeks, contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
-  matchesCards, matchesContactFilters, sortFacts,
+  letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
+import { ContactIndexStrip } from "./contact/ContactIndexStrip";
 import { isGenreMatch } from "../../lib/genreMatch";
 import { ContactControls } from "./contact/ContactControls";
 import { ContactRows } from "./contact/ContactRows";
@@ -123,22 +123,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
   const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
   const facts = useMemo(() => heroFacts(agents, census.standing, scoped), [agents, census, scoped]);
-  /* the count cards are a multi-select OR (v11 §3.3); the floating bar spells them out in P3 */
-  const [cardSel, setCardSel] = useState<ReadonlySet<ContactCardKey>>(new Set());
-  const toggleCard = useCallback((k: ContactCardKey) => {
-    setCardSel((prev) => {
-      const next = new Set(prev);
-      if (next.has(k)) next.delete(k); else next.add(k);
-      return next;
-    });
-  }, []);
-  /* the quick-add card "+ Add an agent" drops beneath the header's actions (page header v2 §4) */
+  /* ⚠️ THE COUNT CARDS LEFT THE LIST WITH v12 (the card index): their pool narrowing, the
+     cardSel state and the bar's "Showing" chips went with them. `CountCards` itself survives —
+     the empty state's exhibit still renders it on a fixture, until P5 replaces that surface. */
   const addBtnRef = useRef<HTMLButtonElement>(null);
 
   const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
-  const [groupKey, setGroupKey] = useState<GroupKey>("stand");
-  const [sortKey, setSortKey] = useState<ContactSortKey>("due");
+  /* v12 §9: the page opens on the card index — grouped by letter, ordered by surname */
+  const [groupKey, setGroupKey] = useState<GroupKey>("letter");
+  const [sortKey, setSortKey] = useState<ContactSortKey>("surname");
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -225,10 +219,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     [tintGenre],
   );
   const inPool = useCallback(
-    (x: { agent: Agent; stand: string }) =>
-      matchesAgentSearch(x.agent, search)
-      && matchesCards(cardSel, census.standing.get(x.agent.id) ?? { kind: "none" }),
-    [search, cardSel, census],
+    (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search),
+    [search],
   );
   const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool), [factsAll, filters, inPool]);
   const visibleFacts = useMemo(
@@ -256,15 +248,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     [queries, agents, scoped, nowMs],
   );
   const anyActive =
-    contactFilterCount(filters) > 0 || cardSel.size > 0 || search.trim() !== ""
-    || groupKey !== "stand" || sortKey !== "due";
-  const CARD_NAME: Record<ContactCardKey, string> = { active: "Active queries", never: "Never queried", closed: "Query closed" };
+    contactFilterCount(filters) > 0 || search.trim() !== ""
+    || groupKey !== "letter" || sortKey !== "surname";
   const barChips: BarChip[] = useMemo(() => {
     const chips: BarChip[] = [];
-    for (const k of cardSel) chips.push({
-      key: `card-${k}`, label: "Showing", value: CARD_NAME[k],
-      onRemove: () => toggleCard(k),
-    });
     const drop = <S extends keyof ContactFilters>(section: S, label: string, value: ContactFilters[S][number], shown?: string) =>
       chips.push({
         key: `${section}-${String(value)}`, label, value: shown ?? String(value),
@@ -279,15 +266,72 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (search.trim()) chips.push({ key: "find", label: "Name has", value: search.trim(), onRemove: () => setSearch("") });
     return chips;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardSel, filters, search, toggleCard]);
+  }, [filters, search]);
 
   const resetList = useCallback(() => {
     setFilters(emptyContactFilters());
-    setCardSel(new Set());
     setSearch("");
-    setGroupKey("stand");
-    setSortKey("due");
+    setGroupKey("letter");
+    setSortKey("surname");
   }, []);
+
+  /* ── v12 §4: the index strip's marked letter ──────────────────────────────
+   * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
+   * IO-misses-are-permanent law): the marked cell is the LAST letter divider at or above the
+   * strip's bottom edge, re-read rAF-throttled on every scroll — a reading that cannot go
+   * stale, where an observer event not delivered is wrong for the life of the page. Capture-
+   * phase on document because scroll does not bubble and the page's scroller is the shell's,
+   * not this component's to name. Letters only: under any other grouping there are no letter
+   * dividers to be nearest, so nothing marks. */
+  const [markedLetter, setMarkedLetter] = useState<string | null>(null);
+  useEffect(() => {
+    if (!active || groupKey !== "letter") { setMarkedLetter(null); return; }
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const col = mainColRef.current;
+      const wrap = col?.querySelector('[data-clv="idxwrap"]');
+      if (!col || !wrap) return;
+      const below = wrap.getBoundingClientRect().bottom + 9;
+      let cur: string | null = null;
+      for (const band of Array.from(col.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]'))) {
+        if (band.getBoundingClientRect().top <= below) cur = band.dataset.letter ?? null;
+        else break;
+      }
+      setMarkedLetter((m) => (m === cur ? m : cur));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [active, groupKey, visibleFacts]);
+
+  /* a letter scrolls its divider under the strip (the divider's own scroll-margin-top lands it
+     §10.2's 8px below); under another grouping the pick RESTORES the letter grouping first.
+     "All" clears the mark and returns to the top of the list. */
+  const pickLetter = useCallback((letter: string | null) => {
+    const behavior = prefersReducedMotion() ? ("auto" as const) : ("smooth" as const);
+    const toBand = (L: string) =>
+      mainColRef.current
+        ?.querySelector(`[data-clv="band"][data-letter="${L}"]`)
+        ?.scrollIntoView({ block: "start", behavior });
+    if (letter === null) {
+      setMarkedLetter(null);
+      mainColRef.current?.scrollIntoView({ block: "start", behavior });
+      return;
+    }
+    setMarkedLetter(letter);
+    if (groupKey !== "letter") {
+      setGroupKey("letter");
+      window.setTimeout(() => toBand(letter), 0);
+    } else {
+      toBand(letter);
+    }
+  }, [groupKey]);
+  const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
 
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
@@ -723,9 +767,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             manuscriptTitle={scoped?.title?.trim() || null}
             genre={scoped?.genre ?? null}
             addRef={addBtnRef}
-            /* v12: the quick-add drop is retired app-wide — both pills open the centred card */
+            /* v12: the quick-add drop and the paste pill are retired — the one door is the card
+               (its link mode survives INSIDE the card), and the secondary is Discover, matching
+               the populated header (LH7's same-shape claim) */
             onAdd={() => setAdding("name")}
-            onPaste={() => setAdding("link")}
             /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             /* §4 — the page's own components over a sample constant, mounted ONLY on the empty page */
@@ -760,12 +805,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {!showList ? null : (
         <>
 
-        {/* ⚠️ THE COUNT CARDS ARE THE FIRST THING BELOW THE RULE (page header v2 §4), a row of three
-            at the top of the page column — moved out of the retired hero, not restyled. */}
+        {/* ⚠️ v12 §4: THE INDEX STRIP IS THE FIRST THING BELOW THE RULE — above the head, as the
+            mock orders it — and it indexes the SAME filtered set the list shows (one derivation,
+            two readers). The v11 count cards left this page with it. */}
         {showList && (
-          <CountCards cards={census.cards} sel={cardSel} onToggle={toggleCard} row />
+          <ContactIndexStrip
+            total={visibleFacts.length}
+            counts={stripCounts}
+            marked={markedLetter}
+            onPick={pickLetter}
+          />
         )}
-        {/* the v11 header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}
+        {/* the header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}
         {showList && (
           <ContactControls
             shownCount={visible.length}
@@ -832,7 +883,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 className="act"
                 onClick={() => {
                   setFilters(emptyContactFilters());
-                  setCardSel(new Set());
                   setSearch("");
                   setNotice(null);
                   // let the cleared list render, then bring the card into view

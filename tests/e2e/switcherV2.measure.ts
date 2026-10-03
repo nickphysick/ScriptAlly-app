@@ -152,8 +152,10 @@ test("S5 · M opens the menu from the page, and nowhere it should not", async ({
     await page.keyboard.press("m"); await page.waitForTimeout(150);
     L.check("S5 · M in a textarea does nothing", ctx, !(await menuOpen(page)), "");
     await page.evaluate(() => document.getElementById("sw-probe-ta")?.remove());
-    /* an open modal: the real add card, focus on its close button (not a field) */
-    await page.locator('[data-probe="page-header"] .ph-secondary').filter({ hasText: "Paste a link" }).first().click();
+    /* an open modal: the real add card, focus on its close button (not a field).
+       v12 P2 (3 Oct): the "Paste a link" secondary retired with the quick-add — the SAME card
+       opens from the primary now. */
+    await page.locator('[data-probe="page-header"] .ph-primary').filter({ hasText: "+ Add an agent" }).first().click();
     await page.locator('[data-clv="addcard"]').waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-clv="addcard"] [data-clv="close"]').focus();
     await page.keyboard.press("m"); await page.waitForTimeout(150);

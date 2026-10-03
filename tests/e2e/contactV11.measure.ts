@@ -418,26 +418,37 @@ test("narrow rows at 1280 — two lines, the fit beneath its hairline", async ({
   bump(1 + r.sample.length * 3);
 });
 
-test("the bands stick at the scroller's top with the page-coloured shadow", async ({ page }) => {
+/* v12 P2 (3 Oct): the dividers no longer pin at the scroller's top — they pin BELOW the index
+   strip, and the claim is measured as two boxes meeting (the band's top IS the pinned strip
+   wrapper's bottom), never a restated constant. */
+test("the bands stick BELOW the pinned index strip with the page-coloured shadow", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   const r = await page.evaluate(async (scope) => {
     const scroller = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
+    const wrap = document.querySelector(`${scope} [data-clv="idxwrap"]`) as HTMLElement | null;
     const bands = [...document.querySelectorAll(`${scope} [data-clv="band"]`)] as HTMLElement[];
-    if (bands.length < 2) return null;
+    if (!wrap || bands.length < 2) return null;
     const second = bands[1];
     /* scroll until the SECOND band's group is in play, then the FIRST should be gone and the
-       second pinned at the scroller's top */
+       second pinned flush under the strip's own wrapper */
     scroller.scrollTop = second.offsetTop + 80;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     const st = scroller.getBoundingClientRect().top;
+    const w = wrap.getBoundingClientRect();
     const b = second.getBoundingClientRect();
-    return { pinned: Math.abs(b.top - st) <= 2, sticky: getComputedStyle(second).position === "sticky" };
+    return {
+      stripPinned: Math.abs(w.top - st) <= 2,
+      pinned: Math.abs(b.top - w.bottom) <= 2,
+      sticky: getComputedStyle(second).position === "sticky",
+      detail: `strip ${w.top.toFixed(1)}–${w.bottom.toFixed(1)} band ${b.top.toFixed(1)} scroller ${st.toFixed(1)}`,
+    };
   }, scope);
-  expect(r, "fewer than two bands on this account — the pinned claim is unreachable").not.toBeNull();
+  expect(r, "no strip or fewer than two bands — the pinned claim is unreachable").not.toBeNull();
   expect(r!.sticky).toBe(true);
-  expect(r!.pinned, "the band does not pin at the scroller's top").toBe(true);
-  bump(3);
+  expect(r!.stripPinned, `the strip wrapper does not pin at the scroller's top — ${r!.detail}`).toBe(true);
+  expect(r!.pinned, `the band does not pin flush under the strip — ${r!.detail}`).toBe(true);
+  bump(4);
 });
 
 /* ══════════════════════════ phase 4 — the agent pop-up (§11.6 / §11.7) ══════════════════════════ */
@@ -1019,4 +1030,150 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
   await page.click(`${scope} [data-probe="page-header"] .ph-secondary`);
   await page.waitForURL(/\/agents\/discover/);
   bump(3);
+});
+
+/* ══════════════════════════ v12 P2 — the index strip (§10.2) and the re-dressed head (§10.3) ══════════════════════════ */
+
+test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider 8px under the strip, marked", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="idx"]`);
+
+  /* ── the census: strip cells against the dividers against the rows — three derivations of one
+     partition, compared to each other, never to literals. Per-branch population asserted: a run
+     with no lettered cells, or no letterless ones, proves nothing about the split. ── */
+  const census = await page.evaluate((scope) => {
+    const cells = [...document.querySelectorAll(`${scope} [data-clv="ixtab"]`)] as HTMLElement[];
+    const all = document.querySelector(`${scope} [data-clv="ixall"]`) as HTMLElement | null;
+    const bands = [...document.querySelectorAll(`${scope} [data-clv="band"]`)] as HTMLElement[];
+    const perBand = bands.map((b) => {
+      let n = 0;
+      for (let el = b.nextElementSibling; el && !el.matches('[data-clv="band"]'); el = el.nextElementSibling) {
+        if (el.matches("[data-agent-card]")) n += 1;
+      }
+      return { letter: b.dataset.letter ?? "", band: Number((b.querySelector("i")?.textContent ?? "").trim()), rows: n };
+    });
+    const perCell = cells.map((c) => ({
+      letter: c.dataset.letter ?? "",
+      has: c.classList.contains("has"),
+      disabled: (c as HTMLButtonElement).disabled,
+      n: Number(c.querySelector("i")?.textContent ?? "0"),
+    }));
+    const rowCount = document.querySelectorAll(`${scope} [data-agent-card]`).length;
+    return { cells: perCell, bands: perBand, allText: (all?.textContent ?? "").trim(), rowCount };
+  }, scope);
+
+  expect(census.cells.length, "26 letter cells").toBe(26);
+  expect(census.allText).toBe(`All · ${census.rowCount}`);
+  const lettered = census.cells.filter((c) => c.has);
+  const bare = census.cells.filter((c) => !c.has);
+  expect(lettered.length, "per-branch population: some cells carry agents").toBeGreaterThan(2);
+  expect(bare.length, "per-branch population: some cells are empty").toBeGreaterThan(2);
+  for (const c of bare) expect(c.disabled, `the bare ${c.letter} cell is inert`).toBe(true);
+  /* cell count == divider count == rows under the divider, letter by letter */
+  expect(census.bands.map((b) => b.letter)).toEqual(lettered.map((c) => c.letter));
+  for (const b of census.bands) {
+    const cell = lettered.find((c) => c.letter === b.letter)!;
+    expect(cell?.n, `the ${b.letter} cell's count is its divider's`).toBe(b.band);
+    expect(b.rows, `the ${b.letter} divider's count is its rows`).toBe(b.band);
+  }
+  /* the cells' sum is the tally's shown count */
+  expect(lettered.reduce((s, c) => s + c.n, 0)).toBe(census.rowCount);
+  bump(8 + bare.length + census.bands.length * 2);
+
+  /* ── the click: pick a late letter; the divider lands 8px under the pinned strip and the cell
+     marks in the bands' own ink. ⚠️ THE SETTLE MUST SEE THE SCROLL *LEAVE* FIRST: a smooth
+     scroll has a startup standstill, and "three equal scrollTop reads" is satisfied by a scroll
+     that has not begun — measured, gap 526.5 with the cell un-marked, a reading taken mid-
+     flight. So: departed from the starting value, THEN three stable reads. ── */
+  /* ⚠️ THE TARGET IS THE SECOND DIVIDER, NOT THE LAST: the landing position is 96px below the
+     scrollport's top, and the LAST band has too little content beneath it to get there — the
+     scroller hits its end and the band rests mid-viewport (measured: gap 526.5 on a correct
+     page). The second divider has every later group below it, so it can always land. */
+  const target = census.bands[1].letter;
+  const startTop = await page.evaluate((scope) => (document.querySelector(`${scope} .wpg-scroll`) as HTMLElement).scrollTop, scope);
+  await page.click(`${scope} [data-clv="ixtab"][data-letter="${target}"]`);
+  await page.waitForFunction(([scope, startTop]) => {
+    const sc = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
+    const w = window as unknown as { __clvLast?: number; __clvHold?: number };
+    if (sc.scrollTop === startTop) { w.__clvHold = 0; w.__clvLast = sc.scrollTop; return false; }
+    const same = w.__clvLast === sc.scrollTop;
+    w.__clvHold = same ? (w.__clvHold ?? 0) + 1 : 0;
+    w.__clvLast = sc.scrollTop;
+    return same && (w.__clvHold ?? 0) >= 3;
+  }, [scope, startTop] as const, { timeout: 10000 });
+  const landed = await page.evaluate(([scope, target]) => {
+    const wrap = document.querySelector(`${scope} [data-clv="idxwrap"]`) as HTMLElement;
+    const band = document.querySelector(`${scope} [data-clv="band"][data-letter="${target}"]`) as HTMLElement;
+    const cell = document.querySelector(`${scope} [data-clv="ixtab"][data-letter="${target}"]`) as HTMLElement;
+    const bandBg = getComputedStyle(band).backgroundColor;
+    const cellBg = getComputedStyle(cell).backgroundColor;
+    return {
+      gap: band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom,
+      marked: cell.classList.contains("on"),
+      inkMatch: cellBg === bandBg,
+      detail: `gap ${(band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom).toFixed(1)} cell ${cellBg} band ${bandBg}`,
+    };
+  }, [scope, target] as const);
+  expect(Math.abs(landed.gap - 8), `the divider lands 8px under the strip — ${landed.detail}`).toBeLessThanOrEqual(2);
+  expect(landed.marked, "the picked cell is marked").toBe(true);
+  expect(landed.inkMatch, `the marked cell wears the dividers' own ink — ${landed.detail}`).toBe(true);
+
+  /* ── All clears the mark and returns to the top of the list ── */
+  await page.click(`${scope} [data-clv="ixall"]`);
+  await page.waitForFunction((scope) => {
+    const sc = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
+    return sc.scrollTop <= 2 || !document.querySelector(`${scope} [data-clv="ixtab"].on`);
+  }, scope);
+  const cleared = await page.evaluate((scope) => ({
+    marked: !!document.querySelector(`${scope} [data-clv="ixtab"].on`),
+  }), scope);
+  expect(cleared.marked, "All clears the marked cell").toBe(false);
+  bump(4);
+});
+
+test("v12 §10.3 — the head: dashed-underlined title, a quiet un-underlined tally, and the controls drop under as a piece", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="ctl"]`);
+  const head = await page.evaluate((scope) => {
+    const ttl = document.querySelector(`${scope} [data-clv="ctl"] .clv-ttlu`) as HTMLElement | null;
+    const em = document.querySelector(`${scope} [data-clv="tally"]`) as HTMLElement | null;
+    const group = document.querySelector(`${scope} [data-clv="btn-group"]`) as HTMLElement | null;
+    if (!ttl || !em || !group) return null;
+    const ts = getComputedStyle(ttl); const es = getComputedStyle(em);
+    return {
+      ttlUnderline: `${ts.borderBottomStyle} ${ts.borderBottomWidth}`,
+      emUnderline: es.borderBottomStyle,
+      emFont: es.fontFamily,
+      emSize: es.fontSize,
+      groupValue: (group.querySelector("i")?.textContent ?? "").trim(),
+      h2Size: getComputedStyle(ttl.closest("h2") as HTMLElement).fontSize,
+    };
+  }, scope);
+  expect(head, "the head's three parts render").not.toBeNull();
+  expect(head!.ttlUnderline, "the title carries the dashed underline").toBe("dashed 1px");
+  expect(head!.emUnderline, "the tally carries NO underline (§10.3)").toBe("none");
+  expect(head!.emFont, "the tally is serif").toContain("Source Serif 4");
+  expect(head!.emSize).toBe("15px");
+  expect(head!.h2Size, "the title steps to the mock's 25").toBe("25px");
+  expect(head!.groupValue, "the Group chip states its value").toBe("letter");
+  bump(7);
+
+  /* at the narrow column the controls drop UNDER the title as one piece — never over it. The
+     geometric claim is overlap-freedom plus which side of the title's baseline the group sits;
+     whether 1280 wraps is REPORTED (it depends on the column, not the viewport). */
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.waitForTimeout(250);
+  const narrow = await page.evaluate((scope) => {
+    const h2 = document.querySelector(`${scope} [data-clv="ctl"] h2`) as HTMLElement;
+    const grp = document.querySelector(`${scope} [data-clv="ctlg"]`) as HTMLElement;
+    const a = h2.getBoundingClientRect(); const b = grp.getBoundingClientRect();
+    const overlap = a.right > b.left + 1 && b.right > a.left + 1 && a.bottom > b.top + 1 && b.bottom > a.top + 1;
+    return { overlap, wrapped: b.top >= a.bottom - 1, h2: `${a.left.toFixed(0)},${a.top.toFixed(0)}–${a.right.toFixed(0)},${a.bottom.toFixed(0)}`, grp: `${b.left.toFixed(0)},${b.top.toFixed(0)}–${b.right.toFixed(0)},${b.bottom.toFixed(0)}` };
+  }, scope);
+  // eslint-disable-next-line no-console
+  console.log(`[v12 §10.3] 1280: wrapped=${narrow.wrapped} h2 ${narrow.h2} ctlg ${narrow.grp}`);
+  expect(narrow.overlap, `the controls never overlap the title — h2 ${narrow.h2} ctlg ${narrow.grp}`).toBe(false);
+  bump(2);
 });

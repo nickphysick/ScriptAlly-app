@@ -358,8 +358,9 @@ export function facetOptions(
 
 /* ── grouping (v11 §5.2) — a PARTITION of the already-sorted list ── */
 
-export type GroupKey = "stand" | "door" | "agency" | "loc" | "status" | "none";
+export type GroupKey = "letter" | "stand" | "door" | "agency" | "loc" | "status" | "none";
 export const GROUP_OPTIONS: { key: GroupKey; label: string }[] = [
+  { key: "letter", label: "Letter" },
   { key: "stand", label: "Where you stand" },
   { key: "door", label: "Open to queries" },
   { key: "agency", label: "Agency" },
@@ -376,6 +377,35 @@ const STATUS_GROUP_ORDER = [
 ];
 const deThe = (s: string) => s.replace(/^the\s+/i, "");
 
+/* ── v12: the surname and its initial (the card index's key) ──────────────────────────────
+   ⚠️ THE MOCK IS THE RULE: the last word of the primary name, with a leading O' folded to O
+   (`sur(c)[0]` in the oracle — O'Brien files under O, apostrophe normalised, NOT under B),
+   and NO Mc/Mac handling (McAllister files under M). The agent model has no surname field.
+   Diacritics fold to their base letter so Édouard files under E; an initial still outside
+   A–Z keeps its own character — the strip simply has no cell to jump to it, which the
+   delivered data never produces. */
+export function surnameOf(a: Pick<Agent, "name" | "agency">): string {
+  const primary = (a.name ?? "").trim() || (a.agency ?? "").trim();
+  const last = primary.split(/\s+/).filter(Boolean).pop() ?? "";
+  return last.replace(/^O'/i, "O");
+}
+
+export function surnameInitial(a: Pick<Agent, "name" | "agency">): string {
+  const ch = surnameOf(a).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+  return ch || "#";
+}
+
+/** The strip's per-letter counts over the SAME set the list shows (§9 — a filter moves them). */
+export function letterCounts(facts: readonly AgentFacts[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const x of facts) {
+    const L = surnameInitial(x.agent);
+    m.set(L, (m.get(L) ?? 0) + 1);
+  }
+  return m;
+}
+
+
 export interface ContactGroup { label: string; ids: string[]; extra?: string }
 
 export function contactGroups(key: GroupKey, ordered: readonly AgentFacts[]): ContactGroup[] {
@@ -386,14 +416,16 @@ export function contactGroups(key: GroupKey, ordered: readonly AgentFacts[]): Co
     if (l) l.push(id); else buckets.set(label, [id]);
   };
   for (const x of ordered) {
-    if (key === "stand") put(STAND_LABEL[x.stand], x.agent.id);
+    if (key === "letter") put(surnameInitial(x.agent), x.agent.id);
+    else if (key === "stand") put(STAND_LABEL[x.stand], x.agent.id);
     else if (key === "door") put(x.door === "open" ? "Open" : "Closed", x.agent.id);
     else if (key === "agency") put(x.agent.agency.trim() || "No agency", x.agent.id);
     else if (key === "loc") put(x.loc ?? "Location not recorded", x.agent.id);
     else put(x.statusKey === "Revise & resubmit" ? "Revise & resubmit" : x.statusKey, x.agent.id);
   }
   let labels = [...buckets.keys()];
-  if (key === "stand") labels = (Object.values(STAND_LABEL)).filter((l) => buckets.has(l));
+  if (key === "letter") labels.sort((a, b) => a.localeCompare(b));
+  else if (key === "stand") labels = (Object.values(STAND_LABEL)).filter((l) => buckets.has(l));
   else if (key === "door") labels = ["Open", "Closed"].filter((l) => buckets.has(l));
   else if (key === "status") labels = STATUS_GROUP_ORDER.filter((l) => buckets.has(l));
   else if (key === "agency") labels.sort((a, b) => (a === "No agency" ? 1 : b === "No agency" ? -1 : deThe(a).localeCompare(deThe(b))));
@@ -407,12 +439,13 @@ export function contactGroups(key: GroupKey, ordered: readonly AgentFacts[]): Co
 
 /* ── sorting (v11 §5.3) — within groups when grouped ── */
 
-export type SortKey = "due" | "name" | "agency" | "reply" | "rating" | "activity";
+export type SortKey = "surname" | "due" | "name" | "agency" | "reply" | "rating" | "activity";
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: "due", label: "Next action due" },
-  { key: "name", label: "Name, A to Z" },
+  { key: "surname", label: "Surname, A to Z" },
+  { key: "name", label: "First name, A to Z" },
   { key: "agency", label: "Agency, A to Z" },
   { key: "reply", label: "Replies fastest" },
+  { key: "due", label: "Next action due" },
   { key: "rating", label: "Your rating, highest" },
   { key: "activity", label: "Latest activity" },
 ];
@@ -440,6 +473,7 @@ export function sortFacts(
   const by = [...facts];
   const name = (x: AgentFacts) => (x.agent.name.trim() || x.agent.agency).toLowerCase();
   switch (key) {
+    case "surname": by.sort((a, b) => surnameOf(a.agent).localeCompare(surnameOf(b.agent)) || name(a).localeCompare(name(b))); break;
     case "due": by.sort((a, b) => compareDue(a, b, genreHit, nowMs) || name(a).localeCompare(name(b))); break;
     case "name": by.sort((a, b) => name(a).localeCompare(name(b))); break;
     case "agency": by.sort((a, b) => deThe(a.agent.agency || "￿").toLowerCase().localeCompare(deThe(b.agent.agency || "￿").toLowerCase()) || name(a).localeCompare(name(b))); break;

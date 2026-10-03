@@ -116,9 +116,14 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
   return (
     <div className="clv-ctl" data-clv="ctl" ref={rootRef}>
       <h2>
-        Your agents
+        {/* v12 §5: the title takes the Query Centre's dashed underline; the tally rides beside
+            it in quiet serif, un-underlined (§10.3) */}
+        <span className="clv-ttlu">Your agents</span>
         <em data-clv="tally">{shownCount} of {total}</em>
       </h2>
+      {/* the controls are ONE flex item (the mock's .ctl), so at the narrow column they drop
+          under the title as a piece rather than shedding one chip at a time */}
+      <div className="clv-ctlg" data-clv="ctlg">
       <label className="clv-find" data-clv="find">
         <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
@@ -140,27 +145,30 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
       >
         {FILTER_ICON} Filter {nFilters > 0 && <span className="clv-nb">{nFilters}</span>}
       </button>
+      {/* v12: the chips carry their VALUE as the mock's italic <i> ("Group letter"), and light
+          against the NEW defaults — letter grouping, surname order (§5/§9) */}
       <button
         type="button" className="clv-dbtn" data-clv="btn-group"
-        data-on={pop === "group" || groupKey !== "stand" || undefined}
+        data-on={pop === "group" || groupKey !== "letter" || undefined}
         aria-expanded={pop === "group"}
         onClick={(e) => openPop("group", e.currentTarget)}
       >
-        {GROUP_ICON} Group
+        {GROUP_ICON} Group <i>{GROUP_OPTIONS.find((g) => g.key === groupKey)?.label.toLowerCase()}</i>
       </button>
       <button
         type="button" className="clv-dbtn" data-clv="btn-sort"
-        data-on={pop === "sort" || sortKey !== "due" || undefined}
+        data-on={pop === "sort" || sortKey !== "surname" || undefined}
         aria-expanded={pop === "sort"}
         onClick={(e) => openPop("sort", e.currentTarget)}
       >
-        {SORT_ICON} Sort
+        {SORT_ICON} Sort <i>{SORT_OPTIONS.find((s) => s.key === sortKey)?.label.toLowerCase()}</i>
       </button>
       {anyActive && (
         <button type="button" className="clv-dbtn clv-dbtn--reset" data-clv="btn-reset" aria-label="Reset the list" title="Reset the list" onClick={() => { onReset(); setPop(null); }}>
           {RESET_ICON}
         </button>
       )}
+      </div>
 
       {pop === "filter" && (
         <div className="clv-pop clv-fpanel" data-clv="fpanel" style={{ right: 0, maxHeight: maxH }} role="dialog" aria-label="Filter">

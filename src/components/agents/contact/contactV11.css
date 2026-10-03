@@ -64,6 +64,11 @@
   min-width: 0;
   container-type: inline-size;
   container-name: col;
+  /* ⚠️ v12 §4: the index strip's three tokens are the ONE OWNER of both sticky offsets — the
+     strip wrapper's own box, and the group dividers' pin below it both derive from these. */
+  --clv-idx-h: 62px;
+  --clv-idx-pt: 12px;
+  --clv-idx-pb: 14px;
 }
 /* ⚠️ THE SHARED FULL HEADER SPANS BOTH TRACKS, AND EVERYTHING ELSE STARTS BELOW ITS RULE
    (page header v2 §4, the Query Centre's own arrangement): the count cards at the rule + 24, and
@@ -304,42 +309,55 @@
 
 /* ══ phase 3 — the list: header row, panels, bands, rows, the floating bar (v11 §4–6) ══════ */
 
-/* ── the header row (§4): title + count, Find, Filter · Group · Sort · ↺ ── */
+/* ── the header row, re-dressed to the mock's lhead (v12 §5): ONE wrapping flex row — the
+   dashed-underlined title, the serif tally, then the control group, which drops UNDER the
+   title as a piece at the narrow column (the mock's .sp/.ctl construction). ── */
 .clv-ctl {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+  row-gap: 12px;
+  margin: 0 0 16px;
   position: relative;
 }
 .clv-ctl h2 {
-  margin: 0 auto 0 0;
+  margin: 0;
   font-family: var(--clv-type);
   font-weight: 400;
-  font-size: 23px;
+  font-size: 25px;
+  line-height: 1.1;
   white-space: nowrap;
   color: var(--clv-ink);
 }
+.clv-ctl h2 .clv-ttlu {
+  border-bottom: 1px dashed rgba(28, 19, 15, 0.35);
+  padding-bottom: 3px;
+}
+/* §10.3: the tally is serif and quiet, and carries NO underline of its own */
 .clv-ctl h2 em {
   font-style: normal;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--clv-serif);
+  font-size: 15px;
   color: var(--clv-ink-45);
-  margin-left: 10px;
-  vertical-align: 4px;
+  margin-left: 12px;
+  border-bottom: 0;
+}
+.clv-ctlg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 .clv-find {
   display: flex;
   align-items: center;
   gap: 7px;
-  height: 34px;
   width: 190px;
-  padding: 0 10px;
-  background: var(--clv-p2);
+  padding: 9px 10px 7px 4px;
+  background: transparent;
   border-radius: 10px;
-  color: var(--clv-ink-70);
+  color: var(--clv-ink-45);
 }
 .clv-find input {
   border: 0;
@@ -356,18 +374,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
-  padding: 1px 12px 0;
+  padding: 9px 14px 7px;
   border: 0;
   border-radius: 10px;
-  background: var(--clv-p2);
+  background: #e9e4dc;
   font-family: var(--clv-type);
-  font-size: 12.5px;
+  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
-  color: var(--clv-ink);
+  color: var(--clv-ink-70);
 }
 .clv-dbtn svg { margin-top: -1px; }
+/* the chip's value — Group's grouping, Sort's order — rides as the browser's own italic <i> */
 .clv-dbtn .clv-nb {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 9px;
@@ -377,9 +395,15 @@
   padding: 2px 6px;
   margin-left: 2px;
 }
-.clv-dbtn[data-on="true"] { background: var(--clv-ink); color: #f5f1eb; }
-.clv-dbtn[data-on="true"] .clv-nb { background: #f5f1eb; color: var(--clv-ink); }
-.clv-dbtn--reset { width: 34px; padding: 0; justify-content: center; }
+/* v12 inverts the active chip: WHITE on the parchment chips, held by a hair ring + a whisper
+   of shadow (the mock's .on) — the ink fill now belongs to the strip's marked cell and the
+   group bands alone. The count badge keeps its anthracite on both states. */
+.clv-dbtn[data-on="true"] {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px var(--clv-hair);
+  color: var(--clv-ink);
+}
+.clv-dbtn--reset { padding: 9px 11px 7px; justify-content: center; }
 
 /* ── popovers: the sectioned Filter panel and the two menus (§5) ── */
 .clv-pop {
@@ -564,7 +588,12 @@
 .clv-list { display: flex; flex-direction: column; }
 .clv-band2 {
   position: sticky;
-  top: 0;
+  /* v12 §4: the dividers pin BELOW the index strip, from the strip's own three tokens; and a
+     strip click lands its divider just under the strip's edge (§10.2's 8px). ⚠️ THE SCROLLER'S
+     OWN `scroll-padding-top` (workspacePageGrid's anchor inset) ADDS to every landing, so the
+     margin states the 8 NET of it — measured: without the subtraction the divider lands at 20. */
+  top: calc(var(--clv-idx-h) + var(--clv-idx-pt) + var(--clv-idx-pb));
+  scroll-margin-top: calc(var(--clv-idx-h) + var(--clv-idx-pt) + var(--clv-idx-pb) + 8px - var(--wpg-scroll-pad, 12px));
   z-index: 5;
   display: flex;
   align-items: center;
@@ -1526,3 +1555,67 @@
 /* living headers §3 — the empty account: the header takes row 1 across both tracks, as on the
    populated page, and the exhibition and the hint take row 2 across both */
 .clv-group > .clv-empty-below { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+
+/* ── v12 §4: the index strip ──────────────────────────────────────────────────────────────── */
+/* Its three size tokens live on `.clv-main` (the one owner — the dividers' sticky top derives
+   from the same three). The wrapper is the sticky layer: ground-coloured, so rows slide under
+   its paddings before emerging — the same page-coloured-shadow trick the bands play. The mock's
+   strip is NOT sticky (§4 says build it); the visible gap beneath — pb 14 + margin 12 — is the
+   mock's own 26. */
+.clv-idxwrap {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  background: var(--clv-ground);
+  padding: var(--clv-idx-pt) 0 var(--clv-idx-pb);
+  margin: 0 0 12px;
+}
+.clv-idx {
+  display: flex;
+  height: var(--clv-idx-h);
+  background: #fff;
+  border: 1px solid var(--clv-hair);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--clv-soft);
+}
+.clv-ixtab {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-right: 1px solid var(--clv-hair);
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--clv-type);
+  font-size: 17px;
+  color: var(--clv-ink-45); /* letterless cells rest quiet (§4) */
+}
+.clv-ixtab:last-child { border-right: 0; }
+.clv-ixtab[disabled] { cursor: default; }
+.clv-ixtab.has { color: var(--clv-ink); }
+.clv-ixtab.has i {
+  font: 700 7px var(--font-mono, "JetBrains Mono", monospace);
+  font-style: normal;
+  color: var(--clv-ink-45);
+}
+.clv-ixtab.has:hover { background: var(--clv-p2); }
+.clv-ixtab.on { background: var(--clv-btn); color: #f5f1eb; }
+.clv-ixtab.on i { color: rgba(245, 241, 235, 0.7); }
+.clv-ixall {
+  flex: 0 0 72px;
+  background: #efe9e2;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  color: var(--clv-ink);
+}
+/* the narrow column (the mock's own 720 boundary): the letters step down with the rows */
+@container col (max-width: 720px) {
+  .clv-ixtab { font-size: 14px; }
+}

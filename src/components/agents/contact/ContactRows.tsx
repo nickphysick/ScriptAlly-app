@@ -140,7 +140,11 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
     {groups.map((g) => (
       <React.Fragment key={g.label}>
         {groups.length > 1 || g.label !== "All agents" ? (
-          <div className="clv-band2" data-clv="band">
+          /* a LETTER divider carries its letter as data — the strip's click target and the
+             marked-letter derivation both reach it by `[data-clv="band"][data-letter]`; only
+             the letter grouping's labels are single A–Z/# characters, so no other grouping
+             can wear the attribute */
+          <div className="clv-band2" data-clv="band" data-letter={/^[A-Z#]$/.test(g.label) ? g.label : undefined}>
             <b>{g.label}</b>
             <i>{String(g.ids.length).padStart(2, "0")}</i>
             {g.extra && <small>{g.extra}</small>}

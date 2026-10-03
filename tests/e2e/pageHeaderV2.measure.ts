@@ -125,8 +125,10 @@ for (const vp of SIZES) {
     const ctx = { route: "/agents", size: `${vp.width}`, state: "expanded" };
     L.check("§4 · the full header was found", ctx, !!r, JSON.stringify(r));
     if (r) judgeFull(L, r, ctx, mock);
-    const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="tiles"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
-    if (r) L.check("§4 · the count cards start at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `counts ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
+    /* v12 P2 (3 Oct): the count cards left the list with the card index — the INDEX STRIP is the
+       first thing below the rule now, at the same rule + 24 (the column's own padding). */
+    const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="idxwrap"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
+    if (r) L.check("§4 · the index strip starts at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `strip ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
     const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
     /* v12 P1 (3 Oct): the hero art is the WHOLE painting now — the hawk-only crop survives in
        Housekeeping's tray and the (pre-P5) empty state, not here. */

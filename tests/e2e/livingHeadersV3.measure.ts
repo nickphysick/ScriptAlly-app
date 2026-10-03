@@ -37,7 +37,10 @@ interface Pg {
 }
 const PAGES: Pg[] = [
   { route: "/queries", key: "qc", name: "Query Centre", section: "QUERIES", empty: "Nothing out yet", tile: '[data-qcv="court"]', num: ".qcv-court-n", row: '[data-qcv="row"]', rail: ".qcv-rail", exPart: ".qcv-row-nm" },
-  { route: "/agents", key: "cl", name: "Contact list", section: "AGENTS", empty: "No agents on your list yet", tile: '[data-clv="tile"]', num: ".clv-kh b", row: "[data-agent-card]", rail: ".clv-rail", exPart: ".clv-rwho" },
+  /* v12 P2 (3 Oct): the Contact list's count cards retired with the card index — its "tiles" are
+     the INDEX STRIP's cells now (the All cell is first in DOM at the column's left edge, so LH4's
+     one-left-x reads the strip's own edge), and the number is each lettered cell's <i>. */
+  { route: "/agents", key: "cl", name: "Contact list", section: "AGENTS", empty: "No agents on your list yet", tile: ".clv-ixtab", num: "i", row: "[data-agent-card]", rail: ".clv-rail", exPart: ".clv-rwho" },
   { route: "/todo", key: "td", name: "To-do list", section: "TASKS", empty: "Nothing to do yet", tile: ".tdv2-tile:not(.tdv2-tile--sk)", num: ".tdv2-num", row: '[data-todo-v2="row"]', rail: ".tdv2-group > .tdv2-rail", exPart: '[data-todo-v2="row"]' },
   { route: "/manuscripts/packages", key: "sp", name: "Submission packages", section: "MATERIALS", empty: "No packages yet", tile: null, num: null, row: '[data-ppv="pkg"]', rail: '[data-ppv="rail"]', exPart: '[data-ppv="pkg"]' },
   { route: "/manuscripts/comps", key: "ct", name: "Comparable titles", section: "MATERIALS", empty: "No comp titles yet", tile: null, num: null, row: '[data-cpv="comp"]', rail: ".cpv-group > .sa-prail", exPart: '[data-cpv="comp"]' },

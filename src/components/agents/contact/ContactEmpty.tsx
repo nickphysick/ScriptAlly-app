@@ -39,7 +39,6 @@ export interface ContactEmptyProps {
   manuscriptTitle: string | null;
   genre: string | null;
   onAdd: () => void;
-  onPaste: () => void;
   /** Discover, when the page can reach it — the line is OMITTED when it cannot (§3). */
   onDiscover?: () => void;
   addRef?: React.Ref<HTMLButtonElement>;
@@ -47,7 +46,10 @@ export interface ContactEmptyProps {
   exhibition?: React.ReactNode;
 }
 
-export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, genre, onAdd, onPaste, onDiscover, addRef, actionsPopover, exhibition }) => (
+/* v12 P2 (3 Oct): the "Paste a link" pill retired with the quick-add (the go-ahead's ask 2),
+   and the empty state's secondary is the SAME Discover pill the populated header wears —
+   LH7's same-size claim is what holds the two states to one shape. */
+export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, genre, onAdd, onDiscover, addRef, actionsPopover, exhibition }) => (
   <div className="clv-group" data-clv-empty="">
     <PageHeader
       variant="full"
@@ -55,7 +57,7 @@ export const ContactEmpty: React.FC<ContactEmptyProps> = ({ manuscriptTitle, gen
       living={{ count: 0, copy: () => ({ headline: "", subline: [] }), empty: { heading: CONTACT_EMPTY_HEADING, subline: contactEmptySubline(manuscriptTitle) } }}
       primaryRef={addRef}
       primary={{ label: "+ Add an agent", onClick: onAdd }}
-      secondary={{ label: "Paste a link", onClick: onPaste }}
+      secondary={onDiscover ? { label: "Discover agents", onClick: onDiscover } : undefined}
       art={<img src={`${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`} width={CONTACT_HAWK.width} height={CONTACT_HAWK.height} alt="" />}
       actionsPopover={actionsPopover}
     />

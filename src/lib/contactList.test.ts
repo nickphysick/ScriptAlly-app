@@ -5,7 +5,10 @@
  * Contact list v11 — locks for the pure derivations (phase 1: the rail's height law).
  */
 import { describe, expect, it } from "vitest";
-import { RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, averageReplyWeeks, findDuplicateAgent, railHeight } from "./contactList";
+import {
+  GROUP_OPTIONS, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, averageReplyWeeks, findDuplicateAgent,
+  letterCounts, railHeight, surnameInitial, surnameOf,
+} from "./contactList";
 
 describe("railHeight — the rail derives its height from its own measured top", () => {
   it("at rest the rail runs from its top to 16px above the fold", () => {
@@ -275,5 +278,45 @@ describe("v12 · averageReplyWeeks — the stated-windows mean", () => {
   it("null when nobody states one — the sentence is dropped, never a guessed speed", () => {
     expect(averageReplyWeeks(A.map((a) => ({ ...a, responseTimeWeeks: undefined })))).toBeNull();
     expect(averageReplyWeeks(A.map((a) => ({ ...a, responseTimeWeeks: 0 })))).toBeNull();
+  });
+});
+
+describe("v12 · the surname, its initial, and the letter grouping", () => {
+  const A = CONTACT_FIXTURE_AGENTS;
+  it("the mock's rule: last word, O' folds to O (O'Brien files under O, never B), Mc stays Mc", () => {
+    expect(surnameOf({ name: "Niamh O'Brien", agency: "" })).toBe("OBrien");
+    expect(surnameInitial({ name: "Niamh O'Brien", agency: "" })).toBe("O");
+    expect(surnameInitial({ name: "Rory McAllister", agency: "" })).toBe("M");
+    /* agency stands in when the name is the agency (fx-bare's shape) */
+    expect(surnameInitial({ name: "", agency: "Penhallow Literary" })).toBe("L");
+    /* diacritics fold to the base letter */
+    expect(surnameInitial({ name: "Luc Édouard", agency: "" })).toBe("E");
+  });
+
+  it("the letter grouping partitions the ordered list, labels A→Z, and the strip's counts are the groups' sizes", () => {
+    const ordered = sortFacts(facts, "surname", () => false, NOW);
+    const groups = contactGroups("letter", ordered);
+    expect(groups.reduce((n, g) => n + g.ids.length, 0), "a partition").toBe(ordered.length);
+    const labels = groups.map((g) => g.label);
+    expect([...labels].sort((a, b) => a.localeCompare(b)), "dividers run A to Z").toEqual(labels);
+    /* two derivations against each other — the strip can never disagree with the dividers */
+    const counts = letterCounts(ordered);
+    for (const g of groups) expect(counts.get(g.label), `the strip's ${g.label}`).toBe(g.ids.length);
+    expect(counts.size).toBe(groups.length);
+  });
+
+  it("the default sort is the surname's own order, the oracle's localeCompare", () => {
+    const ordered = sortFacts(facts, "surname", () => false, NOW);
+    const expected = [...facts].sort((a, b) =>
+      surnameOf(a.agent).localeCompare(surnameOf(b.agent))
+      || (a.agent.name.trim() || a.agent.agency).toLowerCase().localeCompare((b.agent.name.trim() || b.agent.agency).toLowerCase()));
+    expect(ordered.map((x) => x.agent.id)).toEqual(expected.map((x) => x.agent.id));
+    expect(A.length, "population").toBeGreaterThan(10);
+  });
+
+  it("the tables carry v12's defaults: Letter leads the groupings, Surname leads the sorts", () => {
+    expect(GROUP_OPTIONS[0]).toEqual({ key: "letter", label: "Letter" });
+    expect(SORT_OPTIONS_V12[0]).toEqual({ key: "surname", label: "Surname, A to Z" });
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toContain("First name, A to Z");
   });
 });
