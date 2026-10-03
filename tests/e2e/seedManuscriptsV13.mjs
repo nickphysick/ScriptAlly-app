@@ -28,7 +28,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, deleteDoc, getDocs, collection, Timestamp } from "firebase/firestore";
+import { getFirestore, doc, setDoc, updateDoc, deleteDoc, getDocs, collection, Timestamp } from "firebase/firestore";
 import {
   FILLED_EMAIL, FILLED_NAME, EMPTY_EMAIL, EMPTY_NAME, MS_ID, MS_TITLE, MS, OTHER_MS_ID, OTHER_MS_TITLE,
   BV, LETTERS, SYNOPSES, PKGS, ACTIVE_PKG, AGENTS, QUERIES, MS_UPDATED, COMPS,
@@ -82,6 +82,10 @@ const recreateUserDoc = async (db, uid, name, email, plan) => {
     trialStartDate: "2026-02-01T09:00:00.000Z", subscriptionStatus: plan === "Pro" ? "active" : "none",
     onboardingComplete: true,
   });
+  /* the dashboard's first-visit tour floats over every workspace page (the dashboard stays mounted)
+     and scrims the page under test; a returning writer has finished it. An update, not part of the
+     create — the field is in the user update allowlist. */
+  await updateDoc(doc(db, "users", uid), { tourCompletedAt: "2026-02-01T09:05:00.000Z" });
 };
 
 /** Empty every collection the page reads — the query logs included. Returns the count removed. */

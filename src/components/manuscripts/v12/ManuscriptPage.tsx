@@ -2,17 +2,23 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ THE MANUSCRIPTS PAGE (v12) — one book, everything that goes out with it ═══════════════════
+ * ══ THE MANUSCRIPTS PAGE (v13, the dashboard shelf) — one book, everything that goes out with it ══
  *
- * Design authority: design-refs/manuscripts/manuscripts-v12.html, rendered at its default body
- * attributes (desk hero · across · blush tray · list versions). Locks:
- * tests/e2e/manuscriptsV12.measure.ts (L1–L11) + msv12 unit locks.
+ * Design authority: design-refs/manuscripts/manuscripts-v13.html, rendered at its own default state
+ * (Shelf · ink bands). Locks: tests/e2e/manuscriptsV13.measure.ts (M1–M8) + the msv12 unit locks.
+ *
+ * ⚠️ ONE COLUMN (F1). Under the hero's rule: the owed requests, the shelf (Comps · Materials ·
+ * Packages), the Versions tiles and Recent activity, each a white card under the anthracite band.
+ * The v12 rail and its four list sections are gone; the empty state is v12's, unchanged (F8).
+ *
+ * ⚠️ THE HERO IS v12's DESK HERO (F5): art · title block · cover. Two things moved — the facts read
+ * as one row (Status · Current version · Setting · Series) and Edit details sits under them.
  *
  * ⚠️ SINGLE-MANUSCRIPT BY DESIGN (D1). The page shows the SCOPED manuscript — the shell's own
- * `scriptally_active_manuscript_id` selection resolved through `scopedManuscript` — and the
- * "More manuscripts: coming soon" tag renders ONLY while the account holds at most one, because
- * copy asserts what the code does today and a writer with three books beside a working switcher
- * must not be told more are coming soon.
+ * `scriptally_active_manuscript_id` selection resolved through `scopedManuscript` — read on every
+ * arrival (`location.key`), because the bar's switcher writes the key and re-opens the route; a
+ * mount-once read kept the first book on screen after a switch. The "More manuscripts: coming soon"
+ * tag renders ONLY while the account holds at most one, because copy asserts what the code does today.
  *
  * ⚠️ NOTHING HERE CHANGES A QUERY INLINE (L4/D13). An owed row's button opens the query drawer's
  * "I've sent it" journey for that query, and only the drawer writes.
@@ -21,26 +27,23 @@
  * ported.
  */
 import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
 import { packagesUnlocked } from "../../../lib/entitlements";
-import { ComponentType, ManuscriptStatus, QueryStatus, UserPlan } from "../../../types";
-import type { Manuscript, ManuscriptVersion, Query } from "../../../types";
+import { ComponentType, ManuscriptStatus, QueryStatus } from "../../../types";
+import type { BookVersion, Query } from "../../../types";
 import {
-  bylineFor, compLetterTally, currentBookVersion, hasTwoPageSynopsis, letterInUse,
-  materialQueryCount, materialsOf, otherMaterialTiles, owedRequests, packageQueries,
-  packageUsageCounts, packagesInUse, queryingSince, scopedManuscript, versionUsage,
+  bylineFor, compLetterTally, currentBookVersion, letterInUse, materialsOf, otherMaterialTiles,
+  owedRequests, queryingSince, scopedManuscript,
 } from "../../../lib/manuscriptSummary";
+import {
+  compRows, manuscriptActivity, materialChips, materialsFact, packageRows, packagesFact, versionTiles,
+} from "../../../lib/manuscriptShelf";
 import { bookVersionsOf, bookVersionById } from "../../../lib/bookVersions";
 import { StatusDot } from "../../StatusDot";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
-import { MaterialModal } from "../../packages/MaterialModal";
-import { applyMaterialDraft } from "./msv12Materials";
-import {
-  CountCluster, MaterialsSections, OtherSection, OwedList, PackagesSection, SectionH,
-  VersionsSection, fmtDay,
-} from "./Msv12Sections";
-import type { PkgCardModel } from "./Msv12Sections";
-import { CompsRail } from "./Msv12Rail";
+import { OwedList, fmtDay } from "./Msv12Sections";
+import { RecentActivity, ShelfComps, ShelfMaterials, ShelfPackages, VersionTiles } from "./Msv13Shelf";
 import { Msv12EditDetails, Msv12NewVersion } from "./Msv12EditDetails";
 import { Msv12Empty } from "./Msv12Empty";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
@@ -50,6 +53,16 @@ import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 /** The shell's shared scope key — the sidebar switcher writes it; this page only reads. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
+/** The status fact's words — the enum, in the page's sentence case. */
+const STATUS_WORDS: Record<ManuscriptStatus, string> = {
+  [ManuscriptStatus.DRAFTING]: "Drafting",
+  [ManuscriptStatus.REVISING]: "Revising",
+  [ManuscriptStatus.READY_TO_QUERY]: "Ready to query",
+  [ManuscriptStatus.QUERYING]: "Querying",
+  [ManuscriptStatus.SHELVED]: "Shelved",
+  [ManuscriptStatus.ON_SUBMISSION]: "On submission",
+};
+
 export interface ManuscriptPageProps {
   onNavigate: (tab: string, subPage?: string) => void;
   active?: boolean;
@@ -58,13 +71,15 @@ export interface ManuscriptPageProps {
 
 export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, openId = null }) => {
   const {
-    currentUser, manuscripts, versions, packages, agents, queries,
-    updateManuscript, addVersion, updateVersion,
+    currentUser, manuscripts, versions, packages, agents, queries, activities,
+    updateManuscript, updateUserProfile,
   } = useScriptAllyDb();
+  const location = useLocation();
 
+  /* ⚠️ KEYED ON location.key: the bar's switcher writes the key and re-opens the route */
   const stored = useMemo(() => {
     try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; }
-  }, []);
+  }, [location.key]);
   const ms = useMemo(
     () => scopedManuscript(manuscripts, openId ?? stored),
     [manuscripts, openId, stored],
@@ -74,7 +89,6 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   const msQueries = useMemo(() => (ms ? queries.filter((q) => q.manuscriptId === ms.id) : []), [ms, queries]);
   const msPackages = useMemo(() => (ms ? packages.filter((p) => p.manuscriptId === ms.id && p.status !== "Retired") : []), [ms, packages]);
   const bookVersions = useMemo(() => bookVersionsOf(ms), [ms]);
-  const newestFirst = useMemo(() => [...bookVersions].sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)), [bookVersions]);
   const current = useMemo(() => currentBookVersion(ms), [ms]);
   const letters = useMemo(() => (ms ? materialsOf(ms.id, ComponentType.QUERY_LETTER, versions) : []), [ms, versions]);
   const synopses = useMemo(() => (ms ? materialsOf(ms.id, ComponentType.SYNOPSIS, versions) : []), [ms, versions]);
@@ -83,6 +97,25 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   const since = useMemo(() => queryingSince(msQueries), [msQueries]);
   /* founding-member access — the packages lock reads the entitlement, not the plan (packages v2 D7) */
   const pro = packagesUnlocked(currentUser);
+
+  /* ══ the shelf, the tiles, the activity — derived, lib/manuscriptShelf ═════════════════════ */
+
+  const comps = useMemo(() => ms?.comps ?? [], [ms]);
+  const tally = useMemo(() => compLetterTally(comps), [comps]);
+  const rowsOfComps = useMemo(() => compRows(comps), [comps]);
+  const letterName = useMemo(() => letters.find((l) => l.id === inUseLetter)?.versionName ?? null, [letters, inUseLetter]);
+  const chips = useMemo(() => materialChips(letters, synopses, inUseLetter, msPackages), [letters, synopses, inUseLetter, msPackages]);
+  const others = useMemo(() => otherMaterialTiles(msPackages, msQueries), [msPackages, msQueries]);
+  const pkgRows = useMemo(() => packageRows(msPackages, msQueries, ms?.activePackageId || null), [msPackages, msQueries, ms]);
+  const pkgFact = useMemo(() => packagesFact(msPackages, msQueries), [msPackages, msQueries]);
+  const tiles = useMemo(
+    () => versionTiles(bookVersions, current?.id ?? null, msPackages, msQueries),
+    [bookVersions, current, msPackages, msQueries],
+  );
+  const activity = useMemo(
+    () => (ms ? manuscriptActivity({ ms, activities, queries, agents, packages, bookVersions, now: new Date() }) : { rows: [], total: 0 }),
+    [ms, activities, queries, agents, packages, bookVersions],
+  );
 
   const agentName = (id: string) => agents.find((a) => a.id === id)?.name ?? "The agent";
 
@@ -106,33 +139,8 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   /* ══ the page's own dialogs ═════════════════════════════════════════════════════════════════ */
 
   const [editOpen, setEditOpen] = useState(false);
-  const [newVersionOpen, setNewVersionOpen] = useState(false);
-  const [materialModal, setMaterialModal] = useState<ComponentType | null>(null);
-
-  /* ══ derived card models ════════════════════════════════════════════════════════════════════ */
-
-  const pkgCards: PkgCardModel[] = useMemo(() => msPackages.map((p) => {
-    const items: { label: string; version?: string }[] = [];
-    const letter = versions.find((v) => v.id === p.queryLetterVersionId);
-    if (letter) items.push({ label: letter.versionName });
-    const syn = versions.find((v) => v.id === p.synopsisVersionId);
-    if (syn) items.push({ label: syn.versionName });
-    if (p.bookVersionId) {
-      items.push({ label: "Opening pages", version: bookVersionById(bookVersions, p.bookVersionId)?.name ?? undefined });
-    }
-    if (p.otherMaterials) items.push({ label: p.otherMaterials });
-    const mine = packageQueries(p.id, msQueries);
-    const seen = new Map<string, number>();
-    for (const qq of mine) if (!seen.has(qq.agentId)) seen.set(qq.agentId, 1);
-    const recipientIds = [...seen.keys()];
-    const shown = recipientIds.slice(0, 3).map((id) => agents.find((a) => a.id === id)).filter((a): a is NonNullable<typeof a> => !!a);
-    return {
-      pkg: p, items, recipients: shown, extraRecipients: Math.max(0, recipientIds.length - shown.length),
-      counts: packageUsageCounts(p.id, msQueries),
-    };
-  }), [msPackages, versions, bookVersions, msQueries, agents]);
-
-  const otherTiles = useMemo(() => otherMaterialTiles(msPackages, msQueries), [msPackages, msQueries]);
+  /** `null` closed · `"new"` a new version · a version to rename (no per-version panel exists) */
+  const [versionDlg, setVersionDlg] = useState<"new" | BookVersion | null>(null);
 
   /* ══ render ═════════════════════════════════════════════════════════════════════════════════ */
 
@@ -153,18 +161,18 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
 
   const showSoonTag = manuscripts.length <= 1;
   const shelved = ms.status === ManuscriptStatus.SHELVED || ms.shelved === true;
+  const querying = !shelved && ms.status === ManuscriptStatus.QUERYING;
+  /* "Querying since" is the first send, a fact the queries carry; every other status dates from
+     the moment it was set */
+  const statusSince = querying ? (since ?? ms.statusChangedDate ?? null) : (ms.statusChangedDate ?? null);
+  const statusWords = shelved ? STATUS_WORDS[ManuscriptStatus.SHELVED] : (STATUS_WORDS[ms.status] ?? ms.status);
+  const toPackages = () => onNavigate("manuscripts", "Submission packages");
 
   return grid(
     <>
-      <div className="msv12-topline">
-        <button type="button" className="msv12-btn" data-msv12="edit-details" onClick={() => setEditOpen(true)}>
-          Edit details
-        </button>
-      </div>
-
-      <div className="msv12-group">
+      <div className="msv13-pg" data-msv13="pg">
         {/* ── the hero ─────────────────────────────────────────────────────────────────────── */}
-        <section className="msv12-hero" data-msv12="hero">
+        <section className="msv12-hero msv13-hero" data-msv12="hero">
           <div className="msv12-heroart" data-msv12="hero-art">
             <img
               className="msv12-heroimg" data-msv12="hero-img" src={heroArt}
@@ -177,22 +185,18 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
               {showSoonTag ? <span className="msv12-soon">More manuscripts: coming soon</span> : null}
             </div>
             <h1 className="msv12-title">{ms.title}</h1>
-            <div className="msv12-by">{bylineFor(ms, currentUser?.name)}</div>
-            {ms.logline ? <p className="msv12-log">{ms.logline}</p> : null}
+            <div className="msv12-by" data-msv12="byline">{bylineFor(ms, currentUser?.name)}</div>
+            {ms.logline ? <p className="msv12-log" data-msv12="logline">{ms.logline}</p> : null}
             <dl className="msv12-facts" data-msv12="facts">
               <div data-msv12="fact-status">
                 <dt>Status</dt>
                 <dd>
-                  {since ? (
-                    <>
-                      <span className="msv12-sd" data-msv12-sd="">
-                        <StatusDot status={QueryStatus.QUERIED} overrideSize={12} decorative />
-                      </span>
-                      {shelved ? "Shelved" : "Querying"} since {fmtDay(since)}
-                    </>
-                  ) : (
-                    <>{shelved ? "Shelved" : "Not yet querying"}</>
-                  )}
+                  {querying ? (
+                    <span className="msv12-sd" data-msv12-sd="">
+                      <StatusDot status={QueryStatus.QUERIED} overrideSize={12} decorative />
+                    </span>
+                  ) : null}
+                  {statusSince ? `${statusWords} since ${fmtDay(statusSince)}` : statusWords}
                 </dd>
               </div>
               <div data-msv12="fact-current">
@@ -201,7 +205,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
                   <dd className="msv12-rust">{current.name}</dd>
                 ) : (
                   <dd className="msv12-miss">
-                    Not recorded <button type="button" className="msv12-mini" onClick={() => setNewVersionOpen(true)}>Add</button>
+                    Not recorded <button type="button" className="msv12-mini" onClick={() => setVersionDlg("new")}>Add</button>
                   </dd>
                 )}
               </div>
@@ -217,15 +221,15 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
               </div>
               <div data-msv12="fact-series">
                 <dt>Series</dt>
-                {ms.series ? (
-                  <dd>{ms.series}</dd>
-                ) : (
-                  <dd className="msv12-miss">
-                    Not recorded <button type="button" className="msv12-mini" onClick={() => setEditOpen(true)}>Add</button>
-                  </dd>
-                )}
+                {ms.series ? <dd>{ms.series}</dd> : <dd className="msv12-miss">Standalone</dd>}
               </div>
             </dl>
+            <button
+              type="button" className="msv12-btn msv12-btn--line msv13-edit" data-msv12="edit-details"
+              onClick={() => setEditOpen(true)}
+            >
+              Edit details
+            </button>
           </div>
           <div className="msv12-cover" data-msv12="cover">
             {/* ⚠️ NO UPLOAD IN THIS PASS (D9) — Storage is not provisioned. The button opens
@@ -244,60 +248,40 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
           </div>
         </section>
 
-        {/* ── the main column ──────────────────────────────────────────────────────────────── */}
-        <div className="msv12-col" data-msv12="col">
-          <OwedList owed={owed} agentName={agentName} versionPin={versionPin} onSend={openSend} />
-          <VersionsSection
-            versions={newestFirst}
-            currentId={current?.id ?? null}
-            usage={(id) => versionUsage(id, msPackages, msQueries)}
-            onNewVersion={() => setNewVersionOpen(true)}
-          />
-          <MaterialsSections
-            letters={letters}
-            synopses={synopses}
-            letterInUseId={inUseLetter}
-            queryCount={(id, slot) => materialQueryCount(id, slot, msPackages, msQueries)}
-            showTwoPageNote={synopses.length > 0 && !hasTwoPageSynopsis(synopses)}
-            onNew={(which) => setMaterialModal(which === "letter" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS)}
-          />
-          <OtherSection tiles={otherTiles} />
-          <PackagesSection
-            pro={pro}
-            cards={pkgCards}
-            inUse={packagesInUse(msPackages, msQueries)}
-            onOpenPackages={() => onNavigate("manuscripts", "Submission packages")}
-            onSeePro={() => onNavigate("plans")}
-          />
+        <OwedList owed={owed} agentName={agentName} versionPin={versionPin} onSend={openSend} />
+
+        {/* ── the shelf ────────────────────────────────────────────────────────────────────── */}
+        <div className="msv13-shelfbox">
+          <div className="msv13-shelf" data-msv13="shelf">
+            <ShelfComps
+              rows={rowsOfComps} total={tally.total} inLetter={tally.inLetter} letterName={letterName}
+              onOpen={() => onNavigate("manuscripts", "Comparable titles")}
+            />
+            <ShelfMaterials
+              {...materialsFact(letters.length, synopses.length)}
+              chips={chips} others={others} onOpen={toPackages}
+            />
+            <ShelfPackages pro={pro} total={msPackages.length} fact={pkgFact} rows={pkgRows} onOpen={toPackages} />
+          </div>
         </div>
 
-        {/* ── the rail ─────────────────────────────────────────────────────────────────────── */}
-        <CompsRail
-          comps={ms.comps ?? []}
-          tally={compLetterTally(ms.comps ?? [])}
-          onAddComp={() => onNavigate("manuscripts", "Comparable titles")}
-          onOpenComps={() => onNavigate("manuscripts", "Comparable titles")}
-          onAddNote={() => onNavigate("manuscripts", "Comparable titles")}
-        />
+        <VersionTiles tiles={tiles} onOpen={(v) => setVersionDlg(v)} onNew={() => setVersionDlg("new")} />
+
+        <RecentActivity rows={activity.rows} total={activity.total} onOpen={() => onNavigate("queries")} />
       </div>
 
       {/* ── overlays ───────────────────────────────────────────────────────────────────────── */}
       {editOpen ? (
-        <Msv12EditDetails ms={ms} updateManuscript={updateManuscript} onClose={() => setEditOpen(false)} />
+        <Msv12EditDetails
+          ms={ms} authorName={currentUser?.name ?? ""}
+          updateManuscript={updateManuscript} updateUserProfile={updateUserProfile}
+          onClose={() => setEditOpen(false)}
+        />
       ) : null}
-      {newVersionOpen ? (
-        <Msv12NewVersion ms={ms} updateManuscript={updateManuscript} onClose={() => setNewVersionOpen(false)} />
-      ) : null}
-      {materialModal ? (
-        <MaterialModal
-          editing={null}
-          versions={versions.filter((v) => v.manuscriptId === ms.id)}
-          bookVersions={bookVersions}
-          preselect={materialModal}
-          onClose={() => setMaterialModal(null)}
-          onSave={(draft) => {
-            void applyMaterialDraft(draft, ms.id, { addVersion, updateVersion }).then(() => setMaterialModal(null));
-          }}
+      {versionDlg ? (
+        <Msv12NewVersion
+          ms={ms} editing={versionDlg === "new" ? null : versionDlg}
+          updateManuscript={updateManuscript} onClose={() => setVersionDlg(null)}
         />
       ) : null}
     </>,

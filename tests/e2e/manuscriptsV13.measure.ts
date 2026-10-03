@@ -28,6 +28,7 @@ import { test, expect, type Page, type BrowserContext, type Browser } from "@pla
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { visiblePage, KILL_MOTION, KILL_MOTION_ID } from "./measure";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { MS_ID, FILLED_EMAIL, COMPS, EXPECT, OTHER_MS_ID } from "./ms13Fixture.mjs";
@@ -133,6 +134,22 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     expect(rail, "a rail is still in the DOM").toBe(0);
     const hero = await one(page, '[data-msv12="hero"]');
     expect(hero, "the hero renders").toBeTruthy();
+    /* ⚠️ THE PAGE SITS IN THE SHARED COLUMN — the gutter is `.wpg-scroll > *`'s padding-inline, the
+       grid's own clamp(28px, 3.2vw, 52px) of the WINDOW. A page rule that sets horizontal padding on
+       its root zeroes it (v12's `padding: 28px 0 120px` did, from 26 Sep to v13) and every card then
+       agrees with the hero while all of them run 46px too wide — which the comparisons below cannot
+       see, because they compare the page with itself. */
+    const col = await page.evaluate(() => {
+      const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+      const el = root.querySelector('[data-msv12="page"]') as HTMLElement;
+      const cs = getComputedStyle(el);
+      return { x: el.getBoundingClientRect().x, pl: parseFloat(cs.paddingLeft), pr: parseFloat(cs.paddingRight), vw: window.innerWidth };
+    });
+    const gutter = Math.min(52, Math.max(28, 0.032 * col.vw));
+    expect(Math.abs(col.pl - gutter), `the shared gutter applies on the left (${col.pl} vs ${gutter})`).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(col.pr - gutter), `…and on the right (${col.pr} vs ${gutter})`).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(hero!.x - (col.x + col.pl)), "the hero starts at the column's padded edge").toBeLessThanOrEqual(1);
+    ck(3);
     const parts = [
       ["the shelf", '[data-msv13="shelf"]'],
       ["Versions", '[data-msv13-card="versions"]'],
@@ -190,12 +207,36 @@ test("M3 bands", async () => {
   });
   expect(bands.map((b) => b.card).sort(), "five containers").toEqual(["activity", "comps", "materials", "packages", "versions"]);
   ck(1);
+  /* ⚠️ THE HEIGHT IS THE MOCK'S, READ FROM THE MOCK — NOT THE PROMPT'S "52" FOR EVERY BAND. Rendered,
+     the ref's Recent activity band is 56.125: its "Query Centre ›" link is a flex item, so it is
+     blockified and its 5px padding counts, which a 52 for every band would call a fault in a page
+     drawn exactly to the mock. The other four are 52. One ruler, one browser, so neither side's
+     number is restated here. */
+  const ref = await ctx.newPage();
+  await ref.setViewportSize({ width: 1440, height: 900 });
+  await ref.goto(pathToFileURL(resolve(process.cwd(), "design-refs/manuscripts/manuscripts-v13.html")).href);
+  await ref.waitForTimeout(800);
+  const refH = await ref.evaluate(() => {
+    const key: Record<string, string> = { "c-comps": "comps", "c-mats": "materials", "c-pkgs": "packages", "c-ver": "versions", "c-act": "activity" };
+    const out: Record<string, number> = {};
+    for (const c of document.querySelectorAll(".card")) {
+      if (c.getBoundingClientRect().width === 0) continue;
+      const k = Object.keys(key).find((x) => c.classList.contains(x));
+      const ch = c.querySelector(":scope > .ch");
+      if (k && ch) out[key[k]] = ch.getBoundingClientRect().height;
+    }
+    return out;
+  });
+  await ref.close();
+  expect(Object.keys(refH).sort(), "the mock's five bands were read").toEqual(["activity", "comps", "materials", "packages", "versions"]);
+  ck(1);
   for (const b of bands) {
     expect(b.band, `${b.card} has the band`).toBe(true);
     if (!b.band) continue;
     expect(b.bg, `${b.card} band background`).toBe("rgb(42, 58, 82)");
-    expect(Math.abs(b.h - 52), `${b.card} band height ${b.h}`).toBeLessThanOrEqual(1);
-    ck(3);
+    expect(Math.abs(b.h - refH[b.card!]), `${b.card} band height ${b.h} vs the mock's ${refH[b.card!]}`).toBeLessThanOrEqual(1);
+    expect(b.h, `${b.card} band is at least the 52 the band states`).toBeGreaterThanOrEqual(51);
+    ck(4);
   }
   const routes: Record<string, string> = { comps: "/manuscripts/comps", materials: "/manuscripts/packages", packages: "/manuscripts/packages" };
   for (const [card, path] of Object.entries(routes)) {
@@ -395,6 +436,10 @@ test("M8 owed-kept", async () => {
   await rows.first().locator('[data-msv12="owed-send"]').click();
   const drawer = page.locator('.qad-drawer[data-qad-drawer="sent"]');
   await expect(drawer, "the drawer's I've-sent-it journey").toBeVisible({ timeout: 10_000 });
+  /* ⚠️ WAIT FOR OPEN, NOT FOR VISIBLE: the drawer mounts translated off-screen (a box, so "visible")
+     and opens two frames later, and its Escape listener attaches only once it is open — a key
+     pressed in between lands on nothing and the drawer stays */
+  await expect(page.locator(".qad-root.is-open"), "the drawer has opened").toHaveCount(1, { timeout: 10_000 });
   await page.keyboard.press("Escape");
   await expect(drawer).toHaveCount(0, { timeout: 10_000 });
   expect((await rows.first().innerText()).replace(/\s+/g, " "), "closing the drawer wrote nothing").toBe(before);

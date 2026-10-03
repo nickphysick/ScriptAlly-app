@@ -1,7 +1,8 @@
 /**
- * Manuscripts v12 — the page: ground, hero, owed rows, sections, packages, comps rail, empty
- * state, and the page's own edit dialog. Ref design-refs/manuscripts/manuscripts-v12.html; every
- * class is msv12- scoped.
+ * Manuscripts — the page: ground, hero, owed rows, the v13 shelf / version tiles / Recent activity
+ * (msv13- classes), the v12 empty state (unchanged, F8) and the page's own dialogs. Refs
+ * design-refs/manuscripts/manuscripts-v13.html (the filled page) and manuscripts-v12.html (the empty
+ * state and the hero it keeps).
  *
  * ⚠️ VALUES ARE THE MOCK'S RENDERED CASCADE, NOT ITS SOURCE. The ref is cumulative (v2 → v12 blocks
  * overriding earlier ones); these are the values its default render computes, written as one clean
@@ -14,7 +15,9 @@
  * ⚠️ THE FIVE STATE FILLS ARE `--state-*` AT :ROOT (f12.css) and the object colours are
  * `--o-ms`/`--o-pkg` at :root (index.css) — this sheet declares NONE of those, it reads them.
  */
-.msv12-wpg {
+/* the page's tokens — on the grid root, and on `.msv12-layer`, the host the two dialogs portal into
+   (a portal leaves the grid's scope, and a token read outside its defining scope paints nothing) */
+.msv12-wpg, .msv12-layer {
   --msv12-page: #f5f1eb;
   --msv12-ink: #1c130f;
   --msv12-btn: #2a3a52;
@@ -50,8 +53,11 @@
   font-family: var(--msv12-serif);
   font-size: 15px;
   line-height: 1.45;
-  /* horizontal inset is the GRID's gutter (above); the root pays only the vertical rhythm */
-  padding: 28px 0 120px;
+  /* ⚠️ BLOCK PADDING ONLY. The horizontal inset is the shared column's `padding-inline` on
+     `.wpg-scroll > *` — which IS this element — and a `padding` shorthand here, at the same
+     specificity and later in the bundle, zeroed it: the page ran edge to edge from Page header v1
+     P3 (1866419c, 26 Sep, when the gutter moved into padding) until v13. */
+  padding-block: 28px 120px;
   min-width: 0;
   position: relative;
 }
@@ -69,12 +75,6 @@
 .msv12-col { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 .msv12-group > .msv12-rail { grid-column: 2; grid-row: 2; }
 
-/* the page's one chrome control — the mock hosts Edit details in ITS top bar, which in this app
-   is the shell's; here it floats at the page's top-right, out of flow, so the hero keeps the
-   mock's y. It clears the cover plate by construction: the button's foot is at 62 and the cover
-   never starts above 105. */
-.msv12-topline { position: absolute; top: 28px; right: 0; z-index: 3; }
-
 /* ── controls ──────────────────────────────────────────────────────────────────────────────── */
 .msv12-btn {
   height: 34px; padding: 0 14px; border: 0; border-radius: 9px;
@@ -83,16 +83,15 @@
   display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
 }
 .msv12-btn--dark { background: var(--msv12-btn); color: #fdf9f5; }
+/* the mock's `.btn.line` — Edit details under the facts */
+.msv12-btn--line { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.28); }
+.msv12-btn--line:hover { background: rgba(255, 255, 255, 0.6); }
+.msv12-btn:focus-visible { outline: 2px solid var(--msv12-btn); outline-offset: 2px; }
 .msv12-btn[aria-disabled="true"] { opacity: 0.55; cursor: default; }
 .msv12-mini {
   font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
   background: #fff; border: 0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
   border-radius: 6px; padding: 4px 7px; cursor: pointer; color: var(--msv12-ink);
-}
-.msv12-link {
-  font-family: var(--msv12-type); font-size: 12.5px; color: var(--msv12-ink);
-  text-decoration: none; border: 0; background: none; padding: 0; cursor: pointer;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.3);
 }
 .msv12-lbl {
   font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -132,18 +131,15 @@
 }
 .msv12-by { font-family: var(--msv12-type); font-size: 15px; color: var(--msv12-muted); margin-top: 12px; }
 .msv12-log { font-size: 18px; line-height: 1.55; max-width: 46ch; margin: 18px 0 0; }
-.msv12-facts {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 22px;
-  margin: 24px 0 0; border-top: 1px solid var(--msv12-hair); padding-top: 14px;
-}
+/* v13: one row that may wrap — the mock's `.facts` (flex, 26 gap, 20 above) */
+.msv12-facts { display: flex; flex-wrap: wrap; gap: 26px; margin: 20px 0 0; }
+.msv12-facts > div { display: flex; flex-direction: column; gap: 4px; }
 .msv12-facts dt {
   font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--msv12-muted); font-weight: 600;
 }
-.msv12-facts dd { margin: 3px 0 0; font-size: 14px; display: block; }
-.msv12-facts dd .msv12-sd { vertical-align: -1px; margin-right: 6px; }
-.msv12-facts dd .msv12-mini { margin-left: 6px; }
-.msv12-facts dd.msv12-rust { color: var(--o-ms); font-family: var(--msv12-type); font-size: 14px; }
+.msv12-facts dd { margin: 0; font-size: 14.5px; display: flex; align-items: center; gap: 7px; }
+.msv12-facts dd.msv12-rust { color: var(--o-ms); font-family: var(--msv12-type); font-size: 14.5px; }
 .msv12-facts dd.msv12-miss { color: var(--msv12-muted); }
 .msv12-cover { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .msv12-coverph {
@@ -179,8 +175,6 @@
 .msv12-sec { background: #fff; border-radius: 14px; box-shadow: var(--msv12-shadow); padding: 20px 22px 22px; }
 .msv12-sech { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .msv12-sech h2 { margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 22px; }
-.msv12-sech .msv12-sub { font-size: 14px; color: var(--msv12-muted); margin-left: 10px; font-family: var(--msv12-serif); }
-.msv12-sech .msv12-acts { display: flex; gap: 8px; align-items: center; }
 .msv12-pro {
   font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.14em;
   text-transform: uppercase; color: #fff; background: var(--o-pkg); border-radius: 6px;
@@ -205,7 +199,6 @@
 }
 .msv12-vused { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-family: var(--msv12-mono); font-size: 10px; }
 .msv12-vused > span { display: inline-flex; align-items: center; gap: 5px; font-family: var(--msv12-mono); }
-.msv12-vused .msv12-pkgn { font-size: 7.5px; }
 .msv12-curtag {
   font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: #fff; background: var(--o-ms); border-radius: 6px;
@@ -221,7 +214,7 @@
   padding: 11px 13px; border-radius: 12px; background: var(--msv12-parch-1);
   box-shadow: inset 0 0 0 1px var(--msv12-hair);
 }
-.msv12-mrow i, .msv12-otile i {
+.msv12-mrow i {
   display: block; width: 10px; height: 10px; border-radius: 2px; background: var(--o-pkg); opacity: 0.4;
 }
 .msv12-mrow--cur { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(154, 114, 51, 0.55); }
@@ -231,22 +224,6 @@
   font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--msv12-muted); margin-top: 3px;
 }
-.msv12-mnote { margin: 12px 2px 0; font-size: 13px; color: var(--msv12-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-/* other materials */
-.msv12-ogrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.msv12-otile {
-  display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px;
-  background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
-  text-align: left; border: 0; font: inherit; color: var(--msv12-ink);
-}
-.msv12-otile i { opacity: 1; margin-bottom: 4px; }
-.msv12-otile--add { flex-direction: row; align-items: center; gap: 12px; background: var(--msv12-parch-2); box-shadow: none; }
-.msv12-otile--add .msv12-plus {
-  width: 28px; height: 28px; border-radius: 50%; background: var(--msv12-btn); color: #fdf9f5;
-  display: grid; place-items: center; font-size: 17px; flex: none; font-family: var(--msv12-serif);
-}
-.msv12-otile--add[aria-disabled="true"] { opacity: 0.6; }
 
 /* packages */
 .msv12-pgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -269,20 +246,7 @@
 .msv12-pkgf .msv12-used { font-family: var(--msv12-mono); font-size: 9.5px; display: flex; gap: 10px; align-items: center; }
 .msv12-pkgf .msv12-used > span { display: inline-flex; gap: 5px; align-items: center; font-family: var(--msv12-mono); }
 
-/* the free-plan teaser */
-.msv12-lock {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center;
-  background: var(--msv12-parch-1); border-radius: 12px; padding: 16px;
-  box-shadow: inset 0 0 0 1px rgba(154, 114, 51, 0.35);
-}
-.msv12-lock .msv12-lockic {
-  width: 34px; height: 34px; border-radius: 10px; background: #fff; display: grid; place-items: center;
-  box-shadow: inset 0 0 0 1px var(--msv12-hair);
-}
-.msv12-lock .msv12-lockt { font-family: var(--msv12-type); font-size: 15px; }
-.msv12-lock p { margin: 2px 0 0; font-size: 13.5px; color: var(--msv12-muted); }
-
-/* ── the rail ──────────────────────────────────────────────────────────────────────────────── */
+/* ── the rail (the v12 empty state's — the filled page has none since v13) ────────────────── */
 .msv12-rail {
   position: sticky; top: 28px; background: #fff; border-radius: 14px; box-shadow: var(--msv12-shadow);
   overflow: hidden; display: flex; flex-direction: column;
@@ -299,17 +263,12 @@
    claim is boxes-clear-of-boxes, and 4px makes it true by construction. No line of the tray's
    text comes within 20px of either cap, so nothing visible moves. */
 .msv12-traytext { position: relative; z-index: 2; max-width: 146px; }
-.msv12-counts { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-top: 12px; }
-.msv12-cnt { background: rgba(255, 255, 255, 0.55); border-radius: 9px; padding: 6px 9px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
-.msv12-cnt b { font-family: var(--msv12-serif); font-size: 18px; font-weight: 400; margin-right: 4px; }
-.msv12-cnt span { font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; }
 .msv12-trayart { position: absolute; right: 0; bottom: 0; width: 172px; height: auto; z-index: 1; pointer-events: none; }
 .msv12-railbody { overflow: auto; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
 .msv12-rh {
   display: flex; align-items: center; gap: 8px; font-family: var(--msv12-type); font-size: 15px;
   margin: 6px 4px 2px; position: sticky; top: -14px; background: #fff; padding: 6px 0; z-index: 3;
 }
-.msv12-rh .msv12-pill { font-family: var(--msv12-mono); font-size: 9px; background: var(--msv12-parch-3); border-radius: 10px; padding: 2px 7px; }
 .msv12-comp {
   display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 11px; padding: 10px;
   border-radius: 12px; background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
@@ -334,7 +293,174 @@
 .msv12-sooncard { margin-top: 6px; border-radius: 12px; padding: 12px 14px; box-shadow: inset 0 0 0 1px rgba(70, 122, 118, 0.4); background: #fff; }
 .msv12-sooncard .msv12-rh2 { display: flex; align-items: center; justify-content: space-between; font-family: var(--msv12-type); font-size: 15px; color: var(--msv12-scout); }
 .msv12-sooncard p { margin: 6px 0 0; font-size: 13px; color: var(--msv12-muted); }
-.msv12-railfoot { flex: none; border-top: 1px solid var(--msv12-hair); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+
+/* ══ v13 — the filled page is ONE column (F1): hero · owed · shelf · Versions · Recent activity ══
+   Ref design-refs/manuscripts/manuscripts-v13.html at its own state (Shelf · ink bands). Values are
+   the mock's rendered cascade. ⚠️ THE RESET ABOVE PUTS THE SERIF ON EVERY BARE span/p/div/b, so
+   anything set in the typewriter or mono face states it on its own element — inheritance from a
+   styled parent does not reach through the reset. */
+.msv13-pg { display: flex; flex-direction: column; gap: 26px; min-width: 0; }
+/* the hero's rule — the mock's desk closes on a hairline with 26px of air above it */
+.msv13-hero { padding-bottom: 26px; border-bottom: 1px solid rgba(28, 19, 15, 0.16); }
+.msv13-edit { margin-top: 22px; }
+
+/* ── the card and its anthracite band (F2) ── */
+.msv13-card {
+  background: #fff; border-radius: 14px; box-shadow: var(--msv12-shadow); overflow: hidden;
+  display: flex; flex-direction: column; min-width: 0;
+}
+.msv13-band {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 20px; min-height: 52px; background: var(--msv12-btn); color: #fdf9f5;
+}
+/* ⚠️ line-height 1 IS THE MOCK'S AND IS SAFE HERE: the band is 52 tall around a 21px line, so no
+   clipping ancestor sits near the descenders; at 1.3 the band would grow past its 52 */
+.msv13-card .msv13-band h2 {
+  margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 21px;
+  line-height: 1; display: flex; align-items: center; gap: 10px; color: inherit;
+}
+.msv13-card--sum .msv13-band { padding: 12px 18px; margin-bottom: 8px; }
+.msv13-card--sum .msv13-band h2 { font-size: 19px; white-space: nowrap; }
+.msv13-pill {
+  font-family: var(--msv12-mono); font-size: 10px; border-radius: 10px; padding: 2px 8px;
+  background: rgba(253, 249, 245, 0.18); color: #fdf9f5;
+}
+.msv13-hint {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(253, 249, 245, 0.72); white-space: nowrap;
+}
+.msv13-more {
+  font-family: var(--msv12-type); font-size: 12.5px; color: inherit; text-decoration: none;
+  white-space: nowrap; padding: 5px 8px; border-radius: 7px; border: 0; background: none; cursor: pointer;
+}
+.msv13-more::after { content: " ›"; }
+.msv13-more:hover { background: rgba(253, 249, 245, 0.14); }
+.msv13-more:focus-visible { outline: 2px solid #fdf9f5; outline-offset: 1px; }
+.msv13-cb { padding: 16px 20px 18px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.msv13-card--sum .msv13-cb { padding: 14px 18px 16px; }
+.msv13-empty { margin: 0; font-size: 14px; color: var(--msv12-muted); }
+.msv13-tag {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; border-radius: 6px; padding: 3px 6px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px; background: #fff;
+}
+.msv13-tag--och { color: var(--o-pkg); box-shadow: inset 0 0 0 1px rgba(154, 114, 51, 0.5); }
+.msv13-tag--plain { color: var(--msv12-muted); box-shadow: inset 0 0 0 1px var(--msv12-hair); }
+.msv13-tag--ms { color: var(--o-ms); box-shadow: inset 0 0 0 1px rgba(138, 74, 60, 0.45); }
+
+/* ── the shelf: 1.1fr 1fr 1fr, equal heights, gap 16 ──
+   ⚠️ THE MOCK'S TWO BREAKPOINTS ARE VIEWPORT QUERIES IN A FRAME WHERE THE SIDEBAR IS ALWAYS OPEN;
+   here the column narrows when the sidebar opens and widens when it collapses, so they are
+   restated as CONTAINER queries on the shelf's own width — the widths the shelf has at the mock's
+   1360 and 1180 with the sidebar expanded. Measured 3 Oct: 1025.0 at 1360 and 1025.9 at 1361;
+   856.5 at 1180 and 857.4 at 1181 — so each threshold sits between the two, where a sub-pixel of
+   rounding cannot put a breakpoint on the wrong side (856 left 1180 three-up). The wrapper is the container rather
+   than the grid because a grid cannot query itself, and it holds nothing else — size containment
+   on an ancestor of the page's fixed dialogs would make it their containing block. */
+.msv13-shelfbox { container: msv13-shelf / inline-size; min-width: 0; }
+.msv13-shelf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.msv13-fact { margin: 0; font-size: 14px; line-height: 1.45; }
+.msv13-fact b { font-weight: 600; }
+.msv13-fact .msv13-pn { font-family: var(--msv12-type); }
+.msv13-fact--comps { margin-bottom: 12px; }
+.msv13-crows { display: flex; flex-direction: column; gap: 8px; }
+.msv13-crow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.msv13-crow > span:nth-child(2) { min-width: 0; }
+.msv13-ctab {
+  width: 30px; height: 40px; border-radius: 3px 6px 6px 3px; background: #f3e1d8; color: var(--o-ms);
+  font-family: var(--msv12-type); font-size: 14px; display: grid; place-items: center;
+  box-shadow: inset 2px 0 0 rgba(138, 74, 60, 0.35);
+}
+.msv13-crow[data-off="1"] .msv13-ctab { background: var(--msv12-parch-2); color: var(--msv12-muted); box-shadow: inset 2px 0 0 var(--msv12-hair); }
+/* 1.3, not the mock's 1.15: the title clips (ellipsis), and a clipped mixed-case line box must
+   hold its descenders — the row's height is the 40px tab's, so nothing else moves */
+.msv13-ctitle {
+  display: block; font-family: var(--msv12-type); font-size: 14.5px; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msv13-cmeta {
+  display: block; font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msv13-papers { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 0; }
+.msv13-paper {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 11px;
+  border-radius: 9px; background: var(--msv12-parch-2); font-size: 13px;
+}
+.msv13-paper .msv13-pname { font-family: var(--msv12-type); white-space: nowrap; }
+.msv13-paper .msv13-cm {
+  font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted); white-space: nowrap;
+}
+.msv13-paper--lead { background: #fff; box-shadow: inset 0 0 0 1px rgba(154, 114, 51, 0.5); }
+.msv13-pkgrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 13.5px; }
+.msv13-pkgrow .msv13-tag, .msv13-pkgrow .msv13-psent { margin-left: auto; }
+.msv13-mk { width: 10px; height: 10px; border-radius: 3px; background: var(--o-pkg); flex: none; }
+.msv13-pkgrow[data-unsent="1"] { opacity: 0.6; }
+.msv13-pkgrow[data-unsent="1"] .msv13-mk { background: var(--msv12-parch-3); box-shadow: inset 0 0 0 1px var(--msv12-hair); }
+.msv13-psent {
+  font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted); white-space: nowrap;
+}
+@container msv13-shelf (max-width: 1025.4px) {
+  .msv13-shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .msv13-card--sum .msv13-band h2 { font-size: 18px; }
+  .msv13-paper { flex-direction: column; align-items: flex-start; gap: 3px; }
+}
+@container msv13-shelf (max-width: 856.9px) {
+  .msv13-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .msv13-shelf > :first-child { grid-column: 1 / -1; }
+}
+
+/* ── the version tiles (F3) ── */
+.msv13-vlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.msv13-vtile {
+  display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 14px; border-radius: 12px;
+  background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+  text-align: left; border: 0; font: inherit; color: inherit; cursor: pointer; min-height: 150px; min-width: 0;
+}
+.msv13-vtile:hover { background: #fff; }
+.msv13-vtile:focus-visible { outline: 2px solid var(--msv12-btn); outline-offset: 2px; }
+.msv13-vtile--cur { box-shadow: inset 0 0 0 1.5px rgba(138, 74, 60, 0.55); background: #fff; }
+.msv13-vt { display: flex; align-items: center; gap: 8px; }
+.msv13-vmk { width: 10px; height: 10px; border-radius: 3px; background: var(--o-ms); flex: none; }
+.msv13-vn { font-family: var(--msv12-type); font-size: 17px; line-height: 1.15; }
+.msv13-vt .msv13-tag { margin-left: auto; }
+.msv13-vd { font-size: 13.5px; color: var(--msv12-muted); line-height: 1.4; flex: 1; }
+.msv13-vm {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted); margin-top: 6px;
+}
+.msv13-use {
+  display: flex; gap: 12px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--msv12-hair);
+  font-family: var(--msv12-mono); font-size: 9px; color: var(--msv12-ink);
+}
+.msv13-use > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-family: var(--msv12-mono); }
+.msv13-use .msv13-pk { margin-left: auto; color: var(--msv12-muted); }
+.msv13-vtile--new {
+  justify-content: center; align-items: center; background: transparent; box-shadow: none;
+  border: 1.5px dashed rgba(28, 19, 15, 0.25); color: var(--msv12-muted);
+  font-family: var(--msv12-type); font-size: 15px; gap: 4px;
+}
+.msv13-vtile--new:hover { background: rgba(255, 255, 255, 0.6); color: var(--msv12-ink); }
+.msv13-plus { font-family: var(--msv12-type); font-size: 26px; line-height: 1; }
+
+/* ── recent activity ── */
+.msv13-alist { display: flex; flex-direction: column; }
+.msv13-arow {
+  display: grid; grid-template-columns: 72px 14px minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: 10px 4px; border-top: 1px solid var(--msv12-hair); font-size: 14px; line-height: 1.4;
+}
+.msv13-arow:first-child { border-top: 0; }
+.msv13-ad {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted); padding-top: 4px;
+}
+.msv13-ai { display: flex; padding-top: 4px; }
+.msv13-aims { width: 12px; height: 12px; border-radius: 3px; background: var(--o-ms); }
+.msv13-at b { font-weight: 600; }
+.msv13-at .msv13-em { font-family: var(--msv12-type); }
+.msv13-sub { display: block; font-size: 12.5px; color: var(--msv12-muted); }
 
 /* ── the empty state ───────────────────────────────────────────────────────────────────────── */
 .msv12-hero--empty .msv12-title { font-size: 44px; line-height: 1.15; }
@@ -356,32 +482,53 @@
 .msv12-ghost.msv12-pgrid { grid-template-columns: minmax(0, 1fr); }
 .msv12-sec--e { padding-bottom: 18px; }
 
-/* ── the edit-details dialog (the page's own) ────────────────────────────────────────────── */
+/* ── the page's two dialogs — the mock's `.modal` (540 wide, the be-accent head, a 2-up form) ── */
 .msv12-scrim {
   position: fixed; inset: 0; background: rgba(28, 19, 15, 0.38); display: grid; place-items: center;
   z-index: 80;
 }
 .msv12-dlg {
-  width: 560px; max-width: calc(100vw - 48px); max-height: calc(100vh - 64px); overflow: auto;
+  width: 540px; max-width: calc(100vw - 48px); max-height: calc(100vh - 64px); overflow: auto;
   background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(28, 19, 15, 0.3);
   font-family: var(--msv12-serif); color: var(--msv12-ink);
 }
+/* the container takes focus only as the trap's starting point (useOverlay); every control inside
+   keeps its own focus ring */
+.msv12-dlg:focus { outline: none; }
 .msv12-dlg .msv12-dhead { background: var(--be-accent); padding: 18px 22px; }
 .msv12-dlg .msv12-dhead h3 { margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 22px; }
 .msv12-dlg .msv12-dhead p { margin: 4px 0 0; font-size: 13.5px; }
 .msv12-dlg form { padding: 18px 22px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .msv12-fld { display: flex; flex-direction: column; gap: 5px; }
 .msv12-fld--w { grid-column: 1 / -1; }
-.msv12-fld label {
+.msv12-fld { min-width: 0; }
+.msv12-fld label, .msv12-fld .msv12-fl {
   font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--msv12-muted); font-weight: 600;
 }
+.msv12-fld label .msv12-req { font-family: var(--msv12-mono); color: var(--o-ms); }
 .msv12-fld input, .msv12-fld select, .msv12-fld textarea {
   border: 0; border-radius: 9px; background: var(--msv12-parch-2); padding: 0 11px;
-  font-family: var(--msv12-serif); font-size: 14.5px; color: var(--msv12-ink); height: 36px;
+  font-family: var(--msv12-serif); font-size: 14.5px; color: var(--msv12-ink); height: 36px; width: 100%;
+  box-shadow: inset 0 0 0 1px transparent;
 }
-.msv12-fld textarea { height: auto; min-height: 64px; padding: 8px 11px; resize: vertical; }
+.msv12-fld input:focus, .msv12-fld select:focus, .msv12-fld textarea:focus {
+  outline: none; box-shadow: inset 0 0 0 1.5px var(--msv12-btn); background: #fff;
+}
+.msv12-fld textarea { height: auto; min-height: 60px; padding: 9px 11px; line-height: 1.45; resize: vertical; }
 .msv12-fld .msv12-hint { font-size: 12px; color: var(--msv12-muted); }
+.msv12-fld .msv12-ferr { font-size: 12.5px; color: var(--msv12-ink); }
+/* the status segments — the mock's `.seg` */
+.msv12-seg { display: inline-flex; flex-wrap: wrap; justify-self: start; align-self: flex-start; background: var(--msv12-parch-2); border-radius: 10px; padding: 3px; gap: 2px; }
+.msv12-seg button {
+  border: 0; background: transparent; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: var(--msv12-type); font-size: 12px; color: var(--msv12-muted);
+}
+.msv12-seg button.msv12-on {
+  background: #fff; color: var(--msv12-ink);
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px var(--msv12-hair);
+}
+.msv12-seg button:focus-visible { outline: 2px solid var(--msv12-btn); outline-offset: 1px; }
 .msv12-dfoot { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; align-items: center; }
 .msv12-derr { grid-column: 1 / -1; font-size: 13px; color: #7c2d2d; }
 
@@ -394,8 +541,6 @@
 }
 @media (max-width: 1400px) {
   .msv12-mat2 { grid-template-columns: 1fr; }
-  .msv12-ogrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .msv12-ogrid .msv12-otile--add { grid-column: 1 / -1; }
 }
 @media (max-width: 1200px) {
   .msv12-hero { grid-template-columns: 220px minmax(0, 1fr) 130px; gap: 24px; }
