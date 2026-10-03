@@ -36,7 +36,7 @@ interface Pg {
   exPart: string;
 }
 const PAGES: Pg[] = [
-  { route: "/queries", key: "qc", name: "Query Centre", section: "QUERIES", empty: "Nothing out yet", tile: '[data-qcv="court"]', num: ".qcv-court-n", row: '[data-qcv="row"]', rail: ".qcv-rail", exPart: ".qcv-row-nm" },
+  { route: "/queries", key: "qc", name: "Query Centre", section: "QUERIES", empty: "Nothing out yet", tile: '[data-qcv="court"]', num: ".qcv-court-n", row: '[data-qcv="row"]', rail: ".qcv-rail", exPart: '[data-qcv="row"]' },
   /* v12 P2 (3 Oct): the Contact list's count cards retired with the card index — its "tiles" are
      the INDEX STRIP's cells now (the All cell is first in DOM at the column's left edge, so LH4's
      one-left-x reads the strip's own edge), and the number is each lettered cell's <i>. */

@@ -646,6 +646,12 @@
 .ph--living.ph--full .ph-title { font-size: clamp(40px, 3.7vw, 56px); line-height: 1.02; min-height: 1.05em; white-space: nowrap; }
 /* two lines or one occupy the same space */
 .ph--living.ph--full .ph-intro { max-width: none; min-height: 52px; }
+/* ⚠️ A STYLED RUN MAY NOT GROW THE LINE (living headers v3, LH1). The manuscript's name is 17px Special
+   Elite inheriting the intro's unitless 1.45, and that face's ascent and descent put its inline box past
+   the 18px serif strut: measured, the subline went 52 → 54.7 between two counts at 1440 and 1512 with
+   no wrap. `line-height: 1` on the run leaves the strut to set every line, so a count change moves only
+   the words — the fixed shape's whole claim. */
+.ph--living .ph-intro .ph-ms, .ph--living .ph-intro b { line-height: 1; }
 /* ⚠️ 286 IS THE REF'S HEIGHT, AND THE REF'S PAGE HAS ROOM ABOVE ITS HEADER THAT OURS DOES NOT. Its drawing
    rises 40px above the header; here the header sits 18px under the bar and `.ws-window` clips, so a 286
    box put the top 14px of the Contact list's hawk (the quill's tip) under the window's edge. The box is
