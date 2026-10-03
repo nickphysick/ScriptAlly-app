@@ -107,8 +107,11 @@ for (const vp of SIZES) {
     check("feature-fits", size, !!r.feature && !!r.scroller && r.feature.t >= r.scroller.t - 0.5 && r.feature.b <= r.scroller.b + 0.5,
       `feature ${r.feature?.t.toFixed(1)}–${r.feature?.b.toFixed(1)} in scroller ${r.scroller?.t.toFixed(1)}–${r.scroller?.b.toFixed(1)}`);
     check("feature-max-760", size, !!r.feature && r.feature.h <= 760.5, `feature height ${r.feature?.h.toFixed(1)}`);
-    check("button-visible", size, !!r.button && !!r.scroller && r.button.b <= r.scroller.b && r.button.t >= r.scroller.t && r.button.h > 20,
-      `button ${r.button?.t.toFixed(1)}–${r.button?.b.toFixed(1)}`);
+    /* whole AND clear of the grid's 44px bottom hem, which washes whatever lies under it */
+    check("button-visible", size, !!r.button && !!r.scroller && r.button.b <= r.scroller.b - 44 && r.button.t >= r.scroller.t && r.button.h > 20,
+      `button ${r.button?.t.toFixed(1)}–${r.button?.b.toFixed(1)} against the hem's top ${(r.scroller ? r.scroller.b - 44 : NaN).toFixed(1)}`);
+    check("feature-clear-of-hem", size, !!r.feature && !!r.scroller && r.feature.b <= r.scroller.b - 44 + 0.5,
+      `feature bottom ${r.feature?.b.toFixed(1)} against the hem's top ${(r.scroller ? r.scroller.b - 44 : NaN).toFixed(1)}`);
     check("no-living-header", size, r.livingHeader === 0, `${r.livingHeader} living-header/PageHeader elements on the page`);
 
     /* 2 · seven sections, the three white containers on 1, 3 and 5, and the caveats last */

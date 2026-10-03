@@ -226,17 +226,8 @@ export function compsHeaderCopy(count: number, ctx: { missing: number; inLetter:
   return { headline, subline: ["None is in your letter yet."] };
 }
 
-/** Analytics: "One query in" / "‹n› queries in". Never a rate from fewer than five answered. */
-export const ANALYTICS_MIN_ANSWERED = 5;
-export const TOO_EARLY = "Too early to tell you anything. Come back once a few more are out.";
-export function analyticsHeaderCopy(count: number, ctx: { answered: number; requests: number; medianDays: number | null }): LivingLine {
-  const headline = count === 1 ? "One query in" : `${count} queries in`;
-  if (count === 1 || ctx.answered < ANALYTICS_MIN_ANSWERED) return { headline, subline: [TOO_EARLY] };
-  const req = ctx.requests === 0 ? "No requests" : `${cap(numberWords(ctx.requests))} ${ctx.requests === 1 ? "request" : "requests"}`;
-  const runs: LivingRun[] = [{ b: req }, ` from ${ctx.answered} answered`];
-  runs.push(ctx.medianDays != null ? `, and agents take ${plural(ctx.medianDays, "day", "days")} to reply.` : ".");
-  return { headline, subline: runs };
-}
+/* Analytics' living-header copy is RETIRED (analytics v13, 3 Oct): the page opens on a feature
+   container instead, and its numbers live in its sections. The other five pages keep theirs. */
 
 /** To-do list: "One thing to do" / "‹n› things to do". The oldest or soonest item, by its own deed. */
 export interface TodoFirst { deed: string; dueYmd: string | null }

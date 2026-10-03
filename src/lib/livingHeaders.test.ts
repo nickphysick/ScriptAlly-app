@@ -185,7 +185,7 @@ describe("LH9 · the rules that hold everywhere", () => {
 });
 
 /* ══ living headers v3 — the four new pages and the To-do list's caught-up line ══════════════════ */
-import { packagesHeaderCopy, compsHeaderCopy, analyticsHeaderCopy, todoHeaderCopy, todoCaughtUpLine, ANALYTICS_MIN_ANSWERED, TOO_EARLY } from "./livingHeaders";
+import { packagesHeaderCopy, compsHeaderCopy, todoHeaderCopy, todoCaughtUpLine } from "./livingHeaders";
 
 describe("Submission packages' two lines", () => {
   const lead = { name: "Standard", sent: 11, answered: 8, requests: 3 };
@@ -227,23 +227,6 @@ describe("Comparable titles' two lines", () => {
   });
 });
 
-describe("Analytics' two lines — never a rate from fewer than five answered", () => {
-  it("many: the requests, the answered, the typical reply", () => {
-    const l = analyticsHeaderCopy(27, { answered: 24, requests: 3, medianDays: 31 });
-    expect(l.headline).toBe("27 queries in");
-    expect(sub(l)).toBe("Three requests from 24 answered, and agents take 31 days to reply.");
-    expect(sub(analyticsHeaderCopy(27, { answered: 6, requests: 0, medianDays: null }))).toBe("No requests from 6 answered.");
-    expect(sub(analyticsHeaderCopy(27, { answered: 9, requests: 1, medianDays: 1 }))).toBe("One request from 9 answered, and agents take 1 day to reply.");
-  });
-  it("below five answered, and at one, it is too early", () => {
-    expect(ANALYTICS_MIN_ANSWERED).toBe(5);
-    expect(sub(analyticsHeaderCopy(27, { answered: 4, requests: 3, medianDays: 20 }))).toBe(TOO_EARLY);
-    const one = analyticsHeaderCopy(1, { answered: 9, requests: 2, medianDays: 10 });
-    expect(one.headline).toBe("One query in");
-    expect(sub(one)).toBe(TOO_EARLY);
-  });
-});
-
 describe("the To-do list's two lines, and all caught up", () => {
   const today = "2026-09-19";
   it("many: the oldest or soonest, by its own deed, in the right tense", () => {
@@ -266,14 +249,13 @@ describe("the To-do list's two lines, and all caught up", () => {
   });
 });
 
-describe("LH12 · the v3 rules across all six", () => {
+describe("LH12 · the v3 rules across all five (Analytics retired its living header in v13)", () => {
   const counts = [1, 2, 9, 13, 27, 148];
   const all = counts.flatMap((c) => [
     { c, l: qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue()])) },
     { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), facts: { want: 9, fresh: 7, genre: "crime", msTitle: "M" }, avgReplyWeeks: 8 }) },
     { c, l: packagesHeaderCopy(c, { lead: { name: "Standard", sent: 11, answered: 8, requests: 3 }, firstLiveName: "Standard" }) },
     { c, l: compsHeaderCopy(c, { missing: 3, inLetter: ["The Dry"], firstTitle: "The Dry" }) },
-    { c, l: analyticsHeaderCopy(c, { answered: 24, requests: 3, medianDays: 31 }) },
     /* a SEPTEMBER date, so the "Sept" sweep below has something to catch (an October-only fixture cannot) */
     { c, l: todoHeaderCopy(c, { first: { deed: "Send the partial", dueYmd: "2026-09-26" }, todayYmd: "2026-09-19" }) },
   ]);

@@ -17,7 +17,6 @@ const FILES = [
   "src/components/todo/v2/TodoExhibit.tsx",
   "src/components/packages/PackagesExhibit.tsx",
   "src/components/manuscripts/CompsEmpty.tsx",
-  "src/components/analytics/AnalyticsExhibit.tsx",
   "src/components/shell/LivingExhibition.tsx",
 ];
 const DATA_PATHS = [/useScriptAllyDb/, /from "[^"]*lib\/db"/, /firebase/, /\bfetch\(/, /onSnapshot/, /getDocs?\(/, /useContext\(/];
@@ -48,7 +47,8 @@ describe("LH6 · the exhibition reads nothing but its constant (source)", () => 
       ["src/components/todo/ToDoPage.tsx", "<TodoExhibit", 'tdState === "nothing"'],
       ["src/components/SubmissionPackages.tsx", "<PackagesExhibit", "exhibit ?"],
       ["src/components/manuscripts/ComparableTitlesPage.tsx", "<CompsExhibit", "exhibit ?"],
-      ["src/components/QueryAnalytics.tsx", "<AnalyticsExhibit", "(exhibit)"],
+      /* Analytics' exhibit retired with its living header (analytics v13, 3 Oct): its empty page is the
+         feature container over example rows built from `exampleModel`, not a living-header exhibition. */
     ];
     for (const [file, tag, gate] of mounts) {
       const s = src(file);
