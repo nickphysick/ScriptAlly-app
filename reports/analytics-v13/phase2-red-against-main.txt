@@ -1,0 +1,60 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.0s)
+LEDGER analyticsV13: 1 checks, 1 failed
+  ✘  2 [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1440×820 (25.2s)
+LEDGER analyticsV13: 1 checks, 1 failed
+  ✘  3 [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1920×1080 (25.2s)
+
+
+  1) [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1440×820 
+
+    Error: page-present @ 1440×820: a visible [data-a13=page] on /queries/analytics
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      24 |   ran++;
+      25 |   ledger.push({ lock, size, ok, detail });
+    > 26 |   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
+         |                                              ^
+      27 | }
+      28 | test.afterAll(() => {
+      29 |   mkdirSync(`${OUT}/ledger`, { recursive: true });
+        at check (/Users/nickphysick/ScriptAlly-analytics-v13/tests/e2e/analyticsV13.measure.ts:26:46)
+        at /Users/nickphysick/ScriptAlly-analytics-v13/tests/e2e/analyticsV13.measure.ts:101:5
+
+    Error Context: test-results/analyticsV13.measure.ts-fe-0d288-ns-figures-and-nav-1440×820-measure/error-context.md
+
+    Error Context: test-results/analyticsV13.measure.ts-fe-0d288-ns-figures-and-nav-1440×820-measure/error-context.md
+
+  2) [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1920×1080 
+
+    Error: page-present @ 1920×1080: a visible [data-a13=page] on /queries/analytics
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      24 |   ran++;
+      25 |   ledger.push({ lock, size, ok, detail });
+    > 26 |   expect(ok, `${lock} @ ${size}: ${detail}`).toBe(true);
+         |                                              ^
+      27 | }
+      28 | test.afterAll(() => {
+      29 |   mkdirSync(`${OUT}/ledger`, { recursive: true });
+        at check (/Users/nickphysick/ScriptAlly-analytics-v13/tests/e2e/analyticsV13.measure.ts:26:46)
+        at /Users/nickphysick/ScriptAlly-analytics-v13/tests/e2e/analyticsV13.measure.ts:101:5
+
+    Error Context: test-results/analyticsV13.measure.ts-fe-d54f9-s-figures-and-nav-1920×1080-measure/error-context.md
+
+    Error Context: test-results/analyticsV13.measure.ts-fe-d54f9-s-figures-and-nav-1920×1080-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1440×820 
+    [measure] › tests/e2e/analyticsV13.measure.ts:97:3 › feature, sections, figures and nav @ 1920×1080 
+  1 passed (1.2m)
