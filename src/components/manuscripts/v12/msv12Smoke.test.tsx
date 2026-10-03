@@ -213,6 +213,22 @@ describe("the dialogs carry the mock's fields (v13)", () => {
     expect(dialog).toMatch(/if \(d\.author\.trim\(\) !== authorName\.trim\(\)\)/);
   });
 
+  it("both dialogs portal out of #root — useOverlay seals #root inert, so a dialog inside it is dead", () => {
+    /* v12 rendered both inside the page and every field and button in them was inert from the day
+       they shipped (25 Sep) until v13. useOverlay states the contract in a comment; this holds it. */
+    const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
+    expect(src).toMatch(/createPortal\(node, document\.body\)/);
+    for (const [from, to] of [["export const Msv12EditDetails", "export const Msv12NewVersion"], ["export const Msv12NewVersion", "\u0000"]] as const) {
+      const body = to === "\u0000" ? src.slice(src.indexOf(from)) : sliceBetween(src, from, to, from);
+      expect(body, `${from} sits on useOverlay`).toMatch(/useOverlay\(/);
+      expect(body, `${from} renders through the portal`).toMatch(/return toBody\(/);
+      /* the portal leaves .msv12-wpg's token scope — the host carries the class that declares them */
+      expect(body, `${from}'s portal host declares the page's tokens`).toContain('className="msv12-own msv12-layer"');
+    }
+    const css = readFileSync(join(__dirname, "msv12.css"), "utf8");
+    expect(css, "msv12-layer declares the --msv12-* tokens with the grid").toMatch(/\.msv12-wpg, \.msv12-layer \{\s*\n\s*--msv12-page/);
+  });
+
   it("a new version is dated by the London calendar, never the UTC date", () => {
     const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
     expect(src).toContain("createdDate: londonDay(new Date())");

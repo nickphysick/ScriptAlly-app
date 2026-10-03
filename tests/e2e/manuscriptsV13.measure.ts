@@ -2,11 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ MANUSCRIPTS v13 — the shelf, the version tiles, Recent activity (M1–M8) ════════════════════
+ * ══ MANUSCRIPTS v13 — the shelf, the version tiles, Recent activity (M1–M8), and v12's hero locks ══
  *
  * Ref: design-refs/manuscripts/manuscripts-v13.html (hash-enrolled; it renders its own chosen state
  * — Shelf, ink bands — so no attribute is set) and its geometry json. Profile LIGHT: these locks run
  * at 1440, with 1280 where the prompt marks it.
+ *
+ * ⚠️ THIS FILE REPLACES manuscriptsV12.measure.ts (v13 Phase 4). The v12 locks that still hold are
+ * carried here under their own names — L1 (rewritten: the cover meets the COLUMN's right edge now
+ * that the rail is gone), L2, L5, L6 (the empty state, F8), L9 (rewritten: a series reads
+ * "Standalone"), L11 — and the rest are retired by name in tests/e2e/RETIRED-manuscripts-v13.md
+ * (L3 → M5, L4 → M8, L7, L8, L10, the rail half of the geometry cases).
  *
  * ⚠️ TWO DEDICATED ACCOUNTS (ms13Fixture.mjs). The seeder runs in `beforeAll` and again in
  * `afterAll`: M5 saves a version and M7 saves details, and both writes narrate a feed row, so the
@@ -31,13 +37,15 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { visiblePage, KILL_MOTION, KILL_MOTION_ID } from "./measure";
 import { assertLocalBundleIsDev } from "./bundleGuard";
-import { MS_ID, FILLED_EMAIL, COMPS, EXPECT, OTHER_MS_ID } from "./ms13Fixture.mjs";
+import { MS_ID, FILLED_EMAIL, EMPTY_EMAIL, COMPS, EXPECT, OTHER_MS_ID } from "./ms13Fixture.mjs";
 
 test.setTimeout(150_000);
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 70;
+/* the count a green run makes (logged by the floor case) less a margin for a lock that legitimately
+   finds one fewer subject — a run that measured materially less than last time is red */
+const FLOOR = 175;
 
 const readPw = (): string => {
   if (process.env.SA_E2E_PASSWORD) return process.env.SA_E2E_PASSWORD;
@@ -64,12 +72,12 @@ async function signInAs(page: Page, email: string) {
 }
 
 /**
- * A signed-in context for the filled account — from the saved state where it still works, else one
- * password sign-in whose state (IndexedDB included) is saved for the next case.
+ * A signed-in context for one of the two accounts — from the saved state where it still works, else
+ * one password sign-in whose state (IndexedDB included) is saved for the next case.
  */
-async function filledContext(browser: Browser, baseURL: string): Promise<{ ctx: BrowserContext; page: Page }> {
+async function accountContext(browser: Browser, baseURL: string, email: string, tag: string): Promise<{ ctx: BrowserContext; page: Page }> {
   const port = new URL(baseURL).port || "443";
-  const file = resolve(process.cwd(), `tests/e2e/.auth/ms13-filled-${port}.json`);
+  const file = resolve(process.cwd(), `tests/e2e/.auth/ms13-${tag}-${port}.json`);
   const viewport = { width: 1440, height: 900 };
   if (existsSync(file)) {
     const ctx = await browser.newContext({ storageState: file, viewport, baseURL });
@@ -83,14 +91,15 @@ async function filledContext(browser: Browser, baseURL: string): Promise<{ ctx: 
   }
   const ctx = await browser.newContext({ viewport, baseURL });
   const page = await ctx.newPage();
-  await signInAs(page, FILLED_EMAIL);
+  await signInAs(page, email);
   await ctx.storageState({ path: file, indexedDB: true });
   return { ctx, page };
 }
+const filledContext = (browser: Browser, baseURL: string) => accountContext(browser, baseURL, FILLED_EMAIL, "filled");
 
-async function openMs(page: Page, viewport: { width: number; height: number }) {
+async function openMs(page: Page, viewport: { width: number; height: number }, msId: string = MS_ID) {
   await page.setViewportSize(viewport);
-  await page.evaluate((id) => localStorage.setItem("scriptally_active_manuscript_id", id), MS_ID);
+  await page.evaluate((id) => localStorage.setItem("scriptally_active_manuscript_id", id), msId);
   await page.goto("/manuscripts");
   await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
   await expect(page.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
@@ -446,7 +455,212 @@ test("M8 owed-kept", async () => {
   ck(3);
 });
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   v12's HERO LOCKS, CARRIED — the hero is v12's desk hero (F5), so what held of it still holds
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ══ L1 · hero-one-row — art, text and cover overlap vertically; the cover ends at the column's edge ══
+   v12 asserted "cover right = rail right"; the rail is gone and the hero spans the column, so the
+   cover's right edge is the hero's — the page column's padded edge. */
+for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
+  test(`L1 hero-one-row @ ${vp.width}`, async () => {
+    await openMs(page, vp);
+    const art = await one(page, '[data-msv12="hero-art"]');
+    const text = await one(page, '[data-msv12="hero-text"]');
+    const cover = await one(page, '[data-msv12="cover"]');
+    const hero = await one(page, '[data-msv12="hero"]');
+    expect(art && text && cover && hero, "art, text, cover and hero all render").toBeTruthy();
+    ck(1);
+    const overlaps = (a: Box, b: Box) => Math.min(a.b, b.b) - Math.max(a.y, b.y);
+    expect(overlaps(art!, text!), `art/text overlap @${vp.width}`).toBeGreaterThan(0);
+    expect(overlaps(text!, cover!), `text/cover overlap @${vp.width}`).toBeGreaterThan(0);
+    expect(overlaps(art!, cover!), `art/cover overlap @${vp.width}`).toBeGreaterThan(0);
+    expect(Math.abs(cover!.r - hero!.r), `cover right vs the column's right @${vp.width}`).toBeLessThanOrEqual(1);
+    ck(4);
+  });
+}
+
+/* ══ L2 · art-floats — no mask, no ancestor fill above the page ground, inside its column ═════ */
+test("L2 art-floats", async () => {
+  await openMs(page, { width: 1440, height: 900 });
+  const r = await page.evaluate(() => {
+    const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+    const img = root.querySelector('[data-msv12="hero-img"]') as HTMLElement | null;
+    const col = root.querySelector('[data-msv12="hero-art"]') as HTMLElement | null;
+    if (!img || !col) return { missing: true as const };
+    const cs = getComputedStyle(img);
+    const masks = [cs.maskImage, (cs as unknown as Record<string, string>).webkitMaskImage].map((v) => v || "none");
+    const fills: string[] = [];
+    let el: HTMLElement | null = img.parentElement;
+    /* the walk stops at the element that paints the PAGE GROUND — the one fill permitted */
+    while (el && !el.classList.contains("wpg-scroll") && !el.classList.contains("msv12-wpg")) {
+      const s = getComputedStyle(el);
+      const bg = s.backgroundColor;
+      const transparent = !bg || bg === "transparent" || /rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\s*\)/.test(bg);
+      if (!transparent || s.backgroundImage !== "none") fills.push(`${el.className}: ${bg} / ${s.backgroundImage.slice(0, 40)}`);
+      el = el.parentElement;
+    }
+    const ib = img.getBoundingClientRect(); const cb = col.getBoundingClientRect();
+    const inside = ib.left >= cb.left - 1 && ib.right <= cb.right + 1 && ib.top >= cb.top - 1 && ib.bottom <= cb.bottom + 1;
+    return { missing: false as const, masks, fills, inside };
+  });
+  expect(r.missing, "hero img/column missing").toBe(false);
+  if (r.missing) return;
+  expect(r.masks, "the art carries a mask").toEqual(["none", "none"]);
+  expect(r.fills, "an ancestor paints behind the art").toEqual([]);
+  expect(r.inside, "the art leaks outside its column").toBe(true);
+  ck(4);
+});
+
+/* ══ L5 · statusdot — every status glyph is the app's own StatusDot ═══════════════════════════
+   v13 adds the tile footers and the activity rows to the population — the owed rows, the status
+   fact, three tiles × three counts and every status record in the activity list. */
+test("L5 statusdot", async () => {
+  await openMs(page, { width: 1440, height: 900 });
+  const r = await page.evaluate(() => {
+    const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+    const wraps = [...root.querySelectorAll("[data-msv12-sd]")];
+    const withSvg = wraps.filter((w) => w.querySelector('svg[viewBox="0 0 24 24"]')).length;
+    const mockRings = root.querySelectorAll(".dot, .ai.req, .ai.sent, .ai.rep").length;
+    return { wraps: wraps.length, withSvg, mockRings };
+  });
+  expect(r.wraps, "status glyph population").toBeGreaterThanOrEqual(12);
+  expect(r.withSvg, "every glyph wrapper holds the real StatusDot").toBe(r.wraps);
+  expect(r.mockRings, "no ported .dot rings or .ai stand-ins").toBe(0);
+  ck(3);
+});
+
+/* ══ L9 · honest-missing — an unset series reads "Standalone"; an unset fact says so and its Add opens the right dialog ══
+   v12 asserted "Not recorded" on the series. v13 Phase 2 makes it "Standalone", muted — so the
+   "Not recorded" + Add half is measured on the account's SECOND book, which records no setting and
+   no version: its Add buttons must open edit-details (with a Setting field) and the version dialog. */
+test("L9 honest-missing", async () => {
+  let pre = await openMs(page, { width: 1440, height: 900 });
+  const series = page.locator(`${pre}[data-msv12="fact-series"]`);
+  await expect(series).toContainText("Standalone");
+  expect(await series.locator("button").count(), "Standalone offers no Add").toBe(0);
+  const muted = await series.locator("dd").evaluate((dd) => [getComputedStyle(dd).color, getComputedStyle(dd.closest("[data-msv12='facts']")!.querySelector("[data-msv12='fact-setting'] dd")!).color]);
+  expect(muted[0], "…and is muted against a recorded fact").not.toBe(muted[1]);
+  ck(3);
+  pre = await openMs(page, { width: 1440, height: 900 }, OTHER_MS_ID);
+  const setting = page.locator(`${pre}[data-msv12="fact-setting"]`);
+  await expect(setting).toContainText("Not recorded");
+  await setting.getByRole("button", { name: /add/i }).click();
+  const dlg = page.locator('[data-msv12="edit-dialog"]');
+  await expect(dlg, "edit-details opens").toBeVisible({ timeout: 10_000 });
+  await expect(dlg.getByLabel(/setting/i), "…with a Setting field").toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dlg).toHaveCount(0, { timeout: 10_000 });
+  ck(3);
+  const current = page.locator(`${pre}[data-msv12="fact-current"]`);
+  await expect(current).toContainText("Not recorded");
+  await current.getByRole("button", { name: /add/i }).click();
+  const vdlg = page.locator('[data-msv12="new-version-dialog"]');
+  await expect(vdlg, "the version dialog opens").toBeVisible({ timeout: 10_000 });
+  await page.keyboard.press("Escape");
+  await expect(vdlg).toHaveCount(0, { timeout: 10_000 });
+  ck(2);
+});
+
+/* ══ L11 · no-appraisal — the page's own words never grade the writer ═════════════════════════ */
+test("L11 no-appraisal", async () => {
+  await openMs(page, { width: 1440, height: 900 });
+  const text = await page.evaluate(() => {
+    const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+    return (root as HTMLElement).innerText;
+  });
+  const banned = /(?<![\w-])(only|already|still|good|bad|slow|fast|poor|strong|weak|overdue|late|behind|impressive|finally|unfortunately)(?![\w-])/i;
+  const hit = banned.exec(text);
+  expect(hit ? `"${hit[0]}" in: …${text.slice(Math.max(0, hit.index - 40), hit.index + 40)}…` : null, "appraisal word on the page").toBeNull();
+  ck(1);
+});
+
+/* ══ L6 · empty-examples — five faded sections, a real CTA, nothing clickable in the ghosts (F8) ══ */
+test("L6 empty-examples", async ({ browser }, info) => {
+  const { ctx: ectx, page: ep } = await accountContext(browser, String(info.project.use.baseURL ?? ""), EMPTY_EMAIL, "empty");
+  try {
+    await ep.goto("/manuscripts");
+    await ep.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
+    await expect(ep.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
+    await ep.waitForTimeout(2000);
+    const pre = await visiblePage(ep, ".msv12-wpg");
+    const secs = await ep.evaluate(() => {
+      const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+      return [...root.querySelectorAll("[data-msv12-esec]")].map((s) => ({
+        key: s.getAttribute("data-msv12-esec"),
+        example: !!s.querySelector('[data-msv12="example-tag"]'),
+        ghost: (() => {
+          const g = s.querySelector("[data-msv12-ghost]") as HTMLElement | null;
+          if (!g) return null;
+          const cs = getComputedStyle(g);
+          return { pe: cs.pointerEvents, aria: g.getAttribute("aria-hidden") };
+        })(),
+      }));
+    });
+    const keys = secs.map((s) => s.key).sort();
+    expect(keys, "the five sections").toEqual(["comps", "letters", "packages", "synopses", "versions"]);
+    for (const s of secs) {
+      expect(s.example, `${s.key} carries an Example tag`).toBe(true);
+      expect(s.ghost?.pe, `${s.key} ghost is inert`).toBe("none");
+      expect(s.ghost?.aria, `${s.key} ghost is aria-hidden`).toBe("true");
+    }
+    ck(1 + secs.length * 3);
+    await expect(ep.locator(`${pre}[data-msv12="empty-hero"]`)).toContainText("Your manuscript starts here");
+    ck(1);
+    await ep.locator(`${pre}[data-msv12="empty-cta"]`).click();
+    /* the existing AddManuscriptFocusForm — its step-1 label is bare text, not a bound <label> */
+    await expect(ep.getByText(/Manuscript Title/).first(), "the existing create flow opens").toBeVisible({ timeout: 10_000 });
+    ck(1);
+  } finally {
+    await ectx.close();
+  }
+});
+
+/* ══ geometry vs the mock — the PAGE COLUMN is the mock's, to the pixel ══════════════════════════
+   Both frames are the shell's (a 248px sidebar, the shared column), so the column-level containers
+   must sit where the mock draws them: x and width within 1px at 1440 and 1280. The hero is v12's
+   (F5), so its height — and every y below it — differs, and is printed rather than asserted. */
+for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
+  test(`geometry vs mock @ ${vp.width}`, async () => {
+    await openMs(page, vp);
+    const app = await page.evaluate(() => {
+      const root = (window as unknown as { __saVisRoot: () => Element }).__saVisRoot();
+      const g = (sel: string) => { const el = root.querySelector(sel); if (!el) return null; const b = el.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map((v) => Math.round(v * 10) / 10); };
+      return {
+        hero: g('[data-msv12="hero"]'), shelf: g('[data-msv13="shelf"]'), card: g('[data-msv13-card="comps"]'),
+        band: g('[data-msv13-card="comps"] > [data-msv13="band"]'), versions: g('[data-msv13-card="versions"]'),
+        vtile: g("[data-msv13-vtile]"), vnew: g('[data-msv13-vtile="new"]'), activity: g('[data-msv13-card="activity"]'),
+        edit: g('[data-msv12="edit-details"]'),
+      };
+    });
+    const ref = await ctx.newPage();
+    await ref.setViewportSize(vp);
+    await ref.goto(pathToFileURL(resolve(process.cwd(), "design-refs/manuscripts/manuscripts-v13.html")).href);
+    await ref.waitForTimeout(800);
+    const mock = await ref.evaluate(() => {
+      const g = (sel: string) => { const el = [...document.querySelectorAll(sel)].find((e) => e.getBoundingClientRect().width > 0); if (!el) return null; const b = el.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map((v) => Math.round(v * 10) / 10); };
+      return {
+        hero: g(".desk"), shelf: g(".shelf"), card: g(".shelf .card"), band: g(".shelf .card > .ch"), versions: g(".card.c-ver"),
+        vtile: g(".vtile:not(.new)"), vnew: g(".vtile.new"), activity: g(".card.c-act"), edit: g(".desk .edit"),
+      };
+    });
+    await ref.close();
+    console.log(`\n[geometry @ ${vp.width}] app vs mock — [x, y, w, h]`);
+    for (const k of Object.keys(app) as (keyof typeof app)[]) console.log(`  ${k.padEnd(9)} app ${JSON.stringify(app[k])}  mock ${JSON.stringify(mock[k])}`);
+    for (const k of ["shelf", "versions", "activity"] as const) {
+      expect(app[k] && mock[k], `${k} measured on both`).toBeTruthy();
+      expect(Math.abs(app[k]![0] - mock[k]![0]), `${k} x vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+      expect(Math.abs(app[k]![2] - mock[k]![2]), `${k} width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+      ck(3);
+    }
+    expect(Math.abs(app.card![2] - mock.card![2]), `first shelf card width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(app.vtile![2] - mock.vtile![2]), `version tile width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+    ck(2);
+  });
+}
+
 /* ══ the floor ════════════════════════════════════════════════════════════════════════════════ */
 test("assertion floor", () => {
+  console.log(`[assertion floor] ${asserts} assertions this run (floor ${FLOOR})`);
   expect(asserts, `assertion floor — ${asserts} < ${FLOOR}`).toBeGreaterThanOrEqual(FLOOR);
 });

@@ -1250,6 +1250,50 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ THE CAP TINTS ARE NAMED BY ROLE — `--cap-outgoing/incoming/pro/reference` — NEVER BY COLOUR AND NEVER BY MATERIAL.** They were `--pkgt-pro/let/syn/sam`, which is true on a page whose cards ARE materials and a coincidence anywhere else; they spent one commit as `--cap-slate/pink/sage/tan`, which is honest and says nothing. A letter is pink because **correspondence** is pink — the same semantic `StatusDot`'s direction colouring draws on. Packages keeps its material names and READS these; a lock forbids any colour-named cap token in either sheet. **The assignment is locked as a table anchored on the card** (`containers.test.tsx`), because the naming immediately exposed a real inconsistency: `Who holds what` and `Out with agents now` list the same thing — material out with an agent — and one was sage while the other was pink. **Where Pro and outgoing both apply, Pro wins.**
 - **⚠️ THE REAL-RENDER CHECK IS `tests/e2e/msProfileScroll.measure.ts` AND IT ASSERTS ITS PRECONDITION FIRST.** A sticky element on a non-scrolling ancestor does not idle, it CLAMPS — so "the CSS is present" proves nothing, and "unstuck at rest" is exactly what a row with nothing to scroll reports before never sticking at all. It measures the overflow (307px), then rest → scrolled → back, and counts nested scrollports (0).
 
+## Manuscripts — v13, the dashboard shelf (3 Oct; ref = design-refs/manuscripts/manuscripts-v13.html; report reports/manuscripts-v13/REPORT.md; SUPERSEDES every Manuscripts section below for the ROUTED page)
+
+**Context:**
+- `/manuscripts` has rendered `manuscripts/v12/ManuscriptPage` since 25 Sep (v12, which left no record here).
+- `AllManuscripts.tsx`, the book profile below, is locked and unit-tested, and no route renders it.
+
+**The page:**
+- **ONE COLUMN under v12's desk hero (F5):** the owed requests, then the shelf (Comps · Materials · Packages), the Versions tiles and Recent activity.
+- Each section is a white card under the anthracite band. The card is `MsCard` in `v12/Msv13Shelf.tsx`, and the derivations are in `lib/manuscriptShelf.ts`.
+- **PkgBand cannot be reused here:** its colours are tokens on `.ppv-page`. It is a merge candidate.
+- The empty state is v12's, unchanged (F8).
+
+- **⚠️ A PAGE'S ROOT NEVER SETS HORIZONTAL PADDING.**
+  - The shared column's gutter is `padding-inline` on `.wpg-scroll > *`, and that selector matches the page's root.
+  - So a `padding:` shorthand on the root zeroes the gutter at equal specificity.
+  - v12's `padding: 28px 0 120px` did exactly that from Page header v1 P3 (`1866419c`, 26 Sep) until v13: the page ran edge to edge.
+  - Nothing caught it, because every card agreed with the hero; a comparison of the page with itself cannot see this.
+  - M1 now asserts the gutter from the grid's own formula.
+- **⚠️ EVERY `useOverlay` CALLER PORTALS TO `document.body`.**
+  - `useOverlay` makes `#root` inert. A dialog rendered inside the page is sealed along with everything behind it.
+  - v12's Edit details and New version had nothing focusable or pressable from the day they shipped.
+  - The portal leaves the page's token scope, so the host carries `msv12-layer`, which declares the same `--msv12-*` tokens.
+  - This is locked for these two dialogs only. Every other caller is held by nothing but the comment in `useOverlay`, and `HousekeepingSweep` renders inline (filed separately).
+- **⚠️ THE SHELF'S BREAKPOINTS ARE CONTAINER QUERIES.**
+  - They are set at the shelf widths measured at the mock's 1360 and 1180 with the sidebar expanded: **1025.4 / 856.9**.
+  - Each sits between the width at the breakpoint and the width one pixel above it; 856 left 1180 three-up.
+  - A viewport query fires at the wrong width once the sidebar collapses.
+- **⚠️ BANDS ARE 52 TALL — EXCEPT RECENT ACTIVITY'S 56.125, AND THE MOCK'S IS TOO.**
+  - Its link is a blockified flex item, so its padding counts.
+  - M3 compares each band with the mock in the same browser; never pin a flat 52.
+
+**Decisions and gaps:**
+- **Author name is `User.name`.** There is no pen-name field, so the edit dialog writes it as a second write, after the manuscript's.
+- **A version tile opens the version dialog in edit mode** (`renameBookVersion`, name and note only), because no per-version panel exists.
+- **Recent activity** is scoped to this book and shows seven rows, using the feed's own `describeEvent` / `feedPill` / `eventShape`.
+  - A version save narrates as "You updated a manuscript's details", because `MANUSCRIPT_UPDATED` names no version.
+  - A comps-only write narrates nothing.
+  - So the mock's "Saved X and made it current" row and its comp rows have no source.
+- **Open, for Nick:**
+  - The hero title renders Playfair, because brand.tsx's forced `h1` beats `.msv12-title`'s single class. One selector fixes it; F5 kept the hero as it is.
+  - The Packages pill: the text says live packages; the mock says packages sent.
+  - The facts take two rows at 1440 on v12's hero tracks.
+  - The comps fact names the letter in use, although `inQuery` is tied to no particular letter.
+
 ## Manuscripts page — THE BOOK PROFILE (26 Aug, amended 27 Aug; ref = design-refs/manuscripts-scroll-page.html — the earlier `manuscripts-book-profile.html` is REMOVED, not superseded in place; SUPERSEDES the sage-plate tabbed pane below, whose four panes are DELETED from live code)
 - **Five tabs, and the absence is the point: Overview · Journey · Comparable titles · Versions (Pro) · Notes.** **There is NO packages tab** — sample material points at a book version and packages never reference a version, so a tab here would advertise an edge that does not exist and must not be created. Packages reach this page as a footer link. **Only Versions is chipped**: comps are free (only the Scout is gated) and packages have no gate at all, so a chip on either sells a writer what they already own. Tab state is LOCAL — no route, no URL param, no persistence.
 - **⚠️ THE TWO JOURNEY TRACKS MUST DISAGREE ABOUT THE SAME QUERY, and that is the feature.** `standingTrack` counts each query ONCE at its CURRENT point (seven stations + closed + unrecognised = total); `furthestTrack` counts each query ONCE at its FURTHEST-EVER point, open or closed (six rungs = total). A query that drew a full request and was then declined **stands at closed and reached full requested**. Making them agree would delete every request the writer has ever had the moment it closed. Both sums are locked as PROPERTIES over six status mixtures in `src/lib/manuscriptJourney.test.ts`, and both were proved red twice — once with the module missing, once against the natural mistakes (a cumulative standing track gave 31 against 10; a furthest track reading current status gave 1 against 10). **`furthestTrack` imports `analytics.buildRows` rather than re-deriving "reached"**, so this page and Analytics cannot disagree about the word.
