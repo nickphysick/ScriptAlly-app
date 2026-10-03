@@ -29,7 +29,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { analyticsModel } from "../lib/analyticsModel";
 import { DotNav, Feature, Section, Skeleton, TipProvider, useReveal } from "./analytics/A13Frame";
 import { A13Empty } from "./analytics/A13Empty";
-import { Funnel, Volume } from "./analytics/A13Figures";
+import { Funnel, ReplyWindow, ShareBars, Volume } from "./analytics/A13Figures";
 import "./analytics/a13.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -107,9 +107,13 @@ export const QueryAnalytics: React.FC = () => {
           <Volume model={model} />
         </Section>
         <Section sec={2} num="Response rate" headline={v.rate.headline} lede={v.rate.lede} flip
-          art={["Illustration · the Archivist", "opening the post"]} readings={v.rate.readings} />
+          art={["Illustration · the Archivist", "opening the post"]} readings={v.rate.readings}>
+          <ShareBars model={model} />
+        </Section>
         <Section sec={3} num="Response window honesty" headline="What agents said, against when they replied" lede={v.reply.lede} white
-          art={["Illustration · a calendar", "on the agent's wall"]} readings={v.reply.readings} />
+          art={["Illustration · a calendar", "on the agent's wall"]} readings={v.reply.readings}>
+          <ReplyWindow model={model} />
+        </Section>
         <Section sec={4} num="Wait times by stage" headline="How long each step has taken" flip
           lede="Left: the gap between one stage and the next, from the fastest query to the slowest, with the median marked. Right: how many weeks each closed query ran before it ended. The later stages rest on very few queries."
           art={["Illustration · an hourglass", "on the desk"]} readings={v.waits.readings} />

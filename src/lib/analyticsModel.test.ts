@@ -443,6 +443,8 @@ describe("v13 — the figures the page states", () => {
     expect(v.waits.endingQueries.noresponse).toHaveLength(1);
     expect(v.waits.endingQueries.withdrawn).toHaveLength(1);
     expect(v.waits.endingQueries.offer).toHaveLength(1);
+    /* the dots are the lanes' weeks, query by query */
+    for (const l of m.endings.lanes) expect(v.waits.points[l.key].map((p) => p.weeks).sort((a, b) => a - b)).toEqual([...l.weeks].sort((a, b) => a - b));
     expect(v.waits.readings[2].value).toBe(String(Math.round(m.endings.lanes[0].medianWeeks as number)) + " weeks");
   });
 

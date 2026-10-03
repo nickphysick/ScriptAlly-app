@@ -980,7 +980,7 @@ export interface V13 {
     readings: V13Reading[];
   };
   reply: { lede: string; figNote: string; rows: (ReplyRow & { query: V13Query })[]; maxWeeks: number; readings: V13Reading[] };
-  waits: { gaps: StageGap[]; endings: EndingLane[]; endingQueries: Record<string, V13Query[]>; readings: V13Reading[] };
+  waits: { gaps: StageGap[]; endings: EndingLane[]; endingQueries: Record<string, V13Query[]>; points: Record<string, { weeks: number; q: V13Query }[]>; readings: V13Reading[] };
   lanes: { lede: string; rows: V13Query[]; startMs: number | null; nowMs: number; undated: number; readings: V13Reading[] };
   caveats: { headline: string; notes: { title: string; text: string }[] };
 }
@@ -1200,10 +1200,25 @@ export function buildV13(items: Enriched[], c: V13Ctx): V13 {
     else if (e.row.status === QueryStatus.WITHDRAWN && e.q.closingReason !== "offer_declined") endingQueries.withdrawn.push(q);
     if (e.row.reachedOffer) endingQueries.offer.push(q);
   }
+  /* one dot per dated ending, tied to its query so its tooltip can name the agent — the same dates the
+     lanes' weeks came from (the close rung, or the offer), so a dot and its lane cannot disagree */
+  const points: Record<string, { weeks: number; q: V13Query }[]> = { rejected: [], noresponse: [], withdrawn: [], offer: [] };
+  for (const e of items) {
+    const q = byId.get(e.row.id)!;
+    const add = (lane: string, at: number | null) => {
+      const g = gapDays(e.row.sentMs, at);
+      if (g !== null) points[lane].push({ weeks: Math.round((g / 7) * 10) / 10, q });
+    };
+    if (e.row.status === QueryStatus.REJECTED) add("rejected", e.dates.closed);
+    else if (e.row.status === QueryStatus.NO_RESPONSE) add("noresponse", e.dates.closed);
+    else if (e.row.status === QueryStatus.WITHDRAWN && e.q.closingReason !== "offer_declined") add("withdrawn", e.dates.closed);
+    if (e.row.reachedOffer) add("offer", e.dates.offer);
+  }
   const waits = {
     gaps: c.gapRows,
     endings: c.lanes,
     endingQueries,
+    points,
     readings: [
       daysR(qr, "median from query to a request", "no dated request yet"),
       daysR(rs, "median for you to send what was asked for", "no requested material sent yet"),
