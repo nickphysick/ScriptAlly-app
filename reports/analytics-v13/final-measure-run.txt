@@ -1,0 +1,8 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [measure] › tests/e2e/analyticsV13.measure.ts:107:3 › feature, sections, figures and nav @ 1440×820 (11.1s)
+LEDGER analyticsV13: 70 checks, 0 failed
+  ✓  2 [measure] › tests/e2e/analyticsV13.measure.ts:107:3 › feature, sections, figures and nav @ 1920×1080 (31.0s)
+
+  2 passed (42.4s)

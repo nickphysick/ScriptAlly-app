@@ -86,6 +86,16 @@ async function readPage(page: Page) {
       figs,
       lastSec: kids.length ? kids[kids.length - 1].dataset.sec ?? kids[kids.length - 1].className : null,
       livingHeader: p.querySelectorAll(".ph, [data-lh]").length,
+      /* every visible part of the feature's text column, against the container that clips it */
+      featParts: (() => {
+        const f = p.querySelector('[data-a13="feature"]');
+        const t = f?.querySelector(".a13-feat-txt");
+        if (!f || !t) return null;
+        const fr = f.getBoundingClientRect();
+        const parts = [...t.children].filter((c) => getComputedStyle(c).display !== "none") as HTMLElement[];
+        const out = parts.filter((c) => { const r = c.getBoundingClientRect(); return r.top < fr.top - 0.5 || r.bottom > fr.bottom + 0.5; });
+        return { n: parts.length, clipped: out.map((c) => c.className || c.tagName) };
+      })(),
     };
   }, VIS);
 }
@@ -108,10 +118,19 @@ for (const vp of SIZES) {
       `feature ${r.feature?.t.toFixed(1)}–${r.feature?.b.toFixed(1)} in scroller ${r.scroller?.t.toFixed(1)}–${r.scroller?.b.toFixed(1)}`);
     check("feature-max-760", size, !!r.feature && r.feature.h <= 760.5, `feature height ${r.feature?.h.toFixed(1)}`);
     /* whole AND clear of the grid's 44px bottom hem, which washes whatever lies under it */
-    check("button-visible", size, !!r.button && !!r.scroller && r.button.b <= r.scroller.b - 44 && r.button.t >= r.scroller.t && r.button.h > 20,
-      `button ${r.button?.t.toFixed(1)}–${r.button?.b.toFixed(1)} against the hem's top ${(r.scroller ? r.scroller.b - 44 : NaN).toFixed(1)}`);
+    /* ⚠️ AND INSIDE THE FEATURE CONTAINER'S OWN BOX: the container clips (overflow: hidden), so a button
+       pushed out of it is invisible while still lying inside the scrollport — the first version of this
+       lock checked only the scrollport and stayed green with the button clipped away (mutation run). */
+    check("button-visible", size, !!r.button && !!r.scroller && !!r.feature && r.button.b <= r.scroller.b - 44 && r.button.t >= r.scroller.t
+      && r.button.b <= r.feature.b && r.button.t >= r.feature.t && r.button.h > 20,
+      `button ${r.button?.t.toFixed(1)}–${r.button?.b.toFixed(1)} in feature ${r.feature?.t.toFixed(1)}–${r.feature?.b.toFixed(1)}, hem's top ${(r.scroller ? r.scroller.b - 44 : NaN).toFixed(1)}`);
     check("feature-clear-of-hem", size, !!r.feature && !!r.scroller && r.feature.b <= r.scroller.b - 44 + 0.5,
       `feature bottom ${r.feature?.b.toFixed(1)} against the hem's top ${(r.scroller ? r.scroller.b - 44 : NaN).toFixed(1)}`);
+    /* ⚠️ THE WHOLE TEXT COLUMN, NOT JUST THE BUTTON: the column is centred, so content that does not fit
+       overflows at BOTH ends and the container clips the eyebrow and headline before it clips the button
+       (mutation run: the button-only lock stayed green with the paragraph forced on). */
+    check("feature-parts-population", size, !!r.featParts && r.featParts.n >= 4, `${r.featParts?.n} parts in the text column`);
+    check("feature-text-whole", size, !!r.featParts && r.featParts.clipped.length === 0, `clipped by the container: ${r.featParts?.clipped.join(", ") || "nothing"}`);
     check("no-living-header", size, r.livingHeader === 0, `${r.livingHeader} living-header/PageHeader elements on the page`);
 
     /* 2 · seven sections, the three white containers on 1, 3 and 5, and the caveats last */
