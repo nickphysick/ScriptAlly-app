@@ -30,9 +30,11 @@ for (const vp of SIZES) {
       L.check("Q1 · the bar was found", ctx, !!rest, "");
       if (!rest) continue;
       L.check("Q1 · at rest the bar's ground is the page's", ctx, rest.barBg === rest.groundBg && !transparent(rest.barBg), `bar ${rest.barBg} ground ${rest.groundBg}`);
-      L.check("Q2 · at rest no hairline and no shadow", ctx, rest.shadow === "none" && rest.hairline === 0, `shadow ${rest.shadow} hairline ${rest.hairline}`);
+      /* ⚠️ AMENDED 4 OCT (Nick's ruling, the plate-header pack): the hairline is ON AT REST on every route —
+         a reversal of the quiet bar's "no hairline at rest". No shadow, as before. */
+      L.check("Q2 · at rest the hairline is visible and there is no shadow", ctx, rest.shadow === "none" && rest.hairline === 1, `shadow ${rest.shadow} hairline ${rest.hairline}`);
       /* ⚠️ LIVING HEADERS v3 (1 Oct): on the six living routes the bar carries the page's crumb from first
-         paint — shown at rest and at every scroll; only the hairline still wakes. The quiet bar's naming
+         paint — shown at rest and at every scroll; the hairline is on throughout (4 Oct). The quiet bar's naming
          rule (Q2–Q4, Q6) governs every other route, unchanged. */
       if (LIVING_ROUTES.includes(route)) {
         tally.living++;
@@ -40,7 +42,7 @@ for (const vp of SIZES) {
         if (!sc || sc.max < 3) continue;
         await scrollTo(page, 3);
         const l3 = await readBar(page);
-        L.check("Q3 · (living) at 3 the hairline wakes and the crumb stays", { ...ctx, state: "scrollTop 3" }, !!l3 && l3.hairline === 1 && l3.shadow === "none" && !!l3.name && l3.name.opacity === 1, `hairline ${l3?.hairline} ${JSON.stringify(l3?.name)}`);
+        L.check("Q3 · (living) at 3 the hairline is still there and the crumb stays", { ...ctx, state: "scrollTop 3" }, !!l3 && l3.hairline === 1 && l3.shadow === "none" && !!l3.name && l3.name.opacity === 1, `hairline ${l3?.hairline} ${JSON.stringify(l3?.name)}`);
         await scrollTo(page, 0);
         continue;
       }
@@ -50,7 +52,7 @@ for (const vp of SIZES) {
       const s3 = await readBar(page);
       const c3 = { ...ctx, state: "scrollTop 3" };
       L.check("Q1 · scrolled, the bar's ground is still the page's", c3, !!s3 && s3.barBg === s3.groundBg, `bar ${s3?.barBg} ground ${s3?.groundBg}`);
-      L.check("Q3 · at 3 the hairline is visible and there is no shadow", c3, !!s3 && s3.hairline === 1 && s3.shadow === "none", `hairline ${s3?.hairline} shadow ${s3?.shadow}`);
+      L.check("Q3 · at 3 the hairline is still visible and there is still no shadow", c3, !!s3 && s3.hairline === 1 && s3.shadow === "none", `hairline ${s3?.hairline} shadow ${s3?.shadow}`);
       if (!sc.hasTitle) {
         tally.untitled++;
         L.check("Q5 · with no marked title, the name shows at 3", c3, !!s3?.name && s3.name.opacity === 1 && s3.name.ariaHidden === null, JSON.stringify(s3?.name));
@@ -86,7 +88,7 @@ for (const vp of SIZES) {
       L.check("Q7 · no control in the bar moved when the name appeared", cn, moved.length === 0 && Object.keys(rest.controls).length >= 6, `moved ${JSON.stringify(moved)} of ${Object.keys(rest.controls).length}`);
       await scrollTo(page, 0);
       const back = await readBar(page);
-      L.check("Q4 · back at 0, the bar is at rest again", { ...ctx, state: "back to 0" }, !!back?.name && back.name.opacity === 0 && back.name.ariaHidden === "true" && back.hairline === 0, `${JSON.stringify(back?.name)} hairline ${back?.hairline}`);
+      L.check("Q4 · back at 0, the bar is at rest again", { ...ctx, state: "back to 0" }, !!back?.name && back.name.opacity === 0 && back.name.ariaHidden === "true" && back.hairline === 1, `${JSON.stringify(back?.name)} hairline ${back?.hairline}`);
     }
     const all = { route: "*", size: `${vp.width}`, state: "tally" };
     L.check("population · each branch entered", all, tally.titled >= 3 && tally.untitled >= 1 && tally.fixedTitle >= 1 && tally.living === LIVING_ROUTES.length, JSON.stringify(tally));
@@ -113,7 +115,7 @@ test("Q6 · a route change starts the new page's bar at rest", async ({ page }) 
     await page.waitForURL(/\/todo\/calendar/);
     await page.waitForTimeout(400);
     const r = await readBar(page);
-    L.check("Q6 · the new page's bar is at rest", ctx, !!r && r.hairline === 0 && !!r.name && r.name.opacity === 0 && r.name.ariaHidden === "true", `hairline ${r?.hairline} ${JSON.stringify(r?.name)}`);
+    L.check("Q6 · the new page's bar is at rest (hairline on, name hidden)", ctx, !!r && r.hairline === 1 && !!r.name && r.name.opacity === 0 && r.name.ariaHidden === "true", `hairline ${r?.hairline} ${JSON.stringify(r?.name)}`);
   }
   L.write();
   expect(L.rows.length).toBe(4);
@@ -137,7 +139,8 @@ test("Q9 · reduced motion makes both changes instant", async ({ browser }) => {
       L.check("Q9 · reduce: the hairline's transition is instant", c, !!r && instant(r.hairlineDur), `${r?.hairlineDur}`);
       L.check("Q9 · reduce: the name's transition is instant", c, !!r?.name && instant(r.name.dur), `${r?.name?.dur}`);
     } else {
-      L.check("Q9 · no preference: the hairline fades over 0.25s", c, r?.hairlineDur === "0.25s", `${r?.hairlineDur}`);
+      /* the hairline no longer changes, so it no longer transitions (4 Oct) */
+      L.check("Q9 · no preference: the hairline does not transition", c, !!r && r.hairlineDur.split(",").every((d) => parseFloat(d) === 0), `${r?.hairlineDur}`);
       L.check("Q9 · no preference: the name moves over 0.28s", c, !!r?.name && r.name.dur.split(",").every((d) => d.trim() === "0.28s"), `${r?.name?.dur}`);
     }
     await ctx.close();

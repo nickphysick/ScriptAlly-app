@@ -775,7 +775,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
-          <header ref={barRef} className={`ws-pagebar${barScrolled ? " ws-pagebar--scrolled" : ""}${barNamed ? " ws-pagebar--named" : ""}${crumbRoute ? " ws-pagebar--crumb" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"} data-crumb={crumbRoute ? "true" : undefined}>
+          <header ref={barRef} className={`ws-pagebar${barNamed ? " ws-pagebar--named" : ""}${crumbRoute ? " ws-pagebar--crumb" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"} data-crumb={crumbRoute ? "true" : undefined}>
               {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
                   move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
               {/* the sidebar toggle — first in the bar, 24px in from its left, and it does not move

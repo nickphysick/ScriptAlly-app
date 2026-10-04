@@ -716,24 +716,26 @@
      "the bar is the sidebar's colour". It reads `--ws-page`, which the routes retone on `.ws-main`
      (the dashboard and the ground-mode pages), so the bar and the ground below it cannot disagree on
      any route. The lock asserts the two computed backgrounds are EQUAL, never a literal. Flat: no
-     radius, and NO SHADOW in either state — the one edge is the hairline below, and only once the
-     page has scrolled. */
+     radius, and NO SHADOW in either state — the one edge is the hairline below, which is on at rest
+     too since 4 Oct (Nick's ruling; see the hairline rule). */
   position: relative;
   background: var(--ws-page);
   border-radius: 0;
   box-shadow: none;
 }
-/* THE ONE HAIRLINE, faded in once the page scrolls. A pseudo-element rather than an inset shadow so it
-   can fade: `opacity` transitions cleanly where a shadow's colour does not.
-   ⚠️ A PSEUDO-ELEMENT KEEPS ITS OWN TRANSITION, so the reduced-motion rule below names it directly. */
+/* THE ONE HAIRLINE — ON AT REST, ON EVERY ROUTE (4 Oct, Nick's ruling).
+   ⚠️ THIS REVERSES THE QUIET BAR'S "no hairline at rest". The quiet bar faded it in once the page
+   scrolled; with the Query Centre's header becoming a plate that stands on the page ground, a bar with
+   no edge at rest left the plate's 74px of ground above it reading as part of the bar. So the edge is
+   permanent and nothing fades: no transition, no scrolled state for it to follow. The page NAME keeps
+   its own rule (hidden at rest on ordinary routes, shown from first paint on the living ones) — that is
+   `.ws-pagebar--named` / the crumb, untouched here. The scrolled SHADOW stays retired: a shadow under a
+   bar that is the page's own ground reads as the bar lifting off it.
+   A pseudo-element still, so the hairline sits inside the bar's own box and adds nothing to its height. */
 .ws-pagebar::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
-  background: var(--shell-rule); opacity: 0; pointer-events: none;
-  transition: opacity 0.25s ease;
+  background: var(--shell-rule); opacity: 1; pointer-events: none;
 }
-.ws-pagebar--scrolled::after { opacity: 1; }
-/* ⚠️ THE SCROLLED SHADOW IS RETIRED (quiet-bar v1). `.ws-pagebar--scrolled` now only fades the hairline
-   in (above); a shadow under a bar that is the page's own ground reads as the bar lifting off it. */
 .ws-grow { flex: 1 1 auto; min-width: 0; }
 /* ⚠️ v3: THE DASHBOARD'S BAR IS NO LONGER LAID OVER ITS SCROLLER — `--dash-bar-h`, the absolute
    placement, the measure-padding and the transparent-until-scrolled ground are retired together.
@@ -769,7 +771,7 @@
 .ws-pagebar--named .ws-pname { pointer-events: auto; }
 /* ⚠️ REDUCED MOTION IS THE SHELL'S ONE RULE, NOT A SECOND ONE HERE: `.ws-app *, *::before, *::after`
    take `transition-duration: 0.01ms !important` under `prefers-reduced-motion: reduce` (the foot of
-   this sheet), which reaches the bar's hairline and the name. A local `transition: none` beside it was
+   this sheet), which reaches the name. (The hairline no longer transitions at all — 4 Oct.) A local `transition: none` beside it was
    measured to change nothing — deleting it left every duration at 0.01ms. */
 .ws-pname-n { font-family: inherit; display: block; }
 .ws-pname-s { display: block; margin-bottom: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-ink-45); }
