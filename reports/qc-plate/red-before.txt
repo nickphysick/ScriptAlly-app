@@ -1,0 +1,290 @@
+
+Running 6 tests using 1 worker
+
+[1/6] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/6] [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1280
+[measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1280
+LEDGER ph1-4-1280 (pass/fail): {"PH1 · the header is a plate":"0/1","PH1 · the plate spans the column (±1)":"0/1","PH1 · 220 tall":"0/1","PH1 · 16 radius":"0/1","PH1 · the token's white":"0/1","PH1 · 74 between the bar and the plate's top":"0/1","PH1 · the desk starts 26 below the plate":"0/1","PH2 · the drawing's clipping ancestor is the plate's box (±1)":"0/1","PH2 · and it is overflow hidden":"0/1","PH2 · both art layers are present":"0/1","PH4 · the title's right edge is left of the art":"0/1","PH4 · the intro's right edge is left of the art":"0/1","PH4 · the actions's right edge is left of the art":"0/1"}
+
+  ✗ PH1 · the header is a plate · /queries · 1280 — plate null
+
+  ✗ PH1 · the plate spans the column (±1) · /queries · 1280 — plate undefined/undefined column 248/1032
+
+  ✗ PH1 · 220 tall · /queries · 1280 — h undefined
+
+  ✗ PH1 · 16 radius · /queries · 1280 — null
+
+  ✗ PH1 · the token's white · /queries · 1280 — bg null token rgb(255, 255, 255)
+
+  ✗ PH1 · 74 between the bar and the plate's top · /queries · 1280 — —
+
+  ✗ PH1 · the desk starts 26 below the plate · /queries · 1280 — —
+
+  ✗ PH2 · the drawing's clipping ancestor is the plate's box (±1) · /queries · 1280 — clip null
+
+  ✗ PH2 · and it is overflow hidden · /queries · 1280 — null
+
+  ✗ PH2 · both art layers are present · /queries · 1280 — under false figure false
+
+  ✗ PH4 · the title's right edge is left of the art · /queries · 1280 — title 641.109375 art Infinity
+
+  ✗ PH4 · the intro's right edge is left of the art · /queries · 1280 — intro 665.125 art Infinity
+
+  ✗ PH4 · the actions's right edge is left of the art · /queries · 1280 — actions 639.53125 art Infinity
+
+  1) [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1280 
+
+    Error: PH1–PH4 measured fewer checks than they claim
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 16
+    Received:    13
+
+      184 |     }
+      185 |     L.write();
+    > 186 |     expect(L.rows.length, "PH1–PH4 measured fewer checks than they claim").toBeGreaterThanOrEqual(16);
+          |                                                                            ^
+      187 |     expect(L.rows.filter((r) => !r.ok).map((r) => `${r.lock} — ${r.detail}`)).toEqual([]);
+      188 |   });
+      189 | }
+        at /private/tmp/sa-qc95/tests/e2e/plateHeader.measure.ts:186:76
+
+    Error Context: test-results/plateHeader.measure.ts-PH1-89440-uery-Centre-s-plate-at-1280-measure/error-context.md
+
+
+[3/6] [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1440
+[measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1440
+LEDGER ph1-4-1440 (pass/fail): {"PH1 · the header is a plate":"0/1","PH1 · the plate spans the column (±1)":"0/1","PH1 · 220 tall":"0/1","PH1 · 16 radius":"0/1","PH1 · the token's white":"0/1","PH1 · 74 between the bar and the plate's top":"0/1","PH1 · the desk starts 26 below the plate":"0/1","PH2 · the drawing's clipping ancestor is the plate's box (±1)":"0/1","PH2 · and it is overflow hidden":"0/1","PH2 · both art layers are present":"0/1","PH4 · the title's right edge is left of the art":"0/1","PH4 · the intro's right edge is left of the art":"0/1","PH4 · the actions's right edge is left of the art":"0/1"}
+
+  ✗ PH1 · the header is a plate · /queries · 1440 — plate null
+
+  ✗ PH1 · the plate spans the column (±1) · /queries · 1440 — plate undefined/undefined column 248/1192
+
+  ✗ PH1 · 220 tall · /queries · 1440 — h undefined
+
+  ✗ PH1 · 16 radius · /queries · 1440 — null
+
+  ✗ PH1 · the token's white · /queries · 1440 — bg null token rgb(255, 255, 255)
+
+  ✗ PH1 · 74 between the bar and the plate's top · /queries · 1440 — —
+
+  ✗ PH1 · the desk starts 26 below the plate · /queries · 1440 — —
+
+  ✗ PH2 · the drawing's clipping ancestor is the plate's box (±1) · /queries · 1440 — clip null
+
+  ✗ PH2 · and it is overflow hidden · /queries · 1440 — null
+
+  ✗ PH2 · both art layers are present · /queries · 1440 — under false figure false
+
+  ✗ PH4 · the title's right edge is left of the art · /queries · 1440 — title 690.25 art Infinity
+
+  ✗ PH4 · the intro's right edge is left of the art · /queries · 1440 — intro 763.078125 art Infinity
+
+  ✗ PH4 · the actions's right edge is left of the art · /queries · 1440 — actions 644.65625 art Infinity
+
+  2) [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1440 
+
+    Error: PH1–PH4 measured fewer checks than they claim
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 16
+    Received:    13
+
+      184 |     }
+      185 |     L.write();
+    > 186 |     expect(L.rows.length, "PH1–PH4 measured fewer checks than they claim").toBeGreaterThanOrEqual(16);
+          |                                                                            ^
+      187 |     expect(L.rows.filter((r) => !r.ok).map((r) => `${r.lock} — ${r.detail}`)).toEqual([]);
+      188 |   });
+      189 | }
+        at /private/tmp/sa-qc95/tests/e2e/plateHeader.measure.ts:186:76
+
+    Error Context: test-results/plateHeader.measure.ts-PH1-481b8-uery-Centre-s-plate-at-1440-measure/error-context.md
+
+
+[4/6] [measure] › tests/e2e/plateHeader.measure.ts:206:1 › PH5 · the plate is the Query Centre's alone
+[measure] › tests/e2e/plateHeader.measure.ts:206:1 › PH5 · the plate is the Query Centre's alone
+LEDGER ph5 (pass/fail): {"PH5 · precondition: the override drew QcEmpty, not the populated page":"0/2","PH5 · the header was found":"10/0","PH5 · it carries no plate":"10/0","PH5 · its frame paints what it painted":"10/0","PH5 · header keeps its box (±1)":"10/0","PH5 · frame keeps its box (±1)":"10/0","PH5 · title keeps its box (±1)":"10/0","PH5 · intro keeps its box (±1)":"10/0","PH5 · acts keeps its box (±1)":"10/0","PH5 · art keeps its box (±1)":"10/0"}
+
+  ✗ PH5 · precondition: the override drew QcEmpty, not the populated page · qc-empty@1280 — 
+
+  ✗ PH5 · precondition: the override drew QcEmpty, not the populated page · qc-empty@1440 — 
+
+  3) [measure] › tests/e2e/plateHeader.measure.ts:206:1 › PH5 · the plate is the Query Centre's alone 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "qc-empty@1280: PH5 · precondition: the override drew QcEmpty, not the populated page — ",
+    +   "qc-empty@1440: PH5 · precondition: the override drew QcEmpty, not the populated page — ",
+    + ]
+
+      244 |   L.write();
+      245 |   expect(L.rows.length, "PH5 measured fewer checks than it claims").toBeGreaterThanOrEqual(80);
+    > 246 |   expect(L.rows.filter((r) => !r.ok).map((r) => `${r.where}: ${r.lock} — ${r.detail}`)).toEqual([]);
+          |                                                                                         ^
+      247 | });
+      248 |
+      249 | /* PH6 · the hairline at rest, everywhere; the name keeps its rule */
+        at /private/tmp/sa-qc95/tests/e2e/plateHeader.measure.ts:246:89
+
+    Error Context: test-results/plateHeader.measure.ts-PH5-7b717-is-the-Query-Centre-s-alone-measure/error-context.md
+
+
+[5/6] [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1280
+[measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1280
+LEDGER ph6-1280 (pass/fail): {"PH6 · the bar was found":"15/0","PH6 · at scrollTop 0 the hairline is visible, and no shadow":"0/15","PH6 · at rest the page name is hidden":"9/0","PH6 · scrolled, the hairline is still there and still no shadow":"14/0","PH6 · (living) at rest the crumb is shown, as before":"6/0","PH6 · population: every route, every living one, and some scrolled":"1/0"}
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /dashboard · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /queries · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /queries/analytics · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /agents · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /agents/discover · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts/comps · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts/packages · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo/calendar · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo/noteboard · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /import · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /account/profile · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /plans · 1280 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /help · 1280 — hairline 0 shadow none
+
+  4) [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1280 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   "/dashboard · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/queries · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/queries/analytics · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/agents · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/agents/discover · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts/comps · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts/packages · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo/calendar · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo/noteboard · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/import · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/account/profile · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/plans · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/help · 1280: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    + ]
+
+      277 |     L.write();
+      278 |     expect(L.rows.length).toBeGreaterThanOrEqual(BAR_ROUTES.length * 3);
+    > 279 |     expect(L.rows.filter((r) => !r.ok).map((r) => `${r.where}: ${r.lock} — ${r.detail}`)).toEqual([]);
+          |                                                                                           ^
+      280 |   });
+      281 | }
+      282 |
+        at /private/tmp/sa-qc95/tests/e2e/plateHeader.measure.ts:279:91
+
+    Error Context: test-results/plateHeader.measure.ts-PH6-2c654-rest-on-every-route-at-1280-measure/error-context.md
+
+
+[6/6] [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1440
+[measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1440
+LEDGER ph6-1440 (pass/fail): {"PH6 · the bar was found":"15/0","PH6 · at scrollTop 0 the hairline is visible, and no shadow":"0/15","PH6 · at rest the page name is hidden":"9/0","PH6 · scrolled, the hairline is still there and still no shadow":"14/0","PH6 · (living) at rest the crumb is shown, as before":"6/0","PH6 · population: every route, every living one, and some scrolled":"1/0"}
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /dashboard · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /queries · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /queries/analytics · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /agents · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /agents/discover · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts/comps · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /manuscripts/packages · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo/calendar · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /todo/noteboard · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /import · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /account/profile · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /plans · 1440 — hairline 0 shadow none
+
+  ✗ PH6 · at scrollTop 0 the hairline is visible, and no shadow · /help · 1440 — hairline 0 shadow none
+
+  5) [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1440 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   "/dashboard · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/queries · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/queries/analytics · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/agents · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/agents/discover · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts/comps · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/manuscripts/packages · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo/calendar · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/todo/noteboard · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/import · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/account/profile · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/plans · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    +   "/help · 1440: PH6 · at scrollTop 0 the hairline is visible, and no shadow — hairline 0 shadow none",
+    + ]
+
+      277 |     L.write();
+      278 |     expect(L.rows.length).toBeGreaterThanOrEqual(BAR_ROUTES.length * 3);
+    > 279 |     expect(L.rows.filter((r) => !r.ok).map((r) => `${r.where}: ${r.lock} — ${r.detail}`)).toEqual([]);
+          |                                                                                           ^
+      280 |   });
+      281 | }
+      282 |
+        at /private/tmp/sa-qc95/tests/e2e/plateHeader.measure.ts:279:91
+
+    Error Context: test-results/plateHeader.measure.ts-PH6-a91d0-rest-on-every-route-at-1440-measure/error-context.md
+
+
+  5 failed
+    [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1280 
+    [measure] › tests/e2e/plateHeader.measure.ts:122:3 › PH1–PH4 · the Query Centre's plate at 1440 
+    [measure] › tests/e2e/plateHeader.measure.ts:206:1 › PH5 · the plate is the Query Centre's alone 
+    [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1280 
+    [measure] › tests/e2e/plateHeader.measure.ts:251:3 › PH6 · the bar's hairline at rest on every route at 1440 
+  1 passed (3.4m)
