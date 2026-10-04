@@ -122,6 +122,9 @@ export async function readLeft(page: Page) {
     const first = surfaces[0];
     return {
       size: hd.dataset.size ?? null,
+      /* a plate (4 Oct): its frame is the box on the column, and the text sits inside its padding */
+      plate: hd.hasAttribute("data-plate"),
+      frameL: (hd.querySelector('[data-probe="hero-frame"]') as HTMLElement | null)?.getBoundingClientRect().left ?? null,
       textL: text ? text.getBoundingClientRect().left : null,
       headerL: h.left, headerR: h.right,
       drawnR,

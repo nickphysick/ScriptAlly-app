@@ -125,6 +125,14 @@ describe("no shell rule reads a token that does not exist", () => {
     // a shell stylesheet may define its own scoped token, so collect those too
     const texts = shellFiles.map((f) => readFileSync(resolve(__dirname, f), "utf8"));
     for (const t of texts) for (const m of t.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
+    /* THE PLATE (4 Oct) reads `--fc-card`, the shared card-surface white. It is defined in
+       containers/framedCard.css, and it is accepted here only because it sits at `:root` there — a
+       token defined under a theme or a component class would resolve to nothing on the pages outside
+       it, which is the fault this lock exists for. So the `:root` block is what is read, not the file. */
+    const fc = readFileSync(resolve(__dirname, "../containers/framedCard.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const fcRoot = fc.match(/(?:^|\n)\s*:root\s*\{([^}]*)\}/);
+    expect(fcRoot, "framedCard.css no longer declares its tokens at :root").not.toBeNull();
+    for (const m of fcRoot![1].matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
     // Set INLINE per element rather than in a stylesheet: `--i` is the column's stagger index,
     // `--cols` is a mega-menu's column count. Both carry a fallback in the CSS, so an element
     // that somehow renders without them still lays out.

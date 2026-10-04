@@ -677,3 +677,60 @@
 .ph--living.ph--empty { border-bottom: 0; min-height: 0; padding-bottom: 6px; }
 .ph--living.ph--empty .ph-hin { min-height: 206px; }
 .ph--empty .ph-eh2 { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 29px; line-height: 1.18; color: var(--sp-ink); }
+
+/* ══ THE PLATE (ref design-refs/page-header/qc-plate-header-v1.html, 4 Oct) — opt-in, the Query Centre's alone ══
+   The full header becomes a white plate standing on the page ground: 74px of ground above it (the room
+   the drawing rises into), the plate 220 tall across the content column, and the desk 26px below.
+   ⚠️ EVERY RULE HERE COMES AFTER THE LIVING BLOCK AND MATCHES ITS SPECIFICITY, so source order settles
+   each tie in the plate's favour; nothing here uses `!important` beyond the title face the header
+   already needs. */
+.ph--full.ph--plate {
+  /* the plate REPLACES the header's rule; the header itself is now only the 74px of ground */
+  margin-top: 74px; padding: 0; min-height: 0; border-bottom: 0;
+}
+.ph--plate .ph-hin {
+  /* ⚠️ THE WHITE IS --fc-card, the shared card surface at :root — the desk's frame paints the same value
+     as a literal, and the plate reads the token rather than copying it (Step 0, ✗ 3; Nick's call). */
+  box-sizing: border-box; height: 220px; min-height: 0;
+  padding: 26px 38px;
+  border-radius: 16px;
+  background: var(--fc-card);
+  box-shadow: inset 0 0 0 1px var(--shell-rule), 0 1px 2px rgba(28, 19, 15, 0.05), 0 8px 22px rgba(28, 19, 15, 0.06);
+}
+/* the text is above the brush (z 2 over the clip's 1) and below the figure (3) — it is clear of both by
+   layout (PH4), so the order only matters to the brush's faded left edge */
+.ph--plate .ph-text { position: relative; z-index: 2; max-width: none; }
+/* 48px, one line; `line-height: 1` is the header's own rule for this face, which has no descender
+   problem and nothing clips it */
+.ph--plate.ph--full .ph-title { font-size: 48px; line-height: 1; min-height: 1em; }
+/* ⚠️ 22px LINES ARE DERIVED, NOT TASTE: inside 220 with 26px of padding the stack has 168px, and title
+   48 + 10 + two intro lines + 18 + the 48px buttons fits it exactly at 22 a line. The living intro
+   holds two lines' room whatever the count says, so the actions never move. */
+/* THE INTRO'S MEASURE IS 520 OR WHAT ENDS LEFT OF THE DRAWING, WHICHEVER IS SHORTER (PH4). The drawing's
+   box is 282 × 484/375 ≈ 364 wide at right 24, so it starts 388 in from the plate's padding edge; from the
+   text's 38px inset that leaves (content width − 350). 352 keeps a 2px margin. Above ~1180 the 520 binds. */
+.ph--plate.ph--full .ph-intro { margin-top: 10px; max-width: min(520px, calc(100% - 352px)); font-size: 16px; line-height: 22px; min-height: 44px; }
+.ph--plate .ph-acts { margin-top: 18px; }
+/* THE CLIP IS THE PLATE: its box and its radius, `overflow: hidden`, so the under layer — brush and all —
+   stops at the plate's edge. */
+.ph-plclip {
+  position: absolute; inset: 0; z-index: 1;
+  border-radius: inherit; overflow: hidden;
+  pointer-events: none;
+}
+/* ONE BOX FOR BOTH LAYERS: 282 tall, right 24, its bottom on the plate's bottom; the width follows the
+   drawing's 484 × 375 (≈364), so it rises 62px above the plate's top. */
+.ph-under, .ph-over {
+  position: absolute; right: 24px; bottom: 0;
+  height: 282px; aspect-ratio: 484 / 375;
+  pointer-events: none;
+}
+.ph-under img, .ph-over img { display: block; width: 100%; height: 100%; }
+.ph-under {
+  -webkit-mask-image: linear-gradient(to right, transparent 4%, #000 30%);
+  mask-image: linear-gradient(to right, transparent 4%, #000 30%);
+}
+/* ⚠️ THE FIGURE IS A CHILD OF THE PLATE ABOVE EVERYTHING THE PLATE PAINTS — its hairline and shadow are
+   the plate's own background layer, and a positioned child paints over its parent's background — so
+   where the courier crosses the top edge, the edge passes behind him. Unclipped, unmasked. */
+.ph-over { z-index: 3; }

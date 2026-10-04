@@ -1,0 +1,554 @@
+[
+ {
+  "lock": "PH5 · precondition: the override drew QcEmpty, not the populated page",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "the visible header is not inside QcEmpty"
+ },
+ {
+  "lock": "PH5 · precondition: the override drew QcEmpty, not the populated page",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "the visible header is not inside QcEmpty"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "contact@1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) → rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[289,123.8,950.1,263] → [289,179.8,950.1,220]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[289,145.8,950.1,214] → [289,179.8,950.1,220]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[289,145.8,437,49.7] → [327,205.8,874.1,48]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[289,209.5,437,78.3] → [327,263.8,520,44]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[289,309.8,344.1,48] → [327,325.8,344.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "contact@1280",
+  "ok": false,
+  "detail": "[802,113.8,437,272] → null"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[289,123.8,950.1,263] → [289,123.8,950.1,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[289,145.8,950.1,214] → [289,145.8,950.1,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[289,145.8,437,49.7] → [289,145.8,437,49.7]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[289,209.5,437,52.2] → [289,209.5,437,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[289,283.7,296,48] → [289,283.7,296,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "packages@1280",
+  "ok": true,
+  "detail": "[802,113.8,437,272] → [802,113.8,437,272]"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "[289,123.8,950.1,263] → [289,123.8,950.1,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "[289,145.8,950.1,214] → [289,145.8,950.1,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "[289,145.8,437,49.7] → [289,145.8,437,49.7]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "[289,209.5,437,52] → [289,209.5,437,52]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "[289,283.5,144.1,48] → [289,283.5,144.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "comps@1280",
+  "ok": true,
+  "detail": "null → null"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[289,123.8,950.1,263] → [289,123.8,950.1,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[289,145.8,950.1,214] → [289,145.8,950.1,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[289,145.8,437,49.7] → [289,145.8,437,49.7]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[289,209.5,437,52.2] → [289,209.5,437,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[289,283.7,142.1,48] → [289,283.7,142.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "todo@1280",
+  "ok": true,
+  "detail": "[802,113.8,437,272] → [802,113.8,437,272]"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "[289,123.8,950.1,234] → [289,123.8,950.1,234]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "[289,145.8,950.1,206] → [289,145.8,950.1,206]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "null → null"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "[289,194,437,52.2] → [289,194,437,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "[289,268.2,350.6,48] → [289,268.2,350.6,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "qc-empty@1280",
+  "ok": true,
+  "detail": "[802,105.8,437,272] → [802,105.8,437,272]"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "contact@1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) → rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[294.1,123.8,1099.8,263] → [294.1,179.8,1099.8,220]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[294.1,145.8,1099.8,214] → [294.1,179.8,1099.8,220]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[294.1,145.8,505.9,55.9] → [332.1,205.8,1023.8,48]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[294.1,215.7,505.9,52.2] → [332.1,263.8,520,44]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[294.1,289.9,344.1,48] → [332.1,325.8,344.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "contact@1440",
+  "ok": false,
+  "detail": "[888,113.8,505.9,272] → null"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[294.1,123.8,1099.8,263] → [294.1,123.8,1099.8,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,1099.8,214] → [294.1,145.8,1099.8,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,505.9,55.9] → [294.1,145.8,505.9,55.9]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[294.1,215.7,505.9,52.2] → [294.1,215.7,505.9,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[294.1,289.9,296,48] → [294.1,289.9,296,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "packages@1440",
+  "ok": true,
+  "detail": "[888,113.8,505.9,272] → [888,113.8,505.9,272]"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "[294.1,123.8,1099.8,263] → [294.1,123.8,1099.8,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,1099.8,214] → [294.1,145.8,1099.8,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,505.9,55.9] → [294.1,145.8,505.9,55.9]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "[294.1,215.7,505.9,52] → [294.1,215.7,505.9,52]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "[294.1,289.7,144.1,48] → [294.1,289.7,144.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "comps@1440",
+  "ok": true,
+  "detail": "null → null"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[294.1,123.8,1099.8,263] → [294.1,123.8,1099.8,263]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,1099.8,214] → [294.1,145.8,1099.8,214]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,505.9,55.9] → [294.1,145.8,505.9,55.9]"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[294.1,215.7,505.9,52.2] → [294.1,215.7,505.9,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[294.1,289.9,142.1,48] → [294.1,289.9,142.1,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "todo@1440",
+  "ok": true,
+  "detail": "[888,113.8,505.9,272] → [888,113.8,505.9,272]"
+ },
+ {
+  "lock": "PH5 · the header was found",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH5 · it carries no plate",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PH5 · its frame paints what it painted",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) → rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "PH5 · header keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "[294.1,123.8,1099.8,234] → [294.1,123.8,1099.8,234]"
+ },
+ {
+  "lock": "PH5 · frame keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "[294.1,145.8,1099.8,206] → [294.1,145.8,1099.8,206]"
+ },
+ {
+  "lock": "PH5 · title keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "null → null"
+ },
+ {
+  "lock": "PH5 · intro keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "[294.1,194,505.9,52.2] → [294.1,194,505.9,52.2]"
+ },
+ {
+  "lock": "PH5 · acts keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "[294.1,268.2,350.6,48] → [294.1,268.2,350.6,48]"
+ },
+ {
+  "lock": "PH5 · art keeps its box (±1)",
+  "where": "qc-empty@1440",
+  "ok": true,
+  "detail": "[888,105.8,505.9,272] → [888,105.8,505.9,272]"
+ }
+]

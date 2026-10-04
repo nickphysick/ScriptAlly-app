@@ -1,0 +1,362 @@
+[
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/dashboard · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/dashboard · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/dashboard · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/dashboard · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/queries · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/queries/analytics · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/queries/analytics · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/queries/analytics · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/queries/analytics · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/agents · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/agents · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/agents · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/agents · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/agents/discover · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/agents/discover · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/agents/discover · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/agents/discover · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/manuscripts · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/manuscripts · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/manuscripts · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/manuscripts · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/manuscripts/comps · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/manuscripts/comps · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/manuscripts/comps · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/manuscripts/comps · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/manuscripts/packages · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/manuscripts/packages · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/manuscripts/packages · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/manuscripts/packages · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/todo · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/todo · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · (living) at rest the crumb is shown, as before",
+  "where": "/todo · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":1,\"ariaHidden\":null,\"pe\":\"auto\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/todo · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/todo/calendar · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/todo/calendar · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/todo/calendar · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/todo/calendar · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/todo/noteboard · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/todo/noteboard · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/todo/noteboard · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/todo/noteboard · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/import · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/import · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/import · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/import · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/account/profile · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/account/profile · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/account/profile · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/plans · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/plans · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/plans · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/plans · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · the bar was found",
+  "where": "/help · 1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PH6 · at scrollTop 0 the hairline is visible, and no shadow",
+  "where": "/help · 1440",
+  "ok": false,
+  "detail": "hairline 0 shadow none"
+ },
+ {
+  "lock": "PH6 · at rest the page name is hidden",
+  "where": "/help · 1440",
+  "ok": true,
+  "detail": "{\"opacity\":0,\"ariaHidden\":\"true\",\"pe\":\"none\",\"dur\":\"0s\"}"
+ },
+ {
+  "lock": "PH6 · scrolled, the hairline is still there and still no shadow",
+  "where": "/help · 1440",
+  "ok": true,
+  "detail": "hairline 1 shadow none"
+ },
+ {
+  "lock": "PH6 · population: every route, every living one, and some scrolled",
+  "where": "all",
+  "ok": true,
+  "detail": "{\"routes\":15,\"living\":6,\"scrolled\":14}"
+ }
+]

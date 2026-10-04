@@ -22,6 +22,7 @@ async function pressBarGap(page: Page) {
   });
   await page.mouse.click(at.x, at.y);
 }
+import { PLATE_ROUTES } from "./plateRoutes";
 import { BAR_ROUTES, LIVING_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
@@ -105,9 +106,17 @@ for (const vp of SIZES) {
     const r = await readFull(page, '[data-qcv="rail"]');
     const ctx = { route: "/queries", size: `${vp.width}`, state: "expanded" };
     L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
-    if (r) judgeFull(L, r, ctx, mock);
+    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the Query Centre's full header is a plate, so the open
+       header's geometry (the 18 below the bar, the 55% text block, art standing on the rule, the rail
+       at the rule + 24) is not its geometry — plateHeader.measure.ts PH1–PH4 own it. What stays here is
+       that it is the shared header and that it IS a plate. */
+    const plate = PLATE_ROUTES.includes("/queries");
+    if (plate) {
+      const isPlate = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-plate]')].find((e) => e.getBoundingClientRect().height > 0));
+      L.check("§2 · (plate) the Query Centre's header is a plate — its geometry is PH1–PH4's", ctx, isPlate, `plate ${isPlate}`);
+    } else if (r) judgeFull(L, r, ctx, mock);
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(15);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(plate ? 2 : 15);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -185,17 +194,31 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
     /* ⚠️ RETARGETED BY LIVING HEADERS v3 (1 Oct): all four full headers are living, so they are ONE header
        again — the header's and the title's tops agree across all four, and none carries an eyebrow (the
        section is the bar's crumb; livingHeadersV3.measure LH5 holds its words). */
+    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the Query Centre's header is a plate 74px below the bar, so
+       it no longer opens at the open headers' height by design. The three open headers are held to EACH
+       OTHER (the Contact list the anchor), and the Query Centre is held to being the register's plate. */
+    const qcPlate = PLATE_ROUTES.includes("/queries");
+    const anchor = qcPlate ? c : q;
+    const anchorName = qcPlate ? "the Contact list" : "the Query Centre";
+    const others = (qcPlate ? [["Comparable titles", m], ["Submission packages", pk]] : [["the Contact list", c], ["Comparable titles", m], ["Submission packages", pk]]) as [string, typeof q][];
     for (const k of ["header", "title"] as const) {
-      for (const [nm, o] of [["the Contact list", c], ["Comparable titles", m], ["Submission packages", pk]] as const) {
-        L.check(`§4.4 · the ${k}'s top is the Query Centre's on ${nm}`, ctx, Number.isFinite(q[k]) && Math.abs(q[k] - o[k]) <= 0.5, `qc ${q[k].toFixed(1)} ${nm} ${o[k].toFixed(1)}`);
+      for (const [nm, o] of others) {
+        L.check(`§4.4 · the ${k}'s top is ${anchorName}'s on ${nm}`, ctx, Number.isFinite(anchor[k]) && Math.abs(anchor[k] - o[k]) <= 0.5, `${anchorName} ${anchor[k].toFixed(1)} ${nm} ${o[k].toFixed(1)}`);
       }
+    }
+    if (qcPlate) {
+      await openApp(page, "/queries", vp);
+      const isPlate = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-plate]')].find((e) => e.getBoundingClientRect().height > 0));
+      L.check("§4.4 · (plate) the Query Centre is exempt because it is the register's plate", ctx, isPlate && PLATE_ROUTES.length === 1, `plate ${isPlate} register ${JSON.stringify(PLATE_ROUTES)}`);
     }
     L.check("§4.4 · no full header carries an eyebrow", ctx, [q, c, m, pk].every((x) => !Number.isFinite(x.eyebrow) && !x.eyebrowText), JSON.stringify([q, c, m, pk].map((x) => x.eyebrowText)));
   }
   L.write();
   /* 7 per size since living headers v3: header and title against the Query Centre on three pages, and the
      one no-eyebrow row — an exact count, not a floor */
-  expect(L.rows.length).toBe(SIZES.length * 7);
+  /* with the Query Centre a plate (4 Oct): the header and title tops of the two other open headers against
+     the Contact list (4), the no-eyebrow row, and the plate row — 6 per size; 7 without a plate */
+  expect(L.rows.length).toBe(SIZES.length * (PLATE_ROUTES.includes("/queries") ? 6 : 7));
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 

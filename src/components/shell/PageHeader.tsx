@@ -176,6 +176,19 @@ export interface PageHeaderProps {
   /** §3.1 — the drawing, anchored to the header's bottom-right. `full` only; absent renders no slot. */
   art?: React.ReactNode;
   /**
+   * THE PLATE (qc-plate-header-v1, 4 Oct) — opt-in, `full` only, and today the Query Centre's alone.
+   * The header becomes a white plate standing on the page ground, and its drawing splits in two:
+   * `art` becomes the UNDER layer, clipped by a layer that IS the plate (so the brush stops at the
+   * plate's edge) and faded in from the left; `artFigure` is the OVER layer, the same drawing with the
+   * see-through brush removed, unclipped and stacked above the plate's hairline and shadow, so where
+   * the courier crosses the plate's top edge the edge passes behind him. Same box, same place.
+   *
+   * ⚠️ A PROP PER PAGE, NOT A VARIANT: the rollout to the other full headers is this flag on each page.
+   */
+  plate?: boolean;
+  /** The plate's OVER layer (see `plate`). Ignored without `plate`. */
+  artFigure?: React.ReactNode;
+  /**
    * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
    * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
    *
@@ -247,6 +260,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   primaryRef,
   secondary,
   art,
+  plate = false,
+  artFigure,
   title,
   icon,
   primary,
@@ -445,8 +460,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}`}
-      data-probe="page-header" data-size="full"
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}`}
+      data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >
       {/**
@@ -501,7 +516,18 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         * will go. The text block keeps its half either way, so the two pages that do have art and
         * the one that does not open identically.
         */}
-      {art && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
+      {art && !plate && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
+      {/**
+        * THE PLATE'S TWO LAYERS (see the `plate` prop). The clip is a sibling of the text, inset to the
+        * plate's own box with its radius, so the under layer is cut at exactly the plate's edge; the
+        * over layer is outside it. Both are decorative: aria-hidden, and no pointer events (CSS).
+        */}
+      {plate && art && (
+        <div className="ph-plclip" aria-hidden="true">
+          <div className="ph-under" data-probe="art-under">{art}</div>
+        </div>
+      )}
+      {plate && artFigure && <div className="ph-over" data-probe="art-figure" aria-hidden="true">{artFigure}</div>}
       </div>
     </header>
   );

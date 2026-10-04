@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "PH1 · the header is a plate",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "plate {\"l\":294.078125,\"r\":1393.921875,\"t\":179.75,\"b\":399.75,\"w\":1099.84375,\"h\":220}"
+ },
+ {
+  "lock": "PH1 · the plate spans the column (±1)",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "plate 294.078125/1099.84375 column 294.08/1099.8400000000001"
+ },
+ {
+  "lock": "PH1 · 220 tall",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "h 220"
+ },
+ {
+  "lock": "PH1 · 16 radius",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "16px"
+ },
+ {
+  "lock": "PH1 · the token's white",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) token rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PH1 · 74 between the bar and the plate's top",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "74.0"
+ },
+ {
+  "lock": "PH1 · the desk starts 26 below the plate",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "PH2 · the drawing's clipping ancestor is the plate's box (±1)",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "clip {\"l\":294.078125,\"r\":1393.921875,\"t\":179.75,\"b\":399.75,\"w\":1099.84375,\"h\":220}"
+ },
+ {
+  "lock": "PH2 · and it is overflow hidden",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "PH2 · precondition: a brush-only column exists 10px above the plate",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "14 columns at natural y 69.1"
+ },
+ {
+  "lock": "PH2 · there, the pixel is the page ground",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "at 244,240,234 ground 244,240,234 (x 1139.1)"
+ },
+ {
+  "lock": "PH3 · precondition: the figure crosses the plate's top edge",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "191 columns at natural y 82.4"
+ },
+ {
+  "lock": "PH3 · elementFromPoint on the crossing is the figure",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "art-figure"
+ },
+ {
+  "lock": "PH3 · no hairline or shadow drawn through the figure",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "with [[54,41,36],[135,84,52],[137,81,47],[137,81,47]] without [[54,41,36],[135,84,52],[137,81,47],[137,81,47]]"
+ },
+ {
+  "lock": "PH4 · the title's right edge is left of the art",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "title 688.984375 art 1005.96875"
+ },
+ {
+  "lock": "PH4 · the intro's right edge is left of the art",
+  "where": "/queries · 1440",
+  "ok": false,
+  "detail": "intro 1032.078125 art 1005.96875"
+ },
+ {
+  "lock": "PH4 · the actions's right edge is left of the art",
+  "where": "/queries · 1440",
+  "ok": true,
+  "detail": "actions 682.65625 art 1005.96875"
+ }
+]

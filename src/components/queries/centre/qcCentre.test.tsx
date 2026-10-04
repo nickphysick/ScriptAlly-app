@@ -18,7 +18,7 @@ import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DOCK_MIN_COLUMN, QcCentre, readBirdsEyeOpen } from "./QcCentre";
-import { HERO_COURIER_MAP } from "./qcArt";
+import { HERO_COURIER_MAP, QC_PLATE_COURIER, QC_PLATE_FIGURE } from "./qcArt";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -210,10 +210,18 @@ describe("the frame, rendered", () => {
      * with is the page's decision and nothing else knows it; where it sits is the header's, and
      * "last in the reading order, aria-hidden" is asserted once for every page in `mastheadFormat`.
      */
+    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the populated page's header is a plate, and its drawing is the
+       two enrolled layers — the full crop under the plate's clip, the brushless figure over its edge.
+       `hero-courier-map.png` is still the asset `QcEmpty` opens with; it is no longer this page's. */
     const html = frame();
-    expect(html).toContain(HERO_COURIER_MAP.src);
-    expect(html).toContain(`?v=${HERO_COURIER_MAP.version}`);
-    expect(html, "the art stopped reaching the header's slot").toContain('data-probe="art"');
+    for (const art of [QC_PLATE_COURIER, QC_PLATE_FIGURE]) {
+      expect(html).toContain(art.src);
+      expect(html).toContain(`?v=${art.version}`);
+    }
+    expect(html, "the plate is not switched on").toContain('data-plate=""');
+    expect(html, "the full crop stopped reaching the plate's clipped layer").toMatch(/class="ph-plclip"[^>]*>\s*<div class="ph-under" data-probe="art-under"><img src="\/images\/qc\/qc-plate-courier\.png/);
+    expect(html, "the figure stopped reaching the over layer").toMatch(/class="ph-over" data-probe="art-figure" aria-hidden="true"><img src="\/images\/qc\/qc-plate-courier-figure\.png/);
+    expect(html, "the populated page went back to the open header's single drawing").not.toContain(HERO_COURIER_MAP.src);
   });
   /**
  * ⚠️ RETIRED BY §3 — the head's grid and its container-query fallback belonged to the page's own

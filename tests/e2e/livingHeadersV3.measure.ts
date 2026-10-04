@@ -21,6 +21,7 @@ import { resolve } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 import { Ledger, near, f1 } from "./shellV3Lib";
+import { PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 
 test.describe.configure({ timeout: 1_800_000 });
 
@@ -55,6 +56,8 @@ type Box = { l: number; t: number; w: number; h: number; r: number; b: number } 
 type Hero = {
   living: string | null; rule: number; hd: Box; eyebrow: number; h1: Box; h1Text: string; h1Scroll: number; h1Client: number; h1Lines: number;
   h2: Box; h2Text: string; intro: Box; introText: string; acts: Box; b1: Box; b2: Box; art: Box; artSrc: string; shape: string;
+  /** the header is a plate (`data-plate`, the register in plateRoutes.ts) */
+  plate: boolean;
 };
 
 async function setCount(page: Page, n: number | null) {
@@ -91,6 +94,7 @@ async function readHero(page: Page): Promise<Hero> {
     return {
       living: hd.getAttribute("data-living"),
       rule: parseFloat(getComputedStyle(hd).borderBottomWidth) || 0,
+      plate: hd.hasAttribute("data-plate"),
       hd: { l: o.left, t: o.top, w: o.width, h: o.height, r: o.right, b: o.bottom },
       eyebrow: hd.querySelectorAll('[data-probe="eyebrow"]').length,
       h1: box(h1), h1Text: h1?.innerText.trim() ?? "", h1Scroll: h1?.scrollWidth ?? -1, h1Client: h1?.clientWidth ?? -1, h1Lines: lines(h1),
@@ -127,6 +131,7 @@ async function readRef(page: Page, hdW: number, pg: string, n: number) {
 test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edge, only the text, the empty page", async ({ page }) => {
   const L = new Ledger("lh3-shape");
   const widths1280: Record<string, Record<string, number>> = {};
+  const platesSeen = new Set<string>();
   let reads = 0;
   for (const w of WIDTHS) for (const p of RUN) {
     const ctx = (state: string) => ({ route: p.route, size: `${w}`, state });
@@ -185,6 +190,7 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
       const main = rail?.previousElementSibling ?? null;
       return {
         h1: Lx(hd.querySelector("h1")), intro: Lx(hd.querySelector('[data-probe="intro"]')), acts: Lx(hd.querySelector('[data-probe="actions"]')),
+        frame: Lx(hd.querySelector('[data-probe="hero-frame"]')),
         tile: Lx(vis(p.tile)), row: Lx(vis(p.row)),
         heroR: hd.getBoundingClientRect().right, railR: rail?.getBoundingClientRect().right ?? null,
         /* the rail is BESIDE the column (not stacked under it) when its top is near the column's */
@@ -193,7 +199,15 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     }, p);
     reads++;
     const lefts = [edges.h1, edges.intro, edges.acts, edges.tile, edges.row].filter((x) => x !== null) as number[];
-    L.check("LH4 one left x", ctx("data"), lefts.length >= 3 && lefts.every((x) => near(x, edges.h1!, 1)), [edges.h1, edges.intro, edges.acts, edges.tile, edges.row].map(f1).join(" "));
+    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): on a plate route the text is inset by the plate's padding, so
+       "one left x" becomes TWO: the plate's left is the cards' left, and the text sits PLATE_PAD_X inside it. */
+    if (PLATE_ROUTES.includes(p.route)) {
+      platesSeen.add(p.route);
+      const text = [edges.h1, edges.intro, edges.acts].filter((x) => x !== null) as number[];
+      const column = [edges.frame, edges.tile, edges.row].filter((x) => x !== null) as number[];
+      L.check("LH4 (plate) the plate's left is the cards' left", ctx("data"), column.length >= 3 && column.every((x) => near(x, edges.frame!, 1)), [edges.frame, edges.tile, edges.row].map(f1).join(" "));
+      L.check("LH4 (plate) the text sits the plate's padding inside it", ctx("data"), text.length >= 3 && edges.frame !== null && text.every((x) => near(x, edges.frame! + PLATE_PAD_X, 1)), [edges.h1, edges.intro, edges.acts].map(f1).join(" ") + ` frame ${f1(edges.frame)}`);
+    } else L.check("LH4 one left x", ctx("data"), lefts.length >= 3 && lefts.every((x) => near(x, edges.h1!, 1)), [edges.h1, edges.intro, edges.acts, edges.tile, edges.row].map(f1).join(" "));
     if (edges.beside) L.check("LH4 hero right = rail right", ctx("data"), near(edges.heroR, edges.railR ?? -1, 1), `${f1(edges.heroR)} vs ${f1(edges.railR)}`);
     else L.check("LH4 rail stacked (reported, not asserted)", ctx("data"), true, `rail right ${f1(edges.railR)} hero right ${f1(edges.heroR)}`);
 
@@ -202,15 +216,25 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     const empty = await readHero(page);
     reads++;
     L.check("LH7 empty mode", ctx("0"), empty.living === "empty" && !empty.h1 && !!empty.h2 && empty.h2Text === p.empty, `living ${empty.living} h1 ${s(empty.h1)} h2 "${empty.h2Text}"`);
-    L.check("LH7 no rule", ctx("0"), empty.rule === 0 && many.rule > 0, `rule ${empty.rule} (populated ${many.rule})`);
+    const isPlate = PLATE_ROUTES.includes(p.route);
+    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): on a plate route the populated header IS the plate, which
+       replaces the rule; the empty state keeps the open header, held to its pre-plate geometry by PH5. */
+    if (isPlate) L.check("LH7 (plate) no rule either side: the plate replaces it", ctx("0"), empty.rule === 0 && !empty.plate && many.rule === 0 && many.plate, `rule ${empty.rule}/${many.rule} plate ${empty.plate}/${many.plate}`);
+    else L.check("LH7 no rule", ctx("0"), empty.rule === 0 && many.rule > 0, `rule ${empty.rule} (populated ${many.rule})`);
     L.check("LH7 no eyebrow", ctx("0"), empty.eyebrow === 0 && many.eyebrow === 0, `${empty.eyebrow} / ${many.eyebrow}`);
     for (const k of ["b1", "b2", "art"] as const) {
       if (!many[k] && !empty[k]) continue;
+      /* a plate's buttons sit inside its padding and its art is two layers — the empty state is a different
+         header by design (PH5 holds it); the cross-state claim does not apply */
+      if (isPlate) { L.check("LH7 (plate) cross-state boxes skipped: the empty state is the open header (PH5)", ctx(`0·${k}`), true, ""); continue; }
       L.check("LH7 same x and size", ctx(`0·${k}`), !!empty[k] && !!many[k] && near(empty[k]!.l, many[k]!.l, 1) && near(empty[k]!.w, many[k]!.w, 1) && near(empty[k]!.h, many[k]!.h, 1), `${s(empty[k])} vs ${s(many[k])}`);
     }
 
     /* ── LH0: the populated hero against the ref's, by the same ruler ── */
-    if (w === 1440) {
+    if (w === 1440 && PLATE_ROUTES.includes(p.route)) {
+      /* ⚠️ the living ref draws the OPEN header; a plate route's header is measured against the plate ref by PH1–PH4 */
+      L.check("LH0 (plate) skipped: the plate's ref is qc-plate-header-v1 (PH1–PH4)", ctx("27"), many.plate, `plate ${many.plate}`);
+    } else if (w === 1440) {
       const r = await readRef(page, many.hd!.w, p.key, 27);
       L.check("LH0 ref: header height", ctx("27"), near(many.hd!.h, r.hdH, 2), `${f1(many.hd!.h)} vs ref ${f1(r.hdH)}`);
       L.check("LH0 ref: title top", ctx("27"), near(many.h1!.t, r.h1!.t, 1), `${f1(many.h1!.t)} vs ref ${f1(r.h1!.t)}`);
@@ -224,6 +248,8 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
   writeFileSync("reports/living-headers-v3/headline-widths-1280.json", JSON.stringify(widths1280, null, 1));
   L.write();
   console.log(`LH3 shape reads: ${reads}`);
+  /* what was treated as a plate IS the register's set, among the routes this run covered */
+  expect([...platesSeen].sort(), "the plate exemptions are not the register's").toEqual(PLATE_ROUTES.filter((r) => RUN.some((p) => p.route === r)).slice().sort());
   expect(reads, "the suite measured less than it claims").toBeGreaterThanOrEqual(WIDTHS.length * RUN.length * 9);
   expect(L.failures(), L.failures().map((f) => `${f.lock} ${f.route} ${f.size} ${f.state}: ${f.detail}`).join("\n")).toEqual([]);
 });
@@ -344,7 +370,8 @@ test("LH9 · a page filtered to nothing keeps its hero", async ({ page }) => {
     const none = await page.evaluate((sel) => !![...document.querySelectorAll(sel)].find((e) => e.getBoundingClientRect().height > 0), noneSel);
     const ctx = { route, size: "1440", state };
     L.check("LH9 population", ctx, none, `no-match shown ${none}`);
-    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && h.rule > 0 && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule}`);
+    /* a plate route keeps its PLATE where an open header keeps its rule (4 Oct) */
+    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : h.rule > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate}`);
     L.check("LH9 no exhibition", ctx, (await page.evaluate(() => [...document.querySelectorAll('[data-lh="band"]')].filter((e) => e.getBoundingClientRect().height > 0).length)) === 0, "");
   };
   if (!ONLY || ONLY === "qc") {

@@ -9,6 +9,7 @@ import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
 import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
+import { PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
 
 test.describe.configure({ timeout: Number(process.env.QB_TIMEOUT ?? 900_000) });
@@ -153,6 +154,7 @@ test("Q9 · reduced motion makes both changes instant", async ({ browser }) => {
 test("Q8 · every full header starts on the column's left, level with the first card; the drawing ends on its right", async ({ page }) => {
   const L = new Ledger("qb-left");
   let full = 0, compact = 0, drawn = 0;
+  const platesSeen = new Set<string>();
   for (const vp of SIZES) {
     for (const route of BAR_ROUTES) {
       await openApp(page, route, vp);
@@ -167,7 +169,13 @@ test("Q8 · every full header starts on the column's left, level with the first 
       if (r.size === "full" && !r.card) continue;
       if (r.size === "full") {
         full++;
-        L.check("Q8 · full: the text's left = the first card's left (±1)", ctx, !!r.card && near(r.textL, r.card.l, 1), `text ${r.textL.toFixed(1)} card ${r.card?.l.toFixed(1)} (${r.card?.cls})`);
+        /* ⚠️ RETARGETED BY THE PLATE (4 Oct): on a plate route the PLATE starts on the column's left, level
+           with the first card, and the text sits the plate's padding inside it (plateRoutes.ts). */
+        if (PLATE_ROUTES.includes(route)) {
+          platesSeen.add(route);
+          L.check("Q8 · (plate) the plate's left = the first card's left (±1)", ctx, r.plate && !!r.card && r.frameL !== null && near(r.frameL, r.card.l, 1), `plate ${r.plate} frame ${r.frameL?.toFixed(1)} card ${r.card?.l.toFixed(1)}`);
+          L.check("Q8 · (plate) the text sits the plate's padding inside it (±1)", ctx, r.frameL !== null && near(r.textL, r.frameL + PLATE_PAD_X, 1), `text ${r.textL.toFixed(1)} frame ${r.frameL?.toFixed(1)}`);
+        } else L.check("Q8 · full: the text's left = the first card's left (±1)", ctx, !!r.card && near(r.textL, r.card.l, 1), `text ${r.textL.toFixed(1)} card ${r.card?.l.toFixed(1)} (${r.card?.cls})`);
         /* Comparable titles passes no art — nothing to anchor; the tally below counts the drawings measured */
         if (r.drawnR !== null) {
           drawn++;
@@ -184,8 +192,11 @@ test("Q8 · every full header starts on the column's left, level with the first 
     }
   }
   const all = { route: "*", size: "*", state: "tally" };
-  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6, `full ${full} compact ${compact} drawn ${drawn}`);
+  /* a plate's drawing sits 24 in from its right by design (PH1–PH4 own it), so each plate route takes its
+     drawing out of this tally at both sizes — 6 open drawings became 4 when the Query Centre became a plate */
+  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6 - 2 * PLATE_ROUTES.length, `full ${full} compact ${compact} drawn ${drawn}`);
   L.write();
   console.log(`Q8 tally: full ${full} compact ${compact} drawn ${drawn}`);
+  expect([...platesSeen].sort(), "Q8's plate exemptions are not the register's").toEqual([...PLATE_ROUTES].sort());
   expect(L.failures().map((f) => `${f.lock} · ${f.route} ${f.size} — ${f.detail}`)).toEqual([]);
 });

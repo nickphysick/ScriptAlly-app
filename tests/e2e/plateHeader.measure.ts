@@ -47,11 +47,15 @@ async function readPlate(page: Page) {
     const box = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; };
     const head = [...document.querySelectorAll('[data-probe="page-header"]')].find(vis) ?? null;
     const plate = head && head.hasAttribute("data-plate") ? head.querySelector('[data-probe="hero-frame"]') : null;
-    const group = head?.closest(".qcv-group") ?? null;
+    /* THE COLUMN IS THE GROUP'S CONTENT BOX — its border box includes the page gutter */
+    const groupEl = head?.closest(".qcv-group") as HTMLElement | null;
+    const group = groupEl ? (() => { const r = groupEl.getBoundingClientRect(); const cs = getComputedStyle(groupEl); const pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight); return { l: r.left + pl, r: r.right - pr, t: r.top, b: r.bottom, w: r.width - pl - pr, h: r.height }; })() : null;
     const desk = [...document.querySelectorAll(".qcv-desk")].find(vis) ?? null;
     const bar = [...document.querySelectorAll('[data-probe="navrow"]')].find(vis) ?? null;
+    /* the layers are wrappers holding an <img>: the box is the wrapper's, the source the image's */
     const under = plate?.querySelector('[data-probe="art-under"]') ?? null;
     const figure = plate?.querySelector('[data-probe="art-figure"]') ?? null;
+    const img = (e: Element | null) => (e ? (e.tagName === "IMG" ? e : e.querySelector("img")) as HTMLImageElement | null : null);
     let clip: Element | null = null;
     for (let p = under?.parentElement ?? null; p; p = p.parentElement) { if (getComputedStyle(p).overflow !== "visible") { clip = p; break; } }
     const probe = document.createElement("div");
@@ -69,12 +73,14 @@ async function readPlate(page: Page) {
     const actsRight = acts ? Math.max(...[...acts.querySelectorAll("*")].filter(vis).map((e) => e.getBoundingClientRect().right), -Infinity) : null;
     const ps = plate ? getComputedStyle(plate) : null;
     return {
-      head: box(head), plate: box(plate), group: box(group), desk: box(desk), bar: box(bar),
+      head: box(head), plate: box(plate), group, desk: box(desk), bar: box(bar),
       under: box(under), figure: box(figure), clip: box(clip),
       clipOverflow: clip ? getComputedStyle(clip).overflow : null, clipIsPlate: !!clip && clip === plate,
       plateBg: ps?.backgroundColor ?? null, plateRadius: ps?.borderTopLeftRadius ?? null, token,
-      titleInk: ink(head?.querySelector("h1") ?? null), introInk: ink(head?.querySelector(".ph-intro") ?? null), actsRight,
-      underSrc: (under as HTMLImageElement | null)?.currentSrc ?? null, figureSrc: (figure as HTMLImageElement | null)?.currentSrc ?? null,
+      /* the intro is read by its BOX — its measure — not its ink, so the claim holds for any copy that fills
+         the measure rather than only for today's sentence (a one-line intro clears the art whatever its cap) */
+      titleInk: ink(head?.querySelector("h1") ?? null), introInk: (head?.querySelector(".ph-intro") as HTMLElement | null)?.getBoundingClientRect().right ?? null, actsRight,
+      underSrc: img(under)?.currentSrc ?? null, figureSrc: img(figure)?.currentSrc ?? null,
     };
   });
 }
@@ -90,7 +96,7 @@ async function scanColumns(page: Page, a: string, b: string, y: number, minA: nu
     const out: number[] = [];
     for (let x = Math.ceil(fromX); x < da.width - 2; x++) {
       let ok = true;
-      for (let dy = -2; dy <= 2 && ok; dy++) for (let dx = -2; dx <= 2 && ok; dx++) {
+      for (let dy = -1; dy <= 1 && ok; dy++) for (let dx = -1; dx <= 1 && ok; dx++) {
         if (al(da, x + dx, y + dy) < minA || al(db, x + dx, y + dy) > maxB) ok = false;
       }
       if (ok) out.push(x);
@@ -141,7 +147,9 @@ for (const vp of SIZES) {
     if (p.plate && p.under && p.figure && p.underSrc && p.figureSrc) {
       const scale = p.under.h / 375;
       const yNat = (p.plate.t - 10 - p.under.t) / scale;
-      const s = await scanColumns(page, p.underSrc, p.figureSrc, yNat, 160, 4, 484 * 0.35);
+      /* the brush is a see-through layer (alpha ≤ ~176 at this row), so the floor is 60 over a 3×3 patch: unclipped, that is
+         still ~18 levels of colour over the ground against a 3-level tolerance */
+      const s = await scanColumns(page, p.underSrc, p.figureSrc, yNat, 60, 0, 484 * 0.35);
       L.check("PH2 · precondition: a brush-only column exists 10px above the plate", w, s.cols.length > 0, `${s.cols.length} columns at natural y ${yNat.toFixed(1)}`);
       if (s.cols.length) {
         const x = p.under.l + s.cols[Math.floor(s.cols.length / 2)] * scale;
@@ -163,9 +171,10 @@ for (const vp of SIZES) {
         const y = p.plate.t + 0.5;
         const hit = await page.evaluate(({ x, y }) => {
           const f = [...document.querySelectorAll<HTMLElement>('[data-probe="art-figure"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-          const was = f.style.pointerEvents; f.style.pointerEvents = "auto";
-          const e = document.elementFromPoint(x, y); f.style.pointerEvents = was;
-          return e ? (e.getAttribute("data-probe") ?? e.className.toString()) : null;
+          const els = [f, ...f.querySelectorAll<HTMLElement>("*")];
+          const was = els.map((n) => n.style.pointerEvents); els.forEach((n) => { n.style.pointerEvents = "auto"; });
+          const e = document.elementFromPoint(x, y); els.forEach((n, i) => { n.style.pointerEvents = was[i]; });
+          return e ? (e.closest('[data-probe="art-figure"]') ? "art-figure" : (e.getAttribute("data-probe") ?? e.className.toString())) : null;
         }, { x, y });
         L.check("PH3 · elementFromPoint on the crossing is the figure", w, hit === "art-figure", `${hit}`);
         const shots = async () => Promise.all([-1, 0, 1, 2].map((dy) => pixel(page, x, p.plate!.t + dy)));
