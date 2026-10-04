@@ -48,3 +48,32 @@ export const BE_HAWK_HEAD: QcArt = {
   width: 300,
   height: 287,
 };
+
+/**
+ * The plate header's drawing, in TWO LAYERS that share one box (4 Oct; ref
+ * `design-refs/page-header/qc-plate-header-v1.html`).
+ *
+ * `QC_PLATE_COURIER` is `hero-courier-map.png` cropped from x 712 — the courier, his map, letters and
+ * satchel, without the two drawn cards. `QC_PLATE_FIGURE` is the same crop with the semi-transparent
+ * brush layer removed (pixels below alpha 200 dropped, ramped to 235). The UNDER layer is clipped to
+ * the plate; the OVER layer is not, so the figure rises past the plate's top edge in front of its
+ * border while the brush stops at it. Every brush in this art is a see-through layer, which is what
+ * makes the split possible.
+ *
+ * ⚠️ THEY SHIP AS SUPPLIED — RGBA, not quantised — so they sit outside the PNG-8 budget the two
+ * drawings above are held to. Both are guarded twice: their bytes against the pack's SHA256 in
+ * `design-refs/.refhashes.json`, and their md5 version here, read by `qcArt.test.ts`. **The two must
+ * share one box**, or the figure stops landing exactly on its own brush; that is locked too.
+ */
+export const QC_PLATE_COURIER: QcArt = {
+  src: "/images/qc/qc-plate-courier.png",
+  version: "4ba13296",
+  width: 484,
+  height: 375,
+};
+export const QC_PLATE_FIGURE: QcArt = {
+  src: "/images/qc/qc-plate-courier-figure.png",
+  version: "a84c6aac",
+  width: 484,
+  height: 375,
+};

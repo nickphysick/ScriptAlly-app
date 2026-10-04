@@ -67,7 +67,14 @@ const update = process.argv.includes("--update");
  *   --update                 re-record the watchlist, naming what actually changed
  *   --update <path…>         enrol those refs as well, naming each
  */
-const relOf = (arg) => (arg.startsWith("design-refs/") ? arg : `design-refs/${arg}`);
+/**
+ * A bare name is a ref in `design-refs/`, as it always was. A repo-relative path that EXISTS is taken
+ * as given — added (4 Oct, the plate header) because the pack's two art files are reference artefacts
+ * that ship as-is to `public/images/qc/`, so guarding the shipped bytes IS guarding the ref. Before
+ * this, `--update public/…` silently became `design-refs/public/…` and failed as "not there".
+ */
+const relOf = (arg) =>
+  arg.startsWith("design-refs/") ? arg : existsSync(join(ROOT, arg)) ? arg : `design-refs/${arg}`;
 
 if (update) {
   const listed = new Set(entries.map(([rel]) => rel));

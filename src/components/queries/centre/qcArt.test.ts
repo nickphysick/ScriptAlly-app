@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { BE_HAWK_HEAD, COURIER_CUTOUT, HERO_COURIER_MAP, type QcArt } from "./qcArt";
+import { BE_HAWK_HEAD, COURIER_CUTOUT, HERO_COURIER_MAP, QC_PLATE_COURIER, QC_PLATE_FIGURE, type QcArt } from "./qcArt";
 
 const file = resolve(process.cwd(), "public", COURIER_CUTOUT.src.replace(/^\//, ""));
 
@@ -69,6 +69,27 @@ describe("the v65.2 artwork", () => {
       expect(Math.round(b.length / 1024), `${name} is over its budget`).toBeLessThanOrEqual(maxKb);
     });
   }
+  /**
+   * The plate's two layers ship as supplied (RGBA, not quantised), so they are held to their own
+   * claims rather than the PNG-8 loop above: the bytes the pack approved, real alpha, and ONE box
+   * between them — the figure is drawn over its own brush, so a different size or crop is a figure
+   * that no longer lands on itself.
+   */
+  for (const [name, art] of [["the plate's courier", QC_PLATE_COURIER], ["the plate's figure", QC_PLATE_FIGURE]] as const) {
+    it(`${name}: the file is where the record says, at the bytes the pack approved`, () => {
+      const f = at(art);
+      expect(existsSync(f), `${f} is not in the tree`).toBe(true);
+      const b = readFileSync(f);
+      expect(createHash("md5").update(b).digest("hex").slice(0, 8)).toBe(art.version);
+      expect(b.subarray(1, 4).toString("ascii")).toBe("PNG");
+      expect(b.readUInt32BE(16)).toBe(art.width);
+      expect(b.readUInt32BE(20)).toBe(art.height);
+      expect(b.readUInt8(25), "colour type 6 — RGBA, so it composites with no blend mode").toBe(6);
+    });
+  }
+  it("⚠️ the plate's two layers share ONE box, or the figure stops landing on its own brush", () => {
+    expect([QC_PLATE_FIGURE.width, QC_PLATE_FIGURE.height]).toEqual([QC_PLATE_COURIER.width, QC_PLATE_COURIER.height]);
+  });
   it("⚠️ each is TRIMMED to its drawn area — a padded image scales its padding with it", () => {
     /* the sources carry transparent margin (the hero 16px at the left, the head 56px at the top),
        and every measured number in §3 and §6 is about the DRAWING, not the file it arrived in */
