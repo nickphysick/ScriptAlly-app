@@ -5,21 +5,23 @@
  * AgentCardHost — the agent card, mounted ONCE (Agent card v1 §2; ref
  * design-refs/agent-card-housekeeping-v7.html). It subscribes to `agentCardStore`, owns everything
  * the card needs from the data layer — the scoped manuscript, the agent's facts off the Query
- * Centre's own rows, the one notes listener, the save and the add — and portals the card to
- * document.body, so it opens over whatever page the writer is on.
+ * Centre's own rows, the one notes listener, the writer, the save and the add — and portals the
+ * card to document.body, so it opens over whatever page the writer is on.
  *
- * ⚠️ PHASE 1 IS A RELOCATION. The host renders today's pop-up (`ContactProfile`) and add card
- * (`ContactAddCard`) with the plumbing that used to live in `AgentList`, moved here verbatim. The
- * v11/v12 suites staying green is the proof the move changed nothing; Phases 2–3 replace what it
- * renders. One behaviour changes on purpose: the card no longer closes when its agent drops out of
- * the list's FILTER (the old auto-close discarded a card opened from Housekeeping for any agent the
- * current search hid). It closes when the agent no longer exists.
+ * ⚠️ PHASE 2 DRAWS THE QUICK VIEW; THE EDITOR IS STILL THE OLD POP-UP'S EDIT FACE (`ContactProfile`
+ * opened at a section) until Phase 3 replaces it. Every way into the editor goes through ONE
+ * function here, `openEditor`, so Phase 3 changes one place. Leaving that editor returns to the
+ * quick view, as the mock's editor does.
  *
  * ⚠️ THE LIST STILL OWNS ITS OWN AFTERMATH — the notice saying where a saved record went, its Undo,
- * the FLIP, the ring on a new row — through the store's events, because the host is app-level and
- * the Contact list is only one of the pages the card opens over.
+ * the FLIP, the ring on a new row, the row scrolled into view on a step — through the store, because
+ * the host is app-level and the Contact list is only one of the pages the card opens over.
+ *
+ * ⚠️ THE QUICK VIEW'S OWN WRITES (the stars, the wishlist stamp) GO THROUGH `commitAgentEdits`, NOT
+ * `updateAgent`: the latter logs an activity for every write, so its Undo would append a second
+ * entry — the house undo rule forbids compensating entries.
  */
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../../../lib/firebase";
@@ -29,8 +31,9 @@ import {
   AgentNote, committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft,
 } from "../../../lib/agentNotes";
 import {
-  AgentCardOptions, closeAgentCard, currentAgentCard, emitAgentCardEvent, legacySectionFor,
-  openAgentCard, openNewAgentCard, useAgentCardRequest,
+  AgentCardField, AgentCardOptions, AgentCardTab, closeAgentCard, currentAgentCard, emitAgentCardEvent,
+  legacySectionFor, openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
+  type AgentCardOrigin,
 } from "../../../lib/agentCardStore";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { buildQcRows } from "../../../lib/qcSummary";
@@ -39,16 +42,29 @@ import { isGenreMatch, matchGenre } from "../../../lib/genreMatch";
 import {
   AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor,
 } from "../../../lib/contactEdit";
-import { AgentEditPatch, commitAgentEdits } from "../../../lib/saveAgentEdits";
+import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../../lib/computeAgentDeadlineWrites";
 import { normaliseSubmissionsUrl } from "../../../lib/quickAdd";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { dayMonth } from "../../../lib/dates";
+import { alsoQueried, cardQuery, cardRows, reopenReminder, stepTarget, type CardAct } from "../../../lib/agentCard";
 import { ContactProfile } from "../contact/ContactProfile";
 import { ContactAddCard } from "../contact/ContactAddCard";
+import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
+import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
 import "../contact/contactV11.css";
 
 /** The shared manuscript-scope key — the same one the Contact list, Packages and Comps read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
+
+/** How the card writes an agent. The app's is Firestore; the lab's is its own cast. */
+export type AgentWriter = (agentId: string, patch: AgentEditPatch) => Promise<SaveAgentResult>;
+
+/** What the dev lab swaps in — its own writer, and the fact that it IS the Contact list. */
+export interface AgentCardSandbox {
+  writeAgent?: AgentWriter;
+  contactListHere?: boolean;
+}
 
 /* The measurement harness opens the card the way every door does, through the store. Development
    builds only: the MODE literal is replaced at build time, so a production bundle carries none of
@@ -63,21 +79,36 @@ if (import.meta.env.MODE === "development" && typeof window !== "undefined") {
   };
 }
 
-export const AgentCardHost: React.FC = () => {
+export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox }) => {
   const req = useAgentCardRequest();
   if (!req) return null;
-  return <AgentCardSession key={req.seq} />;
+  return <AgentCardSession key={req.seq} sandbox={sandbox} />;
 };
 
+/** The row's box on screen now — the exit shrinks back into it. Rows carry `data-agent-card`. */
+const rowBoxOf = (agentId: string): AgentCardOrigin | null => {
+  const el = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${agentId}"]`)]
+    .find((e) => e.getBoundingClientRect().height > 0);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: r.x, y: r.y, width: r.width, height: r.height };
+};
+
+/** The editor a door asked for: a tab, and the field to focus there. */
+interface EditTarget { tab: AgentCardTab; focus?: AgentCardField }
+
 /** One open of the card — keyed on the request's seq, so every open is a fresh session. */
-const AgentCardSession: React.FC = () => {
+const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox }) => {
   const req = useAgentCardRequest();
   const navigate = useNavigate();
   /* ⚠️ THE SWITCHER RE-OPENS THE ROUTE (page header v2 §4.5): a switch is a new location KEY, and
      that key is what the scope reads on — memoised on `manuscripts` alone the card would go on
      stating the old book. */
-  const { key: locationKey } = useLocation();
-  const { agents, queries, manuscripts, activities, addAgent, currentUser, collectionsReady, packages } = useScriptAllyDb();
+  const { key: locationKey, pathname } = useLocation();
+  const {
+    agents, queries, manuscripts, activities, addAgent, addUserTask, deleteUserTask, currentUser,
+    collectionsReady, packages,
+  } = useScriptAllyDb();
 
   const scoped = useMemo(() => {
     let id: string | null = null;
@@ -109,7 +140,14 @@ const AgentCardSession: React.FC = () => {
     if (agentId && collectionsReady && agents.length > 0 && !agent) closeAgentCard();
   }, [agentId, agent, collectionsReady, agents.length]);
 
-  const [savedNote, setSavedNote] = useState<string | null>(null);
+  /* the editor a door asked for opens straight away; otherwise the quick view */
+  const [editing, setEditing] = useState<EditTarget | null>(req?.tab ? { tab: req.tab, focus: req.focus } : null);
+  const [handover, setHandover] = useState<QuickFoot | null>(null);
+  const [slide, setSlide] = useState<"l" | "r" | null>(null);
+  const frameRef = useRef<AgentCardFrameHandle>(null);
+  /* the entrance plays once per open — coming back from the editor is not an arrival */
+  const shown = useRef(false);
+  useEffect(() => { if (!editing) shown.current = true; });
 
   /* ONE notes listener, for the open agent only — never one per row. */
   const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
@@ -149,10 +187,21 @@ const AgentCardSession: React.FC = () => {
     [storedNotes, agent],
   );
 
+  /** THE writer. Never through `updateAgent` (see the header): no activity, so an undo appends none. */
+  const writeAgent: AgentWriter = useCallback(async (id, patch) => {
+    if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
+    if (!currentUser) return { ok: false, error: "Not signed in." };
+    return commitAgentEdits(db, currentUser.id, id, patch);
+  }, [sandbox, currentUser]);
+  const write = useCallback(async (patch: AgentEditPatch) => {
+    if (!agentId) return false;
+    return (await writeAgent(agentId, patch)).ok;
+  }, [agentId, writeAgent]);
+
   /**
-   * SAVE: diff the draft against the record, send ONLY what changed through `commitAgentEdits` —
-   * sanitised, atomic, with the reply-time deadline fan-out riding the same batch
-   * (`computeAgentDeadlineWrites`). A wishlist edit stamps `mswlCheckedAt` in the SAME write.
+   * SAVE (the bridge editor's): diff the draft against the record, send ONLY what changed through
+   * `commitAgentEdits` — sanitised, atomic, with the reply-time deadline fan-out riding the same
+   * batch (`computeAgentDeadlineWrites`). A wishlist edit stamps `mswlCheckedAt` in the SAME write.
    */
   const onSave = useCallback(async (d: ContactDraft, notes: AlsoNote[]): Promise<boolean> => {
     const orig = agentId ? agents.find((a) => a.id === agentId) : null;
@@ -188,16 +237,17 @@ const AgentCardSession: React.FC = () => {
       : [];
     const res = await commitAgentEdits(db, currentUser.id, orig.id, patch, extras);
     if (!res.ok) return false;
-    setSavedNote(savedLineFor(notes));
+    setHandover({ text: savedLineFor(notes) });
     const after = Object.assign({ ...orig } as Agent, patch as Partial<Agent>);
     emitAgentCardEvent({ type: "saved", agentId: orig.id, before: { ...orig }, after });
     return true;
   }, [agentId, agents, currentUser, queries]);
 
-  /** Add ONE note — the subcollection write plus the documented cache, together. */
-  const onAddNote = useCallback(async (text: string) => {
+  /** Add ONE note — the subcollection write plus the documented cache, together. Resolves to
+   *  whether it landed, so the composer can keep the words when it did not. */
+  const onAddNote = useCallback(async (text: string): Promise<boolean> => {
     const orig = agentId ? agents.find((a) => a.id === agentId) : null;
-    if (!orig || !currentUser) return;
+    if (!orig || !currentUser) return false;
     const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
     const createdAt = new Date().toISOString();
     try {
@@ -209,12 +259,15 @@ const AgentCardSession: React.FC = () => {
       ));
       const preview = computeNotePreview(after, orig.pinnedNoteId);
       if ((orig.notePreview ?? "") !== preview) {
-        await commitAgentEdits(db, currentUser.id, orig.id, { notePreview: preview });
+        await writeAgent(orig.id, { notePreview: preview });
       }
+      return true;
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${orig.id}/notes`);
+      /* the handler logs and THROWS (its callers' control flow); here the flow is the boolean */
+      try { handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${orig.id}/notes`); } catch { /* logged */ }
+      return false;
     }
-  }, [agentId, agents, currentUser, storedNotes]);
+  }, [agentId, agents, currentUser, storedNotes, writeAgent]);
 
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
@@ -247,6 +300,63 @@ const AgentCardSession: React.FC = () => {
     return { ok: true as const };
   }, [addAgent]);
 
+  /* ── moving and leaving ──────────────────────────────────────────────────────────────────── */
+
+  /** ✕, Escape and the backdrop: shrink back into the row when it is on screen, then close. */
+  const leaving = useRef(false);
+  const requestClose = useCallback(async () => {
+    if (leaving.current) return;
+    leaving.current = true;
+    await frameRef.current?.leave(agentId ? rowBoxOf(agentId) : null);
+    closeAgentCard();
+  }, [agentId]);
+
+  const onStep = useCallback((dir: 1 | -1) => {
+    if (!agentId) return;
+    const next = stepTarget(req?.sequence, agentId, dir);
+    if (!next) return;
+    setSlide(dir > 0 ? "l" : "r");
+    stepAgentCard(next);
+  }, [agentId, req?.sequence]);
+
+  /** THE one way into the editor — Phase 3 swaps what it renders, and nothing else changes. */
+  const openEditor = useCallback((tab: AgentCardTab, focus?: AgentCardField) => {
+    setHandover(null);
+    setEditing({ tab, focus });
+  }, []);
+
+  /** The primary and secondary buttons (§3's table). The drawer journeys close the card first;
+   *  Phase 5 docks it instead. */
+  const onAct = useCallback(async (act: CardAct): Promise<QuickFoot | null> => {
+    if (!agent) return null;
+    const q = cardQuery(cardRows(qcRows, agent.id, scoped?.id ?? null));
+    if (act === "qc") {
+      if (!q) return null;
+      closeAgentCard();
+      navigate(`/queries?q=${q.id}`);
+      return null;
+    }
+    if (act === "remind") {
+      const task = reopenReminder(agent);
+      if (!task) { openEditor("work", "reopen"); return null; }
+      const id = await addUserTask(task);
+      return {
+        text: `Reminder added to To-do for ${dayMonth(new Date(`${task.dueDate}T00:00:00`))}: check ${(agent.name ?? "").trim() || agent.agency} has reopened.`,
+        undo: id ? async () => { await deleteUserTask(id); } : undefined,
+      };
+    }
+    if (act === "log") {
+      const id = agent.id;
+      closeAgentCard();
+      openQueryDrawer({ mode: "log", agentId: id });
+      return null;
+    }
+    if (!q) return null;
+    closeAgentCard();
+    openQueryDrawer({ mode: act, queryId: q.id });
+    return null;
+  }, [agent, qcRows, scoped, navigate, addUserTask, deleteUserTask, openEditor]);
+
   if (!req) return null;
 
   if (req.agentId === null) {
@@ -265,27 +375,62 @@ const AgentCardSession: React.FC = () => {
 
   if (!agent) return null;
   const facts = agentFacts(agent, qcRows, scoped?.id ?? null);
+
+  /* ⚠️ THE BRIDGE (Phase 2 only): the old pop-up's edit face, opened at the door's section, and
+     returning to the quick view when it is left — by Cancel, Escape, ✕ or a save. */
+  if (editing) {
+    return (
+      <ContactProfile
+        agent={agent}
+        facts={facts}
+        nowMs={nowMs}
+        msGenre={scoped?.genre ?? null}
+        msTitle={scoped?.title ?? null}
+        genreHit={genreHit}
+        genrePool={genrePool}
+        editCtx={editCtx}
+        notes={profileNotes}
+        packages={packages}
+        editAt={legacySectionFor(editing.tab, editing.focus)}
+        savedLine={null}
+        onLeaveEdit={() => setEditing(null)}
+        onClose={closeAgentCard}
+        onSave={onSave}
+        onAddNote={async (t) => { await onAddNote(t); }}
+        onOpenQuery={(qid) => { closeAgentCard(); navigate(`/queries?q=${qid}`); }}
+        onRecordResponse={() => { closeAgentCard(); openQueryDrawer({ mode: "resp" }); }}
+        onLogQuery={() => { const id = agent.id; closeAgentCard(); openQueryDrawer({ mode: "log", agentId: id }); }}
+      />
+    );
+  }
+
+  const q = cardQuery(cardRows(qcRows, agent.id, scoped?.id ?? null));
+  const also = alsoQueried(qcRows, agent.id, scoped?.id ?? null, (id) => manuscripts.find((m) => m.id === id)?.title ?? null);
+  const onContactList = !!sandbox?.contactListHere || pathname === "/agents";
   return (
-    <ContactProfile
-      agent={agent}
-      facts={facts}
-      nowMs={nowMs}
-      msGenre={scoped?.genre ?? null}
-      msTitle={scoped?.title ?? null}
-      genreHit={genreHit}
-      genrePool={genrePool}
-      editCtx={editCtx}
-      notes={profileNotes}
-      packages={packages}
-      editAt={legacySectionFor(req.tab, req.focus)}
-      savedLine={savedNote}
-      onClose={closeAgentCard}
-      onSave={onSave}
-      onAddNote={onAddNote}
-      onOpenQuery={(qid) => { closeAgentCard(); navigate(`/queries?q=${qid}`); }}
-      /* unchanged in Phase 1: the drawer opens on its picker, as the old page's capture did */
-      onRecordResponse={() => { closeAgentCard(); openQueryDrawer({ mode: "resp" }); }}
-      onLogQuery={() => { const id = agent.id; closeAgentCard(); openQueryDrawer({ mode: "log", agentId: id }); }}
-    />
+    <AgentCardFrame ref={frameRef} labelledBy="ac-name" originRect={req.originRect ?? null} entrance={!shown.current} onScrim={() => void requestClose()}>
+      <AgentQuickView
+        agent={agent}
+        facts={facts}
+        q={q}
+        nowMs={nowMs}
+        msTitle={scoped?.title ?? null}
+        genreHit={genreHit}
+        also={also}
+        notes={profileNotes}
+        packages={packages}
+        sequence={req.sequence}
+        slide={slide}
+        initialFoot={handover}
+        showOpenInContactList={!onContactList}
+        write={write}
+        onStep={onStep}
+        onEdit={openEditor}
+        onClose={() => void requestClose()}
+        onAct={onAct}
+        onOpenInContactList={() => navigate("/agents")}
+        onAddNote={onAddNote}
+      />
+    </AgentCardFrame>
   );
 };

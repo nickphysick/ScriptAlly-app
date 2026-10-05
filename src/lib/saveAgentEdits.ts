@@ -42,8 +42,9 @@ export interface AgentEditPatch {
   reopensOn?: string | null;
   /** v11: the documented card cache, recomputed when the pop-up adds a note (now allowlisted). */
   notePreview?: string;
-  /** v11: when the wishlist was last checked; stamped by the editor on a wishlist edit. */
-  mswlCheckedAt?: string;
+  /** v11: when the wishlist was last checked; stamped by the editor on a wishlist edit. null =
+   *  clear — the Undo of a FIRST stamp, which has to leave the field absent, as it was. */
+  mswlCheckedAt?: string | null;
   // Social handles — the canonical list plus the mirrored discrete fields (X/Bluesky/Instagram) the
   // agent-database display still reads. See [[agent-socials-display-backlog]].
   socials?: AgentSocial[];
@@ -176,7 +177,8 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     else fields.notePreview = patch.notePreview;
   }
   if (patch.mswlCheckedAt !== undefined) {
-    if (typeof patch.mswlCheckedAt !== "string" || patch.mswlCheckedAt.length > 64) errors.push("mswlCheckedAt must be an ISO string.");
+    if (patch.mswlCheckedAt === null) deletes.push("mswlCheckedAt");
+    else if (typeof patch.mswlCheckedAt !== "string" || patch.mswlCheckedAt.length > 64) errors.push("mswlCheckedAt must be an ISO string.");
     else fields.mswlCheckedAt = patch.mswlCheckedAt;
   }
 

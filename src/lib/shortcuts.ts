@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -54,6 +54,11 @@ export const SHORTCUTS = {
   calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
+  /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only
+     when no field has focus; the card's own handler stops them reaching a page beneath it */
+  cardEdit:         { chords: [k("e")], label: "Edit the agent", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },
+  cardPrev:         { chords: [k("ArrowLeft")], label: "Previous agent in the list", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },
+  cardNext:         { chords: [k("ArrowRight")], label: "Next agent in the list", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },
 } as const satisfies Record<string, Shortcut>;
 
 export type ShortcutId = keyof typeof SHORTCUTS;

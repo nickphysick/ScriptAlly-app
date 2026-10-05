@@ -94,18 +94,31 @@ test("the dashboard quick card: the chip in its header and the box on the send",
   }
 });
 
-test("the Contact list profile: the chip and the box above the trail", async ({ page }) => {
+/* ⚠️ REWRITTEN AGAINST THE AGENT CARD (Agent card v1 P2, 5 Oct). The Contact list's pop-up is the
+   app-level agent card now; its face is the mock's quick view, which has no room for what was sent,
+   so the chip and the box ride at the top of the card's History disclosure — above the steps, as
+   they sat above the pop-up's trail. The case opens the disclosure, then reads both, VISIBLE. */
+test("the agent card: the chip and the box above the steps, in its History", async ({ page }) => {
   test.setTimeout(240_000);
   await start(page, "/agents");
   for (const c of CASES) {
-    const card = page.locator(`[data-agent-card="${c.agent}"]`).first();
-    await expect(card, `no row for ${c.name}`).toBeVisible({ timeout: 20_000 });
-    await card.click();
-    await page.waitForTimeout(800);
-    const s = await seen(page, ".clv-sec[data-psec='query']");
-    ok(s?.chip === c.kind && s?.box === c.kind, `Contact profile for ${c.kind}: ${JSON.stringify(s)}`);
+    const row = page.locator(`[data-agent-card="${c.agent}"]`).first();
+    await expect(row, `no row for ${c.name}`).toBeVisible({ timeout: 20_000 });
+    await row.click();
+    await page.waitForSelector('[data-ac="card"] [data-ac="hist"]');
+    await page.click('[data-ac="card"] [data-ac="hist"]');
+    await page.waitForSelector('[data-ac="card"] [data-ac="histbody"]');
+    const s = await seen(page, '[data-ac="card"] [data-ac="histbody"]');
+    ok(s?.chip === c.kind && s?.box === c.kind, `agent card for ${c.kind}: ${JSON.stringify(s)}`);
+    /* above the steps, as on the pop-up — order is part of the claim */
+    const above = await page.evaluate(() => {
+      const box = document.querySelector('[data-ac="card"] [data-ac="histbody"] [data-sent-box]');
+      const trail = document.querySelector('[data-ac="card"] [data-ac="trail"]');
+      return !!box && !!trail && box.getBoundingClientRect().bottom <= trail.getBoundingClientRect().top + 0.5;
+    });
+    ok(above, `agent card for ${c.kind}: what was sent is not above the steps`);
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(400);
+    await page.waitForSelector('[data-ac="card"]', { state: "detached" });
   }
 });
 

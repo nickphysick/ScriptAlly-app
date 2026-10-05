@@ -22,6 +22,7 @@ import {
   matchesAgentSearch,
 } from "../../lib/agentList";
 import { prefersReducedMotion } from "../../lib/agentMotion";
+import { reopenReminder } from "../../lib/agentCard";
 import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
@@ -39,7 +40,7 @@ import { agentRows } from "../../lib/contactList";
 import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import {
-  AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents, targetForSection,
+  AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
@@ -355,8 +356,24 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!agents.some((a) => a.id === agentId)) return;
     openAgentCard(agentId, { ...opts, sequence });
   }, [agents, sequence]);
-  /** OPEN the card on this agent — reading, from the top (v11 §7.1). */
-  const onOpen = useCallback((agentId: string) => openCard(agentId, { from: "row" }), [openCard]);
+  /** OPEN the card on this agent — reading, from the top (v11 §7.1) — growing out of the row. */
+  const onOpen = useCallback((agentId: string, from?: DOMRect) => openCard(agentId, {
+    from: "row",
+    originRect: from ? { x: from.x, y: from.y, width: from.width, height: from.height } : null,
+  }), [openCard]);
+  /** a Housekeeping name opens the card too — but it is not a list row, so the card lifts */
+  const onHkOpen = useCallback((agentId: string) => openCard(agentId, { from: "hk" }), [openCard]);
+
+  /* ‹ › on the card move the SAME session to the next agent; the list scrolls that row into view
+     behind the card, and its ring (aria-current, from `openId`) has already moved with it. */
+  const lastOpen = useRef<string | null>(null);
+  useEffect(() => {
+    const was = lastOpen.current;
+    lastOpen.current = openId;
+    if (!was || !openId || was === openId) return;
+    const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${openId}"]`)].find((e) => e.getBoundingClientRect().height > 0);
+    row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }, [openId]);
   /** "+ Add an agent" — the empty card, growing out of the button that asked for it. */
   const openAdd = useCallback(() => {
     const r = addBtnRef.current?.getBoundingClientRect();
@@ -512,14 +529,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const onHkChecked = useCallback(async (agentId: string) => {
     await updateAgent(agentId, { mswlCheckedAt: new Date().toISOString() } as Partial<Agent>);
   }, [updateAgent]);
+  /* the card's "Remind me when they reopen" adds the SAME task — one derivation, one wording */
   const onHkRemind = useCallback((agent: Agent) => {
-    const due = (agent.reopensOn ?? "").trim();
-    if (!due) { openCard(agent.id, { ...targetForSection("door"), from: "hk" }); return; } // ruling (b): no date → the editor at the door
-    void addUserTask({
-      agentId: agent.id,
-      dueDate: due,
-      text: `${(agent.name ?? "").trim() || agent.agency}'s list reopens — check it and query`,
-    });
+    const task = reopenReminder(agent);
+    if (!task) { openCard(agent.id, { tab: "work", focus: "door", from: "hk" }); return; } // ruling (b): no date → the editor at the door
+    void addUserTask(task);
   }, [addUserTask, openCard]);
 
 
@@ -710,7 +724,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactRail counts={hk.countsLine}>
             <ContactHousekeeping
               model={hk}
-              onOpen={onOpen}
+              onOpen={onHkOpen}
               onEditAt={(id, at) => openCard(id, { ...at, from: "hk" })}
               onInlineSave={onHkInlineSave}
               onChecked={onHkChecked}

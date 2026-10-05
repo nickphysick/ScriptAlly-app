@@ -31,6 +31,7 @@ import React, { useState } from "react";
 import { DbContext } from "../../lib/db";
 import { AgentList } from "./AgentList";
 import { AgentCardHost } from "./card/AgentCardHost";
+import { sanitizeAgentPatch, type AgentEditPatch } from "../../lib/saveAgentEdits";
 import { Agent, SubmissionMethod, SubmissionStatus, UserPlan } from "../../types";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_MANUSCRIPTS, CONTACT_FIXTURE_QUERIES } from "./contactFixture";
 import { FONT_MONO } from "../../lib/designTokens";
@@ -92,6 +93,25 @@ export const ContactListLab: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labTasks.length]);
 
+  const deleteUserTask = React.useCallback(async (id: string) => {
+    setLabTasks((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+  /* the agent card's writer (Agent card v1): the app's goes through commitAgentEdits; the lab's
+     validates through the SAME sanitiser and applies the result to the cast — a null still means
+     "the field goes", so an Undo back to absent is real here too */
+  const cardWrite = React.useCallback(async (id: string, patch: AgentEditPatch) => {
+    const s = sanitizeAgentPatch(patch);
+    if (s.errors.length) return { ok: false as const, error: s.errors[0] };
+    setCast((prev) => prev.map((a) => {
+      if (a.id !== id) return a;
+      const next = { ...a, ...s.fields } as Record<string, unknown>;
+      for (const k of s.deletes) delete next[k];
+      return next as unknown as Agent;
+    }));
+    return { ok: true as const };
+  }, []);
+  const cardSandbox = React.useMemo(() => ({ writeAgent: cardWrite, contactListHere: true }), [cardWrite]);
+
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
      and the failure would be a render crash in a lab rather than a clear "the stub is short". */
@@ -108,6 +128,7 @@ export const ContactListLab: React.FC = () => {
       updateAgent,
       addAgent,
       addUserTask,
+      deleteUserTask,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),
@@ -160,7 +181,7 @@ export const ContactListLab: React.FC = () => {
           <AgentList key={view} onNavigate={() => {}} />
           {/* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2) and this route returns before App's own hosts
               mount, so the lab mounts the one host itself — inside the stub, so the card reads the cast */}
-          <AgentCardHost />
+          <AgentCardHost sandbox={cardSandbox} />
         </DbContext.Provider>
       </div>
     </div>

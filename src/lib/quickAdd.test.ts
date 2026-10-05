@@ -82,8 +82,9 @@ describe("the submissions-page normaliser is a scheme allowlist", () => {
      copies of a security test is two chances to fix only some of them. */
   it("every surface that renders the address goes through one function", () => {
     /* v11 phase 4: the pop-up is the ONE surviving renderer of the stored address — the peek and
-       the card retired with the flip grid. A new renderer joins this list, never builds its own. */
-    for (const rel of ["../components/agents/contact/ContactProfile.tsx"]) {
+       the card retired with the flip grid. A new renderer joins this list, never builds its own.
+       Agent card v1: the card's quick view joined it (the pop-up leaves with its edit face, P3). */
+    for (const rel of ["../components/agents/contact/ContactProfile.tsx", "../components/agents/card/AgentQuickView.tsx", "./agentCard.ts"]) {
       const src = readFileSync(new URL(rel, import.meta.url), "utf8");
       expect(src, rel + " builds its own href instead of calling hrefFor").not.toMatch(/https:\/\/\$\{/);
       expect(src, rel + " does not use the shared href builder").toMatch(/hrefFor|isLiveHref/);

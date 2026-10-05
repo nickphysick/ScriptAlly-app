@@ -384,27 +384,18 @@ test("the bands stick BELOW the pinned index strip with the page-coloured shadow
 
 /* ══════════════════════════ phase 4 — the agent pop-up (§11.6 / §11.7) ══════════════════════════ */
 
-test("the pop-up: centred, 540 wide (520 editing), band by standing — and the picker wears the portal dress (§11.6)", async ({ page }) => {
+/* ⚠️ REWRITTEN AGAINST THE AGENT CARD (Agent card v1 P2, 5 Oct). The pop-up's VIEW face is the agent
+   card's quick view now, and its claims moved with it: the card's width (548, measured against the
+   mock), its slate band on every agent and its tone by standing are agentCardV1.measure.ts's. What
+   stays here is the EDIT face, which is still this page's old form until Phase 3 replaces it —
+   520 wide, and its picker in the portal dress. */
+test("the editor (the old form, until Agent card v1 P3): 520 wide, and the picker wears the portal dress (§11.6)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.click(`${scope} [data-clv="row"]`);
-  await page.waitForSelector('[data-clv="profile"]');
-  const view = await page.evaluate(() => {
-    const card = document.querySelector('[data-clv="profile"]') as HTMLElement;
-    const r = card.getBoundingClientRect();
-    return {
-      w: Math.round(r.width),
-      centred: Math.abs((r.left + r.right) / 2 - window.innerWidth / 2),
-      band: (document.querySelector('[data-clv="bandchip"]') as HTMLElement).textContent?.trim() ?? "",
-      dialog: card.getAttribute("role"),
-    };
-  });
-  expect(view.w, "the view card is 540 wide").toBe(540);
-  expect(view.centred, "the card is centred on the viewport").toBeLessThanOrEqual(8);
-  expect(view.band.length, "the band chip states the standing").toBeGreaterThan(0);
-  expect(view.dialog).toBe("dialog");
-
-  await page.click('[data-clv="edit"]');
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
+  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
   const edit = await page.evaluate(() => {
     const card = document.querySelector('[data-clv="profile"]') as HTMLElement;
     const control = document.querySelector('[data-clv="profile"] .agl-cc-control') as HTMLElement;
@@ -427,38 +418,44 @@ test("the pop-up: centred, 540 wide (520 editing), band by standing — and the 
   expect(menu.bg, "the menu panel has no fill — its rules are not reaching the portal").toBe("rgb(255, 255, 255)");
   expect(menu.radius).toBe("10px");
   expect(menu.onTop).toBe(true);
-  await page.keyboard.press("Escape"); // the picker's own capture consumes it
-  await page.click('[data-clv="profile"] .clv-cx'); // Cancel back to view, nothing written
-  bump(10);
+  await page.keyboard.press("Escape"); // the picker's own layer consumes it
+  await page.click('[data-clv="profile"] .clv-cx'); // Cancel — back to the card's quick view, nothing written
+  await expect(page.locator('[data-ac="card"]'), "leaving the editor did not return to the quick view").toBeVisible();
+  bump(7);
 });
 
+/* ⚠️ REWRITTEN AGAINST THE AGENT CARD (P2): the view face is the card's quick view (`data-ac`); the
+   edit face is still the old form (`data-clv="profile"`, `.clv-pcard--edit`) until Phase 3. */
 test("Escape cascades edit → view → closed, and the backdrop is inert while editing (§11.6)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.click(`${scope} [data-clv="row"]`);
-  await page.waitForSelector('[data-clv="profile"]');
-  await page.click('[data-clv="edit"]');
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
   await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
   await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-ac="card"]');
   const afterFirst = await page.evaluate(() => ({
-    open: !!document.querySelector('[data-clv="profile"]'),
+    view: !!document.querySelector('[data-ac="card"]'),
     editing: !!document.querySelector('[data-clv="profile"].clv-pcard--edit'),
   }));
-  expect(afterFirst.open, "the first Escape closed the whole card — it must only leave edit mode").toBe(true);
+  expect(afterFirst.view, "the first Escape closed the whole card — it must only leave edit mode").toBe(true);
   expect(afterFirst.editing, "the first Escape did not leave edit mode").toBe(false);
   await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
 
   /* the backdrop: closes the VIEW, does nothing while editing */
   await page.click(`${scope} [data-clv="row"]`);
-  await page.waitForSelector('[data-clv="profile"]');
-  await page.click('[data-clv="edit"]');
-  await page.mouse.click(30, 450); // well outside the 540px centred card
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
+  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
+  await page.mouse.click(30, 450); // well outside the centred card
   const heldOpen = await page.evaluate(() => !!document.querySelector('[data-clv="profile"].clv-pcard--edit'));
   expect(heldOpen, "a backdrop click discarded an edit in progress").toBe(true);
   await page.click('[data-clv="profile"] .clv-cx');
+  await page.waitForSelector('[data-ac="card"]');
   await page.mouse.click(30, 450);
-  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
   bump(4);
 });
 
@@ -481,8 +478,8 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
   let touchedId = "";
   for (const id of candidates) {
     await page.click(`${scope} [data-agent-card="${id}"]`);
-    await page.waitForSelector('[data-clv="profile"]');
-    await page.click('[data-clv="edit"]');
+    await page.waitForSelector('[data-ac="card"]');
+    await page.click('[data-ac="card"] [data-ac="edit"]'); // (P2: the card's pencil opens the old form)
     const orig = await page.inputValue('[data-clv="f-weeks"]');
     const next = orig === "12" ? "9" : "12";
     await page.fill('[data-clv="f-weeks"]', next);
@@ -497,8 +494,9 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
       break;
     }
     await page.click('[data-clv="profile"] .clv-cx');
+    await page.waitForSelector('[data-ac="card"]');
     await page.keyboard.press("Escape");
-    await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+    await page.waitForSelector('[data-ac="card"]', { state: "detached" });
   }
   expect(generic, "the reply note never appeared at all").toContain("To-do list and Dashboard");
   expect(generic).toContain("Analytics");
@@ -511,10 +509,12 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
   expect(perQuery).toMatch(/\d{1,2} [A-Z][a-z]{2}/);
   /* Cancel writes NOTHING: reopen and the stored value is the original */
   await page.click('[data-clv="profile"] .clv-cx');
-  await page.click('[data-clv="edit"]');
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
   const after = await page.inputValue('[data-clv="f-weeks"]');
   expect(after, `Cancel wrote a draft value to ${touchedId} — the account has been changed`).toBe(before);
   await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-ac="card"]');
   await page.keyboard.press("Escape");
   bump(7);
 });
@@ -524,24 +524,26 @@ test("§11.7 write half — save says what else moved, and the fixture agent is 
   const scope = await visiblePage(page, ".agl-wpg");
   const fx = `${scope} [data-agent-card="clv-fx-never"]`;
   expect(await page.locator(fx).count(), "the fixture agent is not on this account — run tests/e2e/seedContactFixture.mjs").toBe(1);
+  /* (P2: the card's quick view opens; its pencil opens the old form, and a save returns to the quick
+     view with the saved line in its foot) */
   await page.click(fx);
-  await page.waitForSelector('[data-clv="profile"]');
-  await page.click('[data-clv="edit"]');
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
   expect(await page.inputValue('[data-clv="f-weeks"]'), "precondition: the fixture's reply time is deliberately absent (ruling c)").toBe("");
   await page.fill('[data-clv="f-weeks"]', "9");
   await page.click('[data-clv="save"]');
-  await page.waitForSelector('[data-clv="savedline"]');
-  const saved = await page.textContent('[data-clv="savedline"]');
+  await page.waitForSelector('[data-ac="card"] [data-ac="foot"].on');
+  const saved = await page.textContent('[data-ac="card"] [data-ac="foot"]');
   /* ⚠️ THE ACCOUNT IS NOW CHANGED — everything from here to the restore runs without navigation */
   expect(saved, "the saved line is missing — the write may have failed with the account half-changed").toContain("Saved");
-  const who = await page.textContent('[data-clv="profile"]');
+  const who = await page.textContent('[data-ac="card"] [data-ac="where"]');
   expect(who, "the view does not show the saved window").toContain("Replies in about 9 weeks");
   /* restore: back to unstated (the field is DELETED, not zeroed — absence is the fixture) */
-  await page.click('[data-clv="edit"]');
+  await page.click('[data-ac="card"] [data-ac="edit"]');
   await page.fill('[data-clv="f-weeks"]', "");
   await page.click('[data-clv="save"]');
-  await page.waitForSelector('[data-clv="savedline"]');
-  const restored = await page.evaluate(() => (document.querySelector('[data-clv="profile"]') as HTMLElement).textContent ?? "");
+  await page.waitForSelector('[data-ac="card"] [data-ac="foot"].on');
+  const restored = await page.evaluate(() => (document.querySelector('[data-ac="card"]') as HTMLElement).textContent ?? "");
   expect(restored, "THE FIXTURE WAS NOT RESTORED — clv-fx-never now carries a reply window it must not have").not.toContain("Replies in about");
   await page.keyboard.press("Escape");
   bump(6);
@@ -576,15 +578,16 @@ test("the add card (§11.9): disabled until name AND agency, the duplicate block
   await expect(page.locator('[data-clv="dup"]')).toBeVisible();
   expect(await disabledAt(), "a duplicate name did not block Add").toBe(true);
   await page.click('[data-clv="dup-open"]');
-  await page.waitForSelector('[data-clv="profile"]');
+  /* (P2: OPEN CARD opens the agent card's quick view, named by its heading) */
+  await page.waitForSelector('[data-ac="card"]');
   const opened = await page.evaluate(() => ({
     add: !!document.querySelector('[data-clv="addcard"]'),
-    who: (document.querySelector('[data-clv="profile"]') as HTMLElement).getAttribute("aria-label") ?? "",
+    who: (document.querySelector('[data-ac="card"] #ac-name') as HTMLElement | null)?.textContent ?? "",
   }));
-  expect(opened.add, "OPEN CARD left the add card open behind the pop-up").toBe(false);
+  expect(opened.add, "OPEN CARD left the add card open behind the card").toBe(false);
   expect(opened.who).toContain(existing!.name);
   await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
 
   /* §11.9's identity clause: the focused element is the SAME NODE before and after typing */
   await openAddCard(page, scope);
@@ -691,14 +694,14 @@ test("§11.7's third leg — saving a window that crosses today MOVES the row's 
   let orig: string | null = null; // null = the forward save never landed; "" = unstated
   try {
     await page.click(`${scope} [data-agent-card="${pick}"]`);
-    await page.waitForSelector('[data-clv="profile"]');
-    await page.click('[data-clv="edit"]');
+    await page.waitForSelector('[data-ac="card"]');
+    await page.click('[data-ac="card"] [data-ac="edit"]'); // (P2: the card's pencil opens the old form)
     orig = await page.inputValue('[data-clv="f-weeks"]');
     await page.fill('[data-clv="f-weeks"]', "1");
     await page.click('[data-clv="save"]');
-    await page.waitForSelector('[data-clv="savedline"]');
+    await page.waitForSelector('[data-ac="card"] [data-ac="foot"].on');
     await page.keyboard.press("Escape");
-    await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+    await page.waitForSelector('[data-ac="card"]', { state: "detached" });
     const moved = await page.evaluate(
       ({ scope, id }) => (document.querySelector(`${scope} [data-agent-card="${id}"]`) as HTMLElement | null)?.dataset.stand ?? "",
       { scope, id: pick! },
@@ -710,19 +713,21 @@ test("§11.7's third leg — saving a window that crosses today MOVES the row's 
       /* restore the exact original — a stated number, or a CLEAR back to unstated (the field
          is deleted, which P4's write-half already proved round-trips) */
       await page.click(`${scope} [data-agent-card="${pick}"]`);
-      await page.waitForSelector('[data-clv="profile"]');
-      await page.click('[data-clv="edit"]');
+      await page.waitForSelector('[data-ac="card"]');
+      await page.click('[data-ac="card"] [data-ac="edit"]');
       await page.fill('[data-clv="f-weeks"]', orig);
       /* a store already holding the original (the forward save never wrote) leaves the form
          clean and Save disabled — nothing to restore, and clicking would hang */
       const dirty = await page.evaluate(() => !(document.querySelector('[data-clv="save"]') as HTMLButtonElement).disabled);
       if (dirty) {
         await page.click('[data-clv="save"]');
-        await page.waitForSelector('[data-clv="savedline"]');
+        await page.waitForSelector('[data-ac="card"] [data-ac="foot"].on');
+      } else {
+        await page.keyboard.press("Escape"); // leave the editor for the quick view
+        await page.waitForSelector('[data-ac="card"]');
       }
       await page.keyboard.press("Escape");
-      await page.keyboard.press("Escape");
-      await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+      await page.waitForSelector('[data-ac="card"]', { state: "detached" });
       const back = await page.evaluate(
         ({ scope, id }) => (document.querySelector(`${scope} [data-agent-card="${id}"]`) as HTMLElement | null)?.dataset.stand ?? "",
         { scope, id: pick! },
@@ -843,10 +848,11 @@ test("§11.8 — CHECKED, REMIND ME and the inline save each remove exactly one 
 
   /* the bare REMIND ME (no reopensOn) opens the editor at the door instead — ruling (b) */
   await page.click(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-shut"] [data-clv="hk-remind"]`);
-  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
+  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit'); // (P2: the old form, at the door)
   await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-ac="card"]'); // leaving the editor lands on the card's quick view
   await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
 
   /* the inline save writes the window — the stub row leaves the reply section */
   expect(await rowIn("reply", "fx-stub0"), "precondition: the stub window is listed").toBe(true);
@@ -887,14 +893,15 @@ test("Log query opens the query drawer on this page — no navigation, the agent
     [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0));
   const scope2 = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope2} [data-clv="row"]`);
-  /* door 2: the pop-up's Log query — the pop-up yields to the drawer (one asking surface at a time) */
-  await page.click(`${scope2} [data-clv="row"][data-stand="none"]`);
-  await page.waitForSelector('[data-clv="profile"]');
-  await page.click('[data-clv="profile"] [data-clv="logquery"]');
+  /* door 2: the agent card's Log a query (rewritten against the card, Agent card v1 P2) — the card
+     yields to the drawer (one asking surface at a time); Phase 5 docks it instead */
+  await page.click(`${scope2} [data-clv="row"][data-stand="none"][data-door="open"]`);
+  await page.waitForSelector('[data-ac="card"]');
+  await page.click('[data-ac="card"] [data-ac="primary"][data-act="log"]');
   await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
   const two = await page.evaluate(() => ({
     path: window.location.pathname,
-    popup: !!document.querySelector('[data-clv="profile"]'),
+    popup: !!document.querySelector('[data-ac="card"]'),
   }));
   expect(two.path).toBe("/agents");
   expect(two.popup, "the pop-up stayed open behind the drawer — two asking surfaces at once").toBe(false);

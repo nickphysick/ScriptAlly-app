@@ -98,6 +98,16 @@ describe("sanitizeAgentPatch", () => {
     expect(sanitizeAgentPatch({ socials: [{ platform: "X" } as never] }).errors.length).toBe(1);
   });
 
+  /* Agent card v1: the wishlist stamp's Undo and the rating's Undo restore what was there — and
+     where nothing was, that means the field goes, not a stand-in value */
+  it("maps mswlCheckedAt: null and starRating: null to deletes", () => {
+    const r = sanitizeAgentPatch({ mswlCheckedAt: null, starRating: null });
+    expect(r.errors).toEqual([]);
+    expect(r.deletes.sort()).toEqual(["mswlCheckedAt", "starRating"]);
+    expect("mswlCheckedAt" in r.fields).toBe(false);
+    expect(sanitizeAgentPatch({ mswlCheckedAt: "2026-10-05T00:00:00.000Z" }).fields.mswlCheckedAt).toBe("2026-10-05T00:00:00.000Z");
+  });
+
   it("passes a full valid patch through cleanly", () => {
     const r = sanitizeAgentPatch({
       name: "Sarah Latham", agency: "Curtis Brown", email: "s@cb.com", website: "",

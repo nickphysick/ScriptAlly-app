@@ -1,0 +1,539 @@
+/**
+ * The agent card (Agent card v1; design authority design-refs/agent-card-housekeeping-v7.html,
+ * measured at 1440×900 and 1280×800). Ported from the mock's own rules — its base block and its v3
+ * "quick view + tabbed editor" block, the later one winning where both state a value, as they do in
+ * the rendered mock.
+ *
+ * ⚠️ THE CARD PORTALS TO `document.body`, so every token it reads is declared at `:root` — its own
+ * here, and the Contact list's `--clv-*` family in contactV11.css (the portal law: a page-scoped
+ * token resolves to nothing out there and the declaration is dropped in silence).
+ *
+ * ⚠️ NO FONT FAMILY IS NAMED HERE. The typewriter face is `var(--clv-type)` (→ `--sp-type`), the
+ * serif `var(--clv-serif)`; marketingTokens.test.ts holds the set of files that may name either.
+ *
+ * ⚠️ brand.tsx NAMES BARE `span, p, div, button, label, input, textarea` AS THE BODY SANS (0-0-1)
+ * and forces `h3` with `!important`. So every element here takes its face from a class rule scoped
+ * under `.ac` (0-2-0), the bare descendants inherit through the reset below, and the name's `h3`
+ * carries `!important` at 0-2-1.
+ */
+:root {
+  --ac-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+  /* decision 2: only the query section changes colour — these four and white-with-a-hairline */
+  --ac-tone-you: #f5e6df;
+  --ac-tone-agent: #f7efe3;
+  --ac-tone-offer: #d7e0e8;
+  --ac-tone-closed: #e4e1db;
+  --ac-ini: #dbe3ea;
+  --ac-hover: #f5f1eb;
+  --ac-warn: #fbf3ef;
+  --ac-mono: var(--font-mono, "JetBrains Mono", monospace);
+}
+
+/* the overlay: one fixed box over the viewport holding the backdrop and the card. It is the focus
+   trap's root, so it takes focus without drawing a ring. z 63–68 sits above page menus (60) and
+   below the query drawer (70), so the drawer stacks over a docked card. */
+.ac-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 63;
+  outline: none;
+}
+.ac-ov .ac-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 19, 15, 0.32);
+  animation: acScrimIn 0.18s ease-out;
+}
+@keyframes acScrimIn { from { opacity: 0; } }
+.ac-ov.is-leaving .ac-scrim { opacity: 0; transition: opacity 0.18s; }
+
+/* ⚠️ THE CARD'S BOX MODEL IS DECLARED, NOT INHERITED — its width (548 / 780) includes the 6px rim. */
+.ac,
+.ac *,
+.ac *::before,
+.ac *::after { box-sizing: border-box; }
+
+/* the reset brand.tsx makes necessary: bare elements take the face of the classed parent */
+.ac :where(span, p, div, label, button, input, textarea, b, i, em, small, time, a, ul, li, h4, h5) {
+  font-family: inherit;
+}
+
+.ac-ov .ac {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  /* % of the overlay, which IS the viewport — the card's height comes from the box it is centred
+     in, never `100vh` */
+  width: min(548px, calc(100% - 48px));
+  max-height: calc(100% - 64px);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.1), 0 24px 60px rgba(28, 19, 15, 0.22);
+  color: var(--clv-ink);
+  font-family: var(--clv-serif);
+  transition: width 0.26s var(--ac-ease);
+}
+.ac-ov .ac.big { width: min(780px, calc(100% - 48px)); }
+
+.ac .ac-frame {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px var(--clv-frame);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── the band: slate on every agent ─────────────────────────────────────────────────────── */
+.ac .ac-band {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 12px;
+  color: #fff;
+  background: var(--clv-slate);
+  flex: none;
+}
+.ac .ac-band .sp { flex: 1; }
+.ac .ac-chip {
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 9px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  white-space: nowrap;
+}
+.ac .ac-band .ac-chip { margin-left: 6px; }
+.ac .ac-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font: 400 9px var(--ac-mono);
+  letter-spacing: 0.1em;
+}
+.ac .ac-cnt { min-width: 58px; text-align: center; opacity: 0.85; }
+.ac .ac-ib {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.ac .ac-ib:hover { background: rgba(255, 255, 255, 0.16); }
+.ac .ac-ib:disabled { opacity: 0.35; cursor: default; background: transparent; }
+.ac .ac-ib svg { width: 15px; height: 15px; }
+.ac .ac-band .ac-ib { width: 32px; height: 32px; border-radius: 50%; }
+.ac .ac-band .ac-ib[data-ac="edit"] { background: rgba(255, 255, 255, 0.16); }
+.ac .ac-band .ac-ib[data-ac="edit"]:hover { background: rgba(255, 255, 255, 0.28); }
+
+.ac .ac-stars { display: flex; gap: 1px; }
+.ac .ac-stars button {
+  border: 0;
+  background: none;
+  padding: 2px;
+  font-size: 17px;
+  line-height: 1;
+  color: #d9d2c8;
+  cursor: pointer;
+  transition: transform 0.12s, color 0.12s;
+}
+.ac .ac-band .ac-stars { margin-right: 4px; }
+.ac .ac-band .ac-stars button { color: rgba(255, 255, 255, 0.38); font-size: 16px; }
+.ac .ac-band .ac-stars button.on { color: #fff; }
+.ac .ac-band .ac-stars:hover button { color: #fff; }
+.ac .ac-band .ac-stars button:hover ~ button { color: rgba(255, 255, 255, 0.38); }
+.ac .ac-stars.pop button.on { animation: acStar 0.3s var(--ac-ease); }
+@keyframes acStar { 50% { transform: scale(1.25); } }
+
+/* the ⋯ menu */
+.ac .ac-menu {
+  position: absolute;
+  right: 46px;
+  top: 46px;
+  z-index: 5;
+  min-width: 210px;
+  padding: 6px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--clv-hair), 0 10px 26px rgba(28, 19, 15, 0.16);
+  animation: acPop 0.16s var(--ac-ease);
+}
+@keyframes acPop { from { opacity: 0; transform: translateY(-4px); } }
+.ac .ac-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font: 400 14px var(--clv-serif);
+  color: var(--clv-ink);
+  cursor: pointer;
+}
+.ac .ac-menu button:hover { background: var(--ac-hover); }
+.ac .ac-menu button.del { color: var(--clv-rust); }
+.ac .ac-menu hr { border: 0; border-top: 1px solid var(--clv-hair); margin: 4px 2px; }
+
+/* ── the body ───────────────────────────────────────────────────────────────────────────── */
+.ac .ac-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 0 8px;
+}
+.ac .ac-body.slide-l { animation: acSlideL 0.2s var(--ac-ease); }
+.ac .ac-body.slide-r { animation: acSlideR 0.2s var(--ac-ease); }
+@keyframes acSlideL { from { opacity: 0; transform: translateX(14px); } }
+@keyframes acSlideR { from { opacity: 0; transform: translateX(-14px); } }
+
+/* the head */
+.ac .acq-head { display: grid; grid-template-columns: 48px 1fr; gap: 14px; padding: 20px 22px 14px; }
+.ac .acq-ini {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ac-ini);
+  color: var(--clv-slate);
+  font: 700 12px var(--ac-mono);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(95, 123, 147, 0.25);
+}
+.ac .acq-id { min-width: 0; }
+/* 1.2 is the mock's, and safe here: the house's 1.3 floor is for mixed-case PLAYFAIR in a box that
+   clips, and this is the serif in a box that does not (its descenders land inside the body) */
+.ac .acq-id h3 {
+  margin: 0;
+  font: 600 24px/1.2 var(--clv-serif) !important;
+  color: var(--clv-ink);
+}
+.ac .acq-agy {
+  margin-top: 4px;
+  font: 400 9.5px var(--ac-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--clv-ink-70);
+}
+.ac .acq-mt {
+  margin-top: 6px;
+  font: 400 9px var(--ac-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+.ac .acq-mt .fi { margin-right: 5px; border-radius: 1.5px; }
+.ac .acq-links { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.ac .acq-links a,
+.ac .acq-links button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 400 10px var(--ac-mono);
+  letter-spacing: 0.06em;
+  color: var(--clv-ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(28, 19, 15, 0.3);
+  text-underline-offset: 3px;
+}
+.ac .acq-links .miss { color: var(--clv-ink-45); text-decoration: none; }
+.ac .acq-links .miss:hover { color: var(--clv-ink); }
+
+/* the query section — the one place on the card that changes colour */
+.ac .acq-q { margin: 2px 16px 6px; padding: 14px 16px; border-radius: 12px; transition: background-color 0.3s; }
+.ac .acq-q[data-tone="you"] { background: var(--ac-tone-you); }
+.ac .acq-q[data-tone="agent"] { background: var(--ac-tone-agent); }
+.ac .acq-q[data-tone="offer"] { background: var(--ac-tone-offer); }
+.ac .acq-q[data-tone="closed"] { background: var(--ac-tone-closed); }
+.ac .acq-q[data-tone="none"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+.ac .acq-qh { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ac .acq-chip {
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px 3px;
+  border-radius: 999px;
+  background: rgba(28, 19, 15, 0.08);
+  color: var(--clv-ink);
+}
+.ac .acq-q[data-tone="you"] .acq-chip { background: var(--clv-ink); color: #fff; }
+.ac .acq-qh small { font: italic 400 13px var(--clv-serif); color: var(--clv-ink-70); }
+.ac .acq-now { display: flex; align-items: center; gap: 9px; font: 400 16px var(--clv-serif); }
+.ac .acq-now b { font-weight: 600; }
+.ac .acq-now time {
+  margin-left: auto;
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+.ac .acq-qrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.ac .acq-qtx { flex: 1 1 180px; font: 400 14.5px var(--clv-serif); color: var(--clv-ink-70); }
+.ac .acq-qtx.late { color: var(--clv-rust); }
+.ac .acq-hist {
+  border: 0;
+  background: none;
+  padding: 8px 0 0;
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink-70);
+  cursor: pointer;
+}
+.ac .acq-hist:hover { color: var(--clv-ink); }
+.ac .acq-histbody { margin-top: 8px; animation: acIn 0.16s var(--ac-ease); }
+@keyframes acIn { from { opacity: 0; transform: translateY(-3px); } }
+.ac .acq-sent { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.ac .acq-trail { position: relative; margin: 0 0 0 2px; padding: 0; list-style: none; }
+.ac .acq-trail::before {
+  content: "";
+  position: absolute;
+  left: 6.5px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--clv-ink-45);
+}
+.ac .acq-trail li {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 2px 0;
+  font: 400 14px var(--clv-serif);
+}
+.ac .acq-trail li.cur { font-weight: 600; }
+.ac .acq-trail time {
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+  font-weight: 400;
+}
+/* the glyph wears the section's own ground, so the spine passes BEHIND it */
+.ac .acq-dot { position: relative; display: inline-flex; border-radius: 50%; }
+.ac .acq-q[data-tone="you"] .acq-dot { background: var(--ac-tone-you); }
+.ac .acq-q[data-tone="agent"] .acq-dot { background: var(--ac-tone-agent); }
+.ac .acq-q[data-tone="offer"] .acq-dot { background: var(--ac-tone-offer); }
+.ac .acq-q[data-tone="closed"] .acq-dot { background: var(--ac-tone-closed); }
+.ac .acq-other { margin-top: 8px; font: 400 13px var(--clv-serif); color: var(--clv-ink-70); }
+
+/* the sections under it */
+.ac .acq-s { margin: 0 22px; padding: 13px 0; border-top: 1px solid var(--clv-hair); }
+.ac .acq-lab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font: 400 8.5px var(--ac-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+.ac .acq-more {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--clv-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ac .acq-gch { display: flex; gap: 6px; flex-wrap: wrap; }
+.ac .acq-gch span {
+  font: 400 9.5px var(--ac-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 9px 5px;
+  border-radius: 5px;
+  background: var(--clv-p3);
+}
+.ac .acq-gch span.hit { background: var(--clv-sage); display: inline-flex; align-items: center; gap: 6px; }
+.ac .acq-gch span.hit::before {
+  content: "";
+  width: 6px;
+  height: 3px;
+  border: solid var(--clv-ink);
+  border-width: 0 0 1.5px 1.5px;
+  transform: rotate(-45deg) translateY(-1px);
+}
+.ac .acq-wish { margin: 0 0 7px; font: italic 400 16.5px/1.5 var(--clv-serif); color: var(--clv-ink); }
+.ac .acq-mats { display: flex; gap: 6px; flex-wrap: wrap; }
+.ac .acq-mat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px 5px;
+  border-radius: 5px;
+  background: var(--clv-p3);
+  color: var(--clv-ink);
+  font: 400 9.5px var(--ac-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ac .acq-mat svg { width: 12px; height: 12px; flex: none; }
+.ac .acq-note p { margin: 0; font: 400 15px/1.45 var(--clv-serif); }
+.ac .acq-note time {
+  display: block;
+  margin-top: 3px;
+  font: 400 8px var(--ac-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+.ac .acq-compose { margin-top: 8px; }
+.ac .acq-compose textarea { height: 64px; }
+.ac .acq-cbtn { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+/* the wishlist stamp (decision 11): quiet, and "✓ mark checked" only on hover or focus */
+.ac .acq-stamp {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 8px var(--ac-mono);
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--clv-ink-45);
+}
+.ac .acq-stamp button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--clv-ink-45);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ac .acq-s:hover .acq-stamp button,
+.ac .acq-stamp button:focus-visible { opacity: 1; }
+.ac .acq-stamp button:hover { color: var(--clv-ink); text-decoration: underline; text-underline-offset: 2px; }
+.ac .acq-stamp.stamped { color: var(--clv-ink); border-radius: 4px; padding: 0 3px; animation: acPulse 1.6s ease-out; }
+
+/* ── the shared controls ────────────────────────────────────────────────────────────────── */
+.ac .ac-btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--clv-btn);
+  color: #fff;
+  font: 400 14px var(--clv-type);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.ac .ac-btn:hover { box-shadow: 0 3px 10px rgba(42, 58, 82, 0.28); }
+.ac .ac-btn:active { transform: translateY(1px); }
+.ac .ac-btn.gh { background: #fff; color: var(--clv-ink); box-shadow: inset 0 0 0 1px var(--clv-ink-45); }
+.ac .ac-btn.gh:hover { box-shadow: inset 0 0 0 1px var(--clv-ink); }
+.ac .ac-btn.sm { height: 30px; font-size: 12.5px; padding: 0 12px; border-radius: 8px; }
+.ac .ac-btn.danger { background: var(--clv-rust); }
+.ac .ac-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+.ac .ac-mini {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 1px 9px 0;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--clv-ink-45);
+  font: 400 8px var(--ac-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clv-ink);
+  cursor: pointer;
+}
+.ac .ac-mini:hover { box-shadow: inset 0 0 0 1px var(--clv-ink); }
+.ac .ac-torn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 6px 0 12px;
+  background: var(--clv-p3);
+  font: italic 400 14px var(--clv-serif);
+  color: var(--clv-ink-70);
+  -webkit-mask: conic-gradient(from -45deg at left, #0000 25%, #000 0) 0 50% / 100% 7px;
+  mask: conic-gradient(from -45deg at left, #0000 25%, #000 0) 0 50% / 100% 7px;
+}
+.ac .ac-in {
+  height: 36px;
+  width: 100%;
+  border-radius: 8px;
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22);
+  background: #fff;
+  padding: 0 11px;
+  font: 400 15px var(--clv-serif);
+  color: var(--clv-ink);
+  line-height: normal;
+}
+.ac .ac-in:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--clv-btn); }
+.ac textarea.ac-in { height: 76px; padding: 9px 11px; resize: vertical; line-height: 1.45; }
+
+/* ⚠️ A `var()` INSIDE @keyframes FAILS SILENTLY IN THIS SETUP — the stops stay literal (the tone
+   `--ac-tone-you`'s value) */
+.ac .ac-pulse { animation: acPulse 1.8s ease-out; }
+@keyframes acPulse { 0% { background: #f5e6df; } 100% { background: transparent; } }
+
+/* ── the foot: messages, the undo, and (later) the asks ─────────────────────────────────── */
+.ac .ac-foot { flex: none; overflow: hidden; max-height: 0; transition: max-height 0.22s var(--ac-ease); }
+.ac .ac-foot.on { max-height: 120px; }
+.ac .ac-foot > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--clv-hair);
+  font: 400 14.5px var(--clv-serif);
+  background: #fff;
+}
+.ac .ac-foot .msg { flex: 1 1 260px; }
+.ac .ac-foot.warn > div { background: var(--ac-warn); }
+.ac .ac-foot .tick {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--clv-btn);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-ov,
+  .ac-ov * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

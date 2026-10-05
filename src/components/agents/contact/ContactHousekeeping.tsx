@@ -95,7 +95,7 @@ const Ring: React.FC<{ n: number }> = ({ n }) => {
     <svg className="clv-hkring" width="30" height="30" viewBox="0 0 30 30" role="img" aria-label={`${n} of 6 checks in place`}>
       <circle cx="15" cy="15" r={r} fill="none" stroke="rgba(28,19,15,.14)" strokeWidth="3" />
       <circle
-        cx="15" cy="15" r={r} fill="none" stroke="var(--clv-band-slate)" strokeWidth="3"
+        cx="15" cy="15" r={r} fill="none" stroke="var(--clv-slate)" strokeWidth="3"
         strokeDasharray={`${(c * n) / 6} ${c}`} strokeLinecap="round" transform="rotate(-90 15 15)"
       />
     </svg>

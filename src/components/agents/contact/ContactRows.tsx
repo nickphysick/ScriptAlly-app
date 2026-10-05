@@ -28,7 +28,8 @@ export interface ContactRowsProps {
   openId: string | null;
   /** the just-added agent — its row wears the 2.4s ring (§8.4) */
   newId?: string | null;
-  onOpen: (agentId: string) => void;
+  /** the row's own box rides with the open, so the agent card grows out of it (Agent card v1 §2) */
+  onOpen: (agentId: string, from?: DOMRect) => void;
   onLogQuery: (agentId: string) => void;
   onAddGenres: (agentId: string) => void;
   /** the wishlist torn slip's door — the profile at its wishlist section (v12 §6) */
@@ -44,7 +45,7 @@ const Row: React.FC<{
   genreHit: (g: string) => boolean;
   current: boolean;
   fresh: boolean;
-  onOpen: () => void;
+  onOpen: (from: DOMRect) => void;
   onLogQuery: () => void;
   onAddGenres: () => void;
   onAddWishlist: () => void;
@@ -77,7 +78,7 @@ const Row: React.FC<{
       data-loc={x.loc ?? ""}
       data-genres={x.genres.join("|")}
       aria-current={current || undefined}
-      onClick={onOpen}
+      onClick={(e) => onOpen(e.currentTarget.getBoundingClientRect())}
     >
       <span className="clv-ini" aria-hidden="true">{agentInitials(a)}</span>
       <span className="clv-rwho">
@@ -182,7 +183,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
               genreHit={genreHit}
               current={openId === id}
               fresh={newId === id}
-              onOpen={() => onOpen(id)}
+              onOpen={(from) => onOpen(id, from)}
               onLogQuery={() => onLogQuery(id)}
               onAddGenres={() => onAddGenres(id)}
               onAddWishlist={() => onAddWishlist(id)}

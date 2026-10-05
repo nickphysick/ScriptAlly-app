@@ -13,8 +13,9 @@
  * owner: one declaration, here, and marketingTokens.test.ts names this file in its allowed list.
  */
 :root {
-  /* the three standing bands (mock :145-146) + the chrome the overlays need outside any scope */
-  --clv-band-slate: #5f7b93;
+  /* the two old standing bands (mock :145-146) + the chrome the overlays need outside any scope.
+     ⚠️ THE SLATE BAND IS `--clv-slate` (Agent card v1): `--clv-band-slate` was the same #5f7b93 under
+     a second name, and two tokens for one colour drift — it is folded, readers and all. */
   --clv-band-rose: #c09495;
   --clv-band-taupe: #a79f96;
   /* ⚠️ THE v12 ACCENT FAMILY (the go-ahead's ruling 1). `--slate` at the app's :root is the PRO
@@ -863,7 +864,7 @@
 .clv-pcard--edit { width: min(520px, 100%); }
 .clv-pcard > .clv-frame { flex: 1; min-height: 0; }
 .clv-pband { height: 46px; }
-.clv-pband--slate { background: var(--clv-band-slate); }
+.clv-pband--slate { background: var(--clv-slate); }
 .clv-pband--rose { background: var(--clv-band-rose); }
 .clv-pband--taupe { background: var(--clv-band-taupe); }
 .clv-bchip {
@@ -1133,8 +1134,8 @@
   display: inline-block;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 8px; letter-spacing: .12em;
-  color: var(--clv-band-slate);
-  border: 1px solid var(--clv-band-slate);
+  color: var(--clv-slate);
+  border: 1px solid var(--clv-slate);
   border-radius: 4px;
   padding: 1px 5px;
 }
@@ -1149,13 +1150,13 @@
    one treatment (the ref's `.row.new`/`newrow` pattern) */
 .clv-row--new { animation: clvNewRow 2.4s ease-out; }
 @keyframes clvNewRow {
-  0% { box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-band-slate); }
+  0% { box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-slate); }
   100% { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
 }
 @media (prefers-reduced-motion: reduce) {
   /* no animation, and the ring shows AT ONCE (§8.4 — the prompt's clause; the ref only kills
      the animation, which would show nothing) */
-  .clv-row--new { animation: none; box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-band-slate); }
+  .clv-row--new { animation: none; box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-slate); }
 }
 .clv-fwk {
   display: flex;

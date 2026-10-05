@@ -58,6 +58,9 @@ export interface ContactProfileProps {
   /** open straight into edit at a section (a slip's or Housekeeping's door) */
   editAt?: FormSection | null;
   savedLine: string | null;
+  /** Agent card v1 Phase 2's bridge: told whenever the edit face is left (Cancel, Escape, ✕, a
+   *  save), so the host returns to the card's quick view. Deleted with this file in Phase 3. */
+  onLeaveEdit?: () => void;
   onClose: () => void;
   onSave: (draft: ContactDraft, notes: AlsoNote[]) => Promise<boolean>;
   onAddNote: (text: string) => Promise<void>;
@@ -88,7 +91,7 @@ const verbFor = (q: QcRow): string | null => {
 
 export const ContactProfile: React.FC<ContactProfileProps> = ({
   agent, facts, nowMs, msGenre, msTitle, genreHit, genrePool, editCtx, notes, packages = [],
-  editAt = null, savedLine, onClose, onSave, onAddNote, onOpenQuery, onRecordResponse, onLogQuery,
+  editAt = null, savedLine, onLeaveEdit, onClose, onSave, onAddNote, onOpenQuery, onRecordResponse, onLogQuery,
 }) => {
   const [editing, setEditing] = useState<boolean>(editAt != null);
   const [focusSection, setFocusSection] = useState<FormSection | null>(editAt ?? null);
@@ -121,7 +124,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
   const editingRef = useRef(editing);
   editingRef.current = editing;
   useEscapeLayer(true, () => {
-    if (editingRef.current) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); }
+    if (editingRef.current) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); onLeaveEdit?.(); }
     else onClose();
   }, ESC_LEVEL.card);
 
@@ -130,8 +133,8 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
     setSaving(true);
     const ok = await onSave(draft, liveNotes);
     setSaving(false);
-    if (ok) { setEditing(false); setFocusSection(null); }
-  }, [draft, liveNotes, onSave, saving]);
+    if (ok) { setEditing(false); setFocusSection(null); onLeaveEdit?.(); }
+  }, [draft, liveNotes, onSave, saving, onLeaveEdit]);
 
   const band = facts.standing.kind === "none" ? "slate" : facts.standing.kind === "open" ? "rose" : "taupe";
   const bandLabel = facts.door === "closed" && facts.standing.kind !== "open"
@@ -179,7 +182,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
               type="button" className="clv-ib" data-clv="close"
               aria-label={editing ? "Stop editing" : "Close"}
               onClick={() => {
-                if (editing) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); }
+                if (editing) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); onLeaveEdit?.(); }
                 else onClose();
               }}
             >
@@ -201,7 +204,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
               </div>
               <div className="clv-ffoot2">
                 <span className="clv-hint" data-clv="also-summary">{alsoSummary(liveNotes)}</span>
-                <button type="button" className="clv-cx" onClick={() => { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); }}>Cancel</button>
+                <button type="button" className="clv-cx" onClick={() => { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); onLeaveEdit?.(); }}>Cancel</button>
                 <button type="button" className="clv-done" data-clv="save" disabled={saving || !dirty} onClick={() => void save()}>
                   Save changes
                 </button>

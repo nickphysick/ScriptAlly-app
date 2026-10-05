@@ -66,6 +66,16 @@ export function closeAgentCard(): void {
   current = null;
   notify();
 }
+/**
+ * ‹ › — the SAME session moves to the next agent in its order. The seq does not move, so the card
+ * is not re-opened (no entrance, no remount): the body slides, and the list's ring follows the
+ * agent id. Ignored when nothing is open or the agent is not in the order it was opened with.
+ */
+export function stepAgentCard(agentId: string): void {
+  if (!current || current.agentId === null || !current.sequence?.includes(agentId)) return;
+  current = { ...current, agentId, tab: undefined, focus: undefined, prefill: undefined, originRect: null };
+  notify();
+}
 export function currentAgentCard(): AgentCardRequest | null {
   return current;
 }

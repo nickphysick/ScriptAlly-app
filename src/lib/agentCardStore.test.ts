@@ -8,10 +8,36 @@ import { describe, it, expect, afterEach } from "vitest";
 import {
   closeAgentCard, currentAgentCard, legacySectionFor, openAgentCard, openNewAgentCard,
   subscribeAgentCard, targetForSection, emitAgentCardEvent, subscribeAgentCardEvents,
-  type AgentCardRequest,
+  stepAgentCard, type AgentCardRequest,
 } from "./agentCardStore";
 
 afterEach(() => closeAgentCard());
+
+describe("‹ › — a step moves the SAME session", () => {
+  it("changes the agent and keeps the seq, so the card is not re-opened", () => {
+    openAgentCard("a", { from: "row", sequence: ["a", "b", "c"], tab: "want", focus: "genres" });
+    const before = currentAgentCard()!;
+    stepAgentCard("b");
+    const after = currentAgentCard()!;
+    expect(after.agentId).toBe("b");
+    expect(after.seq, "a step is not an open — the session must not remount").toBe(before.seq);
+    expect(after.sequence).toEqual(["a", "b", "c"]);
+    expect(after.tab, "a step reads the next agent from the top, not at the last door's field").toBeUndefined();
+    expect(after.focus).toBeUndefined();
+    closeAgentCard();
+  });
+  it("refuses an agent outside the order, a new-agent card, and a closed card", () => {
+    openAgentCard("a", { sequence: ["a", "b"] });
+    stepAgentCard("z");
+    expect(currentAgentCard()!.agentId).toBe("a");
+    openNewAgentCard();
+    stepAgentCard("a");
+    expect(currentAgentCard()!.agentId).toBeNull();
+    closeAgentCard();
+    stepAgentCard("a");
+    expect(currentAgentCard()).toBeNull();
+  });
+});
 
 describe("the agent card's store", () => {
   it("opens an agent with every option carried, and notifies subscribers", () => {
