@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "AN17-11 six records",
+  "where": "1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
+  "where": "1280",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
+  "where": "1280",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-11 six records",
+  "where": "1440",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
+  "where": "1440",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
+  "where": "1440",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-11 six records",
+  "where": "1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-11 six records",
+  "where": "1920",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
+  "where": "1920",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
+  "where": "1920",
+  "ok": false,
+  "detail": "undefined StatusDot, undefined svg"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "AN17-5 five cells",
+  "where": "1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-5 five cells",
+  "where": "1440",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-5 five cells",
+  "where": "1512",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-5 Last 90 days changes at least one big number",
+  "where": "1512",
+  "ok": false,
+  "detail": " → "
+ },
+ {
+  "lock": "AN17-5 All time restores them",
+  "where": "1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-5 five cells",
+  "where": "1920",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

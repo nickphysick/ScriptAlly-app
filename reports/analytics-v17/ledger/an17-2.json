@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AN17-2 the band exists",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-2 the band exists",
+  "where": "1440",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-2 the band exists",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-2 the band exists",
+  "where": "1920",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

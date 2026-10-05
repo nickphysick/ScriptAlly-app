@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "AN17-12 the chart is on screen",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-12 the readout starts at Today",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ }
+]

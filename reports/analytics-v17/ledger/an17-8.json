@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "AN17-8 the page has dated queries",
+  "where": "1280",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-8 one dot per dated query",
+  "where": "1280",
+  "ok": false,
+  "detail": "0 dots, undefined dated"
+ },
+ {
+  "lock": "AN17-8 each dot takes its query's status fill",
+  "where": "1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-8 weekly bars present",
+  "where": "1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 exactly one rust weekly bar",
+  "where": "1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 the rust bar is the busiest week",
+  "where": "1280",
+  "ok": false,
+  "detail": "rust undefined busiest 0"
+ },
+ {
+  "lock": "AN17-8 the rest are anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-8 the page has dated queries",
+  "where": "1440",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-8 one dot per dated query",
+  "where": "1440",
+  "ok": false,
+  "detail": "0 dots, undefined dated"
+ },
+ {
+  "lock": "AN17-8 each dot takes its query's status fill",
+  "where": "1440",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-8 weekly bars present",
+  "where": "1440",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 exactly one rust weekly bar",
+  "where": "1440",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 the rust bar is the busiest week",
+  "where": "1440",
+  "ok": false,
+  "detail": "rust undefined busiest 0"
+ },
+ {
+  "lock": "AN17-8 the rest are anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-8 the page has dated queries",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-8 one dot per dated query",
+  "where": "1512",
+  "ok": false,
+  "detail": "0 dots, undefined dated"
+ },
+ {
+  "lock": "AN17-8 each dot takes its query's status fill",
+  "where": "1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-8 weekly bars present",
+  "where": "1512",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 exactly one rust weekly bar",
+  "where": "1512",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 the rust bar is the busiest week",
+  "where": "1512",
+  "ok": false,
+  "detail": "rust undefined busiest 0"
+ },
+ {
+  "lock": "AN17-8 the rest are anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-8 the page has dated queries",
+  "where": "1920",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-8 one dot per dated query",
+  "where": "1920",
+  "ok": false,
+  "detail": "0 dots, undefined dated"
+ },
+ {
+  "lock": "AN17-8 each dot takes its query's status fill",
+  "where": "1920",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-8 weekly bars present",
+  "where": "1920",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 exactly one rust weekly bar",
+  "where": "1920",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-8 the rust bar is the busiest week",
+  "where": "1920",
+  "ok": false,
+  "detail": "rust undefined busiest 0"
+ },
+ {
+  "lock": "AN17-8 the rest are anthracite",
+  "where": "1920",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

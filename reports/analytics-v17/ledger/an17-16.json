@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "AN17-16 the page is cut to one query",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-16 figures were found",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined"
+ }
+]

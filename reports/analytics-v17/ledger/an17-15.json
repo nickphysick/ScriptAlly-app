@@ -1,0 +1,284 @@
+[
+ {
+  "lock": "AN17-15 the tab exists",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 fixed",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "where": "1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "AN17-15 before the first section it reads Under the hood",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 1 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 2 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 3 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 4 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 5 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 6 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 7 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 8 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 9 in view",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 ☰ opens a menu of nine",
+  "where": "1280",
+  "ok": false,
+  "detail": "false 0"
+ },
+ {
+  "lock": "AN17-15 Escape closes the menu",
+  "where": "1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-15 Escape closes the menu only (the tab stays)",
+  "where": "1280",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-15 the tab exists",
+  "where": "1440",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 fixed",
+  "where": "1440",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "where": "1440",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "AN17-15 before the first section it reads Under the hood",
+  "where": "1440",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-15 the tab exists",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 fixed",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "where": "1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "AN17-15 before the first section it reads Under the hood",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 1 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 2 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 3 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 4 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 5 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 6 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 7 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 8 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 names section 9 in view",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 ☰ opens a menu of nine",
+  "where": "1512",
+  "ok": false,
+  "detail": "false 0"
+ },
+ {
+  "lock": "AN17-15 Escape closes the menu",
+  "where": "1512",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-15 Escape closes the menu only (the tab stays)",
+  "where": "1512",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-15 the tab exists",
+  "where": "1920",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 fixed",
+  "where": "1920",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "where": "1920",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "AN17-15 before the first section it reads Under the hood",
+  "where": "1920",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-15 absent at ≤760px",
+  "where": "390",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 absent at ≤760px",
+  "where": "414",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-15 absent at ≤760px",
+  "where": "760",
+  "ok": true,
+  "detail": "null"
+ }
+]

@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "AN17-13 lanes present",
+  "where": "1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-13 one line per dated query",
+  "where": "1280",
+  "ok": false,
+  "detail": "0 lanes, undefined dated, population undefined"
+ },
+ {
+  "lock": "AN17-13 each line in a status fill",
+  "where": "1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-13 the today line is rust",
+  "where": "1280",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-13 the today line sits at the plot's right edge",
+  "where": "1280",
+  "ok": false,
+  "detail": "today undefined plot undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-13 lanes present",
+  "where": "1440",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-13 one line per dated query",
+  "where": "1440",
+  "ok": false,
+  "detail": "0 lanes, undefined dated, population undefined"
+ },
+ {
+  "lock": "AN17-13 each line in a status fill",
+  "where": "1440",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-13 the today line is rust",
+  "where": "1440",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-13 the today line sits at the plot's right edge",
+  "where": "1440",
+  "ok": false,
+  "detail": "today undefined plot undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-13 lanes present",
+  "where": "1512",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-13 one line per dated query",
+  "where": "1512",
+  "ok": false,
+  "detail": "0 lanes, undefined dated, population undefined"
+ },
+ {
+  "lock": "AN17-13 each line in a status fill",
+  "where": "1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-13 the today line is rust",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-13 the today line sits at the plot's right edge",
+  "where": "1512",
+  "ok": false,
+  "detail": "today undefined plot undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-13 lanes present",
+  "where": "1920",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "AN17-13 one line per dated query",
+  "where": "1920",
+  "ok": false,
+  "detail": "0 lanes, undefined dated, population undefined"
+ },
+ {
+  "lock": "AN17-13 each line in a status fill",
+  "where": "1920",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AN17-13 the today line is rust",
+  "where": "1920",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AN17-13 the today line sits at the plot's right edge",
+  "where": "1920",
+  "ok": false,
+  "detail": "today undefined plot undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

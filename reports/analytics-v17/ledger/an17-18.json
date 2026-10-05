@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "AN17-18 the page reads a manuscript",
+  "where": "1512",
+  "ok": false,
+  "detail": "{\"ms\":null,\"sent\":-1,\"strip\":null,\"funnel\":null}"
+ },
+ {
+  "lock": "AN17-18 switched to another manuscript with queries",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-18 without a reload",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 → 1 document loads"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

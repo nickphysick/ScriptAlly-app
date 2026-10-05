@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "AN17-1 the v17 page is on the route",
+  "where": "1280",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-1 main ground",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 page ground",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-1 sidebar",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "AN17-1 top bar on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 top-bar rule",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "AN17-1 the page ground is greige (pixel)",
+  "where": "1280",
+  "ok": false,
+  "detail": "no strip / first banner to sample between"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-1 the v17 page is on the route",
+  "where": "1440",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-1 main ground",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 page ground",
+  "where": "1440",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-1 sidebar",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "AN17-1 top bar on the page colour",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 top-bar rule",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "AN17-1 the page ground is greige (pixel)",
+  "where": "1440",
+  "ok": false,
+  "detail": "no strip / first banner to sample between"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-1 the v17 page is on the route",
+  "where": "1512",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-1 main ground",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 page ground",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-1 sidebar",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "AN17-1 top bar on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 top-bar rule",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "AN17-1 the page ground is greige (pixel)",
+  "where": "1512",
+  "ok": false,
+  "detail": "no strip / first banner to sample between"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-1 the v17 page is on the route",
+  "where": "1920",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "AN17-1 main ground",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 page ground",
+  "where": "1920",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "AN17-1 sidebar",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "AN17-1 top bar on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "AN17-1 top-bar rule",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "AN17-1 the page ground is greige (pixel)",
+  "where": "1920",
+  "ok": false,
+  "detail": "no strip / first banner to sample between"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]

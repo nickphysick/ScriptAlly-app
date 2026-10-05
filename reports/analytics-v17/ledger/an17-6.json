@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AN17-6 nine sections",
+  "where": "1280",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-6 nine sections",
+  "where": "1440",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-6 nine sections",
+  "where": "1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": false,
+  "detail": "found false over NaN"
+ },
+ {
+  "lock": "AN17-6 nine sections",
+  "where": "1920",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": false,
+  "detail": "found false over NaN"
+ }
+]
