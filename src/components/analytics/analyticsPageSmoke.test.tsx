@@ -38,6 +38,7 @@ describe("/queries/analytics renders", () => {
     /* the seed is one query, sent and unanswered */
     expect(html).toContain('data-sent="1"');
     expect(html).toContain("Where the one query got to");
+    expect(html).toContain("At a glance");
   });
 
   it("opens on the shared band — a PageHeader with `band`, fixed, and no living header", () => {
@@ -61,6 +62,8 @@ describe("/queries/analytics renders", () => {
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     expect(html).not.toMatch(/>\s*Export\s*</);
     expect(html).not.toContain("Last 6 months");
+    expect(html).toContain("All time");
+    expect(html).toContain("Last 90 days");
   });
 
   it("⚠️ the dev review aid is unreachable from a production build — gated at the call site", async () => {
