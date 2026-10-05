@@ -55,6 +55,7 @@ describe("/queries/analytics renders", () => {
     const at = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((s) => html.indexOf(`data-sec="${s}"`));
     expect(at.every((i) => i > -1)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
+    expect(html).toContain("What the numbers can&#x27;t tell you");
   });
 
   it("draws no Export and no old time-range control — the strip's All time | Last 90 days is the only one", () => {

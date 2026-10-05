@@ -512,3 +512,72 @@ export const OverTime: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   );
 };
 
+/* ═════════════ 8 · every query against time ═════════════ */
+export const Lanes: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const mark = useMark();
+  const l = model.v17.lanes;
+  const rows = l.rows;
+  if (l.startMs === null) return <Fig k="lanes" title="Every query against time" note="up to today" population={0}><p className="a17-none">No dated query sent yet</p></Fig>;
+  const start = l.startMs, span = Math.max(DAY, l.nowMs - start);
+  const months = (every: number) => {
+    const out: { ms: number; label: string }[] = [];
+    const d = new Date(start); d.setDate(1); d.setHours(0, 0, 0, 0);
+    let i = 0;
+    while (d.getTime() <= l.nowMs) { if (d.getTime() >= start && i % every === 0) out.push({ ms: d.getTime(), label: MONTHS_SHORT[d.getMonth()].toUpperCase() }); d.setMonth(d.getMonth() + 1); i++; }
+    return out;
+  };
+  const W = 1200, x0 = 96, x1 = W - 30, top = 30, rowH = Math.max(12, Math.min(22, 540 / Math.max(1, rows.length)));
+  const H = top + rows.length * rowH + 30, per = (x1 - x0) / span;
+  const MW = 330, mx0 = 64, mx1 = MW - 4, mper = (mx1 - mx0) / span, mtop = 22, mRow = 20;
+  const MH = mtop + rows.length * mRow + 22;
+  const tip = (q: V17Query) => mark(titleOf(q), [queryLine(q, l.nowMs)]);
+  return (
+    <Fig k="lanes" title="Every query against time" note="up to today" population={rows.length}
+      keyItems={<StateKey waiting="Still waiting" read="Being read" closed="Ended" today />}>
+      <svg className="a17-d" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Every query against time">
+        {months(1).map((m) => (
+          <g key={m.ms}><line x1={x0 + (m.ms - start) * per} y1={18} x2={x0 + (m.ms - start) * per} y2={H - 28} className="a17-faint" /><text className="a17-ax" x={x0 + (m.ms - start) * per + 4} y={12}>{m.label}</text></g>
+        ))}
+        <rect data-a17="lanes-plot" x={x0} y={16} width={x1 - x0} height={H - 42} fill="transparent" />
+        {rows.map((q, i) => {
+          const y = top + i * rowH + rowH / 2;
+          const a = q.sentMs as number, b = q.endMs ?? l.nowMs;
+          return (
+            <g key={q.id}>
+              <text className="a17-nm" x={0} y={y + 4}>{short(q)}</text>
+              <rect {...tip(q)} data-a17="lane" x={x0 + (a - start) * per} y={y - 5} width={Math.max(4, (b - a) * per)} height={10} rx={5} className={`a17-f-${q.bucket} a17-hairrule`} />
+            </g>
+          );
+        })}
+        <line data-a17="today" x1={x1} y1={16} x2={x1} y2={H - 26} className="a17-todayline" />
+        <text className="a17-ax a17-rustfill" x={x1 - 4} y={H - 8} textAnchor="end">TODAY</text>
+      </svg>
+      <svg className="a17-m" viewBox={`0 0 ${MW} ${MH}`} width="100%" role="img" aria-label="Every query against time">
+        {months(3).map((m) => (
+          <g key={m.ms}><line x1={mx0 + (m.ms - start) * mper} y1={14} x2={mx0 + (m.ms - start) * mper} y2={mtop + rows.length * mRow} className="a17-faint" /><text className="a17-axm" x={mx0 + (m.ms - start) * mper + 3} y={10}>{m.label}</text></g>
+        ))}
+        {rows.map((q, i) => {
+          const y = mtop + i * mRow, a = q.sentMs as number, b = q.endMs ?? l.nowMs;
+          return (
+            <g key={q.id}>
+              <text className="a17-lbm" x={0} y={y + 13} fontSize={12}>{short(q)}</text>
+              <rect {...tip(q)} x={mx0 + (a - start) * mper} y={y + 5} width={Math.max(4, (b - a) * mper)} height={10} rx={5} className={`a17-f-${q.bucket} a17-hairrule`} />
+            </g>
+          );
+        })}
+        <line x1={mx1} y1={12} x2={mx1} y2={mtop + rows.length * mRow + 2} className="a17-todayline" />
+        <text className="a17-axm a17-rustfill" x={mx1} y={mtop + rows.length * mRow + 16} textAnchor="end">TODAY</text>
+      </svg>
+    </Fig>
+  );
+};
+
+/* ═════════════ 9 · reading the numbers: the blush workspace ═════════════ */
+export const Caveats: React.FC<{ model: AnalyticsModel }> = ({ model }) => (
+  <div className="a17-ws a17-rv d1" data-a17="ws">
+    <div className="a17-gband a17-tw" data-a17="ws-band">What the numbers can&apos;t tell you <em>{model.v17.caveats.length}</em><small>Sample size · silence · medians · what&apos;s not recorded</small></div>
+    <div className="a17-cards">
+      {model.v17.caveats.map((c) => <div className="a17-card" key={c.title} data-a17="ws-card"><h4 className="a17-tw">{c.title}</h4><p>{c.text}</p></div>)}
+    </div>
+  </div>
+);
