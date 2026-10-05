@@ -129,3 +129,21 @@ describe("v126 §7 · the tray's action is one drawer door per bucket", () => {
     expect(trayRequest("decide", S.OFFER, "q")?.mode).toBe("offer");
   });
 });
+
+describe("v126.2 · the Birds-eye row's one next move", () => {
+  it("is the tray's own act where something is coming up, else the card's primary door", async () => {
+    const { nextMove, trayRequest } = await import("./qcComingUp");
+    const { QueryStatus: S } = await import("../types");
+    const r = (status: string, id = "q1") => ({ id, status, expectedMs: NOW - 10 * DAY } as unknown as QcRow);
+    /* a raised card: the tray's label and the tray's journey, from the one derivation */
+    for (const [b, t] of Object.entries(TYPE_FOR) as [Exclude<Bucket, "note">, string][]) {
+      const st = b === "decide" ? S.OFFER : b === "send" ? S.FULL_REQUESTED : S.QUERIED;
+      const m = nextMove(card(t), r(st), NOW);
+      expect(m?.label, b).toBe(COMING_ACTION[b]);
+      expect(m?.request, b).toEqual(trayRequest(b, st, "q1"));
+    }
+    /* nothing raised: the card's own primary door */
+    expect(nextMove(undefined, r(S.QUERIED), NOW)).toEqual({ label: "Record a response", request: { mode: "resp", queryId: "q1" } });
+    expect(nextMove(undefined, r(S.FULL_REQUESTED), NOW)?.request.mode).toBe("sent");
+  });
+});

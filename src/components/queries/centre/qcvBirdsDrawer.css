@@ -39,30 +39,37 @@
 .bvd-dim.is-in { opacity: 1; }
 .bvd {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;
-  width: min(780px, 56vw); display: flex; flex-direction: column;
+  width: min(1120px, 74vw); display: flex; flex-direction: column;
   background: #ffffff; color: #1c130f; font-family: var(--sp-serif);
   box-shadow: -30px 0 70px -30px rgba(28, 19, 15, 0.45);
   transform: translateX(100%); transition: transform 0.34s cubic-bezier(.2, .8, .2, 1);
 }
 .bvd.is-in { transform: none; }
 
-/* ── the ink block: it only ever grows downwards ─────────────────────────────────────────────── */
-.bvd-head { position: relative; z-index: 40; flex: none; box-sizing: border-box; padding: 16px 16px 14px 132px; background: #2a3a52; color: #f5f1eb; }
+/* ── the ink block ───────────────────────────────────────────────────────────────────────────
+   ⚠️ ONE GRID, TWO ARRANGEMENTS. Below 1101px it is v126's block — the title and the × on one row,
+   the pills beneath, the filter line last. From 1101px the title, the pills and the × share one 96px
+   row and the filter line becomes a sub-strip spanning the drawer. Either way the filter line is the
+   grid's LAST row, so opening it moves nothing above it. */
+.bvd-head {
+  position: relative; z-index: 40; flex: none; box-sizing: border-box; padding: 16px 16px 14px 132px; background: #2a3a52; color: #f5f1eb;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px;
+}
 /* ⚠️ INTERIM MASK: the head is cut flat at both sides; the fade comes off with the uncut drawing */
 .bvd-hawk {
   position: absolute; left: 22px; bottom: 0; width: 96px; height: auto; display: block; pointer-events: none;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
 }
-.bvd-row1 { display: flex; align-items: flex-start; gap: 12px; }
 /* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces every h2's face at runtime */
-.bvd-head .bvd-title { flex: 1; margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 30px; line-height: 32px; color: #f5f1eb; }
+.bvd-head .bvd-title { grid-row: 1; grid-column: 1; min-width: 0; margin: 0; white-space: nowrap; font-family: var(--sp-type) !important; font-weight: 400; font-size: 30px; line-height: 32px; color: #f5f1eb; }
 .bvd-x {
+  grid-row: 1; grid-column: 2; align-self: start;
   flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: #f5f1eb; cursor: pointer;
   box-shadow: inset 0 0 0 1.5px rgba(245, 241, 235, 0.55); display: flex; align-items: center; justify-content: center;
 }
 .bvd-x:hover { background: rgba(245, 241, 235, 0.1); }
-.bvd-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 13px; }
+.bvd-btb { grid-row: 2; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 13px; }
 .bvd-pw { position: relative; display: inline-flex; }
 .bvd-sortj { position: relative; display: inline-flex; gap: 1px; }
 .bvd-pill, .bvd-dir {
@@ -81,7 +88,7 @@
 .bvd-pill.is-set i { opacity: 0.62; }
 .bvd-pill:focus-visible, .bvd-dir:focus-visible, .bvd-x:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 2px; }
 
-.bvd-fline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font: 400 13px/1.3 var(--sp-serif); color: rgba(245, 241, 235, 0.78); }
+.bvd-fline { grid-row: 3; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font: 400 13px/1.3 var(--sp-serif); color: rgba(245, 241, 235, 0.78); }
 .bvd-fshow b { color: #f5f1eb; font-weight: 600; }
 .bvd-fchip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 4px 0 10px; border-radius: 12px; background: rgba(245, 241, 235, 0.14); color: #f5f1eb; font: 400 12.5px/1 var(--sp-type); }
 .bvd-fchip button { width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(245, 241, 235, 0.18); color: #f5f1eb; cursor: pointer; font: 400 12px/1 var(--sp-type); }
@@ -134,7 +141,6 @@
 
 /* ── the time control, in the date row's corner ────────────────────────────────────────────── */
 .bvd .qcv-tl { --qcv-tl-daterow-h: 52px; }
-.bvd .qcv-tl-corner { justify-content: flex-end; padding: 0 12px; }
 .bvd-time {
   display: inline-flex; align-items: center; gap: 2px; height: 34px; box-sizing: border-box; padding: 0 3px;
   border-radius: 17px; background: #f4f2ee; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
@@ -150,18 +156,16 @@
 .bvd-time .bvd-today.is-away { background: #2a3a52; color: #f5f1eb; }
 
 /* ── the bars' paint ───────────────────────────────────────────────────────────────────────── */
-.bvd .qcv-tl-bar { background: transparent; box-shadow: none; overflow: visible; }
-.bvd .qcv-tl-bar:hover { box-shadow: none; }
 .bvd .qcv-tl-bar:hover .bvd-part { box-shadow: inset 0 0 0 1.6px #1c130f; }
-.bvd-part { position: absolute; top: 0; bottom: 0; background: var(--qcv-state, var(--state-closed)); border-radius: 11px; text-decoration: none; }
-.bvd-part--l { border-radius: 11px 0 0 11px; }
-.bvd-part--r { border-radius: 0 11px 11px 0; }
+.bvd-part { position: absolute; top: 0; bottom: 0; background: var(--qcv-state, var(--state-closed)); border-radius: 12px; text-decoration: none; }
+.bvd-part--l { border-radius: 12px 0 0 12px; }
+.bvd-part--r { border-radius: 0 12px 12px 0; }
 .bvd-part--after { opacity: 0.42; }
-/* the torn ends keep their own squared corner */
-.bvd .qcv-tl-bar--torn-start .bvd-part--solid { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.bvd .qcv-tl-bar--torn-end .bvd-part--solid:not(.bvd-part--l) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.bvd .qcv-tl-words { position: relative; z-index: 1; }
+/* a torn end, and an end cut by the window's edge, are square */
+.bvd .qcv-tl-bar--torn-start .bvd-part--solid, .bvd .bvd-bar--cutl .bvd-part--solid { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.bvd .qcv-tl-bar--torn-end .bvd-part, .bvd .bvd-bar--cutr .bvd-part { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .bvd-duetick { position: absolute; top: 2px; bottom: 2px; width: 0; border-left: 2px dashed rgba(28, 19, 15, 0.5); z-index: 1; }
+/* ● — the beacon at an overdue bar's today end: what the footer's "●" names */
 .bvd-beacon { position: absolute; right: -5px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #2a3a52; z-index: 3; }
 .bvd-beacon::before, .bvd-beacon::after {
   content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.55);
@@ -169,13 +173,61 @@
 }
 .bvd-beacon::after { animation-delay: 0.9s; }
 @keyframes bvdRing { from { transform: scale(1); opacity: 1; } to { transform: scale(2.6); opacity: 0; } }
-.bvd-tail { position: absolute; top: 12px; display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; z-index: 2; }
-.bvd-over { font: 700 9px/20px var(--font-mono); letter-spacing: 0.1em; color: #2a3a52; }
-.bvd-tail .qcv-tl-nudge { position: static; }
+/**
+ * ⚠️ THE SENTENCE IS WHOLE OR ABSENT — no `text-overflow`, ever. The component places it inside the
+ * bar, just after it, or not at all, by its measured width; a rule that ellipsised it here would
+ * hide a placement fault rather than prevent one.
+ */
+.bvd-words {
+  position: absolute; top: 13px; height: 24px; z-index: 2; pointer-events: none; white-space: nowrap;
+  font: 400 11.5px/24px var(--sp-type); color: #1c130f;
+}
+.bvd-words--past { color: rgba(28, 19, 15, 0.7); }
+.bvd-words--out { color: rgba(28, 19, 15, 0.7); }
+/* the end labels: N DAYS OVER 8px past today; IN 5D 8px past the bar's end */
+.bvd-over, .bvd-in { position: absolute; top: 19px; z-index: 2; white-space: nowrap; pointer-events: none; font: 700 8.5px/12px var(--font-mono); letter-spacing: 0.06em; }
+.bvd-over { color: #2a3a52; }
+.bvd-in { color: rgba(28, 19, 15, 0.55); }
+
+/* ── the action column: one pill per row, always visible, right-aligned ──────────────────────── */
+.bvd-actcell { display: flex; justify-content: flex-end; align-items: center; min-width: 0; height: 100%; }
+.bvd-act {
+  box-sizing: border-box; height: 28px; max-width: 100%; padding: 0 12px; margin-right: 4px; border: 0; border-radius: 14px; cursor: pointer;
+  background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.55);
+  font: 400 12px/28px var(--sp-type); white-space: nowrap;
+}
+.bvd-act:hover { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
+.bvd-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 .bvd-gdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .bvd .qcv-tl-band b { font-weight: 400; }
 
-@media (max-width: 1399px) {
+/* ── the header from 1101px: one 96px row, the filter line as a sub-strip ─────────────────── */
+@media (min-width: 1101px) {
+  .bvd-head { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-rows: 96px auto; column-gap: 14px; padding: 0 18px 0 136px; }
+  .bvd-head .bvd-title { grid-row: 1; grid-column: 1; align-self: center; }
+  .bvd-btb { grid-row: 1; grid-column: 2; margin: 0; align-self: center; flex-wrap: nowrap; }
+  .bvd-x { grid-row: 1; grid-column: 3; align-self: center; }
+  .bvd-fline {
+    grid-row: 2; grid-column: 1 / -1; margin: 0 -18px 0 -136px; padding: 11px 18px 12px 136px;
+    background: #22304a; box-shadow: inset 0 1px 0 rgba(245, 241, 235, 0.08);
+  }
+  /* the hawk sits on the row's floor: the title is centred on him, and he stays put when the strip opens */
+  .bvd-hawk { bottom: auto; top: 4px; left: 24px; width: 96px; }
+}
+/**
+ * ⚠️ 1101–1400: TIGHTER. Title 26, left padding 118, the pills' own padding 0 10 and 6 between them.
+ * The hawk is 86 wide at the ref's left 18 — and at top 8, NOT the ref's 10: at 86 wide the drawing
+ * is 82.3 tall, so top 10 puts his centre 3.1px below the title's against the 3px the brief asks.
+ */
+@media (min-width: 1101px) and (max-width: 1400px) {
+  .bvd-head { padding-left: 118px; column-gap: 10px; }
+  .bvd-head .bvd-title { font-size: 26px; }
+  .bvd-fline { margin-left: -118px; padding-left: 118px; }
+  .bvd-hawk { width: 86px; left: 18px; top: 8px; }
+  .bvd-pill { padding: 0 10px; }
+  .bvd-btb { gap: 6px; }
+}
+@media (max-width: 1100px) {
   .bvd-head .bvd-title { font-size: 26px; line-height: 32px; }
   .bvd-hawk { width: 82px; }
 }

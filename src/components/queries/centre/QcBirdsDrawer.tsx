@@ -5,7 +5,7 @@
  * QcBirdsDrawer — the Birds-eye view as a floating tab and a half-screen drawer (Query Centre v126
  * §6; ref design-refs/query-centre-v126.html). It replaces the rail's view and the old expanded card.
  *
- * ⚠️ THE TIMELINE IS UNCHANGED UNDERNEATH. `QcTimeline` still owns the scale, the scroll, the date
+ * ⚠️ `QcTimeline` OWNS TIME — the scale, the window onto it (v126.2: windowed, not scrolled), the date
  * row, today and the crosshair; this file is the furniture around it — the tab, the dim, the ink
  * header, the three pills and their popovers — and the drawer's own view (`lib/qcBirdsDrawer`).
  *
@@ -80,12 +80,14 @@ export const QcBirdsDrawer: React.FC<{
   onCardClose: () => void;
   /** whether the action drawer is open over everything — the drawer's keys stand down */
   actionOpen: boolean;
-  /** a row's action button — the one action drawer */
+  /** each row's one next move — the action pill's words (`nextMove`) */
+  moves: ReadonlyMap<string, { label: string }>;
+  /** a row's action pill — the one action drawer, in the journey its next move names */
   onAct: (id: string) => void;
   /** a query to centre the timeline on when the drawer opens */
   focusId?: string | null;
   loading?: boolean;
-}> = ({ rows, nowMs, open, onOpenDrawer, onCloseDrawer, onOpenQuery, cardOpen, onCardClose, actionOpen, onAct, focusId = null, loading = false }) => {
+}> = ({ rows, nowMs, open, onOpenDrawer, onCloseDrawer, onOpenQuery, cardOpen, onCardClose, actionOpen, moves, onAct, focusId = null, loading = false }) => {
   const [view, setView] = useState<BvdView>(BVD_DEFAULT);
   const [pop, setPop] = useState<Pop>(null);
   const popRef = useRef<Pop>(null);
@@ -212,13 +214,17 @@ export const QcBirdsDrawer: React.FC<{
           {/* ⚠️ INTERIM: the head is cut flat at both sides, so its sides are masked. When the uncut
               drawing arrives, the mask comes off (Nick, v126 §6). */}
           <img className="bvd-hawk" data-qcv="bvd-hawk" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" aria-hidden="true" />
-          <div className="bvd-row1">
-            <h2 id="bvd-title" className="bvd-title" data-qcv="bvd-title">Birds-eye view</h2>
-            <button type="button" className="bvd-x" data-qcv="bvd-close" aria-label="Close the Birds-eye view" onClick={close}>
-              <svg width="12" height="12" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div className="bvd-row2">
+          {/**
+            * v126.2 — ONE GRID: the title, the three pills and the ×. From 1101px they share one 96px
+            * row (title left and centred on the hawk, the pills and the × right); below it the pills
+            * drop to a second row, as v126 drew it. The filter line is the grid's last row either way,
+            * so opening it never moves the title, the pills or the hawk.
+            */}
+          <h2 id="bvd-title" className="bvd-title" data-qcv="bvd-title">Birds-eye view</h2>
+          <button type="button" className="bvd-x" data-qcv="bvd-close" aria-label="Close the Birds-eye view" onClick={close}>
+            <svg width="12" height="12" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          </button>
+          <div className="bvd-btb" data-qcv="bvd-btb">
             <span className="bvd-pw">
             <button type="button" className={`bvd-pill${nFilters ? " is-set" : ""}`} data-qcv="bvd-pill" data-k="filter"
               aria-haspopup="dialog" aria-expanded={pop === "filter"} onClick={() => setPop((p) => (p === "filter" ? null : "filter"))}>
@@ -318,11 +324,11 @@ export const QcBirdsDrawer: React.FC<{
           ) : (
             <QcTimeline
               rows={rows} groups={groups} banded={view.groupBy !== "none"} nowMs={clock} focusId={focusId}
-              onOpen={(id) => onOpenQuery(id, groups.flatMap((g) => g.rows.map((r) => r.id)))} onAct={onAct} keysActive={!cardOpen && !actionOpen && !pop} filtered={nFilters > 0}
+              onOpen={(id) => onOpenQuery(id, groups.flatMap((g) => g.rows.map((r) => r.id)))} moves={moves} onAct={onAct} keysActive={!cardOpen && !actionOpen && !pop} filtered={nFilters > 0}
             />
           )}
         </div>
-        <p className="bvd-foot" data-qcv="bvd-foot">DRAG THE DATES OR USE ← → TO SCROLL · T FOR TODAY · INK IS TIME PAST THE DATE · CLICK A ROW TO OPEN IT</p>
+        <p className="bvd-foot" data-qcv="bvd-foot">DRAG THE DATES OR USE ← → TO SCROLL · T FOR TODAY · ● MARKS A QUERY PAST ITS DATE · CLICK A ROW TO OPEN IT</p>
       </aside>
     </>
   ) : null;

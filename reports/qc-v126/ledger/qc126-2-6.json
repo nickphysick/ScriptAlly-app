@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "QC126-2.6 no '…' on any row, and no sentence clipped",
+  "where": "1280",
+  "ok": true,
+  "detail": "ell false clipped 0"
+ },
+ {
+  "lock": "QC126-2.6 population: overdue bars wide enough for their sentence",
+  "where": "1280",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.6 every bar carries its full sentence on its title",
+  "where": "1280",
+  "ok": true,
+  "detail": "72/0"
+ },
+ {
+  "lock": "QC126-2.6 no '…' on any row, and no sentence clipped",
+  "where": "1512",
+  "ok": true,
+  "detail": "ell false clipped 0"
+ },
+ {
+  "lock": "QC126-2.6 population: overdue bars wide enough for their sentence",
+  "where": "1512",
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.6 every bar carries its full sentence on its title",
+  "where": "1512",
+  "ok": true,
+  "detail": "75/0"
+ },
+ {
+  "lock": "QC126-2.6 no '…' on any row, and no sentence clipped",
+  "where": "1920",
+  "ok": true,
+  "detail": "ell false clipped 0"
+ },
+ {
+  "lock": "QC126-2.6 population: overdue bars wide enough for their sentence",
+  "where": "1920",
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.6 every bar carries its full sentence on its title",
+  "where": "1920",
+  "ok": true,
+  "detail": "75/0"
+ }
+]

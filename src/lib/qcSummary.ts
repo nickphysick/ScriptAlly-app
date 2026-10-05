@@ -297,6 +297,7 @@ export const FOOT_DISCS = 4;
  * day it closed is `stageStartMs`, the day it reached the stage, never `lastMs`, which is the last
  * thing that happened to the query and moves whenever anyone adds a note to it.
  */
+const startOfDayMs = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number): Pick<CourtTile, "who" | "more" | "when"> {
   const closed = key === "closed";
   /* undated last in either direction — a missing date is not a position on the scale */
@@ -329,14 +330,25 @@ export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number)
    * The LABEL is a property of the court, never of the date — which is what makes this possible at
    * all: "next due" / "next reply expected" / "last closed" are known before any row is consulted.
    */
-  const label = closed ? "last closed" : key === "you" ? "next due" : "next reply expected";
+  let label = closed ? "last closed" : key === "you" ? "next due" : "next reply expected";
   let date: string | null = null;
   if (closed) {
     const last = ordered.find((r) => r.stageStartMs != null)?.stageStartMs;
     if (last != null) date = shortDay(last);
   } else {
-    const next = ordered.find((r) => r.expectedMs != null && r.expectedMs >= nowMs)?.expectedMs;
-    if (next != null) date = key === "you" ? shortWeekDay(next) : shortDay(next);
+    /**
+     * ⚠️ v126.2 — WHEN THE EARLIEST DATE HAS PASSED, THE FOOT SAYS SO: "overdue since Fri 31 Jul".
+     * It used to look only for a date still to come, so a section whose every date had gone read
+     * "next due —" — the em dash claiming there was no date when the truth was that they had all
+     * passed. The dash is now only for a section with no dates at all.
+     */
+    const earliest = ordered.find((r) => r.expectedMs != null)?.expectedMs ?? null;
+    if (earliest != null && earliest < startOfDayMs(nowMs)) {
+      label = "overdue since";
+      date = shortWeekDay(earliest);
+    } else if (earliest != null) {
+      date = key === "you" ? shortWeekDay(earliest) : shortDay(earliest);
+    }
   }
   const when: CourtWhen = { label, date };
   return { who, more: Math.max(0, agents - who.length), when };

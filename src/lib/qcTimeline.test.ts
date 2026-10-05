@@ -29,7 +29,7 @@ const EXT = extentOf(rowsOf([mkQ()]), NOW);
 describe("§8.4 · the scale", () => {
   it("the stated numbers, and the clamp", () => {
     expect([PXD_MIN, PXD_MAX, PXD_DEFAULT]).toEqual([3, 30, 10.5]);
-    expect(TODAY_AT).toBe(0.58);
+    expect(TODAY_AT).toBe(0.4);
     expect(NUDGE_WEEKS).toBe(4);
     expect(clampPxd(1)).toBe(PXD_MIN);
     expect(clampPxd(100)).toBe(PXD_MAX);
@@ -65,7 +65,7 @@ describe("§8.4 · the scale", () => {
       expect(Math.round(msAt(EXT, pxd, xAt(EXT, pxd, ms)))).toBe(Math.round(ms));
     }
   });
-  it("on open, today sits at 58% of the visible track", () => {
+  it("on open, today sits at 40% of the visible track", () => {
     const boxW = 900;
     const left = scrollForToday(EXT, PXD_DEFAULT, boxW, NOW);
     const todayX = xAt(EXT, PXD_DEFAULT, new Date(NOW).setHours(0, 0, 0, 0));
@@ -138,9 +138,11 @@ describe("§8.4 · the tier's labels", () => {
 describe("§8.7 · the bars and their words", () => {
   it("⚠️ the tense follows the DATE, not the status", () => {
     const soon = one({ dateSent: ago(10) });
-    expect(currentWords(soon, NOW)).toMatch(/agent response expected by/);
+    expect(currentWords(soon, NOW)).toMatch(/^Queried · reply by \d+ \w{3}$/);
     const gone = one({ dateSent: ago(400) });
-    expect(currentWords(gone, NOW)).toMatch(/agent response was expected by/);
+    /* v126.2 — past its date, every stage reads "<Stage> · overdue since <date>" */
+    expect(currentWords(gone, NOW)).toMatch(/^Queried · overdue since \d+ \w{3}$/);
+    expect(currentWords(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(30), expectedSendDate: ago(5) }), NOW)).toMatch(/· overdue since /);
   });
   it("the three courts each say their own thing, and a missing date says which is missing", () => {
     expect(currentWords(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2), expectedSendDate: new Date(NOW + 6 * DAY).toISOString() }), NOW)).toMatch(/send by/);

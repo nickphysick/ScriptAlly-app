@@ -1,379 +1,152 @@
 /**
- * Query Centre v65 §8.4–§8.9 — the expanded Birds-eye view's body.
+ * The Birds-eye drawer's body (Query Centre v126.2; ref design-refs/query-centre-v130.html).
  *
- * ⚠️ THE LANE'S CONTROLS SIT OVER THE SCROLLER, NOT IN IT (§8.4, §8.10). They are siblings of the
- * thing that scrolls, absolutely placed above it — so nothing scrolls under them and a rebuild of
- * the rows cannot take them with it. In the mockup they lived inside the axis and a re-render lost
- * them; the fix is structural, because a control that has to be put back is one that will one day
- * not be.
+ * ⚠️ THREE COLUMNS, ONE GRID, TWICE: the date row and every row are `220px | track | 164px`, so the
+ * dates stop exactly where the action column begins and the time control sits over the names. The
+ * two grids are stated with the same two tokens and nothing else — a date row that drifted from the
+ * rows by a pixel is a scale that reads one day out.
  *
- * ⚠️ AND THE NAMES CELL IS `position: sticky; left: 0` WITH AN OPAQUE FILL. A transparent sticky
- * cell has the dates scrolling visibly behind the names, which reads as a rendering fault rather
- * than as a column.
+ * ⚠️ THE TRACK DOES NOT SCROLL. The component computes every element straight into the visible
+ * window (see QcTimeline.tsx), so the only scroller here is VERTICAL, and it is `overflow-x: hidden`
+ * because nothing it holds is wider than it.
  */
 @import "./qcvPage.css";
 
 /**
- * ⚠️ `--qcv-tl-daterow-h` IS THE DATE ROW'S HEIGHT AND THE GROUP BANDS' STICKY OFFSET, and it is ONE
- * number because they are one fact: a band stuck at anything other than the row's own height either
- * slides under it or floats below it. Four rules read it — the row, its two cells and the band.
+ * `--qcv-tl-daterow-h` is the date row's height. The group bands stick at the rows' scroller's top,
+ * which is BELOW the date row now that the date row is outside the scroller — so they stick at 0.
  */
 .qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; --qcv-tl-daterow-h: 60px; }
 
-/**
- * §1.5 / §6 — THE DATE ROW IS ON WHITE. v65 ran the tray's colour down through the lane and the
- * tier so the two read as one coloured band; §6 retires that — the tray is a shape with four
- * corners and the date row beneath it is the card's own white, closed by a hairline.
- *
- * ⚠️ `--qcv-tl-lanetop` HAS ONE READER LEFT AND IT IS A FALLBACK. The time controls are portalled
- * into the tray and sit statically there; they draw in the lane only for the frame before the host
- * ref lands. Filter, Group, Sort and ↺ left the lane entirely in §6 — they are in the date row's
- * corner now — so the token is no longer "the offset both clusters read".
- */
-/**
- * §5 — THE LANE HAS NO HEIGHT OF ITS OWN. It holds what must not scroll with the dates — the edge
- * markers and the crosshair's tag — and lies OVER the date row rather than above it.
- *
- * ⚠️ `height: 0` WITH `overflow: visible`, NOT `display: contents`. Its children are positioned
- * against it, so it has to remain a containing block; `display: contents` would hand them to the
- * timeline's own box and every offset in this file would start from somewhere else.
- */
-.qcv-tl-lane { position: relative; flex: none; height: 0; z-index: 6; }
-.qcv-tl-controls { position: absolute; top: var(--qcv-tl-lanetop); left: calc(var(--qcv-tl-names) + 18px); display: flex; align-items: center; gap: 10px; z-index: 4; }
-.qcv-tl-nav, .qcv-tl-zoom { display: flex; align-items: center; height: 40px; box-sizing: border-box; background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 20px; }
-.qcv-tl-nav button {
-  height: 100%; padding: 0 12px; border: 0; background: none; cursor: pointer;
-  font-family: var(--qcv-type); font-size: 15px; line-height: 1; color: var(--qcv-ink); border-radius: 20px;
-}
-.qcv-tl-nav .qcv-tl-today { padding: 0 18px; }
-.qcv-tl-nav button:hover, .qcv-tl-zoom button:hover { background: var(--qcv-parchment); }
-.qcv-tl-zoom { padding: 4px; gap: 2px; }
-.qcv-tl-zoom button {
-  height: 32px; padding: 0 12px; border: 0; background: none; cursor: pointer; border-radius: 16px;
-  font-family: var(--qcv-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-70);
-}
-/* ⚠️ THE PRESSED PRESET IS ANTHRACITE, the app's one ink fill for a chosen control */
-.qcv-tl-zoom button[aria-pressed="true"] { background: var(--sp-anthracite); color: #fff; }
-.qcv-tl-nav button:focus-visible, .qcv-tl-zoom button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: -2px; }
-
-/* §8.8 — the markers, in the lane and clear of the controls */
-.qcv-tl-marker {
-  position: absolute; top: 18px; z-index: 3; height: 28px; padding: 0 12px; border-radius: 14px;
-  background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); cursor: pointer;
-  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70);
-}
-/* §5 — just right of the names column, and 14px in from the panel's right */
-.qcv-tl-marker--l { left: calc(var(--qcv-tl-names) + 12px); }
-.qcv-tl-marker--r { right: 14px; }
-.qcv-tl-marker:hover { background: var(--qcv-parchment); }
-
-/* §8.9 — the crosshair's tag, riding the lane */
-/* §5 — the tag rides in the band-label line */
+/* the crosshair's tag, in the date row's top line — clamped inside the track by the component */
 .qcv-tl-tag {
-  position: absolute; top: 5px; z-index: 5; transform: translateX(-50%); pointer-events: none;
+  position: absolute; top: 4px; z-index: 5; transform: translateX(-50%); pointer-events: none;
   padding: 3px 8px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
   font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
 }
 .qcv-tl-tag--today { background: var(--qcv-rust); }
 
-/* the scroller: both ways, inside the card */
-.qcv-tl-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-.qcv-tl-inner { position: relative; }
+/* the rows' scroller: vertical only, with the body's 18px inset each side */
+.qcv-tl-scroll {
+  flex: 1 1 auto; min-height: 0; box-sizing: border-box; padding: 0 18px 12px;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+}
+.qcv-tl-scroll--drag, .qcv-tl-scroll--drag * { cursor: grabbing !important; }
 
 /**
- * §5 — THE TIER IS THE DATE ROW'S SECOND CELL, and it is TRANSPARENT: the row beneath it is white,
- * and what colours the tier is the month bands inside it. A fill here would paint over them.
- *
- * §9 — AND THE TIER IS THE DRAG HANDLE, so it says so in the cursor and in `touch-action`.
- *
- * ⚠️ `pan-y` RATHER THAN `none`: a horizontal drag pans the dates and a vertical one still scrolls
- * the page, which is what a reader on a phone expects of a wide thing inside a tall one.
+ * ⚠️ THE DATE ROW IS THE ROWS' GRID, NOT AN OVERLAY ON IT — `220 | track | 164`, with the body's own
+ * 18px on the left and the rows' scroller's 18px (plus its scrollbar, set inline) on the right.
+ * It declares its own `box-sizing`: the hairline is part of the height, as in the ref.
  */
-.qcv-tl-tier { position: relative; flex: none; height: var(--qcv-tl-daterow-h); background: transparent; cursor: grab; touch-action: pan-y; }
-/* §9 — grabbing applies to the WHOLE body while a drag is live, not just the tier the press began on */
-.qcv-tl-scroll--drag, .qcv-tl-scroll--drag * { cursor: grabbing !important; }
-/**
- * §5 — THE DATE ROW IS STICKY AT THE BODY'S TOP, and the corner cell is sticky-left inside it. Two
- * stickies, one row: the dates hold their place as the rows scroll under them, and the corner holds
- * its place over the names as the dates run under IT.
- */
-/* ⚠️ IT DECLARES ITS OWN `box-sizing`: the hairline is part of the 60, as it is in the ref, and a
-   rule whose height is stated beside a border must not inherit which of the two wins. */
 .qcv-tl-daterow {
-  position: sticky; top: 0; z-index: 12; display: flex; box-sizing: border-box; height: var(--qcv-tl-daterow-h);
+  flex: none; display: grid; grid-template-columns: var(--qcv-tl-names) minmax(0, 1fr) var(--bvd-ac);
+  box-sizing: border-box; height: var(--qcv-tl-daterow-h); padding-left: 18px;
   background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
 }
-/* §5 · §6 — the corner: 330 × 60, white and OPAQUE, holding Filter, Group, Sort and ↺ */
-.qcv-tl-corner {
-  position: sticky; left: 0; z-index: 15; flex: none;
-  width: var(--qcv-tl-names); height: var(--qcv-tl-daterow-h); box-sizing: border-box; background: #fff;
-  /* the ref's own: a flex row, centred, 10px in from each end */
-  display: flex; align-items: center; padding: 0 10px;
-}
+/* the corner is exactly the names column, and the time control sits at its left edge */
+.qcv-tl-corner { display: flex; align-items: center; justify-content: flex-start; box-sizing: border-box; padding: 0; min-width: 0; }
+/* the dates: the drag handle, and they clip nothing because nothing is placed outside them */
+.qcv-tl-tier { position: relative; height: 100%; min-width: 0; overflow: hidden; cursor: grab; touch-action: pan-y; }
 /**
- * §5 — ONE BAND PER MONTH, alternating, with a 1px rule at its left edge and its name STUCK at the
- * names column's right + 8 — so the month a reader is looking at is the one named, at every drag
- * position, without anything having to dodge the TODAY pill.
- */
-/**
- * ⚠️ §A3 — `clip-path: inset(0)`, NEVER `overflow: hidden`. The band's label is `position: sticky`,
- * and an `overflow` of any value on an ancestor makes that ancestor the label's scrollport: the
- * label then sticks to the BAND, which never scrolls, and follows it off the screen. `clip-path`
- * clips the painting without touching what the sticky is measured against.
- *
- * What it stops is a label bleeding into the neighbouring band — on dev, a stray "326" at an edge.
+ * ONE BAND PER VISIBLE MONTH, alternating, with a 1px rule at its left edge and its name at its
+ * left — the component cuts each band to the window and names it only where the name fits whole.
  */
 .qcv-tl-mb {
-  position: absolute; top: 0; bottom: 0; clip-path: inset(0);
-  background: #faf7f3; border-left: 1px solid rgba(28, 19, 15, 0.1);
+  position: absolute; top: 0; bottom: 0; overflow: hidden;
+  background: #faf7f3; border-left: 1px solid rgba(28, 19, 15, 0.1); box-sizing: border-box;
 }
 .qcv-tl-mb--alt { background: #f2ede5; }
 .qcv-tl-mb b {
-  position: sticky; left: calc(var(--qcv-tl-names) + 8px); display: inline-block;
-  margin: 7px 0 0 8px; white-space: nowrap;
+  position: absolute; left: 8px; top: 7px; white-space: nowrap;
   font-family: var(--qcv-type); font-weight: 400; font-size: 13px; line-height: 1; color: var(--qcv-ink);
 }
 .qcv-tl-mb b u {
   margin-left: 3px; text-decoration: none;
   font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--qcv-ink-45);
 }
-/* §5 — every Monday's date, centred on its x, 30px down, with a 1 × 4px tick above it */
+/* every Monday's date, centred on its x, with a 1 × 4px tick above it */
 .qcv-tl-wk {
-  position: absolute; top: 30px; padding-top: 6px; transform: translateX(-50%);
+  position: absolute; bottom: 8px; padding-top: 6px; transform: translateX(-50%);
   font-family: var(--qcv-mono); font-size: 9px; line-height: 1; color: var(--qcv-ink-70); white-space: nowrap;
 }
-/* the tick is the label's own top 4px — one element, so the two cannot drift apart */
 .qcv-tl-wk::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.3); }
-/* §5 — TODAY: the ink pill on the dates' line */
 .qcv-tl-todaypill {
-  position: absolute; top: 32px; transform: translateX(-50%); z-index: 3;
+  position: absolute; bottom: 6px; transform: translateX(-50%); z-index: 3;
   padding: 2px 7px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
   font-family: var(--qcv-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
 }
 
-/* §8.6 — the rows */
+/* the rows */
 .qcv-tl-rows { position: relative; background: #fff; }
-/* ⚠️ THE TODAY LINE AND THE CROSSHAIR RUN THE ROWS' FULL HEIGHT, and both are placed from the same
-   `xAt` every bar is placed from — one derivation, so they cannot drift apart at a zoom. */
+/* ⚠️ THE TODAY LINE AND THE CROSSHAIR ARE THE ROWS' OWN, placed from the same `xAt` every bar is */
 .qcv-tl-todayline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--qcv-ink); z-index: 3; pointer-events: none; }
-/* §10 — 1px at 28% ink, snapped to the day, through the tier and the rows alike */
 .qcv-tl-cross { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(28, 19, 15, 0.28); z-index: 3; pointer-events: none; }
 .qcv-tl-none { margin: 40px 0; text-align: center; font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45); }
 
 /**
- * §7 — THE GROUP BAND IS ANTHRACITE AND STICKS BELOW THE DATE ROW. Three things make it work and
- * all three are load-bearing:
- *
- * ⚠️ IT RUNS THE FULL WIDTH OF THE TRACK, which is what v85's own headline is about: a band that
- * stopped at the names column would let rows show beside it, and a heading with a row alongside it
- * reads as a row rather than as a heading.
- *
- * ⚠️ IT STICKS AT `--qcv-tl-daterow-h`, NOT AT 0. The date row is sticky at the body's top, so a
- * band stuck at 0 slides UNDER it and the reader loses the heading exactly when the rows they are
- * reading belong to it. The two offsets are one number and it is declared once.
- *
- * ⚠️ AND THE 14px GAP IS A `margin-top` ON EVERY BAND BUT THE FIRST. It is the air between groups,
- * so it belongs to the band that starts the next one — a padding on the section would put the same
- * gap above the first band too, against the date row.
+ * THE GROUP BAND IS ANTHRACITE, RADIUS 9 (v126.2 — the overdue band reads as the other bands do),
+ * and sticks at the top of the rows' scroller. The 14px gap is a `margin-top` on every band but the
+ * first — `:first-of-type`, because the today line and the crosshair are `<i>` siblings ahead of it.
  */
 .qcv-tl-band {
-  position: sticky; top: var(--qcv-tl-daterow-h); z-index: 9;
-  height: 30px; margin-top: 14px; background: var(--sp-anthracite);
+  position: sticky; top: 0; z-index: 9;
+  height: 30px; margin-top: 14px; border-radius: 9px; background: var(--sp-anthracite);
 }
-/* ⚠️ `:first-of-type`, NOT `:first-child` — the today line and the crosshair are `<i>` siblings
-   ahead of the first section, so `:first-child` matched nothing and every band carried the gap,
-   including the one against the date row. */
 .qcv-tl-group:first-of-type .qcv-tl-band { margin-top: 0; }
 .qcv-tl-band span {
-  position: sticky; left: 0; display: inline-flex; align-items: baseline; gap: 8px; height: 30px;
-  padding: 0 8px 0 18px; box-sizing: border-box;
+  display: inline-flex; align-items: baseline; gap: 8px; height: 30px;
+  padding: 0 8px 0 14px; box-sizing: border-box;
   font-family: var(--qcv-type); font-weight: 700; font-size: 14px; line-height: 30px; color: #fff;
 }
 .qcv-tl-band i { font-style: normal; font-family: var(--qcv-mono); font-weight: 400; font-size: 9px; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.62); }
-/* §6 — the hint, beside the name in the band's own line */
-.qcv-tl-band em { font-style: normal; font-family: var(--qcv-serif); font-weight: 400; font-size: 11.5px; color: rgba(255, 255, 255, 0.62); }
 
-/**
- * §D4 — THE CURSOR SAYS WHICH HALF OF A ROW DOES WHAT. The row carried `pointer` across its whole
- * width while only two things in it open a query, so the empty track promised a click it no longer
- * makes. The names cell keeps `pointer`; the track is a drag handle and says so in exactly the two
- * declarations the date row uses, because it is the same gesture on the same scroller.
- */
-.qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: default; }
-/* the track's own rule below carries `cursor: grab` — one rule per selector, per this file */
-.qcv-tl-row:hover { background: var(--qcv-parchment); }
-/* §8.11 — a row arrived at from the rail wears an ink ring */
+/* THREE COLUMNS: names · track · action. Nothing runs under the action. */
+.qcv-tl-row {
+  position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) minmax(0, 1fr) var(--bvd-ac);
+  align-items: center; height: 50px; border-bottom: 1px solid rgba(28, 19, 15, 0.06); cursor: default;
+}
+.qcv-tl-row:hover { background: #faf5f1; }
 .qcv-tl-row--focus { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
-/* §8.6 — watch-and-wait bars sit back until the row is under the pointer */
 .qcv-tl-row--watch .qcv-tl-bar { opacity: 0.72; }
 .qcv-tl-row--watch:hover .qcv-tl-bar { opacity: 1; }
 
-/* ⚠️ STICKY AND OPAQUE — a transparent sticky cell has the dates scrolling visibly behind the names */
+/* the names: disc, name, agency beneath — nothing else; the date and its distance are on the track */
 .qcv-tl-names {
-  position: sticky; left: 0; z-index: 2; display: flex; align-items: center; gap: 10px;
-  box-sizing: border-box; padding: 0 14px 0 18px; background: #fff; border-right: 1px solid var(--qcv-hair);
-  cursor: pointer;                       /* §D4 — it opens the query; the track beside it pans */
+  display: flex; align-items: center; gap: 9px; min-width: 0; height: 100%;
+  box-sizing: border-box; padding: 0 12px 0 4px; cursor: pointer;
 }
-/**
- * §7 — the due date over its distance, at the cell's right. The same two facts the rail's right
- * column states, in the same type, from the same `dueCell`: either alone leaves the reader doing
- * arithmetic — "10d over" does not say which day, "9 Sep" does not say whether it has gone.
- */
-.qcv-tl-due { margin-left: auto; padding-left: 8px; text-align: right; flex: none; }
-.qcv-tl-due b { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12px; line-height: 1.1; color: var(--qcv-ink); white-space: nowrap; }
-.qcv-tl-due u {
-  display: block; margin-top: 2px; text-decoration: none;
-  font-family: var(--qcv-mono); font-weight: 400; font-size: 7px; line-height: 1.1;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
-}
-.qcv-tl-due--late u { font-weight: 700; color: var(--qcv-ink); }
-.qcv-tl-due[data-due="none"] b { color: var(--qcv-ink-45); }
-
-/**
- * §B2 — AN OVERDUE ROW'S ONLY MARK IS A 4px INK EDGE DOWN ITS NAMES CELL. The row and the cell stay
- * white.
- *
- * ⚠️ WHAT WENT, AND WHY IT IS A REMOVAL RATHER THAN A RETUNE. v65.3 drew a blush pill inside the
- * cell with an ink tab at its left — two marks and a fill for one fact, on the one column a reader
- * scans down. A wash makes the row look like a different kind of row; an edge says "this one"
- * without changing what the row IS. The edge is on the cell rather than the row because the cell is
- * `position: sticky` with an opaque white of its own, so a mark on the row alone slides underneath
- * it — the same reason the wash needed the cell in the first place.
- *
- * ⚠️ THE RAIL'S OVERDUE ROWS ARE UNTOUCHED. They carry their own inset wash and 3px edge, and they
- * are a glance rather than a working surface; this is not a retune of "how overdue looks".
- */
-.qcv-tl-row--late .qcv-tl-names { box-shadow: inset 4px 0 0 var(--qcv-ink); }
-.qcv-tl-row:hover .qcv-tl-names { background: var(--qcv-parchment); }
 .qcv-tl-ini {
-  flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  flex: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: var(--sp-anthracite); color: #f5f1eb;
-  font-family: var(--qcv-mono); font-weight: 600; font-size: 9px; line-height: 1; font-style: normal;
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 8.5px; line-height: 1; font-style: normal;
 }
-.qcv-tl-who { min-width: 0; }
-.qcv-tl-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 13.5px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-tl-st { display: flex; align-items: center; gap: 5px; font-family: var(--qcv-type); font-size: 11.5px; line-height: 14px; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; }
-.qcv-tl-st svg { flex: none; }
+.qcv-tl-who { min-width: 0; display: flex; flex-direction: column; }
+/* ⚠️ ELLIPSIS HERE ONLY: a genuinely long NAME, never a sentence */
+.qcv-tl-nm {
+  display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 14px; line-height: 1.15; color: var(--qcv-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qcv-tl-ag {
+  display: block; margin-top: 1px; font-family: var(--sp-serif); font-weight: 400; font-size: 11.5px; line-height: 1.25;
+  color: rgba(28, 19, 15, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
-.qcv-tl-track { position: relative; height: 44px; cursor: grab; touch-action: pan-y; }
+.qcv-tl-track { position: relative; height: 100%; min-width: 0; overflow: hidden; cursor: grab; touch-action: pan-y; }
 
-/* §8.7 — the bars */
+/* the bars: 24 tall, 12px corners, their stage's colour from `--qcv-state` */
 .qcv-tl-bar {
-  position: absolute; top: 11px; height: 22px; border-radius: 11px; box-sizing: border-box;
-  appearance: none; -webkit-appearance: none; border: 0; padding: 0 10px; cursor: pointer; text-align: left;
-  background: var(--qcv-state, var(--state-closed)); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
-  overflow: hidden; white-space: nowrap;
+  position: absolute; top: 13px; height: 24px; border-radius: 12px; box-sizing: border-box;
+  appearance: none; -webkit-appearance: none; border: 0; padding: 0; cursor: pointer;
+  background: transparent; box-shadow: none; overflow: visible;
 }
-/**
- * §A2 — A PAST STAGE IS THE SAME BAR, SET BACK. It was a 10px hairline with 9px words, which reads
- * as a different KIND of thing from the stage beside it rather than as the same thing, earlier.
- * The mock draws one bar: 22 tall, 11px corners, its stage's colour at 42%, coming forward to 70%
- * with its row. The only difference from the current bar is the opacity and where the words sit.
- */
 .qcv-tl-bar--past { opacity: 0.42; transition: opacity 0.12s; }
 .qcv-tl-row:hover .qcv-tl-bar--past { opacity: 0.7; }
-/**
- * §C1 — NO RUST. The 3px rust inset is gone from the bar; your move is said by the TAG (§C2), once,
- * in words. An edge in a colour the page uses nowhere else for this had to be learnt before it
- * meant anything, and it competed with the stage colour it was drawn on top of.
- */
-.qcv-tl-bar--you { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
-.qcv-tl-bar:hover { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
 .qcv-tl-bar:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
-/* the ink stretch from the expected date to today — no words, because the chip states the number */
-/**
- * §7 / §1.9 — THE OVERRUN IS INK AT FULL OPACITY. It was `rgba(28, 19, 15, 0.55)`, which renders
- * taupe over a bar's own colour — reported as a token failing to resolve and diagnosed by Nick as
- * the alpha itself. It is the same fact the rail's `.qcv-be-over` states, so the two carry the same
- * value: a stretch past the date is ink, never a tint of one.
- */
-.qcv-tl-over { position: absolute; top: 0; bottom: 0; background: var(--qcv-ink); border-left: 1.5px solid var(--qcv-ink); }
-/* ⚠️ THE STRETCH BEYOND TODAY IS HOLLOW — it has not happened, so it is drawn as time left */
-.qcv-tl-ahead { position: absolute; top: 0; bottom: 0; background: rgba(255, 255, 255, 0.68); border-left: 1.5px dashed rgba(28, 19, 15, 0.45); }
-/**
- * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR, not to the bar's left edge.
- *
- * ⚠️ A BAR THAT BEGINS OFF-SCREEN LEFT TOOK ITS WORDS WITH IT AND SLID THEM UNDER THE STICKY NAMES
- * CELL — on dev an offer read "ur decision was due 31 Jul", a sentence with its first half eaten.
- *
- * ⚠️ AND `position: sticky` CANNOT DO IT HERE, WHICH THE MEASUREMENT PROVED. The bar carries
- * `overflow: hidden`, so the bar IS the sticky child's nearest scrollport and the words stuck to a
- * box that never scrolls — ink at −8360 against a visible edge of 568. The offset is computed in
- * `QcTimeline` instead, as a MARGIN, because a margin also takes the width away and that is what
- * turns "does not fit" into the ellipsis below.
- */
-.qcv-tl-words {
-  position: relative; z-index: 1; font-family: var(--qcv-type); font-size: 11.5px; line-height: 22px; color: var(--qcv-ink);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
-}
-/* §A2 — the stage name at the bar's START, in the same 11.5px typewriter as the current bar's */
-.qcv-tl-bar--past .qcv-tl-words { color: var(--qcv-ink-70); }
-
-/* §8.7 — the dotted chip and the action ghost */
-.qcv-tl-nudge {
-  position: absolute; top: 12px; height: 20px; padding: 0 9px; border-radius: 10px; white-space: nowrap;
-  background: #fff; border: 1px dashed var(--qcv-ink); color: var(--qcv-ink); cursor: pointer;
-  /* ⚠️ THE CHIP IS TYPEWRITER AND LOWERCASE (§8.7, v65.1). It was mono 8px uppercase — the page's
-     own grammar for a SYSTEM TAG — and this is a sentence someone reads and acts on: "14 days
-     overdue · nudge". Set as a tag it read as a status the app had computed rather than as the one
-     thing on the row you can do something about. */
-  font-family: var(--qcv-type); font-size: 11px; letter-spacing: 0;
-}
-.qcv-tl-nudge:hover { background: #fdf3ef; }
-/**
- * §C3 — THE TAG, 8px AFTER THE CHIP. It hangs outside the chip rather than inside it because the
- * chip is a sentence someone acts on ("60 days overdue · nudge or close") and the tag is a label
- * about the row; run together they read as one phrase and neither is legible.
- */
-.qcv-tl-nudge--ym { overflow: visible; }
-.qcv-tl-nudge--ym::after {
-  content: "YOUR MOVE"; position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%);
-  padding: 3px 6px; border-radius: 6px; background: var(--sp-anthracite); color: #fff;
-  font-family: var(--qcv-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em; white-space: nowrap;
-}
-/**
- * §C1–§C2 — THE NEXT-STEP RING IS INK, AND IT CARRIES THE TAG. The ring was rust; it is a 1.4px
- * dashed ink at 55% now, the page's own "not established fact" line. The tag hangs OUTSIDE the bar,
- * 30px from the ring's own left edge, so it can never meet a bar's label — which is what the mock
- * settles and what a tag placed inside the bar could not promise.
- */
-.qcv-tl-ghost {
-  position: absolute; top: 10px; width: 24px; height: 24px; border-radius: 50%; overflow: visible;
-  border: 1.4px dashed rgba(28, 19, 15, 0.55); display: flex; align-items: center; justify-content: center;
-}
-.qcv-tl-ghost--you::after {
-  content: "YOUR MOVE"; position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
-  padding: 3px 6px; border-radius: 6px; background: var(--sp-anthracite); color: #fff;
-  font-family: var(--qcv-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em; white-space: nowrap;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .qcv-tl-scroll { scroll-behavior: auto; }
-}
 
 /**
- * §B3 — A MISSING DATE IS A TORN EDGE, NEVER A STRIPE OR A DASH.
- *
- * ⚠️ WHAT THE PATTERN GOT WRONG. A striped or dashed bar reads as a different KIND of thing — the
- * page's dashed grammar already means "provisional", so a whole bar in it said the STAGE was
- * provisional, when the only provisional thing is one of its two ends. It also threw away the stage
- * colour, which is the one thing about the bar that is certain. A torn edge keeps the colour and
- * says exactly where the knowledge stops.
- *
- * The bar is its stage's own colour in both cases, from `--qcv-state`, like every other bar.
+ * A MISSING DATE IS A TORN EDGE, never a stripe or a dash: square at that end, with a white
+ * saw-tooth painted over it. Declared per selector — one base rule per selector in this sheet.
  */
-/* torn START — the stage's start was never recorded: square left, round right, ragged left end */
-.qcv-tl-bar--torn-start { border-radius: 0 11px 11px 0; }
-/* torn END — no expected or send-by date: round left, square right, ragged right end */
-.qcv-tl-bar--torn-end { border-radius: 11px 0 0 11px; }
-/**
- * ⚠️ THE ZIG-ZAG IS DRAWN IN WHITE OVER THE BAR'S OWN END, not cut out of it. A `mask` would take
- * the bar's inset ring with it and leave a soft edge; an 8px white saw-tooth painted on top reads
- * as a torn sheet against the card, which is the whole metaphor.
- */
-/* ⚠️ DECLARED PER SELECTOR, NOT GROUPED. This sheet's own invariant is one base rule per selector —
-   a grouped rule plus an individual one makes every first-match slice in the locks ambiguous, which
-   this repo has paid for twice. The shared properties are restated rather than shared. */
 .qcv-tl-bar--torn-start::before {
   content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 8px; z-index: 2;
   background-repeat: no-repeat; background-size: 8px 100%;
@@ -384,19 +157,7 @@
   background-repeat: no-repeat; background-size: 8px 100%;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='22' viewBox='0 0 8 22'%3E%3Cpath d='M8 0H2L6 3.7L2 7.3L6 11L2 14.7L6 18.3L2 22H8Z' fill='white'/%3E%3C/svg%3E");
 }
-/* the half of the sentence naming what is missing is italic and quieter than the stage's name */
-.qcv-tl-bar--torn-start .qcv-tl-words,
-.qcv-tl-bar--torn-end .qcv-tl-words { color: var(--qcv-ink-70); }
-/**
- * §B3 — ADD DATE: a mono 8px tag at the bar's right, white on a 1px inset ring. It is the only
- * control inside a bar, so it states its own cursor and its own stacking — the words beside it are
- * `z-index: 1` and the torn edge is 2.
- */
-.qcv-tl-adddate {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); z-index: 3;
-  padding: 2px 7px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.2);
-  text-decoration: none; cursor: pointer; white-space: nowrap;
-  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink);
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-tl-bar--past { transition: none; }
 }
-.qcv-tl-adddate:hover { background: var(--qcv-parchment); }
-.qcv-tl-adddate:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }

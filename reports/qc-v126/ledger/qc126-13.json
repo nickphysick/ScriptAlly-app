@@ -1,9 +1,9 @@
 [
  {
-  "lock": "QC126-13 width min(780px, 56vw)",
+  "lock": "QC126-13 width min(1120px, 74vw)",
   "where": "1280",
   "ok": true,
-  "detail": "716.796875 vs 716.8000000000001"
+  "detail": "947.1875 vs 947.2"
  },
  {
   "lock": "QC126-13 the dim covers the page",
@@ -18,7 +18,7 @@
   "detail": "rgb(42, 58, 82)"
  },
  {
-  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "lock": "QC126-13 the title is 30px (26 at 1400 and under)",
   "where": "1280",
   "ok": true,
   "detail": "26px"
@@ -36,10 +36,10 @@
   "detail": "found true over 0"
  },
  {
-  "lock": "QC126-13 width min(780px, 56vw)",
+  "lock": "QC126-13 width min(1120px, 74vw)",
   "where": "1440",
   "ok": true,
-  "detail": "780 vs 780"
+  "detail": "1065.59375 vs 1065.6"
  },
  {
   "lock": "QC126-13 the dim covers the page",
@@ -54,7 +54,7 @@
   "detail": "rgb(42, 58, 82)"
  },
  {
-  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "lock": "QC126-13 the title is 30px (26 at 1400 and under)",
   "where": "1440",
   "ok": true,
   "detail": "30px"
@@ -72,10 +72,10 @@
   "detail": "found true over 0"
  },
  {
-  "lock": "QC126-13 width min(780px, 56vw)",
+  "lock": "QC126-13 width min(1120px, 74vw)",
   "where": "1512",
   "ok": true,
-  "detail": "780 vs 780"
+  "detail": "1118.875 vs 1118.8799999999999"
  },
  {
   "lock": "QC126-13 the dim covers the page",
@@ -90,7 +90,7 @@
   "detail": "rgb(42, 58, 82)"
  },
  {
-  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "lock": "QC126-13 the title is 30px (26 at 1400 and under)",
   "where": "1512",
   "ok": true,
   "detail": "30px"
@@ -108,10 +108,10 @@
   "detail": "found true over 0"
  },
  {
-  "lock": "QC126-13 width min(780px, 56vw)",
+  "lock": "QC126-13 width min(1120px, 74vw)",
   "where": "1920",
   "ok": true,
-  "detail": "780 vs 780"
+  "detail": "1120 vs 1120"
  },
  {
   "lock": "QC126-13 the dim covers the page",
@@ -126,7 +126,7 @@
   "detail": "rgb(42, 58, 82)"
  },
  {
-  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "lock": "QC126-13 the title is 30px (26 at 1400 and under)",
   "where": "1920",
   "ok": true,
   "detail": "30px"

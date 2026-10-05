@@ -140,7 +140,7 @@ import {
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
-import { cardsByQuery, comingUp, trayRequest, type ComingUp } from "../lib/qcComingUp";
+import { cardsByQuery, comingUp, nextMove, trayRequest, type ComingUp, type NextMove } from "../lib/qcComingUp";
 import { QcCarousel } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
@@ -3648,6 +3648,21 @@ export const Queries: React.FC<{
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qcVisible, qcBoardCards]);
+  /**
+   * v126.2 · each Birds-eye row's one next move — the pill's words and the journey it opens. Over the
+   * SCOPED set the drawer draws, from the list tray's own derivation (`nextMove` → `comingUp` →
+   * `trayRequest`), so the drawer and the tray cannot offer different acts for one query.
+   */
+  const qcMoves = useMemo(() => {
+    const now = Date.now();
+    const out = new Map<string, NextMove>();
+    for (const r of qcScoped) {
+      const m = nextMove(qcBoardCards.get(r.id), r, now);
+      if (m) out.set(r.id, m);
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qcScoped, qcBoardCards]);
   const qcById = new Map(qcRows.map((r) => [r.id, r]));
   const sortedList = qcVisible.map((r) => r.query);
   /* ── the head's line, and the sentence's manuscript scope ──
@@ -6641,7 +6656,9 @@ export const Queries: React.FC<{
                 cardOpen={qcOpenCardNode != null && beCard != null}
                 onCardClose={closeQueryCard}
                 actionOpen={qaOpen}
-                onAct={(id) => openQueryDrawer({ mode: "nudge", queryId: id })}
+                moves={qcMoves}
+                /* v126.2 — the pill opens the journey its next move names, never a hard-wired nudge */
+                onAct={(id) => { const m = qcMoves.get(id); if (m) openQueryDrawer(m.request); }}
               />
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}

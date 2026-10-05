@@ -126,7 +126,11 @@
     "design-refs/qc-v126/ref-08-card@2x.png": "3f893adf06131e5420a3231ee0f9aaf2af2d2fb81fa67f74ff32948eebad6d80",
     "design-refs/qc-v126/ref-09-action-drawer@2x.png": "cf1918588c5766980d99d9cc47b8d9e22938272fe24094ad879dde4987866102",
     "public/images/qc/qc-courier-disc.png": "bed183ffb8a3edb0c0ec7943015befafd3ae65ff8ae12d9fb7b90ad537d0e81f",
-    "public/images/qc/qc-list-perch.png": "a9fc31d38173b71832cf74d6347359b22f7e156e9449bc72ae59d6d9a976bcb0"
+    "public/images/qc/qc-list-perch.png": "a9fc31d38173b71832cf74d6347359b22f7e156e9449bc72ae59d6d9a976bcb0",
+    "design-refs/query-centre-v130.html": "d26b82c76febecfe2a3b5f4bacd6bf701d074a45a0df1bd7174408923559efa4",
+    "design-refs/qc-v126/ref-v130-birdseye-1512@2x.png": "bcfda2ae31c406cc23a898a3cad3e3d11545139f102abbf133d255bec7e9eca2",
+    "design-refs/qc-v126/ref-v130-birdseye-filtered-1512@2x.png": "a96528fc6401c562112193af1a5377801e0f80bfb15d75f41c0cf3e51d4ff1ac",
+    "design-refs/qc-v126/ref-v130-birdseye-1280@2x.png": "38aeb5c0d35558dacd5a69d655a3acb492908b0a39f216ef3fbc7966693ca54c"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

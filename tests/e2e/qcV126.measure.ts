@@ -346,11 +346,13 @@ test("QC126-13 · drawer", async ({ page }) => {
       return { w: d?.getBoundingClientRect().width ?? NaN, dim: dim ? [dim.getBoundingClientRect().width, dim.getBoundingClientRect().height, getComputedStyle(dim).backgroundColor] : null,
         head: head ? getComputedStyle(head).backgroundColor : null, fs: title ? getComputedStyle(title).fontSize : null, innerW: innerWidth };
     });
-    const want = Math.min(780, 0.56 * vp.width);
-    L.check("QC126-13 width min(780px, 56vw)", w, near(r.w, want, 1), `${r.w} vs ${want}`);
+    /* v126.2 — RETARGETED: the drawer is min(1120px, 74vw) now; QC126-2.1 owns that claim at three
+       widths and this keeps the reading at all four */
+    const want = Math.min(1120, 0.74 * vp.width);
+    L.check("QC126-13 width min(1120px, 74vw)", w, near(r.w, want, 1), `${r.w} vs ${want}`);
     L.check("QC126-13 the dim covers the page", w, !!r.dim && (r.dim[0] as number) >= r.innerW - 1 && r.dim[2] === "rgba(28, 19, 15, 0.28)", JSON.stringify(r.dim));
     L.check("QC126-13 the header block is anthracite", w, r.head === "rgb(42, 58, 82)", `${r.head}`);
-    L.check("QC126-13 the title is 30px (26 under 1400)", w, r.fs === (vp.width < 1400 ? "26px" : "30px"), `${r.fs}`);
+    L.check("QC126-13 the title is 30px (26 at 1400 and under)", w, r.fs === (vp.width <= 1400 ? "26px" : "30px"), `${r.fs}`);
     if (r.dim) {
       await page.mouse.click(30, vp.height / 2);
       await page.waitForTimeout(400);
@@ -361,31 +363,11 @@ test("QC126-13 · drawer", async ({ page }) => {
   L.done(24);
 });
 
-/* ── QC126-14 · the header grows downwards only ── */
-test("QC126-14 · grows down", async ({ page }) => {
-  const L = new Ledger("qc126-14");
-  await openQc(page, AT_1512);
-  await openDrawer(page).catch(() => {});
-  const read = () => page.evaluate(() => {
-    const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const h = vis('[data-qcv="bvd-head"]'), t = vis('[data-qcv="bvd-title"]'), k = vis('[data-qcv="bvd-hawk"]'), f = vis('[data-qcv="bvd-fline"]');
-    return { h: h?.getBoundingClientRect().height ?? NaN, hb: h?.getBoundingClientRect().bottom ?? NaN, tt: t?.getBoundingClientRect().top ?? NaN, kb: k?.getBoundingClientRect().bottom ?? NaN, fh: f?.getBoundingClientRect().height ?? 0 };
-  });
-  const a = await read();
-  await page.locator('[data-qcv="bvd-pill"][data-k="filter"]').first().click({ timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(300);
-  const chips = page.locator('[data-qcv="bvd-pop"][data-k="filter"] [data-qcv="bvd-chip"]');
-  await chips.nth(0).click({ timeout: 4000 }).catch(() => {}); await chips.nth(4).click({ timeout: 4000 }).catch(() => {});
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
-  const b = await read();
-  /* the growth is the filter line plus at most its own 16px of spacing — never less than the line */
-  L.check("QC126-14 the block grows by the filter line", "1512", b.fh > 0 && b.h - a.h >= b.fh - 0.5 && b.h - a.h <= b.fh + 16, `${a.h} → ${b.h} (line ${b.fh})`);
-  L.check("QC126-14 the title's top is unchanged (±0)", "1512", Number.isFinite(a.tt) && b.tt === a.tt, `${a.tt} → ${b.tt}`);
-  L.check("QC126-14 the hawk's bottom = the block's bottom", "1512", near(b.kb, b.hb, 0.5) && near(a.kb, a.hb, 0.5), `${a.kb}/${a.hb} → ${b.kb}/${b.hb}`);
-  await checkOverflow(page, L, "1512");
-  L.done(4);
-});
+/* ── QC126-14 · RETIRED (v126.2) ──
+   "The header grows downwards only" asserted v126's two-row block: the block growing by the filter
+   line and the hawk's bottom on the block's bottom. v126.2's one-row header puts the hawk at a fixed
+   top and the filter line in a sub-strip beneath the row; QC126-2.8 owns "nothing above the strip
+   moves", stated against the new arrangement. */
 
 /* ── QC126-15 · the pills' labels ── */
 test("QC126-15 · pill labels", async ({ page }) => {
@@ -594,4 +576,240 @@ test("QC126-20 · one door", async ({ page }) => {
   await closeAll();
   await checkOverflow(page, L, "1512");
   L.done(5);
+});
+
+/* ══ v126.2 — the drawer refit (ref design-refs/query-centre-v130.html) ═══════════════════════════ */
+const W3 = [{ width: 1280, height: 800 }, AT_1512, { width: 1920, height: 1080 }] as const;
+
+/* ── QC126-2.1 · the drawer's width ── */
+test("QC126-2.1 · width", async ({ page }) => {
+  const L = new Ledger("qc126-2-1");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const d = await box(page, '[data-qcv="bvd"]');
+    const want = Math.min(1120, 0.74 * vp.width);
+    L.check("QC126-2.1 width min(1120px, 74vw)", `${vp.width}`, !!d && near(d.w, want, 1), `${d?.w} vs ${want}`);
+  }
+  L.done(3);
+});
+
+/* ── QC126-2.2 · three columns, and the date row on the same edges ── */
+test("QC126-2.2 · columns", async ({ page }) => {
+  const L = new Ledger("qc126-2-2");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const d = document.querySelector<HTMLElement>('[data-qcv="bvd"]');
+      const rows = [...document.querySelectorAll<HTMLElement>('[data-qcv="bvd-row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+      const per = rows.slice(0, 30).map((row) => {
+        const R = row.getBoundingClientRect();
+        const n = row.querySelector<HTMLElement>('[data-qcv="tl-names"]')!.getBoundingClientRect();
+        const t = row.querySelector<HTMLElement>('[data-qcv="tl-track"]')!.getBoundingClientRect();
+        const a = row.querySelector<HTMLElement>('[data-qcv="bvd-actcell"]')?.getBoundingClientRect();
+        return { row: R.width, rl: R.left, n: n.width, nl: n.left, t: t.width, tl: t.left, tr: t.right, a: a?.width ?? NaN, ar: a?.right ?? NaN, rr: R.right };
+      });
+      const tier = document.querySelector<HTMLElement>('[data-qcv="bvd-dates"]')?.getBoundingClientRect();
+      const time = document.querySelector<HTMLElement>('[data-qcv="bvd-time"]')?.getBoundingClientRect();
+      return { per, dl: d?.getBoundingClientRect().left ?? NaN, tier: tier ? [tier.left, tier.right] : null, time: time?.left ?? NaN };
+    });
+    L.check("QC126-2.2 population: rows", w, r.per.length > 3, `${r.per.length}`);
+    L.check("QC126-2.2 names 220 at the row's left", w, r.per.length > 0 && r.per.every((x) => near(x.n, 220, 1) && near(x.nl, x.rl, 1)), JSON.stringify(r.per.slice(0, 2)));
+    L.check("QC126-2.2 action 164 at the row's right", w, r.per.length > 0 && r.per.every((x) => near(x.a, 164, 1) && near(x.ar, x.rr, 1)), JSON.stringify(r.per.slice(0, 2).map((x) => [x.a, x.ar, x.rr])));
+    L.check("QC126-2.2 track = row − 384 (±1), between them", w, r.per.length > 0 && r.per.every((x) => near(x.t, x.row - 384, 1) && near(x.tl, x.nl + 220, 1)), JSON.stringify(r.per.slice(0, 2).map((x) => [x.t, x.row])));
+    const t0 = r.per[0];
+    L.check("QC126-2.2 the date row shares the track's left and right", w, !!r.tier && !!t0 && near(r.tier[0], t0.tl, 1) && near(r.tier[1], t0.tr, 1), `${JSON.stringify(r.tier)} vs ${t0?.tl},${t0?.tr}`);
+    L.check("QC126-2.2 the time control sits 18px in from the drawer", w, near(r.time - r.dl, 18, 1), `${r.time - r.dl}`);
+  }
+  L.done(18);
+});
+
+/* ── QC126-2.3 · nothing escapes ── */
+test("QC126-2.3 · nothing escapes", async ({ page }) => {
+  const L = new Ledger("qc126-2-3");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    for (const step of ["open", "earlier", "later", "6W", "6M"]) {
+      if (step === "earlier") { for (let i = 0; i < 3; i++) await page.locator('[data-qcv="bvd-earlier"]').click().catch(() => {}); }
+      if (step === "later") { for (let i = 0; i < 4; i++) await page.locator('[data-qcv="bvd-later"]').click().catch(() => {}); }
+      if (step === "6W" || step === "6M") { await page.locator(`[data-qcv="bvd-time"] [data-z="${step.toLowerCase()}"]`).click().catch(() => {}); await page.keyboard.press("t"); }
+      await page.waitForTimeout(250);
+      const r = await page.evaluate(() => {
+        const d = document.querySelector<HTMLElement>('[data-qcv="bvd"]');
+        if (!d) return null;
+        const D = d.getBoundingClientRect();
+        const past = [...d.querySelectorAll<HTMLElement>("*")].filter((e) => { const x = e.getBoundingClientRect(); return x.width > 0 && x.height > 0 && x.right > D.right + 0.5; }).map((e) => `${e.className}`.slice(0, 40));
+        const tracks = [...d.querySelectorAll<HTMLElement>('[data-qcv="tl-track"]')].filter((e) => e.getBoundingClientRect().height > 0);
+        let labels = 0; const outT: string[] = [];
+        for (const t of tracks) {
+          const T = t.getBoundingClientRect();
+          for (const e of t.querySelectorAll<HTMLElement>("*")) {
+            const x = e.getBoundingClientRect();
+            if (x.width === 0) continue;
+            if ((e.textContent ?? "").trim() && !e.children.length) labels++;
+            if (x.right > T.right + 0.5 || x.left < T.left - 0.5) outT.push(`${e.className}:${(e.textContent ?? "").slice(0, 24)} ${Math.round(x.left - T.left)}..${Math.round(x.right - T.right)}`);
+          }
+        }
+        const tier = d.querySelector<HTMLElement>('[data-qcv="bvd-dates"]');
+        if (tier) { const T = tier.getBoundingClientRect(); for (const e of tier.querySelectorAll<HTMLElement>("*")) { const x = e.getBoundingClientRect(); if (x.width && (x.right > T.right + 0.5 || x.left < T.left - 0.5)) outT.push(`dates ${e.className}`); } }
+        const sc = d.querySelector<HTMLElement>('[data-qcv="tl-scroll"]');
+        return { past, outT, labels, sw: sc ? [sc.scrollWidth, sc.clientWidth] : null };
+      });
+      L.check(`QC126-2.3 population: labels on the tracks (${step})`, w, !!r && r.labels > 5, `${r?.labels}`);
+      L.check(`QC126-2.3 nothing right of the drawer (${step})`, w, !!r && r.past.length === 0, JSON.stringify(r?.past.slice(0, 6)));
+      L.check(`QC126-2.3 nothing outside its track (${step})`, w, !!r && r.outT.length === 0, JSON.stringify(r?.outT.slice(0, 6)));
+      L.check(`QC126-2.3 the rows' scroller does not scroll sideways (${step})`, w, !!r?.sw && r.sw[0] === r.sw[1], JSON.stringify(r?.sw));
+    }
+  }
+  L.done(60);
+});
+
+/* ── QC126-2.4 · today at 40% ── */
+test("QC126-2.4 · today", async ({ page }) => {
+  const L = new Ledger("qc126-2-4");
+  const at = () => page.evaluate(() => {
+    const t = document.querySelector<HTMLElement>('[data-qcv="bvd-dates"]')?.getBoundingClientRect();
+    const l = document.querySelector<HTMLElement>('[data-qcv="bvd-todayline"]')?.getBoundingClientRect();
+    return t && l ? (l.left + l.width / 2 - t.left) / t.width : NaN;
+  });
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const o = await at();
+    L.check("QC126-2.4 on open, today at 40% (±1%)", w, near(o, 0.4, 0.01), `${o}`);
+    for (const z of ["6w", "3m", "6m"]) {
+      await page.locator(`[data-qcv="bvd-time"] [data-z="${z}"]`).click().catch(() => {});
+      await page.waitForTimeout(150);
+      const p = await at();
+      L.check(`QC126-2.4 at ${z.toUpperCase()}, today at 40%`, w, near(p, 0.4, 0.01), `${p}`);
+      for (let i = 0; i < 3; i++) await page.locator('[data-qcv="bvd-later"]').click().catch(() => {});
+      await page.keyboard.press("t");
+      await page.waitForTimeout(150);
+      const q = await at();
+      L.check(`QC126-2.4 at ${z.toUpperCase()}, T returns today to 40%`, w, near(q, 0.4, 0.01), `${q}`);
+    }
+  }
+  L.done(21);
+});
+
+/* ── QC126-2.5 · one action per row, and nothing to press in a track ── */
+test("QC126-2.5 · one action", async ({ page }) => {
+  const L = new Ledger("qc126-2-5");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll<HTMLElement>('[data-qcv="bvd-row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+      const counts = rows.map((row) => [...row.querySelectorAll<HTMLElement>('[data-qcv="bvd-actcell"] button')].filter((b) => b.getBoundingClientRect().width > 0).length);
+      const inTrack = rows.flatMap((row) => [...row.querySelectorAll<HTMLElement>('[data-qcv="tl-track"] *')].filter((e) => {
+        if (e.getBoundingClientRect().width === 0) return false;
+        const pressable = (e.tagName === "BUTTON" && !/^bvd-(bar|prev)$/.test(e.getAttribute("data-qcv") ?? "")) || e.getAttribute("role") === "button";
+        const tag = /your move|nudge|add date/i.test(e.textContent ?? "") && !e.children.length;
+        return pressable || tag || e.tagName.toLowerCase() === "svg";
+      }).map((e) => `${e.tagName}.${e.className}:${(e.textContent ?? "").slice(0, 20)}`));
+      const fits = [...document.querySelectorAll<HTMLElement>('[data-qcv="bvd-act"]')].filter((b) => b.getBoundingClientRect().width > 0).map((b) => [b.textContent, b.scrollWidth <= b.clientWidth + 0.5 && b.getBoundingClientRect().width <= 164]);
+      return { n: rows.length, counts, inTrack, labels: [...new Set(fits.map((f) => f[0]))], bad: fits.filter((f) => !f[1]).map((f) => f[0]) };
+    });
+    L.check("QC126-2.5 exactly one visible pill in each row's action column", w, r.n > 3 && r.counts.every((c) => c === 1), `${r.n} rows ${JSON.stringify(r.counts.filter((c) => c !== 1))}`);
+    L.check("QC126-2.5 no pill, chip or tag in any track", w, r.inTrack.length === 0, JSON.stringify(r.inTrack.slice(0, 5)));
+    L.check("QC126-2.5 every label fits the 164px column", w, r.bad.length === 0, `${JSON.stringify(r.labels)} bad ${JSON.stringify(r.bad)}`);
+  }
+  L.done(9);
+});
+
+/* ── QC126-2.6 · sentences are whole ── */
+test("QC126-2.6 · sentences", async ({ page }) => {
+  const L = new Ledger("qc126-2-6");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const d = document.querySelector<HTMLElement>('[data-qcv="bvd"]')!;
+      const ell = /…|\.\.\./.test(d.querySelector<HTMLElement>('[data-qcv="tl-rows"]')?.innerText ?? "");
+      const clipped = [...d.querySelectorAll<HTMLElement>('[data-qcv="tl-words"]')].filter((e) => getComputedStyle(e).textOverflow === "ellipsis" || e.scrollWidth > e.clientWidth + 0.5).length;
+      const meas = document.createElement("span"); meas.className = "bvd-words"; meas.style.position = "fixed"; meas.style.visibility = "hidden"; d.appendChild(meas);
+      const rows = [...d.querySelectorAll<HTMLElement>('[data-qcv="bvd-row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+      let wide = 0, insideOk = 0; const fails: string[] = []; let titled = 0, untitled = 0;
+      for (const row of rows) {
+        for (const b of row.querySelectorAll<HTMLElement>('[data-qcv="bvd-bar"], [data-qcv="bvd-prev"]')) { if (b.title.trim()) titled++; else untitled++; }
+        const bar = row.querySelector<HTMLElement>('[data-qcv="bvd-bar"]');
+        if (!bar || !/ · overdue since \d+ \w{3}$/.test(bar.title)) continue;
+        meas.textContent = bar.title;
+        const need = meas.getBoundingClientRect().width + 20;
+        const B = bar.getBoundingClientRect();
+        if (B.width < need) continue;
+        wide++;
+        const words = [...row.querySelectorAll<HTMLElement>('[data-qcv="tl-words"]')].find((e) => e.textContent === bar.title);
+        const x = words?.getBoundingClientRect();
+        if (words && words.dataset.place === "inside" && x && x.left >= B.left - 0.5 && x.right <= B.right + 0.5) insideOk++;
+        else fails.push(`${bar.title} bar ${Math.round(B.width)} need ${Math.round(need)}`);
+      }
+      meas.remove();
+      return { ell, clipped, wide, insideOk, fails, titled, untitled };
+    });
+    L.check("QC126-2.6 no '…' on any row, and no sentence clipped", w, !r.ell && r.clipped === 0, `ell ${r.ell} clipped ${r.clipped}`);
+    L.check("QC126-2.6 population: overdue bars wide enough for their sentence", w, r.wide > 2, `${r.wide}`);
+    L.check("QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar", w, r.wide > 0 && r.insideOk === r.wide, JSON.stringify(r.fails.slice(0, 4)));
+    L.check("QC126-2.6 every bar carries its full sentence on its title", w, r.titled > 3 && r.untitled === 0, `${r.titled}/${r.untitled}`);
+  }
+  L.done(12);
+});
+
+/* ── QC126-2.7 · the court is "With the agent" ── */
+test("QC126-2.7 · court name", async ({ page }) => {
+  const L = new Ledger("qc126-2-7");
+  await openQc(page, AT_1512);
+  const read = () => page.evaluate(() => {
+    const t = document.body.innerText;
+    const hits = (t.match(/with the agency/gi) ?? []).length;
+    const desk = [...document.querySelectorAll<HTMLElement>('[data-qcv="court-when"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.textContent?.replace(/\s+/g, " ").trim());
+    return { hits, agent: (t.match(/with the agent\b/gi) ?? []).length, desk };
+  });
+  const a = await read();
+  L.check("QC126-2.7 no rendered 'With the agency' (any case)", "1512", a.hits === 0 && a.agent > 0, `agency ${a.hits} agent ${a.agent}`);
+  L.check("QC126-2.7 the desk foot never reads a dash where a date has passed", "1512", a.desk.length > 0 && a.desk.every((s) => !/^next (due|reply expected) —$/.test(s ?? "")), JSON.stringify(a.desk));
+  await openDrawer(page).catch(() => {});
+  const b = await read();
+  L.check("QC126-2.7 nor in the drawer", "1512", b.hits === 0, `${b.hits}`);
+  L.done(3);
+});
+
+/* ── QC126-2.8 · the header is one row ── */
+test("QC126-2.8 · header row", async ({ page }) => {
+  const L = new Ledger("qc126-2-8");
+  const read = () => page.evaluate(() => {
+    const g = (s: string) => document.querySelector<HTMLElement>(`[data-qcv="${s}"]`)?.getBoundingClientRect() ?? null;
+    const d = g("bvd"), t = g("bvd-title"), p = g("bvd-btb"), k = g("bvd-hawk"), x = g("bvd-close"), f = g("bvd-fline");
+    const j = (r: DOMRect | null) => (r ? { l: r.left, r: r.right, t: r.top, b: r.bottom, c: r.top + r.height / 2 } : null);
+    return { d: j(d), t: j(t), p: j(p), k: j(k), x: j(x), f: j(f) };
+  });
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const a = await read();
+    const ok = !!(a.d && a.t && a.p && a.k && a.x);
+    L.check("QC126-2.8 population: title, pills, hawk, ×", w, ok, JSON.stringify(a));
+    if (!ok) continue;
+    L.check("QC126-2.8 the title's centre within 3px of the hawk's", w, Math.abs(a.t!.c - a.k!.c) <= 3, `${a.t!.c} vs ${a.k!.c}`);
+    L.check("QC126-2.8 the pills' centre within 2px of the title's", w, Math.abs(a.p!.c - a.t!.c) <= 2, `${a.p!.c} vs ${a.t!.c}`);
+    L.check("QC126-2.8 the pills sit right of the title and left of the ×", w, a.p!.l >= a.t!.r && a.p!.r <= a.x!.l, `t ${a.t!.r} p ${a.p!.l}..${a.p!.r} x ${a.x!.l}`);
+    L.check("QC126-2.8 the × is 18px from the drawer's right (±1)", w, near(a.d!.r - a.x!.r, 18, 1), `${a.d!.r - a.x!.r}`);
+    await page.locator('[data-qcv="bvd-pill"][data-k="filter"]').first().click({ timeout: 4000 }).catch(() => {});
+    const chips = page.locator('[data-qcv="bvd-pop"][data-k="filter"] [data-qcv="bvd-chip"]');
+    await chips.nth(0).click({ timeout: 4000 }).catch(() => {}); await chips.nth(4).click({ timeout: 4000 }).catch(() => {});
+    await page.locator('[data-qcv="bvd-pop"][data-k="filter"] .bvd-pdone').click({ timeout: 4000 }).catch(() => {});
+    await page.waitForTimeout(250);
+    const b = await read();
+    L.check("QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0)", w, !!(b.t && b.p && b.k) && b.t!.t === a.t!.t && b.p!.t === a.p!.t && b.k!.t === a.k!.t, `${a.t!.t}/${a.p!.t}/${a.k!.t} → ${b.t?.t}/${b.p?.t}/${b.k?.t}`);
+    L.check("QC126-2.8 the sub-strip spans the drawer", w, !!b.f && near(b.f.l, b.d!.l, 0.5) && near(b.f.r, b.d!.r, 0.5) && b.f.t >= b.t!.b, JSON.stringify([b.f, b.d]));
+  }
+  L.done(21);
 });

@@ -1,0 +1,362 @@
+[
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (open)",
+  "where": "1280",
+  "ok": true,
+  "detail": "115"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (open)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (open)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (open)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[947,947]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (earlier)",
+  "where": "1280",
+  "ok": true,
+  "detail": "42"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (earlier)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (earlier)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (earlier)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[947,947]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (later)",
+  "where": "1280",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (later)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (later)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (later)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[947,947]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6W)",
+  "where": "1280",
+  "ok": true,
+  "detail": "115"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6W)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6W)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6W)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[947,947]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6M)",
+  "where": "1280",
+  "ok": true,
+  "detail": "118"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6M)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6M)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6M)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[947,947]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (open)",
+  "where": "1512",
+  "ok": true,
+  "detail": "117"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (open)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (open)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (open)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1119,1119]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (earlier)",
+  "where": "1512",
+  "ok": true,
+  "detail": "67"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (earlier)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (earlier)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (earlier)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1119,1119]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (later)",
+  "where": "1512",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (later)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (later)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (later)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1119,1119]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6W)",
+  "where": "1512",
+  "ok": true,
+  "detail": "115"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6W)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6W)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6W)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1119,1119]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6M)",
+  "where": "1512",
+  "ok": true,
+  "detail": "119"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6M)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6M)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6M)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1119,1119]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (open)",
+  "where": "1920",
+  "ok": true,
+  "detail": "117"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (open)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (open)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (open)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1120,1120]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (earlier)",
+  "where": "1920",
+  "ok": true,
+  "detail": "67"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (earlier)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (earlier)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (earlier)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1120,1120]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (later)",
+  "where": "1920",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (later)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (later)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (later)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1120,1120]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6W)",
+  "where": "1920",
+  "ok": true,
+  "detail": "115"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6W)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6W)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6W)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1120,1120]"
+ },
+ {
+  "lock": "QC126-2.3 population: labels on the tracks (6M)",
+  "where": "1920",
+  "ok": true,
+  "detail": "119"
+ },
+ {
+  "lock": "QC126-2.3 nothing right of the drawer (6M)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 nothing outside its track (6M)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.3 the rows' scroller does not scroll sideways (6M)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1120,1120]"
+ }
+]

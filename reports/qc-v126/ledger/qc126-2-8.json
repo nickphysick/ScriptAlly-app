@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":332.8125,\"r\":1280,\"t\":0,\"b\":800,\"c\":400},\"t\":{\"l\":450.8125,\"r\":783,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":793,\"r\":1218,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":350.8125,\"r\":436.8125,\"t\":8,\"b\":90.265625,\"c\":49.1328125},\"x\":{\"l\":1228,\"r\":1262,\"t\":31,\"b\":65,\"c\":48},\"f\":null}"
+ },
+ {
+  "lock": "QC126-2.8 the title's centre within 3px of the hawk's",
+  "where": "1280",
+  "ok": true,
+  "detail": "48 vs 49.1328125"
+ },
+ {
+  "lock": "QC126-2.8 the pills' centre within 2px of the title's",
+  "where": "1280",
+  "ok": true,
+  "detail": "48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 the pills sit right of the title and left of the ×",
+  "where": "1280",
+  "ok": true,
+  "detail": "t 783 p 793..1218 x 1228"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0)",
+  "where": "1280",
+  "ok": true,
+  "detail": "32/31/8 → 32/31/8"
+ },
+ {
+  "lock": "QC126-2.8 the sub-strip spans the drawer",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"l\":332.8125,\"r\":1280,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":332.8125,\"r\":1280,\"t\":0,\"b\":800,\"c\":400}]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":393.125,\"r\":1512,\"t\":0,\"b\":900,\"c\":450},\"t\":{\"l\":529.125,\"r\":991,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":1005,\"r\":1446,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":417.125,\"r\":513.125,\"t\":4,\"b\":95.828125,\"c\":49.9140625},\"x\":{\"l\":1460,\"r\":1494,\"t\":31,\"b\":65,\"c\":48},\"f\":null}"
+ },
+ {
+  "lock": "QC126-2.8 the title's centre within 3px of the hawk's",
+  "where": "1512",
+  "ok": true,
+  "detail": "48 vs 49.9140625"
+ },
+ {
+  "lock": "QC126-2.8 the pills' centre within 2px of the title's",
+  "where": "1512",
+  "ok": true,
+  "detail": "48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 the pills sit right of the title and left of the ×",
+  "where": "1512",
+  "ok": true,
+  "detail": "t 991 p 1005..1446 x 1460"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0)",
+  "where": "1512",
+  "ok": true,
+  "detail": "32/31/4 → 32/31/4"
+ },
+ {
+  "lock": "QC126-2.8 the sub-strip spans the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"l\":393.125,\"r\":1512,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":393.125,\"r\":1512,\"t\":0,\"b\":900,\"c\":450}]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":800,\"r\":1920,\"t\":0,\"b\":1080,\"c\":540},\"t\":{\"l\":936,\"r\":1399,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":1413,\"r\":1854,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":824,\"r\":920,\"t\":4,\"b\":95.828125,\"c\":49.9140625},\"x\":{\"l\":1868,\"r\":1902,\"t\":31,\"b\":65,\"c\":48},\"f\":null}"
+ },
+ {
+  "lock": "QC126-2.8 the title's centre within 3px of the hawk's",
+  "where": "1920",
+  "ok": true,
+  "detail": "48 vs 49.9140625"
+ },
+ {
+  "lock": "QC126-2.8 the pills' centre within 2px of the title's",
+  "where": "1920",
+  "ok": true,
+  "detail": "48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 the pills sit right of the title and left of the ×",
+  "where": "1920",
+  "ok": true,
+  "detail": "t 1399 p 1413..1854 x 1868"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0)",
+  "where": "1920",
+  "ok": true,
+  "detail": "32/31/4 → 32/31/4"
+ },
+ {
+  "lock": "QC126-2.8 the sub-strip spans the drawer",
+  "where": "1920",
+  "ok": true,
+  "detail": "[{\"l\":800,\"r\":1920,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":800,\"r\":1920,\"t\":0,\"b\":1080,\"c\":540}]"
+ }
+]
