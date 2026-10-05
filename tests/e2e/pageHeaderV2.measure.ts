@@ -249,17 +249,19 @@ test("§4.6 · the add door (v12 P1: the quick-add drop and the paste pill are r
   });
   L.check("§4.6 · no Paste-a-link pill — the secondary is Discover", ctx, secondaryText.includes("Discover agents"), secondaryText);
   await add.click({ timeout: 5000 }).catch(() => {});
-  await page.waitForSelector('[data-clv="addcard"]', { timeout: 5000 }).catch(() => {});
+  /* (Agent card v1 P3: the add card is the agent card's editor, opened empty, name focused) */
+  await page.waitForSelector('[data-ac="card"] [data-ae-mode="new"]', { timeout: 5000 }).catch(() => {});
+  await page.waitForFunction(() => document.activeElement?.getAttribute("data-ae") === "name", undefined, { timeout: 3000 }).catch(() => {});
   const q = await page.evaluate(() => ({
-    addCard: !!document.querySelector('[data-clv="addcard"]'),
+    addCard: !!document.querySelector('[data-ac="card"] [data-ae-mode="new"]'),
     quick: !!document.querySelector('[data-clv="quickadd"]'),
-    focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-clv") ?? "",
+    focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-ae") ?? "",
   }));
-  L.check("§4.6 · + Add an agent opens the centred card directly, name focused", ctx, q.addCard && q.focused === "f-name", JSON.stringify(q));
+  L.check("§4.6 · + Add an agent opens the centred card directly, name focused", ctx, q.addCard && q.focused === "name", JSON.stringify(q));
   L.check("§4.6 · and drops no quick-add on the way", ctx, !q.quick, "");
   await page.keyboard.press("Escape");
   await page.waitForTimeout(250);
-  L.check("§4.6 · Escape closes the card", ctx, (await page.locator('[data-clv="addcard"]').count()) === 0, "");
+  L.check("§4.6 · Escape closes the card", ctx, (await page.locator('[data-ac="card"]').count()) === 0, "");
   L.write();
   expect(L.rows.length).toBe(5);
   expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);

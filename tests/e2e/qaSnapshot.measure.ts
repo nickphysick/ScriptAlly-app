@@ -113,6 +113,9 @@ test("H12 — a manuscript with no packages offers no package cards, and the que
   await expect(page.locator("[data-qad-pkg]")).toHaveCount(0);
   await toReview(page);
   await expect(page.locator("[data-qad-primary]")).toBeEnabled();
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Discard" }).click();
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it — ✕ closes, and asks first only when there are answers */
+  await page.locator(".qad-dx").click();
+  { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
+  await expect(page.locator("[data-qad-drawer]:visible")).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator("[data-qad-park-chip]")).toHaveCount(0);
 });

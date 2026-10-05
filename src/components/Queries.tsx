@@ -175,7 +175,7 @@ import { MarkClosedDesk, type MarkClosedDraft } from "./queries/MarkClosedDesk";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
-import { useOpenEditAgent } from "./EditAgentHost";
+import { openAgentCard } from "../lib/agentCardStore";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
@@ -499,7 +499,6 @@ export const Queries: React.FC<{
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
-  const openEditAgent = useOpenEditAgent();
   /**
    * ⚠️ THE APP'S ONE BLOCKING-CHOICE PRIMITIVE, REUSED RATHER THAN A SECOND DIALOG BUILT (D10).
    * `useConfirmAsk` already owns Escape, the scrim, one-at-a-time and the promise — the parts worth
@@ -5267,7 +5266,7 @@ export const Queries: React.FC<{
                     };
                   })}
                   onOpenContactList={() => onNavigate?.("agents")}
-                  onEditAgent={() => openEditAgent?.(activeAgent.id)}
+                  onEditAgent={() => openAgentCard(activeAgent.id, { from: "qc" })}
                 />
               ) : undefined) : null;
   const qpNotesTab = panelRow && activeQuery ? ((

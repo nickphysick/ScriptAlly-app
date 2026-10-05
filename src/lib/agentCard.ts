@@ -313,3 +313,44 @@ export function reopenReminder(a: Pick<Agent, "id" | "name" | "agency" | "reopen
     text: `${(a.name ?? "").trim() || (a.agency ?? "").trim()}'s list reopens — check it and query`,
   };
 }
+
+/* ── after a save (Agent card v1 §4; the mock's "…and save" journey) ─────────────────────── */
+
+/**
+ * The quick view's foot after a save, in the mock's words: "Saved." — and, where the reply time
+ * moved them, how many expected-reply dates moved. The count is the dry run's own (`moved` on the
+ * reply note — one per live query whose expected date changes), never weeks-arithmetic. A save that
+ * added the reopen reminder (decision 13) says so last: "Saved. Reminder added for 1 Nov."
+ */
+export function cardSavedLine(notes: readonly { moved?: number }[], reminderDue?: string | null): string {
+  const moved = notes.reduce((n, x) => n + (x.moved ?? 0), 0);
+  const head = moved ? `Saved. ${moved} expected-reply date${moved === 1 ? "" : "s"} moved.` : "Saved.";
+  return reminderDue
+    ? `${head} Reminder added for ${formatDate(new Date(`${reminderDue}T00:00:00`), { day: "numeric", month: "short" })}.`
+    : head;
+}
+
+/**
+ * DECISION 13 — the date a save's reopen reminder is for, or null: the agent is CLOSED after the
+ * save and its reopening date is not the one stored before it (the door just closed with a date, or
+ * the date moved). No date means no task; an unchanged date adds nothing (its reminder, if any, is
+ * already on the list). The reminder itself is `reopenReminder`'s — the quick view's own.
+ */
+export function reminderOnSave(
+  before: Pick<Agent, "submissionStatus" | "reopensOn">,
+  after: Pick<Agent, "submissionStatus" | "reopensOn">,
+): string | null {
+  if (after.submissionStatus !== "Closed") return null;
+  const due = (after.reopensOn ?? "").trim();
+  if (!due) return null;
+  return due === (before.reopensOn ?? "").trim() ? null : due;
+}
+
+/** The parts of the quick view a save pulses — the mock's map: Contact and Submissions changes show
+ *  in the head (where and how they take queries), Wishlist changes in the genres section. */
+export type SavedPulse = "head" | "genres";
+export function savedPulse(tabs: readonly ("who" | "want" | "work")[]): SavedPulse[] {
+  const out = new Set<SavedPulse>();
+  for (const t of tabs) out.add(t === "want" ? "genres" : "head");
+  return [...out];
+}

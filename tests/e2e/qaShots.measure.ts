@@ -68,10 +68,12 @@ test("journey pictures — app vs mock at 1440", async ({ page, browser }) => {
     await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
   };
   const discard = async () => {
-    await page.keyboard.press("Escape");
+    /* decision 8 (Agent card v1): Escape with answers PARKS now — ✕ is the way out, asking first only when there are answers */
+    await page.locator(".qad-dx").click();
     const d = page.getByRole("button", { name: "Discard" });
     if (await d.count()) await d.click();
     await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
+    await expect(page.locator("[data-qad-park-chip]")).toHaveCount(0);
   };
 
   const ref = await browser.newPage({ viewport: { width: 1440, height: 900 } });

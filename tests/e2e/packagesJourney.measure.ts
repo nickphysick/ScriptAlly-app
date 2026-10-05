@@ -104,8 +104,11 @@ test("S1 + LP1 — the default: opens on a package, with the 'used for new queri
   ok(await page.locator("[data-qad-inpk]").isVisible(), "IN THIS PACKAGE is shown");
   ok(!(await page.getByText("Custom", { exact: true }).count()), "there is no Custom card");
   await shot(page, "step2-1-package-default");
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Discard" }).click();
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it — ✕ closes, and asks first only when there are answers */
+  await page.locator(".qad-dx").click();
+  { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
+  await expect(page.locator("[data-qad-drawer]:visible")).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator("[data-qad-park-chip]")).toHaveCount(0);
 });
 
 test("S1 + LP2 + LP3 — a preset holds against the agent; a retired preset falls through", async ({ page }) => {
@@ -129,14 +132,20 @@ test("S1 + LP2 + LP3 — a preset holds against the agent; a retired preset fall
     await updateDoc(agRef, { materialsWanted: agBefore.materialsWanted ?? deleteField() });
   }
   await shot(page, "step2-2-package-preset");
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Discard" }).click();
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it — ✕ closes, and asks first only when there are answers */
+  await page.locator(".qad-dx").click();
+  { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
+  await expect(page.locator("[data-qad-drawer]:visible")).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator("[data-qad-park-chip]")).toHaveCount(0);
 
   await openDrawer(page, { mode: "log", agentId: agent.id, manuscriptId: MS, packageId: RETIRED });
   await toStep2(page);
   ok(await selected(page) === ACTIVE, `LP3: a retired preset falls through to the default (got ${await selected(page)})`);
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Discard" }).click();
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it — ✕ closes, and asks first only when there are answers */
+  await page.locator(".qad-dx").click();
+  { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
+  await expect(page.locator("[data-qad-drawer]:visible")).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator("[data-qad-park-chip]")).toHaveCount(0);
 });
 
 test("S1 + LP4 — no packages: individually, the package option disabled, and the leave bar works", async ({ page }) => {
@@ -414,7 +423,8 @@ test("AGAIN — after an individual log, Log another opens individually with the
     const again = await pieces();
     ok(again === logged, `AGAIN: every piece as it was logged (logged "${logged}", reopened "${again}")`);
     await shot(page, "log-another-individual");
-    await page.keyboard.press("Escape");
+    /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it now — ✕ is what asks to discard */
+    await page.locator(".qad-dx").click();
     await page.getByRole("button", { name: "Discard" }).click();
   } catch (e) { failure = e; } finally {
     if (qid) await removeQuery(qid);

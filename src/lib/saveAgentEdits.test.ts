@@ -176,3 +176,12 @@ describe("firestore.rules · responseTimeWeeks relaxation (rule-text)", () => {
     );
   });
 });
+
+describe("the Undo's deletes (Agent card v1 P4)", () => {
+  it("socials and noResponseMeansNo take null as a delete — an Undo of a field the save added", () => {
+    const s = sanitizeAgentPatch({ socials: null, noResponseMeansNo: null });
+    expect(s.errors).toEqual([]);
+    expect(s.deletes.sort()).toEqual(["noResponseMeansNo", "socials"]);
+    expect(s.fields).toEqual({});
+  });
+});

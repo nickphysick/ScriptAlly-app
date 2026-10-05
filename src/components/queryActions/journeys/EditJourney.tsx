@@ -30,7 +30,7 @@ import { ordinal } from "../SentHow";
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyView } from "../journey";
 import { emptyView } from "./ResponseJourney";
-import { agentName, firstName, nrmnOf, whoLine } from "./common";
+import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, whoLine } from "./common";
 
 interface Entry { id: string; name: string; day: Date; note: string; status: string | null; isNudge: boolean }
 
@@ -44,18 +44,27 @@ export function entryName(data: Record<string, unknown>): string {
   return type || "Entry";
 }
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface EditAnswers {
+  d: string | null; note: string | null; told: boolean;
+  sent: { how: "package"; key: string } | { how: "individual"; mat: Materials } | null;
+}
+
 export function EditJourney({ req, today, children }: JourneyProps) {
   const db = useScriptAllyDb();
+  const S = seedOf<EditAnswers>(req);
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const [log, setLog] = useState<Entry[] | null>(null);
-  const [d, setD] = useState<Date | null>(null);
-  const [note, setNote] = useState<string | null>(null);
-  const [told, setTold] = useState(false);
-  const [touched, setTouched] = useState(false);
+  const [d, setD] = useState<Date | null>(dayIn(S.d));
+  const [note, setNote] = useState<string | null>(S.note !== undefined ? S.note : null);
+  const [told, setTold] = useState(S.told ?? false);
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
   const tellMode = !req.entryId;
   /* §A4 — what was sent, corrected. null = unchanged; the writer's choice replaces the snapshot. */
-  const [sent, setSent] = useState<{ how: "package"; key: string } | { how: "individual"; mat: Materials } | null>(null);
+  const [sent, setSent] = useState<{ how: "package"; key: string } | { how: "individual"; mat: Materials } | null>(S.sent ?? null);
+  const snapshot = (): EditAnswers => ({ d: dayOut(d), note, told, sent });
 
   useEffect(() => {
     if (!q || tellMode) return;
@@ -91,7 +100,7 @@ export function EditJourney({ req, today, children }: JourneyProps) {
         ),
       }],
       saves: told ? [{ text: `The “Tell ${first}” to-do comes off your list` }] : [{ text: "Nothing changes until you've told them" }],
-      who, dirty: touched, touched: () => [q.id],
+      who, dirty: touched, snapshot, touched: () => [q.id],
       commit: async () => {
         if (told) await db.updateQuery(q.id, { withdrawTold: true } as Partial<Query>);
         return { queryId: q.id, message: `Noted · ${agentName(agent)}`, sub: told ? `TOLD ${up(today)}` : "NOTHING CHANGED", touched: [q.id] };
@@ -217,7 +226,7 @@ export function EditJourney({ req, today, children }: JourneyProps) {
         { text: `The entry shows “Corrected ${dm(today)}”, and the original stays in its history` },
       ]),
     ],
-    who, dirty: touched, touched: () => [q.id],
+    who, dirty: touched, snapshot, touched: () => [q.id],
     commit: async () => {
       await db.editActivity(q.id, e.id, { ...(moved ? { date: dayIso(day) } : {}), ...(note !== null ? { details: text } : {}) });
       const extra: Record<string, unknown> = {};

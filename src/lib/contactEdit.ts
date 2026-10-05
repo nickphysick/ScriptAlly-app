@@ -79,6 +79,8 @@ export interface AlsoNote {
   lines: string[];
   /** the surfaces this note touches — the footer and the saved line union these */
   surfaces: string[];
+  /** reply notes only: how many live queries' expected dates the dry run moves */
+  moved?: number;
 }
 
 export interface EditCtx {
@@ -106,6 +108,7 @@ export function alsoChanges(orig: Agent, draft: ContactDraft, ctx: EditCtx): Als
   const weeksChanged = draft.responseTimeWeeks !== (typeof orig.responseTimeWeeks === "number" ? orig.responseTimeWeeks : null);
   if (weeksChanged) {
     const lines: string[] = [];
+    let moved = 0;
     const draftAgent: Agent = { ...orig, responseTimeWeeks: draft.responseTimeWeeks ?? undefined };
     if (draft.responseTimeWeeks == null) delete (draftAgent as Partial<Agent>).responseTimeWeeks;
     const live = ctx.queries.filter((q) => q.agentId === orig.id && LIVE(q));
@@ -125,10 +128,11 @@ export function alsoChanges(orig: Agent, draft: ContactDraft, ctx: EditCtx): Als
           ? ", so it becomes past the date and moves to Your move"
           : "";
       lines.push(`Query Centre and Birds-eye view: your query's reply expected ${from} → ${to}${crossing}.`);
+      moved += 1;
     }
     lines.push("To-do list and Dashboard: when to nudge, and the reply-window bar, read this window.");
     lines.push(`Analytics: ${orig.name.trim() || "this agent"}'s stated window feeds your expected-reply figures.`);
-    notes.push({ field: "reply", lines, surfaces: ["the Query Centre", "the To-do list", "the Dashboard", "Analytics"] });
+    notes.push({ field: "reply", lines, surfaces: ["the Query Centre", "the To-do list", "the Dashboard", "Analytics"], moved });
   }
 
   /* ── name / agency: only an agent with queries is named anywhere else ──────────────────── */
@@ -144,17 +148,33 @@ export function alsoChanges(orig: Agent, draft: ContactDraft, ctx: EditCtx): Als
     });
   }
 
-  /* ── open to queries ───────────────────────────────────────────────────────────────────── */
-  if (draft.submissionStatus !== orig.submissionStatus) {
+  /* ── open to queries — and the reopen reminder a save adds (Agent card v1 decision 13) ──── */
+  const doorChanged = draft.submissionStatus !== orig.submissionStatus;
+  const due = (draft.reopensOn ?? "").trim();
+  /* the mock's rule: a closed door whose reopening date is new (the door just closed, or the date
+     moved) says what happens to the To-do list — a reminder for that date, or, with no date, none */
+  const reminderLine = draft.submissionStatus === "Closed"
+    && (orig.submissionStatus !== "Closed" || due !== (orig.reopensOn ?? "").trim())
+    ? (due
+        ? `A To-do for ${dmy(Date.parse(`${due}T00:00:00`))}: check they’ve reopened.`
+        : "No reopening date, so no reminder. Housekeeping will ask for the date.")
+    : null;
+  if (doorChanged || reminderLine) {
     const opening = draft.submissionStatus === "Open";
     const openNow = ctx.agents.filter((a) => a.id !== orig.id && isDoorOpen(a)).length + (opening ? 1 : 0);
     notes.push({
       field: "door",
       lines: [
-        `This page's counts move: Open to queries becomes ${openNow}.`,
-        `The log-a-query sheet and the Query Centre's agent panel show them as ${opening ? "open" : "closed"} to queries.`,
+        ...(doorChanged ? [
+          `This page's counts move: Open to queries becomes ${openNow}.`,
+          `The log-a-query sheet and the Query Centre's agent panel show them as ${opening ? "open" : "closed"} to queries.`,
+        ] : []),
+        ...(reminderLine ? [reminderLine] : []),
       ],
-      surfaces: ["this page's counts", "the log-a-query sheet", "the Query Centre's agent panel"],
+      surfaces: [
+        ...(doorChanged ? ["this page's counts", "the log-a-query sheet", "the Query Centre's agent panel"] : []),
+        ...(reminderLine && due ? ["the To-do list"] : []),
+      ],
     });
   }
 
@@ -194,23 +214,10 @@ export function alsoChanges(orig: Agent, draft: ContactDraft, ctx: EditCtx): Als
   return notes;
 }
 
-/** The footer's one-line summary (§7.3). */
-export function alsoSummary(notes: readonly AlsoNote[]): string {
-  const surfaces = [...new Set(notes.flatMap((n) => n.surfaces))];
-  if (surfaces.length === 0) return "Only this card changes.";
-  const list = surfaces.length === 1 ? surfaces[0]
-    : `${surfaces.slice(0, -1).join(", ")} and ${surfaces[surfaces.length - 1]}`;
-  return `Saving also updates ${list}.`;
-}
-
-/** The sage line the card returns to view mode with. */
-export function savedLine(notes: readonly AlsoNote[]): string {
-  const surfaces = [...new Set(notes.flatMap((n) => n.surfaces))];
-  if (surfaces.length === 0) return "Saved.";
-  const list = surfaces.length === 1 ? surfaces[0]
-    : `${surfaces.slice(0, -1).join(", ")} and ${surfaces[surfaces.length - 1]}`;
-  return `Saved. Also updated ${list}.`;
-}
+/* ⚠️ `alsoSummary` and `savedLine` RETIRED (Agent card v1 P4): the v11 pop-up's footer and saved
+   line, which unioned surfaces into a sentence. The agent card counts what moves instead — the
+   editor's foot ("N changes · also changes N things elsewhere") and its saved line
+   (`cardSavedLine`, lib/agentCard: "Saved. N expected-reply dates moved.") — the mock's copy. */
 
 /** How far a date-only string is from now, for the reopen field's own display. */
 export const daysUntil = (iso: string, nowMs: number): number => Math.round((Date.parse(iso) - nowMs) / DAY);

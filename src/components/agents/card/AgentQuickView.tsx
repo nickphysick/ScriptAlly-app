@@ -11,8 +11,8 @@
  * read, so the card and the row behind it cannot disagree. A status is drawn only by StatusDot.
  *
  * ⚠️ ESCAPE IS ONE HANDLER (§9): an open ⋯ menu closes first, then an open note composer (its
- * words are kept while the card is open), then the card. Lists inside the card that push their own
- * layer (Phase 3's pickers) are above it on the stack and are asked first.
+ * words are kept while the card is open), then the delete confirm, then the card. Nothing answers
+ * while a delete is under way.
  *
  * ⚠️ WHAT WAS SENT STAYS ON THE CARD (the clean-up pass's materials-everywhere law, which the
  * old pop-up carried). The mock's face has no room for it, so the shared chip and box ride at the
@@ -29,13 +29,15 @@ import type { AgentNote } from "../../../lib/agentNotes";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import type { AgentEditPatch } from "../../../lib/saveAgentEdits";
 import { hrefFor } from "../../../lib/quickAdd";
+import { genreLabel, type PersonalGenre } from "../../../lib/genres";
 import { formatDate } from "../../../lib/dates";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import {
-  type AlsoQueried, type CardAct, howLine, materialChips, mswlLinkOf, nextLine, nowLine, primaryFor,
+  type AlsoQueried, type CardAct, type SavedPulse, howLine, materialChips, mswlLinkOf, nextLine, nowLine, primaryFor,
   queryTone, seqPosition, trailOf, whereLine, wishStamp,
 } from "../../../lib/agentCard";
+import { canDestroy } from "../../../lib/cascade";
 
 /* the mock's own marks — line drawings in the ink, inheriting the link's colour */
 const ICO = {
@@ -60,8 +62,13 @@ const dayLabel = (iso: string, nowMs: number) => {
 
 export interface QuickFoot {
   text: string;
-  undo?: () => void | Promise<void>;
+  /** may answer with what to say next ("Undone.", or why it could not) */
+  undo?: () => void | Promise<void | QuickFoot | null>;
 }
+
+/** What a delete takes with it — the destroy manifest's own counts, so the confirm cannot promise
+ *  less than the cascade removes. */
+export interface DeleteFacts { queries: number; history: number; msTitle: string | null }
 
 export interface AgentQuickViewProps {
   agent: Agent;
@@ -71,6 +78,8 @@ export interface AgentQuickViewProps {
   nowMs: number;
   msTitle: string | null;
   genreHit: (g: string) => boolean;
+  /** the writer's own genres, so a stored id reads as its label (ruling 1) */
+  personal?: PersonalGenre[];
   also: AlsoQueried[];
   /** committed notes, any order */
   notes: AgentNote[];
@@ -81,6 +90,14 @@ export interface AgentQuickViewProps {
   slide: "l" | "r" | null;
   /** a message the host hands over (a save from the editor) */
   initialFoot?: QuickFoot | null;
+  /** after a save, the parts that changed pulse once (the mock's map, lib/agentCard `savedPulse`) */
+  pulse?: SavedPulse[];
+  /** back from a journey the drawer SAVED (§6.1): the query section pulses — a new number each time,
+   *  so a second save pulses again rather than leaving the first animation's class in place */
+  queryPulse?: number;
+  deleteFacts?: DeleteFacts | null;
+  /** ⋯ → Delete agent…, once confirmed — absent, the menu offers no delete */
+  onDelete?: () => Promise<void>;
   /** the menu's first item, when the card is open over a page other than the Contact list */
   showOpenInContactList: boolean;
   /** the sole writer — through commitAgentEdits (no activity, so an undo appends nothing) */
@@ -96,8 +113,9 @@ export interface AgentQuickViewProps {
 }
 
 export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
-  agent, facts, q, nowMs, msTitle, genreHit, also, notes, packages, sequence, slide, initialFoot = null,
-  showOpenInContactList, write, onStep, onEdit, onClose, onAct, onOpenInContactList, onAddNote,
+  agent, facts, q, nowMs, msTitle, genreHit, personal, also, notes, packages, sequence, slide, initialFoot = null,
+  pulse, queryPulse = 0, deleteFacts = null, onDelete, showOpenInContactList, write, onStep, onEdit, onClose, onAct, onOpenInContactList,
+  onAddNote,
 }) => {
   const tone = queryTone(facts, q);
   const primary = primaryFor(facts, q);
@@ -110,8 +128,8 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
   const mats = useMemo(() => materialChips(agent.materialsWanted as string[] | undefined), [agent.materialsWanted]);
   /* the manuscript's genre first, ticked — the row's own order */
   const genres = useMemo(
-    () => [...(agent.genres ?? [])].sort((a, b) => Number(genreHit(b)) - Number(genreHit(a))),
-    [agent.genres, genreHit],
+    () => (agent.genres ?? []).map((g) => genreLabel(g, personal)).sort((a, b) => Number(genreHit(b)) - Number(genreHit(a))),
+    [agent.genres, genreHit, personal],
   );
   const wish = (agent.mswlNotes ?? "").trim();
   const sortedNotes = useMemo(
@@ -149,7 +167,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
     document.addEventListener("pointerdown", down, true);
     return () => document.removeEventListener("pointerdown", down, true);
   }, [menu]);
-  const menuItems: { key: string; label: string; run: () => void }[] = [];
+  const menuItems: { key: string; label: string; run: () => void; danger?: boolean }[] = [];
   if (showOpenInContactList) menuItems.push({ key: "contacts", label: "Open in Contact list", run: onOpenInContactList });
   if (q) menuItems.push({ key: "qc", label: "Open in Query Centre", run: () => void onAct("qc") });
   if (email) {
@@ -162,6 +180,22 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
       },
     });
   }
+
+  /* ── ⋯ → Delete agent…: the foot becomes the confirm (§7). With queries, their name is typed. ── */
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const delName = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
+  const delHeavy = !!deleteFacts && deleteFacts.queries > 0;
+  /* the mock's gate: the name as typed, case aside — through the house's own type-to-confirm */
+  const delReady = !delHeavy || canDestroy(typed.toLowerCase(), delName.toLowerCase(), false);
+  const openDelete = () => {
+    window.clearTimeout(footTimer.current);
+    setFoot(null);
+    setTyped("");
+    setConfirmDel(true);
+  };
+  if (onDelete) menuItems.push({ key: "delete", label: "Delete agent…", run: openDelete, danger: true });
 
   /* ── the note composer — composes in place, without the editor ─────────────────────────── */
   const [composing, setComposing] = useState(false);
@@ -181,11 +215,13 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
   };
 
   /* ── Escape: one handler, the cascade inside it ────────────────────────────────────────── */
-  const state = useRef({ menu, composing });
-  state.current = { menu, composing };
+  const state = useRef({ menu, composing, confirmDel, deleting });
+  state.current = { menu, composing, confirmDel, deleting };
   useEscapeLayer(true, () => {
+    if (state.current.deleting) return;
     if (state.current.menu) { setMenu(false); moreRef.current?.focus(); return; }
     if (state.current.composing) { setComposing(false); return; }
+    if (state.current.confirmDel) { setConfirmDel(false); return; }
     onClose();
   }, ESC_LEVEL.card);
 
@@ -274,14 +310,17 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
 
       {menu && (
         <div ref={menuRef} className="ac-menu" role="menu" data-ac="menu">
-          {menuItems.map((m) => (
-            <button key={m.key} type="button" role="menuitem" data-ac={`menu-${m.key}`} onClick={() => { setMenu(false); m.run(); }}>{m.label}</button>
+          {menuItems.map((m, i) => (
+            <React.Fragment key={m.key}>
+              {m.danger && i > 0 && <hr />}
+              <button type="button" role="menuitem" className={m.danger ? "del" : undefined} data-ac={`menu-${m.key}`} onClick={() => { setMenu(false); m.run(); }}>{m.label}</button>
+            </React.Fragment>
           ))}
         </div>
       )}
 
       <div key={agent.id} className={`ac-body${slide ? ` slide-${slide}` : ""}`} data-ac="body">
-        <div className="acq-head" data-ac="head">
+        <div className={`acq-head${pulse?.includes("head") ? " ac-pulse" : ""}`} data-ac="head">
           <span className="acq-ini" aria-hidden="true">{agentInitials(agent)}</span>
           <div className="acq-id">
             <h3 id="ac-name">{name}</h3>
@@ -303,7 +342,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
           </div>
         </div>
 
-        <div className="acq-q" data-tone={tone.tone} data-ac="q">
+        <div key={`q${queryPulse}`} className={`acq-q${queryPulse ? " ac-pulse" : ""}`} data-tone={tone.tone} data-ac="q">
           <div className="acq-qh">
             <span className="acq-chip" data-ac="tone">{tone.label}</span>
             {/* the title sits beside the chip, not at the far edge — the mock's spacer has no rule */}
@@ -326,7 +365,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
           ))}
         </div>
 
-        <div className="acq-s" data-ac="s-genres">
+        <div className={`acq-s${pulse?.includes("genres") ? " ac-pulse" : ""}`} data-ac="s-genres">
           <h4 className="acq-lab">Genres sought</h4>
           {genres.length ? (
             <div className="acq-gch">
@@ -392,14 +431,41 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
         </div>
       </div>
 
-      <div className={`ac-foot${foot ? " on" : ""}`} data-ac="foot" role="status">
+      <div className={`ac-foot${foot || confirmDel ? " on" : ""}${confirmDel ? " warn" : ""}`} data-ac="foot" role="status">
         <div>
-          {foot && (
+          {confirmDel ? (
+            <>
+              <span className="msg" data-ac="delete-ask">
+                {delHeavy ? (
+                  <>Delete <b>{delName}</b>? {deleteFacts!.queries === 1 && deleteFacts!.msTitle
+                    ? <>Their query for <i>{deleteFacts!.msTitle}</i></>
+                    : <>Their {deleteFacts!.queries} quer{deleteFacts!.queries === 1 ? "y" : "ies"}</>}
+                  {" "}and {deleteFacts!.history} history entr{deleteFacts!.history === 1 ? "y" : "ies"} go too. Type their name to confirm.</>
+                ) : (
+                  <>Delete <b>{delName}</b> from your Contact list? No queries go with them.</>
+                )}
+              </span>
+              {delHeavy && (
+                <input
+                  className="ac-in ac-confirm-in" data-ac="delete-name" value={typed} placeholder={delName} autoComplete="off" autoFocus
+                  aria-label={`Type ${delName} to confirm`} onChange={(e) => setTyped(e.target.value)}
+                />
+              )}
+              <button type="button" className="ac-btn gh sm" data-ac="delete-cancel" disabled={deleting} onClick={() => setConfirmDel(false)}>Cancel</button>
+              <button
+                type="button" className="ac-btn sm danger" data-ac="delete-go" disabled={!delReady || deleting}
+                onClick={async () => { if (!onDelete || !delReady) return; setDeleting(true); await onDelete(); }}
+              >Delete</button>
+            </>
+          ) : foot && (
             <>
               <span className="tick" aria-hidden="true">✓</span>
               <span className="msg">{foot.text}</span>
               {foot.undo && (
-                <button type="button" className="ac-btn gh sm" data-ac="undo" onClick={() => { const u = foot.undo!; say(null); void u(); }}>Undo</button>
+                <button
+                  type="button" className="ac-btn gh sm" data-ac="undo"
+                  onClick={async () => { const u = foot.undo!; say(null); const next = await u(); if (next) say(next); }}
+                >Undo</button>
               )}
             </>
           )}

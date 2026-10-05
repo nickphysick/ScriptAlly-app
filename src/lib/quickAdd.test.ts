@@ -81,10 +81,11 @@ describe("the submissions-page normaliser is a scheme allowlist", () => {
   /* ⚠️ NO RENDER SITE MAY BUILD ITS OWN HREF. Three of them did it with an inline regex, and three
      copies of a security test is two chances to fix only some of them. */
   it("every surface that renders the address goes through one function", () => {
-    /* v11 phase 4: the pop-up is the ONE surviving renderer of the stored address — the peek and
-       the card retired with the flip grid. A new renderer joins this list, never builds its own.
-       Agent card v1: the card's quick view joined it (the pop-up leaves with its edit face, P3). */
-    for (const rel of ["../components/agents/contact/ContactProfile.tsx", "../components/agents/card/AgentQuickView.tsx", "./agentCard.ts"]) {
+    /* Agent card v1: the card's quick view is the ONE renderer of the stored address — the pop-up
+       retired with its edit face in P3, as the peek and the flip card had before it. The editor
+       shows the cleaned domain as TEXT, never a link. A new renderer joins this list, never builds
+       its own. */
+    for (const rel of ["../components/agents/card/AgentQuickView.tsx", "./agentCard.ts"]) {
       const src = readFileSync(new URL(rel, import.meta.url), "utf8");
       expect(src, rel + " builds its own href instead of calling hrefFor").not.toMatch(/https:\/\/\$\{/);
       expect(src, rel + " does not use the shared href builder").toMatch(/hrefFor|isLiveHref/);
@@ -117,11 +118,23 @@ describe("a typed genre is committed, never discarded", () => {
     expect(commitTypedGenre("   ", ["Crime"], SUGG)).toBeNull();
   });
 
-  /* ⚠️ AND THE FORM CONSUMES IT — a raw `[...genres, other.trim()]` in the "+ Other" handler is
+  /* ⚠️ AND THE CARD CONSUMES IT (Agent card v1 §5) — a typed genre reaches the list ONLY through
+     the deliberate "+ Add “…” as a new genre", whose handler canonicalises against EVERY source
+     before anything becomes the writer's own. A raw push of the typed text in the chip field is
      the case-duplicate fault this function exists to prevent, reintroduced one component along. */
-  it("the pop-up form's + Other input goes through commitTypedGenre", () => {
-    const form = readFileSync(new URL("../components/agents/contact/ContactAgentForm.tsx", import.meta.url), "utf8");
-    expect(form, "the + Other handler stopped canonicalising against the pool").toContain("commitTypedGenre(");
-    expect(form, "a raw push came back beside the canonical commit").not.toMatch(/genres:\s*\[\.\.\.draft\.genres,\s*other\.trim\(\)\]/);
+  it("the card's new-genre path goes through commitTypedGenre, and the chip field never pushes what was typed", () => {
+    const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
+    const host = strip(readFileSync(new URL("../components/agents/card/AgentCardHost.tsx", import.meta.url), "utf8"));
+    const at = host.indexOf("const onNewGenre");
+    expect(at, "the new-genre handler left the host").toBeGreaterThan(-1);
+    const handler = host.slice(at, host.indexOf("}, [", at));
+    expect(handler, "the new-genre path stopped canonicalising").toContain("commitTypedGenre(");
+    expect(handler, "the canonical check stopped reading every source").toMatch(/AGENT_GENRES/);
+    expect(handler, "a genuinely new genre stopped going through addPersonalGenre (the cap of ten)").toContain("addPersonalGenre(");
+    const inputs = strip(readFileSync(new URL("../components/agents/card/cardInputs.tsx", import.meta.url), "utf8"));
+    const field = inputs.slice(inputs.indexOf("export const GenreField"), inputs.indexOf("/* ── steppers"));
+    expect(field.length, "GenreField moved — re-anchor this lock").toBeGreaterThan(200);
+    expect(field, "a pick of the new-genre row stopped handing the typed text to onNew").toMatch(/x\.isNew[\s\S]{0,80}onNew\(x\.value\)/);
+    expect(field, "the chip field pushed the typed text straight into the list").not.toMatch(/onGenres\(\[\.\.\.genres,\s*q/);
   });
 });

@@ -14,8 +14,8 @@
  */
 import { useSyncExternalStore } from "react";
 import type { Agent } from "../types";
-import type { ContactDraft } from "./contactEdit";
-import type { FormSection } from "../components/agents/contact/ContactAgentForm";
+import type { CardDraft } from "./cardDraft";
+import type { AgentDataNeed } from "./agentDataQuality";
 
 /** The editor's four tabs — the mock's own keys: Contact · Wishlist · Submissions · Notes. */
 export type AgentCardTab = "who" | "want" | "work" | "notes";
@@ -33,7 +33,7 @@ export interface AgentCardOptions {
   tab?: AgentCardTab;
   focus?: AgentCardField;
   /** a partial draft: the editor opens with it applied and dirty (Housekeeping's carry-over) */
-  prefill?: Partial<ContactDraft>;
+  prefill?: Partial<CardDraft>;
   from?: AgentCardFrom;
   /** the row's or button's box the card grows out of; absent, it fades and lifts from 8px below */
   originRect?: AgentCardOrigin | null;
@@ -57,6 +57,20 @@ const notify = () => listeners.forEach((l) => l(current));
 export function openAgentCard(agentId: string, opts: AgentCardOptions = {}): void {
   current = { ...opts, agentId, seq: ++seq };
   notify();
+}
+/**
+ * A data-quality task's door (Agent card v1 §8): the editor, on the tab and field of the FIRST gap
+ * the agent still has, in `agentDataQualityNeeds`' own order. With no gap left the task is stale,
+ * so it opens the quick view (null) rather than an editor pointing at nothing. The targets are
+ * Housekeeping's own, so the two doors into one gap cannot land in different places.
+ */
+const NEED_TARGET: Record<AgentDataNeed, { tab: AgentCardTab; focus: AgentCardField }> = {
+  responseTime: { tab: "work", focus: "reply" },
+  materials: { tab: "want", focus: "materials" },
+  mswl: { tab: "want", focus: "wishlist" },
+};
+export function dataNeedTarget(needs: readonly AgentDataNeed[]): { tab: AgentCardTab; focus: AgentCardField } | null {
+  return needs.length ? NEED_TARGET[needs[0]] : null;
 }
 export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from"> = {}): void {
   current = { ...opts, agentId: null, seq: ++seq };
@@ -90,13 +104,20 @@ export function useAgentCardRequest(): AgentCardRequest | null {
 }
 
 /* ---------- events the page listens to ----------
-   The card saves and adds; the PAGE owns what follows on the list — the notice saying where the
-   saved record went (and the FLIP measured with it, the agentMotion law), and the ring on a new
-   row. An event rather than a prop because the host is app-level and the page is merely one of
-   the places the card opens over. */
+   The card saves, adds and deletes; the PAGE owns what follows on the list — the notice saying where
+   the saved record went (and the FLIP measured with it, the agentMotion law), the ring on a new row,
+   and the row collapsing behind a delete. An event rather than a prop because the host is app-level
+   and the page is merely one of the places the card opens over. */
 export type AgentCardEvent =
-  | { type: "saved"; agentId: string; before: Agent; after: Agent }
-  | { type: "added"; agentId: string };
+  /* `undo` is the card's whole-document Undo — the SAME closure the card's foot offers, so the list's
+     notice can offer it too and the two cannot restore different things; it runs once */
+  | { type: "saved"; agentId: string; before: Agent; after: Agent; undo?: () => Promise<unknown> }
+  | { type: "added"; agentId: string }
+  /* a save's Undo ran (from either place) — the list drops its notice's Undo */
+  | { type: "undone"; agentId: string }
+  /* a delete is under way: the card has shrunk into the row, which collapses (240ms) */
+  | { type: "deleting"; agentId: string }
+  | { type: "delete-failed"; agentId: string; name: string };
 
 type EventListener = (e: AgentCardEvent) => void;
 const eventListeners = new Set<EventListener>();
@@ -106,29 +127,4 @@ export function emitAgentCardEvent(e: AgentCardEvent): void {
 export function subscribeAgentCardEvents(l: EventListener): () => void {
   eventListeners.add(l);
   return () => { eventListeners.delete(l); };
-}
-
-/* ---------- the old pop-up's sections ----------
-   ⚠️ A BRIDGE FOR PHASE 1 ONLY, deleted with the pop-up in Phase 3: the doors already speak the
-   card's tabs and fields, and the old form still needs a section to scroll to. Reply time lived
-   in the old form's FIRST section, which is why Housekeeping's reply gap used to pass "who". */
-export function targetForSection(section: FormSection): Pick<AgentCardOptions, "tab" | "focus"> {
-  switch (section) {
-    case "genres": return { tab: "want", focus: "genres" };
-    case "wishlist": return { tab: "want", focus: "wishlist" };
-    case "materials": return { tab: "want", focus: "materials" };
-    case "door": return { tab: "work", focus: "door" };
-    case "notes": return { tab: "notes" };
-    case "who":
-    case "rating":
-    default: return { tab: "who" };
-  }
-}
-export function legacySectionFor(tab: AgentCardTab | undefined, focus: AgentCardField | undefined): FormSection | null {
-  if (!tab) return null;
-  if (focus === "genres" || focus === "wishlist" || focus === "materials") return focus;
-  if (focus === "door" || focus === "reopen") return "door";
-  if (tab === "notes") return "notes";
-  /* name, agency, country, city, links, reply time, no-reply rule: the old form's first section */
-  return "who";
 }

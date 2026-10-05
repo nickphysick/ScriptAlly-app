@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Edit Query drawer — a Form 11 drawer sibling of EditAgentDrawer, on the shared Form11Drawer shell.
+ * Edit Query drawer — a Form 11 drawer on the shared Form11Drawer shell (its sibling EditAgentDrawer
+ * retired with Agent card v1).
  *
  * The one rule: editing a query never writes derived state. status / responses / revisionRound /
  * pipeline dates are derived from the activity log by recomputeQuery — the single writer. This drawer

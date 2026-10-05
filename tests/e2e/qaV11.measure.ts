@@ -270,7 +270,9 @@ for (const [w, h] of [[390, 844], [768, 1024]] as const) {
         for (const o of a.out) problems.push(`${tag}: past the edge — ${o}`);
         for (const c of a.clipped) problems.push(`${tag}: clipped — ${c}`);
       }
-      await page.keyboard.press("Escape");
+      /* decision 8 (Agent card v1): Escape on a journey WITH answers parks it now (and a parked journey
+         would turn the next door into the clash ask) — ✕ is what asks to discard, then nothing is left */
+      await page.locator(".qad-dx").click();
       const dsc = page.getByRole("button", { name: "Discard" });
       if (await dsc.count()) await dsc.click();
       await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });

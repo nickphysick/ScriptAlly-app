@@ -26,12 +26,13 @@ import { UserPlan } from "../../../types";
 import { fmt, toDay } from "../../../lib/queryActions/dates";
 import { initialsOf } from "../controls";
 import type { JourneyView } from "../journey";
-import { isLive, statusWords } from "./common";
+import { isLive, seedOf, statusWords } from "./common";
 
-export function QueryPicker({ onPick, children }: { onPick: (queryId: string) => void; children: (view: JourneyView) => React.ReactElement }) {
+export function QueryPicker({ onPick, seed, children }: { onPick: (queryId: string) => void; seed?: unknown; children: (view: JourneyView) => React.ReactElement }) {
   const db = useScriptAllyDb();
   const isPro = db.currentUser?.plan === UserPlan.PRO;
-  const [typed, setTyped] = useState("");
+  /* parking (§6.4): what was typed is the picker's one answer */
+  const [typed, setTyped] = useState(seedOf<{ typed: string }>({ seed }).typed ?? "");
   const t = typed.trim().toLowerCase();
   const live = useMemo(() => db.queries.filter(isLive), [db.queries]);
   const rows = useMemo(() => live
@@ -81,6 +82,7 @@ export function QueryPicker({ onPick, children }: { onPick: (queryId: string) =>
     steps: [{ title: "The query", summary: "", body }],
     saves: [],
     dirty: t.length > 0,
+    snapshot: () => ({ typed }),
     touched: () => [],
     commit: async () => { throw new Error("No query chosen"); },
   });

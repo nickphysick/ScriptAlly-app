@@ -6,8 +6,8 @@
  */
 import { describe, it, expect, afterEach } from "vitest";
 import {
-  closeAgentCard, currentAgentCard, legacySectionFor, openAgentCard, openNewAgentCard,
-  subscribeAgentCard, targetForSection, emitAgentCardEvent, subscribeAgentCardEvents,
+  closeAgentCard, currentAgentCard, openAgentCard, openNewAgentCard,
+  subscribeAgentCard, emitAgentCardEvent, subscribeAgentCardEvents,
   stepAgentCard, type AgentCardRequest,
 } from "./agentCardStore";
 
@@ -84,25 +84,5 @@ describe("the agent card's store", () => {
     off();
     emitAgentCardEvent({ type: "added", agentId: "ag-x" });
     expect(got).toEqual(["saved:ag-1", "added:ag-9"]);
-  });
-});
-
-describe("the old pop-up's sections map onto the card's tabs and fields", () => {
-  it("each section names the tab the field now lives on", () => {
-    expect(targetForSection("who")).toEqual({ tab: "who" });
-    expect(targetForSection("genres")).toEqual({ tab: "want", focus: "genres" });
-    expect(targetForSection("wishlist")).toEqual({ tab: "want", focus: "wishlist" });
-    expect(targetForSection("materials")).toEqual({ tab: "want", focus: "materials" });
-    expect(targetForSection("door")).toEqual({ tab: "work", focus: "door" });
-    expect(targetForSection("notes")).toEqual({ tab: "notes" });
-  });
-
-  it("…and the bridge back: reply time lived in the old form's FIRST section, the door in its own", () => {
-    expect(legacySectionFor("work", "reply")).toBe("who");
-    expect(legacySectionFor("work", "door")).toBe("door");
-    expect(legacySectionFor("want", "genres")).toBe("genres");
-    expect(legacySectionFor("want", "materials")).toBe("materials");
-    expect(legacySectionFor("who", "name")).toBe("who");
-    expect(legacySectionFor(undefined, undefined)).toBeNull();
   });
 });

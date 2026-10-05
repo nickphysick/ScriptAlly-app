@@ -36,7 +36,7 @@ import {
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyStep, JourneyView, SaveLine } from "../journey";
 import {
-  agencyOf, agentName, firstName, isLive, viaLabel, viaOptions, whoLine,
+  agencyOf, agentName, dayIn, dayOut, firstName, isLive, seedOf, viaLabel, viaOptions, whoLine,
 } from "./common";
 
 type IfNo = "nudge" | "close" | "nothing";
@@ -61,34 +61,43 @@ function readActiveManuscript(): string | null {
   try { return localStorage.getItem("scriptally_active_manuscript_id"); } catch { return null; }
 }
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`; the based-on package by id. */
+interface LogAnswers {
+  msId: string; agentId: string | null; typed: string; requery: boolean; sent: string | null; via: SubmissionMethod;
+  how: "package" | "individual"; pkg: string | null; pkgTouched: boolean; basedOnId: string | null; mat: Materials;
+  expectMode: string; expectCustom: string | null; nrmn: boolean | null; ifNo: IfNo; ifNoSet: boolean;
+  nudgeWhen: string; nudgeCustom: string | null; exactDeclined: string | null;
+}
+
 export function LogJourney({ req, today, children }: JourneyProps) {
   const db = useScriptAllyDb();
   const { agents, queries, manuscripts, packages, versions } = db;
   const liveMss = manuscripts.filter((m) => !m.shelved);
   const again = req.again;
+  const S = seedOf<LogAnswers>(req);
   const [msId, setMsId] = useState<string>(() => {
-    const want = req.manuscriptId || again?.manuscriptId || readActiveManuscript();
+    const want = S.msId || req.manuscriptId || again?.manuscriptId || readActiveManuscript();
     return (want && manuscripts.some((m) => m.id === want) ? want : (liveMss[0] || manuscripts[0])?.id) || "";
   });
   const ms = manuscripts.find((m) => m.id === msId) || null;
   const book = useMemo(() => bookOf(ms?.wordCount), [ms?.wordCount]);
 
-  const [agentId, setAgentId] = useState<string | null>(req.agentId || null);
-  const [typed, setTyped] = useState("");
-  const [requery, setRequery] = useState(false);
-  const [sent, setSent] = useState<Date>(again?.sent ?? today);
-  const [via, setVia] = useState<SubmissionMethod>((again?.via as SubmissionMethod) ?? SubmissionMethod.EMAIL);
+  const [agentId, setAgentId] = useState<string | null>(S.agentId !== undefined ? S.agentId : (req.agentId || null));
+  const [typed, setTyped] = useState(S.typed ?? "");
+  const [requery, setRequery] = useState(S.requery ?? false);
+  const [sent, setSent] = useState<Date>(dayIn(S.sent) ?? again?.sent ?? today);
+  const [via, setVia] = useState<SubmissionMethod>(S.via ?? (again?.via as SubmissionMethod) ?? SubmissionMethod.EMAIL);
   /* ---------- step 2: a package, or individually (§A1) ---------- */
   const orderFor = (id: string) => {
     const live = packagesFor(id, packages, versions, manuscripts.find((m) => m.id === id)?.bookVersions);
     return { live, ...openingChoice(live, req.packageId, again, activePackageId(manuscripts.find((m) => m.id === id), packages)) };
   };
-  const [how, setHow] = useState<"package" | "individual">(() => orderFor(msId).how);
-  const [pkg, setPkg] = useState<string | null>(() => orderFor(msId).pkg);
+  const [how, setHow] = useState<"package" | "individual">(() => S.how ?? orderFor(msId).how);
+  const [pkg, setPkg] = useState<string | null>(() => (S.pkg !== undefined ? S.pkg : orderFor(msId).pkg));
   /** The writer chose an option or a package themselves: nothing re-applies the order after that. */
-  const [pkgTouched, setPkgTouched] = useState(false);
+  const [pkgTouched, setPkgTouched] = useState(S.pkgTouched ?? false);
   /** The package the writer started from before switching to individually — the "based on" (§A2). */
-  const [basedOn, setBasedOn] = useState<PackageCard | null>(null);
+  const [basedOn, setBasedOn] = useState<PackageCard | null>(() => (S.basedOnId ? orderFor(msId).live.find((p) => p.id === S.basedOnId) ?? null : null));
   /** "Leave this query to make a package?" is up. */
   const [leaving, setLeaving] = useState(false);
   const navigate = useNavigate();
@@ -101,15 +110,16 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const card = openedPkg ? live.find((p) => p.id === openedPkg) : null;
     if (card) setMat((m) => ({ ...m, ql: card.ql, syn: card.syn }));
   }
-  const [mat, setMat] = useState<Materials>(() => (again?.mat as Materials) ?? { ql: true, syn: true, s: { unit: "chapters", amt: 3, from: 1, sect: false, fu: null } });
-  const [expectMode, setExpectMode] = useState<string>("usual");
-  const [expectCustom, setExpectCustom] = useState<Date | null>(null);
-  const [nrmn, setNrmn] = useState<boolean | null>(null);
-  const [ifNo, setIfNo] = useState<IfNo>("nudge");
-  const [ifNoSet, setIfNoSet] = useState(false);
-  const [nudgeWhen, setNudgeWhen] = useState<string>("week");
-  const [nudgeCustom, setNudgeCustom] = useState<Date | null>(null);
-  const [touched, setTouched] = useState(false);
+  const [mat, setMat] = useState<Materials>(() => S.mat ?? (again?.mat as Materials) ?? { ql: true, syn: true, s: { unit: "chapters", amt: 3, from: 1, sect: false, fu: null } });
+  const [expectMode, setExpectMode] = useState<string>(S.expectMode ?? "usual");
+  const [expectCustom, setExpectCustom] = useState<Date | null>(dayIn(S.expectCustom));
+  const [nrmn, setNrmn] = useState<boolean | null>(S.nrmn !== undefined ? S.nrmn : null);
+  const [ifNo, setIfNo] = useState<IfNo>(S.ifNo ?? "nudge");
+  const [ifNoSet, setIfNoSet] = useState(S.ifNoSet ?? false);
+  const [nudgeWhen, setNudgeWhen] = useState<string>(S.nudgeWhen ?? "week");
+  const [nudgeCustom, setNudgeCustom] = useState<Date | null>(dayIn(S.nudgeCustom));
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
   const newId = useRef<string>(doc(collection(fsdb, "users", db.currentUser?.id || "_", "queries")).id);
 
   const agent = agents.find((a) => a.id === agentId) || null;
@@ -127,7 +137,9 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const synV = currentVersion(msId, versions, ComponentType.SYNOPSIS);
 
   /* ---------- picking an agent fills the rest from their guidelines ---------- */
-  function pickAgent(a: Agent) {
+  /** `byDoor`: the door chose the agent (the card, a Contact-list row), not the writer — so nothing
+   *  has been ANSWERED yet, and Escape on an untouched journey cancels rather than parks (decision 8). */
+  function pickAgent(a: Agent, byDoor = false) {
     const g = guidelineAsk(a);
     setAgentId(a.id);
     setRequery(false);
@@ -148,11 +160,12 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     setIfNo(a.noResponseMeansNo ? "close" : "nudge");
     setNudgeWhen("week");
     setNudgeCustom(null);
-    setTouched(true);
+    if (!byDoor) setTouched(true);
   }
-  // A door from the Contact list arrives with the agent already chosen.
-  const seeded = useRef(false);
-  if (!seeded.current && req.agentId && agent) { seeded.current = true; pickAgent(agent); }
+  // A door from the Contact list arrives with the agent already chosen. A resumed journey brings its
+  // own answers, so the agent's guidelines must not be laid over them again.
+  const seeded = useRef(!!req.seed);
+  if (!seeded.current && req.agentId && agent) { seeded.current = true; pickAgent(agent, true); }
 
   /** A tick or the sample: in package mode only the portion can change, and it stays a package (D2). */
   const touchMat = (m: Materials) => { setMat(m); setTouched(true); };
@@ -256,7 +269,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const changes = !pkCard && basedOn ? piecesChanged(basedOn, pieceV) : [];
   /** Chosen individually yet exactly a live package: the review asks, never converts (§A2, LP8). */
   const exact = !pkCard ? (basedOn && !changes.length ? basedOn : exactPackage(pkgs, pieceV)) : null;
-  const [exactDeclined, setExactDeclined] = useState<string | null>(null);
+  const [exactDeclined, setExactDeclined] = useState<string | null>(S.exactDeclined ?? null);
   const ok = !!agent;
 
   /* ---------- the steps ---------- */
@@ -276,7 +289,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
                 {requery
                   ? <>Logging a second, separate query to {first}. </>
                   : <>You already have a live query with {first} for {ms?.title}, sent {fmt(dayOr(dup.dateSent, today))}. Did you mean to record a response or a nudge instead? </>}
-                <NoteLink onClick={() => setRequery(!requery)}>{requery ? "Undo" : "It's a separate query"}</NoteLink>
+                <NoteLink onClick={() => { setRequery(!requery); setTouched(true); }}>{requery ? "Undo" : "It's a separate query"}</NoteLink>
               </Note>
             ) : null}
             {sameAg && sameAgent ? (
@@ -290,7 +303,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
               </Note>
             ) : null}
             <Who name={agentName(agent)} sub={whoLine(agent, null)} nrmn={!!agent.noResponseMeansNo}
-              extra={<button type="button" className="qad-change" onClick={() => { setAgentId(null); setTyped(""); }}>CHANGE</button>} />
+              extra={<button type="button" className="qad-change" onClick={() => { setAgentId(null); setTyped(""); setTouched(true); }}>CHANGE</button>} />
           </>
         ) : (
           <>
@@ -301,7 +314,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
         <Fl>MANUSCRIPT</Fl>
         <div className="qad-chips">
           {(liveMss.length ? liveMss : manuscripts).map((m) => (
-            <Chip key={m.id} on={m.id === msId} onClick={() => { setMsId(m.id); if (!pkgTouched) applyOrder(m.id); else { setHow("individual"); setPkg(null); setBasedOn(null); } }}>{m.title}</Chip>
+            <Chip key={m.id} on={m.id === msId} onClick={() => { setMsId(m.id); setTouched(true); if (!pkgTouched) applyOrder(m.id); else { setHow("individual"); setPkg(null); setBasedOn(null); } }}>{m.title}</Chip>
           ))}
         </div>
       </>
@@ -496,7 +509,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
         <p>{summaryOf(pieces)}: the same pieces as {exact.name}'s {ordinal(exact.edition)} edition. Record it as that package, so it counts towards {exact.name}'s results?</p>
         <div>
           <button type="button" className="rec" onClick={() => attach(exact.id)}>Record as {exact.name}</button>
-          <button type="button" className="keep" onClick={() => setExactDeclined(exact.id)}>Keep as chosen individually</button>
+          <button type="button" className="keep" onClick={() => { setExactDeclined(exact.id); setTouched(true); }}>Keep as chosen individually</button>
         </div>
       </div>
     ) : undefined,
@@ -507,8 +520,12 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       cancel: () => setLeaving(false),
       go: () => navigate("/manuscripts/packages"),
     } : null,
-    dirty: touched || !!agent || typed.trim() !== "",
-    guardDiscard: !!agent,
+    /* an agent the WRITER chose is an answer; the one the door brought is not */
+    dirty: touched || (!!agent && agent.id !== req.agentId) || typed.trim() !== "",
+    snapshot: (): LogAnswers => ({
+      msId, agentId, typed, requery, sent: dayOut(sent), via, how, pkg, pkgTouched, basedOnId: basedOn?.id ?? null, mat,
+      expectMode, expectCustom: dayOut(expectCustom), nrmn, ifNo, ifNoSet, nudgeWhen, nudgeCustom: dayOut(nudgeCustom), exactDeclined,
+    }),
     touched: () => [newId.current],
     commit: async () => {
       if (!agent) throw new Error("No agent chosen");

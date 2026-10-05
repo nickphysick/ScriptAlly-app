@@ -17,7 +17,7 @@
 import React, { useMemo, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
-import { QueryStatus, SubmissionMethod, type Query } from "../../../types";
+import { QueryStatus, SubmissionMethod, type Agent, type Query } from "../../../types";
 import {
   addDays, dayDiff, dayIso, dm, fmt, offWeekend, pastAnchors, rel, toDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
@@ -30,7 +30,7 @@ import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import type { TrackPoint } from "../../../lib/queryActions/track";
 import { emptyView } from "./ResponseJourney";
-import { agentName, firstName, nrmnOf, viaLabel, viaOptions, whoLine } from "./common";
+import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, viaLabel, viaOptions, whoLine } from "./common";
 
 type Kind = "partial" | "full" | "rr";
 
@@ -45,7 +45,24 @@ export function requestSample(q: Query): Sample | null {
   return { unit, amt: n, from: sect ? q.requestFrom! : 1, sect, fu: sect ? (q.requestFromUnit ?? null) : null };
 }
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface SentAnswers {
+  s: Sample; syn: boolean; ver: string | null; changed: string; sent: string | null; via: SubmissionMethod;
+  expMode: string; expCustom: string | null; ifNo: "nudge" | "nothing";
+}
+
+/**
+ * Where the send went from: the query's own record first, else how the agent takes submissions —
+ * but only a method the chips offer, so a legacy value never preselects nothing (§6.2's prefill).
+ */
+export function defaultVia(q: Query | null, agent: Agent | null): SubmissionMethod {
+  if (q?.sendMethod) return q.sendMethod as SubmissionMethod;
+  const m = agent?.submissionMethod as SubmissionMethod | undefined;
+  return m && viaOptions(agent).some(([k]) => k === m) ? m : SubmissionMethod.EMAIL;
+}
+
 export function SentJourney({ req, today, children }: JourneyProps) {
+  const S = seedOf<SentAnswers>(req);
   const db = useScriptAllyDb();
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
@@ -53,16 +70,18 @@ export function SentJourney({ req, today, children }: JourneyProps) {
   const book = useMemo(() => bookOf(ms?.wordCount), [ms?.wordCount]);
   const reqSample = q ? requestSample(q) : null;
   const drafts = [...(ms?.bookVersions ?? [])].reverse();
-  const [s, setS] = useState<Sample>(reqSample ?? { unit: "pages", amt: 50, from: 1, sect: false, fu: null });
-  const [syn, setSyn] = useState<boolean>(!!q?.requestSynopsis);
-  const [ver, setVer] = useState<string | null>(drafts[0]?.id ?? null);
-  const [changed, setChanged] = useState("");
-  const [sent, setSent] = useState<Date>(today);
-  const [via, setVia] = useState<SubmissionMethod>((q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL);
-  const [expMode, setExpMode] = useState("w1");
-  const [expCustom, setExpCustom] = useState<Date | null>(null);
-  const [ifNo, setIfNo] = useState<"nudge" | "nothing">("nudge");
-  const [touched, setTouched] = useState(false);
+  const [s, setS] = useState<Sample>(S.s ?? reqSample ?? { unit: "pages", amt: 50, from: 1, sect: false, fu: null });
+  const [syn, setSyn] = useState<boolean>(S.syn ?? !!q?.requestSynopsis);
+  const [ver, setVer] = useState<string | null>(S.ver !== undefined ? S.ver : (drafts[0]?.id ?? null));
+  const [changed, setChanged] = useState(S.changed ?? "");
+  const [sent, setSent] = useState<Date>(dayIn(S.sent) ?? today);
+  /* §6.2 — the agent's own method fills in where the query records none (Log already reads it) */
+  const [via, setVia] = useState<SubmissionMethod>(S.via ?? defaultVia(q, agent));
+  const [expMode, setExpMode] = useState(S.expMode ?? "w1");
+  const [expCustom, setExpCustom] = useState<Date | null>(dayIn(S.expCustom));
+  const [ifNo, setIfNo] = useState<"nudge" | "nothing">(S.ifNo ?? "nudge");
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
 
   if (!q) return children(emptyView("SENT WHAT THEY ASKED FOR", "I’ve sent it"));
   const kind: Kind = q.status === QueryStatus.FULL_REQUESTED ? "full" : q.status === QueryStatus.REVISE_RESUBMIT ? "rr" : "partial";
@@ -119,7 +138,7 @@ export function SentJourney({ req, today, children }: JourneyProps) {
         <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
         <SampleLine label={`${syn ? "Synopsis and " : ""}${sampleName(s)}`} sample={s} book={book} />
         {reqSample && !mismatch ? <Note kind="ok" tag="MATCH">Matches what {first} asked for.</Note> : null}
-        {mismatch ? <Note kind="warn" tag="CHECK">{first} asked for the {sampleName(reqSample!)}. <NoteLink onClick={() => setS(reqSample!)}>Match the request</NoteLink></Note> : null}
+        {mismatch ? <Note kind="warn" tag="CHECK">{first} asked for the {sampleName(reqSample!)}. <NoteLink onClick={() => { setS(reqSample!); setTouched(true); }}>Match the request</NoteLink></Note> : null}
       </>
     ) : (
       <>
@@ -137,7 +156,7 @@ export function SentJourney({ req, today, children }: JourneyProps) {
           </>
         ) : null}
         <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }} style={{ marginTop: 12 }}>A synopsis too</Toggle>
-        {kind === "rr" ? (<><Fl>WHAT YOU CHANGED · OPTIONAL</Fl><TextBox value={changed} onChange={setChanged} placeholder="A few lines on the revision, for your own record." /></>) : null}
+        {kind === "rr" ? (<><Fl>WHAT YOU CHANGED · OPTIONAL</Fl><TextBox value={changed} onChange={(v) => { setChanged(v); setTouched(true); }} placeholder="A few lines on the revision, for your own record." /></>) : null}
         {kind === "rr" && lastRead && ver === lastRead ? <Note kind="warn" tag="CHECK">That's the version {first} has already read.</Note> : null}
       </>
     ),
@@ -213,6 +232,7 @@ export function SentJourney({ req, today, children }: JourneyProps) {
     ],
     who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmnOf(q, agent)} />,
     dirty: touched,
+    snapshot: (): SentAnswers => ({ s, syn, ver, changed, sent: dayOut(sent), via, expMode, expCustom: dayOut(expCustom), ifNo }),
     touched: () => [q.id],
     commit: async () => {
       const label = kind === "partial" ? capFirst(`${syn ? "synopsis and " : ""}${sampleName(s)}`) : `${kind === "full" ? "Full manuscript" : "Revised manuscript"}${verName ? ` · ${verName}` : ""}${syn ? " and synopsis" : ""}`;

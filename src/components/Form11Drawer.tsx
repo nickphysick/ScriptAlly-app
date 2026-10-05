@@ -2,9 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Form11Drawer — the shared Form 11 drawer shell, extracted from EditAgentDrawer (Prompt 1) so the
- * Edit Agent and Edit Query drawers share ONE implementation of the chrome, the motion, and the
- * click-to-edit field affordances.
+ * Form11Drawer — the shared Form 11 drawer shell, extracted from EditAgentDrawer (Prompt 1) so its
+ * drawers share ONE implementation of the chrome, the motion, and the click-to-edit field
+ * affordances. (EditAgentDrawer itself retired with Agent card v1; EditQueryDrawer remains.)
  *
  * What it owns (everything portable):
  *  · the dimmed overlay + the slide-in panel (MountPanel-style parchment body inside a burgundy
@@ -18,8 +18,8 @@
  *  · the pinned footer slot + the global Escape / outside-click close that PARKS the draft;
  *  · the background scroll-lock for the app-level overlay use.
  *
- * The canonical field primitives live here too (`RestingField`, `Form11Select`, `BlockNote`,
- * `ConfirmGuard`, `DirtyDot`) so both drawers inherit the finalised affordances. `StatusDot` stays
+ * The canonical field primitives live here too (`RestingField`, `Form11Select`,
+ * `ConfirmGuard`, `DirtyDot`) so the drawers inherit the finalised affordances. `StatusDot` stays
  * the locked source for status glyphs — never rolled here.
  *
  * Critical colours are inline (the Tailwind-drift footgun this codebase has hit before).
@@ -58,9 +58,6 @@ export const prefersReducedMotion = () =>
 // ── icons (shared) ──────────────────────────────────────────────────────────────
 export const AlertIcon = () => (
   <svg viewBox="0 0 16 16" fill="none" width={13} height={13} style={{ flexShrink: 0, marginTop: 1 }}><path d="M8 2l6.5 11.5h-13L8 2z" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round" /><path d="M8 6.5v3M8 11.6h.01" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" /></svg>
-);
-export const OkIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" width={13} height={13} style={{ flexShrink: 0, marginTop: 1 }}><circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth={1.2} /><path d="M5.5 8l1.7 1.7L10.5 6.5" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
 export const PencilGlyph = () => (
   <svg viewBox="0 0 16 16" fill="none" width={13} height={13}><path d="M11 2l3 3-8 8-3.5.5.5-3.5 8-8z" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round" /></svg>
@@ -157,17 +154,6 @@ export const Form11Select: React.FC<{
     </select>
   );
 };
-
-// ── hard-block note (locks Save with a plain reason + an inline "Undo — keep …") ───
-export const BlockNote: React.FC<{ msg: string; onUndo: () => void; undoLabel: string }> = ({ msg, onUndo, undoLabel }) => (
-  <div style={{ marginTop: 8 }}>
-    <div style={{ display: "flex", gap: 7, alignItems: "flex-start", background: F11.errBg, border: `1px solid ${F11.errBorder}`, borderRadius: 7, padding: "8px 10px", fontSize: 11, color: F11.err, lineHeight: 1.45 }}>
-      <AlertIcon /><span>{msg}</span>
-    </div>
-    <span role="button" onMouseDown={(e) => { e.preventDefault(); onUndo(); }}
-      style={{ display: "inline-block", marginTop: 6, fontFamily: F11_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: F11.burgundy, cursor: "pointer", borderBottom: "1px solid rgba(124,58,42,0.4)" }}>{undoLabel}</span>
-  </div>
-);
 
 // ── consequence guard (an identity-changing / destructive edit; locks Save until acknowledged) ──
 export const ConfirmGuard: React.FC<{ message: React.ReactNode; confirmLabel: string; keepLabel: string; onConfirm: () => void; onKeep: () => void }> = ({ message, confirmLabel, keepLabel, onConfirm, onKeep }) => (

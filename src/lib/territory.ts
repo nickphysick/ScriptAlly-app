@@ -75,7 +75,8 @@ export const COUNTRIES_ISO: readonly IsoCountry[] = ISO_CODES
   .sort((a, b) => a.name.localeCompare(b.name));
 
 /** Codes surfaced first in pickers (the app's core markets), in priority order. */
-export const QUICK_PICKS: readonly string[] = ["GB", "US", "IE", "CA", "AU", "NZ"];
+/* the agent card's order (ruling 5, 4 Oct): the UK and Ireland first, as the mock draws them */
+export const QUICK_PICKS: readonly string[] = ["GB", "IE", "US", "CA", "AU", "NZ"];
 
 // Reverse map: lower-cased display name → canonical code. Built from the resolved names, plus explicit
 // aliases for the LEGACY name-based `COUNTRIES` list (agentOptions.ts) and a few common variants, so a

@@ -146,7 +146,8 @@ test.describe("query drawer journeys", () => {
     ok(await page.locator("[data-qad-primary]").isDisabled(), "Next is disabled on a blocked step");
     await page.getByRole("button", { name: "It's a separate query" }).click();
     ok(await page.locator("[data-qad-primary]").isEnabled(), "the override clears the block");
-    await page.keyboard.press("Escape");
+    /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it now — ✕ is what asks to discard */
+    await page.locator(".qad-dx").click();
     await expect(page.locator("[data-qad-discard]")).toBeVisible();
     await page.getByRole("button", { name: "Discard" }).click();
     await expect(page.locator("[data-qad-drawer]")).toHaveCount(0);

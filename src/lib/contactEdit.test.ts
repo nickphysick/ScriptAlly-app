@@ -11,7 +11,7 @@ import { formatDate } from "./dates";
 import { describe, expect, it } from "vitest";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_QUERIES } from "../components/agents/contactFixture";
 import { expectedFor } from "./qcSummary";
-import { AlsoNote, alsoChanges, alsoSummary, draftFromAgentRecord, savedLine } from "./contactEdit";
+import { alsoChanges, draftFromAgentRecord } from "./contactEdit";
 import type { Agent, Query } from "../types";
 
 const NOW = Date.parse("2026-09-01T12:00:00.000Z");
@@ -32,6 +32,9 @@ describe("the reply-time note is a dry run through the engine", () => {
     /* retargeted (clean-up pass item 4, 28 Sep): the one formatter, so the note reads "Sep" */
     const fmt = (ms: number) => formatDate(ms, { day: "numeric", month: "short" });
     expect(reply.lines[0]).toContain(`${fmt(before.ms!)} → ${fmt(after.ms!)}`);
+    /* the count the card's saved line states (Agent card v1 P4) is the dry run's own lines */
+    expect(reply.moved, "the moved count is not the per-query lines").toBe(reply.lines.filter((l) => l.startsWith("Query Centre")).length);
+    expect(reply.moved).toBeGreaterThan(0);
   });
 
   it("⚠️ THE §11.7 FIXTURE: a writer-dated query does not move with the window, so it gets NO line", () => {
@@ -56,6 +59,7 @@ describe("the reply-time note is a dry run through the engine", () => {
       reply.lines.filter((l) => l.startsWith("Query Centre")).length,
       "a per-query line appeared for a query whose date does not depend on the window — the note is not running the engine",
     ).toBe(0);
+    expect(reply.moved, "a date that did not move was counted as moved").toBe(0);
   });
 
   it("the crossing clause appears only when the date crosses today, in either direction", () => {
@@ -97,19 +101,31 @@ describe("the other notes name only real readers", () => {
     expect(long.find((n) => n.field === "genres")).toBeUndefined();
   });
 
+  it("decision 13: a door closing with a date notes the reminder the save adds; with none, says there will be none", () => {
+    expect(AGENT.submissionStatus, "precondition: the long agent is open").toBe("Open");
+    const shut = (reopensOn: string) => alsoChanges(AGENT, { ...draftOf(AGENT), submissionStatus: "Closed" as Agent["submissionStatus"], reopensOn }, ctx)
+      .find((n) => n.field === "door")!;
+    const dated = shut("2026-11-01");
+    expect(dated.lines).toContain("A To-do for 1 Nov: check they’ve reopened.");
+    expect(dated.lines.some((l) => l.startsWith("This page's counts move")), "the door change lost its own lines").toBe(true);
+    expect(dated.surfaces).toContain("the To-do list");
+    const none = shut("");
+    expect(none.lines).toContain("No reopening date, so no reminder. Housekeeping will ask for the date.");
+    expect(none.surfaces, "no reminder is not a To-do change").not.toContain("the To-do list");
+  });
+
+  it("decision 13: on a door already closed, only a NEW date notes the reminder — and alone", () => {
+    const reopen = CONTACT_FIXTURE_AGENTS.find((a) => a.id === "fx-reopen")!;
+    expect(reopen.submissionStatus, "precondition: the reopen agent is closed with a date").toBe("Closed");
+    const renamed = alsoChanges(reopen, { ...draftOf(reopen), mswlNotes: "Something new." }, ctx);
+    expect(renamed.find((n) => n.field === "door"), "an unchanged date noted a reminder").toBeUndefined();
+    const moved = alsoChanges(reopen, { ...draftOf(reopen), reopensOn: "2026-12-01" }, ctx).find((n) => n.field === "door")!;
+    expect(moved.lines, "a date move is not a door change").toEqual(["A To-do for 1 Dec: check they’ve reopened."]);
+  });
+
   it("rating, wishlist, materials, links and location say Only this card changes", () => {
     const draft = { ...draftOf(AGENT), starRating: 5, mswlNotes: "New wishes.", city: "Bath", website: "https://x.co" };
     const notes = alsoChanges(AGENT, draft, ctx);
     expect(notes, "a note fired for a field with no outside reader").toEqual([]);
-    expect(alsoSummary(notes)).toBe("Only this card changes.");
-    expect(savedLine(notes)).toBe("Saved.");
-  });
-
-  it("the footer unions the surfaces across notes, readably", () => {
-    const notes: AlsoNote[] = [
-      { field: "reply", lines: [], surfaces: ["the Query Centre", "Analytics"] },
-      { field: "nrn", lines: [], surfaces: ["the To-do list", "the Query Centre"] },
-    ];
-    expect(alsoSummary(notes)).toBe("Saving also updates the Query Centre, Analytics and the To-do list.");
   });
 });

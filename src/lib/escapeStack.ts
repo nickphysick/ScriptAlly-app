@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * THE ONE ESCAPE KEY (Agent card v1 §6.6, §9). Every overlay layer — the agent card, its open
- * comboboxes and calendars, the query drawer once it joins (Phase 5) — registers here, and ONE
- * capture-phase listener decides which of them hears the key.
+ * comboboxes and calendars, the query drawer (its own window listener retired in Phase 5) and the
+ * parked chip's two asks — registers here, and ONE capture-phase listener decides which of them
+ * hears the key.
  *
  * ⚠️ TWO CAPTURE LISTENERS ON ONE TARGET ARE RESOLVED BY REGISTRATION ORDER — a fact about which
  * element mounted last, not about what is on screen — so "the popover consumes the key and the
@@ -20,7 +21,7 @@
  * ⚠️ THE LISTENER IS ON THE WINDOW, CAPTURE PHASE, and it stops immediate propagation once it has
  * handled the key: window capture runs before every document listener and before React's root,
  * so a layer's Escape can never ALSO reach a handler further down that would close something
- * else (the "+ Other" genre input's lost draft, ContactAgentForm.tsx:267, was exactly that).
+ * else (the "+ Other" genre input's lost draft in the retired pop-up form was exactly that).
  * With no layers it does nothing at all, so pages that own Escape for themselves keep it.
  */
 import { useEffect, useRef } from "react";

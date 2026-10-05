@@ -25,7 +25,7 @@ import { Chips, DateField, Fl, Note, PlanTrack, Radios, TextBox, Who } from "../
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import { emptyView } from "./ResponseJourney";
-import { agentName, firstName, lastSendDay, nrmnOf, viaLabel, viaOptions, whoLine, windowDay } from "./common";
+import { agentName, dayIn, dayOut, firstName, lastSendDay, nrmnOf, seedOf, viaLabel, viaOptions, whoLine, windowDay } from "./common";
 
 type Tab = "sent" | "plan";
 
@@ -36,19 +36,30 @@ export function nudgeDays(q: Query, activities: { queryId: string; activityType:
   return all.sort((a, b) => a.getTime() - b.getTime());
 }
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface NudgeAnswers {
+  tabPick: Tab | null; sent: string | null; via: SubmissionMethod; said: string;
+  thenMode: string; thenCustom: string | null; whenMode: string | null; whenCustom: string | null;
+}
+
 export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
   const db = useScriptAllyDb();
+  const S = seedOf<NudgeAnswers>(req);
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
-  const [tabPick, setTabPick] = useState<Tab | null>(req.preset?.nudgeTab ?? null);
-  const [sent, setSent] = useState<Date>(today);
-  const [via, setVia] = useState<SubmissionMethod>((agent?.submissionMethod as SubmissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL);
-  const [said, setSaid] = useState("");
-  const [thenMode, setThenMode] = useState("4w");
-  const [thenCustom, setThenCustom] = useState<Date | null>(null);
-  const [whenMode, setWhenMode] = useState<string | null>(null);
-  const [whenCustom, setWhenCustom] = useState<Date | null>(null);
-  const [touched, setTouched] = useState(false);
+  const [tabPick, setTabPick] = useState<Tab | null>(S.tabPick !== undefined ? S.tabPick : (req.preset?.nudgeTab ?? null));
+  const [sent, setSent] = useState<Date>(dayIn(S.sent) ?? today);
+  const [via, setVia] = useState<SubmissionMethod>(S.via ?? ((agent?.submissionMethod as SubmissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL));
+  const [said, setSaid] = useState(S.said ?? "");
+  const [thenMode, setThenMode] = useState(S.thenMode ?? "4w");
+  const [thenCustom, setThenCustom] = useState<Date | null>(dayIn(S.thenCustom));
+  const [whenMode, setWhenMode] = useState<string | null>(S.whenMode !== undefined ? S.whenMode : null);
+  const [whenCustom, setWhenCustom] = useState<Date | null>(dayIn(S.whenCustom));
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
+  const snapshot = (): NudgeAnswers => ({
+    tabPick, sent: dayOut(sent), via, said, thenMode, thenCustom: dayOut(thenCustom), whenMode, whenCustom: dayOut(whenCustom),
+  });
 
   if (!q) return children(emptyView("NUDGE", "Nudge"));
   const first = firstName(agent);
@@ -164,7 +175,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
         ...(plannedAhead ? [{ text: `Your planned reminder for ${fmt(plannedAhead)} is done — it comes off your to-do` }] : []),
       ],
       who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmn} />,
-      dirty: touched, touched: () => [q.id],
+      dirty: touched, snapshot, touched: () => [q.id],
       commit: async () => {
         if (!db.currentUser) throw new Error("Signed out");
         const uid = db.currentUser.id;
@@ -210,7 +221,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
         { text: "If they reply first, the reminder cancels itself" },
       ],
       who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmn} />,
-      dirty: touched, touched: () => [q.id],
+      dirty: touched, snapshot, touched: () => [q.id],
       commit: async () => {
         await db.updateQuery(q.id, { nudgeDate: dayIso(when) });
         return { queryId: q.id, message: `Nudge planned · ${agentName(agent)}`, sub: `REMINDER ON ${up(when)}`, touched: [q.id] };

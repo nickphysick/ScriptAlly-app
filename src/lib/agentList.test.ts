@@ -127,8 +127,8 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
      is shut AND nothing is live) styled the flip card; the v11 page draws rows, and rows carry
      no history tint and never dim. The LAW underneath — a live query outranks the shut door,
      so a closed agency holding your full never reads as dormant — moved rather than lapsed:
-     `contactStanding` (contactList.ts) answers "open" whatever the door says, and the pop-up's
-     band says "Closed to submissions" only when the standing is NOT open (ContactProfile.tsx).
+     `contactStanding` (contactList.ts) answers "open" whatever the door says, and the agent
+     card says "Closed to submissions" only when nothing is live (`queryTone`, agentCard.ts).
      contactFixture.test.ts holds the fixture to exercising both branches of that precedence.
      The hatch/stamp/hush artefact cases went with their subjects (AgentCard.tsx, deleted).
      Recoverable at 2d160183's parent. */

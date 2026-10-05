@@ -223,3 +223,38 @@ describe("the reopen reminder (ruling b) — Housekeeping's words, and nothing w
     expect(reopenReminder(agent("fx-shut") as Agent)).toBeNull();
   });
 });
+
+describe("after a save (P4)", () => {
+  it("the foot says Saved — and how many expected-reply dates moved, from the dry run's own count", async () => {
+    const { cardSavedLine } = await import("./agentCard");
+    expect(cardSavedLine([])).toBe("Saved.");
+    expect(cardSavedLine([{ moved: 0 }, {}])).toBe("Saved.");
+    expect(cardSavedLine([{ moved: 1 }])).toBe("Saved. 1 expected-reply date moved.");
+    expect(cardSavedLine([{ moved: 2 }, { moved: 1 }])).toBe("Saved. 3 expected-reply dates moved.");
+    /* decision 13: a reminder the save added is named last, in the mock's words */
+    expect(cardSavedLine([], "2026-11-01")).toBe("Saved. Reminder added for 1 Nov.");
+    expect(cardSavedLine([{ moved: 1 }], "2026-11-01")).toBe("Saved. 1 expected-reply date moved. Reminder added for 1 Nov.");
+    expect(cardSavedLine([], null)).toBe("Saved.");
+  });
+  it("decision 13: a save adds the reopen reminder only for a CLOSED door with a NEW date", async () => {
+    const { reminderOnSave } = await import("./agentCard");
+    const open = { submissionStatus: "Open", reopensOn: undefined } as Agent;
+    const shut = (d?: string) => ({ submissionStatus: "Closed", reopensOn: d }) as Agent;
+    expect(reminderOnSave(open, shut("2026-11-01")), "the door closing with a date").toBe("2026-11-01");
+    expect(reminderOnSave(shut("2026-11-01"), shut("2026-12-01")), "the date moving").toBe("2026-12-01");
+    expect(reminderOnSave(shut("2026-11-01"), shut("2026-11-01")), "an unchanged date adds nothing").toBeNull();
+    expect(reminderOnSave(open, shut(undefined)), "no date, no task").toBeNull();
+    expect(reminderOnSave(open, shut("")), "Not announced is no date").toBeNull();
+    expect(reminderOnSave(shut("2026-11-01"), open), "an open door adds nothing").toBeNull();
+    /* the fixture's own closed-with-a-date agent, reached as the save reaches it */
+    const reopen = agent("fx-reopen");
+    expect(reminderOnSave({ ...reopen, submissionStatus: "Open", reopensOn: undefined } as Agent, reopen)).toBe(reopen.reopensOn);
+  });
+  it("the mock's pulse map: Contact and Submissions changes in the head, Wishlist in the genres", async () => {
+    const { savedPulse } = await import("./agentCard");
+    expect(savedPulse(["who", "work"])).toEqual(["head"]);
+    expect(savedPulse(["want"])).toEqual(["genres"]);
+    expect(savedPulse(["who", "want"])).toEqual(["head", "genres"]);
+    expect(savedPulse([])).toEqual([]);
+  });
+});

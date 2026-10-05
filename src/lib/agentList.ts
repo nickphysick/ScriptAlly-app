@@ -78,8 +78,8 @@ export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
    card, and the flip card is deleted. The LAW they carried — a live query outranks the shut
    door, so a closed agency holding your full never reads as dormant — did not lapse with them:
    it lives in `contactStanding` (contactList.ts, standing "open" whatever the door says) and in
-   the pop-up's band label (ContactProfile.tsx: "Closed to submissions" only when the standing
-   is NOT open). contactFixture.test.ts asserts the fixture still exercises both branches. */
+   the agent card's query section (`queryTone` in agentCard.ts: "Closed to submissions" only
+   when nothing is live). contactFixture.test.ts asserts the fixture still exercises both branches. */
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE THREE AXES (rebuild v2 established two; the door became the third, 28 Jul)

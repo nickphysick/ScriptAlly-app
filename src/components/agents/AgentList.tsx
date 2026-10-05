@@ -144,13 +144,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const flipBefore = useRef<FlipRects | null>(null);
   /** The saved card's beat, and the inline notice that outlives the motion. */
   const [notice, setNotice] = useState<{
-    text: string; kind: "travel" | "filtered-out"; agentId: string; canUndo: boolean;
+    text: string; kind: "travel" | "filtered-out" | "failed"; agentId: string; canUndo: boolean;
   } | null>(null);
   /** Which section the card sat in before the save — read once the outcome is computed. */
   const sectionBeforeSave = useRef<string | null>(null);
-  /** The agent exactly as it was before the last save, so Undo can put it back. Null for a card
-   *  that was CREATED by the save — there is no previous version to restore. */
-  const undoSnapshot = useRef<Agent | null>(null);
+  /** The card's own Undo for the last save — the SAME closure its foot offers (a whole-document
+   *  snapshot: the agent, the deadlines the fan-out moved, the task flag), so the notice and the card
+   *  cannot restore different things. Null when the card could not take a snapshot. */
+  const undoSave = useRef<(() => Promise<unknown>) | null>(null);
 
   // LAST + INVERT + PLAY. Runs after the DOM has the new arrangement but before paint, so the
   // displaced cards are jumped back to their old positions and released on the next frame. Only
@@ -411,9 +412,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         text: saveNotice(saved.name || saved.agency, outcome),
         kind: outcome.kind,
         agentId: saved.id,
-        // Undo restores a PREVIOUS version; a save that created an agent has none, and undoing it
-        // would mean deletion — which this page deliberately has no affordance for.
-        canUndo: !!undoSnapshot.current,
+        // the card's snapshot Undo, when it could take one
+        canUndo: !!undoSave.current,
       });
 
       /* the list reflows under the store's own update — measure BEFORE it lands so the FLIP
@@ -424,19 +424,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
 
   /**
-   * Undo — restores the agent's previous field values in ONE write, mirroring the save's single
-   * write. It is offered only for an EDIT: a save that created an agent has no previous version,
-   * and undoing it would mean deleting one, which this page has no affordance for (deleteAgent
-   * has no cascade and would orphan queries).
+   * Undo — the card's own (Agent card v1 P4). ⚠️ The old one restored by `updateAgent(prev)`, which
+   * merged (a field the save ADDED survived it), logged an activity the save never logged, and left
+   * every deadline the reply-time fan-out had moved where the save put it. The card's snapshot
+   * restores all of it, whichever of the two places it is pressed in.
    */
-  const undoSave = useCallback(async () => {
-    const prev = undoSnapshot.current;
+  const runUndoSave = useCallback(async () => {
+    const undo = undoSave.current;
     setNotice(null);
-    if (!prev) return;
+    undoSave.current = null;
+    if (!undo) return;
     flipBefore.current = measureFlip(gridRef.current);
-    await updateAgent(prev.id, prev);
-    undoSnapshot.current = null;
-  }, [updateAgent]);
+    await undo();
+  }, []);
+  /* the row a delete collapses — kept so a delete that fails can put the row back */
+  const collapsing = useRef<Animation | null>(null);
 
   /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
   const [newId, setNewId] = useState<string | null>(null);
@@ -454,14 +456,32 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.removeEventListener("sa:contact-add", openAdd);
   }, [active, openAdd]);
 
-  /* the card's aftermath ON THE LIST: a save's notice (with its Undo) and FLIP, an add's ring */
+  /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
+     the notice withdrawing once the Undo has run, and a delete's row collapsing */
   useEffect(() => subscribeAgentCardEvents((e) => {
     if (e.type === "saved") {
-      /* the pre-save record, so the notice's Undo can put it back in ONE write (the old law) */
-      undoSnapshot.current = e.before;
+      undoSave.current = e.undo ?? null;
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
       setNewId(e.agentId);
+    } else if (e.type === "undone") {
+      undoSave.current = null;
+      setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
+    } else if (e.type === "deleting") {
+      /* §7: the row collapses over 240ms, then the delete runs and the list closes the gap */
+      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${e.agentId}"]`)]
+        .find((r) => r.getBoundingClientRect().height > 0);
+      if (row && !prefersReducedMotion() && typeof row.animate === "function") {
+        row.style.overflow = "hidden";
+        collapsing.current = row.animate(
+          [{ height: `${row.offsetHeight}px`, opacity: 1 }, { height: "0px", opacity: 0, paddingTop: "0px", paddingBottom: "0px", marginTop: "0px", marginBottom: "0px" }],
+          { duration: 240, easing: "cubic-bezier(.4,0,.8,.4)", fill: "forwards" },
+        );
+      }
+    } else if (e.type === "delete-failed") {
+      collapsing.current?.cancel();
+      collapsing.current = null;
+      setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
 
@@ -710,7 +730,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 Show all agents
               </button>
             ) : notice.canUndo ? (
-              <button type="button" className="act" onClick={() => void undoSave()}>
+              <button type="button" className="act" onClick={() => void runUndoSave()}>
                 Undo
               </button>
             ) : null}

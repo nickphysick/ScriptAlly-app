@@ -135,6 +135,28 @@ describe('cascadePlan — children first, the parent ALWAYS last', () => {
     expect(ag.queryIds).toEqual(['q1', 'q3']);
     expect(ag.docs.filter((d) => d.col === 'taskFlags').map((d) => d.id).sort()).toEqual(['f-a1', 'f-q1', 'f-q3']);
   });
+  /* ⚠️ RULING 4 (Agent card v1): the agent's own stored tasks go with it — a reopen reminder about an
+     agent who is gone is a To-do about nobody — and ONLY that agent's, and before the agent itself */
+  it("an agent delete takes the agent's stored tasks — only its own, before the agent", () => {
+    const withTasks: DestroyData = {
+      ...DATA,
+      userTasks: [{ id: 't-a1', agentId: 'a1' }, { id: 't-a1b', agentId: 'a1' }, { id: 't-a2', agentId: 'a2' }, { id: 't-none' }],
+    };
+    const ag = cascadePlan('agent', 'a1', withTasks);
+    expect(ag.docs.filter((d) => d.col === 'tasks').map((d) => d.id).sort(), "the wrong tasks are planned").toEqual(['t-a1', 't-a1b']);
+    expect(ag.docs[ag.docs.length - 1], "the agent is not last").toEqual({ col: 'agents', id: 'a1' });
+    expect(cascadePlan('manuscript', 'm1', withTasks).docs.some((d) => d.col === 'tasks'), "a manuscript delete planned tasks").toBe(false);
+    expect(cascadePlan('agent', 'a1', DATA).docs.some((d) => d.col === 'tasks'), "tasks appeared from nowhere").toBe(false);
+  });
+});
+
+/* the store's own deleteAgent hands the cascade its tasks — the plan above is only as good as its input */
+describe("db.tsx's deleteAgent plans with the writer's tasks", () => {
+  it("passes userTasks to the agent cascade", async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync(new URL('./db.tsx', import.meta.url), 'utf8');
+    expect(src, "deleteAgent stopped handing its tasks to the cascade").toMatch(/cascadePlan\("agent", id, \{[^}]*userTasks[^}]*\}\)/);
+  });
 });
 
 describe('canDestroy — the type-to-confirm gate', () => {
