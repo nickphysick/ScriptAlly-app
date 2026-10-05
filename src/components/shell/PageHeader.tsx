@@ -196,6 +196,13 @@ export interface PageHeaderProps {
    */
   band?: boolean;
   /**
+   * THE FIXED BAND (Analytics v17, 5 Oct; ref design-refs/analytics-v17.html) — a modifier of `band`, and
+   * Analytics' alone: the band 337px tall with its contents vertically centred, a 250px disc rather than the
+   * courier's 290, and no eyebrow. ⚠️ A MODIFIER, NOT A SECOND BAND: every rule it adds names `.ph--bandfix`,
+   * so the Query Centre — which does not pass it — renders exactly as before (AN17-3). Ignored without `band`.
+   */
+  bandFixed?: boolean;
+  /**
    * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
    * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
    *
@@ -270,6 +277,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   plate = false,
   artFigure,
   band = false,
+  bandFixed = false,
   title,
   icon,
   primary,
@@ -468,7 +476,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}`}
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}`}
       data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >

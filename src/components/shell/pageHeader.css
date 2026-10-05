@@ -780,3 +780,28 @@
   .ph--band .ph-hin { grid-template-columns: minmax(0, 1fr); justify-content: start; row-gap: 24px; }
   .ph--band .ph-bdisc { justify-self: start; }
 }
+
+/* ══ THE FIXED BAND (Analytics v17, 5 Oct; ref design-refs/analytics-v17.html, measured at 1512 and 390) ══
+   A modifier of the band (`bandFixed`), Analytics' alone: 337px tall with its contents vertically centred, a
+   250px disc 64px right of the text, no eyebrow, and the title capped at 15ch so it sets on two lines.
+   ⚠️ EVERY RULE NAMES `.ph--bandfix`, so the Query Centre's band, which does not pass it, cannot move (AN17-3).
+   ⚠️ THE PAIR STAYS SIDE BY SIDE DOWN TO A 1100px WINDOW (the ref's own breakpoint, a viewport query): the
+   band's container query stacks the courier's 290 disc below 1100px of COLUMN, which a 1280 window is, and
+   the 250 disc beside a 15ch title fits there with room to spare. */
+.ph--full.ph--band.ph--bandfix { height: 337px; padding: 0; display: flex; align-items: center; box-sizing: border-box; }
+.ph--band.ph--bandfix .ph-hin { width: 100%; grid-template-columns: minmax(0, auto) 250px; }
+.ph--band.ph--bandfix .ph-bdisc { width: 250px; }
+.ph--band.ph--bandfix .ph-eyebrow { display: none; }
+.ph--band.ph--bandfix.ph--full .ph-title { font-size: clamp(40px, 3.9vw, 58px); line-height: 1.04; min-height: 0; max-width: 15ch; white-space: normal; }
+.ph--band.ph--bandfix.ph--full .ph-intro { margin-top: 14px; max-width: 44ch; min-height: 0; font-size: 18px; line-height: 26px; }
+.ph--band.ph--bandfix.ph--full .ph-acts { margin-top: 26px; gap: 12px; }
+.ph--band.ph--bandfix .ph-primary { padding: 0 24px; }
+@container (max-width: 1099.5px) {
+  .ph--band.ph--bandfix .ph-hin { grid-template-columns: minmax(0, auto) 250px; justify-content: center; row-gap: 0; }
+  .ph--band.ph--bandfix .ph-bdisc { justify-self: auto; }
+}
+@media (max-width: 1100px) {
+  .ph--full.ph--band.ph--bandfix { height: auto; padding: 48px 0; display: block; }
+  .ph--band.ph--bandfix .ph-hin { grid-template-columns: minmax(0, 1fr); justify-content: start; }
+  .ph--band.ph--bandfix .ph-bdisc { width: 200px; margin-top: 28px; justify-self: start; }
+}

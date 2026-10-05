@@ -87,7 +87,14 @@ export const QcBirdsDrawer: React.FC<{
   /** a query to centre the timeline on when the drawer opens */
   focusId?: string | null;
   loading?: boolean;
-}> = ({ rows, nowMs, open, onOpenDrawer, onCloseDrawer, onOpenQuery, cardOpen, onCardClose, actionOpen, moves, onAct, focusId = null, loading = false }) => {
+  /**
+   * ⚠️ WHETHER THE QUERY CENTRE IS THE PAGE ON SCREEN (Analytics v17, 5 Oct). Every workspace page stays
+   * mounted and the tab is portalled to `document.body`, so without this the tab — and its B shortcut —
+   * showed on every route, where Analytics' section tab sits in the same corner. The component stays
+   * mounted either way, so the drawer's grouping, sort and filters survive a visit elsewhere.
+   */
+  routeActive?: boolean;
+}> = ({ rows, nowMs, open, onOpenDrawer, onCloseDrawer, onOpenQuery, cardOpen, onCardClose, actionOpen, moves, onAct, focusId = null, loading = false, routeActive = true }) => {
   const [view, setView] = useState<BvdView>(BVD_DEFAULT);
   const [pop, setPop] = useState<Pop>(null);
   const popRef = useRef<Pop>(null);
@@ -106,12 +113,12 @@ export const QcBirdsDrawer: React.FC<{
   const shown = groups.reduce((n, g) => n + g.shown, 0);
 
   /* B opens it — never in a field, and never while something is open above the page */
-  const keyState = useRef({ open, cardOpen, actionOpen });
-  keyState.current = { open, cardOpen, actionOpen };
+  const keyState = useRef({ open, cardOpen, actionOpen, routeActive });
+  keyState.current = { open, cardOpen, actionOpen, routeActive };
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const k = keyState.current;
-      if (k.open || k.cardOpen || k.actionOpen || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+      if (!k.routeActive || k.open || k.cardOpen || k.actionOpen || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
       if (e.key !== "b" && e.key !== "B") return;
       const t = e.target as HTMLElement | null;
       if (t?.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
@@ -333,6 +340,6 @@ export const QcBirdsDrawer: React.FC<{
     </>
   ) : null;
 
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined" || !routeActive) return null;
   return createPortal(<>{tab}{drawer}</>, document.body);
 };

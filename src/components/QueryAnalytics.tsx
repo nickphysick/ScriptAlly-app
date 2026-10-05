@@ -2,20 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QueryAnalytics — Queries → Analytics (ref design-refs/analytics-v13.html).
+ * QueryAnalytics — Queries → Analytics (ref design-refs/analytics-v17.html), in the Query Centre's v126
+ * dress: the greige shell, the shared anthracite band, the at-a-glance strip, nine sections each opening
+ * on a banner with perched art over the desk's white frame, the floating section tab, and `AppFooter`.
  *
- * ⚠️ IT READS AND DERIVES. NOTHING ELSE. Every figure and sentence comes from `analyticsModel`'s `v13`
+ * ⚠️ IT READS AND DERIVES. NOTHING ELSE. Every figure and sentence comes from `analyticsModel`'s `v17`
  * block at read time; no write, no callable, no `recomputeQuery`, no stored field behind any number.
  *
  * ⚠️ ONE MANUSCRIPT, NEVER AN AGGREGATE. Scope is the manuscript in the bar's switcher —
  * `localStorage["scriptally_active_manuscript_id"]`, written by `BarSwitcher` before it re-opens the
  * route. It is read every render, and the derivation is keyed on `useLocation().key` as well as the
- * data, so a switch can never leave the page stating the previous book.
- *
- * ⚠️ THE PAGE OPENS ON A FEATURE CONTAINER, NOT A LIVING HEADER (v13, superseding living headers v3 on
- * this page only). The page's name lives in the bar's breadcrumb (`/queries/analytics` stays in
- * `LIVING_ROUTES`); the grid draws no masthead. No time-range control and no Export: the ref has
- * neither (both noted in the run report for Nick).
+ * data, so a switch can never leave the page stating the previous book (AN17-18).
  *
  * ⚠️ THE PAGE LIVES IN THIS FILE — `workspacePageGrid.test.tsx` and `pageStructure.test.ts` read the
  * path. Its parts live in `analytics/`.
@@ -23,18 +20,26 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
+import { PageHeader } from "./shell/PageHeader";
+import { AppFooter } from "./shell/AppFooter";
 import { useScriptAllyDb } from "../lib/db";
 import { resolveScopedManuscript } from "../lib/shellSidebar";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { analyticsModel } from "../lib/analyticsModel";
-import { DotNav, Feature, Section, Skeleton, TipProvider, useReveal } from "./analytics/A13Frame";
-import { A13Empty } from "./analytics/A13Empty";
-import { Endings, Funnel, Lanes, ReplyWindow, ShareBars, StageGaps, Volume } from "./analytics/A13Figures";
-import "./analytics/a13.css";
+import { openQueryDrawer } from "../lib/queryActions/drawerStore";
+import { limitForReview } from "../lib/analyticsReviewAid";
+import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
+import { A17Empty } from "./analytics/A17Empty";
+import "./analytics/a17.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
-export const QueryAnalytics: React.FC = () => {
+/** The band's illustration slot: a 250px white disc, empty until the art arrives (`artSrc`). */
+const BandDisc: React.FC<{ artSrc?: string }> = ({ artSrc }) => (
+  <span className="a17-disc" data-a17="disc">{artSrc ? <img src={artSrc} alt="" /> : null}</span>
+);
+
+export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string) => void }> = ({ onNavigate }) => {
   const { queries, activities, agents, manuscripts, packages, versions, collectionsReady, activitiesReady } = useScriptAllyDb();
   const location = useLocation();
   const pageRef = React.useRef<HTMLDivElement | null>(null);
@@ -45,37 +50,25 @@ export const QueryAnalytics: React.FC = () => {
 
   /** ⚠️ ONE CLOCK PER DERIVATION, so every figure on the page agrees about what today is. */
   const model = React.useMemo(() => {
-    const scoped = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
+    const own = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
+    /* ⚠️ THE DEV REVIEW AID IS GATED HERE, AT THE CALL SITE: a statically replaced MODE makes the branch
+       dead in a production build, so the module is unreachable from it (AN17-16 cuts the fixture with it). */
+    const scoped = import.meta.env.MODE === "production" ? own : limitForReview(own);
     return analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs: Date.now(), title: manuscript?.title });
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
 
   const load = useQcLoad(collectionsReady && activitiesReady);
-  const v = model.v13;
-
-  /**
-   * ⚠️ "ABOUT A VIEWPORT TALL" IS THE SCROLLPORT, MEASURED — never `100vh` with the ref's constant
-   * offset, which is a guess at the chrome above its own scroller. Published as `--a13-port`; a zero
-   * reading is the page before layout (or hidden under a sibling route) and is refused.
-   */
-  React.useLayoutEffect(() => {
-    const page = pageRef.current;
-    const scroller = page?.closest(".wpg-scroll") as HTMLElement | null;
-    if (!page || !scroller) return undefined;
-    const put = () => { const h = scroller.clientHeight; if (h > 0) page.style.setProperty("--a13-port", `${h}px`); };
-    put();
-    const ro = new ResizeObserver(put);
-    ro.observe(scroller);
-    return () => ro.disconnect();
-  }, []);
+  const v = model.v17;
+  const names = NAV_NAMES(model.sent);
 
   /** Scroll the page's own scroller to a section (or, on the empty page, to the first example). */
   const go = React.useCallback((sec: number) => {
     const page = pageRef.current;
     const scroller = page?.closest(".wpg-scroll") as HTMLElement | null;
-    const target = (page?.querySelector(`[data-a13="sec"][data-sec="${sec}"]`) ?? page?.querySelector('[data-a13="example"]')) as HTMLElement | null;
+    const target = (page?.querySelector(`[data-a17="sec"][data-sec="${sec}"]`) ?? page?.querySelector('[data-a17="example"]')) as HTMLElement | null;
     if (!scroller || !target) return;
-    const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 10;
+    const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 12;
     scroller.scrollTo({ top, behavior: "smooth" });
   }, []);
 
@@ -87,61 +80,50 @@ export const QueryAnalytics: React.FC = () => {
     body = <Skeleton />;
   } else if (manuscript === null) {
     body = (
-      <p className="a13-blank" data-a13="blank">
+      <p className="a17-blank" data-a17="blank">
         Analytics follow a manuscript. Add one and its queries, requests and reply times will be gathered here.
       </p>
     );
   } else if (empty) {
-    body = <A13Empty model={model} onGo={() => go(0)} />;
+    body = <A17Empty />;
   } else {
+    const b = v.banners;
     body = (
       <>
-        <Feature model={model} onGo={() => go(0)} />
-        <Section sec={0} num="Fall-off by stage" headline={v.funnel.headline} artH={140}
-          lede="Each row is a stage, and its bar is how many queries reached it. The note beside each bar is how many went on from the stage before."
-          art={["Illustration · letters sorted", "into four trays"]}>
-          <Funnel model={model} />
-        </Section>
-        <Section sec={1} num="Queries sent" headline={v.sentByMonth.headline} lede={v.sentByMonth.lede} white
-          art={["Illustration · the Courier", "with a bundle of letters"]} readings={v.sentByMonth.readings}>
-          <Volume model={model} />
-        </Section>
-        <Section sec={2} num="Response rate" headline={v.rate.headline} lede={v.rate.lede} flip
-          art={["Illustration · the Archivist", "opening the post"]} readings={v.rate.readings}>
-          <ShareBars model={model} />
-        </Section>
-        <Section sec={3} num="Response window honesty" headline="What agents said, against when they replied" lede={v.reply.lede} white
-          art={["Illustration · a calendar", "on the agent's wall"]} readings={v.reply.readings}>
-          <ReplyWindow model={model} />
-        </Section>
-        <Section sec={4} num="Wait times by stage" headline="How long each step has taken" flip
-          lede="Left: the gap between one stage and the next, from the fastest query to the slowest, with the median marked. Right: how many weeks each closed query ran before it ended. The later stages rest on very few queries."
-          art={["Illustration · an hourglass", "on the desk"]} readings={v.waits.readings}>
-          <div className="a13-two"><StageGaps model={model} /><Endings model={model} /></div>
-        </Section>
-        <Section sec={5} num="How things stand" headline="Every query against time, up to today" lede={v.lanes.lede} white
-          art={["Illustration · the hawk", "over the field"]} readings={v.lanes.readings}>
-          <Lanes model={model} />
-        </Section>
-        <section className="a13-chap" data-a13="sec" data-sec={6} id="a13-sec-6">
-          <div className="a13-num a13-rv">What the numbers can&apos;t tell you</div>
-          <h2 className="a13-big a13-tw a13-rv d1">{v.caveats.headline}</h2>
-          <div className="a13-cav a13-rv d2">
-            {v.caveats.notes.map((n) => <div key={n.title}><h4 className="a13-tw">{n.title}</h4><p>{n.text}</p></div>)}
-          </div>
-        </section>
+        <Section sec={0} banner={b[0]}>{null}</Section>
+        <Section sec={1} banner={b[1]}>{null}</Section>
+        <Section sec={2} banner={b[2]}>{null}</Section>
+        <Section sec={3} banner={b[3]}>{null}</Section>
+        <Section sec={4} banner={b[4]}>{null}</Section>
+        <Section sec={5} banner={b[5]}>{null}</Section>
+        <Section sec={6} banner={b[6]}>{null}</Section>
+        <Section sec={7} banner={b[7]}>{null}</Section>
+        <Section sec={8} banner={b[8]}>{null}</Section>
       </>
     );
   }
 
-  const pageClass = ["a13-page", load.loading ? "a13-page--loading" : "", load.blank ? "a13-page--blank" : ""].filter(Boolean).join(" ");
+  const pageClass = ["a17-page", load.loading ? "a17-page--loading" : "", load.blank ? "a17-page--blank" : ""].filter(Boolean).join(" ");
   return (
     <div className="qa-wrap">
       <WorkspacePageGrid className="qa-wpg" scrollLabel="Analytics" masthead={null}>
-        <div className={pageClass} ref={pageRef} data-a13="page" data-sent={model.sent} data-phase={load.phase}>
+        <div className={pageClass} ref={pageRef} data-a17="page" data-sent={model.sent} data-dated={v.dated} data-ms={manuscript?.id ?? ""} data-phase={load.phase}>
           <TipProvider>
-            <div className="a13-flow" data-a13="flow">{body}</div>
-            {!load.loading && manuscript !== null && !empty ? <DotNav pageRef={pageRef} onGo={go} /> : null}
+            {/* the band is the page's own chrome, so it renders through loading and on the empty page */}
+            <PageHeader
+              variant="full"
+              band
+              bandFixed
+              title="Less guesswork, better results"
+              description="Patterns, stats and insights to help you query smarter."
+              primary={{ label: "Take a look ↓", onClick: () => go(0) }}
+              secondary={{ label: "Record a response", onClick: () => openQueryDrawer({ mode: "resp" }) }}
+              art={<BandDisc />}
+            />
+            <div className="a17-flow" data-a17="flow">{body}</div>
+            <div className="a17-after" />
+            {onNavigate ? <AppFooter onNavigate={onNavigate} /> : null}
+            {!load.loading && manuscript !== null && !empty ? <SectionTab pageRef={pageRef} names={names} onGo={go} /> : null}
           </TipProvider>
         </div>
       </WorkspacePageGrid>

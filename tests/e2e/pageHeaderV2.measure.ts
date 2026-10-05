@@ -244,7 +244,10 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
      the Contact list (4), the no-eyebrow row, and the plate row — 6 per size; 7 without a plate */
   /* v13: per size, 2 × (open headers − 1) tops, the no-eyebrow row, a plate row if any, and one row per
      band route — counted from the registers, so a register change cannot leave this stale */
-  const openN = 4 - PLATE_ROUTES.length - BAND_ROUTES.length;
+  /* framed among THESE four only: a band route that is not one of them (Analytics v17) adds its own band
+     row through the loop above and takes no open header away */
+  const FOUR = ["/queries", "/agents", "/manuscripts/comps", "/manuscripts/packages"];
+  const openN = FOUR.filter((r) => !PLATE_ROUTES.includes(r) && !BAND_ROUTES.includes(r)).length;
   expect(L.rows.length).toBe(SIZES.length * (2 * (openN - 1) + 1 + (PLATE_ROUTES.includes("/queries") ? 1 : 0) + BAND_ROUTES.length));
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });

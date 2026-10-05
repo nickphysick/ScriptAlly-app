@@ -45,8 +45,9 @@ const PAGES: Pg[] = [
   { route: "/todo", key: "td", name: "To-do list", section: "TASKS", empty: "Nothing to do yet", tile: ".tdv2-tile:not(.tdv2-tile--sk)", num: ".tdv2-num", row: '[data-todo-v2="row"]', rail: ".tdv2-group > .tdv2-rail", exPart: '[data-todo-v2="row"]' },
   { route: "/manuscripts/packages", key: "sp", name: "Submission packages", section: "MATERIALS", empty: "No packages yet", tile: null, num: null, row: '[data-ppv="pkg"]', rail: '[data-ppv="rail"]', exPart: '[data-ppv="pkg"]' },
   { route: "/manuscripts/comps", key: "ct", name: "Comparable titles", section: "MATERIALS", empty: "No comp titles yet", tile: null, num: null, row: '[data-cpv="comp"]', rail: ".cpv-group > .sa-prail", exPart: '[data-cpv="comp"]' },
-  /* ANALYTICS LEFT ON 3 OCT (analytics v13): the page opens on a feature container, not a living header,
-     and is locked by tests/e2e/analyticsV13.measure.ts instead. Five pages here now. */
+  /* ANALYTICS LEFT ON 3 OCT (analytics v13, a feature container) and stays out under v17 (5 Oct): it
+     opens on the shared band (BAND_ROUTES), with no living-header tally, and is locked by
+     tests/e2e/analyticsV17.measure.ts instead. Five pages here now. */
 ];
 const ONLY = process.env.LH_ONLY;
 const RUN = ONLY ? PAGES.filter((p) => p.key === ONLY) : PAGES;

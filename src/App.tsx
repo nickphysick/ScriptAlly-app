@@ -722,7 +722,7 @@ function AppContent() {
             fixed-viewport work wrapper and the chain resolves. Same fault as `.tpl-cols` and
             `.f12-body`; same tell — a page that scrolls where its spec says its rows do. */}
         <StagePage active={queriesAnalytics} layout="fill" clip>
-          <QueryAnalytics />
+          <QueryAnalytics onNavigate={handleNavigate} />
         </StagePage>
 
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).

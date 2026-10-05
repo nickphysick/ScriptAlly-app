@@ -17,7 +17,10 @@ export const PLATE_ROUTES: readonly string[] = [];
  * and reported it red (pre-existing on main at 10c53e79). Both band pages are named here; a band
  * route's header geometry belongs to `qcV126` QC126-3 and `contactV13` CL13-1, and the open-header
  * claims skip it by NAME, with the reason, and assert that what they skipped IS this set.
+ *
+ * Analytics v17 (5 Oct) opens on the same band (`PageHeader band bandFixed`), so it is named here too;
+ * its header geometry belongs to `analyticsV17` AN17-2/AN17-3.
  */
-export const BAND_ROUTES: readonly string[] = ["/queries", "/agents"];
+export const BAND_ROUTES: readonly string[] = ["/queries", "/agents", "/queries/analytics"];
 /** The plate's text inset — its 38px of horizontal padding, which PH1 measures against the brief. */
 export const PLATE_PAD_X = 38;

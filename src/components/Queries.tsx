@@ -6645,6 +6645,7 @@ export const Queries: React.FC<{
              */
             overlay={(
               <QcBirdsDrawer
+                routeActive={routeActive}
                 rows={qcScoped}
                 nowMs={Date.now()}
                 loading={showGridSkeleton}
