@@ -8,8 +8,8 @@
  {
   "lock": "QC126-4 desk → carousel head 40",
   "where": "1280",
-  "ok": false,
-  "detail": "44"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "QC126-4 carousel → list banner 40",
@@ -32,8 +32,8 @@
  {
   "lock": "QC126-4 desk → carousel head 40",
   "where": "1440",
-  "ok": false,
-  "detail": "44"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "QC126-4 carousel → list banner 40",
@@ -56,8 +56,8 @@
  {
   "lock": "QC126-4 desk → carousel head 40",
   "where": "1512",
-  "ok": false,
-  "detail": "44"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "QC126-4 carousel → list banner 40",
@@ -80,8 +80,8 @@
  {
   "lock": "QC126-4 desk → carousel head 40",
   "where": "1920",
-  "ok": false,
-  "detail": "44"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "QC126-4 carousel → list banner 40",
