@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (3m)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6m)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6w)",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (3m)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6m)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6w)",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (3m)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6m)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (6w)",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.9 population: out-of-bar running sentences",
+  "where": "all",
+  "ok": true,
+  "detail": "5 [\"Queried · reply by 16 Oct · in 11 days\",\"Queried · reply by 16 Oct · in 11 days\",\"Queried · reply by 16 Oct · in 11 days\",\"Queried · reply by 16 Oct · in 11 days\"]"
+ }
+]

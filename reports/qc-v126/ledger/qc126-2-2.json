@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "QC126-2.2 population: rows",
+  "where": "1280",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "QC126-2.2 names 220 at the row's left",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"row\":911.1875,\"rl\":350.8125,\"n\":220,\"nl\":350.8125,\"t\":527.1875,\"tl\":570.8125,\"tr\":1098,\"a\":164,\"ar\":1262,\"rr\":1262},{\"row\":911.1875,\"rl\":350.8125,\"n\":220,\"nl\":350.8125,\"t\":527.1875,\"tl\":570.8125,\"tr\":1098,\"a\":164,\"ar\":1262,\"rr\":1262}]"
+ },
+ {
+  "lock": "QC126-2.2 action 164 at the row's right",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[164,1262,1262],[164,1262,1262]]"
+ },
+ {
+  "lock": "QC126-2.2 track = row − 384 (±1), between them",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[527.1875,911.1875],[527.1875,911.1875]]"
+ },
+ {
+  "lock": "QC126-2.2 the date row shares the track's left and right",
+  "where": "1280",
+  "ok": true,
+  "detail": "[570.8125,1098] vs 570.8125,1098"
+ },
+ {
+  "lock": "QC126-2.2 the time control sits 18px in from the drawer",
+  "where": "1280",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.2 population: rows",
+  "where": "1512",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "QC126-2.2 names 220 at the row's left",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"row\":1082.875,\"rl\":411.125,\"n\":220,\"nl\":411.125,\"t\":698.875,\"tl\":631.125,\"tr\":1330,\"a\":164,\"ar\":1494,\"rr\":1494},{\"row\":1082.875,\"rl\":411.125,\"n\":220,\"nl\":411.125,\"t\":698.875,\"tl\":631.125,\"tr\":1330,\"a\":164,\"ar\":1494,\"rr\":1494}]"
+ },
+ {
+  "lock": "QC126-2.2 action 164 at the row's right",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[164,1494,1494],[164,1494,1494]]"
+ },
+ {
+  "lock": "QC126-2.2 track = row − 384 (±1), between them",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[698.875,1082.875],[698.875,1082.875]]"
+ },
+ {
+  "lock": "QC126-2.2 the date row shares the track's left and right",
+  "where": "1512",
+  "ok": true,
+  "detail": "[631.125,1330] vs 631.125,1330"
+ },
+ {
+  "lock": "QC126-2.2 the time control sits 18px in from the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.2 population: rows",
+  "where": "1920",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "QC126-2.2 names 220 at the row's left",
+  "where": "1920",
+  "ok": true,
+  "detail": "[{\"row\":1084,\"rl\":818,\"n\":220,\"nl\":818,\"t\":700,\"tl\":1038,\"tr\":1738,\"a\":164,\"ar\":1902,\"rr\":1902},{\"row\":1084,\"rl\":818,\"n\":220,\"nl\":818,\"t\":700,\"tl\":1038,\"tr\":1738,\"a\":164,\"ar\":1902,\"rr\":1902}]"
+ },
+ {
+  "lock": "QC126-2.2 action 164 at the row's right",
+  "where": "1920",
+  "ok": true,
+  "detail": "[[164,1902,1902],[164,1902,1902]]"
+ },
+ {
+  "lock": "QC126-2.2 track = row − 384 (±1), between them",
+  "where": "1920",
+  "ok": true,
+  "detail": "[[700,1084],[700,1084]]"
+ },
+ {
+  "lock": "QC126-2.2 the date row shares the track's left and right",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1038,1738] vs 1038,1738"
+ },
+ {
+  "lock": "QC126-2.2 the time control sits 18px in from the drawer",
+  "where": "1920",
+  "ok": true,
+  "detail": "18"
+ }
+]

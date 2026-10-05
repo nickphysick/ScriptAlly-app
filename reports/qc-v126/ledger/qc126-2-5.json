@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "QC126-2.5 exactly one visible pill in each row's action column",
+  "where": "1280",
+  "ok": true,
+  "detail": "69 rows []"
+ },
+ {
+  "lock": "QC126-2.5 no pill, chip or tag in any track",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.5 every label fits the 164px column",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"Close it\",\"Record a response\",\"Nudge now\",\"Log the send\",\"Decide on the offer\"] bad []"
+ },
+ {
+  "lock": "QC126-2.5 exactly one visible pill in each row's action column",
+  "where": "1512",
+  "ok": true,
+  "detail": "69 rows []"
+ },
+ {
+  "lock": "QC126-2.5 no pill, chip or tag in any track",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.5 every label fits the 164px column",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"Close it\",\"Record a response\",\"Nudge now\",\"Log the send\",\"Decide on the offer\"] bad []"
+ },
+ {
+  "lock": "QC126-2.5 exactly one visible pill in each row's action column",
+  "where": "1920",
+  "ok": true,
+  "detail": "69 rows []"
+ },
+ {
+  "lock": "QC126-2.5 no pill, chip or tag in any track",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.5 every label fits the 164px column",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"Close it\",\"Record a response\",\"Nudge now\",\"Log the send\",\"Decide on the offer\"] bad []"
+ }
+]

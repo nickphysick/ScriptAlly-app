@@ -1,0 +1,84 @@
+[
+ {
+  "lock": "QC126-2.1",
+  "mutation": "width: min(780px, 56vw); display: flex;",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.1 width min(1120px, 74vw) · 1280 — 716.796875 vs 947.2",
+   "✗ QC126-2.1 width min(1120px, 74vw) · 1512 — 780 vs 1118.8799999999999",
+   "✗ QC126-2.1 width min(1120px, 74vw) · 1920 — 780 vs 1120"
+  ]
+ },
+ {
+  "lock": "QC126-2.2",
+  "mutation": "grid-template-columns: var(--qcv-tl-names) 110px minmax(0, 1fr) var(--bvd-ac);\n  align-items: center; height: 50px;",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.2 action 164 at the row's right · 1280 — [[417.1875,1098,1262],[417.1875,1098,1262]]",
+   "✗ QC126-2.2 track = row − 384 (±1), between them · 1280 — [[110,911.1875],[110,911.1875]]",
+   "✗ QC126-2.2 the date row shares the track's left and right · 1280 — [570.8125,1098] vs 570.8125,680.8125",
+   "✗ QC126-2.2 action 164 at the row's right · 1512 — [[588.875,1330,1494],[588.875,1330,1494]]",
+   "✗ QC126-2.2 track = row − 384 (±1), between them · 1512 — [[110,1082.875],[110,1082.875]]",
+   "✗ QC126-2.2 the date row shares the track's left and right · 1512 — [631.125,1330] vs 631.125,741.125"
+  ]
+ },
+ {
+  "lock": "QC126-2.3",
+  "mutation": "          {overdue && <button type=\"button\" className=\"qcv-tl-nudge\" style={{ position: \"absolute\", top: 0, left: xAt(ex",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.3 nothing right of the drawer (open) · 1280 — [\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\"]",
+   "✗ QC126-2.3 nothing outside its track (open) · 1280 — [\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\"]",
+   "✗ QC126-2.3 nothing right of the drawer (earlier) · 1280 — [\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\"]",
+   "✗ QC126-2.3 nothing outside its track (earlier) · 1280 — [\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\",\"qcv-tl-nudge:✉ Nudge 9968..9497\"]",
+   "✗ QC126-2.3 nothing right of the drawer (6W) · 1280 — [\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\",\"qcv-tl-nudge\"]",
+   "✗ QC126-2.3 nothing outside its track (6W) · 1280 — [\"qcv-tl-nudge:✉ Nudge 19921..19450\",\"qcv-tl-nudge:✉ Nudge 19921..19450\",\"qcv-tl-nudge:✉ Nudge 19921..19450\",\"qcv-tl-nudge:✉ Nudge 19921..19450\",\"qcv-tl-nudge:✉ Nudge 19921..19450\",\"qcv-tl-nudge:✉ Nudge 19921..19450\"]"
+  ]
+ },
+ {
+  "lock": "QC126-2.4",
+  "mutation": "export const TODAY_AT = 0.6;",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.4 on open, today at 40% (±1%) · 1280 — 0.6007113218731476",
+   "✗ QC126-2.4 at 6W, today at 40% · 1280 — 0.6007113218731476",
+   "✗ QC126-2.4 at 6W, T returns today to 40% · 1280 — 0.6007113218731476",
+   "✗ QC126-2.4 at 3M, today at 40% · 1280 — 0.6007113218731476",
+   "✗ QC126-2.4 at 3M, T returns today to 40% · 1280 — 0.6007113218731476",
+   "✗ QC126-2.4 at 6M, today at 40% · 1280 — 0.6007113218731476"
+  ]
+ },
+ {
+  "lock": "QC126-2.5",
+  "mutation": "<div className=\"qcv-tl-track\" data-qcv=\"tl-track\">{track(t)}{late && <span style={{ position: \"absolute\", left: 4, top: ",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.5 no pill, chip or tag in any track · 1280 — [\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\"]",
+   "✗ QC126-2.5 no pill, chip or tag in any track · 1512 — [\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\"]",
+   "✗ QC126-2.5 no pill, chip or tag in any track · 1920 — [\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\",\"SPAN.:YOUR MOVE\"]"
+  ]
+ },
+ {
+  "lock": "QC126-2.6",
+  "mutation": "      if (tw + 20 <= (dueAt != null ? Math.max(0, Math.min(w, dueAt)) : w)) at = l + 10;",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar · 1280 — [\"Queried · overdue since 27 Sep bar 211 need 199\",\"Queried · overdue since 2 Mar bar 211 need 194\",\"Queried · overdue since 10 Apr bar 211 need 199\",\"Queried · overdue since 15 Apr bar 211 need 198\"]",
+   "✗ QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar · 1512 — [\"Queried · overdue since 27 Sep bar 280 need 199\",\"Queried · overdue since 2 Mar bar 280 need 194\",\"Queried · overdue since 10 Apr bar 280 need 199\",\"Queried · overdue since 15 Apr bar 280 need 198\"]",
+   "✗ QC126-2.6 each shows '<Stage> · overdue since <date>' inside the bar · 1920 — [\"Queried · overdue since 27 Sep bar 280 need 199\",\"Queried · overdue since 2 Mar bar 280 need 194\",\"Queried · overdue since 10 Apr bar 280 need 199\",\"Queried · overdue since 15 Apr bar 280 need 198\"]"
+  ]
+ },
+ {
+  "lock": "QC126-2.8",
+  "mutation": "  .bvd-btb { grid-row: 2; grid-column: 1 / -1; margin: 0; align-self: center; flex-wrap: nowrap; }",
+  "red": true,
+  "reds": [
+   "✗ QC126-2.8 the pills' centre within 2px of the title's · 1280 — 113 vs 48",
+   "✗ QC126-2.8 the pills sit right of the title and left of the × · 1280 — t 1208 p 450.8125..1262 x 1228",
+   "✗ QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0) · 1280 — 32/96/8 → 32/102.5/8",
+   "✗ QC126-2.8 the pills' centre within 2px of the title's · 1512 — 113 vs 48",
+   "✗ QC126-2.8 the pills sit right of the title and left of the × · 1512 — t 1432 p 529.125..1494 x 1460",
+   "✗ QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0) · 1512 — 32/96/4 → 32/102.5/4"
+  ]
+ }
+]

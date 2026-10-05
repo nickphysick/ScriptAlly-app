@@ -16,7 +16,7 @@ import {
   BASE_STAGES, CALENDAR_GROUPS, DEFAULT_SORT, SORT_OPTIONS, STAGE_NAME,
   buildQcRows, courtOf, expectedFor, factLine, filterForStatusParam, filterOptions, filterPhrase,
   rowsForClosed, rowsWithdrawn,
-  courtTiles, rowsForTile, tileCourt, type TileCourt,
+  courtFoot, courtTiles, rowsForTile, tileCourt, type TileCourt,
   inScope, isWithYou, matchesFilter, primaryActionLabel, sortRows, stageFilter, stageOrder, standLine,
   type QcFilter, type QcRow,
 } from "./qcSummary";
@@ -237,5 +237,23 @@ describe("the court tiles state what the carousel deals", () => {
     const rows = tiles([QueryStatus.PARTIAL_REQUESTED, QueryStatus.QUERIED, QueryStatus.REJECTED]);
     expect(courtTiles(rows).map((c) => c.rust)).toEqual([true, false, false]);
     expect(courtTiles([]).map((c) => c.rust)).toEqual([false, false, false]);
+  });
+});
+
+describe("v126.2 · the desk foot says when the earliest date has passed", () => {
+  it("'overdue since <weekday date>' once the earliest has gone; the next date while it is still to come; the dash only with no dates", () => {
+    const a = agent({ responseTimeWeeks: 4 });
+    /* sent 40 days ago against a 4-week window: its reply date has passed */
+    const past = rowsOf([mkQ({ dateSent: ago(40) })], [a]);
+    const f1 = courtFoot(past, "agent", NOW);
+    expect(f1.when.label).toBe("overdue since");
+    expect(f1.when.date).toMatch(/^[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}$/);
+    /* sent 5 days ago: still to come */
+    const f2 = courtFoot(rowsOf([mkQ({ dateSent: ago(5) })], [a]), "agent", NOW);
+    expect(f2.when.label).toBe("next reply expected");
+    expect(f2.when.date).not.toBeNull();
+    /* no window stated, so no date at all: the dash */
+    const f3 = courtFoot(rowsOf([mkQ({ dateSent: ago(5) })], [agent()]), "agent", NOW);
+    expect(f3.when.date).toBeNull();
   });
 });

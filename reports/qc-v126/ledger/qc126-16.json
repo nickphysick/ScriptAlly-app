@@ -3,13 +3,13 @@
   "lock": "QC126-16 the pill sits in the date row's corner",
   "where": "1280",
   "ok": true,
-  "detail": "{\"x\":676.90625,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":881.203125,\"bottom\":154,\"left\":676.90625} in {\"x\":-8835.796875,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3029.203125,\"bottom\":163,\"left\":-8835.796875}"
+  "detail": "{\"x\":350.8125,\"y\":104.5,\"width\":204.296875,\"height\":34,\"top\":104.5,\"right\":555.109375,\"bottom\":138.5,\"left\":350.8125} in {\"x\":570.8125,\"y\":96,\"width\":527.1875,\"height\":51,\"top\":96,\"right\":1098,\"bottom\":147,\"left\":570.8125}"
  },
  {
   "lock": "QC126-16 left of the first date label, no overlap",
   "where": "1280",
   "ok": true,
-  "detail": "pill r 881.203125 first 892.296875"
+  "detail": "pill r 555.109375 first 629.640625"
  },
  {
   "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
@@ -27,13 +27,13 @@
   "lock": "QC126-16 the pill sits in the date row's corner",
   "where": "1440",
   "ok": true,
-  "detail": "{\"x\":773.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":978,\"bottom\":154,\"left\":773.703125} in {\"x\":-8703,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3162,\"bottom\":163,\"left\":-8703}"
+  "detail": "{\"x\":392.40625,\"y\":104.5,\"width\":204.296875,\"height\":34,\"top\":104.5,\"right\":596.703125,\"bottom\":138.5,\"left\":392.40625} in {\"x\":612.40625,\"y\":96,\"width\":645.59375,\"height\":51,\"top\":96,\"right\":1258,\"bottom\":147,\"left\":612.40625}"
  },
  {
   "lock": "QC126-16 left of the first date label, no overlap",
   "where": "1440",
   "ok": true,
-  "detail": "pill r 978 first 1025.09375"
+  "detail": "pill r 596.703125 first 645.328125"
  },
  {
   "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
@@ -51,13 +51,13 @@
   "lock": "QC126-16 the pill sits in the date row's corner",
   "where": "1512",
   "ok": true,
-  "detail": "{\"x\":845.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":1050,\"bottom\":154,\"left\":845.703125} in {\"x\":-8631,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3234,\"bottom\":163,\"left\":-8631}"
+  "detail": "{\"x\":411.125,\"y\":104.5,\"width\":204.296875,\"height\":34,\"top\":104.5,\"right\":615.421875,\"bottom\":138.5,\"left\":411.125} in {\"x\":631.125,\"y\":96,\"width\":698.875,\"height\":51,\"top\":96,\"right\":1330,\"bottom\":147,\"left\":631.125}"
  },
  {
   "lock": "QC126-16 left of the first date label, no overlap",
   "where": "1512",
   "ok": true,
-  "detail": "pill r 1050 first 1097.09375"
+  "detail": "pill r 615.421875 first 685.25"
  },
  {
   "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
@@ -87,13 +87,13 @@
   "lock": "QC126-16 the pill sits in the date row's corner",
   "where": "1920",
   "ok": true,
-  "detail": "{\"x\":1253.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":1458,\"bottom\":154,\"left\":1253.703125} in {\"x\":-8223,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3642,\"bottom\":163,\"left\":-8223}"
+  "detail": "{\"x\":818,\"y\":104.5,\"width\":204.296875,\"height\":34,\"top\":104.5,\"right\":1022.296875,\"bottom\":138.5,\"left\":818} in {\"x\":1038,\"y\":96,\"width\":700,\"height\":51,\"top\":96,\"right\":1738,\"bottom\":147,\"left\":1038}"
  },
  {
   "lock": "QC126-16 left of the first date label, no overlap",
   "where": "1920",
   "ok": true,
-  "detail": "pill r 1458 first 1505.09375"
+  "detail": "pill r 1022.296875 first 1092.53125"
  },
  {
   "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",

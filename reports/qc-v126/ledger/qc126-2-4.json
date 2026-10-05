@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "QC126-2.4 on open, today at 40% (±1%)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, today at 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, T returns today to 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, today at 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, T returns today to 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, today at 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, T returns today to 40%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.40080023710729107"
+ },
+ {
+  "lock": "QC126-2.4 on open, today at 40% (±1%)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, today at 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, T returns today to 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, today at 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, T returns today to 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, today at 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, T returns today to 40%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.4007780361294938"
+ },
+ {
+  "lock": "QC126-2.4 on open, today at 40% (±1%)",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, today at 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 6W, T returns today to 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, today at 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 3M, T returns today to 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, today at 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ },
+ {
+  "lock": "QC126-2.4 at 6M, T returns today to 40%",
+  "where": "1920",
+  "ok": true,
+  "detail": "0.4007142857142857"
+ }
+]
