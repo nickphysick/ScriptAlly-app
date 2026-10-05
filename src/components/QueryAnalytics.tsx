@@ -29,7 +29,7 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Endings, Funnel, ReplyWindow, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
+import { Endings, Funnel, OverTime, Records, ReplyWindow, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
 import { A17Empty } from "./analytics/A17Empty";
 import "./analytics/a17.css";
 
@@ -97,8 +97,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
         <Section sec={3} banner={b[3]} readings={v.reply.readings}><ReplyWindow model={model} /></Section>
         <Section sec={4} banner={b[4]} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
-        <Section sec={5} banner={b[5]}>{null}</Section>
-        <Section sec={6} banner={b[6]}>{null}</Section>
+        <Section sec={5} banner={b[5]}><Records model={model} /></Section>
+        <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
         <Section sec={7} banner={b[7]}>{null}</Section>
         <Section sec={8} banner={b[8]}>{null}</Section>
       </>

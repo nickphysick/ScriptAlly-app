@@ -424,3 +424,91 @@ export const Endings: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   );
 };
 
+/* ═════════════ 6 · firsts and records ═════════════ */
+const ICONS: Record<string, React.ReactNode> = {
+  quickest: <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeWidth="1.6" /><path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.6" fill="none" /></svg>,
+  busiest: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15h14M5 15V9M9 15V5M13 15V8" stroke="currentColor" strokeWidth="1.8" fill="none" /></svg>,
+  run: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="1.8" fill="none" /></svg>,
+  "full-read": <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3h6M7 17h6M8 3c0 4 4 4 4 7s-4 3-4 7M12 3c0 4-4 4-4 7" stroke="currentColor" strokeWidth="1.5" fill="none" /></svg>,
+};
+export const Records: React.FC<{ model: AnalyticsModel }> = ({ model }) => (
+  <div className="a17-recs">
+    {model.v17.records.map((r) => (
+      <div className="a17-rec" key={r.key} data-a17="rec" data-a17-fig="" data-key={r.key}>
+        <div className="a17-medal" data-a17="medal">
+          {/* ⚠️ THE TWO STATUS RECORDS IMPORT `StatusDot` — the glyph is never recreated (AN17-11) */}
+          {r.key === "first-request" ? <StatusDot status={QueryStatus.PARTIAL_REQUESTED} overrideSize={22} />
+            : r.key === "first-offer" ? <StatusDot status={QueryStatus.OFFER} overrideSize={22} />
+            : ICONS[r.key]}
+        </div>
+        <div>
+          <div className="a17-reck">{r.label}</div>
+          <div className="a17-recv a17-tw" data-a17="rec-v">{r.value}</div>
+          <div className="a17-who">{r.who}{r.aside ? <i> · {r.aside}</i> : null}</div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/* ═════════════ 7 · the campaign over time ═════════════ */
+const SERIES = [
+  { k: "sent", label: "Sent", cls: "a17-s-sent" },
+  { k: "requests", label: "Requests for more", cls: "a17-s-req" },
+  { k: "ended", label: "Ended", cls: "a17-s-end" },
+] as const;
+export const OverTime: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const o = model.v17.overTime;
+  const [at, setAt] = React.useState<number | null>(null);
+  if (o.startMs === null) return <p className="a17-none">No dated query sent yet</p>;
+  const start = o.startMs, span = Math.max(DAY, o.nowMs - start);
+  const t = at ?? o.nowMs;
+  const cnt = (xs: number[], u: number) => { let n = 0; for (const x of xs) if (x <= u) n++; return n; };
+  const vals = SERIES.map((s) => cnt(o[s.k], t));
+  const max = o.max;
+  const yTicks = [0, Math.round(max / 3), Math.round((2 * max) / 3), max].filter((v, i, a) => a.indexOf(v) === i);
+  const monthTicks = (every: number) => {
+    const out: { ms: number; label: string }[] = [];
+    const d = new Date(start); d.setDate(1); d.setHours(0, 0, 0, 0);
+    let i = 0;
+    while (d.getTime() <= o.nowMs) { if (d.getTime() >= start && i % every === 0) out.push({ ms: d.getTime(), label: MONTHS_SHORT[d.getMonth()].toUpperCase() }); d.setMonth(d.getMonth() + 1); i++; }
+    return out;
+  };
+  const draw = (W: number, H: number, x0: number, x1: number, top: number, bot: number, every: number, mobile: boolean) => {
+    const per = (x1 - x0) / span;
+    const y = (v: number) => bot - (v / max) * (bot - top);
+    const xOf = (ms: number) => x0 + (ms - start) * per;
+    const step = (xs: number[]) => { let d = `M${x0} ${y(0)}`; xs.forEach((v, i) => { d += ` H${xOf(v).toFixed(1)} V${y(i + 1).toFixed(1)}`; }); return `${d} H${x1}`; };
+    const gx = xOf(t);
+    const toT = (e: React.PointerEvent<SVGSVGElement>) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width) * W;
+      return start + Math.max(0, Math.min(span, (px - x0) / per));
+    };
+    return (
+      <svg className={mobile ? "a17-m a17-scrubsvg" : "a17-d a17-scrubsvg"} viewBox={`0 0 ${W} ${H}`} width="100%" data-a17="scrub" role="img" aria-label="The campaign over time"
+        onPointerMove={(e) => setAt(toT(e))} onPointerDown={(e) => setAt(toT(e))} onPointerLeave={() => setAt(null)}>
+        {yTicks.map((v) => (
+          <g key={v}><line x1={x0} y1={y(v)} x2={x1} y2={y(v)} className="a17-faint" /><text className={mobile ? "a17-axm" : "a17-ax"} x={x0 - (mobile ? 5 : 8)} y={y(v) + 4} textAnchor="end">{v}</text></g>
+        ))}
+        {monthTicks(every).map((m) => <text key={m.ms} className={mobile ? "a17-axm" : "a17-ax"} x={xOf(m.ms)} y={H - (mobile ? 6 : 8)}>{m.label}</text>)}
+        <path d={`${step(o.sent)} V${bot} H${x0} Z`} className="a17-s-area" />
+        {SERIES.map((s) => <path key={s.k} d={step(o[s.k])} className={`a17-sline ${s.cls}`} />)}
+        <line data-a17="guide" x1={gx} y1={top} x2={gx} y2={bot} className="a17-guide" />
+        {SERIES.map((s, i) => <circle key={s.k} cx={gx} cy={y(vals[i])} r={mobile ? 4 : 4.5} className={`a17-sdot ${s.cls}`} />)}
+        <rect x={x0} y={top} width={x1 - x0} height={bot - top} fill="transparent" />
+      </svg>
+    );
+  };
+  return (
+    <div className="a17-scrubwrap">
+      <div className="a17-sread" data-a17="sread">
+        <span className="a17-dt" data-a17="sread-date">{at === null || at >= o.nowMs - DAY / 2 ? "Today" : dayMonth(at)}</span>
+        {SERIES.map((s, i) => <div key={s.k}><b className="a17-tw">{vals[i]}</b><span><i className={`${s.cls}-sw`} />{s.label}</span></div>)}
+      </div>
+      {draw(1200, 300, 36, 1188, 12, 270, 2, false)}
+      {draw(330, 230, 22, 324, 10, 206, 4, true)}
+    </div>
+  );
+};
+
