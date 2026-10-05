@@ -83,6 +83,8 @@ export const QcCentre: React.FC<{
    * over the page; the desk now selects what the carousel shows and nothing else.
    */
   carousel?: React.ReactNode;
+  /** v126 §5 — the app footer, the group's last row; opt-in, and today only this page mounts it. */
+  footer?: React.ReactNode;
   /**
    * The Birds-eye view, expanded (§7). It portals itself, so this is only its mount —
    * but it needs one: rendered inside the rail it would unmount the moment the rail showed a query.
@@ -101,7 +103,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, sticky, carousel, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -242,6 +244,7 @@ export const QcCentre: React.FC<{
         {loading ? "" : "Queries loaded"}
       </div>
     </div>
+    {footer}
     {overlay}
     </div>
   );

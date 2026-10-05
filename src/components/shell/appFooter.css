@@ -1,0 +1,62 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * AppFooter (Query Centre v126 §5; values measured off design-refs/query-centre-v126.html at 1512).
+ *
+ * ⚠️ THE GROUND IS FULL-BLEED AND THE BOX IS THE COLUMN. `.af` sits in the page's own column — so its
+ * content box IS the desk's (QC126-11) — and paints its ground across the main column with the band's
+ * trick: a spread shadow clipped back to its own height, so the ground reaches both edges of the main
+ * column without the element being any wider than its column (no horizontal overflow).
+ */
+.af {
+  box-sizing: border-box;
+  --af-ground: #ebe9e5;
+  --af-ink: #3a1c14;
+  --af-mute: #8a7a6c;
+  position: relative;
+  padding: 60px 0 26px;
+  background: var(--af-ground);
+  /* the ground and its 1px top rule are both spread shadows: the second sits 1px higher than the
+     first and shows only as that pixel. Shadows add nothing to scrollable overflow; a positioned
+     pseudo-element 100vmax wide did, and gave the scroller a horizontal scrollbar. */
+  box-shadow: 0 0 0 100vmax var(--af-ground), 0 -1px 0 100vmax rgba(28, 19, 15, 0.1);
+  clip-path: inset(-1px -100vmax -100vmax -100vmax);
+  border-top: 0;
+  color: var(--af-ink);
+  font-family: var(--sp-serif);
+  font-size: 16px;
+}
+.af-in { box-sizing: border-box; }
+.af-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px; align-items: start; }
+.af-brand { display: flex; align-items: center; gap: 11px; }
+.af-brand img { width: 38px; height: 38px; display: block; }
+/* ⚠️ PLAYFAIR 600 IS LOADED FOR THIS ONE WORDMARK (index.html requests the weight). */
+.af .af-brand span { font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.3; letter-spacing: -0.3px; color: var(--sp-ink, #1c130f); }
+.af .af-tag { margin: 16px 0 0; max-width: 17.66em; font-size: 16px; line-height: 1.6; color: var(--af-mute); }
+.af-glyphs { display: flex; gap: 14px; margin-top: 22px; color: var(--af-mute); }
+.af-glyphs svg { width: 19px; height: 19px; display: block; }
+.af .af-col h4 { margin: 0 0 18px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 15px; line-height: 1; color: #8a4a3c; }
+.af-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12.6px; }
+.af .af-link {
+  margin: 0; padding: 0 0 2px; border: 0; background: none; cursor: pointer;
+  font: 400 16px/1.4 var(--sp-serif); color: var(--af-ink);
+  text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.15s;
+}
+.af .af-link:hover, .af .af-link:focus-visible { text-decoration-color: currentColor; }
+.af-base { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-top: 50px; padding-top: 22px; border-top: 1px solid rgba(28, 19, 15, 0.1); font-size: 14px; color: var(--af-mute); }
+.af-base p { margin: 0; }
+.af-made { display: flex; align-items: center; gap: 8px; }
+.af-made svg { width: 16px; height: 16px; flex: none; color: #8a4a3c; }
+.af .af-mail { justify-self: end; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .af .af-link { transition: none; } }
+@media (max-width: 1100px) {
+  .af-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .af-brandcol { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .af-grid { grid-template-columns: 1fr; }
+  .af-base { grid-template-columns: 1fr; }
+  .af .af-mail { justify-self: start; }
+}

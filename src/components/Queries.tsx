@@ -142,6 +142,7 @@ import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
 import { cardsByQuery, comingUp, type ComingUp } from "../lib/qcComingUp";
 import { QcCarousel } from "./queries/centre/QcCarousel";
+import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -6641,6 +6642,7 @@ export const Queries: React.FC<{
                 onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeCard(null); setBeNudge(id); }}
               />
             ) : null}
+            footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
             carousel={showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;

@@ -163,6 +163,8 @@
 .qcv-group > .qcv-page { grid-column: 1 / -1; grid-row: 4; }
 /* the live page ends at its workspace, whose own 60px is the gap to what follows */
 .qcv-group--one > .qcv-page { padding-bottom: 0; }
+/* v126 §5 — the footer is the group's last row, so its content box is the column's */
+.qcv-group > .af { grid-column: 1 / -1; grid-row: 5; min-width: 0; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
