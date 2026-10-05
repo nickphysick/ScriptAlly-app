@@ -11,9 +11,9 @@
  *
  * ⚠️ THE PANEL'S MAX-HEIGHT IS MEASURED FROM THE BUTTON'S OWN BOX at open (min(560, innerHeight −
  * button bottom − 24)) — the house viewport law; a constant would be a guess about the chrome
- * above the page. Below PANEL_FLOOR of room, the row is scrolled up before it is measured.
+ * above the page. With less than PANEL_FLOOR below and more room above, it opens upward instead.
  */
-/** the least panel height worth opening at; with less room below the button, the page scrolls first */
+/** the least panel height worth opening downward at; with less room below and more above, it opens up */
 const PANEL_FLOOR = 360;
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
@@ -65,6 +65,7 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const bodyScroll = useRef(0);
   const [maxH, setMaxH] = useState(560);
+  const [up, setUp] = useState(false);
 
   const nFilters = contactFilterCount(filters);
 
@@ -72,20 +73,18 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
   popNow.current = pop;
   const openPop = useCallback((which: Exclude<Pop, null>, btn: HTMLElement) => {
     if (popNow.current === which) { setPop(null); return; }
-    /* ⚠️ ROOM FIRST, THEN MEASURE (Contact list v13 P2). The strip and the carousel put this row low on
-       the page — at 900 tall its button sat 17px above the fold and the panel opened 0px tall. When
-       less than a usable height is left below the button, the page's scroller brings the row up
-       before the height is read. Outside the state updater, which StrictMode runs twice. */
-    let b = btn.getBoundingClientRect();
-    const want = Math.min(560, PANEL_FLOOR);
-    if (window.innerHeight - b.bottom - 24 < want) {
-      const sc = btn.closest<HTMLElement>(".wpg-scroll");
-      if (sc) {
-        sc.scrollTop += b.bottom + 24 + 560 - window.innerHeight;
-        b = btn.getBoundingClientRect();
-      }
-    }
-    setMaxH(Math.min(560, window.innerHeight - b.bottom - 24));
+    /* ⚠️ UP WHEN THERE IS NO ROOM BELOW (Contact list v13 P2). The strip and the carousel put this row
+       low on the page — at 900 tall its button sat 17px above the fold and the panel opened 0px tall.
+       With less than PANEL_FLOOR below and more room above, the panel opens UPWARD, sized to the room
+       between the button and the scroller's top. It never scrolls the page: opening a control must not
+       move the list under the reader. Outside the state updater, which StrictMode runs twice. */
+    const b = btn.getBoundingClientRect();
+    const below = window.innerHeight - b.bottom - 24;
+    const top = btn.closest<HTMLElement>(".wpg-scroll")?.getBoundingClientRect().top ?? 0;
+    const above = b.top - top - 24;
+    const goUp = below < PANEL_FLOOR && above > below;
+    setUp(goUp);
+    setMaxH(Math.min(560, goUp ? above : below));
     bodyScroll.current = 0;
     setPop(which);
   }, []);
@@ -185,7 +184,7 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
       </div>
 
       {pop === "filter" && (
-        <div className="clv-pop clv-fpanel" data-clv="fpanel" style={{ right: 0, maxHeight: maxH }} role="dialog" aria-label="Filter">
+        <div className="clv-pop clv-fpanel" data-clv="fpanel" style={{ right: 0, maxHeight: maxH, ...(up ? { top: "auto", bottom: "calc(100% + 8px)" } : null) }} data-up={up || undefined} role="dialog" aria-label="Filter">
           <div className="clv-fhead">
             <b>Filter</b>
             {nFilters > 0 && <em data-clv="factive">{nFilters} active</em>}
@@ -297,7 +296,7 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
       )}
 
       {pop === "group" && (
-        <div className="clv-pop clv-menu" data-clv="gmenu" style={{ right: 0 }} role="menu" aria-label="Group">
+        <div className="clv-pop clv-menu" data-clv="gmenu" style={{ right: 0, maxHeight: maxH, overflowY: "auto", ...(up ? { top: "auto", bottom: "calc(100% + 8px)" } : null) }} data-up={up || undefined} role="menu" aria-label="Group">
           <h4>Group</h4>
           {GROUP_OPTIONS.map((g) => (
             <button key={g.key} type="button" role="menuitemradio" aria-checked={groupKey === g.key} onClick={() => { onGroup(g.key); setPop(null); }}>
@@ -307,7 +306,7 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
         </div>
       )}
       {pop === "sort" && (
-        <div className="clv-pop clv-menu" data-clv="smenu" style={{ right: 0 }} role="menu" aria-label="Sort">
+        <div className="clv-pop clv-menu" data-clv="smenu" style={{ right: 0, maxHeight: maxH, overflowY: "auto", ...(up ? { top: "auto", bottom: "calc(100% + 8px)" } : null) }} data-up={up || undefined} role="menu" aria-label="Sort">
           <h4>Sort</h4>
           {SORT_OPTIONS.map((s) => (
             <button key={s.key} type="button" role="menuitemradio" aria-checked={sortKey === s.key} onClick={() => { onSort(s.key); setPop(null); }}>

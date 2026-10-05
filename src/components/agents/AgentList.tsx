@@ -62,7 +62,11 @@ import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
 import { ContactStrip, type FigureKey } from "./contact/ContactStrip";
-import { stripFacts } from "../../lib/contactStrip";
+import { stripFacts, fitsGenre, genrePluralLower } from "../../lib/contactStrip";
+import { Carousel } from "../shell/Carousel";
+import { AgentCarouselCard } from "./card/AgentCarouselCard";
+import { FIGURE_LABEL, SET_LABEL, carouselSet, figureSet, type CarouselSet } from "../../lib/contactCarousel";
+import { cardQuery, cardRows, type CardAct } from "../../lib/agentCard";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
@@ -456,6 +460,43 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      Log query) come through here; the pop-up closes first, so there is one asking surface. */
   const onLogQuery = (agent: { id: string }) => openQueryDrawer({ mode: "log", agentId: agent.id });
 
+  /* ── v13 §4 — "Who to query next" ─────────────────────────────────────────────────────────────
+     ⚠️ A PRESSED FIGURE REPLACES THE SET; IT NEVER TOUCHES THE LIST. Its key lives in `figure` and
+     nothing in the list's filter/search/group/sort reads it (lock 3). A selector choice, Clear, or the
+     figure pressed again hands the carousel back to the set it was showing. */
+  const [czSet, setCzSet] = useState<CarouselSet>("fit");
+  /* ⚠️ THE CAROUSEL READS EVERY AGENT'S FACTS, NEVER THE LIST'S FILTERED `factsById` — a Find or a
+     filter on the list must not empty the carousel (lock 3 holds both directions). */
+  const czFactsById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x])), [factsAll]);
+  /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
+  const remindRef = useRef<(a: Agent) => void>(() => {});
+  const czInput = useMemo(() => ({
+    agents,
+    queried: (a: Agent) => (czFactsById.get(a.id)?.standing.kind ?? "none") !== "none",
+    msGenre: scoped?.genre ?? null,
+    nowMs,
+  }), [agents, czFactsById, scoped, nowMs]);
+  const czCounts = useMemo(() => ({
+    fit: carouselSet("fit", czInput).length, new: carouselSet("new", czInput).length, reopen: carouselSet("reopen", czInput).length,
+  }), [czInput]);
+  const czItems = useMemo(() => (figure ? figureSet(figure, czInput) : carouselSet(czSet, czInput)), [figure, czSet, czInput]);
+  const czMs = scoped?.title?.trim() || null;
+  const czNote = figure
+    ? { fit: `Take ${scoped?.genre ? genrePluralLower(scoped.genre) : "your genre"} · not queried first`, open: "Open to queries · not queried first", added: "Newest first" }[figure]
+    : { fit: czMs ? `Fit ${czMs} · not queried yet` : "Not queried yet", new: `The last ${czCounts.new} you added`, reopen: "Closed now, reopening soon" }[czSet];
+  const fitWord = scoped?.genre && tintGenre ? genrePluralLower(scoped.genre) : null;
+  /** a card's (and, from Phase 4, a row tray's) next step, WITHOUT the card: the same journey the card's
+   *  button opens, straight to the drawer (§4: "its button opens the journey directly") */
+  const actWithoutCard = useCallback((agentId: string, act: CardAct) => {
+    const agent = agents.find((a) => a.id === agentId);
+    if (!agent) return;
+    if (act === "log") { openQueryDrawer({ mode: "log", agentId, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
+    if (act === "remind") { remindRef.current(agent); return; }
+    const q = cardQuery(cardRows(qcRows, agentId, scoped?.id ?? null));
+    if (!q || act === "qc") { openCard(agentId, { from: "row" }); return; }
+    openQueryDrawer({ mode: act, queryId: q.id });
+  }, [agents, scoped, qcRows, openCard]);
+
   /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
      dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
   useEffect(() => {
@@ -561,6 +602,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!task) { openCard(agent.id, { tab: "work", focus: "door", from: "hk" }); return; } // ruling (b): no date → the editor at the door
     void addUserTask(task);
   }, [addUserTask, openCard]);
+  remindRef.current = onHkRemind;
 
 
 
@@ -641,6 +683,48 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
         {showList && <ContactStrip facts={strip} selected={figure} onPress={pressFigure} />}
+        {/* v13 §4 — "Who to query next": the shared carousel shell, the agent card in its carousel dress */}
+        {showList && (
+          <Carousel
+            probe="contacts"
+            className={`cl13-cz${figure ? " is-fig" : ""}`}
+            label="Who to query next"
+            title={figure ? `${FIGURE_LABEL[figure]} · ${czItems.length}` : "Who to query next"}
+            note={czNote}
+            resetKey={figure ?? czSet}
+            controls={(
+              <>
+                {figure && <button type="button" className="cl13-clear" data-cl13="cz-clear" onClick={() => setFigure(null)}>{"✕"} Clear</button>}
+                <div className="cl13-seg" role="group" aria-label="Choose what the carousel shows" data-cl13="cz-seg">
+                  {(["fit", "new", "reopen"] as CarouselSet[]).map((k) => (
+                    <button key={k} type="button" aria-pressed={!figure && czSet === k} data-cz-set={k}
+                      onClick={() => { setFigure(null); setCzSet(k); }}>
+                      {SET_LABEL[k]}<em>{czCounts[k]}</em>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+            items={czItems}
+            itemKey={(a) => a.id}
+            empty={figure ? "No agents here." : { fit: "No open agent who fits is left to query.", new: "No agents yet.", reopen: "Nobody is closed to queries." }[czSet]}
+            renderItem={(a) => {
+              const f = czFactsById.get(a.id);
+              if (!f) return null;
+              return (
+                <AgentCarouselCard
+                  agent={a} facts={f}
+                  q={cardQuery(cardRows(qcRows, a.id, scoped?.id ?? null))}
+                  genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
+                  fitWord={fitWord} fits={fitsGenre(a, scoped?.genre ?? null)}
+                  onOpen={(id, rect) => onOpen(id, rect)}
+                  onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
+                  onAct={actWithoutCard}
+                />
+              );
+            }}
+          />
+        )}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;

@@ -3,7 +3,7 @@
   "lock": "CL13-S the strip exists",
   "where": "1512",
   "ok": true,
-  "detail": "{\"w\":1167.25,\"bandW\":1167.25,\"group\":1167.25,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":515.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":530.75}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+  "detail": "{\"w\":1167.25,\"bandW\":1167.25,\"group\":1167.25,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":531.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":531.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":531.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":531.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":531.75}],\"intro\":\"Two of them want thrillers and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
  },
  {
   "lock": "CL13-S five cells, the mock's labels in order",
@@ -14,14 +14,14 @@
  {
   "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
   "where": "1512",
-  "ok": false,
-  "detail": "515.8 530.8 530.8 530.8 530.8"
+  "ok": true,
+  "detail": "531.8 531.8 531.8 531.8 531.8"
  },
  {
   "lock": "CL13-S the band and the strip name the genre one way",
   "where": "1512",
-  "ok": false,
-  "detail": "band \"thriller\" strip \"thrillers\""
+  "ok": true,
+  "detail": "band \"thrillers\" strip \"thrillers\""
  },
  {
   "lock": "CL13-S equal cells (±1)",
@@ -44,13 +44,13 @@
  {
   "lock": "CL13-S figures are Special Elite at 34px",
   "where": "1512",
-  "ok": false,
-  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+  "ok": true,
+  "detail": "[[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"]]"
  },
  {
   "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
   "where": "1512",
-  "ok": false,
+  "ok": true,
   "detail": ""
  },
  {
@@ -93,7 +93,7 @@
   "lock": "CL13-S the strip exists",
   "where": "1440",
   "ok": true,
-  "detail": "{\"w\":1099.84375,\"bandW\":1099.84375,\"group\":1099.84375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":515.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+  "detail": "{\"w\":1099.84375,\"bandW\":1099.84375,\"group\":1099.84375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":531.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":531.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":531.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":531.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":531.75}],\"intro\":\"Two of them want thrillers and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
  },
  {
   "lock": "CL13-S five cells, the mock's labels in order",
@@ -104,14 +104,14 @@
  {
   "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
   "where": "1440",
-  "ok": false,
-  "detail": "515.8 530.8 530.8 530.8 530.8"
+  "ok": true,
+  "detail": "531.8 531.8 531.8 531.8 531.8"
  },
  {
   "lock": "CL13-S the band and the strip name the genre one way",
   "where": "1440",
-  "ok": false,
-  "detail": "band \"thriller\" strip \"thrillers\""
+  "ok": true,
+  "detail": "band \"thrillers\" strip \"thrillers\""
  },
  {
   "lock": "CL13-S equal cells (±1)",
@@ -134,13 +134,13 @@
  {
   "lock": "CL13-S figures are Special Elite at 34px",
   "where": "1440",
-  "ok": false,
-  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+  "ok": true,
+  "detail": "[[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"]]"
  },
  {
   "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
   "where": "1440",
-  "ok": false,
+  "ok": true,
   "detail": ""
  },
  {
@@ -183,7 +183,7 @@
   "lock": "CL13-S the strip exists",
   "where": "1280",
   "ok": true,
-  "detail": "{\"w\":950.09375,\"bandW\":950.09375,\"group\":950.09375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":735.0625},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.03125,\"labelTop\":750.0625}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+  "detail": "{\"w\":950.09375,\"bandW\":950.09375,\"group\":950.09375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":751.0625},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":751.0625},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":751.0625},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":false,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":751.0625},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"figSize\":\"34px\",\"w\":190.03125,\"labelTop\":751.0625}],\"intro\":\"Two of them want thrillers and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
  },
  {
   "lock": "CL13-S five cells, the mock's labels in order",
@@ -194,14 +194,14 @@
  {
   "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
   "where": "1280",
-  "ok": false,
-  "detail": "735.1 750.1 750.1 750.1 750.1"
+  "ok": true,
+  "detail": "751.1 751.1 751.1 751.1 751.1"
  },
  {
   "lock": "CL13-S the band and the strip name the genre one way",
   "where": "1280",
-  "ok": false,
-  "detail": "band \"thriller\" strip \"thrillers\""
+  "ok": true,
+  "detail": "band \"thrillers\" strip \"thrillers\""
  },
  {
   "lock": "CL13-S equal cells (±1)",
@@ -224,13 +224,13 @@
  {
   "lock": "CL13-S figures are Special Elite at 34px",
   "where": "1280",
-  "ok": false,
-  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+  "ok": true,
+  "detail": "[[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"],[\"\\\"Special Elite\\\", \\\"Co\",\"34px\"]]"
  },
  {
   "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
   "where": "1280",
-  "ok": false,
+  "ok": true,
   "detail": ""
  },
  {

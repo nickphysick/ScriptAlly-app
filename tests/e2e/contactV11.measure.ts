@@ -116,10 +116,13 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
     expect(rest.max, "the page does not scroll — the pinned state is unreachable on this fixture").toBeGreaterThan(120);
     bump();
 
-    await page.evaluate((scope) => {
+    /* ⚠️ v13 P2: the strip and the carousel put the rail ~1,000px down, so a fixed 600 no longer reaches
+       its pin point. Scroll PAST the rail's own pin point (its resting top less the scroller's top and
+       the 16 it sticks at), by 120, so the reading is of the pinned state whatever sits above it. */
+    await page.evaluate(([scope, past]) => {
       const scroller = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
-      scroller.scrollTop = Math.min(600, scroller.scrollHeight - scroller.clientHeight);
-    }, scope);
+      scroller.scrollTop = Math.min(past, scroller.scrollHeight - scroller.clientHeight);
+    }, [scope, Math.round(rest.top - rest.scrollerTop - 16 + 120)] as const);
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
     const pinned = await read();
@@ -138,6 +141,10 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
   test("the tray: 122px inset 8, the title at (19,32), the peek art at (236,61) behind it", async ({ page }) => {
     await openRoute(page, "/agents", { width: 1440, height: 900 });
     const scope = await visiblePage(page, ".agl-wpg");
+    /* v13 P2: the rail starts below the strip and the carousel, under the fold at load — bring it on
+       screen first (the claims are all relative to the card and the tray, so they are unchanged) */
+    await page.evaluate((scope) => document.querySelector(`${scope} .clv-hkrail`)?.scrollIntoView({ block: "start" }), scope);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
     const t = await page.evaluate((scope) => {
       const card = document.querySelector(`${scope} .clv-hkrail`) as HTMLElement | null;
@@ -325,10 +332,18 @@ test("the filter panel — faceted counts, kept scroll, and an outside pointerdo
 test("the floating bar — centred on the list's box, never moving the list (§11.10)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
+  /* v13 P2: the strip and the carousel put Find below the fold at load, and `fill` scrolls to reach
+     it — which moves the list for a reason that is the harness's, not the bar's. Bring it on screen
+     before the "before" reading, so the only thing that could move the list is the bar. */
+  await page.evaluate((scope) => document.querySelector(`${scope} [data-clv="find"]`)?.scrollIntoView({ block: "center" }), scope);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const before = await page.evaluate((scope) => {
     const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
     const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
-    return { centre: main.getBoundingClientRect().left + main.getBoundingClientRect().width / 2, listTop: list.getBoundingClientRect().top };
+    /* the list's top IN THE SCROLLER'S CONTENT — the bar taking flow space would move it there; a scroll
+       clamping because a filter shortened the page does not (v13 P2: the page now starts scrolled) */
+    const sc = list.closest(".wpg-scroll") as HTMLElement;
+    return { centre: main.getBoundingClientRect().left + main.getBoundingClientRect().width / 2, listTop: list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop };
   }, scope);
   expect(await page.locator(".clv-fbar").count(), "the bar shows with nothing active").toBe(0);
   /* v12 P2 (3 Oct): the count cards are gone — Find is the cheapest chip-raiser left */
@@ -338,7 +353,8 @@ test("the floating bar — centred on the list's box, never moving the list (§1
     const bar = document.querySelector(".clv-fbar") as HTMLElement;
     const r = bar.getBoundingClientRect();
     const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
-    return { barCentre: r.left + r.width / 2, bottom: r.bottom, listTop: list.getBoundingClientRect().top, chips: bar.querySelectorAll(".clv-pl").length };
+    const sc = list.closest(".wpg-scroll") as HTMLElement;
+    return { barCentre: r.left + r.width / 2, bottom: r.bottom, listTop: list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop, chips: bar.querySelectorAll(".clv-pl").length };
   }, scope);
   expect(Math.abs(after.barCentre - before.centre), "the bar is not centred on the list's box").toBeLessThanOrEqual(1);
   expect(Math.abs(after.bottom - (900 - 22)), "22px above the window's bottom").toBeLessThanOrEqual(1);

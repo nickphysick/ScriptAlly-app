@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "CL13-4 cards render",
+  "where": "1512",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "CL13-4 every card is an agent card (.ac) built of the shared blocks",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 no card carries an id (a carousel cannot duplicate the quick view's)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 no card carries a data-ac marker (the open card's probes stay unambiguous)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 318 wide, 18 apart, the last card peeking",
+  "where": "1512",
+  "ok": true,
+  "detail": "318 18 peek true"
+ },
+ {
+  "lock": "CL13-4 clicking a card opens the agent card",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 the quick view's genres block IS the carousel card's",
+  "where": "1512",
+  "ok": true,
+  "detail": "<h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr vs <h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr"
+ },
+ {
+  "lock": "CL13-4 the card's Log a query opens the drawer and no agent card",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"drawer\":1,\"card\":0}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-4 cards render",
+  "where": "1440",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "CL13-4 every card is an agent card (.ac) built of the shared blocks",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 no card carries an id (a carousel cannot duplicate the quick view's)",
+  "where": "1440",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 no card carries a data-ac marker (the open card's probes stay unambiguous)",
+  "where": "1440",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 318 wide, 18 apart, the last card peeking",
+  "where": "1440",
+  "ok": true,
+  "detail": "318 18 peek true"
+ },
+ {
+  "lock": "CL13-4 clicking a card opens the agent card",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 the quick view's genres block IS the carousel card's",
+  "where": "1440",
+  "ok": true,
+  "detail": "<h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr vs <h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr"
+ },
+ {
+  "lock": "CL13-4 the card's Log a query opens the drawer and no agent card",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"drawer\":1,\"card\":0}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-4 cards render",
+  "where": "1280",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "CL13-4 every card is an agent card (.ac) built of the shared blocks",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 no card carries an id (a carousel cannot duplicate the quick view's)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 no card carries a data-ac marker (the open card's probes stay unambiguous)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL13-4 318 wide, 18 apart, the last card peeking",
+  "where": "1280",
+  "ok": true,
+  "detail": "318 18 peek true"
+ },
+ {
+  "lock": "CL13-4 clicking a card opens the agent card",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-4 the quick view's genres block IS the carousel card's",
+  "where": "1280",
+  "ok": true,
+  "detail": "<h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr vs <h4 class=\"acq-lab\">Genres sought</h4><div class=\"acq-gch\"><span class=\"hit\">Thr"
+ },
+ {
+  "lock": "CL13-4 the card's Log a query opens the drawer and no agent card",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"drawer\":1,\"card\":0}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

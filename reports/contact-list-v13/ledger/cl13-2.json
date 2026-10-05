@@ -2,11 +2,17 @@
  {
   "lock": "CL13-2 band → strip 40 (±1)",
   "where": "1512",
-  "ok": false,
-  "detail": "24"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "CL13-2 strip → the next section 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "CL13-2 carousel → the section under it 40 (±1)",
   "where": "1512",
   "ok": true,
   "detail": "40"
@@ -20,11 +26,17 @@
  {
   "lock": "CL13-2 band → strip 40 (±1)",
   "where": "1440",
-  "ok": false,
-  "detail": "24"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "CL13-2 strip → the next section 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "CL13-2 carousel → the section under it 40 (±1)",
   "where": "1440",
   "ok": true,
   "detail": "40"
@@ -38,11 +50,17 @@
  {
   "lock": "CL13-2 band → strip 40 (±1)",
   "where": "1280",
-  "ok": false,
-  "detail": "24"
+  "ok": true,
+  "detail": "40"
  },
  {
   "lock": "CL13-2 strip → the next section 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "CL13-2 carousel → the section under it 40 (±1)",
   "where": "1280",
   "ok": true,
   "detail": "40"

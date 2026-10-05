@@ -84,10 +84,12 @@
 .clv-group > .ph { grid-column: 1 / -1; grid-row: 1; }
 /* v13 §2 — under the BAND the next section is one rhythm step down (`--page-section-gap`, 40), not
    the open header's rule + 24; the rail keeps level with the column until it retires (v13 §6). */
-/* v13 §3 — the numbers strip is row 2, the whole group's width; the column and the rail are row 3 */
+/* v13 §3–4 — the numbers strip is row 2 and the carousel row 3, each the whole group's width; the
+   column and the rail are row 4. Each section is one rhythm step under the last. */
 .clv-group > .cl13-strip { grid-column: 1 / -1; grid-row: 2; margin-top: var(--page-section-gap); }
-.clv-group > .clv-main { grid-column: 1; grid-row: 3; padding-top: var(--page-section-gap); }
-.clv-group > .clv-rail { grid-column: 2; grid-row: 3; margin-top: var(--page-section-gap); }
+.clv-group > .cl13-cz { grid-column: 1 / -1; grid-row: 3; margin-top: var(--page-section-gap); min-width: 0; }
+.clv-group > .clv-main { grid-column: 1; grid-row: 4; padding-top: var(--page-section-gap); }
+.clv-group > .clv-rail { grid-column: 2; grid-row: 4; margin-top: var(--page-section-gap); }
 /* v13 §2 — THE BAND'S DISC. The Archivist file is square on white, not pre-cut (the Query Centre's
    disc art is), so the circle is drawn here: 290 white, the drawing inset at 92% and nudged 4px down,
    the mock's `.disc`. ⚠️ `.ph-bdisc img` sets the shared art to 100%; this 0-2-1 rule wins honestly. */

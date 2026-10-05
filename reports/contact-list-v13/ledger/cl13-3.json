@@ -1,0 +1,380 @@
+[
+ {
+  "lock": "CL13-3 the carousel exists, on a set",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the carousel holds exactly the figure's agents",
+  "where": "1512",
+  "ok": true,
+  "detail": "8 cards vs figure 8"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the head reads \"Fit your book · 8\", the selector dims, Clear shows",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Fit your book · 8\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the cell is pressed",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Fit your book: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1512",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Fit your book: pressed again, the previous set is back",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Open now: the carousel holds exactly the figure's agents",
+  "where": "1512",
+  "ok": true,
+  "detail": "33 cards vs figure 33"
+ },
+ {
+  "lock": "CL13-3 Open now: the head reads \"Open now · 33\", the selector dims, Clear shows",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Open now · 33\",\"cards\":[\"seed-agent-5\",\"seed-agent-10\",\"seed-cal-bang\",\"seed-agent-9\",\"seed-cal-passed20\",\"thin-ag-gap\",\"seed-cal-soon\",\"thin-ag-remind\",\"rej-agent-1\",\"rj-agent-1\",\"clv-fx-stale\",\"seed-cal-passed865\",\"seed-agent-4\",\"thin-ag-close\",\"rj-agent-3\",\"rj-agent-2\",\"thin-ag-chase\",\"seed-cal-near\",\"seed-agent-nowin-1\",\"seed-agent-8\",\"seed-agent-3\",\"seed-agent-nowin-2\",\"seed-agent-12\",\"seed-agent-7\",\"seed-agent-2\",\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Open now: the cell is pressed",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Open now: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1512",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Open now: pressed again, the previous set is back",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the carousel holds exactly the figure's agents",
+  "where": "1512",
+  "ok": true,
+  "detail": "4 cards vs figure 4"
+ },
+ {
+  "lock": "CL13-3 Added this month: the head reads \"Added this month · 4\", the selector dims, Clear shows",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Added this month · 4\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the cell is pressed",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Added this month: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1512",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Added this month: pressed again, the previous set is back",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Clear returns the carousel to where it was",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 a selector choice clears the figure and shows its set",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\",\"seed-agent-nowin-1\",\"seed-agent-nowin-2\",\"rj-agent-3\",\"rj-agent-2\"],\"pressed\":[\"new\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 after all of it, the list is still identical",
+  "where": "1512",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 a Find that empties the list leaves the carousel identical",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-3 the carousel exists, on a set",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the carousel holds exactly the figure's agents",
+  "where": "1440",
+  "ok": true,
+  "detail": "8 cards vs figure 8"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the head reads \"Fit your book · 8\", the selector dims, Clear shows",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Fit your book · 8\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the cell is pressed",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Fit your book: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1440",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Fit your book: pressed again, the previous set is back",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Open now: the carousel holds exactly the figure's agents",
+  "where": "1440",
+  "ok": true,
+  "detail": "33 cards vs figure 33"
+ },
+ {
+  "lock": "CL13-3 Open now: the head reads \"Open now · 33\", the selector dims, Clear shows",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Open now · 33\",\"cards\":[\"seed-agent-5\",\"seed-agent-10\",\"seed-cal-bang\",\"seed-agent-9\",\"seed-cal-passed20\",\"thin-ag-gap\",\"seed-cal-soon\",\"thin-ag-remind\",\"rej-agent-1\",\"rj-agent-1\",\"clv-fx-stale\",\"seed-cal-passed865\",\"seed-agent-4\",\"thin-ag-close\",\"rj-agent-3\",\"rj-agent-2\",\"thin-ag-chase\",\"seed-cal-near\",\"seed-agent-nowin-1\",\"seed-agent-8\",\"seed-agent-3\",\"seed-agent-nowin-2\",\"seed-agent-12\",\"seed-agent-7\",\"seed-agent-2\",\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Open now: the cell is pressed",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Open now: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1440",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Open now: pressed again, the previous set is back",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the carousel holds exactly the figure's agents",
+  "where": "1440",
+  "ok": true,
+  "detail": "4 cards vs figure 4"
+ },
+ {
+  "lock": "CL13-3 Added this month: the head reads \"Added this month · 4\", the selector dims, Clear shows",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Added this month · 4\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the cell is pressed",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Added this month: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1440",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Added this month: pressed again, the previous set is back",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Clear returns the carousel to where it was",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 a selector choice clears the figure and shows its set",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\",\"seed-agent-nowin-1\",\"seed-agent-nowin-2\",\"rj-agent-3\",\"rj-agent-2\"],\"pressed\":[\"new\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 after all of it, the list is still identical",
+  "where": "1440",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 a Find that empties the list leaves the carousel identical",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-3 the carousel exists, on a set",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the carousel holds exactly the figure's agents",
+  "where": "1280",
+  "ok": true,
+  "detail": "8 cards vs figure 8"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the head reads \"Fit your book · 8\", the selector dims, Clear shows",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Fit your book · 8\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Fit your book: the cell is pressed",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Fit your book: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1280",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Fit your book: pressed again, the previous set is back",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Open now: the carousel holds exactly the figure's agents",
+  "where": "1280",
+  "ok": true,
+  "detail": "33 cards vs figure 33"
+ },
+ {
+  "lock": "CL13-3 Open now: the head reads \"Open now · 33\", the selector dims, Clear shows",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Open now · 33\",\"cards\":[\"seed-agent-5\",\"seed-agent-10\",\"seed-cal-bang\",\"seed-agent-9\",\"seed-cal-passed20\",\"thin-ag-gap\",\"seed-cal-soon\",\"thin-ag-remind\",\"rej-agent-1\",\"rj-agent-1\",\"clv-fx-stale\",\"seed-cal-passed865\",\"seed-agent-4\",\"thin-ag-close\",\"rj-agent-3\",\"rj-agent-2\",\"thin-ag-chase\",\"seed-cal-near\",\"seed-agent-nowin-1\",\"seed-agent-8\",\"seed-agent-3\",\"seed-agent-nowin-2\",\"seed-agent-12\",\"seed-agent-7\",\"seed-agent-2\",\"clv-fx-stub0\",\"clv-fx-never\",\"msv12-agent-2\",\"msv12-agent-3\",\"msv12-agent-1\",\"msv12-agent-6\",\"msv12-agent-5\",\"msv12-agent-4\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Open now: the cell is pressed",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Open now: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1280",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Open now: pressed again, the previous set is back",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the carousel holds exactly the figure's agents",
+  "where": "1280",
+  "ok": true,
+  "detail": "4 cards vs figure 4"
+ },
+ {
+  "lock": "CL13-3 Added this month: the head reads \"Added this month · 4\", the selector dims, Clear shows",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Added this month · 4\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\"],\"pressed\":[],\"clear\":true}"
+ },
+ {
+  "lock": "CL13-3 Added this month: the cell is pressed",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 Added this month: the list is IDENTICAL — rows, order, controls, filter line, index",
+  "where": "1280",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 Added this month: pressed again, the previous set is back",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 Clear returns the carousel to where it was",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-3 a selector choice clears the figure and shows its set",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\",\"clv-fx-stale\",\"clv-fx-reopen\",\"seed-agent-nowin-1\",\"seed-agent-nowin-2\",\"rj-agent-3\",\"rj-agent-2\"],\"pressed\":[\"new\"],\"clear\":false}"
+ },
+ {
+  "lock": "CL13-3 after all of it, the list is still identical",
+  "where": "1280",
+  "ok": true,
+  "detail": "list changed"
+ },
+ {
+  "lock": "CL13-3 a Find that empties the list leaves the carousel identical",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false} vs {\"title\":\"Who to query next\",\"cards\":[\"clv-fx-stub0\",\"clv-fx-never\"],\"pressed\":[\"fit\"],\"clear\":false}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

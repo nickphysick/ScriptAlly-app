@@ -38,18 +38,7 @@ import {
   queryTone, seqPosition, trailOf, whereLine, wishStamp,
 } from "../../../lib/agentCard";
 import { canDestroy } from "../../../lib/cascade";
-
-/* the mock's own marks — line drawings in the ink, inheriting the link's colour */
-const ICO = {
-  web: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><circle cx="7" cy="7" r="5.5" /><path d="M1.5 7h11M7 1.5c2 2 2 9 0 11M7 1.5c-2 2-2 9 0 11" /></svg>,
-  mail: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="1.5" y="3" width="11" height="8" rx="1" /><path d="M1.5 3.5l5.5 4 5.5-4" /></svg>,
-  list: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M4 3.5h8M4 7h8M4 10.5h8" /><circle cx="1.8" cy="3.5" r=".6" /><circle cx="1.8" cy="7" r=".6" /><circle cx="1.8" cy="10.5" r=".6" /></svg>,
-  ql: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2.5" y="1.5" width="9" height="11" rx="1" /><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" /></svg>,
-  syn: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M3 1.5h5.5L11 4v8.5H3z" /><path d="M8.5 1.5V4H11" /></svg>,
-  smp: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M4.5 3.5h7v9h-7z" /><path d="M2.5 10.5v-9h7" /></svg>,
-  oth: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9" /></svg>,
-  pen: <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="M9.5 2l2.5 2.5L5 11.5 2 12l.5-3z" /></svg>,
-};
+import { CardIdentity, GenresBlock, ICO, MaterialsBlock, WishlistBlock } from "./AgentCardParts";
 
 const dmy = (ms: number) => formatDate(new Date(ms), { day: "numeric", month: "short" });
 /** "1 Nov", with the year only when it is not this year's */
@@ -320,10 +309,8 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
       )}
 
       <div key={agent.id} className={`ac-body${slide ? ` slide-${slide}` : ""}`} data-ac="body">
-        <div className={`acq-head${pulse?.includes("head") ? " ac-pulse" : ""}`} data-ac="head">
-          <span className="acq-ini" aria-hidden="true">{agentInitials(agent)}</span>
-          <div className="acq-id">
-            <h3 id="ac-name">{name}</h3>
+        {/* the identity and the three blocks are AgentCardParts' — the carousel's card renders the same */}
+        <CardIdentity agent={agent} headingId="ac-name" pulse={pulse?.includes("head")}>
             {showAgency && <div className="acq-agy">{agent.agency.trim()}</div>}
             <div className="acq-mt" data-ac="where">
               {where.flag && <span className={where.flag} aria-hidden="true" />}
@@ -339,8 +326,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
                 : <button type="button" className="miss" data-ac="add-email" onClick={() => onEdit("who", "email")}>+ Email</button>}
               {mswl && <a href={mswl} target="_blank" rel="noreferrer">{ICO.list}MSWL</a>}
             </div>
-          </div>
-        </div>
+        </CardIdentity>
 
         <div key={`q${queryPulse}`} className={`acq-q${queryPulse ? " ac-pulse" : ""}`} data-tone={tone.tone} data-ac="q">
           <div className="acq-qh">
@@ -365,36 +351,20 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
           ))}
         </div>
 
-        <div className={`acq-s${pulse?.includes("genres") ? " ac-pulse" : ""}`} data-ac="s-genres">
-          <h4 className="acq-lab">Genres sought</h4>
-          {genres.length ? (
-            <div className="acq-gch">
-              {genres.map((g) => <span key={g} className={genreHit(g) ? "hit" : undefined}>{g}</span>)}
-            </div>
-          ) : <Torn text="Not recorded" clv="torn-genres" onAdd={() => onEdit("want", "genres")} />}
-        </div>
+        <GenresBlock genres={genres} genreHit={genreHit} pulse={pulse?.includes("genres")} onAdd={() => onEdit("want", "genres")} />
 
-        <div className="acq-s" data-ac="s-wishlist">
-          <h4 className="acq-lab">
-            Manuscript wishlist
-            {wish && (
-              <span ref={stampRef} className="acq-stamp" data-ac="stamp" title="When you last looked at their wishlist">
-                {wishStamp(agent.mswlCheckedAt, nowMs)}
-                <button type="button" data-ac="mark-checked" aria-label="Mark as checked today" onClick={() => void markChecked()}>✓ mark checked</button>
-              </span>
-            )}
-          </h4>
-          {wish ? <p className="acq-wish">{wish}</p> : <Torn text="No wishlist yet" clv="torn-wishlist" onAdd={() => onEdit("want", "wishlist")} />}
-        </div>
+        <WishlistBlock
+          wish={wish}
+          onAdd={() => onEdit("want", "wishlist")}
+          stamp={(
+            <span ref={stampRef} className="acq-stamp" data-ac="stamp" title="When you last looked at their wishlist">
+              {wishStamp(agent.mswlCheckedAt, nowMs)}
+              <button type="button" data-ac="mark-checked" aria-label="Mark as checked today" onClick={() => void markChecked()}>✓ mark checked</button>
+            </span>
+          )}
+        />
 
-        <div className="acq-s" data-ac="s-materials">
-          <h4 className="acq-lab">Materials requested</h4>
-          {mats.length ? (
-            <div className="acq-mats">
-              {mats.map((m) => <span key={`${m.kind}-${m.label}`} className="acq-mat">{ICO[m.kind]}{m.label}</span>)}
-            </div>
-          ) : <Torn text="Not recorded" clv="torn-materials" onAdd={() => onEdit("want", "materials")} />}
-        </div>
+        <MaterialsBlock mats={mats} onAdd={() => onEdit("want", "materials")} />
 
         <div className="acq-s" data-ac="s-notes">
           <h4 className="acq-lab">
@@ -474,12 +444,6 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
     </>
   );
 };
-
-const Torn: React.FC<{ text: string; clv: string; onAdd: () => void }> = ({ text, clv, onAdd }) => (
-  <span className="ac-torn" data-ac={clv}>
-    {text} <button type="button" className="ac-mini" onClick={onAdd}>Add</button>
-  </span>
-);
 
 /** The section for a queried agent: where it stands now, what comes next, the button by stage,
  *  and the steps under a disclosure. */

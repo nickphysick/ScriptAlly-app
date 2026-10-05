@@ -123,3 +123,138 @@ test("CL13-S · strip", async ({ page }) => {
   }
   L.done(45);
 });
+
+/** The list's whole visible state — its rows in order, the controls' labels and on-states, the filter
+ *  line and the index strip. Lock 3 requires it IDENTICAL before and after a figure is pressed. */
+async function listState(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')].map((r) => r.getAttribute("data-agent") ?? r.textContent?.slice(0, 40));
+    const ctl = [...root.querySelectorAll<HTMLElement>('.clv-ctl button, [data-cl13="lbanner"] button, [data-cl13-pill]')].map((b) => `${b.textContent?.trim()}|${b.getAttribute("data-on") ?? ""}|${b.className}`);
+    const line = (root.querySelector('[data-clv="bar"], [data-cl13="fline"]') as HTMLElement | null)?.innerText ?? "";
+    const strip = (root.querySelector('[data-clv="idxwrap"]') as HTMLElement | null)?.innerText ?? "";
+    const find = [...root.querySelectorAll<HTMLInputElement>('input[placeholder="Find an agent"]')].map((i) => i.value);
+    return JSON.stringify({ rows, ctl, line, strip, find });
+  });
+}
+const czState = (page: import("@playwright/test").Page) => page.evaluate(() => {
+  const cz = [...document.querySelectorAll<HTMLElement>('.aglist [data-cz="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
+  if (!cz) return null;
+  return {
+    title: cz.querySelector(".cz-title")?.textContent ?? "",
+    cards: [...cz.querySelectorAll<HTMLElement>('[data-cl13="ccard"]')].map((c) => c.getAttribute("data-agent")),
+    pressed: [...cz.querySelectorAll<HTMLElement>("[data-cz-set]")].filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.getAttribute("data-cz-set")),
+    clear: !!cz.querySelector('[data-cl13="cz-clear"]'),
+  };
+});
+
+/* ── lock 3 · a figure fills the carousel and leaves the list identical ── */
+test("CL13-3 · figures fill the carousel, not the list", async ({ page }) => {
+  const L = new Ledger("cl13-3");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const before = await listState(page);
+    const cz0 = await czState(page);
+    L.check("CL13-3 the carousel exists, on a set", w, !!cz0 && cz0.pressed.length === 1 && !cz0.clear, JSON.stringify(cz0));
+    for (const [label, key] of [["Fit your book", "fit"], ["Open now", "open"], ["Added this month", "added"]] as const) {
+      const fig = Number((await page.locator(`.aglist [data-cl13-fig="${key}"] .cl13-sf`).first().textContent() ?? "").replace("+", ""));
+      await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().click();
+      await page.waitForTimeout(250);
+      const cz = await czState(page);
+      L.check(`CL13-3 ${label}: the carousel holds exactly the figure's agents`, w, !!cz && cz.cards.length === fig, `${cz?.cards.length} cards vs figure ${fig}`);
+      L.check(`CL13-3 ${label}: the head reads "${label} · ${fig}", the selector dims, Clear shows`, w, !!cz && cz.title === `${label} · ${fig}` && cz.pressed.length === 0 && cz.clear, JSON.stringify(cz));
+      L.check(`CL13-3 ${label}: the cell is pressed`, w, (await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().getAttribute("aria-pressed")) === "true", "");
+      L.check(`CL13-3 ${label}: the list is IDENTICAL — rows, order, controls, filter line, index`, w, (await listState(page)) === before, "list changed");
+      /* pressing the figure again hands the carousel back */
+      await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().click();
+      await page.waitForTimeout(250);
+      const back = await czState(page);
+      L.check(`CL13-3 ${label}: pressed again, the previous set is back`, w, JSON.stringify(back) === JSON.stringify(cz0), `${JSON.stringify(back)} vs ${JSON.stringify(cz0)}`);
+    }
+    /* Clear and a selector choice also hand it back */
+    await page.locator('.aglist [data-cl13-fig="open"]').first().click();
+    await page.locator('.aglist [data-cl13="cz-clear"]').first().click();
+    await page.waitForTimeout(200);
+    L.check("CL13-3 Clear returns the carousel to where it was", w, JSON.stringify(await czState(page)) === JSON.stringify(cz0), "");
+    await page.locator('.aglist [data-cl13-fig="open"]').first().click();
+    await page.locator('.aglist [data-cz-set="new"]').first().click();
+    await page.waitForTimeout(200);
+    const onNew = await czState(page);
+    L.check("CL13-3 a selector choice clears the figure and shows its set", w, !!onNew && onNew.pressed.join() === "new" && !onNew.clear && (await page.locator('.aglist [data-cl13-fig="open"]').first().getAttribute("aria-pressed")) === "false", JSON.stringify(onNew));
+    L.check("CL13-3 after all of it, the list is still identical", w, (await listState(page)) === before, "list changed");
+    /* …and the other direction: narrowing the LIST leaves the carousel exactly as it was */
+    await page.locator('.aglist [data-cz-set="fit"]').first().click();
+    await page.waitForTimeout(200);
+    const czBefore = await czState(page);
+    const find = page.locator('.aglist input[placeholder="Find an agent"]').first();
+    await find.evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await find.fill("zzqx no such agent");
+    await page.waitForTimeout(300);
+    L.check("CL13-3 a Find that empties the list leaves the carousel identical", w, JSON.stringify(await czState(page)) === JSON.stringify(czBefore), `${JSON.stringify(await czState(page))} vs ${JSON.stringify(czBefore)}`);
+    await find.fill("");
+    await page.waitForTimeout(200);
+    await checkOverflow(page, L, w);
+  }
+  L.done(60);
+});
+
+/* ── lock 4 · the carousel's cards are the agent card ── */
+test("CL13-4 · carousel cards are the agent card", async ({ page }) => {
+  const L = new Ledger("cl13-4");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    /* the set with the most cards, so the track scrolls and the peek shows */
+    await page.locator('.aglist [data-cz-set="new"]').first().click();
+    await page.waitForTimeout(200);
+    const r = await page.evaluate(() => {
+      const cz = [...document.querySelectorAll<HTMLElement>('.aglist [data-cz="contacts"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+      const cards = [...cz.querySelectorAll<HTMLElement>('[data-cl13="ccard"]')];
+      const track = cz.querySelector<HTMLElement>("[data-cz-track]")!;
+      const c0 = cards[0], c1 = cards[1];
+      return {
+        n: cards.length,
+        sig: cards.every((c) => c.classList.contains("ac") && !!c.querySelector('[data-cl13-blk="head"] .acq-ini') && !!c.querySelector('[data-cl13-blk="s-genres"] .acq-lab') && !!c.querySelector('[data-cl13-blk="s-wishlist"] .acq-lab') && !!c.querySelector('[data-cl13-blk="s-materials"] .acq-lab')),
+        acMarks: cz.querySelectorAll("[data-ac]").length,
+        ids: cards.filter((c) => c.querySelector("[id]")).length,
+        w: c0?.getBoundingClientRect().width ?? 0,
+        gap: c0 && c1 ? c1.getBoundingClientRect().left - c0.getBoundingClientRect().right : null,
+        peek: track.scrollWidth > track.clientWidth && cards.some((c) => { const b = c.getBoundingClientRect(), t = track.getBoundingClientRect(); return b.left < t.right && b.right > t.right; }),
+        agent: c0?.getAttribute("data-agent") ?? null,
+        genres: c0?.querySelector('[data-cl13-blk="s-genres"]')?.innerHTML.replace(/data-(ac|cl13-blk)=/g, "data-x=") ?? null,
+      };
+    });
+    L.check("CL13-4 cards render", w, r.n >= 2, `${r.n}`);
+    L.check("CL13-4 every card is an agent card (.ac) built of the shared blocks", w, r.sig, "");
+    L.check("CL13-4 no card carries an id (a carousel cannot duplicate the quick view's)", w, r.ids === 0, `${r.ids}`);
+    L.check("CL13-4 no card carries a data-ac marker (the open card's probes stay unambiguous)", w, r.acMarks === 0, `${r.acMarks}`);
+    L.check("CL13-4 318 wide, 18 apart, the last card peeking", w, near(r.w, 318, 1) && near(r.gap ?? -1, 18, 1) && r.peek, `${r.w} ${r.gap} peek ${r.peek}`);
+    /* the same agent's blocks in the quick view are the same markup */
+    await page.locator(`.aglist [data-cl13="ccard"][data-agent="${r.agent}"]`).first().click();
+    await page.locator('[data-ac="overlay"] [data-ac="s-genres"]').first().waitFor({ timeout: 6000 }).catch(() => {});
+    const qv = await page.evaluate(() => ({
+      genres: document.querySelector('[data-ac="overlay"] [data-ac="s-genres"]')?.innerHTML.replace(/data-(ac|cl13-blk)=/g, "data-x=") ?? null,
+    }));
+    L.check("CL13-4 clicking a card opens the agent card", w, qv.genres !== null, "");
+    L.check("CL13-4 the quick view's genres block IS the carousel card's", w, qv.genres === r.genres, `${qv.genres?.slice(0, 80)} vs ${r.genres?.slice(0, 80)}`);
+    await page.keyboard.press("Escape");
+    await page.locator('[data-ac="overlay"]').waitFor({ state: "detached", timeout: 4000 }).catch(() => {});
+    /* the card's button opens the journey directly — the drawer, with no agent card over the page */
+    const go = page.locator('.aglist [data-cl13="ccard"] [data-cl13="cgo"][data-act="log"]').first();
+    if (await go.count()) {
+      await go.click();
+      await page.locator("[data-qad-drawer]:visible").first().waitFor({ timeout: 6000 }).catch(() => {});
+      const st = await page.evaluate(() => ({
+        drawer: [...document.querySelectorAll("[data-qad-drawer]")].filter((e) => e.getBoundingClientRect().height > 0).length,
+        card: [...document.querySelectorAll('[data-ac="overlay"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+      }));
+      L.check("CL13-4 the card's Log a query opens the drawer and no agent card", w, st.drawer === 1 && st.card === 0, JSON.stringify(st));
+      await page.locator(".qad-dx").first().click();
+      { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
+      await page.locator("[data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+    } else L.check("CL13-4 a Log a query card was on the set", w, false, "none");
+    await checkOverflow(page, L, w);
+  }
+  L.done(27);
+});
