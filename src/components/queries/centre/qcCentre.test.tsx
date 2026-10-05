@@ -32,7 +32,7 @@ const rule = (sel: string) => {
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
   <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}}
-    sentence={<h2 id="sentence">s</h2>} body={<div id="body" />} courts={<div id="courts" />} rail={<aside id="rail" />}
+    sentence={<h2 id="sentence">s</h2>} body={<div id="body" />} courts={<div id="courts" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );
 
@@ -152,36 +152,19 @@ describe("the frame, rendered", () => {
     expect(html).toContain("+ Log a query");
     expect(html).toContain("Record a response");
   });
-  it("§2 · the page and the card are ONE group — the card is a sibling of the page, not a child", () => {
-    const html = frame({ rail: React.createElement("aside", { "data-qcv": "rail" }) });
-    /* the group wraps both, so the grid can place them; a card inside `.qcv-page` would be inside
-       the very column whose width it is meant to sit beside */
-    /* ⚠️ NOT ANCHORED ON `^`. React 19's SSR prepends `<link rel="preload" as="image">` for the
-       hero art, so the markup does not start with the group — and that preload is the art's, which
-       is a thing this page now WANTS. */
-    expect(html).toContain('<div class="qcv-group qcv-own" data-qcv="group" data-rail="beside">');
-    const group = html.indexOf('data-qcv="group"');
-    const page = html.indexOf('data-qcv="page"');
-    expect(group, "the page is not inside the group").toBeLessThan(page);
-    const rail = html.indexOf('data-qcv="rail"');
-    expect(rail, "the card renders after the page opens").toBeGreaterThan(page);
-    /**
-     * ⚠️ THE PAGE MUST HAVE CLOSED BEFORE THE CARD OPENS, AND THAT IS A DEPTH QUESTION, NOT A
-     * `</div>` QUESTION. A first cut asserted "some `</div>` sits between the two", which is true
-     * of a card nested three levels inside the page — proved vacuous by moving `{rail}` back inside
-     * `.qcv-page` and watching all 147 stay green. Walk the tags instead: from the page's own
-     * opening tag, depth must return to zero before the card's.
-     */
-    const depthAt = (from: number, to: number) => {
-      let d = 0;
-      for (const m of html.slice(from, to).matchAll(/<(\/?)div\b|<div\b[^>]*\/>/g)) d += m[1] ? -1 : 1;
-      return d;
-    };
-    const pageOpen = html.lastIndexOf("<div", page);
-    expect(depthAt(pageOpen, html.lastIndexOf("<", rail)), "the card is nested inside the page").toBe(0);
-    /* …and the card is still inside the group: the group has NOT closed by then */
-    const groupOpen = html.lastIndexOf("<div", group);
-    expect(depthAt(groupOpen, html.lastIndexOf("<", rail)), "the card fell out of the group").toBe(1);
+  it("v126 §4 · the rail is gone: the group is one column, and the workspace holds the list", () => {
+    const html = frame({ sticky: (stuck) => <div data-qcv="lsticky" data-stuck={String(stuck)} /> });
+    expect(html).toContain('<div class="qcv-group qcv-group--one qcv-own" data-qcv="group">');
+    expect(html, "a rail mounted again").not.toContain('data-qcv="rail"');
+    expect(html, "the group still says it has a rail beside it").not.toContain("data-rail=");
+    const ws = html.indexOf('data-qcv="workspace"'), sticky = html.indexOf('data-qcv="lsticky"');
+    const stage = html.indexOf('data-qcv="stagegrid"'), ctl = html.indexOf('data-qcv="ctl"');
+    expect(ws).toBeGreaterThan(-1);
+    expect(ctl, "the banner sits above the workspace").toBeLessThan(ws);
+    expect(sticky, "the sticky bar is the workspace's first child").toBeGreaterThan(ws);
+    expect(stage, "the list is inside the workspace").toBeGreaterThan(sticky);
+    expect(html, "the bar renders unstuck at rest").toContain('data-stuck="false"');
+    expect(read("src/components/queries/centre/QcCentre.tsx"), "stuck is derived from the banner on scroll").toMatch(/b\.bottom < scroller\.getBoundingClientRect\(\)\.top \+ 4/);
   });
   /**
    * ⚠️ THE DOCK IS DECIDED ON THE GROUP, AND READING THE PAGE COLUMN COST FOUR MEASUREMENTS.
@@ -252,10 +235,10 @@ describe("the frame, rendered", () => {
    * rather than left selecting on nothing. `docked` still exists and still measures the COLUMN: it
    * decides card-versus-drawer, which is a different question from how wide the ledger is.
    */
-  it("⚠️ one column always — the stage never narrows for a card, and the rail is always mounted", () => {
+  it("⚠️ one column always — the stage never narrows for a card, and no rail is mounted (v126 §4)", () => {
     for (const d of [true, false, null] as const) {
       expect(frame({ docked: d }), String(d)).not.toContain("qcv-stage--docked");
-      expect(frame({ docked: d }), `the rail is not mounted at docked=${d}`).toContain('id="rail"');
+      expect(frame({ docked: d }), `a rail mounted at docked=${d}`).not.toContain("qcv-rail");
       expect(frame({ docked: d }), String(d)).toContain('id="courts"');
     }
     expect(frame({ docked: false })).toContain("qcv-page--narrow");

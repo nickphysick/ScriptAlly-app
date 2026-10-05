@@ -266,9 +266,9 @@ export const QcList: React.FC<{
         g.label ? (
           <div key={g.key} role="group" className="qcv-sect"
             aria-label={`${g.label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}${g.hint ? `, ${g.hint}` : ""}`}>
-            <div className="qcv-grp" data-qcv="grp" data-group={g.key} aria-hidden="true">
+            <div className="qcv-grp" data-qcv="gband" data-group={g.key} aria-hidden="true">
               {g.label}
-              <em className="qcv-grp-n" data-qcv="grp-count">{g.rows.length}</em>
+              <em className="qcv-grp-n" data-qcv="gband-n">{g.rows.length}</em>
               {g.hint && <small className="qcv-grp-h">{g.hint}</small>}
             </div>
             {g.rows.map(renderRow)}

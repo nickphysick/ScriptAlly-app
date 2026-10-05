@@ -68,7 +68,7 @@ describe("§7 · the card", () => {
      * box came back null, and the card drew itself at the viewport's top-left — measured at top 0
      * against the rail's 137.8. The fallback lives in `readWindow`, so every caller gets it.
      */
-    const rail = read("src/components/queries/centre/QcRail.tsx");
+    const rail = read("src/components/queries/centre/qcWindow.ts");
     expect(rail).toContain('el?.closest(".ws-window") ?? document.querySelector(".ws-window")');
     expect(src, "it must go through the shared reader rather than walking up itself").not.toContain('closest(".ws-window")');
   });

@@ -148,6 +148,10 @@
   min-width: 0;
 }
 .qcv-group[data-rail="stacked"] { grid-template-columns: minmax(0, 1fr); }
+/* v126 §4 — THE LIVE PAGE IS ONE COLUMN: the rail is retired and the list takes the content
+   column's width. A modifier rather than an edit to the base rule, because the empty state
+   (`QcEmpty`, which this pack does not touch) still lays itself out on the two-track group. */
+.qcv-group.qcv-group--one { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
 /* §2 (page header v2) + §1 (v95): the header takes row 1 across BOTH tracks and the DESK takes row
    2 across both; the carousel (v126 §3) takes row 3 across both; the page and the rail share row
    4, so the rail starts below the carousel instead of beside the header. Every row is placed, because CSS grid auto-placement
@@ -156,8 +160,9 @@
 .qcv-group > .ph { grid-column: 1 / -1; grid-row: 1; }
 .qcv-group > .qcv-deskw { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
 .qcv-group > .qcv-cz { grid-column: 1 / -1; grid-row: 3; min-width: 0; }
-.qcv-group > .qcv-page { grid-column: 1; grid-row: 4; }
-.qcv-group > .qcv-rail { grid-column: 2; grid-row: 4; }
+.qcv-group > .qcv-page { grid-column: 1 / -1; grid-row: 4; }
+/* the live page ends at its workspace, whose own 60px is the gap to what follows */
+.qcv-group--one > .qcv-page { padding-bottom: 0; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
@@ -269,7 +274,6 @@
 /* §2 — 44px of air below the desk, as the reference renders it: no rule, no heading. It was 22.
    The gap is this element's top margin because the group's grid states no row gap, so the desk's
    row and the page's row meet at a shared edge and the first child's margin IS the distance. */
-.qcv-ctl { display: block; margin: 44px 0 0; }
 
 /**
  * §2 · THE LIST HEAD — the reference's own, measured at 1512: a three-track grid, `auto 1fr auto`,
@@ -337,6 +341,9 @@
   font: 700 9px var(--qcv-mono); letter-spacing: 0.06em;
   background: var(--qcv-navy); color: #f5f1eb; border-radius: 8px; padding: 2px 6px;
 }
+
+/* the empty state's exhibition still draws the list head in this wrapper */
+.qcv-ctl { display: block; margin: 44px 0 0; }
 
 /* ⚠️ `.qcv-pk` IS DELETED WITH THE SENTENCE IT STYLED, not left inert — the head's controls are
    `.qcv-op` and nothing emits the old class. A rule with no subject is what the next reader

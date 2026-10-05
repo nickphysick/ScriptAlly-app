@@ -93,7 +93,6 @@ import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
-import { QcRail } from "./queries/centre/QcRail";
 import { PageGuide, type GuideStep } from "./shell/PageGuide";
 
 /**
@@ -106,8 +105,8 @@ const QC_GUIDE: readonly GuideStep[] = [
   {
     title: "Your desk, in three bands",
     body: [
-      "The desk at the top counts what's with you, with the agents, and closed. Click a section to see just those.",
-      "The counts are the whole manuscript, so narrowing the list below never moves them.",
+      "The desk at the top counts what's with you, with the agents, and closed. Click a section to see all of them in the cards below it.",
+      "The desk only chooses the cards. The list underneath always shows every query, whatever the desk says.",
     ],
   },
   {
@@ -125,7 +124,6 @@ const QC_GUIDE: readonly GuideStep[] = [
     ],
   },
 ];
-import { QcBirdsEye } from "./queries/centre/QcBirdsEye";
 import { QcExpanded } from "./queries/centre/QcExpanded";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
@@ -135,11 +133,10 @@ import { QcQueryModal } from "./queries/centre/QcQueryModal";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, courtTiles, filterForStatusParam, filterOptions,
+  DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, filterForStatusParam, filterOptions,
   inScope, matchesFilter, matchesFind, sortRows,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
-import type { EyeFocus } from "../lib/qcBirdsEye";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
@@ -2297,13 +2294,6 @@ export const Queries: React.FC<{
      reads it; nothing the reader can reach does. */
   const QC_UNASSIGNED = "__unassigned__";
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
-  /**
-   * §1 (v95) · QC3 — THE RAIL'S FOCUS LIVES HERE, because a desk section sets it as well as the
-   * rail's own tabs. It was `useState` inside `QcBirdsEye`, which is right for a control nothing
-   * else touches; the moment the desk became a second thing that touches it, two owners of one
-   * value is the fault. The rail's header is untouched — only where the value lives moved.
-   */
-  const [qcEyeFocus, setQcEyeFocus] = useState<EyeFocus>("all");
   /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
   const [qcGroup, setQcGroup] = useState<GroupBy>("none");
   /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
@@ -6574,8 +6564,34 @@ export const Queries: React.FC<{
                 onSort={setQcSort}
                 scope={qcScopeMenu}
                 scopeTitle={qcScopeTitle}
+                variant="banner"
+                needYou={rowsForTile(qcScoped, "you").length}
+                msTitle={qcLineTitle}
               />
             }
+            sticky={(stuck) => (
+              <QcSentence
+                find={qcFind}
+                onFind={setQcFind}
+                loading={showGridSkeleton}
+                /* Birds-eye is the rail's view, not a state this sentence can be in (v65 §1) */
+                calendar={false}
+                filter={qcFilter}
+                total={qcScoped.length}
+                group={qcGroup}
+                onGroup={setQcGroup}
+                count={qcVisible.length}
+                options={filterOptions(qcScoped)}
+                onFilter={pickQcFilter}
+                sort={qcSort}
+                onSort={setQcSort}
+                scope={qcScopeMenu}
+                scopeTitle={qcScopeTitle}
+                variant="sticky"
+                stuck={stuck}
+                needYou={rowsForTile(qcScoped, "you").length}
+              />
+            )}
             courts={showGridSkeleton ? <QcCourtsSkeleton /> : (
               <QcCourts
                 tiles={courtTiles(qcScoped, Date.now())}
@@ -6668,34 +6684,6 @@ export const Queries: React.FC<{
             onExport={handleExportFilteredCSV}
             canExport={gridRows.length > 0}
             hasOpen={!!(panelRow && activeQuery)}
-            /**
-             * ⚠️ THE OPEN QUERY LIVES IN THE RAIL NOW (v65 §6.5) — the same query, tabs and handlers
-             * the drawer has; only its house changed again. `QcRail` shows the Birds-eye view while
-             * nothing is chosen and this card while something is, so the page's furniture never
-             * moves and the ledger keeps its whole width either way.
-             *
-             * ⚠️ AND IT IS STILL GATED ON `qcDocked`, which measures the PAGE's own column. Under
-             * 900px of it the drawer below takes over, as it has since v11. The rail's own stacking
-             * threshold is a different question about a different box — the WINDOW's width against
-             * what a card plus a usable ledger needs — and the two are deliberately not folded.
-             *
-             * ⚠️ THE COVER RESERVES A CARD ONLY WHERE ONE IS COMING (v21 §7). Since nothing selects
-             * itself, `/queries` loads with no card at all — and a cover that drew one anyway put the
-             * ledger at 698px behind a page that lands at 1114, which is a 416px jump at the instant
-             * the cover lifts: the exact fault the cover exists to prevent, built into the cover.
-             */
-            rail={(
-              <QcRail
-                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} focus={qcEyeFocus} onFocus={setQcEyeFocus} onExpand={openBirdsEye} />}
-                /**
-                 * §2 (v65.6) — THE RAIL IS ALWAYS THE BIRDS-EYE VIEW. It used to swap to the open
-                 * query for clicks on the page, so the same act had two outcomes depending on which
-                 * door you came through, and the rail — the one place that shows the shape of
-                 * everything — went blank exactly when a reader was comparing one query to the rest.
-                 * One way to open a query now, and it is the modal.
-                 */
-                />
-              )}
             body={
               showGridSkeleton ? (
                 <QcListSkeleton />

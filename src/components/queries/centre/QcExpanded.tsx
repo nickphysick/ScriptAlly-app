@@ -32,7 +32,7 @@ import { QcCalControls, type CalMenu } from "./QcCalControls";
 import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
 import { BE_HAWK_HEAD } from "./qcArt";
-import { expandedBox, readWindow, type ExpandedBox } from "./QcRail";
+import { expandedBox, readWindow, type ExpandedBox } from "./qcWindow";
 import { nextUp } from "../../../lib/qcBirdsEye";
 import "./qcvExpanded.css";
 

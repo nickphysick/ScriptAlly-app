@@ -1,0 +1,112 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The list's open banner, its workspace and its sticky bar (v126 §4; ref
+ * design-refs/query-centre-v126.html `.lbn`, `.pg2`, `.lsticky`).
+ *
+ * ⚠️ THE BANNER IS OPEN — NO FILL AND NO CONTAINER. The hawk perches in a 170px first column and
+ * stands on the workspace's top edge: its bottom margin is −14 and it paints above the blush, so the
+ * edge passes behind his feet. The PNG is already mirrored; it is never flipped here.
+ *
+ * ⚠️ THE CONTROLS ARE THE LIST'S OWN, RE-HOUSED — `.qcv-lh-find` and `.qcv-op` from qcvPage.css,
+ * dressed as a 260×40 field and 40px pills by the descendant rules below. Their menus and their
+ * behaviour are the head's, unchanged.
+ *
+ * ⚠️ AND THEY WRAP RATHER THAN OVERFLOW. Where the column cannot hold the sentence and the controls
+ * side by side the row wraps, and the controls start a line of their own 16px down at the left. The
+ * reference overflowed by 109px at 1280 before that rule existed.
+ */
+.qcv-lbw { margin-top: 40px; min-width: 0; }
+
+.qcv-lbn {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 170px minmax(0, 1fr); column-gap: 30px; align-items: end;
+  padding: 10px 0 24px; background: transparent;
+}
+.qcv-lhawk {
+  grid-row: 1 / 4; align-self: end; display: block;
+  width: 170px; height: auto; margin: 0 0 -38px 18px;
+  position: relative; z-index: 3; pointer-events: none;
+}
+.qcv-lbn > .qcv-lbn-n, .qcv-lbn > .qcv-lbn-h, .qcv-lbn > .qcv-lbn-row { grid-column: 2; min-width: 0; }
+.qcv-lbn .qcv-lbn-n {
+  display: block; margin-bottom: 8px;
+  font: 400 9.5px/1.35 var(--qcv-mono); letter-spacing: 0.16em; color: rgba(28, 19, 15, 0.5);
+}
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces every h2's face at runtime */
+.qcv-lbn .qcv-lbn-h {
+  margin: 0; white-space: nowrap;
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(32px, 2.8vw, 42.3px); line-height: 1.05;
+  color: var(--qcv-ink);
+}
+.qcv-lbn-row {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  column-gap: 40px; row-gap: 16px; margin-top: 10px;
+}
+.qcv-lbn .qcv-lbn-p {
+  flex: 1 1 340px; min-width: 300px; max-width: 56ch; margin: 0;
+  font: 400 16.5px/24.75px var(--sp-serif); color: rgba(28, 19, 15, 0.72);
+}
+.qcv-lbn .qcv-lbn-p b { font-weight: 600; color: var(--qcv-ink); }
+
+.qcv-lbn-ctl, .qcv-lsticky { --qcv-ctl-h: 40px; }
+.qcv-lbn-ctl { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+.qcv-lbn-ctl .qcv-lh-ops, .qcv-lsticky .qcv-lh-ops { gap: 10px; font-size: 14px; }
+.qcv-lbn-ctl .qcv-lh-find, .qcv-lsticky .qcv-lh-find {
+  box-sizing: border-box; justify-self: auto; height: var(--qcv-ctl-h); width: 260px; padding: 0 14px;
+  border-radius: calc(var(--qcv-ctl-h) / 2); background: #ffffff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
+  font-size: 14px;
+}
+.qcv-lbn-ctl .qcv-lh-find input, .qcv-lsticky .qcv-lh-find input { width: 100%; flex: 1; }
+.qcv-lbn-ctl .qcv-op, .qcv-lsticky .qcv-op {
+  box-sizing: border-box; height: var(--qcv-ctl-h); padding: 0 15px; gap: 7px;
+  border-radius: calc(var(--qcv-ctl-h) / 2); background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+}
+.qcv-lbn-ctl .qcv-op:hover, .qcv-lsticky .qcv-op:hover { background: rgba(255, 255, 255, 0.85); }
+.qcv-lbn-ctl .qcv-op:focus-visible, .qcv-lsticky .qcv-op:focus-visible { border-radius: calc(var(--qcv-ctl-h) / 2); }
+
+/* below a 1100px VIEWPORT the banner stacks and the hawk goes — the reference's own media query.
+   Between 1100 and ~1366 the hawk stays and the controls wrap under the sentence instead. */
+@media (max-width: 1100px) {
+  .qcv-lbn { grid-template-columns: minmax(0, 1fr); padding-left: 0; }
+  .qcv-lhawk { display: none; }
+  .qcv-lbn > .qcv-lbn-n, .qcv-lbn > .qcv-lbn-h, .qcv-lbn > .qcv-lbn-row { grid-column: 1; }
+  .qcv-lbn .qcv-lbn-h { white-space: normal; }
+  .qcv-lbn-row { flex-direction: column; align-items: flex-start; }
+  .qcv-lbn .qcv-lbn-p { flex: none; min-width: 0; }
+  .qcv-lbn-ctl { flex-wrap: wrap; }
+}
+
+/* ── the workspace ───────────────────────────────────────────────────────────────────────────── */
+.qcv-work {
+  position: relative; z-index: 1; box-sizing: border-box;
+  margin-bottom: 60px; padding: 22px 22px 26px; border-radius: 22px; background: #f4e0d4;
+}
+
+/* the second band stands 18px off the rows above it (the head's list keeps its own 22) */
+.qcv-work .qcv-sect + .qcv-sect .qcv-grp { margin-top: 18px; }
+
+/**
+ * ⚠️ THE STICKY BAR TAKES NO FLOW SPACE, SO SHOWING IT MOVES NOTHING. It is always laid out — the
+ * reference toggles `display`, which pushes every row down 70px at the instant it appears — and its
+ * bottom margin cancels its own height. Hidden, it is transparent and takes no pointer events.
+ */
+.qcv-lsticky {
+  --qcv-ctl-h: 34px;
+  position: sticky; top: 0; z-index: 20; box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px; height: 56px;
+  margin: -22px -22px -34px; padding: 0 22px;
+  background: rgba(244, 224, 212, 0.94); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(124, 58, 42, 0.15); border-radius: 22px 22px 0 0;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s;
+}
+.qcv-lsticky.is-stuck { opacity: 1; pointer-events: auto; border-radius: 0; }
+.qcv-lsticky > b { font: 400 18px/1.3 var(--sp-type); color: var(--qcv-ink); white-space: nowrap; }
+.qcv-lsticky > small { font: 400 9px var(--qcv-mono); letter-spacing: 0.14em; color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.qcv-lsticky-sp { flex: 1; }
+.qcv-lsticky .qcv-lh-find { width: 220px; font-size: 13px; }
+.qcv-lsticky .qcv-op { padding: 0 13px; font-size: 13px; background: rgba(255, 255, 255, 0.6); }
+
+@media (prefers-reduced-motion: reduce) { .qcv-lsticky { transition: none; } }

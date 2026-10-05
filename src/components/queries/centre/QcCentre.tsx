@@ -14,7 +14,7 @@
  * measurement (a layout effect, so before paint) — the page renders neither the card nor a drawer
  * on a guess.
  */
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../../shell/primitives.css";
 import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { QC_COURIER_DISC } from "./qcArt";
@@ -74,14 +74,10 @@ export const QcCentre: React.FC<{
   /** The three court tiles (§4), between the hero and the sentence. */
   courts: React.ReactNode;
   /**
-   * The fixed card at the right (§2, §6): the Birds-eye view, or the open query.
-   *
-   * ⚠️ IT IS HANDED IN WHOLE, ALREADY DECIDED. The page reserves its column with padding and places
-   * nothing: the card measures the window and places itself. Passing its CONTENTS instead would put
-   * the choice between Birds-eye and a query in the page's layout component, which knows about
-   * neither.
+   * v126 §4 — the slim bar that pins once the banner has scrolled away, given whether it should
+   * show. The page renders it; this frame decides when, from the scroller it sits in.
    */
-  rail: React.ReactNode;
+  sticky?: (stuck: boolean) => React.ReactNode;
   /**
    * The carousel (v126 §3), between the desk and the list. It replaces the fan, which dealt a court
    * over the page; the desk now selects what the carousel shows and nothing else.
@@ -105,7 +101,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, carousel, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, sticky, carousel, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -128,13 +124,38 @@ export const QcCentre: React.FC<{
     return () => ro.disconnect();
   }, [onDocked]);
 
+  /**
+   * v126 §4 — STUCK IS DERIVED FROM THE BANNER'S BOX ON EVERY SCROLL, never an observer: a missed
+   * intersection event is permanent, a reading taken on the next scroll cannot go stale. The
+   * scroller is the grid's own (`.wpg-scroll`), found from the group, so a page that scrolls
+   * somewhere else would simply never stick rather than stick wrongly.
+   */
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const group = groupRef.current;
+    const scroller = group?.closest<HTMLElement>(".wpg-scroll");
+    if (!group || !scroller) return undefined;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const banner = group.querySelector<HTMLElement>('[data-qcv="lbanner"]');
+      if (!banner) { setStuck(false); return; }
+      const b = banner.getBoundingClientRect();
+      setStuck(b.height > 0 && b.bottom < scroller.getBoundingClientRect().top + 4);
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    scroller.addEventListener("scroll", on, { passive: true });
+    return () => { scroller.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
   return (
     /**
      * §2 — THE PAGE AND THE BIRDS-EYE CARD ARE ONE CENTRED GROUP. The card used to be placed against
      * the window's right edge, which is right while the page fills the window and strands it on a
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
-    <div ref={groupRef} className="qcv-group qcv-own" data-qcv="group" data-rail="beside">
+    <div ref={groupRef} className="qcv-group qcv-group--one qcv-own" data-qcv="group">
       {/**
         * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
         * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the
@@ -175,15 +196,16 @@ export const QcCentre: React.FC<{
     <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
 
-      {/* ⚠️ THERE IS NO VIEW SWITCH AND NOTHING TO SWITCH (v65 §1). The ledger IS the page; the
-          calendar is the rail's Birds-eye view. A segmented control here would offer a state the
-          page cannot be in. */}
-      <div className="qcv-ctl" data-qcv="ctl">
+      {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
+          are the list's own and their menus have not changed. */}
+      <div className="qcv-lbw" data-qcv="ctl">
         {sentence}
       </div>
 
-      {/* ⚠️ ONE COLUMN (§5). The open query lives in the rail now, so the ledger keeps the page's
-          whole width whatever is chosen — and selecting a row no longer narrows it by 396px. */}
+      {/* v126 §4 — THE WORKSPACE: blush, radius 22, the two bands and their rows inside it. The rail
+          is gone, so it spans the whole content column. */}
+      <div className="qcv-work" data-qcv="workspace">
+        {sticky?.(stuck)}
       <div className="qcv-stage" data-qcv="stagegrid"
         /* ⚠️ BOUND HERE, NOT ON THE DOCUMENT. The drawer bound the arrows only while open; a docked card
            is always open, so a global binding would take the arrows from the whole page. Skipped in
@@ -212,15 +234,14 @@ export const QcCentre: React.FC<{
             frame used to be it. */}
         <section className="qcv-ledger" data-qcv="ledger" aria-label="Queries">{body}</section>
       </div>
-
       <div className="qcv-foot">
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
+      </div>
       </div>
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}
       </div>
     </div>
-    {rail}
     {overlay}
     </div>
   );

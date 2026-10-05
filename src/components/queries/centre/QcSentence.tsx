@@ -37,7 +37,9 @@ import {
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import { QcMenu, type QcMenuGroup } from "./QcMenu";
 import { FILTER_ICON, GROUP_ICON, SORT_ICON } from "../../shared/listControlIcons";
+import { QC_LIST_PERCH } from "./qcArt";
 import "./qcvPage.css";
+import "./qcvListBanner.css";
 
 export interface ScopeOption { id: string; title: string; count: number }
 
@@ -62,7 +64,21 @@ export const QcSentence: React.FC<{
   /** §2 — the Find field, the same search the Contact list's head carries. */
   find: string;
   onFind: (v: string) => void;
-}> = ({ loading, calendar, filter, count, total, options, onFilter, sort, onSort, group, onGroup, scope, scopeTitle, find, onFind }) => {
+  /**
+   * v126 §4 — WHERE THE CONTROLS ARE HOUSED. `head` is the one-line list head (still the empty
+   * state's exhibition's); `banner` is the open banner over the workspace, with the perched hawk;
+   * `sticky` is the slim bar that pins once the banner has scrolled away. Every variant renders the
+   * SAME controls and the same menus — only the house changes.
+   */
+  variant?: "head" | "banner" | "sticky";
+  /** banner: how many of the rows are the writer's move ("N NEED YOU") */
+  needYou?: number;
+  /** banner: the manuscript the list is for, named in bold; null across all manuscripts */
+  msTitle?: string | null;
+  /** sticky: shown, or laid out and invisible (it takes no flow space either way) */
+  stuck?: boolean;
+  bannerRef?: React.Ref<HTMLElement>;
+}> = ({ loading, calendar, filter, count, total, options, onFilter, sort, onSort, group, onGroup, scope, scopeTitle, find, onFind, variant = "head", needYou = 0, msTitle = null, stuck = false, bannerRef }) => {
   const [open, setOpen] = useState<Open>(null);
   const filterRef = useRef<HTMLButtonElement>(null);
   const groupRef = useRef<HTMLButtonElement>(null);
@@ -70,7 +86,7 @@ export const QcSentence: React.FC<{
   const close = useCallback(() => setOpen(null), []);
   const toggle = (k: Exclude<Open, null>) => setOpen((o) => (o === k ? null : k));
 
-  if (loading) {
+  if (loading && variant === "head") {
     return (
       <div className="qcv-lhead" data-qcv="sentence">
         {/* ⚠️ `0.7em` AND `vertical-align: middle`, NOT A PIXEL HEIGHT ON THE BASELINE. An
@@ -101,11 +117,8 @@ export const QcSentence: React.FC<{
     }] : []),
   ];
 
-  return (
-    <div className="qcv-lhead" data-qcv="sentence">
-      <h2 className="qcv-lh-ttl" data-qcv="lh-title">
-        Your queries<small data-qcv="lh-tally">{count} OF {total}</small>
-      </h2>
+  const controls = (
+    <>
       {/* ⚠️ THE MAGNIFIER IS DRAWN. The reference types `⌕` (U+2315) in Special Elite, which does
           not carry it; a character is a request to a font and a path is a picture. */}
       <label className="qcv-lh-find" data-qcv="find">
@@ -137,6 +150,10 @@ export const QcSentence: React.FC<{
           </button>
         )}
       </div>
+    </>
+  );
+  const menus = (
+    <>
       {open === "filter" && <QcMenu anchor={filterRef.current} label="Which queries" groups={filterGroups} onClose={close} />}
       {open === "group" && (
         <QcMenu anchor={groupRef.current} label="How to group them" onClose={close}
@@ -146,6 +163,62 @@ export const QcSentence: React.FC<{
         <QcMenu anchor={sortRef.current} label="In what order" onClose={close}
           groups={[{ current: sort, items: SORT_OPTIONS.map((o) => ({ key: o.key, label: o.label.replace(/^./, (c) => c.toUpperCase()) })), onPick: (k) => onSort(k as QcSort) }]} />
       )}
+    </>
+  );
+
+  /**
+   * v126 §4 — THE OPEN BANNER. No fill and no container: the perched hawk in a 170px first column,
+   * then the count line, the headline, one sentence and the controls on its row. Its feet stand on
+   * the workspace's top edge (a negative bottom margin, painted above it).
+   */
+  if (variant === "banner") {
+    const n = total;
+    return (
+      <section className="qcv-lbn" data-qcv="lbanner" ref={bannerRef} aria-label="Every query">
+        <img className="qcv-lhawk" data-qcv="lhawk" src={`${QC_LIST_PERCH.src}?v=${QC_LIST_PERCH.version}`}
+          width={QC_LIST_PERCH.width} height={QC_LIST_PERCH.height} alt="" aria-hidden="true" />
+        {/* data-n is what the list SHOWS, so the two bands' counts add up to it (QC126-8) */}
+        <small className="qcv-lbn-n" data-qcv="lb-total" data-n={count}>
+          {count === n ? n : `${count} OF ${n}`} {n === 1 ? "QUERY" : "QUERIES"}{needYou > 0 ? ` · ${needYou} NEED${needYou === 1 ? "S" : ""} YOU` : ""}
+        </small>
+        <h2 className="qcv-lbn-h">Every query, in one place.</h2>
+        <div className="qcv-lbn-row">
+          <p className="qcv-lbn-p">
+            All {n} {n === 1 ? "query" : "queries"}{msTitle ? <> for <b>{msTitle}</b></> : " across your manuscripts"}.
+            {group === "none" ? " Your move first, then the rest." : ""} Filter, group and sort them however you work.
+          </p>
+          <div className="qcv-lbn-ctl" data-qcv="lb-ctl">{loading ? null : controls}</div>
+        </div>
+        {menus}
+      </section>
+    );
+  }
+
+  /**
+   * v126 §4 — THE STICKY BAR. It is always laid out and takes no flow space (a negative bottom
+   * margin equal to its height), so showing it moves nothing; it is shown once the banner has
+   * scrolled away and hidden again when it returns.
+   */
+  if (variant === "sticky") {
+    return (
+      <div className={`qcv-lsticky${stuck ? " is-stuck" : ""}`} data-qcv="lsticky" data-stuck={stuck ? "true" : "false"}
+        aria-hidden={!stuck} inert={!stuck || undefined}>
+        <b>Every query</b>
+        <small>{count === total ? `${total}` : `${count} OF ${total}`}{needYou > 0 ? ` · ${needYou} NEED${needYou === 1 ? "S" : ""} YOU` : ""}</small>
+        <span className="qcv-lsticky-sp" />
+        {controls}
+        {menus}
+      </div>
+    );
+  }
+
+  return (
+    <div className="qcv-lhead" data-qcv="sentence">
+      <h2 className="qcv-lh-ttl" data-qcv="lh-title">
+        Your queries<small data-qcv="lh-tally">{count} OF {total}</small>
+      </h2>
+      {controls}
+      {menus}
     </div>
   );
 };

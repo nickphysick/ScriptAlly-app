@@ -473,9 +473,9 @@ export function listGroups(
    * `Your move 〔4〕 · OFFERS, REQUESTS AND NUDGES` and the rows beneath it are the ones it counts.
    * Changing the words was in scope; changing the claim was not. (Ruled by Nick, 3 Oct.)
    *
-   * So an ungrouped list is TWO groups: the your-move band and its rows, then the rest with no band
-   * at all — `QcList` draws no heading for a group whose label is empty, which is the branch that
-   * already existed for the ungrouped case.
+   * So an ungrouped list is TWO groups: the your-move band and its rows, then the rest under its own
+   * band, "Everything else · WAITING ON AGENTS · CLOSED" (v126 §4 — it used to have no band at all).
+   * The two bands' counts are one partition by `tileCourt`, so they always add up to the total.
    *
    * ⚠️ THE COUNT IS `tileCourt`, THE DESK'S OWN FIRST SECTION. One classification, asked in two
    * places, so the band and the desk cannot state different numbers for the same set.
@@ -486,7 +486,7 @@ export function listGroups(
     const rest = rows.filter((r) => tileCourt(r.status) !== "you");
     return [
       ...(mine.length ? [mk("you", "Your move", mine, "offers, requests and nudges")] : []),
-      ...(rest.length ? [mk("rest", "", rest)] : []),
+      ...(rest.length ? [mk("rest", "Everything else", rest, "waiting on agents · closed")] : []),
     ];
   }
 
