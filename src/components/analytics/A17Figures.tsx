@@ -247,3 +247,180 @@ export const ShareBars: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   );
 };
 
+/* ═════════════ 4 · response window honesty ═════════════ */
+export const ReplyWindow: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const mark = useMark();
+  const rp = model.v17.reply;
+  const rows = rp.rows;
+  const maxW = rp.maxWeeks;
+  const step = maxW > 24 ? 8 : 4;
+  const W = 1200, x0 = 96, x1 = W - 30, per = (x1 - x0) / maxW;
+  const rowH = Math.max(22, Math.min(40, 350 / Math.max(1, rows.length)));
+  const H = rows.length * rowH + 50;
+  const ticks = Array.from({ length: Math.floor(maxW / step) }, (_, i) => (i + 1) * step);
+  /* phone */
+  const MW = 330, mper = (MW - 6) / maxW, mRow = 38;
+  const tipOf = (r: (typeof rows)[number]) => [`Said ${r.windowWeeks} ${r.windowWeeks === 1 ? "week" : "weeks"} · replied in ${Math.round(r.replyWeeks * 10) / 10} (${r.inside ? "inside" : "after"} the window)`, r.query.state];
+  return (
+    <Fig k="reply" title="Stated window and actual reply" note={rp.note + (rp.agents ? ` · ${rp.stated} of ${rp.agents} agents state a response time` : "")} population={rows.length}
+      keyItems={<><span><Sw c="a17-sw--win" />Stated window the agent gives</span><span><Sw c="a17-f-requested a17-sw--dot" />Reply, coloured by what it was</span><span><Sw c="a17-sw--dash" />How late it came</span></>}>
+      {rows.length === 0 ? <p className="a17-none">No replies against a stated window yet</p> : (
+        <>
+          <svg className="a17-d" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Stated window and actual reply">
+            {ticks.map((w) => (
+              <g key={w}>
+                <line x1={x0 + w * per} y1={0} x2={x0 + w * per} y2={H - 34} className="a17-faint" />
+                <text className="a17-ax" x={x0 + w * per} y={H - 12} textAnchor="middle">{w} WEEKS</text>
+              </g>
+            ))}
+            {rows.map((r, i) => {
+              const y = 6 + i * rowH + rowH / 2;
+              return (
+                <g key={r.id} data-a17="rrow" data-late={r.inside ? "false" : "true"}>
+                  <text className="a17-nm" x={0} y={y + 4}>{short(r.query)}</text>
+                  <rect {...mark(titleOf(r.query), [`States ${r.windowWeeks} ${r.windowWeeks === 1 ? "week" : "weeks"}`])} x={x0} y={y - 7} width={r.windowWeeks * per} height={14} rx={7} className="a17-win" />
+                  {!r.inside ? <line data-a17="leader" x1={x0 + r.windowWeeks * per} y1={y} x2={x0 + r.replyWeeks * per} y2={y} className="a17-leader" /> : null}
+                  <circle {...mark(titleOf(r.query), tipOf(r))} data-a17="rdot" cx={x0 + r.replyWeeks * per} cy={y} r={8} className={`a17-f-${r.bucket} a17-inkrule16`} />
+                </g>
+              );
+            })}
+          </svg>
+          <svg className="a17-m" viewBox={`0 0 ${MW} ${rows.length * mRow + 30}`} width="100%" data-a17="m-reply" role="img" aria-label="Stated window and actual reply">
+            {ticks.map((w) => (
+              <g key={w}>
+                <line x1={w * mper} y1={4} x2={w * mper} y2={rows.length * mRow + 6} className="a17-faint" />
+                <text className="a17-axm" x={Math.min(w * mper, MW - 4)} y={rows.length * mRow + 22} textAnchor={w === maxW ? "end" : "middle"}>{w}W</text>
+              </g>
+            ))}
+            {rows.map((r, i) => {
+              const y = i * mRow;
+              return (
+                <g key={r.id}>
+                  <text className="a17-lbm" x={0} y={y + 13}>{short(r.query)}</text>
+                  <text className="a17-axm" x={MW} y={y + 13} textAnchor="end">{`SAID ${r.windowWeeks}W · ${Math.round(r.replyWeeks)}W`}</text>
+                  <rect x={0} y={y + 19} width={r.windowWeeks * mper} height={10} rx={5} className="a17-win" />
+                  {!r.inside ? <line x1={r.windowWeeks * mper} y1={y + 24} x2={r.replyWeeks * mper} y2={y + 24} className="a17-leader" /> : null}
+                  <circle {...mark(titleOf(r.query), tipOf(r))} cx={Math.min(r.replyWeeks * mper, MW - 7)} cy={y + 24} r={7} className={`a17-f-${r.bucket} a17-inkrule14`} />
+                </g>
+              );
+            })}
+          </svg>
+        </>
+      )}
+    </Fig>
+  );
+};
+
+/* ═════════════ 5 · wait times by stage ═════════════ */
+const GAP_ORDER = ["q-r", "r-s", "s-f", "f-o"] as const;
+const GAP_LABEL: Record<string, string> = { "q-r": "Queried → requested", "r-s": "Requested → sent", "s-f": "Sent → full requested", "f-o": "Full → offer" };
+const END_LABEL: Record<string, string> = { rejected: "Rejected", noresponse: "No response", withdrawn: "Withdrawn", offer: "Offer" };
+const qn = (n: number) => `${n} ${n === 1 ? "QUERY" : "QUERIES"}`;
+
+export const StageGaps: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const mark = useMark();
+  const gaps = GAP_ORDER.map((k) => model.v17.waits.gaps.find((g) => g.key === k)!);
+  const maxD = model.stages.maxDays;
+  const ticks = [maxD / 3, (2 * maxD) / 3, maxD].map(Math.round);
+  const W = 600, H = 260, x0 = 196, x1 = W - 84, per = (x1 - x0) / maxD, rowH = (H - 40) / 4;
+  const MW = 330, mper = (MW - 40) / maxD, mRow = 54;
+  const pop = gaps.reduce((a, g) => a + g.days.length, 0);
+  return (
+    <Fig k="stage" title="Stage to stage" note="in days" population={pop}
+      keyItems={<><span><Sw c="a17-sw--win" />Fastest to slowest</span><span><Sw c="a17-sw--med" />Median</span></>}>
+      <svg className="a17-d" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Stage to stage">
+        {ticks.map((d) => (
+          <g key={d}><line x1={x0 + d * per} y1={0} x2={x0 + d * per} y2={H - 34} className="a17-faint" /><text className="a17-ax" x={x0 + d * per} y={H - 12} textAnchor="middle">{d} DAYS</text></g>
+        ))}
+        {gaps.map((g, i) => {
+          const y = 10 + i * rowH + rowH / 2;
+          return (
+            <g key={g.key}>
+              <text className="a17-nm" x={0} y={y + 4}>{GAP_LABEL[g.key]}</text>
+              {g.medianDays === null ? <text className="a17-ax" x={x0} y={y + 4}>NOT YET</text> : (
+                <>
+                  <rect {...mark(GAP_LABEL[g.key], [`Fastest ${g.lo} · median ${g.medianDays} · slowest ${g.hi} days`, qn(g.days.length).toLowerCase()])}
+                    x={x0 + (g.lo as number) * per} y={y - 8} width={Math.max(4, ((g.hi as number) - (g.lo as number)) * per)} height={16} rx={8} className="a17-win a17-o55" />
+                  <line x1={x0 + g.medianDays * per} y1={y - 12} x2={x0 + g.medianDays * per} y2={y + 12} className="a17-median" />
+                  <text className="a17-n a17-rustfill" x={x0 + g.medianDays * per + 8} y={y - 14} fontSize={13}>{g.medianDays}d</text>
+                  {g.days.length < 5 ? <text className="a17-ax" x={x0 + (g.hi as number) * per + 10} y={y + 4}>{qn(g.days.length)}</text> : null}
+                </>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <svg className="a17-m" viewBox={`0 0 ${MW} ${gaps.length * mRow + 14}`} width="100%" role="img" aria-label="Stage to stage">
+        {gaps.map((g, i) => {
+          const y = i * mRow;
+          return (
+            <g key={g.key}>
+              <text className="a17-lbm" x={0} y={y + 14}>{GAP_LABEL[g.key]}</text>
+              <text className="a17-axm a17-rustfill" x={MW} y={y + 14} textAnchor="end">{g.medianDays === null ? "NOT YET" : `${g.medianDays} DAYS${g.days.length < 5 ? ` · ${qn(g.days.length)}` : ""}`}</text>
+              {g.medianDays !== null ? (
+                <>
+                  <rect x={(g.lo as number) * mper} y={y + 24} width={Math.max(4, ((g.hi as number) - (g.lo as number)) * mper)} height={14} rx={7} className="a17-win a17-o55" />
+                  <line x1={g.medianDays * mper} y1={y + 20} x2={g.medianDays * mper} y2={y + 42} className="a17-median" />
+                </>
+              ) : null}
+            </g>
+          );
+        })}
+        {ticks.map((d) => <text key={d} className="a17-axm" x={d * mper} y={gaps.length * mRow + 8} textAnchor="middle">{d}D</text>)}
+      </svg>
+    </Fig>
+  );
+};
+
+export const Endings: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const mark = useMark();
+  const w = model.v17.waits;
+  const lanes = w.endings;
+  const maxW = model.endings.maxWeeks;
+  const ticks = [maxW / 3, (2 * maxW) / 3, maxW].map(Math.round);
+  const W = 600, H = 260, x0 = 116, x1 = W - 10, per = (x1 - x0) / maxW, rowH = (H - 40) / 4;
+  const MW = 330, mper = (MW - 14) / maxW, mRow = 50;
+  const pop = lanes.reduce((a, l) => a + l.weeks.length, 0);
+  return (
+    <Fig k="endings" title="Weeks to an ending" note="one dot per closed query" population={pop}
+      keyItems={<><span><Sw c="a17-f-closed a17-sw--dot" />Closed</span><span><Sw c="a17-f-offer a17-sw--dot" />Offer</span><span><Sw c="a17-sw--med" />Median</span></>}>
+      <svg className="a17-d" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Weeks to an ending">
+        {ticks.map((t) => (
+          <g key={t}><line x1={x0 + t * per} y1={0} x2={x0 + t * per} y2={H - 34} className="a17-faint" /><text className="a17-ax" x={x0 + t * per} y={H - 12} textAnchor="middle">{t} WEEKS</text></g>
+        ))}
+        {lanes.map((l, i) => {
+          const y = 10 + i * rowH + rowH / 2;
+          const pts = w.points[l.key] ?? [];
+          return (
+            <g key={l.key}>
+              <text className="a17-nm" x={0} y={y + 4}>{END_LABEL[l.key]}</text>
+              <line x1={x0} y1={y} x2={x1} y2={y} className="a17-faint" />
+              {pts.length === 0 ? <text className="a17-ax" x={x0 + 6} y={y - 8}>NONE YET</text> : pts.map((p, j) => (
+                <circle key={`${p.q.id}-${j}`} {...mark(END_LABEL[l.key], [`${titleOf(p.q)}`, `${p.weeks} weeks from query to ending`])} cx={x0 + p.weeks * per} cy={y} r={7}
+                  className={`${l.key === "offer" ? "a17-f-offer" : "a17-f-closed"} a17-inkrule14`} />
+              ))}
+              {l.medianWeeks !== null ? <line x1={x0 + l.medianWeeks * per} y1={y - 12} x2={x0 + l.medianWeeks * per} y2={y + 12} className="a17-median" /> : null}
+            </g>
+          );
+        })}
+      </svg>
+      <svg className="a17-m" viewBox={`0 0 ${MW} ${lanes.length * mRow + 12}`} width="100%" role="img" aria-label="Weeks to an ending">
+        {lanes.map((l, i) => {
+          const y = i * mRow;
+          const pts = w.points[l.key] ?? [];
+          return (
+            <g key={l.key}>
+              <text className="a17-lbm" x={0} y={y + 14}>{END_LABEL[l.key]}</text>
+              <text className="a17-axm" x={MW} y={y + 14} textAnchor="end">{pts.length === 0 ? "NONE YET" : qn(pts.length)}</text>
+              <line x1={0} y1={y + 32} x2={MW} y2={y + 32} className="a17-faint" />
+              {pts.map((p, j) => <circle key={`${p.q.id}-${j}`} {...mark(END_LABEL[l.key], [titleOf(p.q), `${p.weeks} weeks from query to ending`])} cx={7 + p.weeks * mper} cy={y + 32} r={7} className={`${l.key === "offer" ? "a17-f-offer" : "a17-f-closed"} a17-inkrule13`} />)}
+              {l.medianWeeks !== null ? <line x1={7 + l.medianWeeks * mper} y1={y + 21} x2={7 + l.medianWeeks * mper} y2={y + 43} className="a17-median" /> : null}
+            </g>
+          );
+        })}
+        {ticks.map((t) => <text key={t} className="a17-axm" x={7 + t * mper} y={lanes.length * mRow + 6} textAnchor="middle">{t}W</text>)}
+      </svg>
+    </Fig>
+  );
+};
+
