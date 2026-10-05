@@ -29,6 +29,7 @@ import type { AgentNote } from "../../../lib/agentNotes";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import type { AgentEditPatch } from "../../../lib/saveAgentEdits";
 import { hrefFor } from "../../../lib/quickAdd";
+import { genreLabel, type PersonalGenre } from "../../../lib/genres";
 import { formatDate } from "../../../lib/dates";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
@@ -71,6 +72,8 @@ export interface AgentQuickViewProps {
   nowMs: number;
   msTitle: string | null;
   genreHit: (g: string) => boolean;
+  /** the writer's own genres, so a stored id reads as its label (ruling 1) */
+  personal?: PersonalGenre[];
   also: AlsoQueried[];
   /** committed notes, any order */
   notes: AgentNote[];
@@ -96,7 +99,7 @@ export interface AgentQuickViewProps {
 }
 
 export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
-  agent, facts, q, nowMs, msTitle, genreHit, also, notes, packages, sequence, slide, initialFoot = null,
+  agent, facts, q, nowMs, msTitle, genreHit, personal, also, notes, packages, sequence, slide, initialFoot = null,
   showOpenInContactList, write, onStep, onEdit, onClose, onAct, onOpenInContactList, onAddNote,
 }) => {
   const tone = queryTone(facts, q);
@@ -110,8 +113,8 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
   const mats = useMemo(() => materialChips(agent.materialsWanted as string[] | undefined), [agent.materialsWanted]);
   /* the manuscript's genre first, ticked — the row's own order */
   const genres = useMemo(
-    () => [...(agent.genres ?? [])].sort((a, b) => Number(genreHit(b)) - Number(genreHit(a))),
-    [agent.genres, genreHit],
+    () => (agent.genres ?? []).map((g) => genreLabel(g, personal)).sort((a, b) => Number(genreHit(b)) - Number(genreHit(a))),
+    [agent.genres, genreHit, personal],
   );
   const wish = (agent.mswlNotes ?? "").trim();
   const sortedNotes = useMemo(

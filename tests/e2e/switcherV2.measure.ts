@@ -156,11 +156,13 @@ test("S5 · M opens the menu from the page, and nowhere it should not", async ({
        v12 P2 (3 Oct): the "Paste a link" secondary retired with the quick-add — the SAME card
        opens from the primary now. */
     await page.locator('[data-probe="page-header"] .ph-primary').filter({ hasText: "+ Add an agent" }).first().click();
-    await page.locator('[data-clv="addcard"]').waitFor({ state: "visible", timeout: 5000 });
-    await page.locator('[data-clv="addcard"] [data-clv="close"]').focus();
+    /* (Agent card v1 P3: the add card is the agent card's editor, opened empty; its ✕ is the band's) */
+    await page.locator('[data-ac="card"] [data-ae-mode="new"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-ac="card"] [data-ac="close"]').focus();
     await page.keyboard.press("m"); await page.waitForTimeout(150);
     L.check("S5 · M with a modal open does nothing", ctx, !(await menuOpen(page)), "");
-    await page.locator('[data-clv="addcard"] [data-clv="close"]').click();
+    await page.locator('[data-ac="card"] [data-ac="close"]').click();
+    await page.locator('[data-ac="card"]').waitFor({ state: "detached", timeout: 5000 });
   }
   L.write();
   expect(L.rows.length).toBe(SIZES.length * 4);

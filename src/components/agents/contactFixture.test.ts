@@ -86,9 +86,9 @@ describe("the Contact list fixture — a cast, not a crowd", () => {
 
   /* ⚠️ BOTH CLOSED CASES, AND THE SECOND IS THE ONE THE REF CANNOT SPEAK TO. Its two closed
      agents are both terminal, so it never draws a shut door over a live query — and that is
-     precisely the case the pop-up band's precedence exists to get right ("Closed to submissions"
-     only when the standing is NOT open — ContactProfile.tsx; `agentCardDims` carried the same
-     law on the retired card). Without both rows the carve-out is unproved, and an unproved
+     precisely the case the card's precedence exists to get right ("Closed to submissions" only
+     when the standing is NOT open — `queryTone` in lib/agentCard.ts; the retired pop-up and
+     `agentCardDims` carried the same law before it). Without both rows the carve-out is unproved, and an unproved
      carve-out is one edit from being "simplified" away. Derived through `contactStanding`, the
      function the census and the band both read. */
   it("carries a closed door BOTH ways — nothing live, and a live query", () => {

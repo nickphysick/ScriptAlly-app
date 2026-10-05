@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * The agent card's frame (Agent card v1 §2): the overlay, the backdrop, the white rim and the
- * burgundy line, and the entrance and exit. What is INSIDE — the quick view's band and body, and
- * (Phase 3) the editor's — is the caller's.
+ * burgundy line, and the entrance and exit. What is INSIDE — the quick view's band and body, or the
+ * editor's tabs — is the caller's; going from one to the other is this one frame changing width.
  *
  * ⚠️ THE OVERLAY'S OBLIGATIONS ARE THE SHELL'S, NOT A NEW COPY: `useOverlay` traps focus, seals the
  * page behind it (counted `inert` on #root), locks the stage's scroll and returns focus on close.
@@ -25,6 +25,8 @@ import "./agentCard.css";
 export interface AgentCardFrameHandle {
   /** Play the exit — into `to` when it is on screen, else down and out — and resolve when done. */
   leave: (to: AgentCardOrigin | null) => Promise<void>;
+  /** Fade the body in — the contents swapped while the box stayed (the card widening or narrowing). */
+  fade: (ms: number) => void;
 }
 
 interface Props {
@@ -32,6 +34,8 @@ interface Props {
   big?: boolean;
   /** the element naming the dialog */
   labelledBy?: string;
+  /** the dialog's name where no element on the card states it (the editor) */
+  ariaLabel?: string;
   originRect?: AgentCardOrigin | null;
   /** false when the card is already open and only its contents changed (back from the editor) */
   entrance?: boolean;
@@ -54,7 +58,7 @@ const toBox = (card: DOMRect, box: AgentCardOrigin): string => {
 };
 
 export const AgentCardFrame = forwardRef<AgentCardFrameHandle, Props>(function AgentCardFrame(
-  { big = false, labelledBy, originRect = null, entrance = true, onScrim, children },
+  { big = false, labelledBy, ariaLabel, originRect = null, entrance = true, onScrim, children },
   ref,
 ) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -93,6 +97,11 @@ export const AgentCardFrame = forwardRef<AgentCardFrameHandle, Props>(function A
       a.onfinish = () => resolve();
       a.oncancel = () => resolve();
     }),
+    fade: (ms) => {
+      const body = cardRef.current?.querySelector<HTMLElement>('[data-ac="body"]');
+      if (!body || reduced() || typeof body.animate !== "function") return;
+      body.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms });
+    },
   }), []);
 
   return createPortal(
@@ -104,6 +113,7 @@ export const AgentCardFrame = forwardRef<AgentCardFrameHandle, Props>(function A
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
+        aria-label={labelledBy ? undefined : ariaLabel}
         data-ac="card"
       >
         <div className="ac-frame">{children}</div>

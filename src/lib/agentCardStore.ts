@@ -14,8 +14,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { Agent } from "../types";
-import type { ContactDraft } from "./contactEdit";
-import type { FormSection } from "../components/agents/contact/ContactAgentForm";
+import type { CardDraft } from "./cardDraft";
 
 /** The editor's four tabs — the mock's own keys: Contact · Wishlist · Submissions · Notes. */
 export type AgentCardTab = "who" | "want" | "work" | "notes";
@@ -33,7 +32,7 @@ export interface AgentCardOptions {
   tab?: AgentCardTab;
   focus?: AgentCardField;
   /** a partial draft: the editor opens with it applied and dirty (Housekeeping's carry-over) */
-  prefill?: Partial<ContactDraft>;
+  prefill?: Partial<CardDraft>;
   from?: AgentCardFrom;
   /** the row's or button's box the card grows out of; absent, it fades and lifts from 8px below */
   originRect?: AgentCardOrigin | null;
@@ -106,29 +105,4 @@ export function emitAgentCardEvent(e: AgentCardEvent): void {
 export function subscribeAgentCardEvents(l: EventListener): () => void {
   eventListeners.add(l);
   return () => { eventListeners.delete(l); };
-}
-
-/* ---------- the old pop-up's sections ----------
-   ⚠️ A BRIDGE FOR PHASE 1 ONLY, deleted with the pop-up in Phase 3: the doors already speak the
-   card's tabs and fields, and the old form still needs a section to scroll to. Reply time lived
-   in the old form's FIRST section, which is why Housekeeping's reply gap used to pass "who". */
-export function targetForSection(section: FormSection): Pick<AgentCardOptions, "tab" | "focus"> {
-  switch (section) {
-    case "genres": return { tab: "want", focus: "genres" };
-    case "wishlist": return { tab: "want", focus: "wishlist" };
-    case "materials": return { tab: "want", focus: "materials" };
-    case "door": return { tab: "work", focus: "door" };
-    case "notes": return { tab: "notes" };
-    case "who":
-    case "rating":
-    default: return { tab: "who" };
-  }
-}
-export function legacySectionFor(tab: AgentCardTab | undefined, focus: AgentCardField | undefined): FormSection | null {
-  if (!tab) return null;
-  if (focus === "genres" || focus === "wishlist" || focus === "materials") return focus;
-  if (focus === "door" || focus === "reopen") return "door";
-  if (tab === "notes") return "notes";
-  /* name, agency, country, city, links, reply time, no-reply rule: the old form's first section */
-  return "who";
 }

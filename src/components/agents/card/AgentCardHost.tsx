@@ -8,22 +8,21 @@
  * Centre's own rows, the one notes listener, the writer, the save and the add — and portals the
  * card to document.body, so it opens over whatever page the writer is on.
  *
- * ⚠️ PHASE 2 DRAWS THE QUICK VIEW; THE EDITOR IS STILL THE OLD POP-UP'S EDIT FACE (`ContactProfile`
- * opened at a section) until Phase 3 replaces it. Every way into the editor goes through ONE
- * function here, `openEditor`, so Phase 3 changes one place. Leaving that editor returns to the
- * quick view, as the mock's editor does.
+ * ⚠️ ONE FRAME, TWO STATES. The quick view and the editor render inside the SAME frame, so going
+ * from one to the other is the card widening (548 → 780, 260ms) and narrowing back — never a
+ * second card arriving. Every way into the editor goes through `openEditor`.
  *
  * ⚠️ THE LIST STILL OWNS ITS OWN AFTERMATH — the notice saying where a saved record went, its Undo,
  * the FLIP, the ring on a new row, the row scrolled into view on a step — through the store, because
  * the host is app-level and the Contact list is only one of the pages the card opens over.
  *
- * ⚠️ THE QUICK VIEW'S OWN WRITES (the stars, the wishlist stamp) GO THROUGH `commitAgentEdits`, NOT
- * `updateAgent`: the latter logs an activity for every write, so its Undo would append a second
- * entry — the house undo rule forbids compensating entries.
+ * ⚠️ THE CARD'S WRITES GO THROUGH `commitAgentEdits`, NOT `updateAgent`: the latter logs an
+ * activity for every write, so an Undo through it would append a second entry — the house undo rule
+ * forbids compensating entries.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
 import { Agent, SubmissionMethod, SubmissionStatus } from "../../../types";
@@ -32,26 +31,26 @@ import {
 } from "../../../lib/agentNotes";
 import {
   AgentCardField, AgentCardOptions, AgentCardTab, closeAgentCard, currentAgentCard, emitAgentCardEvent,
-  legacySectionFor, openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
+  openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
   type AgentCardOrigin,
 } from "../../../lib/agentCardStore";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { agentFacts } from "../../../lib/contactList";
 import { isGenreMatch, matchGenre } from "../../../lib/genreMatch";
-import {
-  AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor,
-} from "../../../lib/contactEdit";
+import { EditCtx, alsoChanges, savedLine as savedLineFor } from "../../../lib/contactEdit";
 import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../../lib/computeAgentDeadlineWrites";
-import { normaliseSubmissionsUrl } from "../../../lib/quickAdd";
+import { commitTypedGenre, hrefFor } from "../../../lib/quickAdd";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { dayMonth } from "../../../lib/dates";
+import { AGENT_GENRES } from "../../../lib/agentOptions";
+import { genreLabel } from "../../../lib/genres";
 import { alsoQueried, cardQuery, cardRows, reopenReminder, stepTarget, type CardAct } from "../../../lib/agentCard";
-import { ContactProfile } from "../contact/ContactProfile";
-import { ContactAddCard } from "../contact/ContactAddCard";
+import { type CardDraft, cardPatch, encodeMats, toContactDraft } from "../../../lib/cardDraft";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
+import { AgentCardEditor, type EditorSaveResult } from "./AgentCardEditor";
 import "../contact/contactV11.css";
 
 /** The shared manuscript-scope key — the same one the Contact list, Packages and Comps read. */
@@ -94,8 +93,18 @@ const rowBoxOf = (agentId: string): AgentCardOrigin | null => {
   return { x: r.x, y: r.y, width: r.width, height: r.height };
 };
 
-/** The editor a door asked for: a tab, and the field to focus there. */
-interface EditTarget { tab: AgentCardTab; focus?: AgentCardField }
+/** The record as it is after a patch — `null` is a field removed. For the list's aftermath. */
+const applied = (a: Agent, patch: AgentEditPatch): Agent => {
+  const next = { ...a } as Record<string, unknown>;
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === null) delete next[k];
+    else if (v !== undefined) next[k] = v;
+  }
+  return next as unknown as Agent;
+};
+
+/** The editor a door asked for: a tab, the field to focus there, and any answers carried over. */
+interface EditTarget { tab: AgentCardTab; focus?: AgentCardField; prefill?: Partial<CardDraft> }
 
 /** One open of the card — keyed on the request's seq, so every open is a fresh session. */
 const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox }) => {
@@ -106,8 +115,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
      stating the old book. */
   const { key: locationKey, pathname } = useLocation();
   const {
-    agents, queries, manuscripts, activities, addAgent, addUserTask, deleteUserTask, currentUser,
-    collectionsReady, packages,
+    agents, queries, manuscripts, activities, addAgent, addUserTask, deleteUserTask, addPersonalGenre,
+    currentUser, collectionsReady, packages,
   } = useScriptAllyDb();
 
   const scoped = useMemo(() => {
@@ -118,15 +127,22 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   }, [manuscripts, locationKey]);
   const tintGenre = useMemo(() => matchGenre(scoped?.genre), [scoped]);
   const genreHit = useCallback((g: string) => !!tintGenre && isGenreMatch(g, tintGenre), [tintGenre]);
+  const personal = useMemo(() => currentUser?.personalGenres ?? [], [currentUser?.personalGenres]);
+  const personalLabels = useMemo(() => personal.map((p) => p.label), [personal]);
 
   /* ⚠️ THE QUERY CENTRE'S OWN ROWS — one derivation, so the card and the list cannot disagree. */
   const qcRows = useMemo(() => buildQcRows(queries, agents, activities, Date.now()), [queries, agents, activities]);
   const nowMs = useMemo(() => Date.now(), [qcRows]);
+  /* the genres already on the list, the most used first — as LABELS (ruling 1), so a stored id is
+     never offered as a choice */
   const genrePool = useMemo(() => {
     const freq = new Map<string, number>();
-    for (const a of agents) for (const g of a.genres ?? []) freq.set(g, (freq.get(g) ?? 0) + 1);
+    for (const a of agents) for (const g of a.genres ?? []) {
+      const l = genreLabel(g, personal);
+      freq.set(l, (freq.get(l) ?? 0) + 1);
+    }
     return [...freq.entries()].sort((x, y) => y[1] - x[1]).map(([g]) => g);
-  }, [agents]);
+  }, [agents, personal]);
   const editCtx: EditCtx = useMemo(
     () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
     [queries, agents, scoped, nowMs],
@@ -140,14 +156,15 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     if (agentId && collectionsReady && agents.length > 0 && !agent) closeAgentCard();
   }, [agentId, agent, collectionsReady, agents.length]);
 
-  /* the editor a door asked for opens straight away; otherwise the quick view */
-  const [editing, setEditing] = useState<EditTarget | null>(req?.tab ? { tab: req.tab, focus: req.focus } : null);
+  /* the editor a door asked for opens straight away, with its carried answers; otherwise the
+     quick view. The carried answers belong to THAT opening — the pencil later starts clean. */
+  const [editing, setEditing] = useState<EditTarget | null>(
+    req?.tab ? { tab: req.tab, focus: req.focus, prefill: req.prefill } : null,
+  );
   const [handover, setHandover] = useState<QuickFoot | null>(null);
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
   const frameRef = useRef<AgentCardFrameHandle>(null);
-  /* the entrance plays once per open — coming back from the editor is not an arrival */
-  const shown = useRef(false);
-  useEffect(() => { if (!editing) shown.current = true; });
+  const editorLeave = useRef<(() => void) | null>(null);
 
   /* ONE notes listener, for the open agent only — never one per row. */
   const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
@@ -177,8 +194,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     return () => unsub();
   }, [agentId, currentUser?.id]);
 
-  /* committed only — the card composes ADDITIONS one at a time; the flat legacy note rides as the
-     oldest bubble exactly as the old drawer showed it */
+  /* the quick view's notes: committed only, with the flat legacy note riding as the oldest bubble
+     exactly as the old drawer showed it */
   const profileNotes = useMemo(
     () => committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), {
       flatNote: agent?.notes,
@@ -198,111 +215,139 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     return (await writeAgent(agentId, patch)).ok;
   }, [agentId, writeAgent]);
 
+  /** The dry run the editor shows before a save — the REAL engine (decision 14), never a sum. */
+  const alsoFor = useCallback(
+    (d: CardDraft, base: CardDraft) => (agent ? alsoChanges(agent, toContactDraft(agent, base, d), editCtx) : []),
+    [agent, editCtx],
+  );
+
   /**
-   * SAVE (the bridge editor's): diff the draft against the record, send ONLY what changed through
-   * `commitAgentEdits` — sanitised, atomic, with the reply-time deadline fan-out riding the same
-   * batch (`computeAgentDeadlineWrites`). A wishlist edit stamps `mswlCheckedAt` in the SAME write.
+   * SAVE: ONLY what changed (`cardPatch`), through `commitAgentEdits` — sanitised, atomic, with the
+   * reply-time deadline fan-out riding the same batch (`computeAgentDeadlineWrites`) and a wishlist
+   * edit stamping `mswlCheckedAt` in the same write. The card narrows back to the quick view and
+   * says what else moved.
    */
-  const onSave = useCallback(async (d: ContactDraft, notes: AlsoNote[]): Promise<boolean> => {
-    const orig = agentId ? agents.find((a) => a.id === agentId) : null;
-    if (!orig || !currentUser) return false;
-    const base = draftFromAgentRecord(orig);
-    const patch: AgentEditPatch = {};
-    if (d.name !== base.name) patch.name = d.name.trim();
-    if (d.agency !== base.agency) patch.agency = d.agency.trim();
-    if (d.email !== base.email) patch.email = d.email.trim();
-    if (d.website !== base.website) patch.website = d.website.trim();
-    if (d.city !== base.city) patch.city = d.city.trim();
-    if (d.country !== base.country) patch.country = d.country;
-    if (d.responseTimeWeeks !== base.responseTimeWeeks) patch.responseTimeWeeks = d.responseTimeWeeks;
-    if (d.noResponseMeansNo !== base.noResponseMeansNo && d.noResponseMeansNo !== undefined) patch.noResponseMeansNo = d.noResponseMeansNo;
-    if (d.submissionStatus !== base.submissionStatus) patch.submissionStatus = d.submissionStatus;
-    if (d.reopensOn !== base.reopensOn) patch.reopensOn = d.reopensOn.trim() === "" ? null : d.reopensOn;
-    if (JSON.stringify(d.genres) !== JSON.stringify(base.genres)) patch.genres = d.genres;
-    if (d.mswlNotes !== base.mswlNotes) {
-      patch.mswlNotes = d.mswlNotes;
-      /* editing the wishlist IS checking it (§10: starts as the date it was last edited) */
-      patch.mswlCheckedAt = new Date().toISOString();
+  const onEditorSave = useCallback(async (d: CardDraft, base: CardDraft): Promise<EditorSaveResult> => {
+    if (!agent) return { ok: false, error: "That agent is no longer on your list." };
+    const patch = cardPatch(agent, base, d, new Date().toISOString());
+    if (Object.keys(patch).length === 0) { setEditing(null); return { ok: true }; }
+    const notes = alsoChanges(agent, toContactDraft(agent, base, d), editCtx);
+    let res: SaveAgentResult;
+    if (sandbox?.writeAgent) res = await sandbox.writeAgent(agent.id, patch);
+    else {
+      if (!currentUser) return { ok: false, error: "Not signed in." };
+      const extras = patch.responseTimeWeeks !== undefined
+        ? computeAgentDeadlineWrites(
+            queries.filter((q) => q.agentId === agent.id),
+            typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
+            (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
+          )
+        : [];
+      res = await commitAgentEdits(db, currentUser.id, agent.id, patch, extras);
     }
-    if (JSON.stringify(d.materialsWanted) !== JSON.stringify(base.materialsWanted)) patch.materialsWanted = d.materialsWanted;
-    if (d.starRating !== base.starRating) patch.starRating = d.starRating;
-    if (Object.keys(patch).length === 0) return true;
-
-    const extras = patch.responseTimeWeeks !== undefined
-      ? computeAgentDeadlineWrites(
-          queries.filter((q) => q.agentId === orig.id),
-          typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
-          (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
-        )
-      : [];
-    const res = await commitAgentEdits(db, currentUser.id, orig.id, patch, extras);
-    if (!res.ok) return false;
+    /* "in", not `!res.ok`: with strictNullChecks off a boolean discriminant does not narrow */
+    if ("error" in res) return { ok: false, error: res.error };
     setHandover({ text: savedLineFor(notes) });
-    const after = Object.assign({ ...orig } as Agent, patch as Partial<Agent>);
-    emitAgentCardEvent({ type: "saved", agentId: orig.id, before: { ...orig }, after });
-    return true;
-  }, [agentId, agents, currentUser, queries]);
-
-  /** Add ONE note — the subcollection write plus the documented cache, together. Resolves to
-   *  whether it landed, so the composer can keep the words when it did not. */
-  const onAddNote = useCallback(async (text: string): Promise<boolean> => {
-    const orig = agentId ? agents.find((a) => a.id === agentId) : null;
-    if (!orig || !currentUser) return false;
-    const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
-    const createdAt = new Date().toISOString();
-    try {
-      await setDoc(doc(collection(db, "users", currentUser.id, "agents", orig.id, "notes"), noteId), { text, createdAt });
-      const after = committedNotes(effectiveNotes(
-        [...storedNotes, { id: noteId, text, createdAt }],
-        emptyNotesDraft(),
-        { flatNote: orig.notes, dateAdded: orig.dateAdded },
-      ));
-      const preview = computeNotePreview(after, orig.pinnedNoteId);
-      if ((orig.notePreview ?? "") !== preview) {
-        await writeAgent(orig.id, { notePreview: preview });
-      }
-      return true;
-    } catch (e) {
-      /* the handler logs and THROWS (its callers' control flow); here the flow is the boolean */
-      try { handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${orig.id}/notes`); } catch { /* logged */ }
-      return false;
-    }
-  }, [agentId, agents, currentUser, storedNotes, writeAgent]);
+    emitAgentCardEvent({ type: "saved", agentId: agent.id, before: { ...agent }, after: applied(agent, patch) });
+    setEditing(null);
+    return { ok: true };
+  }, [agent, editCtx, sandbox, currentUser, queries]);
 
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
-   * AGENT_ADDED activity, undefined-stripping), with the v11 rules: optionals born ABSENT, the link
-   * field saving to `website` through the scheme allowlist (§8.3), `reopensOn` only when the door
-   * is Closed, and `submissionMethod` defaulting to Email exactly as the app-level form does.
+   * AGENT_ADDED activity, undefined-stripping), with the house rules: optionals born ABSENT, the
+   * links through the scheme allowlist, `reopensOn` only behind a CLOSED door, and
+   * `submissionMethod` defaulting to Email exactly as the app-level form does when none is chosen.
    */
-  const onCreateAgent = useCallback(async (d: ContactDraft, link: string) => {
+  const onCreateAgent = useCallback(async (d: CardDraft): Promise<EditorSaveResult> => {
+    const wishlist = d.wishlist.trim();
+    const mswl = d.mswl.trim();
     const res = await addAgent({
       name: d.name.trim(),
       agency: d.agency.trim(),
       email: d.email.trim(),
-      website: d.website.trim() || (link ? normaliseSubmissionsUrl(link) : ""),
-      genres: d.genres,
-      mswlNotes: d.mswlNotes,
-      submissionStatus: d.submissionStatus,
-      submissionMethod: SubmissionMethod.EMAIL,
-      materialsWanted: d.materialsWanted,
+      website: hrefFor(d.website) ?? "",
+      genres: [...d.genres],
+      mswlNotes: wishlist,
+      submissionStatus: d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED,
+      submissionMethod: d.method ?? SubmissionMethod.EMAIL,
+      materialsWanted: encodeMats(d.mats),
       notes: "",
       ...(d.city.trim() ? { city: d.city.trim() } : {}),
       ...(d.country ? { country: d.country } : {}),
-      ...(d.responseTimeWeeks != null ? { responseTimeWeeks: d.responseTimeWeeks } : {}),
-      ...(d.noResponseMeansNo !== undefined ? { noResponseMeansNo: d.noResponseMeansNo } : {}),
-      ...(d.reopensOn.trim() && d.submissionStatus === SubmissionStatus.CLOSED ? { reopensOn: d.reopensOn.trim() } : {}),
-      ...(d.starRating != null ? { starRating: d.starRating as Agent["starRating"] } : {}),
+      ...(d.weeks != null ? { responseTimeWeeks: d.weeks } : {}),
+      ...(d.nrn != null ? { noResponseMeansNo: d.nrn } : {}),
+      ...(d.door === "closed" && d.reopens ? { reopensOn: d.reopens } : {}),
+      ...(mswl && hrefFor(mswl) ? { socials: [{ platform: "MSWL", handle: hrefFor(mswl)! }] } : {}),
+      /* the wishlist was written just now, so it was checked just now */
+      ...(wishlist ? { mswlCheckedAt: new Date().toISOString() } : {}),
     });
-    if (!res.success || !res.id) return { ok: false as const, error: res.error };
+    if (!res.success || !res.id) return { ok: false, error: res.error ?? "Couldn’t add the agent." };
     closeAgentCard();
     emitAgentCardEvent({ type: "added", agentId: res.id });
-    return { ok: true as const };
+    return { ok: true };
   }, [addAgent]);
+
+  /**
+   * A genre matching nothing on any list (ruling 1): its case is matched to a genre that already
+   * exists (`commitTypedGenre`), and only a genuinely new one becomes the writer's own — through
+   * `addPersonalGenre`, which keeps the cap of ten and refuses junk with a reason.
+   */
+  const onNewGenre = useCallback(async (typed: string) => {
+    const sources = [...(scoped?.genre ? [scoped.genre] : []), ...genrePool, ...personalLabels, ...AGENT_GENRES];
+    const label = commitTypedGenre(typed, [], sources)?.[0];
+    if (!label) return { ok: false as const, reason: "Type a genre first." };
+    if (sources.some((s) => s.toLowerCase() === label.toLowerCase())) return { ok: true as const, label };
+    const r = await addPersonalGenre(label);
+    if (!r) return { ok: false as const, reason: "Couldn’t add that genre just now." };
+    return "reason" in r ? { ok: false as const, reason: r.reason } : { ok: true as const, label: r.label };
+  }, [scoped, genrePool, personalLabels, addPersonalGenre]);
+
+  /* ── the notes subcollection: a note saves as it is written, outside Save changes ─────────── */
+
+  /** The documented card cache, kept in step with the notes as they now stand. */
+  const keepPreview = useCallback(async (orig: Agent, list: AgentNote[]) => {
+    const after = committedNotes(effectiveNotes(list, emptyNotesDraft(), { flatNote: orig.notes, dateAdded: orig.dateAdded }));
+    const preview = computeNotePreview(after, orig.pinnedNoteId);
+    if ((orig.notePreview ?? "") !== preview) await writeAgent(orig.id, { notePreview: preview });
+  }, [writeAgent]);
+
+  /** A note write, its preview, and the house error handling — resolving to whether it landed, so
+   *  the composer keeps the words when it did not. */
+  const noteWrite = useCallback(async (
+    op: OperationType,
+    run: (uid: string, orig: Agent) => Promise<AgentNote[]>,
+  ): Promise<boolean> => {
+    if (!agent || !currentUser) return false;
+    try {
+      await keepPreview(agent, await run(currentUser.id, agent));
+      return true;
+    } catch (e) {
+      /* the handler logs and THROWS (its callers' control flow); here the flow is the boolean */
+      try { handleFirestoreError(e, op, `users/${currentUser.id}/agents/${agent.id}/notes`); } catch { /* logged */ }
+      return false;
+    }
+  }, [agent, currentUser, keepPreview]);
+
+  const onAddNote = useCallback((text: string) => noteWrite(OperationType.WRITE, async (uid, orig) => {
+    const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
+    const createdAt = new Date().toISOString();
+    await setDoc(doc(collection(db, "users", uid, "agents", orig.id, "notes"), noteId), { text, createdAt });
+    return [...storedNotes, { id: noteId, text, createdAt }];
+  }), [noteWrite, storedNotes]);
+  const onEditNote = useCallback((id: string, text: string) => noteWrite(OperationType.UPDATE, async (uid, orig) => {
+    await updateDoc(doc(db, "users", uid, "agents", orig.id, "notes", id), { text });
+    return storedNotes.map((n) => (n.id === id ? { ...n, text } : n));
+  }), [noteWrite, storedNotes]);
+  const onDeleteNote = useCallback((n: AgentNote) => noteWrite(OperationType.DELETE, async (uid, orig) => {
+    await deleteDoc(doc(db, "users", uid, "agents", orig.id, "notes", n.id));
+    return storedNotes.filter((x) => x.id !== n.id);
+  }), [noteWrite, storedNotes]);
 
   /* ── moving and leaving ──────────────────────────────────────────────────────────────────── */
 
-  /** ✕, Escape and the backdrop: shrink back into the row when it is on screen, then close. */
+  /** ✕, Escape and the backdrop on the quick view, and a new card left: shrink back into the row
+   *  when it is on screen (else fall and fade), then close. */
   const leaving = useRef(false);
   const requestClose = useCallback(async () => {
     if (leaving.current) return;
@@ -319,7 +364,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     stepAgentCard(next);
   }, [agentId, req?.sequence]);
 
-  /** THE one way into the editor — Phase 3 swaps what it renders, and nothing else changes. */
+  /** THE one way into the editor. */
   const openEditor = useCallback((tab: AgentCardTab, focus?: AgentCardField) => {
     setHandover(null);
     setEditing({ tab, focus });
@@ -357,65 +402,76 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     return null;
   }, [agent, qcRows, scoped, navigate, addUserTask, deleteUserTask, openEditor]);
 
+  const isNew = req?.agentId === null;
+  const inEditor = isNew || !!editing;
+
+  /* the box stays and its contents change: the body fades in as the card widens or narrows (the
+     mock's 220ms in, 200ms back) — never on the first paint, which the entrance owns */
+  const wasEditor = useRef(inEditor);
+  useLayoutEffect(() => {
+    if (wasEditor.current === inEditor) return;
+    wasEditor.current = inEditor;
+    frameRef.current?.fade(inEditor ? 220 : 200);
+  }, [inEditor]);
+
   if (!req) return null;
+  if (!isNew && !agent) return null;
 
-  if (req.agentId === null) {
+  if (inEditor) {
+    const target: EditTarget = isNew ? { tab: "who", focus: "name", prefill: req.prefill } : editing!;
+    const name = isNew ? "New agent" : `Editing ${(agent!.name ?? "").trim() || agent!.agency}`;
     return (
-      <ContactAddCard
-        focus="name"
-        agents={agents}
-        msGenre={scoped?.genre ?? null}
-        genrePool={genrePool}
-        onClose={closeAgentCard}
-        onCreate={onCreateAgent}
-        onOpenAgent={(id) => openAgentCard(id, { from: "button" })}
-      />
+      <AgentCardFrame
+        ref={frameRef}
+        big
+        ariaLabel={name}
+        originRect={req.originRect ?? null}
+        onScrim={() => editorLeave.current?.()}
+      >
+        <AgentCardEditor
+          mode={isNew ? "new" : "edit"}
+          agent={isNew ? null : agent}
+          prefill={target.prefill}
+          personal={personal}
+          tab={target.tab}
+          focus={target.focus}
+          agents={agents}
+          msGenre={scoped?.genre ?? null}
+          genrePool={genrePool}
+          personalGenres={personalLabels}
+          allGenres={AGENT_GENRES}
+          isHit={genreHit}
+          nowMs={nowMs}
+          alsoFor={alsoFor}
+          notes={storedNotes}
+          earlierNote={agent?.notes ?? ""}
+          onSave={isNew ? (d) => onCreateAgent(d) : onEditorSave}
+          onLeave={isNew ? () => void requestClose() : () => setEditing(null)}
+          onOpenAgent={(id) => openAgentCard(id, { from: "button" })}
+          onNewGenre={onNewGenre}
+          onAddNote={onAddNote}
+          onEditNote={onEditNote}
+          onDeleteNote={onDeleteNote}
+          bindLeave={editorLeave}
+        />
+      </AgentCardFrame>
     );
   }
 
-  if (!agent) return null;
-  const facts = agentFacts(agent, qcRows, scoped?.id ?? null);
-
-  /* ⚠️ THE BRIDGE (Phase 2 only): the old pop-up's edit face, opened at the door's section, and
-     returning to the quick view when it is left — by Cancel, Escape, ✕ or a save. */
-  if (editing) {
-    return (
-      <ContactProfile
-        agent={agent}
-        facts={facts}
-        nowMs={nowMs}
-        msGenre={scoped?.genre ?? null}
-        msTitle={scoped?.title ?? null}
-        genreHit={genreHit}
-        genrePool={genrePool}
-        editCtx={editCtx}
-        notes={profileNotes}
-        packages={packages}
-        editAt={legacySectionFor(editing.tab, editing.focus)}
-        savedLine={null}
-        onLeaveEdit={() => setEditing(null)}
-        onClose={closeAgentCard}
-        onSave={onSave}
-        onAddNote={async (t) => { await onAddNote(t); }}
-        onOpenQuery={(qid) => { closeAgentCard(); navigate(`/queries?q=${qid}`); }}
-        onRecordResponse={() => { closeAgentCard(); openQueryDrawer({ mode: "resp" }); }}
-        onLogQuery={() => { const id = agent.id; closeAgentCard(); openQueryDrawer({ mode: "log", agentId: id }); }}
-      />
-    );
-  }
-
-  const q = cardQuery(cardRows(qcRows, agent.id, scoped?.id ?? null));
-  const also = alsoQueried(qcRows, agent.id, scoped?.id ?? null, (id) => manuscripts.find((m) => m.id === id)?.title ?? null);
+  const facts = agentFacts(agent!, qcRows, scoped?.id ?? null);
+  const q = cardQuery(cardRows(qcRows, agent!.id, scoped?.id ?? null));
+  const also = alsoQueried(qcRows, agent!.id, scoped?.id ?? null, (id) => manuscripts.find((m) => m.id === id)?.title ?? null);
   const onContactList = !!sandbox?.contactListHere || pathname === "/agents";
   return (
-    <AgentCardFrame ref={frameRef} labelledBy="ac-name" originRect={req.originRect ?? null} entrance={!shown.current} onScrim={() => void requestClose()}>
+    <AgentCardFrame ref={frameRef} labelledBy="ac-name" originRect={req.originRect ?? null} onScrim={() => void requestClose()}>
       <AgentQuickView
-        agent={agent}
+        agent={agent!}
         facts={facts}
         q={q}
         nowMs={nowMs}
         msTitle={scoped?.title ?? null}
         genreHit={genreHit}
+        personal={personal}
         also={also}
         notes={profileNotes}
         packages={packages}

@@ -17,9 +17,9 @@
  * ⚠️ THE PORTAL-SCOPE LESSON OUTLIVES THE RULES THAT TAUGHT IT. Every rule here is `.aglist …`
  * and every token is declared on `.aglist`, so anything that portals to `document.body` leaves
  * both behind — the selectors stop matching and every `var(--agl-…)` read is silently dropped.
- * That is why the pop-up (ContactProfile) and the country picker inside it are dressed in
- * `contactV11.css` under the `:root` `--clv-*` palette, never in this sheet: the picker rendered
- * UNSTYLED in the pop-up while its `.aglist .agl-cc*` rules sat here, valid, matching nothing.
+ * That is why the agent card (card/agentCard.css) reads only `:root` tokens and never this sheet:
+ * the retired pop-up's country picker rendered UNSTYLED while its `.aglist .agl-cc*` rules sat
+ * here, valid, matching nothing.
  */
 
 .aglist {

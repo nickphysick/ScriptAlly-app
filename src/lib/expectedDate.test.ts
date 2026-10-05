@@ -166,9 +166,10 @@ describe("§1 · addQuery no longer seeds the agency's window", () => {
 /* ⚠️ "§2 · Done and Discard no longer share a class" IS RETIRED (v11 P4, 25 Sep). Its subject —
    the flip editor's `.agl-done`/`.agl-disc` header pair — is deleted with AgentEditor.tsx. The
    incident it recorded (a probe clicking `.agl-done` hit DISCARD, because a shared chassis was
-   named for one of its two actions) stays worth knowing, and the v11 pop-up does not recreate
-   the shape: its footer's Cancel and Save are separately-classed buttons (`.clv-ffoot2`,
-   ContactProfile.tsx) with no shared class named for either action. The WRITE path the incident
+   named for one of its two actions) stays worth knowing, and the agent card's editor does not
+   recreate the shape: its foot's Cancel and Save are separately marked buttons
+   (`data-ae="cancel"` / `data-ae="save"`, AgentCardEditor.tsx) with no shared class named for
+   either action. The WRITE path the incident
    exonerated — draft diff → deletes → `deleteField()` — is unchanged and is asserted by the
    saveAgentEdits suite, not here. Recoverable at 2d160183's parent. */
 

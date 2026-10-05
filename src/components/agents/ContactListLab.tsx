@@ -111,13 +111,24 @@ export const ContactListLab: React.FC = () => {
     return { ok: true as const };
   }, []);
   const cardSandbox = React.useMemo(() => ({ writeAgent: cardWrite, contactListHere: true }), [cardWrite]);
+  /* the editor's "+ Add “…” as a new genre" — a local personal genre, so the deliberate-new path
+     runs here end to end (the account's is `addPersonalGenre`, capped at ten; so is this one) */
+  const [labGenres, setLabGenres] = useState<{ id: string; label: string }[]>([]);
+  const addPersonalGenre = React.useCallback(async (raw: string) => {
+    const label = raw.trim();
+    if (!label) return { ok: false as const, reason: "Type a genre first." };
+    if (labGenres.length >= 10) return { ok: false as const, reason: "You can have up to 10 genres of your own." };
+    const id = `personal:lab:${label.toLowerCase().replace(/\s+/g, "-")}`;
+    setLabGenres((prev) => (prev.some((g) => g.id === id) ? prev : [...prev, { id, label }]));
+    return { ok: true as const, id, label };
+  }, [labGenres.length]);
 
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
      and the failure would be a render crash in a lab rather than a clear "the stub is short". */
   const value = new Proxy(
     {
-      currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB" },
+      currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB", personalGenres: labGenres },
       collectionsReady: view !== "settling",
       agents: view === "cast" ? cast : view === "list" ? [SAMPLE] : [],
       queries: view === "cast" ? CONTACT_FIXTURE_QUERIES : [],
@@ -129,6 +140,7 @@ export const ContactListLab: React.FC = () => {
       addAgent,
       addUserTask,
       deleteUserTask,
+      addPersonalGenre,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),

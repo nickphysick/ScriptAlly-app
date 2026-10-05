@@ -36,8 +36,9 @@ export interface AgentEditPatch {
   agency?: string;
   email?: string;
   website?: string;
-  country?: string;
-  city?: string;
+  /** null = clear: the location law stores "not set" as the key OMITTED, never "" */
+  country?: string | null;
+  city?: string | null;
   /** v11: the reopen date (Closed reveals it); null = clear (reopened, or withdrawn a date). */
   reopensOn?: string | null;
   /** v11: the documented card cache, recomputed when the pop-up adds a note (now allowlisted). */
@@ -117,6 +118,8 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
   for (const k of ["name", "agency", "email", "website", "country", "city", "twitter", "bluesky", "instagram", "mswlNotes", "notes", "submissionMethod"] as const) {
     const v = patch[k];
     if (v === undefined) continue;
+    /* the location pair clears by deletion (Agent card v1) — nothing else here takes null */
+    if (v === null && (k === "country" || k === "city")) { deletes.push(k); continue; }
     if (typeof v !== "string") { errors.push(`${k} must be a string.`); continue; }
     fields[k] = v;
   }

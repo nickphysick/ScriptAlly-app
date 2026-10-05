@@ -343,7 +343,7 @@ export async function readQuick(page: Page) {
       if (!hit || !qa.contains(hit)) onTopAll = false;
     }
     return { qa: box(qa), acts: box(acts), tiles: box(vis('[data-clv="tiles"]')), head: hd ? { bg: getComputedStyle(hd).backgroundColor, text: hd.textContent } : null,
-      onTop: onTopAll, addCard: !!vis('[data-clv="addcard"]'),
+      onTop: onTopAll, addCard: !!vis('[data-ac="card"] [data-ae-mode="new"]'),
       focused: (document.activeElement as HTMLElement | null)?.getAttribute("data-clv") ?? null };
   });
 }
