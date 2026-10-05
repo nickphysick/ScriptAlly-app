@@ -527,8 +527,10 @@ test("§11.7 write half — save says what else moved, and the fixture agent is 
     await page.waitForSelector('[data-ac="card"] [data-ac="foot"].on');
     /* ⚠️ THE ACCOUNT IS NOW CHANGED — the restore is in `finally` */
     const saved = await page.textContent('[data-ac="card"] [data-ac="foot"]');
-    expect(saved, "the saved line is missing — the write may have failed with the account half-changed").toContain("Saved");
-    expect(saved, "the saved line does not say what else moved").toContain("Also updated");
+    expect(saved, "the saved line is missing — the write may have failed with the account half-changed").toContain("Saved.");
+    /* (Agent card v1 P4: the v11 line listed surfaces; the card's — the mock's — counts the expected
+       dates the dry run moved, and this fixture is never queried, so it moves none and says so) */
+    expect(saved, "the saved line claimed a date moved on an agent with no query").not.toContain("expected-reply date");
     expect(await page.textContent('[data-ac="card"] [data-ac="where"]'), "the view does not show the saved window").toContain("Replies in about 6 weeks");
     expect((await getDoc(ref)).data()?.responseTimeWeeks, "the window did not reach the store").toBe(6);
     await page.keyboard.press("Escape");

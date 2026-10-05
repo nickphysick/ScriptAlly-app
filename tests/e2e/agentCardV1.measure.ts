@@ -32,7 +32,7 @@ import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { openRoute, visiblePage } from "./measure";
 import { harnessDb } from "./harnessDocs";
-import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query as fsQuery, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query as fsQuery, setDoc, updateDoc, where } from "firebase/firestore";
 
 let asserts = 0;
 let ran = 0;
@@ -1014,6 +1014,298 @@ test.describe("phase 3 — the editor", () => {
       expect(JSON.stringify(now.socials ?? null), "THE FIXTURE'S SOCIALS WERE NOT RESTORED — the account has been changed").toBe(JSON.stringify(before.socials ?? null));
       expect(now.city ?? null, "THE FIXTURE'S CITY WAS NOT RESTORED").toBe(before.city ?? null);
       bump(2);
+    }
+  });
+});
+
+/* ══════════════════════════ phase 4 — save, undo, Also changes and delete ══════════════════════════ */
+
+/** re-seed the v11 fixture agents: the RESTORE for any case that edits or deletes one */
+const reseedFixture = async () => {
+  const { execSync } = await import("node:child_process");
+  return execSync("node tests/e2e/seedContactFixture.mjs", { encoding: "utf8" });
+};
+
+test.describe("phase 4 — save, undo, Also changes and delete", () => {
+  test("a save pulses what changed and offers Undo in the foot — and the list's notice offers the SAME Undo (the lab)", async ({ page }) => {
+    const scope = await openLab(page);
+    const rowText = () => page.evaluate((s) => document.querySelector<HTMLElement>(`${s} [data-agent-card="fx-sparse"]`)?.innerText ?? "", scope);
+    expect(await rowText(), "precondition: no city on the sparse agent").not.toContain("Leeds");
+    await openEditor(page, "fx-sparse", "who");
+    await page.fill(`${CARD} [data-ae="city"]`, "Leeds");
+    await page.keyboard.press("Tab");
+    await page.click(`${CARD} [data-ae="save"]`);
+    await expect(page.locator(`${CARD} [data-ac="head"]`)).toBeVisible();
+    expect(await page.getAttribute(`${CARD} [data-ac="head"]`, "class"), "the changed head did not pulse").toContain("ac-pulse");
+    expect(await page.getAttribute(`${CARD} [data-ac="s-genres"]`, "class"), "an unchanged section pulsed").not.toContain("ac-pulse");
+    await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Saved.");
+    await expect.poll(rowText).toContain("Leeds");
+    /* the card's Undo — and the list's notice withdraws with it */
+    await page.click(`${CARD} [data-ac="undo"]`);
+    await expect(page.locator(`${CARD} [data-ac="foot"].on`), "Undo said nothing").toContainText("Undone.");
+    await expect.poll(rowText, { message: "the card's Undo did not put the city back" }).not.toContain("Leeds");
+    await closeCard(page);
+    expect(await page.locator(`${scope} .agl-notice .act`, { hasText: "Undo" }).count(), "the list still offers an Undo that has already run").toBe(0);
+
+    /* again, undone from the LIST's notice this time — the same closure */
+    await openEditor(page, "fx-sparse", "want");
+    await page.click(`${CARD} [data-ae="genres"] [data-ae="genre-input"]`);
+    await page.keyboard.type("Crime");
+    await page.locator(`${CARD} [data-ae="genre-input-list"] [role="option"]`, { hasText: /^Crime$/ }).first().click();
+    await page.click(`${CARD} [data-ae="save"]`);
+    await expect(page.locator(`${CARD} [data-ac="head"]`)).toBeVisible();
+    expect(await page.getAttribute(`${CARD} [data-ac="s-genres"]`, "class"), "the changed genres did not pulse").toContain("ac-pulse");
+    await closeCard(page);
+    const genreText = () => page.evaluate((s) => document.querySelector<HTMLElement>(`${s} [data-agent-card="fx-sparse"] [data-clv="gch"]`)?.innerText ?? "", scope);
+    await expect.poll(genreText).toContain("CRIME");
+    await page.locator(`${scope} .agl-notice .act`, { hasText: "Undo" }).click();
+    await expect.poll(genreText, { message: "the list's Undo did not take the genre back" }).not.toContain("CRIME");
+    bump(10);
+  });
+
+  test("Also changes is the engine's dry run, counted in the foot — and Undo restores the query's DEADLINE, read back from Firestore (lock 6)", async ({ page }) => {
+    const { db, uid } = await harnessDb();
+    /* ⚠️ NO QUERY ON THE HARNESS ACCOUNT STORES A `responseDeadline` (all 83 measured, 5 Oct), so
+       the fan-out — which rewrites a stored deadline and never adds one — has nothing to move there.
+       The dry run needs nothing arranged (the engine deliberately does not read that field); the
+       fan-out does, so the case arranges a stored deadline on the chosen agent's queried queries and
+       puts the field's absence back in `finally`. */
+    const queried = (await getDocs(fsQuery(collection(db, "users", uid, "queries"), where("status", "==", "Queried")))).docs
+      .map((d) => ({ id: d.id, ref: d.ref, data: d.data() }))
+      .filter((q) => typeof q.data.agentId === "string" && typeof q.data.dateSent === "string");
+    const agentIds = [...new Set(queried.map((q) => q.data.agentId as string))].slice(0, 6);
+    expect(agentIds.length, "population first — no queried query on this account").toBeGreaterThan(0);
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const stepUp = async () => {
+      const plus = page.locator(`${CARD} [data-ae="weeks"] [data-d="1"]`);
+      if (await plus.isEnabled()) await plus.click(); else await page.click(`${CARD} [data-ae="weeks"] [data-d="-1"]`);
+    };
+    let picked: string | null = null;
+    for (const id of agentIds) {
+      await openEditor(page, id, "work");
+      await stepUp();
+      const also = await page.evaluate(() => document.querySelector('[data-ae="also-work"]')?.textContent ?? "");
+      const found = /Query Centre and Birds-eye view: your query's reply expected .+ → .+/.test(also);
+      if (found) expect(await sum(page), "the foot does not count the moved date").toMatch(/also changes \d+ things? elsewhere/);
+      await discard(page);
+      await closeCard(page);
+      if (found) { picked = id; break; }
+    }
+    expect(picked, "no candidate's dry run moved a date — the engine is not reaching the queries").not.toBeNull();
+    if (!picked) return;
+    const aRef = doc(db, "users", uid, "agents", picked);
+    const aBefore = (await getDoc(aRef)).data() ?? {};
+    const mine = queried.filter((q) => q.data.agentId === picked);
+    const ARRANGED = "2026-01-01T00:00:00.000Z";
+    try {
+      for (const q of mine) await updateDoc(q.ref, { responseDeadline: ARRANGED });
+      await page.waitForTimeout(1500); // the app's listener takes the arranged field before the save reads it
+      await openEditor(page, picked, "work");
+      await stepUp();
+      await page.click(`${CARD} [data-ae="save"]`);
+      await expect(page.locator(`${CARD} [data-ac="head"]`)).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`), "the saved line does not say a date moved").toContainText(/Saved\. \d+ expected-reply dates? moved\./);
+      const moved = async () => {
+        let n = 0;
+        for (const q of mine) if ((await getDoc(q.ref)).data()?.responseDeadline !== ARRANGED) n += 1;
+        return n;
+      };
+      await expect.poll(moved, { message: "the save moved no stored deadline — the fan-out did not run", timeout: 15_000 }).toBeGreaterThan(0);
+      /* Undo puts every deadline back, and the window with it */
+      await page.click(`${CARD} [data-ac="undo"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Undone.", { timeout: 15_000 });
+      await expect.poll(moved, { message: "Undo did not restore the query's deadline", timeout: 15_000 }).toBe(0);
+      expect(JSON.stringify((await getDoc(aRef)).data()?.responseTimeWeeks ?? null), "Undo did not restore the reply time")
+        .toBe(JSON.stringify(aBefore.responseTimeWeeks ?? null));
+      await closeCard(page);
+      /* the list's notice offered the SAME Undo — it withdraws once the card's has run */
+      const scope = await visiblePage(page, ".agl-wpg");
+      expect(await page.locator(`${scope} .agl-notice .act`, { hasText: "Undo" }).count(), "the list still offers an Undo that has already run").toBe(0);
+      bump(7);
+    } finally {
+      /* ⚠️ RESTORE IN THE SAME RUN whatever the case said: the window, and the deadline's ABSENCE */
+      await updateDoc(aRef, { responseTimeWeeks: "responseTimeWeeks" in aBefore ? aBefore.responseTimeWeeks : deleteField() });
+      for (const q of mine) await updateDoc(q.ref, { responseDeadline: "responseDeadline" in q.data ? q.data.responseDeadline : deleteField() });
+      const left = await Promise.all(mine.map(async (q) => (await getDoc(q.ref)).data()?.responseDeadline ?? null));
+      expect(left.filter((x) => x === ARRANGED).length, "THE ARRANGED DEADLINE WAS NOT REMOVED — the account has been changed").toBe(0);
+      bump();
+    }
+  });
+
+  test("a save that clears the last data-quality gap resolves the dashboard's flag — and Undo takes the resolution back (the account, re-seeded)", async ({ page }) => {
+    const ID = "clv-fx-stub0";
+    const { db, uid } = await harnessDb();
+    const flagRef = doc(db, "users", uid, "taskFlags", `data_quality_poor__q___a_${ID}__r_`);
+    /* ⚠️ the flag as it WAS, so the finally puts back exactly that — normally no document at all. A
+       finally that only strips `resolvedAt` leaves a stanceless document the save created behind it
+       whenever the Undo fails (measured: the snapshot-without-flags mutation did exactly that). */
+    const flag0 = await getDoc(flagRef);
+    const flagOriginal = flag0.exists() ? flag0.data() : null;
+    try {
+      await reseedFixture();
+      if (flagOriginal?.resolvedAt != null) await updateDoc(flagRef, { resolvedAt: deleteField() });
+      const flagBefore = (await getDoc(flagRef)).exists() ? (await getDoc(flagRef)).data() : null;
+      expect(flagBefore?.resolvedAt ?? null, "precondition: the stub's data-quality task is unresolved").toBeNull();
+      await openRoute(page, "/agents", { width: 1440, height: 900 });
+      await openEditor(page, ID, "work");
+      expect(await stepText(page, "weeks"), "precondition: the stub 0 reads Unknown").toBe("Unknown");
+      await page.click(`${CARD} [data-ae="weeks"] [data-d="1"]`);
+      await page.click(`${CARD} [data-ae="save"]`);
+      await expect(page.locator(`${CARD} [data-ac="head"]`)).toBeVisible({ timeout: 15_000 });
+      await expect.poll(async () => (await getDoc(flagRef)).data()?.resolvedAt ?? null,
+        { message: "the save cleared the last gap and left the task unresolved", timeout: 15_000 }).not.toBeNull();
+      await page.click(`${CARD} [data-ac="undo"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Undone.", { timeout: 15_000 });
+      await expect.poll(async () => (await getDoc(flagRef)).data()?.resolvedAt ?? null,
+        { message: "Undo left the task resolved — the gap is back and the dashboard would not say so", timeout: 15_000 }).toBeNull();
+      expect((await getDoc(doc(db, "users", uid, "agents", ID))).data()?.responseTimeWeeks, "Undo did not put the stub back").toBe(0);
+      await closeCard(page);
+      bump(5);
+    } finally {
+      const out = await reseedFixture();
+      expect(out, "THE FIXTURE WAS NOT RE-SEEDED").toContain("seeded");
+      if (flagOriginal) await setDoc(flagRef, flagOriginal);
+      else await deleteDoc(flagRef);
+      expect((await getDoc(flagRef)).exists(), "THE FLAG WAS NOT PUT BACK — the account has been changed").toBe(!!flagOriginal);
+      bump();
+    }
+  });
+
+  test("delete: the foot asks — plainly with no queries, by typed name with them — and Escape closes only the ask (the lab)", async ({ page }) => {
+    const scope = await openLab(page);
+    /* with queries: the cascade is named and the name must be typed (case aside) */
+    await openFromRow(page, scope, "fx-long");
+    await page.click(`${CARD} [data-ac="more"]`);
+    await page.click(`${CARD} [data-ac="menu-delete"]`);
+    await expect(page.locator(`${CARD} [data-ac="delete-ask"]`)).toContainText(/Delete Aisha Kapoor\? Their .+ history entr(y|ies) go too\. Type their name to confirm\./);
+    expect(await page.isDisabled(`${CARD} [data-ac="delete-go"]`), "Delete is live before the name is typed").toBe(true);
+    await page.fill(`${CARD} [data-ac="delete-name"]`, "aisha kapoor");
+    expect(await page.isDisabled(`${CARD} [data-ac="delete-go"]`), "the typed name (case aside) did not arm Delete").toBe(false);
+    await page.keyboard.press("Escape");
+    expect(await page.locator(`${CARD} [data-ac="delete-ask"]`).count(), "Escape left the ask open").toBe(0);
+    expect(await page.locator(CARD).count(), "Escape on the ask closed the card").toBe(1);
+    await closeCard(page);
+    /* with none: one plain sentence, and Delete takes them off the list */
+    expect(await page.locator(`${scope} [data-agent-card="fx-sparse"]`).count()).toBe(1);
+    await openFromRow(page, scope, "fx-sparse");
+    await page.click(`${CARD} [data-ac="more"]`);
+    await page.click(`${CARD} [data-ac="menu-delete"]`);
+    await expect(page.locator(`${CARD} [data-ac="delete-ask"]`)).toHaveText("Delete Ottoline Frayn from your Contact list? No queries go with them.");
+    await page.click(`${CARD} [data-ac="delete-go"]`);
+    await expect(page.locator(CARD)).toHaveCount(0, { timeout: 5_000 });
+    await expect(page.locator(`${scope} [data-agent-card="fx-sparse"]`), "the deleted agent's row is still on the list").toHaveCount(0, { timeout: 5_000 });
+    bump(9);
+  });
+
+  test("delete on the account takes the agent's own To-do tasks with it (ruling 4) — and the fixture is re-seeded", async ({ page }) => {
+    const ID = "clv-fx-reopen";
+    const { db, uid } = await harnessDb();
+    const startedAt = new Date().toISOString();
+    try {
+      await reseedFixture();
+      await openRoute(page, "/agents", { width: 1440, height: 900 });
+      const scope = await visiblePage(page, ".agl-wpg");
+      /* a reminder for them, through the card's own door */
+      await page.click(`${scope} [data-agent-card="${ID}"]`);
+      await page.waitForSelector(CARD);
+      await page.click(`${CARD} [data-ac="primary"][data-act="remind"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Reminder added to To-do", { timeout: 15_000 });
+      const tasks = () => getDocs(fsQuery(collection(db, "users", uid, "tasks"), where("agentId", "==", ID)));
+      await expect.poll(async () => (await tasks()).size, { message: "the reminder was not written", timeout: 15_000 }).toBeGreaterThan(0);
+      await page.click(`${CARD} [data-ac="more"]`);
+      await page.click(`${CARD} [data-ac="menu-delete"]`);
+      await expect(page.locator(`${CARD} [data-ac="delete-ask"]`)).toContainText("No queries go with them.");
+      await page.click(`${CARD} [data-ac="delete-go"]`);
+      await expect(page.locator(CARD)).toHaveCount(0, { timeout: 10_000 });
+      await expect.poll(async () => (await getDoc(doc(db, "users", uid, "agents", ID))).exists(), { message: "the agent was not deleted", timeout: 20_000 }).toBe(false);
+      expect((await tasks()).size, "the agent's reminder outlived them — a To-do about nobody").toBe(0);
+      await expect(page.locator(`${scope} [data-agent-card="${ID}"]`)).toHaveCount(0, { timeout: 10_000 });
+      bump(5);
+    } finally {
+      const out = await reseedFixture();
+      expect(out, "THE FIXTURE WAS NOT RE-SEEDED — clv-fx-reopen is missing from the account").toContain("seeded");
+      /* the delete's durable feed line ("You deleted Tomas Keller") is this run's write too */
+      const lines = (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("activityType", "==", "Agent Deleted")))).docs
+        .filter((d) => String(d.data().description ?? "").startsWith("You deleted Tomas Keller") && String(d.data().date ?? "") >= startedAt);
+      for (const d of lines) await deleteDoc(d.ref);
+      bump();
+    }
+  });
+
+  /** close the door in the open editor and pick the calendar's LAST open day; returns it and its label */
+  const closeWithDate = async (page: Page) => {
+    await page.click(`${CARD} [data-ae="door"] [data-v="closed"]`);
+    await expect(page.locator(`${CARD} [data-ae="calendar"]`)).toBeVisible();
+    const day = await page.evaluate(() => {
+      const open = [...document.querySelectorAll<HTMLButtonElement>('[data-ae="calendar"] [data-day]')].filter((b) => !b.disabled);
+      return open.length ? open[open.length - 1].dataset.day! : null;
+    });
+    expect(day, "the calendar offered no day that is not past").not.toBeNull();
+    await page.click(`${CARD} [data-ae="calendar"] [data-day="${day}"]`);
+    const d = new Date(`${day}T00:00:00`);
+    /* the house formatter's "1 Nov" — three letters, never "Sept" */
+    return { day: day!, label: `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" }).slice(0, 3)}` };
+  };
+
+  test("decision 13: a save that closes the door with a date adds the reopen reminder, says so — and Undo takes it away (the lab)", async ({ page }) => {
+    const scope = await openLab(page);
+    const labTasks = () => page.evaluate(() => JSON.parse(document.querySelector("[data-lab-tasks]")?.getAttribute("data-lab-tasks") ?? "[]") as [string, string][]);
+    expect((await labTasks()).filter(([a]) => a === "fx-long"), "precondition: no task for the long agent").toEqual([]);
+    expect(await page.getAttribute(`${scope} [data-agent-card="fx-long"]`, "data-door"), "precondition: the long agent is open").toBe("open");
+    await openEditor(page, "fx-long", "work");
+    const { day, label } = await closeWithDate(page);
+    /* the dry run says it before the save, inside the tab that causes it */
+    await expect(page.locator(`${CARD} [data-ae="also-work"]`)).toContainText(`A To-do for ${label}: check they’ve reopened.`);
+    await page.click(`${CARD} [data-ae="save"]`);
+    await expect(page.locator(`${CARD} [data-ac="foot"].on`), "the saved line did not name the reminder").toContainText(`Saved. Reminder added for ${label}.`);
+    await expect.poll(async () => (await labTasks()).filter(([a]) => a === "fx-long"), { message: "the save added no reminder" }).toEqual([["fx-long", day]]);
+    await page.click(`${CARD} [data-ac="undo"]`);
+    await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Undone.");
+    await expect.poll(async () => (await labTasks()).filter(([a]) => a === "fx-long"), { message: "Undo left the reminder" }).toEqual([]);
+    expect(await page.getAttribute(`${scope} [data-agent-card="fx-long"]`, "data-door"), "Undo did not reopen the door").toBe("open");
+    /* and with no date: no task, and the dry run says there will be none */
+    await openEditor(page, "fx-long", "work");
+    await page.click(`${CARD} [data-ae="door"] [data-v="closed"]`);
+    /* the calendar opens a render later: Escape before it is up is the EDITOR's (a dirty one asks) */
+    await expect(page.locator(`${CARD} [data-ae="calendar"]`)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator(`${CARD} [data-ae="calendar"]`), "Escape did not close the calendar").toHaveCount(0);
+    await expect(page.locator(`${CARD} [data-ae="also-work"]`)).toContainText("No reopening date, so no reminder. Housekeeping will ask for the date.");
+    await page.click(`${CARD} [data-ae="save"]`);
+    await expect(page.locator(`${CARD} [data-ac="foot"].on .msg`), "a dateless save claimed a reminder").toHaveText("Saved.");
+    expect((await labTasks()).filter(([a]) => a === "fx-long"), "a dateless closed door added a reminder").toEqual([]);
+    await page.click(`${CARD} [data-ac="undo"]`);
+    await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Undone.");
+    await closeCard(page);
+    bump(10);
+  });
+
+  test("decision 13 on the account: the reminder is a real To-do, and Undo deletes it (the snapshot holds the agent's tasks) — the fixture re-seeded", async ({ page }) => {
+    const ID = "clv-fx-never";
+    const { db, uid } = await harnessDb();
+    const tasks = () => getDocs(fsQuery(collection(db, "users", uid, "tasks"), where("agentId", "==", ID)));
+    try {
+      await reseedFixture();
+      expect((await tasks()).size, "precondition: no task for the never-queried fixture").toBe(0);
+      await openRoute(page, "/agents", { width: 1440, height: 900 });
+      await openEditor(page, ID, "work");
+      const { day, label } = await closeWithDate(page);
+      await page.click(`${CARD} [data-ae="save"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText(`Saved. Reminder added for ${label}.`, { timeout: 15_000 });
+      await expect.poll(async () => (await tasks()).docs.map((d) => d.data().dueDate), { message: "the reminder was not written", timeout: 15_000 }).toEqual([day]);
+      await page.click(`${CARD} [data-ac="undo"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Undone.", { timeout: 15_000 });
+      await expect.poll(async () => (await tasks()).size, { message: "Undo left the reminder on the To-do list", timeout: 15_000 }).toBe(0);
+      const a = (await getDoc(doc(db, "users", uid, "agents", ID))).data() ?? {};
+      expect(a.submissionStatus, "Undo did not reopen the door").toBe("Open");
+      expect("reopensOn" in a, "Undo left the reopening date").toBe(false);
+      await closeCard(page);
+      bump(6);
+    } finally {
+      const out = await reseedFixture();
+      expect(out, "THE FIXTURE WAS NOT RE-SEEDED").toContain("seeded");
+      expect((await tasks()).size, "A FIXTURE REMINDER WAS LEFT ON THE ACCOUNT").toBe(0);
+      bump();
     }
   });
 });

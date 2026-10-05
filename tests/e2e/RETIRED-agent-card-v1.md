@@ -62,3 +62,23 @@ block is the list's: the after-add ring on a new row.
 - `quickAdd.test.ts`: the href renderers (the quick view and `agentCard.ts`; the editor shows a
   cleaned domain as text, never a link) and the typed-genre law (the card's new-genre path through
   `commitTypedGenre` over every source, then `addPersonalGenre`).
+
+## Phase 4 (5 Oct) — save, undo, Also changes and delete
+
+**Retired, swapped not added:**
+
+- `AgentList`'s `undoSave` (`updateAgent(prev)`) — it restored by MERGING, so a field the save added
+  (a first `mswlCheckedAt`, a `reopensOn`, a rating) survived the Undo; it logged an activity the
+  save never logged (the house undo rule forbids compensating entries); and it left every deadline
+  the reply-time fan-out had moved where the save put it. The list's notice now offers the card's
+  OWN Undo — one closure, run once from either place — and that Undo is a snapshot
+  (`lib/agentCardSnapshot`, on the drawer's `planRestore`): the agent, its queries and its task
+  flags read before the save and put back whole. No snapshot, no Undo.
+- `contactEdit.alsoSummary` and `contactEdit.savedLine` — the v11 pop-up's footer and saved line,
+  which unioned surfaces into a sentence. The card counts what moves instead, in the mock's words:
+  the editor's foot ("N changes · also changes N things elsewhere") and its saved line
+  (`cardSavedLine`: "Saved. N expected-reply dates moved.", from the dry run's own `moved` count).
+
+**Locks rewritten:** `contactV11.measure.ts`'s §11.7 write half asserted the v11 saved line ("Also
+updated …"); the fixture is never queried, so the card's line moves no date and says only
+"Saved." — asserted as that, and as never claiming a date moved.

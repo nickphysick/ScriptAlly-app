@@ -11,8 +11,8 @@ import { CONTACT_FIXTURE_AGENTS as A } from "../components/agents/contactFixture
 import { buildAgentMaterials } from "./agentMaterials";
 import { sanitizeAgentPatch } from "./saveAgentEdits";
 import {
-  agencyKey, agencyOptions, cardPatch, changedFields, cityOptions, colleagueWeeks, colleaguesOf, draftOf,
-  emailOk, emptyCardDraft, encodeMats, genreOptions, hostOf, linkOk, matsOf, methodOf, problemsOf,
+  agencyKey, agencyOptions, applyPatch, cardPatch, changedFields, changedTabs, cityOptions, colleagueWeeks, colleaguesOf,
+  draftOf, emailOk, emptyCardDraft, encodeMats, genreOptions, hostOf, inversePatch, linkOk, matsOf, methodOf, problemsOf,
   socialsWithMswl, tabOf,
 } from "./cardDraft";
 
@@ -172,5 +172,41 @@ describe("the lists the inputs offer", () => {
   it("genres: the manuscript's first, then the list's, the writer's own, then the app's — each once", () => {
     expect(genreOptions("Thriller", ["Crime", "thriller"], ["Northern gothic"], ["Crime", "Fantasy"]))
       .toEqual(["Thriller", "Crime", "Northern gothic", "Fantasy"]);
+  });
+});
+
+describe("the lab's Undo — the inverse of a save puts the record back exactly", () => {
+  /* change everything the editor can change, on every fixture agent */
+  const everything = (d: ReturnType<typeof draftOf>) => {
+    d.name = `${d.name} X`; d.agency = `${d.agency} X`; d.city = d.city ? "" : "Leeds"; d.country = d.country === "IE" ? "" : "IE";
+    d.email = "x@y.co"; d.website = "z.co"; d.mswl = d.mswl ? "" : "manuscriptwishlist.com/x"; d.genres = ["Crime"];
+    d.wishlist = "W"; d.mats = { ...d.mats, oth: { on: true, text: "Photo" } }; d.weeks = (d.weeks ?? 0) + 3;
+    d.nrn = !(d.nrn ?? false); d.method = SubmissionMethod.POST;
+    d.door = d.door === "open" ? "closed" : "open"; d.reopens = d.door === "closed" ? "2027-01-04" : "";
+  };
+  it("every key returns to its earlier value, and a key the record lacked is removed again", () => {
+    for (const a of A) {
+      const { patch } = edit(a, everything);
+      const after = applyPatch(a, patch);
+      expect(applyPatch(after, inversePatch(a, patch)), `${a.id}: the undo did not put the record back`).toEqual(a);
+    }
+  });
+  it("every inverse passes the real sanitiser — an Undo the writer cannot store is no Undo", () => {
+    for (const a of A) {
+      const { patch } = edit(a, everything);
+      expect(sanitizeAgentPatch(inversePatch(a, patch)).errors, a.id).toEqual([]);
+    }
+  });
+  it("a field the save added goes by deletion, never as an empty value", () => {
+    const a = agent("fx-sparse");
+    const { patch } = edit(a, (d) => { d.weeks = 6; d.nrn = true; });
+    expect(inversePatch(a, patch)).toEqual({ responseTimeWeeks: null, noResponseMeansNo: null });
+  });
+  it("the tabs a save changed — what pulses after it", () => {
+    const a = agent("fx-long");
+    const base = draftOf(a);
+    expect(changedTabs(base, { ...base, city: "Leeds", weeks: 9 })).toEqual(["who", "work"]);
+    expect(changedTabs(base, { ...base, genres: ["Crime"] })).toEqual(["want"]);
+    expect(changedTabs(base, structuredClone(base))).toEqual([]);
   });
 });

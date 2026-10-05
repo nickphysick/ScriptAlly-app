@@ -89,13 +89,20 @@ export function useAgentCardRequest(): AgentCardRequest | null {
 }
 
 /* ---------- events the page listens to ----------
-   The card saves and adds; the PAGE owns what follows on the list — the notice saying where the
-   saved record went (and the FLIP measured with it, the agentMotion law), and the ring on a new
-   row. An event rather than a prop because the host is app-level and the page is merely one of
-   the places the card opens over. */
+   The card saves, adds and deletes; the PAGE owns what follows on the list — the notice saying where
+   the saved record went (and the FLIP measured with it, the agentMotion law), the ring on a new row,
+   and the row collapsing behind a delete. An event rather than a prop because the host is app-level
+   and the page is merely one of the places the card opens over. */
 export type AgentCardEvent =
-  | { type: "saved"; agentId: string; before: Agent; after: Agent }
-  | { type: "added"; agentId: string };
+  /* `undo` is the card's whole-document Undo — the SAME closure the card's foot offers, so the list's
+     notice can offer it too and the two cannot restore different things; it runs once */
+  | { type: "saved"; agentId: string; before: Agent; after: Agent; undo?: () => Promise<unknown> }
+  | { type: "added"; agentId: string }
+  /* a save's Undo ran (from either place) — the list drops its notice's Undo */
+  | { type: "undone"; agentId: string }
+  /* a delete is under way: the card has shrunk into the row, which collapses (240ms) */
+  | { type: "deleting"; agentId: string }
+  | { type: "delete-failed"; agentId: string; name: string };
 
 type EventListener = (e: AgentCardEvent) => void;
 const eventListeners = new Set<EventListener>();

@@ -19,6 +19,12 @@
  * ⚠️ THE CARD'S WRITES GO THROUGH `commitAgentEdits`, NOT `updateAgent`: the latter logs an
  * activity for every write, so an Undo through it would append a second entry — the house undo rule
  * forbids compensating entries.
+ *
+ * ⚠️ A SAVE'S UNDO IS A SNAPSHOT (lib/agentCardSnapshot): the agent, its queries, its task flags and
+ * its To-do tasks are read BEFORE the save and put back whole — so it also restores the deadlines the
+ * reply-time fan-out moved, the dashboard flag a save that clears the last data-quality gap
+ * resolves, and the reopen reminder a save that closes the door adds (decision 13). A snapshot that
+ * cannot be read means NO Undo is offered: an Undo that restores nothing is worse.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -38,7 +44,7 @@ import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { agentFacts } from "../../../lib/contactList";
 import { isGenreMatch, matchGenre } from "../../../lib/genreMatch";
-import { EditCtx, alsoChanges, savedLine as savedLineFor } from "../../../lib/contactEdit";
+import { EditCtx, alsoChanges } from "../../../lib/contactEdit";
 import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../../lib/computeAgentDeadlineWrites";
 import { commitTypedGenre, hrefFor } from "../../../lib/quickAdd";
@@ -46,8 +52,14 @@ import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { dayMonth } from "../../../lib/dates";
 import { AGENT_GENRES } from "../../../lib/agentOptions";
 import { genreLabel } from "../../../lib/genres";
-import { alsoQueried, cardQuery, cardRows, reopenReminder, stepTarget, type CardAct } from "../../../lib/agentCard";
-import { type CardDraft, cardPatch, encodeMats, toContactDraft } from "../../../lib/cardDraft";
+import {
+  alsoQueried, cardQuery, cardRows, cardSavedLine, reminderOnSave, reopenReminder, savedPulse, stepTarget, type CardAct, type SavedPulse,
+} from "../../../lib/agentCard";
+import { type CardDraft, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
+import { restoreAgentSnapshot, takeAgentSnapshot, type AgentSnapshot } from "../../../lib/agentCardSnapshot";
+import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
+import { flagKeyForTask } from "../../../lib/taskFlags";
+import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
 import { AgentCardEditor, type EditorSaveResult } from "./AgentCardEditor";
@@ -93,14 +105,14 @@ const rowBoxOf = (agentId: string): AgentCardOrigin | null => {
   return { x: r.x, y: r.y, width: r.width, height: r.height };
 };
 
-/** The record as it is after a patch — `null` is a field removed. For the list's aftermath. */
-const applied = (a: Agent, patch: AgentEditPatch): Agent => {
-  const next = { ...a } as Record<string, unknown>;
-  for (const [k, v] of Object.entries(patch)) {
-    if (v === null) delete next[k];
-    else if (v !== undefined) next[k] = v;
-  }
-  return next as unknown as Agent;
+/** An Undo that runs once, from whichever place it is pressed (the card's foot or the list's notice). */
+const once = <T,>(run: () => Promise<T>): (() => Promise<T | null>) => {
+  let used = false;
+  return async () => {
+    if (used) return null;
+    used = true;
+    return run();
+  };
 };
 
 /** The editor a door asked for: a tab, the field to focus there, and any answers carried over. */
@@ -116,7 +128,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const { key: locationKey, pathname } = useLocation();
   const {
     agents, queries, manuscripts, activities, addAgent, addUserTask, deleteUserTask, addPersonalGenre,
-    currentUser, collectionsReady, packages,
+    currentUser, collectionsReady, packages, taskFlags, deleteAgent, resolveTaskFlag,
   } = useScriptAllyDb();
 
   const scoped = useMemo(() => {
@@ -161,7 +173,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const [editing, setEditing] = useState<EditTarget | null>(
     req?.tab ? { tab: req.tab, focus: req.focus, prefill: req.prefill } : null,
   );
-  const [handover, setHandover] = useState<QuickFoot | null>(null);
+  /* what a save hands back to the quick view: its foot (with the Undo) and the parts to pulse */
+  const [handover, setHandover] = useState<{ foot: QuickFoot; pulse: SavedPulse[] } | null>(null);
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
   const frameRef = useRef<AgentCardFrameHandle>(null);
   const editorLeave = useRef<(() => void) | null>(null);
@@ -232,26 +245,69 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     const patch = cardPatch(agent, base, d, new Date().toISOString());
     if (Object.keys(patch).length === 0) { setEditing(null); return { ok: true }; }
     const notes = alsoChanges(agent, toContactDraft(agent, base, d), editCtx);
+    const before = { ...agent } as Agent;
+    const after = applyPatch(agent, patch);
+    /* DECISION 13: a save that leaves the door closed with a new reopening date adds the reopen
+       reminder — the quick view's own task — and the saved line says so; never without a date */
+    const due = reminderOnSave(before, after);
+    let reminderId: string | undefined;
+    const addReminder = async () => {
+      const task = due ? reopenReminder(after) : null;
+      if (task) { try { reminderId = await addUserTask(task); } catch { reminderId = undefined; } }
+    };
     let res: SaveAgentResult;
-    if (sandbox?.writeAgent) res = await sandbox.writeAgent(agent.id, patch);
-    else {
+    let undo: (() => Promise<QuickFoot | null>) | undefined;
+    if (sandbox?.writeAgent) {
+      const write = sandbox.writeAgent;
+      res = await write(agent.id, patch);
+      if (!("error" in res)) await addReminder();
+      /* the lab's cast has nothing but the agent, and the reminder the save added, to put back */
+      undo = once(async () => {
+        const r = await write(before.id, inversePatch(before, patch));
+        if ("error" in r) return { text: `Couldn’t undo: ${r.error}` };
+        if (reminderId) await deleteUserTask(reminderId);
+        emitAgentCardEvent({ type: "undone", agentId: before.id });
+        return { text: "Undone." };
+      });
+    } else {
       if (!currentUser) return { ok: false, error: "Not signed in." };
+      const uid = currentUser.id;
+      const mine = queries.filter((q) => q.agentId === agent.id);
+      /* the snapshot FIRST — no snapshot, no Undo (never an Undo that restores nothing) */
+      let snap: AgentSnapshot | null = null;
+      try { snap = await takeAgentSnapshot(uid, agent.id, mine.map((q) => q.id)); } catch { snap = null; }
       const extras = patch.responseTimeWeeks !== undefined
         ? computeAgentDeadlineWrites(
-            queries.filter((q) => q.agentId === agent.id),
+            mine,
             typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
-            (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
+            (queryId) => doc(db, "users", uid, "queries", queryId),
           )
         : [];
-      res = await commitAgentEdits(db, currentUser.id, agent.id, patch, extras);
+      res = await commitAgentEdits(db, uid, agent.id, patch, extras);
+      /* a save that clears the agent's LAST data-quality gap clears the dashboard's task too, as the
+         Housekeeping fixes do — and the snapshot holds the flag, so Undo takes it back */
+      if (!("error" in res) && agentDataQualityNeeds(before).length > 0 && agentDataQualityNeeds(after).length === 0) {
+        try { await resolveTaskFlag(flagKeyForTask("data_quality_poor", agent.id)); } catch { /* the save stands */ }
+      }
+      /* the snapshot holds the agent's tasks, so Undo deletes the reminder this adds */
+      if (!("error" in res)) await addReminder();
+      if (snap) {
+        const s = snap;
+        undo = once(async () => {
+          try { await restoreAgentSnapshot(s); } catch { return { text: "Couldn’t undo the save." }; }
+          emitAgentCardEvent({ type: "undone", agentId: s.agentId });
+          return { text: "Undone." };
+        });
+      }
     }
     /* "in", not `!res.ok`: with strictNullChecks off a boolean discriminant does not narrow */
     if ("error" in res) return { ok: false, error: res.error };
-    setHandover({ text: savedLineFor(notes) });
-    emitAgentCardEvent({ type: "saved", agentId: agent.id, before: { ...agent }, after: applied(agent, patch) });
+    /* the line claims a reminder only when the task came back with an id */
+    setHandover({ foot: { text: cardSavedLine(notes, reminderId ? due : null), undo }, pulse: savedPulse(changedTabs(base, d)) });
+    emitAgentCardEvent({ type: "saved", agentId: agent.id, before, after, undo });
     setEditing(null);
     return { ok: true };
-  }, [agent, editCtx, sandbox, currentUser, queries]);
+  }, [agent, editCtx, sandbox, currentUser, queries, resolveTaskFlag, addUserTask, deleteUserTask]);
 
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
@@ -363,6 +419,29 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     setSlide(dir > 0 ? "l" : "r");
     stepAgentCard(next);
   }, [agentId, req?.sequence]);
+
+  /**
+   * ⋯ → Delete agent… (§7): the cascade through `deleteAgent` (its queries, their history, its notes,
+   * its flags, and its own To-do tasks — ruling 4). No Undo. The card shrinks into its row, the row
+   * collapses (240ms, the list's), and only then does the delete run, so the list closes the gap.
+   */
+  const deleteFacts = useMemo(() => {
+    if (!agent) return null;
+    const m = destroyManifest("agent", agent.id, { queries, activities, taskFlags });
+    const mine = queries.filter((q) => q.agentId === agent.id);
+    const msTitle = mine.length === 1 ? manuscripts.find((x) => x.id === mine[0].manuscriptId)?.title ?? null : null;
+    return { queries: m.queries, history: m.activityRecords, msTitle };
+  }, [agent, queries, activities, taskFlags, manuscripts]);
+  const onDelete = useCallback(async () => {
+    if (!agent) return;
+    const id = agent.id;
+    const name = (agent.name ?? "").trim() || agent.agency;
+    await frameRef.current?.leave(rowBoxOf(id));
+    closeAgentCard();
+    emitAgentCardEvent({ type: "deleting", agentId: id });
+    await new Promise((r) => window.setTimeout(r, 240));
+    try { await deleteAgent(id); } catch { emitAgentCardEvent({ type: "delete-failed", agentId: id, name }); }
+  }, [agent, deleteAgent]);
 
   /** THE one way into the editor. */
   const openEditor = useCallback((tab: AgentCardTab, focus?: AgentCardField) => {
@@ -477,7 +556,10 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
         packages={packages}
         sequence={req.sequence}
         slide={slide}
-        initialFoot={handover}
+        initialFoot={handover?.foot ?? null}
+        pulse={handover?.pulse}
+        deleteFacts={deleteFacts}
+        onDelete={onDelete}
         showOpenInContactList={!onContactList}
         write={write}
         onStep={onStep}

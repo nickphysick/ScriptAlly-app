@@ -53,6 +53,12 @@ export interface DestroyData {
   packages?: { id: string; manuscriptId: string }[];
   /** Attachment RECORDS. The blobs they point at are removed by db.tsx, not planned here. */
   attachments?: { id: string; manuscriptId: string }[];
+  /**
+   * The writer's own stored tasks (users/{uid}/tasks). ⚠️ AN AGENT DELETE TAKES THE AGENT'S TASKS WITH
+   * IT (Agent card v1, ruling 4): a reopen reminder ("{name}'s list reopens — check it and query") for
+   * an agent who no longer exists is a To-do about nobody. A manuscript delete does not plan them.
+   */
+  userTasks?: { id: string; agentId?: string }[];
 }
 
 /** The "Goes with it" panel — live counts computed at dialog-open. One source with the cascade
@@ -89,7 +95,7 @@ export function destroyManifest(kind: "manuscript" | "agent", id: string, data: 
 
 /** One doc the cascade deletes, by top-level collection. */
 export interface CascadeDoc {
-  col: "versions" | "packages" | "queries" | "activities" | "taskFlags" | "attachments" | "manuscripts" | "agents";
+  col: "versions" | "packages" | "queries" | "activities" | "taskFlags" | "attachments" | "tasks" | "manuscripts" | "agents";
   id: string;
 }
 
@@ -122,6 +128,7 @@ export function cascadePlan(kind: "manuscript" | "agent", id: string, data: Dest
   for (const qid of queryIds) docs.push({ col: "queries", id: qid });
   for (const aid of activityIdsForQueries(data.activities, queryIds)) docs.push({ col: "activities", id: aid });
   for (const fid of flagIdsForCascade(data.taskFlags, { queryIds, ...(kind === "agent" ? { agentId: id } : {}) })) docs.push({ col: "taskFlags", id: fid });
+  if (kind === "agent") for (const t of (data.userTasks ?? []).filter((x) => x.agentId === id)) docs.push({ col: "tasks", id: t.id });
   docs.push(kind === "manuscript" ? { col: "manuscripts", id } : { col: "agents", id });
   return { queryIds, docs };
 }

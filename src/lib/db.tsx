@@ -2290,8 +2290,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const agentName = agents.find(a => a.id === id)?.name || "an agent";
     // The ordered plan (cascade.ts, unit-locked): queries (each preceded by its live-fetched activity
     // subcollection) → global-feed projections → taskFlag stances (query-keyed AND the agent's own
-    // dq stance — 6A) → THE AGENT LAST, so a mid-way failure leaves it (and a retry) intact.
-    const plan = cascadePlan("agent", id, { queries, activities, taskFlags });
+    // dq stance — 6A) → the agent's own stored tasks (Agent card v1, ruling 4: a reopen reminder
+    // about an agent who is gone is a To-do about nobody) → THE AGENT LAST, so a mid-way failure
+    // leaves it (and a retry) intact.
+    const plan = cascadePlan("agent", id, { queries, activities, taskFlags, userTasks });
     const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];

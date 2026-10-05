@@ -96,6 +96,12 @@ export const ContactListLab: React.FC = () => {
   const deleteUserTask = React.useCallback(async (id: string) => {
     setLabTasks((prev) => prev.filter((t) => t.id !== id));
   }, []);
+  /* the card's delete (Agent card v1 P4) — the cast loses the agent and, as the account's cascade
+     does (ruling 4), the agent's own tasks; the lab's cast has no queries to take with it */
+  const deleteAgent = React.useCallback(async (id: string) => {
+    setCast((prev) => prev.filter((a) => a.id !== id));
+    setLabTasks((prev) => prev.filter((t) => t.agentId !== id));
+  }, []);
   /* the agent card's writer (Agent card v1): the app's goes through commitAgentEdits; the lab's
      validates through the SAME sanitiser and applies the result to the cast — a null still means
      "the field goes", so an Undo back to absent is real here too */
@@ -141,6 +147,7 @@ export const ContactListLab: React.FC = () => {
       addUserTask,
       deleteUserTask,
       addPersonalGenre,
+      deleteAgent,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),
@@ -154,7 +161,10 @@ export const ContactListLab: React.FC = () => {
       style={{ height: "100vh", display: "flex", flexDirection: "column", background: "var(--desk)", overflow: "hidden" }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: "1px solid var(--bd)", flexWrap: "wrap", flexShrink: 0 }}>
-        <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/contact-lab</span>
+        {/* the lab's open To-do tasks as [agent, due] — what a measurement reads to see a reminder
+            arrive and leave (the account's are read from Firestore) */}
+        <span data-lab-tasks={JSON.stringify(labTasks.filter((t) => !t.done).map((t) => [t.agentId ?? "", t.dueDate ?? ""]))}
+          style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/contact-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
           {(["settling", "blank", "list", "cast"] as View[]).map((v) => (
             <button key={v} type="button" data-lab-view={v} onClick={() => setView(v)} style={btn(view === v)}>

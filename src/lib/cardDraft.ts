@@ -171,6 +171,12 @@ export function changedFields(base: CardDraft, d: CardDraft): (keyof CardDraft)[
   return (Object.values(TAB_FIELDS).flat()).filter((k) => norm(k, base[k]) !== norm(k, d[k]));
 }
 
+/** The tabs whose fields differ — what a save pulses afterwards (lib/agentCard `savedPulse`). */
+export function changedTabs(base: CardDraft, d: CardDraft): Exclude<CardTab, "notes">[] {
+  const ch = new Set(changedFields(base, d));
+  return (Object.keys(TAB_FIELDS) as Exclude<CardTab, "notes">[]).filter((t) => TAB_FIELDS[t].some((f) => ch.has(f)));
+}
+
 /* ── what is wrong ───────────────────────────────────────────────────────────────────────── */
 
 /** Is this a link the card can store? Blank is fine; a word with a space is not. */
@@ -260,6 +266,36 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
     patch.reopensOn = d.reopens || null;
   }
   return patch;
+}
+
+/** The record as it stands after a patch — `null` is a field removed (the sanitiser's deletes). */
+export function applyPatch(a: Agent, patch: AgentEditPatch): Agent {
+  const next = { ...a } as Record<string, unknown>;
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === null) delete next[k];
+    else if (v !== undefined) next[k] = v;
+  }
+  return next as unknown as Agent;
+}
+
+/**
+ * The write that puts a patch's fields back as they were: each key the patch touched takes the
+ * record's earlier value, and a key the record did not have is removed (`null`). ⚠️ THE ACCOUNT'S
+ * UNDO IS A SNAPSHOT (lib/agentCardSnapshot — it also restores the deadlines and the task flag a
+ * save moves); this is the LAB's, whose writer is its own cast and has nothing else to restore.
+ */
+/* fields the rules require on every agent: an absent one goes back as its empty form, never null */
+const REQUIRED_EMPTY: Record<string, unknown> = { name: "", agency: "", email: "", website: "", mswlNotes: "", genres: [], materialsWanted: [] };
+export function inversePatch(before: Agent, patch: AgentEditPatch): AgentEditPatch {
+  const was = before as unknown as Record<string, unknown>;
+  const inv: Record<string, unknown> = {};
+  for (const k of Object.keys(patch)) {
+    if ((patch as Record<string, unknown>)[k] === undefined) continue;
+    if (was[k] !== undefined) inv[k] = was[k];
+    else if (k in REQUIRED_EMPTY) inv[k] = REQUIRED_EMPTY[k];
+    else inv[k] = null;
+  }
+  return inv as AgentEditPatch;
 }
 
 /* ── the lists the inputs offer ──────────────────────────────────────────────────────────── */

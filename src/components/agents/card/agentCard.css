@@ -525,6 +525,9 @@
 }
 .ac .ac-foot .msg { flex: 1 1 260px; }
 .ac .ac-foot.warn > div { background: var(--ac-warn); }
+.ac .ac-foot .msg i { font-style: italic; }
+/* the delete confirm's typed name (the mock's .ac-confirm-in) */
+.ac .ac-confirm-in { height: 32px; width: 220px; max-width: 100%; }
 .ac .ac-foot .tick {
   width: 18px;
   height: 18px;

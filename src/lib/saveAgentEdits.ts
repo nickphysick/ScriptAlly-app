@@ -48,7 +48,8 @@ export interface AgentEditPatch {
   mswlCheckedAt?: string | null;
   // Social handles — the canonical list plus the mirrored discrete fields (X/Bluesky/Instagram) the
   // agent-database display still reads. See [[agent-socials-display-backlog]].
-  socials?: AgentSocial[];
+  /** null = the list removed (the lab's Undo of a first MSWL link on an agent that had none) */
+  socials?: AgentSocial[] | null;
   twitter?: string;
   bluesky?: string;
   instagram?: string;
@@ -59,7 +60,8 @@ export interface AgentEditPatch {
   starRating?: number | null;
   submissionStatus?: SubmissionStatus | string;
   responseTimeWeeks?: number | null;
-  noResponseMeansNo?: boolean;
+  /** null = back to unstated — only ever an Undo; the editor itself has no road back (decision 9) */
+  noResponseMeansNo?: boolean | null;
   submissionMethod?: string;
   materialsWanted?: string[];
 }
@@ -67,7 +69,7 @@ export interface AgentEditPatch {
 export interface SanitizedAgentWrite {
   /** Validated fields to set (no `undefined`, no `null`-as-delete). */
   fields: Record<string, unknown>;
-  /** Keys to `deleteField()` (currently only ever `responseTimeWeeks`). */
+  /** Keys to `deleteField()` — each a field whose "not set" is the key omitted. */
   deletes: string[];
   /** Validation failures; non-empty means do NOT write. */
   errors: string[];
@@ -125,7 +127,8 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
   }
 
   // Social handles list — { platform, handle } entries, capped at 30 (mirrors the Firestore rule).
-  if (patch.socials !== undefined) {
+  if (patch.socials === null) deletes.push("socials");
+  else if (patch.socials !== undefined) {
     if (!Array.isArray(patch.socials)) errors.push("socials must be a list.");
     else if (patch.socials.length > 30) errors.push("socials is capped at 30.");
     else if (!patch.socials.every((s) => s && typeof s.platform === "string" && typeof s.handle === "string")) {
@@ -138,7 +141,8 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     else fields.genres = patch.genres;
   }
 
-  if (patch.noResponseMeansNo !== undefined) {
+  if (patch.noResponseMeansNo === null) deletes.push("noResponseMeansNo");
+  else if (patch.noResponseMeansNo !== undefined) {
     if (typeof patch.noResponseMeansNo !== "boolean") errors.push("noResponseMeansNo must be a boolean.");
     else fields.noResponseMeansNo = patch.noResponseMeansNo;
   }
