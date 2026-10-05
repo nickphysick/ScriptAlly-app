@@ -245,7 +245,7 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
   expect(r.toolbarGone, "the old toolbar is still mounted").toBe(true);
   expect(r.gridGone, "the card grid is still mounted").toBe(true);
   expect(r.rows, "population first").toBeGreaterThan(10);
-  expect(r.tally).toBe(`${r.rows} of ${r.rows}`);
+  /* (the head row's "N of M" tally retired with the head, v13 P3 — the banner's eyebrow counts now) */
   expect(r.dotted, "a queried row without its StatusDot").toBe(r.queried);
   expect(r.hitFirst, "a matched genre chip is not first").toBe(true);
   const over = r.names.filter((n) => n.over).length;
@@ -258,122 +258,10 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
   bump(8);
 });
 
-test("the filter panel — faceted counts, kept scroll, and an outside pointerdown closing it (§11.4)", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  /* the whole list's facts, read off the rows BEFORE anything narrows them — the oracle the
-     panel's counts are checked against, independent of the panel's own arithmetic */
-  const all = await page.evaluate((scope) =>
-    [...document.querySelectorAll(`${scope} [data-clv="row"]`)].map((x) => ({
-      door: (x as HTMLElement).dataset.door,
-      stand: (x as HTMLElement).dataset.stand,
-      genres: ((x as HTMLElement).dataset.genres ?? "").split("|").filter(Boolean),
-    })), scope);
-  expect(all.length, "population first").toBeGreaterThan(10);
-  bump();
+/* §11.4 (the v12 Filter panel) and §11.10 (the floating active-filter bar) are RETIRED by v13 P3: the
+   banner's labelled pills and the filter line replace both (contactV13 CL13-7 holds the faceted counts,
+   the kept scroll and the outside press; CL13-F the filter line). RETIRED-contact-list-v13.md. */
 
-  await page.locator(`${scope} [data-clv="btn-filter"]`).click();
-  await expect(page.locator(`${scope} [data-clv="fpanel"]`)).toBeVisible();
-  /* pick the first genre chip with a non-zero count */
-  const genre = await page.evaluate((scope) => {
-    const chip = [...document.querySelectorAll(`${scope} [data-clv="fsec-genres"] .clv-chip`)]
-      .find((c) => !(c as HTMLElement).dataset.zero && !(c.textContent ?? "").startsWith("Not recorded"));
-    return chip?.firstChild?.textContent?.trim() ?? null;
-  }, scope);
-  expect(genre, "no selectable genre on this account").not.toBeNull();
-  await page.locator(`${scope} [data-clv="fsec-genres"] .clv-chip`, { hasText: genre! }).first().click();
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-
-  const panel = await page.evaluate((scope) => {
-    const opt = (sec: string) => [...document.querySelectorAll(`${scope} [data-clv="fsec-${sec}"] [aria-pressed], ${scope} [data-clv="fsec-${sec}"] [role="checkbox"]`)]
-      .map((o) => ({ v: (o.textContent ?? "").trim(), n: parseInt(o.querySelector("i")?.textContent ?? "0", 10) }));
-    return { door: opt("door"), stand: opt("stand") };
-  }, scope);
-  const pool = all.filter((x) => x.genres.includes(genre!));
-  const doorOpen = panel.door.find((o) => o.v.startsWith("Open"))!;
-  const doorClosed = panel.door.find((o) => o.v.startsWith("Closed"))!;
-  expect(doorOpen.n, "faceted: door Open under the genre filter").toBe(pool.filter((x) => x.door === "open").length);
-  expect(doorClosed.n, "faceted: door Closed under the genre filter").toBe(pool.filter((x) => x.door === "closed").length);
-  bump(3);
-
-  /* kept scroll: scroll the body, tick a checkbox, the place holds.
-     ⚠️ A NON-ZERO checkbox, by the same population-first law as the genre pick above: the first
-     row blindly was "Your move", and `genre ∧ Your move` went empty as the shared account's
-     statuses drifted — the outside-close loop below then waited its whole timeout for a band
-     that a correctly-filtered EMPTY list is right not to draw. */
-  await page.evaluate((scope) => { (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop = 220; }, scope);
-  const standPick = await page.evaluate((scope) => {
-    const rows = [...document.querySelectorAll(`${scope} [data-clv="fsec-stand"] .clv-fck`)] as HTMLElement[];
-    const i = rows.findIndex((r) => parseInt(r.querySelector("i")?.textContent ?? "0", 10) > 0);
-    return i;
-  }, scope);
-  expect(standPick, "no non-zero standing under the genre filter — the intersection cannot be exercised").toBeGreaterThanOrEqual(0);
-  await page.locator(`${scope} [data-clv="fsec-stand"] .clv-fck`).nth(standPick).click();
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-  const kept = await page.evaluate((scope) => (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop, scope);
-  expect(Math.abs(kept - 220), "the panel lost its place on a selection").toBeLessThanOrEqual(2);
-  bump();
-
-  /* an outside pointerdown closes it — the five §11.4 targets in turn */
-  /* the fifth target was the retired hero's card; the shared header's title stands in (v2 §4) */
-  for (const sel of ["h2", '[data-clv="band"]', '[data-clv="row"]', '[data-clv="tray"]', '[data-probe="page-header"] [data-probe="title"]'] as const) {
-    if (!(await page.locator(`${scope} [data-clv="fpanel"]`).count())) {
-      await page.locator(`${scope} [data-clv="btn-filter"]`).click();
-      await expect(page.locator(`${scope} [data-clv="fpanel"]`)).toBeVisible();
-    }
-    const target = sel === "h2" ? page.locator(`${scope} .clv-ctl h2`) : page.locator(`${scope} ${sel}`).first();
-    await target.dispatchEvent("pointerdown", { bubbles: true });
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-    expect(await page.locator(`${scope} [data-clv="fpanel"]`).count(), `a pointerdown on ${sel} left the panel open`).toBe(0);
-    bump();
-  }
-});
-
-test("the floating bar — centred on the list's box, never moving the list (§11.10)", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  /* v13 P2: the strip and the carousel put Find below the fold at load, and `fill` scrolls to reach
-     it — which moves the list for a reason that is the harness's, not the bar's. Bring it on screen
-     before the "before" reading, so the only thing that could move the list is the bar. */
-  await page.evaluate((scope) => document.querySelector(`${scope} [data-clv="find"]`)?.scrollIntoView({ block: "center" }), scope);
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-  const before = await page.evaluate((scope) => {
-    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
-    const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
-    /* the list's top IN THE SCROLLER'S CONTENT — the bar taking flow space would move it there; a scroll
-       clamping because a filter shortened the page does not (v13 P2: the page now starts scrolled) */
-    const sc = list.closest(".wpg-scroll") as HTMLElement;
-    return { centre: main.getBoundingClientRect().left + main.getBoundingClientRect().width / 2, listTop: list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop };
-  }, scope);
-  expect(await page.locator(".clv-fbar").count(), "the bar shows with nothing active").toBe(0);
-  /* v12 P2 (3 Oct): the count cards are gone — Find is the cheapest chip-raiser left */
-  await page.fill(`${scope} [data-clv="find"] input`, "an");
-  await expect(page.locator(".clv-fbar")).toBeVisible();
-  const after = await page.evaluate((scope) => {
-    const bar = document.querySelector(".clv-fbar") as HTMLElement;
-    const r = bar.getBoundingClientRect();
-    const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
-    const sc = list.closest(".wpg-scroll") as HTMLElement;
-    return { barCentre: r.left + r.width / 2, bottom: r.bottom, listTop: list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop, chips: bar.querySelectorAll(".clv-pl").length };
-  }, scope);
-  expect(Math.abs(after.barCentre - before.centre), "the bar is not centred on the list's box").toBeLessThanOrEqual(1);
-  expect(Math.abs(after.bottom - (900 - 22)), "22px above the window's bottom").toBeLessThanOrEqual(1);
-  expect(after.listTop, "the bar moved the list").toBe(before.listTop);
-  expect(after.chips).toBe(1);
-  await page.locator(".clv-fbar .clv-pl button").click();
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-  expect(await page.locator(".clv-fbar").count(), "removing the one chip hides the bar").toBe(0);
-  bump(6);
-});
-
-/* ⚠️ RETIRED BY v12 P3 (3 Oct), by name: "narrow rows at 1280 — two lines, the fit beneath its
-   hairline". Its subject — the v11 two-deck fold (three tracks, the fit row under its hairline)
-   — is retired by the dossier re-cut: the mock's m4 keeps ONE row of four columns on tighter
-   floors at the narrow container, measured in §10.5's 1280 leg. */
-
-/* v12 P2 (3 Oct): the dividers no longer pin at the scroller's top — they pin BELOW the index
-   strip, and the claim is measured as two boxes meeting (the band's top IS the pinned strip
-   wrapper's bottom), never a restated constant. */
 test("the bands stick BELOW the pinned index strip with the page-coloured shadow", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
@@ -1072,53 +960,8 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
   bump(4);
 });
 
-test("v12 §10.3 — the head: dashed-underlined title, a quiet un-underlined tally, and the controls drop under as a piece", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  await page.waitForSelector(`${scope} [data-clv="ctl"]`);
-  const head = await page.evaluate((scope) => {
-    const ttl = document.querySelector(`${scope} [data-clv="ctl"] .clv-ttlu`) as HTMLElement | null;
-    const em = document.querySelector(`${scope} [data-clv="tally"]`) as HTMLElement | null;
-    const group = document.querySelector(`${scope} [data-clv="btn-group"]`) as HTMLElement | null;
-    if (!ttl || !em || !group) return null;
-    const ts = getComputedStyle(ttl); const es = getComputedStyle(em);
-    return {
-      ttlUnderline: `${ts.borderBottomStyle} ${ts.borderBottomWidth}`,
-      emUnderline: es.borderBottomStyle,
-      emFont: es.fontFamily,
-      emSize: es.fontSize,
-      groupValue: (group.querySelector("i")?.textContent ?? "").trim(),
-      h2Size: getComputedStyle(ttl.closest("h2") as HTMLElement).fontSize,
-    };
-  }, scope);
-  expect(head, "the head's three parts render").not.toBeNull();
-  expect(head!.ttlUnderline, "the title carries the dashed underline").toBe("dashed 1px");
-  expect(head!.emUnderline, "the tally carries NO underline (§10.3)").toBe("none");
-  expect(head!.emFont, "the tally is serif").toContain("Source Serif 4");
-  expect(head!.emSize).toBe("15px");
-  expect(head!.h2Size, "the title steps to the mock's 25").toBe("25px");
-  expect(head!.groupValue, "the Group chip states its value").toBe("letter");
-  bump(7);
-
-  /* at the narrow column the controls drop UNDER the title as one piece — never over it. The
-     geometric claim is overlap-freedom plus which side of the title's baseline the group sits;
-     whether 1280 wraps is REPORTED (it depends on the column, not the viewport). */
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.waitForTimeout(250);
-  const narrow = await page.evaluate((scope) => {
-    const h2 = document.querySelector(`${scope} [data-clv="ctl"] h2`) as HTMLElement;
-    const grp = document.querySelector(`${scope} [data-clv="ctlg"]`) as HTMLElement;
-    const a = h2.getBoundingClientRect(); const b = grp.getBoundingClientRect();
-    const overlap = a.right > b.left + 1 && b.right > a.left + 1 && a.bottom > b.top + 1 && b.bottom > a.top + 1;
-    return { overlap, wrapped: b.top >= a.bottom - 1, h2: `${a.left.toFixed(0)},${a.top.toFixed(0)}–${a.right.toFixed(0)},${a.bottom.toFixed(0)}`, grp: `${b.left.toFixed(0)},${b.top.toFixed(0)}–${b.right.toFixed(0)},${b.bottom.toFixed(0)}` };
-  }, scope);
-  // eslint-disable-next-line no-console
-  console.log(`[v12 §10.3] 1280: wrapped=${narrow.wrapped} h2 ${narrow.h2} ctlg ${narrow.grp}`);
-  expect(narrow.overlap, `the controls never overlap the title — h2 ${narrow.h2} ctlg ${narrow.grp}`).toBe(false);
-  bump(2);
-});
-
-/* ══════════════════════════ v12 P3 — the dividers (§10.4) and the dossier rows (§10.5) ══════════════════════════ */
+/* v12 §10.3 (the head row: dashed title, tally, the controls dropping under) is RETIRED by v13 P3 — the
+   open banner is the list's head (contactV13 CL13-B). RETIRED-contact-list-v13.md. */
 
 test("v12 §10.4 — the divider: a slate tab SITTING on the rule, the count right, on the ground", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
@@ -1266,7 +1109,6 @@ test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped
     const peek = tray.querySelector(".clv-peek") as HTMLElement;
     const tgl = document.querySelector(`${scope} [data-clv="hk-toggle"]`) as HTMLElement;
     const on = tgl?.querySelector('button[aria-pressed="true"]') as HTMLElement | null;
-    const groupChip = document.querySelector(`${scope} [data-clv="btn-group"]`) as HTMLElement;
     /* every expected value resolved from the page's own tokens — never a literal here */
     const probe = document.createElement("i");
     probe.style.cssText = `position:absolute;visibility:hidden;background:${getComputedStyle(main).getPropertyValue("--clv-slate-tray")};font-family:var(--clv-serif)`;
@@ -1292,7 +1134,6 @@ test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped
       tglW: tgl ? tgl.getBoundingClientRect().width : null,
       tglH: tgl ? tgl.getBoundingClientRect().height : null,
       tglBg: tgl ? getComputedStyle(tgl).backgroundColor : null,
-      chipBg: getComputedStyle(groupChip).backgroundColor,
       onBg: on ? getComputedStyle(on).backgroundColor : null,
       onRing: on ? getComputedStyle(on).boxShadow : null,
     };
@@ -1310,7 +1151,7 @@ test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped
   expect(Math.abs((r.tglW ?? 0) - 306), "the toggle is the mock's 306 wide").toBeLessThanOrEqual(1);
   expect(r.tglH!, "…and ~37 tall").toBeGreaterThanOrEqual(35);
   expect(r.tglH!).toBeLessThanOrEqual(39);
-  expect(r.tglBg, "the toggle sits on the head chips' own parchment — two readers, one dress").toBe(r.chipBg);
+  /* (the toggle-against-the-head-chips claim left with the head row, v13 P3 — the tray retires in P4) */
   expect(r.onBg, "the active segment is white").toBe("rgb(255, 255, 255)");
   expect(r.onRing, "…held by an inset ring").toContain("inset");
   bump(15);

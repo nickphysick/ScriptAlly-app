@@ -4,6 +4,7 @@
  *
  * Contact list v11 — locks for the pure derivations (phase 1: the rail's height law).
  */
+import { openKeyOf } from "./contactList";
 import { genrePluralLower } from "./contactStrip";
 import { describe, expect, it } from "vitest";
 import {
@@ -189,10 +190,12 @@ describe("the filter: OR within a section, AND across, counts faceted", () => {
     const someGenre = facts.find((x) => x.genres.length > 0)!.genres[0];
     const f = { ...emptyContactFilters(), genres: [someGenre] };
     const opts = facetOptions(facts, f, () => true);
-    /* the door counts under the genre filter equal a direct count over the genre-filtered set */
-    const pool = facts.filter((x) => matchesContactFilters(x, f, "door"));
-    for (const o of opts.door) {
-      expect(o.n, `door ${o.value}`).toBe(pool.filter((x) => x.door === o.value).length);
+    /* v13: "Open to queries" (three-way, replacing the door's two) counts under the genre filter equal
+       a direct count over the genre-filtered set */
+    const pool = facts.filter((x) => matchesContactFilters(x, f, "open"));
+    expect(opts.open.map((o) => o.value)).toEqual(["open", "closed", "unstated"]);
+    for (const o of opts.open) {
+      expect(o.n, `open ${o.value}`).toBe(pool.filter((x) => x.openKey === o.value).length);
     }
     /* the genre section counts under everything EXCEPT itself — here, no other filter, the list */
     const g = opts.genres.find((o) => o.value === someGenre)!;
@@ -243,10 +246,14 @@ describe("grouping partitions the ordered list; sorting orders within", () => {
     void compareDue;
   });
 
-  it("Replies fastest and Rating put absence last", () => {
+  /* v13: "not stated" is the stub 0 as well as an absent value (the quick-add 0 is not "replies at once") */
+  const stated = (x: { agent: { responseTimeWeeks?: number } }) => typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0;
+  it("Replies fastest and Rating put absence last — the stub 0 counts as absent", () => {
     const byReply = sortFacts(facts, "reply", () => false, NOW);
-    const noWindow = byReply.findIndex((x) => x.agent.responseTimeWeeks == null);
-    if (noWindow >= 0) for (const x of byReply.slice(noWindow)) expect(x.agent.responseTimeWeeks == null).toBe(true);
+    expect(facts.some((x) => x.agent.responseTimeWeeks === 0), "population: a stub 0 exists").toBe(true);
+    const noWindow = byReply.findIndex((x) => !stated(x));
+    expect(noWindow, "population: an unstated window exists").toBeGreaterThan(0);
+    for (const x of byReply.slice(noWindow)) expect(stated(x)).toBe(false);
     const byRating = sortFacts(facts, "rating", () => false, NOW);
     const unrated = byRating.findIndex((x) => x.rating == null);
     if (unrated >= 0) for (const x of byRating.slice(unrated)) expect(x.rating == null).toBe(true);
@@ -301,8 +308,58 @@ describe("v12 · the surname, its initial, and the letter grouping", () => {
   });
 
   it("the tables carry v12's defaults: Letter leads the groupings, Surname leads the sorts", () => {
-    expect(GROUP_OPTIONS[0]).toEqual({ key: "letter", label: "Letter" });
-    expect(SORT_OPTIONS_V12[0]).toEqual({ key: "surname", label: "Surname, A to Z" });
-    expect(SORT_OPTIONS_V12.map((o) => o.label)).toContain("First name, A to Z");
+    /* v13 §5: the mock's labels, each sort with its italic line and its direction's two words */
+    expect(GROUP_OPTIONS[0]).toEqual({ key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z strip" });
+    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["Letter", "Where you stand", "Agency", "Location", "Open to queries", "Fit for your book", "Query status", "No grouping"]);
+    expect(SORT_OPTIONS_V12[0]).toEqual({ key: "surname", label: "Surname", line: "A to Z by family name", dir: ["A to Z", "Z to A"] });
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "First name", "Agency", "Replies fastest", "Next date", "Your rating", "Latest activity"]);
+    expect(SORT_OPTIONS_V12.find((o) => o.key === "reply")!.dir).toEqual(["Fastest first", "Slowest first"]);
+    expect(SORT_OPTIONS_V12.find((o) => o.key === "due")!.dir).toEqual(["Soonest first", "Latest first"]);
+  });
+});
+
+
+describe("v13 §5 — the new sections, the direction, and Open to queries", () => {
+  const stated = (x: { agent: { responseTimeWeeks?: number } }) => typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0;
+  const ctx = { fits: (x: { genres: string[] }) => x.genres.includes("Thriller"), gaps: (x: { agent: { mswlNotes?: string } }) => !(x.agent.mswlNotes ?? "").trim() };
+  it("openKey is the record's own word: Open, Closed, or Not stated", () => {
+    expect(openKeyOf({ submissionStatus: "Open" } as never)).toBe("open");
+    expect(openKeyOf({ submissionStatus: "Closed" } as never)).toBe("closed");
+    expect(openKeyOf({ submissionStatus: "Unknown" } as never)).toBe("unstated");
+    expect(openKeyOf({} as never)).toBe("unstated");
+    expect(new Set(facts.map((x) => x.openKey)).size, "population: the cast has more than one door").toBeGreaterThan(1);
+  });
+  it("Offer is its own option in Where you stand; Your move still counts it (the v12 union)", () => {
+    const f = emptyContactFilters();
+    const offers = facts.filter((x) => x.q?.court === "offer");
+    expect(offers.length, "population: an offer exists").toBeGreaterThan(0);
+    for (const x of offers) expect(matchesContactFilters(x, { ...f, stand: ["offer"] })).toBe(true);
+    expect(facts.filter((x) => matchesContactFilters(x, { ...f, stand: ["offer"] })).length).toBe(offers.length);
+  });
+  it("Fit and Profile read the context; OR within a section, AND across", () => {
+    const f = emptyContactFilters();
+    const takes = facts.filter((x) => matchesContactFilters(x, { ...f, fit: ["takes"] }, undefined, ctx as never));
+    const doesnt = facts.filter((x) => matchesContactFilters(x, { ...f, fit: ["doesnt"] }, undefined, ctx as never));
+    expect(takes.length + doesnt.length).toBe(facts.length);
+    expect(facts.filter((x) => matchesContactFilters(x, { ...f, fit: ["takes", "doesnt"] }, undefined, ctx as never)).length).toBe(facts.length);
+    const both = facts.filter((x) => matchesContactFilters(x, { ...f, fit: ["takes"], profile: ["gaps"] }, undefined, ctx as never));
+    expect(both.every((x) => ctx.fits(x) && ctx.gaps(x as never))).toBe(true);
+    expect(contactFilterCount({ ...f, fit: ["takes"], profile: ["gaps"], open: ["unstated"] })).toBe(3);
+  });
+  it("reversed reverses — but the missing stay last", () => {
+    const fwd = sortFacts(facts, "reply", () => false, NOW);
+    const rev = sortFacts(facts, "reply", () => false, NOW, true);
+    const has = (xs: typeof fwd) => xs.filter((x) => stated(x)).map((x) => x.agent.id);
+    expect(has(rev)).toEqual([...has(fwd)].reverse());
+    const firstMissing = rev.findIndex((x) => !stated(x));
+    for (const x of rev.slice(firstMissing)) expect(stated(x)).toBe(false);
+    /* names are never missing: A to Z simply turns round */
+    expect(sortFacts(facts, "name", () => false, NOW, true).map((x) => x.agent.id)).toEqual(sortFacts(facts, "name", () => false, NOW).map((x) => x.agent.id).reverse());
+  });
+  it("grouping by Open to queries is three-way; by Fit, two named groups", () => {
+    const byOpen = contactGroups("door", facts).map((g) => g.label);
+    expect(byOpen.every((l) => ["Open now", "Closed to queries", "Not stated"].includes(l))).toBe(true);
+    const byFit = contactGroups("fit", facts, { fits: ctx.fits, genreWord: "thrillers" }).map((g) => g.label);
+    expect(byFit).toEqual(["Takes thrillers", "Doesn\u2019t list thrillers"]);
   });
 });

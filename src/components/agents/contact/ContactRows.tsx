@@ -21,6 +21,9 @@ import { STAGE_NAME } from "../../../lib/qcSummary";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
+  /** v13 §5: while the list is filtered, each heading reads "n of m" — m from this map (a group's
+   *  size over every agent); absent, the heading counts its own rows */
+  totals?: ReadonlyMap<string, number> | null;
   byId: Map<string, AgentFacts>;
   nowMs: number;
   /** the manuscript's genre, matched — the ticked chip comes first */
@@ -155,7 +158,7 @@ const Row: React.FC<{
 };
 
 export const ContactRows: React.FC<ContactRowsProps> = ({
-  groups, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres, onAddWishlist,
+  groups, totals = null, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres, onAddWishlist,
 }) => (
   <div className="clv-list" data-clv="list">
     {groups.map((g) => (
@@ -168,7 +171,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
           <div className="clv-band2" data-clv="band" data-letter={/^[A-Z#]$/.test(g.label) ? g.label : undefined}>
             <b>{g.label}</b>
             <i aria-hidden="true" />
-            <small>{g.ids.length} {g.ids.length === 1 ? "agent" : "agents"}</small>
+            <small data-cl13="gcount">{totals ? `${g.ids.length} of ${totals.get(g.label) ?? g.ids.length}` : `${g.ids.length} ${g.ids.length === 1 ? "agent" : "agents"}`}</small>
             {g.extra && <small>{g.extra}</small>}
           </div>
         ) : null}

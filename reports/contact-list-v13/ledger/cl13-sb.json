@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "CL13-SB at rest: off, out of sight, inert, and visibility hidden (so nothing targets its inputs)",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"stuck\":false,\"inert\":true,\"vis\":\"hidden\",\"visible\":false,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":true,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB once the banner is gone: on, in sight, not inert, visible",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"stuck\":true,\"inert\":false,\"vis\":\"visible\",\"visible\":true,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":true,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB on the slate tray at .94",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(214, 223, 230, 0.94)"
+ },
+ {
+  "lock": "CL13-SB the mini A–Z only at 1441px and wider",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL13-SB no control is clipped by the bar (the mock's own fault, not copied)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 clipped"
+ },
+ {
+  "lock": "CL13-SB a filter set in the bar shows on the banner's pill too",
+  "where": "1512",
+  "ok": true,
+  "detail": "⛉Filters (1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-SB at rest: off, out of sight, inert, and visibility hidden (so nothing targets its inputs)",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"stuck\":false,\"inert\":true,\"vis\":\"hidden\",\"visible\":false,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":false,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB once the banner is gone: on, in sight, not inert, visible",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"stuck\":true,\"inert\":false,\"vis\":\"visible\",\"visible\":true,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":false,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB on the slate tray at .94",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(214, 223, 230, 0.94)"
+ },
+ {
+  "lock": "CL13-SB the mini A–Z only at 1441px and wider",
+  "where": "1440",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL13-SB no control is clipped by the bar (the mock's own fault, not copied)",
+  "where": "1440",
+  "ok": true,
+  "detail": "0 clipped"
+ },
+ {
+  "lock": "CL13-SB a filter set in the bar shows on the banner's pill too",
+  "where": "1440",
+  "ok": true,
+  "detail": "⛉Filters (1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-SB at rest: off, out of sight, inert, and visibility hidden (so nothing targets its inputs)",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"stuck\":false,\"inert\":true,\"vis\":\"hidden\",\"visible\":false,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":false,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB once the banner is gone: on, in sight, not inert, visible",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"stuck\":true,\"inert\":false,\"vis\":\"visible\",\"visible\":true,\"bg\":\"rgba(214, 223, 230, 0.94)\",\"mz\":false,\"filter\":\"⛉Filters\",\"clipped\":0}"
+ },
+ {
+  "lock": "CL13-SB on the slate tray at .94",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(214, 223, 230, 0.94)"
+ },
+ {
+  "lock": "CL13-SB the mini A–Z only at 1441px and wider",
+  "where": "1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL13-SB no control is clipped by the bar (the mock's own fault, not copied)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 clipped"
+ },
+ {
+  "lock": "CL13-SB a filter set in the bar shows on the banner's pill too",
+  "where": "1280",
+  "ok": true,
+  "detail": "⛉Filters (1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

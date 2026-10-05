@@ -47,16 +47,19 @@ import { useLocation } from "react-router-dom";
 import { CONTACT_BAND_DISC, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
-  ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
+  ContactFilters, FILTER_SECTIONS, type FilterCtx, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
 import { isGenreMatch } from "../../lib/genreMatch";
-import { ContactControls } from "./contact/ContactControls";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { BarChip, ContactBar } from "./contact/ContactBar";
+import { ContactListControls, type ContactPop, filterValueLabel } from "./contact/ContactListControls";
+import { OpenBanner } from "../shell/OpenBanner";
+import { StickyBar, useStuckPast } from "../shell/StickyBar";
+import { usePopover } from "../shell/ListPills";
+import { readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
@@ -127,11 +130,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
   const addBtnRef = useRef<HTMLButtonElement>(null);
 
-  const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
-  const [search, setSearch] = useState(searchQuery?.trim() || "");
+  /* v13 §5 — REMEMBERED FOR THE VISIT: filters, search, grouping, sort and direction are read from
+     sessionStorage (`sa.contactList`) on mount and written on every change, so a reload or a return
+     to the page puts the list back as it was; a fresh session starts from the defaults. A search
+     handed in from the shell wins over a remembered one. */
+  const remembered = useMemo(() => readListMemory(), []);
+  const [filters, setFilters] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
+  const [search, setSearch] = useState(() => searchQuery?.trim() || remembered?.search || "");
   /* v12 §9: the page opens on the card index — grouped by letter, ordered by surname */
-  const [groupKey, setGroupKey] = useState<GroupKey>("letter");
-  const [sortKey, setSortKey] = useState<ContactSortKey>("surname");
+  const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "letter");
+  const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
+  const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
+  /* choosing a sort resets the direction to its natural order (§5) */
+  const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
+  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed }); }, [filters, search, groupKey, sortKey, reversed]);
+  const pop = usePopover<ContactPop>();
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -227,15 +240,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search),
     [search],
   );
-  const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool), [factsAll, filters, inPool]);
+  /* v13 §5: "Fit for the book" reads the hero's genre match; "Has gaps to fill" the four profile gaps
+     the mock names (reply time, genres, wishlist, what they want you to send) */
+  const filterCtx = useMemo<FilterCtx>(() => ({
+    fits: (x) => genreHitFact(x),
+    gaps: (x) => !(typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0)
+      || (x.agent.genres ?? []).length === 0 || !(x.agent.mswlNotes ?? "").trim() || (x.agent.materialsWanted ?? []).length === 0,
+  }), [genreHitFact]);
+  const genreWord = scoped?.genre && tintGenre ? genrePluralLower(scoped.genre) : null;
+  const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool, filterCtx), [factsAll, filters, inPool, filterCtx]);
   const visibleFacts = useMemo(
     () => sortFacts(
-      factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)),
-      sortKey, genreHitFact, nowMs,
+      factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters, undefined, filterCtx)),
+      sortKey, genreHitFact, nowMs, reversed,
     ),
-    [factsAll, inPool, filters, sortKey, genreHitFact, nowMs],
+    [factsAll, inPool, filters, filterCtx, sortKey, genreHitFact, nowMs, reversed],
   );
-  const groups = useMemo(() => contactGroups(groupKey, visibleFacts), [groupKey, visibleFacts]);
+  const groupCtx = useMemo(() => ({ fits: genreHitFact, genreWord }), [genreHitFact, genreWord]);
+  const groups = useMemo(() => contactGroups(groupKey, visibleFacts, groupCtx), [groupKey, visibleFacts, groupCtx]);
+  /* "n of m" on a group heading while the list is filtered: each group's size over every agent */
+  const filtered = visibleFacts.length < factsAll.length;
+  const groupTotals = useMemo(
+    () => new Map(contactGroups(groupKey, factsAll, groupCtx).map((g) => [g.label, g.ids.length])),
+    [groupKey, factsAll, groupCtx],
+  );
   const factsById = useMemo(
     () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
     [visibleFacts],
@@ -245,30 +273,41 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const anyActive =
     contactFilterCount(filters) > 0 || search.trim() !== ""
     || groupKey !== "letter" || sortKey !== "surname";
-  const barChips: BarChip[] = useMemo(() => {
-    const chips: BarChip[] = [];
-    const drop = <S extends keyof ContactFilters>(section: S, label: string, value: ContactFilters[S][number], shown?: string) =>
-      chips.push({
-        key: `${section}-${String(value)}`, label, value: shown ?? String(value),
-        onRemove: () => setFilters((f) => ({ ...f, [section]: (f[section] as unknown[]).filter((v) => v !== value) }) as ContactFilters),
-      });
-    for (const v of filters.stand) drop("stand", "Standing", v, STAND_LABEL[v]);
-    for (const v of filters.genres) drop("genres", "Genre", v);
-    for (const v of filters.door) drop("door", "Queries", v, v === "open" ? "Open" : "Closed");
-    for (const v of filters.locs) drop("locs", "Location", v);
-    for (const v of filters.status) drop("status", "Status", v);
-    for (const v of filters.rating) drop("rating", "Rating", v, v === 0 ? "Unrated" : "★".repeat(v));
-    if (search.trim()) chips.push({ key: "find", label: "Name has", value: search.trim(), onRemove: () => setSearch("") });
-    return chips;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, search]);
+  /* v13 §5 — the filter line's chips: one per active filter value, and the search text */
+  const lineChips = useMemo(() => {
+    const out: { key: string; label: string; remove: () => void }[] = [];
+    for (const sec of FILTER_SECTIONS) {
+      for (const v of filters[sec] as (string | number)[]) {
+        out.push({
+          key: `${sec}:${v}`, label: filterValueLabel(sec, String(v), genreWord),
+          remove: () => setFilters((f) => ({ ...f, [sec]: (f[sec] as unknown[]).filter((x) => x !== v) }) as ContactFilters),
+        });
+      }
+    }
+    if (search.trim()) out.push({ key: "find", label: `\u201c${search.trim()}\u201d`, remove: () => setSearch("") });
+    return out;
+  }, [filters, search, genreWord]);
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, []);
+  /* "M NEED YOU" — the agents whose move it is (the v12 union: requests, offers and past-date nudges) */
+  const needYou = useMemo(() => factsAll.filter((x) => x.stand === "you").length, [factsAll]);
+  /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
+  const controlsFor = (where: "banner" | "sticky") => (
+    <ContactListControls
+      where={where} find={search} onFind={setSearch}
+      filters={filters} onFilters={setFilters} options={filterOptions}
+      groupKey={groupKey} onGroup={setGroupKey}
+      sortKey={sortKey} reversed={reversed} onSort={setSortKey} onReverse={() => setReversed((r) => !r)}
+      pop={pop} msTitle={scoped?.title?.trim() || null} genreWord={genreWord}
+    />
+  );
+  const bannerRef = useRef<HTMLDivElement | null>(null);
 
   const resetList = useCallback(() => {
     setFilters(emptyContactFilters());
     setSearch("");
     setGroupKey("letter");
     setSortKey("surname");
-  }, []);
+  }, [setSortKey]);
 
   /* ── v12 §4: the index strip's marked letter ──────────────────────────────
    * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
@@ -348,6 +387,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
   const showList = pageState === "list" && !showEmpty;
+  /* v13 §5 — the sticky slim bar: on once the banner has scrolled off, gone once the list has. ⚠️ Read
+     BELOW `showList` (a TS2448 caught it above), and bound again when the list arrives. */
+  const stuck = useStuckPast(bannerRef, mainColRef, showList);
 
   /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
      Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
@@ -408,12 +450,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
          does the saved record still match the pool and the panel, and where does it land */
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
-      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
+      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters, undefined, filterCtx);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsById.get(a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
       const after = sortFacts(
-        afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)),
-        sortKey, genreHitFact, nowMs,
+        afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters, undefined, filterCtx)),
+        sortKey, genreHitFact, nowMs, reversed,
       );
       const index = after.findIndex((x) => x.agent.id === saved.id);
       const outcome: SaveOutcome = !survives
@@ -432,7 +474,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
          can play the move (rows carry data-agent-card, flip.ts's selector) */
       flipBefore.current = measureFlip(gridRef.current);
     },
-    [agents, filters, sortKey, genreHitFact, nowMs, qcRows, scoped, factsById, inPool],
+    [agents, filters, filterCtx, sortKey, reversed, genreHitFact, nowMs, qcRows, scoped, factsById, inPool],
   );
 
   /**
@@ -658,6 +700,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             exhibition={<ContactExhibit />}
           />
         ) : (
+        <>
+        {/* v13 §5 — THE STICKY SLIM BAR, outside the group's grid so it sticks to the scroller's top
+            across the whole page: "Every agent", the count, the mini A–Z (1441px and wider) and the
+            same controls as the banner's, sharing their state. */}
+        {showList && (
+          <StickyBar stuck={stuck} probe="contacts">
+            <b className="cl13-sb-t">Every agent</b>
+            <span className="cl13-sb-k">{visibleFacts.length} {visibleFacts.length === 1 ? "AGENT" : "AGENTS"}</span>
+            {groupKey === "letter" && (
+              <span className="cl13-mz" data-cl13="mz">
+                {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((L) => (
+                  <button key={L} type="button" className={`${stripCounts.get(L) ? "" : "off"}${markedLetter === L ? " on" : ""}`}
+                    disabled={!stripCounts.get(L)} onClick={() => pickLetter(L)}>{L}</button>
+                ))}
+              </span>
+            )}
+            <span className="cl13-sb-sp" />
+            {controlsFor("sticky")}
+          </StickyBar>
+        )}
         <div className="clv-group">
         {/* ⚠️ THE SHARED FULL HEADER (page header v2 §4): the Query Centre's component, frame and rule.
             It spans the whole group — column AND rail — so the Housekeeping rail starts below the
@@ -733,9 +795,35 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {!showList ? null : (
         <>
 
-        {/* ⚠️ v12 §4: THE INDEX STRIP IS THE FIRST THING BELOW THE RULE — above the head, as the
-            mock orders it — and it indexes the SAME filtered set the list shows (one derivation,
-            two readers). The v11 count cards left this page with it. */}
+        {/* v13 §5 — THE OPEN BANNER: the perched Archivist, "N AGENTS · M NEED YOU", the heading, the
+            sentence, and the controls right-aligned. It replaces v12's head row (ContactControls). */}
+        {showList && (
+          <OpenBanner
+            probe="contacts" bannerRef={bannerRef}
+            figure={{ src: `${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`, width: CONTACT_HAWK.width, height: CONTACT_HAWK.height }}
+            eyebrow={<span data-cl13="lk">{agents.length} {agents.length === 1 ? "agent" : "agents"} {"\u00b7"} {needYou} need you</span>}
+            heading="Every agent, on file."
+            sentence={scoped?.title?.trim()
+              ? <>Your card index for <b>{scoped.title.trim()}</b>: what each agent wants, how fast they reply, and where your query to them stands.</>
+              : <>Your card index: what each agent wants, how fast they reply, and where your query to them stands.</>}
+            controls={controlsFor("banner")}
+          />
+        )}
+        {/* v13 §5 — the filter line, while anything narrows the list: what is showing, a chip per
+            filter and the search, and Clear all. It replaces v12's floating bar (ContactBar). */}
+        {showList && filtered && (
+          <div className="cl13-fline" data-cl13="fline" role="status">
+            <span>Showing <b>{visibleFacts.length}</b> of {factsAll.length}</span>
+            {lineChips.map((c) => (
+              <span key={c.key} className="cl13-fchip" data-cl13-chip={c.key}>
+                {c.label}<button type="button" aria-label={`Remove ${c.label}`} onClick={c.remove}>{"\u2715"}</button>
+              </span>
+            ))}
+            <button type="button" className="cl13-clr" data-cl13="clear-all" onClick={clearFilters}>Clear all</button>
+          </div>
+        )}
+        {/* ⚠️ v12 §4: THE INDEX STRIP — it indexes the SAME filtered set the list shows (one derivation,
+            two readers). Phase 4 moves it inside the workspace. */}
         {showList && (
           <ContactIndexStrip
             total={visibleFacts.length}
@@ -744,38 +832,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onPick={pickLetter}
           />
         )}
-        {/* the header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}
-        {showList && (
-          <ContactControls
-            shownCount={visible.length}
-            total={agents.length}
-            find={search}
-            onFind={setSearch}
-            filters={filters}
-            onFilters={setFilters}
-            options={filterOptions}
-            groupKey={groupKey}
-            onGroup={setGroupKey}
-            sortKey={sortKey}
-            onSort={setSortKey}
-            anyActive={anyActive}
-            onReset={resetList}
-          />
-        )}
-
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
             default selector, so a filter change still animates the reflow. */}
         {showList && (
         <div ref={gridRef}>
           {visible.length === 0 ? (
-            <div className="agl-empty">
-              <div className="big">No agents match.</div>
-              <div className="small">Loosen the filter, or clear the search.</div>
+            <div className="agl-empty" data-cl13="none">
+              <div className="big">No agents match these filters.</div>
+              <div className="small">Loosen the filter, or clear the search. <button type="button" className="cl13-none-clr" data-cl13="none-clear" onClick={clearFilters}>Clear filters</button></div>
             </div>
           ) : (
             <ContactRows
               groups={shownGroups}
+              totals={filtered ? groupTotals : null}
               byId={factsById}
               nowMs={nowMs}
               genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
@@ -791,15 +861,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
         </>
         )}
-        {/* the floating active-filter bar (§5.4): everything narrowing the list, spelled out */}
-        {showList && (
-          <ContactBar
-            anchor={mainColRef}
-            onClearAll={resetList}
-            chips={barChips}
-          />
-        )}
-
         {/* The notice sits BENEATH the grid and persists until dismissed or superseded — a card
             that travelled off-screen, or left because it no longer matches the filters, would
             otherwise simply have vanished. It rises in with the same shared vocabulary. */}
@@ -848,6 +909,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </ContactRail>
         )}
         </div>
+        </>
         )}
        </div>
        </WorkspacePageGrid>

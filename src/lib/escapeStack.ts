@@ -27,6 +27,8 @@
 import { useEffect, useRef } from "react";
 
 export const ESC_LEVEL = {
+  /** a page's own popover (the Contact list's labelled pills) — under anything that opens over the page */
+  page: 5,
   /** the agent card itself — view or editor */
   card: 10,
   /** anything open INSIDE the card: a combobox, the calendar, the ⋯ menu */
