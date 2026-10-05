@@ -54,3 +54,5 @@
 .qcv-qm-card > * {
   position: static; width: auto; max-width: none; max-height: none; height: auto; margin: 0;
 }
+/* v126 §7 — docked under the action drawer: laid out, hidden, and out of the way of every press */
+.qcv-qm.qcv-qm--docked { visibility: hidden; pointer-events: none; }

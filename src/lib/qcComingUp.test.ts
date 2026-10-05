@@ -117,3 +117,15 @@ describe("QC7 · the row's Coming-up verb is the To-do list's own derivation", (
     expect(m.get("q1")!.taskType).toBe("full_requested");
   });
 });
+
+describe("v126 §7 · the tray's action is one drawer door per bucket", () => {
+  it("maps every bucket to a drawer journey, and Consider closing presets the no-reply reason", async () => {
+    const { trayRequest } = await import("./qcComingUp");
+    const { QueryStatus: S } = await import("../types");
+    expect(trayRequest("send", S.PARTIAL_REQUESTED, "q")).toEqual({ mode: "sent", queryId: "q" });
+    expect(trayRequest("chase", S.QUERIED, "q")).toEqual({ mode: "nudge", queryId: "q" });
+    expect(trayRequest("close", S.QUERIED, "q")).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
+    expect(trayRequest("fix", S.QUERIED, "q")).toEqual({ mode: "edit", queryId: "q" });
+    expect(trayRequest("decide", S.OFFER, "q")?.mode).toBe("offer");
+  });
+});

@@ -133,14 +133,14 @@ import { QcQueryModal } from "./queries/centre/QcQueryModal";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, filterForStatusParam, filterOptions,
+  DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
   inScope, matchesFilter, matchesFind, sortRows,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
-import { cardsByQuery, comingUp, type ComingUp } from "../lib/qcComingUp";
+import { cardsByQuery, comingUp, trayRequest, type ComingUp } from "../lib/qcComingUp";
 import { QcCarousel } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
@@ -1837,7 +1837,7 @@ export const Queries: React.FC<{
     openQueryDrawer({
       mode: door.mode,
       queryId: q.id,
-      ...(fromCard && ag ? { dock: { initials: "", name: ag.name || ag.agency || "The agent", status: String(q.status) } } : {}),
+      ...(fromCard && ag ? { dock: { initials: qcById.get(q.id)?.initials ?? "", name: ag.name || ag.agency || "The agent", status: String(q.status) } } : {}),
     });
     return true;
   };
@@ -2290,7 +2290,15 @@ export const Queries: React.FC<{
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
   /* v126 §6 — whether the action drawer is open, so the Birds-eye drawer's keys stand down beneath it */
   const [qaOpen, setQaOpen] = useState<boolean>(() => currentDrawerRequest() != null);
-  useEffect(() => subscribeDrawer((r) => setQaOpen(r != null)), []);
+  /* …and whether it was opened from the card, which then docks to the drawer's chip */
+  const [qaDocked, setQaDocked] = useState<boolean>(() => !!currentDrawerRequest()?.dock);
+  useEffect(() => subscribeDrawer((r) => { setQaOpen(r != null); setQaDocked(!!r?.dock); }), []);
+  /**
+   * v126 §7 — THE SET THE CARD WAS OPENED FROM, so ← → in the centred card step through the list's
+   * rows, the carousel's cards or the Birds-eye drawer's rows — whichever the reader came from. A
+   * deep link (`?q`) has no surface and steps through the list.
+   */
+  const cardSetRef = useRef<string[] | null>(null);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -5318,7 +5326,7 @@ export const Queries: React.FC<{
       onDoor={(mode, anchor) => {
         const ag = agents.find((a) => a.id === activeQuery.agentId);
         if (DRAWER_LIVE[mode]) {
-          openQueryDrawer({ mode, queryId: activeQuery.id, ...(ag ? { dock: { initials: "", name: ag.name || ag.agency || "The agent", status: String(activeQuery.status) } } : {}) });
+          openQueryDrawer({ mode, queryId: activeQuery.id, ...(ag ? { dock: { initials: qcById.get(activeQuery.id)?.initials ?? "", name: ag.name || ag.agency || "The agent", status: String(activeQuery.status) } } : {}) });
           return;
         }
         if (mode === "offer") openRecord(activeQuery);
@@ -6607,6 +6615,13 @@ export const Queries: React.FC<{
                 /* ⚠️ v126 §3 — A SECTION SELECTS FOR THE CAROUSEL ONLY. It used to filter the list
                    (v95), and before that deal a fan; the list below is now untouched by it. */
                 onCourt={pickCourt}
+                /* v126 §7 — a disc opens its query in the centred card; ← → then step that court */
+                onOpenQuery={(id) => {
+                  const r = qcById.get(id);
+                  const court = r ? tileCourt(r.status) : null;
+                  cardSetRef.current = court ? rowsForTile(qcScoped, court).map((x) => x.id) : null;
+                  onOpenQuery?.(id);
+                }}
               />
             )}
             /**
@@ -6623,7 +6638,7 @@ export const Queries: React.FC<{
                 focusId={beFocus}
                 onOpenDrawer={() => openBirdsEye(null)}
                 onCloseDrawer={() => { setBeOpen(false); setBeFocus(null); setBeCard(null); }}
-                onOpenQuery={(id) => setBeCard(id)}
+                onOpenQuery={(id, set) => { cardSetRef.current = set; setBeCard(id); }}
                 cardOpen={qcOpenCardNode != null && beCard != null}
                 onCardClose={closeQueryCard}
                 actionOpen={qaOpen}
@@ -6644,7 +6659,7 @@ export const Queries: React.FC<{
                   sort={qcCzSort}
                   onSort={setQcCzSort}
                   total={qcScoped.length}
-                  onOpen={(id) => onOpenQuery?.(id)}
+                  onOpen={(id) => { cardSetRef.current = dealt.map((r) => r.id); onOpenQuery?.(id); }}
                   onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
                   onBirdsEye={() => openBirdsEye(null)}
                   model={(row) => {
@@ -6700,14 +6715,20 @@ export const Queries: React.FC<{
                      sort applies WITHIN each group for free (§2). A grouping that re-ordered would
                      be a second ordering pass disagreeing with the sort control. */
                   groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
-                  selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()}
+                  selectedId={selectedQueryId} onOpen={(id) => { cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
                   coming={qcComing}
                   packageName={qcPackageName}
                   /* ⚠️ THE TRAY'S PRIMARY IS THE PAGE'S OWN ACTION ENGINE, never a second write
                      path: it opens the query and offers its verb, exactly as pressing the row and
                      then the card's primary does. Nothing in the tray is destructive in one click —
                      `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
-                  onAct={(id) => onOpenQuery?.(id)}
+                  /* v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER in the journey its bucket names
+                     (`trayRequest`); nothing here opens its own modal for an action any more. */
+                  onAct={(id, bucket) => {
+                    const r = qcById.get(id);
+                    const req = r ? trayRequest(bucket, r.status, id) : null;
+                    if (req) openQueryDrawer(req); else onOpenQuery?.(id);
+                  }}
                   /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
                   onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
                   onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
@@ -6814,7 +6835,14 @@ export const Queries: React.FC<{
             * is on screen rather than of which component mounted last.
             */}
           {qcOpenCardNode && (beCard != null || qcDocked === true) && (
-            <QcQueryModal onClose={closeQueryCard} ownsEscape={!beOpen}>{qcOpenCardNode}</QcQueryModal>
+            <QcQueryModal onClose={closeQueryCard} ownsEscape={!beOpen} docked={qaOpen && qaDocked}
+              onStep={(delta) => {
+                const set = cardSetRef.current ?? qcVisible.map((r) => r.id);
+                if (!set.length || !cardQueryId) return;
+                const at = set.indexOf(cardQueryId);
+                const next = set[((at < 0 ? 0 : at + delta) + set.length) % set.length];
+                if (beCard != null) setBeCard(next); else onOpenQuery?.(next);
+              }}>{qcOpenCardNode}</QcQueryModal>
           )}
 
           {/* UNDER 900px OF COLUMN the open query is today's DRAWER — for a query the reader chose (`?q`),

@@ -36,12 +36,42 @@ export const QcQueryModal: React.FC<{
    * calendar; this component then registers nothing at all, so there is no race to resolve.
    */
   ownsEscape: boolean;
-}> = ({ children, onClose, ownsEscape }) => {
+  /**
+   * v126 §7 — ← → STEP THROUGH THE SET THE CARD WAS OPENED FROM (the list's rows, the carousel's
+   * cards, the Birds-eye drawer's rows). The page knows the set; this only hears the keys.
+   */
+  onStep?: (delta: 1 | -1) => void;
+  /**
+   * v126 §7 — WHILE THE ACTION DRAWER IS OPEN FROM THIS CARD, THE CARD DOCKS: the drawer shows its
+   * chip and this modal steps aside, laid out but hidden, so it returns exactly as it was when the
+   * drawer closes. At z 80 it would otherwise sit over the drawer (71) and the drawer could not be
+   * used.
+   */
+  docked?: boolean;
+}> = ({ children, onClose, ownsEscape, onStep, docked = false }) => {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const stepRef = useRef({ onStep, docked });
+  stepRef.current = { onStep, docked };
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const k = stepRef.current;
+      if (!k.onStep || k.docked || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, select, [contenteditable='true'], [role='menu'], [role='tablist']")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      k.onStep(e.key === "ArrowRight" ? 1 : -1);
+    };
+    /* capture, so the Birds-eye drawer's own ← → (which scroll time) never see a press meant for
+       the card above it */
+    document.addEventListener("keydown", on, true);
+    return () => document.removeEventListener("keydown", on, true);
+  }, []);
 
   useEffect(() => {
-    if (!ownsEscape) return undefined;
+    if (!ownsEscape || docked) return undefined;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
@@ -50,7 +80,7 @@ export const QcQueryModal: React.FC<{
     };
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [ownsEscape]);
+  }, [ownsEscape, docked]);
 
   /**
    * ⚠️ THE PAGE BEHIND IT DOES NOT SCROLL, AND ITS POSITION IS NOT TOUCHED. `overflow: hidden` on
@@ -65,7 +95,7 @@ export const QcQueryModal: React.FC<{
   }, []);
 
   return createPortal(
-    <div className="qcv-qm" data-qcv="qm" role="dialog" aria-modal="true" aria-label="Query">
+    <div className={`qcv-qm${docked ? " qcv-qm--docked" : ""}`} data-qcv="qm" role="dialog" aria-modal={!docked} aria-hidden={docked || undefined} aria-label="Query">
       <div className="qcv-qm-back" data-qcv="qm-back" onClick={() => closeRef.current()} aria-hidden="true" />
       <div className="qcv-qm-card" data-qcv="qm-card">{children}</div>
       {/**
@@ -73,10 +103,8 @@ export const QcQueryModal: React.FC<{
         * a fact about the card's BAND as much as about the control: the card's ✕ is 24px tall in a
         * band whose type is 15, so leaving it in makes the band 45px where the design draws 36.
         *
-        * ⚠️ THE MOCK ALSO DRAWS PREV/NEXT ARROWS BESIDE IT AND THEY ARE DELIBERATELY NOT BUILT. The
-        * brief names three ways to close and no way to step, and a stepper is a feature rather than
-        * a treatment — building it from an artefact nobody asked for is how a page grows a control
-        * with no decision behind it.
+        * ⚠️ THE MOCK ALSO DRAWS PREV/NEXT ARROWS BESIDE IT AND THEY ARE STILL NOT BUILT. v126 §7
+        * asks for ← → stepping, which is the keys above; a drawn control is a separate decision.
         */}
       <button type="button" className="qcv-qm-x" data-qcv="qm-close" aria-label="Close" onClick={() => closeRef.current()}>✕</button>
     </div>,

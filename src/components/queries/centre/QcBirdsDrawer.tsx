@@ -73,8 +73,8 @@ export const QcBirdsDrawer: React.FC<{
   open: boolean;
   onOpenDrawer: () => void;
   onCloseDrawer: () => void;
-  /** a name or a bar opens the centred card over the drawer */
-  onOpenQuery: (id: string) => void;
+  /** a name or a bar opens the centred card over the drawer; the drawer's row order rides with it so ← → step the drawer's set */
+  onOpenQuery: (id: string, set: string[]) => void;
   /** whether that card is open, and how it closes (Escape reaches it before the drawer) */
   cardOpen: boolean;
   onCardClose: () => void;
@@ -318,7 +318,7 @@ export const QcBirdsDrawer: React.FC<{
           ) : (
             <QcTimeline
               rows={rows} groups={groups} banded={view.groupBy !== "none"} nowMs={clock} focusId={focusId}
-              onOpen={onOpenQuery} onAct={onAct} keysActive={!cardOpen && !actionOpen && !pop} filtered={nFilters > 0}
+              onOpen={(id) => onOpenQuery(id, groups.flatMap((g) => g.rows.map((r) => r.id)))} onAct={onAct} keysActive={!cardOpen && !actionOpen && !pop} filtered={nFilters > 0}
             />
           )}
         </div>

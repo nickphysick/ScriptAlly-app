@@ -26,6 +26,9 @@ import { cardBucket, type Bucket } from "./todoBuckets";
 import type { BoardCard } from "./todoBoard";
 import { elapsedPhrase } from "./elapsed";
 import type { QcRow } from "./qcSummary";
+import type { QueryStatus } from "../types";
+import { primaryDoor } from "./queryActions/entry";
+import type { OpenRequest } from "./queryActions/drawerStore";
 
 const DAY = 86_400_000;
 
@@ -124,4 +127,23 @@ export function cardsByQuery(cards: readonly BoardCard[]): Map<string, BoardCard
     out.set(id, c);
   }
   return out;
+}
+
+/**
+ * v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER, in the journey its bucket names. It used to open
+ * the query, so the act was one click further away and through a second door.
+ *
+ * send → Mark sent · chase → Nudge · close → Close, with the no-reply reason preset ("Consider
+ * closing" is a query that has gone quiet) · fix → Edit · decide → the card's own primary door for
+ * the status (an offer's next steps, a late reply), so the tray and the card offer the same verb.
+ */
+export function trayRequest(bucket: Exclude<Bucket, "note">, status: QueryStatus, queryId: string): OpenRequest | null {
+  switch (bucket) {
+    case "send": return { mode: "sent", queryId };
+    case "chase": return { mode: "nudge", queryId };
+    case "close": return { mode: "close", queryId, preset: { closeWhy: "noreply" } };
+    case "fix": return { mode: "edit", queryId };
+    case "decide": { const d = primaryDoor(status); return d ? { mode: d.mode, queryId } : null; }
+    default: { const unhandled: never = bucket; return unhandled; }
+  }
 }

@@ -152,3 +152,18 @@
 @media (prefers-reduced-motion: reduce) {
   .qcv-half { transition: none; }
 }
+
+/**
+ * v126 §7 — THE GROUPED SECTION: a stretched button chooses the court, the drawn content sits above
+ * it and lets presses through, and only the discs take presses of their own (they open a query).
+ */
+.qcv-half.qcv-half--grp { position: relative; cursor: default; }
+.qcv-half-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.qcv-half-hit:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: -3px; }
+.qcv-half-hit:disabled { cursor: default; }
+.qcv-half--grp > :not(.qcv-half-hit) { position: relative; z-index: 1; pointer-events: none; }
+.qcv-half-who .qcv-disc { pointer-events: auto; margin: 0 0 0 -7px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.qcv-half-who .qcv-disc:first-child { margin-left: 0; }
+.qcv-half-who .qcv-disc i { margin-left: 0; }
+.qcv-half-who .qcv-disc:hover i, .qcv-half-who .qcv-disc:focus-visible i { box-shadow: 0 0 0 2px var(--qcv-ink); }
+.qcv-half-who .qcv-disc:focus-visible { outline: none; }

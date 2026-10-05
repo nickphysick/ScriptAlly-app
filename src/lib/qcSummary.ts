@@ -263,7 +263,8 @@ export interface CourtTile {
 }
 
 /** One overlapping initials disc in a desk section's foot. */
-export interface CourtDisc { initials: string; name: string }
+/** `queryId` is the query that put the agent on the desk — the one a disc opens (v126 §7). */
+export interface CourtDisc { initials: string; name: string; queryId?: string }
 /**
  * The foot's right-hand fact: a label the COURT owns, and a date that may not exist.
  *
@@ -315,7 +316,7 @@ export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number)
     if (seen.has(id)) continue;
     seen.add(id);
     agents += 1;
-    if (who.length < FOOT_DISCS) who.push({ initials: r.initials, name: r.agentName });
+    if (who.length < FOOT_DISCS) who.push({ initials: r.initials, name: r.agentName, queryId: r.id });
   }
   /**
    * ⚠️ §5 (v96.1) · THE CLAUSE ALWAYS RENDERS; THE DATE IS WHAT CAN BE MISSING. It used to be

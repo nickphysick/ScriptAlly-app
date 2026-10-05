@@ -488,9 +488,11 @@ test("QC126-18 · Escape ladder", async ({ page }) => {
   L.check("QC126-18a second Escape closes the drawer", "1512", !(await has('[data-qcv="bvd"]')), "");
   /* (b) drawer → a bar's card → the card's action */
   await openDrawer(page).catch(() => {});
-  await page.locator('[data-qcv="bvd-row"] [data-qcv="bvd-bar"]').first().click({ timeout: 4000 }).catch(() => {});
+  /* corrected (Phase 7): a long bar's centre lies under the sticky names column, so a click there is
+     intercepted; the names cell is the other reading door §7 names */
+  await page.locator('[data-qcv="bvd-row"] [data-qcv="tl-names"]').first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(400);
-  await page.locator('[data-qcv="qm-card"] .qcv-open-actions button, [data-qcv="qm-card"] [data-qcv="qm-act"]').first().click({ timeout: 4000 }).catch(() => {});
+  await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): see QC126-20 */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(600);
   L.check("QC126-18b precondition: Birds-eye, card (docked) and action drawer open", "1512",
     (await has('[data-qcv="bvd"]')) && (await has("[data-qad-drawer]")) && (await has("[data-qad-dock]")), "");
@@ -562,7 +564,7 @@ test("QC126-20 · one door", async ({ page }) => {
   /* the card's footer button */
   await page.locator('[data-qcv="row"]').first().click({ timeout: 8000 });
   await page.waitForTimeout(500);
-  await page.locator('[data-qcv="qm-card"] .qcv-open-actions button').first().click({ timeout: 4000 }).catch(() => {});
+  await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): the card's primary door; `.qcv-open-actions` named no element */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
   const c = await drawer();
   L.check("QC126-20 the card's footer opens the drawer, with dock", "1512", !!c.mode && MODES.has(c.mode) && c.dock && c.others === 0, JSON.stringify(c));
