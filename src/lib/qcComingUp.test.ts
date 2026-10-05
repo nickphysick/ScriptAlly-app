@@ -147,3 +147,15 @@ describe("v126.2 · the Birds-eye row's one next move", () => {
     expect(nextMove(undefined, r(S.FULL_REQUESTED), NOW)?.request.mode).toBe("sent");
   });
 });
+
+describe("v126.2.1 · an overdue send reads '<Stage> N days over', without the verb", () => {
+  it("Partial / Full once the date has passed; unchanged while it has not", () => {
+    const over = comingUp(card("partial_requested"), row(NOW - 2 * DAY), NOW)!;
+    expect(`${over.verb} ${over.tail?.figure}`).toBe("Partial 2 days over");
+    const full = comingUp(card("full_requested"), row(NOW - 3 * DAY), NOW)!;
+    expect(`${full.verb} ${full.tail?.figure}`).toBe("Full 3 days over");
+    const soon = comingUp(card("partial_requested"), row(NOW + 5 * DAY), NOW)!;
+    expect(soon.verb).toBe(SEND_VERB.partial);
+    expect(soon.tail?.lead).toBe("in");
+  });
+});

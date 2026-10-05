@@ -10,6 +10,7 @@
 import { expect, test } from "@playwright/test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openDrawer, openQc, pixel, sameRgb } from "./qc126Lib";
 
 test.describe.configure({ timeout: Number(process.env.QC126_TIMEOUT ?? 900_000) });
@@ -781,35 +782,153 @@ test("QC126-2.7 · court name", async ({ page }) => {
   L.done(3);
 });
 
-/* ── QC126-2.8 · the header is one row ── */
+/* ── QC126-2.8 · the header: one row when the DRAWER is 880 or wider, v126's block below ──
+   v126.2.1 — the switch follows the drawer's own width (a container query), not the window's, so it is
+   read at 1101 / 1150 / 1190 too: the widths where the window says "wide" and the drawer is not. */
+const HEAD_W = [
+  { width: 1101, height: 800 }, { width: 1150, height: 800 }, { width: 1190, height: 800 },
+  { width: 1280, height: 800 }, AT_1512, { width: 1920, height: 1080 },
+] as const;
 test("QC126-2.8 · header row", async ({ page }) => {
   const L = new Ledger("qc126-2-8");
   const read = () => page.evaluate(() => {
     const g = (s: string) => document.querySelector<HTMLElement>(`[data-qcv="${s}"]`)?.getBoundingClientRect() ?? null;
-    const d = g("bvd"), t = g("bvd-title"), p = g("bvd-btb"), k = g("bvd-hawk"), x = g("bvd-close"), f = g("bvd-fline");
+    const d = g("bvd"), t = g("bvd-title"), p = g("bvd-btb"), k = g("bvd-hawk"), x = g("bvd-close"), f = g("bvd-fline"), h = g("bvd-head");
     const j = (r: DOMRect | null) => (r ? { l: r.left, r: r.right, t: r.top, b: r.bottom, c: r.top + r.height / 2 } : null);
-    return { d: j(d), t: j(t), p: j(p), k: j(k), x: j(x), f: j(f) };
+    /* every piece of the header that could collide: the title's INK (its text, not its 1fr box), each pill, the × */
+    const title = document.querySelector<HTMLElement>('[data-qcv="bvd-title"]');
+    const ink = (() => { if (!title) return null; const rg = document.createRange(); rg.selectNodeContents(title); const r = rg.getBoundingClientRect(); return r.width ? r : null; })();
+    const parts: [string, DOMRect][] = [];
+    if (ink) parts.push(["title", ink]);
+    document.querySelectorAll<HTMLElement>('[data-qcv="bvd-head"] [data-qcv="bvd-pill"], [data-qcv="bvd-head"] [data-qcv="bvd-dir"], [data-qcv="bvd-close"]').forEach((e) => parts.push([e.getAttribute("data-k") ?? e.getAttribute("data-qcv") ?? "?", e.getBoundingClientRect()]));
+    const hits: string[] = [];
+    for (let i = 0; i < parts.length; i++) for (let k2 = i + 1; k2 < parts.length; k2++) {
+      const [na, A] = parts[i], [nb, B] = parts[k2];
+      const ox = Math.min(A.right, B.right) - Math.max(A.left, B.left), oy = Math.min(A.bottom, B.bottom) - Math.max(A.top, B.top);
+      if (ox > 0.5 && oy > 0.5) hits.push(`${na}×${nb}`);
+    }
+    const outside = parts.filter(([, R]) => d && (R.right > d.right + 0.5 || R.left < d.left - 0.5)).map(([n]) => n);
+    return { d: j(d), t: j(t), p: j(p), k: j(k), x: j(x), f: j(f), h: j(h), ink: ink ? { r: ink.right } : null, hits, outside, n: parts.length };
   });
-  for (const vp of W3) {
+  for (const vp of HEAD_W) {
     await openQc(page, vp);
     await openDrawer(page).catch(() => {});
     const w = `${vp.width}`;
     const a = await read();
-    const ok = !!(a.d && a.t && a.p && a.k && a.x);
-    L.check("QC126-2.8 population: title, pills, hawk, ×", w, ok, JSON.stringify(a));
+    const ok = !!(a.d && a.t && a.p && a.k && a.x && a.ink);
+    L.check("QC126-2.8 population: title, pills, hawk, ×", w, ok && a.n >= 5, JSON.stringify(a).slice(0, 200));
     if (!ok) continue;
-    L.check("QC126-2.8 the title's centre within 3px of the hawk's", w, Math.abs(a.t!.c - a.k!.c) <= 3, `${a.t!.c} vs ${a.k!.c}`);
-    L.check("QC126-2.8 the pills' centre within 2px of the title's", w, Math.abs(a.p!.c - a.t!.c) <= 2, `${a.p!.c} vs ${a.t!.c}`);
-    L.check("QC126-2.8 the pills sit right of the title and left of the ×", w, a.p!.l >= a.t!.r && a.p!.r <= a.x!.l, `t ${a.t!.r} p ${a.p!.l}..${a.p!.r} x ${a.x!.l}`);
+    const dw = a.d!.r - a.d!.l;
+    const oneRow = dw >= 880;
+    L.check("QC126-2.8 nothing in the header overlaps", w, a.hits.length === 0 && a.outside.length === 0, `drawer ${dw} hits ${JSON.stringify(a.hits)} outside ${JSON.stringify(a.outside)}`);
     L.check("QC126-2.8 the × is 18px from the drawer's right (±1)", w, near(a.d!.r - a.x!.r, 18, 1), `${a.d!.r - a.x!.r}`);
+    if (oneRow) {
+      L.check("QC126-2.8 one row: the pills' centre within 2px of the title's", w, Math.abs(a.p!.c - a.t!.c) <= 2, `drawer ${dw}: ${a.p!.c} vs ${a.t!.c}`);
+      L.check("QC126-2.8 one row: the title's centre within 3px of the hawk's", w, Math.abs(a.t!.c - a.k!.c) <= 3, `${a.t!.c} vs ${a.k!.c}`);
+      L.check("QC126-2.8 one row: the pills sit right of the title and left of the ×", w, a.p!.l >= a.ink!.r && a.p!.r <= a.x!.l, `ink ${a.ink!.r} p ${a.p!.l}..${a.p!.r} x ${a.x!.l}`);
+    } else {
+      L.check("QC126-2.8 below 880: the pills drop to their own row beneath the title", w, a.p!.t >= a.t!.b, `drawer ${dw}: pills top ${a.p!.t} title bottom ${a.t!.b}`);
+    }
     await page.locator('[data-qcv="bvd-pill"][data-k="filter"]').first().click({ timeout: 4000 }).catch(() => {});
     const chips = page.locator('[data-qcv="bvd-pop"][data-k="filter"] [data-qcv="bvd-chip"]');
     await chips.nth(0).click({ timeout: 4000 }).catch(() => {}); await chips.nth(4).click({ timeout: 4000 }).catch(() => {});
     await page.locator('[data-qcv="bvd-pop"][data-k="filter"] .bvd-pdone').click({ timeout: 4000 }).catch(() => {});
     await page.waitForTimeout(250);
     const b = await read();
-    L.check("QC126-2.8 with two filters on, the title, pills and hawk tops are unchanged (±0)", w, !!(b.t && b.p && b.k) && b.t!.t === a.t!.t && b.p!.t === a.p!.t && b.k!.t === a.k!.t, `${a.t!.t}/${a.p!.t}/${a.k!.t} → ${b.t?.t}/${b.p?.t}/${b.k?.t}`);
-    L.check("QC126-2.8 the sub-strip spans the drawer", w, !!b.f && near(b.f.l, b.d!.l, 0.5) && near(b.f.r, b.d!.r, 0.5) && b.f.t >= b.t!.b, JSON.stringify([b.f, b.d]));
+    /* one row: the hawk is pinned to the row, so all three tops hold. Two rows (v126's block): the
+       hawk stands on the block's bottom edge by design and moves with the filter line — QC126-14's
+       own claim, kept here for the block that still has it. */
+    L.check("QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)", w, !!(b.t && b.p) && b.t!.t === a.t!.t && b.p!.t === a.p!.t, `${a.t!.t}/${a.p!.t} → ${b.t?.t}/${b.p?.t}`);
+    if (oneRow) L.check("QC126-2.8 one row: and the hawk's top is unchanged (±0)", w, !!b.k && b.k.t === a.k!.t, `${a.k!.t} → ${b.k?.t}`);
+    else L.check("QC126-2.8 two rows: the hawk stands on the block's bottom, filtered or not", w, !!b.k && !!b.h && near(a.k!.b, a.h!.b, 0.5) && near(b.k.b, b.h.b, 0.5), `${a.k!.b}/${a.h?.b} → ${b.k?.b}/${b.h?.b}`);
+    L.check("QC126-2.8 with filters on, still nothing overlaps", w, b.hits.length === 0 && b.outside.length === 0, JSON.stringify([b.hits, b.outside]));
+    if (oneRow) L.check("QC126-2.8 one row: the sub-strip spans the drawer", w, !!b.f && near(b.f.l, b.d!.l, 0.5) && near(b.f.r, b.d!.r, 0.5) && b.f.t >= b.t!.b, JSON.stringify([b.f, b.d]));
   }
-  L.done(21);
+  L.done(40);
+});
+
+/* ── QC126-2.9 · a sentence after its bar keeps its distance ── */
+/* ⚠️ THE SHARED ACCOUNT HAS NO SUBJECT FOR THIS RULE: every dated running bar on it is 212px or
+   wider, so its sentence always fits inside. `seedBvdShort.mjs` adds one short running bar (a
+   two-week window, queried three days ago) and the case removes it again in the same run. */
+test("QC126-2.9 · out-of-bar distance", async ({ page }) => {
+  const L = new Ledger("qc126-2-9");
+  execSync("node tests/e2e/seedBvdShort.mjs", { stdio: "inherit" });
+  try {
+  let seen = 0;
+  const samples: string[] = [];
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    for (const z of ["3m", "6m", "6w"]) {
+      await page.locator(`[data-qcv="bvd-time"] [data-z="${z}"]`).click().catch(() => {});
+      await page.keyboard.press("t");
+      await page.waitForTimeout(200);
+      const r = await page.evaluate(() => {
+        const out: { text: string; title: string; inLabel: boolean }[] = [];
+        for (const row of document.querySelectorAll<HTMLElement>('[data-qcv="bvd-row"]')) {
+          if (row.querySelector('[data-qcv="bvd-over"]')) continue;
+          const bar = row.querySelector<HTMLElement>('[data-qcv="bvd-bar"]');
+          /* a DATED running bar only: a torn bar has no date to count to */
+          if (bar && /qcv-tl-bar--torn/.test(bar.className)) continue;
+          const w = [...row.querySelectorAll<HTMLElement>('[data-qcv="tl-words"][data-place="after"]')][0];
+          if (!bar || !w) continue;
+          /* …and a bar whose missing end is off-screen loses its torn class, so its undated sentence is skipped by its words too */
+          if (bar.dataset.missing || /no send-by date|no date promised|date not recorded/.test(w.textContent ?? "")) continue;
+          out.push({ text: w.textContent ?? "", title: bar.title, inLabel: !!row.querySelector('[data-qcv="bvd-in"]') });
+        }
+        return out;
+      });
+      seen += r.length;
+      for (const x of r) if (samples.length < 4) samples.push(x.text);
+      const bad = r.filter((x) => !/ · (in \d+ days?|today)$/.test(x.text) || x.title !== x.text || x.inLabel);
+      L.check(`QC126-2.9 each out-of-bar sentence ends with its distance, matches its title, and has no IN label (${z})`, `${vp.width}`, bad.length === 0, JSON.stringify(bad.slice(0, 3)));
+    }
+  }
+  L.check("QC126-2.9 population: out-of-bar running sentences", "all", seen > 0, `${seen} ${JSON.stringify(samples)}`);
+  } finally {
+    execSync("node tests/e2e/seedBvdShort.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(10);
+});
+
+/* ── QC126-2.10 · a missing date still reads as missing ── */
+test("QC126-2.10 · torn edges", async ({ page }) => {
+  const L = new Ledger("qc126-2-10");
+  for (const vp of W3) {
+    await openQc(page, vp);
+    await openDrawer(page).catch(() => {});
+    const w = `${vp.width}`;
+    const info = await page.evaluate(() => {
+      const bars = [...document.querySelectorAll<HTMLElement>('[data-qcv="bvd-bar"]')].filter((b) => /qcv-tl-bar--torn-(start|end)/.test(b.className));
+      return bars.map((b, i) => {
+        b.setAttribute("data-probe-torn", String(i));
+        const side = /torn-start/.test(b.className) ? "start" : "end";
+        const ps = getComputedStyle(b, side === "start" ? "::before" : "::after");
+        return { i, side, title: b.title, painted: ps.content !== "none" && /svg/.test(ps.backgroundImage), w: b.getBoundingClientRect().width };
+      });
+    });
+    const starts = info.filter((x) => x.side === "start"), ends = info.filter((x) => x.side === "end");
+    L.check("QC126-2.10 population: torn starts AND torn ends", w, starts.length > 0 && ends.length > 0, `start ${starts.length} end ${ends.length}`);
+    L.check("QC126-2.10 every torn bar's edge is painted", w, info.length > 0 && info.every((x) => x.painted), JSON.stringify(info.filter((x) => !x.painted).slice(0, 3)));
+    L.check("QC126-2.10 every torn bar's title says 'No date set — click to add'", w, info.length > 0 && info.every((x) => x.title.endsWith("No date set — click to add")), JSON.stringify(info.slice(0, 2).map((x) => x.title)));
+    /* and the pixels: the torn edge is white saw-tooth over the bar's own colour. Read from a
+       screenshot OF THE BAR, so every coordinate is the bar's own and nothing else's ink can be hit. */
+    for (const pick of [starts[0], ends[0]].filter(Boolean)) {
+      const loc = page.locator(`[data-probe-torn="${pick!.i}"]`);
+      /* centred first: at the scroller's edge a sticky group band can lie over the bar */
+      await loc.evaluate((e) => e.scrollIntoView({ block: "center" })).catch(() => {});
+      await page.waitForTimeout(150);
+      const shot = await loc.screenshot({ animations: "disabled" }).catch(() => null);
+      const px = shot ? await page.evaluate(async ({ b64, side }) => {
+        const im = new Image(); im.src = `data:image/png;base64,${b64}`; await im.decode();
+        const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const x = c.getContext("2d")!; x.drawImage(im, 0, 0);
+        const y = Math.round(im.height * (7.3 / 22));
+        const at = (xx: number) => [...x.getImageData(xx, y, 1, 1).data].slice(0, 3);
+        return side === "start" ? { edge: at(2), body: at(Math.min(im.width - 1, 9)) } : { edge: at(im.width - 3), body: at(Math.max(0, im.width - 10)) };
+      }, { b64: shot.toString("base64"), side: pick!.side }) : null;
+      L.check(`QC126-2.10 the torn ${pick!.side} draws white over the bar's colour`, w, !!px && px.edge.every((v) => v >= 245) && !px.body.every((v) => v >= 245), JSON.stringify(px));
+    }
+  }
+  L.done(12);
 });

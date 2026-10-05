@@ -345,7 +345,39 @@ export const QcTimeline: React.FC<{
       const overdue = b.current && due != null && due < today;
       const dueAt = overdue ? vx(due!) - l : null;
       const split = b.current && b.aheadFromMs != null ? Math.min(w, Math.max(0, vx(b.aheadFromMs) - l)) : null;
+      /* the torn edge draws where the missing end is ON SCREEN; the bar says it is missing either way */
       const torn = b.torn === "start" && cutL ? null : b.torn === "end" && cutR ? null : b.torn;
+      /**
+       * v126.2.1 — A RUNNING DATED BAR WHOSE SENTENCE SITS AFTER IT KEEPS ITS DISTANCE IN THE
+       * SENTENCE: "Full requested · send by 8 Oct · in 7 days". The separate IN 5D label is drawn
+       * only when the sentence is inside the bar; outside, the two would compete for one place.
+       */
+      const running = b.current && due != null && !overdue && !b.torn;
+      const dDays = running ? Math.round((startOfDay(due!) - today) / DAY) : 0;
+      const dist = dDays <= 0 ? "today" : `in ${dDays} ${dDays === 1 ? "day" : "days"}`;
+      /* ⚠️ THE SENTENCE IS WHOLE OR ABSENT. Inside the bar if it fits; else, for the current stage,
+         just after the bar's end (overdue: after its days-over label) if that is inside the track;
+         else omitted — its full text is always on the bar's title. Placed BEFORE the bar is drawn,
+         because where it lands decides the bar's title. */
+      const base = b.current ? b.words : b.label;
+      let text = base;
+      let at: number | null = null;
+      let outside = false;
+      if (base) {
+        if (sentenceW(base) + 20 <= w) at = l + 10;
+        else if (b.current) {
+          let ox = rr + 8;
+          if (overdue) { const lab = overLabel(due!); ox = Math.max(0, tx) + 8 + markW(lab) + 10; }
+          const outText = running ? `${base} · ${dist}` : base;
+          if (ox >= 0 && ox + sentenceW(outText) <= W) { at = ox; outside = true; text = outText; }
+        }
+      }
+      /**
+       * The hover title follows the same rules. An out-of-bar running sentence carries its
+       * distance there too; a bar with a missing date says so on a second line — whether or not
+       * its torn end is on screen, since a cut-off end still is not a date.
+       */
+      const title = b.torn ? `${b.title}\nNo date set — click to add` : outside && running ? text : b.title;
       out.push(
         <button
           key={b.key}
@@ -355,7 +387,8 @@ export const QcTimeline: React.FC<{
           data-status={b.status}
           data-current={b.current ? "true" : "false"}
           style={{ left: l, width: w, ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
-          title={b.title}
+          title={title}
+          data-missing={b.torn ?? undefined}
           /* a torn bar opens the card on Tracking, where its missing date is recorded */
           onClick={() => (b.torn ? openTracking(r.id) : onOpen(r.id))}
         >
@@ -365,21 +398,6 @@ export const QcTimeline: React.FC<{
           {overdue && !cutR && <i className="bvd-beacon" data-qcv="bvd-beacon" aria-hidden="true" />}
         </button>,
       );
-
-      /* ⚠️ THE SENTENCE IS WHOLE OR ABSENT. Inside the bar if it fits; else, for the current stage,
-         just after the bar's end (overdue: after its days-over label) if that is inside the track;
-         else omitted — its full text is always on the bar's title. */
-      const text = b.current ? b.words : b.label;
-      if (!text) continue;
-      const tw = sentenceW(text);
-      let at: number | null = null;
-      let outside = false;
-      if (tw + 20 <= w) at = l + 10;
-      else if (b.current) {
-        let ox = rr + 8;
-        if (overdue) { const lab = overLabel(due!); ox = Math.max(0, tx) + 8 + markW(lab) + 10; }
-        if (ox >= 0 && ox + tw <= W) { at = ox; outside = true; }
-      }
       if (at != null) {
         out.push(<span key={`${b.key}:w`} className={`bvd-words${outside ? " bvd-words--out" : ""}${b.current ? "" : " bvd-words--past"}`} data-qcv="tl-words" data-place={outside ? "after" : "inside"} style={{ left: at }}>{text}</span>);
       }

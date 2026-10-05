@@ -40,6 +40,8 @@
 .bvd {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;
   width: min(1120px, 74vw); display: flex; flex-direction: column;
+  /* v126.2.1 — the header's arrangement follows the DRAWER's width (a container), not the window's */
+  container: bvd / inline-size;
   background: #ffffff; color: #1c130f; font-family: var(--sp-serif);
   box-shadow: -30px 0 70px -30px rgba(28, 19, 15, 0.45);
   transform: translateX(100%); transition: transform 0.34s cubic-bezier(.2, .8, .2, 1);
@@ -52,7 +54,7 @@
    row and the filter line becomes a sub-strip spanning the drawer. Either way the filter line is the
    grid's LAST row, so opening it moves nothing above it. */
 .bvd-head {
-  position: relative; z-index: 40; flex: none; box-sizing: border-box; padding: 16px 16px 14px 132px; background: #2a3a52; color: #f5f1eb;
+  position: relative; z-index: 40; flex: none; box-sizing: border-box; padding: 16px 18px 14px 132px; background: #2a3a52; color: #f5f1eb;
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px;
 }
 /* ⚠️ INTERIM MASK: the head is cut flat at both sides; the fade comes off with the uncut drawing */
@@ -201,8 +203,12 @@
 .bvd-gdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .bvd .qcv-tl-band b { font-weight: 400; }
 
-/* ── the header from 1101px: one 96px row, the filter line as a sub-strip ─────────────────── */
-@media (min-width: 1101px) {
+/* ── the header in a drawer 880px or wider: one 96px row, the filter line as a sub-strip ─────
+   ⚠️ v126.2.1 — A CONTAINER QUERY ON THE DRAWER, NOT A MEDIA QUERY ON THE WINDOW. The row needs about
+   840px of drawer; 74vw is 814 at a 1101 window and 851 at 1150, so a window threshold put one row in
+   a drawer it does not fit (measured: the title ran under the Filters pill at 1101). The two-row block
+   below 880 is v126's. */
+@container bvd (min-width: 880px) {
   .bvd-head { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-rows: 96px auto; column-gap: 14px; padding: 0 18px 0 136px; }
   .bvd-head .bvd-title { grid-row: 1; grid-column: 1; align-self: center; }
   .bvd-btb { grid-row: 1; grid-column: 2; margin: 0; align-self: center; flex-wrap: nowrap; }
@@ -215,11 +221,11 @@
   .bvd-hawk { bottom: auto; top: 4px; left: 24px; width: 96px; }
 }
 /**
- * ⚠️ 1101–1400: TIGHTER. Title 26, left padding 118, the pills' own padding 0 10 and 6 between them.
+ * ⚠️ A DRAWER 880–1036 WIDE (a 1190–1400 window): TIGHTER. Title 26, left padding 118, the pills' own padding 0 10 and 6 between them.
  * The hawk is 86 wide at the ref's left 18 — and at top 8, NOT the ref's 10: at 86 wide the drawing
  * is 82.3 tall, so top 10 puts his centre 3.1px below the title's against the 3px the brief asks.
  */
-@media (min-width: 1101px) and (max-width: 1400px) {
+@container bvd (min-width: 880px) and (max-width: 1036px) {
   .bvd-head { padding-left: 118px; column-gap: 10px; }
   .bvd-head .bvd-title { font-size: 26px; }
   .bvd-fline { margin-left: -118px; padding-left: 118px; }
@@ -227,7 +233,8 @@
   .bvd-pill { padding: 0 10px; }
   .bvd-btb { gap: 6px; }
 }
-@media (max-width: 1100px) {
+/* the two-row block, in a drawer under 880 */
+@container bvd (max-width: 879.98px) {
   .bvd-head .bvd-title { font-size: 26px; line-height: 32px; }
   .bvd-hawk { width: 82px; }
 }

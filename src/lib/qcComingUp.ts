@@ -48,6 +48,13 @@ export const COMING_VERB: Record<Exclude<Bucket, "send" | "note">, string> = {
   fix: "Record what you sent",
 };
 export const SEND_VERB = { partial: "Send partial", full: "Send full" } as const;
+/**
+ * v126.2.1 — PAST ITS DATE, A SEND NAMES THE STAGE AND DROPS THE VERB: "Partial 2 days over",
+ * "Full 3 days over". "Send partial 2 days over" is 24 characters of 13.5px typewriter and did not
+ * fit the 160px Coming-up column (QC4, measured at 1280). The act is unchanged — the tray's pill
+ * still says "Log the send" — only the line that states how late it is gets shorter.
+ */
+export const SEND_OVER_VERB = { partial: "Partial", full: "Full" } as const;
 
 /** The tray's primary, the same act in the imperative — "Log the send", not "Send full". */
 export const COMING_ACTION: Record<Exclude<Bucket, "note">, string> = {
@@ -107,8 +114,10 @@ export function comingUp(card: BoardCard | undefined | null, row: QcRow, nowMs: 
     : days >= 0
       ? { lead: "in", figure: elapsedPhrase(days) }
       : { lead: "", figure: `${elapsedPhrase(-days)} over` };
+  const lateSend = b === "send" && dated && days < 0;
+  const said = lateSend ? (card.taskType === "partial_requested" ? SEND_OVER_VERB.partial : SEND_OVER_VERB.full) : verb;
 
-  return { bucket: b, verb, tail, over, action: COMING_ACTION[b] };
+  return { bucket: b, verb: said, tail, over, action: COMING_ACTION[b] };
 }
 
 /**

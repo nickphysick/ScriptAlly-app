@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "QC126-2.10 population: torn starts AND torn ends",
+  "where": "1280",
+  "ok": true,
+  "detail": "start 1 end 22"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's edge is painted",
+  "where": "1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's title says 'No date set — click to add'",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"Full requested · no send-by date\\nNo date set — click to add\",\"Partial requested · no send-by date\\nNo date set — click to add\"]"
+ },
+ {
+  "lock": "QC126-2.10 the torn start draws white over the bar's colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ },
+ {
+  "lock": "QC126-2.10 the torn end draws white over the bar's colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ },
+ {
+  "lock": "QC126-2.10 population: torn starts AND torn ends",
+  "where": "1512",
+  "ok": true,
+  "detail": "start 1 end 22"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's edge is painted",
+  "where": "1512",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's title says 'No date set — click to add'",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"Full requested · no send-by date\\nNo date set — click to add\",\"Partial requested · no send-by date\\nNo date set — click to add\"]"
+ },
+ {
+  "lock": "QC126-2.10 the torn start draws white over the bar's colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ },
+ {
+  "lock": "QC126-2.10 the torn end draws white over the bar's colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ },
+ {
+  "lock": "QC126-2.10 population: torn starts AND torn ends",
+  "where": "1920",
+  "ok": true,
+  "detail": "start 1 end 22"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's edge is painted",
+  "where": "1920",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "QC126-2.10 every torn bar's title says 'No date set — click to add'",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"Full requested · no send-by date\\nNo date set — click to add\",\"Partial requested · no send-by date\\nNo date set — click to add\"]"
+ },
+ {
+  "lock": "QC126-2.10 the torn start draws white over the bar's colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ },
+ {
+  "lock": "QC126-2.10 the torn end draws white over the bar's colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"edge\":[255,255,255],\"body\":[245,230,223]}"
+ }
+]

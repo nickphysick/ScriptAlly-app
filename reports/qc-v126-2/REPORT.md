@@ -104,6 +104,7 @@ Changed nothing, per the brief.
 - **1101–1400:** the tighter band.
 - **Below 1101:** v126's two-row block.
 - **⚠️ Unmeasured below ~1190px:** the single row needs about 880px of drawer, and 74vw is 814px at 1101. The locks cover 1280, 1512 and 1920 only.
+- **⚠️ SUPERSEDED by v126.2.1 §1 below.** The switch now follows the drawer's own width (one row at 880px and wider), and QC126-2.8 measures 1101, 1150 and 1190 as well.
 
 **Court name and desk foot**
 - "With the agency" → "With the agent" (`qcFanModel.ts`, `QueryCardLive.tsx`).
@@ -158,3 +159,77 @@ Each lock was proved red in the measurement worktree; the results are in `report
 - `ref-v130-birdseye-1280@2x.png`
 - `ref-v130-birdseye-1512@2x.png`
 - `ref-v130-birdseye-filtered-1512@2x.png`
+
+---
+
+# v126.2.1 follow-ups
+
+Branch `qc-v126`, one commit. Not merged.
+
+## What changed
+
+### 1. The header switches on the drawer's width, not the window's
+
+- The drawer is a CSS container (`container: bvd / inline-size`).
+- **Below 880px of drawer:** v126's two-row block (title and × on the first row, pills beneath).
+- **880px and wider:** one row, with the tighter values for a drawer 880–1036px wide (a 1190–1400 window).
+- **Two-row block, right padding 16 → 18:** the × now sits 18px from the drawer's edge in both arrangements.
+- **Why:** the old window threshold put one row into an 814px drawer at a 1101 window. Measured on the old build, the title ran under the Filters pill once filters were on.
+
+### 2. A sentence after its bar keeps its distance
+
+- When a running bar's sentence sits after the bar, it carries its distance: "Queried · reply by 16 Oct · in 11 days".
+- The bar's hover title says the same.
+- The separate "IN 5D" label is drawn only when the sentence is inside the bar.
+
+### 3. A missing date still reads as missing
+
+- **The torn edge was not lost in the track rebuild.** It is measured painted on every torn bar: one torn start and 22 torn ends at each width.
+- **New hover title:** a second line, "No date set — click to add", on every bar with a missing date.
+- **New `data-missing` attribute** on every bar with a missing date, including one whose missing end is scrolled off-screen.
+- **⚠️ An end that is off-screen draws no torn edge.** It can't, since that end isn't in view. The title still says the date is missing.
+
+### 4. An overdue send reads "<Stage> N days over"
+
+- **Change:** `comingUp` now gives "Partial 2 days over" or "Full 3 days over" (`SEND_OVER_VERB`).
+- **Unchanged:**
+  - a send that is not yet overdue still reads "Send partial in 5 days";
+  - the tray pill still says "Log the send".
+
+## A fixture gap, and the seeder that closes it
+
+- **QC126-2.9 had nothing to measure on the shared account.**
+  - Every dated running bar there is at least 212px wide, so its sentence always fits inside.
+  - That holds at the 1101 and 1512 windows, at 6W, 3M and 6M.
+- **New `tests/e2e/seedBvdShort.mjs`** seeds one short running bar:
+  - an agency with a two-week window, queried three days ago;
+  - ids prefixed `bvds-`;
+  - `--clean` removes it.
+- **The lock seeds it and removes it in the same run**, from a `finally`. Each run's log shows "seeded" and then "removed 4".
+
+## Locks
+
+All 1101–1280 readings are on the final build.
+
+| Lock | Red first | Green reading |
+|---|---|---|
+| QC126-2.8, extended to 1101 / 1150 / 1190 / 1280 / 1512 / 1920 | old build: at 1101 the title overlapped the Filters pill; at 1101/1150 the header stayed one row; × 16px from the edge | 1101 and 1150 (drawers 814.7 and 851): two rows, pills top 63 below title bottom 49, nothing overlaps, × 18. 1190 (drawer 880.6): one row, pills' and title's centres both 48, hawk centre 49.1, × 18. Hawk top unchanged with filters on in one row; in two rows the hawk's bottom stays on the block's bottom (111/111 → 147/147). |
+| QC126-2.9, out-of-bar sentences carry their distance (new) | old build plus seed: "Queried · reply by 16 Oct" with no distance | 5 out-of-bar sentences, each ending "· in 11 days", each matching its bar's title, none with an IN label |
+| QC126-2.10, torn edges (new) | old build: no "No date set" title. Pixel half proved by mutation (`content: none` on the pseudo-elements): painted and pixel checks red at all three widths | edge pixel 255,255,255 over body 245,230,223, at 1280 / 1512 / 1920 |
+| qcV96 QC4 | old wording: "Send partial 2 days over" truncated at 1280, flat and grouped, at rest and hovered | green at all four widths. The column is still 160px. |
+| Unit: `comingUp` overdue send | red on "Send partial" | "Partial 2 days over", "Full 3 days over"; not-yet-overdue unchanged |
+
+## Lock change
+
+- **QC126-2.8, hawk check:** "with filters on, the hawk's top is unchanged" now applies to the one-row header only.
+- In v126's two-row block the hawk stands on the block's bottom by design, so it moves with the filter line. That was QC126-14's own claim, and it is now asserted there instead.
+
+## Gates
+
+- **Code gates:** tsc 0 errors; Vitest 520 files, 8,282 passed; dev and production builds free of CSS warnings.
+- **QC126 suite:** 30/30.
+- **qcV96:** 8/8. QC4 is green for the first time.
+
+## Screenshot
+
+`drawer-1150.png` shows the two-row block in an 851px drawer.
