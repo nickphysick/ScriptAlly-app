@@ -15,11 +15,12 @@ import { Activity, Agent, Query, QueryStatus } from "../types";
 import {
   BASE_STAGES, CALENDAR_GROUPS, DEFAULT_SORT, SORT_OPTIONS, STAGE_NAME,
   buildQcRows, courtOf, expectedFor, factLine, filterForStatusParam, filterOptions, filterPhrase,
-  handOf, rowsForClosed, rowsWithdrawn,
-  courtTiles, rowsForTile, tileCourt, tileHand, type TileCourt,
+  rowsForClosed, rowsWithdrawn,
+  courtTiles, rowsForTile, tileCourt, type TileCourt,
   inScope, isWithYou, matchesFilter, primaryActionLabel, sortRows, stageFilter, stageOrder, standLine,
   type QcFilter, type QcRow,
 } from "./qcSummary";
+import { carouselRows } from "./qcCarousel";
 
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 8, 19, 12);
@@ -87,7 +88,6 @@ describe("the ONE clock — expectedFor", () => {
  * no longer has a caller. Each thing this block proved has a home below, over the tiles:
  *
  *   · a card states what its fan deals  → "the count and the hand are the same membership, per tile"
- *   · the cap, and latest-activity order → "the hand's cap and order are ONE function — `handOf`"
  *   · withdrawn is in no closed count   → the same case, and `tileCourt`'s own `null`
  *   · a card at zero states no figures  → "the fact lines, including the zero case"
  *   · "N past the date" is ink          → "the rust dot is the With-you tile's and no other"
@@ -209,35 +209,18 @@ describe("⚠️ tileCourt is NOT courtOf, and the difference is the whole rulin
   });
 });
 
-describe("the court tiles state what their fan deals", () => {
+describe("the court tiles state what the carousel deals", () => {
   const tiles = (st: QueryStatus[]) => rowsOf(st.map((status) => mkQ({ status })));
   it("⚠️ the count and the hand are the same membership, per tile — never two derivations", () => {
     const rows = tiles([QueryStatus.QUERIED, QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
     for (const t of ["you", "agent", "closed"] as TileCourt[]) {
       const tile = courtTiles(rows).find((c) => c.key === t)!;
       expect(tile.count, t).toBe(rowsForTile(rows, t).length);
-      expect(tileHand(rows, t).count, t).toBe(tile.count);
+      expect(carouselRows(rows, t, "recent").length, t).toBe(tile.count);
     }
-    /* the withdrawn one is in no tile's count and in no tile's hand */
+    /* the withdrawn one is in no tile's count and in no tile's deal */
     const total = courtTiles(rows).reduce((n, c) => n + c.count, 0);
     expect(total, "a withdrawn query was counted in a tile").toBe(rows.length - 1);
-  });
-  it("⚠️ and the hand's cap and order are ONE function — `handOf`, which both doors read", () => {
-    /* ⚠️ THE DATES MUST DIFFER OR THE ORDER CLAIM IS VACUOUS. Twenty rows built from one factory
-       share a `lastMs`, so ANY order is in descending order and dropping the sort passes. Measured:
-       it did — the mutation reddened a neighbouring case and left this one green. */
-    /* …and they are built OLDEST FIRST, so the input's own order is the wrong one. Built newest
-       first, the unsorted slice is already descending and dropping the sort is invisible. Measured
-       that too: the first fixture had distinct dates and STILL passed the mutation. */
-    const rows = rowsOf(Array.from({ length: 20 }, (_, i) => mkQ({ status: QueryStatus.QUERIED, dateSent: ago(20 - i) })));
-    const hand = tileHand(rows, "agent");
-    expect(new Set(rows.map((r) => r.lastMs)).size, "the fixture is a monoculture; the order claim below would be vacuous").toBe(20);
-    expect(hand.dealt.length).toBe(15);
-    expect(hand.more).toBe(5);
-    expect(hand.count).toBe(20);
-    expect(handOf(rowsForTile(rows, "agent"))).toEqual(hand);
-    /* latest activity first — a length check alone would pass on any fifteen */
-    expect(hand.dealt.map((r) => r.lastMs)).toEqual([...hand.dealt.map((r) => r.lastMs)].sort((a, b) => b - a));
   });
   it("the fact lines, including the zero case — a tile at zero states no figures", () => {
     const empty = courtTiles([]);

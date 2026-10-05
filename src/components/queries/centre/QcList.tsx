@@ -170,7 +170,7 @@ export const QcList: React.FC<{
     const ago = sentMs != null ? `${elapsedPhrase(Math.max(0, Math.round((nowMs - sentMs) / DAY)))} ago` : null;
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qcv-row${r.withYou ? " qcv-row--you" : ""}`}
-        data-qcv="row" data-id={r.id} data-status={r.status} data-you={r.withYou ? "true" : "false"}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         style={{ ["--qcv-state" as string]: `var(--state-${r.state})` }}
         onClick={() => onOpen(r.id)}

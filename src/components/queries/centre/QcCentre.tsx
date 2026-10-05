@@ -82,10 +82,13 @@ export const QcCentre: React.FC<{
    * neither.
    */
   rail: React.ReactNode;
-  /** The open fan, if a court tile has dealt one. It portals itself; this is only its mount. */
-  fan?: React.ReactNode;
   /**
-   * The Birds-eye view, expanded (§7). Like the fan it portals itself, so this is only its mount —
+   * The carousel (v126 §3), between the desk and the list. It replaces the fan, which dealt a court
+   * over the page; the desk now selects what the carousel shows and nothing else.
+   */
+  carousel?: React.ReactNode;
+  /**
+   * The Birds-eye view, expanded (§7). It portals itself, so this is only its mount —
    * but it needs one: rendered inside the rail it would unmount the moment the rail showed a query.
    */
   overlay?: React.ReactNode;
@@ -102,7 +105,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, carousel, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -168,6 +171,7 @@ export const QcCentre: React.FC<{
       * copy are the living-headers pack's and are unchanged.
       */}
     {courts}
+    {carousel}
     <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
 
@@ -217,7 +221,6 @@ export const QcCentre: React.FC<{
       </div>
     </div>
     {rail}
-    {fan}
     {overlay}
     </div>
   );

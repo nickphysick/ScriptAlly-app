@@ -2,7 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The model a fanned card is drawn from (v21 §5) — built from a `QcRow` the page already has.
+ * The model a dealt card is drawn from (v21 §5) — built from a `QcRow` the page already has. The fan
+ * that first read it is retired (v126 §3); the carousel deals the same card now, which is why the
+ * name survives.
  *
  * ⚠️ IT IS BUILT FROM THE ROW, NOT READ FROM FIRESTORE, AND THAT IS THE POINT. `QueryCardLive`
  * subscribes to a query's activity subcollection to build the same model for ONE card; a hand of
@@ -77,9 +79,9 @@ export function fanCardModel(
     /* §5's "standing line at the left": the same sentence the Ledger's rows carry */
     window: standLine(row),
     /**
-     * ⚠️ DISPLAY-ONLY IN THIS PASS (§5) — the label states what this query's next act WOULD be, and
-     * `qcFan.css` makes the button unpressable. It must never change a status in one click; when
-     * the centred task flow exists, this is what opens it.
+     * The label states this query's next act. A host that makes the button act (the carousel, v126)
+     * overrides both the label and `onOpenQuery` with the drawer's own door — the button opens the
+     * action drawer and never changes a status in one click.
      */
     actionLabel: primaryActionLabel(row.status),
     onOpenQuery,

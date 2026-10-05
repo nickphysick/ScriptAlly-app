@@ -135,8 +135,8 @@ import { QcQueryModal } from "./queries/centre/QcQueryModal";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, courtFilter, courtOfFilter, courtTiles, filterForStatusParam, filterOptions,
-  inScope, matchesFilter, matchesFind, rowsWithdrawn, sortRows, tileHand,
+  DEFAULT_SORT, buildQcRows, courtTiles, filterForStatusParam, filterOptions,
+  inScope, matchesFilter, matchesFind, sortRows,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 import type { EyeFocus } from "../lib/qcBirdsEye";
@@ -144,7 +144,8 @@ import type { EyeFocus } from "../lib/qcBirdsEye";
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
 import { cardsByQuery, comingUp, type ComingUp } from "../lib/qcComingUp";
-import { QcFan } from "./queries/centre/QcFan";
+import { QcCarousel } from "./queries/centre/QcCarousel";
+import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
    Every piece below is shared: the board, its winbar, the window's arithmetic and the bar engine's
@@ -2340,16 +2341,12 @@ export const Queries: React.FC<{
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
-   * The open fan: which stat card dealt it, and the element it was dealt from.
-   *
-   * ⚠️ THE ORIGIN IS AN ELEMENT RATHER THAN A POINT, because it is needed twice and for two
-   * different reasons: the cards fly out of its centre, and focus goes back into it when the fan
-   * closes. A captured `{x, y}` serves the first and silently drops the second.
+   * v126 §3 — the desk's choice and the carousel's sort. The desk is a selector for the CAROUSEL
+   * ONLY: it never filters, groups or reorders the list (QC126-6). The fan it used to deal is
+   * retired; the carousel deals every query in the chosen court instead.
    */
-  /* ⚠️ THE FAN IS DEALT BY A COURT TILE NOW (v65 §1.4), not by a stage card. The fan itself is
-     unchanged — fifteen most recent, a stack card beyond, the closed hand noting withdrawals; only
-     its door moved, which is the whole of the change here. */
-  const [qcFan, setQcFan] = useState<{ key: TileCourt; origin: HTMLElement | null } | null>(null);
+  const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
+  const [qcCzSort, setQcCzSort] = useState<CzSort>("recent");
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
@@ -3688,25 +3685,15 @@ export const Queries: React.FC<{
     releaseIfHidden((id) => { const r = qcById.get(id); return !!r && qcScoped.includes(r) && matchesFilter(r, f); });
   };
   /**
-   * §1 (v95) · QC3 — pressing a desk section filters the list to that section and moves the rail's
-   * control with it; pressing the same one again clears BOTH. One handler, so the two cannot come
-   * apart: a version that set the filter and left the rail alone would leave the page saying "13
-   * with you" in the list and "Everything" in the rail, which are two answers to one question.
-   *
-   * ⚠️ THE FILTER IS `courtFilter(key)`, NOT the menu's `"you"` / `"agent"` / `"closed"`. See the
-   * note at `courtFilter`: the menu's `"you"` excludes an offer the section counts and its
-   * `"closed"` includes a Withdrawn the section does not, so the two measurably disagreed by one
-   * row and two rows on the harness account. One function counts a section and filters to it.
-   *
-   * ⚠️ AND CLOSED HANDS THE RAIL BACK TO "Everything" rather than reaching for a focus of its own —
-   * the rail's control is a three-way `all / you / agent` and has no closed state, so the honest
-   * move is to stop focusing rather than to invent one.
+   * v126 §3 · QC126-6 — pressing a desk section chooses what the CAROUSEL deals; pressing it again
+   * (or the carousel's ×) clears it. It used to filter the list and move the rail's focus (v95);
+   * neither happens now. The list keeps its rows, its order and its band counts whatever the desk
+   * says, so a reader is never left working out which of two narrowed surfaces answered them.
    */
   const pickCourt = (key: TileCourt) => {
-    const on = courtOfFilter(qcFilter) === key;
-    pickQcFilter(on ? "all" : courtFilter(key));
-    setQcEyeFocus(on || key === "closed" ? "all" : key === "you" ? "you" : "agent");
+    setQcCzCourt((c) => (c === key ? null : key));
   };
+
   const pickQcScope = (id: string | null) => {
     setQcScope(id);
     releaseIfHidden((qid) => {
@@ -6596,9 +6583,9 @@ export const Queries: React.FC<{
                    (§1, QC2). The desk counts the manuscript; a desk that counted the filtered list
                    would answer the question a reader has already narrowed rather than the one they
                    are using it to decide. */
-                active={courtOfFilter(qcFilter)}
-                /* ⚠️ A SECTION FILTERS NOW; IT NO LONGER DEALS A HAND. The fan was the tiles'
-                   affordance and `see all` inside it did this, one click further away. */
+                active={qcCzCourt}
+                /* ⚠️ v126 §3 — A SECTION SELECTS FOR THE CAROUSEL ONLY. It used to filter the list
+                   (v95), and before that deal a fan; the list below is now untouched by it. */
                 onCourt={pickCourt}
               />
             )}
@@ -6638,37 +6625,34 @@ export const Queries: React.FC<{
                 onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeCard(null); setBeNudge(id); }}
               />
             ) : null}
-            fan={qcFan && (() => {
-              const hand = tileHand(qcScoped, qcFan.key);
-              const card = courtTiles(qcScoped).find((c) => c.key === qcFan.key);
-              /* ⚠️ THE HEADER STATES THE FULL COUNT, NEVER THE HAND — the cap changes the deal and
-                 not the number (Nick, 21 Sep). `hand.count` is the card's own figure. */
-              const wd = qcFan.key === "closed" ? rowsWithdrawn(qcScoped).length : 0;
+            carousel={showGridSkeleton ? null : (() => {
+              const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
+              const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
               return (
-                <QcFan
-                  title={`${hand.count} ${(card?.name ?? "").toLowerCase()}`}
-                  dealt={hand.dealt}
-                  more={hand.more}
-                  /* ⚠️ STATED, NEVER DEALT: the closed card counts Rejected and No Response, so a
-                     withdrawal is accounted for out loud rather than silently dropped. */
-                  withdrawnNote={wd > 0 ? `+${wd} withdrawn, not shown` : null}
-                  origin={qcFan.origin}
-                  model={(row) => ({
-                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {}),
-                    /* item 3 (28 Sep): the header chip — the fan draws no tabs, so the chip is all it can carry */
-                    sentHow: { chip: <SentChip q={row.query} packages={packages} />, box: null },
-                  })}
-                  onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
-                  onSeeAll={() => {
-                    setQcFan(null);
-                    /* ⚠️ `courtFilter`, NOT THE MENU'S KEYS. This comment used to claim it
-                       narrowed "to exactly the set the tile counted" while reaching for `"you"` and
-                       `"closed"`, which measurably do not: the menu's `"you"` drops the offer the
-                       tile counts and its `"closed"` adds a Withdrawn the tile does not. The claim
-                       is true now — one function counts the court and filters to it. */
-                    setQcFilter(courtFilter(qcFan.key));
+                <QcCarousel
+                  rows={dealt}
+                  title="Recently moved"
+                  countLine={carouselCountLine(qcScoped.length, dealt.length, qcCzCourt)}
+                  chosen={tile ? { name: tile.name, count: tile.count } : null}
+                  onClear={() => setQcCzCourt(null)}
+                  sort={qcCzSort}
+                  onSort={setQcCzSort}
+                  total={qcScoped.length}
+                  onOpen={(id) => onOpenQuery?.(id)}
+                  onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  onBirdsEye={() => openBirdsEye(null)}
+                  model={(row) => {
+                    /* ⚠️ THE FOOT'S BUTTON ACTS THROUGH THE ONE DRAWER (v126 §7) — the card's own
+                       primary door, so the carousel and the centred card offer the same verb. */
+                    const door = primaryDoor(row.status);
+                    return {
+                      ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null,
+                        door ? () => openQueryDrawer({ mode: door.mode, queryId: row.id }) : () => onOpenQuery?.(row.id)),
+                      actionLabel: door ? door.label : "Open",
+                      /* no sentHow chip: the landing dress draws none, and at 316px the line it adds
+                         pushes the second dated step under the foot (measured) */
+                    };
                   }}
-                  onClose={() => setQcFan(null)}
                 />
               );
             })()}

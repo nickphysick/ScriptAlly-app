@@ -26,7 +26,6 @@ import { resolveExpectedDate } from "./expectedDate";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
-import { FAN_MAX_DEALT } from "./qcFan";
 
 const DAY = 86_400_000;
 
@@ -187,10 +186,10 @@ const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - 
  *
  * ⚠️ AND v65 §4 TOOK THE OVERVIEW'S OWN SELECTORS WITH IT — `OverviewKey`, `OverviewCard`,
  * `overviewCards`, `rowsForCard` and `fanHand`. The three court tiles replace the seven-or-eight
- * stat cards, so `courtTiles` and `tileHand` replace them; a replacement that is ADDED leaves the
+ * stat cards, so `courtTiles` replaces them (and `tileHand`/`handOf` went with the fan, v126 §3); a replacement that is ADDED leaves the
  * original reachable, and only one that is SWAPPED retires it.
  *
- * What stays is what the sentence, the courts and the fan read: `rowsForStage`, `rowsForClosed`
+ * What stays is what the sentence and the courts read: `rowsForStage`, `rowsForClosed`
  * and `rowsWithdrawn`.
  */
 
@@ -213,13 +212,6 @@ export const rowsForClosed = (rows: readonly QcRow[]): QcRow[] =>
   rows.filter((r) => r.closedHow === "passed" || r.closedHow === "noReply");
 export const rowsWithdrawn = (rows: readonly QcRow[]): QcRow[] =>
   rows.filter((r) => r.closedHow === "withdrawn");
-
-export interface FanHand { dealt: QcRow[]; more: number; count: number }
-/** The cap and the order, over whatever set was chosen. Both doors into the fan read THIS. */
-export function handOf(set: readonly QcRow[]): FanHand {
-  const all = set.slice().sort((a, b) => b.lastMs - a.lastMs);
-  return { dealt: all.slice(0, FAN_MAX_DEALT), more: Math.max(0, all.length - FAN_MAX_DEALT), count: all.length };
-}
 
 /* ── the three courts, as the page's tiles state them (v65 §1.3) ── */
 
@@ -385,8 +377,6 @@ export function courtTiles(rows: readonly QcRow[], nowMs: number = Date.now()): 
     },
   ];
 }
-/** The hand a court tile deals — the same membership its count states. */
-export const tileHand = (rows: readonly QcRow[], tile: TileCourt): FanHand => handOf(rowsForTile(rows, tile));
 
 /* ── the sentence: one filter, one manuscript scope, one sort ── */
 export type QcFilter = "all" | "you" | "agent" | "offers" | "past" | "closed" | `stage:${QueryStatus}` | `court:${TileCourt}`;

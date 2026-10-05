@@ -1,0 +1,128 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The carousel (v126 §3; ref design-refs/query-centre-v126.html `.cz`). On the page ground, no
+ * frame, the full content width.
+ *
+ * ⚠️ `.qcv-cz .qcard` IS THE CARD'S LANDING-PAGE DRESS, AND IT IS THE ONLY PLACE IT IS WRITTEN.
+ * The card is the app's one `QueryCard`; this host gives it 282×316, takes away the tab row, puts
+ * the status pill on its own line and makes the foot's button the ink pill. A prop per difference
+ * would have forked the component.
+ *
+ * ⚠️ THE TRACK'S RIGHT PADDING IS 90, AND THE FADE IS 70 OF IT. The last card peeks out of the
+ * fade rather than being cut by the content column's edge, which is how a reader knows there is
+ * more to the right without a scrollbar.
+ */
+.qcv-cz { position: relative; margin-top: 40px; }
+
+.qcv-cz-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; min-height: 34px; }
+.qcv-cz-title { font: 400 22px/1.3 var(--sp-type); color: var(--qcv-ink); white-space: nowrap; }
+.qcv-cz-n { font: 400 9.5px var(--font-mono); letter-spacing: 0.14em; color: var(--qcv-ink-45); white-space: nowrap; }
+.qcv-cz-sp { flex: 1; }
+.qcv-cz-x {
+  width: 26px; height: 26px; border-radius: 50%; border: 0; background: transparent; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.35); color: var(--qcv-ink); font: 400 15px/1 var(--sp-type);
+}
+.qcv-cz-x:hover { background: rgba(28, 19, 15, 0.05); }
+.qcv-cz-sortw { position: relative; }
+.qcv-cz-sort {
+  font: 400 14px/1.3 var(--sp-type); color: rgba(28, 19, 15, 0.7); background: none; border: 0; cursor: pointer;
+  border-bottom: 1px dashed rgba(28, 19, 15, 0.35); padding: 0 0 2px; white-space: nowrap;
+}
+.qcv-cz-menu {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; min-width: 190px;
+  background: #ffffff; border-radius: 12px; padding: 6px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 14px 32px -12px rgba(28, 19, 15, 0.32);
+  display: flex; flex-direction: column;
+}
+.qcv-cz-menu button {
+  text-align: left; font: 400 14px/1.3 var(--sp-type); color: var(--qcv-ink); background: none; border: 0;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer;
+}
+.qcv-cz-menu button:hover { background: rgba(28, 19, 15, 0.05); }
+.qcv-cz-menu button.on { background: rgba(42, 58, 82, 0.09); }
+.qcv-cz-ar {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.35); color: var(--qcv-ink); font: 400 16px/1 var(--sp-type);
+}
+.qcv-cz-ar:hover { background: rgba(28, 19, 15, 0.05); }
+
+.qcv-cz-trackw { position: relative; }
+/* the fade over the last 70px of the track's 90 of right padding, in the page's own ground */
+.qcv-cz-trackw::after {
+  content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 70px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(var(--ws-page-rgb), 0), rgb(var(--ws-page-rgb)));
+}
+.qcv-cz-track {
+  display: flex; gap: 18px; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scroll-padding-left: 4px;
+  padding: 6px 90px 22px 4px; scrollbar-width: none;
+}
+.qcv-cz-track::-webkit-scrollbar { display: none; }
+.qcv-cz-track:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; border-radius: 14px; }
+
+.qcv-cz-item { flex: none; width: 282px; scroll-snap-align: start; border-radius: 12px; cursor: pointer; outline: none; }
+.qcv-cz-item:focus-visible .qcard { box-shadow: 0 0 0 2px var(--qcv-navy), 0 10px 22px -12px rgba(28, 19, 15, 0.45); }
+
+/* ── the card's landing dress ──────────────────────────────────────────────────────────────── */
+.qcv-cz .qcard {
+  position: relative; z-index: auto; width: 282px; height: 316px; border: 0; border-radius: 12px;
+  box-shadow: 0 10px 22px -12px rgba(28, 19, 15, 0.45), 0 1px 3px rgba(28, 19, 15, 0.12);
+  animation: none; transition: transform 0.2s cubic-bezier(.2, .8, .2, 1), box-shadow 0.2s;
+}
+.qcv-cz-item:hover .qcard {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 40px -18px rgba(28, 19, 15, 0.5), 0 2px 6px rgba(28, 19, 15, 0.1);
+}
+.qcv-cz .qcard-band { padding: 10px 14px; font-size: 8px; letter-spacing: 0.12em; color: var(--qcv-ink); }
+.qcv-cz .qcard-band span:last-child { color: rgba(28, 19, 15, 0.7); }
+.qcv-cz .qcard-who {
+  grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; row-gap: 11px; padding: 13px 16px 0;
+}
+.qcv-cz .qcard-av { width: 34px; height: 34px; border: 0; background: var(--qcv-navy); color: #f5f1eb; font-weight: 700; font-size: 10px; }
+.qcv-cz .qcard-name b { font: 600 16px/1.15 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-cz .qcard-name small { margin-top: 3px; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-cz .qcard-st {
+  grid-column: 1 / -1; justify-self: start; border: 0; background: #f6f1ea;
+  padding: 4px 10px; font: 400 12.5px/1.3 var(--sp-serif);
+}
+.qcv-cz .qcard-how { padding: 6px 16px 0; }
+.qcv-cz .qcard-ms { margin: 10px 16px 0; padding: 9px 11px; border: 0; border-radius: 8px; background: #f6f1ea; }
+.qcv-cz .qcard-ms .qcard-k { font-size: 7.5px; margin: 0; }
+.qcv-cz .qcard-ms b { font-size: 16px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the tab row is the popover's affordance; a dealt card is a glance */
+.qcv-cz .qcard-tabs { display: none; }
+.qcv-cz .qcard-tl { padding: 0; margin: 10px 16px 12px; overflow: hidden; }
+.qcv-cz .qcard-ev { grid-template-columns: 14px 1fr auto; gap: 9px; align-items: center; padding: 4px 0; }
+.qcv-cz .qcard-ev::before { display: none; }
+.qcv-cz .qcard-g { margin: 0; width: 14px; }
+.qcv-cz .qcard-ev b { font: 400 12.5px/1.35 var(--sp-serif); }
+.qcv-cz .qcard-d { padding: 0; }
+.qcv-cz .qcard-foot { margin: auto 0 0; padding: 10px 12px 12px 16px; border-top: 1px solid rgba(28, 19, 15, 0.1); gap: 10px; }
+.qcv-cz .qcard-exp { flex: 1; min-width: 0; font-size: 8px; letter-spacing: 0.08em; line-height: 1.45; color: rgba(28, 19, 15, 0.5); }
+.qcv-cz .qcard-foot button {
+  flex: none; height: 30px; padding: 1px 12px 0; border-radius: 18px; background: var(--qcv-navy); color: #ffffff;
+  font: 400 12px/1 var(--sp-type); text-decoration: none;
+}
+.qcv-cz .qcard-foot button:hover { background: var(--qcv-navy-hov); color: #ffffff; }
+
+/* the track's end: two ways on */
+.qcv-cz-end {
+  flex: none; width: 282px; height: 316px; border-radius: 12px; scroll-snap-align: start;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.18);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 24px; text-align: center;
+}
+.qcv-cz-end button { background: none; border: 0; cursor: pointer; font: 400 16px/1.4 var(--sp-type); color: rgba(28, 19, 15, 0.7); }
+.qcv-cz-end button:hover { color: var(--qcv-ink); }
+.qcv-cz-end .qcv-cz-endsm { font: 400 9px var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
+
+.qcv-cz-dots { display: flex; justify-content: center; gap: 7px; margin-top: 2px; height: 7px; }
+.qcv-cz-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(28, 19, 15, 0.18); transition: background 0.2s, width 0.2s; }
+.qcv-cz-dots i.on { width: 20px; border-radius: 4px; background: var(--qcv-navy); }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-cz .qcard, .qcv-cz-dots i { transition: none; }
+  .qcv-cz-item:hover .qcard { transform: none; }
+}

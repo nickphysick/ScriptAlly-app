@@ -102,7 +102,12 @@ export const QueryCard: React.FC<{
   /** the row the card belongs to — it stays lit, and the card is placed against it */
   anchor?: HTMLElement;
   onClose?: () => void;
-}> = ({ model, anchor, onClose }) => {
+  /**
+   * Extra attributes for the foot's button (v126 §3) — the carousel names it as its action so a
+   * click on it is told apart from a click on the card. Additive: no caller before v126 passes it.
+   */
+  actionProps?: React.ButtonHTMLAttributes<HTMLButtonElement> & { [k: `data-${string}`]: string };
+}> = ({ model, anchor, onClose, actionProps }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<QueryCardTab>("tracking");
 
@@ -212,7 +217,7 @@ export const QueryCard: React.FC<{
 
       <div className="qcard-foot">
         <span className="qcard-exp">{model.window}</span>
-        <button type="button" onClick={model.onOpenQuery}>{model.actionLabel ?? "Open the full query"}</button>
+        <button type="button" {...actionProps} onClick={model.onOpenQuery}>{model.actionLabel ?? "Open the full query"}</button>
       </div>
     </div>
   );
