@@ -136,6 +136,7 @@ import { queriesMissingMaterials, isBulkMaterialsGap, MATERIALS_BULK_RECORD_ID }
 import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
+import { applyUserPaths, type UserPaths } from "./userPaths";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -493,6 +494,9 @@ interface DbContextType {
 
   // User Actions
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
+  /** Write LEAVES of the user doc by dotted path ("todoPrefs.types.send") — siblings untouched.
+   *  `lib/userPaths` says why: a whole-map write of a shared map wipes the other owners. */
+  updateUserPaths: (paths: UserPaths) => Promise<void>;
   
   // Task Actions
   dismissTask: (taskType: string, relatedRecordId: string, dismissType: DismissType, snoozeDays?: number) => Promise<void>;
@@ -3641,6 +3645,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // Leaf writer — the same optimistic model, applied to a nested copy (never a flat dotted key).
+  const updateUserPaths = async (paths: UserPaths) => {
+    if (!currentUser || Object.keys(paths).length === 0) return;
+    setCurrentUser(applyUserPaths(currentUser, paths));
+    try {
+      await updateDoc(doc(db, "users", currentUser.id), paths);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}`);
+    }
+  };
+
   // ── Task flags — the user's STANCE on a derived task (snooze / commit / skip / resolve). ──
   const DAY_MS = 86400000;
   const upsertTaskFlag = async (
@@ -3956,6 +3971,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         moveActivity,
         editActivity,
         updateUserProfile,
+        updateUserPaths,
         dismissTask,
         logNudge,
         recordOfferDecision

@@ -713,4 +713,62 @@ await attempt("…without disturbing the Noteboard's sub-map", "promos pack",
   () => updateDoc(UREF, { todoPrefs: { ...(priorPrefs ?? {}), noteboard: { dismissedExamples: ["x"] }, manuscripts: { dismissedTiles: [] } } }),
   restorePrefs);
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   DESK SAVE BY LEAF — Contact list v13, Phase 0.
+
+   Settings used to save a desk behaviour as the WHOLE `todoPrefs` map, built from `todoPrefs()`'s
+   three-field view, so every save wiped the list view, the Noteboard and the Manuscripts tiles.
+   It now writes leaf paths (`lib/userPaths.deskPrefPaths`, locked in `userPaths.test.ts`):
+   "todoPrefs.staleMonths", "todoPrefs.rollForward", "todoPrefs.types.<key>". This proves the
+   DEPLOYED ruleset accepts that shape and that the three sub-maps come back byte-identical.
+
+   ⚠️ THE OLD WRITE IS RUN TOO, AND MUST WIPE. A check that passes on both writes is not looking at
+   the sub-maps at all; seeing the old shape fail is what makes the new shape's pass mean anything.
+   ⚠️ RESTORED TO THE EXACT PRIOR STATE: an absent `todoPrefs` goes back to absent, not to `{}`.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+console.log("\ndesk save by leaf — listView, noteboard and manuscripts survive (v13 Phase 0):");
+{
+  const before = (await getDoc(UREF)).data() ?? {};
+  const hadPrefs = Object.prototype.hasOwnProperty.call(before, "todoPrefs");
+  const OWNERS = ["listView", "noteboard", "manuscripts"];
+  const stable = (v) => JSON.stringify(v, (_k, x) => (x && typeof x === "object" && !Array.isArray(x)
+    ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, x[k]])) : x));
+  const owners = (tp) => stable(Object.fromEntries(OWNERS.map((k) => [k, tp?.[k] ?? null])));
+  const seeded = {
+    ...(before.todoPrefs ?? {}),
+    staleMonths: 12, rollForward: true,
+    types: { send: true, decide: true, chase: true, close: true, fix: true },
+    listView: { view: "list", probe: "phase-0" },
+    noteboard: { dismissedExamples: ["probe-a"], order: ["probe-n2", "probe-n1"] },
+    manuscripts: { dismissedTiles: ["wordcount"] },
+  };
+  const restore = () => updateDoc(UREF, { todoPrefs: hadPrefs ? before.todoPrefs : deleteField() });
+  const run = async (label, write, mustSurvive) => {
+    try {
+      await updateDoc(UREF, { todoPrefs: seeded });
+      const want = owners(seeded);
+      await write();
+      const got = owners((await getDoc(UREF)).data()?.todoPrefs);
+      const survived = got === want;
+      const ok = survived === mustSurvive;
+      console.log(`  ${ok ? "✅" : "❌"} ${label.padEnd(44)} sub-maps ${survived ? "byte-identical" : "CHANGED"}`);
+      if (!ok) console.log(`     want ${want}\n     got  ${got}`);
+    } catch (e) {
+      const denied = /permission|insufficient/i.test(e.message || "");
+      console.log(`  ❌ ${label.padEnd(44)} ${denied ? "DENIED" : "ERROR: " + (e.message || "").slice(0, 90)}`);
+    } finally {
+      try { await restore(); } catch (e) { console.log(`  ⚠️  RESTORE FAILED — the account has changed: ${e.message}`); }
+    }
+  };
+  await run("staleMonths by leaf", () => updateDoc(UREF, { "todoPrefs.staleMonths": 6 }), true);
+  await run("rollForward by leaf", () => updateDoc(UREF, { "todoPrefs.rollForward": false }), true);
+  await run("one type switch by leaf", () => updateDoc(UREF, { "todoPrefs.types.chase": false }), true);
+  await run("the OLD whole-map write (must WIPE)", () => updateDoc(UREF, {
+    todoPrefs: { staleMonths: 6, rollForward: true, types: seeded.types },
+  }), false);
+  const after = (await getDoc(UREF)).data() ?? {};
+  const back = hadPrefs ? stable(after.todoPrefs) === stable(before.todoPrefs) : !("todoPrefs" in after);
+  console.log(`  ${back ? "✅" : "❌"} ${"todoPrefs restored to its exact prior state".padEnd(44)} ${back ? "" : "— THE ACCOUNT HAS CHANGED"}`);
+}
+
 process.exit(0);
