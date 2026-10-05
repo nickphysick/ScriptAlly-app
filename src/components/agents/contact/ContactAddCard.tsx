@@ -29,6 +29,7 @@ import type { Agent } from "../../../types";
 import { ContactDraft, emptyContactDraft } from "../../../lib/contactEdit";
 import { findDuplicateAgent } from "../../../lib/contactList";
 import { ContactAgentForm } from "./ContactAgentForm";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 /* ── §8.3's parked components — the reader's dress, mounted nowhere until it exists ────────── */
 
@@ -75,16 +76,9 @@ export const ContactAddCard: React.FC<ContactAddCardProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Escape closes — one capture handler; the country picker's own capture consumes its first */
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      onClose();
-    };
-    document.addEventListener("keydown", key, true);
-    return () => document.removeEventListener("keydown", key, true);
-  }, [onClose]);
+  /* Escape closes — a layer on the app's one Escape stack (Agent card v1 §9); the country picker,
+     a layer above it while open, is asked first */
+  useEscapeLayer(true, onClose, ESC_LEVEL.card);
 
   const dup = useMemo(() => findDuplicateAgent(draft.name, agents), [draft.name, agents]);
   const ready = draft.name.trim().length > 0 && draft.agency.trim().length > 0 && !dup && !saving;

@@ -30,6 +30,7 @@
 import React, { useState } from "react";
 import { DbContext } from "../../lib/db";
 import { AgentList } from "./AgentList";
+import { AgentCardHost } from "./card/AgentCardHost";
 import { Agent, SubmissionMethod, SubmissionStatus, UserPlan } from "../../types";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_MANUSCRIPTS, CONTACT_FIXTURE_QUERIES } from "./contactFixture";
 import { FONT_MONO } from "../../lib/designTokens";
@@ -157,6 +158,9 @@ export const ContactListLab: React.FC = () => {
         <DbContext.Provider value={value as any}>
           {/* remounted per view so the page's load animation and measurements run from scratch */}
           <AgentList key={view} onNavigate={() => {}} />
+          {/* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2) and this route returns before App's own hosts
+              mount, so the lab mounts the one host itself — inside the stub, so the card reads the cast */}
+          <AgentCardHost />
         </DbContext.Provider>
       </div>
     </div>

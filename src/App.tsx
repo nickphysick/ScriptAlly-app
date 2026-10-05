@@ -80,6 +80,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -858,6 +859,10 @@ function AppContent() {
         onClose={() => setIsAddManuscriptOpen(false)}
         onSuccessToast={(msg) => setSuccessToast(msg)}
       />
+
+      {/* Agent card v1 — THE agent card, mounted once for the workspace. Every surface opens it
+          through `openAgentCard(…)` / `openNewAgentCard(…)` (lib/agentCardStore). */}
+      <AgentCardHost />
 
       {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
           Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}

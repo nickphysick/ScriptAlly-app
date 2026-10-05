@@ -113,7 +113,8 @@
     "design-refs/analytics-v13.html": "dcc587754721e03bdf6231ce1f0e031b8aaa388d0b5aac279f3af81fe0e3a38f",
     "design-refs/page-header/qc-plate-header-v1.html": "7995b916d9bae6e2f515ec378201a0f4399fb924671cbe7b006e6fb326d13486",
     "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b",
-    "public/images/qc/qc-plate-courier-figure.png": "b0e20bf289042551cfcb0ef2c08541101dedca014dc773199a5b1dd5873229a8"
+    "public/images/qc/qc-plate-courier-figure.png": "b0e20bf289042551cfcb0ef2c08541101dedca014dc773199a5b1dd5873229a8",
+    "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

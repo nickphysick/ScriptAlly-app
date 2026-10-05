@@ -13,6 +13,9 @@ import { emptyContactDraft } from "../../../lib/contactEdit";
 const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
 const card = readFileSync(new URL("./ContactAddCard.tsx", import.meta.url), "utf8");
 const list = readFileSync(new URL("../AgentList.tsx", import.meta.url), "utf8");
+/* ⚠️ RETARGETED (Agent card v1 P1, 5 Oct): the create moved with the card into the app-level host.
+   The law is unchanged and asserted unchanged — one path through addAgent, optionals born absent. */
+const host = readFileSync(new URL("../card/AgentCardHost.tsx", import.meta.url), "utf8");
 
 describe("a new agent is born the way the house births agents", () => {
   it("the empty draft carries ABSENCE, not zeros — null weeks, undefined NRN, no rating, door open", () => {
@@ -26,7 +29,9 @@ describe("a new agent is born the way the house births agents", () => {
   });
 
   it("the create goes through addAgent — the one path with the cap and the activity — and the optionals spread in only when stated", () => {
-    const create = strip(list).slice(strip(list).indexOf("const onCreateAgent"), strip(list).indexOf("const onCreateAgent") + 1600);
+    const at = strip(host).indexOf("const onCreateAgent");
+    expect(at, "the create is no longer in the host").toBeGreaterThan(-1);
+    const create = strip(host).slice(at, at + 1600);
     expect(create, "the create left the shared path").toContain("await addAgent({");
     expect(create, "the link stopped going through the scheme allowlist").toContain("normaliseSubmissionsUrl(link)");
     expect(create, "reopensOn must ride only a CLOSED door").toMatch(/reopensOn[\s\S]*SubmissionStatus\.CLOSED/);
@@ -47,7 +52,7 @@ describe("FILL IN is deliberately not rendered (§8.3)", () => {
     expect(card).toContain("export const FromLinkTag");
     expect(card).toContain("export const FilledCountLine");
     /* reachability, not existence: the sweep is over the whole src tree via the two JSX spellings */
-    const files = [list, card, readFileSync(new URL("./ContactAgentForm.tsx", import.meta.url), "utf8"),
+    const files = [list, host, card, readFileSync(new URL("./ContactAgentForm.tsx", import.meta.url), "utf8"),
       readFileSync(new URL("./ContactProfile.tsx", import.meta.url), "utf8")];
     for (const f of files) {
       expect(strip(f)).not.toContain("<FromLinkTag");

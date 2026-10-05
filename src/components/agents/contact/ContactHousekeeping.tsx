@@ -18,20 +18,27 @@ import React, { useState } from "react";
 import type { Agent } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { GapKey, HkAgentRow, HkModel, gapChipLabel, remindLabel } from "../../../lib/contactHousekeeping";
-import type { FormSection } from "./ContactAgentForm";
+import type { AgentCardOptions } from "../../../lib/agentCardStore";
+
+/** where a gap's door lands on the agent card: a tab, and the field focused there */
+type CardTarget = Pick<AgentCardOptions, "tab" | "focus">;
 
 export type HkGrouping = "unlocks" | "agent";
 const HK_GROUP_KEY = "sa.hkGrouping";
 
-/** the editor section each gap's Add opens (§9.3's action column) */
-const GAP_SECTION: Record<Exclude<GapKey, "reopen" | "recheck">, FormSection> = {
-  reply: "who", genres: "genres", wishlist: "wishlist", materials: "materials",
+/** the card tab and field each gap's Add opens (§9.3's action column; Agent card v1 — reply time
+ *  lives on Submissions now, not in the old form's first section) */
+const GAP_TARGET: Record<Exclude<GapKey, "reopen" | "recheck">, CardTarget> = {
+  reply: { tab: "work", focus: "reply" },
+  genres: { tab: "want", focus: "genres" },
+  wishlist: { tab: "want", focus: "wishlist" },
+  materials: { tab: "want", focus: "materials" },
 };
 
 export interface ContactHousekeepingProps {
   model: HkModel;
   onOpen: (agentId: string) => void;
-  onEditAt: (agentId: string, section: FormSection) => void;
+  onEditAt: (agentId: string, at: CardTarget) => void;
   onInlineSave: (agentId: string, weeks: number) => Promise<void>;
   onChecked: (agentId: string) => Promise<void>;
   onRemind: (agent: Agent) => void;
@@ -107,7 +114,7 @@ export const ContactHousekeeping: React.FC<ContactHousekeepingProps> = ({
   const action = (key: GapKey, r: HkAgentRow) => {
     if (key === "reply") {
       return r.band === "live"
-        ? <button type="button" className="clv-hkadd" data-clv="hk-add" onClick={() => onEditAt(r.agent.id, "who")}>Add</button>
+        ? <button type="button" className="clv-hkadd" data-clv="hk-add" onClick={() => onEditAt(r.agent.id, GAP_TARGET.reply)}>Add</button>
         : <InlineWeeks agentId={r.agent.id} onSave={onInlineSave} />;
     }
     if (key === "recheck") {
@@ -116,7 +123,7 @@ export const ContactHousekeeping: React.FC<ContactHousekeepingProps> = ({
     if (key === "reopen") {
       return <button type="button" className="clv-hkadd clv-hkadd--mono" data-clv="hk-remind" onClick={() => onRemind(r.agent)}>{remindLabel(r.agent)}</button>;
     }
-    return <button type="button" className="clv-hkadd" data-clv="hk-add" onClick={() => onEditAt(r.agent.id, GAP_SECTION[key])}>Add</button>;
+    return <button type="button" className="clv-hkadd" data-clv="hk-add" onClick={() => onEditAt(r.agent.id, GAP_TARGET[key])}>Add</button>;
   };
 
   return (
@@ -156,13 +163,13 @@ export const ContactHousekeeping: React.FC<ContactHousekeepingProps> = ({
                 {r.gaps.map((g) =>
                   g === "reply"
                     ? (r.band === "live"
-                      ? <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => onEditAt(r.agent.id, "who")}>+ Reply time</button>
+                      ? <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => onEditAt(r.agent.id, GAP_TARGET.reply)}>+ Reply time</button>
                       : <InlineWeeks key={g} agentId={r.agent.id} onSave={onInlineSave} />)
                     : g === "recheck"
                       ? <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => void onChecked(r.agent.id)}>{gapChipLabel[g]}</button>
                       : g === "reopen"
                         ? <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => onRemind(r.agent)}>{gapChipLabel[g]}</button>
-                        : <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => onEditAt(r.agent.id, GAP_SECTION[g])}>{gapChipLabel[g]}</button>,
+                        : <button key={g} type="button" className="clv-hkchip" data-clv="hk-chip" onClick={() => onEditAt(r.agent.id, GAP_TARGET[g])}>{gapChipLabel[g]}</button>,
                 )}
               </span>
             </li>

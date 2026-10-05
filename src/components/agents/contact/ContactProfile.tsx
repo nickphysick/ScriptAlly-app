@@ -37,6 +37,7 @@ import { parseAgentMaterials, MAT_QTY } from "../../../lib/agentMaterials";
 import { AgentNote } from "../../../lib/agentNotes";
 import { ContactAgentForm, FormSection } from "./ContactAgentForm";
 import { formatDate } from "../../../lib/dates";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 const dmy = (ms: number) => formatDate(new Date(ms), { day: "numeric", month: "short" });
 const monthYear = (iso: string) => formatDate(new Date(iso), { month: "short", year: "numeric" });
@@ -115,19 +116,14 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({
     [agent, draft, editCtx, dirty, editing],
   );
 
-  /* ⚠️ ONE Escape handler, the cascade in one place (§7.1) */
+  /* ⚠️ ONE Escape handler, the cascade in one place (§7.1) — a layer on the app's one Escape stack
+     (Agent card v1 §9), so a combobox open inside the card is asked first, whatever mounted last */
   const editingRef = useRef(editing);
   editingRef.current = editing;
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      if (editingRef.current) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); }
-      else onClose();
-    };
-    document.addEventListener("keydown", key, true);
-    return () => document.removeEventListener("keydown", key, true);
-  }, [agent, onClose]);
+  useEscapeLayer(true, () => {
+    if (editingRef.current) { setEditing(false); setFocusSection(null); setDraft(draftFromAgentRecord(agent)); }
+    else onClose();
+  }, ESC_LEVEL.card);
 
   const save = useCallback(async () => {
     if (saving) return;

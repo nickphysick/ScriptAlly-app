@@ -12,12 +12,14 @@
  * normaliseCountry) or "" to clear — NEVER raw typed text. Deployed rules validate the stored value
  * with isKnownCountry, so a free-text field here would produce writes the rules reject at Done.
  *
- * ESCAPE, STAGE 1: while the menu is open this listens on the CAPTURE phase and calls
- * stopImmediatePropagation, so it closes itself and the page's bubble-phase handler never sees the
- * key — the draft is never discarded by dismissing a dropdown.
+ * ESCAPE, STAGE 1: while the menu is open it is a layer ABOVE the card on the app's one Escape stack
+ * (lib/escapeStack, Agent card v1 §9), so it closes itself and the card never sees the key — the
+ * draft is never discarded by dismissing a dropdown. It used to be a second window-capture listener
+ * winning by registration order, which held only while it registered after the card's.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { COUNTRIES_ISO, QUICK_PICKS, countryName, flagFor, normaliseCountry } from "../../lib/territory";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import "flag-icons/css/flag-icons.min.css";
 
 interface AgentCountryPickerProps {
@@ -38,19 +40,9 @@ export const AgentCountryPicker: React.FC<AgentCountryPickerProps> = ({ value, o
   const label = countryName(value) || "";
   const flag = flagFor(value);
 
-  // Stage 1 of the Escape cascade — capture phase, and the event stops dead here.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      setOpen(false);
-      setQuery("");
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [open]);
+  // Stage 1 of the Escape cascade — while open, a layer ABOVE the card on the app's one Escape stack
+  // (Agent card v1 §9): the list closes and the card hears nothing of it.
+  useEscapeLayer(open, () => { setOpen(false); setQuery(""); }, ESC_LEVEL.cardPopup);
 
   useEffect(() => {
     if (!open) return;

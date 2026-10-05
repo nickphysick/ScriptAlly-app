@@ -14,12 +14,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
-import { collection, deleteDoc, deleteField, doc, onSnapshot, setDoc } from "firebase/firestore";
-import { db, handleFirestoreError, OperationType } from "../../lib/firebase";
-import {
-  AgentNote, committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft,
-} from "../../lib/agentNotes";
-import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
+import { Agent } from "../../types";
 import { agentRelationship } from "../../lib/agentList";
 import {
   isDoorOpen,
@@ -43,13 +38,11 @@ import { HkBand, hkModel } from "../../lib/contactHousekeeping";
 import { agentRows } from "../../lib/contactList";
 import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { flagKeyForTask } from "../../lib/taskFlags";
-import { ContactProfile } from "./contact/ContactProfile";
-import { ContactAddCard } from "./contact/ContactAddCard";
-import type { FormSection } from "./contact/ContactAgentForm";
-import { AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor } from "../../lib/contactEdit";
-import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
-import { computeAgentDeadlineWrites } from "../../lib/computeAgentDeadlineWrites";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents, targetForSection,
+  useAgentCardRequest,
+} from "../../lib/agentCardStore";
+import { useLocation } from "react-router-dom";
 import { CONTACT_ARCHIVIST, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
@@ -61,7 +54,6 @@ import { ContactIndexStrip } from "./contact/ContactIndexStrip";
 import { isGenreMatch } from "../../lib/genreMatch";
 import { ContactControls } from "./contact/ContactControls";
 import { ContactRows } from "./contact/ContactRows";
-import { normaliseSubmissionsUrl } from "../../lib/quickAdd";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { BarChip, ContactBar } from "./contact/ContactBar";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -93,12 +85,11 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
-  const navigate = useNavigate();
   /* ⚠️ THE SWITCHER RE-OPENS THE ROUTE (page header v2 §4.5), so a switch is a new location KEY on
      the same path — and that key is what the scope reads on. Memoised on `manuscripts` alone, the
      page went on stating the old book's facts after the bar had changed book. */
   const { key: locationKey } = useLocation();
-  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady, userTasks, addUserTask, resolveTaskFlag, packages } =
+  const { agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, resolveTaskFlag } =
     useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -237,16 +228,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   const shownGroups = groups;
   const visible = visibleFacts;
-  /** every genre already on the writer's list, most-used first (§8.2's options) */
-  const genrePool = useMemo(() => {
-    const freq = new Map<string, number>();
-    for (const a of agents) for (const g of a.genres ?? []) freq.set(g, (freq.get(g) ?? 0) + 1);
-    return [...freq.entries()].sort((x, y) => y[1] - x[1]).map(([g]) => g);
-  }, [agents]);
-  const editCtx: EditCtx = useMemo(
-    () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
-    [queries, agents, scoped, nowMs],
-  );
   const anyActive =
     contactFilterCount(filters) > 0 || search.trim() !== ""
     || groupKey !== "letter" || sortKey !== "surname";
@@ -362,41 +343,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      feature to whoever finds it next. */
 
 
-  // ── Flip + buffered draft (decision 1) ────────────────────────────────────
-  // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
-  // mutates the draft only; Done validates, diffs and commits a SINGLE updateAgent call; Escape
-  // (or opening another card) discards it. Nothing here writes per keystroke.
-  /* ⚠️ `openId` IS THE DRAWER'S AGENT, and it used to be `flippedId` — the card whose editor face
-     was showing. The rename is the point rather than tidiness: the editor left the card in Phase
-     4, so a name meaning "the flipped card" would have described a mechanism that no longer
-     exists while driving one that does. The card's own flip is `peekId` now, and what it shows is
-     the read-only contact peek. */
-  const [openId, setOpenId] = useState<string | null>(null);
+  /* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2). The page opens it through the store and keeps
+     only what is the LIST's: the ring on the open row, the notice and FLIP after a save, the ring
+     on a new row. The card no longer closes when its agent leaves the filter — opened, it stays
+     open, and ‹ › step through the order it was opened from. */
+  const cardReq = useAgentCardRequest();
+  const openId = cardReq?.agentId ?? null;
+  /** the list's current order and filter — what the card's ‹ › step through */
+  const sequence = useMemo(() => visibleFacts.map((x) => x.agent.id), [visibleFacts]);
+  const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => {
+    if (!agents.some((a) => a.id === agentId)) return;
+    openAgentCard(agentId, { ...opts, sequence });
+  }, [agents, sequence]);
+  /** OPEN the card on this agent — reading, from the top (v11 §7.1). */
+  const onOpen = useCallback((agentId: string) => openCard(agentId, { from: "row" }), [openCard]);
+  /** "+ Add an agent" — the empty card, growing out of the button that asked for it. */
+  const openAdd = useCallback(() => {
+    const r = addBtnRef.current?.getBoundingClientRect();
+    openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null });
+  }, []);
 
   /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
      Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
      clears it, and a bookmarked `?view=board` lands on the one list rather than erroring
      (`readQcView` is the precedent). Grid/List/Board and their model went with the switch. */
-
-
-  /** The pop-up's session: which agent, whether it opened straight into edit at a section, and
-   *  the sage line the view returns with after a save. The DRAFT lives inside ContactProfile —
-   *  the overlay is outside the list, so a list re-render cannot touch it (§7.1). */
-  const [editAt, setEditAt] = useState<FormSection | null>(null);
-  const [savedNote, setSavedNote] = useState<string | null>(null);
-  // ONE notes listener, for the OPEN profile only — never one per row.
-  const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
-  const [notesLoaded, setNotesLoaded] = useState(false);
-
-  const clearEditor = useCallback(() => {
-    setOpenId(null);
-    setEditAt(null);
-    setSavedNote(null);
-    setStoredNotes([]);
-    setNotesLoaded(false);
-  }, []);
-
-  const discard = clearEditor;
 
   /**
    * The SAVE NOTICE (v11 P4). The three-beat card choreography retired with the flip card it
@@ -451,205 +421,32 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     undoSnapshot.current = null;
   }, [updateAgent]);
 
-  // Subscribe to the open agent's notes subcollection. `notesLoaded` only turns true once the
-  // listener actually resolves — the notePreview recompute is gated on it, because an unresolved
-  // listener is indistinguishable from "no notes" and would wipe a valid preview on Done.
-  useEffect(() => {
-    setStoredNotes([]);
-    setNotesLoaded(false);
-    if (!openId || !currentUser) return;
-    const ref = collection(db, "users", currentUser.id, "agents", openId, "notes");
-    const unsub = onSnapshot(
-      ref,
-      (snap) => {
-        const list: AgentNote[] = [];
-        snap.forEach((d) => {
-          const data = d.data() as { text?: string; createdAt?: { toDate?: () => Date } | string };
-          list.push({
-            id: d.id,
-            text: String(data.text ?? ""),
-            createdAt:
-              typeof data.createdAt === "object" && data.createdAt?.toDate
-                ? data.createdAt.toDate().toISOString()
-                : String(data.createdAt ?? ""),
-          });
-        });
-        setStoredNotes(list);
-        setNotesLoaded(true);
-      },
-      (e) => handleFirestoreError(e, OperationType.LIST, `users/${currentUser.id}/agents/${openId}/notes`),
-    );
-    return () => unsub();
-  }, [openId, currentUser?.id]);
-
-  /** OPEN the profile on this agent — reading, from the top (v11 §7.1). */
-  const onOpen = useCallback((agentId: string) => {
-    if (!agents.some((a) => a.id === agentId)) return;
-    setOpenId(agentId);
-    setEditAt(null);
-    setSavedNote(null);
-  }, [agents]);
-
-  /** OPEN straight into edit at a section — a torn slip's or Housekeeping's door (§7.1, §9.3). */
-  const onEditAt = useCallback((agentId: string, at: FormSection) => {
-    if (!agents.some((a) => a.id === agentId)) return;
-    setOpenId(agentId);
-    setEditAt(at);
-    setSavedNote(null);
-  }, [agents]);
-
-  
-
-
-
-  const openAgent = openId ? agents.find((a) => a.id === openId) ?? null : null;
-
-  /* the profile's notes: committed only — the pop-up composes ADDITIONS one at a time (§7.2);
-     the flat legacy note rides as the oldest bubble exactly as the old drawer showed it */
-  const profileNotes = useMemo(
-    () => committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), {
-      flatNote: openAgent?.notes,
-      dateAdded: openAgent?.dateAdded,
-    })),
-    [storedNotes, openAgent],
-  );
-
-  /**
-   * SAVE from the pop-up (§7.3): diff the draft against the record, send ONLY what changed
-   * through `commitAgentEdits` — sanitised, atomic, with the reply-time deadline fan-out riding
-   * the same batch (`computeAgentDeadlineWrites`; the engine then moves the rows: "It never
-   * writes a derived date"). A wishlist edit stamps `mswlCheckedAt` in the SAME write.
-   */
-  const onProfileSave = useCallback(async (d: ContactDraft, notes: AlsoNote[]): Promise<boolean> => {
-    const orig = openId ? agents.find((a) => a.id === openId) : null;
-    if (!orig || !currentUser) return false;
-    const base = draftFromAgentRecord(orig);
-    const patch: AgentEditPatch = {};
-    if (d.name !== base.name) patch.name = d.name.trim();
-    if (d.agency !== base.agency) patch.agency = d.agency.trim();
-    if (d.email !== base.email) patch.email = d.email.trim();
-    if (d.website !== base.website) patch.website = d.website.trim();
-    if (d.city !== base.city) patch.city = d.city.trim();
-    if (d.country !== base.country) patch.country = d.country;
-    if (d.responseTimeWeeks !== base.responseTimeWeeks) patch.responseTimeWeeks = d.responseTimeWeeks;
-    if (d.noResponseMeansNo !== base.noResponseMeansNo && d.noResponseMeansNo !== undefined) patch.noResponseMeansNo = d.noResponseMeansNo;
-    if (d.submissionStatus !== base.submissionStatus) patch.submissionStatus = d.submissionStatus;
-    if (d.reopensOn !== base.reopensOn) patch.reopensOn = d.reopensOn.trim() === "" ? null : d.reopensOn;
-    if (JSON.stringify(d.genres) !== JSON.stringify(base.genres)) patch.genres = d.genres;
-    if (d.mswlNotes !== base.mswlNotes) {
-      patch.mswlNotes = d.mswlNotes;
-      /* editing the wishlist IS checking it (§10: starts as the date it was last edited) */
-      patch.mswlCheckedAt = new Date().toISOString();
-    }
-    if (JSON.stringify(d.materialsWanted) !== JSON.stringify(base.materialsWanted)) patch.materialsWanted = d.materialsWanted;
-    if (d.starRating !== base.starRating) patch.starRating = d.starRating;
-    if (Object.keys(patch).length === 0) return true;
-
-    const extras = patch.responseTimeWeeks !== undefined
-      ? computeAgentDeadlineWrites(
-          queries.filter((q) => q.agentId === orig.id),
-          typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
-          (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
-        )
-      : [];
-    /* the pre-save record, so the notice's Undo can put it back in ONE write (the old law) */
-    undoSnapshot.current = { ...orig };
-    const res = await commitAgentEdits(db, currentUser.id, orig.id, patch, extras);
-    if (!res.ok) {
-      /* strictNullChecks is off, so the boolean discriminant does not narrow (the house rule) */
-      setNotice({ text: (res as { ok: false; error: string }).error, kind: "travel", agentId: orig.id, canUndo: false });
-      return false;
-    }
-    setSavedNote(savedLineFor(notes));
-    /* the row may change group or leave the filtered view — expected; the notice says where */
-    const saved = { ...orig } as Agent;
-    beginSaveChoreography(Object.assign(saved, patch as Partial<Agent>));
-    return true;
-  }, [openId, agents, currentUser, queries, beginSaveChoreography]);
-
-  /** Add ONE note from the pop-up — the subcollection write plus the documented cache, together. */
-  const onAddNote = useCallback(async (text: string) => {
-    const orig = openId ? agents.find((a) => a.id === openId) : null;
-    if (!orig || !currentUser) return;
-    const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
-    const createdAt = new Date().toISOString();
-    try {
-      await setDoc(doc(collection(db, "users", currentUser.id, "agents", orig.id, "notes"), noteId), { text, createdAt });
-      const after = committedNotes(effectiveNotes(
-        [...storedNotes, { id: noteId, text, createdAt }],
-        emptyNotesDraft(),
-        { flatNote: orig.notes, dateAdded: orig.dateAdded },
-      ));
-      const preview = computeNotePreview(after, orig.pinnedNoteId);
-      if ((orig.notePreview ?? "") !== preview) {
-        await commitAgentEdits(db, currentUser.id, orig.id, { notePreview: preview });
-      }
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${orig.id}/notes`);
-    }
-  }, [openId, agents, currentUser, storedNotes]);
-
-  // A row that scrolls out of the filtered set takes its draft with it. Checked against the
-  // RENDERED map, not `visible` — the unsaved new agent rides only there, and checking `visible`
-  // would discard a brand-new record the instant it opened.
-  useEffect(() => {
-    if (openId && !factsById.has(openId)) discard();
-  }, [factsById, openId, discard]);
-
-
-  /* ── adding an agent (v11 §8) ─────────────────────────────────────────────────────────────
-     The centred add card, portalled like the pop-up. `adding` carries WHICH field opens focused
-     — the hero card's body asks for the name, its paste strip for the link (§3.4) — and the
-     app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
-     dispatches on /agents (ruling f): elsewhere the old focus form is untouched. */
-  const [adding, setAdding] = useState<null | "name" | "link">(null);
   /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
   const [newId, setNewId] = useState<string | null>(null);
-  const onAddAgent = () => setAdding("name");
   /* Query actions v1 (27 Sep): every page finishes in the query drawer — the log doors open
      it IN PLACE with the agent carried, instead of navigating to the hub so ITS seed effect
      could open the same drawer one route later. Both doors (the row's mini and the pop-up's
      Log query) come through here; the pop-up closes first, so there is one asking surface. */
   const onLogQuery = (agent: { id: string }) => openQueryDrawer({ mode: "log", agentId: agent.id });
 
+  /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
+     dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
   useEffect(() => {
     if (!active) return;
-    const open = () => setAdding("name");
-    window.addEventListener("sa:contact-add", open);
-    return () => window.removeEventListener("sa:contact-add", open);
-  }, [active]);
+    window.addEventListener("sa:contact-add", openAdd);
+    return () => window.removeEventListener("sa:contact-add", openAdd);
+  }, [active, openAdd]);
 
-  /**
-   * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
-   * AGENT_ADDED activity, undefined-stripping), with the v11 rules: optionals born ABSENT, the
-   * link field saving to `website` through the scheme allowlist (§8.3 — the importer-shaped
-   * path the allowlist's own docstring reserves itself for), `reopensOn` only when the door is
-   * Closed, and `submissionMethod` defaulting to Email exactly as the app-level form does.
-   */
-  const onCreateAgent = useCallback(async (d: ContactDraft, link: string) => {
-    const res = await addAgent({
-      name: d.name.trim(),
-      agency: d.agency.trim(),
-      email: d.email.trim(),
-      website: d.website.trim() || (link ? normaliseSubmissionsUrl(link) : ""),
-      genres: d.genres,
-      mswlNotes: d.mswlNotes,
-      submissionStatus: d.submissionStatus,
-      submissionMethod: SubmissionMethod.EMAIL,
-      materialsWanted: d.materialsWanted,
-      notes: "",
-      ...(d.city.trim() ? { city: d.city.trim() } : {}),
-      ...(d.country ? { country: d.country } : {}),
-      ...(d.responseTimeWeeks != null ? { responseTimeWeeks: d.responseTimeWeeks } : {}),
-      ...(d.noResponseMeansNo !== undefined ? { noResponseMeansNo: d.noResponseMeansNo } : {}),
-      ...(d.reopensOn.trim() && d.submissionStatus === SubmissionStatus.CLOSED ? { reopensOn: d.reopensOn.trim() } : {}),
-      ...(d.starRating != null ? { starRating: d.starRating as Agent["starRating"] } : {}),
-    });
-    if (!res.success || !res.id) return { ok: false as const, error: res.error };
-    setAdding(null);
-    setNewId(res.id);
-    return { ok: true as const };
-  }, [addAgent]);
+  /* the card's aftermath ON THE LIST: a save's notice (with its Undo) and FLIP, an add's ring */
+  useEffect(() => subscribeAgentCardEvents((e) => {
+    if (e.type === "saved") {
+      /* the pre-save record, so the notice's Undo can put it back in ONE write (the old law) */
+      undoSnapshot.current = e.before;
+      beginSaveChoreography(e.after);
+    } else if (e.type === "added") {
+      setNewId(e.agentId);
+    }
+  }), [beginSaveChoreography]);
 
   /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
      class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
@@ -717,13 +514,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [updateAgent]);
   const onHkRemind = useCallback((agent: Agent) => {
     const due = (agent.reopensOn ?? "").trim();
-    if (!due) { onEditAt(agent.id, "door"); return; } // ruling (b): no date → the editor at the door
+    if (!due) { openCard(agent.id, { ...targetForSection("door"), from: "hk" }); return; } // ruling (b): no date → the editor at the door
     void addUserTask({
       agentId: agent.id,
       dueDate: due,
       text: `${(agent.name ?? "").trim() || agent.agency}'s list reopens — check it and query`,
     });
-  }, [addUserTask, onEditAt]);
+  }, [addUserTask, openCard]);
 
 
 
@@ -770,7 +567,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             /* v12: the quick-add drop and the paste pill are retired — the one door is the card
                (its link mode survives INSIDE the card), and the secondary is Discover, matching
                the populated header (LH7's same-shape claim) */
-            onAdd={() => setAdding("name")}
+            onAdd={openAdd}
             /* the ways' recommended tile — the same bridge the rail's Import entry takes */
             onImport={() => onNavigate?.("import")}
             /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
@@ -794,7 +591,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             title="Contact list"
             living={living}
             primaryRef={addBtnRef}
-            primary={{ label: "+ Add an agent", onClick: () => setAdding("name") }}
+            primary={{ label: "+ Add an agent", onClick: openAdd }}
             secondary={{ label: "Discover agents", onClick: () => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); } }}
             art={<img src={`${CONTACT_ARCHIVIST.src}?v=${CONTACT_ARCHIVIST.version}`} width={CONTACT_ARCHIVIST.width} height={CONTACT_ARCHIVIST.height} alt="" />}
           />
@@ -857,8 +654,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               newId={newId}
               onOpen={onOpen}
               onLogQuery={(id) => onLogQuery({ id })}
-              onAddGenres={(id) => onEditAt(id, "genres")}
-              onAddWishlist={(id) => onEditAt(id, "wishlist")}
+              onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
+              onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
             />
           )}
         </div>
@@ -914,7 +711,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <ContactHousekeeping
               model={hk}
               onOpen={onOpen}
-              onEditAt={onEditAt}
+              onEditAt={(id, at) => openCard(id, { ...at, from: "hk" })}
               onInlineSave={onHkInlineSave}
               onChecked={onHkChecked}
               onRemind={onHkRemind}
@@ -928,41 +725,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       </div>
 
 
-      {/* ⚠️ THE PROFILE IS AN OVERLAY OUTSIDE THE LIST (§7.1) — a list re-render never touches
-          it, and it portals to document.body, where the `--clv-*` palette at :root reaches it. */}
-      {adding && (
-        <ContactAddCard
-          focus={adding}
-          agents={agents}
-          msGenre={scoped?.genre ?? null}
-          genrePool={genrePool}
-          onClose={() => setAdding(null)}
-          onCreate={onCreateAgent}
-          onOpenAgent={(id) => { setAdding(null); onOpen(id); }}
-        />
-      )}
-      {openAgent && (
-        <ContactProfile
-          agent={openAgent}
-          facts={factsById.get(openAgent.id) ?? agentFacts(openAgent, qcRows, scoped?.id ?? null)}
-          nowMs={nowMs}
-          msGenre={scoped?.genre ?? null}
-          msTitle={scoped?.title ?? null}
-          genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
-          genrePool={genrePool}
-          editCtx={editCtx}
-          notes={profileNotes}
-          packages={packages}
-          editAt={editAt}
-          savedLine={savedNote}
-          onClose={clearEditor}
-          onSave={onProfileSave}
-          onAddNote={onAddNote}
-          onOpenQuery={(qid) => { clearEditor(); navigate(`/queries?q=${qid}`); }}
-          onRecordResponse={() => { clearEditor(); onNavigate?.("queries", "Record a response"); }}
-          onLogQuery={() => { const id = openAgent.id; clearEditor(); onLogQuery({ id }); }}
-        />
-      )}
+      {/* the card itself is app-level now — AgentCardHost, mounted once by App (Agent card v1 §2) */}
     </div>
   );
 };
