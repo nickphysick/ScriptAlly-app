@@ -82,3 +82,55 @@ block is the list's: the after-add ring on a new row.
 **Locks rewritten:** `contactV11.measure.ts`'s §11.7 write half asserted the v11 saved line ("Also
 updated …"); the fixture is never queried, so the card's line moves no date and says only
 "Saved." — asserted as that, and as never claiming a date moved.
+
+## Phase 5 (5 Oct) — hand-off, docking, parking and reload; decision 8 app-wide
+
+**Retired, swapped not added:**
+
+- **The drawer's own Escape listener** (`DrawerShell`'s `window` capture handler). Two capture
+  listeners on one target are resolved by registration order; the drawer is now a layer on the one
+  stack (`useEscapeLayer(open, …, ESC_LEVEL.drawer)`), which outranks a docked card by level. Its
+  cascade is unchanged in order — the open calendar, the open ask, the leave bar — and ends in
+  decision 8 rather than in a discard.
+- **The backdrop's shake** (`.qad-drawer.is-shake`, `@keyframes qadShake`, the `shake` state). With
+  answers the backdrop PARKS now (decision 8); with none it cancels, as before.
+- **`JourneyView.guardDiscard`** (Log a query's "ask once an agent is chosen"). Decision 8 asks on
+  ✕ for ANY journey with answers, read from `dirty` alone — one rule instead of one journey's flag.
+  And the agent a DOOR brings (the card, a Contact-list row) is no longer an answer: Log a query
+  opened from the card with nothing touched cancels on Escape rather than parking an untouched
+  journey (`pickAgent(a, byDoor)`).
+- **"Discard this query? What you've entered will be lost. · Keep editing · Discard"** — the ask is
+  the mock's now: "Discard this? Nothing has been saved yet. · Keep going · Discard".
+- **The foot's Cancel once anything is answered** — it reads "Finish later" and parks; ✕ in the
+  header still asks before discarding. Cancel returns when nothing is answered.
+- **The dock chip's old dress** (ink, bottom-left, not clickable). It sits BESIDE the drawer as the
+  mock draws it — white, the initials, the name, a status line, "Back to card" — and a click parks
+  with answers or cancels without. Hidden at 768 and below, where the drawer is the whole screen and
+  "← name" in its header is the way back.
+- **The card closing on a hand-off** (`closeAgentCard(); openQueryDrawer(…)` in the host's
+  `onAct`). The card docks instead — `onDock` from the drawer says when it steps aside and when it
+  comes back, on save, cancel, park or a failed save alike — and a save brings it back pulsing.
+
+**Locks rewritten (decision 8 changed what Escape means on a drawer with answers — it parks):**
+the eight sites the plan named, each `Escape` → `Discard` pair now `✕` → `Discard`:
+`qaJourneys.measure.ts` (D1), `qaLocks.measure.ts` (H4's two), `packagesJourney.measure.ts` (LP1,
+LP2, LP3, AGAIN) and `qaSnapshot.measure.ts` (the empty manuscript) — and a NINTH the plan did not
+list: `qaV11.measure.ts`'s mobile sheet walk, which answers steps on its way to the review and then
+pressed Escape expecting the drawer gone (it would park, and the next journey would meet the clash).
+
+**Corrected after the first full run:** four of those sites, `packagesJourney` LP1, LP2 and LP3
+and `qaSnapshot` H12, close a drawer that has NO answers. Pressing Next does not count as an
+answer, so ✕ closes them outright and no Discard is offered: the first rewrite waited for one for
+three minutes. (LP2 and LP3 looked green in that run only because the file is serial: after LP1
+failed they did not run.) Those four now press ✕, press Discard only if it is offered, and then
+assert two things: the drawer is gone, and no chip is parked. The sites whose drawers DO carry
+answers keep the strict ✕ → Discard, which proves the ask: D1, H4's two and AGAIN, all measured
+green that way. A tenth site is `qaShots.measure.ts`'s own `discard` helper, which pressed Escape
+and would now park a drawer that has answers. It takes the same ✕ pattern. (qaShots also needs
+`design-refs/` served on 127.0.0.1:4610. That step is environmental, not something this pass
+changed.)
+
+**Rewritten against the dock, not weakened:** `contactV11.measure.ts`'s "Log query opens the query
+drawer on this page" door 2 asserted the card was GONE behind the drawer ("two asking surfaces at
+once"). The card docks now — mounted, stepped aside, out of reach and out of sight — so the case
+requires exactly that (`.is-docked`, the card hidden) and lock 7 holds the rest.

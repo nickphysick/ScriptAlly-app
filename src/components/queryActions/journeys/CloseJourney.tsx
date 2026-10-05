@@ -26,7 +26,7 @@ import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import { emptyView } from "./ResponseJourney";
 import { nudgeDays } from "./NudgeJourney";
-import { agentName, firstName, lastSendDay, nrmnOf, owes, whoLine, windowDay } from "./common";
+import { agentName, dayIn, dayOut, firstName, lastSendDay, nrmnOf, owes, seedOf, whoLine, windowDay } from "./common";
 
 type Why = "noreply" | "said" | "withdraw" | "gone";
 const WHY: Record<Why, [string, string]> = {
@@ -36,8 +36,15 @@ const WHY: Record<Why, [string, string]> = {
   gone: ["They’ve stopped taking queries", "Closed to queries, or left the agency"],
 };
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface CloseAnswers {
+  why: Why | null; on: string | null; wd: "offer" | "revise" | "other"; told: boolean; remindTell: boolean;
+  recheck: "3m" | "6m" | "no"; note: string;
+}
+
 export function CloseJourney({ req, today, children, switchTo }: JourneyProps) {
   const db = useScriptAllyDb();
+  const S = seedOf<CloseAnswers>(req);
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const initialWhy = (): Why | null => {
@@ -46,14 +53,15 @@ export function CloseJourney({ req, today, children, switchTo }: JourneyProps) {
     const w = windowDay(q, agent);
     return w && dayDiff(today, w) > 0 && !owes(q) ? "noreply" : null;
   };
-  const [why, setWhy] = useState<Why | null>(initialWhy);
-  const [on, setOn] = useState<Date>(today);
-  const [wd, setWd] = useState<"offer" | "revise" | "other">("offer");
-  const [told, setTold] = useState(false);
-  const [remindTell, setRemindTell] = useState(true);
-  const [recheck, setRecheck] = useState<"3m" | "6m" | "no">("3m");
-  const [note, setNote] = useState("");
-  const [touched, setTouched] = useState(false);
+  const [why, setWhy] = useState<Why | null>(S.why !== undefined ? () => S.why ?? null : initialWhy);
+  const [on, setOn] = useState<Date>(dayIn(S.on) ?? today);
+  const [wd, setWd] = useState<"offer" | "revise" | "other">(S.wd ?? "offer");
+  const [told, setTold] = useState(S.told ?? false);
+  const [remindTell, setRemindTell] = useState(S.remindTell ?? true);
+  const [recheck, setRecheck] = useState<"3m" | "6m" | "no">(S.recheck ?? "3m");
+  const [note, setNote] = useState(S.note ?? "");
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
 
   if (!q) return children(emptyView("CLOSE QUERY", "Close query"));
   const first = firstName(agent);
@@ -143,14 +151,14 @@ export function CloseJourney({ req, today, children, switchTo }: JourneyProps) {
               {wd === "offer" ? <Note kind="info" tag="TIP">Recording the offer on that agent's query sets up “tell the others” for every agent at once — including {first}.</Note> : null}
               <DateField id="closeOn" label="WITHDRAWN ON" value={on} anchors={anch} dir="past" onPick={(d) => { if (d) { setOn(d); setTouched(true); } }} />
               <Toggle testId="told" on={told} onClick={() => { setTold(!told); setTouched(true); }} style={{ marginTop: 16 }}>I’ve told {first}</Toggle>
-              {!told ? <Toggle testId="remind" on={remindTell} onClick={() => setRemindTell(!remindTell)} small="TOMORROW">Remind me to tell {first}</Toggle> : null}
+              {!told ? <Toggle testId="remind" on={remindTell} onClick={() => { setRemindTell(!remindTell); setTouched(true); }} small="TOMORROW">Remind me to tell {first}</Toggle> : null}
             </>
           ) : null}
           {why === "gone" ? (
             <>
               <DateField id="closeOn" label="CLOSED ON" value={on} anchors={anch} dir="past" onPick={(d) => { if (d) { setOn(d); setTouched(true); } }} />
               <Fl>CHECK BACK ON {first.toUpperCase()}</Fl>
-              <Chips<"3m" | "6m" | "no"> name="recheck" value={recheck} onPick={setRecheck} options={[["3m", "In 3 months"], ["6m", "In 6 months"], ["no", "No need"]]} />
+              <Chips<"3m" | "6m" | "no"> name="recheck" value={recheck} onPick={(k) => { setRecheck(k); setTouched(true); }} options={[["3m", "In 3 months"], ["6m", "In 6 months"], ["no", "No need"]]} />
               <p className="qad-secs" style={{ marginTop: 8 }}>A reminder to see whether they've reopened, or where they've moved to.</p>
             </>
           ) : null}
@@ -177,7 +185,9 @@ export function CloseJourney({ req, today, children, switchTo }: JourneyProps) {
       { text: `${first} stays on your Contact list, marked as queried for this book — free to query with your next book` },
     ] : [],
     who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmnOf(q, agent)} />,
-    dirty: touched, touched: () => [q.id],
+    dirty: touched,
+    snapshot: (): CloseAnswers => ({ why, on: dayOut(on), wd, told, remindTell, recheck, note }),
+    touched: () => [q.id],
     commit: async () => {
       if (!why || why === "said" || !db.currentUser) throw new Error("No reason chosen");
       const ms = db.manuscripts.find((m) => m.id === q.manuscriptId) || null;

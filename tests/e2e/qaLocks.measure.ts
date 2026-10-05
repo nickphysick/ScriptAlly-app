@@ -81,7 +81,8 @@ test("H2 — a block stops Next and turns the review rust; a check stops nothing
   await expect(page.locator('[data-qad-verdict="blk"]')).toBeVisible();
   ok(await page.locator("[data-qad-primary]").isDisabled(), "the review's action is enabled over a block");
   ok((await page.locator('[data-qad-step="2"]').getAttribute("data-qad-state")) === "blk", "a reached block's dot is not rust");
-  await page.keyboard.press("Escape");
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it now — ✕ is what asks to discard */
+  await page.locator(".qad-dx").click();
   await page.getByRole("button", { name: "Discard" }).click();
 });
 
@@ -130,7 +131,8 @@ test("H5 — the date field: past strikes the future, future marks weekends, rem
     const d = new Date(`${s} ${new Date().getFullYear()}`);
     if (!isNaN(d.getTime())) ok(d.getDay() !== 0 && d.getDay() !== 6, `a reminder chip lands on a weekend: ${s}`);
   }
-  await page.keyboard.press("Escape");
+  /* decision 8 (Agent card v1): Escape on a drawer WITH answers parks it now — ✕ is what asks to discard */
+  await page.locator(".qad-dx").click();
   await page.getByRole("button", { name: "Discard" }).click();
 });
 

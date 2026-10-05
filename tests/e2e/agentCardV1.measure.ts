@@ -1309,3 +1309,332 @@ test.describe("phase 4 — save, undo, Also changes and delete", () => {
     }
   });
 });
+
+/* ══════════════════════ phase 5 — hand-off, docking, parking and reload ══════════════════════ */
+
+/** the documents a journey can write — the drawer suite's own set (qaJourneys `readSet`), so a save
+ *  and its Undo are compared byte for byte, and a park is proved to have written nothing at all */
+const canonDoc = (v: unknown): string => {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  const o = v as Record<string, unknown>;
+  if (typeof (o as { toMillis?: unknown }).toMillis === "function") return `ts:${(o as { toMillis: () => number }).toMillis()}`;
+  if (Array.isArray(v)) return `[${v.map(canonDoc).join(",")}]`;
+  return `{${Object.keys(o).sort().map((k) => `${k}:${canonDoc(o[k])}`).join(",")}}`;
+};
+const readQuerySet = async (ids: string[]): Promise<Map<string, string>> => {
+  const { db, uid } = await harnessDb();
+  const out = new Map<string, string>();
+  for (const id of ids) {
+    const q = await getDoc(doc(db, "users", uid, "queries", id));
+    if (q.exists()) out.set(q.ref.path, canonDoc(q.data()));
+    (await getDocs(collection(db, "users", uid, "queries", id, "activity"))).forEach((d) => out.set(d.ref.path, canonDoc(d.data())));
+    (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canonDoc(d.data())));
+    for (const c of ["taskFlags", "tasks"]) (await getDocs(fsQuery(collection(db, "users", uid, c), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canonDoc(d.data())));
+  }
+  return out;
+};
+const diffQuerySets = (a: Map<string, string>, b: Map<string, string>) => {
+  const d: string[] = [];
+  for (const [k, v] of a) if (b.get(k) !== v) d.push(`changed/removed ${k}`);
+  for (const k of b.keys()) if (!a.has(k)) d.push(`added ${k}`);
+  return d;
+};
+
+const DOCKED = '[data-ac="overlay"].is-docked';
+const PARK = "[data-qad-park-chip]";
+
+/** open every Contact-list card in turn and note which agent offers which primary — the app's own
+ *  derivation (`primaryFor`), never a guess from the data */
+async function primaries(page: Page, scope: string, want: readonly string[]) {
+  const found: Record<string, string> = {};
+  for (const id of await rowIds(page, scope)) {
+    await handle(page).open(id);
+    await page.waitForSelector(`${CARD} [data-ac="primary"]`);
+    const act = await page.getAttribute(`${CARD} [data-ac="primary"]`, "data-act");
+    if (act && want.includes(act) && !found[act]) found[act] = id;
+    await handle(page).close();
+    await page.waitForSelector(CARD, { state: "detached" });
+    if (want.every((m) => found[m])) break;
+  }
+  return found;
+}
+const cardName = (page: Page) => page.evaluate(() => (document.querySelector('[data-ac="card"] #ac-name')?.textContent ?? "").trim());
+const cardTone = (page: Page) => page.evaluate(() => (document.querySelector('[data-ac="card"] [data-ac="tone"]')?.textContent ?? "").trim());
+const qClass = (page: Page) => page.evaluate(() => document.querySelector('[data-ac="card"] [data-ac="q"]')?.className ?? "");
+const storedPark = (page: Page) => page.evaluate(() => sessionStorage.getItem("qh.parkedJourney"));
+
+test.describe("phase 5 — hand-off, docking, parking and reload", () => {
+  test("lock 7: from each primary button the right journey opens and the card docks beside it — a clean close brings it straight back", async ({ page }) => {
+    test.setTimeout(300_000);
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const scope = await visiblePage(page, ".agl-wpg");
+    const MODES = ["log", "resp", "sent", "nudge", "offer"] as const;
+    const found = await primaries(page, scope, MODES);
+    console.log("[lock 7] primaries on the account:", JSON.stringify(found));
+    expect(Object.keys(found).length, `population first — the account offers ${JSON.stringify(found)}`).toBeGreaterThanOrEqual(4);
+    for (const [act, id] of Object.entries(found)) {
+      await handle(page).open(id);
+      await page.waitForSelector(CARD);
+      await settle(page);
+      const name = await cardName(page);
+      const tone = await cardTone(page);
+      await page.click(`${CARD} [data-ac="primary"]`);
+      /* the right journey, every step — nothing shortened because it started on the card */
+      await expect(page.locator(`[data-qad-drawer="${act}"]`), `${act}: the primary did not open its journey`).toBeVisible({ timeout: 10_000 });
+      /* the card steps aside, still mounted; its chip waits BESIDE the drawer */
+      await expect(page.locator(DOCKED), `${act}: the card did not dock`).toHaveCount(1, { timeout: 5_000 });
+      const dock = page.locator("[data-qad-dock]");
+      await expect(dock).toBeVisible();
+      expect((await dock.locator("b").textContent())?.trim(), `${act}: the chip names the card`).toBe(name);
+      /* read every status line at once, so a chip with none FAILS by name rather than waiting out the clock */
+      expect((await dock.locator("small").allTextContents()).map((s) => s.trim()), `${act}: the chip's status is the card's own`).toEqual([tone]);
+      expect((await dock.locator(".qad-dk").textContent())?.trim()).toBe("Back to card");
+      await expect(page.locator("[data-qad-from]"), `${act}: the drawer does not say where it came from`).toHaveText(`← ${name}`);
+      const geo = await page.evaluate(() => {
+        const d = document.querySelector("[data-qad-dock]")!.getBoundingClientRect();
+        const w = document.querySelector(".qad-root .qad-drawer")!.getBoundingClientRect();
+        return { dockRight: d.right, drawerLeft: w.left, bottom: window.innerHeight - d.bottom };
+      });
+      expect(geo.dockRight, `${act}: the chip sits under the drawer, not beside it`).toBeLessThanOrEqual(geo.drawerLeft - 12);
+      /* nothing answered: Escape cancels — the card comes straight back and nothing is parked */
+      await page.keyboard.press("Escape");
+      await expect(page.locator("[data-qad-drawer]"), `${act}: Escape on an untouched journey did not close it`).toHaveCount(0, { timeout: 5_000 });
+      await expect(page.locator(DOCKED), `${act}: the card did not come back`).toHaveCount(0, { timeout: 5_000 });
+      await expect(page.locator(`${CARD} [data-ac="q"]`)).toBeVisible();
+      expect(await qClass(page), `${act}: a cancel pulsed the query section`).not.toContain("ac-pulse");
+      expect(await page.locator(PARK).count(), `${act}: an untouched journey was parked`).toBe(0);
+      await closeCard(page);
+      bump(11);
+    }
+  });
+
+  test("lock 7: a save brings the card back with its query section pulsing — and the drawer's Undo bar puts the account back byte for byte", async ({ page }) => {
+    test.setTimeout(240_000);
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const scope = await visiblePage(page, ".agl-wpg");
+    const { resp: id } = await primaries(page, scope, ["resp"]);
+    expect(id, "population first — no agent whose card offers Record a response").toBeTruthy();
+    const { db, uid } = await harnessDb();
+    const qid = (await getDocs(fsQuery(collection(db, "users", uid, "queries"), where("agentId", "==", id)))).docs
+      .find((d) => !["Rejected", "Withdrawn", "No Response", "Signed"].includes(String(d.data().status)))?.id;
+    expect(qid, "the agent's live query").toBeTruthy();
+    const before = await readQuerySet([qid!]);
+    await handle(page).open(id!);
+    await page.waitForSelector(CARD);
+    await settle(page);
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    for (let i = 0; i < 6 && !(await page.locator("[data-qad-review]").count()); i++) await page.click("[data-qad-primary]");
+    await expect(page.locator("[data-qad-review]")).toBeVisible();
+    let failure: unknown = null;
+    try {
+      await page.click("[data-qad-primary]");
+      await expect(page.locator('[data-qad-toast="on"]'), "the save did not land").toBeVisible({ timeout: 60_000 });
+      await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
+      /* the card is open again, with the query section pulsing, and it has already changed */
+      await expect(page.locator(DOCKED)).toHaveCount(0, { timeout: 5_000 });
+      await expect.poll(() => qClass(page), { message: "the query section did not pulse on the card's return" }).toContain("ac-pulse");
+      await expect.poll(() => cardTone(page), { message: "the card came back stating the old standing" }).toMatch(/^Closed/);
+      bump(4);
+    } catch (e) { failure = e; }
+    /* ⚠️ THE UNDO RUNS WHATEVER THE CASE SAID — the bar IS the undo, and nothing navigates first */
+    const undo = page.locator("[data-qad-undo]");
+    expect(await undo.count(), "no Undo on the bar — THE HARNESS ACCOUNT HAS BEEN CHANGED; restore it by hand").toBeGreaterThan(0);
+    await undo.click();
+    await expect(page.locator('[data-qad-toast="done"]')).toBeVisible({ timeout: 20_000 });
+    await expect.poll(async () => diffQuerySets(before, await readQuerySet([qid!])), { timeout: 15_000, message: "UNDO LEFT THE ACCOUNT DIFFERENT — restore it by hand" }).toEqual([]);
+    bump(2);
+    if (failure) throw failure;
+  });
+
+  test("lock 8: answer a step → Escape parks it (step N of M) → a reload keeps the chip → Resume: the same step, the same answers → a second journey asks → ✕ asks → Discard clears it", async ({ page }) => {
+    test.setTimeout(300_000);
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const scope = await visiblePage(page, ".agl-wpg");
+    const found = await primaries(page, scope, ["resp", "nudge", "sent"]);
+    expect(found.resp, "population first — no agent whose card offers Record a response").toBeTruthy();
+    const other = found.nudge ?? found.sent;
+    expect(other, "a second agent with another journey, for the clash").toBeTruthy();
+    const { db, uid } = await harnessDb();
+    const qid = (await getDocs(fsQuery(collection(db, "users", uid, "queries"), where("agentId", "==", found.resp)))).docs
+      .find((d) => !["Rejected", "Withdrawn", "No Response", "Signed"].includes(String(d.data().status)))?.id;
+    const before = await readQuerySet([qid!]);
+    await handle(page).open(found.resp!);
+    await page.waitForSelector(CARD);
+    await settle(page);
+    const name = await cardName(page);
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    /* answers: a pass, then a personal note on the next step */
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    await page.click("[data-qad-primary]");
+    await expect(page.locator('[data-qad-sec="Feedback"]')).toBeVisible();
+    await page.click('[data-qad-chips="fb"] [data-qad-chip="personal"]');
+    await page.fill('[data-qad-sec="Feedback"] textarea', "zz parked note");
+    await expect(page.locator("[data-qad-later]"), "with answers the foot offers Finish later").toBeVisible();
+    /* Escape PARKS it: the drawer goes, the chip says where it stopped, the card comes back */
+    await page.keyboard.press("Escape");
+    await expect(page.locator(PARK)).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator(PARK)).toContainText("Record a response");
+    await expect(page.locator(PARK)).toContainText(`${name} · step 2 of 3 · nothing lost`);
+    await expect(page.locator('.qad-root[data-qad-root]')).toBeHidden();
+    await expect(page.locator(DOCKED), "the park did not put the writer back on the card").toHaveCount(0, { timeout: 5_000 });
+    const stored = JSON.parse((await storedPark(page)) ?? "null") as { mode: string; queryId: string; step: number; answers: Record<string, unknown> } | null;
+    expect(stored, "the parked journey was not kept for a reload").not.toBeNull();
+    expect({ mode: stored!.mode, queryId: stored!.queryId, step: stored!.step, type: stored!.answers.type, fb: stored!.answers.fb, note: stored!.answers.note })
+      .toEqual({ mode: "resp", queryId: qid, step: 1, type: "pass", fb: "personal", note: "zz parked note" });
+    /* a reload brings the chip back — the journey itself mounts only on Resume */
+    await page.reload();
+    await expect(page.locator(PARK), "the reload lost the parked journey").toBeVisible({ timeout: 60_000 });
+    await expect(page.locator(PARK)).toContainText(`${name} · step 2 of 3 · nothing lost`);
+    expect(await page.locator("[data-qad-drawer]").count(), "the reload mounted the journey before Resume").toBe(0);
+    await page.click(`${PARK} [data-qad-park="resume"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    /* ⚠️ WAIT FOR OPEN, NOT FOR VISIBLE (manuscriptsV13's finding): the drawer mounts off-screen and
+       opens two frames later, and its Escape layer arrives with `open` — a key pressed in between
+       lands on nothing */
+    await expect(page.locator(".qad-root.is-open")).toHaveCount(1, { timeout: 10_000 });
+    await expect(page.locator('[data-qad-sec="Feedback"]'), "Resume did not return to the same step").toBeVisible();
+    expect(await page.getAttribute('[data-qad-chips="fb"] [data-qad-chip="personal"]', "class"), "Resume lost an answer").toContain("on");
+    expect(await page.inputValue('[data-qad-sec="Feedback"] textarea'), "Resume lost the note").toBe("zz parked note");
+    expect(await storedPark(page), "a resumed journey is still stored as parked").toBeNull();
+    /* park it again, then ask for ANOTHER journey: the chip asks — never a silent replace */
+    await page.keyboard.press("Escape");
+    await expect(page.locator(PARK)).toBeVisible({ timeout: 5_000 });
+    await handle(page).open(other!);
+    await page.waitForSelector(CARD);
+    await settle(page);
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator(PARK), "a second journey did not turn the chip into the ask").toContainText(`Record a response for ${name} is half done.`, { timeout: 5_000 });
+    await expect(page.locator(PARK)).toContainText("Finish it first, or put it away and start");
+    /* the parked journey is still MOUNTED (hidden) by design — what must not exist is a drawer on screen */
+    expect(await page.locator("[data-qad-drawer]:visible").count(), "the second journey opened over the parked one").toBe(0);
+    await expect(page.locator(`${PARK} [data-qad-park="finish"]`)).toBeVisible();
+    await expect(page.locator(`${PARK} [data-qad-park="swap"]`)).toBeVisible();
+    /* Escape keeps the parked journey as it was; ✕ asks; Discard clears it — the stored copy too */
+    await page.keyboard.press("Escape");
+    await expect(page.locator(`${PARK} [data-qad-park="resume"]`)).toBeVisible();
+    await page.click(`${PARK} [data-qad-park="x"]`);
+    await expect(page.locator(PARK)).toContainText(`Discard record a response for ${name}?`);
+    await expect(page.locator(PARK)).toContainText("Nothing has been saved yet.");
+    await page.click(`${PARK} [data-qad-park="drop"]`);
+    await expect(page.locator(PARK)).toHaveCount(0);
+    expect(await storedPark(page), "Discard left the journey in session storage").toBeNull();
+    expect(diffQuerySets(before, await readQuerySet([qid!])), "parking wrote to the account").toEqual([]);
+    await closeCard(page);
+    bump(26);
+  });
+
+  test("decision 8: ✕ with answers asks before discarding, the backdrop and \"← name\" park, and the dock chip with nothing answered goes straight back", async ({ page }) => {
+    test.setTimeout(240_000);
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const scope = await visiblePage(page, ".agl-wpg");
+    const { resp: id } = await primaries(page, scope, ["resp"]);
+    expect(id, "population first — no agent whose card offers Record a response").toBeTruthy();
+    const open = async () => {
+      await handle(page).open(id!);
+      await page.waitForSelector(CARD);
+      await settle(page);
+      await page.click(`${CARD} [data-ac="primary"]`);
+      await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    };
+    /* the dock chip with nothing answered: straight back to the card, nothing parked */
+    await open();
+    await page.click("[data-qad-dock]");
+    await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
+    await expect(page.locator(DOCKED)).toHaveCount(0, { timeout: 5_000 });
+    expect(await page.locator(PARK).count(), "the dock chip parked an untouched journey").toBe(0);
+    /* ✕ with answers asks — Keep going keeps it; Discard throws it away and the card returns */
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    await page.click(".qad-dx");
+    await expect(page.locator("[data-qad-discard]")).toContainText("Discard this?");
+    await expect(page.locator("[data-qad-discard]")).toContainText("Nothing has been saved yet.");
+    await page.getByRole("button", { name: "Keep going" }).click();
+    await expect(page.locator("[data-qad-discard]")).toHaveCount(0);
+    await page.click(".qad-dx");
+    await page.getByRole("button", { name: "Discard" }).click();
+    await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
+    await expect(page.locator(DOCKED)).toHaveCount(0, { timeout: 5_000 });
+    expect(await page.locator(PARK).count(), "a discarded journey was parked").toBe(0);
+    /* the backdrop with answers parks… */
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    await page.mouse.click(40, 450);
+    await expect(page.locator(PARK), "the backdrop did not park a journey with answers").toBeVisible({ timeout: 5_000 });
+    await page.click(`${PARK} [data-qad-park="x"]`);
+    await page.click(`${PARK} [data-qad-park="drop"]`);
+    /* …and so does "← name" */
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    await page.click("[data-qad-from]");
+    await expect(page.locator(PARK), "\"← name\" did not park a journey with answers").toBeVisible({ timeout: 5_000 });
+    await expect(page.locator(DOCKED)).toHaveCount(0, { timeout: 5_000 });
+    await page.click(`${PARK} [data-qad-park="x"]`);
+    await page.click(`${PARK} [data-qad-park="drop"]`);
+    expect(await storedPark(page)).toBeNull();
+    await closeCard(page);
+    bump(15);
+  });
+
+  test("the dock chip and the parked chip are the mock's by one ruler: beside the drawer, 54 tall, 20 from the corner, 14px corners, anthracite", async ({ page }) => {
+    test.setTimeout(240_000);
+    /* the oracle first, same browser, same viewport: open Jonathan Marsh's card, send the full, answer
+       a step, Finish later */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(MOCK);
+    await page.waitForTimeout(500);
+    const mock = await page.evaluate(async () => {
+      const w = window as unknown as { __C: { n: string; id: number; st: string }[]; __ac: { open: (id: number, o: unknown) => void } };
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      w.__ac.open(w.__C.find((c) => c.st === "fr")!.id, { lift: true });
+      await wait(400);
+      document.querySelector<HTMLElement>("#acQ .ac-btn")?.click();
+      await wait(600);
+      const box = (s: string) => { const e = document.querySelector(s)!; const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return { w: r.width, h: r.height, right: innerWidth - r.right, bottom: innerHeight - r.bottom, left: r.left, radius: cs.borderRadius, bg: cs.backgroundColor }; };
+      const dock = box("#drDock");
+      const drawer = box("#dr");
+      document.querySelector<HTMLElement>("#drB [data-optk] button")?.click();
+      document.querySelector<HTMLElement>("#drLater")?.click();
+      await wait(800);
+      return { dock, gap: drawer.left - (innerWidth - dock.right), park: box("#drPark") };
+    });
+    /* the app: the same moments on a card the account offers */
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    const scope = await visiblePage(page, ".agl-wpg");
+    const { resp: id } = await primaries(page, scope, ["resp"]);
+    expect(id, "population first — no agent whose card offers Record a response").toBeTruthy();
+    await handle(page).open(id!);
+    await page.waitForSelector(CARD);
+    await settle(page);
+    await page.click(`${CARD} [data-ac="primary"]`);
+    await expect(page.locator(".qad-root.is-open")).toHaveCount(1, { timeout: 10_000 });
+    await page.waitForTimeout(400);
+    const box = (s: string) => page.evaluate((s) => { const e = document.querySelector(s)!; const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return { w: r.width, h: r.height, right: innerWidth - r.right, bottom: innerHeight - r.bottom, left: r.left, radius: cs.borderRadius, bg: cs.backgroundColor }; }, s);
+    const dock = await box("[data-qad-dock]");
+    const drawer = await box(".qad-root .qad-drawer");
+    await page.click('[data-qad-chips="resp"] [data-qad-chip="pass"]');
+    await page.keyboard.press("Escape");
+    await expect(page.locator(PARK)).toBeVisible({ timeout: 5_000 });
+    await page.waitForTimeout(500);
+    const park = await box(PARK);
+    console.log("[chips] mock", JSON.stringify(mock), "app", JSON.stringify({ dock, gap: drawer.left - (1440 - dock.right), park }));
+    expect(Math.abs(dock.h - mock.dock.h), `the dock chip is ${dock.h} tall against the mock's ${mock.dock.h}`).toBeLessThanOrEqual(2);
+    expect(dock.radius).toBe(mock.dock.radius);
+    expect(dock.bg).toBe(mock.dock.bg);
+    expect(Math.abs(dock.bottom - mock.dock.bottom), "the dock chip's foot").toBeLessThanOrEqual(1);
+    expect(Math.abs(drawer.left - (1440 - dock.right) - mock.gap), `the dock chip is ${drawer.left - (1440 - dock.right)} from the drawer against the mock's ${mock.gap}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(park.h - mock.park.h), `the parked chip is ${park.h} tall against the mock's ${mock.park.h}`).toBeLessThanOrEqual(2);
+    expect([park.right, park.bottom, park.radius, park.bg]).toEqual([mock.park.right, mock.park.bottom, mock.park.radius, mock.park.bg]);
+    /* tidy: nothing was saved, and nothing stays parked */
+    await page.click(`${PARK} [data-qad-park="x"]`);
+    await page.click(`${PARK} [data-qad-park="drop"]`);
+    expect(await storedPark(page)).toBeNull();
+    await closeCard(page);
+    bump(9);
+  });
+});

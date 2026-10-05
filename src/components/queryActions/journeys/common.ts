@@ -6,7 +6,7 @@
  * queries, whether a query is live, and where its reply window closes.
  */
 import { SubmissionMethod, QueryStatus, type Agent, type Query } from "../../../types";
-import { addDays, dayOf, toDay, up } from "../../../lib/queryActions/dates";
+import { addDays, dayOf, toDay, up, ymd } from "../../../lib/queryActions/dates";
 import { expectedFor } from "../../../lib/qcSummary";
 
 /** The three methods the drawer offers, in the mock's words, and the stored value each writes. */
@@ -76,3 +76,14 @@ export function lastSendDay(q: Query): Date | null {
 }
 
 export const inDays = (d: Date, n: number) => addDays(d, n);
+
+/* ── parking (Agent card v1 §6.4): a journey's answers as plain data, and back ─────────────── */
+
+/** A day as a parked snapshot stores it — `YYYY-MM-DD`, never a Date in storage. */
+export const dayOut = (d: Date | null | undefined): string | null => (d ? ymd(d) : null);
+/** …and back to the local day it was, or null for anything else. */
+export const dayIn = (v: unknown): Date | null =>
+  typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T00:00:00`) : null;
+/** The answers a resumed journey starts from — its own snapshot, or nothing at all. */
+export const seedOf = <T extends object>(req: { seed?: unknown }): Partial<T> =>
+  req.seed && typeof req.seed === "object" ? (req.seed as Partial<T>) : {};

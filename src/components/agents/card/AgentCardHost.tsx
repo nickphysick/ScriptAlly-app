@@ -48,12 +48,13 @@ import { EditCtx, alsoChanges } from "../../../lib/contactEdit";
 import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { computeAgentDeadlineWrites } from "../../../lib/computeAgentDeadlineWrites";
 import { commitTypedGenre, hrefFor } from "../../../lib/quickAdd";
-import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { openQueryDrawer, provideDock, type OpenRequest } from "../../../lib/queryActions/drawerStore";
+import { agentInitials } from "../../../lib/agentDisplay";
 import { dayMonth } from "../../../lib/dates";
 import { AGENT_GENRES } from "../../../lib/agentOptions";
 import { genreLabel } from "../../../lib/genres";
 import {
-  alsoQueried, cardQuery, cardRows, cardSavedLine, reminderOnSave, reopenReminder, savedPulse, stepTarget, type CardAct, type SavedPulse,
+  alsoQueried, cardQuery, cardRows, cardSavedLine, queryTone, reminderOnSave, reopenReminder, savedPulse, stepTarget, type CardAct, type SavedPulse,
 } from "../../../lib/agentCard";
 import { type CardDraft, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
 import { restoreAgentSnapshot, takeAgentSnapshot, type AgentSnapshot } from "../../../lib/agentCardSnapshot";
@@ -178,6 +179,18 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
   const frameRef = useRef<AgentCardFrameHandle>(null);
   const editorLeave = useRef<(() => void) | null>(null);
+
+  /* ── the hand-off (§6.1): a query journey runs in the drawer while the card waits, docked ─────
+     The drawer says when the card steps aside and when it comes back (`onDock`) — on save, cancel,
+     park or a failed save alike — so no path can leave the card stepped aside behind nothing. A
+     save comes back with the query section pulsing; the drawer's Undo bar owns the undo. */
+  const [docked, setDocked] = useState(false);
+  const [queryPulse, setQueryPulse] = useState(0);
+  const pulseOnReturn = useRef(false);
+  const onDock = useCallback((d: boolean) => {
+    setDocked(d);
+    if (!d && pulseOnReturn.current) { pulseOnReturn.current = false; setQueryPulse((n) => n + 1); }
+  }, []);
 
   /* ONE notes listener, for the open agent only — never one per row. */
   const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
@@ -449,8 +462,21 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     setEditing({ tab, focus });
   }, []);
 
-  /** The primary and secondary buttons (§3's table). The drawer journeys close the card first;
-   *  Phase 5 docks it instead. */
+  /** What the dock chip shows and how the card hears back — for a journey started here, and for a
+   *  parked one resumed while this card is open (Continuity: Resume). */
+  const dockHooks = useCallback((): Pick<OpenRequest, "dock" | "onDock" | "onSaved"> | null => {
+    if (!agent) return null;
+    const facts = agentFacts(agent, qcRows, scoped?.id ?? null);
+    const q = cardQuery(cardRows(qcRows, agent.id, scoped?.id ?? null));
+    return {
+      dock: { initials: agentInitials(agent), name: (agent.name ?? "").trim() || agent.agency, status: queryTone(facts, q).label },
+      onDock,
+      onSaved: () => { pulseOnReturn.current = true; },
+    };
+  }, [agent, qcRows, scoped, onDock]);
+
+  /** The primary and secondary buttons (§3's table). A query journey hands off to the drawer — the
+   *  full journey, every step — and the card docks until it is done (§6.1). */
   const onAct = useCallback(async (act: CardAct): Promise<QuickFoot | null> => {
     if (!agent) return null;
     const q = cardQuery(cardRows(qcRows, agent.id, scoped?.id ?? null));
@@ -470,19 +496,24 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       };
     }
     if (act === "log") {
-      const id = agent.id;
-      closeAgentCard();
-      openQueryDrawer({ mode: "log", agentId: id });
+      openQueryDrawer({ mode: "log", agentId: agent.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}), ...dockHooks() });
       return null;
     }
     if (!q) return null;
-    closeAgentCard();
-    openQueryDrawer({ mode: act, queryId: q.id });
+    openQueryDrawer({ mode: act, queryId: q.id, ...dockHooks() });
     return null;
-  }, [agent, qcRows, scoped, navigate, addUserTask, deleteUserTask, openEditor]);
+  }, [agent, qcRows, scoped, navigate, addUserTask, deleteUserTask, openEditor, dockHooks]);
 
   const isNew = req?.agentId === null;
   const inEditor = isNew || !!editing;
+
+  /* a parked journey resumed while this card's quick view is open docks THIS card (the mock: only
+     the quick view, never the editor — a draft is not a place to wait) */
+  useEffect(() => {
+    if (!agent || inEditor || docked) return;
+    provideDock(dockHooks);
+    return () => provideDock(null);
+  }, [agent, inEditor, docked, dockHooks]);
 
   /* the box stays and its contents change: the body fades in as the card widens or narrows (the
      mock's 220ms in, 200ms back) — never on the first paint, which the entrance owns */
@@ -542,7 +573,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const also = alsoQueried(qcRows, agent!.id, scoped?.id ?? null, (id) => manuscripts.find((m) => m.id === id)?.title ?? null);
   const onContactList = !!sandbox?.contactListHere || pathname === "/agents";
   return (
-    <AgentCardFrame ref={frameRef} labelledBy="ac-name" originRect={req.originRect ?? null} onScrim={() => void requestClose()}>
+    <AgentCardFrame ref={frameRef} labelledBy="ac-name" originRect={req.originRect ?? null} docked={docked} onScrim={() => void requestClose()}>
       <AgentQuickView
         agent={agent!}
         facts={facts}
@@ -558,6 +589,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
         slide={slide}
         initialFoot={handover?.foot ?? null}
         pulse={handover?.pulse}
+        queryPulse={queryPulse}
         deleteFacts={deleteFacts}
         onDelete={onDelete}
         showOpenInContactList={!onContactList}

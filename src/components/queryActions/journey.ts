@@ -71,10 +71,20 @@ export interface JourneyView {
    * The shell draws its own confirm bar with this wording; Leave closes the drawer and then calls `go`.
    */
   leave?: { title: string; sub: string; button: string; cancel: () => void; go: () => void } | null;
-  /** The writer has entered something — a scrim click shakes rather than closes. */
+  /**
+   * The writer has answered something. DECISION 8 (Agent card v1, app-wide) reads it and nothing
+   * else: with answers, Escape, the backdrop, the dock chip and "← name" PARK the journey and ✕
+   * asks "Discard this? Nothing has been saved yet"; with none, every one of them simply cancels.
+   * So every answer control must set it (locked: journeysAnswered.test.ts).
+   */
   dirty: boolean;
-  /** Closing asks first ("Discard this query?") — Log a query once an agent is chosen. */
-  guardDiscard?: boolean;
+  /**
+   * PARKING (§6.4): the journey's own answers as plain data — Dates as `YYYY-MM-DD` — so a reload
+   * can seed it. A journey resumed after a reload is mounted with that data as `req.seed` and starts
+   * from it (the shell restores the step); one parked in the same tab never needs it, because its
+   * instance stays mounted.
+   */
+  snapshot?: () => unknown;
   /** Snapshot scope before the save, and the save. */
   touched: () => string[];
   commit: () => Promise<SaveOutcome>;

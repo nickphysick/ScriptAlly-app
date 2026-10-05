@@ -28,7 +28,7 @@ import { DateField, Fl, Note, PlanTrack, Radios, Seg, TextBox, Toggle, Who, init
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import { emptyView } from "./ResponseJourney";
-import { agentName, firstName, isLive, nrmnOf, statusWords, whoLine } from "./common";
+import { agentName, dayIn, dayOut, firstName, isLive, nrmnOf, seedOf, statusWords, whoLine } from "./common";
 
 type Reply = "wait" | "full" | "aside" | "offer";
 const REPLY: [Reply, string][] = [["wait", "Waiting"], ["full", "Wants the full"], ["aside", "Stepped aside"], ["offer", "Offered too"]];
@@ -41,24 +41,34 @@ const closeData = (on: Date, token: string, key: "withdrawn_on_offer" | "offer_d
   closingReason: "Withdrew my submission", closingNotes: notes, eventKey: key, closeAs: "withdrawn", closingToken: token,
 });
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface OfferAnswers {
+  told: Record<string, boolean>; reply: Record<string, Reply>; call: "none" | "booked" | "done";
+  callMode: string; callCustom: string | null; callNotes: string; dec: Dec;
+  withdraw: Record<string, boolean>; remindTell: boolean;
+}
+
 export function OfferJourney({ req, today, children }: JourneyProps) {
   const db = useScriptAllyDb();
+  const S = seedOf<OfferAnswers>(req);
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const others = useMemo(
     () => (q ? db.queries.filter((x) => x.id !== q.id && x.manuscriptId === q.manuscriptId && isLive(x)) : []),
     [q, db.queries],
   );
-  const [told, setTold] = useState<Record<string, boolean>>(() => Object.fromEntries(others.map((o) => [o.id, o.offerRefQueryId === q?.id && !!o.offerTold])));
-  const [reply, setReply] = useState<Record<string, Reply>>(() => Object.fromEntries(others.map((o) => [o.id, (o.offerRefQueryId === q?.id && o.offerReply) || "wait"])));
-  const [call, setCall] = useState<"none" | "booked" | "done">(q?.offerCall ?? "none");
-  const [callMode, setCallMode] = useState("2d");
-  const [callCustom, setCallCustom] = useState<Date | null>(toDay(q?.offerCallOn));
-  const [callNotes, setCallNotes] = useState("");
-  const [dec, setDec] = useState<Dec>("wait");
-  const [withdraw, setWithdraw] = useState<Record<string, boolean>>({});
-  const [remindTell, setRemindTell] = useState(true);
-  const [touched, setTouched] = useState(false);
+  /* a seeded mark wins for a query still in the list; one that has since closed simply falls away */
+  const [told, setTold] = useState<Record<string, boolean>>(() => Object.fromEntries(others.map((o) => [o.id, S.told && o.id in S.told ? !!S.told[o.id] : o.offerRefQueryId === q?.id && !!o.offerTold])));
+  const [reply, setReply] = useState<Record<string, Reply>>(() => Object.fromEntries(others.map((o) => [o.id, (S.reply && S.reply[o.id]) || (o.offerRefQueryId === q?.id && o.offerReply) || "wait"])));
+  const [call, setCall] = useState<"none" | "booked" | "done">(S.call ?? q?.offerCall ?? "none");
+  const [callMode, setCallMode] = useState(S.callMode ?? "2d");
+  const [callCustom, setCallCustom] = useState<Date | null>(S.callCustom !== undefined ? dayIn(S.callCustom) : toDay(q?.offerCallOn));
+  const [callNotes, setCallNotes] = useState(S.callNotes ?? "");
+  const [dec, setDec] = useState<Dec>(S.dec ?? "wait");
+  const [withdraw, setWithdraw] = useState<Record<string, boolean>>(S.withdraw ?? {});
+  const [remindTell, setRemindTell] = useState(S.remindTell ?? true);
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed);
 
   if (!q) return children(emptyView("OFFER OF REPRESENTATION", "The offer"));
   const first = firstName(agent);
@@ -130,7 +140,7 @@ export function OfferJourney({ req, today, children }: JourneyProps) {
           <DateField id="ofCall" label="CALL ON" value={callOn} anchors={callAnch} dir="future" forceKey={callMode === "custom" ? null : callMode}
             onPick={(d, k) => { if (!d) return; if (k === "custom") { setCallMode("custom"); setCallCustom(d); } else setCallMode(k); setTouched(true); }} />
         ) : null}
-        {call === "done" ? (<><Fl>NOTES FROM THE CALL · OPTIONAL</Fl><TextBox value={callNotes} onChange={setCallNotes} placeholder="What they said about the book, edits, their list, how they work." /></>) : null}
+        {call === "done" ? (<><Fl>NOTES FROM THE CALL · OPTIONAL</Fl><TextBox value={callNotes} onChange={(v) => { setCallNotes(v); setTouched(true); }} placeholder="What they said about the book, edits, their list, how they work." /></>) : null}
       </>
     ),
   });
@@ -156,10 +166,10 @@ export function OfferJourney({ req, today, children }: JourneyProps) {
             <div className="qad-othr">
               {others.map((o) => {
                 const on = withdraw[o.id] !== false;
-                return <Toggle key={o.id} testId={`wd-${o.id}`} on={on} small={statusWords(o.status).toUpperCase()} onClick={() => setWithdraw({ ...withdraw, [o.id]: !on })}>{nameOf(o)}</Toggle>;
+                return <Toggle key={o.id} testId={`wd-${o.id}`} on={on} small={statusWords(o.status).toUpperCase()} onClick={() => { setWithdraw({ ...withdraw, [o.id]: !on }); setTouched(true); }}>{nameOf(o)}</Toggle>;
               })}
             </div>
-            <Toggle testId="remind-tell" on={remindTell} onClick={() => setRemindTell(!remindTell)} style={{ marginTop: 14 }}>Remind me to tell each of them</Toggle>
+            <Toggle testId="remind-tell" on={remindTell} onClick={() => { setRemindTell(!remindTell); setTouched(true); }} style={{ marginTop: 14 }}>Remind me to tell each of them</Toggle>
           </>
         ) : null}
         {dec === "decline" ? <Note kind="info" tag="FOR THE RECORD">{first} stays on your Contact list. Declining an offer is recorded as your decision, not a pass.</Note> : null}
@@ -188,6 +198,7 @@ export function OfferJourney({ req, today, children }: JourneyProps) {
     ok: true, steps, saves,
     who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmnOf(q, agent)} />,
     dirty: touched,
+    snapshot: (): OfferAnswers => ({ told, reply, call, callMode, callCustom: dayOut(callCustom), callNotes, dec, withdraw, remindTell }),
     touched: () => [q.id, ...others.map((o) => o.id)],
     commit: async () => {
       if (!db.currentUser) throw new Error("Signed out");

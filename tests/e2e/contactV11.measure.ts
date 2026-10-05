@@ -901,18 +901,16 @@ test("Log query opens the query drawer on this page — no navigation, the agent
     [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0));
   const scope2 = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope2} [data-clv="row"]`);
-  /* door 2: the agent card's Log a query (rewritten against the card, Agent card v1 P2) — the card
-     yields to the drawer (one asking surface at a time); Phase 5 docks it instead */
+  /* door 2: the agent card's Log a query — the card yields to the drawer (one asking surface at a
+     time). Retargeted (Agent card v1 P5): it no longer CLOSES, it DOCKS — mounted, so it comes back
+     where it was, but stepped aside: out of reach and out of sight (lock 7 holds the rest) */
   await page.click(`${scope2} [data-clv="row"][data-stand="none"][data-door="open"]`);
   await page.waitForSelector('[data-ac="card"]');
   await page.click('[data-ac="card"] [data-ac="primary"][data-act="log"]');
   await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
-  const two = await page.evaluate(() => ({
-    path: window.location.pathname,
-    popup: !!document.querySelector('[data-ac="card"]'),
-  }));
-  expect(two.path).toBe("/agents");
-  expect(two.popup, "the pop-up stayed open behind the drawer — two asking surfaces at once").toBe(false);
+  expect(await page.evaluate(() => window.location.pathname)).toBe("/agents");
+  await expect(page.locator('[data-ac="overlay"].is-docked'), "the card stayed up behind the drawer — two asking surfaces at once").toHaveCount(1, { timeout: 5_000 });
+  await expect(page.locator('[data-ac="card"]'), "a docked card is still on screen").toBeHidden();
   bump(5);
 });
 

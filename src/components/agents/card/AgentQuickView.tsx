@@ -92,6 +92,9 @@ export interface AgentQuickViewProps {
   initialFoot?: QuickFoot | null;
   /** after a save, the parts that changed pulse once (the mock's map, lib/agentCard `savedPulse`) */
   pulse?: SavedPulse[];
+  /** back from a journey the drawer SAVED (§6.1): the query section pulses — a new number each time,
+   *  so a second save pulses again rather than leaving the first animation's class in place */
+  queryPulse?: number;
   deleteFacts?: DeleteFacts | null;
   /** ⋯ → Delete agent…, once confirmed — absent, the menu offers no delete */
   onDelete?: () => Promise<void>;
@@ -111,7 +114,7 @@ export interface AgentQuickViewProps {
 
 export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
   agent, facts, q, nowMs, msTitle, genreHit, personal, also, notes, packages, sequence, slide, initialFoot = null,
-  pulse, deleteFacts = null, onDelete, showOpenInContactList, write, onStep, onEdit, onClose, onAct, onOpenInContactList,
+  pulse, queryPulse = 0, deleteFacts = null, onDelete, showOpenInContactList, write, onStep, onEdit, onClose, onAct, onOpenInContactList,
   onAddNote,
 }) => {
   const tone = queryTone(facts, q);
@@ -339,7 +342,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
           </div>
         </div>
 
-        <div className="acq-q" data-tone={tone.tone} data-ac="q">
+        <div key={`q${queryPulse}`} className={`acq-q${queryPulse ? " ac-pulse" : ""}`} data-tone={tone.tone} data-ac="q">
           <div className="acq-qh">
             <span className="acq-chip" data-ac="tone">{tone.label}</span>
             {/* the title sits beside the chip, not at the far edge — the mock's spacer has no rule */}

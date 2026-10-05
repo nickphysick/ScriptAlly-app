@@ -27,7 +27,7 @@ import {
 } from "../controls";
 import type { JourneyProps } from "../QueryDrawer";
 import type { JourneyStep, JourneyView, SaveLine } from "../journey";
-import { agentName, firstName, isLive, nrmnOf, statusWords, whoLine } from "./common";
+import { agentName, dayIn, dayOut, firstName, isLive, nrmnOf, seedOf, statusWords, whoLine } from "./common";
 
 type RType = "partial" | "full" | "rr" | "pass" | "offer";
 const RL: Record<RType, string> = { partial: "Partial requested", full: "Full requested", rr: "Revise & resubmit", pass: "Pass", offer: "Offer" };
@@ -41,30 +41,40 @@ const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2]
  * choosing one. A wrapper rather than a branch inside the journey, so no hook is ever conditional.
  */
 export function ResponseJourney(props: JourneyProps) {
-  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery}>{(v) => props.children(v)}</QueryPicker>;
+  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery} seed={props.req.seed}>{(v) => props.children(v)}</QueryPicker>;
   return <ResponseJourneyForQuery {...props} />;
 }
 
+/** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
+interface RespAnswers {
+  type: RType | null; recv: string | null; s: Sample; syn: boolean;
+  sendByMode: string; sendByCustom: string | null; remind: string;
+  fb: "form" | "personal"; note: string; rrNote: string;
+  offerByMode: string; offerByCustom: string | null; notify: boolean;
+}
+
 function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
+  const S = seedOf<RespAnswers>(req);
   const db = useScriptAllyDb();
   const q = db.queries.find((x) => x.id === req.queryId) || null;
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const ms = q ? db.manuscripts.find((m) => m.id === q.manuscriptId) || null : null;
   const book = useMemo(() => bookOf(ms?.wordCount), [ms?.wordCount]);
-  const [type, setType] = useState<RType | null>(req.preset?.respType ?? null);
-  const [recv, setRecv] = useState<Date>(today);
-  const [s, setS] = useState<Sample>({ unit: "pages", amt: 50, from: 1, sect: false, fu: null });
-  const [syn, setSyn] = useState(false);
-  const [sendByMode, setSendByMode] = useState<string>("2w");
-  const [sendByCustom, setSendByCustom] = useState<Date | null>(null);
-  const [remind, setRemind] = useState("2d");
-  const [fb, setFb] = useState<"form" | "personal">("form");
-  const [note, setNote] = useState("");
-  const [rrNote, setRrNote] = useState("");
-  const [offerByMode, setOfferByMode] = useState("2w");
-  const [offerByCustom, setOfferByCustom] = useState<Date | null>(null);
-  const [notify, setNotify] = useState(true);
-  const [touched, setTouched] = useState(!!req.preset?.respType);
+  const [type, setType] = useState<RType | null>(S.type !== undefined ? S.type : (req.preset?.respType ?? null));
+  const [recv, setRecv] = useState<Date>(dayIn(S.recv) ?? today);
+  const [s, setS] = useState<Sample>(S.s ?? { unit: "pages", amt: 50, from: 1, sect: false, fu: null });
+  const [syn, setSyn] = useState(S.syn ?? false);
+  const [sendByMode, setSendByMode] = useState<string>(S.sendByMode ?? "2w");
+  const [sendByCustom, setSendByCustom] = useState<Date | null>(dayIn(S.sendByCustom));
+  const [remind, setRemind] = useState(S.remind ?? "2d");
+  const [fb, setFb] = useState<"form" | "personal">(S.fb ?? "form");
+  const [note, setNote] = useState(S.note ?? "");
+  const [rrNote, setRrNote] = useState(S.rrNote ?? "");
+  const [offerByMode, setOfferByMode] = useState(S.offerByMode ?? "2w");
+  const [offerByCustom, setOfferByCustom] = useState<Date | null>(dayIn(S.offerByCustom));
+  const [notify, setNotify] = useState(S.notify ?? true);
+  /* a resumed journey was parked WITH answers, so it starts answered */
+  const [touched, setTouched] = useState(!!req.seed || !!req.preset?.respType);
 
   if (!q) return children(emptyView("RECORD A RESPONSE", "Record a response"));
   const first = firstName(agent);
@@ -113,7 +123,7 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
         <>
           <p className="qad-secs">Most requests are the opening pages; some want a later section.</p>
           <SampleControl name="req" sample={s} onChange={(x) => { setS(x); setTouched(true); }} book={book} />
-          <Toggle testId="syn" on={syn} onClick={() => setSyn(!syn)}>A synopsis too</Toggle>
+          <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
           <SampleLine label={`${syn ? "Synopsis and " : ""}${capFirst(sampleName(s))}`} sample={s} book={book} />
         </>
       ),
@@ -138,7 +148,7 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
           {!none ? (
             <>
               <Fl>REMIND ME</Fl>
-              <Chips name="remind" value={remind} onPick={setRemind} options={REMIND.map(([k, l]) => [k, l] as [string, string])} />
+              <Chips name="remind" value={remind} onPick={(k) => { setRemind(k); setTouched(true); }} options={REMIND.map(([k, l]) => [k, l] as [string, string])} />
             </>
           ) : (
             <Note kind="info" tag="TIP">Agents who don't set a date still notice speed. We'll put “Send the {type === "full" ? "full" : "pages"}” on your to-do for <b>{fmt(noDateTask)}</b>, so it doesn't drift.</Note>
@@ -154,8 +164,8 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
       body: (
         <>
           <Fl>FEEDBACK</Fl>
-          <Chips<"form" | "personal"> name="fb" value={fb} onPick={setFb} options={[["form", "Form rejection"], ["personal", "A personal note"]]} />
-          {fb === "personal" ? (<><Fl>WHAT THEY SAID</Fl><TextBox value={note} onChange={setNote} placeholder="Worth keeping — patterns across passes show up in Analytics." /></>) : null}
+          <Chips<"form" | "personal"> name="fb" value={fb} onPick={(k) => { setFb(k); setTouched(true); }} options={[["form", "Form rejection"], ["personal", "A personal note"]]} />
+          {fb === "personal" ? (<><Fl>WHAT THEY SAID</Fl><TextBox value={note} onChange={(v) => { setNote(v); setTouched(true); }} placeholder="Worth keeping — patterns across passes show up in Analytics." /></>) : null}
         </>
       ),
     });
@@ -168,8 +178,8 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
         <>
           <DateField id="offerBy" label="THEY'D LIKE AN ANSWER BY" value={offerBy} anchors={offerAnch} dir="future"
             forceKey={offerByMode === "custom" ? null : offerByMode}
-            onPick={(d, k) => { if (!d) return; if (k === "custom") { setOfferByMode("custom"); setOfferByCustom(d); } else setOfferByMode(k); }} />
-          <Toggle testId="notify" on={notify} onClick={() => setNotify(!notify)} small={`${others.length} AGENTS`} style={{ marginTop: 16 }}>Tell the others who have it</Toggle>
+            onPick={(d, k) => { if (!d) return; if (k === "custom") { setOfferByMode("custom"); setOfferByCustom(d); } else setOfferByMode(k); setTouched(true); }} />
+          <Toggle testId="notify" on={notify} onClick={() => { setNotify(!notify); setTouched(true); }} small={`${others.length} AGENTS`} style={{ marginTop: 16 }}>Tell the others who have it</Toggle>
           <Note kind="info" tag="WHY">
             It's standard to let every agent still considering <b>{ms?.title}</b> know you have an offer, with your deadline.{others.length ? ` We'll add one to-do per agent: ${otherFirsts.join(", ")}.` : " Nobody else has it at the moment."}
           </Note>
@@ -210,6 +220,10 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
     saves,
     who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmnOf(q, agent)} />,
     dirty: touched,
+    snapshot: (): RespAnswers => ({
+      type, recv: dayOut(recv), s, syn, sendByMode, sendByCustom: dayOut(sendByCustom), remind,
+      fb, note, rrNote, offerByMode, offerByCustom: dayOut(offerByCustom), notify,
+    }),
     touched: () => [q.id, ...(type === "offer" && notify ? others.map((x) => x.id) : [])],
     commit: async () => {
       if (!type || !db.currentUser) throw new Error("No response chosen");

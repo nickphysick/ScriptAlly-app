@@ -50,6 +50,10 @@
 }
 @keyframes acScrimIn { from { opacity: 0; } }
 .ac-ov.is-leaving .ac-scrim { opacity: 0; transition: opacity 0.18s; }
+/* docked (Agent card v1 §6.1): a query journey is running in the drawer. The card stays mounted —
+   it comes back exactly where it was — but it is out of reach: no clicks, and out of the
+   accessibility tree, so the drawer is the only dialog in it. */
+.ac-ov.is-docked { visibility: hidden; pointer-events: none; }
 
 /* ⚠️ THE CARD'S BOX MODEL IS DECLARED, NOT INHERITED — its width (548 / 780) includes the 6px rim. */
 .ac,
