@@ -113,3 +113,137 @@ export const Funnel: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   );
 };
 
+/* ═════════════ 2 · queries sent: the training log ═════════════ */
+const DAYS = ["MON", "", "WED", "", "FRI", "", "SUN"];
+export const TrainingLog: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const mark = useMark();
+  const v = model.v17;
+  const { weeks, busiest, months } = v.log;
+  const n = Math.max(1, weeks.length);
+  const G = 40, W = 1100, H = 300, top = 22, cell = (H - top - 84) / 7, cw = W / n;
+  const max = Math.max(1, ...weeks.map((w) => w.count));
+  const firstSend = v.lanes.startMs;
+  const firstDay = firstSend === null ? Infinity : new Date(firstSend).setHours(0, 0, 0, 0);
+  const now = v.lanes.nowMs;
+  const base = H - 6;
+  const [all, setAll] = React.useState(false);
+  const shown = all ? weeks.slice().reverse() : weeks.slice(-12).reverse();
+  return (
+    <Fig k="log" title="Training log" note="one dot per query" population={v.dated}
+      keyItems={<StateKey waiting="Still waiting for a reply" />}>
+      <svg className="a17-d" viewBox={`0 0 ${G + W} ${H}`} width="100%" role="img" aria-label="Training log">
+        {DAYS.map((d, i) => d ? <text key={i} className="a17-ax" x={0} y={top + i * cell + cell / 2 + 4}>{d}</text> : null)}
+        <text className="a17-ax" x={0} y={base - 4}>WEEK</text>
+        {months.map((m) => (
+          <g key={m.index}>
+            <text className="a17-ax" x={G + m.index * cw + 2} y={12}>{m.label.toUpperCase()}</text>
+            <line x1={G + m.index * cw} y1={16} x2={G + m.index * cw} y2={H} className="a17-faint" />
+          </g>
+        ))}
+        {weeks.map((w, wi) => w.days.map((qs, d) => {
+          const dayMs = w.startMs + d * DAY;
+          /* the faint dots run from the day of the first send to today; a sent query always draws */
+          if (qs.length === 0 && (dayMs < firstDay || dayMs > now)) return null;
+          const cx = G + wi * cw + cw / 2, cy = top + d * cell + cell / 2;
+          if (qs.length === 0) return <circle key={`${wi}-${d}`} cx={cx} cy={cy} r={1.6} className="a17-daydot" />;
+          const r0 = Math.min(cw, cell) * 0.42;
+          const r = qs.length === 1 ? r0 : Math.min(r0, (cw * 0.9) / (2 * qs.length));
+          return qs.map((q, j) => (
+            <circle key={q.id} {...mark(titleOf(q), [queryLine(q, now)])} data-a17="logdot" data-bucket={q.bucket}
+              cx={cx + (j - (qs.length - 1) / 2) * 2 * r} cy={cy} r={r} className={`a17-f-${q.bucket} a17-inkrule`} />
+          ));
+        }))}
+        {weeks.map((w, wi) => {
+          if (!w.count) return null;
+          const h = (w.count / max) * 48;
+          return (
+            <rect key={wi} {...mark(`Week of ${dayMonth(w.startMs)}`, [`${w.count} ${w.count === 1 ? "query" : "queries"} sent`])}
+              data-a17="wkbar" data-count={w.count} x={G + wi * cw + cw * 0.2} y={base - h} width={cw * 0.6} height={h} rx={2}
+              className={wi === busiest ? "a17-rustfill" : "a17-anth"} />
+          );
+        })}
+        <line x1={G} y1={base + 0.5} x2={G + W} y2={base + 0.5} className="a17-axis" />
+      </svg>
+      <div className="a17-m">
+        <div className="a17-mlog" data-a17="m-log">
+          <span />
+          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i} className="a17-mh">{d}</span>)}
+          <span className="a17-mh">#</span>
+          {(() => {
+            const out: React.ReactNode[] = [];
+            let lastM = "";
+            shown.forEach((w) => {
+              const d = new Date(w.startMs);
+              const mLabel = monthYearLong(d.getFullYear() * 12 + d.getMonth()).toUpperCase();
+              if (mLabel !== lastM) { out.push(<div key={`m${w.startMs}`} className="a17-mo">{mLabel}</div>); lastM = mLabel; }
+              const wi = weeks.indexOf(w);
+              out.push(<span key={`w${w.startMs}`} className="a17-wk" data-a17="m-week">{w.label}</span>);
+              w.days.forEach((qs, di) => {
+                out.push(
+                  <span key={`c${w.startMs}-${di}`} className="a17-mc">
+                    {qs.length ? <b {...mark(titleOf(qs[0]), [queryLine(qs[0], now), ...(qs.length > 1 ? [`and ${qs.length - 1} more that day`] : [])])} className={`a17-f-${qs[0].bucket}`} /> : <i />}
+                  </span>,
+                );
+              });
+              out.push(<span key={`t${w.startMs}`} className={`a17-mt a17-tw${wi === busiest ? " top" : ""}`}>{w.count || ""}</span>);
+            });
+            return out;
+          })()}
+        </div>
+        <button type="button" className="a17-mmore a17-tw" data-a17="m-more" onClick={() => setAll((a) => !a)}>
+          {all ? "Show the last 12 weeks" : `Show all ${weeks.length} ${weeks.length === 1 ? "week" : "weeks"}`}
+        </button>
+      </div>
+    </Fig>
+  );
+};
+
+/* ═════════════ 3 · response rate: two 100% bars ═════════════ */
+const ShareFig: React.FC<{ k: string; title: string; note: string; segs: { key: string; label: string; count: number; bucket: StateBucket }[] }> = ({ k, title, note, segs }) => {
+  const mark = useMark();
+  const total = segs.reduce((a, s) => a + s.count, 0);
+  const W = 1200, h = 40;
+  let x = 0;
+  return (
+    <Fig k={k} title={title} note={note} population={total}>
+      {total === 0 ? <p className="a17-none">None yet</p> : (
+        <>
+          <svg className="a17-d" viewBox={`0 0 ${W} 96`} width="100%" role="img" aria-label={title} data-a17="share" data-total={total}>
+            {segs.map((s) => {
+              const w = (W * s.count) / total, x0 = x;
+              x += w;
+              return (
+                <g key={s.key}>
+                  <rect {...mark(`${s.count} · ${s.label}`, [`${Math.round((s.count / total) * 100)}% of ${total}`])} data-a17="seg" data-count={s.count} data-bucket={s.bucket}
+                    x={x0 + 1} y={0} width={Math.max(0, w - 2)} height={h} rx={3} className={`a17-f-${s.bucket} a17-hairrule`} />
+                  {w > 30 ? <text className="a17-n" x={x0 + 12} y={h / 2 + 9} fontSize={24}>{s.count}</text> : null}
+                  {w > 80 ? <text className="a17-ax" x={x0 + 1} y={h + 26}>{s.label.toUpperCase()}</text> : null}
+                </g>
+              );
+            })}
+          </svg>
+          <div className="a17-m a17-mshare" data-a17="m-share">
+            <div className="a17-mstack" data-a17="m-stack">
+              {segs.map((s) => <i key={s.key} className={`a17-f-${s.bucket}`} style={{ width: `${(s.count / total) * 100}%` }} />)}
+            </div>
+            <ul>
+              {segs.map((s) => (
+                <li key={s.key}><i className={`a17-f-${s.bucket}`} /><b className="a17-tw">{s.count}</b><span>{s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span><em>{Math.round((s.count / total) * 100)}%</em></li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+    </Fig>
+  );
+};
+export const ShareBars: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+  const r = model.v17.rate;
+  return (
+    <>
+      <ShareFig k="share-all" title={r.allTitle} note="share of all queries" segs={r.all} />
+      <ShareFig k="share-req" title={r.reqTitle} note="share of all requests" segs={r.req} />
+    </>
+  );
+};
+

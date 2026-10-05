@@ -10,9 +10,13 @@
  * real `analyticsModel`), never a drawing of them, so an example can only show a shape the page can draw.
  */
 import React from "react";
+import { exampleModel } from "../../lib/analyticsExample";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { ExampleRow } from "./A17Frame";
+import { Funnel, TrainingLog } from "./A17Figures";
 
 export const A17Empty: React.FC = () => {
+  const ex = React.useMemo(() => exampleModel(Date.now()), []);
   return (
     <>
       <div className="a17-frame a17-first" data-a17="first">
@@ -20,6 +24,8 @@ export const A17Empty: React.FC = () => {
         <p>Log a query and this page fills in as replies come back: how far each query gets, how long agents take, and what has changed over the campaign.</p>
         <button type="button" data-a17="log" onClick={() => openQueryDrawer({ mode: "log" })}>+ Log a query</button>
       </div>
+      <ExampleRow title="Where the queries got to"><Funnel model={ex} /></ExampleRow>
+      <ExampleRow title="Queries sent"><TrainingLog model={ex} /></ExampleRow>
     </>
   );
 };

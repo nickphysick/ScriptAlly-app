@@ -29,7 +29,7 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Funnel } from "./analytics/A17Figures";
+import { Funnel, ShareBars, TrainingLog } from "./analytics/A17Figures";
 import { A17Empty } from "./analytics/A17Empty";
 import "./analytics/a17.css";
 
@@ -93,8 +93,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       <>
         <Glance cells={v.glance} />
         <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
-        <Section sec={1} banner={b[1]}>{null}</Section>
-        <Section sec={2} banner={b[2]}>{null}</Section>
+        <Section sec={1} banner={b[1]} readings={v.log.readings}><TrainingLog model={model} /></Section>
+        <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
         <Section sec={3} banner={b[3]}>{null}</Section>
         <Section sec={4} banner={b[4]}>{null}</Section>
         <Section sec={5} banner={b[5]}>{null}</Section>
