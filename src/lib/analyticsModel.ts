@@ -378,6 +378,7 @@ export interface AnalyticsModel {
   caveats: { lead: string; notes: { title: string; text: string }[] };
   /** Every figure and sentence the v13 page states (design-refs/analytics-v13.html). */
   v13: V13;
+  v17: V17;
 }
 
 /**
@@ -694,9 +695,11 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
   });
 
   const v13 = buildV13(items, { sent, requests, fulls, offers, stillOut, replies, sinceMs, nowMs, medWait, replyRows, withoutWindow, lanes, gapRows, title: input.title ?? "" });
+  const v17 = buildV17(items, { sent, requests, fulls, offers, stillOut, replies, sinceMs, nowMs, medWait, replyRows, withoutWindow, lanes, gapRows, title: input.title ?? "", agents });
 
   return {
     v13,
+    v17,
     range,
     sent,
     total: allRows.length,
@@ -1282,3 +1285,647 @@ export function buildV13(items: Enriched[], c: V13Ctx): V13 {
 
   return { title: c.title, sent, replies, feature, funnel, sentByMonth, rate, reply, waits, lanes, caveats };
 }
+
+/* ══════════════════════════════════ v17 (design-refs/analytics-v17.html) ══════════════════════════════════
+ *
+ * ⚠️ THE REF'S COPY, VERBATIM, WITH THE LIVE NUMBERS SUBSTITUTED — and where the ref's sentence would be
+ * false of the data, the sentence says what the data says (a cold rejection the ref has no segment for,
+ * a rate that counts still-waiting queries in its denominator, the caveat that claims otherwise).
+ *
+ * ⚠️ THE THIN-SAMPLE RULE, v17's FORM (baked decision 9): a figure resting on fewer than five states its
+ * population; a figure resting on none — or a count that is zero — is PLAIN WORDS ("None yet", "Not
+ * yet", "No replies yet"). Never `0`, `0%` or a bare dash, and a figure never hides itself.
+ *
+ * ⚠️ ONE CLOCK: `nowMs` is the caller's, and every window here — the last 90 days, the 90 before, the
+ * weeks of the log — is measured from it, so no two figures can disagree about what today is.
+ */
+
+/** One query as a v17 mark — every dot, segment, lane and record is one of these. */
+export interface V17Query {
+  id: string;
+  agent: string;
+  agency: string;
+  sentMs: number | null;
+  /** The close rung's date for a closed query; null while open. */
+  endMs: number | null;
+  bucket: StateBucket;
+  /** "Still waiting for a first reply" … in the ref's words. */
+  state: string;
+}
+
+/** A reading under a frame (and a figure in the strip): the value, its note, and what it rests on. */
+/** ⚠️ `population` IS NULL FOR A PLAIN COUNT — its number already is its population. A STATISTIC (a rate,
+ *  a median, an "n of m") carries the count it rests on, and under five its label says so. */
+export interface V17Reading { value: string; label: string; population: number | null }
+export interface V17Segment { key: string; label: string; count: number; bucket: StateBucket; ids: string[] }
+export interface V17FunnelRow {
+  count: number;
+  /** The count as the page states it — words when it is zero. */
+  display: string;
+  name: string;
+  desc: string;
+  /** "n of m went on" — null on the first row, and where the stage before reached nobody. */
+  went: string | null;
+  note: string | null;
+  /** What the row rests on: the stage before's count (the first row: every query). */
+  population: number;
+}
+export interface V17Banner { count: string; title: string; sentence: string; bold?: string }
+
+/** One cell of the at-a-glance strip. `all` and `d90` are the two states of the big number. */
+export interface V17Glance {
+  key: "sent" | "rate" | "wait" | "out" | "weeks";
+  label: string;
+  all: { value: string; unit: string | null; population: number | null };
+  d90: { value: string; unit: string | null; population: number | null };
+  /** The comparison line: `lead` (italic) around `bold` (roman) and `rest`. Always last 90 vs the 90 before. */
+  compare: { lead: string; bold: string; rest: string };
+  spark: { kind: "bars" | "line"; values: number[] };
+}
+
+export interface V17Week {
+  /** Monday 00:00, local. */
+  startMs: number;
+  /** "3 Nov" */
+  label: string;
+  /** Mon … Sun — the queries sent that day. */
+  days: V17Query[][];
+  count: number;
+}
+
+export interface V17Record {
+  key: "quickest" | "first-request" | "first-offer" | "busiest" | "run" | "full-read";
+  label: string;
+  /** "Not yet" when there is nothing to state. */
+  value: string;
+  who: string;
+  aside: string | null;
+  empty: boolean;
+}
+
+export interface V17 {
+  title: string;
+  sent: number;
+  dated: number;
+  replies: number;
+  glance: V17Glance[];
+  banners: V17Banner[];
+  funnel: { since: string | null; rows: V17FunnelRow[] };
+  log: { weeks: V17Week[]; busiest: number | null; months: { index: number; label: string }[]; readings: V17Reading[] };
+  rate: { allTitle: string; reqTitle: string; all: V17Segment[]; req: V17Segment[]; readings: V17Reading[] };
+  reply: { rows: (ReplyRow & { query: V17Query })[]; maxWeeks: number; stated: number; agents: number; note: string; readings: V17Reading[] };
+  waits: { gaps: StageGap[]; endings: EndingLane[]; points: Record<string, { weeks: number; q: V17Query }[]>; readings: V17Reading[] };
+  records: V17Record[];
+  overTime: { startMs: number | null; nowMs: number; sent: number[]; requests: number[]; ended: number[]; max: number; readings: V17Reading[] };
+  lanes: { rows: V17Query[]; startMs: number | null; nowMs: number; readings: V17Reading[] };
+  caveats: { title: string; text: string }[];
+}
+
+export const V17_STATE: Record<StateBucket, string> = {
+  queried: "Still waiting for a first reply",
+  requested: "Material requested",
+  sent: "Material sent, being read",
+  offer: "Offer",
+  closed: "Closed",
+};
+
+/* `say`, `Say`, `qs` and `listAnd` — the prose helpers — are shared with the block above. */
+/** A count as a FIGURE: digits, except zero, which is a word. */
+export const num = (n: number, zero = "None"): string => (n === 0 ? zero : String(n));
+/** "n of m", with a zero numerator in words. */
+const nOf = (n: number, m: number): string => `${n === 0 ? "None" : n} of ${m}`;
+const durDays = (d: number): string => `${d} ${d === 1 ? "day" : "days"}`;
+const durWeeks = (w: number): string => `${w} ${w === 1 ? "week" : "weeks"}`;
+const MONTHS_FULL = MONTHS_LONG;
+
+/** Monday 00:00 (local) of the week holding `ms`. */
+export function mondayOf(ms: number): number {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d.getTime();
+}
+/** Mon = 0 … Sun = 6. */
+export const weekdayOf = (ms: number): number => (new Date(ms).getDay() + 6) % 7;
+const WEEKDAY = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const addDays = (ms: number, n: number): number => { const d = new Date(ms); d.setDate(d.getDate() + n); return d.getTime(); };
+/** "1 to 7 June" / "29 May to 4 June" / "29 Dec 2025 to 4 Jan 2026" — a week, Monday to Sunday. */
+export function weekRange(mondayMs: number): string {
+  return dayRange(mondayMs, addDays(mondayMs, 6));
+}
+export function dayRange(a: number, b: number): string {
+  const x = new Date(a), y = new Date(b);
+  if (x.getFullYear() !== y.getFullYear()) return `${x.getDate()} ${MONTHS[x.getMonth()]} ${x.getFullYear()} to ${y.getDate()} ${MONTHS[y.getMonth()]} ${y.getFullYear()}`;
+  if (x.getMonth() !== y.getMonth()) return `${x.getDate()} ${MONTHS_FULL[x.getMonth()]} to ${y.getDate()} ${MONTHS_FULL[y.getMonth()]}`;
+  return `${x.getDate()} to ${y.getDate()} ${MONTHS_FULL[y.getMonth()]}`;
+}
+
+interface V17Ctx {
+  sent: number; requests: number; fulls: number; offers: number; stillOut: number; replies: number;
+  sinceMs: number | null; nowMs: number; medWait: number | null; replyRows: ReplyRow[]; withoutWindow: number;
+  lanes: EndingLane[]; gapRows: StageGap[]; title: string; agents: Agent[];
+}
+
+/** A reply's status as a lower-case aside on a record ("partial requested"). */
+const STATE_WORD: Partial<Record<QueryStatus, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "partial requested",
+  [QueryStatus.FULL_REQUESTED]: "full requested",
+  [QueryStatus.OFFER]: "offer",
+  [QueryStatus.REJECTED]: "passed",
+  [QueryStatus.REVISE_RESUBMIT]: "revise and resubmit",
+};
+
+/** When the agent first asked for more: the earliest dated request rung. */
+const requestAt = (e: Enriched): number | null => minDate(e.dates.partialRequested, e.dates.fullRequested);
+
+export function buildV17(items: Enriched[], c: V17Ctx): V17 {
+  const { sent, requests, fulls, offers, stillOut, replies, sinceMs, nowMs } = c;
+  const asQuery = (e: Enriched): V17Query => ({
+    id: e.row.id,
+    agent: e.row.agentName,
+    agency: e.row.agentSub,
+    sentMs: e.row.sentMs,
+    endMs: e.bucket === "closed" ? e.dates.closed : null,
+    bucket: e.bucket,
+    state: V17_STATE[e.bucket],
+  });
+  const byId = new Map(items.map((e) => [e.row.id, asQuery(e)]));
+  const dated = items.filter((e) => e.row.sentMs !== null);
+  const A0 = nowMs - 90 * DAY_MS, B0 = nowMs - 180 * DAY_MS;
+  const inA = (t: number | null) => t !== null && t > A0 && t <= nowMs;
+  const inB = (t: number | null) => t !== null && t > B0 && t <= A0;
+  const replyAt = (e: Enriched): number | null => (e.replyDays === null || e.row.sentMs === null ? null : e.row.sentMs + e.replyDays * DAY_MS);
+  const endedAt = (e: Enriched): number | null => (e.bucket === "closed" ? e.dates.closed : null);
+
+  /* ── the training log's weeks: Monday of the first dated send → the week holding today ── */
+  const weeks: V17Week[] = [];
+  if (dated.length) {
+    const first = mondayOf(Math.min(...dated.map((e) => e.row.sentMs as number)));
+    const last = mondayOf(nowMs);
+    for (let m = first; m <= last; m = addDays(m, 7)) {
+      const d = new Date(m);
+      weeks.push({ startMs: m, label: `${d.getDate()} ${MONTHS[d.getMonth()]}`, days: [[], [], [], [], [], [], []], count: 0 });
+    }
+    const idx = new Map(weeks.map((w, i) => [w.startMs, i]));
+    for (const e of dated.slice().sort((a, b) => (a.row.sentMs as number) - (b.row.sentMs as number))) {
+      const w = weeks[idx.get(mondayOf(e.row.sentMs as number)) as number];
+      w.days[weekdayOf(e.row.sentMs as number)].push(byId.get(e.row.id)!);
+      w.count++;
+    }
+  }
+  const nWeeks = weeks.length;
+  const wMax = Math.max(0, ...weeks.map((w) => w.count));
+  /* ⚠️ TIES: THE EARLIEST WEEK WINS — the first time the writer sent that many — so exactly one is rust */
+  const busiest = wMax > 0 ? weeks.findIndex((w) => w.count === wMax) : null;
+  const active = weeks.filter((w) => w.count > 0).length;
+  const months: { index: number; label: string }[] = [];
+  weeks.forEach((w, i) => {
+    const d = new Date(w.startMs);
+    const prev = i === 0 ? null : new Date(weeks[i - 1].startMs);
+    if (i === 0 || (prev && prev.getMonth() !== d.getMonth())) months.push({ index: i, label: MONTHS[d.getMonth()] });
+  });
+  const dayCounts = [0, 0, 0, 0, 0, 0, 0];
+  for (const e of dated) dayCounts[weekdayOf(e.row.sentMs as number)]++;
+  const dayMax = Math.max(0, ...dayCounts);
+  const topDay = dayMax > 0 ? dayCounts.indexOf(dayMax) : -1;
+  const log = {
+    weeks,
+    busiest,
+    months,
+    readings: [
+      busiest === null
+        ? { value: "None yet", label: "no dated query sent yet", population: 0 }
+        : { value: String(wMax), label: `busiest week, ${weekRange(weeks[busiest].startMs)}`, population: null },
+      topDay < 0
+        ? { value: "None yet", label: "no dated query sent yet", population: 0 }
+        : { value: WEEKDAY[topDay], label: `the day you send most, ${dayMax} of ${dated.length}`, population: dated.length },
+      nWeeks === 0
+        ? { value: "None yet", label: "no week with a query sent yet", population: 0 }
+        : { value: `${active} of ${nWeeks}`, label: "weeks with a query sent", population: nWeeks },
+    ] as V17Reading[],
+  };
+
+  /* ── at a glance ── */
+  const datedIn = (w: (t: number | null) => boolean) => dated.filter((e) => w(e.row.sentMs));
+  const sA = datedIn(inA), sB = datedIn(inB);
+  const reqOf = (xs: Enriched[]) => xs.filter((e) => e.row.reachedRequest).length;
+  const rateVal = (r: number, n: number): { value: string; unit: string | null; population: number } => {
+    if (n === 0) return { value: "No queries", unit: null, population: 0 };
+    if (n < MIN_SAMPLE) return { value: nOf(r, n), unit: null, population: n };
+    if (r === 0) return { value: "None", unit: null, population: n };
+    return { value: String(Math.round((r / n) * 100)), unit: "%", population: n };
+  };
+  const repliesIn = (w: (t: number | null) => boolean) => items.filter((e) => e.replyDays !== null && w(replyAt(e))).map((e) => e.replyDays as number);
+  const wA = repliesIn(inA), wB = repliesIn(inB);
+  const medVal = (xs: number[]): { value: string; unit: string | null; population: number } => {
+    const m = median(xs);
+    return m === null ? { value: "No replies", unit: null, population: 0 } : { value: String(m), unit: m === 1 ? "day" : "days", population: xs.length };
+  };
+  const waitingAt = (t: number) => items.filter((e) => {
+    if (e.row.sentMs === null || e.row.sentMs > t) return false;
+    const r = replyAt(e), end = endedAt(e);
+    if (r !== null && r <= t) return false;
+    if (end !== null && end <= t) return false;
+    /* a query that is no longer waiting today but has no dated reply left the waiting set undated: count it
+       as waiting only while it is still Queried */
+    if (r === null && end === null && e.row.status !== QueryStatus.QUERIED) return false;
+    return true;
+  }).length;
+  const waitingIn = (xs: Enriched[]) => xs.filter((e) => e.row.status === QueryStatus.QUERIED).length;
+  const outDates = items.filter((e) => e.row.status === QueryStatus.QUERIED).map((e) => e.row.sentMs).filter((t): t is number => t !== null);
+  const oldestDays = outDates.length ? Math.floor((nowMs - Math.min(...outDates)) / DAY_MS) : null;
+  const weeksA = Math.min(13, nWeeks), weeksB = Math.max(0, Math.min(13, nWeeks - 13));
+  const activeA = weeks.slice(-13).filter((w) => w.count > 0).length;
+  const activeB = weeks.slice(-26, -13).filter((w) => w.count > 0).length;
+  /* sparkline samples: 24 instants from the first send to today */
+  const samples = (f: (t: number) => number | null): number[] => {
+    if (sinceMs === null) return [];
+    const out: number[] = [];
+    for (let i = 0; i < 24; i++) { const v = f(sinceMs + ((nowMs - sinceMs) * i) / 23); if (v !== null) out.push(v); }
+    return out;
+  };
+  const reqAtList = items.map(requestAt).filter((t): t is number => t !== null);
+  const glance: V17Glance[] = [
+    {
+      key: "sent",
+      label: "Queries sent",
+      all: { value: num(sent, "None yet"), unit: null, population: null },
+      d90: { value: num(sA.length), unit: null, population: null },
+      compare: sA.length === 0 && sB.length === 0
+        ? { lead: "", bold: "None", rest: " sent in the last 180 days" }
+        : { lead: "", bold: num(sA.length), rest: ` in the last 90 days, ${num(sB.length, "none")} in the 90 before` },
+      spark: { kind: "bars", values: weeks.map((w) => w.count) },
+    },
+    {
+      key: "rate",
+      label: "Request rate",
+      all: rateVal(requests, sent),
+      d90: rateVal(reqOf(sA), sA.length),
+      compare: sA.length === 0
+        ? { lead: "", bold: "No queries", rest: ` sent in the last 90 days${sB.length ? `; ${nOf(reqOf(sB), sB.length)} asked for more in the 90 before` : ""}` }
+        : { lead: "", bold: nOf(reqOf(sA), sA.length), rest: ` asked for more in the last 90 days, ${sB.length ? nOf(reqOf(sB), sB.length).replace(/^None/, "none") : "none sent"} in the 90 before` },
+      spark: {
+        kind: "line",
+        values: samples((t) => {
+          const s = dated.filter((e) => (e.row.sentMs as number) <= t).length;
+          return s === 0 ? null : reqAtList.filter((r) => r <= t).length / s;
+        }),
+      },
+    },
+    {
+      key: "wait",
+      label: "Median wait",
+      all: medVal(items.map((e) => e.replyDays).filter((d): d is number => d !== null)),
+      d90: medVal(wA),
+      compare: wA.length === 0
+        ? { lead: "for a first reply, from ", bold: `${replies} ${replies === 1 ? "reply" : "replies"}`, rest: `; none in the last 90 days${wB.length ? `, ${wB.length} in the 90 before` : ""}` }
+        : { lead: "for a first reply; ", bold: durDays(median(wA) as number), rest: ` across ${wA.length} ${wA.length === 1 ? "reply" : "replies"} in the last 90 days, ${wB.length ? `${durDays(median(wB) as number)} across ${wB.length} in the 90 before` : "none in the 90 before"}` },
+      spark: {
+        kind: "line",
+        values: samples((t) => median(items.filter((e) => { const r = replyAt(e); return r !== null && r <= t; }).map((e) => e.replyDays as number))),
+      },
+    },
+    {
+      key: "out",
+      label: "Still waiting",
+      all: { value: num(stillOut), unit: null, population: null },
+      d90: { value: num(waitingIn(sA)), unit: null, population: null },
+      compare: oldestDays === null
+        ? { lead: "", bold: "None", rest: " out without a reply" }
+        : { lead: "oldest out for ", bold: durDays(oldestDays), rest: `; ${num(waitingIn(sA), "none")} sent in the last 90 days, ${num(waitingIn(sB), "none")} in the 90 before` },
+      spark: { kind: "line", values: samples((t) => waitingAt(t)) },
+    },
+    {
+      key: "weeks",
+      label: "Querying for",
+      all: nWeeks === 0 ? { value: "Not yet", unit: null, population: null } : { value: String(nWeeks), unit: nWeeks === 1 ? "week" : "weeks", population: null },
+      d90: weeksA === 0 ? { value: "Not yet", unit: null, population: null } : { value: num(activeA), unit: `of ${weeksA} ${weeksA === 1 ? "week" : "weeks"}`, population: null },
+      compare: nWeeks === 0
+        ? { lead: "", bold: "No queries", rest: " sent yet" }
+        : { lead: "queries sent in ", bold: num(active, "none"), rest: ` of them; ${activeA} of the last ${weeksA}, ${weeksB ? `${activeB} of the ${weeksB} before` : "none before"}` },
+      spark: { kind: "bars", values: weeks.map((w) => (w.count > 0 ? 1 : 0)) },
+    },
+  ];
+
+  /* ── where the queries got to ── */
+  const closedCold = items.filter((e) => e.bucket === "closed" && !e.row.reachedRequest).length;
+  const counts = [sent, requests, fulls, offers];
+  const NAMES: [string, string][] = [
+    ["Queried", "Letter, synopsis and opening pages"],
+    ["Material requested", "A partial or the full asked for"],
+    ["Full manuscript", "The whole book requested"],
+    ["Offer", "Representation offered"],
+  ];
+  const funnelRows: V17FunnelRow[] = NAMES.map(([name, desc], i) => {
+    const prev = i === 0 ? null : counts[i - 1];
+    let note: string | null = null;
+    if (i === 1 && sent > 0) {
+      const bits: string[] = [];
+      if (stillOut) bits.push(`${stillOut} still waiting`);
+      if (closedCold) bits.push(`${closedCold} closed`);
+      note = bits.join(" · ") || null;
+    } else if (i > 1 && prev !== null && prev > 0) {
+      note = prev - counts[i] > 0 ? `${prev - counts[i]} did not, so far` : null;
+    }
+    return {
+      count: counts[i],
+      display: counts[i] === 0 ? (i === 0 ? "None yet" : "None") : String(counts[i]),
+      name,
+      desc,
+      went: i === 0 || prev === null || prev === 0 ? null : `${counts[i] === 0 ? "none" : counts[i]} of ${prev} went on`,
+      note,
+      population: i === 0 ? sent : (prev as number),
+    };
+  });
+  const sinceDays = sinceMs === null ? null : Math.max(0, Math.floor((nowMs - sinceMs) / DAY_MS));
+
+  /* ── response rate: the two share bars ── */
+  const ids = (f: (e: Enriched) => boolean) => items.filter(f).map((e) => e.row.id);
+  const seg = (key: string, label: string, bucket: StateBucket, f: (e: Enriched) => boolean): V17Segment => {
+    const list = ids(f);
+    return { key, label, bucket, count: list.length, ids: list };
+  };
+  const cold = (st: QueryStatus) => (e: Enriched) => !e.row.reachedRequest && e.row.status === st && !(st === QueryStatus.WITHDRAWN && e.q.closingReason === "offer_declined");
+  const all = [
+    seg("asked", "asked for more", "requested", (e) => e.row.reachedRequest),
+    seg("waiting", "no reply yet", "queried", (e) => e.row.status === QueryStatus.QUERIED),
+    seg("passed", "passed on the letter", "closed", cold(QueryStatus.REJECTED)),
+    seg("silence", "closed for silence", "closed", cold(QueryStatus.NO_RESPONSE)),
+    seg("withdrawn", "withdrawn", "closed", cold(QueryStatus.WITHDRAWN)),
+  ].filter((x) => x.count > 0);
+  const reqd = (e: Enriched) => e.row.reachedRequest;
+  const req = [
+    seg("offer", "offer", "offer", (e) => reqd(e) && e.row.reachedOffer),
+    seg("reading", "still reading", "sent", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "sent"),
+    seg("owed", "requested, not sent yet", "requested", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "requested"),
+    seg("passedAfter", "passed after reading", "closed", (e) => reqd(e) && !e.row.reachedOffer && e.bucket === "closed"),
+  ].filter((x) => x.count > 0);
+  const silence = all.find((x) => x.key === "silence")?.count ?? 0;
+  const withdrawn = all.find((x) => x.key === "withdrawn")?.count ?? 0;
+  const passedCold = all.find((x) => x.key === "passed")?.count ?? 0;
+  const pct = safePct(requests, sent);
+  const rateLede: string[] = [];
+  if (sent > 0) {
+    rateLede.push(pct.includes("%") ? `That is a ${pct} request rate.` : `That is ${pct.replace(/^0 /, "none ")} so far, too few for a percentage, which appears from ${MIN_SAMPLE} queries.`);
+    if (stillOut > 0) rateLede.push(`${Say(stillOut)} ${stillOut === 1 ? "query has" : "queries have"} had no reply yet, so the rate can still move either way.`);
+    const closes: string[] = [];
+    if (passedCold) closes.push(`${say(passedCold)} ${passedCold === 1 ? "was" : "were"} passed on from the letter alone`);
+    if (silence) closes.push(`${say(silence)} ${silence === 1 ? "was" : "were"} closed by you after a long silence`);
+    if (withdrawn) closes.push(`${say(withdrawn)} ${withdrawn === 1 ? "was" : "were"} withdrawn`);
+    if (closes.length) { const t = listAnd(closes); rateLede.push(`${t.charAt(0).toUpperCase()}${t.slice(1)}.`); }
+  }
+  const rate = {
+    allTitle: sent === 1 ? "What happened to the one query" : `What happened to the ${sent}`,
+    reqTitle: requests === 1 ? "What happened to the one request" : `What happened to the ${requests} requests`,
+    all,
+    req,
+    readings: [
+      sent === 0 ? { value: "None yet", label: "no queries sent yet", population: 0 } : { value: pct.replace(/^0 of/, "None of"), label: pct.includes("%") ? `request rate, ${requests} of ${sent}` : `asked for more, too few queries for a percentage`, population: sent },
+      requests === 0 ? { value: "None yet", label: "no requests yet, so none went on to the full", population: 0 } : { value: nOf(fulls, requests), label: `${requests === 1 ? "request" : "requests"} went on to the full`, population: requests },
+      fulls === 0 ? { value: "None yet", label: "no full manuscript requested yet", population: 0 } : { value: nOf(offers, fulls), label: `full ${fulls === 1 ? "read" : "reads"} led to an offer`, population: fulls },
+    ] as V17Reading[],
+  };
+
+  /* ── response window honesty ── */
+  const rows = c.replyRows.slice().sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0)).map((r) => ({ ...r, query: byId.get(r.id)! }));
+  const inside = rows.filter((r) => r.inside).length;
+  const longest = rows.reduce<(typeof rows)[number] | null>((m, r) => (m === null || r.replyDays > m.replyDays ? r : m), null);
+  const replyMax = Math.max(16, Math.ceil(Math.max(0, ...rows.map((r) => Math.max(r.windowWeeks, r.replyWeeks))) / 4) * 4);
+  /* how many of the manuscript's agents state a reply time at all — the reply chart can only draw those */
+  const agentIds = new Set(items.map((e) => e.q.agentId));
+  const scopedAgents = c.agents.filter((a) => agentIds.has(a.id));
+  const stated = scopedAgents.filter((a) => (a.responseTimeWeeks ?? 0) > 0).length;
+  const reply = {
+    rows,
+    maxWeeks: replyMax,
+    stated,
+    agents: scopedAgents.length,
+    note: rows.length === 0
+      ? "no replies against a stated window yet"
+      : `in the order the queries were sent${c.withoutWindow ? ` · ${c.withoutWindow} more from agencies that state no window` : ""}`,
+    readings: [
+      c.medWait === null || replies === 0
+        ? { value: "No replies yet", label: "so no median wait", population: 0 }
+        : { value: durDays(c.medWait), label: `median wait for a reply${replies < THIN_SAMPLE ? `, from ${replies} ${replies === 1 ? "reply" : "replies"}` : ""}`, population: replies },
+      rows.length === 0
+        ? { value: "None yet", label: "no replies against a stated window yet", population: 0 }
+        : { value: nOf(inside, rows.length), label: "replied inside their window", population: rows.length },
+      longest === null
+        ? { value: "No replies yet", label: "so no longest wait", population: 0 }
+        : { value: `${Math.max(1, Math.round(longest.replyDays / 7))} wks`, label: `longest wait, ${longest.sub || longest.name}${rows.length < THIN_SAMPLE ? `, from ${rows.length} ${rows.length === 1 ? "reply" : "replies"}` : ""}`, population: rows.length },
+    ] as V17Reading[],
+  };
+
+  /* ── wait times by stage ── */
+  const gap = (k: StageGap["key"]) => c.gapRows.find((g) => g.key === k)!;
+  const qr = gap("q-r"), rs = gap("r-s");
+  const pass = c.lanes.find((l) => l.key === "rejected")!;
+  const daysR = (g: StageGap, label: string, missing: string): V17Reading =>
+    g.medianDays === null
+      ? { value: "Not yet", label: missing, population: 0 }
+      : { value: durDays(g.medianDays), label: `${label}${g.days.length < THIN_SAMPLE ? `, from ${g.days.length} ${qs(g.days.length)}` : ""}`, population: g.days.length };
+  const points: Record<string, { weeks: number; q: V17Query }[]> = { rejected: [], noresponse: [], withdrawn: [], offer: [] };
+  for (const e of items) {
+    const q = byId.get(e.row.id)!;
+    const add = (lane: string, at: number | null) => {
+      const g = gapDays(e.row.sentMs, at);
+      if (g !== null) points[lane].push({ weeks: Math.round((g / 7) * 10) / 10, q });
+    };
+    if (e.row.status === QueryStatus.REJECTED) add("rejected", e.dates.closed);
+    else if (e.row.status === QueryStatus.NO_RESPONSE) add("noresponse", e.dates.closed);
+    else if (e.row.status === QueryStatus.WITHDRAWN && e.q.closingReason !== "offer_declined") add("withdrawn", e.dates.closed);
+    if (e.row.reachedOffer) add("offer", e.dates.offer);
+  }
+  const ended = c.lanes.reduce((s, l) => s + l.weeks.length, 0);
+  const waits = {
+    gaps: c.gapRows,
+    endings: c.lanes,
+    points,
+    readings: [
+      daysR(qr, "median from query to a request", "no dated request yet"),
+      daysR(rs, "median for you to send what was asked", "no requested material sent yet"),
+      pass.medianWeeks === null
+        ? { value: "Not yet", label: "no dated pass yet", population: 0 }
+        : { value: durWeeks(Math.max(1, Math.round(pass.medianWeeks))), label: `median time to a pass${pass.weeks.length < THIN_SAMPLE ? `, from ${pass.weeks.length} ${qs(pass.weeks.length)}` : ""}`, population: pass.weeks.length },
+    ] as V17Reading[],
+  };
+
+  /* ── firsts and records ── */
+  const replied = items.filter((e) => e.replyDays !== null);
+  const quickest = replied.slice().sort((a, b) => (a.replyDays as number) - (b.replyDays as number) || (a.row.sentMs ?? 0) - (b.row.sentMs ?? 0))[0] ?? null;
+  const reqd2 = items.map((e) => ({ e, t: requestAt(e) })).filter((x): x is { e: Enriched; t: number } => x.t !== null).sort((a, b) => a.t - b.t);
+  const firstReq = reqd2[0] ?? null;
+  const offerd = items.map((e) => ({ e, t: e.dates.offer })).filter((x): x is { e: Enriched; t: number } => x.t !== null).sort((a, b) => a.t - b.t);
+  const firstOffer = offerd[0] ?? null;
+  /* the longest run of consecutive weeks with a query sent; ties go to the earlier run */
+  let run = 0, runStart = -1, best = 0, bestStart = -1;
+  weeks.forEach((w, i) => {
+    if (w.count > 0) { if (run === 0) runStart = i; run++; if (run > best) { best = run; bestStart = runStart; } } else run = 0;
+  });
+  /* the longest full read: from the full going out to the offer, the pass, or — still open — today */
+  const reads = items.filter((e) => e.dates.fullSent !== null).map((e) => {
+    const from = e.dates.fullSent as number;
+    const offerT = e.dates.offer !== null && e.dates.offer >= from ? e.dates.offer : null;
+    const closeT = e.bucket === "closed" && e.dates.closed !== null && e.dates.closed >= from ? e.dates.closed : null;
+    const end = offerT ?? closeT ?? (e.bucket === "sent" ? nowMs : null);
+    return end === null ? null : { e, days: Math.round((end - from) / DAY_MS), how: offerT !== null ? "to the offer" : closeT !== null ? "to a pass" : "still reading" };
+  }).filter((x): x is { e: Enriched; days: number; how: string } => x !== null)
+    .sort((a, b) => b.days - a.days || (a.e.row.sentMs ?? 0) - (b.e.row.sentMs ?? 0));
+  const longestRead = reads[0] ?? null;
+  const replyName = (s: QueryStatus | null) => (s ? STATE_WORD[s] : "");
+  const who = (e: Enriched) => (e.row.agentSub ? `${e.row.agentName} · ${e.row.agentSub}` : e.row.agentName);
+  const records: V17Record[] = [
+    quickest === null
+      ? { key: "quickest", label: "Quickest reply", value: "Not yet", who: "No agent has replied yet", aside: null, empty: true }
+      : { key: "quickest", label: "Quickest reply", value: (quickest.replyDays as number) < 14 ? durDays(quickest.replyDays as number) : durWeeks(Math.round((quickest.replyDays as number) / 7)), who: who(quickest), aside: replyName(quickest.replyStatus), empty: false },
+    firstReq === null
+      ? { key: "first-request", label: "First request", value: "Not yet", who: "No agent has asked for more yet", aside: null, empty: true }
+      : { key: "first-request", label: "First request", value: dayMonth(firstReq.t), who: sinceMs === null ? who(firstReq.e) : `${durDays(Math.max(0, Math.round((firstReq.t - sinceMs) / DAY_MS)))} after your first query`, aside: null, empty: false },
+    firstOffer === null
+      ? { key: "first-offer", label: "First offer", value: "Not yet", who: "No offer yet", aside: null, empty: true }
+      : { key: "first-offer", label: "First offer", value: dayMonth(firstOffer.t), who: firstOffer.e.row.agentSub || firstOffer.e.row.agentName, aside: firstOffer.e.row.status === QueryStatus.OFFER ? "still open" : firstOffer.e.row.status === QueryStatus.SIGNED ? "signed" : "closed", empty: false },
+    busiest === null
+      ? { key: "busiest", label: "Busiest week", value: "Not yet", who: "No dated query sent yet", aside: null, empty: true }
+      : { key: "busiest", label: "Busiest week", value: `${wMax} ${qs(wMax)}`, who: weekRange(weeks[busiest].startMs), aside: null, empty: false },
+    best === 0
+      ? { key: "run", label: "Longest run", value: "Not yet", who: "No dated query sent yet", aside: null, empty: true }
+      : { key: "run", label: "Longest run", value: durWeeks(best), who: best === 1 ? `a query sent in the week of ${dayMonth(weeks[bestStart].startMs)}` : `a query sent every week, ${dayRange(weeks[bestStart].startMs, addDays(weeks[bestStart + best - 1].startMs, 6))}`, aside: null, empty: false },
+    longestRead === null
+      ? { key: "full-read", label: "Longest full read", value: "Not yet", who: "No full manuscript has gone out yet", aside: null, empty: true }
+      : { key: "full-read", label: "Longest full read", value: durDays(longestRead.days), who: `${longestRead.e.row.agentSub || longestRead.e.row.agentName}, ${longestRead.how}`, aside: null, empty: false },
+  ];
+
+  /* ── the campaign over time: three running totals ── */
+  const sentT = dated.map((e) => e.row.sentMs as number).sort((a, b) => a - b);
+  const reqT = reqAtList.slice().sort((a, b) => a - b);
+  const endT = items.map(endedAt).filter((t): t is number => t !== null).sort((a, b) => a - b);
+  const n90 = (xs: number[]) => xs.filter((t) => t > A0 && t <= nowMs).length;
+  const overTime = {
+    startMs: sentT.length ? sentT[0] : null,
+    nowMs,
+    sent: sentT,
+    requests: reqT,
+    ended: endT,
+    max: Math.max(1, sentT.length),
+    readings: [
+      { value: num(n90(sentT)), label: "sent in the last 90 days", population: null },
+      { value: num(n90(endT)), label: "ended in the last 90 days", population: null },
+      { value: num(n90(reqT)), label: "requests in the last 90 days", population: null },
+    ] as V17Reading[],
+  };
+
+  /* ── how things stand: one line per query ── */
+  const laneRows = dated.map((e) => byId.get(e.row.id)!).sort((a, b) => (a.sentMs as number) - (b.sentMs as number));
+  const reading = items.filter((e) => e.bucket === "requested" || e.bucket === "sent").length;
+  const openOffers = items.filter((e) => e.row.status === QueryStatus.OFFER).length;
+  const waitingOldest = laneRows.filter((q) => q.bucket === "queried")[0] ?? null;
+  const lanes = {
+    rows: laneRows,
+    startMs: laneRows.length ? (laneRows[0].sentMs as number) : null,
+    nowMs,
+    readings: [
+      sent === 0 ? { value: "None yet", label: "no queries sent yet", population: 0 } : { value: num(stillOut), label: "awaiting a first reply", population: null },
+      sent === 0 ? { value: "None yet", label: "no queries sent yet", population: 0 } : { value: num(reading), label: "reading more than the letter", population: null },
+      waitingOldest === null
+        ? { value: "None", label: "no query is waiting", population: 0 }
+        : (() => { const d = Math.floor((nowMs - (waitingOldest.sentMs as number)) / DAY_MS); return { value: durDays(d), label: `oldest still waiting, ${waitingOldest.agency || waitingOldest.agent}`, population: null }; })(),
+    ] as V17Reading[],
+  };
+
+  /* ── the nine banners ── */
+  const firstMonth = sinceMs === null ? null : `${MONTHS[new Date(sinceMs).getMonth()]} ${new Date(sinceMs).getFullYear()}`;
+  const banners: V17Banner[] = [
+    {
+      count: `${sent} ${qs(sent)} · 4 stages`,
+      title: sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`,
+      sentence: "Each row is a stage, and its bar is how many queries reached it. The note beside each bar is how many went on from the stage before.",
+    },
+    {
+      count: `${sent} ${qs(sent)} · ${nWeeks} ${nWeeks === 1 ? "week" : "weeks"}`,
+      title: "Queries sent",
+      sentence: "One dot per query on the day it went out, in its status colour today. The bars underneath are each week's total.",
+    },
+    {
+      count: `${requests === 0 ? "None" : requests} of ${sent} asked for more`,
+      title: "Response rate",
+      sentence: rateLede.join(" ") || "Once queries go out, this shows how many drew a request for more.",
+    },
+    {
+      count: replies === 0 ? "No replies yet" : `${replies} ${replies === 1 ? "reply" : "replies"} so far`,
+      title: "Response window honesty",
+      sentence: "The bar is the response time each agent states in their guidelines. The dot is when the reply arrived, coloured by what it was; a dotted line shows how far past the window it came.",
+    },
+    {
+      count: `4 stages · ${ended === 0 ? "no" : ended} ${ended === 1 ? "ending" : "endings"}`,
+      title: "Wait times by stage",
+      sentence: "Left, the gap between one stage and the next, from the fastest query to the slowest, with the median marked. Right, how many weeks each closed query ran before it ended. The later stages rest on very few queries.",
+    },
+    {
+      count: `from ${sent} ${qs(sent)}`,
+      title: "Firsts and records",
+      sentence: "The quickest, longest and busiest moments of the campaign so far. They update as replies come in.",
+    },
+    {
+      count: firstMonth === null ? "No queries yet" : `${firstMonth} to today`,
+      title: "The campaign over time",
+      sentence: "Running totals since your first query: letters sent, requests for more, and queries that have ended. Move along the chart to read any day.",
+    },
+    {
+      count: [`${stillOut === 0 ? "none" : stillOut} waiting`, `${reading === 0 ? "none" : reading} being read`, ...(openOffers ? [`${openOffers} ${openOffers === 1 ? "offer" : "offers"}`] : [])].join(" · "),
+      title: "How things stand",
+      sentence: "One line per query, from the day it went out to today or to the day it ended.",
+    },
+    {
+      count: `${sent} ${qs(sent)} · ${replies === 0 ? "no" : replies} ${replies === 1 ? "reply" : "replies"}`,
+      title: "Reading the numbers",
+      sentence: "Everything on this page rests on ",
+      bold: `${sent === 0 ? "no" : sent} ${qs(sent)} and ${replies === 0 ? "no" : replies} ${replies === 1 ? "reply" : "replies"}`,
+    },
+  ];
+
+  /* ── what the numbers can't tell you ── */
+  const pp = sent > 0 ? Math.max(1, Math.round(100 / sent)) : 0;
+  const caveats = [
+    {
+      title: "Small numbers move a lot",
+      text: sent > 0
+        ? `One more reply moves the request rate by about ${say(pp)} percentage ${pp === 1 ? "point" : "points"}. Treat the rates as a rough picture rather than a precise measure.`
+        : "With no queries out there is no rate yet. Once there is one, every reply moves it.",
+    },
+    {
+      title: "No reply is not counted as a no",
+      /* ⚠️ NOT THE REF'S SENTENCE. The ref says still-waiting queries are "left out of the rates until they
+         close"; here the request rate's denominator is every query sent, waiting ones included. */
+      text: stillOut > 0
+        ? `${Say(stillOut)} ${stillOut === 1 ? "query is" : "queries are"} still waiting. ${stillOut === 1 ? "It counts" : "They count"} as not yet asked for more rather than as a no, so the rates can go up or down from here.`
+        : "No query is waiting for a first reply, so the request rate will only move when more letters go out.",
+    },
+    {
+      title: "Medians, not averages",
+      text: "A single very slow reply would pull an average a long way. The median is the middle value, so it is less affected by one outlier.",
+    },
+    {
+      title: "What this page cannot see",
+      text: "How full an agent's list is, what they have recently sold, whether they are on leave, and when your query was actually read. None of that is recorded here, and all of it affects the numbers.",
+    },
+  ];
+
+  return {
+    title: c.title,
+    sent,
+    dated: dated.length,
+    replies,
+    glance,
+    banners,
+    funnel: { since: sinceMs === null ? null : `since ${dayMonthYear(sinceMs)} · ${sinceDays === 0 ? "today" : durDays(sinceDays as number)}`, rows: funnelRows },
+    log,
+    rate,
+    reply,
+    waits,
+    records,
+    overTime,
+    lanes,
+    caveats,
+  };
+}
+

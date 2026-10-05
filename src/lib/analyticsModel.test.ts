@@ -9,7 +9,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { Activity, ActivityType, Agent, ManuscriptVersion, Query, QueryStatus, SubmissionPackage } from "../types";
-import { analyticsModel, stateBucket, figure, THIN_SAMPLE, DASH, ModelInput } from "./analyticsModel";
+import { analyticsModel, stateBucket, figure, THIN_SAMPLE, DASH, ModelInput, dayMonth } from "./analyticsModel";
 import { AnalyticsRange } from "./analytics";
 
 const NOW = new Date(2026, 8, 29, 12, 0, 0).getTime();
@@ -474,5 +474,150 @@ describe("v13 — the figures the page states", () => {
     const C = agent();
     const one = model([walk(C, 100, [[QueryStatus.REJECTED, 70]])], [C]).v13;
     expect(one.reply.readings[0].label).toBe("median wait for a reply — 1 reply");
+  });
+});
+
+describe("v17 — the figures the page states", () => {
+  const A = agent({ name: "Ada Ayres", agency: "Ayres & Colt", responseTimeWeeks: 6 });
+  const B = agent({ name: "Bo Feld", agency: "Feld Agency", responseTimeWeeks: 6 });
+  /* 10 queries: 3 still out, 2 passed on the letter, 1 closed for silence, 1 withdrawn,
+     1 requested-not-sent, 1 being read (full), 1 partial → full → offer */
+  const parts: Part[] = [
+    walk(A, 40), walk(A, 35), walk(A, 30),
+    walk(B, 200, [[QueryStatus.REJECTED, 180]]),
+    walk(B, 190, [[QueryStatus.REJECTED, 100]]),
+    walk(A, 180, [[QueryStatus.NO_RESPONSE, 60]]),
+    walk(A, 170, [[QueryStatus.WITHDRAWN, 90]]),
+    walk(B, 150, [[QueryStatus.PARTIAL_REQUESTED, 120]]),
+    walk(A, 140, [[QueryStatus.FULL_REQUESTED, 110], [QueryStatus.FULL_SENT, 108]]),
+    walk(B, 130, [[QueryStatus.PARTIAL_REQUESTED, 120], [QueryStatus.PARTIAL_SENT, 118], [QueryStatus.FULL_REQUESTED, 90],
+      [QueryStatus.FULL_SENT, 88], [QueryStatus.OFFER, 20]]),
+  ];
+  const m = model(parts, [A, B], "all", { title: "Murphy's Day Out" });
+  const v = m.v17;
+
+  it("the funnel's counts and its three \"went on\" rates", () => {
+    expect(v.funnel.rows.map((r) => r.count)).toEqual([10, 3, 2, 1]);
+    expect(v.funnel.rows.map((r) => r.display)).toEqual(["10", "3", "2", "1"]);
+    expect(v.funnel.rows.map((r) => r.went)).toEqual([null, "3 of 10 went on", "2 of 3 went on", "1 of 2 went on"]);
+    expect(v.funnel.rows[1].note).toBe("3 still waiting · 4 closed");
+    expect(v.funnel.rows[2].note).toBe("1 did not, so far");
+    expect(v.funnel.rows.map((r) => r.population)).toEqual([10, 10, 3, 2]);
+    expect(v.banners[0].title).toBe("Where the 10 queries got to");
+  });
+
+  it("⚠️ both breakdowns of what became of the queries add up to their totals", () => {
+    expect(v.rate.all.map((s) => [s.key, s.count])).toEqual([["asked", 3], ["waiting", 3], ["passed", 2], ["silence", 1], ["withdrawn", 1]]);
+    expect(v.rate.all.reduce((n, s) => n + s.count, 0)).toBe(m.sent);
+    expect(v.rate.req.map((s) => [s.key, s.count])).toEqual([["offer", 1], ["reading", 1], ["owed", 1]]);
+    expect(v.rate.req.reduce((n, s) => n + s.count, 0)).toBe(m.requests);
+    expect(v.rate.allTitle).toBe("What happened to the 10");
+    expect(v.rate.reqTitle).toBe("What happened to the 3 requests");
+  });
+
+  it("median wait with 0, 1, 2 and 10 replies", () => {
+    const C = agent();
+    const at = (waits: number[]) => model(waits.map((w) => walk(C, 800, [[QueryStatus.REJECTED, 800 - w]])), [C]).v17.reply.readings[0];
+    expect(at([])).toEqual({ value: "No replies yet", label: "so no median wait", population: 0 });
+    expect(at([12]).value).toBe("12 days");
+    expect(at([12]).label).toBe("median wait for a reply, from 1 reply");
+    expect(at([10, 20]).value).toBe("15 days");
+    expect(at([5, 10, 12, 20, 25, 30, 40, 45, 50, 700]).value).toBe("28 days"); /* 25 and 30, rounded */
+    expect(at([5, 10, 12, 20, 25, 30, 40, 45, 50, 700]).label).toBe("median wait for a reply");
+  });
+
+  it("a stage gap skips a query whose intermediate date is missing, and a stage with no date says so", () => {
+    const C = agent();
+    /* a full sent with no request on record: the requested → sent gap has nothing to measure from */
+    const p = model([
+      walk(C, 100, [[QueryStatus.PARTIAL_REQUESTED, 80], [QueryStatus.PARTIAL_SENT, 76]]),
+      (() => { const q = query(C.id, { status: QueryStatus.FULL_SENT, dateSent: ago(90), fullSentDate: ago(50) }); return { q, acts: [rung(q.id, QueryStatus.QUERIED, ago(90))] }; })(),
+    ], [C]).v17;
+    const rs = p.waits.gaps.find((g) => g.key === "r-s")!;
+    expect(rs.days).toEqual([4]);
+    const fo = p.waits.gaps.find((g) => g.key === "f-o")!;
+    expect(fo.days).toEqual([]);
+    expect(fo.medianDays).toBeNull();
+    expect(p.waits.readings[2]).toEqual({ value: "Not yet", label: "no dated pass yet", population: 0 });
+  });
+
+  it("weeks to an ending, by outcome", () => {
+    const pts = v.waits.points;
+    expect(pts.rejected.map((p) => p.weeks).sort((a, b) => a - b)).toEqual([2.9, 12.9]);
+    expect(pts.noresponse.map((p) => p.weeks)).toEqual([17.1]);
+    expect(pts.withdrawn.map((p) => p.weeks)).toEqual([11.4]);
+    expect(pts.offer.map((p) => p.weeks)).toEqual([15.7]);
+    expect(v.waits.readings[2].value).toBe("8 weeks"); /* the median of 2.9 and 12.9 */
+  });
+
+  it("the records, with ties going to the earliest", () => {
+    const rec = Object.fromEntries(v.records.map((r) => [r.key, r]));
+    expect(v.records.map((r) => r.key)).toEqual(["quickest", "first-request", "first-offer", "busiest", "run", "full-read"]);
+    expect(rec.quickest.value).toBe("10 days"); /* 130 → 120, and 150 → 120 is 30 */
+    expect(rec["first-request"].value).toBe(dayMonth(NOW - 120 * DAY)); /* two rungs that day; either is the first */
+    expect(rec["first-request"].who).toBe("80 days after your first query"); /* 200 → 120 */
+    expect(rec["first-offer"].aside).toBe("still open");
+    /* the full out 108 days and still being read outlasts the one read for 68 days to an offer */
+    expect(rec["full-read"].value).toBe("108 days");
+    expect(rec["full-read"].who).toBe("Ayres & Colt, still reading");
+    /* two replies on the same day after the same wait: the one SENT first wins */
+    const C = agent({ name: "Cy Cole", agency: "Cole & Co" }), D = agent({ name: "Di Dunn", agency: "Dunn Lit" });
+    const tie = model([walk(D, 50, [[QueryStatus.REJECTED, 40]]), walk(C, 60, [[QueryStatus.REJECTED, 50]])], [C, D]).v17;
+    expect(tie.records[0].who).toBe("Cy Cole · Cole & Co");
+  });
+
+  it("an empty campaign: every record reads Not yet, nothing reads 0", () => {
+    const e = model([], []).v17;
+    expect(e.records.every((r) => r.value === "Not yet" && r.empty)).toBe(true);
+    for (const r of [...e.log.readings, ...e.rate.readings, ...e.reply.readings, ...e.waits.readings, ...e.lanes.readings, ...e.overTime.readings]) {
+      expect(r.value, r.label).not.toMatch(/^(0|0%|—)$/);
+      expect(r.label.length).toBeGreaterThan(0);
+    }
+    for (const g of e.glance) for (const s of [g.all, g.d90]) expect(s.value, g.key).not.toMatch(/^(0|0%|—)$/);
+  });
+
+  it("the running totals at three dates", () => {
+    const o = v.overTime;
+    const at = (daysAgo: number) => { const t = NOW - daysAgo * DAY; const c = (xs: number[]) => xs.filter((x) => x <= t).length; return [c(o.sent), c(o.requests), c(o.ended)]; };
+    expect(at(195)).toEqual([1, 0, 0]);
+    expect(at(100)).toEqual([7, 3, 2]);
+    expect(at(0)).toEqual([10, 3, 4]);
+  });
+
+  it("the 90-day and previous-90-day split at its boundary", () => {
+    const C = agent();
+    const g = model([walk(C, 90), walk(C, 89), walk(C, 180), walk(C, 181)], [C]).v17.glance[0];
+    /* the windows are (now − 90 days, now] and (now − 180 days, now − 90 days]: exactly 90 days ago belongs
+       to the 90 BEFORE, and exactly 180 days ago is outside both */
+    expect(g.d90.value).toBe("1");
+    expect(g.compare.bold + g.compare.rest).toBe("1 in the last 90 days, 1 in the 90 before");
+    expect(g.all.value).toBe("4");
+  });
+
+  it("the thin-sample rule at populations of 0, 1 and 5", () => {
+    const C = agent();
+    const zero = model([], [C]).v17;
+    expect(zero.glance.find((x) => x.key === "rate")!.all).toEqual({ value: "No queries", unit: null, population: 0 });
+    const one = model([walk(C, 30)], [C]).v17;
+    expect(one.glance.find((x) => x.key === "rate")!.all).toEqual({ value: "None of 1", unit: null, population: 1 });
+    expect(one.rate.readings[0].value).toBe("None of 1");
+    expect(one.funnel.rows.map((r) => r.display)).toEqual(["1", "None", "None", "None"]);
+    expect(one.funnel.rows.map((r) => r.went)).toEqual([null, "none of 1 went on", null, null]);
+    const five = model([0, 1, 2, 3, 4].map((i) => walk(C, 100 + i, [[QueryStatus.REJECTED, 90]])), [C]).v17;
+    expect(five.reply.readings[0].label).toBe("median wait for a reply"); /* five states no population */
+    const four = model([0, 1, 2, 3].map((i) => walk(C, 100 + i, [[QueryStatus.REJECTED, 90]])), [C]).v17;
+    expect(four.reply.readings[0].label).toBe("median wait for a reply, from 4 replies");
+  });
+
+  it("the training log: one dot per dated query on its day, and exactly one busiest week", () => {
+    const dots = v.log.weeks.flatMap((w) => w.days.flat());
+    expect(dots).toHaveLength(10);
+    expect(v.log.weeks.reduce((n, w) => n + w.count, 0)).toBe(10);
+    expect(v.log.busiest).not.toBeNull();
+    const C = agent();
+    /* two weeks of two: the EARLIER is the busiest — week 0, the week of the first send, not the later tie */
+    const t = model([walk(C, 70), walk(C, 70), walk(C, 21), walk(C, 21)], [C]).v17;
+    expect(t.log.weeks.filter((w) => w.count === 2)).toHaveLength(2);
+    expect(t.log.busiest).toBe(0);
   });
 });
