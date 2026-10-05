@@ -44,11 +44,11 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
-import { CONTACT_ARCHIVIST, CONTACT_HAWK } from "./contact/ContactHeader";
+import { CONTACT_BAND_DISC, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
   ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
-  averageReplyWeeks, contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
+  contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
@@ -525,18 +525,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     [agents, hkLiveById, hkReopenTaskById, nowMs],
   );
   /* v12: the subline is the card index's sentence — `facts` (want/fresh/genre/title, the page's
-     own derivation) and the stated-windows mean. The Housekeeping gap count left the sentence
-     with the v3 copy, so the living memo no longer reads `hk` and the old ordering hazard is
-     gone with the read (contactLivingOrder.test retired with a note). */
-  const avgReply = useMemo(() => averageReplyWeeks(agents), [agents]);
+     own derivation). v13 §2: its second sentence (the stated-windows mean) is gone; the numbers
+     strip states the typical reply. The living memo still reads no `hk`. */
   const living = useMemo<LivingHeader>(() => {
     const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
     const agentsById = new Map(agents.map((a) => [a.id, a]));
     return {
       count: pageState === "list" ? (lhOverride ?? agents.length) : null,
-      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, facts, avgReplyWeeks: avgReply }),
+      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, facts }),
     };
-  }, [pageState, lhOverride, agents, qcRows, scoped, facts, avgReply]);
+  }, [pageState, lhOverride, agents, qcRows, scoped, facts]);
 
   /* the three direct fixes — through the CONTEXT writers (the hkSave discipline, lib/hkSave.ts):
      the same updateAgent To-do's rail writes with, and the dq flag resolved when this was the
@@ -627,7 +625,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             primaryRef={addBtnRef}
             primary={{ label: "+ Add an agent", onClick: openAdd }}
             secondary={{ label: "Discover agents", onClick: () => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); } }}
-            art={<img src={`${CONTACT_ARCHIVIST.src}?v=${CONTACT_ARCHIVIST.version}`} width={CONTACT_ARCHIVIST.width} height={CONTACT_ARCHIVIST.height} alt="" />}
+            /* v13 §2 — THE BAND (the Query Centre's, `PageHeader band`): full-bleed anthracite under the
+               top bar, the Archivist in a 290px white disc on the text's right. */
+            band
+            art={<span className="clv-bdisc"><img src={`${CONTACT_BAND_DISC.src}?v=${CONTACT_BAND_DISC.version}`} width={CONTACT_BAND_DISC.width} height={CONTACT_BAND_DISC.height} alt="" /></span>}
           />
         )}
         <div className="clv-main" ref={mainColRef}>

@@ -134,8 +134,6 @@ export interface ContactCopyContext extends PressingContext {
   agents: readonly Agent[];
   /** v12: the hero facts the page already derives (want/fresh/genre/msTitle) — never recounted here */
   facts?: { want: number; fresh: number; genre: string | null; msTitle: string | null } | null;
-  /** v12: `averageReplyWeeks(agents)` — stated windows only; null drops the second sentence */
-  avgReplyWeeks?: number | null;
 }
 
 /** Contact list: "One agent" / "‹n› agents", and the sentence. */
@@ -154,8 +152,7 @@ export function contactHeaderCopy(count: number, ctx: ContactCopyContext): Livin
   }
   /* v12 — THE CARD INDEX'S SENTENCE (the oracle's own arithmetic): the bold number is the agents
      who want the manuscript's genre AND haven't been queried (`facts.fresh` — the mock's
-     `hit && st.startsWith('no')`), words up to twenty then digits; the second sentence is the
-     stated-windows mean, dropped when nobody states one. The spec's none-case sentence covers
+     `hit && st.startsWith('no')`), words up to twenty then digits. The spec's none-case sentence covers
      fresh === 0 (the delivered mock cannot reach it, so the text governs that branch). */
   const headline = count === 1 ? "One agent on file" : `${count} agents on file`;
   const f = ctx.facts;
@@ -178,10 +175,9 @@ export function contactHeaderCopy(count: number, ctx: ContactCopyContext): Livin
         ? ([{ b: "All of them queried" }, "."] as LivingRun[])
         : ([{ b: `${nQueried} queried` }, `, and ${toGo} still to go.`] as LivingRun[])));
   }
-  if (ctx.avgReplyWeeks != null) {
-    const w = wordsToTwenty(ctx.avgReplyWeeks);
-    runs.push(" Across your list a reply takes about ", { b: `${w} week${ctx.avgReplyWeeks === 1 ? "" : "s"}` }, ".");
-  }
+  /* ⚠️ v13 §2 — ONE SENTENCE. The v12 subline went on to the list's average reply time; the numbers
+     strip under the band now states the typical reply (a median, with the fastest agent), and two
+     surfaces stating one fact two ways is the disagreement the strip was built to end. */
   return { headline, subline: runs };
 }
 

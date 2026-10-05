@@ -67,5 +67,6 @@ into room our page does not have, so a 286 box would run into the bar.
 `/agents` row in `livingHeadersV3.measure`'s RUN table now reads the INDEX STRIP — `tile: ".clv-ixtab"`
 (the All cell is first in DOM at the column's left edge, which is what keeps LH4's one-left-x honest)
 and `num: "i"` (each lettered cell's count). `contactHeaderCopy`'s subline has carried the v12 sentence
-since P1 — "{N} of them want {genre} and haven't seen {title} yet.", plus the average-reply clause when
-any agent states a window — with the header's `facts`/`avgReplyWeeks` context supplied by the page.
+since P1 — "{N} of them want {genre} and haven't seen {title} yet." **v13 (5 Oct) dropped the
+average-reply clause** that followed it: the numbers strip under the band states the typical reply now,
+so the header carries the one sentence, with the page's `facts` as its context.

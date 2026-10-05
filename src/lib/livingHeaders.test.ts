@@ -122,28 +122,28 @@ describe("the Contact list's two lines", () => {
     const solo = ag("a9", "Greg Panetta", "");
     expect(sub(contactHeaderCopy(1, { ...ctxOf([], [solo]), agents: [solo] }))).toBe("Greg Panetta, and you haven’t queried them yet.");
   });
-  /* ⚠️ RETARGETED (Contact list v12 §3): the many-case is the CARD INDEX's sentence — the bold
-     number is want∧not-queried (the oracle's `hit && st.startsWith('no')`), words to twenty then
-     digits; the second sentence is the stated-windows mean, dropped when nobody states one; and
-     the gaps clause left the subline with the v3 copy (Housekeeping's tray still counts them). */
-  it("many: 'n agents on file', the fresh count in words, the title run, the average", () => {
-    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, facts: { want: 12, fresh: 11, genre: "thrillers", msTitle: "Murphy's Day Out" }, avgReplyWeeks: 6 });
+  /* ⚠️ RETARGETED TWICE. Contact list v12 §3 made the many-case the CARD INDEX's sentence — the
+     bold number is want∧not-queried (the oracle's `hit && st.startsWith('no')`), words to twenty
+     then digits. v13 §2 then dropped its second sentence (the list's average reply time): the
+     numbers strip under the band owns that figure now, so the header states one sentence. */
+  it("many: 'n agents on file', the fresh count in words, the title run — and no reply clause", () => {
+    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, facts: { want: 12, fresh: 11, genre: "thrillers", msTitle: "Murphy's Day Out" } });
     expect(l.headline).toBe("16 agents on file");
-    expect(sub(l)).toBe("Eleven of them want thrillers and haven’t seen Murphy's Day Out yet. Across your list a reply takes about six weeks.");
-    /* the title is an {ms} RUN (Special Elite), the numbers are {b} runs */
+    expect(sub(l)).toBe("Eleven of them want thrillers and haven’t seen Murphy's Day Out yet.");
+    expect(sub(l)).not.toMatch(/reply|week/i);
+    /* the title is an {ms} RUN (Special Elite), the number is a {b} run */
     expect(l.subline.some((r) => typeof r === "object" && "ms" in r && r.ms === "Murphy's Day Out")).toBe(true);
     expect(l.subline.some((r) => typeof r === "object" && "b" in r && r.b === "Eleven")).toBe(true);
-    expect(l.subline.some((r) => typeof r === "object" && "b" in r && r.b === "six weeks")).toBe(true);
   });
-  it("past twenty the number is digits; one week is singular", () => {
-    const l = contactHeaderCopy(40, { ...ctxOf([]), agents: AGENTS, facts: { want: 30, fresh: 23, genre: "fantasy", msTitle: "T" }, avgReplyWeeks: 1 });
-    expect(sub(l)).toBe("23 of them want fantasy and haven’t seen T yet. Across your list a reply takes about one week.");
+  it("past twenty the number is digits", () => {
+    const l = contactHeaderCopy(40, { ...ctxOf([]), agents: AGENTS, facts: { want: 30, fresh: 23, genre: "fantasy", msTitle: "T" } });
+    expect(sub(l)).toBe("23 of them want fantasy and haven’t seen T yet.");
   });
-  it("nobody matches → the spec's none-case; no stated windows → the second sentence is dropped", () => {
-    const none = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 0, fresh: 0, genre: "thrillers", msTitle: "M" }, avgReplyWeeks: null });
+  it("nobody matches → the spec's none-case, as v12 has it", () => {
+    const none = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 0, fresh: 0, genre: "thrillers", msTitle: "M" } });
     expect(sub(none)).toBe("None of them want thrillers yet.");
-    const noAvg = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 3, fresh: 2, genre: "crime", msTitle: "M" }, avgReplyWeeks: null });
-    expect(sub(noAvg)).toBe("Two of them want crime and haven’t seen M yet.");
+    const two = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 3, fresh: 2, genre: "crime", msTitle: "M" } });
+    expect(sub(two)).toBe("Two of them want crime and haven’t seen M yet.");
   });
   it("no manuscript in scope → the queried/to-go line stays, so the subline is never empty", () => {
     expect(sub(contactHeaderCopy(3, { ...ctxOf([]), agents: AGENTS }))).toBe("None queried yet.");
@@ -253,7 +253,7 @@ describe("LH12 · the v3 rules across all five (Analytics retired its living hea
   const counts = [1, 2, 9, 13, 27, 148];
   const all = counts.flatMap((c) => [
     { c, l: qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue()])) },
-    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), facts: { want: 9, fresh: 7, genre: "crime", msTitle: "M" }, avgReplyWeeks: 8 }) },
+    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), facts: { want: 9, fresh: 7, genre: "crime", msTitle: "M" } }) },
     { c, l: packagesHeaderCopy(c, { lead: { name: "Standard", sent: 11, answered: 8, requests: 3 }, firstLiveName: "Standard" }) },
     { c, l: compsHeaderCopy(c, { missing: 3, inLetter: ["The Dry"], firstTitle: "The Dry" }) },
     /* a SEPTEMBER date, so the "Sept" sweep below has something to catch (an October-only fixture cannot) */

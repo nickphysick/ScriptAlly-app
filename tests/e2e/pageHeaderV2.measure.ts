@@ -22,7 +22,7 @@ async function pressBarGap(page: Page) {
   });
   await page.mouse.click(at.x, at.y);
 }
-import { PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, PLATE_ROUTES } from "./plateRoutes";
 import { BAR_ROUTES, LIVING_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
@@ -110,13 +110,20 @@ for (const vp of SIZES) {
        header's geometry (the 18 below the bar, the 55% text block, art standing on the rule, the rail
        at the rule + 24) is not its geometry — plateHeader.measure.ts PH1–PH4 own it. What stays here is
        that it is the shared header and that it IS a plate. */
+    /* ⚠️ RETARGETED BY THE BAND (v126, registered by Contact list v13): the plate is retired and the
+       Query Centre's full header is the band, whose geometry is QC126-3's. What stays here is that it
+       is the shared header and that it IS the register's band. */
     const plate = PLATE_ROUTES.includes("/queries");
+    const band = BAND_ROUTES.includes("/queries");
     if (plate) {
       const isPlate = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-plate]')].find((e) => e.getBoundingClientRect().height > 0));
       L.check("§2 · (plate) the Query Centre's header is a plate — its geometry is PH1–PH4's", ctx, isPlate, `plate ${isPlate}`);
+    } else if (band) {
+      const isBand = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0));
+      L.check("§2 · (band) the Query Centre's header is the band — its geometry is QC126-3's", ctx, isBand, `band ${isBand}`);
     } else if (r) judgeFull(L, r, ctx, mock);
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(plate ? 2 : 15);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(plate || band ? 2 : 15);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -133,19 +140,26 @@ for (const vp of SIZES) {
     const r = await readFull(page, ".clv-rail");
     const ctx = { route: "/agents", size: `${vp.width}`, state: "expanded" };
     L.check("§4 · the full header was found", ctx, !!r, JSON.stringify(r));
-    if (r) judgeFull(L, r, ctx, mock);
-    /* v12 P2 (3 Oct): the count cards left the list with the card index — the INDEX STRIP is the
-       first thing below the rule now, at the same rule + 24 (the column's own padding). */
-    const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="idxwrap"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
-    if (r) L.check("§4 · the index strip starts at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `strip ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
-    const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>('[data-probe="art"] img')].find((e) => e.getBoundingClientRect().height > 0); return i ? [i.currentSrc, i.naturalWidth] : null; });
-    /* v12 P1 (3 Oct): the hero art is the WHOLE painting now — the hawk-only crop survives in
-       Housekeeping's tray and the (pre-P5) empty state, not here. */
-    L.check("§4 · the art is the full painting at native resolution", ctx, !!art && /contact-list-hero-archivist-full\.png/.test(art[0] as string) && art[1] === 1141, JSON.stringify(art));
+    /* ⚠️ RETARGETED BY THE BAND (Contact list v13 §2): the Contact list's full header is the band, so
+       the open header's geometry (18 below the bar, art standing on the rule, the panel at the rule +
+       24) is not its geometry — contactV13 CL13-1 and CL13-2 own it. What stays here is that it is
+       the shared header, that it IS the register's band, and that the disc holds the Archivist. */
+    const band = BAND_ROUTES.includes("/agents");
+    if (band) {
+      const b = await page.evaluate(() => {
+        const hd = [...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0);
+        const img = hd?.querySelector<HTMLImageElement>(".ph-bdisc img") ?? null;
+        return { band: !!hd, src: img?.currentSrc ?? null, nat: img?.naturalWidth ?? 0 };
+      });
+      L.check("§4 · (band) the Contact list's header is the band — its geometry is CL13-1's", ctx, b.band, JSON.stringify(b));
+      L.check("§4 · (band) the disc holds the Archivist at native resolution", ctx, /\/images\/contact-archivist\.png/.test(b.src ?? "") && b.nat === 800, JSON.stringify(b));
+    } else {
+      if (r) judgeFull(L, r, ctx, mock);
+      const counts = await page.evaluate(() => [...document.querySelectorAll('[data-clv="idxwrap"]')].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().top ?? NaN);
+      if (r) L.check("§4 · the index strip starts at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `strip ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
+    }
     L.write();
-    /* living headers (29 Sep): the Contact list is a living page, so the v5 mock's header-height row is not
-       asserted here (the living ref holds its geometry in livingHeadersV3.measure) — one row fewer with a mock */
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(mock ? 18 : 17);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(band ? 3 : (mock ? 18 : 17));
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -197,10 +211,15 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
     /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the Query Centre's header is a plate 74px below the bar, so
        it no longer opens at the open headers' height by design. The three open headers are held to EACH
        OTHER (the Contact list the anchor), and the Query Centre is held to being the register's plate. */
+    /* ⚠️ RETARGETED BY THE BAND (v13): the Query Centre and the Contact list both open on the band, so
+       the OPEN headers left are Comparable titles and Submission packages, held to each other; each
+       framed route is held to being its register's band or plate. */
     const qcPlate = PLATE_ROUTES.includes("/queries");
-    const anchor = qcPlate ? c : q;
-    const anchorName = qcPlate ? "the Contact list" : "the Query Centre";
-    const others = (qcPlate ? [["Comparable titles", m], ["Submission packages", pk]] : [["the Contact list", c], ["Comparable titles", m], ["Submission packages", pk]]) as [string, typeof q][];
+    const framed = (route: string) => PLATE_ROUTES.includes(route) || BAND_ROUTES.includes(route);
+    const open = ([["the Query Centre", "/queries", q], ["the Contact list", "/agents", c], ["Comparable titles", "/manuscripts/comps", m], ["Submission packages", "/manuscripts/packages", pk]] as [string, string, typeof q][])
+      .filter(([, route]) => !framed(route));
+    const [anchorName, , anchor] = open[0];
+    const others = open.slice(1).map(([nm, , o]) => [nm, o]) as [string, typeof q][];
     for (const k of ["header", "title"] as const) {
       for (const [nm, o] of others) {
         L.check(`§4.4 · the ${k}'s top is ${anchorName}'s on ${nm}`, ctx, Number.isFinite(anchor[k]) && Math.abs(anchor[k] - o[k]) <= 0.5, `${anchorName} ${anchor[k].toFixed(1)} ${nm} ${o[k].toFixed(1)}`);
@@ -211,6 +230,11 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
       const isPlate = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-plate]')].find((e) => e.getBoundingClientRect().height > 0));
       L.check("§4.4 · (plate) the Query Centre is exempt because it is the register's plate", ctx, isPlate && PLATE_ROUTES.length === 1, `plate ${isPlate} register ${JSON.stringify(PLATE_ROUTES)}`);
     }
+    for (const route of BAND_ROUTES) {
+      await openApp(page, route, vp);
+      const isBand = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0));
+      L.check(`§4.4 · (band) ${route} is exempt because it is the register's band`, ctx, isBand, `band ${isBand}`);
+    }
     L.check("§4.4 · no full header carries an eyebrow", ctx, [q, c, m, pk].every((x) => !Number.isFinite(x.eyebrow) && !x.eyebrowText), JSON.stringify([q, c, m, pk].map((x) => x.eyebrowText)));
   }
   L.write();
@@ -218,7 +242,10 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
      one no-eyebrow row — an exact count, not a floor */
   /* with the Query Centre a plate (4 Oct): the header and title tops of the two other open headers against
      the Contact list (4), the no-eyebrow row, and the plate row — 6 per size; 7 without a plate */
-  expect(L.rows.length).toBe(SIZES.length * (PLATE_ROUTES.includes("/queries") ? 6 : 7));
+  /* v13: per size, 2 × (open headers − 1) tops, the no-eyebrow row, a plate row if any, and one row per
+     band route — counted from the registers, so a register change cannot leave this stale */
+  const openN = 4 - PLATE_ROUTES.length - BAND_ROUTES.length;
+  expect(L.rows.length).toBe(SIZES.length * (2 * (openN - 1) + 1 + (PLATE_ROUTES.includes("/queries") ? 1 : 0) + BAND_ROUTES.length));
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 

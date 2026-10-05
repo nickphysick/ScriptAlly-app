@@ -498,19 +498,3 @@ export function findDuplicateAgent(name: string, agents: readonly Agent[]): Agen
   return agents.find((a) => (a.name ?? "").trim().toLowerCase() === typed) ?? null;
 }
 
-/* ── v12: the hero's second sentence (stated windows only) ────────────────────────────────── */
-
-/**
- * The list's typical reply time, in weeks — the MEAN of the agents' own stated windows, rounded
- * to the nearest week; null when nobody states one. ⚠️ THE SET IS RULING (c)'s: a truthy
- * `responseTimeWeeks` only, so the quick-add stub (0) and the writer's "Unknown" (absent) are
- * both outside it — an average over invented zeros would state a speed nobody promised.
- * (The v12 oracle computes exactly this: `C.filter(c=>c.wk)` then a rounded mean.)
- */
-export function averageReplyWeeks(agents: readonly Agent[]): number | null {
-  const stated = agents
-    .map((a) => a.responseTimeWeeks)
-    .filter((w): w is number => typeof w === "number" && w > 0);
-  if (!stated.length) return null;
-  return Math.round(stated.reduce((s, w) => s + w, 0) / stated.length);
-}

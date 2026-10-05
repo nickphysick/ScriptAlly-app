@@ -191,6 +191,10 @@
      bounds; its one app reader (`.ws-app`) reads `--ws-page` now, so nothing in the app shows it. */
   --ws-page-rgb: 243, 242, 240;
   --ws-page: rgb(var(--ws-page-rgb));
+  /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
+     and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
+     its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */
+  --page-section-gap: 40px;
   --ws-edge: #e9e2d7;
   /**
    * ⚠️ THE WINDOW IS NO LONGER PURE WHITE, AND CARDS ARE — that inversion is the point. At
