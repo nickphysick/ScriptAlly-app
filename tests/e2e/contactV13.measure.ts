@@ -52,17 +52,74 @@ test("CL13-1 · band", async ({ page }) => {
   L.done(33);
 });
 
-/* ── lock 2 · the 40px rhythm (Phase 1: the band to the section under it) ── */
+/* ── lock 2 · the 40px rhythm: band → strip → carousel head → list banner ── */
 test("CL13-2 · rhythm", async ({ page }) => {
   const L = new Ledger("cl13-2");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
     const w = `${vp.width}`;
     const band = await box(page, '.aglist [data-probe="page-header"][data-band]');
-    /* the first section under the band; Phase 2 puts the numbers strip here */
-    const next = await box(page, '.aglist [data-cl13="strip"]') ?? await box(page, ".aglist .clv-idxwrap");
-    L.check("CL13-2 band → the next section 40 (±1)", w, !!band && !!next && near(next.t - band.b, 40, 1), `${band && next ? next.t - band.b : "—"}`);
+    const strip = await box(page, '.aglist [data-cl13="strip"]');
+    L.check("CL13-2 band → strip 40 (±1)", w, !!band && !!strip && near(strip.t - band.b, 40, 1), `${band && strip ? strip.t - band.b : "—"}`);
+    /* the section under the strip: the carousel's head from Phase 2b, the list's banner from Phase 3 */
+    const czHead = await box(page, '.aglist [data-cz="contacts"] [data-cz-head]');
+    const cz = await box(page, '.aglist [data-cz="contacts"]');
+    const next = czHead ?? await box(page, '.aglist [data-cl13="lbanner"]') ?? await box(page, ".aglist .clv-idxwrap");
+    L.check("CL13-2 strip → the next section 40 (±1)", w, !!strip && !!next && near(next.t - strip.b, 40, 1), `${strip && next ? next.t - strip.b : "—"}`);
+    if (cz) {
+      const after = await box(page, '.aglist [data-cl13="lbanner"]') ?? await box(page, ".aglist .clv-idxwrap");
+      L.check("CL13-2 carousel → the section under it 40 (±1)", w, !!after && near(after.t - cz.b, 40, 1), `${after ? after.t - cz.b : "—"}`);
+    }
     await checkOverflow(page, L, w);
   }
-  L.done(6);
+  L.done(9);
+});
+
+/* ── §3 · the numbers strip: five cells, its figures, three of them pressable ── */
+test("CL13-S · strip", async ({ page }) => {
+  const L = new Ledger("cl13-s");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const strip = [...document.querySelectorAll<HTMLElement>('.aglist [data-cl13="strip"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const band = [...document.querySelectorAll<HTMLElement>('.aglist [data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0);
+      if (!strip) return null;
+      const cells = [...strip.querySelectorAll<HTMLElement>("[data-cl13-cell]")];
+      const sb = strip.getBoundingClientRect();
+      return {
+        w: sb.width, bandW: band?.querySelector(".ph-hin")?.getBoundingClientRect().width ?? null,
+        group: strip.parentElement?.getBoundingClientRect().width ?? null,
+        bg: getComputedStyle(strip).backgroundColor, radius: getComputedStyle(strip).borderTopLeftRadius,
+        cells: cells.map((c) => ({
+          label: c.getAttribute("data-cl13-cell"), fig: c.querySelector(".cl13-sf")?.textContent?.trim() ?? "",
+          line: c.querySelector(".cl13-se")?.textContent?.trim() ?? "", pressable: c.tagName === "BUTTON",
+          figFont: getComputedStyle(c.querySelector(".cl13-sf")!).fontFamily, figSize: getComputedStyle(c.querySelector(".cl13-sf")!).fontSize,
+          w: c.getBoundingClientRect().width, labelTop: c.querySelector(".cl13-sl")?.getBoundingClientRect().top ?? NaN,
+        })),
+        intro: (band?.querySelector(".ph-intro") as HTMLElement | null)?.innerText ?? "",
+        spark: strip.querySelectorAll('[data-cl13="spark"] i').length,
+        title: band?.querySelector("h1")?.textContent ?? "",
+      };
+    });
+    L.check("CL13-S the strip exists", w, !!r, JSON.stringify(r));
+    if (!r) continue;
+    L.check("CL13-S five cells, the mock's labels in order", w, JSON.stringify(r.cells.map((c) => c.label)) === JSON.stringify(["On file", "Fit your book", "Open now", "Typical reply", "Added this month"]), JSON.stringify(r.cells.map((c) => c.label)));
+    L.check("CL13-S every label on one top (a <button> cell does not centre its content)", w, r.cells.every((c) => near(c.labelTop, r.cells[0].labelTop, 1)), r.cells.map((c) => c.labelTop.toFixed(1)).join(" "));
+    const want = (r.intro.match(/want ([^.]+?) and haven/) ?? [])[1] ?? null, take = (r.cells[1].line.match(/^take (.+)$/) ?? [])[1] ?? null;
+    L.check("CL13-S the band and the strip name the genre one way", w, !take || want === take, `band "${want}" strip "${take}"`);
+    L.check("CL13-S equal cells (±1)", w, r.cells.length === 5 && r.cells.every((c) => near(c.w, r.cells[0].w, 1)), r.cells.map((c) => c.w.toFixed(1)).join(" "));
+    L.check("CL13-S the strip is the group's full width", w, near(r.w, r.group ?? -1, 1), `${r.w} vs ${r.group}`);
+    L.check("CL13-S white, 16px corners", w, r.bg === "rgb(255, 255, 255)" && r.radius === "16px", `${r.bg} ${r.radius}`);
+    L.check("CL13-S figures are Special Elite at 34px", w, r.cells.every((c) => /Special Elite/.test(c.figFont) && c.figSize === "34px"), JSON.stringify(r.cells.map((c) => [c.figFont.slice(0, 20), c.figSize])));
+    L.check("CL13-S exactly Fit your book, Open now and Added this month are pressable", w, JSON.stringify(r.cells.filter((c) => c.pressable).map((c) => c.label)) === JSON.stringify(["Fit your book", "Open now", "Added this month"]), "");
+    const onFile = Number(r.cells[0].fig), title = Number((r.title.match(/^(\d+)/) ?? [])[1] ?? (/^One/.test(r.title) ? 1 : NaN));
+    L.check("CL13-S On file = the band's count", w, onFile === title, `${onFile} vs "${r.title}"`);
+    L.check("CL13-S On file's line names the agencies; six spark bars", w, /^agents, across \d+ agenc(y|ies)$/.test(r.cells[0].line) && r.spark === 6, `${r.cells[0].line} · ${r.spark}`);
+    L.check("CL13-S Open now's line counts the closed", w, /^\d+ closed for now$/.test(r.cells[2].line), r.cells[2].line);
+    L.check("CL13-S Typical reply reads 'N wks' and names the fastest", w, (/^\d+wks$/.test(r.cells[3].fig) && /^fastest: .+, \d+ wks?$/.test(r.cells[3].line)) || r.cells[3].fig === "—", `${r.cells[3].fig} · ${r.cells[3].line}`);
+    L.check("CL13-S Added this month reads '+N'", w, /^\+\d+$/.test(r.cells[4].fig), r.cells[4].fig);
+    await checkOverflow(page, L, w);
+  }
+  L.done(45);
 });

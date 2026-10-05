@@ -1,6 +1,12 @@
 [
  {
-  "lock": "CL13-2 band → the next section 40 (±1)",
+  "lock": "CL13-2 band → strip 40 (±1)",
+  "where": "1512",
+  "ok": false,
+  "detail": "24"
+ },
+ {
+  "lock": "CL13-2 strip → the next section 40 (±1)",
   "where": "1512",
   "ok": true,
   "detail": "40"
@@ -12,7 +18,13 @@
   "detail": "found true over 0"
  },
  {
-  "lock": "CL13-2 band → the next section 40 (±1)",
+  "lock": "CL13-2 band → strip 40 (±1)",
+  "where": "1440",
+  "ok": false,
+  "detail": "24"
+ },
+ {
+  "lock": "CL13-2 strip → the next section 40 (±1)",
   "where": "1440",
   "ok": true,
   "detail": "40"
@@ -24,7 +36,13 @@
   "detail": "found true over 0"
  },
  {
-  "lock": "CL13-2 band → the next section 40 (±1)",
+  "lock": "CL13-2 band → strip 40 (±1)",
+  "where": "1280",
+  "ok": false,
+  "detail": "24"
+ },
+ {
+  "lock": "CL13-2 strip → the next section 40 (±1)",
   "where": "1280",
   "ok": true,
   "detail": "40"

@@ -11,8 +11,10 @@
  *
  * ⚠️ THE PANEL'S MAX-HEIGHT IS MEASURED FROM THE BUTTON'S OWN BOX at open (min(560, innerHeight −
  * button bottom − 24)) — the house viewport law; a constant would be a guess about the chrome
- * above the page.
+ * above the page. Below PANEL_FLOOR of room, the row is scrolled up before it is measured.
  */
+/** the least panel height worth opening at; with less room below the button, the page scrolls first */
+const PANEL_FLOOR = 360;
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -66,14 +68,26 @@ export const ContactControls: React.FC<ContactControlsProps> = ({
 
   const nFilters = contactFilterCount(filters);
 
+  const popNow = useRef<Pop>(null);
+  popNow.current = pop;
   const openPop = useCallback((which: Exclude<Pop, null>, btn: HTMLElement) => {
-    setPop((p) => {
-      if (p === which) return null;
-      const b = btn.getBoundingClientRect();
-      setMaxH(Math.min(560, window.innerHeight - b.bottom - 24));
-      bodyScroll.current = 0;
-      return which;
-    });
+    if (popNow.current === which) { setPop(null); return; }
+    /* ⚠️ ROOM FIRST, THEN MEASURE (Contact list v13 P2). The strip and the carousel put this row low on
+       the page — at 900 tall its button sat 17px above the fold and the panel opened 0px tall. When
+       less than a usable height is left below the button, the page's scroller brings the row up
+       before the height is read. Outside the state updater, which StrictMode runs twice. */
+    let b = btn.getBoundingClientRect();
+    const want = Math.min(560, PANEL_FLOOR);
+    if (window.innerHeight - b.bottom - 24 < want) {
+      const sc = btn.closest<HTMLElement>(".wpg-scroll");
+      if (sc) {
+        sc.scrollTop += b.bottom + 24 + 560 - window.innerHeight;
+        b = btn.getBoundingClientRect();
+      }
+    }
+    setMaxH(Math.min(560, window.innerHeight - b.bottom - 24));
+    bodyScroll.current = 0;
+    setPop(which);
   }, []);
 
   /* one closer for the whole cluster: outside pointerdown (capture) and Escape. "Outside" means

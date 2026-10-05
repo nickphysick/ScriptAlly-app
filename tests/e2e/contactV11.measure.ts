@@ -104,7 +104,11 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
     /* at rest: height = innerHeight − its own top − 16, clamped [360, 860] */
     const want = Math.max(360, Math.min(860, rest.inner - Math.max(16, rest.top) - 16));
     expect(Math.abs(rest.h - want), `rest: rail height ${rest.h} against derived ${want}`).toBeLessThanOrEqual(2);
-    expect(rest.bottom, "rest: the rail spills past the fold").toBeLessThanOrEqual(rest.inner - 14);
+    /* ⚠️ v13 P2: the strip and the carousel sit above the rail until it retires (P4), so at 900 tall its
+       resting top is low enough that the 360 floor binds — and a floored rail runs past the fold BY
+       its own rule. "Never past the fold" holds where the floor does not bind, and always once pinned
+       (asserted below). RETIRED-contact-list-v13.md records the narrowing. */
+    if (want > 360) expect(rest.bottom, "rest: the rail spills past the fold").toBeLessThanOrEqual(rest.inner - 14);
     bump(2);
 
     /* ⚠️ THE PRECONDITION FIRST: the page must actually scroll before the pinned reading means

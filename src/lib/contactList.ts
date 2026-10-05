@@ -18,6 +18,7 @@ import type { Agent, Manuscript, Query, QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
 import { isDoorOpen } from "./agentList";
 import { isGenreMatch, matchGenre } from "./genreMatch";
+import { genrePluralLower } from "./contactStrip";
 
 /** The rail's breathing room from the viewport's edges, and its height clamp (mock: the rail's
  *  JS writes an inline height; CSS carries `position: sticky; top: 16px; max-height: 860px`).
@@ -155,7 +156,8 @@ export function heroFacts(
   return {
     total: agents.length,
     msTitle: ms?.title ?? null,
-    genre: ms?.genre && match ? ms.genre.toLowerCase() : null,
+    /* v13: the lower-case PLURAL ("want thrillers"), the strip's and Housekeeping's own word for it */
+    genre: ms?.genre && match ? genrePluralLower(ms.genre) : null,
     want: wanters.length,
     fresh: wanters.filter((a) => standing.get(a.id)?.kind === "none").length,
   };

@@ -60,6 +60,9 @@ import { BarChip, ContactBar } from "./contact/ContactBar";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
+import "./contact/contactV13.css";
+import { ContactStrip, type FigureKey } from "./contact/ContactStrip";
+import { stripFacts } from "../../lib/contactStrip";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
@@ -203,6 +206,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
+  /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
+     A pressed figure fills the carousel (Phase 2b) and never touches the list's filters. */
+  const strip = useMemo(() => stripFacts(agents, scoped?.genre ?? null, nowMs), [agents, scoped, nowMs]);
+  const [figure, setFigure] = useState<FigureKey | null>(null);
+  const pressFigure = useCallback((k: FigureKey) => setFigure((f) => (f === k ? null : k)), []);
   const factsAll = useMemo(
     () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
     [agents, qcRows, scoped],
@@ -631,6 +639,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             art={<span className="clv-bdisc"><img src={`${CONTACT_BAND_DISC.src}?v=${CONTACT_BAND_DISC.version}`} width={CONTACT_BAND_DISC.width} height={CONTACT_BAND_DISC.height} alt="" /></span>}
           />
         )}
+        {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
+        {showList && <ContactStrip facts={strip} selected={figure} onPress={pressFigure} />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;

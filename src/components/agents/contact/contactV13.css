@@ -1,0 +1,118 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v13 (ref design-refs/contact-list-v13.html, measured at 1512 × 900). The page-scoped
+ * dress for the pieces v13 adds: the numbers strip, the carousel's head, the workspace's contents.
+ * Shared components (shell/) carry their own sheets; this sheet only dresses them for this page.
+ *
+ * ⚠️ TOKENS ARE THE `--clv-*` FAMILY at `:root` (contactV11.css), so a portal still resolves them.
+ */
+
+/* ══ §3 · the numbers strip ═════════════════════════════════════════════════════════════════════ */
+.cl13-strip {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -22px rgba(28, 19, 15, 0.3);
+}
+/* ⚠️ A FLEX COLUMN, NOT A BLOCK: three cells are <button>s, and a button centres its content
+   vertically when the grid stretches it, so the labels would sit at two heights across one strip */
+.cl13-sc {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left;
+  padding: 18px 22px; border: 0; border-left: 1px solid var(--clv-hair);
+  background: none; font: inherit; color: var(--clv-ink); min-width: 0;
+}
+.cl13-sc:first-child { border-left: 0; border-radius: 16px 0 0 16px; }
+.cl13-sc:last-child { border-radius: 0 16px 16px 0; }
+.cl13-sl {
+  display: block; font: 400 8.5px/1.3 var(--sp-mono);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--clv-ink-45);
+}
+.cl13-sf {
+  display: block; margin-top: 6px;
+  font-family: var(--clv-type); font-weight: 400; font-size: 34px; line-height: 1.1;
+}
+.cl13-sf i { font-style: normal; font-size: 16px; margin-left: 4px; color: var(--clv-ink-70); }
+.cl13-se {
+  display: block; margin-top: 4px; font-family: var(--clv-serif); font-style: italic;
+  font-size: 13px; line-height: 1.4; color: var(--clv-ink-70);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cl13-spark { display: flex; align-items: flex-end; gap: 3px; height: 22px; margin-top: 8px; }
+.cl13-spark i { width: 7px; background: var(--clv-slate-pale); border-radius: 2px; }
+.cl13-spark i:last-child { background: var(--clv-btn); }
+
+/* the pressable figures: a pointer, a hover wash, "Show in carousel →", and a pale slate ground with
+   a 3px anthracite foot while selected (the mock's `.strip div.pr.on`) */
+.cl13-sc--pr { cursor: pointer; transition: background 0.15s; }
+.cl13-sc--pr:hover { background: #f7f5f2; }
+.cl13-sc--pr::after {
+  content: "Show in carousel \2192"; position: absolute; right: 16px; top: 18px;
+  font: 400 8.5px/1.3 var(--sp-mono); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--clv-slate-ink); opacity: 0; transition: opacity 0.15s;
+}
+.cl13-sc--pr:hover::after, .cl13-sc--pr:focus-visible::after { opacity: 1; }
+.cl13-sc--pr.is-on { background: #eef2f5; box-shadow: inset 0 -3px 0 var(--clv-btn); }
+.cl13-sc--pr.is-on::after { content: "In the carousel \2713"; opacity: 1; }
+.cl13-sc--pr:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) {
+  .cl13-sc--pr, .cl13-sc--pr::after { transition: none; }
+}
+
+/* ══ §4 · "Who to query next" — the shell is shell/Carousel; this is the page's dress ═══════════════ */
+/* the selector: the mock's `.seg` (a white pill, the chosen choice anthracite); dimmed while a figure
+   has the carousel */
+.cl13-seg { display: flex; padding: 3px; border-radius: 20px; background: #fff; box-shadow: inset 0 0 0 1px var(--clv-hair); }
+.cl13-seg button {
+  border: 0; background: none; height: 32px; padding: 0 14px; border-radius: 16px;
+  font-family: var(--clv-serif); font-size: 14px; color: var(--clv-ink-70); white-space: nowrap; cursor: pointer;
+}
+.cl13-seg button[aria-pressed="true"] { background: var(--clv-btn); color: #f5f1eb; }
+.cl13-seg em { font-style: normal; font: 400 9px/1 var(--sp-mono); margin-left: 6px; opacity: 0.7; }
+.cl13-cz.is-fig .cl13-seg button { opacity: 0.6; }
+.cl13-clear {
+  border: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--clv-hair); height: 30px; padding: 0 12px;
+  border-radius: 15px; font-family: var(--clv-serif); font-size: 13px; color: var(--clv-ink); cursor: pointer;
+}
+
+/* the card: the agent card (`.ac`) in the carousel's dress, 318 wide — the shared blocks' `.ac .acq-*`
+   rules give it its parts, and these rules size them down to the mock's `.ac`.
+   ⚠️ EVERY RULE IS `.cz-item .cl13-ac …` (0-3-0) so it beats the card sheet's `.ac .acq-*` (0-2-0)
+   whatever order the bundle emits the two sheets in. */
+.cz-item > .cl13-ac {
+  width: 318px; display: flex; flex-direction: column; background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 14px 30px -18px rgba(28, 19, 15, 0.35);
+  cursor: pointer; transition: transform 0.18s; color: var(--clv-ink); font-family: var(--clv-serif);
+}
+.cz-item > .cl13-ac:hover { transform: translateY(-3px); }
+.cz-item > .cl13-ac:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: 2px; }
+.cz-item .cl13-ac .cl13-acb { height: 40px; background: var(--clv-slate); display: flex; align-items: center; gap: 8px; padding: 0 12px; flex: none; }
+.cz-item .cl13-ac .cl13-acchip {
+  font: 500 8px/1 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+  background: rgba(255, 255, 255, 0.18); padding: 4px 8px; border-radius: 10px;
+}
+.cz-item .cl13-ac .cl13-acst { margin-left: auto; color: #fff; font-size: 12px; letter-spacing: 1px; opacity: 0.9; }
+.cz-item .cl13-ac .cl13-acst span { opacity: 0.35; }
+.cz-item .cl13-ac .acq-head.cl13-ach { grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 16px 6px; align-items: center; }
+.cz-item .cl13-ac .cl13-ach .acq-ini { width: 34px; height: 34px; font-size: 11px; background: var(--clv-btn); color: #f5f1eb; }
+.cz-item .cl13-ac .cl13-ach h3 { font-size: 17px !important; line-height: 1.2 !important; }
+.cz-item .cl13-ac .cl13-acsub {
+  display: block; margin-top: 3px; font: 400 9px/1.3 var(--sp-mono); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--clv-ink-45);
+}
+.cz-item .cl13-ac .acq-s { margin: 0 16px; padding: 10px 0 0; border-top: 0; }
+.cz-item .cl13-ac .acq-lab { margin: 0 0 6px; font-size: 8.5px; }
+.cz-item .cl13-ac .acq-wish { margin: 0; font-size: 14px; line-height: 1.4; color: var(--clv-ink-70); min-height: 40px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cz-item .cl13-ac .cl13-acf {
+  margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border-top: 1px solid var(--clv-hair); margin-top: 14px;
+}
+.cz-item .cl13-ac .cl13-acf small {
+  font: 400 8.5px/1.5 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--clv-ink-45);
+}
+.cz-item .cl13-ac .cl13-acgo {
+  margin-left: auto; height: 32px; padding: 0 14px; border-radius: 16px; border: 0;
+  background: var(--clv-btn); color: #f5f1eb; font-family: var(--clv-type); font-size: 13px; white-space: nowrap; cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) { .cz-item > .cl13-ac { transition: none; } }

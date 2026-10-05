@@ -4,6 +4,7 @@
  *
  * Contact list v11 — locks for the pure derivations (phase 1: the rail's height law).
  */
+import { genrePluralLower } from "./contactStrip";
 import { describe, expect, it } from "vitest";
 import {
   GROUP_OPTIONS, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent,
@@ -102,12 +103,13 @@ describe("where you stand — the page-local union over the QC's own rows", () =
     expect(matchesCards(new Set(["active", "closed"]), s)).toBe(false);
   });
 
-  it("the facts sentence: totals, the genre as recorded (lowercased), and the fresh tail", () => {
+  /* v13: the genre is the lower-case PLURAL the strip says ("want thrillers"), through the one helper */
+  it("the facts sentence: totals, the genre as the lower-case plural, and the fresh tail", () => {
     const { standing } = contactCensus(CONTACT_FIXTURE_AGENTS, rows, MS.id);
     const f = heroFacts(CONTACT_FIXTURE_AGENTS, standing, MS);
     expect(f.total).toBe(CONTACT_FIXTURE_AGENTS.length);
     expect(f.msTitle).toBe(MS.title);
-    expect(f.genre).toBe(MS.genre.toLowerCase());
+    expect(f.genre).toBe(genrePluralLower(MS.genre));
     expect(f.want, "genre matches over the whole list").toBeGreaterThan(0);
     expect(f.fresh, "the bold tail counts matches never queried").toBeLessThanOrEqual(f.want);
     /* no manuscript in scope → the sentence has no subject and no tail */

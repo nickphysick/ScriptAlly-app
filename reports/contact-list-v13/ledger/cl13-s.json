@@ -1,0 +1,272 @@
+[
+ {
+  "lock": "CL13-S the strip exists",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"w\":1167.25,\"bandW\":1167.25,\"group\":1167.25,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":515.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.453125,\"labelTop\":530.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":233.4375,\"labelTop\":530.75}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+ },
+ {
+  "lock": "CL13-S five cells, the mock's labels in order",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"On file\",\"Fit your book\",\"Open now\",\"Typical reply\",\"Added this month\"]"
+ },
+ {
+  "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
+  "where": "1512",
+  "ok": false,
+  "detail": "515.8 530.8 530.8 530.8 530.8"
+ },
+ {
+  "lock": "CL13-S the band and the strip name the genre one way",
+  "where": "1512",
+  "ok": false,
+  "detail": "band \"thriller\" strip \"thrillers\""
+ },
+ {
+  "lock": "CL13-S equal cells (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "233.4 233.5 233.5 233.5 233.4"
+ },
+ {
+  "lock": "CL13-S the strip is the group's full width",
+  "where": "1512",
+  "ok": true,
+  "detail": "1167.25 vs 1167.25"
+ },
+ {
+  "lock": "CL13-S white, 16px corners",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) 16px"
+ },
+ {
+  "lock": "CL13-S figures are Special Elite at 34px",
+  "where": "1512",
+  "ok": false,
+  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+ },
+ {
+  "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
+  "where": "1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-S On file = the band's count",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 vs \"37 agents on file\""
+ },
+ {
+  "lock": "CL13-S On file's line names the agencies; six spark bars",
+  "where": "1512",
+  "ok": true,
+  "detail": "agents, across 37 agencies · 6"
+ },
+ {
+  "lock": "CL13-S Open now's line counts the closed",
+  "where": "1512",
+  "ok": true,
+  "detail": "4 closed for now"
+ },
+ {
+  "lock": "CL13-S Typical reply reads 'N wks' and names the fastest",
+  "where": "1512",
+  "ok": true,
+  "detail": "8wks · fastest: Cormac Bligh, 4 wks"
+ },
+ {
+  "lock": "CL13-S Added this month reads '+N'",
+  "where": "1512",
+  "ok": true,
+  "detail": "+4"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-S the strip exists",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"w\":1099.84375,\"bandW\":1099.84375,\"group\":1099.84375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":515.75},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":219.96875,\"labelTop\":530.75}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+ },
+ {
+  "lock": "CL13-S five cells, the mock's labels in order",
+  "where": "1440",
+  "ok": true,
+  "detail": "[\"On file\",\"Fit your book\",\"Open now\",\"Typical reply\",\"Added this month\"]"
+ },
+ {
+  "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
+  "where": "1440",
+  "ok": false,
+  "detail": "515.8 530.8 530.8 530.8 530.8"
+ },
+ {
+  "lock": "CL13-S the band and the strip name the genre one way",
+  "where": "1440",
+  "ok": false,
+  "detail": "band \"thriller\" strip \"thrillers\""
+ },
+ {
+  "lock": "CL13-S equal cells (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "220.0 220.0 220.0 220.0 220.0"
+ },
+ {
+  "lock": "CL13-S the strip is the group's full width",
+  "where": "1440",
+  "ok": true,
+  "detail": "1099.84375 vs 1099.84375"
+ },
+ {
+  "lock": "CL13-S white, 16px corners",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) 16px"
+ },
+ {
+  "lock": "CL13-S figures are Special Elite at 34px",
+  "where": "1440",
+  "ok": false,
+  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+ },
+ {
+  "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
+  "where": "1440",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-S On file = the band's count",
+  "where": "1440",
+  "ok": true,
+  "detail": "37 vs \"37 agents on file\""
+ },
+ {
+  "lock": "CL13-S On file's line names the agencies; six spark bars",
+  "where": "1440",
+  "ok": true,
+  "detail": "agents, across 37 agencies · 6"
+ },
+ {
+  "lock": "CL13-S Open now's line counts the closed",
+  "where": "1440",
+  "ok": true,
+  "detail": "4 closed for now"
+ },
+ {
+  "lock": "CL13-S Typical reply reads 'N wks' and names the fastest",
+  "where": "1440",
+  "ok": true,
+  "detail": "8wks · fastest: Cormac Bligh, 4 wks"
+ },
+ {
+  "lock": "CL13-S Added this month reads '+N'",
+  "where": "1440",
+  "ok": true,
+  "detail": "+4"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-S the strip exists",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"w\":950.09375,\"bandW\":950.09375,\"group\":950.09375,\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"16px\",\"cells\":[{\"label\":\"On file\",\"fig\":\"37\",\"line\":\"agents, across 37 agencies\",\"pressable\":false,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":735.0625},{\"label\":\"Fit your book\",\"fig\":\"8\",\"line\":\"take thrillers\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Open now\",\"fig\":\"33\",\"line\":\"4 closed for now\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Typical reply\",\"fig\":\"8wks\",\"line\":\"fastest: Cormac Bligh, 4 wks\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.015625,\"labelTop\":750.0625},{\"label\":\"Added this month\",\"fig\":\"+4\",\"line\":\"last: Imogen Vale, 5 Oct\",\"pressable\":true,\"figFont\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"figSize\":\"34px\",\"w\":190.03125,\"labelTop\":750.0625}],\"intro\":\"Two of them want thriller and haven’t seen Harbour of Glass yet.\",\"spark\":6,\"title\":\"37 agents on file\"}"
+ },
+ {
+  "lock": "CL13-S five cells, the mock's labels in order",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"On file\",\"Fit your book\",\"Open now\",\"Typical reply\",\"Added this month\"]"
+ },
+ {
+  "lock": "CL13-S every label on one top (a <button> cell does not centre its content)",
+  "where": "1280",
+  "ok": false,
+  "detail": "735.1 750.1 750.1 750.1 750.1"
+ },
+ {
+  "lock": "CL13-S the band and the strip name the genre one way",
+  "where": "1280",
+  "ok": false,
+  "detail": "band \"thriller\" strip \"thrillers\""
+ },
+ {
+  "lock": "CL13-S equal cells (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "190.0 190.0 190.0 190.0 190.0"
+ },
+ {
+  "lock": "CL13-S the strip is the group's full width",
+  "where": "1280",
+  "ok": true,
+  "detail": "950.09375 vs 950.09375"
+ },
+ {
+  "lock": "CL13-S white, 16px corners",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) 16px"
+ },
+ {
+  "lock": "CL13-S figures are Special Elite at 34px",
+  "where": "1280",
+  "ok": false,
+  "detail": "[[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"],[\"\\\"Source Sans 3\\\", sys\",\"34px\"]]"
+ },
+ {
+  "lock": "CL13-S exactly Fit your book, Open now and Added this month are pressable",
+  "where": "1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-S On file = the band's count",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 vs \"37 agents on file\""
+ },
+ {
+  "lock": "CL13-S On file's line names the agencies; six spark bars",
+  "where": "1280",
+  "ok": true,
+  "detail": "agents, across 37 agencies · 6"
+ },
+ {
+  "lock": "CL13-S Open now's line counts the closed",
+  "where": "1280",
+  "ok": true,
+  "detail": "4 closed for now"
+ },
+ {
+  "lock": "CL13-S Typical reply reads 'N wks' and names the fastest",
+  "where": "1280",
+  "ok": true,
+  "detail": "8wks · fastest: Cormac Bligh, 4 wks"
+ },
+ {
+  "lock": "CL13-S Added this month reads '+N'",
+  "where": "1280",
+  "ok": true,
+  "detail": "+4"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]
