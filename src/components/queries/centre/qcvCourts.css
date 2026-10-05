@@ -14,7 +14,8 @@
 @import "./qcvPage.css";
 
 /* the 26px the reference puts between the header's rule and the desk */
-.qcv-deskw { padding-top: 26px; }
+/* v126 §2: one 40px rhythm — band → desk → carousel → list banner */
+.qcv-deskw { padding-top: 40px; }
 
 .qcv-desk {
   display: grid;

@@ -18,7 +18,7 @@ import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DOCK_MIN_COLUMN, QcCentre, readBirdsEyeOpen } from "./QcCentre";
-import { HERO_COURIER_MAP, QC_PLATE_COURIER, QC_PLATE_FIGURE } from "./qcArt";
+import { HERO_COURIER_MAP, QC_COURIER_DISC } from "./qcArt";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -205,22 +205,15 @@ describe("the frame, rendered", () => {
    * container query, and could not be trimmed: it would need a crop, and §1.1 forbids one.
    */
   it("§3 · the hero art is still the enrolled asset, and the page is what names it", () => {
-    /**
-     * ⚠️ WHAT SURVIVES HERE IS THE ASSET, not the arrangement. Which drawing the Query Centre opens
-     * with is the page's decision and nothing else knows it; where it sits is the header's, and
-     * "last in the reading order, aria-hidden" is asserted once for every page in `mastheadFormat`.
-     */
-    /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the populated page's header is a plate, and its drawing is the
-       two enrolled layers — the full crop under the plate's clip, the brushless figure over its edge.
-       `hero-courier-map.png` is still the asset `QcEmpty` opens with; it is no longer this page's. */
+    /* ⚠️ RETARGETED BY v126 (5 Oct): the populated page's header is the anthracite BAND, its drawing the
+       courier in a white disc (`qc-courier-disc.png`). The plate (4 Oct) is retired here and stays on
+       PageHeader for other routes; `hero-courier-map.png` is still the asset `QcEmpty` opens with. */
     const html = frame();
-    for (const art of [QC_PLATE_COURIER, QC_PLATE_FIGURE]) {
-      expect(html).toContain(art.src);
-      expect(html).toContain(`?v=${art.version}`);
-    }
-    expect(html, "the plate is not switched on").toContain('data-plate=""');
-    expect(html, "the full crop stopped reaching the plate's clipped layer").toMatch(/class="ph-plclip"[^>]*>\s*<div class="ph-under" data-probe="art-under"><img src="\/images\/qc\/qc-plate-courier\.png/);
-    expect(html, "the figure stopped reaching the over layer").toMatch(/class="ph-over" data-probe="art-figure" aria-hidden="true"><img src="\/images\/qc\/qc-plate-courier-figure\.png/);
+    expect(html).toContain(QC_COURIER_DISC.src);
+    expect(html).toContain(`?v=${QC_COURIER_DISC.version}`);
+    expect(html, "the band is not switched on").toContain('data-band=""');
+    expect(html, "the disc stopped reaching the band's slot").toMatch(/class="ph-bdisc" data-probe="band-disc" aria-hidden="true"><img src="\/images\/qc\/qc-courier-disc\.png/);
+    expect(html, "the plate came back on the populated page").not.toContain('data-plate=""');
     expect(html, "the populated page went back to the open header's single drawing").not.toContain(HERO_COURIER_MAP.src);
   });
   /**

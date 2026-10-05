@@ -93,12 +93,12 @@ test("QC126-3 · band", async ({ page }) => {
     const r = await page.evaluate(() => {
       const vis = (s: string, root: ParentNode = document) => [...root.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
-      const band = vis('[data-qcv="band"]'); const bar = vis('[data-probe="navrow"]'); const main = vis(".ws-main");
+      const band = vis('[data-probe="page-header"][data-band]'); const bar = vis('[data-probe="navrow"]'); const main = vis(".ws-main");
       const desk = vis('[data-qcv="courts"]');
       return {
         band: b(band), bg: band ? getComputedStyle(band).backgroundColor : null, bar: b(bar), main: b(main), desk: b(desk),
         title: b(band?.querySelector("h1") ?? null), titleAlign: band?.querySelector("h1") ? getComputedStyle(band.querySelector("h1")!).textAlign : null,
-        text: b(band?.querySelector('[data-qcv="band-text"]') ?? null), disc: b(band?.querySelector('[data-qcv="band-disc"]') ?? null),
+        text: b(band?.querySelector('[data-probe="band-text"]') ?? null), disc: b(band?.querySelector('[data-probe="band-disc"]') ?? null),
         plates: document.querySelectorAll(".ph--plate, [data-plate]").length,
       };
     });
@@ -111,7 +111,9 @@ test("QC126-3 · band", async ({ page }) => {
     L.check("QC126-3 the band spans the main column (pixel at each edge)", w, sameRgb(left, [42, 58, 82], 3) && sameRgb(right, [42, 58, 82], 3), `left ${left} right ${right}`);
     L.check("QC126-3 the title is left-aligned", w, r.titleAlign === "left" || r.titleAlign === "start", `${r.titleAlign}`);
     if (r.text && r.disc && r.desk) {
-      L.check("QC126-3 the disc is right of the text block", w, r.disc.l >= r.text.r, `disc ${r.disc.l} text ${r.text.r}`);
+      /* below 1100px of column the disc drops beneath the text (§2); the column is the desk's width */
+      if (r.desk.w >= 1099.5) L.check("QC126-3 the disc is right of the text block", w, r.disc.l >= r.text.r, `disc ${r.disc.l} text ${r.text.r}`);
+      else L.check("QC126-3 (column < 1100) the disc drops beneath the text", w, r.disc.t >= r.text.b - 0.5, `disc top ${r.disc.t} text bottom ${r.text.b} (column ${r.desk.w})`);
       if (vp.width >= 1440) {
         const mid = (r.text.l + r.disc.r) / 2, col = (r.desk.l + r.desk.r) / 2;
         L.check("QC126-3 text + disc centred on the content column (±2)", w, near(mid, col, 2), `pair ${mid.toFixed(1)} column ${col.toFixed(1)}`);
@@ -129,7 +131,7 @@ test("QC126-4 · rhythm", async ({ page }) => {
   for (const vp of WIDTHS) {
     await openQc(page, vp);
     const w = `${vp.width}`;
-    const band = await box(page, '[data-qcv="band"]'), desk = await box(page, '[data-qcv="courts"]');
+    const band = await box(page, '[data-probe="page-header"][data-band]'), desk = await box(page, '[data-qcv="courts"]');
     const cz = await box(page, '[data-qcv="cz-head"]'), czAll = await box(page, '[data-qcv="cz"]'), lb = await box(page, '[data-qcv="lbanner"]');
     L.check("QC126-4 band → desk 40", w, !!band && !!desk && near(desk.t - band.b, 40, 1), `${band && desk ? desk.t - band.b : "—"}`);
     L.check("QC126-4 desk → carousel head 40", w, !!desk && !!cz && near(cz.t - desk.b, 40, 1), `${desk && cz ? cz.t - desk.b : "—"}`);

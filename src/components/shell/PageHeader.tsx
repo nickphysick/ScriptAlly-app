@@ -189,6 +189,13 @@ export interface PageHeaderProps {
   /** The plate's OVER layer (see `plate`). Ignored without `plate`. */
   artFigure?: React.ReactNode;
   /**
+   * THE BAND (Query Centre v126, 5 Oct) — opt-in, `full` only, and today the Query Centre's alone. The
+   * header becomes a full-bleed anthracite band starting directly under the top bar: the text block
+   * left-aligned with `art` (a drawing in a white disc) on its right, the pair centred on the column.
+   * The plate path stays for anyone else; a page passes one or the other.
+   */
+  band?: boolean;
+  /**
    * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
    * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
    *
@@ -262,6 +269,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   art,
   plate = false,
   artFigure,
+  band = false,
   title,
   icon,
   primary,
@@ -460,8 +468,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}`}
-      data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined}
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}`}
+      data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >
       {/**
@@ -471,7 +479,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         * anchored to the frame's right and to the rule, so it ends at the column's right edge.
         */}
       <div className="ph-hin" data-probe="hero-frame">
-      <div className="ph-text">
+      <div className="ph-text" data-probe={band ? "band-text" : undefined}>
         {section && <p className="ph-eyebrow" data-probe="eyebrow"><span>{section}</span> / <b>{title}</b></p>}
         {living && living.count === 0 && living.empty ? (
           <>
@@ -516,7 +524,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         * will go. The text block keeps its half either way, so the two pages that do have art and
         * the one that does not open identically.
         */}
-      {art && !plate && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
+      {art && !plate && !band && <div className="ph-art" data-probe="art" aria-hidden="true">{art}</div>}
+      {/* the band's drawing: a disc beside the text, in the flow of the band's grid, never absolute */}
+      {art && band && <div className="ph-bdisc" data-probe="band-disc" aria-hidden="true">{art}</div>}
       {/**
         * THE PLATE'S TWO LAYERS (see the `plate` prop). The clip is a sibling of the text, inset to the
         * plate's own box with its radius, so the under layer is cut at exactly the plate's edge; the

@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { BE_HAWK_HEAD, COURIER_CUTOUT, HERO_COURIER_MAP, QC_PLATE_COURIER, QC_PLATE_FIGURE, type QcArt } from "./qcArt";
+import { BE_HAWK_HEAD, COURIER_CUTOUT, HERO_COURIER_MAP, QC_COURIER_DISC, QC_LIST_PERCH, QC_PLATE_COURIER, QC_PLATE_FIGURE, type QcArt } from "./qcArt";
 
 const file = resolve(process.cwd(), "public", COURIER_CUTOUT.src.replace(/^\//, ""));
 
@@ -75,7 +75,7 @@ describe("the v65.2 artwork", () => {
    * between them — the figure is drawn over its own brush, so a different size or crop is a figure
    * that no longer lands on itself.
    */
-  for (const [name, art] of [["the plate's courier", QC_PLATE_COURIER], ["the plate's figure", QC_PLATE_FIGURE]] as const) {
+  for (const [name, art] of [["the plate's courier", QC_PLATE_COURIER], ["the plate's figure", QC_PLATE_FIGURE], ["the band's courier disc", QC_COURIER_DISC], ["the list's perched hawk", QC_LIST_PERCH]] as const) {
     it(`${name}: the file is where the record says, at the bytes the pack approved`, () => {
       const f = at(art);
       expect(existsSync(f), `${f} is not in the tree`).toBe(true);

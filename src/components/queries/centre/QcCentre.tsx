@@ -17,7 +17,7 @@
 import React, { useLayoutEffect, useRef } from "react";
 import "../../shell/primitives.css";
 import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
-import { QC_PLATE_COURIER, QC_PLATE_FIGURE } from "./qcArt";
+import { QC_COURIER_DISC } from "./qcArt";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
@@ -150,13 +150,11 @@ export const QcCentre: React.FC<{
         primaryRef={logRef}
         primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled || loading }}
         secondary={{ label: "Record a response", onClick: onRecord, disabled: loading }}
-        /* THE PLATE (4 Oct, a test on this page alone): the header stands on the ground as a white
-           plate, and the courier is two layers of one drawing — the full crop clipped to the plate,
-           and the figure without its brush standing in front of the plate's edge. `QcEmpty` keeps
-           the open header and `hero-courier-map.png`. */
-        plate
-        art={<img src={`${QC_PLATE_COURIER.src}?v=${QC_PLATE_COURIER.version}`} width={QC_PLATE_COURIER.width} height={QC_PLATE_COURIER.height} alt="" />}
-        artFigure={<img src={`${QC_PLATE_FIGURE.src}?v=${QC_PLATE_FIGURE.version}`} width={QC_PLATE_FIGURE.width} height={QC_PLATE_FIGURE.height} alt="" />}
+        /* THE BAND (v126 §2, 5 Oct): a full-bleed anthracite band under the top bar, the courier in a
+           white disc on the text's right. The plate is retired on this page (it stays on PageHeader for
+           anyone else); `QcEmpty` keeps the open header and `hero-courier-map.png`. */
+        band
+        art={<img src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} alt="" />}
       />
     {/**
       * §1 (v95) — THE DESK IS A FULL-SPAN BAND, like the header above it, and the rail starts in

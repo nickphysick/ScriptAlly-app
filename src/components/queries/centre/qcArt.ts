@@ -77,3 +77,11 @@ export const QC_PLATE_FIGURE: QcArt = {
   width: 484,
   height: 375,
 };
+
+/**
+ * Query Centre v126 — the header band's courier in a white disc (290 wide on the band), and the list
+ * banner's perched hawk (170 wide, ALREADY MIRRORED — never flipped in CSS). Both from the v126 pack,
+ * hashes verified at enrolment.
+ */
+export const QC_COURIER_DISC: QcArt = { src: "/images/qc/qc-courier-disc.png", version: "d09517cf", width: 560, height: 501 };
+export const QC_LIST_PERCH: QcArt = { src: "/images/qc/qc-list-perch.png", version: "e1faf886", width: 464, height: 480 };
