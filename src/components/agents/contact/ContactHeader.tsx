@@ -15,11 +15,13 @@
 /** The hawk, cropped from `/images/contact/hero-archivist.png` with the drawn card removed. */
 export const CONTACT_HAWK = { src: "/images/contact/contact-hawk.webp", version: "1", width: 389, height: 344 };
 
-/** v12: the whole painting, trimmed to its bounds — the hero art in the shared art box
- *  (`object-fit: contain`, anchored bottom-right by the box). Replaces the hawk-only crop in
- *  the HEADER; the hawk survives as the Housekeeping tray's stand-in and the empty state's
- *  art until P5. */
-export const CONTACT_ARCHIVIST = { src: "/images/contact/contact-list-hero-archivist-full.png", version: "1", width: 1141, height: 360 };
+/** v13 §2: the band's white disc holds the Archivist at the desk — the marketing Contact page's own
+ *  drawing (`src/marketing/ContactPage.tsx`), READ from its public path rather than copied, so the
+ *  two pages cannot drift. The file is square on white, not pre-cut to a circle (the Query Centre's
+ *  disc art is), so the page's `.clv-bdisc` draws the white circle and insets the drawing in it.
+ *  ⚠️ It replaces v12's `CONTACT_ARCHIVIST` (the full painting, `contact-list-hero-archivist-full.png`),
+ *  whose only reader was the open header this band retires; that PNG is now referenced by nothing. */
+export const CONTACT_BAND_DISC = { src: "/images/contact-archivist.png", version: "a603d9cb", width: 800, height: 800 };
 
 /**
  * The intro, in runs from the one derivation — the manuscript's title in the typewriter face and

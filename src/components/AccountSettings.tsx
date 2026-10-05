@@ -60,6 +60,7 @@ import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
+import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
 import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
 import { smartImportLine } from "../lib/smartImportEntitlement";
 import { planAllowanceLine } from "../lib/planComparison";
@@ -493,7 +494,7 @@ export const AccountSettings: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ section, onNavigate }) => {
   const {
-    currentUser, updateUserProfile, resetPassword,
+    currentUser, updateUserProfile, updateUserPaths, resetPassword,
     agents, queries, manuscripts, versions, packages, activities, notes, userTasks,
     logout,
   } = useScriptAllyDb();
@@ -579,9 +580,12 @@ export const AccountSettings: React.FC<{
 
   /** Every task pref commits instantly with the standard receipt — the same model as every other
    *  toggle and select on this page. */
-  const saveTodoPref = async (patch: Partial<typeof prefs>, what: string) => {
+  /* ⚠️ BY LEAF, NEVER AS A MAP. `prefs` is `todoPrefs()`'s three-field view, so spreading it back
+     as the whole `todoPrefs` deleted the list view, the Noteboard and the Manuscripts tiles on every
+     save (Contact list v13, Phase 0). `deskPrefPaths` names the one leaf the control changed. */
+  const saveTodoPref = async (patch: DeskPrefPatch, what: string) => {
     try {
-      await updateUserProfile({ todoPrefs: { ...prefs, ...patch } });
+      await updateUserPaths(deskPrefPaths(patch));
       savedReceipt(what);
     } catch {
       showToast({ message: `Couldn't save ${what.toLowerCase()} — try again?`, duration: 4000 });
@@ -1239,7 +1243,7 @@ export const AccountSettings: React.FC<{
             key={t.key}
             label={t.label}
             description={t.gloss}
-            control={<Toggle on={prefs.types[t.key]} onChange={(v) => saveTodoPref({ types: { ...prefs.types, [t.key]: v } }, t.label)} label={t.label} />}
+            control={<Toggle on={prefs.types[t.key]} onChange={(v) => saveTodoPref({ types: { [t.key]: v } }, t.label)} label={t.label} />}
           />
         ))}
       </SettingsCard>

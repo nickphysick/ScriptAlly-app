@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
 import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
-import { PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
 
 test.describe.configure({ timeout: Number(process.env.QB_TIMEOUT ?? 900_000) });
@@ -155,6 +155,7 @@ test("Q8 · every full header starts on the column's left, level with the first 
   const L = new Ledger("qb-left");
   let full = 0, compact = 0, drawn = 0;
   const platesSeen = new Set<string>();
+  const bandsSeen = new Set<string>();
   for (const vp of SIZES) {
     for (const route of BAR_ROUTES) {
       await openApp(page, route, vp);
@@ -175,9 +176,16 @@ test("Q8 · every full header starts on the column's left, level with the first 
           platesSeen.add(route);
           L.check("Q8 · (plate) the plate's left = the first card's left (±1)", ctx, r.plate && !!r.card && r.frameL !== null && near(r.frameL, r.card.l, 1), `plate ${r.plate} frame ${r.frameL?.toFixed(1)} card ${r.card?.l.toFixed(1)}`);
           L.check("Q8 · (plate) the text sits the plate's padding inside it (±1)", ctx, r.frameL !== null && near(r.textL, r.frameL + PLATE_PAD_X, 1), `text ${r.textL.toFixed(1)} frame ${r.frameL?.toFixed(1)}`);
+        } else if (BAND_ROUTES.includes(route)) {
+          /* ⚠️ A BAND ROUTE (v126, registered by Contact list v13): the band centres its text and disc as
+             a pair over the column, so the text's left follows the title's width by design — QC126-3 and
+             CL13-1 own its placement. What stays here is that the header IS the band. */
+          bandsSeen.add(route);
+          const isBand = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0));
+          L.check("Q8 · (band) the header is the register's band", ctx, isBand, `band ${isBand}`);
         } else L.check("Q8 · full: the text's left = the first card's left (±1)", ctx, !!r.card && near(r.textL, r.card.l, 1), `text ${r.textL.toFixed(1)} card ${r.card?.l.toFixed(1)} (${r.card?.cls})`);
         /* Comparable titles passes no art — nothing to anchor; the tally below counts the drawings measured */
-        if (r.drawnR !== null) {
+        if (r.drawnR !== null && !BAND_ROUTES.includes(route)) {
           drawn++;
           L.check("Q8 · full: the drawing's right = the column's right (±1)", ctx, near(r.drawnR, r.headerR, 1), `drawn ${r.drawnR.toFixed(1)} column ${r.headerR.toFixed(1)}`);
         }
@@ -194,9 +202,10 @@ test("Q8 · every full header starts on the column's left, level with the first 
   const all = { route: "*", size: "*", state: "tally" };
   /* a plate's drawing sits 24 in from its right by design (PH1–PH4 own it), so each plate route takes its
      drawing out of this tally at both sizes — 6 open drawings became 4 when the Query Centre became a plate */
-  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6 - 2 * PLATE_ROUTES.length, `full ${full} compact ${compact} drawn ${drawn}`);
+  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6 - 2 * (PLATE_ROUTES.length + BAND_ROUTES.length), `full ${full} compact ${compact} drawn ${drawn}`);
   L.write();
   console.log(`Q8 tally: full ${full} compact ${compact} drawn ${drawn}`);
   expect([...platesSeen].sort(), "Q8's plate exemptions are not the register's").toEqual([...PLATE_ROUTES].sort());
+  expect([...bandsSeen].sort(), "Q8's band exemptions are not the register's").toEqual([...BAND_ROUTES].sort());
   expect(L.failures().map((f) => `${f.lock} · ${f.route} ${f.size} — ${f.detail}`)).toEqual([]);
 });

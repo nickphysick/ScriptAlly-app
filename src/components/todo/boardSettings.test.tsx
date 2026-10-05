@@ -127,8 +127,14 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
     }
   });
 
-  it("⚠️ ONE FIELD, ONE WRITE PATH — the map is merged, never four flat writes", () => {
-    expect(tasksPage).toContain("updateUserProfile({ todoPrefs: { ...prefs, ...patch } })");
+  /* ⚠️ RETARGETED (Contact list v13, Phase 0). This used to require the whole-map spread
+     `{ todoPrefs: { ...prefs, ...patch } }` — and `prefs` is the TOTAL reader's three-field view,
+     so that write deleted every other owner of the map (list view, Noteboard, Manuscripts tiles).
+     The law it stood for survives: ONE stored field, read through the total reader. What changed is
+     that the field is now written by LEAF, which is the only form that cannot touch its siblings. */
+  it("⚠️ ONE FIELD, ONE WRITE PATH — written by leaf, never as a whole map", () => {
+    expect(tasksPage).toContain("updateUserPaths(deskPrefPaths(patch))");
+    expect(tasksPage).not.toContain("todoPrefs: { ...prefs, ...patch }");
     expect(tasksPage).toContain("todoPrefs(currentUser.todoPrefs)");
   });
 

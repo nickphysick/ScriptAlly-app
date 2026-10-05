@@ -130,7 +130,8 @@
     "design-refs/query-centre-v130.html": "d26b82c76febecfe2a3b5f4bacd6bf701d074a45a0df1bd7174408923559efa4",
     "design-refs/qc-v126/ref-v130-birdseye-1512@2x.png": "bcfda2ae31c406cc23a898a3cad3e3d11545139f102abbf133d255bec7e9eca2",
     "design-refs/qc-v126/ref-v130-birdseye-filtered-1512@2x.png": "a96528fc6401c562112193af1a5377801e0f80bfb15d75f41c0cf3e51d4ff1ac",
-    "design-refs/qc-v126/ref-v130-birdseye-1280@2x.png": "38aeb5c0d35558dacd5a69d655a3acb492908b0a39f216ef3fbc7966693ca54c"
+    "design-refs/qc-v126/ref-v130-birdseye-1280@2x.png": "38aeb5c0d35558dacd5a69d655a3acb492908b0a39f216ef3fbc7966693ca54c",
+    "design-refs/contact-list-v13.html": "ef20ece16de30b18b0a1fb67d6ad3a64a2eec1c814d0e87741d01ceec4674b8e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

@@ -21,7 +21,7 @@ import { resolve } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 import { Ledger, near, f1 } from "./shellV3Lib";
-import { PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 
 test.describe.configure({ timeout: 1_800_000 });
 
@@ -58,6 +58,8 @@ type Hero = {
   h2: Box; h2Text: string; intro: Box; introText: string; acts: Box; b1: Box; b2: Box; art: Box; artSrc: string; shape: string;
   /** the header is a plate (`data-plate`, the register in plateRoutes.ts) */
   plate: boolean;
+  /** the header is the band (`data-band`, BAND_ROUTES in plateRoutes.ts) */
+  band: boolean;
 };
 
 async function setCount(page: Page, n: number | null) {
@@ -87,7 +89,11 @@ async function readHero(page: Page): Promise<Hero> {
     const lines = (e: Element | null) => {
       if (!e) return 0;
       const r = document.createRange(); r.selectNodeContents(e);
-      return new Set([...r.getClientRects()].filter((x) => x.width > 0).map((x) => Math.round(x.top))).size;
+      /* ⚠️ CLUSTERED, NOT ROUNDED (v13): the band's title sits on a top near x.5, so its two line boxes
+         rounded to different integers and one line read as two. A line is a top more than 2px from
+         the previous one — a real wrap is a whole line-height lower. */
+      const tops = [...r.getClientRects()].filter((x) => x.width > 0).map((x) => x.top).sort((a, b) => a - b);
+      return tops.reduce((n, t, i) => (i === 0 || t - tops[i - 1] > 2 ? n + 1 : n), 0);
     };
     const clone = hd.cloneNode(true) as HTMLElement;
     clone.querySelectorAll('h1[data-probe="title"], [data-probe="intro"]').forEach((e) => { e.innerHTML = ""; });
@@ -95,6 +101,7 @@ async function readHero(page: Page): Promise<Hero> {
       living: hd.getAttribute("data-living"),
       rule: parseFloat(getComputedStyle(hd).borderBottomWidth) || 0,
       plate: hd.hasAttribute("data-plate"),
+      band: hd.hasAttribute("data-band"),
       hd: { l: o.left, t: o.top, w: o.width, h: o.height, r: o.right, b: o.bottom },
       eyebrow: hd.querySelectorAll('[data-probe="eyebrow"]').length,
       h1: box(h1), h1Text: h1?.innerText.trim() ?? "", h1Scroll: h1?.scrollWidth ?? -1, h1Client: h1?.clientWidth ?? -1, h1Lines: lines(h1),
@@ -132,6 +139,7 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
   const L = new Ledger("lh3-shape");
   const widths1280: Record<string, Record<string, number>> = {};
   const platesSeen = new Set<string>();
+  const bandsSeen = new Set<string>();
   let reads = 0;
   for (const w of WIDTHS) for (const p of RUN) {
     const ctx = (state: string) => ({ route: p.route, size: `${w}`, state });
@@ -151,9 +159,17 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     /* the one-line subline was written into React's DOM by hand — reopen before React renders over it */
     await openApp(page, p.route, { width: w, height: H });
     L.check("LH0 population", ctx("27"), many.living === "settled" && !!many.h1 && !!many.intro, `living ${many.living}`);
+    /* ⚠️ A BAND ROUTE CENTRES ITS TEXT AND DISC AS A PAIR (v126 §2, v13 §2), so a shorter title moves
+       the pair sideways by design; "no movement" there is VERTICAL — every box keeps its top and its
+       height. Its horizontal placement is QC126-3's and CL13-1's. */
+    const isBand = BAND_ROUTES.includes(p.route);
+    if (isBand) bandsSeen.add(p.route);
     for (const [nm, x] of [["one", one], ["one-line subline", short]] as const) {
       for (const k of ["h1", "intro", "acts", "b1", "b2", "art"] as const) {
-        L.check("LH1 no movement", ctx(`${nm}·${k}`), sameBox(x[k], many[k]), `${s(x[k])} vs ${s(many[k])}`);
+        if (isBand) {
+          const a = x[k], b = many[k];
+          L.check("LH1 (band) no vertical movement", ctx(`${nm}·${k}`), (a === null && b === null) || (!!a && !!b && near(a.t, b.t, 1) && near(a.h, b.h, 1)), `${s(a)} vs ${s(b)}`);
+        } else L.check("LH1 no movement", ctx(`${nm}·${k}`), sameBox(x[k], many[k]), `${s(x[k])} vs ${s(many[k])}`);
       }
       L.check("LH1 no movement", ctx(`${nm}·header`), near(x.hd!.h, many.hd!.h, 1), `${f1(x.hd!.h)} vs ${f1(many.hd!.h)}`);
     }
@@ -207,6 +223,14 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
       const column = [edges.frame, edges.tile, edges.row].filter((x) => x !== null) as number[];
       L.check("LH4 (plate) the plate's left is the cards' left", ctx("data"), column.length >= 3 && column.every((x) => near(x, edges.frame!, 1)), [edges.frame, edges.tile, edges.row].map(f1).join(" "));
       L.check("LH4 (plate) the text sits the plate's padding inside it", ctx("data"), text.length >= 3 && edges.frame !== null && text.every((x) => near(x, edges.frame! + PLATE_PAD_X, 1)), [edges.h1, edges.intro, edges.acts].map(f1).join(" ") + ` frame ${f1(edges.frame)}`);
+    } else if (isBand) {
+      /* a band's text is centred with its disc, so it does not share the cards' left: the text lines
+         share ONE left x among themselves, and the page below shares another */
+      const text = [edges.h1, edges.intro, edges.acts].filter((x) => x !== null) as number[];
+      L.check("LH4 (band) the text lines share one left x", ctx("data"), text.length === 3 && text.every((x) => near(x, text[0], 1)), text.map(f1).join(" "));
+      /* the page below is the band page's own (its rows sit inside the workspace's padding by design —
+         QC126-8, CL13-5); reported here, not asserted */
+      L.check("LH4 (band) the page's lefts (reported, not asserted)", ctx("data"), true, [edges.tile, edges.row].map(f1).join(" "));
     } else L.check("LH4 one left x", ctx("data"), lefts.length >= 3 && lefts.every((x) => near(x, edges.h1!, 1)), [edges.h1, edges.intro, edges.acts, edges.tile, edges.row].map(f1).join(" "));
     if (edges.beside) L.check("LH4 hero right = rail right", ctx("data"), near(edges.heroR, edges.railR ?? -1, 1), `${f1(edges.heroR)} vs ${f1(edges.railR)}`);
     else L.check("LH4 rail stacked (reported, not asserted)", ctx("data"), true, `rail right ${f1(edges.railR)} hero right ${f1(edges.heroR)}`);
@@ -220,6 +244,10 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     /* ⚠️ RETARGETED BY THE PLATE (4 Oct): on a plate route the populated header IS the plate, which
        replaces the rule; the empty state keeps the open header, held to its pre-plate geometry by PH5. */
     if (isPlate) L.check("LH7 (plate) no rule either side: the plate replaces it", ctx("0"), empty.rule === 0 && !empty.plate && many.rule === 0 && many.plate, `rule ${empty.rule}/${many.rule} plate ${empty.plate}/${many.plate}`);
+    /* a band route keeps its BAND in the empty mode too: the band replaces the rule on both sides */
+    /* a band route's empty mode is the OPEN empty header (the real empty page is too), so the band is on
+       the populated side only — and neither side carries the rule */
+    else if (isBand) L.check("LH7 (band) no rule either side; the band is the populated header's", ctx("0"), empty.rule === 0 && !empty.band && many.rule === 0 && many.band, `rule ${empty.rule}/${many.rule} band ${empty.band}/${many.band}`);
     else L.check("LH7 no rule", ctx("0"), empty.rule === 0 && many.rule > 0, `rule ${empty.rule} (populated ${many.rule})`);
     L.check("LH7 no eyebrow", ctx("0"), empty.eyebrow === 0 && many.eyebrow === 0, `${empty.eyebrow} / ${many.eyebrow}`);
     for (const k of ["b1", "b2", "art"] as const) {
@@ -227,6 +255,9 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
       /* a plate's buttons sit inside its padding and its art is two layers — the empty state is a different
          header by design (PH5 holds it); the cross-state claim does not apply */
       if (isPlate) { L.check("LH7 (plate) cross-state boxes skipped: the empty state is the open header (PH5)", ctx(`0·${k}`), true, ""); continue; }
+      /* a band centres text + disc as a pair, and the empty heading is a different width from the title,
+         so the pair moves sideways by design — the claim left is vertical */
+      if (isBand) { L.check("LH7 (band) cross-state boxes skipped: the empty state is the open header, the populated one the band", ctx(`0·${k}`), true, `${s(empty[k])} vs ${s(many[k])}`); continue; }
       L.check("LH7 same x and size", ctx(`0·${k}`), !!empty[k] && !!many[k] && near(empty[k]!.l, many[k]!.l, 1) && near(empty[k]!.w, many[k]!.w, 1) && near(empty[k]!.h, many[k]!.h, 1), `${s(empty[k])} vs ${s(many[k])}`);
     }
 
@@ -234,6 +265,10 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     if (w === 1440 && PLATE_ROUTES.includes(p.route)) {
       /* ⚠️ the living ref draws the OPEN header; a plate route's header is measured against the plate ref by PH1–PH4 */
       L.check("LH0 (plate) skipped: the plate's ref is qc-plate-header-v1 (PH1–PH4)", ctx("27"), many.plate, `plate ${many.plate}`);
+    } else if (w === 1440 && isBand) {
+      /* ⚠️ the living ref draws the OPEN header; a band route is measured against its own ref by
+         QC126-3 (query-centre-v126.html) and CL13-1 (contact-list-v13.html) */
+      L.check("LH0 (band) skipped: the band's ref is the page's own (QC126-3 / CL13-1)", ctx("27"), many.band, `band ${many.band}`);
     } else if (w === 1440) {
       const r = await readRef(page, many.hd!.w, p.key, 27);
       L.check("LH0 ref: header height", ctx("27"), near(many.hd!.h, r.hdH, 2), `${f1(many.hd!.h)} vs ref ${f1(r.hdH)}`);
@@ -250,6 +285,7 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
   console.log(`LH3 shape reads: ${reads}`);
   /* what was treated as a plate IS the register's set, among the routes this run covered */
   expect([...platesSeen].sort(), "the plate exemptions are not the register's").toEqual(PLATE_ROUTES.filter((r) => RUN.some((p) => p.route === r)).slice().sort());
+  expect([...bandsSeen].sort(), "the band exemptions are not the register's").toEqual(BAND_ROUTES.filter((r) => RUN.some((p) => p.route === r)).slice().sort());
   expect(reads, "the suite measured less than it claims").toBeGreaterThanOrEqual(WIDTHS.length * RUN.length * 9);
   expect(L.failures(), L.failures().map((f) => `${f.lock} ${f.route} ${f.size} ${f.state}: ${f.detail}`).join("\n")).toEqual([]);
 });
@@ -371,7 +407,8 @@ test("LH9 · a page filtered to nothing keeps its hero", async ({ page }) => {
     const ctx = { route, size: "1440", state };
     L.check("LH9 population", ctx, none, `no-match shown ${none}`);
     /* a plate route keeps its PLATE where an open header keeps its rule (4 Oct) */
-    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : h.rule > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate}`);
+    /* …and a band route keeps its BAND (v13) */
+    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : BAND_ROUTES.includes(route) ? h.band : h.rule > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate} band ${h.band}`);
     L.check("LH9 no exhibition", ctx, (await page.evaluate(() => [...document.querySelectorAll('[data-lh="band"]')].filter((e) => e.getBoundingClientRect().height > 0).length)) === 0, "");
   };
   if (!ONLY || ONLY === "qc") {

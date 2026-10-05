@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CL13-2 band → the next section 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-2 band → the next section 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-2 band → the next section 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

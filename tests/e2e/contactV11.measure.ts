@@ -917,47 +917,9 @@ test("Log query opens the query drawer on this page — no navigation, the agent
 
 /* ══════════════════════════ v12 P1 — the hero (§10.1), the pills, and the quick-add's absence ══════════════════════════ */
 
-for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }] as const) {
-  test(`v12 §10.1 — the hero at ${vp.width}: the QC's height, the painting on the column's edge, never over the text`, async ({ page }) => {
-    await openRoute(page, "/queries", vp);
-    const qcH = await page.evaluate(() => {
-      const h = [...document.querySelectorAll(".ph--full")].find((e) => e.getBoundingClientRect().height > 0);
-      return h ? h.getBoundingClientRect().height : null;
-    });
-    expect(qcH, "no QC full header to compare against").not.toBeNull();
-    await openRoute(page, "/agents", vp);
-    const scope = await visiblePage(page, ".agl-wpg");
-    const r = await page.evaluate((scope) => {
-      const hd = [...document.querySelectorAll(`${scope} .ph--full`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
-      if (!hd) return null;
-      const img = hd.querySelector<HTMLImageElement>(".ph-art img");
-      const title = hd.querySelector('[data-probe="title"]');
-      const sub = hd.querySelector('[data-probe="intro"]');
-      const group = document.querySelector(`${scope} .clv-group`) as HTMLElement;
-      const ir = img?.getBoundingClientRect(); const ar = img?.closest(".ph-art")?.getBoundingClientRect();
-      const tr = title?.getBoundingClientRect(); const sr = sub?.getBoundingClientRect();
-      const overlaps = (a?: DOMRect, b?: DOMRect) => !!a && !!b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-      return {
-        h: hd.getBoundingClientRect().height,
-        src: img?.currentSrc ?? "", nat: img?.naturalWidth ?? 0,
-        boxRight: ar?.right ?? NaN, colRight: group.getBoundingClientRect().right,
-        overTitle: overlaps(ir, tr as DOMRect), overSub: overlaps(ir, sr as DOMRect),
-        primary: hd.querySelector(".ph-primary")?.textContent?.trim() ?? "",
-        secondary: hd.querySelector(".ph-secondary")?.textContent?.trim() ?? "",
-      };
-    }, scope);
-    expect(r, "no full header on /agents").not.toBeNull();
-    expect(Math.abs(r!.h - (qcH as number)), `hero height ${r!.h} against the QC's ${qcH}`).toBeLessThanOrEqual(4);
-    expect(r!.src, "the art is not the full painting").toContain("contact-list-hero-archivist-full");
-    expect(r!.nat, "the painting's natural width").toBe(1141);
-    expect(Math.abs(r!.boxRight - r!.colRight), "the art box's right edge is not the column's").toBeLessThanOrEqual(1.5);
-    expect(r!.overTitle, "the art passed behind the title").toBe(false);
-    expect(r!.overSub, "the art passed behind the subline").toBe(false);
-    expect(r!.primary).toContain("+ Add an agent");
-    expect(r!.secondary, "the secondary pill is Discover (the paste pill is retired)").toContain("Discover agents");
-    bump(8);
-  });
-}
+/* v12 §10.1 (the open hero at the QC's height, the full painting on the column's edge) is RETIRED by
+   Contact list v13 §2: the hero is the band, held by contactV13 CL13-1. It was already red on main
+   before v13 (the QC's header became the band in v126). See RETIRED-contact-list-v13.md. */
 
 test("v12 P1 — + Add an agent opens the centred card directly; no quick-add exists; Discover navigates", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });

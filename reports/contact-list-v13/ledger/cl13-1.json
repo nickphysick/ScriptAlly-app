@@ -1,0 +1,200 @@
+[
+ {
+  "lock": "CL13-1 the band exists on the Contact list",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"l\":296.375,\"t\":105.75,\"r\":1463.625,\"b\":473.75,\"w\":1167.25,\"h\":368}"
+ },
+ {
+  "lock": "CL13-1 anthracite rgb(42,58,82)",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-1 starts at the top bar's bottom (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "CL13-1 the band spans the main column (pixel at each edge)",
+  "where": "1512",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "CL13-1 the disc is 290 (±2), white, round",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"l\":1055.859375,\"t\":153.75,\"r\":1345.859375,\"b\":443.75,\"w\":290,\"h\":290} rgb(255, 255, 255)"
+ },
+ {
+  "lock": "CL13-1 the disc holds contact-archivist.png",
+  "where": "1512",
+  "ok": true,
+  "detail": "/images/contact-archivist.png?v=a603d9cb"
+ },
+ {
+  "lock": "CL13-1 title 'N agents on file'",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 agents on file"
+ },
+ {
+  "lock": "CL13-1 the sentence has no reply-time clause",
+  "where": "1512",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 the sentence is ONE sentence",
+  "where": "1512",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 buttons: + Add an agent · Discover agents",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-1 the band exists on the Contact list",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"l\":294.078125,\"t\":105.75,\"r\":1393.921875,\"b\":473.75,\"w\":1099.84375,\"h\":368}"
+ },
+ {
+  "lock": "CL13-1 anthracite rgb(42,58,82)",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-1 starts at the top bar's bottom (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "CL13-1 the band spans the main column (pixel at each edge)",
+  "where": "1440",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "CL13-1 the disc is 290 (±2), white, round",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"l\":1006.21875,\"t\":153.75,\"r\":1296.21875,\"b\":443.75,\"w\":290,\"h\":290} rgb(255, 255, 255)"
+ },
+ {
+  "lock": "CL13-1 the disc holds contact-archivist.png",
+  "where": "1440",
+  "ok": true,
+  "detail": "/images/contact-archivist.png?v=a603d9cb"
+ },
+ {
+  "lock": "CL13-1 title 'N agents on file'",
+  "where": "1440",
+  "ok": true,
+  "detail": "37 agents on file"
+ },
+ {
+  "lock": "CL13-1 the sentence has no reply-time clause",
+  "where": "1440",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 the sentence is ONE sentence",
+  "where": "1440",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 buttons: + Add an agent · Discover agents",
+  "where": "1440",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-1 the band exists on the Contact list",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"l\":288.953125,\"t\":105.75,\"r\":1239.046875,\"b\":693.0625,\"w\":950.09375,\"h\":587.3125}"
+ },
+ {
+  "lock": "CL13-1 anthracite rgb(42,58,82)",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-1 starts at the top bar's bottom (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "CL13-1 the band spans the main column (pixel at each edge)",
+  "where": "1280",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "CL13-1 the disc is 290 (±2), white, round",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"l\":288.953125,\"t\":373.0625,\"r\":578.953125,\"b\":663.0625,\"w\":290,\"h\":290} rgb(255, 255, 255)"
+ },
+ {
+  "lock": "CL13-1 the disc holds contact-archivist.png",
+  "where": "1280",
+  "ok": true,
+  "detail": "/images/contact-archivist.png?v=a603d9cb"
+ },
+ {
+  "lock": "CL13-1 title 'N agents on file'",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 agents on file"
+ },
+ {
+  "lock": "CL13-1 the sentence has no reply-time clause",
+  "where": "1280",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 the sentence is ONE sentence",
+  "where": "1280",
+  "ok": true,
+  "detail": "Two of them want thriller and haven’t seen Harbour of Glass yet."
+ },
+ {
+  "lock": "CL13-1 buttons: + Add an agent · Discover agents",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]
