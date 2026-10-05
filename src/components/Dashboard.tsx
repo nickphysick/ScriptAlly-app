@@ -53,7 +53,8 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { OneScreenDashboard } from "./dashboard/OneScreenDashboard";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
-import { useOpenEditAgent } from "./EditAgentHost";
+import { dataNeedTarget, openAgentCard } from "../lib/agentCardStore";
+import { agentDataQualityNeeds } from "../lib/agentDataQuality";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -203,7 +204,6 @@ const TaskPanelCard: React.FC<{
   onClosePanel: () => void;
   onOpenQuery?: (queryId: string) => void;
 }> = ({ task, onNavigate, dismissTask, onClosePanel, onOpenQuery }) => {
-  const openEditAgent = useOpenEditAgent();
   const { queries, agents, manuscripts } = useScriptAllyDb();
   const [showSnoozeDropdown, setShowSnoozeDropdown] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -266,9 +266,13 @@ const TaskPanelCard: React.FC<{
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // The "Edit Agent" housekeeping task opens the Edit Agent drawer in place (app-level overlay —
-    // no route change); every other task navigates.
-    if (task.taskType === "data_quality_poor") openEditAgent(task.relatedRecordId, { fromTask: true });
+    // The "Edit Agent" housekeeping task opens the agent card in place, on the editor at the agent's
+    // first gap (app-level overlay — no route change); every other task navigates. The card resolves
+    // the task when a save leaves no gap.
+    if (task.taskType === "data_quality_poor") {
+      const ag = agents.find((a) => a.id === task.relatedRecordId);
+      openAgentCard(task.relatedRecordId, { ...(ag ? dataNeedTarget(agentDataQualityNeeds(ag)) : null), from: "task" });
+    }
     else onNavigate(task.actionPath, task.title);
     onClosePanel();
   };
@@ -470,7 +474,6 @@ export const Dashboard: React.FC<{
   searchQuery,
   setSearchQuery
 }) => {
-  const openEditAgent = useOpenEditAgent();
   const openEditQuery = useOpenEditQuery();
   const {
     currentUser,

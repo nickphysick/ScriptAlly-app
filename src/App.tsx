@@ -14,7 +14,6 @@ import { AppShell, StagePage } from "./components/shell/AppShell";
 // Queries rail) but still power the dev-only #/shell-lab review surface.
 import { SidebarShell } from "./components/shell/SidebarShell";
 import { QueriesRail } from "./components/shell/QueriesRail";
-import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
@@ -67,10 +66,9 @@ import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
 // TEMP: duplicate-query reconcile card dev preview (#/reconcile-card) — remove after sign-off.
 import { ReconcileCardDevPreview } from "./components/onboarding/ReconcileCard";
-import { QueryStatus, SubmissionStatus, SubmissionMethod, UserPlan } from "./types";
+import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
-import { EditAgentDrawer } from "./components/EditAgentDrawer";
 import { EditQueryDrawer } from "./components/EditQueryDrawer";
 // TEMP: query reading-pane review harness (#/reading-pane-lab) — DEV only.
 import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
@@ -119,24 +117,12 @@ const ScatterLoaderDevHarness: React.FC = () => {
   return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={() => {}} userName="Nick" />;
 };
 
-/** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditAgentDrawer over a mock
- *  agent so the extracted shell can be reviewed without signing in. Sits inside DbProvider, so the
- *  drawer's useScriptAllyDb works (queries/manuscripts come back empty when signed out). */
+/** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditQueryDrawer over a mock
+ *  query so the shell can be reviewed without signing in. Sits inside DbProvider, so the drawer's
+ *  useScriptAllyDb works (queries/manuscripts come back empty when signed out). Its agent half went
+ *  with EditAgentDrawer (Agent card v1 P6) — the agent card has its own lab, #/contact-lab. */
 const DrawerLab: React.FC = () => {
-  const [which, setWhich] = useState<"agent" | "query">("agent");
   const [open, setOpen] = useState(true);
-  const mockAgent = {
-    id: "lab-agent", userId: "lab", name: "Eleanor Hart", agency: "Hart & Quill Literary",
-    email: "eleanor@hartquill.co.uk", website: "hartquill.co.uk", country: "United Kingdom", city: "London",
-    socials: [{ platform: "X / Twitter", handle: "@eleanorhart" }],
-    submissionStatus: SubmissionStatus.OPEN, submissionMethod: SubmissionMethod.EMAIL,
-    noResponseMeansNo: false, responseTimeWeeks: 8, starRating: 4,
-    genres: ["Literary Fiction", "Upmarket Fiction"],
-    materialsWanted: ["Query Letter", "Synopsis", "First 50 pages"],
-    mswlNotes: "Voice-driven literary fiction with a strong sense of place.",
-    notes: "Met at a conference; very warm in person.",
-    dateAdded: new Date().toISOString(), lastCheckedDate: new Date().toISOString(),
-  } as any;
   const mockQuery = {
     id: "lab-query", userId: "lab", manuscriptId: "lab-ms", agentId: "lab-agent", packageId: "",
     status: QueryStatus.PARTIAL_REQUESTED, dateSent: "2026-03-04T10:00:00.000Z",
@@ -153,13 +139,9 @@ const DrawerLab: React.FC = () => {
   return (
     <div style={{ minHeight: "100vh", background: "#F5F0EA", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "fixed", top: 20, left: 20, display: "flex", gap: 8, zIndex: 2000 }}>
-        <button style={btn(which === "agent")} onClick={() => { setWhich("agent"); setOpen(true); }}>Agent drawer</button>
-        <button style={btn(which === "query")} onClick={() => { setWhich("query"); setOpen(true); }}>Query drawer</button>
         {!open && <button style={btn(false)} onClick={() => setOpen(true)}>Reopen</button>}
       </div>
-      {which === "agent"
-        ? <EditAgentDrawer agent={mockAgent} isOpen={open} onClose={() => setOpen(false)} />
-        : <EditQueryDrawer query={mockQuery} isOpen={open} onClose={() => setOpen(false)} />}
+      <EditQueryDrawer query={mockQuery} isOpen={open} onClose={() => setOpen(false)} />
     </div>
   );
 };
@@ -684,13 +666,10 @@ function AppContent() {
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
       {/* Global AppShell: persistent left rail + the stage (the app's scroll container); pages
-          render inside as persistent StagePage slots. EditQueryHost + EditAgentHost mount the
-          single Edit Query / Edit Agent drawers as app-level overlays (opened via
-          useOpenEditQuery / useOpenEditAgent — no route change, scroll preserved). */}
+          render inside as persistent StagePage slots. EditQueryHost mounts the single Edit Query
+          drawer as an app-level overlay (useOpenEditQuery — no route change, scroll preserved);
+          agents open in the agent card, mounted below beside the query drawer. */}
       <EditQueryHost onSavedToast={(msg) => setSuccessToast(msg)}>
-      <EditAgentHost
-        onSavedToast={(msg) => setSuccessToast(msg)}
-      >
       <AppShell
         routeKey={routeKey}
         onNavigate={handleNavigate}
@@ -844,7 +823,6 @@ function AppContent() {
             reached from the shell rail. The MARKETING footer (Landing.tsx `.mk-foot`) is a
             separate element and is untouched. */}
       </AppShell>
-      </EditAgentHost>
       </EditQueryHost>
 
       {/* Focus Mode Overlay Dialog Form */}

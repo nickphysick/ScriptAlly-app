@@ -15,6 +15,7 @@
 import { useSyncExternalStore } from "react";
 import type { Agent } from "../types";
 import type { CardDraft } from "./cardDraft";
+import type { AgentDataNeed } from "./agentDataQuality";
 
 /** The editor's four tabs — the mock's own keys: Contact · Wishlist · Submissions · Notes. */
 export type AgentCardTab = "who" | "want" | "work" | "notes";
@@ -56,6 +57,20 @@ const notify = () => listeners.forEach((l) => l(current));
 export function openAgentCard(agentId: string, opts: AgentCardOptions = {}): void {
   current = { ...opts, agentId, seq: ++seq };
   notify();
+}
+/**
+ * A data-quality task's door (Agent card v1 §8): the editor, on the tab and field of the FIRST gap
+ * the agent still has, in `agentDataQualityNeeds`' own order. With no gap left the task is stale,
+ * so it opens the quick view (null) rather than an editor pointing at nothing. The targets are
+ * Housekeeping's own, so the two doors into one gap cannot land in different places.
+ */
+const NEED_TARGET: Record<AgentDataNeed, { tab: AgentCardTab; focus: AgentCardField }> = {
+  responseTime: { tab: "work", focus: "reply" },
+  materials: { tab: "want", focus: "materials" },
+  mswl: { tab: "want", focus: "wishlist" },
+};
+export function dataNeedTarget(needs: readonly AgentDataNeed[]): { tab: AgentCardTab; focus: AgentCardField } | null {
+  return needs.length ? NEED_TARGET[needs[0]] : null;
 }
 export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from"> = {}): void {
   current = { ...opts, agentId: null, seq: ++seq };

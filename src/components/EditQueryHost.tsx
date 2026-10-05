@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * App-level host for the Edit Query drawer — a sibling of EditAgentHost. The drawer is an OVERLAY:
+ * App-level host for the Edit Query drawer. (Its sibling EditAgentHost retired with Agent card v1;
+ * agents open in the agent card.) The drawer is an OVERLAY:
  * opening it leaves the user exactly where they are (same page, same scroll). It's mounted once here,
  * driven by an `openEditQuery(queryId[, opts])` action exposed via context, so any surface — a query
  * row, the contextual query CTA, the agent drawer's query list, a to-do task — can open it without a

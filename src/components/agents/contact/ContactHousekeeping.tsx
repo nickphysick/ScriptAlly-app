@@ -28,7 +28,7 @@ const HK_GROUP_KEY = "sa.hkGrouping";
 
 /** the card tab and field each gap's Add opens (§9.3's action column; Agent card v1 — reply time
  *  lives on Submissions now, not in the old form's first section) */
-const GAP_TARGET: Record<Exclude<GapKey, "reopen" | "recheck">, CardTarget> = {
+export const GAP_TARGET: Record<Exclude<GapKey, "reopen" | "recheck">, CardTarget> = {
   reply: { tab: "work", focus: "reply" },
   genres: { tab: "want", focus: "genres" },
   wishlist: { tab: "want", focus: "wishlist" },

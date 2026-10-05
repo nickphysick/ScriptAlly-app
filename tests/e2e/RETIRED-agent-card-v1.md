@@ -134,3 +134,37 @@ changed.)
 drawer on this page" door 2 asserted the card was GONE behind the drawer ("two asking surfaces at
 once"). The card docks now — mounted, stepped aside, out of reach and out of sight — so the case
 requires exactly that (`.is-docked`, the card hidden) and lock 7 holds the rest.
+
+## Phase 6 (5 Oct) — EditAgentDrawer retires
+
+**Deleted:** `src/components/EditAgentDrawer.tsx` (681 lines) and `src/components/EditAgentHost.tsx`
+(its app-level host, the `useOpenEditAgent` hook and its context). The agent card is the only agent
+editor now. Swept for their EXCLUSIVE helpers: `Form11Drawer`'s `BlockNote` and `OkIcon` had no
+other importer and go with them; `AlertIcon` stays (`ConfirmGuard` uses it), as do the rest of
+`Form11Drawer` (the Edit Query drawer's shell) and every form primitive the drawer shared with
+`AddAgentFocusForm` (`CountryCombobox`, `FitStars`, `SOCIAL_PLATFORMS`, the materials encoder). No
+stylesheet carried `.ea-` rules; the drawer styled itself inline.
+
+**Repointed openers:**
+- `Dashboard.tsx` — the `data_quality_poor` action → `openAgentCard(id, { ...dataNeedTarget(needs),
+  from: "task" })`: the editor on the tab and field of the agent's FIRST gap, the quick view when
+  none is left. The card resolves the task flag when a save leaves no gap (since P4), as the host
+  did. ⚠️ **This door renders nowhere:** `TaskPanelCard` sits under `renderTasksSidebarWidget`, which
+  nothing calls, so the task panel cannot be opened on the live dashboard. It is repointed rather
+  than left importing a deleted file. Its half of lock 10 is a source lock, and the dead cluster is
+  flagged for its own pass.
+- `Queries.tsx` — the open query's Agent tab, "Edit agent ›" → `openAgentCard(id, { from: "qc" })`,
+  the quick view over the Query Centre, whose ⋯ offers "Open in Contact list" (built in P2).
+- `App.tsx` — `#/drawer-lab` loses its agent half; the Edit Query drawer's half stays.
+
+**What the old drawer had that the card does not** (all as §8 rules): social handles are preserved
+untouched on save (the card's patch writes `socials` only when the MSWL link changes, keeping every
+other entry in place); the legacy `notes` string shows read-only as "Earlier note" (since P3); the
+"Queries to {name}" list is the card's history; the guided data-quality walkthrough is opening at
+the field; in-memory parked drafts are superseded by the dirty-close ask.
+
+**Locks:** `agentCardRetire.test.ts` (the files gone, no import of either or of the hook, both doors'
+wiring, `dataNeedTarget` derived through `agentDataQualityNeeds` and agreeing with Housekeeping's
+`GAP_TARGET`, now exported for the comparison) and `agentCardV1.measure.ts` phase 6 (the Query
+Centre's Edit agent opens the card for that query's agent, `from: "qc"`, over `/queries`, the quick
+view rather than the editor, and no Form 11 drawer beside it).

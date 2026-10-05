@@ -32,6 +32,7 @@ import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { openRoute, visiblePage } from "./measure";
 import { harnessDb } from "./harnessDocs";
+import { openQueryById, openTab } from "./openQuery";
 import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query as fsQuery, setDoc, updateDoc, where } from "firebase/firestore";
 
 let asserts = 0;
@@ -1636,5 +1637,43 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
     expect(await storedPark(page)).toBeNull();
     await closeCard(page);
     bump(9);
+  });
+});
+
+/* ═════════════════════════ phase 6 — EditAgentDrawer retires (lock 10) ═════════════════════════ */
+
+test.describe("phase 6 — the old agent drawer retires", () => {
+  /* Lock 10's rendered half. The Query Centre's "Edit agent ›" (the open query's Agent tab) is the one
+     live door the old drawer had; it must open THE CARD, over the Query Centre, for that query's agent,
+     with no route change and no drawer. `current().from` proves the door was this button rather than
+     a lookalike opener. (The dashboard's data-quality door is repointed too, but nothing renders it —
+     `renderTasksSidebarWidget` is never called — so its half is a source lock: agentCardRetire.test.ts.) */
+  test("lock 10: the Query Centre's Edit agent opens the agent card over the page — the old drawer is gone", async ({ page }) => {
+    test.setTimeout(240_000);
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    const id = await page.evaluate(() => document.querySelector<HTMLElement>('.qcv-page [data-qcv="row"][data-id]')?.dataset.id ?? null);
+    expect(id, "population first — the Query Centre lists no query").not.toBeNull();
+    const { db, uid } = await harnessDb();
+    const q = (await getDoc(doc(db, "users", uid, "queries", id!))).data() as { agentId: string };
+    const agent = (await getDoc(doc(db, "users", uid, "agents", q.agentId))).data() as { name?: string; agency?: string };
+    const host = await openQueryById(page, id!);
+    await openTab(page, host, "Agent");
+    const edit = page.locator(`${host.root} button`).filter({ hasText: /^Edit agent/ });
+    await expect(edit, "the Agent tab offers no Edit agent").toBeVisible();
+    await edit.click();
+    /* named, and on its own short clock — a door that opens nothing must say so, not time out */
+    await expect(page.locator(CARD), "Edit agent opened no agent card").toBeVisible({ timeout: 10_000 });
+    await settle(page);
+    const req = await handle(page).current();
+    expect(req?.agentId, "the card opened for another agent").toBe(q.agentId);
+    expect(req?.from, "the card was not opened by the Query Centre's door").toBe("qc");
+    expect(await page.evaluate(() => window.location.pathname), "Edit agent navigated away from the Query Centre").toBe("/queries");
+    expect(await page.locator(EDITOR).count(), "it opens the quick view, not straight into the editor").toBe(0);
+    expect(await cardName(page), "the card names a different agent").toBe((agent.name || agent.agency || "").trim());
+    /* the retired drawer slid in on Form11Drawer's shell, whose root is `.f11-slide` (the Edit Query
+       drawer still uses it, so the class is live and this read can see one) */
+    expect(await page.locator(".f11-slide").count(), "a Form 11 drawer opened beside the card").toBe(0);
+    await closeCard(page);
+    bump(6);
   });
 });
