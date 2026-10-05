@@ -2,49 +2,247 @@
  {
   "lock": "AN17-2 the band exists",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":288.953125,\"t\":105.75,\"r\":1239.046875,\"b\":442.75,\"w\":950.09375,\"h\":337}"
+ },
+ {
+  "lock": "AN17-2 anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "AN17-2 starts at the top bar's bottom edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "AN17-2 spans the main column (pixel at each edge)",
+  "where": "1280",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "AN17-2 the title",
+  "where": "1280",
+  "ok": true,
+  "detail": "Less guesswork, better results"
+ },
+ {
+  "lock": "AN17-2 the disc is 250px",
+  "where": "1280",
+  "ok": true,
+  "detail": "250×250"
+ },
+ {
+  "lock": "AN17-2 the disc is right of the text",
+  "where": "1280",
+  "ok": true,
+  "detail": "disc 899.6875 text 835.6875"
+ },
+ {
+  "lock": "AN17-2 a 64px gap (±2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "AN17-2 the pair is centred on the content column (±2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "pair 764.0 column 764.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-2 the band exists",
   "where": "1440",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":294.078125,\"t\":105.75,\"r\":1393.921875,\"b\":442.75,\"w\":1099.84375,\"h\":337}"
+ },
+ {
+  "lock": "AN17-2 anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "AN17-2 starts at the top bar's bottom edge",
+  "where": "1440",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "AN17-2 spans the main column (pixel at each edge)",
+  "where": "1440",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "AN17-2 the title",
+  "where": "1440",
+  "ok": true,
+  "detail": "Less guesswork, better results"
+ },
+ {
+  "lock": "AN17-2 the disc is 250px",
+  "where": "1440",
+  "ok": true,
+  "detail": "250×250"
+ },
+ {
+  "lock": "AN17-2 the disc is right of the text",
+  "where": "1440",
+  "ok": true,
+  "detail": "disc 1008.28125 text 944.28125"
+ },
+ {
+  "lock": "AN17-2 a 64px gap (±2)",
+  "where": "1440",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "AN17-2 the pair is centred on the content column (±2)",
+  "where": "1440",
+  "ok": true,
+  "detail": "pair 844.0 column 844.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-2 the band exists",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":296.375,\"t\":105.75,\"r\":1463.625,\"b\":442.75,\"w\":1167.25,\"h\":337}"
+ },
+ {
+  "lock": "AN17-2 anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "AN17-2 starts at the top bar's bottom edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "AN17-2 spans the main column (pixel at each edge)",
+  "where": "1512",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "AN17-2 the title",
+  "where": "1512",
+  "ok": true,
+  "detail": "Less guesswork, better results"
+ },
+ {
+  "lock": "AN17-2 337px tall at 1512 (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "337"
+ },
+ {
+  "lock": "AN17-2 the disc is 250px",
+  "where": "1512",
+  "ok": true,
+  "detail": "250×250"
+ },
+ {
+  "lock": "AN17-2 the disc is right of the text",
+  "where": "1512",
+  "ok": true,
+  "detail": "disc 1052.703125 text 988.703125"
+ },
+ {
+  "lock": "AN17-2 a 64px gap (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "AN17-2 the pair is centred on the content column (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "pair 880.0 column 880.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-2 the band exists",
   "where": "1920",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":456,\"t\":105.75,\"r\":1712,\"b\":442.75,\"w\":1256,\"h\":337}"
+ },
+ {
+  "lock": "AN17-2 anthracite",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "AN17-2 starts at the top bar's bottom edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "AN17-2 spans the main column (pixel at each edge)",
+  "where": "1920",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "AN17-2 the title",
+  "where": "1920",
+  "ok": true,
+  "detail": "Less guesswork, better results"
+ },
+ {
+  "lock": "AN17-2 the disc is 250px",
+  "where": "1920",
+  "ok": true,
+  "detail": "250×250"
+ },
+ {
+  "lock": "AN17-2 the disc is right of the text",
+  "where": "1920",
+  "ok": true,
+  "detail": "disc 1256.703125 text 1192.703125"
+ },
+ {
+  "lock": "AN17-2 a 64px gap (±2)",
+  "where": "1920",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "AN17-2 the pair is centred on the content column (±2)",
+  "where": "1920",
+  "ok": true,
+  "detail": "pair 1084.0 column 1084.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

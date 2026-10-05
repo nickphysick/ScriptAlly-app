@@ -2,73 +2,313 @@
  {
   "lock": "AN17-4 band and strip found",
   "where": "1280",
-  "ok": false,
-  "detail": "false false"
+  "ok": true,
+  "detail": "true true"
  },
  {
   "lock": "AN17-4 nine sections",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-4 band → strip 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 strip → first section 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 0 frame → section 1 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 1 frame → section 2 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 2 frame → section 3 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 3 frame → section 4 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 4 frame → section 5 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 5 frame → section 6 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 6 frame → section 7 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 7 frame → section 8 40 (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-4 band and strip found",
   "where": "1440",
-  "ok": false,
-  "detail": "false false"
+  "ok": true,
+  "detail": "true true"
  },
  {
   "lock": "AN17-4 nine sections",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-4 band → strip 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 strip → first section 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 0 frame → section 1 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 1 frame → section 2 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 2 frame → section 3 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 3 frame → section 4 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 4 frame → section 5 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 5 frame → section 6 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 6 frame → section 7 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 7 frame → section 8 40 (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "40.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-4 band and strip found",
   "where": "1512",
-  "ok": false,
-  "detail": "false false"
+  "ok": true,
+  "detail": "true true"
  },
  {
   "lock": "AN17-4 nine sections",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-4 band → strip 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 strip → first section 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 0 frame → section 1 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 1 frame → section 2 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 2 frame → section 3 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 3 frame → section 4 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 4 frame → section 5 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 5 frame → section 6 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 6 frame → section 7 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 7 frame → section 8 40 (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "40.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-4 band and strip found",
   "where": "1920",
-  "ok": false,
-  "detail": "false false"
+  "ok": true,
+  "detail": "true true"
  },
  {
   "lock": "AN17-4 nine sections",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-4 band → strip 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 strip → first section 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 0 frame → section 1 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 1 frame → section 2 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 2 frame → section 3 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 3 frame → section 4 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 4 frame → section 5 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 5 frame → section 6 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 6 frame → section 7 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "AN17-4 section 7 frame → section 8 40 (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "40.0"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

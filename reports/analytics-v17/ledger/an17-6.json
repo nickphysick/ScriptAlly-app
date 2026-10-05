@@ -2,49 +2,751 @@
  {
   "lock": "AN17-6 nine sections",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-6 §0 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §0 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §0 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §1 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §1 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §1 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §2 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §2 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §2 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §3 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §3 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §3 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §4 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §4 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §4 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §5 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §5 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §5 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §6 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §6 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §6 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §7 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §7 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §7 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §8 the banner has no background",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §8 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §8 the perch paints above the frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-6 nine sections",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-6 §0 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §0 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §0 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §1 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §1 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §1 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §2 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §2 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §2 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §3 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §3 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §3 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §4 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §4 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §4 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §5 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §5 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §5 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §6 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §6 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §6 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §7 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §7 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §7 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §8 the banner has no background",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §8 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1440",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §8 the perch paints above the frame",
+  "where": "1440",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-6 nine sections",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-6 §0 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §0 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §0 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §0 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Where the 8 queries got to\""
+ },
+ {
+  "lock": "AN17-6 §1 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §1 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §1 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §1 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Queries sent\""
+ },
+ {
+  "lock": "AN17-6 §2 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §2 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §2 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §2 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Response rate\""
+ },
+ {
+  "lock": "AN17-6 §3 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §3 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §3 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §3 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Response window honesty\""
+ },
+ {
+  "lock": "AN17-6 §4 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §4 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §4 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §4 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Wait times by stage\""
+ },
+ {
+  "lock": "AN17-6 §5 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §5 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §5 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §5 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Firsts and records\""
+ },
+ {
+  "lock": "AN17-6 §6 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §6 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §6 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §6 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"The campaign over time\""
+ },
+ {
+  "lock": "AN17-6 §7 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §7 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §7 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §7 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"How things stand\""
+ },
+ {
+  "lock": "AN17-6 §8 the banner has no background",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §8 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §8 the perch paints above the frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §8 the title is one line at 1512",
+  "where": "1512",
+  "ok": true,
+  "detail": "1 lines (45.4px) \"Reading the numbers\""
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-6 nine sections",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "AN17-6 §0 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §0 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §0 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §1 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §1 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §1 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §2 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §2 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §2 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §3 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §3 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §3 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §4 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §4 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §4 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §5 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §5 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §5 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §6 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §6 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §6 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §7 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §7 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §7 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
+ },
+ {
+  "lock": "AN17-6 §8 the banner has no background",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) none"
+ },
+ {
+  "lock": "AN17-6 §8 the perch's foot is 14px (±2) below the frame's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AN17-6 §8 the perch paints above the frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "banner z 2 frame z 1"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

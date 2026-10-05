@@ -2,145 +2,145 @@
  {
   "lock": "AN17-13 lanes present",
   "where": "1280",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "8"
  },
  {
   "lock": "AN17-13 one line per dated query",
   "where": "1280",
-  "ok": false,
-  "detail": "0 lanes, undefined dated, population undefined"
+  "ok": true,
+  "detail": "8 lanes, 8 dated, population 8"
  },
  {
   "lock": "AN17-13 each line in a status fill",
   "where": "1280",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(228, 225, 219) rgb(247, 239, 227) rgb(224, 229, 221) rgb(245, 230, 223)"
  },
  {
   "lock": "AN17-13 the today line is rust",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(138, 74, 60)"
  },
  {
   "lock": "AN17-13 the today line sits at the plot's right edge",
   "where": "1280",
-  "ok": false,
-  "detail": "today undefined plot undefined"
+  "ok": true,
+  "detail": "today 1185.8392333984375 plot 1185.8392333984375"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-13 lanes present",
   "where": "1440",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "8"
  },
  {
   "lock": "AN17-13 one line per dated query",
   "where": "1440",
-  "ok": false,
-  "detail": "0 lanes, undefined dated, population undefined"
+  "ok": true,
+  "detail": "8 lanes, 8 dated, population 8"
  },
  {
   "lock": "AN17-13 each line in a status fill",
   "where": "1440",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(228, 225, 219) rgb(247, 239, 227) rgb(224, 229, 221) rgb(245, 230, 223)"
  },
  {
   "lock": "AN17-13 the today line is rust",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(138, 74, 60)"
  },
  {
   "lock": "AN17-13 the today line sits at the plot's right edge",
   "where": "1440",
-  "ok": false,
-  "detail": "today undefined plot undefined"
+  "ok": true,
+  "detail": "today 1336.938232421875 plot 1336.9382019042969"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-13 lanes present",
   "where": "1512",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "8"
  },
  {
   "lock": "AN17-13 one line per dated query",
   "where": "1512",
-  "ok": false,
-  "detail": "0 lanes, undefined dated, population undefined"
+  "ok": true,
+  "detail": "8 lanes, 8 dated, population 8"
  },
  {
   "lock": "AN17-13 each line in a status fill",
   "where": "1512",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(228, 225, 219) rgb(247, 239, 227) rgb(224, 229, 221) rgb(245, 230, 223)"
  },
  {
   "lock": "AN17-13 the today line is rust",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(138, 74, 60)"
  },
  {
   "lock": "AN17-13 the today line sits at the plot's right edge",
   "where": "1512",
-  "ok": false,
-  "detail": "today undefined plot undefined"
+  "ok": true,
+  "detail": "today 1404.9781494140625 plot 1404.9781494140625"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-13 lanes present",
   "where": "1920",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "8"
  },
  {
   "lock": "AN17-13 one line per dated query",
   "where": "1920",
-  "ok": false,
-  "detail": "0 lanes, undefined dated, population undefined"
+  "ok": true,
+  "detail": "8 lanes, 8 dated, population 8"
  },
  {
   "lock": "AN17-13 each line in a status fill",
   "where": "1920",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(228, 225, 219) rgb(247, 239, 227) rgb(224, 229, 221) rgb(245, 230, 223)"
  },
  {
   "lock": "AN17-13 the today line is rust",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(138, 74, 60)"
  },
  {
   "lock": "AN17-13 the today line sits at the plot's right edge",
   "where": "1920",
-  "ok": false,
-  "detail": "today undefined plot undefined"
+  "ok": true,
+  "detail": "today 1651.1318359375 plot 1651.1318359375"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

@@ -2,14 +2,14 @@
  {
   "lock": "AN17-10 rows exist",
   "where": "1280",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "1"
  },
  {
   "lock": "AN17-10 one row per replied query with a stated window",
   "where": "1280",
-  "ok": false,
-  "detail": "0 rows, population undefined"
+  "ok": true,
+  "detail": "1 rows, population 1"
  },
  {
   "lock": "AN17-10 every late reply has a rust dotted leader",
@@ -21,37 +21,37 @@
   "lock": "AN17-10 no on-time reply has one",
   "where": "1280",
   "ok": true,
-  "detail": "0 of 0 on-time rows carry a leader"
+  "detail": "0 of 1 on-time rows carry a leader"
  },
  {
   "lock": "AN17-10 both kinds present, or the absent one reported",
   "where": "1280",
   "ok": true,
-  "detail": "late 0 on time 0"
+  "detail": "late 0 on time 1"
  },
  {
   "lock": "AN17-10 dots take status fills",
   "where": "1280",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-10 rows exist",
   "where": "1440",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "1"
  },
  {
   "lock": "AN17-10 one row per replied query with a stated window",
   "where": "1440",
-  "ok": false,
-  "detail": "0 rows, population undefined"
+  "ok": true,
+  "detail": "1 rows, population 1"
  },
  {
   "lock": "AN17-10 every late reply has a rust dotted leader",
@@ -63,37 +63,37 @@
   "lock": "AN17-10 no on-time reply has one",
   "where": "1440",
   "ok": true,
-  "detail": "0 of 0 on-time rows carry a leader"
+  "detail": "0 of 1 on-time rows carry a leader"
  },
  {
   "lock": "AN17-10 both kinds present, or the absent one reported",
   "where": "1440",
   "ok": true,
-  "detail": "late 0 on time 0"
+  "detail": "late 0 on time 1"
  },
  {
   "lock": "AN17-10 dots take status fills",
   "where": "1440",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-10 rows exist",
   "where": "1512",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "1"
  },
  {
   "lock": "AN17-10 one row per replied query with a stated window",
   "where": "1512",
-  "ok": false,
-  "detail": "0 rows, population undefined"
+  "ok": true,
+  "detail": "1 rows, population 1"
  },
  {
   "lock": "AN17-10 every late reply has a rust dotted leader",
@@ -105,37 +105,37 @@
   "lock": "AN17-10 no on-time reply has one",
   "where": "1512",
   "ok": true,
-  "detail": "0 of 0 on-time rows carry a leader"
+  "detail": "0 of 1 on-time rows carry a leader"
  },
  {
   "lock": "AN17-10 both kinds present, or the absent one reported",
   "where": "1512",
   "ok": true,
-  "detail": "late 0 on time 0"
+  "detail": "late 0 on time 1"
  },
  {
   "lock": "AN17-10 dots take status fills",
   "where": "1512",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-10 rows exist",
   "where": "1920",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "1"
  },
  {
   "lock": "AN17-10 one row per replied query with a stated window",
   "where": "1920",
-  "ok": false,
-  "detail": "0 rows, population undefined"
+  "ok": true,
+  "detail": "1 rows, population 1"
  },
  {
   "lock": "AN17-10 every late reply has a rust dotted leader",
@@ -147,24 +147,24 @@
   "lock": "AN17-10 no on-time reply has one",
   "where": "1920",
   "ok": true,
-  "detail": "0 of 0 on-time rows carry a leader"
+  "detail": "0 of 1 on-time rows carry a leader"
  },
  {
   "lock": "AN17-10 both kinds present, or the absent one reported",
   "where": "1920",
   "ok": true,
-  "detail": "late 0 on time 0"
+  "detail": "late 0 on time 1"
  },
  {
   "lock": "AN17-10 dots take status fills",
   "where": "1920",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

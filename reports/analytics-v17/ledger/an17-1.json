@@ -2,8 +2,8 @@
  {
   "lock": "AN17-1 the v17 page is on the route",
   "where": "1280",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "AN17-1 main ground",
@@ -14,8 +14,8 @@
  {
   "lock": "AN17-1 page ground",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "lock": "AN17-1 sidebar",
@@ -36,22 +36,28 @@
   "detail": "rgba(28, 19, 15, 0.1) op 1"
  },
  {
+  "lock": "AN17-1 the sampled gap is on screen",
+  "where": "1280",
+  "ok": true,
+  "detail": "614.8"
+ },
+ {
   "lock": "AN17-1 the page ground is greige (pixel)",
   "where": "1280",
-  "ok": false,
-  "detail": "no strip / first banner to sample between"
+  "ok": true,
+  "detail": "243,242,240"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-1 the v17 page is on the route",
   "where": "1440",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "AN17-1 main ground",
@@ -62,8 +68,8 @@
  {
   "lock": "AN17-1 page ground",
   "where": "1440",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "lock": "AN17-1 sidebar",
@@ -84,22 +90,28 @@
   "detail": "rgba(28, 19, 15, 0.1) op 1"
  },
  {
+  "lock": "AN17-1 the sampled gap is on screen",
+  "where": "1440",
+  "ok": true,
+  "detail": "655.6"
+ },
+ {
   "lock": "AN17-1 the page ground is greige (pixel)",
   "where": "1440",
-  "ok": false,
-  "detail": "no strip / first banner to sample between"
+  "ok": true,
+  "detail": "243,242,240"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-1 the v17 page is on the route",
   "where": "1512",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "AN17-1 main ground",
@@ -110,8 +122,8 @@
  {
   "lock": "AN17-1 page ground",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "lock": "AN17-1 sidebar",
@@ -132,22 +144,28 @@
   "detail": "rgba(28, 19, 15, 0.1) op 1"
  },
  {
+  "lock": "AN17-1 the sampled gap is on screen",
+  "where": "1512",
+  "ok": true,
+  "detail": "655.6"
+ },
+ {
   "lock": "AN17-1 the page ground is greige (pixel)",
   "where": "1512",
-  "ok": false,
-  "detail": "no strip / first banner to sample between"
+  "ok": true,
+  "detail": "243,242,240"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-1 the v17 page is on the route",
   "where": "1920",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "AN17-1 main ground",
@@ -158,8 +176,8 @@
  {
   "lock": "AN17-1 page ground",
   "where": "1920",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "lock": "AN17-1 sidebar",
@@ -180,15 +198,21 @@
   "detail": "rgba(28, 19, 15, 0.1) op 1"
  },
  {
+  "lock": "AN17-1 the sampled gap is on screen",
+  "where": "1920",
+  "ok": true,
+  "detail": "736.4"
+ },
+ {
   "lock": "AN17-1 the page ground is greige (pixel)",
   "where": "1920",
-  "ok": false,
-  "detail": "no strip / first banner to sample between"
+  "ok": true,
+  "detail": "243,242,240"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

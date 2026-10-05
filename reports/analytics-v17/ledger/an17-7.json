@@ -2,121 +2,241 @@
  {
   "lock": "AN17-7 four bars",
   "where": "1280",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "4"
  },
  {
   "lock": "AN17-7 the top bar's population is non-zero",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "AN17-7 bar 1 is to scale (8)",
+  "where": "1280",
+  "ok": true,
+  "detail": "w 629.1 expected 629.1"
+ },
+ {
+  "lock": "AN17-7 bar 2 is to scale (3)",
+  "where": "1280",
+  "ok": true,
+  "detail": "w 235.9 expected 235.9"
+ },
+ {
+  "lock": "AN17-7 bar 3 is to scale (2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "w 157.3 expected 157.3"
+ },
+ {
+  "lock": "AN17-7 bar 4 is to scale (0)",
+  "where": "1280",
+  "ok": true,
+  "detail": "w 20.7 expected 20.7"
+ },
+ {
+  "lock": "AN17-7 the counts are the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "bars 8,3,2,0 model 8,3,2,0"
  },
  {
   "lock": "AN17-7 three \"went on\" notes",
   "where": "1280",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "3 of 8 went on | 2 of 3 went on | none of 2 went on"
  },
  {
   "lock": "AN17-7 the notes are rust",
   "where": "1280",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(138, 74, 60) rgb(138, 74, 60) rgb(138, 74, 60)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-7 four bars",
   "where": "1440",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "4"
  },
  {
   "lock": "AN17-7 the top bar's population is non-zero",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "AN17-7 bar 1 is to scale (8)",
+  "where": "1440",
+  "ok": true,
+  "detail": "w 735.1 expected 735.1"
+ },
+ {
+  "lock": "AN17-7 bar 2 is to scale (3)",
+  "where": "1440",
+  "ok": true,
+  "detail": "w 275.7 expected 275.7"
+ },
+ {
+  "lock": "AN17-7 bar 3 is to scale (2)",
+  "where": "1440",
+  "ok": true,
+  "detail": "w 183.8 expected 183.8"
+ },
+ {
+  "lock": "AN17-7 bar 4 is to scale (0)",
+  "where": "1440",
+  "ok": true,
+  "detail": "w 24.2 expected 24.2"
+ },
+ {
+  "lock": "AN17-7 the counts are the model's",
+  "where": "1440",
+  "ok": true,
+  "detail": "bars 8,3,2,0 model 8,3,2,0"
  },
  {
   "lock": "AN17-7 three \"went on\" notes",
   "where": "1440",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "3 of 8 went on | 2 of 3 went on | none of 2 went on"
  },
  {
   "lock": "AN17-7 the notes are rust",
   "where": "1440",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(138, 74, 60) rgb(138, 74, 60) rgb(138, 74, 60)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-7 four bars",
   "where": "1512",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "4"
  },
  {
   "lock": "AN17-7 the top bar's population is non-zero",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "AN17-7 bar 1 is to scale (8)",
+  "where": "1512",
+  "ok": true,
+  "detail": "w 782.9 expected 782.9"
+ },
+ {
+  "lock": "AN17-7 bar 2 is to scale (3)",
+  "where": "1512",
+  "ok": true,
+  "detail": "w 293.6 expected 293.6"
+ },
+ {
+  "lock": "AN17-7 bar 3 is to scale (2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "w 195.7 expected 195.7"
+ },
+ {
+  "lock": "AN17-7 bar 4 is to scale (0)",
+  "where": "1512",
+  "ok": true,
+  "detail": "w 25.8 expected 25.8"
+ },
+ {
+  "lock": "AN17-7 the counts are the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "bars 8,3,2,0 model 8,3,2,0"
  },
  {
   "lock": "AN17-7 three \"went on\" notes",
   "where": "1512",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "3 of 8 went on | 2 of 3 went on | none of 2 went on"
  },
  {
   "lock": "AN17-7 the notes are rust",
   "where": "1512",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(138, 74, 60) rgb(138, 74, 60) rgb(138, 74, 60)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-7 four bars",
   "where": "1920",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "4"
  },
  {
   "lock": "AN17-7 the top bar's population is non-zero",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "AN17-7 bar 1 is to scale (8)",
+  "where": "1920",
+  "ok": true,
+  "detail": "w 845.7 expected 845.7"
+ },
+ {
+  "lock": "AN17-7 bar 2 is to scale (3)",
+  "where": "1920",
+  "ok": true,
+  "detail": "w 317.1 expected 317.1"
+ },
+ {
+  "lock": "AN17-7 bar 3 is to scale (2)",
+  "where": "1920",
+  "ok": true,
+  "detail": "w 211.4 expected 211.4"
+ },
+ {
+  "lock": "AN17-7 bar 4 is to scale (0)",
+  "where": "1920",
+  "ok": true,
+  "detail": "w 27.9 expected 27.9"
+ },
+ {
+  "lock": "AN17-7 the counts are the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "bars 8,3,2,0 model 8,3,2,0"
  },
  {
   "lock": "AN17-7 three \"went on\" notes",
   "where": "1920",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "3 of 8 went on | 2 of 3 went on | none of 2 went on"
  },
  {
   "lock": "AN17-7 the notes are rust",
   "where": "1920",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "rgb(138, 74, 60) rgb(138, 74, 60) rgb(138, 74, 60)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

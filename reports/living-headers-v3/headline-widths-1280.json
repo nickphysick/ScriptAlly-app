@@ -1,1 +1,38 @@
-{}
+{
+ "/queries": {
+  "One query out": 396.1,
+  "9 queries out": 386.6,
+  "13 queries out": 417.2,
+  "27 queries out": 417.3,
+  "148 queries out": 452.5
+ },
+ "/agents": {
+  "One agent on file": 498.4,
+  "9 agents on file": 459.6,
+  "13 agents on file": 490.1,
+  "27 agents on file": 490.2,
+  "148 agents on file": 525.5
+ },
+ "/todo": {
+  "One thing to do": 372.4,
+  "9 things to do": 339.8,
+  "13 things to do": 365.5,
+  "27 things to do": 365.5,
+  "148 things to do": 395.2,
+  "All caught up": 327
+ },
+ "/manuscripts/packages": {
+  "One package": 288.9,
+  "9 packages": 256.2,
+  "13 packages": 281.9,
+  "27 packages": 282,
+  "148 packages": 311.7
+ },
+ "/manuscripts/comps": {
+  "One comp title": 350.8,
+  "9 comp titles": 318.2,
+  "13 comp titles": 343.9,
+  "27 comp titles": 344,
+  "148 comp titles": 373.6
+ }
+}

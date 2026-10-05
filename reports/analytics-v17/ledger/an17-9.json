@@ -2,49 +2,193 @@
  {
   "lock": "AN17-9 two share bars",
   "where": "1280",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 1 has segments",
+  "where": "1280",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments sum to its total",
+  "where": "1280",
+  "ok": true,
+  "detail": "8 of 8"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments take status fills",
+  "where": "1280",
+  "ok": true,
+  "detail": "requested:rgb(245, 230, 223) queried:rgb(247, 239, 227) closed:rgb(228, 225, 219) closed:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "AN17-9 bar 2 has segments",
+  "where": "1280",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments sum to its total",
+  "where": "1280",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments take status fills",
+  "where": "1280",
+  "ok": true,
+  "detail": "sent:rgb(224, 229, 221) requested:rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-9 two share bars",
   "where": "1440",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 1 has segments",
+  "where": "1440",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments sum to its total",
+  "where": "1440",
+  "ok": true,
+  "detail": "8 of 8"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments take status fills",
+  "where": "1440",
+  "ok": true,
+  "detail": "requested:rgb(245, 230, 223) queried:rgb(247, 239, 227) closed:rgb(228, 225, 219) closed:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "AN17-9 bar 2 has segments",
+  "where": "1440",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments sum to its total",
+  "where": "1440",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments take status fills",
+  "where": "1440",
+  "ok": true,
+  "detail": "sent:rgb(224, 229, 221) requested:rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-9 two share bars",
   "where": "1512",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 1 has segments",
+  "where": "1512",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments sum to its total",
+  "where": "1512",
+  "ok": true,
+  "detail": "8 of 8"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments take status fills",
+  "where": "1512",
+  "ok": true,
+  "detail": "requested:rgb(245, 230, 223) queried:rgb(247, 239, 227) closed:rgb(228, 225, 219) closed:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "AN17-9 bar 2 has segments",
+  "where": "1512",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments sum to its total",
+  "where": "1512",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments take status fills",
+  "where": "1512",
+  "ok": true,
+  "detail": "sent:rgb(224, 229, 221) requested:rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-9 two share bars",
   "where": "1920",
-  "ok": false,
-  "detail": "0"
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 1 has segments",
+  "where": "1920",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments sum to its total",
+  "where": "1920",
+  "ok": true,
+  "detail": "8 of 8"
+ },
+ {
+  "lock": "AN17-9 bar 1 segments take status fills",
+  "where": "1920",
+  "ok": true,
+  "detail": "requested:rgb(245, 230, 223) queried:rgb(247, 239, 227) closed:rgb(228, 225, 219) closed:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "AN17-9 bar 2 has segments",
+  "where": "1920",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments sum to its total",
+  "where": "1920",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "AN17-9 bar 2 segments take status fills",
+  "where": "1920",
+  "ok": true,
+  "detail": "sent:rgb(224, 229, 221) requested:rgb(245, 230, 223)"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

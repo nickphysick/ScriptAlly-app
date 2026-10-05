@@ -2,86 +2,86 @@
  {
   "lock": "AN17-15 the tab exists",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":877.265625,\"t\":718,\"r\":1256,\"b\":776}"
  },
  {
   "lock": "AN17-15 fixed",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "fixed"
  },
  {
   "lock": "AN17-15 24px from the window box's right and bottom (±1)",
   "where": "1280",
-  "ok": false,
-  "detail": "—"
+  "ok": true,
+  "detail": "24.0 / 24.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Under the hood"
  },
  {
   "lock": "AN17-15 names section 1 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Where the 8 queries got to"
  },
  {
   "lock": "AN17-15 names section 2 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Queries sent"
  },
  {
   "lock": "AN17-15 names section 3 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Response rate"
  },
  {
   "lock": "AN17-15 names section 4 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Response window honesty"
  },
  {
   "lock": "AN17-15 names section 5 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Wait times by stage"
  },
  {
   "lock": "AN17-15 names section 6 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Firsts and records"
  },
  {
   "lock": "AN17-15 names section 7 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "The campaign over time"
  },
  {
   "lock": "AN17-15 names section 8 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "How things stand"
  },
  {
   "lock": "AN17-15 names section 9 in view",
   "where": "1280",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Reading the numbers"
  },
  {
   "lock": "AN17-15 ☰ opens a menu of nine",
   "where": "1280",
-  "ok": false,
-  "detail": "false 0"
+  "ok": true,
+  "detail": "true 9"
  },
  {
   "lock": "AN17-15 Escape closes the menu",
@@ -92,128 +92,140 @@
  {
   "lock": "AN17-15 Escape closes the menu only (the tab stays)",
   "where": "1280",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-15 the tab exists",
   "where": "1440",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":1037.265625,\"t\":818,\"r\":1416,\"b\":876}"
  },
  {
   "lock": "AN17-15 fixed",
   "where": "1440",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "fixed"
  },
  {
   "lock": "AN17-15 24px from the window box's right and bottom (±1)",
   "where": "1440",
-  "ok": false,
-  "detail": "—"
+  "ok": true,
+  "detail": "24.0 / 24.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
   "where": "1440",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Under the hood"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-15 the tab exists",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":1109.265625,\"t\":818,\"r\":1488,\"b\":876}"
  },
  {
   "lock": "AN17-15 fixed",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "fixed"
  },
  {
   "lock": "AN17-15 24px from the window box's right and bottom (±1)",
   "where": "1512",
-  "ok": false,
-  "detail": "—"
+  "ok": true,
+  "detail": "24.0 / 24.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Under the hood"
+ },
+ {
+  "lock": "AN17-15 precondition: the window is pulled in from the viewport",
+  "where": "1512",
+  "ok": true,
+  "detail": "60.0 / 40.0"
+ },
+ {
+  "lock": "AN17-15 the tab follows the window, not the viewport (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "24.0 / 24.0"
  },
  {
   "lock": "AN17-15 names section 1 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Where the 8 queries got to"
  },
  {
   "lock": "AN17-15 names section 2 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Queries sent"
  },
  {
   "lock": "AN17-15 names section 3 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Response rate"
  },
  {
   "lock": "AN17-15 names section 4 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Response window honesty"
  },
  {
   "lock": "AN17-15 names section 5 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Wait times by stage"
  },
  {
   "lock": "AN17-15 names section 6 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Firsts and records"
  },
  {
   "lock": "AN17-15 names section 7 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "The campaign over time"
  },
  {
   "lock": "AN17-15 names section 8 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "How things stand"
  },
  {
   "lock": "AN17-15 names section 9 in view",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Reading the numbers"
  },
  {
   "lock": "AN17-15 ☰ opens a menu of nine",
   "where": "1512",
-  "ok": false,
-  "detail": "false 0"
+  "ok": true,
+  "detail": "true 9"
  },
  {
   "lock": "AN17-15 Escape closes the menu",
@@ -224,44 +236,44 @@
  {
   "lock": "AN17-15 Escape closes the menu only (the tab stays)",
   "where": "1512",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-15 the tab exists",
   "where": "1920",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":1517.265625,\"t\":998,\"r\":1896,\"b\":1056}"
  },
  {
   "lock": "AN17-15 fixed",
   "where": "1920",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "fixed"
  },
  {
   "lock": "AN17-15 24px from the window box's right and bottom (±1)",
   "where": "1920",
-  "ok": false,
-  "detail": "—"
+  "ok": true,
+  "detail": "24.0 / 24.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
   "where": "1920",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Under the hood"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-15 absent at ≤760px",

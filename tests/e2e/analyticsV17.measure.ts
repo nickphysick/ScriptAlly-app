@@ -60,8 +60,14 @@ test("AN17-1 · shell", async ({ page }) => {
        mutation paints the page cream): sample the ground between the strip and the first banner. */
     const d = await readDesk(page);
     if (d?.glance && d.secs[0]?.ban) {
-      const y = (d.glance.b + d.secs[0].box!.t) / 2;
-      const px = await pixel(page, d.col.l + 4, y);
+      /* ⚠️ THE PRECONDITION FIRST: the gap must be ON SCREEN, or the screenshot clip is outside the image
+         (measured at 1280). Scroll the strip's foot to the middle of the scrollport, then re-read. */
+      await page.evaluate(() => { const g = [...document.querySelectorAll<HTMLElement>('[data-a17="glance"]')].find((e) => e.getBoundingClientRect().height > 0); g?.scrollIntoView({ block: "center" }); });
+      await page.waitForTimeout(200);
+      const d2 = (await readDesk(page))!;
+      const y = (d2.strip!.b + d2.secs[0].box!.t) / 2;
+      L.check("AN17-1 the sampled gap is on screen", w, y > 0 && y < vp.height, `${y.toFixed(1)}`);
+      const px = await pixel(page, d2.col.l + 4, y);
       L.check("AN17-1 the page ground is greige (pixel)", w, sameRgb(px, [243, 242, 240], 2), `${px}`);
     } else L.check("AN17-1 the page ground is greige (pixel)", w, false, "no strip / first banner to sample between");
     await checkOverflow(page, L, w);
@@ -412,10 +418,18 @@ test("AN17-14 · workspace + footer", async ({ page }) => {
       await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0); f?.scrollIntoView({ block: "center" }); });
       await page.waitForTimeout(250);
       const f = await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0)!; const r = f.getBoundingClientRect(); return { t: r.top }; });
-      const y = Math.floor(f.t) - 1;
-      const l = await pixel(page, d.main.l + 3, y), r = await pixel(page, d.main.r - 3, y);
-      /* rgba(28,19,15,.1) over the greige ground */
-      L.check("AN17-14 the footer's top rule spans the main column", w, sameRgb(l, [221, 220, 218], 4) && sameRgb(r, [221, 220, 218], 4), `left ${l} right ${r}`);
+      /* ⚠️ A 1px RULE AT A FRACTIONAL y IS BLENDED ACROSS ROWS, so no single pixel has a fixed value. The
+         claim is that the rule runs the main column's width: the COLUMN of rows −3…+1 at each edge of the
+         scroller's client box (clear of a classic scrollbar, which darkens the last 15px) must equal the same
+         column at the centre (±3), and that column must carry a row darker than the page above it (the rule). */
+      const f2 = await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0)!; const sc = f.closest(".wpg-scroll") as HTMLElement; const r = sc.getBoundingClientRect(); return { l: r.left, cw: sc.clientWidth }; });
+      const column = async (x: number) => { const out: number[] = []; for (let dy = -3; dy <= 1; dy++) out.push((await pixel(page, x, Math.floor(f.t) + dy))[0]); return out; };
+      const cl = await column(f2.l + 3), cc = await column(f2.l + f2.cw / 2), cr = await column(f2.l + f2.cw - 3);
+      /* compared as PROFILES, each column against its own top row: the window's right edge carries a shade that
+         darkens every row there by ~7 (measured, page rows included), which says nothing about the rule */
+      const same = (a: number[], b: number[]) => a.every((v, i) => Math.abs((v - a[0]) - (b[i] - b[0])) <= 3);
+      const ruled = Math.min(...cc) <= cc[0] - 4;
+      L.check("AN17-14 the footer's top rule spans the main column", w, ruled && same(cl, cc) && same(cr, cc), `left ${cl} centre ${cc} right ${cr}`);
     }
     await checkOverflow(page, L, w);
   }
@@ -448,6 +462,21 @@ test("AN17-15 · tab", async ({ page }) => {
     L.check("AN17-15 24px from the window box's right and bottom (±1)", w, !!a.tab && !!a.win && near(a.win.r - a.tab.r, 24, 1) && near(a.win.b - a.tab.b, 24, 1),
       `${a.tab && a.win ? `${(a.win.r - a.tab.r).toFixed(1)} / ${(a.win.b - a.tab.b).toFixed(1)}` : "—"}`);
     L.check("AN17-15 before the first section it reads Under the hood", w, a.name === "Under the hood", `${a.name}`);
+    if (vp.width === 1512) {
+      /* ⚠️ THE ANCHOR, NOT THE NUMBER (Phase 9): the window box is flush with the viewport at its right and
+         bottom, so "24 from the window" and "24 from the viewport" read the same and the mutation that pins
+         the tab to the viewport went green. Pull the window in from both edges and measure again — the
+         precondition first, so a perturbation that did nothing cannot pass for one that did. */
+      const perturb = await page.addStyleTag({ content: ".ws-window { margin-right: 60px !important; margin-bottom: 40px !important; }" });
+      await page.waitForTimeout(300);
+      const p = await tabRead(page);
+      const vw = await page.evaluate(() => ({ w: document.documentElement.clientWidth, h: document.documentElement.clientHeight }));
+      L.check("AN17-15 precondition: the window is pulled in from the viewport", w, !!p.win && vw.w - p.win.r >= 30 && vw.h - p.win.b >= 20, p.win ? `${(vw.w - p.win.r).toFixed(1)} / ${(vw.h - p.win.b).toFixed(1)}` : "—");
+      L.check("AN17-15 the tab follows the window, not the viewport (±1)", w, !!p.tab && !!p.win && near(p.win.r - p.tab.r, 24, 1) && near(p.win.b - p.tab.b, 24, 1),
+        `${p.tab && p.win ? `${(p.win.r - p.tab.r).toFixed(1)} / ${(p.win.b - p.tab.b).toFixed(1)}` : "—"}`);
+      await perturb.evaluate((el) => (el as Element).remove());
+      await page.waitForTimeout(300);
+    }
     if (vp.width === 1512 || vp.width === 1280) {
       for (let i = 0; i < 9; i++) {
         await scrollToSec(page, i, -40);
@@ -480,21 +509,37 @@ test("AN17-16 · thin sample", async ({ page }) => {
   const L = new Ledger("an17-16");
   await page.addInitScript(() => { (window as unknown as { __SA_AN_LIMIT?: number }).__SA_AN_LIMIT = 1; });
   await openAn(page, AT_1512);
-  const r = await page.evaluate(() => {
+  /* ⚠️ BOTH STRIP STATES (Phase 9): "Last 90 days" swaps the strip's numbers, and a figure that is empty in
+     that window is exactly where a zero can hide — the all-time state alone missed the median-wait
+     mutation, because the one query kept has a reply all-time and none in the last 90 days. */
+  const read = () => page.evaluate(() => {
     const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     if (!p) return null;
     /* every FIGURE: the strip's numbers, the readings, the records' values, the funnel counts */
     const figs = [...p.querySelectorAll<HTMLElement>('[data-a17="gv"], [data-a17="read-v"], [data-a17="rec-v"], [data-a17="fcount"]')]
       .filter((e) => e.getBoundingClientRect().width > 0)
-      .map((e) => ({ kind: e.dataset.a17 ?? "", text: (e.textContent ?? "").trim(), pop: e.dataset.population ?? null, note: (e.closest("[data-a17-fig]")?.textContent ?? e.parentElement?.textContent ?? "").trim() }));
+      /* ⚠️ innerText, NOT textContent, for BOTH reads: textContent glues a value to its unit ("0days") and to
+         the next line ("None of 1No queries"), so a zero with a unit and a stated population both read wrong
+         (measured — the first is how the median-wait mutation went green) */
+      .map((e) => ({ kind: e.dataset.a17 ?? "", text: (e.innerText ?? e.textContent ?? "").replace(/\s+/g, " ").trim() /* an SVG <text> has no innerText */, pop: e.dataset.population ?? null, note: (((e.closest("[data-a17-fig]") ?? e.parentElement) as HTMLElement | null)?.innerText ?? "").replace(/\s+/g, " ").trim() }));
     return { sent: Number(p.dataset.sent), figs };
   });
+  const all = await read();
+  await page.locator('[data-a17="range"][data-v="d90"]:visible').first().click({ timeout: 4000 }).catch(() => {});
+  await page.waitForTimeout(250);
+  const d90 = await read();
+  await page.locator('[data-a17="range"][data-v="all"]:visible').first().click({ timeout: 4000 }).catch(() => {});
+  const r = all;
   L.check("AN17-16 the page is cut to one query", "1512", r?.sent === 1, `${r?.sent}`);
   L.check("AN17-16 figures were found", "1512", (r?.figs.length ?? 0) >= 12, `${r?.figs.length}`);
-  for (const f of r?.figs ?? []) {
-    L.check(`AN17-16 ${f.kind} is not 0 / 0% / a bare dash`, "1512", !/^(0|0%|0 days|—|-)$/.test(f.text) && f.text !== "", `"${f.text}"`);
-    if (f.pop !== null && Number(f.pop) > 0 && Number(f.pop) < 5) {
-      L.check(`AN17-16 ${f.kind} under 5 states its population`, "1512", /\b\d+\s+(QUER(Y|IES)|quer(y|ies)|repl(y|ies)|REPL(Y|IES))\b/.test(f.note) || /\bof \d+\b/.test(f.note), `"${f.text}" in "${f.note.slice(0, 120)}"`);
+  L.check("AN17-16 the Last 90 days strip was read", "1512", (d90?.figs.filter((f) => f.kind === "gv").length ?? 0) === 5, `${d90?.figs.filter((f) => f.kind === "gv").length}`);
+  const ZERO = /^(0|0%|0\s*[a-z]+|—|-)$/i; /* a unit may sit flush in its own span: "0days" */
+  for (const [state, set] of [["all time", all], ["last 90 days", d90]] as const) {
+    for (const f of (set?.figs ?? []).filter((x) => state === "all time" || x.kind === "gv")) {
+      L.check(`AN17-16 ${f.kind} is not 0 / 0% / a bare dash (${state})`, "1512", !ZERO.test(f.text) && f.text !== "", `"${f.text}"`);
+      if (f.pop !== null && Number(f.pop) > 0 && Number(f.pop) < 5) {
+        L.check(`AN17-16 ${f.kind} under 5 states its population (${state})`, "1512", /\b\d+\s+(QUER(Y|IES)|quer(y|ies)|repl(y|ies)|REPL(Y|IES))\b/.test(f.note) || /\bof \d+\b/.test(f.note), `"${f.text}" in "${f.note.slice(0, 120)}"`);
+      }
     }
   }
   L.done(14);
@@ -600,4 +645,35 @@ test("AN17-18 · manuscript", async ({ page }) => {
   if (changed && a.ms) await page.evaluate((id) => localStorage.setItem("scriptally_active_manuscript_id", id), a.ms);
   await checkOverflow(page, L, "1512");
   L.done(5);
+});
+
+/* ── screenshots (Phase 9; off unless AN17_SHOTS=1): each state a reference PNG shows, at its size, @2× ── */
+test.describe("AN17 shots", () => {
+  test.use({ deviceScaleFactor: 2 });
+  const ONLY = (process.env.AN17_SHOT_SIZES ?? "1512,390").split(",").map(Number);
+  const STATES: { name: string; sec: number | null; menu?: boolean }[] = [
+    { name: "01-top", sec: null }, { name: "02-funnel", sec: 0 }, { name: "03-log", sec: 1 }, { name: "04-rate", sec: 2 },
+    { name: "05-reply", sec: 3 }, { name: "06-wait", sec: 4 }, { name: "07-records", sec: 5 }, { name: "08-overtime", sec: 6 },
+    { name: "09-stand", sec: 7 }, { name: "10-reading", sec: 8 }, { name: "11-section-menu", sec: 2, menu: true },
+  ];
+  for (const vp of [...DESKTOP, ...PHONE].filter((v) => ONLY.includes(v.width))) {
+    test(`shots @ ${vp.width}`, async ({ page }) => {
+      test.skip(process.env.AN17_SHOTS !== "1", "screenshots run on request");
+      await openAn(page, vp);
+      mkdirSync(`${DIR}/shots`, { recursive: true });
+      for (const s of STATES) {
+        if (vp.width <= 760 && s.menu) continue;
+        if (s.sec === null) await page.evaluate(() => { const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0); (p?.closest(".wpg-scroll") as HTMLElement | null)?.scrollTo(0, 0); });
+        else await scrollToSec(page, s.sec, -12);
+        if (s.menu) await page.locator('[data-a17="tab-all"]:visible').first().click({ timeout: 3000 }).catch(() => {});
+        /* the reveal is 0.7s plus a 0.12s stagger: 350ms photographed it mid-fade */
+        await page.waitForTimeout(1100);
+        await page.screenshot({ path: `${DIR}/shots/${vp.width}-${s.name}@2x.png` });
+        if (s.menu) await page.keyboard.press("Escape");
+      }
+      await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0); f?.scrollIntoView({ block: "end" }); });
+      await page.waitForTimeout(1100);
+      await page.screenshot({ path: `${DIR}/shots/${vp.width}-12-footer@2x.png` });
+    });
+  }
 });

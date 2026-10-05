@@ -2,19 +2,217 @@
  {
   "lock": "AN17-17 the page renders",
   "where": "390",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-17 funnel rows",
+  "where": "390",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-17 the log shows 12 weeks (or all, if fewer)",
+  "where": "390",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "AN17-17 the Show all toggle",
+  "where": "390",
+  "ok": true,
+  "detail": "Show all 32 weeks"
+ },
+ {
+  "lock": "AN17-17 the stacked share bar",
+  "where": "390",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-17 the phone reply chart",
+  "where": "390",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "AN17-17 desktop figures hidden",
+  "where": "390",
+  "ok": true,
+  "detail": "0 of 9 shown"
+ },
+ {
+  "lock": "AN17-17 every chart label ≥ 9px",
+  "where": "390",
+  "ok": true,
+  "detail": "min 9.00 over 108"
+ },
+ {
+  "lock": "AN17-17 the disc is 100px",
+  "where": "390",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":153,\"right\":362}"
+ },
+ {
+  "lock": "AN17-17 the disc is top-right of the band's text",
+  "where": "390",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":153,\"right\":362} band {\"top\":123,\"right\":362}"
+ },
+ {
+  "lock": "AN17-17 Show all reveals every week",
+  "where": "390",
+  "ok": true,
+  "detail": "32 of 32"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "390",
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-17 the page renders",
   "where": "414",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-17 funnel rows",
+  "where": "414",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-17 the log shows 12 weeks (or all, if fewer)",
+  "where": "414",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "AN17-17 the Show all toggle",
+  "where": "414",
+  "ok": true,
+  "detail": "Show all 32 weeks"
+ },
+ {
+  "lock": "AN17-17 the stacked share bar",
+  "where": "414",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-17 the phone reply chart",
+  "where": "414",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "AN17-17 desktop figures hidden",
+  "where": "414",
+  "ok": true,
+  "detail": "0 of 9 shown"
+ },
+ {
+  "lock": "AN17-17 every chart label ≥ 9px",
+  "where": "414",
+  "ok": true,
+  "detail": "min 9.00 over 108"
+ },
+ {
+  "lock": "AN17-17 the disc is 100px",
+  "where": "414",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":153,\"right\":386}"
+ },
+ {
+  "lock": "AN17-17 the disc is top-right of the band's text",
+  "where": "414",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":153,\"right\":386} band {\"top\":123,\"right\":386}"
+ },
+ {
+  "lock": "AN17-17 Show all reveals every week",
+  "where": "414",
+  "ok": true,
+  "detail": "32 of 32"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "414",
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-17 the page renders",
   "where": "760",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-17 funnel rows",
+  "where": "760",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AN17-17 the log shows 12 weeks (or all, if fewer)",
+  "where": "760",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "AN17-17 the Show all toggle",
+  "where": "760",
+  "ok": true,
+  "detail": "Show all 32 weeks"
+ },
+ {
+  "lock": "AN17-17 the stacked share bar",
+  "where": "760",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "AN17-17 the phone reply chart",
+  "where": "760",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "AN17-17 desktop figures hidden",
+  "where": "760",
+  "ok": true,
+  "detail": "0 of 9 shown"
+ },
+ {
+  "lock": "AN17-17 every chart label ≥ 9px",
+  "where": "760",
+  "ok": true,
+  "detail": "min 9.00 over 108"
+ },
+ {
+  "lock": "AN17-17 the disc is 100px",
+  "where": "760",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":135,\"right\":732}"
+ },
+ {
+  "lock": "AN17-17 the disc is top-right of the band's text",
+  "where": "760",
+  "ok": true,
+  "detail": "{\"w\":100,\"h\":100,\"top\":135,\"right\":732} band {\"top\":105,\"right\":732}"
+ },
+ {
+  "lock": "AN17-17 Show all reveals every week",
+  "where": "760",
+  "ok": true,
+  "detail": "32 of 32"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "760",
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

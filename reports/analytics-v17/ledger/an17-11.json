@@ -2,97 +2,241 @@
  {
   "lock": "AN17-11 six records",
   "where": "1280",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "quickest,first-request,first-offer,busiest,run,full-read"
  },
  {
   "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
  },
  {
   "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
+ },
+ {
+  "lock": "AN17-11 quickest states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"6 days\""
+ },
+ {
+  "lock": "AN17-11 first-request states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"20 Jul\""
+ },
+ {
+  "lock": "AN17-11 first-offer states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-11 busiest states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"2 queries\""
+ },
+ {
+  "lock": "AN17-11 run states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"2 weeks\""
+ },
+ {
+  "lock": "AN17-11 full-read states a value or \"Not yet\"",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"74 days\""
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-11 six records",
   "where": "1440",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "quickest,first-request,first-offer,busiest,run,full-read"
  },
  {
   "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
  },
  {
   "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
+ },
+ {
+  "lock": "AN17-11 quickest states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"6 days\""
+ },
+ {
+  "lock": "AN17-11 first-request states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"20 Jul\""
+ },
+ {
+  "lock": "AN17-11 first-offer states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-11 busiest states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"2 queries\""
+ },
+ {
+  "lock": "AN17-11 run states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"2 weeks\""
+ },
+ {
+  "lock": "AN17-11 full-read states a value or \"Not yet\"",
+  "where": "1440",
+  "ok": true,
+  "detail": "\"74 days\""
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-11 six records",
   "where": "1512",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "quickest,first-request,first-offer,busiest,run,full-read"
  },
  {
   "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
  },
  {
   "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
+ },
+ {
+  "lock": "AN17-11 quickest states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"6 days\""
+ },
+ {
+  "lock": "AN17-11 first-request states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"20 Jul\""
+ },
+ {
+  "lock": "AN17-11 first-offer states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-11 busiest states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"2 queries\""
+ },
+ {
+  "lock": "AN17-11 run states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"2 weeks\""
+ },
+ {
+  "lock": "AN17-11 full-read states a value or \"Not yet\"",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"74 days\""
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-11 six records",
   "where": "1920",
-  "ok": false,
-  "detail": ""
+  "ok": true,
+  "detail": "quickest,first-request,first-offer,busiest,run,full-read"
  },
  {
   "lock": "AN17-11 first-request renders StatusDot (and nothing else)",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
  },
  {
   "lock": "AN17-11 first-offer renders StatusDot (and nothing else)",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined StatusDot, undefined svg"
+  "ok": true,
+  "detail": "1 StatusDot, 1 svg"
+ },
+ {
+  "lock": "AN17-11 quickest states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"6 days\""
+ },
+ {
+  "lock": "AN17-11 first-request states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"20 Jul\""
+ },
+ {
+  "lock": "AN17-11 first-offer states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-11 busiest states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"2 queries\""
+ },
+ {
+  "lock": "AN17-11 run states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"2 weeks\""
+ },
+ {
+  "lock": "AN17-11 full-read states a value or \"Not yet\"",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"74 days\""
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

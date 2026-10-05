@@ -172,8 +172,9 @@ export async function readDesk(page: Page) {
     const recs = all('[data-a17="rec"]').map((r) => ({
       key: r.dataset.key ?? "", v: r.querySelector('[data-a17="rec-v"]')?.textContent?.trim() ?? "",
       /* StatusDot's own signature (src/test/statusDotSignature.ts): an img-role span holding the 24-unit
-         viewBox with its r=10 ring — a ring recreated in the ref's 20-unit drawing cannot satisfy it */
-      statusDot: [...r.querySelectorAll('[data-a17="medal"] span[role="img"] > svg[viewBox="0 0 24 24"]')].filter((s) => s.querySelector('circle[r="10"]')).length,
+         viewBox at stroke-width 2 — a glyph recreated in the ref's 20-unit drawing cannot satisfy it. Not the
+         r=10 ring: Offer is drawn as a document outline and has none (measured red on first-offer). */
+      statusDot: r.querySelectorAll('[data-a17="medal"] span[role="img"] > svg[viewBox="0 0 24 24"][stroke-width="2"]').length,
       svgs: r.querySelectorAll('[data-a17="medal"] svg').length,
     }));
     const lanes = all('[data-a17="lane"]').map((e) => ({ fill: getComputedStyle(e).fill, r: e.getBoundingClientRect().right }));

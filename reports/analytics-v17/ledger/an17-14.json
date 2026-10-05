@@ -2,145 +2,193 @@
  {
   "lock": "AN17-14 the workspace is blush",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(244, 224, 212)"
  },
  {
   "lock": "AN17-14 radius 22",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "22px"
  },
  {
   "lock": "AN17-14 an anthracite band",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
  },
  {
   "lock": "AN17-14 four white cards",
   "where": "1280",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255)"
  },
  {
   "lock": "AN17-14 the footer is mounted",
   "where": "1280",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-14 footer content box = the content column (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "288.953125–1239.046875 vs 288.96–1239.04"
+ },
+ {
+  "lock": "AN17-14 the footer's top rule spans the main column",
+  "where": "1280",
+  "ok": true,
+  "detail": "left 243,243,233,235,235 centre 243,243,233,235,235 right 236,236,227,229,229"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1280",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-14 the workspace is blush",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(244, 224, 212)"
  },
  {
   "lock": "AN17-14 radius 22",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "22px"
  },
  {
   "lock": "AN17-14 an anthracite band",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
  },
  {
   "lock": "AN17-14 four white cards",
   "where": "1440",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255)"
  },
  {
   "lock": "AN17-14 the footer is mounted",
   "where": "1440",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-14 footer content box = the content column (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "294.078125–1393.921875 vs 294.08–1393.92"
+ },
+ {
+  "lock": "AN17-14 the footer's top rule spans the main column",
+  "where": "1440",
+  "ok": true,
+  "detail": "left 243,243,237,235,235 centre 243,243,237,235,235 right 236,236,231,229,229"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1440",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-14 the workspace is blush",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(244, 224, 212)"
  },
  {
   "lock": "AN17-14 radius 22",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "22px"
  },
  {
   "lock": "AN17-14 an anthracite band",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
  },
  {
   "lock": "AN17-14 four white cards",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255)"
  },
  {
   "lock": "AN17-14 the footer is mounted",
   "where": "1512",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-14 footer content box = the content column (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "296.375–1463.625 vs 296.384–1463.616"
+ },
+ {
+  "lock": "AN17-14 the footer's top rule spans the main column",
+  "where": "1512",
+  "ok": true,
+  "detail": "left 243,243,237,235,235 centre 243,243,237,235,235 right 236,236,231,229,229"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  },
  {
   "lock": "AN17-14 the workspace is blush",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(244, 224, 212)"
  },
  {
   "lock": "AN17-14 radius 22",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "22px"
  },
  {
   "lock": "AN17-14 an anthracite band",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
  },
  {
   "lock": "AN17-14 four white cards",
   "where": "1920",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255) rgb(255, 255, 255)"
  },
  {
   "lock": "AN17-14 the footer is mounted",
   "where": "1920",
-  "ok": false,
-  "detail": "false"
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "AN17-14 footer content box = the content column (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "456–1712 vs 456–1712"
+ },
+ {
+  "lock": "AN17-14 the footer's top rule spans the main column",
+  "where": "1920",
+  "ok": true,
+  "detail": "left 243,243,233,235,235 centre 243,243,233,235,235 right 236,236,227,229,229"
  },
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1920",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

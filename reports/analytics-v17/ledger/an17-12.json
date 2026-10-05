@@ -2,13 +2,73 @@
  {
   "lock": "AN17-12 the chart is on screen",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"l\":327.375,\"t\":399.359375,\"w\":1105.25,\"h\":276.3125}"
  },
  {
   "lock": "AN17-12 the readout starts at Today",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "Today"
+ },
+ {
+  "lock": "AN17-12 moving to 60% changes the date from Today",
+  "where": "1512",
+  "ok": true,
+  "detail": "10 Jul"
+ },
+ {
+  "lock": "AN17-12 the guide moves",
+  "where": "1512",
+  "ok": true,
+  "detail": "1188 → 720.000026507011"
+ },
+ {
+  "lock": "AN17-12 leaving restores Today",
+  "where": "1512",
+  "ok": true,
+  "detail": "Today"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "AN17-12 the chart is on screen",
+  "where": "390",
+  "ok": true,
+  "detail": "{\"l\":45,\"t\":451.578125,\"w\":300,\"h\":209.078125}"
+ },
+ {
+  "lock": "AN17-12 the readout starts at Today",
+  "where": "390",
+  "ok": true,
+  "detail": "Today"
+ },
+ {
+  "lock": "AN17-12 moving to 60% changes the date from Today",
+  "where": "390",
+  "ok": true,
+  "detail": "7 Jul"
+ },
+ {
+  "lock": "AN17-12 the guide moves",
+  "where": "390",
+  "ok": true,
+  "detail": "324 → 198.0000000000007"
+ },
+ {
+  "lock": "AN17-12 leaving restores Today",
+  "where": "390",
+  "ok": true,
+  "detail": "Today"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "390",
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

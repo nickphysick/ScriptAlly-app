@@ -2,14 +2,26 @@
  {
   "lock": "AN17-18 the page reads a manuscript",
   "where": "1512",
-  "ok": false,
-  "detail": "{\"ms\":null,\"sent\":-1,\"strip\":null,\"funnel\":null}"
+  "ok": true,
+  "detail": "{\"ms\":\"msv12-ms\",\"sent\":8,\"strip\":\"8\",\"funnel\":\"8,3,2,0\"}"
  },
  {
   "lock": "AN17-18 switched to another manuscript with queries",
   "where": "1512",
-  "ok": false,
-  "detail": "null"
+  "ok": true,
+  "detail": "{\"ms\":\"seed-ms-1\",\"sent\":57,\"strip\":\"57\",\"funnel\":\"57,21,14,1\"}"
+ },
+ {
+  "lock": "AN17-18 the strip's first number changes",
+  "where": "1512",
+  "ok": true,
+  "detail": "8 → 57"
+ },
+ {
+  "lock": "AN17-18 the funnel's top count changes",
+  "where": "1512",
+  "ok": true,
+  "detail": "8,3,2,0 → 57,21,14,1"
  },
  {
   "lock": "AN17-18 without a reload",
@@ -20,7 +32,7 @@
  {
   "lock": "no horizontal overflow of the scroller",
   "where": "1512",
-  "ok": false,
-  "detail": "found false over NaN"
+  "ok": true,
+  "detail": "found true over 0"
  }
 ]

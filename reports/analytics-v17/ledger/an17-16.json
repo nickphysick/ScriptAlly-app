@@ -2,13 +2,295 @@
  {
   "lock": "AN17-16 the page is cut to one query",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "1"
  },
  {
   "lock": "AN17-16 figures were found",
   "where": "1512",
-  "ok": false,
-  "detail": "undefined"
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "AN17-16 the Last 90 days strip was read",
+  "where": "1512",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None of 1\""
+ },
+ {
+  "lock": "AN17-16 gv under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None of 1\" in \"REQUEST RATE None of 1 No queries sent in the last 90 days\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"59days\""
+ },
+ {
+  "lock": "AN17-16 gv under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"59days\" in \"MEDIAN WAIT 59days for a first reply, from 1 reply; none in the last 90 days, 1 in the 90 before\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"32weeks\""
+ },
+ {
+  "lock": "AN17-16 fcount is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1\""
+ },
+ {
+  "lock": "AN17-16 fcount under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1\" in \"Queries by the furthest stage reached 1 query · bar length to scale 1 QUERIED Letter, synopsis and opening pages since 3\""
+ },
+ {
+  "lock": "AN17-16 fcount is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 fcount under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\" in \"Queries by the furthest stage reached 1 query · bar length to scale 1 QUERIED Letter, synopsis and opening pages since 3\""
+ },
+ {
+  "lock": "AN17-16 fcount is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 fcount is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Tue\""
+ },
+ {
+  "lock": "AN17-16 read-v under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Tue\" in \"Tue the day you send most, 1 of 1\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1 of 32\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None of 1\""
+ },
+ {
+  "lock": "AN17-16 read-v under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None of 1\" in \"None of 1 asked for more, too few queries for a percentage\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"59 days\""
+ },
+ {
+  "lock": "AN17-16 read-v under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"59 days\" in \"59 days median wait for a reply, from 1 reply\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"No replies yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"8 weeks\""
+ },
+ {
+  "lock": "AN17-16 read-v under 5 states its population (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"8 weeks\" in \"8 weeks median time to a pass, from 1 query\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"8 weeks\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1 query\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"1 week\""
+ },
+ {
+  "lock": "AN17-16 rec-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Not yet\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 read-v is not 0 / 0% / a bare dash (all time)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (last 90 days)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (last 90 days)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"No queries\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (last 90 days)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"No replies\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (last 90 days)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"None\""
+ },
+ {
+  "lock": "AN17-16 gv is not 0 / 0% / a bare dash (last 90 days)",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Noneof 13 weeks\""
  }
 ]
