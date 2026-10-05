@@ -94,7 +94,7 @@ export const QueryCardLive: React.FC<{
         ? { label: "Closed", band: "stone" as const }
         : act.ballHolder === "writer"
           ? { label: "With you", band: "rose" as const }
-          : { label: "With the agency", band: "sand" as const };
+          : { label: "With the agent", band: "sand" as const };
 
     const sentMs = query.dateSent ? new Date(query.dateSent).getTime() : NaN;
     const day = Number.isFinite(sentMs) ? `Day ${Math.max(0, daysBetween(sentMs, Date.now()))}` : null;

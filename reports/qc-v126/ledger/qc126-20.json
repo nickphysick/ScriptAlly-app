@@ -21,7 +21,7 @@
   "lock": "QC126-20 a Birds-eye row's button opens the drawer",
   "where": "1512",
   "ok": true,
-  "detail": "{\"mode\":\"nudge\",\"dock\":false,\"others\":0}"
+  "detail": "{\"mode\":\"close\",\"dock\":false,\"others\":0}"
  },
  {
   "lock": "no horizontal overflow of the scroller",

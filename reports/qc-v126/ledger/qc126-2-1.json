@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "QC126-2.1 width min(1120px, 74vw)",
+  "where": "1280",
+  "ok": true,
+  "detail": "947.1875 vs 947.2"
+ },
+ {
+  "lock": "QC126-2.1 width min(1120px, 74vw)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1118.875 vs 1118.8799999999999"
+ },
+ {
+  "lock": "QC126-2.1 width min(1120px, 74vw)",
+  "where": "1920",
+  "ok": true,
+  "detail": "1120 vs 1120"
+ }
+]

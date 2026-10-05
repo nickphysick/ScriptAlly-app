@@ -1,0 +1,326 @@
+[
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1101",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":286.265625,\"r\":1101,\"t\":0,\"b\":800,\"c\":400},\"t\":{\"l\":418.265625,\"r\":1037,\"t\":17,\"b\":49,\"c\":33},\"p\":{\"l\":418.265625,\"r\":1083,\"t\":63,\"b\":97,\"c\":80},\"k\":{\"l\":308.265625,\"r\":390.265625,\"t\":32.562"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1101",
+  "ok": true,
+  "detail": "drawer 814.734375 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1101",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 below 880: the pills drop to their own row beneath the title",
+  "where": "1101",
+  "ok": true,
+  "detail": "drawer 814.734375: pills top 63 title bottom 49"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1101",
+  "ok": true,
+  "detail": "17/63 → 17/63"
+ },
+ {
+  "lock": "QC126-2.8 two rows: the hawk stands on the block's bottom, filtered or not",
+  "where": "1101",
+  "ok": true,
+  "detail": "111/111 → 147/147"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1101",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1150",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":299,\"r\":1150,\"t\":0,\"b\":800,\"c\":400},\"t\":{\"l\":431,\"r\":1086,\"t\":17,\"b\":49,\"c\":33},\"p\":{\"l\":431,\"r\":1132,\"t\":63,\"b\":97,\"c\":80},\"k\":{\"l\":321,\"r\":403,\"t\":32.5625,\"b\":111,\"c\":71.78125},\"x\":{\"l\":10"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1150",
+  "ok": true,
+  "detail": "drawer 851 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1150",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 below 880: the pills drop to their own row beneath the title",
+  "where": "1150",
+  "ok": true,
+  "detail": "drawer 851: pills top 63 title bottom 49"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1150",
+  "ok": true,
+  "detail": "17/63 → 17/63"
+ },
+ {
+  "lock": "QC126-2.8 two rows: the hawk stands on the block's bottom, filtered or not",
+  "where": "1150",
+  "ok": true,
+  "detail": "111/111 → 147/147"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1150",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1190",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":309.40625,\"r\":1190,\"t\":0,\"b\":800,\"c\":400},\"t\":{\"l\":427.40625,\"r\":693,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":703,\"r\":1128,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":327.40625,\"r\":413.40625,\"t\":8,\"b\":90.265625,\"c"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1190",
+  "ok": true,
+  "detail": "drawer 880.59375 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1190",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills' centre within 2px of the title's",
+  "where": "1190",
+  "ok": true,
+  "detail": "drawer 880.59375: 48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 one row: the title's centre within 3px of the hawk's",
+  "where": "1190",
+  "ok": true,
+  "detail": "48 vs 49.1328125"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills sit right of the title and left of the ×",
+  "where": "1190",
+  "ok": true,
+  "detail": "ink 632.296875 p 703..1128 x 1138"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1190",
+  "ok": true,
+  "detail": "32/31 → 32/31"
+ },
+ {
+  "lock": "QC126-2.8 one row: and the hawk's top is unchanged (±0)",
+  "where": "1190",
+  "ok": true,
+  "detail": "8 → 8"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1190",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 one row: the sub-strip spans the drawer",
+  "where": "1190",
+  "ok": true,
+  "detail": "[{\"l\":309.40625,\"r\":1190,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":309.40625,\"r\":1190,\"t\":0,\"b\":800,\"c\":400}]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":332.8125,\"r\":1280,\"t\":0,\"b\":800,\"c\":400},\"t\":{\"l\":450.8125,\"r\":783,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":793,\"r\":1218,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":350.8125,\"r\":436.8125,\"t\":8,\"b\":90.265625,\"c\":49"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1280",
+  "ok": true,
+  "detail": "drawer 947.1875 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills' centre within 2px of the title's",
+  "where": "1280",
+  "ok": true,
+  "detail": "drawer 947.1875: 48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 one row: the title's centre within 3px of the hawk's",
+  "where": "1280",
+  "ok": true,
+  "detail": "48 vs 49.1328125"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills sit right of the title and left of the ×",
+  "where": "1280",
+  "ok": true,
+  "detail": "ink 655.703125 p 793..1218 x 1228"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1280",
+  "ok": true,
+  "detail": "32/31 → 32/31"
+ },
+ {
+  "lock": "QC126-2.8 one row: and the hawk's top is unchanged (±0)",
+  "where": "1280",
+  "ok": true,
+  "detail": "8 → 8"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 one row: the sub-strip spans the drawer",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"l\":332.8125,\"r\":1280,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":332.8125,\"r\":1280,\"t\":0,\"b\":800,\"c\":400}]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":393.125,\"r\":1512,\"t\":0,\"b\":900,\"c\":450},\"t\":{\"l\":529.125,\"r\":991,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":1005,\"r\":1446,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":417.125,\"r\":513.125,\"t\":4,\"b\":95.828125,\"c\":49.91"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1512",
+  "ok": true,
+  "detail": "drawer 1118.875 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills' centre within 2px of the title's",
+  "where": "1512",
+  "ok": true,
+  "detail": "drawer 1118.875: 48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 one row: the title's centre within 3px of the hawk's",
+  "where": "1512",
+  "ok": true,
+  "detail": "48 vs 49.9140625"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills sit right of the title and left of the ×",
+  "where": "1512",
+  "ok": true,
+  "detail": "ink 765.53125 p 1005..1446 x 1460"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1512",
+  "ok": true,
+  "detail": "32/31 → 32/31"
+ },
+ {
+  "lock": "QC126-2.8 one row: and the hawk's top is unchanged (±0)",
+  "where": "1512",
+  "ok": true,
+  "detail": "4 → 4"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 one row: the sub-strip spans the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"l\":393.125,\"r\":1512,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":393.125,\"r\":1512,\"t\":0,\"b\":900,\"c\":450}]"
+ },
+ {
+  "lock": "QC126-2.8 population: title, pills, hawk, ×",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"d\":{\"l\":800,\"r\":1920,\"t\":0,\"b\":1080,\"c\":540},\"t\":{\"l\":936,\"r\":1399,\"t\":32,\"b\":64,\"c\":48},\"p\":{\"l\":1413,\"r\":1854,\"t\":31,\"b\":65,\"c\":48},\"k\":{\"l\":824,\"r\":920,\"t\":4,\"b\":95.828125,\"c\":49.9140625},\"x\":{\"l"
+ },
+ {
+  "lock": "QC126-2.8 nothing in the header overlaps",
+  "where": "1920",
+  "ok": true,
+  "detail": "drawer 1120 hits [] outside []"
+ },
+ {
+  "lock": "QC126-2.8 the × is 18px from the drawer's right (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills' centre within 2px of the title's",
+  "where": "1920",
+  "ok": true,
+  "detail": "drawer 1120: 48 vs 48"
+ },
+ {
+  "lock": "QC126-2.8 one row: the title's centre within 3px of the hawk's",
+  "where": "1920",
+  "ok": true,
+  "detail": "48 vs 49.9140625"
+ },
+ {
+  "lock": "QC126-2.8 one row: the pills sit right of the title and left of the ×",
+  "where": "1920",
+  "ok": true,
+  "detail": "ink 1172.40625 p 1413..1854 x 1868"
+ },
+ {
+  "lock": "QC126-2.8 with two filters on, the title and pills tops are unchanged (±0)",
+  "where": "1920",
+  "ok": true,
+  "detail": "32/31 → 32/31"
+ },
+ {
+  "lock": "QC126-2.8 one row: and the hawk's top is unchanged (±0)",
+  "where": "1920",
+  "ok": true,
+  "detail": "4 → 4"
+ },
+ {
+  "lock": "QC126-2.8 with filters on, still nothing overlaps",
+  "where": "1920",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "lock": "QC126-2.8 one row: the sub-strip spans the drawer",
+  "where": "1920",
+  "ok": true,
+  "detail": "[{\"l\":800,\"r\":1920,\"t\":96,\"b\":143,\"c\":119.5},{\"l\":800,\"r\":1920,\"t\":0,\"b\":1080,\"c\":540}]"
+ }
+]

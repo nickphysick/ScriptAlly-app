@@ -27,8 +27,13 @@ export const PXD_MIN = 3;
 export const PXD_MAX = 30;
 /** About three months across a 1280 window. */
 export const PXD_DEFAULT = 10.5;
-/** On open, today sits this far into the visible track. */
-export const TODAY_AT = 0.58;
+/**
+ * On open, and on T, today sits this far into the visible track — 40% (v126.2; it was 58%). The
+ * drawer's track is narrow, and what a reader opens it for is what is overdue: 40% gives the past
+ * the larger share while still leaving the next few weeks on screen. The presets' px/day are
+ * unchanged — only where today lands.
+ */
+export const TODAY_AT = 0.4;
 /** ‹ › move this far. */
 export const NUDGE_WEEKS = 4;
 
@@ -81,7 +86,7 @@ export const xAt = (ext: Extent, pxd: number, ms: number): number => ((ms - ext.
 export const msAt = (ext: Extent, pxd: number, x: number): number => ext.fromMs + (x / pxd) * DAY;
 export const trackWidth = (ext: Extent, pxd: number): number => ext.days * pxd;
 
-/** The scroll offset that puts today at 58% of a track this wide. */
+/** The scroll offset that puts today at `TODAY_AT` of a track this wide. */
 export const scrollForToday = (ext: Extent, pxd: number, boxW: number, nowMs: number): number =>
   Math.max(0, xAt(ext, pxd, startOfDay(nowMs)) - boxW * TODAY_AT);
 
@@ -235,11 +240,17 @@ export function currentWords(row: QcRow, nowMs: number): string {
   const name = STAGE_NAME[row.status];
   const court = tileCourt(row.status);
   if (row.expectedMs == null) return `${name} · ${court === "you" ? "no send-by date" : "no date promised"}`;
-  const past = row.expectedMs < nowMs;
   const when = shortDate(row.expectedMs);
-  if (row.status === QueryStatus.OFFER) return `${name} · ${past ? "your decision was due" : "your decision by"} ${when}`;
-  if (court === "you") return `${name} · ${past ? "was to be sent by" : "send by"} ${when}`;
-  return `${name} · ${past ? "agent response was expected by" : "agent response expected by"} ${when}`;
+  /**
+   * v126.2 — PAST ITS DATE, EVERY STAGE SAYS THE SAME THING: "<Stage> · overdue since <date>". The
+   * three past-tense verbs ("was expected by", "was to be sent by", "your decision was due") were
+   * longer than the bars they sat in and were cut mid-word by an ellipsis; one short form fits the
+   * bar far more often and states the one fact the reader needs. A running stage keeps its verb.
+   */
+  if (row.expectedMs < startOfDay(nowMs)) return `${name} · overdue since ${when}`;
+  if (row.status === QueryStatus.OFFER) return `${name} · your decision by ${when}`;
+  if (court === "you") return `${name} · send by ${when}`;
+  return `${name} · reply by ${when}`;
 }
 
 /** What a with-you stage owes next (§8.7's action ghosts). Nothing follows an agent-side bar. */

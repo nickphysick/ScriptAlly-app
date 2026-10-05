@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "QC126-2.7 no rendered 'With the agency' (any case)",
+  "where": "1512",
+  "ok": true,
+  "detail": "agency 0 agent 8"
+ },
+ {
+  "lock": "QC126-2.7 the desk foot never reads a dash where a date has passed",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"overdue since Sun 4 Oct\",\"overdue since Sat 27 Sep\",\"last closed 9 Sep\"]"
+ },
+ {
+  "lock": "QC126-2.7 nor in the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ }
+]

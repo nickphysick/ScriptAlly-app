@@ -48,6 +48,13 @@ export const COMING_VERB: Record<Exclude<Bucket, "send" | "note">, string> = {
   fix: "Record what you sent",
 };
 export const SEND_VERB = { partial: "Send partial", full: "Send full" } as const;
+/**
+ * v126.2.1 — PAST ITS DATE, A SEND NAMES THE STAGE AND DROPS THE VERB: "Partial 2 days over",
+ * "Full 3 days over". "Send partial 2 days over" is 24 characters of 13.5px typewriter and did not
+ * fit the 160px Coming-up column (QC4, measured at 1280). The act is unchanged — the tray's pill
+ * still says "Log the send" — only the line that states how late it is gets shorter.
+ */
+export const SEND_OVER_VERB = { partial: "Partial", full: "Full" } as const;
 
 /** The tray's primary, the same act in the imperative — "Log the send", not "Send full". */
 export const COMING_ACTION: Record<Exclude<Bucket, "note">, string> = {
@@ -107,8 +114,10 @@ export function comingUp(card: BoardCard | undefined | null, row: QcRow, nowMs: 
     : days >= 0
       ? { lead: "in", figure: elapsedPhrase(days) }
       : { lead: "", figure: `${elapsedPhrase(-days)} over` };
+  const lateSend = b === "send" && dated && days < 0;
+  const said = lateSend ? (card.taskType === "partial_requested" ? SEND_OVER_VERB.partial : SEND_OVER_VERB.full) : verb;
 
-  return { bucket: b, verb, tail, over, action: COMING_ACTION[b] };
+  return { bucket: b, verb: said, tail, over, action: COMING_ACTION[b] };
 }
 
 /**
@@ -146,4 +155,23 @@ export function trayRequest(bucket: Exclude<Bucket, "note">, status: QueryStatus
     case "decide": { const d = primaryDoor(status); return d ? { mode: d.mode, queryId } : null; }
     default: { const unhandled: never = bucket; return unhandled; }
   }
+}
+
+/**
+ * v126.2 — A ROW'S ONE NEXT MOVE IN THE BIRDS-EYE DRAWER: the words on its action pill and the
+ * journey that pill opens. It is the list tray's own primary where the query has something coming
+ * up (`comingUp` → `trayRequest`, so the tray and the drawer cannot offer different acts for one
+ * query), and otherwise the card's own primary door for the status (`primaryDoor`), so a query with
+ * nothing raised still has the verb its centred card would offer. Null where neither has a live
+ * journey: the pill is then absent rather than a dead button.
+ */
+export interface NextMove { label: string; request: OpenRequest }
+export function nextMove(card: BoardCard | undefined | null, row: QcRow, nowMs: number): NextMove | null {
+  const c = comingUp(card, row, nowMs);
+  if (c) {
+    const request = trayRequest(c.bucket, row.status, row.id);
+    if (request) return { label: c.action, request };
+  }
+  const door = primaryDoor(row.status);
+  return door ? { label: door.label, request: { mode: door.mode, queryId: row.id } } : null;
 }
