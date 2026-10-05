@@ -119,12 +119,12 @@ const QC_GUIDE: readonly GuideStep[] = [
   {
     title: "The Birds-eye view",
     body: [
-      "Each bar runs from the date a query reached its current status to the date it is due. The fuller the bar, the sooner it needs you; a full ink bar is past its date.",
-      "Open it for the whole timeline, where every query sits on one set of dates.",
+      "The tab at the bottom right, or B, opens every live query on one set of dates.",
+      "A bar runs in its stage's colour up to today. Past the due date, a dashed tick marks the day it was due and a beacon marks today.",
     ],
   },
 ];
-import { QcExpanded } from "./queries/centre/QcExpanded";
+import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
@@ -180,7 +180,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { openQueryDrawer, showUndoBar } from "../lib/queryActions/drawerStore";
+import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
@@ -2288,6 +2288,9 @@ export const Queries: React.FC<{
    */
   const [beCard, setBeCard] = useState<string | null>(null);
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
+  /* v126 §6 — whether the action drawer is open, so the Birds-eye drawer's keys stand down beneath it */
+  const [qaOpen, setQaOpen] = useState<boolean>(() => currentDrawerRequest() != null);
+  useEffect(() => subscribeDrawer((r) => setQaOpen(r != null)), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -6606,42 +6609,27 @@ export const Queries: React.FC<{
                 onCourt={pickCourt}
               />
             )}
-            overlay={beOpen ? (
-              <QcExpanded
+            /**
+             * v126 §6 — THE BIRDS-EYE VIEW IS A FLOATING TAB AND A HALF-SCREEN DRAWER, always
+             * mounted so its grouping, sort and filters survive closing and reopening it. A name or
+             * a bar opens the centred card over it; a row's action opens the one action drawer.
+             */
+            overlay={(
+              <QcBirdsDrawer
                 rows={qcScoped}
                 nowMs={Date.now()}
+                loading={showGridSkeleton}
+                open={beOpen}
                 focusId={beFocus}
-                /**
-                 * §8.3 — the package grouping's names.
-                 *
-                 * ⚠️ THE RESOLVER IS PASSED IN RATHER THAN THE LIST, so `groupRows` stays a pure
-                 * function of rows and a view. A lib that reached for the packages collection would
-                 * be a second reader of the page's data with its own idea of which manuscript is in
-                 * scope, and an id it could not resolve is already a case the grouping answers:
-                 * "No package", which is the honest word for a package this page cannot name.
-                 */
-                packageName={(id) => packages.find((pk) => pk.id === id)?.packageName ?? null}
-                onClose={() => { setBeOpen(false); setBeFocus(null); setBeCard(null); }}
-                /**
-                 * §8.11 — A BAR OR A NAME OPENS THE QUERY CENTRED OVER THIS VIEW, which stays
-                 * exactly as it was underneath: scroll, zoom, filters, grouping and Find.
-                 *
-                 * ⚠️ IT USED TO LEAVE. The view closed and the query docked in the rail, recorded
-                 * at the time as a deliberate deviation on the grounds that one house for an open
-                 * query is better than two. The reasoning was right about the CARD and wrong about
-                 * the ROUTE: there is still exactly one card, built once from `cardQueryId` — what
-                 * changed is that it can be drawn here instead of the rail, so a reader who clicked
-                 * a bar to look at a query is not thrown out of the view they were reading it in.
-                 */
-                /* §1 — the card is a VIEWPORT modal now, mounted by the page; this view only says
-                   whether one is open, so its Escape can cascade through it to the calendar. */
-                cardOpen={qcOpenCardNode != null}
+                onOpenDrawer={() => openBirdsEye(null)}
+                onCloseDrawer={() => { setBeOpen(false); setBeFocus(null); setBeCard(null); }}
+                onOpenQuery={(id) => setBeCard(id)}
+                cardOpen={qcOpenCardNode != null && beCard != null}
                 onCardClose={closeQueryCard}
-                onOpen={(id) => setBeCard(id)}
-                /* ⚠️ THE CHIP OPENS THE APP'S OWN NUDGE FLOW (§9), never a second one */
-                onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeCard(null); setBeNudge(id); }}
+                actionOpen={qaOpen}
+                onAct={(id) => openQueryDrawer({ mode: "nudge", queryId: id })}
               />
-            ) : null}
+            )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
             carousel={showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);

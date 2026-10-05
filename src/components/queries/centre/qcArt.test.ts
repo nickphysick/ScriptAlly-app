@@ -35,7 +35,7 @@ describe("the Birds-eye header's Courier", () => {
   });
   it("⚠️ nothing in the Query Centre blends", () => {
     const dir = resolve(process.cwd(), "src/components/queries/centre");
-    const sheets = ["qcvExpanded.css", "qcvBirdsEye.css", "qcvRail.css", "qcvPage.css"]
+    const sheets = ["qcvBirdsDrawer.css", "qcvBirdsEye.css", "qcvRail.css", "qcvPage.css"]
       .filter((f) => existsSync(resolve(dir, f)))
       .map((f) => readFileSync(resolve(dir, f), "utf8"));
     expect(sheets.length).toBeGreaterThan(2);

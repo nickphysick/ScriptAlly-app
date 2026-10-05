@@ -287,9 +287,11 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
        the page's own selection alone. It pinned the handler verbatim and went red when §8.11 gave
        the chip one more thing to clear (the calendar's centred card), which changes nothing about
        what it claims. */
-    const chip = /onNudge=\{\(id\) => \{([^}]*)\}\}/.exec(page)?.[1] ?? "";
+    /* v126 §7 — the Birds-eye chip is the row's action now and opens the ONE action drawer, in
+       nudge mode; the old modal is the mobile door only */
+    const chip = /onAct=\{\(id\) => ([^\n]*)\}\n/.exec(page)?.[1] ?? "";
     expect(chip, "the chip's handler").toBeTruthy();
-    expect(chip).toContain("setBeNudge(id)");
+    expect(chip).toContain('openQueryDrawer({ mode: "nudge", queryId: id })');
     expect(chip, "the chip must not select the query it nudges").not.toMatch(/setSelectedQueryId|onOpenQuery/);
   });
 

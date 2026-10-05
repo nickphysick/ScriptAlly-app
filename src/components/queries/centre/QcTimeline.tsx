@@ -21,7 +21,7 @@ import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { dueCell } from "../../../lib/qcBirdsEye";
 import { TAB_KEY } from "../QueryPanel";
-import { groupRows, type CalView } from "../../../lib/qcCalView";
+import { whenOf, type BvdGroupOut } from "../../../lib/qcBirdsDrawer";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
   NUDGE_WEEKS, PXD_DEFAULT, ZOOM_PRESETS, activePreset, clampPxd, crosshairAt, edgeCounts, extentOf,
@@ -38,29 +38,24 @@ export const NAMES_W = 330;
 
 export const QcTimeline: React.FC<{
   rows: readonly QcRow[];
-  /** §8.3 — which rows, in which groups, in what order. */
-  view: CalView;
-  /** §8.3 — a package's name for the package grouping; absent means every row is "No package". */
-  packageName?: (id: string) => string | null;
-  nowMs: number;
-  /** The query a rail row arrived from: ringed, and scrolled to the middle. */
-  focusId?: string | null;
-  /** §8.11 — a row or a bar opens the query, centred and in focus. */
-  onOpen: (id: string) => void;
-  /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
-  /** §6 — Filter, Sort and ↺, rendered into the date row's top lane. */
-  leftControls?: React.ReactNode;
   /**
-   * §4.2 — where the time controls are DRAWN. They belong to the tray in layout A and to the
-   * scroll state here, so they are rendered by this component and portalled into that host: the
-   * handlers stay beside the value they drive, and the pixels land where the design puts them.
-   * `null` keeps them in the lane, which is what the To-do page's calendar still wants.
+   * v126 §6 — THE GROUPS ARRIVE DECIDED, from the drawer's own model (`bvdGroups`): filtered, grouped
+   * and sorted within each group. This component draws them and owns only time — the scale, the
+   * scroll, the date row and today.
    */
-  timeHost?: HTMLElement | null;
-  /** §4.2 — Find's term, lower-cased. It MARKS and FADES rows; it never filters them. */
-  find?: string;
-  onNudge: (id: string) => void;
-}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, leftControls, onNudge, timeHost = null, find = "" }) => {
+  groups: readonly BvdGroupOut[];
+  /** whether bands are drawn — false for "No grouping" */
+  banded: boolean;
+  nowMs: number;
+  focusId?: string | null;
+  onOpen: (id: string) => void;
+  /** a row's action button (the nudge chip) — through the one drawer */
+  onAct: (id: string) => void;
+  /** ← → and T are live only while nothing sits above the drawer (a card, the action drawer) */
+  keysActive?: boolean;
+  /** "3 of 6" while filtered */
+  filtered?: boolean;
+}> = ({ rows, groups, banded, nowMs, focusId = null, onOpen, onAct, keysActive = true, filtered = false }) => {
   /* §B3 — Add date opens the card on Tracking, through the card's own tab seam */
   const openTracking = useCallback((id: string) => {
     try { sessionStorage.setItem(TAB_KEY, "tracking"); } catch { /* the card's default is fine */ }
@@ -115,7 +110,6 @@ export const QcTimeline: React.FC<{
    * state — the popover's checkboxes and the stat cards read and write one value, so neither can
    * be showing a set the rows disagree with.
    */
-  const groups = useMemo(() => groupRows(rows, view, nowMs, packageName), [rows, view, nowMs, packageName]);
   const tl = useMemo(() => {
     const out = new Map<string, TlRow>();
     for (const g of groups) for (const r of g.rows) out.set(r.id, tlRow(r.row, nowMs));
@@ -261,10 +255,11 @@ export const QcTimeline: React.FC<{
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return undefined;
-    const card = el.closest("[data-qcv='xp-card']");
+    /* v126 §6 — the drawer slides in on `transform`; the same re-place applies once it has landed */
+    const card = el.closest("[data-qcv='bvd']");
     if (!card) return undefined;
     const settle = (e: Event) => {
-      if ((e as TransitionEvent).propertyName !== "clip-path" || e.target !== card) return;
+      if ((e as TransitionEvent).propertyName !== "transform" || e.target !== card) return;
       placedFor.current = null;           /* the reveal has finished: whatever was measured mid-way is stale */
       setBoxW(el.clientWidth - NAMES_W);  /* …and the width is re-read, which re-runs the placement */
     };
@@ -272,22 +267,6 @@ export const QcTimeline: React.FC<{
     return () => card.removeEventListener("transitionend", settle);
   }, []);
 
-  /**
-   * §4.2 — THE FIRST MATCH SCROLLS INTO VIEW, 110px below the body's top.
-   *
-   * ⚠️ IT SCROLLS THE ROWS VERTICALLY AND LEAVES THE DATES ALONE. Find is about WHO, not WHEN —
-   * moving the track sideways would answer a question nobody asked and lose the reader their place
-   * in the calendar. And it is the SCROLLER's own `scrollTop`, never `scrollIntoView`, which would
-   * scroll every ancestor including the page behind the overlay.
-   */
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || !find) return;
-    const hit = el.querySelector("[data-find='hit']") as HTMLElement | null;
-    if (!hit) return;
-    const top = hit.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 110;
-    el.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  }, [find]);
 
   /** Anything the reader does to the track is theirs: nothing re-places it afterwards. */
   const mine = useCallback(() => { touched.current = true; }, []);
@@ -435,61 +414,92 @@ export const QcTimeline: React.FC<{
   };
 
   /**
-   * §4.2 — ‹ Today › and the zoom, rendered ONCE and placed in one of two homes: the tray's own
-   * host in the expanded view, or this component's lane where there is no host.
-   *
-   * ⚠️ ONE ELEMENT, TWO PLACES — never two copies. Two `Today` buttons would be two controls that
-   * have to agree about one scroller, and the second one to be written is the one that forgets.
+   * v126 §6 — THE TIME CONTROL IS ONE PILL IN THE DATE ROW'S CORNER: 6W 3M 6M, a separator, then
+   * ‹ ⌖ › — earlier, today, later. The crosshair is "today", and it fills anthracite whenever the
+   * view is not on today, so the way back is visible exactly when there is somewhere to come back
+   * from. "On today" is derived from the scroll, never a flag a handler keeps.
    */
+  const todayLeft = boxW > 0 ? scrollForToday(ext, pxd, boxW, nowMs) : null;
+  const away = todayLeft != null && Math.abs(scrollLeft - todayLeft) > 2;
+  const toToday = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || boxW <= 0) return;
+    mine();
+    el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" });
+  }, [ext, pxd, boxW, nowMs, mine]);
   const timeControls = (
-    <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
-      <span className="qcv-tl-nav" data-qcv="tl-nav">
-        <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
-        <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { mine(); el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
-        <button type="button" onClick={() => pan(NUDGE_WEEKS)} aria-label="Four weeks later">›</button>
-      </span>
-      <span className="qcv-tl-zoom" data-qcv="tl-zoom" role="group" aria-label="Zoom">
-        {ZOOM_PRESETS.map((p) => (
-          <button key={p.key} type="button" data-z={p.key} aria-pressed={activePreset(pxd) === p.key} onClick={() => toPreset(p.key)}>{p.label}</button>
-        ))}
-      </span>
+    <div className="bvd-time" data-qcv="bvd-time" role="group" aria-label="Time">
+      {ZOOM_PRESETS.map((p) => (
+        <button key={p.key} type="button" className="bvd-z" data-z={p.key} aria-pressed={activePreset(pxd) === p.key} onClick={() => toPreset(p.key)}>{p.label.toUpperCase()}</button>
+      ))}
+      <i className="bvd-sep" data-qcv="bvd-sep" aria-hidden="true" />
+      <button type="button" className="bvd-nav" data-qcv="bvd-earlier" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
+      <button type="button" className={`bvd-nav bvd-today${away ? " is-away" : ""}`} data-qcv="bvd-today" onClick={toToday}
+        aria-label="Back to today" title="Back to today">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="6" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+        </svg>
+      </button>
+      <button type="button" className="bvd-nav" data-qcv="bvd-later" onClick={() => pan(NUDGE_WEEKS)} aria-label="Four weeks later">›</button>
     </div>
   );
+
+  /**
+   * v126 §6 — ← → SCROLL AND T RETURNS TO TODAY, never in a field and never while something sits
+   * above the drawer (`keysActive`). Bound on the document because the drawer's focus can be on any
+   * of its controls; the guard is what keeps the keys from reaching past it.
+   */
+  const keysRef = useRef({ keysActive, pan, toToday });
+  keysRef.current = { keysActive, pan, toToday };
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const k = keysRef.current;
+      if (!k.keysActive || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, select, [contenteditable='true'], [role='menu'], [data-qcv='bvd-pop']")) return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); k.pan(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); k.pan(1); }
+      else if (e.key === "t" || e.key === "T") { e.preventDefault(); k.toToday(); }
+    };
+    document.addEventListener("keydown", on);
+    return () => document.removeEventListener("keydown", on);
+  }, []);
 
   const bar = (r: TlRow, b: TlRow["bars"][number]) => {
     const left = xAt(ext, pxd, b.fromMs);
     const w = Math.max(2, xAt(ext, pxd, b.toMs) - left);
     const pc = (ms: number) => ((xAt(ext, pxd, ms) - left) / w) * 100;
+    /**
+     * v126 §6 — THE PAINT. A running bar is solid in its stage colour up to today and the same
+     * colour at .42 after it (`after`). A past stage is the whole bar at .42, behind. An OVERDUE
+     * bar keeps its stage colour all the way to today — there is no ink overrun — with a 2px dashed
+     * tick at the date it was due and a beacon at its today end. The parts are their own boxes so a
+     * check can ask which is which; the bar itself paints nothing.
+     */
+    /* overdue is the ROW's fact (its expected date has passed), the same one the urgency grouping
+       reads — never whether this bar happened to record where the date fell. An undated stage start
+       has no `overFromMs` and is overdue all the same. */
+    const due = r.row.expectedMs;
+    const overdue = b.current && due != null && due < nowMs;
+    const tickAt = overdue && due! >= b.fromMs && due! <= b.toMs ? pc(due!) : null;
+    const split = b.current && b.aheadFromMs != null ? pc(b.aheadFromMs) : null;
     return (
       <button
         key={b.key}
         type="button"
-        className={`qcv-tl-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${b.you ? " qcv-tl-bar--you" : ""}${b.torn ? ` qcv-tl-bar--torn-${b.torn}` : ""}`}
-        data-qcv="tl-bar"
+        className={`qcv-tl-bar bvd-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${overdue ? " bvd-bar--over" : ""}${b.you ? " qcv-tl-bar--you" : ""}${b.torn ? ` qcv-tl-bar--torn-${b.torn}` : ""}`}
+        /* the previous stage is its own object — faded, behind, no beacon — and says so */
+        data-qcv={b.current ? "bvd-bar" : "bvd-prev"}
         data-status={b.status}
         data-current={b.current ? "true" : "false"}
         style={{ left, width: w, ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
         title={b.title}
         onClick={() => onOpen(r.id)}
       >
-        {/* the ink stretch from the expected date to today, and the hollow one beyond today */}
-        {b.overFromMs != null && <u className="qcv-tl-over" data-qcv="tl-over" style={{ left: `${pc(b.overFromMs)}%`, right: 0 }} />}
-        {b.aheadFromMs != null && <u className="qcv-tl-ahead" data-qcv="tl-ahead" style={{ left: `${pc(b.aheadFromMs)}%`, right: 0 }} />}
-        {/**
-          * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR, and the offset is computed
-          * rather than declared.
-          *
-          * ⚠️ `position: sticky` WAS THE FIRST ANSWER AND IT CANNOT WORK HERE. The bar carries
-          * `overflow: hidden`, which makes it the sticky child's nearest scrollport — so the words
-          * stuck to the BAR, which never scrolls, and a bar beginning off-screen still took them
-          * with it. Measured: a sentence's ink at −8360 against a visible edge of 568.
-          *
-          * The track's visible left edge, in the track's own coordinates, is exactly `scrollLeft`
-          * (the names cell covers the first `NAMES_W` of the viewport and the track begins there),
-          * so the inset is how far the bar's left is behind it, plus the 10px §7 asks for. It is a
-          * MARGIN rather than a transform because a margin also takes the width away, which is what
-          * turns "does not fit" into the bar's own ellipsis.
-          */}
+        <u className={`bvd-part bvd-part--solid${split != null ? " bvd-part--l" : ""}`} data-part="solid" style={split != null ? { left: 0, width: `${split}%` } : { left: 0, right: 0 }} />
+        {split != null && <u className="bvd-part bvd-part--after bvd-part--r" data-part="after" style={{ left: `${split}%`, right: 0 }} />}
+        {tickAt != null && <i className="bvd-duetick" data-qcv="bvd-duetick" style={{ left: `${tickAt}%` }} aria-hidden="true" />}
+        {overdue && <i className="bvd-beacon" data-qcv="bvd-beacon" aria-hidden="true" />}
         <span
           className="qcv-tl-words"
           data-qcv="tl-words"
@@ -533,7 +543,6 @@ export const QcTimeline: React.FC<{
         * element before and after — §11 lock 6, and the reason none of it is in the scrolling body.
         */}
       <div className="qcv-tl-lane" data-qcv="tl-lane" ref={laneRef}>
-        {timeHost ? createPortal(timeControls, timeHost) : timeControls}
         {/* §8.8 — the edge markers, clear of the controls, and absent when there is nothing off-screen */}
         {edges.earlier > 0 && edges.nearestEarlier != null && (
           <button type="button" className="qcv-tl-marker qcv-tl-marker--l" data-qcv="tl-marker" onClick={() => glide(edges.nearestEarlier!)}>‹ {edges.earlier} due earlier</button>
@@ -594,8 +603,8 @@ export const QcTimeline: React.FC<{
             * has to be told how wide the names column is.
             */}
           <div className="qcv-tl-daterow" data-qcv="tl-daterow">
-          <div className="qcv-tl-corner" data-qcv="tl-corner">{leftControls}</div>
-          <div className="qcv-tl-tier" data-qcv="tl-tier" ref={tierRef} style={{ width }}>
+          <div className="qcv-tl-corner" data-qcv="tl-corner">{timeControls}</div>
+          <div className="qcv-tl-tier" data-qcv="bvd-dates" ref={tierRef} style={{ width }}>
             {/**
               * §5 — MONTH BANDS. One band per month across the row's full height, alternating, each
               * naming itself at its own left edge — and the LABEL is sticky at the names column's
@@ -613,7 +622,7 @@ export const QcTimeline: React.FC<{
             ))}
             {/* §5 — every Monday's date, centred on its own x with a tick above it */}
             {weeks.map((w) => (
-              <span key={w.ms} className="qcv-tl-wk" data-qcv="tl-monday" style={{ left: w.x }}>{w.label}</span>
+              <span key={w.ms} className="qcv-tl-wk" data-qcv="bvd-date" style={{ left: w.x }}>{w.label}</span>
             ))}
             <span className="qcv-tl-todaypill" data-qcv="tl-todaypill" style={{ left: todayX }}>Today</span>
             {/* §10 — the crosshair runs through the DATE TIER as well as the rows: a line that
@@ -625,50 +634,33 @@ export const QcTimeline: React.FC<{
           {/* §8.6 — the rows, with the names cell sticky-left */}
           <div className="qcv-tl-rows" data-qcv="tl-rows">
             {/* ⚠️ THE TODAY LINE IS THE ROWS' OWN, at the same x every bar is placed from */}
-            <i className="qcv-tl-todayline" data-qcv="tl-todayline" style={{ left: NAMES_W + todayX }} aria-hidden="true" />
+            <i className="qcv-tl-todayline" data-qcv="bvd-todayline" style={{ left: NAMES_W + todayX }} aria-hidden="true" />
             {cross && <i className="qcv-tl-cross" data-qcv="tl-cross" style={{ left: NAMES_W + cross.x }} aria-hidden="true" />}
             {groups.length === 0 ? (
-              <p className="qcv-tl-none" data-qcv="tl-none">Nothing here with these settings.</p>
+              <p className="qcv-tl-none" data-qcv="bvd-none">Nothing matches these filters</p>
             ) : groups.map((g) => (
-              <section key={g.key} className="qcv-tl-group" data-qcv="tl-group" data-group={g.key}>
-                {/* §8.3 — a heading shows whenever grouping is on, even where there is one group;
-                    only "Nothing" removes them. Its words are the GROUP's, so Status and package
-                    groups name themselves rather than falling back to an attention label. */}
-                {view.groupBy !== "none" && (
+              /* ⚠️ NO GROUPING DRAWS NO GROUP ELEMENT AT ALL — one list, no band, nothing a reader or a
+                 check could take for a heading. */
+              <section key={g.key} className="qcv-tl-group" data-qcv={banded ? "bvd-group" : "bvd-list"} data-group={g.key}>
+                {banded && (
                   <div className="qcv-tl-band" data-qcv="tl-band">
-                    {/* §6 — a Next-action band says what the action IS; the other groupings have
-                        nothing to add to their own names, so they carry no hint rather than one
-                        invented to fill the slot. */}
-                    <span>{g.label}{g.hint && <em>{g.hint}</em>}<i>{g.count}</i></span>
+                    <span>
+                      {g.dot && <i className="bvd-gdot" style={{ background: `var(--state-${g.dot})` }} aria-hidden="true" />}
+                      <b data-qcv="bvd-glabel">{g.label}</b>
+                      <i>{filtered && g.shown !== g.of ? `${g.shown} of ${g.of}` : g.shown}</i>
+                    </span>
                   </div>
                 )}
-                {/**
-                  * §D4 — THE ROW DOES NOT OPEN THE QUERY; A BAR AND THE NAMES CELL DO, each by its
-                  * own handler.
-                  *
-                  * ⚠️ AND THE EMPTY TRACK WAS ALREADY NOT AN OPENER, WHICH IS NOT WHAT I ASSUMED.
-                  * The row's `onClick` looked like it covered the whole width; it did not, because
-                  * the drag calls `preventDefault()` on `pointerdown` and that suppresses the
-                  * compatibility `click`. Measured: restoring the row's handler leaves a press on
-                  * the track opening nothing. So the row's handler was reachable only through the
-                  * names cell — which is in the drag's exclusion list and therefore keeps its click.
-                  *
-                  * ⚠️ WHAT THE CHANGE IS REALLY FOR IS THE COUPLING. "The track does not open a
-                  * query" was a consequence of the exclusion list rather than a statement anybody
-                  * had made: add one excluded element inside the track and it silently becomes an
-                  * opener, through a handler on a different element, for a reason nobody reading
-                  * either file would see. The two openers now say so themselves, and the cursors
-                  * stop the row promising a click across a width where only part of it acts.
-                  */}
                 {g.rows.map((r) => {
                   const t = tl.get(r.id)!;
                   return (
                     <div
                       key={r.id}
-                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}${dueCell(r.row, nowMs).kind === "past" ? " qcv-tl-row--late" : ""}${find ? (r.row.agentName.toLowerCase().includes(find) ? " qcv-tl-row--hit" : " qcv-tl-row--miss") : ""}`}
-                      data-qcv="tl-row"
-                      data-find={find ? (r.row.agentName.toLowerCase().includes(find) ? "hit" : "miss") : undefined}
+                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}${dueCell(r.row, nowMs).kind === "past" ? " qcv-tl-row--late" : ""}`}
+                      data-qcv="bvd-row"
+                      data-att={whenOf(r.row, nowMs)}
                       data-id={r.id}
+                      data-qid={r.id}
                     >
                       {/**
                         * §D4 — THE NAMES CELL IS AN OPENER, AND IT NEEDS ITS OWN HANDLER.
@@ -710,17 +702,31 @@ export const QcTimeline: React.FC<{
                             §C3 — and it carries the YOUR MOVE tag, 8px after itself: an agent-side
                             stage past its date is your move, because nothing happens until you
                             nudge or close. Its COURT is unchanged — it is still With the agent. */}
-                        {t.nudge && (
-                          <button
-                            type="button"
-                            className={`qcv-tl-nudge${t.nudge.yourMove ? " qcv-tl-nudge--ym" : ""}`}
-                            data-qcv="tl-nudge"
-                            style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 10 }}
-                            onClick={(e) => { e.stopPropagation(); onNudge(r.id); }}
-                          >
-                            <span aria-hidden="true">✉</span> {t.nudge.text}
-                          </button>
-                        )}
+                        {/* v126 §6 — after an overdue bar: "N DAYS OVER" in anthracite, then the
+                            row's action (the nudge), which opens the one action drawer. */}
+                        {(() => {
+                          const due = r.row.expectedMs;
+                          const over = due != null && due < nowMs ? Math.max(1, Math.round((new Date(nowMs).setHours(0, 0, 0, 0) - due) / 86_400_000)) : 0;
+                          if (!over && !t.nudge) return null;
+                          return (
+                            <span className="bvd-tail" style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 14 }}>
+                              {over > 0 && <b className="bvd-over" data-qcv="bvd-over">{over} {over === 1 ? "DAY" : "DAYS"} OVER</b>}
+                              {t.nudge && (
+                                <button
+                                  type="button"
+                                  className={`qcv-tl-nudge bvd-act${t.nudge.yourMove ? " qcv-tl-nudge--ym" : ""}`}
+                                  data-qcv="bvd-act"
+                                  title={t.nudge.text}
+                                  aria-label={`Nudge ${r.row.agentName}: ${t.nudge.text}`}
+                                  onClick={(e) => { e.stopPropagation(); onAct(r.id); }}
+                                >
+                                  {/* the figure is the label beside it; the chip says only what it does */}
+                                  <span aria-hidden="true">✉</span> Nudge
+                                </button>
+                              )}
+                            </span>
+                          );
+                        })()}
                         {/* §8.7 — the dotted ring holding what a with-you stage owes next */}
                         {t.ghost && (
                           <span className="qcv-tl-ghost qcv-tl-ghost--you" data-qcv="tl-ghost" title={t.ghost.label} style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 10 }}>

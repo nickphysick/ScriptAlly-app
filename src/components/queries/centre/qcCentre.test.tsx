@@ -343,7 +343,7 @@ describe("the sheet", () => {
       /* ⚠️ `--qcv-xp-lcol` AND `--qcv-xp-ext` LEFT THIS MAP WITH THE COURIER'S COLUMN (v65.2 §6).
          Both sized it; §6 retires it, so neither has a publisher or a reader. An exemption for a
          token nothing publishes is exactly what this check exists to catch. */
-      "--qcv-xp-tw": "src/components/queries/centre/QcExpanded.tsx",
+      /* `--qcv-xp-tw` left with the expanded card (v126 §6), its only publisher and reader */
       "--qcv-tl-names": "src/components/queries/centre/QcTimeline.tsx",
       "--qcv-state": "src/components/queries/centre/QcTimeline.tsx",
     };

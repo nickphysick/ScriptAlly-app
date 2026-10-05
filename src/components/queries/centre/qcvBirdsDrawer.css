@@ -1,0 +1,185 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The Birds-eye tab and drawer (Query Centre v126 §6; ref design-refs/query-centre-v126.html,
+ * `#bevpill`, `#bvd`). Portalled to `document.body`, so every colour here is a literal or a `:root`
+ * token — a `.qcv-page` token would resolve to nothing out here, in silence.
+ *
+ * ⚠️ THE HEADER IS z 40 INSIDE THE DRAWER because the timeline's sticky date row and corner are z
+ * 12–15 in the same stacking context (the drawer's transform makes one): at 5 the popovers hung
+ * BEHIND the dates and a click on "Stage" landed on a date (measured).
+ *
+ * ⚠️ THE STACK: the dim at 60 and the drawer at 61 sit above the page and the tab (55), and below
+ * the action drawer (70/71) and the centred card (80) — so a card or an action opened from the
+ * drawer always lands on top of it.
+ */
+.bvd-tab {
+  position: fixed; z-index: 55;
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; border: 0; border-radius: 18px;
+  background: #2a3a52; color: #f5f1eb; cursor: pointer; text-align: left;
+  box-shadow: 0 18px 40px -16px rgba(28, 19, 15, 0.55), 0 1px 3px rgba(28, 19, 15, 0.15);
+  transition: transform 0.18s cubic-bezier(.2, .8, .2, 1);
+}
+.bvd-tab:hover { transform: translateY(-3px); }
+.bvd-tab:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 3px; }
+.bvd-tab:disabled { cursor: default; opacity: 0.6; }
+.bvd-tab-img { flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: #3a4a63; display: flex; align-items: flex-end; justify-content: center; }
+.bvd-tab-img img { width: 44px; height: auto; display: block; }
+.bvd-tab-t { display: flex; flex-direction: column; min-width: 0; }
+.bvd-tab-t b { font: 400 17px/1.15 var(--sp-type); white-space: nowrap; }
+.bvd-tab-t small { margin-top: 3px; font: 400 9.5px/1.3 var(--sp-serif); letter-spacing: 0.11em; color: rgba(245, 241, 235, 0.7); white-space: nowrap; }
+.bvd-tab-t small em { font-style: normal; font-weight: 700; color: #f5f1eb; }
+.bvd-tab-go {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin-left: 4px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(245, 241, 235, 0.5); font: 400 13px/1 var(--sp-type);
+}
+
+.bvd-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.28); opacity: 0; transition: opacity 0.28s; }
+.bvd-dim.is-in { opacity: 1; }
+.bvd {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;
+  width: min(780px, 56vw); display: flex; flex-direction: column;
+  background: #ffffff; color: #1c130f; font-family: var(--sp-serif);
+  box-shadow: -30px 0 70px -30px rgba(28, 19, 15, 0.45);
+  transform: translateX(100%); transition: transform 0.34s cubic-bezier(.2, .8, .2, 1);
+}
+.bvd.is-in { transform: none; }
+
+/* ── the ink block: it only ever grows downwards ─────────────────────────────────────────────── */
+.bvd-head { position: relative; z-index: 40; flex: none; box-sizing: border-box; padding: 16px 16px 14px 132px; background: #2a3a52; color: #f5f1eb; }
+/* ⚠️ INTERIM MASK: the head is cut flat at both sides; the fade comes off with the uncut drawing */
+.bvd-hawk {
+  position: absolute; left: 22px; bottom: 0; width: 96px; height: auto; display: block; pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+.bvd-row1 { display: flex; align-items: flex-start; gap: 12px; }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces every h2's face at runtime */
+.bvd-head .bvd-title { flex: 1; margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 30px; line-height: 32px; color: #f5f1eb; }
+.bvd-x {
+  flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: #f5f1eb; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(245, 241, 235, 0.55); display: flex; align-items: center; justify-content: center;
+}
+.bvd-x:hover { background: rgba(245, 241, 235, 0.1); }
+.bvd-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 13px; }
+.bvd-pw { position: relative; display: inline-flex; }
+.bvd-sortj { position: relative; display: inline-flex; gap: 1px; }
+.bvd-pill, .bvd-dir {
+  box-sizing: border-box; height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; cursor: pointer;
+  border-radius: 17px; background: rgba(245, 241, 235, 0.1); box-shadow: inset 0 0 0 1px rgba(245, 241, 235, 0.2);
+  color: #f5f1eb; font: 400 13px/1 var(--sp-type); white-space: nowrap;
+}
+.bvd-pill i { font-style: normal; opacity: 0.62; }
+/* ⚠️ brand.tsx names bare spans as sans at runtime; the pill's words inherit its typewriter */
+.bvd-pill span, .bvd-pill i, .bvd-chip em, .bvd-fchip, .bvd-opt span, .bvd-fline span { font-family: inherit; }
+.bvd-pill--l { border-radius: 17px 0 0 17px; }
+.bvd-dir { width: 38px; padding: 0; justify-content: center; border-radius: 0 17px 17px 0; }
+.bvd-pill:hover, .bvd-dir:hover { background: rgba(245, 241, 235, 0.18); }
+/* a pill set to anything but its default fills cream, with ink text */
+.bvd-pill.is-set, .bvd-dir.is-set { background: #f5f1eb; color: #1c130f; box-shadow: none; }
+.bvd-pill.is-set i { opacity: 0.62; }
+.bvd-pill:focus-visible, .bvd-dir:focus-visible, .bvd-x:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 2px; }
+
+.bvd-fline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font: 400 13px/1.3 var(--sp-serif); color: rgba(245, 241, 235, 0.78); }
+.bvd-fshow b { color: #f5f1eb; font-weight: 600; }
+.bvd-fchip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 4px 0 10px; border-radius: 12px; background: rgba(245, 241, 235, 0.14); color: #f5f1eb; font: 400 12.5px/1 var(--sp-type); }
+.bvd-fchip button { width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(245, 241, 235, 0.18); color: #f5f1eb; cursor: pointer; font: 400 12px/1 var(--sp-type); }
+.bvd-fclear { margin-left: 4px; border: 0; background: none; color: #f5f1eb; cursor: pointer; font: 400 13px/1 var(--sp-type); border-bottom: 1px dashed rgba(245, 241, 235, 0.55); padding: 0 0 2px; }
+
+/* ── the popovers: white, anchored under their pill, one at a time ──────────────────────────── */
+.bvd-pop {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; box-sizing: border-box;
+  background: #ffffff; color: #1c130f; border-radius: 16px; padding: 14px;
+  box-shadow: 0 22px 50px -18px rgba(28, 19, 15, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.08);
+}
+.bvd-pop--filter { width: 320px; }
+.bvd-pop--group { width: 280px; padding: 8px; }
+.bvd-pop--sort { width: 270px; padding: 8px; }
+.bvd-pfind { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); color: rgba(28, 19, 15, 0.45); }
+.bvd-pfind input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font: 400 14px/normal var(--sp-type); color: #1c130f; }
+.bvd-ph { margin: 14px 0 8px; font: 400 9px/1.2 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.bvd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bvd-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 0; border-radius: 15px; cursor: pointer;
+  background: #f6f3ef; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); font: 400 13px/1 var(--sp-type); color: #1c130f;
+}
+.bvd-chip em { font-style: normal; font: 700 9px/1 var(--font-mono); color: rgba(28, 19, 15, 0.5); }
+.bvd-chip[aria-pressed="true"] { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
+.bvd-chip[aria-pressed="true"] em { color: rgba(245, 241, 235, 0.75); }
+.bvd-pfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); }
+.bvd-pclear { border: 0; background: none; cursor: pointer; font: 400 13px/1 var(--sp-type); color: rgba(28, 19, 15, 0.7); border-bottom: 1px dashed rgba(28, 19, 15, 0.35); padding: 0 0 2px; }
+.bvd-pclear:disabled { opacity: 0.4; cursor: default; }
+.bvd-pdone { height: 30px; padding: 0 16px; border: 0; border-radius: 15px; background: #2a3a52; color: #f5f1eb; cursor: pointer; font: 400 13px/1 var(--sp-type); }
+.bvd-pop hr { border: 0; border-top: 1px solid rgba(28, 19, 15, 0.1); margin: 6px 6px; }
+.bvd-opt {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 10px; background: none; cursor: pointer;
+  text-align: left; font: 400 14px/1.3 var(--sp-type); color: #1c130f;
+}
+.bvd-opt:hover { background: #f6f3ef; }
+.bvd-opt--2 { align-items: flex-start; }
+.bvd-opt--2 span { display: flex; flex-direction: column; gap: 3px; }
+.bvd-opt--2 b { font-weight: 400; }
+.bvd-opt--2 small { font: italic 400 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+.bvd-radio { flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.4); margin-top: 1px; }
+.bvd-opt[aria-checked="true"] .bvd-radio { box-shadow: inset 0 0 0 4px #2a3a52; }
+
+/* ── the body ───────────────────────────────────────────────────────────────────────────────── */
+.bvd-body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.bvd-body .qcv-tl { flex: 1; min-height: 0; }
+.bvd-foot { flex: none; margin: 0; padding: 10px 18px 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 400 8.5px/1.4 var(--font-mono); letter-spacing: 0.12em; color: rgba(28, 19, 15, 0.45); }
+.bvd-empty { margin: auto; text-align: center; font: 400 16px/1.4 var(--sp-type); color: rgba(28, 19, 15, 0.7); }
+.bvd-empty p { margin: 0 0 12px; }
+.bvd-empty button { height: 32px; padding: 0 16px; border: 0; border-radius: 16px; background: #2a3a52; color: #f5f1eb; cursor: pointer; font: 400 13px/1 var(--sp-type); }
+
+/* ── the time control, in the date row's corner ────────────────────────────────────────────── */
+.bvd .qcv-tl { --qcv-tl-daterow-h: 52px; }
+.bvd .qcv-tl-corner { justify-content: flex-end; padding: 0 12px; }
+.bvd-time {
+  display: inline-flex; align-items: center; gap: 2px; height: 34px; box-sizing: border-box; padding: 0 3px;
+  border-radius: 17px; background: #f4f2ee; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+}
+.bvd-time button {
+  height: 28px; min-width: 28px; padding: 0 8px; border: 0; border-radius: 14px; background: transparent; cursor: pointer;
+  font: 400 12px/1 var(--sp-type); color: #1c130f; display: inline-flex; align-items: center; justify-content: center;
+}
+.bvd-time .bvd-z[aria-pressed="true"] { background: #2a3a52; color: #f5f1eb; }
+.bvd-time .bvd-nav { padding: 0; width: 28px; font-size: 15px; }
+.bvd-sep { width: 1px; height: 18px; margin: 0 4px; background: rgba(28, 19, 15, 0.16); }
+/* away from today, the crosshair fills anthracite: the way back is visible exactly when it is needed */
+.bvd-time .bvd-today.is-away { background: #2a3a52; color: #f5f1eb; }
+
+/* ── the bars' paint ───────────────────────────────────────────────────────────────────────── */
+.bvd .qcv-tl-bar { background: transparent; box-shadow: none; overflow: visible; }
+.bvd .qcv-tl-bar:hover { box-shadow: none; }
+.bvd .qcv-tl-bar:hover .bvd-part { box-shadow: inset 0 0 0 1.6px #1c130f; }
+.bvd-part { position: absolute; top: 0; bottom: 0; background: var(--qcv-state, var(--state-closed)); border-radius: 11px; text-decoration: none; }
+.bvd-part--l { border-radius: 11px 0 0 11px; }
+.bvd-part--r { border-radius: 0 11px 11px 0; }
+.bvd-part--after { opacity: 0.42; }
+/* the torn ends keep their own squared corner */
+.bvd .qcv-tl-bar--torn-start .bvd-part--solid { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.bvd .qcv-tl-bar--torn-end .bvd-part--solid:not(.bvd-part--l) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.bvd .qcv-tl-words { position: relative; z-index: 1; }
+.bvd-duetick { position: absolute; top: 2px; bottom: 2px; width: 0; border-left: 2px dashed rgba(28, 19, 15, 0.5); z-index: 1; }
+.bvd-beacon { position: absolute; right: -5px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #2a3a52; z-index: 3; }
+.bvd-beacon::before, .bvd-beacon::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.55);
+  animation: bvdRing 1.8s ease-out infinite;
+}
+.bvd-beacon::after { animation-delay: 0.9s; }
+@keyframes bvdRing { from { transform: scale(1); opacity: 1; } to { transform: scale(2.6); opacity: 0; } }
+.bvd-tail { position: absolute; top: 12px; display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; z-index: 2; }
+.bvd-over { font: 700 9px/20px var(--font-mono); letter-spacing: 0.1em; color: #2a3a52; }
+.bvd-tail .qcv-tl-nudge { position: static; }
+.bvd-gdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.bvd .qcv-tl-band b { font-weight: 400; }
+
+@media (max-width: 1399px) {
+  .bvd-head .bvd-title { font-size: 26px; line-height: 32px; }
+  .bvd-hawk { width: 82px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bvd, .bvd-dim, .bvd-tab { transition: none; }
+  .bvd-beacon::before, .bvd-beacon::after { animation: none; opacity: 0; }
+}
