@@ -1,0 +1,212 @@
+[
+ {
+  "lock": "QC126-3 the band exists",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"l\":288.953125,\"t\":105.75,\"r\":1239.046875,\"b\":662.5,\"w\":950.09375,\"h\":556.75}"
+ },
+ {
+  "lock": "QC126-3 anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-3 starts at the top bar's bottom",
+  "where": "1280",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "QC126-3 the band spans the main column (pixel at each edge)",
+  "where": "1280",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "QC126-3 the title is left-aligned",
+  "where": "1280",
+  "ok": true,
+  "detail": "left"
+ },
+ {
+  "lock": "QC126-3 (column < 1100) the disc drops beneath the text",
+  "where": "1280",
+  "ok": true,
+  "detail": "disc top 373.0625 text bottom 349.0625 (column 950.09375)"
+ },
+ {
+  "lock": "QC126-3 no plate on the route",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-3 the band exists",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"l\":294.078125,\"t\":105.75,\"r\":1393.921875,\"b\":443.1875,\"w\":1099.84375,\"h\":337.4375}"
+ },
+ {
+  "lock": "QC126-3 anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-3 starts at the top bar's bottom",
+  "where": "1440",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "QC126-3 the band spans the main column (pixel at each edge)",
+  "where": "1440",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "QC126-3 the title is left-aligned",
+  "where": "1440",
+  "ok": true,
+  "detail": "left"
+ },
+ {
+  "lock": "QC126-3 the disc is right of the text block",
+  "where": "1440",
+  "ok": true,
+  "detail": "disc 968.59375 text 904.59375"
+ },
+ {
+  "lock": "QC126-3 text + disc centred on the content column (±2)",
+  "where": "1440",
+  "ok": true,
+  "detail": "pair 844.0 column 844.0"
+ },
+ {
+  "lock": "QC126-3 no plate on the route",
+  "where": "1440",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-3 the band exists",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"l\":296.375,\"t\":105.75,\"r\":1463.625,\"b\":443.1875,\"w\":1167.25,\"h\":337.4375}"
+ },
+ {
+  "lock": "QC126-3 anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-3 starts at the top bar's bottom",
+  "where": "1512",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "QC126-3 the band spans the main column (pixel at each edge)",
+  "where": "1512",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "QC126-3 the title is left-aligned",
+  "where": "1512",
+  "ok": true,
+  "detail": "left"
+ },
+ {
+  "lock": "QC126-3 the disc is right of the text block",
+  "where": "1512",
+  "ok": true,
+  "detail": "disc 1014.234375 text 950.234375"
+ },
+ {
+  "lock": "QC126-3 text + disc centred on the content column (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "pair 880.0 column 880.0"
+ },
+ {
+  "lock": "QC126-3 no plate on the route",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-3 the band exists",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"l\":456,\"t\":105.75,\"r\":1712,\"b\":443.1875,\"w\":1256,\"h\":337.4375}"
+ },
+ {
+  "lock": "QC126-3 anthracite",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-3 starts at the top bar's bottom",
+  "where": "1920",
+  "ok": true,
+  "detail": "band 105.75 bar 105.75"
+ },
+ {
+  "lock": "QC126-3 the band spans the main column (pixel at each edge)",
+  "where": "1920",
+  "ok": true,
+  "detail": "left 42,58,82 right 43,57,79"
+ },
+ {
+  "lock": "QC126-3 the title is left-aligned",
+  "where": "1920",
+  "ok": true,
+  "detail": "left"
+ },
+ {
+  "lock": "QC126-3 the disc is right of the text block",
+  "where": "1920",
+  "ok": true,
+  "detail": "disc 1218.234375 text 1154.234375"
+ },
+ {
+  "lock": "QC126-3 text + disc centred on the content column (±2)",
+  "where": "1920",
+  "ok": true,
+  "detail": "pair 1084.0 column 1084.0"
+ },
+ {
+  "lock": "QC126-3 no plate on the route",
+  "where": "1920",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

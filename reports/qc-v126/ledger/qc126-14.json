@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "QC126-14 the block grows by the filter line",
+  "where": "1512",
+  "ok": true,
+  "detail": "111 → 147 (line 24)"
+ },
+ {
+  "lock": "QC126-14 the title's top is unchanged (±0)",
+  "where": "1512",
+  "ok": true,
+  "detail": "16 → 16"
+ },
+ {
+  "lock": "QC126-14 the hawk's bottom = the block's bottom",
+  "where": "1512",
+  "ok": true,
+  "detail": "111/111 → 147/147"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

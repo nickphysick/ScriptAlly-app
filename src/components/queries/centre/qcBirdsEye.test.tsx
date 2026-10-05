@@ -152,7 +152,7 @@ describe("the view, rendered", () => {
      *
      * A lock pinning a spelling cannot tell a refactor from a regression, which is the only thing a
      * lock is for. **The width and the ink are geometry and live in the measurement now**
-     * (`qcV65.measure.ts`, §A4: background = the card's inner width, ink = the first disc's x).
+     * (was `qcV65.measure.ts` §A4, retired with v126 — `tests/e2e/RETIRED-query-centre-v126.md`).
      * What a source lock can honestly carry is what is left here.
      */
     const r = rule(".qcv-be-gh");

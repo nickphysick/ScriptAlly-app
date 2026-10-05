@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "QC126-17 population: overdue and running bars",
+  "where": "1280",
+  "ok": true,
+  "detail": "over 34 run 12 today 1118.265625"
+ },
+ {
+  "lock": "QC126-17 no ink inside an overdue bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 each overdue beacon is within 12px of today",
+  "where": "1280",
+  "ok": true,
+  "detail": "[-1,0,-1,-1,0,-1,-1,-1,0,-1,0,0,-1,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 a running bar's solid part ends at today",
+  "where": "1280",
+  "ok": true,
+  "detail": "[-1,-1,0,0,0,0,0,-1,-1,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 and the part after today is .42",
+  "where": "1280",
+  "ok": true,
+  "detail": "[0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-17 population: overdue and running bars",
+  "where": "1440",
+  "ok": true,
+  "detail": "over 34 run 12 today 1251.0625"
+ },
+ {
+  "lock": "QC126-17 no ink inside an overdue bar",
+  "where": "1440",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 each overdue beacon is within 12px of today",
+  "where": "1440",
+  "ok": true,
+  "detail": "[-1,0,-1,-1,0,-1,-1,-1,0,-1,0,0,-1,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 a running bar's solid part ends at today",
+  "where": "1440",
+  "ok": true,
+  "detail": "[-1,-1,0,0,0,0,0,-1,-1,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 and the part after today is .42",
+  "where": "1440",
+  "ok": true,
+  "detail": "[0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-17 population: overdue and running bars",
+  "where": "1512",
+  "ok": true,
+  "detail": "over 34 run 12 today 1323.0625"
+ },
+ {
+  "lock": "QC126-17 no ink inside an overdue bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 each overdue beacon is within 12px of today",
+  "where": "1512",
+  "ok": true,
+  "detail": "[-1,0,-1,-1,0,-1,-1,-1,0,-1,0,0,-1,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 a running bar's solid part ends at today",
+  "where": "1512",
+  "ok": true,
+  "detail": "[-1,-1,0,0,0,0,0,-1,-1,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 and the part after today is .42",
+  "where": "1512",
+  "ok": true,
+  "detail": "[0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-17 population: overdue and running bars",
+  "where": "1920",
+  "ok": true,
+  "detail": "over 34 run 12 today 1731.0625"
+ },
+ {
+  "lock": "QC126-17 no ink inside an overdue bar",
+  "where": "1920",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 each overdue beacon is within 12px of today",
+  "where": "1920",
+  "ok": true,
+  "detail": "[-1,0,-1,-1,0,-1,-1,-1,0,-1,0,0,-1,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 a running bar's solid part ends at today",
+  "where": "1920",
+  "ok": true,
+  "detail": "[-1,-1,0,0,0,0,0,-1,-1,0,0,0]"
+ },
+ {
+  "lock": "QC126-17 and the part after today is .42",
+  "where": "1920",
+  "ok": true,
+  "detail": "[0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

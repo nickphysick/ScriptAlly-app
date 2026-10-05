@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "QC126-12 24 from the window box's right and bottom",
+  "where": "1280",
+  "ok": true,
+  "detail": "24 / 24"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-12 24 from the window box's right and bottom",
+  "where": "1440",
+  "ok": true,
+  "detail": "24 / 24"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-12 24 from the window box's right and bottom",
+  "where": "1512",
+  "ok": true,
+  "detail": "24 / 24"
+ },
+ {
+  "lock": "QC126-12 B opens the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "QC126-12 the tab hides while it is open",
+  "where": "1512",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-12 24 from the window box's right and bottom",
+  "where": "1920",
+  "ok": true,
+  "detail": "24 / 24"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

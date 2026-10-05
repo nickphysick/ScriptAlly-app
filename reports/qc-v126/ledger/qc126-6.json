@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "QC126-6 population",
+  "where": "1512",
+  "ok": true,
+  "detail": "rows 83 bands 2"
+ },
+ {
+  "lock": "QC126-6 the carousel shows every with-you query",
+  "where": "1512",
+  "ok": true,
+  "detail": "cards 13 desk 13"
+ },
+ {
+  "lock": "QC126-6 the list's rows and order are identical",
+  "where": "1512",
+  "ok": true,
+  "detail": "83 vs 83"
+ },
+ {
+  "lock": "QC126-6 the band counts are identical",
+  "where": "1512",
+  "ok": true,
+  "detail": "13,70 vs 13,70"
+ },
+ {
+  "lock": "QC126-6 clearing restores the 8",
+  "where": "1512",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

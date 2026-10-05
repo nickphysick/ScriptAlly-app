@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "QC126-8 the banner is open (transparent)",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "QC126-8 the hawk's feet are 14 below the workspace's top (±2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "hawk 1552.03125 ws 1538.03125"
+ },
+ {
+  "lock": "QC126-8 blush, radius 22, padding 22",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(244, 224, 212) 22px 22px 22px 22px"
+ },
+ {
+  "lock": "QC126-8 the group bands are anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"rgb(42, 58, 82)\",\"rgb(42, 58, 82)\"]"
+ },
+ {
+  "lock": "QC126-8 the band counts add up to the total",
+  "where": "1280",
+  "ok": true,
+  "detail": "13,70 total 83"
+ },
+ {
+  "lock": "QC126-8 rows are 10px apart",
+  "where": "1280",
+  "ok": true,
+  "detail": "[10,10,10,10,10,10,10,10]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-8 the banner is open (transparent)",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "QC126-8 the hawk's feet are 14 below the workspace's top (±2)",
+  "where": "1440",
+  "ok": true,
+  "detail": "hawk 1337.421875 ws 1323.421875"
+ },
+ {
+  "lock": "QC126-8 blush, radius 22, padding 22",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(244, 224, 212) 22px 22px 22px 22px"
+ },
+ {
+  "lock": "QC126-8 the group bands are anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": "[\"rgb(42, 58, 82)\",\"rgb(42, 58, 82)\"]"
+ },
+ {
+  "lock": "QC126-8 the band counts add up to the total",
+  "where": "1440",
+  "ok": true,
+  "detail": "13,70 total 83"
+ },
+ {
+  "lock": "QC126-8 rows are 10px apart",
+  "where": "1440",
+  "ok": true,
+  "detail": "[10,10,10,10,10,10,10,10]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-8 the banner is open (transparent)",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "QC126-8 the hawk's feet are 14 below the workspace's top (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "hawk 1308.25 ws 1294.25"
+ },
+ {
+  "lock": "QC126-8 blush, radius 22, padding 22",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(244, 224, 212) 22px 22px 22px 22px"
+ },
+ {
+  "lock": "QC126-8 the group bands are anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"rgb(42, 58, 82)\",\"rgb(42, 58, 82)\"]"
+ },
+ {
+  "lock": "QC126-8 the band counts add up to the total",
+  "where": "1512",
+  "ok": true,
+  "detail": "13,70 total 83"
+ },
+ {
+  "lock": "QC126-8 rows are 10px apart",
+  "where": "1512",
+  "ok": true,
+  "detail": "[10,10,10,10,10,10,10,10]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-8 the banner is open (transparent)",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "QC126-8 the hawk's feet are 14 below the workspace's top (±2)",
+  "where": "1920",
+  "ok": true,
+  "detail": "hawk 1308.25 ws 1294.25"
+ },
+ {
+  "lock": "QC126-8 blush, radius 22, padding 22",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(244, 224, 212) 22px 22px 22px 22px"
+ },
+ {
+  "lock": "QC126-8 the group bands are anthracite",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"rgb(42, 58, 82)\",\"rgb(42, 58, 82)\"]"
+ },
+ {
+  "lock": "QC126-8 the band counts add up to the total",
+  "where": "1920",
+  "ok": true,
+  "detail": "13,70 total 83"
+ },
+ {
+  "lock": "QC126-8 rows are 10px apart",
+  "where": "1920",
+  "ok": true,
+  "detail": "[10,10,10,10,10,10,10,10]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

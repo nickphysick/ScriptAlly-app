@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "QC126-20 the card's footer opens the drawer, with dock",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"mode\":\"sent\",\"dock\":true,\"others\":0}"
+ },
+ {
+  "lock": "QC126-20 a row's tray action opens the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"mode\":\"sent\",\"dock\":false,\"others\":0}"
+ },
+ {
+  "lock": "QC126-20 a carousel card's button opens the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"mode\":\"resp\",\"dock\":false,\"others\":0}"
+ },
+ {
+  "lock": "QC126-20 a Birds-eye row's button opens the drawer",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"mode\":\"nudge\",\"dock\":false,\"others\":0}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

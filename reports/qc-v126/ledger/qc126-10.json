@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "QC126-10 row right = the workspace's inner right",
+  "where": "1280",
+  "ok": true,
+  "detail": "row 1217.046875 inner 1217.046875"
+ },
+ {
+  "lock": "QC126-10 no rail in the DOM",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-10 row right = the workspace's inner right",
+  "where": "1440",
+  "ok": true,
+  "detail": "row 1371.921875 inner 1371.921875"
+ },
+ {
+  "lock": "QC126-10 no rail in the DOM",
+  "where": "1440",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-10 row right = the workspace's inner right",
+  "where": "1512",
+  "ok": true,
+  "detail": "row 1441.625 inner 1441.625"
+ },
+ {
+  "lock": "QC126-10 no rail in the DOM",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-10 row right = the workspace's inner right",
+  "where": "1920",
+  "ok": true,
+  "detail": "row 1690 inner 1690"
+ },
+ {
+  "lock": "QC126-10 no rail in the DOM",
+  "where": "1920",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

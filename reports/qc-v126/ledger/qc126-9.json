@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "QC126-9 the slim bar exists, hidden at rest",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"found\":true,\"on\":false,\"top\":1294.25,\"scTop\":105.75,\"parts\":4}"
+ },
+ {
+  "lock": "QC126-9 past the banner, the slim bar shows at the scroller's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"found\":true,\"on\":true,\"top\":105.75,\"scTop\":105.75,\"parts\":4}"
+ },
+ {
+  "lock": "QC126-9 it holds Find, Filter, Group and Sort",
+  "where": "1512",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "QC126-9 it hides when the banner returns",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"found\":true,\"on\":false,\"top\":1294.25,\"scTop\":105.75,\"parts\":4}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "QC126-1 page ground",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 sidebar ground",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "QC126-1 top bar = the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 top-bar rule",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "QC126-1 sidebar rule",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "QC126-1 sidebar labels",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-1 page ground",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 sidebar ground",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "QC126-1 top bar = the page colour",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 top-bar rule",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "QC126-1 sidebar rule",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "QC126-1 sidebar labels",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-1 page ground",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 sidebar ground",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "QC126-1 top bar = the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 top-bar rule",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "QC126-1 sidebar rule",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "QC126-1 sidebar labels",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-1 page ground",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 sidebar ground",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(230, 228, 224)"
+ },
+ {
+  "lock": "QC126-1 top bar = the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(243, 242, 240)"
+ },
+ {
+  "lock": "QC126-1 top-bar rule",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) op 1"
+ },
+ {
+  "lock": "QC126-1 sidebar rule",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "QC126-1 sidebar labels",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

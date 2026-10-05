@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "QC126-11 present after the workspace",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[288.953125,950.09375],\"desk\":[288.953125,950.09375],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "QC126-11 content box = the desk's x and width (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "288.953125,950.09375 vs 288.953125,950.09375"
+ },
+ {
+  "lock": "QC126-11 tagline, six glyphs, three columns, Help centre (no Open QueryHawk), the email",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[288.953125,950.09375],\"desk\":[288.953125,950.09375],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-11 present after the workspace",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[294.078125,1099.84375],\"desk\":[294.078125,1099.84375],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "QC126-11 content box = the desk's x and width (±1)",
+  "where": "1440",
+  "ok": true,
+  "detail": "294.078125,1099.84375 vs 294.078125,1099.84375"
+ },
+ {
+  "lock": "QC126-11 tagline, six glyphs, three columns, Help centre (no Open QueryHawk), the email",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[294.078125,1099.84375],\"desk\":[294.078125,1099.84375],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-11 present after the workspace",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[296.375,1167.25],\"desk\":[296.375,1167.25],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "QC126-11 content box = the desk's x and width (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "296.375,1167.25 vs 296.375,1167.25"
+ },
+ {
+  "lock": "QC126-11 tagline, six glyphs, three columns, Help centre (no Open QueryHawk), the email",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[296.375,1167.25],\"desk\":[296.375,1167.25],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-11 present after the workspace",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[456,1256],\"desk\":[456,1256],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "QC126-11 content box = the desk's x and width (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "456,1256 vs 456,1256"
+ },
+ {
+  "lock": "QC126-11 tagline, six glyphs, three columns, Help centre (no Open QueryHawk), the email",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"found\":true,\"after\":true,\"fin\":[456,1256],\"desk\":[456,1256],\"glyphs\":6,\"cols\":3,\"help\":true,\"open\":false,\"mail\":true,\"tag\":true}"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

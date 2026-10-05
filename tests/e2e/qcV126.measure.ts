@@ -52,7 +52,10 @@ const ALLOWED_CREAM = new Set([
   "src/components/queries/centre/qcvExpanded.css", "src/components/queries/centre/qcvCourts.css", "src/components/agents/contact/contactV11.css",
   "src/components/agents/card/agentCard.css", "src/components/todo/todoCalendar.css", "src/components/dashboard/oneScreen.css", "src/components/dashboard/queryCard.css", "src/components/containers/framedCard.css",
   "src/components/dashboard/TodoRowCard.tsx", "src/components/dashboard/OneScreenMinimap.tsx", "src/lib/beAccent.ts", "src/components/StatusDotDemo.tsx",
-  "src/components/queries/centre/qcvBand.css", "src/components/queries/centre/qcvBe.css", "src/components/queries/centre/qcvCarousel.css", "src/components/queries/centre/qcvWorkspace.css",
+  /* corrected (Phase 8): Phase 0 named these sheets before they existed; the drawer was built as
+     qcvBirdsDrawer.css and the banner/workspace as qcvListBanner.css (the band is in pageHeader.css,
+     which paints no old cream). qcvExpanded.css is deleted and stays listed harmlessly. */
+  "src/components/queries/centre/qcvBirdsDrawer.css", "src/components/queries/centre/qcvCarousel.css", "src/components/queries/centre/qcvListBanner.css",
 ]);
 /* a declaration that PAINTS a ground with the old neutral: a background / page / ground / field token, or a fade */
 const GROUND = /(background(-color)?|--[a-z0-9-]*(page|ground)[a-z0-9-]*)\s*:[^;]*(#f5f1eb|#e7e3dc|rgba?\(\s*(245,\s*241,\s*235|231,\s*227,\s*220))/i;

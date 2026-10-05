@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "QC126-15 Filters",
+  "where": "1512",
+  "ok": true,
+  "detail": "Filters"
+ },
+ {
+  "lock": "QC126-15 Grouped: Urgency",
+  "where": "1512",
+  "ok": true,
+  "detail": "Grouped: Urgency"
+ },
+ {
+  "lock": "QC126-15 Sort: Due date",
+  "where": "1512",
+  "ok": true,
+  "detail": "Sort: Due date"
+ },
+ {
+  "lock": "QC126-15 Filters (2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "Filters (2)"
+ },
+ {
+  "lock": "QC126-15 Grouped: Stage",
+  "where": "1512",
+  "ok": true,
+  "detail": "Grouped: Stage"
+ },
+ {
+  "lock": "QC126-15 Sort: Agent",
+  "where": "1512",
+  "ok": true,
+  "detail": "Sort: Agent"
+ },
+ {
+  "lock": "QC126-15 non-default pills fill cream",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"rgba(245, 241, 235, 0.1)\",\"rgb(245, 241, 235)\",\"rgb(245, 241, 235)\",\"rgb(245, 241, 235)\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

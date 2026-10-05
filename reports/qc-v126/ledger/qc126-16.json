@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "QC126-16 the pill sits in the date row's corner",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"x\":676.90625,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":881.203125,\"bottom\":154,\"left\":676.90625} in {\"x\":-8835.796875,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3029.203125,\"bottom\":163,\"left\":-8835.796875}"
+ },
+ {
+  "lock": "QC126-16 left of the first date label, no overlap",
+  "where": "1280",
+  "ok": true,
+  "detail": "pill r 881.203125 first 892.296875"
+ },
+ {
+  "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
+  "where": "1280",
+  "ok": true,
+  "detail": "6W3M6M‹› sep true today true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-16 the pill sits in the date row's corner",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"x\":773.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":978,\"bottom\":154,\"left\":773.703125} in {\"x\":-8703,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3162,\"bottom\":163,\"left\":-8703}"
+ },
+ {
+  "lock": "QC126-16 left of the first date label, no overlap",
+  "where": "1440",
+  "ok": true,
+  "detail": "pill r 978 first 1025.09375"
+ },
+ {
+  "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
+  "where": "1440",
+  "ok": true,
+  "detail": "6W3M6M‹› sep true today true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-16 the pill sits in the date row's corner",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"x\":845.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":1050,\"bottom\":154,\"left\":845.703125} in {\"x\":-8631,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3234,\"bottom\":163,\"left\":-8631}"
+ },
+ {
+  "lock": "QC126-16 left of the first date label, no overlap",
+  "where": "1512",
+  "ok": true,
+  "detail": "pill r 1050 first 1097.09375"
+ },
+ {
+  "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
+  "where": "1512",
+  "ok": true,
+  "detail": "6W3M6M‹› sep true today true"
+ },
+ {
+  "lock": "QC126-16 away from today, the crosshair fills anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-16 T returns it to transparent",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-16 the pill sits in the date row's corner",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"x\":1253.703125,\"y\":120,\"width\":204.296875,\"height\":34,\"top\":120,\"right\":1458,\"bottom\":154,\"left\":1253.703125} in {\"x\":-8223,\"y\":111,\"width\":11865,\"height\":52,\"top\":111,\"right\":3642,\"bottom\":163,\"left\":-8223}"
+ },
+ {
+  "lock": "QC126-16 left of the first date label, no overlap",
+  "where": "1920",
+  "ok": true,
+  "detail": "pill r 1458 first 1505.09375"
+ },
+ {
+  "lock": "QC126-16 6W 3M 6M, a separator, ‹ ⌖ ›",
+  "where": "1920",
+  "ok": true,
+  "detail": "6W3M6M‹› sep true today true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "QC126-13 width min(780px, 56vw)",
+  "where": "1280",
+  "ok": true,
+  "detail": "716.796875 vs 716.8000000000001"
+ },
+ {
+  "lock": "QC126-13 the dim covers the page",
+  "where": "1280",
+  "ok": true,
+  "detail": "[1280,800,\"rgba(28, 19, 15, 0.28)\"]"
+ },
+ {
+  "lock": "QC126-13 the header block is anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "where": "1280",
+  "ok": true,
+  "detail": "26px"
+ },
+ {
+  "lock": "QC126-13 a click on the dim closes it",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-13 width min(780px, 56vw)",
+  "where": "1440",
+  "ok": true,
+  "detail": "780 vs 780"
+ },
+ {
+  "lock": "QC126-13 the dim covers the page",
+  "where": "1440",
+  "ok": true,
+  "detail": "[1440,900,\"rgba(28, 19, 15, 0.28)\"]"
+ },
+ {
+  "lock": "QC126-13 the header block is anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "where": "1440",
+  "ok": true,
+  "detail": "30px"
+ },
+ {
+  "lock": "QC126-13 a click on the dim closes it",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-13 width min(780px, 56vw)",
+  "where": "1512",
+  "ok": true,
+  "detail": "780 vs 780"
+ },
+ {
+  "lock": "QC126-13 the dim covers the page",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1512,900,\"rgba(28, 19, 15, 0.28)\"]"
+ },
+ {
+  "lock": "QC126-13 the header block is anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "where": "1512",
+  "ok": true,
+  "detail": "30px"
+ },
+ {
+  "lock": "QC126-13 a click on the dim closes it",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "QC126-13 width min(780px, 56vw)",
+  "where": "1920",
+  "ok": true,
+  "detail": "780 vs 780"
+ },
+ {
+  "lock": "QC126-13 the dim covers the page",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1920,1080,\"rgba(28, 19, 15, 0.28)\"]"
+ },
+ {
+  "lock": "QC126-13 the header block is anthracite",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "QC126-13 the title is 30px (26 under 1400)",
+  "where": "1920",
+  "ok": true,
+  "detail": "30px"
+ },
+ {
+  "lock": "QC126-13 a click on the dim closes it",
+  "where": "1920",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

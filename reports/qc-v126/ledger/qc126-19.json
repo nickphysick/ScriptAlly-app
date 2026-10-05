@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "QC126-19 grouped by Stage, headings in pipeline order",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"Queried\",\"Partial requested\",\"Partial sent\",\"Full requested\",\"Full sent\",\"Revise & resubmit\",\"Offer\"]"
+ },
+ {
+  "lock": "QC126-19 the direction toggle reverses rows within each group",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"a\":[45,5,5,6,6,1,1],\"b\":[45,5,5,6,6,1,1]}"
+ },
+ {
+  "lock": "QC126-19 Last moved sets most recent first",
+  "where": "1512",
+  "ok": true,
+  "detail": "Sort order: Most recent first"
+ },
+ {
+  "lock": "QC126-19 the grouping survives a zoom change",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"Queried\",\"Partial requested\",\"Partial sent\",\"Full requested\",\"Full sent\",\"Revise & resubmit\",\"Offer\"]"
+ },
+ {
+  "lock": "QC126-19 No grouping leaves one list with no visible band",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 groups, 69 rows"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]
