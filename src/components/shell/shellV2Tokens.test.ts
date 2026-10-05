@@ -41,7 +41,7 @@ const BAKED: Record<string, string> = {
   "--shell-rail": "#efe7db",   // the COLUMN capsule (app-shell Baked 3)
   // App shell v3: `--shell-side` is STONE, the sidebar's own surface — no longer an alias of the
   // rail (its three old readers moved to `--shell-rail`). The rest of the v3 set sits beside it.
-  "--shell-side": "#e7e3dc",
+  "--shell-side": "#e6e4e0", // greige since Query Centre v126 (5 Oct)
   "--shell-rule": "rgba(28, 19, 15, 0.10)",
   "--shell-side-w": "248px",
   "--shell-side-w-collapsed": "68px",
@@ -215,7 +215,7 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
   it("surfaces + fills", () => {
     expect(dt.shellGround).toBe("#e7e0d5");
     expect(dt.shellRail).toBe("#efe7db");
-    expect(dt.shellSide).toBe("#e7e3dc"); // app shell v3 Stone (was the rail's alias, #efe7db)
+    expect(dt.shellSide).toBe("#e6e4e0"); // app shell v3 Stone (was the rail's alias, #efe7db)
     expect(dt.shellRule).toBe("rgba(28, 19, 15, 0.10)");
     expect(dt.shellSideW).toBe(248);
     expect(dt.shellSideWCollapsed).toBe(68);
@@ -275,7 +275,7 @@ describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () 
     // v3: `shellSide` is the sidebar's own Stone surface; the alias it used to be went with its
     // readers, which read `--shell-rail` now. What must hold is that no sheet still reads the old
     // name expecting the column's colour.
-    expect(dt.shellSide).toBe("#e7e3dc");
+    expect(dt.shellSide).toBe("#e6e4e0");
     for (const f of ["./mobileShell.css", "./shellV2.css"]) {
       expect(readFileSync(resolve(__dirname, f), "utf8"), `${f} still reads --shell-side`).not.toContain("var(--shell-side)");
     }

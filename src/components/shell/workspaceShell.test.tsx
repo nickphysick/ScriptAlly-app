@@ -138,7 +138,9 @@ describe("one ground, one window", () => {
      survives from the old claim is its second half: nothing else divides them (no ::after, no
      border). The rendered claim is tests/e2e/shellV3.measure.ts L1 + L2. */
   it("⚠️ THE TONE STEP — the sidebar paints Stone, and one inset hairline is the only divide", () => {
-    expect(rule(".ws-app")).toContain("background: var(--ws-ground)");
+    /* ⚠️ v126 (5 Oct): behind the shell is the PAGE's ground now. `--ws-ground` is held at #f7f4ee by the
+       marketing tier's lock and the app stopped reading it, so the app is one greige. */
+    expect(rule(".ws-app")).toContain("background: var(--ws-page)");
     expect(rule(".ws-panel")).toContain("background: var(--shell-side)");
     expect(rule(".ws-panel")).toContain("box-shadow: inset -1px 0 0 var(--shell-rule)");
     expect(cssRules).not.toContain(".ws-panel::after");

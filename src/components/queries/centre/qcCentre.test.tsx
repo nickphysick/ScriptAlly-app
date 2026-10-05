@@ -389,7 +389,7 @@ describe("the sheet", () => {
     expect([...new Set(bad)], "read across sheets from a scope a portal may not be inside").toEqual([]);
   });
   it("every var() the sheet reads resolves — to a token it declares, to an app :root token, or to a PUBLISHED measurement", () => {
-    const APP = ["--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb"];
+    const APP = ["--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb", "--ws-page-rgb"];
     /**
      * ⚠️ A MEASUREMENT PUBLISHED FROM JS IS LEGITIMATELY ABSENT FROM THE SHEET, and its FALLBACK is
      * what renders until it lands — the one case CLAUDE.md names for a fallback ("a token that might

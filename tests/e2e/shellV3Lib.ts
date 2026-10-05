@@ -31,7 +31,8 @@ export const ROUTES = [
 export const COLLAPSE_KEY = "scriptally:sidebar-collapsed";
 
 /* The mock's values — normative per the prompt's relational rules and lock table. */
-export const STONE = "rgb(231, 227, 220)";
+/* ⚠️ GREIGE SINCE QUERY CENTRE v126 (5 Oct): the sidebar is #e6e4e0; it was v3's Stone #e7e3dc. */
+export const STONE = "rgb(230, 228, 224)";
 export const RULE = "rgba(28, 19, 15, 0.1)";
 export const ANTHRACITE = "rgb(42, 58, 82)";
 export const CREAM = "rgb(253, 249, 245)";

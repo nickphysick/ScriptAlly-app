@@ -24,7 +24,7 @@
  */
 
 .tpn {
-  --ground:#f7f4ee; --window:#fefcfa; --white:#ffffff; --field:#fdfbf7;
+  --ground:var(--ws-page); --window:#fefcfa; --white:#ffffff; --field:#fdfbf7;
   --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
   --hair:#e7ddd2; --hair2:#e0d5c8;
   /* ⚠️ THE CONTRACT'S VALUE. Three were in play — this file had #ece4d9, the brief's prose says

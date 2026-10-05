@@ -50,7 +50,7 @@ const ALLOWED_CREAM = new Set([
   "src/components/queries/centre/qcvPage.css", "src/components/queries/centre/qcvOpen.css", "src/components/queries/centre/qcvModal.css",
   "src/components/queries/centre/qcvBirdsEye.css", "src/components/queries/centre/qcvTimeline.css", "src/components/queries/centre/qcvList.css",
   "src/components/queries/centre/qcvExpanded.css", "src/components/queries/centre/qcvCourts.css", "src/components/agents/contact/contactV11.css",
-  "src/components/agents/card/agentCard.css", "src/components/todo/todoCalendar.css", "src/components/dashboard/oneScreen.css",
+  "src/components/agents/card/agentCard.css", "src/components/todo/todoCalendar.css", "src/components/dashboard/oneScreen.css", "src/components/dashboard/queryCard.css", "src/components/containers/framedCard.css",
   "src/components/dashboard/TodoRowCard.tsx", "src/components/dashboard/OneScreenMinimap.tsx", "src/lib/beAccent.ts", "src/components/StatusDotDemo.tsx",
   "src/components/queries/centre/qcvBand.css", "src/components/queries/centre/qcvBe.css", "src/components/queries/centre/qcvCarousel.css", "src/components/queries/centre/qcvWorkspace.css",
 ]);
@@ -70,7 +70,13 @@ test("QC126-2 · no stragglers", async () => {
       if (!GROUND.test(line)) continue;
       /* `--qad-page` is the action drawer's inner note surface, in `queryActions/**`, which this pack may
          call and not change — allowed BY NAME, so the lock goes red the day any other page token returns */
-      const byName = f === "src/components/queryActions/queryDrawer.css" && /--qad-page\s*:/.test(line);
+      const byName = (f === "src/components/queryActions/queryDrawer.css" && /--qad-page\s*:/.test(line))
+        /* named "page" and painting CREAM, not the page: ink on the navy band and the pill fills inside a
+           white card (oneScreen), the pill fills inside the query card (queryCard), the framed card's
+           cream band and its ink on navy (framedCard) — §0.2's list, allowed by name */
+        || (f === "src/components/dashboard/oneScreen.css" && /--dash-page\s*:/.test(line))
+        || (f === "src/components/dashboard/queryCard.css" && /--qcard-page\s*:/.test(line))
+        || (f === "src/components/containers/framedCard.css" && /--fc-page\s*:/.test(line));
       L.check("QC126-2 a neutral ground painted with the old colour", f, byName || (ALLOWED_CREAM.has(f) && !/--[a-z0-9-]*(page|ground)/i.test(line)), line.trim().slice(0, 140));
     }
   }

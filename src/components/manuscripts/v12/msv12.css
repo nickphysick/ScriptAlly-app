@@ -18,7 +18,7 @@
 /* the page's tokens — on the grid root, and on `.msv12-layer`, the host the two dialogs portal into
    (a portal leaves the grid's scope, and a token read outside its defining scope paints nothing) */
 .msv12-wpg, .msv12-layer {
-  --msv12-page: #f5f1eb;
+  --msv12-page: var(--ws-page);
   --msv12-ink: #1c130f;
   --msv12-btn: #2a3a52;
   --msv12-parch-1: #fdf9f5;

@@ -18,7 +18,7 @@
  */
 
 .tdf {
-  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7; --barbg:#fafafa;
+  --ground:var(--ws-page); --white:#ffffff; --field:#fdfbf7; --barbg:#fafafa;
   --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
   --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8;
   --burg:#7c3a2a; --burg-h:#6c3224; --sage:#5a6e58;

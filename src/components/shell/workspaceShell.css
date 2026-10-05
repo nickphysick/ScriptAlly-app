@@ -203,7 +203,7 @@
   line-height: 1.45;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--shell-mute);
+  color: var(--shell-label);
   margin: 20px 8px 6px;
   padding: 0;
 }
@@ -570,7 +570,7 @@
 /* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════
    ⚠️ ONE GROUND. Sidebar and page share `--shell-ground`; the ONLY white surface is the content
    window. A dark rail beside a pale page read as two applications bolted together. */
-.ws-app { background: var(--ws-ground); }
+.ws-app { background: var(--ws-page); }
 /* ⚠️ NOTHING DIVIDES THE SIDEBAR FROM THE PAGE (audit pack P6). The hairline that used to run down
    `.ws-panel::after` is GONE, and it is gone rather than made fainter: the two surfaces already
    share one ground, and a rule between them drew an edge where there is no edge. The white content
@@ -1298,7 +1298,9 @@
 /* v3: the darker ground is a TOKEN now, declared on the column that holds the bar and the page, so
    the bar (which must be the page's colour) and every fade under it resolve the same value. Both
    halves are redeclared here because `--ws-page` is computed at `:root` from the channels. */
-.dash-mode .ws-main, .ground-mode .ws-main { --ws-page-rgb: 244, 240, 234; --ws-page: rgb(var(--ws-page-rgb)); }
+/* v126 (5 Oct): the darker cream ground these routes kept is retired — the whole app is one greige. The
+   rule stays as the place a route-level ground would be redeclared, at the same value. */
+.dash-mode .ws-main, .ground-mode .ws-main { --ws-page-rgb: 243, 242, 240; --ws-page: rgb(var(--ws-page-rgb)); }
 
 /**
  * ══ `ground-mode` — A PAGE WHOSE CARDS SIT ON THE OPEN GROUND (Query Centre v11, 19 Sep) ══

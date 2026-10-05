@@ -186,7 +186,10 @@
      that used to fade into the white window fade into THIS now. Channels because those fades need it at
      other alphas and `color-mix()` is banned at runtime. It starts equal to `--ws-ground` and the
      dashboard and the Query Centre redeclare it (workspaceShell.css) for their darker ground. */
-  --ws-page-rgb: 247, 244, 238;
+  /* ⚠️ GREIGE (Query Centre v126 Phase 1, 5 Oct): the page ground app-wide. `--ws-ground` below stays
+     #f7f4ee because the marketing tier's `--mk-hero-ground` is locked to it and that tier is out of
+     bounds; its one app reader (`.ws-app`) reads `--ws-page` now, so nothing in the app shows it. */
+  --ws-page-rgb: 243, 242, 240;
   --ws-page: rgb(var(--ws-page-rgb));
   --ws-edge: #e9e2d7;
   /**
@@ -344,7 +347,7 @@
      their colour and this name means one thing. The palette sits at `:root` because portalled
      chrome does not inherit page-scoped tokens; `.t-bold` and `.t-edn` map each colour to their
      own existing equivalent (see those blocks). */
-  --shell-side: #e7e3dc;                  /* "Stone": the sidebar surface */
+  --shell-side: #e6e4e0;                  /* "Stone": the sidebar surface — greige since v126 */
   --shell-rule: rgba(28, 19, 15, 0.10);   /* THE one hairline — sidebar edge + under the top bar */
   --shell-side-w: 248px;
   --shell-side-w-collapsed: 68px;
@@ -353,7 +356,8 @@
   --shell-active-fg: #fdf9f5;
   --shell-hover-bg: rgba(255, 255, 255, 0.45);
   --shell-hairline: rgba(28, 19, 15, 0.12); /* the ref's --hair: switcher ring, user-row rule, avatar ring */
-  --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: section labels, meta, counts */
+  --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: meta, counts */
+  --shell-label: rgba(28, 19, 15, 0.45);    /* the sidebar's section labels (v126) */
   --shell-ring: rgba(28, 19, 15, 0.28);     /* the outline ring: Give feedback, Upgrade, the circles' hover */
   --shell-btn-hover: rgba(255, 255, 255, 0.6); /* the outline buttons' hover wash */
   --shell-switch-bg: rgba(255, 255, 255, 0.7); /* the switcher card's fill */

@@ -132,7 +132,7 @@ export const statusParchment = "#fdfaf5"; // offer tick
    is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
 export const shellRail = "#efe7db"; // THE COLUMN capsule (app-shell Baked 3)
-export const shellSide = "#e7e3dc"; // app shell v3 "Stone" — the sidebar surface (was a legacy alias of shellRail)
+export const shellSide = "#e6e4e0"; // app shell v3 "Stone" — the sidebar surface (was a legacy alias of shellRail)
 /* ── App shell v3 (ref design-refs/shell/app-shell-v3.html) — JS twins of the :root tokens in
    index.css, kept in step by shellV2Tokens.test.ts. Default theme; .t-bold/.t-edn map to their
    own existing colours in CSS. ── */

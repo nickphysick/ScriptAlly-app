@@ -20,7 +20,7 @@
 }
 .lh-exb::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 130px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(245, 241, 235, 0), rgba(245, 241, 235, 0.94));
+  background: linear-gradient(180deg, rgba(var(--ws-page-rgb), 0), rgba(var(--ws-page-rgb), 0.94));
 }
 .lh-hint { margin: 20px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, 0.45); }
 .lh-hint-link { color: rgba(28, 19, 15, 0.7); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
