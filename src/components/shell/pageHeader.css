@@ -805,3 +805,13 @@
   .ph--band.ph--bandfix .ph-hin { grid-template-columns: minmax(0, 1fr); justify-content: start; }
   .ph--band.ph--bandfix .ph-bdisc { width: 200px; margin-top: 28px; justify-self: start; }
 }
+/* THE PHONE (≤ 760px): auto height, the disc 100px pinned top-right, the buttons full width and stacked */
+@media (max-width: 760px) {
+  .ph--full.ph--band.ph--bandfix { height: auto; padding: 30px 0; display: block; }
+  .ph--band.ph--bandfix .ph-hin { display: block; position: relative; }
+  .ph--band.ph--bandfix.ph--full .ph-title { font-size: 34px; line-height: 1.08; max-width: none; padding-right: 112px; min-height: 112px; box-sizing: border-box; }
+  .ph--band.ph--bandfix.ph--full .ph-intro { font-size: 16px; line-height: 23px; margin-top: 12px; max-width: none; }
+  .ph--band.ph--bandfix.ph--full .ph-acts { flex-direction: column; gap: 10px; margin-top: 22px; width: auto; }
+  .ph--band.ph--bandfix .ph-primary, .ph--band.ph--bandfix .ph-secondary { width: 100%; height: 50px; }
+  .ph--band.ph--bandfix .ph-bdisc { position: absolute; right: 0; top: 0; width: 100px; margin: 0; }
+}
