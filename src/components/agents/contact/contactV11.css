@@ -50,21 +50,14 @@
   /* §2 (page header v1) — the shared centred column owns the gutter and the cap now. */
 }
 
-/* the centred group: page column + the housekeeping rail. `align-items: start` keeps the rail's
-   ITEM at its own height while its grid AREA spans the row — which is what gives `sticky` its
-   travel (the packages builder's collapsed-track trap, avoided by construction). */
+/* the centred group, ONE COLUMN since v13 §6: the v12 Housekeeping rail retired (Housekeeping
+   moves to a floating tab and a half-screen drawer, Phase 5). Rows stack: band, strip, carousel,
+   then the list column. ⚠️ No row gap — each row's own margin states the rhythm above it. */
 .clv-group {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  /* ⚠️ COLUMN GAP ONLY (page header v2 §4): row 1 is the full header and row 2 the column and the
-     rail, and the 24px below the rule belongs to them — a row gap would add 28 on top of it. */
-  column-gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
   row-gap: 0;
   align-items: start;
-  /* ⚠️ NO TOP PADDING SINCE PAGE HEADER v2: the 16px here put the content top on the rail's sticky
-     clamp line when the rail was the group's first row. The shared header is row 1 now and the rail
-     rests 24 below its rule, far under the clamp — and the 16 put this header 16px lower than the
-     Query Centre's, which starts at the scroller's own top padding. */
 }
 /* the page column is a size container so the narrow rows and the stacked hero read THEIR column,
    not the viewport (the rail is what narrows it) */
@@ -72,11 +65,8 @@
   min-width: 0;
   container-type: inline-size;
   container-name: col;
-  /* ⚠️ v12 §4: the index strip's three tokens are the ONE OWNER of both sticky offsets — the
-     strip wrapper's own box, and the group dividers' pin below it both derive from these. */
-  --clv-idx-h: 62px;
-  --clv-idx-pt: 12px;
-  --clv-idx-pb: 14px;
+  /* v13 §6: the strip and the dividers are no longer sticky, so v12's three offset tokens
+     (--clv-idx-h/pt/pb) retired with the stickiness they sized. */
 }
 /* ⚠️ THE SHARED FULL HEADER SPANS BOTH TRACKS, AND EVERYTHING ELSE STARTS BELOW ITS RULE
    (page header v2 §4, the Query Centre's own arrangement): the count cards at the rule + 24, and
@@ -89,7 +79,6 @@
 .clv-group > .cl13-strip { grid-column: 1 / -1; grid-row: 2; margin-top: var(--page-section-gap); }
 .clv-group > .cl13-cz { grid-column: 1 / -1; grid-row: 3; margin-top: var(--page-section-gap); min-width: 0; }
 .clv-group > .clv-main { grid-column: 1; grid-row: 4; padding-top: var(--page-section-gap); }
-.clv-group > .clv-rail { grid-column: 2; grid-row: 4; margin-top: var(--page-section-gap); }
 /* v13 §2 — THE BAND'S DISC. The Archivist file is square on white, not pre-cut (the Query Centre's
    disc art is), so the circle is drawn here: 290 white, the drawing inset at 92% and nudged 4px down,
    the mock's `.disc`. ⚠️ `.ph-bdisc img` sets the shared art to 100%; this 0-2-1 rule wins honestly. */
@@ -103,15 +92,8 @@
 /* ── the quick-add card "+ Add an agent" drops (§4; the mock's `.qa`) ── */
 /* the quick-add drop card is RETIRED (v12 P1 — "+ Add an agent" opens the centred card directly) */
 
-/* ── the rail: sticky beside the content, never fixed to the window ─────────────────────────── */
-.clv-rail {
-  position: sticky;
-  top: 16px;
-  min-width: 0;
-  /* the JS writes the real height from the rail's own measured top (lib/contactList.railHeight);
-     the cap here is the same 860 so a frame before the first measurement cannot overshoot */
-  max-height: 860px;
-}
+/* ── the Housekeeping card's chrome — the empty state's exhibit still draws it (the v12 rail that
+   carried it on the list retired with v13 §6; `.clv-rail` went with it) ── */
 .clv-hkrail {
   height: 100%;
   display: flex;
@@ -183,8 +165,8 @@
 /* ── the rows' initials disc and genre chips — all that is left of the v11 add card's block;
    the card itself retired with the agent card (Agent card v1 P3), whose editor is the add card ── */
 .clv-ini {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--clv-btn);
   color: #f5f1eb;
@@ -192,7 +174,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   flex: none;
 }
@@ -207,57 +189,45 @@
    banner and the shared labelled pills replace them (shell/OpenBanner, shell/ListPills; the page's
    dress in contactV13.css). Recoverable at 3d6bac97. ── */
 
-/* ── the dividers, re-dressed to the mock's `.div` (v12 §6/P3): a slate TAB sitting on the
-   rule, the count on the right — the v11 anthracite band retires. The STICKY machinery is the
-   build's, not the mock's (§4 says build it), and is unchanged from P2: pin below the strip,
-   both offsets from the strip's three tokens. ── */
+/* ── the dividers (v13 §6, the mock's `.gband`): an ANTHRACITE tab in Special Elite, cream, on a
+   2px anthracite rule, the count at the right above the rule. Not sticky — the slim bar is what
+   stays in reach. A strip pick lands a divider `scroll-margin-top` below the scroller's top, NET of
+   the scroller's own `scroll-padding-top` (which adds to every landing); the marked-letter reading
+   reads both values back rather than restating them. ── */
 .clv-list { display: flex; flex-direction: column; }
 .clv-band2 {
-  position: sticky;
-  /* v12 §4: the dividers pin BELOW the index strip, from the strip's own three tokens; and a
-     strip click lands its divider just under the strip's edge (§10.2's 8px). ⚠️ THE SCROLLER'S
-     OWN `scroll-padding-top` (workspacePageGrid's anchor inset) ADDS to every landing, so the
-     margin states the 8 NET of it — measured: without the subtraction the divider lands at 20. */
-  top: calc(var(--clv-idx-h) + var(--clv-idx-pt) + var(--clv-idx-pb));
-  scroll-margin-top: calc(var(--clv-idx-h) + var(--clv-idx-pt) + var(--clv-idx-pb) + 8px - var(--wpg-scroll-pad, 12px));
-  z-index: 5;
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 30px;
-  margin: 26px 0 12px;
-  /* ground-coloured, with the page-coloured shadows above and below — rows slide under the
-     ground, never visibly behind a transparent divider (the v11 band's own trick, kept) */
-  background: var(--clv-ground);
-  box-shadow: 0 -14px 0 var(--clv-ground), 0 12px 0 var(--clv-ground);
+  align-items: flex-end;
+  margin: 24px 0 10px;
+  scroll-margin-top: calc(80px - var(--wpg-scroll-pad, 12px));
 }
 .clv-band2:first-child { margin-top: 0; }
-/* the tab: slate, top corners only, dipped 7px so it SITS on the rule rather than floats */
 .clv-band2 b {
-  display: flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 14px;
-  border-radius: 7px 7px 0 0;
-  background: var(--clv-slate-pale);
-  color: var(--clv-slate-ink);
   font-family: var(--clv-type);
   font-weight: 400;
   font-size: 17px;
-  position: relative;
-  top: 7px;
+  line-height: 1.1;
+  background: var(--clv-btn);
+  color: #f5f1eb;
+  border-radius: 9px 9px 0 0;
+  padding: 6px 16px 5px;
 }
 .clv-band2 i {
   flex: 1;
-  height: 1px;
-  background: rgba(28, 19, 15, 0.3);
-  font-size: 0; /* the count moved to <small>; the rule carries no text of its own */
+  height: 2px;
+  border-radius: 1px;
+  background: var(--clv-btn);
+  font-size: 0;
 }
 .clv-band2 small {
-  font: 700 8px var(--font-mono, "JetBrains Mono", monospace);
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--clv-ink-45);
+  color: var(--clv-slate-ink);
 }
 
 /* ── the rows, re-cut to the mock's dossier (v12 §6, the oracle's own m4 at data-row="4"):
@@ -267,16 +237,16 @@
 .clv-row {
   position: relative;
   display: grid;
-  grid-template-columns: 30px minmax(170px, 0.8fr) minmax(0, 1.6fr) auto;
+  grid-template-columns: 34px minmax(170px, 0.8fr) minmax(0, 1.6fr) 210px;
   grid-template-areas: "ini who fit q";
   align-items: center;
   column-gap: 18px;
-  min-height: 74px;
+  min-height: 80px;
   margin-bottom: 10px;
-  padding: 12px 18px 12px 16px;
+  padding: 12px 18px 12px 20px;
   background: #fff;
-  border-radius: 10px;
-  box-shadow: var(--clv-soft);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
   overflow: hidden;
   cursor: pointer;
   border: 0;
@@ -285,20 +255,65 @@
   color: var(--clv-ink);
   width: 100%;
 }
-/* the 3px top strip: the accent at rest, INK on a row past its expected date — the slate is
-   never a status (the accent law); the past-date mark is ink, as v11's edge was */
+/* v13 §6 — THE 6px LEFT EDGE IS THE QUERY'S STATE COLOUR, DEEP (the mock's `--edge`), set by the
+   row's `data-edge` (ContactRows' `rowEdge`); a never-queried agent has none. The v12 3px top strip
+   and its ink past-date variant retired: a row past its date is "your move" by the page's union, and
+   says so in its edge and its date line. */
 .clv-row::before {
   content: "";
   position: absolute;
   left: 0;
-  right: 0;
   top: 0;
-  height: 3px;
-  background: var(--clv-slate-pale);
+  bottom: 0;
+  width: 6px;
+  background: transparent;
 }
-.clv-row:hover { transform: translateY(-1px); }
-.clv-row[aria-current="true"] { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
-.clv-row--late::before { background: var(--clv-ink); }
+.clv-row[data-edge="you"]::before { background: var(--state-you-deep); }
+.clv-row[data-edge="agent"]::before { background: var(--state-agent-deep); }
+.clv-row[data-edge="queried"]::before { background: var(--state-queried-deep); }
+.clv-row[data-edge="offer"]::before { background: var(--state-offer-deep); }
+.clv-row[data-edge="closed"]::before { background: var(--state-closed-deep); }
+.clv-row:hover { background: #fdfbf8; }
+.clv-row:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: 2px; }
+.clv-row[aria-current="true"] { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), inset 0 0 0 1.5px var(--clv-ink); }
+/* v13 §6 — THE HOVER TRAY (the mock's .tray): over the query column, on hover or keyboard focus;
+   the query column fades out beneath it. The fade-in ground is the row's hover colour.
+   ⚠️ `.clv-rtray`, NOT `.clv-tray` — that name is the Housekeeping card's tray head (the exhibit still
+   draws it), and the collision stretched this one to 122px with an 8px margin (measured). */
+.clv-rtray {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  background: linear-gradient(90deg, transparent, #fdfbf8 18px);
+  padding-left: 30px;
+}
+.clv-row:hover .clv-rtray, .clv-row:focus-within .clv-rtray { opacity: 1; pointer-events: auto; }
+.clv-row:hover .clv-rq, .clv-row:focus-within .clv-rq { opacity: 0; }
+.clv-trb {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--clv-hair);
+  font-family: var(--clv-type);
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--clv-ink);
+  cursor: pointer;
+}
+.clv-trb.p { background: var(--clv-btn); color: #f5f1eb; box-shadow: none; }
+.clv-trb:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .clv-rtray { transition: none; } }
 .clv-row > .clv-ini { grid-area: ini; }
 .clv-rwho { grid-area: who; min-width: 0; }
 .clv-rwho b {
@@ -440,7 +455,7 @@
    four columns on tighter floors, one row — the v11 two-deck fold retires with the paceBits */
 @container col (max-width: 720px) {
   .clv-row {
-    grid-template-columns: 30px minmax(150px, 0.8fr) minmax(0, 1.4fr) auto;
+    grid-template-columns: 34px minmax(150px, 0.8fr) minmax(0, 1.4fr) auto;
     min-height: 86px;
   }
 }
@@ -458,8 +473,8 @@
    one treatment (the ref's `.row.new`/`newrow` pattern) */
 .clv-row--new { animation: clvNewRow 2.4s ease-out; }
 @keyframes clvNewRow {
-  0% { box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-slate); }
-  100% { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
+  0% { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), inset 0 0 0 2px var(--clv-slate); }
+  100% { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), inset 0 0 0 1.5px var(--clv-ink); }
 }
 @media (prefers-reduced-motion: reduce) {
   /* no animation, and the ring shows AT ONCE (§8.4 — the prompt's clause; the ref only kills
@@ -640,63 +655,49 @@
    populated page, and the exhibition and the hint take row 2 across both */
 .clv-group > .clv-empty-below { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
 
-/* ── v12 §4: the index strip ──────────────────────────────────────────────────────────────── */
-/* Its three size tokens live on `.clv-main` (the one owner — the dividers' sticky top derives
-   from the same three). The wrapper is the sticky layer: ground-coloured, so rows slide under
-   its paddings before emerging — the same page-coloured-shadow trick the bands play. The mock's
-   strip is NOT sticky (§4 says build it); the visible gap beneath — pb 14 + margin 12 — is the
-   mock's own 26. */
-.clv-idxwrap {
-  position: sticky;
-  top: 0;
-  z-index: 7;
-  background: var(--clv-ground);
-  padding: var(--clv-idx-pt) 0 var(--clv-idx-pb);
-  margin: 0 0 12px;
-}
+/* ── the index strip (v12 §4, re-dressed v13 §6 — the mock's `.idx`): white, inside the workspace,
+   "All · N" in a 76px parchment cell then the 26 letters, 54 tall, 22 above the first divider.
+   NOT sticky since v13: the slim bar's mini A–Z is the index that stays in reach. ── */
+.clv-idxwrap { margin: 0 0 22px; }
 .clv-idx {
-  display: flex;
-  height: var(--clv-idx-h);
+  display: grid;
+  grid-template-columns: 76px repeat(26, minmax(0, 1fr));
   background: #fff;
-  border: 1px solid var(--clv-hair);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--clv-soft);
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05);
 }
 .clv-ixtab {
-  flex: 1;
   min-width: 0;
-  position: relative;
+  height: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
   border: 0;
-  border-right: 1px solid var(--clv-hair);
+  border-left: 1px solid var(--clv-hair);
   padding: 0;
   background: none;
   cursor: pointer;
   font-family: var(--clv-type);
   font-size: 17px;
-  color: var(--clv-ink-45); /* letterless cells rest quiet (§4) */
+  color: rgba(28, 19, 15, 0.3); /* letterless cells rest quiet */
 }
-.clv-ixtab:last-child { border-right: 0; }
 .clv-ixtab[disabled] { cursor: default; }
 .clv-ixtab.has { color: var(--clv-ink); }
 .clv-ixtab.has i {
-  font: 700 7px var(--font-mono, "JetBrains Mono", monospace);
+  font: 400 7px var(--font-mono, "JetBrains Mono", monospace);
   font-style: normal;
   color: var(--clv-ink-45);
+  margin-top: 2px;
 }
 .clv-ixtab.has:hover { background: var(--clv-p2); }
 .clv-ixtab.on { background: var(--clv-btn); color: #f5f1eb; }
 .clv-ixtab.on i { color: rgba(245, 241, 235, 0.7); }
 .clv-ixall {
-  flex: 0 0 72px;
-  background: #efe9e2;
+  border-left: 0;
+  background: #f7f3ee;
   font-size: 12.5px;
-  letter-spacing: 0;
   color: var(--clv-ink);
 }
 /* the narrow column (the mock's own 720 boundary): the letters step down with the rows */

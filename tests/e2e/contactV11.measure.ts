@@ -43,140 +43,11 @@ test.afterAll(() => {
 });
 
 test.describe("phase 1 — the centred group and the rail shell", () => {
-  test("the group: two columns, 340px rail, 28px gap, capped and centred", async ({ page }) => {
-    await openRoute(page, "/agents", { width: 1440, height: 900 });
-    const scope = await visiblePage(page, ".agl-wpg");
+  /* the group's two columns are RETIRED by v13 P4 — the rail went and the group is one column (contactV13 CL13-5 holds the workspace's full width). RETIRED-contact-list-v13.md */
 
-    const g = await page.evaluate((scope) => {
-      const grp = document.querySelector(`${scope} .clv-group`);
-      const main = document.querySelector(`${scope} .clv-main`);
-      const rail = document.querySelector(`${scope} [data-clv="rail"]`);
-      if (!grp || !main || !rail) return null;
-      const s = getComputedStyle(grp as HTMLElement);
-      const gr = (grp as HTMLElement).getBoundingClientRect();
-      const mr = (main as HTMLElement).getBoundingClientRect();
-      const rr = (rail as HTMLElement).getBoundingClientRect();
-      return {
-        cols: s.gridTemplateColumns, gap: s.columnGap,
-        groupW: Math.round(gr.width),
-        railW: Math.round(rr.width),
-        gapPx: Math.round(rr.left - mr.right),
-        /* ⚠️ RETARGETED (page header v2 §4): the column's CONTENT top — its box starts at the shared
-           header's rule and its first 24px are the gap below it, which the rail takes as a margin */
-        railTop: Math.round(rr.top), mainTop: Math.round(mr.top + parseFloat(getComputedStyle(main as HTMLElement).paddingTop)),
-      };
-    }, scope);
+  /* the rail's sticky geometry is RETIRED by v13 P4 with the rail; Housekeeping moves to the floating tab and drawer (P5). RETIRED-contact-list-v13.md */
 
-    expect(g, "the centred group is not on the page").not.toBeNull();
-    bump();
-    if (!g) return;
-    expect(g.railW, "the rail's track is not 340px").toBe(340);
-    expect(g.gapPx, "the gap between the column and the rail").toBe(28);
-    expect(g.groupW, "the group overran the 1480 measure").toBeLessThanOrEqual(1480);
-    /* the rail starts level with the page column's content — both at the shared header's rule + 24 */
-    expect(Math.abs(g.railTop - g.mainTop), "the rail does not start level with the column's content").toBeLessThanOrEqual(1);
-    bump(4);
-  });
-
-  test("the rail: sticky, its height from its own measured top, never past the fold", async ({ page }) => {
-    await openRoute(page, "/agents", { width: 1440, height: 900 });
-    const scope = await visiblePage(page, ".agl-wpg");
-
-    const read = () => page.evaluate((scope) => {
-      const rail = document.querySelector(`${scope} [data-clv="rail"]`) as HTMLElement | null;
-      const scroller = rail?.closest(".wpg-scroll") as HTMLElement | null;
-      if (!rail || !scroller) return null;
-      const r = rail.getBoundingClientRect();
-      const sc = scroller.getBoundingClientRect();
-      return {
-        top: Math.round(r.top), bottom: Math.round(r.bottom), h: Math.round(r.height),
-        scrollerTop: Math.round(sc.top),
-        inner: window.innerHeight,
-        scrollTop: Math.round(scroller.scrollTop),
-        max: Math.round(scroller.scrollHeight - scroller.clientHeight),
-      };
-    }, scope);
-
-    const rest = await read();
-    expect(rest, "no rail on the page").not.toBeNull();
-    bump();
-    if (!rest) return;
-    /* at rest: height = innerHeight − its own top − 16, clamped [360, 860] */
-    const want = Math.max(360, Math.min(860, rest.inner - Math.max(16, rest.top) - 16));
-    expect(Math.abs(rest.h - want), `rest: rail height ${rest.h} against derived ${want}`).toBeLessThanOrEqual(2);
-    /* ⚠️ v13 P2: the strip and the carousel sit above the rail until it retires (P4), so at 900 tall its
-       resting top is low enough that the 360 floor binds — and a floored rail runs past the fold BY
-       its own rule. "Never past the fold" holds where the floor does not bind, and always once pinned
-       (asserted below). RETIRED-contact-list-v13.md records the narrowing. */
-    if (want > 360) expect(rest.bottom, "rest: the rail spills past the fold").toBeLessThanOrEqual(rest.inner - 14);
-    bump(2);
-
-    /* ⚠️ THE PRECONDITION FIRST: the page must actually scroll before the pinned reading means
-       anything — a fixture too short to scroll would pass the pinned claim vacuously. */
-    expect(rest.max, "the page does not scroll — the pinned state is unreachable on this fixture").toBeGreaterThan(120);
-    bump();
-
-    /* ⚠️ v13 P2: the strip and the carousel put the rail ~1,000px down, so a fixed 600 no longer reaches
-       its pin point. Scroll PAST the rail's own pin point (its resting top less the scroller's top and
-       the 16 it sticks at), by 120, so the reading is of the pinned state whatever sits above it. */
-    await page.evaluate(([scope, past]) => {
-      const scroller = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
-      scroller.scrollTop = Math.min(past, scroller.scrollHeight - scroller.clientHeight);
-    }, [scope, Math.round(rest.top - rest.scrollerTop - 16 + 120)] as const);
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-
-    const pinned = await read();
-    expect(pinned).not.toBeNull();
-    bump();
-    if (!pinned) return;
-    /* pinned: sticky holds it 16px under the scroller's own top edge (the app's scroller starts
-       below the shared bar — the mock's 16-under-the-viewport, translated to the real chrome) */
-    expect(Math.abs(pinned.top - (pinned.scrollerTop + 16)), `pinned top ${pinned.top} against scroller ${pinned.scrollerTop}+16`).toBeLessThanOrEqual(2);
-    const wantPinned = Math.max(360, Math.min(860, pinned.inner - Math.max(16, pinned.top) - 16));
-    expect(Math.abs(pinned.h - wantPinned), `pinned: rail height ${pinned.h} against derived ${wantPinned}`).toBeLessThanOrEqual(2);
-    expect(pinned.bottom, "pinned: the rail spills past the fold").toBeLessThanOrEqual(pinned.inner - 14);
-    bump(3);
-  });
-
-  test("the tray: 122px inset 8, the title at (19,32), the peek art at (236,61) behind it", async ({ page }) => {
-    await openRoute(page, "/agents", { width: 1440, height: 900 });
-    const scope = await visiblePage(page, ".agl-wpg");
-    /* v13 P2: the rail starts below the strip and the carousel, under the fold at load — bring it on
-       screen first (the claims are all relative to the card and the tray, so they are unchanged) */
-    await page.evaluate((scope) => document.querySelector(`${scope} .clv-hkrail`)?.scrollIntoView({ block: "start" }), scope);
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-
-    const t = await page.evaluate((scope) => {
-      const card = document.querySelector(`${scope} .clv-hkrail`) as HTMLElement | null;
-      const tray = document.querySelector(`${scope} [data-clv="tray"]`) as HTMLElement | null;
-      const title = tray?.querySelector(".clv-tray-t") as HTMLElement | null;
-      const img = tray?.querySelector(".clv-peek") as HTMLElement | null;
-      if (!card || !tray || !title || !img) return null;
-      const c = card.getBoundingClientRect(), tr = tray.getBoundingClientRect();
-      const ti = title.getBoundingClientRect(), im = img.getBoundingClientRect();
-      const centre = document.elementFromPoint(ti.left + ti.width / 2, ti.top + ti.height / 2);
-      return {
-        onScreen: tr.top >= 0 && tr.bottom <= window.innerHeight,
-        trayW: Math.round(tr.width), trayH: Math.round(tr.height),
-        insetL: Math.round(tr.left - c.left), insetT: Math.round(tr.top - c.top),
-        titleL: Math.round(ti.left - tr.left), titleT: Math.round(ti.top - tr.top),
-        imgL: Math.round(im.left - tr.left), imgT: Math.round(im.top - tr.top), imgW: Math.round(im.width),
-        hit: centre === title || title.contains(centre),
-      };
-    }, scope);
-
-    expect(t, "no tray in the rail").not.toBeNull();
-    bump();
-    if (!t) return;
-    /* ⚠️ the elementFromPoint reading below is only a reading if the tray is on screen */
-    expect(t.onScreen, "the tray is off screen — nothing below is a measurement").toBe(true);
-    expect([t.trayW, t.trayH], "tray box").toEqual([324, 122]);
-    expect([t.insetL, t.insetT], "tray inset in the card").toEqual([8, 8]);
-    expect([t.titleL, t.titleT], "the title's corner in the tray").toEqual([19, 32]);
-    expect([t.imgL, t.imgT, t.imgW], "the peek art's slot").toEqual([236, 61, 102]);
-    expect(t.hit, "the title is not above the art — z-order lost").toBe(true);
-    bump(6);
-  });
+  /* the v11 rail tray's geometry is RETIRED by v13 P4 with the rail; HK v2's drawer header replaces it (P5). RETIRED-contact-list-v13.md */
 
   test("?view= is accepted and ignored — one renderer, no switch", async ({ page }) => {
     await openRoute(page, "/agents?view=board", { width: 1440, height: 900 });
@@ -262,35 +133,7 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
    banner's labelled pills and the filter line replace both (contactV13 CL13-7 holds the faceted counts,
    the kept scroll and the outside press; CL13-F the filter line). RETIRED-contact-list-v13.md. */
 
-test("the bands stick BELOW the pinned index strip with the page-coloured shadow", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const r = await page.evaluate(async (scope) => {
-    const scroller = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
-    const wrap = document.querySelector(`${scope} [data-clv="idxwrap"]`) as HTMLElement | null;
-    const bands = [...document.querySelectorAll(`${scope} [data-clv="band"]`)] as HTMLElement[];
-    if (!wrap || bands.length < 2) return null;
-    const second = bands[1];
-    /* scroll until the SECOND band's group is in play, then the FIRST should be gone and the
-       second pinned flush under the strip's own wrapper */
-    scroller.scrollTop = second.offsetTop + 80;
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const st = scroller.getBoundingClientRect().top;
-    const w = wrap.getBoundingClientRect();
-    const b = second.getBoundingClientRect();
-    return {
-      stripPinned: Math.abs(w.top - st) <= 2,
-      pinned: Math.abs(b.top - w.bottom) <= 2,
-      sticky: getComputedStyle(second).position === "sticky",
-      detail: `strip ${w.top.toFixed(1)}–${w.bottom.toFixed(1)} band ${b.top.toFixed(1)} scroller ${st.toFixed(1)}`,
-    };
-  }, scope);
-  expect(r, "no strip or fewer than two bands — the pinned claim is unreachable").not.toBeNull();
-  expect(r!.sticky).toBe(true);
-  expect(r!.stripPinned, `the strip wrapper does not pin at the scroller's top — ${r!.detail}`).toBe(true);
-  expect(r!.pinned, `the band does not pin flush under the strip — ${r!.detail}`).toBe(true);
-  bump(4);
-});
+/* the sticky dividers under the sticky strip are RETIRED by v13 P4 — neither is sticky now; the slim bar stays in reach (CL13-SB). RETIRED-contact-list-v13.md */
 
 /* ══════════════════════════ phase 4 — the agent pop-up (§11.6 / §11.7) ══════════════════════════ */
 
@@ -654,144 +497,25 @@ test("§11.7's third leg — saving a window that crosses today MOVES the row's 
 
 /* ══════════════════════════ phase 6 — Housekeeping (§9 / §11.2 / §11.8) ══════════════════════════ */
 
-test("the tray's counts line at (20,74) with the bold gap count, and the toggle persists for the session (§11.2)", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const r = await page.evaluate((scope) => {
-    const tray = document.querySelector(`${scope} [data-clv="tray"]`) as HTMLElement;
-    const line = document.querySelector(`${scope} [data-clv="hk-counts"]`) as HTMLElement | null;
-    if (!line) return null;
-    const t = tray.getBoundingClientRect(), l = line.getBoundingClientRect();
-    return {
-      left: Math.round(l.left - t.left), top: Math.round(l.top - t.top),
-      bold: line.querySelector("b")?.textContent ?? "",
-      text: line.textContent ?? "",
-      boldWeight: getComputedStyle(line.querySelector("b")!).fontWeight,
-    };
-  }, scope);
-  expect(r, "no counts line in the tray").not.toBeNull();
-  expect(r!.left, "the counts line's x inside the tray").toBe(20);
-  expect(Math.abs(r!.top - 74), "the counts line's y inside the tray").toBeLessThanOrEqual(1);
-  expect(r!.bold).toMatch(/^\d+ GAPS?$/);
-  expect(r!.boldWeight).toBe("700");
-  expect(r!.text).toMatch(/\d+ AGENTS? · \d+ OF \d+ COMPLETE/);
-  /* the seeded stub-0 fixture row carries the inline box on the REAL page, and no live tag */
-  const inline = await page.evaluate((scope) => {
-    const row = document.querySelector(`${scope} [data-clv="hk-row"][data-agent="clv-fx-stub0"]`) as HTMLElement | null;
-    return row ? { hasInline: !!row.querySelector('[data-clv="hk-inline"]'), live: row.dataset.live ?? null } : null;
-  }, scope);
-  expect(inline, "the seeded stub-0 agent is not in the rail — re-run tests/e2e/seedContactFixture.mjs").not.toBeNull();
-  expect(inline!.hasInline, "ruling (c): the stub-0, no-live-query row carries the inline box").toBe(true);
-  expect(inline!.live).toBeNull();
-  /* the grouping persists for the SESSION: flip to By agent, reload, still By agent */
-  await page.click(`${scope} [data-clv="hk-toggle"] button:nth-child(2)`);
-  await page.reload();
-  await page.waitForSelector('[data-clv="hk-toggle"]');
-  const scope2 = await visiblePage(page, ".agl-wpg");
-  const pressed = await page.evaluate(
-    (s) => (document.querySelector(`${s} [data-clv="hk-toggle"] button:nth-child(2)`) as HTMLElement).getAttribute("aria-pressed"),
-    scope2,
-  );
-  expect(pressed, "the grouping did not survive the reload").toBe("true");
-  bump(8);
-});
+/* the rail tray's counts line and toggle are RETIRED by v13 P4 with the rail; HK v2 (P5) rebuilds both in the drawer. RETIRED-contact-list-v13.md */
 
-test("§11.8 — the inline reply box is ABSENT for every agent with a live query (the lab, both populations proved)", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/#/contact-lab");
-  await page.waitForSelector('[data-lab-view="cast"]');
-  await page.click('[data-lab-view="cast"]');
-  const scope = await visiblePage(page, ".agl-wpg");
-  await page.waitForSelector(`${scope} [data-clv="hk-row"]`);
-  const sweep = await page.evaluate((scope) => {
-    const rows = [...document.querySelectorAll(`${scope} [data-clv="hk-row"]`)] as HTMLElement[];
-    return rows.map((r) => ({
-      agent: r.dataset.agent, live: !!r.dataset.live,
-      inline: !!r.querySelector('[data-clv="hk-inline"]'),
-      addForReply: !!r.querySelector('[data-clv="hk-add"]'),
-    }));
-  }, scope);
-  /* populations FIRST, per branch — the cast carries both stub-0 shapes by construction */
-  const inlines = sweep.filter((r) => r.inline);
-  const liveRows = sweep.filter((r) => r.live);
-  expect(inlines.length, "no inline box anywhere — the allowed branch is unexercised").toBeGreaterThan(0);
-  expect(liveRows.length, "no live-query row in the rail — the refused branch is unexercised").toBeGreaterThan(0);
-  expect(sweep.some((r) => r.agent === "fx-stub0-live" && r.live), "the live stub-0 subject is missing from the rail").toBe(true);
-  for (const r of sweep) {
-    expect(r.live && r.inline, `${r.agent} has a live query AND the inline box — the reply note would never be seen (ruling c)`).toBe(false);
-  }
-  bump(3 + sweep.length);
-});
+/* §11.8's inline reply box (in the rail) is RETIRED by v13 P4 with the rail; HK v2 §9 (P5) holds its successor. RETIRED-contact-list-v13.md */
 
-test("§11.8 — CHECKED, REMIND ME and the inline save each remove exactly one gap, and the counts drop with them (the lab)", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/#/contact-lab");
-  await page.waitForSelector('[data-lab-view="cast"]');
-  await page.click('[data-lab-view="cast"]');
-  const scope = await visiblePage(page, ".agl-wpg");
-  await page.waitForSelector(`${scope} [data-clv="hk-row"]`);
-  const gaps = () => page.evaluate(
-    (s) => parseInt((document.querySelector(`${s} [data-clv="hk-counts"] b`) as HTMLElement).textContent ?? "0", 10),
-    scope,
-  );
-  const rowIn = (sec: string, agent: string) => page.evaluate(
-    ({ s, sec, agent }) => !!document.querySelector(`${s} [data-clv="hk-sec"][data-gap="${sec}"] [data-clv="hk-row"][data-agent="${agent}"]`),
-    { s: scope, sec, agent },
-  );
-
-  const n0 = await gaps();
-  /* CHECKED stamps today — the stale row leaves the recheck section, nothing else moves */
-  expect(await rowIn("recheck", "fx-stale"), "precondition: the stale wishlist is listed").toBe(true);
-  await page.click(`${scope} [data-clv="hk-sec"][data-gap="recheck"] [data-agent="fx-stale"] [data-clv="hk-checked"]`);
-  await page.waitForFunction(
-    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="recheck"] [data-agent="fx-stale"]`),
-    { s: scope },
-  );
-  expect(await gaps(), "CHECKED must remove exactly one gap").toBe(n0 - 1);
-
-  /* REMIND ME 1 NOV sets the dated task — the reopen row goes, the counts drop again */
-  expect(await rowIn("reopen", "fx-reopen"), "precondition: the dated closed door is listed").toBe(true);
-  const label = await page.textContent(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"] [data-clv="hk-remind"]`);
-  expect(label, "the button carries the reopen date").toBe("REMIND ME 1 NOV");
-  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"] [data-clv="hk-remind"]`);
-  await page.waitForFunction(
-    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"]`),
-    { s: scope },
-  );
-  expect(await gaps(), "REMIND ME must remove exactly one gap").toBe(n0 - 2);
-
-  /* the bare REMIND ME (no reopensOn) opens the editor at the door instead — ruling (b) */
-  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-shut"] [data-clv="hk-remind"]`);
-  /* (P3: the card's editor, on the Submissions tab, the door focused) */
-  await page.waitForSelector('[data-ac="card"] [data-ae-mode="edit"] [data-sec="work"].on');
-  await expect.poll(() => page.evaluate(() => document.activeElement?.closest("[data-ae]")?.getAttribute("data-ae")), { message: "the bare REMIND ME did not land at the door" }).toBe("door");
-  await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-ac="card"] [data-ac="head"]'); // leaving a clean editor lands on the card's quick view
-  await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
-
-  /* the inline save writes the window — the stub row leaves the reply section */
-  expect(await rowIn("reply", "fx-stub0"), "precondition: the stub window is listed").toBe(true);
-  await page.fill(`${scope} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"] [data-clv="hk-inline"] input`, "8");
-  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"] [data-clv="hk-save"]`);
-  await page.waitForFunction(
-    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"]`),
-    { s: scope },
-  );
-  expect(await gaps(), "the inline save must remove exactly one gap").toBe(n0 - 3);
-  bump(9);
-});
+/* §11.8's three rail fixes are RETIRED by v13 P4 with the rail; HK v2 §9 (P5) holds their successors. RETIRED-contact-list-v13.md */
 
 /* ═════════════ Query actions v1 follow-through — the log doors open the drawer IN PLACE ═════════════ */
 
 test("Log query opens the query drawer on this page — no navigation, the agent carried (both doors)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
-  /* door 1: the row's mini on a never-queried, open-door agent */
-  const row = page.locator(`${scope} [data-clv="row"]`, { has: page.locator('[data-clv="mini-log"]') }).first();
+  /* door 1: the row's hover tray on a never-queried, open-door agent (v13 P4: the v11 mini retired
+     into the tray, whose step is the card's own — Log a query here) */
+  const row = page.locator(`${scope} [data-clv="row"][data-stand="none"][data-door="open"]`).first();
   const who = (await row.locator(".clv-rwho b").textContent())?.trim() ?? "";
-  expect(who.length, "population first — no row offers Log query").toBeGreaterThan(0);
-  await row.locator('[data-clv="mini-log"]').click();
+  expect(who.length, "population first — no never-queried, open-door row").toBeGreaterThan(0);
+  await row.scrollIntoViewIfNeeded();
+  await row.hover();
+  await row.locator('[data-cl13="tray-act"]').click();
   /* the drawer ROOT is a boxless wrapper — wait for ATTACHMENT; the content assertions carry visibility */
   await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
   const after = await page.evaluate(() => ({
@@ -847,7 +571,7 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
 
 /* ══════════════════════════ v12 P2 — the index strip (§10.2) and the re-dressed head (§10.3) ══════════════════════════ */
 
-test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider 8px under the strip, marked", async ({ page }) => {
+test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider clear of the slim bar, marked", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope} [data-clv="idx"]`);
@@ -895,15 +619,12 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
   expect(lettered.reduce((s, c) => s + c.n, 0)).toBe(census.rowCount);
   bump(8 + bare.length + census.bands.length * 2);
 
-  /* ── the click: pick a late letter; the divider lands 8px under the pinned strip and the cell
-     marks in the bands' own ink. ⚠️ THE SETTLE MUST SEE THE SCROLL *LEAVE* FIRST: a smooth
-     scroll has a startup standstill, and "three equal scrollTop reads" is satisfied by a scroll
-     that has not begun — measured, gap 526.5 with the cell un-marked, a reading taken mid-
-     flight. So: departed from the starting value, THEN three stable reads. ── */
-  /* ⚠️ THE TARGET IS THE SECOND DIVIDER, NOT THE LAST: the landing position is 96px below the
-     scrollport's top, and the LAST band has too little content beneath it to get there — the
-     scroller hits its end and the band rests mid-viewport (measured: gap 526.5 on a correct
-     page). The second divider has every later group below it, so it can always land. */
+  /* ── the click: pick a letter; the divider lands where its OWN scroll-margin-top (net of the
+     scroller's scroll-padding-top) puts it — clear of the sticky slim bar — and the cell marks in
+     the discs' ink. v13 P4: the strip is no longer sticky, so the landing is read against the
+     values that place it, never against the strip. ⚠️ THE SETTLE MUST SEE THE SCROLL *LEAVE*
+     FIRST (a smooth scroll's startup standstill reads as "stable"). The target is the SECOND
+     divider: the LAST has too little content beneath it to reach the landing line. ── */
   const target = census.bands[1].letter;
   const startTop = await page.evaluate((scope) => (document.querySelector(`${scope} .wpg-scroll`) as HTMLElement).scrollTop, scope);
   await page.click(`${scope} [data-clv="ixtab"][data-letter="${target}"]`);
@@ -917,22 +638,25 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     return same && (w.__clvHold ?? 0) >= 3;
   }, [scope, startTop] as const, { timeout: 10000 });
   const landed = await page.evaluate(([scope, target]) => {
-    const wrap = document.querySelector(`${scope} [data-clv="idxwrap"]`) as HTMLElement;
+    const sc = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
     const band = document.querySelector(`${scope} [data-clv="band"][data-letter="${target}"]`) as HTMLElement;
     const cell = document.querySelector(`${scope} [data-clv="ixtab"][data-letter="${target}"]`) as HTMLElement;
-    /* v12 P3: the divider is ground-coloured now, so the marked cell's ink anchors on the row
-       DISCS — another reader of the same --clv-btn, never a literal */
+    const bar = document.querySelector(`${scope} [data-sbar="contacts"] .sbar-in`) as HTMLElement | null;
     const disc = document.querySelector(`${scope} .clv-ini`) as HTMLElement;
     const discBg = getComputedStyle(disc).backgroundColor;
     const cellBg = getComputedStyle(cell).backgroundColor;
+    const want = sc.getBoundingClientRect().top + (parseFloat(getComputedStyle(sc).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(band).scrollMarginTop) || 0);
+    const top = band.getBoundingClientRect().top;
     return {
-      gap: band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom,
+      off: top - want,
+      clear: bar ? top - bar.getBoundingClientRect().bottom : null,
       marked: cell.classList.contains("on"),
       inkMatch: cellBg === discBg,
-      detail: `gap ${(band.getBoundingClientRect().top - wrap.getBoundingClientRect().bottom).toFixed(1)} cell ${cellBg} disc ${discBg}`,
+      detail: `top ${top.toFixed(1)} want ${want.toFixed(1)} bar ${bar ? bar.getBoundingClientRect().bottom.toFixed(1) : "none"} cell ${cellBg} disc ${discBg}`,
     };
   }, [scope, target] as const);
-  expect(Math.abs(landed.gap - 8), `the divider lands 8px under the strip — ${landed.detail}`).toBeLessThanOrEqual(2);
+  expect(Math.abs(landed.off), `the divider lands on its own scroll margin — ${landed.detail}`).toBeLessThanOrEqual(2);
+  expect(landed.clear ?? -1, `the divider lands clear of the slim bar — ${landed.detail}`).toBeGreaterThanOrEqual(8);
   expect(landed.marked, "the picked cell is marked").toBe(true);
   expect(landed.inkMatch, `the marked cell wears the discs' own ink — ${landed.detail}`).toBe(true);
 
@@ -957,83 +681,20 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     marked: !!document.querySelector(`${scope} [data-clv="ixtab"].on`),
   }), scope);
   expect(cleared.marked, "All clears the marked cell").toBe(false);
-  bump(4);
+  bump(5);
 });
 
 /* v12 §10.3 (the head row: dashed title, tally, the controls dropping under) is RETIRED by v13 P3 — the
    open banner is the list's head (contactV13 CL13-B). RETIRED-contact-list-v13.md. */
 
-test("v12 §10.4 — the divider: a slate tab SITTING on the rule, the count right, on the ground", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const r = await page.evaluate((scope) => {
-    const bands = [...document.querySelectorAll(`${scope} [data-clv="band"][data-letter]`)] as HTMLElement[];
-    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
-    const tokens = getComputedStyle(main);
-    /* resolve the two slate tokens where they apply, never a literal on both sides */
-    const probe = document.createElement("div");
-    probe.style.cssText = `position:absolute;visibility:hidden;background:${tokens.getPropertyValue("--clv-slate-pale")};color:${tokens.getPropertyValue("--clv-slate-ink")}`;
-    main.appendChild(probe);
-    const slatePale = getComputedStyle(probe).backgroundColor;
-    const slateInk = getComputedStyle(probe).color;
-    probe.remove();
-    const read = bands.map((band) => {
-      const b = band.querySelector("b") as HTMLElement;
-      const i = band.querySelector("i") as HTMLElement;
-      const small = band.querySelector("small") as HTMLElement;
-      const bb = b.getBoundingClientRect(); const ib = i.getBoundingClientRect();
-      const sb = small.getBoundingClientRect(); const db = band.getBoundingClientRect();
-      const bs = getComputedStyle(b);
-      return {
-        tabBg: bs.backgroundColor, tabInk: bs.color, tabRadius: bs.borderRadius,
-        dip: Math.round((bb.bottom - db.bottom) * 10) / 10,
-        ruleH: ib.height, ruleSpans: ib.left > bb.right && ib.right < sb.left,
-        countRight: Math.abs(sb.right - db.right) <= 1,
-        count: (small.textContent ?? "").trim(),
-      };
-    });
-    return { slatePale, slateInk, read };
-  }, scope);
-  expect(r.read.length, "population first").toBeGreaterThan(2);
-  /* ⚠️ THE TOKEN ITSELF IS A PRECONDITION: an undeclared --clv-slate-pale resolves the probe to
-     transparent, and a transparent tab then MATCHES it — two nothings agreeing (found 3 Oct:
-     mutation F stayed green because the family was declared nowhere). */
-  expect(r.slatePale, "--clv-slate-pale resolves to a colour").not.toBe("rgba(0, 0, 0, 0)");
-  expect(r.slateInk, "--clv-slate-ink resolves to a colour").not.toBe("rgba(0, 0, 0, 0)");
-  for (const d of r.read) {
-    expect(d.tabBg, "the tab wears the slate family's pale").toBe(r.slatePale);
-    expect(d.tabInk, "the tab's letter is slate ink").toBe(r.slateInk);
-    expect(d.tabRadius, "top corners only — a TAB, not a pill").toBe("7px 7px 0px 0px");
-    expect(d.dip, "the tab dips 7px to SIT on the rule").toBe(7);
-    expect(d.ruleH, "the rule is a hairline").toBeLessThanOrEqual(1.5);
-    expect(d.ruleSpans, "the rule runs from the tab to the count").toBe(true);
-    expect(d.countRight, "the count sits on the divider's right edge").toBe(true);
-    expect(d.count).toMatch(/^\d+ agents?$/);
-  }
-  bump(1 + r.read.length * 7);
-});
+/* v12 §10.4 (the slate divider tab on the ground) is RETIRED by v13 P4 — the tab is anthracite on a 2px rule inside the workspace (contactV13 CL13-5). RETIRED-contact-list-v13.md */
 
-test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past), one italic line, the clamped wishlist", async ({ page }) => {
+test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped wishlist", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   const read = (w: number) => page.evaluate((scope) => {
     const rows = [...document.querySelectorAll(`${scope} [data-clv="row"]`)] as HTMLElement[];
-    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
-    const probe = document.createElement("div");
-    probe.style.cssText = `position:absolute;visibility:hidden;background:${getComputedStyle(main).getPropertyValue("--clv-slate-pale")}`;
-    main.appendChild(probe);
-    const slatePale = getComputedStyle(probe).backgroundColor;
-    probe.remove();
-    const inkProbe = document.createElement("div");
-    inkProbe.style.cssText = "position:absolute;visibility:hidden;background:var(--clv-ink)";
-    main.appendChild(inkProbe);
-    const ink = getComputedStyle(inkProbe).backgroundColor;
-    inkProbe.remove();
-    const strips = rows.map((row) => ({
-      late: row.classList.contains("clv-row--late"),
-      h: parseFloat(getComputedStyle(row, "::before").height),
-      bg: getComputedStyle(row, "::before").backgroundColor,
-    }));
+    /* v13 P4: the 3px top strip retired — the 6px state edge replaces it (contactV13 CL13-6) */
     const first = rows[0];
     const cols = getComputedStyle(first).gridTemplateColumns.split(" ");
     const q = first.querySelector(".clv-rq") as HTMLElement;
@@ -1043,7 +704,7 @@ test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past)
     return {
       n: rows.length, cols, firstCol: parseFloat(cols[0] ?? "0"),
       qRight: Math.round((first.getBoundingClientRect().right - 18 - q.getBoundingClientRect().right) * 10) / 10,
-      strips, slatePale, ink, pace, italics, minH,
+      pace, italics, minH,
       wishes: [...document.querySelectorAll(`${scope} .clv-rwish`)].length,
       tornWish: document.querySelectorAll(`${scope} [data-clv="torn-wish"]`).length,
     };
@@ -1051,24 +712,14 @@ test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past)
 
   const r = await read(1440);
   expect(r.n, "population first").toBeGreaterThan(10);
-  expect(r.slatePale, "--clv-slate-pale resolves to a colour (the two-nothings guard)").not.toBe("rgba(0, 0, 0, 0)");
   expect(r.cols.length, "four tracks at 1440").toBe(4);
-  expect(r.firstCol, "the disc track").toBe(30);
+  expect(r.firstCol, "the disc track (v13: the mock's 34)").toBe(34);
   expect(Math.abs(r.qRight), "the query column ends on the row's padding edge").toBeLessThanOrEqual(1);
   expect(r.pace, "the v11 paceBits line is retired").toBe(0);
   expect(r.italics.length, "population: the one italic who line renders").toBeGreaterThan(5);
   for (const f of r.italics) expect(f).toBe("italic");
-  /* the 3px strip, BOTH branches entered (the monoculture law) */
-  const late = r.strips.filter((s) => s.late);
-  const calm = r.strips.filter((s) => !s.late);
-  expect(late.length, "per-branch population: some rows are past their date").toBeGreaterThan(0);
-  expect(calm.length, "per-branch population: some rows are not").toBeGreaterThan(0);
-  for (const sRow of r.strips) {
-    expect(sRow.h, "the strip is 3px").toBe(3);
-    expect(sRow.bg, sRow.late ? "a past row's strip is INK" : "a calm row's strip is the slate pale").toBe(sRow.late ? r.ink : r.slatePale);
-  }
   expect(r.wishes + r.tornWish, "every row carries a wishlist or its torn slip").toBe(r.n);
-  bump(10 + r.strips.length * 2 + r.italics.length);
+  bump(7 + r.italics.length);
 
   /* the clamp, under STRESS (the house law: growth must push, never overflow) — inject a long
      wishlist and the box holds at two lines with the clamp visibly engaged */
@@ -1090,72 +741,16 @@ test("v12 §10.5 — the dossier row: four tracks, the 3px strip (ink when past)
   await page.waitForTimeout(250);
   const nr = await read(1280);
   expect(nr.cols.length, "still four tracks at 1280 — the v11 two-deck fold is retired").toBe(4);
-  expect(nr.firstCol).toBe(30);
-  expect(nr.minH, "the narrow row floors at 86").toBeGreaterThanOrEqual(85.5);
+  expect(nr.firstCol).toBe(34);
+  /* v13 P4: with the rail gone the column at 1280 is no longer under the 720 container boundary, so
+     the row keeps the mock's full template and its 80px floor (the 86 belonged to the narrow fold) */
+  expect(nr.minH, "the row floors at the mock's 80").toBeGreaterThanOrEqual(79.5);
   bump(3);
 });
 
 /* ══════════════════════════ v12 P4 — Housekeeping's head in the slate (§10.6) ══════════════════════════ */
 
-test("v12 §10.6 — the slate tray: typewriter title, serif counts, the clipped peek, the mock's toggle", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  await page.waitForSelector(`${scope} [data-clv="tray"]`);
-  const r = await page.evaluate((scope) => {
-    const tray = document.querySelector(`${scope} [data-clv="tray"]`) as HTMLElement;
-    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
-    const title = tray.querySelector(".clv-tray-t") as HTMLElement;
-    const counts = tray.querySelector('[data-clv="hk-counts"]') as HTMLElement;
-    const peek = tray.querySelector(".clv-peek") as HTMLElement;
-    const tgl = document.querySelector(`${scope} [data-clv="hk-toggle"]`) as HTMLElement;
-    const on = tgl?.querySelector('button[aria-pressed="true"]') as HTMLElement | null;
-    /* every expected value resolved from the page's own tokens — never a literal here */
-    const probe = document.createElement("i");
-    probe.style.cssText = `position:absolute;visibility:hidden;background:${getComputedStyle(main).getPropertyValue("--clv-slate-tray")};font-family:var(--clv-serif)`;
-    main.appendChild(probe);
-    const slateTray = getComputedStyle(probe).backgroundColor;
-    const serif = getComputedStyle(probe).fontFamily;
-    probe.remove();
-    const typeFirst = getComputedStyle(main).getPropertyValue("--sp-type").split(",")[0].trim().replace(/^"|"$/g, "");
-    const trayBox = tray.getBoundingClientRect();
-    const peekBox = peek?.getBoundingClientRect();
-    return {
-      slateTray,
-      trayBg: getComputedStyle(tray).backgroundColor,
-      trayClips: getComputedStyle(tray).overflow,
-      titleFace: getComputedStyle(title).fontFamily,
-      typeFirst,
-      titleSize: getComputedStyle(title).fontSize,
-      countsFace: getComputedStyle(counts).fontFamily,
-      serif,
-      countsUpper: getComputedStyle(counts).textTransform,
-      countsB: counts.querySelector("b") ? getComputedStyle(counts.querySelector("b") as HTMLElement).fontWeight : null,
-      peekPast: peekBox ? Math.round((peekBox.right - trayBox.right) * 10) / 10 : null,
-      tglW: tgl ? tgl.getBoundingClientRect().width : null,
-      tglH: tgl ? tgl.getBoundingClientRect().height : null,
-      tglBg: tgl ? getComputedStyle(tgl).backgroundColor : null,
-      onBg: on ? getComputedStyle(on).backgroundColor : null,
-      onRing: on ? getComputedStyle(on).boxShadow : null,
-    };
-  }, scope);
-  expect(r.slateTray, "--clv-slate-tray resolves (the two-nothings guard)").not.toBe("rgba(0, 0, 0, 0)");
-  expect(r.trayBg, "the tray wears the accent family's tray").toBe(r.slateTray);
-  expect(r.trayClips, "the tray clips its peek").toBe("hidden");
-  expect(r.titleFace, `the title PAINTS in the typewriter (brand.tsx forces headings) — ${r.titleFace}`).toContain(r.typeFirst);
-  expect(r.titleSize).toBe("26px");
-  expect(r.countsFace, "the counts line is serif").toBe(r.serif);
-  expect(r.countsUpper).toBe("uppercase");
-  expect(r.countsB, "the figures are bold").toBe("700");
-  expect(r.peekPast, "the peek's box runs past the tray's edge — the clip is engaged").not.toBeNull();
-  expect(r.peekPast!).toBeGreaterThan(2);
-  expect(Math.abs((r.tglW ?? 0) - 306), "the toggle is the mock's 306 wide").toBeLessThanOrEqual(1);
-  expect(r.tglH!, "…and ~37 tall").toBeGreaterThanOrEqual(35);
-  expect(r.tglH!).toBeLessThanOrEqual(39);
-  /* (the toggle-against-the-head-chips claim left with the head row, v13 P3 — the tray retires in P4) */
-  expect(r.onBg, "the active segment is white").toBe("rgb(255, 255, 255)");
-  expect(r.onRing, "…held by an inset ring").toContain("inset");
-  bump(15);
-});
+/* v12 §10.6 (the slate HK tray in the rail) is RETIRED by v13 P4 with the rail; HK v2's drawer (P5) replaces it. RETIRED-contact-list-v13.md */
 
 /* ══════════════════════════ v12 P5 — the empty state: the ways, the banner, the previews (§10.7) ══════════════════════════ */
 

@@ -1025,8 +1025,10 @@
   --state-offer:   #d7e0e8;   /* slate · an offer, undecided                       · offer         */
   --state-closed:  #e4e1db;   /* grey  · closed, rejected, withdrawn, no response   · closed        */
 
-  /* one deeper step of the SAME family — desk strip, active tab, target-rung ring, estimate bars.
-     Not a sixth colour: derived from the same `state`, and never used as a fill. */
+  /* one deeper step of the SAME family — desk strip, active tab, target-rung ring, estimate bars,
+     and (Contact list v13 §6) the 6px state edge down a list row's left side. Not a sixth colour:
+     derived from the same `state`. Never a SURFACE fill — a background behind content — though a
+     thin edge or strip painted in it is its whole job. */
   --state-queried-deep: #e7d9bd;
   --state-agent-deep:   #c7d0c2;
   --state-you-deep:     #e8c9bb;

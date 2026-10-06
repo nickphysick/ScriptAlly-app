@@ -8,7 +8,7 @@
  * its subject has FAILED: it reads null and says so.
  */
 import { test } from "@playwright/test";
-import { INK, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
+import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
 
@@ -485,4 +485,142 @@ test("CL13-SB · sticky bar", async ({ page }) => {
     await checkOverflow(page, L, w);
   }
   L.done(21);
+});
+
+/* ── lock 5 · the workspace: slate, the perch, the letter tabs, the rows' spacing ── */
+test("CL13-5 · workspace", async ({ page }) => {
+  const L = new Ledger("cl13-5");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const ws = [...document.querySelectorAll<HTMLElement>('.aglist [data-wsp="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const ob = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
+      if (!ws || !ob) return null;
+      const wb = ws.getBoundingClientRect(), perch = ob.querySelector<HTMLElement>("[data-ob-perch]")?.getBoundingClientRect();
+      const tabs = [...ws.querySelectorAll<HTMLElement>('[data-clv="band"] b')];
+      const rule = ws.querySelector<HTMLElement>('[data-clv="band"] i');
+      const rows = [...ws.querySelectorAll<HTMLElement>('[data-clv="row"]')].slice(0, 6).map((x) => x.getBoundingClientRect());
+      const gaps: number[] = [];
+      for (let i = 1; i < rows.length; i++) if (Math.abs(rows[i].left - rows[i - 1].left) < 1 && rows[i].top > rows[i - 1].bottom - 1 && rows[i].top - rows[i - 1].bottom < 40) gaps.push(Math.round((rows[i].top - rows[i - 1].bottom) * 10) / 10);
+      const strip = ws.querySelector<HTMLElement>('[data-clv="idx"]');
+      return {
+        bannerBg: getComputedStyle(ob).backgroundColor, wsBg: getComputedStyle(ws).backgroundColor, radius: getComputedStyle(ws).borderTopLeftRadius,
+        perchDrop: perch ? Math.round((perch.bottom - wb.top) * 10) / 10 : null,
+        tabBg: tabs[0] ? getComputedStyle(tabs[0]).backgroundColor : null, tabColour: tabs[0] ? getComputedStyle(tabs[0]).color : null,
+        tabFace: tabs[0] ? getComputedStyle(tabs[0]).fontFamily : null,
+        ruleH: rule ? getComputedStyle(rule).height : null, ruleBg: rule ? getComputedStyle(rule).backgroundColor : null,
+        gaps, stripIn: !!strip && ws.contains(strip), stripBg: strip ? getComputedStyle(strip).backgroundColor : null,
+        stripSticky: strip ? getComputedStyle(strip.parentElement!).position : null,
+        railGone: document.querySelectorAll('.aglist [data-clv="rail"]').length === 0,
+        wsW: wb.width, colW: ws.parentElement!.getBoundingClientRect().width,
+      };
+    });
+    L.check("CL13-5 the workspace and the banner exist", w, !!r, "");
+    if (!r) continue;
+    L.check("CL13-5 the banner is transparent", w, r.bannerBg === "rgba(0, 0, 0, 0)", r.bannerBg);
+    L.check("CL13-5 the workspace is slate rgb(214,223,230), 22px corners", w, r.wsBg === "rgb(214, 223, 230)" && r.radius === "22px", `${r.wsBg} ${r.radius}`);
+    L.check("CL13-5 the perch's feet 14 (±2) into the workspace", w, near(r.perchDrop ?? -99, 14, 2), `${r.perchDrop}`);
+    L.check("CL13-5 the letter tabs are anthracite, cream, Special Elite", w, r.tabBg === INK && r.tabColour === "rgb(245, 241, 235)" && /Special Elite/.test(r.tabFace ?? ""), `${r.tabBg} ${r.tabColour} ${r.tabFace?.slice(0, 20)}`);
+    L.check("CL13-5 the tab sits on a 2px anthracite rule", w, r.ruleH === "2px" && r.ruleBg === INK, `${r.ruleH} ${r.ruleBg}`);
+    L.check("CL13-5 rows 10 apart (±1)", w, r.gaps.length >= 2 && r.gaps.every((g) => near(g, 10, 1)), JSON.stringify(r.gaps));
+    L.check("CL13-5 the A–Z strip is inside the workspace, white, and not sticky", w, r.stripIn && r.stripBg === "rgb(255, 255, 255)" && r.stripSticky !== "sticky", `${r.stripIn} ${r.stripBg} ${r.stripSticky}`);
+    L.check("CL13-5 the rail is gone; the workspace is the column's full width", w, r.railGone && near(r.wsW, r.colW, 1), `${r.railGone} ${r.wsW} vs ${r.colW}`);
+    await checkOverflow(page, L, w);
+  }
+  L.done(30);
+});
+
+/* ── lock 6 · the row's edge is the query's state colour, deep ── */
+test("CL13-6 · row edge", async ({ page }) => {
+  const L = new Ledger("cl13-6");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const probe = document.createElement("i"); document.body.appendChild(probe);
+      const tok = (v: string) => { probe.style.background = `var(${v})`; return getComputedStyle(probe).backgroundColor; };
+      const want = { you: tok("--state-you-deep"), agent: tok("--state-agent-deep"), queried: tok("--state-queried-deep"), offer: tok("--state-offer-deep"), closed: tok("--state-closed-deep") };
+      probe.remove();
+      const rows = [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')];
+      const seen: Record<string, { n: number; bad: string[] }> = {};
+      let topRules = 0;
+      for (const x of rows) {
+        const edge = x.getAttribute("data-edge") ?? "none";
+        const before = getComputedStyle(x, "::before");
+        const bg = before.backgroundColor, wpx = before.width, left = before.left, top = before.top, bottom = before.bottom;
+        const ok = edge === "none" ? bg === "rgba(0, 0, 0, 0)" : bg === (want as Record<string, string>)[edge];
+        (seen[edge] ??= { n: 0, bad: [] }).n++;
+        if (!ok || wpx !== "6px" || left !== "0px" || top !== "0px" || bottom !== "0px") seen[edge].bad.push(`${bg} ${wpx} ${left}/${top}/${bottom}`);
+        if (parseFloat(getComputedStyle(x, "::after").height) === 3) topRules++;
+      }
+      return { want, seen, topRules, n: rows.length };
+    });
+    L.check("CL13-6 the five deep tokens resolve (the two-nothings guard)", w, Object.values(r.want).every((v) => v !== "rgba(0, 0, 0, 0)" && v !== ""), JSON.stringify(r.want));
+    for (const k of ["you", "agent", "queried", "closed", "none"]) {
+      const s = r.seen[k];
+      L.check(`CL13-6 ${k}: population, and a 6px left band in its colour`, w, !!s && s.n > 0 && s.bad.length === 0, s ? `${s.n} rows, bad ${s.bad.slice(0, 2).join(" | ")}` : "none on the fixture");
+    }
+    /* the account holds no agent whose standing query is an offer — the branch is ENTERED in the lab
+       below; here it is only held to its colour wherever it does appear */
+    L.check("CL13-6 offer: any offer row on the account wears its own colour", w, !r.seen.offer || r.seen.offer.bad.length === 0, r.seen.offer ? `${r.seen.offer.n} rows` : "none on the account (entered in the lab)");
+    L.check("CL13-6 no 3px top rule anywhere", w, r.topRules === 0, `${r.topRules}`);
+    await checkOverflow(page, L, w);
+  }
+  /* the offer branch, entered: the lab's cast carries an offer (fq-7 on fx-bare) — no sign-in */
+  await page.goto("/#/contact-lab");
+  await page.waitForSelector('[data-lab-view="cast"]');
+  await page.click('[data-lab-view="cast"]');
+  await page.waitForSelector('[data-clv="row"]');
+  const lab = await page.evaluate(() => {
+    const probe = document.createElement("i"); document.body.appendChild(probe);
+    probe.style.background = "var(--state-offer-deep)"; const want = getComputedStyle(probe).backgroundColor; probe.remove();
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-clv="row"][data-edge="offer"]')].filter((x) => x.getBoundingClientRect().height > 0);
+    return { want, n: rows.length, bad: rows.map((x) => getComputedStyle(x, "::before")).filter((b) => b.backgroundColor !== want || b.width !== "6px").map((b) => `${b.backgroundColor} ${b.width}`) };
+  });
+  L.check("CL13-6 offer (the lab): population, and a 6px left band in the offer's deep slate", "lab", lab.n > 0 && lab.bad.length === 0 && lab.want !== "rgba(0, 0, 0, 0)", JSON.stringify(lab));
+  L.done(28);
+});
+
+/* ── §5 · the hover tray: the next step, then Open card; the step opens the journey without the card ── */
+test("CL13-T · hover tray", async ({ page }) => {
+  const L = new Ledger("cl13-t");
+  await openContacts(page, AT_1512);
+  const row = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
+  await row.scrollIntoViewIfNeeded();
+  await row.hover();
+  await page.waitForTimeout(200);
+  const t = await row.evaluate((x) => {
+    const tray = x.querySelector<HTMLElement>('[data-cl13="tray"]');
+    const rr = x.getBoundingClientRect(), tr = tray?.getBoundingClientRect();
+    return {
+      op: tray ? getComputedStyle(tray).opacity : null, btns: [...(tray?.querySelectorAll("button, [role=button]") ?? [])].map((b) => (b.textContent ?? "").trim()),
+      dy: tr ? Math.round(((tr.top + tr.height / 2) - (rr.top + rr.height / 2)) * 10) / 10 : null, h: tr ? Math.round(tr.height * 10) / 10 : null,
+      inside: !!tr && tr.top >= rr.top - 0.5 && tr.bottom <= rr.bottom + 0.5 && tr.right <= rr.right + 0.5,
+    };
+  });
+  L.check("CL13-T hover shows the tray: the next step, then Open card", "1512", t.op === "1" && t.btns.length === 2 && t.btns[1] === "Open card" && t.btns[0] === "Log a query", JSON.stringify(t));
+  L.check("CL13-T the tray sits on the row's centre line, one line of 32px pills, wholly inside the row", "1512", t.dy !== null && Math.abs(t.dy) <= 1 && near(t.h ?? 0, 32, 1) && t.inside, JSON.stringify(t));
+  await row.locator('[data-cl13="tray-act"]').click();
+  await page.locator("[data-qad-drawer]:visible").first().waitFor({ timeout: 6000 }).catch(() => {});
+  const st = await page.evaluate(() => ({
+    drawer: [...document.querySelectorAll("[data-qad-drawer]")].filter((e) => e.getBoundingClientRect().height > 0).length,
+    card: [...document.querySelectorAll('[data-ac="overlay"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+  }));
+  L.check("CL13-T the tray's step opens the journey without the card", "1512", st.drawer === 1 && st.card === 0, JSON.stringify(st));
+  /* put the page back whichever way it went — a guarded tidy-up, so a wrong route fails on the check
+     above rather than timing out here (measured: an unguarded ✕ waited 15 minutes for a drawer that
+     a broken step never opened) */
+  if (st.drawer) {
+    await page.locator(".qad-dx:visible").first().click({ timeout: 5000 }).catch(() => {});
+    { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click({ timeout: 3000 }).catch(() => {}); }
+    await page.locator("[data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+  }
+  if (st.card) { await page.keyboard.press("Escape"); await page.locator('[data-ac="overlay"]').first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {}); }
+  await row.hover();
+  await row.locator('[data-cl13="tray-open"]').click();
+  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 6000 }).catch(() => {});
+  L.check("CL13-T Open card opens the agent card", "1512", (await page.locator('[data-ac="overlay"]').count()) === 1, "");
+  await page.keyboard.press("Escape");
+  L.done(4);
 });

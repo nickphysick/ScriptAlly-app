@@ -502,18 +502,18 @@ test.describe("phase 2 — the quick view", () => {
     bump(5);
   });
 
-  test("Remind me when they reopen adds the dated To-do — Housekeeping's gap closes — and Undo reopens it", async ({ page }) => {
+  /* ⚠️ THE HOUSEKEEPING HALF IS AWAY FOR ONE PHASE (Contact list v13 P4): the v12 rail it read from
+     retired, and Housekeeping returns as the floating tab and drawer in P5, where this case reads the
+     drawer's reopen group again. Until then it holds the card's half: the reminder is added and says so. */
+  test("Remind me when they reopen adds the dated To-do, says so, and offers Undo", async ({ page }) => {
     const scope = await openLab(page);
-    const listed = () => page.evaluate((s) => !!document.querySelector(`${s} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"]`), scope);
-    expect(await listed(), "precondition: the dated closed door is in Housekeeping").toBe(true);
     await openFromRow(page, scope, "fx-reopen");
     await page.click(`${CARD} [data-ac="primary"]`);
     await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Reminder added to To-do for 1 Nov: check Tomas Keller has reopened.");
-    await expect.poll(listed, { message: "the reminder did not close Housekeeping's reopen gap" }).toBe(false);
+    await expect(page.locator(`${CARD} [data-ac="undo"]`), "the reminder offers no Undo").toBeVisible();
     await page.click(`${CARD} [data-ac="undo"]`);
-    await expect.poll(listed, { message: "Undo did not take the reminder away" }).toBe(true);
     await closeCard(page);
-    bump(4);
+    bump(2);
   });
 
   test("a note that does not land keeps its words — the lab has no account to write to", async ({ page }) => {

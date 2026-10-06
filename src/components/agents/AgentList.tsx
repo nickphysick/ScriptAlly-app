@@ -33,8 +33,6 @@ import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import type { LivingHeader } from "../shell/PageHeader";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
-import { ContactRail } from "./contact/ContactRail";
-import { ContactHousekeeping } from "./contact/ContactHousekeeping";
 import { HkBand, hkModel } from "../../lib/contactHousekeeping";
 import { agentRows } from "../../lib/contactList";
 import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
@@ -47,7 +45,7 @@ import { useLocation } from "react-router-dom";
 import { CONTACT_BAND_DISC, CONTACT_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
-  ContactFilters, FILTER_SECTIONS, type FilterCtx, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
+  type AgentFacts, ContactFilters, FILTER_SECTIONS, type FilterCtx, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
@@ -58,6 +56,7 @@ import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop, filterValueLabel } from "./contact/ContactListControls";
 import { OpenBanner } from "../shell/OpenBanner";
 import { StickyBar, useStuckPast } from "../shell/StickyBar";
+import { Workspace } from "../shell/Workspace";
 import { usePopover } from "../shell/ListPills";
 import { readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -69,7 +68,7 @@ import { stripFacts, fitsGenre, genrePluralLower } from "../../lib/contactStrip"
 import { Carousel } from "../shell/Carousel";
 import { AgentCarouselCard } from "./card/AgentCarouselCard";
 import { FIGURE_LABEL, SET_LABEL, carouselSet, figureSet, type CarouselSet } from "../../lib/contactCarousel";
-import { cardQuery, cardRows, type CardAct } from "../../lib/agentCard";
+import { cardQuery, cardRows, primaryFor, type CardAct } from "../../lib/agentCard";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
@@ -309,14 +308,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setSortKey("surname");
   }, [setSortKey]);
 
-  /* ── v12 §4: the index strip's marked letter ──────────────────────────────
+  /* ── v12 §4 / v13 §6: the marked letter ───────────────────────────────────
    * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
-   * IO-misses-are-permanent law): the marked cell is the LAST letter divider at or above the
-   * strip's bottom edge, re-read rAF-throttled on every scroll — a reading that cannot go
-   * stale, where an observer event not delivered is wrong for the life of the page. Capture-
-   * phase on document because scroll does not bubble and the page's scroller is the shell's,
-   * not this component's to name. Letters only: under any other grouping there are no letter
-   * dividers to be nearest, so nothing marks. */
+   * IO-misses-are-permanent law): the marked cell is the LAST letter divider at or above the line a
+   * strip pick lands a divider on, re-read rAF-throttled on every scroll — a reading that cannot go
+   * stale. Capture-phase on document because scroll does not bubble and the page's scroller is the
+   * shell's, not this component's to name. Letters only: under any other grouping nothing marks.
+   * ⚠️ THE LINE IS READ, NOT RESTATED: the scroller's top, plus its own `scroll-padding-top`, plus the
+   * divider's `scroll-margin-top` — the two values a pick's `scrollIntoView` lands by — so a picked
+   * letter is always the marked one, and moving either value moves both together. */
   const [markedLetter, setMarkedLetter] = useState<string | null>(null);
   useEffect(() => {
     if (!active || groupKey !== "letter") { setMarkedLetter(null); return; }
@@ -324,12 +324,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     const read = () => {
       raf = 0;
       const col = mainColRef.current;
-      const wrap = col?.querySelector('[data-clv="idxwrap"]');
-      if (!col || !wrap) return;
-      const below = wrap.getBoundingClientRect().bottom + 9;
+      const scroller = col?.closest<HTMLElement>(".wpg-scroll");
+      const bands = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]')) : [];
+      if (!col || !scroller || !bands.length) return;
+      const line = scroller.getBoundingClientRect().top
+        + (parseFloat(getComputedStyle(scroller).scrollPaddingTop) || 0)
+        + (parseFloat(getComputedStyle(bands[0]).scrollMarginTop) || 0) + 2;
       let cur: string | null = null;
-      for (const band of Array.from(col.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]'))) {
-        if (band.getBoundingClientRect().top <= below) cur = band.dataset.letter ?? null;
+      for (const band of bands) {
+        if (band.getBoundingClientRect().top <= line) cur = band.dataset.letter ?? null;
         else break;
       }
       setMarkedLetter((m) => (m === cur ? m : cur));
@@ -343,9 +346,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     };
   }, [active, groupKey, visibleFacts]);
 
-  /* a letter scrolls its divider under the strip (the divider's own scroll-margin-top lands it
-     §10.2's 8px below); under another grouping the pick RESTORES the letter grouping first.
-     "All" clears the mark and returns to the top of the list. */
+  /* a letter scrolls its divider under the sticky bar (the divider's own scroll-margin-top lands
+     it); under another grouping the pick RESTORES the letter grouping first. "All" clears the mark
+     and returns to the top of the list. */
   const pickLetter = useCallback((letter: string | null) => {
     const behavior = prefersReducedMotion() ? ("auto" as const) : ("smooth" as const);
     const toBand = (L: string) =>
@@ -496,11 +499,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
   /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
   const [newId, setNewId] = useState<string | null>(null);
-  /* Query actions v1 (27 Sep): every page finishes in the query drawer — the log doors open
-     it IN PLACE with the agent carried, instead of navigating to the hub so ITS seed effect
-     could open the same drawer one route later. Both doors (the row's mini and the pop-up's
-     Log query) come through here; the pop-up closes first, so there is one asking surface. */
-  const onLogQuery = (agent: { id: string }) => openQueryDrawer({ mode: "log", agentId: agent.id });
 
   /* ── v13 §4 — "Who to query next" ─────────────────────────────────────────────────────────────
      ⚠️ A PRESSED FIGURE REPLACES THE SET; IT NEVER TOUCHES THE LIST. Its key lives in `figure` and
@@ -538,6 +536,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!q || act === "qc") { openCard(agentId, { from: "row" }); return; }
     openQueryDrawer({ mode: act, queryId: q.id });
   }, [agents, scoped, qcRows, openCard]);
+  /** v13 §6 — a row's hover tray offers the card's own next step (one derivation: the card's button) */
+  const trayFor = useCallback((x: AgentFacts) => primaryFor(x, cardQuery(cardRows(qcRows, x.agent.id, scoped?.id ?? null))), [qcRows, scoped]);
 
   /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
      dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
@@ -822,9 +822,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <button type="button" className="cl13-clr" data-cl13="clear-all" onClick={clearFilters}>Clear all</button>
           </div>
         )}
-        {/* ⚠️ v12 §4: THE INDEX STRIP — it indexes the SAME filtered set the list shows (one derivation,
-            two readers). Phase 4 moves it inside the workspace. */}
+        {/* v13 §6 — THE WORKSPACE: the slate ground the list sits on, under the banner (the shared
+            component, slate here as blush is the Query Centre's). The A–Z strip heads it, white and
+            no longer sticky; the letter dividers and the rows are floating cards on it. */}
         {showList && (
+        <Workspace tray="var(--clv-slate-tray)" probe="contacts">
+        {/* ⚠️ v12 §4: THE INDEX STRIP — it indexes the SAME filtered set the list shows (one derivation,
+            two readers). Letters only, as the mock's (`display: none` under any other grouping). */}
+        {groupKey === "letter" && (
           <ContactIndexStrip
             total={visibleFacts.length}
             counts={stripCounts}
@@ -835,7 +840,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
             default selector, so a filter change still animates the reflow. */}
-        {showList && (
         <div ref={gridRef}>
           {visible.length === 0 ? (
             <div className="agl-empty" data-cl13="none">
@@ -852,12 +856,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               openId={openId}
               newId={newId}
               onOpen={onOpen}
-              onLogQuery={(id) => onLogQuery({ id })}
               onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
               onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
+              trayFor={trayFor}
+              onAct={actWithoutCard}
             />
           )}
         </div>
+        </Workspace>
         )}
         </>
         )}
@@ -896,18 +902,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </div>
         )}
         </div>
-        {showList && (
-          <ContactRail counts={hk.countsLine}>
-            <ContactHousekeeping
-              model={hk}
-              onOpen={onHkOpen}
-              onEditAt={(id, at) => openCard(id, { ...at, from: "hk" })}
-              onInlineSave={onHkInlineSave}
-              onChecked={onHkChecked}
-              onRemind={onHkRemind}
-            />
-          </ContactRail>
-        )}
         </div>
         </>
         )}

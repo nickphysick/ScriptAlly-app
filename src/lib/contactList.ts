@@ -248,7 +248,7 @@ export interface AgentFacts {
   standing: ContactStanding;
   stand: StandKey;
   q: QcRow | null;
-  /** any live agent-court row past its date — the row's ink edge */
+  /** any live agent-court row past its date (v13: the row draws it through `stand`, the page's union — this flag is the fixture checks' precondition) */
   pastExpected: boolean;
   /** the location as displayed: city, else the country's name, else null */
   loc: string | null;
