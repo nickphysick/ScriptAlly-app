@@ -1,0 +1,20 @@
+{"lock":"INK1","mutation":"ink1-stone","verdict":"red","tests_run":1,"first_error":"    Error: .ws-panel at 1280 in t-capp"}
+{"lock":"INK2","mutation":"ink2-literal","verdict":"red","tests_run":1,"first_error":"    Error: /dashboard 1280: tab vs sheet"}
+{"lock":"INK3","mutation":"ink3-overlap","verdict":"GREEN","tests_run":1,"first_error":""}
+{"lock":"INK4","mutation":"ink4-gradient","verdict":"GREEN","tests_run":1,"first_error":""}
+{"lock":"INK5","mutation":"ink5-inset","verdict":"red","tests_run":1,"first_error":"    Error: tab 272 vs sheet 248 at 1280 expanded"}
+{"lock":"INK6","mutation":"ink6-current","verdict":"red","tests_run":1,"first_error":"    Error: 1440: the current page is never among the siblings"}
+{"lock":"INK7","mutation":"ink7-centre","verdict":"red","tests_run":1,"first_error":"    Error: /dashboard: gap 116.828125"}
+{"lock":"INK8","mutation":"ink8-copy","verdict":"red","tests_run":1,"first_error":"    Error: a capture control in the sidebar"}
+{"lock":"INK9","mutation":"ink9-feedback","verdict":"red","tests_run":1,"first_error":"    Error: gap 152.609375"}
+{"lock":"INK10","mutation":"ink10-tile","verdict":"red","tests_run":1,"first_error":"    Error: cover is tile"}
+{"lock":"INK11","mutation":"ink11-anthracite","verdict":"red","tests_run":1,"first_error":"    Error: expect(received).toBe(expected) // Object.is equality"}
+{"lock":"INK12","mutation":"ink12-plain","verdict":"red","tests_run":1,"first_error":"    Error: expect(received).toBe(expected) // Object.is equality"}
+{"lock":"INK13","mutation":"ink13-nocard","verdict":"red","tests_run":1,"first_error":"    Error: the card at 1000px tall"}
+{"lock":"INK14","mutation":"ink14-motion","verdict":"red","tests_run":1,"first_error":"    Error: durations 0.24s"}
+{"lock":"INK15","mutation":"ink15-fade","verdict":"red","tests_run":1,"first_error":"    Error: /dashboard rest: fades at the sheet's edge"}
+{"lock":"INK16","mutation":"ink16-full","verdict":"red","tests_run":1,"first_error":"    Error: Birds-eye insets at 1280"}
+{"lock":"INK17","mutation":"ink17-window","verdict":"red","tests_run":1,"first_error":"    Error: /queries .bvd-tab: right gap 12"}
+{"lock":"INK18","mutation":"ink18-left","verdict":"red","tests_run":1,"first_error":"    Error: toast centre 131.421875 vs sheet 840"}
+{"lock":"INK19","mutation":"ink19-ink","verdict":"red","tests_run":1,"first_error":"    Error: the phone's shell against main's"}
+{"lock": "INK4", "mutation": "ink4-gradient", "verdict": "red", "tests_run": 1, "first_error": "pixels off the golden in the fillet's own region: 112 > 60 (re-run after the fillet-region assertion was added; the whole-crop 0.5% budget alone stayed green at 0.081%)"}

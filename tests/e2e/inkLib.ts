@@ -95,20 +95,22 @@ export async function css(page: Page, sel: string, props: string[], pseudo?: str
  * Decode two PNGs in the page (no image library is installed) and compare them pixel by pixel.
  * Returns the share of pixels whose largest channel difference exceeds `tol`.
  */
-export async function pngDiff(page: Page, a: Buffer, b: Buffer, tol = 10): Promise<{ share: number; w: number; h: number; wb: number; hb: number }> {
-  return page.evaluate(async ({ a64, b64, tol }) => {
+export async function pngDiff(page: Page, a: Buffer, b: Buffer, tol = 10, region?: { x: number; y: number; w: number; h: number }): Promise<{ share: number; w: number; h: number; wb: number; hb: number; bad: number }> {
+  return page.evaluate(async ({ a64, b64, tol, region }) => {
     const load = (src: string) => new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
     const [ia, ib] = await Promise.all([load(`data:image/png;base64,${a64}`), load(`data:image/png;base64,${b64}`)]);
     const w = Math.min(ia.width, ib.width), h = Math.min(ia.height, ib.height);
     const px = (img: HTMLImageElement) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d")!; x.drawImage(img, 0, 0); return x.getImageData(0, 0, w, h).data; };
     const da = px(ia), db = px(ib);
     let bad = 0;
-    for (let i = 0; i < da.length; i += 4) {
+    const r = region ?? { x: 0, y: 0, w, h };
+    for (let y = r.y; y < Math.min(h, r.y + r.h); y++) for (let x = r.x; x < Math.min(w, r.x + r.w); x++) {
+      const i = (y * w + x) * 4;
       const d = Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2]));
       if (d > tol) bad++;
     }
-    return { share: bad / (w * h), w: ia.width, h: ia.height, wb: ib.width, hb: ib.height };
-  }, { a64: a.toString("base64"), b64: b.toString("base64"), tol });
+    return { share: bad / (r.w * r.h), w: ia.width, h: ia.height, wb: ib.width, hb: ib.height, bad };
+  }, { a64: a.toString("base64"), b64: b.toString("base64"), tol, region });
 }
 
 /** Pixel rows of a PNG, decoded in the page: returns every distinct colour seen in the given rows. */

@@ -9,7 +9,8 @@ another session's uncommitted report PNGs and run artefacts.
    does. Its three files hash exactly as the brief states (verified, then enrolled in `.refhashes.json`).
 2. **The fillet path is not "verbatim from the reference".** The ref draws `M0 0V12H12A12 12 0 0 1 0 0Z`
    in a 12-unit viewBox stretched to 13px; the brief's path is `M0 0V12H13V12A12 12 0 0 1 1 0Z` in a
-   true 13×12 box. The brief's is used; INK4's golden is the arbiter.
+   true 13×12 box. The brief's was used first; **INK4's golden settled it for the reference's** (38 pixels
+   off in the fillet's region against 76), so the reference's path ships.
 3. **"The" drawers, floating tabs and toasts are many more than the brief names.** 11 right-hand drawers
    (brief: 4), 10 corner-anchored floats (6 of them pinned to the viewport with literal px), 9 toast sites
    in five different positions.

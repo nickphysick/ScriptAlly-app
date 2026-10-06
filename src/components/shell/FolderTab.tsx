@@ -12,7 +12,7 @@
  *
  * ⚠️ THE FILLET IS ONE SVG, NEVER A PSEUDO-ELEMENT OR A RADIAL GRADIENT. A gradient corner is
  * anti-aliased differently from the tab's own border-radius and shows a seam at 3× (INK4). The path
- * is the brief's — 13×12, overlapping the tab body by 1px so no hairline of ink can show between them.
+ * is the reference's (see the element), overlapping the tab body by 1px so no ink can show between them.
  *
  * ⚠️ THE FIT RULES, IN ORDER — full names, then icons, then "+N" — and three things that never move:
  * the current page is never hidden (it IS the paper tab), the order is always the sidebar's, and the
@@ -149,9 +149,13 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
           {shown.group && <small className="ws-ftg">{shown.group}</small>}
           <b className="ws-ftn" data-page-name="">{shown.name}</b>
         </span>
-        {/* the one fillet — 13×12, the brief's path, overlapping the tab body by 1px */}
-        <svg className="ws-ftfl" viewBox="0 0 13 12" width="13" height="12" aria-hidden="true" focusable="false">
-          <path d="M0 0V12H13V12A12 12 0 0 1 1 0Z" />
+        {/* ⚠️ THE ONE FILLET — THE REFERENCE'S PATH, VERBATIM: a 12-unit viewBox stretched to 13px wide
+            (`preserveAspectRatio="none"`), overlapping the tab body by 1px. The brief quoted a different
+            path (`M0 0V12H13V12A12 12 0 0 1 1 0Z` in a true 13×12 box) while also saying "copy it from the
+            reference verbatim"; measured at 3× against the normative golden, the reference's path is 38
+            pixels off in the fillet's region and the quoted one 76. The golden decides. */}
+        <svg className="ws-ftfl" viewBox="0 0 12 12" preserveAspectRatio="none" width="13" height="12" aria-hidden="true" focusable="false">
+          <path d="M0 0V12H12A12 12 0 0 1 0 0Z" />
         </svg>
       </span>
       {siblings.length > 0 && (

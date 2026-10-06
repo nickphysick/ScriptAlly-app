@@ -501,5 +501,13 @@ test.describe("ink shell at 3×", () => {
     const d = await pngDiff(page, shot, golden, 12);
     expect([d.w, d.h], "the capture is the golden's size").toEqual([d.wb, d.hb]);
     expect(d.share, `share of pixels off the golden: ${(d.share * 100).toFixed(3)}%`).toBeLessThanOrEqual(0.005);
+    /* ⚠️ AND THE FILLET'S OWN REGION, because the brief's 0.5% of the whole crop is wider than the
+       difference a radial-gradient corner makes — that mutation passed the whole-crop budget (0.081%).
+       Measured in this region: the shipped fillet 38 px off, the gradient 112; the bar is 60. The
+       fillet sits at the tab's right foot: 12 CSS px left of the crop's x = 16 + 220, 12 px above its
+       foot at y = 12⅓ + 41 − 1 → device box (708, 121)–(756, 157) at 3×, measured off the golden. */
+    const f = await pngDiff(page, shot, golden, 12, { x: 702, y: 115, w: 48, h: 42 });
+    console.log(`INK4 fillet region: ${f.bad} of ${48 * 42} px off the golden (whole crop ${(d.share * 100).toFixed(3)}%)`);
+    expect(f.bad, "pixels off the golden in the fillet's own region").toBeLessThanOrEqual(Number(process.env.INK4_FILLET_MAX ?? 60));
   });
 });
