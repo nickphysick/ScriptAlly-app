@@ -806,3 +806,116 @@
     animation-duration: 0s !important;
   }
 }
+
+@media (min-width: 768px) {
+
+  /* ── Phase 5 · scrolling and overlays ────────────────────────────────────────────────────────── */
+
+  /* ⚠️ CLEAN EDGE: THE PAGE CLIPS AT THE SHEET'S PAPER EDGE WITH NO SCROLL FADE. The stage's foot fade
+     and the page grid's bottom hem are fades at the sheet's edge, so both go on the desktop (the phone
+     keeps them — INK19). Small inner scrollers (carousels, the Birds-eye panel, menus) keep theirs. */
+  .sv2-fade,
+  .wpg-hem { display: none !important; }
+
+  /* the pinned-toolbar hairline: one rule, driven by pinnedToolbar.ts — a page opts in with
+     `data-pin-hairline` and does nothing else */
+  [data-pin-hairline] { transition: box-shadow 0.2s ease; }
+  [data-pin-hairline][data-under] { box-shadow: 0 1px 0 rgba(var(--ink-shell-rgb), 0.13); }
+
+  /* ⚠️ THE DRAWERS: same widths, stack order and dim as before; inset 8px from the window's top, right
+     and bottom, radius 12 on every corner. `:root` lifts each rule over its page sheet's own at equal
+     specificity (bundle order is not a contract). The closed transform goes 24px past its width, so
+     the 8px inset leaves no sliver of drawer on screen. */
+  :root .bvd,
+  :root .qad-drawer,
+  :root .hdr,
+  :root .qpn,
+  :root .ppv-drawer,
+  :root .nb-drawer,
+  :root .tl-dw {
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  /* ⚠️ THE TO-DO SLIDE-OVER TAKES THE RADIUS BUT NOT `overflow: hidden` — its pop-out index card is a
+     fixed child that the drawer's transform makes relative to it, and a clip would cut it off. */
+  :root .slo { top: 8px; right: 8px; bottom: 8px; border-radius: 12px; }
+  :root .bvd,
+  :root .qad-drawer,
+  :root .hdr,
+  :root .slo,
+  :root .qpn,
+  :root .ppv-drawer { transform: translateX(calc(100% + 24px)); }
+  :root .bvd.is-in,
+  :root .qad-root.is-open .qad-drawer,
+  :root .hdr.is-in,
+  :root .slo[data-on="true"],
+  :root .qpn[data-on="true"],
+  :root .ppv-drawer.is-open { transform: none; }
+  /* the correction desk sits beside the query panel, which has moved 8px in */
+  :root .qcd { top: 8px; bottom: 8px; right: 600px; }
+
+  /* the dock chip and the card it peeks keep their distance from the drawer, now 8px in */
+  :root .qad-dock { right: calc(min(500px, 100vw) + 20px); bottom: calc(var(--ink-sheet-b, 0px) + 20px); }
+  :root .qad-dock.qad-dock--peek { right: calc(min(500px, 100vw) + 32px); }
+  :root .qcv-qm--peek .qcv-qm-card { right: calc(min(500px, 100%) + 32px); bottom: calc(var(--ink-sheet-b, 0px) + 80px); }
+
+  /* ⚠️ FLOATING CHIPS ANCHOR 20px IN FROM THE SHEET'S BOTTOM-RIGHT CORNER, not the window's — the
+     shell publishes the sheet's insets (WorkspaceShell), so a collapse moves them with the sheet. The
+     floating TABS place themselves from `.ws-window`'s measured box (useWindowCorner, now 20). */
+  :root .qad-park {
+    right: calc(var(--ink-sheet-r, 0px) + 20px);
+    bottom: calc(var(--ink-sheet-b, 0px) + 20px);
+  }
+  /* the feedback panel opens from the sidebar's card now, so it rises from the sheet's bottom-LEFT */
+  :root .sa-fbdock {
+    left: calc(var(--ink-sheet-l, 0px) + 20px);
+    right: auto;
+    bottom: calc(var(--ink-sheet-b, 0px) + 20px);
+  }
+
+  /* ⚠️ TOASTS RISE AT THE BOTTOM CENTRE OF THE SHEET, AS AN INK PILL WITH CREAM TEXT. Centred with
+     left/right on the sheet's edges and `margin: auto` on a fit-content box — NEVER `translateX(-50%)`:
+     the undo bar's and the To-do toast's entrance keyframes animate `transform` with `fill: both`, which
+     would discard a centring transform and leave the toast off to one side. */
+  :root .sa-toasts {
+    left: var(--ink-sheet-l, 0px);
+    right: var(--ink-sheet-r, 0px);
+    bottom: calc(var(--ink-sheet-b, 0px) + 22px);
+    transform: none;
+    width: fit-content;
+    margin: 0 auto;
+  }
+  :root .sa-toast { background: var(--ink-shell); color: var(--ink-cream); }
+  :root .qad-toast,
+  :root .tdb-toast,
+  :root .sa-inktoast {
+    left: var(--ink-sheet-l, 0px);
+    right: var(--ink-sheet-r, 0px);
+    bottom: calc(var(--ink-sheet-b, 0px) + 22px);
+    width: fit-content;
+    margin: 0 auto;
+  }
+  :root .tdb-toast { transform: none; }
+  /* ⚠️ THE TO-DO REFUSAL STAYS PINK — "pink is for a refusal and only for a refusal" (tasksKeys). It
+     moves with the other toasts and is excluded from the ink skin, so todo.css's own rule still paints it. */
+  :root .qad-toast,
+  :root .tdb-toast:not(.warn),
+  :root .sa-inktoast {
+    background: var(--ink-shell);
+    color: var(--ink-cream);
+  }
+}
+
+@media (min-width: 768px) {
+  /* position only, for a toast whose skin is inline (the Dashboard's status undo) */
+  :root .sa-inktoast-at {
+    left: var(--ink-sheet-l, 0px);
+    right: var(--ink-sheet-r, 0px);
+    bottom: calc(var(--ink-sheet-b, 0px) + 22px);
+    width: fit-content;
+    margin: 0 auto;
+  }
+}

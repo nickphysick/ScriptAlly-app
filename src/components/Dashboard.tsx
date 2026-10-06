@@ -1730,7 +1730,9 @@ export const Dashboard: React.FC<{
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-100 rounded-2xl p-4 flex items-center gap-4 max-w-sm select-none font-sans"
+            /* ⚠️ `sa-inktoast-at` (ink shell v1): centred on the sheet's bottom edge at ≥768px. Its parchment
+               skin is inline and stays — making it ink would mean restyling its inner text too. */
+            className="sa-inktoast-at fixed bottom-6 right-6 z-100 rounded-2xl p-4 flex items-center gap-4 max-w-sm select-none font-sans"
             style={{ background: parchment, border: "0.5px solid #e0d5c8", boxShadow: "0 8px 24px rgba(58,28,20,0.18)" }}
           >
             <div className="flex-1 min-w-0 text-left">
@@ -1804,11 +1806,16 @@ export const Dashboard: React.FC<{
       {noteToast
         ? createPortal(
             <div
+              /* ⚠️ CENTRED ON THE SHEET (ink shell v1): left/right on the sheet's insets with auto margins,
+                 which the shell publishes only at ≥768px — so on the phone the fallbacks put it back where
+                 it was (centred on the viewport, 34px up). */
               style={{
                 position: "fixed",
-                left: "50%",
-                bottom: 34,
-                transform: "translateX(-50%)",
+                left: "var(--ink-sheet-l, 0px)",
+                right: "var(--ink-sheet-r, 0px)",
+                margin: "0 auto",
+                width: "fit-content",
+                bottom: "calc(var(--ink-sheet-b, 12px) + 22px)",
                 background: "#3a2c26",
                 color: "#fdfaf5",
                 borderRadius: 11,

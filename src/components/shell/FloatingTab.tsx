@@ -16,6 +16,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { useWindowCorner } from "./useWindowCorner";
 import "./floatingTab.css";
+import { floatInset } from "./inkTokens";
 
 /** the expand mark — DRAWN, never the ⤢ character, which neither house face carries */
 export const EXPAND_MARK = (
@@ -34,7 +35,7 @@ export const FloatingTab: React.FC<{
   disabled?: boolean;
   children: React.ReactNode;
 }> = ({ probe, hidden, routeActive, label, onOpen, disabled, children }) => {
-  const place = useWindowCorner(24);
+  const place = useWindowCorner(floatInset());
   if (typeof document === "undefined" || !routeActive || !place) return null;
   return createPortal(
     <button

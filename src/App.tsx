@@ -864,7 +864,9 @@ function AppContent() {
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-55 bg-stone-900 border border-stone-800 text-[#F8F5F0] rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] p-4 flex items-center gap-3 select-none"
+            /* ⚠️ `sa-inktoast` (ink shell v1): at ≥768px the toast rises at the bottom centre of the sheet
+               as an ink pill (inkShell.css); the utilities below remain its phone position */
+            className="sa-inktoast fixed bottom-6 right-6 z-55 bg-stone-900 border border-stone-800 text-[#F8F5F0] rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] p-4 flex items-center gap-3 select-none"
           >
             <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-white shrink-0">
               <Check className="w-3.5 h-3.5 stroke-[3]" />

@@ -15,6 +15,7 @@
  */
 import React from "react";
 import type { V17Banner, V17Glance, V17Reading } from "../../lib/analyticsModel";
+import { floatInset } from "../shell/inkTokens";
 
 /* ── the tooltip: one per page, fed by every mark; hover on a desktop, a tap on a phone ── */
 export interface TipApi { show: (x: number, y: number, body: React.ReactNode) => void; hide: () => void }
@@ -200,7 +201,7 @@ export const SectionTab: React.FC<{ pageRef: React.RefObject<HTMLElement | null>
     const place = () => {
       const win = page.closest(".ws-window") ?? scroller;
       const r = win.getBoundingClientRect();
-      if (r.height > 0) setPos({ right: document.documentElement.clientWidth - r.right + 24, bottom: document.documentElement.clientHeight - r.bottom + 24 });
+      if (r.height > 0) { const k = floatInset(); setPos({ right: document.documentElement.clientWidth - r.right + k, bottom: document.documentElement.clientHeight - r.bottom + k }); }
     };
     place();
     const ro = new ResizeObserver(place);

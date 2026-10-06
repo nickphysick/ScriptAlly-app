@@ -92,6 +92,7 @@ import { useWindowCorner } from "../shell/useWindowCorner";
 import { CONTACT_GUIDE, CONTACT_GUIDE_PAGE } from "./contact/contactGuide";
 import { ContactSkeleton } from "./contact/ContactSkeleton";
 import "./agentList.css";
+import { floatInset } from "../shell/inkTokens";
 
 /**
  * ⚠️ THE DISCOVER DESTINATION COMES FROM THE RAIL'S OWN TABLE, NOT FROM A PAIR OF STRINGS TYPED
@@ -737,7 +738,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v13 §8 — the page guide sits above the Housekeeping tab: the tab is placed from the window's
      measured corner, so the guide is too — the corner, plus the tab's OWN measured height, plus 24 —
      never a literal for a box another element owns. */
-  const guideCorner = useWindowCorner(24);
+  const guideCorner = useWindowCorner(floatInset());
   const [tabH, setTabH] = useState(0);
   useEffect(() => {
     if (!active || !showList) return undefined;

@@ -104,7 +104,8 @@ export interface WorkspaceShellProps {
   scrollId?: string;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   onScroll?: React.UIEventHandler<HTMLDivElement>;
-  /** Rendered inside the scroller, after the content — the foot fade. */
+  /** Rendered inside the scroller, after the content — the foot fade. ⚠️ Phone only since ink shell v1:
+   *  at ≥768px the page clips cleanly at the sheet's edge (inkShell.css hides it). */
   footFade?: React.ReactNode;
   /**
    * FIXED-VIEWPORT pages (Query Centre): the work wrapper takes a definite height so the page
@@ -475,6 +476,47 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* ⚠️ A ROUTE CHANGE STARTS A NEW PAGE AT REST, and its scroller is a new element that will never
      announce the position the old one was left in. */
   useEffect(() => { setBarScrolled(false); }, [pathname]);
+
+  /**
+   * ⚠️ THE SHEET'S GEOMETRY, PUBLISHED FOR WHAT FLOATS OVER IT (ink shell v1, Phase 5). Toasts, chips
+   * and floating tabs are portalled to `<body>`, so they cannot measure `.ws-window` from a selector —
+   * and a viewport-anchored float sits on the INK, not the sheet. The shell measures the window (on a
+   * ResizeObserver, so a collapse moves everything with it frame by frame) and writes four lengths onto
+   * `<html>`: the sheet's left and right insets from the viewport, its bottom inset, and its centre.
+   * Every float reads them with a fallback, so the phone (where the shell does not render this) and the
+   * first frame are the old viewport positions.
+   */
+  useEffect(() => {
+    const win = winWrapRef.current?.querySelector<HTMLElement>(".ws-window");
+    if (!win || typeof document === "undefined") return undefined;
+    const root = document.documentElement;
+    const keys = ["--ink-sheet-l", "--ink-sheet-r", "--ink-sheet-b", "--ink-sheet-cx"];
+    const mq = window.matchMedia?.("(min-width: 768px)");
+    const write = () => {
+      /* ⚠️ DESKTOP ONLY: the shell renders on the phone too, and publishing there would move the phone's
+         toasts and chips off their viewport positions (INK19). Below 768 the properties are absent and
+         every reader falls back to its old value. */
+      if (mq && !mq.matches) { for (const k of keys) root.style.removeProperty(k); return; }
+      const r = win.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) return;
+      const vw = root.clientWidth || window.innerWidth;
+      const vh = root.clientHeight || window.innerHeight;
+      const px = (n: number) => `${Math.round(n * 10) / 10}px`;
+      root.style.setProperty("--ink-sheet-l", px(r.left));
+      root.style.setProperty("--ink-sheet-r", px(vw - r.right));
+      root.style.setProperty("--ink-sheet-b", px(vh - r.bottom));
+      root.style.setProperty("--ink-sheet-cx", px(r.left + r.width / 2));
+    };
+    write();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(write) : null;
+    ro?.observe(win);
+    window.addEventListener("resize", write);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", write);
+      for (const k of keys) root.style.removeProperty(k);
+    };
+  }, []);
 
   /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
   const searchFieldRef = useRef<HTMLButtonElement | null>(null);

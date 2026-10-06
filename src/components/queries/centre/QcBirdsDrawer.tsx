@@ -32,6 +32,7 @@ import type { QcRow } from "../../../lib/qcSummary";
 import { QcTimeline } from "./QcTimeline";
 import { BE_HAWK_HEAD } from "./qcArt";
 import { readWindow } from "./qcWindow";
+import { floatInset } from "../../shell/inkTokens";
 import "./qcvPage.css";
 import "./qcvBirdsDrawer.css";
 
@@ -55,7 +56,8 @@ function useTabPlace(): { right: number; bottom: number } | null {
       if (!w) return;
       const vh = document.documentElement.clientHeight || window.innerHeight;
       const vw = document.documentElement.clientWidth || window.innerWidth;
-      setP({ right: vw - w.right + 24, bottom: vh - (w.top + w.height) + 24 });
+      const k = floatInset();
+      setP({ right: vw - w.right + k, bottom: vh - (w.top + w.height) + k });
     };
     read();
     window.addEventListener("resize", read);

@@ -250,8 +250,15 @@ describe("⚠️ ONE TOAST, ONE POSITION, ONE UNDO", () => {
     expect(hook).toContain("deadline.current = Math.max(600, deadline.current - Date.now());");
   });
 
-  it("bottom-left on the desktop, and it never stacks — a second act REPLACES the first", () => {
+  /* ⚠️ RETARGETED (ink shell v1, Phase 5): on the DESKTOP every toast rises at the bottom centre of
+     the SHEET as an ink pill (inkShell.css — left/right on the sheet's insets, auto margins, no
+     transform). todo.css's bottom-left rule still stands under it and is what the page itself states;
+     the ink sheet's rule is the one that renders at ≥768px, so it is asserted here too. */
+  it("centred on the sheet on the desktop, and it never stacks — a second act REPLACES the first", () => {
     expect(css).toContain(".tdb-toast { left: 26px; transform: none; }");
+    const ink = readFileSync(join(process.cwd(), "src/components/shell/inkShell.css"), "utf8");
+    expect(ink).toMatch(/:root \.tdb-toast,[\s\S]*?left: var\(--ink-sheet-l, 0px\);[\s\S]*?margin: 0 auto;/);
+    expect(ink).toMatch(/:root \.tdb-toast \{ transform: none; \}/);
     /* the hook has always enforced replacement; it is why one position is enough */
     expect(hook).toContain("setToast({ msg, action });");
   });
