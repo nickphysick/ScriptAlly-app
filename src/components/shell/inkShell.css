@@ -919,3 +919,42 @@
     margin: 0 auto;
   }
 }
+
+@media (min-width: 768px) {
+
+  /* ── Phase 6 · finishing ─────────────────────────────────────────────────────────────────────── */
+
+  /* ⚠️ FOCUS ON INK: A 2px CREAM RING WITH A 2px INK GAP — the outline's offset shows the ink ground
+     between the control and its ring. Only the INK chrome (the sidebar and the bar); focus on the sheet
+     keeps the shell's existing terracotta ring. */
+  .ws-panel a:focus-visible,
+  .ws-panel button:focus-visible,
+  .ws-panel [role="button"]:focus-visible,
+  .ws-pagebar a:focus-visible,
+  .ws-pagebar button:focus-visible {
+    outline: 2px solid var(--ink-cream);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+  /* ⚠️ THE NAV CLIPS (it is an internal scroller), so an outer ring there would be cut at its edges; its
+     rows draw the same ring INSIDE themselves — cream at the edge, the 2px ink gap within. */
+  .ws-nav .ws-ni:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--ink-cream), inset 0 0 0 4px var(--ink-shell);
+  }
+  /* the cream "Log a query" carries a ring of ink, since a cream ring on cream would vanish */
+  .ws-cap--bar .ws-capl:focus-visible,
+  .ws-cap--bar .ws-capr:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--ink-shell);
+  }
+
+  /* text selection on the sheet is pale terracotta */
+  .ws-window ::selection { background: rgba(var(--ink-terra-rgb), 0.3); }
+
+  /* ⚠️ SCROLLBARS: THIN ON THE SHEET, NONE IN THE SIDEBAR. `:where()` keeps the sheet's rule at zero
+     specificity, so any page that states its own scrollbar (or hides one) still wins. */
+  :where(.ws-window, .ws-window *) { scrollbar-width: thin; scrollbar-color: rgba(var(--ink-shell-rgb), 0.22) transparent; }
+  .ws-panel, .ws-panel * { scrollbar-width: none; }
+  .ws-panel ::-webkit-scrollbar { width: 0; height: 0; }
+}
