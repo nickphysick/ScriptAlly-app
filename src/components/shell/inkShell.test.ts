@@ -42,7 +42,7 @@ describe("ink shell — the tokens", () => {
 
   it("is desktop-only: every rule sits inside a min-width: 768px block (INK19)", () => {
     const outside = INK
-      .replace(/@media \(min-width: 768px\)( and \([^)]*\))? \{[\s\S]*?\n\}/g, "")
+      .replace(/@media \(min-width: 768px\)( and \([^)]*\))* \{[\s\S]*?\n\}/g, "")
       .replace(/@media \(max-width: 767px\)[^\n]*\n?/g, "");
     expect(outside.replace(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\n\}/g, "").trim()).toBe("");
   });

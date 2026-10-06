@@ -710,3 +710,99 @@
   }
   .ws-uplink:hover { text-decoration: underline; text-underline-offset: 2px; }
 }
+
+@media (min-width: 768px) {
+
+  /* ── Phase 4 · collapse ──────────────────────────────────────────────────────────────────────── */
+
+  /* 248 ↔ 68 over 0.24s on the house ease; the labels fade out in the first 160ms. The width tokens
+     (`--shell-side-w` / `--shell-side-w-collapsed`) and the `sb-ready` load guard are unchanged. */
+  .ws-panel.sb-ready,
+  .ws-panel.sb-ready .ws-pin {
+    transition: width 0.24s var(--ink-ease), padding 0.24s var(--ink-ease);
+  }
+  .ws-panel.sb-ready .ws-lbl,
+  .ws-panel.sb-ready .ws-utext,
+  .ws-panel.sb-ready .ws-bwm,
+  .ws-panel.sb-ready .ws-beta,
+  .ws-panel.sb-ready .ws-ms--side .ws-ms-tx,
+  .ws-panel.sb-ready .ws-ms--side .ws-ms-chev {
+    transition: opacity 0.16s ease, max-width 0.24s var(--ink-ease), margin 0.24s var(--ink-ease);
+  }
+
+  /* the rail's own inset: 13px each side of a 42px column, as the ref draws it */
+  .sb-collapsed .ws-pin { padding: 16px 13px 12px; align-items: stretch; }
+
+  /* the logo row: the mark alone, and the toggle takes its place while the mark is hovered */
+  .sb-collapsed .ws-logo { gap: 0; padding: 0; justify-content: center; }
+  .sb-collapsed .ws-logo .ws-brand { gap: 0; justify-content: center; }
+  .sb-collapsed .ws-logo .ws-bwm,
+  .sb-collapsed .ws-logo .ws-beta { opacity: 0; max-width: 0; margin: 0; padding: 0; overflow: hidden; box-shadow: none; }
+  .sb-collapsed .ws-logo .sb-toggle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(var(--ink-cream-rgb), 0.08);
+    color: var(--ink-cream-92);
+  }
+  .sb-collapsed .ws-logo:hover .sb-toggle,
+  .sb-collapsed .ws-logo .sb-toggle:focus-visible { opacity: 1; pointer-events: auto; }
+  .sb-collapsed .ws-logo:hover .ws-bmark,
+  .sb-collapsed .ws-logo:has(.sb-toggle:focus-visible) .ws-bmark { opacity: 0; }
+
+  /* the selector: its cover only */
+  .sb-collapsed .ws-ms--side .ws-ms-btn { padding: 6px 0; gap: 0; justify-content: center; background: transparent; box-shadow: none; }
+  .sb-collapsed .ws-ms--side .ws-ms-tx,
+  .sb-collapsed .ws-ms--side .ws-ms-chev { flex: 0 0 0; opacity: 0; max-width: 0; overflow: hidden; }
+
+  /* the group labels go — their spacing stays as the gaps between groups */
+  .sb-collapsed .ws-glabel {
+    width: auto;
+    height: 0;
+    margin: 14px 0 0;
+    background: transparent;
+    opacity: 0;
+  }
+
+  /* centred icon tiles, the selected edge pinned at the rail's left */
+  .sb-collapsed .ws-ni { width: 100%; height: 33px; padding: 0; justify-content: center; }
+  .sb-collapsed .ws-ni.on::before { left: calc(-1 * (var(--shell-side-w-collapsed) - 42px) / 2); }
+  /* the to-do count becomes a corner badge, ringed in ink so it reads off the icon */
+  .sb-collapsed .ws-ct {
+    position: absolute;
+    left: calc(50% + 4px);
+    top: 3px;
+    min-width: 16px;
+    height: 15px;
+    padding: 0 4px;
+    margin: 0;
+    font-size: 9px;
+    line-height: 15px;
+    box-shadow: 0 0 0 2px var(--ink-shell);
+  }
+
+  /* the feedback card becomes its icon, with the dot */
+  .sb-collapsed .ws-fbk { display: flex; justify-content: center; }
+  .sb-collapsed .ws-fbc,
+  .sb-collapsed .ws-fbb { display: none; }
+  .sb-collapsed .ws-fbi { display: grid; }
+
+  /* the foot: the avatar only (the gear and Upgrade are not rendered when collapsed) */
+  .sb-collapsed .ws-pfrow { border-top-color: transparent; }
+  .sb-collapsed .ws-uacct { padding: 0; justify-content: center; }
+}
+
+/* ⚠️ REDUCED MOTION: EVERY SHELL DURATION IS ZERO — the width, the labels, the tab's name swap, the
+   toggle's swap over the mark. (The app-wide rule elsewhere sets 0.01ms; the shell states 0 itself.) */
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .ws-panel, .ws-panel *, .ws-panel *::before, .ws-panel *::after,
+  .ws-pagebar, .ws-pagebar *, .ws-pagebar *::before {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
