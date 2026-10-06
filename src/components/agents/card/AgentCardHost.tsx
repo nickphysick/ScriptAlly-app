@@ -46,7 +46,7 @@ import { agentFacts } from "../../../lib/contactList";
 import { isGenreMatch, matchGenre } from "../../../lib/genreMatch";
 import { EditCtx, alsoChanges } from "../../../lib/contactEdit";
 import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/saveAgentEdits";
-import { computeAgentDeadlineWrites } from "../../../lib/computeAgentDeadlineWrites";
+import { commitCardSave } from "../../../lib/agentCardSave";
 import { commitTypedGenre, hrefFor } from "../../../lib/quickAdd";
 import { openQueryDrawer, provideDock, type OpenRequest } from "../../../lib/queryActions/drawerStore";
 import { agentInitials } from "../../../lib/agentDisplay";
@@ -284,31 +284,18 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       });
     } else {
       if (!currentUser) return { ok: false, error: "Not signed in." };
-      const uid = currentUser.id;
-      const mine = queries.filter((q) => q.agentId === agent.id);
-      /* the snapshot FIRST — no snapshot, no Undo (never an Undo that restores nothing) */
-      let snap: AgentSnapshot | null = null;
-      try { snap = await takeAgentSnapshot(uid, agent.id, mine.map((q) => q.id)); } catch { snap = null; }
-      const extras = patch.responseTimeWeeks !== undefined
-        ? computeAgentDeadlineWrites(
-            mine,
-            typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
-            (queryId) => doc(db, "users", uid, "queries", queryId),
-          )
-        : [];
-      res = await commitAgentEdits(db, uid, agent.id, patch, extras);
-      /* a save that clears the agent's LAST data-quality gap clears the dashboard's task too, as the
-         Housekeeping fixes do — and the snapshot holds the flag, so Undo takes it back */
-      if (!("error" in res) && agentDataQualityNeeds(before).length > 0 && agentDataQualityNeeds(after).length === 0) {
-        try { await resolveTaskFlag(flagKeyForTask("data_quality_poor", agent.id)); } catch { /* the save stands */ }
-      }
-      /* the snapshot holds the agent's tasks, so Undo deletes the reminder this adds */
-      if (!("error" in res)) await addReminder();
-      if (snap) {
-        const s = snap;
+      /* the ONE save path, shared with Housekeeping's fixes (lib/agentCardSave): the snapshot first,
+         the deadline fan-out in the same batch, the data-quality flag, then the reminder — which the
+         snapshot's task set covers, so Undo deletes it */
+      const out = await commitCardSave({
+        uid: currentUser.id, agent, queries, patch, resolveTaskFlag, afterCommit: addReminder,
+      });
+      res = out.res;
+      if (out.undo) {
+        const restore = out.undo;
         undo = once(async () => {
-          try { await restoreAgentSnapshot(s); } catch { return { text: "Couldn’t undo the save." }; }
-          emitAgentCardEvent({ type: "undone", agentId: s.agentId });
+          if (!(await restore())) return { text: "Couldn’t undo the save." };
+          emitAgentCardEvent({ type: "undone", agentId: agent.id });
           return { text: "Undone." };
         });
       }

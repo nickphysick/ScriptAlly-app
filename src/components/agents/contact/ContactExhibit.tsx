@@ -27,7 +27,8 @@ import { agentRows } from "../../../lib/contactList";
 import { hkModel } from "../../../lib/contactHousekeeping";
 import { LivingExhibition } from "../../shell/LivingExhibition";
 import { ContactRows } from "./ContactRows";
-import { ContactHousekeeping } from "./ContactHousekeeping";
+import { HousekeepingPreview } from "./ContactHousekeeping";
+import { contactPrefsOf } from "../../../lib/contactPrefs";
 import "./contactV11.css";
 
 export const CONTACT_EXHIBIT_LABEL = "HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW";
@@ -91,15 +92,17 @@ const ORDERED = sortFacts(FACTS, "surname", () => false, CONTACT_SAMPLE_NOW);
 const SHOWN = ORDERED.slice(0, CONTACT_EXHIBIT_ROWS);
 const GROUPS = contactGroups("letter", SHOWN);
 const BY_ID = new Map(SHOWN.map((x) => [x.agent.id, x]));
-const BAND = new Map(CONTACT_SAMPLE_AGENTS.map((a) => {
-  const mine = agentRows(ROWS, a.id, null);
-  return [a.id, mine.some((r) => r.court !== "closed") ? "live" as const : mine.length === 0 ? "never" as const : "closed" as const];
-}));
+/* Housekeeping v2's model over the sample — a picture of the drawer's list, never live (Contact list
+   v13 P5 swapped the rail's body for the drawer's; the exhibit's chrome and copy stay as v12 built them) */
 const HK = hkModel(
   CONTACT_SAMPLE_AGENTS,
-  (a) => ({ hasLiveQuery: BAND.get(a.id) === "live", hasReopenTask: false, nowMs: CONTACT_SAMPLE_NOW }),
-  (a) => BAND.get(a.id) ?? "never",
+  (a) => {
+    const mine = agentRows(ROWS, a.id, null);
+    return { live: mine.some((r) => r.court !== "closed"), fits: false, queried: mine.length > 0, passedOn: false, hasReopenTask: false };
+  },
+  contactPrefsOf(null, new Date(CONTACT_SAMPLE_NOW)),
 );
+const HK_BOOK = { title: null, genre: null };
 
 const noop = () => {};
 
@@ -129,10 +132,10 @@ export const ContactExhibit: React.FC = () => (
               <div className="clv-tray">
                 <img className="clv-peek" src="/images/qc/be-hawk-head.png" alt="" />
                 <h2 className="clv-tray-t">Housekeeping</h2>
-                <p className="clv-tray-c"><b>{HK.countsLine.gaps}</b>{HK.countsLine.rest}</p>
+                <p className="clv-tray-c"><b>{`${HK.items.length} GAP${HK.items.length === 1 ? "" : "S"}`}</b>{` · ${HK.gapAgents} AGENT${HK.gapAgents === 1 ? "" : "S"} · ${HK.complete} OF ${HK.total} COMPLETE`}</p>
               </div>
               <div className="clv-railbody">
-                <ContactHousekeeping model={HK} onOpen={noop} onEditAt={noop} onInlineSave={async () => {}} onChecked={async () => {}} onRemind={noop} />
+                <HousekeepingPreview model={HK} book={HK_BOOK} />
               </div>
             </div>
           </div>

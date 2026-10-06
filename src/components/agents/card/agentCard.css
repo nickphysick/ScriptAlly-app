@@ -494,7 +494,7 @@
   -webkit-mask: conic-gradient(from -45deg at left, #0000 25%, #000 0) 0 50% / 100% 7px;
   mask: conic-gradient(from -45deg at left, #0000 25%, #000 0) 0 50% / 100% 7px;
 }
-.ac .ac-in {
+:is(.ac, .hkv-fx) .ac-in {
   height: 36px;
   width: 100%;
   border-radius: 8px;
@@ -506,7 +506,7 @@
   color: var(--clv-ink);
   line-height: normal;
 }
-.ac .ac-in:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--clv-btn); }
+:is(.ac, .hkv-fx) .ac-in:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--clv-btn); }
 .ac textarea.ac-in { height: 76px; padding: 9px 11px; resize: vertical; line-height: 1.45; }
 
 /* ⚠️ A `var()` INSIDE @keyframes FAILS SILENTLY IN THIS SETUP — the stops stay literal (the tone
@@ -734,7 +734,10 @@
 .ac .ae-sug button:hover { box-shadow: inset 0 0 0 1px var(--clv-ink); color: var(--clv-ink); }
 
 /* the four materials rows (the mock's .mt) */
-.ac .ae-mt {
+/* ⚠️ THE MATERIALS ROWS, THE STEPPERS, THE SEGMENTS AND THE TEXT INPUT ARE SHARED with Housekeeping's
+   fixes (Contact list v13 P5: "reuse Agent card v1's controls, do not build second copies") — `:is()`
+   keeps the specificity at 0-2-0, and their tokens are `:root`, so they read the same out there. */
+:is(.ac, .hkv-fx) .ae-mt {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -743,7 +746,7 @@
   border-radius: 10px;
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
 }
-.ac .ae-mtr {
+:is(.ac, .hkv-fx) .ae-mtr {
   display: grid;
   grid-template-columns: 22px 128px 1fr;
   align-items: center;
@@ -751,10 +754,10 @@
   min-height: 44px;
   border-bottom: 1px solid var(--clv-hair);
 }
-.ac .ae-mtr:last-child { border-bottom: 0; }
-.ac .ae-mtr > span { font: 400 15px var(--clv-serif); }
-.ac .ae-mtr.off > span { color: var(--clv-ink-45); }
-.ac .ae-bx {
+:is(.ac, .hkv-fx) .ae-mtr:last-child { border-bottom: 0; }
+:is(.ac, .hkv-fx) .ae-mtr > span { font: 400 15px var(--clv-serif); }
+:is(.ac, .hkv-fx) .ae-mtr.off > span { color: var(--clv-ink-45); }
+:is(.ac, .hkv-fx) .ae-bx {
   width: 18px;
   height: 18px;
   padding: 0;
@@ -767,8 +770,8 @@
   align-items: center;
   justify-content: center;
 }
-.ac .ae-bx.on { background: var(--clv-btn); box-shadow: none; }
-.ac .ae-bx.on::after {
+:is(.ac, .hkv-fx) .ae-bx.on { background: var(--clv-btn); box-shadow: none; }
+:is(.ac, .hkv-fx) .ae-bx.on::after {
   content: "";
   width: 8px;
   height: 4px;
@@ -776,12 +779,12 @@
   border-width: 0 0 2px 2px;
   transform: rotate(-45deg) translateY(-1px);
 }
-.ac .ae-mtx { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; transition: opacity 0.15s; }
-.ac .ae-mtr.off .ae-mtx { opacity: 0; pointer-events: none; }
-.ac .ae-mto { height: 30px; font-size: 14px; }
+:is(.ac, .hkv-fx) .ae-mtx { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; transition: opacity 0.15s; }
+:is(.ac, .hkv-fx) .ae-mtr.off .ae-mtx { opacity: 0; pointer-events: none; }
+:is(.ac, .hkv-fx) .ae-mto { height: 30px; font-size: 14px; }
 
 /* steppers and segments (the mock's .ac-step / .ac-seg) */
-.ac .ae-step {
+:is(.ac, .hkv-fx) .ae-step {
   display: inline-flex;
   align-items: center;
   height: 36px;
@@ -789,7 +792,7 @@
   background: #fff;
   box-shadow: inset 0 0 0 1px var(--ac-line);
 }
-.ac .ae-step button {
+:is(.ac, .hkv-fx) .ae-step button {
   width: 34px;
   height: 36px;
   padding: 0;
@@ -799,14 +802,14 @@
   color: var(--clv-ink);
   cursor: pointer;
 }
-.ac .ae-step button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
-.ac .ae-step b { min-width: 92px; text-align: center; font: 400 15px var(--clv-serif); }
-.ac .ae-step.sm { height: 30px; }
-.ac .ae-step.sm button { height: 30px; width: 28px; }
-.ac .ae-step.sm b { min-width: 84px; font-size: 14px; }
-.ac .ae-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--ac-seg); }
-.ac .ae-seg.wrp { flex-wrap: wrap; }
-.ac .ae-seg button {
+:is(.ac, .hkv-fx) .ae-step button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
+:is(.ac, .hkv-fx) .ae-step b { min-width: 92px; text-align: center; font: 400 15px var(--clv-serif); }
+:is(.ac, .hkv-fx) .ae-step.sm { height: 30px; }
+:is(.ac, .hkv-fx) .ae-step.sm button { height: 30px; width: 28px; }
+:is(.ac, .hkv-fx) .ae-step.sm b { min-width: 84px; font-size: 14px; }
+:is(.ac, .hkv-fx) .ae-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--ac-seg); }
+:is(.ac, .hkv-fx) .ae-seg.wrp { flex-wrap: wrap; }
+:is(.ac, .hkv-fx) .ae-seg button {
   height: 30px;
   padding: 0 12px;
   border: 0;
@@ -816,8 +819,8 @@
   color: var(--clv-ink-70);
   cursor: pointer;
 }
-.ac .ae-seg button.on { background: var(--clv-btn); color: #fff; }
-.ac .ae-seg.sm button { height: 26px; padding: 0 9px; font-size: 13px; }
+:is(.ac, .hkv-fx) .ae-seg button.on { background: var(--clv-btn); color: #fff; }
+:is(.ac, .hkv-fx) .ae-seg.sm button { height: 26px; padding: 0 9px; font-size: 13px; }
 
 /* the country: six quick picks and "Other…" (flags are flag-icons, never emoji) */
 .ac .ae-cy { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }

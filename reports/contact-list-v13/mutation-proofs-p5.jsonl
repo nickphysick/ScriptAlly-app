@@ -1,0 +1,13 @@
+{"lock":"CL13-9 tab 24 ±1","mutation":"FloatingTab useWindowCorner(24) → 30","red":"right 30 bottom 30 at all three widths"}
+{"lock":"CL13-9 drawer width","mutation":"width min(780px,56vw) → min(800px,58vw)","red":"800 want 780 · 742.4 want 717"}
+{"lock":"CL13-9 title top with row 3","mutation":".hkv-dh flex column, centred, min-height 190","red":"title 39 with, 55.5 without"}
+{"lock":"CL13-9 fix right of why","mutation":".hkv-hb display:block","red":"fixL 800 < whyR 1468"}
+{"lock":"CL13-9 dim closes","mutation":"HalfDrawer dim onClick no-op","red":"drawer still open at three widths"}
+{"lock":"HK-2 start here shut","mutation":"first row rendered open={true}","red":"open true, body 309.6"}
+{"lock":"HK-3 copy","mutation":"'you’ll see when' → 'you’ll know when'","red":"reply not live why differs"}
+{"lock":"HK-7 materials steps/snap","mutation":"unit switch keeps qty (no snapToUnit)","red":"First 3,4,4,9,9,509"}
+{"lock":"HK-4 card link prefill","mutation":"prefill() returns {}","red":"genres [], save false"}
+{"lock":"HK-9 toggle","mutation":"writeHkView writes sessionStorage","red":"ls agent, view agent after picking detail"}
+{"lock":"HK-5 Later today+30","mutation":"LATER_DAYS 29","red":"expected 2026-11-05, received 2026-11-04 (restored in finally)"}
+{"lock":"HK-8 Undo restores deadlines","mutation":"foot Undo never calls the snapshot restore","red":"Undo did not restore the deadline (restored in finally)"}
+{"lock":"HK-10 exactly one reminder","mutation":"addUserTask called twice","red":"[2026-11-01, 2026-11-01] — first run left one behind; deleted by hand, clean-up now waits 2.5s"}

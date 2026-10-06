@@ -29,6 +29,10 @@ import { useEffect, useRef } from "react";
 export const ESC_LEVEL = {
   /** a page's own popover (the Contact list's labelled pills) — under anything that opens over the page */
   page: 5,
+  /** a page's half-screen drawer (Contact list v13 Housekeeping) — under the agent card, which opens over it */
+  pageDrawer: 6,
+  /** a modal opened from that drawer (Housekeeping's one-at-a-time session) — Escape closes it first */
+  pageModal: 7,
   /** the agent card itself — view or editor */
   card: 10,
   /** anything open INSIDE the card: a combobox, the calendar, the ⋯ menu */

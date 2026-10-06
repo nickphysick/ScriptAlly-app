@@ -16,7 +16,7 @@ import { join, resolve } from "node:path";
 import { sliceBetween } from "../../../test/sliceBetween";
 import { dataNeedTarget } from "../../../lib/agentCardStore";
 import { agentDataQualityNeeds, type AgentDataNeed } from "../../../lib/agentDataQuality";
-import { GAP_TARGET } from "../contact/ContactHousekeeping";
+import { GAP_TARGET } from "../../../lib/contactHousekeeping";
 
 const SRC = resolve(process.cwd(), "src");
 const read = (p: string) => readFileSync(resolve(SRC, p), "utf8");

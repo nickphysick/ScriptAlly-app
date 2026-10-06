@@ -1,0 +1,23 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The floating tab (Contact list v13 §6; ref design-refs/contact-list-v13.html `.hkt`). z-index 55,
+ * the Birds-eye tab's: over the page, under any drawer's dim.
+ */
+.ftab {
+  position: fixed; z-index: 55; box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; border: 0; border-radius: 18px;
+  background: #2a3a52; color: #f5f1eb; cursor: pointer; text-align: left;
+  box-shadow: 0 18px 36px -16px rgba(20, 28, 40, 0.6);
+  transition: transform 0.18s, opacity 0.2s;
+}
+.ftab:hover { transform: translateY(-2px); }
+.ftab:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 3px; }
+.ftab:disabled { cursor: default; opacity: 0.6; }
+.ftab.is-hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
+.ftab-go { display: flex; align-items: center; opacity: 0.75; margin-left: 4px; }
+.ftab-ring { position: relative; flex: none; margin-left: 6px; display: block; }
+.ftab-ring svg { display: block; }
+.ftab-ring > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 500 9.5px var(--font-mono, "JetBrains Mono", monospace); }
+@media (prefers-reduced-motion: reduce) { .ftab { transition: none; } }

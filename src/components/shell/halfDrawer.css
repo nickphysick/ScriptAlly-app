@@ -1,0 +1,20 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The half-screen drawer (Contact list v13 §6; ref design-refs/contact-list-v13.html `.hkd`/`.dim`).
+ * z-index 60/61, the Birds-eye drawer's: over the floating tab (55), under the agent card (63–68).
+ */
+.hdr-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.28); opacity: 0; transition: opacity 0.25s; }
+.hdr-dim.is-in { opacity: 1; }
+.hdr {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;
+  display: flex; flex-direction: column; background: #fff;
+  box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.35);
+  transform: translateX(102%); transition: transform 0.32s cubic-bezier(.22, .8, .3, 1);
+}
+.hdr.is-in { transform: none; }
+.hdr-head { position: relative; flex: none; }
+.hdr-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.hdr-foot { flex: none; }
+@media (prefers-reduced-motion: reduce) { .hdr, .hdr-dim { transition: none; } }

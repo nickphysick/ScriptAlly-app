@@ -502,18 +502,49 @@ test.describe("phase 2 — the quick view", () => {
     bump(5);
   });
 
-  /* ⚠️ THE HOUSEKEEPING HALF IS AWAY FOR ONE PHASE (Contact list v13 P4): the v12 rail it read from
-     retired, and Housekeeping returns as the floating tab and drawer in P5, where this case reads the
-     drawer's reopen group again. Until then it holds the card's half: the reminder is added and says so. */
-  test("Remind me when they reopen adds the dated To-do, says so, and offers Undo", async ({ page }) => {
+  /* The card's half and Housekeeping's half (restored by Contact list v13 P5 against the drawer): the
+     reminder is added and says so, the drawer's reopen row for that agent leaves, and the Undo — offered
+     again on the list's notice, one closure behind two doors — brings the row back. */
+  test("Remind me when they reopen adds the dated To-do, says so, closes Housekeeping's gap — and its Undo keeps the gap open", async ({ page }) => {
+    page.setDefaultTimeout(15_000);
     const scope = await openLab(page);
-    await openFromRow(page, scope, "fx-reopen");
-    await page.click(`${CARD} [data-ac="primary"]`);
-    await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Reminder added to To-do for 1 Nov: check Tomas Keller has reopened.");
-    await expect(page.locator(`${CARD} [data-ac="undo"]`), "the reminder offers no Undo").toBeVisible();
+    const HK = '[data-hdr="housekeeping"]';
+    const ROW = `${HK} [data-hkv="row"][data-key="fx-reopen:reopen"]`;
+    const openHk = async () => {
+      for (let i = 0; i < 3 && !(await page.locator(HK).isVisible()); i++) {
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.keyboard.press("h");
+        await page.locator(HK).waitFor({ state: "visible", timeout: 4000 }).catch(() => {});
+      }
+      if ((await page.locator(`${HK} [data-hkv="body-wrap"]`).getAttribute("data-view")) !== "detail") await page.click(`${HK} [data-hkv="view"][data-v="detail"]`);
+    };
+    const closeHk = async () => { await page.keyboard.press("Escape"); await page.locator(HK).waitFor({ state: "hidden", timeout: 5000 }); };
+    await openHk();
+    expect(await page.locator(ROW).count(), "population first — the drawer has no reopen row for fx-reopen").toBe(1);
+    await closeHk();
+    /* ⚠️ the reminder's Undo is the CARD's foot only (the list's notice carries a SAVE's Undo, not an
+       act's), and the drawer cannot be opened over an open card — so the two halves are two passes.
+       The lab is in memory: nothing here touches the account. */
+    const remind = async () => {
+      await openFromRow(page, scope, "fx-reopen");
+      await page.click(`${CARD} [data-ac="primary"]`);
+      await expect(page.locator(`${CARD} [data-ac="foot"].on`)).toContainText("Reminder added to To-do for 1 Nov: check Tomas Keller has reopened.");
+      await expect(page.locator(`${CARD} [data-ac="undo"]`), "the reminder offers no Undo").toBeVisible();
+    };
+    /* pass 1: Undo — the reminder is taken back, so Housekeeping still asks */
+    await remind();
     await page.click(`${CARD} [data-ac="undo"]`);
     await closeCard(page);
-    bump(2);
+    await openHk();
+    expect(await page.locator(ROW).count(), "Undo did not reopen Housekeeping's gap").toBe(1);
+    await closeHk();
+    /* pass 2: no Undo — the reminder stands, so the row leaves */
+    await remind();
+    await closeCard(page);
+    await openHk();
+    expect(await page.locator(ROW).count(), "the reminder was added and Housekeeping still asks for it").toBe(0);
+    await closeHk();
+    bump(4);
   });
 
   test("a note that does not land keeps its words — the lab has no account to write to", async ({ page }) => {

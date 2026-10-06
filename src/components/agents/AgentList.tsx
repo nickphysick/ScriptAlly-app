@@ -33,10 +33,19 @@ import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import type { LivingHeader } from "../shell/PageHeader";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
-import { HkBand, hkModel } from "../../lib/contactHousekeeping";
+import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
+import {
+  contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
+  writeHkView, type HkView, type WishlistEvery,
+} from "../../lib/contactPrefs";
+import { Housekeeping, type FixResult, type HkFix } from "./contact/ContactHousekeeping";
+import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
+import { alsoChanges } from "../../lib/contactEdit";
+import { commitCardSave } from "../../lib/agentCardSave";
+import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
+import { commitAgentEdits } from "../../lib/saveAgentEdits";
+import { db as firestoreDb } from "../../lib/firebase";
 import { agentRows } from "../../lib/contactList";
-import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
-import { flagKeyForTask } from "../../lib/taskFlags";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -92,15 +101,19 @@ interface AgentListProps {
   onNavigate?: (tab: string, subPageName?: string, opts?: { agentId?: string }) => void;
   /** True while `/agents` is the visible route — the one-shot reveal keys on it; see below. */
   active?: boolean;
+  /** the dev lab's own writer (Agent card v1's sandbox) — Housekeeping's fixes write through it there */
+  sandbox?: { writeAgent?: (agentId: string, patch: AgentEditPatch) => Promise<SaveAgentResult> };
 }
 
-export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
+export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true, sandbox }) => {
   /* ⚠️ THE SWITCHER RE-OPENS THE ROUTE (page header v2 §4.5), so a switch is a new location KEY on
      the same path — and that key is what the scope reads on. Memoised on `manuscripts` alone, the
      page went on stating the old book's facts after the bar had changed book. */
   const { key: locationKey } = useLocation();
-  const { agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, resolveTaskFlag } =
-    useScriptAllyDb();
+  const {
+    agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
+    currentUser, updateUserPaths,
+  } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
      reads (`resolveScopedManuscript`: the stored id, else the most recently created), through
@@ -420,7 +433,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     originRect: from ? { x: from.x, y: from.y, width: from.width, height: from.height } : null,
   }), [openCard]);
   /** a Housekeeping name opens the card too — but it is not a list row, so the card lifts */
-  const onHkOpen = useCallback((agentId: string) => openCard(agentId, { from: "hk" }), [openCard]);
 
   /* ‹ › on the card move the SAME session to the next agent; the list scrolls that row into view
      behind the card, and its ring (aria-current, from `openId`) has already moved with it. */
@@ -587,19 +599,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.clearTimeout(drop);
   }, [newId, factsById]);
 
-  /* ── Housekeeping (v11 §9) ────────────────────────────────────────────────────────────────
+  /* ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
      The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
-     reply window fans out to every query, so the scope chip has no say here — and the reopen
-     flag reads the writer's own undone dated tasks (ruling b), so completing the reminder in
-     To-do reopens the gap here by construction. */
-  const hkLiveById = useMemo(() => {
-    const m = new Map<string, HkBand>();
-    for (const a of agents) {
-      const mine = agentRows(qcRows, a.id, null);
-      m.set(a.id, mine.some((r) => r.court !== "closed") ? "live" : mine.length === 0 ? "never" : "closed");
-    }
-    return m;
-  }, [agents, qcRows]);
+     reply window fans out to every query, so the scope chip has no say there; "fits", "queried" and
+     "passed" (ruling Q6) read the manuscript in scope. The reopen flag reads the writer's own undone
+     dated tasks (ruling b), so completing the reminder in To-do reopens the gap here by construction. */
+  const hkToday = useMemo(() => new Date(nowMs), [nowMs]);
+  const hkPrefs = useMemo(() => contactPrefsOf(currentUser, hkToday), [currentUser, hkToday]);
   const hkReopenTaskById = useMemo(() => {
     const m = new Map<string, boolean>();
     for (const t of userTasks ?? []) {
@@ -607,14 +613,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     }
     return m;
   }, [userTasks]);
-  const hk = useMemo(
-    () => hkModel(
-      agents,
-      (a) => ({ hasLiveQuery: hkLiveById.get(a.id) === "live", hasReopenTask: hkReopenTaskById.get(a.id) ?? false, nowMs }),
-      (a) => hkLiveById.get(a.id) ?? "never",
-    ),
-    [agents, hkLiveById, hkReopenTaskById, nowMs],
-  );
+  const hkCtxById = useMemo(() => {
+    const m = new Map<string, HkAgentCtx>();
+    const msId = scoped?.id ?? null;
+    for (const a of agents) {
+      m.set(a.id, {
+        live: agentRows(qcRows, a.id, null).some((r) => r.court !== "closed"),
+        fits: fitsGenre(a, scoped?.genre ?? null),
+        queried: queries.some((q) => q.agentId === a.id && (!msId || q.manuscriptId === msId)),
+        passedOn: hasPassedOn(a, queries, msId),
+        hasReopenTask: hkReopenTaskById.get(a.id) ?? false,
+      });
+    }
+    return m;
+  }, [agents, qcRows, queries, scoped, hkReopenTaskById]);
+  const hkCtxOf = useCallback((a: Agent): HkAgentCtx => hkCtxById.get(a.id)
+    ?? { live: false, fits: false, queried: false, passedOn: false, hasReopenTask: false }, [hkCtxById]);
+  const hk = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
+  const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
+  const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null }), [scoped]);
+  const [hkOpen, setHkOpen] = useState(false);
+  const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
+  const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* v12: the subline is the card index's sentence — `facts` (want/fresh/genre/title, the page's
      own derivation). v13 §2: its second sentence (the stated-windows mean) is gone; the numbers
      strip states the typical reply. The living memo still reads no `hk`. */
@@ -627,17 +647,99 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     };
   }, [pageState, lhOverride, agents, qcRows, scoped, facts]);
 
-  /* the three direct fixes — through the CONTEXT writers (the hkSave discipline, lib/hkSave.ts):
-     the same updateAgent To-do's rail writes with, and the dq flag resolved when this was the
-     agent's last data-quality gap, so "cleared today" agrees across the two surfaces */
-  const onHkInlineSave = useCallback(async (agentId: string, weeks: number) => {
+  /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
+     the snapshot first, the reply-time deadline fan-out in the same batch, the data-quality flag, and
+     a snapshot Undo. In the lab the card's sandbox writer stands in, with the inverse patch as Undo. */
+  const personalGenres = currentUser?.personalGenres ?? [];
+  const writeFix = useCallback(async (agent: Agent, patch: AgentEditPatch): Promise<FixResult | { ok: true; undo?: () => Promise<boolean> }> => {
+    if (Object.keys(patch).length === 0) return { ok: false, error: "Nothing to save." };
+    if (sandbox?.writeAgent) {
+      const write = sandbox.writeAgent;
+      const before = { ...agent } as Agent;
+      const r = await write(agent.id, patch);
+      if ("error" in r) return { ok: false, error: r.error };
+      return { ok: true, undo: async () => !("error" in (await write(before.id, inversePatch(before, patch)))) };
+    }
+    if (!currentUser) return { ok: false, error: "Not signed in." };
+    const out = await commitCardSave({ uid: currentUser.id, agent, queries, patch, resolveTaskFlag });
+    if ("error" in out.res) return { ok: false, error: out.res.error };
+    return { ok: true, undo: out.undo };
+  }, [sandbox, currentUser, queries, resolveTaskFlag]);
+
+  const onHkFix = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
+    const agent = agents.find((a) => a.id === item.agent.id) ?? item.agent;
+    if (fix.kind === "settled") {
+      const before = hkPrefs.settled;
+      try { await updateUserPaths(settledPath(hkPrefs, agent.id)); } catch (e) { return { ok: false, error: (e as Error).message || "the setting did not save" }; }
+      return { ok: true, line: savedLine(item, { settled: true }), undo: async () => { try { await updateUserPaths(settledRestorePath(before)); return true; } catch { return false; } } };
+    }
+    if (fix.kind === "remind") {
+      const name = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
+      let id: string | undefined;
+      try { id = await addUserTask({ agentId: agent.id, dueDate: fix.on, text: `Check ${name} has reopened to queries` }); } catch (e) { return { ok: false, error: (e as Error).message || "the reminder did not save" }; }
+      return { ok: true, line: savedLine(item, { remindOn: fix.on }), undo: id ? async () => { try { await deleteUserTask(id!); return true; } catch { return false; } } : undefined };
+    }
+    const base = draftOf(agent, personalGenres);
+    const change: Partial<CardDraft> = fix.kind === "weeks" ? { weeks: fix.weeks }
+      : fix.kind === "mats" ? { mats: fix.mats } : fix.kind === "genres" ? { genres: fix.genres } : { wishlist: fix.text };
+    const patch = cardPatch(agent, base, { ...base, ...change }, new Date().toISOString());
+    const r = await writeFix(agent, patch);
+    if ("error" in r) return r;
+    const after = applyPatch(agent, patch);
+    return {
+      ok: true,
+      line: savedLine(item, { weeks: fix.kind === "weeks" ? fix.weeks : undefined, genres: fix.kind === "genres" ? fix.genres : undefined, fitsAfter: fitsGenre(after, hkBook.genre), book: hkBook }),
+      undo: r.undo,
+    };
+  }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
+
+  const hkEditCtx = useMemo(
+    () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
+    [queries, agents, scoped, nowMs],
+  );
+  /** the reply fix's Also-changes lines for a live agent — the card's own dry run, never a sum */
+  const hkAlsoFor = useCallback((agent: Agent, weeks: number): string[] => {
+    const base = draftOf(agent, personalGenres);
+    const notes = alsoChanges(agent, toContactDraft(agent, base, { ...base, weeks }), hkEditCtx);
+    return notes.filter((n) => n.field === "reply").flatMap((n) => n.lines);
+  }, [personalGenres, hkEditCtx]);
+
+  const onHkCard = useCallback((item: HkItem, prefill: Partial<CardDraft>) => {
+    const target = { reply: { tab: "work", focus: "reply" }, materials: { tab: "want", focus: "materials" }, genres: { tab: "want", focus: "genres" },
+      wishlist: { tab: "want", focus: "wishlist" }, reopen: { tab: "work", focus: "reopen" } } as const;
+    const t = target[item.gap];
+    openAgentCard(item.agent.id, { tab: t.tab, focus: t.focus, prefill: Object.keys(prefill).length ? prefill : undefined, from: "hk", sequence });
+  }, [sequence]);
+
+  const onWishlistStill = useCallback(async (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId);
-    await updateAgent(agentId, { responseTimeWeeks: weeks });
-    if (agent && agentDataQualityNeeds(agent).length === 1) void resolveTaskFlag(flagKeyForTask("data_quality_poor", agentId));
-  }, [agents, updateAgent, resolveTaskFlag]);
-  const onHkChecked = useCallback(async (agentId: string) => {
-    await updateAgent(agentId, { mswlCheckedAt: new Date().toISOString() } as Partial<Agent>);
-  }, [updateAgent]);
+    if (!agent) return;
+    const patch: AgentEditPatch = { mswlCheckedAt: new Date().toISOString() };
+    if (sandbox?.writeAgent) { await sandbox.writeAgent(agentId, patch); return; }
+    if (!currentUser) return;
+    await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
+  }, [agents, sandbox, currentUser]);
+
+  /* H opens Housekeeping — not in a field, not while a card, a drawer or a popover is open, and only
+     while this is the page on screen (Phase 7 puts it on the shared shortcut sheet) */
+  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false });
+  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0 };
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== "h" && e.key !== "H") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = hkKeyState.current;
+      if (!k.active || k.hkOpen || k.popOpen || k.cardOpen || !k.enabled) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest("input, textarea, select, [contenteditable='true']"))) return;
+      /* the query drawer over the page owns the keyboard while it is open */
+      if (document.querySelector(".qad-root.is-open")) return;
+      e.preventDefault();
+      setHkOpen(true);
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
   /* the card's "Remind me when they reopen" adds the SAME task — one derivation, one wording */
   const onHkRemind = useCallback((agent: Agent) => {
     const task = reopenReminder(agent);
@@ -704,6 +806,25 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §5 — THE STICKY SLIM BAR, outside the group's grid so it sticks to the scroller's top
             across the whole page: "Every agent", the count, the mini A–Z (1441px and wider) and the
             same controls as the banner's, sharing their state. */}
+        {/* v13 §6 — HOUSEKEEPING: the floating tab in the window's corner and the half-screen drawer it
+            opens (both portalled; the tab only while this is the page on screen) */}
+        {showList && (
+          <Housekeeping
+            model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
+            open={hkOpen} onOpen={() => setHkOpen(true)} onClose={() => setHkOpen(false)}
+            view={hkView} onView={setHkView} routeActive={active} keyHint="H"
+            onFix={onHkFix}
+            onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
+            onShowAll={async () => { await updateUserPaths(showAllPath()); }}
+            onCard={onHkCard}
+            onAgentCard={(id, tab) => openAgentCard(id, { tab, from: "hk", sequence })}
+            alsoFor={hkAlsoFor}
+            onCheckinEvery={async (every: WishlistEvery) => { await updateUserPaths(wishlistEveryPath(every)); }}
+            onCheckinNext={async () => { await updateUserPaths(wishlistNextPath(hkPrefs, hkToday)); }}
+            onWishlistStill={onWishlistStill}
+            onWishlistChanged={(id) => openAgentCard(id, { tab: "want", focus: "wishlist", from: "hk", sequence })}
+          />
+        )}
         {showList && (
           <StickyBar stuck={stuck} probe="contacts">
             <b className="cl13-sb-t">Every agent</b>

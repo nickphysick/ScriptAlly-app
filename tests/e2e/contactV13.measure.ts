@@ -7,7 +7,7 @@
  * overflow of the scroller. Ledgers land in reports/contact-list-v13/ledger/. A lock that cannot find
  * its subject has FAILED: it reads null and says so.
  */
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
@@ -623,4 +623,280 @@ test("CL13-T · hover tray", async ({ page }) => {
   L.check("CL13-T Open card opens the agent card", "1512", (await page.locator('[data-ac="overlay"]').count()) === 1, "");
   await page.keyboard.press("Escape");
   L.done(4);
+});
+
+/* ── lock 9 + HK v2 §9 · Housekeeping in the floating tab and the half-screen drawer ─────────────── */
+const HDR = '[data-hdr="housekeeping"]';
+const q = (s: string) => `${HDR} ${s}`;
+/** Normalise the typographic quotes so a straight-quoted spec line compares with the curly build. */
+const plain = (s: string) => s.replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, " ").trim();
+async function openHk(page: import("@playwright/test").Page) {
+  await page.mouse.click(5, 5).catch(() => {});
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  /* H is bound once the list has rendered; straight after a reload the first press can land before
+     that (measured: one run in four), so press again rather than reading a missing drawer as a fault */
+  for (let i = 0; i < 3 && !(await page.locator(HDR).isVisible()); i++) {
+    await page.keyboard.press("h");
+    await page.locator(HDR).waitFor({ state: "visible", timeout: 4000 }).catch(() => {});
+  }
+  await page.waitForTimeout(250);
+}
+
+test("CL13-9 · housekeeping drawer", async ({ page }) => {
+  const L = new Ledger("cl13-9");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const t = await page.evaluate(() => {
+      const win = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().height > 0);
+      const tab = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]');
+      if (!win || !tab) return null;
+      const a = win.getBoundingClientRect(), b = tab.getBoundingClientRect();
+      return { right: Math.round((a.right - b.right) * 10) / 10, bottom: Math.round((a.bottom - b.bottom) * 10) / 10, vis: getComputedStyle(tab).visibility, op: getComputedStyle(tab).opacity };
+    });
+    L.check("CL13-9 the tab sits 24 ±1 from the main window's right and bottom", w, !!t && near(t.right, 24, 1) && near(t.bottom, 24, 1) && t.vis === "visible", JSON.stringify(t));
+    await openHk(page);
+    const d = await box(page, HDR);
+    const want = vp.width === 1512 ? 780 : vp.width === 1280 ? 717 : Math.min(780, vp.width * 0.56);
+    L.check("CL13-9 H opens the drawer, 780 wide at 1512 and 717 at 1280", w, !!d && near(d.w, want, 1), `${d?.w} want ${want}`);
+    /* the header's title does not move when row 3 goes — a measured A/B on the one element */
+    const tops = await page.evaluate((s) => {
+      const t = document.querySelector<HTMLElement>(`${s} [data-hkv="title-h"]`), r3 = document.querySelector<HTMLElement>(`${s} [data-hkv="r3"]`);
+      if (!t || !r3) return null;
+      const a = t.getBoundingClientRect().top; r3.style.display = "none"; void t.offsetHeight;
+      const b = t.getBoundingClientRect().top; r3.style.display = ""; return { with: a, without: b };
+    }, HDR);
+    L.check("CL13-9 the header block's title top is unchanged with row 3 present", w, !!tops && Math.abs(tops.with - tops.without) <= 0.5, JSON.stringify(tops));
+    await page.locator(q('[data-hkv="row"] [data-hkv="rh"]')).first().click();
+    const g = await page.evaluate((s) => {
+      const why = document.querySelector(`${s} [data-hkv="row"].open [data-hkv="why"]`)?.getBoundingClientRect();
+      const fix = document.querySelector(`${s} [data-hkv="row"].open [data-hkv="fix"]`)?.getBoundingClientRect();
+      return why && fix ? { whyR: why.right, fixL: fix.left, fixR: fix.right } : null;
+    }, HDR);
+    L.check("CL13-9 an open row's fix sits right of its why", w, !!g && g.fixL > g.whyR && g.fixR <= (d?.r ?? 0), JSON.stringify(g));
+    const hov = await page.evaluate((s) => { const el = document.querySelector<HTMLElement>(`${s} [data-hdr="body"]`); return el ? el.scrollWidth - el.clientWidth : NaN; }, HDR);
+    L.check("CL13-9 the drawer's body does not overflow sideways", w, hov <= 0, `${hov}`);
+    const tabGone = await page.evaluate(() => { const t = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]'); return !t || getComputedStyle(t).visibility === "hidden" || getComputedStyle(t).opacity === "0"; });
+    L.check("CL13-9 the tab hides while its drawer is open", w, tabGone, "");
+    /* the dim closes it — click its far-left edge, which the drawer never covers */
+    await page.locator('[data-hdr="dim"][data-hdr-of="housekeeping"]').click({ position: { x: 20, y: 300 } });
+    await page.waitForTimeout(250);
+    L.check("CL13-9 the dim closes the drawer", w, (await box(page, HDR)) === null, "");
+    await openHk(page);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(250);
+    L.check("CL13-9 Escape closes the drawer", w, (await box(page, HDR)) === null, "");
+    await checkOverflow(page, L, w);
+  }
+  L.done(24);
+});
+
+test("CL13-HK · start here, the copy, the fixes and the toggle", async ({ page }) => {
+  /* a missing subject must FAIL, named, in seconds — never wait out the 15-minute case timeout */
+  page.setDefaultTimeout(15_000);
+  const L = new Ledger("cl13-hk");
+  await openContacts(page, AT_1512);
+  await page.evaluate(() => { localStorage.removeItem("sa.hkGrouping"); sessionStorage.setItem("sa.hkGrouping", "agent"); });
+  await page.reload(); await page.locator(".clv-row").first().waitFor();
+  await openHk(page);
+  /* §9.9 the old session value is taken once, then deleted; the choice outlives a reload */
+  const mig = await page.evaluate(() => ({ ss: sessionStorage.getItem("sa.hkGrouping"), ls: localStorage.getItem("sa.hkGrouping"), view: document.querySelector('[data-hdr="housekeeping"] [data-hkv="body-wrap"]')?.getAttribute("data-view") }));
+  L.check("HK-9 the old sessionStorage key is taken on first read and removed", "1512", mig.ss === null && mig.ls === "agent" && mig.view === "agent", JSON.stringify(mig));
+  await page.click(q('[data-hkv="view"][data-v="detail"]'));
+  await page.reload(); await page.locator(".clv-row").first().waitFor(); await openHk(page);
+  const v2 = await page.evaluate(() => ({ ls: localStorage.getItem("sa.hkGrouping"), view: document.querySelector('[data-hdr="housekeeping"] [data-hkv="body-wrap"]')?.getAttribute("data-view") }));
+  L.check("HK-9 the toggle persists across a reload in localStorage", "1512", v2.ls === "detail" && v2.view === "detail", JSON.stringify(v2));
+  /* a broken toggle must fail HERE, by name — not as a missing row further down */
+  if (v2.view !== "detail") await page.click(q('[data-hkv="view"][data-v="detail"]'));
+  /* §9.2 Start here is shut by default and opens on tap */
+  const start = page.locator(q('[data-hkv="start-label"] + [data-hkv="row"]'));
+  const shut = await start.evaluate((r) => ({ open: r.classList.contains("open"), body: r.querySelector('[data-hkv="body"]')?.getBoundingClientRect().height ?? 0 }));
+  L.check("HK-2 Start here is shut by default (its body has height 0)", "1512", !shut.open && shut.body === 0, JSON.stringify(shut));
+  await start.locator('[data-hkv="rh"]').click();
+  const opened = await start.evaluate((r) => r.querySelector('[data-hkv="body"]')?.getBoundingClientRect().height ?? 0);
+  L.check("HK-2 … and opens on tap", "1512", opened > 40, `${opened}`);
+  await start.locator('[data-hkv="rh"]').click();
+  /* §9.3 the copy is §4's word for word — reply and materials, live and not live */
+  const SPEC = {
+    reply: { t: (f: string) => `How long ${f} takes to reply`, live: (f: string) => `You've queried ${f}. Add this and you'll see the date their answer is due, and when it's fair to follow up.`, not: (f: string) => `Add this and, once you query ${f}, you'll see when to expect an answer.`, where: `Most agencies say on their submissions page, something like "we aim to reply within 8 weeks".` },
+    materials: { t: (f: string) => `What ${f} wants you to send`, live: (f: string) => `You've queried ${f}. Note what they ask for so you can check it matches what you sent.`, not: (f: string) => `Note what they ask for, and it'll be listed for you when you're ready to query ${f}.`, where: `Their submissions page will say, for example "query letter, one-page synopsis and the first three chapters".` },
+  } as const;
+  const seen: Record<string, number> = {};
+  for (const gap of ["reply", "materials"] as const) {
+    for (const live of [true, false]) {
+      const rows = page.locator(q(`[data-hkv="row"][data-gap="${gap}"]`));
+      const n = await rows.count();
+      let hit = -1;
+      for (let i = 0; i < n; i++) if ((await rows.nth(i).locator('[data-hkv="queried"]').count() > 0) === live) { hit = i; break; }
+      if (hit < 0) { L.check(`HK-3 ${gap} ${live ? "live" : "not live"}: population`, "1512", false, "no such row on the account"); continue; }
+      const r = rows.nth(hit);
+      await r.locator('[data-hkv="rh"]').click();
+      const got = await r.evaluate((x) => ({ t: x.querySelector('[data-hkv="title"]')?.textContent ?? "", why: x.querySelector('[data-hkv="why"]')?.textContent ?? "", where: (x.querySelector('[data-hkv="where"]')?.textContent ?? "").replace(/^Where to find it/, "") }));
+      const f = plain(got.t).match(gap === "reply" ? /^How long (\S+) takes/ : /^What (\S+) wants/)?.[1] ?? "?";
+      const s = SPEC[gap];
+      L.check(`HK-3 ${gap} ${live ? "live" : "not live"}: title, why and where equal §4`, "1512",
+        plain(got.t) === s.t(f) && plain(got.why) === (live ? s.live(f) : s.not(f)) && plain(got.where) === s.where, JSON.stringify(got));
+      seen[`${gap}/${live}`] = 1;
+      await r.locator('[data-hkv="rh"]').click();
+    }
+  }
+  /* §9.7 the materials fix: steps 1 / 5 / 500, and a unit switch snaps to 3 / 10 / 5,000 */
+  const mrow = page.locator(q('[data-hkv="row"][data-gap="materials"]')).first();
+  await mrow.locator('[data-hkv="rh"]').click();
+  const fx = mrow.locator('[data-hkv="fix"]');
+  await fx.locator('[data-mt="smp"]').click();
+  const txt = () => fx.locator('[data-ae="smp-step"] b').innerText();
+  const steps: string[] = [];
+  for (const u of ["Chapters", "Pages", "Words"]) {
+    await fx.locator(`[data-ae="unit"] [data-v="${u}"]`).click();
+    steps.push(await txt());
+    await fx.locator('[data-ae="smp-step"] [data-d="1"]').click();
+    steps.push(await txt());
+  }
+  L.check("HK-7 the opening sample snaps to 3 / 10 / 5,000 and steps by 1 / 5 / 500", "1512",
+    JSON.stringify(steps) === JSON.stringify(["First 3", "First 4", "First 10", "First 15", "First 5,000", "First 5,500"]), JSON.stringify(steps));
+  L.check("HK-7 Save is enabled once something is ticked", "1512", await mrow.locator('[data-hkv="save"]').isEnabled(), "");
+  await mrow.locator('[data-hkv="rh"]').click();
+  /* §9.4 the card link carries what was picked: two genres → the card on Wishlist with both in its draft.
+     ⚠️ ENTERED IN THE LAB: every agent on the harness account states its genres, so the account has no
+     genres gap to open (measured — the first run waited on a row that is not there). */
+  await page.goto("/#/contact-lab");
+  await page.waitForSelector('[data-lab-view="cast"]');
+  await page.click('[data-lab-view="cast"]');
+  await page.waitForSelector('[data-clv="row"]');
+  await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
+  await openHk(page);
+  if ((await page.locator(q('[data-hkv="body-wrap"]')).getAttribute("data-view")) !== "detail") await page.click(q('[data-hkv="view"][data-v="detail"]'));
+  const grow = page.locator(q('[data-hkv="row"][data-gap="genres"]')).first();
+  await grow.locator('[data-hkv="rh"]').click();
+  const chips = grow.locator('[data-hkv="genre-chip"]');
+  /* a chip may carry a hint after an interpunct ("Thriller · your book") — the genre is what precedes it */
+  const names = [await chips.nth(0).innerText(), await chips.nth(1).innerText()].map((s) => s.split("·")[0].trim());
+  await chips.nth(0).click(); await chips.nth(1).click();
+  await grow.locator('[data-hkv="card-link"]').click();
+  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  const card = await page.evaluate(() => ({
+    tab: document.querySelector('[role="tab"][aria-selected="true"]')?.getAttribute("data-tab") ?? null,
+    /* the CHOSEN chips only — the field's suggestion list names every genre and would satisfy "includes" */
+    genres: [...document.querySelectorAll('[data-ae="genres"] .ae-chip')].map((c) => (c.firstChild?.textContent ?? "").trim().toLowerCase()).sort(),
+    save: !(document.querySelector<HTMLButtonElement>('[data-ae="save"]')?.disabled ?? true),
+    drawer: [...document.querySelectorAll('[data-hdr="housekeeping"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+  }));
+  L.check("HK-4 the card opens on Wishlist, its draft holds both picked genres, and Save is enabled", "1512",
+    card.tab === "want" && JSON.stringify(card.genres) === JSON.stringify(names.map((n) => n.toLowerCase()).sort()) && card.save, JSON.stringify({ ...card, names }));
+  /* put it back: discard the draft without saving */
+  await page.keyboard.press("Escape");
+  { const d = page.getByRole("button", { name: /^Discard/ }); if (await d.count()) await d.first().click({ timeout: 3000 }).catch(() => {}); }
+  await page.keyboard.press("Escape").catch(() => {});
+  L.done(11);
+});
+
+/* ── HK v2 §9.5 / §9.8 / §9.10 · the writing cases: each restores the account in the same run ── */
+test("CL13-HKW · Later, Undo and the reminder chip, read back from Firestore", async ({ page }) => {
+  /* a missing subject must FAIL, named, in seconds — never wait out the 15-minute case timeout */
+  page.setDefaultTimeout(15_000);
+  const L = new Ledger("cl13-hkw");
+  const { harnessDb } = await import("./harnessDocs");
+  const fs = await import("firebase/firestore");
+  const { db, uid } = await harnessDb();
+  const uRef = fs.doc(db, "users", uid);
+  const dk = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const today = new Date();
+  const plus = (n: number) => dk(new Date(today.getFullYear(), today.getMonth(), today.getDate() + n));
+
+  /* §9.8 Undo after a reply-time save restores the deadlines */
+  await openContacts(page, AT_1512);
+  await openHk(page);
+  const rrow = page.locator(q('[data-hkv="row"][data-gap="reply"]:has([data-hkv="queried"])')).first();
+  const agentId = ((await rrow.getAttribute("data-key")) ?? "").split(":")[0];
+  expect(agentId, "population first — no live reply gap on the account").not.toBe("");
+  const aRef = fs.doc(db, "users", uid, "agents", agentId);
+  const aBefore = (await fs.getDoc(aRef)).data() ?? {};
+  const mine = (await fs.getDocs(fs.query(fs.collection(db, "users", uid, "queries"), fs.where("agentId", "==", agentId)))).docs
+    .map((d) => ({ ref: d.ref, data: d.data() })).filter((x) => typeof x.data.dateSent === "string");
+  const ARRANGED = "2026-01-01T00:00:00.000Z";
+  try {
+    for (const x of mine) await fs.updateDoc(x.ref, { responseDeadline: ARRANGED });
+    await page.waitForTimeout(1500);
+    await rrow.locator('[data-hkv="rh"]').click();
+    await rrow.locator('[data-hkv="save"]').click();
+    const moved = async () => { let n = 0; for (const x of mine) if ((await fs.getDoc(x.ref)).data()?.responseDeadline !== ARRANGED) n++; return n; };
+    await expect.poll(moved, { message: "the save moved no stored deadline", timeout: 15_000 }).toBeGreaterThan(0);
+    L.check("HK-8 the save moved the agent's stored deadlines", "1512", (await moved()) > 0, `${mine.length} queries`);
+    await page.locator(q('[data-hkv="undo"]')).click();
+    await expect.poll(moved, { message: "Undo did not restore the deadline", timeout: 15_000 }).toBe(0);
+    const w = (await fs.getDoc(aRef)).data()?.responseTimeWeeks ?? null;
+    L.check("HK-8 Undo restores every deadline and the reply time", "1512", (await moved()) === 0 && JSON.stringify(w) === JSON.stringify(aBefore.responseTimeWeeks ?? null), `weeks ${w}`);
+  } finally {
+    await fs.updateDoc(aRef, { responseTimeWeeks: "responseTimeWeeks" in aBefore ? aBefore.responseTimeWeeks : fs.deleteField() });
+    for (const x of mine) await fs.updateDoc(x.ref, { responseDeadline: "responseDeadline" in x.data ? x.data.responseDeadline : fs.deleteField() });
+    const left = await Promise.all(mine.map(async (x) => (await fs.getDoc(x.ref)).data()?.responseDeadline ?? null));
+    expect(left.filter((x) => x === ARRANGED).length, "THE ARRANGED DEADLINE WAS NOT REMOVED — the account has been changed").toBe(0);
+  }
+
+  /* §9.10 a reopen chip creates exactly one UserTask with that dueDate */
+  const orow = page.locator(q('[data-hkv="row"][data-gap="reopen"]')).first();
+  const oId = ((await orow.getAttribute("data-key")) ?? "").split(":")[0];
+  expect(oId, "population first — no reopen gap on the account").not.toBe("");
+  await orow.locator('[data-hkv="rh"]').click();
+  const chip = orow.locator('[data-hkv="remind-chip"]').first();
+  const on = await chip.getAttribute("data-on");
+  const tasksFor = async () => (await fs.getDocs(fs.query(fs.collection(db, "users", uid, "tasks"), fs.where("agentId", "==", oId)))).docs;
+  const had = new Set((await tasksFor()).map((d) => d.id));
+  try {
+    await chip.click();
+    await expect.poll(async () => (await tasksFor()).filter((d) => !had.has(d.id)).length, { timeout: 10_000 }).toBe(1);
+    /* "exactly one" is a claim about the writes SETTLING, not the first one landing: a poll that returns
+       at one can be read before a second write arrives (measured — a double write passed this lock until
+       it waited) */
+    await page.waitForTimeout(2500);
+    const added = (await tasksFor()).filter((d) => !had.has(d.id));
+    L.check("HK-10 picking a chip creates exactly one UserTask with that dueDate", "1512", added.length === 1 && added[0].data().dueDate === on, JSON.stringify(added.map((d) => d.data().dueDate)));
+  } finally {
+    /* a late second write would land after a hasty sweep (measured, under a mutation that wrote twice):
+       let the writes settle, then sweep everything new for this agent */
+    await page.waitForTimeout(2500);
+    for (const d of (await tasksFor()).filter((x) => !had.has(x.id))) await fs.deleteDoc(d.ref);
+    expect((await tasksFor()).length, "A REMINDER WAS LEFT BEHIND — the account has been changed").toBe(had.size);
+  }
+  /* §9.5 Later */
+  const before = (await fs.getDoc(uRef)).data() ?? {};
+  const tpBefore = (before.todoPrefs ?? {}) as Record<string, unknown>;
+  const laterBefore = ((tpBefore.contacts ?? {}) as Record<string, unknown>).later;
+  let key: string | null = null;
+  try {
+    await openContacts(page, AT_1512);
+    await openHk(page);
+    const row = page.locator(q('[data-hkv="row"][data-gap="wishlist"]')).first();
+    key = await row.getAttribute("data-key");
+    await row.locator('[data-hkv="rh"]').click();
+    await row.locator('[data-hkv="later"]').click();
+    await page.waitForTimeout(900);
+    L.check("HK-5 Later hides the row", "1512", (await page.locator(q(`[data-hkv="row"][data-key="${key}"]`)).count()) === 0, `${key}`);
+    const read = async () => ((await fs.getDoc(uRef)).data() ?? {}) as Record<string, any>;
+    await expect.poll(async () => (await read()).todoPrefs?.contacts?.later?.[key!] ?? null, { timeout: 10_000 }).toBe(plus(30));
+    const after = await read();
+    L.check("HK-5 todoPrefs.contacts.later holds today + 30 at the item's key", "1512", after.todoPrefs?.contacts?.later?.[key!] === plus(30), JSON.stringify(after.todoPrefs?.contacts?.later));
+    for (const sub of ["noteboard", "manuscripts"]) {
+      /* canonical: the client hands back a map's keys in whichever order its cache holds them (measured:
+         the same noteboard map read back with `order` and `dismissedExamples` swapped), so the
+         comparison is over sorted keys — every value, nothing about insertion order */
+      const canon = (v: unknown): string => JSON.stringify(v, (_k, x) => x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, (x as Record<string, unknown>)[k]])) : x);
+      const a1 = canon(tpBefore[sub] ?? null), a2 = canon(after.todoPrefs?.[sub] ?? null);
+      L.check(`HK-5 the ${sub} sub-map is byte-identical after the write`, "1512", a1 === a2, a1 === a2 ? "" : `before ${a1.slice(0, 300)} | after ${a2.slice(0, 300)}`);
+    }
+    L.check("HK-5 the foot names the put-off rows and offers Show them now", "1512", (await page.locator(q('[data-hkv="show-all"]')).count()) === 1 || /Hidden until/.test(await page.locator(q('[data-hkv="foot-text"]')).innerText()), "");
+    /* the row returns 31 days on — the clock moved, the stored date untouched */
+    await page.clock.install({ time: new Date(today.getTime() + 31 * 86_400_000) });
+    await openContacts(page, AT_1512);
+    await openHk(page);
+    L.check("HK-5 the row returns when the clock is advanced 31 days", "1512", (await page.locator(q(`[data-hkv="row"][data-key="${key}"]`)).count()) === 1, `${key}`);
+  } finally {
+    await fs.updateDoc(uRef, { "todoPrefs.contacts.later": laterBefore === undefined ? fs.deleteField() : laterBefore });
+    const back = ((await fs.getDoc(uRef)).data() ?? {}) as Record<string, any>;
+    expect(JSON.stringify(back.todoPrefs?.contacts?.later ?? null), "LATER WAS NOT PUT BACK — the account has been changed").toBe(JSON.stringify(laterBefore ?? null));
+  }
+
+  L.done(9);
 });

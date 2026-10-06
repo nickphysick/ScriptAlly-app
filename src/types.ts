@@ -100,6 +100,11 @@ export interface User {
        `dismissedTiles` = promo ids sent away for good. Only `wordcount` and `packages` are
        dismissable; the versions tile hides on its own evidence (a second version exists). */
     manuscripts?: { dismissedTiles?: string[] };
+    /* Housekeeping v2's own preferences (Contact list v13 P5) — the same page-scoped sub-map
+       precedent, no rules change, proved by rulesProbe. Read through `contactPrefsOf` (total), and
+       written ONLY by its dotted-path builders (lib/contactPrefs). `later` keys are
+       "{agentId}:{gap}" → "YYYY-MM-DD"; `settled` holds "{agentId}:reply" ("Say it's not stated"). */
+    contacts?: { later?: Record<string, string>; settled?: string[]; wishlistEvery?: number; wishlistNextOn?: string };
   };
   /**
    * ⚠️ LEGACY, AND READ BY NOTHING. Superseded by `queryingGoals` below. Left in place rather

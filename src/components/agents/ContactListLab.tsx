@@ -32,6 +32,7 @@ import { DbContext } from "../../lib/db";
 import { AgentList } from "./AgentList";
 import { AgentCardHost } from "./card/AgentCardHost";
 import { sanitizeAgentPatch, type AgentEditPatch } from "../../lib/saveAgentEdits";
+import { applyUserPaths } from "../../lib/userPaths";
 import { Agent, SubmissionMethod, SubmissionStatus, UserPlan } from "../../types";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_MANUSCRIPTS, CONTACT_FIXTURE_QUERIES } from "./contactFixture";
 import { FONT_MONO } from "../../lib/designTokens";
@@ -132,9 +133,16 @@ export const ContactListLab: React.FC = () => {
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
      and the failure would be a render crash in a lab rather than a clear "the stub is short". */
+  /* Housekeeping v2's prefs (`todoPrefs.contacts`) — the lab's own copy, written by the SAME dotted
+     paths through the same `applyUserPaths` the context uses, so Later and the check-in run here */
+  const [labPrefs, setLabPrefs] = useState<Record<string, unknown>>({});
+  const updateUserPaths = React.useCallback(async (paths: Record<string, unknown>) => {
+    setLabPrefs((prev) => applyUserPaths(prev, paths));
+  }, []);
+
   const value = new Proxy(
     {
-      currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB", personalGenres: labGenres },
+      currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB", personalGenres: labGenres, ...labPrefs },
       collectionsReady: view !== "settling",
       agents: view === "cast" ? cast : view === "list" ? [SAMPLE] : [],
       queries: view === "cast" ? CONTACT_FIXTURE_QUERIES : [],
@@ -148,6 +156,7 @@ export const ContactListLab: React.FC = () => {
       deleteUserTask,
       addPersonalGenre,
       deleteAgent,
+      updateUserPaths,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),
@@ -200,7 +209,7 @@ export const ContactListLab: React.FC = () => {
             the shipped route (`/agents`) has no such problem. */}
         <DbContext.Provider value={value as any}>
           {/* remounted per view so the page's load animation and measurements run from scratch */}
-          <AgentList key={view} onNavigate={() => {}} />
+          <AgentList key={view} onNavigate={() => {}} sandbox={cardSandbox} />
           {/* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2) and this route returns before App's own hosts
               mount, so the lab mounts the one host itself — inside the stub, so the card reads the cast */}
           <AgentCardHost sandbox={cardSandbox} />

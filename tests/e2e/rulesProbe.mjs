@@ -771,4 +771,53 @@ console.log("\ndesk save by leaf — listView, noteboard and manuscripts survive
   console.log(`  ${back ? "✅" : "❌"} ${"todoPrefs restored to its exact prior state".padEnd(44)} ${back ? "" : "— THE ACCOUNT HAS CHANGED"}`);
 }
 
+/* Housekeeping v2 (Contact list v13 Phase 5): `todoPrefs.contacts` is a page-scoped sub-map on the
+   unconstrained `todoPrefs` map — NO rules change — written by dotted leaf paths. Each write must
+   be accepted, must land where it was aimed, and must leave the other owners' sub-maps
+   byte-identical. A colon in the `later` key ("{agentId}:{gap}") is part of the proof. */
+console.log("\nHousekeeping prefs by leaf — todoPrefs.contacts, noteboard and manuscripts survive (v13 Phase 5):");
+{
+  const before = (await getDoc(UREF)).data() ?? {};
+  const hadPrefs = Object.prototype.hasOwnProperty.call(before, "todoPrefs");
+  const OWNERS = ["listView", "noteboard", "manuscripts", "staleMonths", "types"];
+  const stable = (v) => JSON.stringify(v, (_k, x) => (x && typeof x === "object" && !Array.isArray(x)
+    ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, x[k]])) : x));
+  const owners = (tp) => stable(Object.fromEntries(OWNERS.map((k) => [k, tp?.[k] ?? null])));
+  const seeded = {
+    ...(before.todoPrefs ?? {}),
+    staleMonths: 12, types: { send: true, chase: false },
+    listView: { view: "list", probe: "phase-5" },
+    noteboard: { dismissedExamples: ["probe-a"], order: ["probe-n2", "probe-n1"] },
+    manuscripts: { dismissedTiles: ["wordcount"] },
+  };
+  const restore = () => updateDoc(UREF, { todoPrefs: hadPrefs ? before.todoPrefs : deleteField() });
+  const run = async (label, paths, read) => {
+    try {
+      await updateDoc(UREF, { todoPrefs: seeded });
+      const want = owners(seeded);
+      await updateDoc(UREF, paths);
+      const tp = (await getDoc(UREF)).data()?.todoPrefs;
+      const survived = owners(tp) === want;
+      const landed = read(tp?.contacts);
+      const ok = survived && landed;
+      console.log(`  ${ok ? "✅" : "❌"} ${label.padEnd(44)} sub-maps ${survived ? "byte-identical" : "CHANGED"} · ${landed ? "landed" : "DID NOT LAND"}`);
+      if (!ok) console.log(`     contacts now ${stable(tp?.contacts)}`);
+    } catch (e) {
+      const denied = /permission|insufficient/i.test(e.message || "");
+      console.log(`  ❌ ${label.padEnd(44)} ${denied ? "DENIED" : "ERROR: " + (e.message || "").slice(0, 90)}`);
+    } finally {
+      try { await restore(); } catch (e) { console.log(`  ⚠️  RESTORE FAILED — the account has changed: ${e.message}`); }
+    }
+  };
+  await run("later (a colon in the key) by leaf", { "todoPrefs.contacts.later.probe-agent:genres": "2026-11-03" },
+    (c) => c?.later?.["probe-agent:genres"] === "2026-11-03");
+  await run("settled by leaf", { "todoPrefs.contacts.settled": ["probe-agent:reply"] },
+    (c) => Array.isArray(c?.settled) && c.settled[0] === "probe-agent:reply");
+  await run("wishlistEvery by leaf", { "todoPrefs.contacts.wishlistEvery": 3 }, (c) => c?.wishlistEvery === 3);
+  await run("wishlistNextOn by leaf", { "todoPrefs.contacts.wishlistNextOn": "2027-04-04" }, (c) => c?.wishlistNextOn === "2027-04-04");
+  const after = (await getDoc(UREF)).data() ?? {};
+  const back = hadPrefs ? stable(after.todoPrefs) === stable(before.todoPrefs) : !("todoPrefs" in after);
+  console.log(`  ${back ? "✅" : "❌"} ${"todoPrefs restored to its exact prior state".padEnd(44)} ${back ? "" : "— THE ACCOUNT HAS CHANGED"}`);
+}
+
 process.exit(0);
