@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "CL13-B the banner exists",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-B eyebrow 'N agents · M need you', set in capitals",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 AGENTS · 3 NEED YOU uppercase"
+ },
+ {
+  "lock": "CL13-B heading 'Every agent, on file.' in Special Elite 42",
+  "where": "1512",
+  "ok": true,
+  "detail": "Every agent, on file. \"Special Elite\", \"Co 42px"
+ },
+ {
+  "lock": "CL13-B the sentence is the card index's",
+  "where": "1512",
+  "ok": true,
+  "detail": "Your card index for Harbour of Glass: what each agent wants, how fast they reply, and where your query to them stands."
+ },
+ {
+  "lock": "CL13-B the perched Archivist, 170 wide",
+  "where": "1512",
+  "ok": true,
+  "detail": "/images/contact/contact-hawk.webp?v=1 170"
+ },
+ {
+  "lock": "CL13-B the controls: Find, Filters, Grouped, Sort and its direction, right-aligned inside the banner",
+  "where": "1512",
+  "ok": true,
+  "detail": "true 0 [\"filter\",\"group\",\"sort\",\"dir\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-B the banner exists",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-B eyebrow 'N agents · M need you', set in capitals",
+  "where": "1440",
+  "ok": true,
+  "detail": "37 AGENTS · 3 NEED YOU uppercase"
+ },
+ {
+  "lock": "CL13-B heading 'Every agent, on file.' in Special Elite 42",
+  "where": "1440",
+  "ok": true,
+  "detail": "Every agent, on file. \"Special Elite\", \"Co 42px"
+ },
+ {
+  "lock": "CL13-B the sentence is the card index's",
+  "where": "1440",
+  "ok": true,
+  "detail": "Your card index for Harbour of Glass: what each agent wants, how fast they reply, and where your query to them stands."
+ },
+ {
+  "lock": "CL13-B the perched Archivist, 170 wide",
+  "where": "1440",
+  "ok": true,
+  "detail": "/images/contact/contact-hawk.webp?v=1 170"
+ },
+ {
+  "lock": "CL13-B the controls: Find, Filters, Grouped, Sort and its direction, right-aligned inside the banner",
+  "where": "1440",
+  "ok": true,
+  "detail": "true 0 [\"filter\",\"group\",\"sort\",\"dir\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-B the banner exists",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-B eyebrow 'N agents · M need you', set in capitals",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 AGENTS · 3 NEED YOU uppercase"
+ },
+ {
+  "lock": "CL13-B heading 'Every agent, on file.' in Special Elite 42",
+  "where": "1280",
+  "ok": true,
+  "detail": "Every agent, on file. \"Special Elite\", \"Co 42px"
+ },
+ {
+  "lock": "CL13-B the sentence is the card index's",
+  "where": "1280",
+  "ok": true,
+  "detail": "Your card index for Harbour of Glass: what each agent wants, how fast they reply, and where your query to them stands."
+ },
+ {
+  "lock": "CL13-B the perched Archivist, 170 wide",
+  "where": "1280",
+  "ok": true,
+  "detail": "/images/contact/contact-hawk.webp?v=1 170"
+ },
+ {
+  "lock": "CL13-B the controls: Find, Filters, Grouped, Sort and its direction, right-aligned inside the banner",
+  "where": "1280",
+  "ok": true,
+  "detail": "true 0 [\"filter\",\"group\",\"sort\",\"dir\"]"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

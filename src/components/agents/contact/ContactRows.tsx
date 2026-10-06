@@ -7,20 +7,38 @@
  * the torn slip with its action, never a dashed error box; and no colour encodes time pressure —
  * a past date is the ink edge and the bold date line, both ink.
  *
- * ⚠️ THE MINIS DO THEIR OWN JOB AND DO NOT OPEN THE ROW (§6.2): LOG QUERY opens the log flow
- * pre-filled; ADD GENRES opens the profile at Genres. REMIND ME (closed to submissions) arrives
- * with the Housekeeping phase's reminder mechanism — an absent control, per the house rule,
- * rather than a dead one.
+ * ⚠️ THE MINIS DO THEIR OWN JOB AND DO NOT OPEN THE ROW (§6.2): ADD opens the card at the gap.
+ * v13 §6: the v11 "Log query" mini retired into the hover tray, which offers the card's own next
+ * step (Log a query, Remind me, a send, a nudge…) beside Open card.
  */
 import React from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { AgentFacts, ContactGroup, RowDateLine, rowDateLine } from "../../../lib/contactList";
-import { STAGE_NAME } from "../../../lib/qcSummary";
+import { QcRow, STAGE_NAME } from "../../../lib/qcSummary";
+import type { CardAct, CardPrimary } from "../../../lib/agentCard";
+
+/**
+ * v13 §6 — the row's 6px left edge is the query's state colour, deep (the mock's `EDGE` map): an
+ * offer, your move (which includes an agent's-court query past its date — the page's union), a
+ * Queried query still with the agent, a later stage with the agent, a close; nothing for a
+ * never-queried agent, whatever their door says. The colour is `--state-*-deep`, read by the sheet.
+ */
+export type RowEdge = "you" | "agent" | "queried" | "offer" | "closed" | "none";
+export function rowEdge(x: Pick<AgentFacts, "stand">, q: Pick<QcRow, "court" | "status"> | null): RowEdge {
+  if (x.stand === "none") return "none";
+  if (q && q.court === "offer") return "offer";
+  if (x.stand === "you") return "you";
+  if (x.stand === "closed") return "closed";
+  return q && q.status === QueryStatus.QUERIED ? "queried" : "agent";
+}
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
+  /** v13 §5: while the list is filtered, each heading reads "n of m" — m from this map (a group's
+   *  size over every agent); absent, the heading counts its own rows */
+  totals?: ReadonlyMap<string, number> | null;
   byId: Map<string, AgentFacts>;
   nowMs: number;
   /** the manuscript's genre, matched — the ticked chip comes first */
@@ -30,10 +48,14 @@ export interface ContactRowsProps {
   newId?: string | null;
   /** the row's own box rides with the open, so the agent card grows out of it (Agent card v1 §2) */
   onOpen: (agentId: string, from?: DOMRect) => void;
-  onLogQuery: (agentId: string) => void;
   onAddGenres: (agentId: string) => void;
   /** the wishlist torn slip's door — the profile at its wishlist section (v12 §6) */
   onAddWishlist: (agentId: string) => void;
+  /** v13 §6 — the hover tray's next step: the card's own primary (`primaryFor`), so the row and the
+   *  card cannot offer different verbs. A ghost primary (a way OUT, not a next step) is not offered. */
+  trayFor: (x: AgentFacts) => CardPrimary;
+  /** the tray's step, straight to its journey without the card */
+  onAct: (agentId: string, act: CardAct) => void;
 }
 
 const Line2: React.FC<{ line: RowDateLine | null }> = ({ line }) =>
@@ -46,10 +68,11 @@ const Row: React.FC<{
   current: boolean;
   fresh: boolean;
   onOpen: (from: DOMRect) => void;
-  onLogQuery: () => void;
   onAddGenres: () => void;
   onAddWishlist: () => void;
-}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onLogQuery, onAddGenres, onAddWishlist }) => {
+  tray: CardPrimary;
+  onAct: (act: CardAct) => void;
+}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
   const a = x.agent;
   const yourMove = x.stand === "you";
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
@@ -65,12 +88,18 @@ const Row: React.FC<{
   const wish = (a.mswlNotes ?? "").trim();
 
   return (
-    <button
-      type="button"
-      className={`clv-row${x.pastExpected ? " clv-row--late" : ""}${fresh ? " clv-row--new" : ""}`}
+    /* ⚠️ A div WITH role=button, NOT A <button> (v13 P4): the row holds real controls now — the torn
+       slips' Add and the tray's two buttons — and a button may not contain another interactive
+       element. Enter and Space open it, as a button's would; a key on a control inside it is that
+       control's. */
+    <div
+      role="button"
+      tabIndex={0}
+      className={`clv-row${fresh ? " clv-row--new" : ""}`}
       data-clv="row"
       /* flip.ts's own default selector — the FLIP and the save-notice scroll both find rows by it */
       data-agent-card={a.id}
+      data-edge={rowEdge(x, x.q)}
       data-stand={x.stand}
       data-door={x.door}
       data-status={x.statusKey}
@@ -79,6 +108,10 @@ const Row: React.FC<{
       data-genres={x.genres.join("|")}
       aria-current={current || undefined}
       onClick={(e) => onOpen(e.currentTarget.getBoundingClientRect())}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return; // a control inside the row answers its own keys
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
+      }}
     >
       <span className="clv-ini" aria-hidden="true">{agentInitials(a)}</span>
       <span className="clv-rwho">
@@ -126,18 +159,8 @@ const Row: React.FC<{
       <span className="clv-rq">
         {x.standing.kind === "none" ? (
           <>
-            <span className="clv-ql clv-ql--none">Not queried yet</span>
-            {x.door === "open" && (
-              <span className="clv-qd">
-                <span
-                  className="clv-mini" role="button" tabIndex={0} data-clv="mini-log"
-                  onClick={(e) => { e.stopPropagation(); onLogQuery(); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onLogQuery(); } }}
-                >
-                  Log query
-                </span>
-              </span>
-            )}
+            <span className="clv-ql clv-ql--none">{x.door === "open" ? "Not queried yet" : "Closed to queries"}</span>
+            {x.door === "open" && <span className="clv-qd">Open to queries</span>}
           </>
         ) : (
           <>
@@ -150,12 +173,33 @@ const Row: React.FC<{
           </>
         )}
       </span>
-    </button>
+      {/* v13 §6 — THE HOVER TRAY (the mock's .tray): the next step, then Open card, over the query
+          column on hover or keyboard focus. */}
+      <span className="clv-rtray" data-cl13="tray">
+        {!tray.ghost && (
+          <TrayBtn primary probe="tray-act" label={tray.label} onPress={() => onAct(tray.act)} />
+        )}
+        <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
+      </span>
+    </div>
   );
 };
 
+const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPress: (rowRect: DOMRect) => void }> = ({ primary, probe, label, onPress }) => (
+  <button
+    type="button" className={`clv-trb${primary ? " p" : ""}`} data-cl13={probe}
+    onClick={(e) => {
+      e.stopPropagation();
+      const row = e.currentTarget.closest<HTMLElement>('[data-clv="row"]');
+      onPress((row ?? e.currentTarget).getBoundingClientRect());
+    }}
+  >
+    {label}
+  </button>
+);
+
 export const ContactRows: React.FC<ContactRowsProps> = ({
-  groups, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres, onAddWishlist,
+  groups, totals = null, byId, nowMs, genreHit, openId, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
 }) => (
   <div className="clv-list" data-clv="list">
     {groups.map((g) => (
@@ -168,7 +212,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
           <div className="clv-band2" data-clv="band" data-letter={/^[A-Z#]$/.test(g.label) ? g.label : undefined}>
             <b>{g.label}</b>
             <i aria-hidden="true" />
-            <small>{g.ids.length} {g.ids.length === 1 ? "agent" : "agents"}</small>
+            <small data-cl13="gcount">{totals ? `${g.ids.length} of ${totals.get(g.label) ?? g.ids.length}` : `${g.ids.length} ${g.ids.length === 1 ? "agent" : "agents"}`}</small>
             {g.extra && <small>{g.extra}</small>}
           </div>
         ) : null}
@@ -184,7 +228,8 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
               current={openId === id}
               fresh={newId === id}
               onOpen={(from) => onOpen(id, from)}
-              onLogQuery={() => onLogQuery(id)}
+              tray={trayFor(x)}
+              onAct={(act) => onAct(id, act)}
               onAddGenres={() => onAddGenres(id)}
               onAddWishlist={() => onAddWishlist(id)}
             />

@@ -41,8 +41,15 @@ export class Ledger {
 }
 
 /** Open the populated Contact list with motion stopped and fonts settled. */
-export async function openContacts(page: Page, vp: { width: number; height: number }, opts: { motion?: boolean } = {}) {
+export async function openContacts(page: Page, vp: { width: number; height: number }, opts: { motion?: boolean; keep?: boolean } = {}) {
   await openApp(page, "/agents", vp);
+  /* ⚠️ THE LIST REMEMBERS ITS SETTINGS FOR THE VISIT (v13 §5, `sa.contactList`): a case that filtered at
+     one width would hand the next width a filtered list. Every open starts from the defaults unless the
+     case is the one measuring the memory (`keep`). */
+  if (!opts.keep) {
+    const had = await page.evaluate(() => { const v = sessionStorage.getItem("sa.contactList"); sessionStorage.removeItem("sa.contactList"); return v !== null && v !== JSON.stringify({ filters: { stand: [], fit: [], open: [], status: [], genres: [], locs: [], rating: [], profile: [] }, search: "", group: "letter", sort: "surname", reversed: false }); });
+    if (had) { await page.reload(); await page.waitForLoadState("domcontentloaded"); }
+  }
   await page.locator(".clv-row").first().waitFor({ timeout: 30_000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   if (!opts.motion) await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });

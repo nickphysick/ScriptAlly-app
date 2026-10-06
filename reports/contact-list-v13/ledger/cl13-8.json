@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CL13-8 set: Grouped: Agency and one filter",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"group\":\"☰ Grouped: Agency ⌄\",\"filter\":\"⛉ Filters (1)\"}"
+ },
+ {
+  "lock": "CL13-8 a reload in the same tab restores both",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"group\":\"☰ Grouped: Agency ⌄\",\"filter\":\"⛉ Filters (1)\",\"chips\":1}"
+ },
+ {
+  "lock": "CL13-8 (extra) to the Query Centre and back, both restored",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-8 a fresh session restores nothing",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"group\":\"☰ Grouped: Letter ⌄\",\"filter\":\"⛉ Filters\"}"
+ }
+]

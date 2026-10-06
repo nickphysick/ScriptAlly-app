@@ -1,0 +1,200 @@
+[
+ {
+  "lock": "CL13-7 at rest: 'Filters', 'Grouped: Letter', 'Sort: Surname', none set",
+  "where": "1512",
+  "ok": true,
+  "detail": "⛉ Filters | ☰ Grouped: Letter ⌄ | Sort: Surname ⌄"
+ },
+ {
+  "lock": "CL13-7 two options with a count are on offer",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"open:open\",\"genres:Crime\"]"
+ },
+ {
+  "lock": "CL13-7 the panel keeps its scroll while you tick",
+  "where": "1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "CL13-7 'Filters (2)' after two ticks, anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": "⛉ Filters (2) rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-7 one popover at a time",
+  "where": "1512",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL13-7 'Grouped: Where you stand', anthracite, and the popover closed",
+  "where": "1512",
+  "ok": true,
+  "detail": "☰ Grouped: Where you stand ⌄"
+ },
+ {
+  "lock": "CL13-7 'Sort: Next date', anthracite; the direction says 'Soonest first'",
+  "where": "1512",
+  "ok": true,
+  "detail": "Sort: Next date ⌄ Sort order: Soonest first"
+ },
+ {
+  "lock": "CL13-7 the toggle names the reversed order and turns anthracite",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-7 Escape closes only the popover",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"pops\":0,\"card\":0,\"list\":true,\"group\":\"☰ Grouped: Where you stand ⌄\"}"
+ },
+ {
+  "lock": "CL13-7 an outside press closes it",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-7 at rest: 'Filters', 'Grouped: Letter', 'Sort: Surname', none set",
+  "where": "1440",
+  "ok": true,
+  "detail": "⛉ Filters | ☰ Grouped: Letter ⌄ | Sort: Surname ⌄"
+ },
+ {
+  "lock": "CL13-7 two options with a count are on offer",
+  "where": "1440",
+  "ok": true,
+  "detail": "[\"open:open\",\"genres:Crime\"]"
+ },
+ {
+  "lock": "CL13-7 the panel keeps its scroll while you tick",
+  "where": "1440",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "CL13-7 'Filters (2)' after two ticks, anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": "⛉ Filters (2) rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-7 one popover at a time",
+  "where": "1440",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL13-7 'Grouped: Where you stand', anthracite, and the popover closed",
+  "where": "1440",
+  "ok": true,
+  "detail": "☰ Grouped: Where you stand ⌄"
+ },
+ {
+  "lock": "CL13-7 'Sort: Next date', anthracite; the direction says 'Soonest first'",
+  "where": "1440",
+  "ok": true,
+  "detail": "Sort: Next date ⌄ Sort order: Soonest first"
+ },
+ {
+  "lock": "CL13-7 the toggle names the reversed order and turns anthracite",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-7 Escape closes only the popover",
+  "where": "1440",
+  "ok": true,
+  "detail": "{\"pops\":0,\"card\":0,\"list\":true,\"group\":\"☰ Grouped: Where you stand ⌄\"}"
+ },
+ {
+  "lock": "CL13-7 an outside press closes it",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-7 at rest: 'Filters', 'Grouped: Letter', 'Sort: Surname', none set",
+  "where": "1280",
+  "ok": true,
+  "detail": "⛉ Filters | ☰ Grouped: Letter ⌄ | Sort: Surname ⌄"
+ },
+ {
+  "lock": "CL13-7 two options with a count are on offer",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"open:open\",\"genres:Crime\"]"
+ },
+ {
+  "lock": "CL13-7 the panel keeps its scroll while you tick",
+  "where": "1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "CL13-7 'Filters (2)' after two ticks, anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": "⛉ Filters (2) rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL13-7 one popover at a time",
+  "where": "1280",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL13-7 'Grouped: Where you stand', anthracite, and the popover closed",
+  "where": "1280",
+  "ok": true,
+  "detail": "☰ Grouped: Where you stand ⌄"
+ },
+ {
+  "lock": "CL13-7 'Sort: Next date', anthracite; the direction says 'Soonest first'",
+  "where": "1280",
+  "ok": true,
+  "detail": "Sort: Next date ⌄ Sort order: Soonest first"
+ },
+ {
+  "lock": "CL13-7 the toggle names the reversed order and turns anthracite",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-7 Escape closes only the popover",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"pops\":0,\"card\":0,\"list\":true,\"group\":\"☰ Grouped: Where you stand ⌄\"}"
+ },
+ {
+  "lock": "CL13-7 an outside press closes it",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

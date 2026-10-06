@@ -1,0 +1,15 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The workspace (Contact list v13; ref design-refs/contact-list-v13.html `.ws`). `--wsp-tray` is the
+ * page's colour.
+ */
+.wsp {
+  background: var(--wsp-tray, #d6dfe6);
+  border-radius: 22px;
+  padding: 22px 22px 26px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 60px;
+}

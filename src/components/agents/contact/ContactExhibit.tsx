@@ -115,7 +115,8 @@ export const ContactExhibit: React.FC = () => (
         <div className="clv-pic">
           <div className="clv-pvw clv-pv1">
             <ContactRows groups={GROUPS} byId={BY_ID} nowMs={CONTACT_SAMPLE_NOW} genreHit={() => false}
-              openId={null} onOpen={noop} onLogQuery={noop} onAddGenres={noop} onAddWishlist={noop} />
+              openId={null} onOpen={noop} onAddGenres={noop} onAddWishlist={noop}
+              trayFor={() => ({ label: "Open card", act: "qc", ghost: true })} onAct={noop} />
           </div>
         </div>
         <h3>The card index.</h3>

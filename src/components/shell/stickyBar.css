@@ -1,0 +1,23 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The sticky slim bar (Contact list v13; ref design-refs/contact-list-v13.html `.stick`): a zero-height
+ * sticky row at the scroller's top; its inner panel slides down from above when stuck, on the page's
+ * tray colour at .94 with a blur. `--sbar-tray` is the tray as r, g, b.
+ */
+.sbar { position: sticky; top: 0; z-index: 20; height: 0; }
+.sbar-in {
+  --sbar-tray: 214, 223, 230;
+  position: absolute; left: 0; right: 0; top: 0;
+  transform: translateY(-100%); transition: transform 0.22s, visibility 0s 0.22s;
+  /* ⚠️ HIDDEN, NOT ONLY MOVED: a panel translated above the scroller is still "visible" to anything
+     that asks (a test harness, a find-in-page) and its inputs can be targeted while inert. Out of
+     sight it is visibility: hidden; the visibility flips after the slide, so the slide still shows. */
+  visibility: hidden;
+  background: rgba(var(--sbar-tray), 0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(28, 19, 15, 0.11);
+}
+.sbar.on .sbar-in { transform: none; visibility: visible; transition: transform 0.22s, visibility 0s; }
+.sbar-row { padding: 10px 0; display: flex; align-items: center; gap: 14px; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .sbar-in { transition: none; } }

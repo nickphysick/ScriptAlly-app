@@ -7,11 +7,9 @@
  * The counts come in from the page (letterCounts over the SAME filtered set the list shows,
  * §9), so a filter moves the strip and the dividers together — one derivation, two readers.
  *
- * ⚠️ THE STRIP IS STICKY AND THE MOCK'S IS NOT (§4: "The mock does not do this; build it").
- * It pins at the scroller's top — which IS "once the hero has scrolled behind the bar", since
- * the scroller starts below the bar — on the page ground, and the group dividers pin BELOW it:
- * both top offsets derive from the same three tokens (`--clv-idx-h/pt/pb`), so the two sticky
- * layers cannot drift apart (the number-owned-once law).
+ * ⚠️ v13 §6: THE STRIP IS NO LONGER STICKY. It sits inside the slate workspace, white, at the head
+ * of the rows (the mock's `.idx`); once the page scrolls, the sticky slim bar's mini A–Z (1441px
+ * and wider) is the index that stays in reach. v12's sticky strip and its three offset tokens retired.
  *
  * ⚠️ THE MARKED CELL IS DERIVED, NEVER AN OBSERVER'S MEMORY. The brief suggests an
  * IntersectionObserver on the dividers; the house law (CLAUDE.md, the IO-misses-are-permanent
@@ -27,7 +25,7 @@ export interface ContactIndexStripProps {
   /** the filtered list's size — the "All · N" cell (§9: the same set the list shows) */
   total: number;
   counts: ReadonlyMap<string, number>;
-  /** the marked letter (a pick, or the divider nearest the strip while scrolling) */
+  /** the marked letter (a pick, or the divider nearest the sticky bar while scrolling) */
   marked: string | null;
   onPick: (letter: string | null) => void;
 }

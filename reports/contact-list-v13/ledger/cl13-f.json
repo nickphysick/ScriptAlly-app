@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "CL13-F no filter line on an unfiltered list",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F live application: the option's count IS the rows shown",
+  "where": "1512",
+  "ok": true,
+  "detail": "33 rows vs count 33"
+ },
+ {
+  "lock": "CL13-F 'Showing n of N' and one chip",
+  "where": "1512",
+  "ok": true,
+  "detail": "Showing 33 of 37 Open now ✕ Clear all"
+ },
+ {
+  "lock": "CL13-F group headings read 'n of m'",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"2 OF 2\",\"3 OF 3\",\"1 OF 1\",\"1 OF 1\"]"
+ },
+ {
+  "lock": "CL13-F the search text is a chip too",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F a chip's ✕ removes just that one",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F nothing matches → the message and Clear",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F Clear returns the whole list and the line goes",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-F no filter line on an unfiltered list",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F live application: the option's count IS the rows shown",
+  "where": "1440",
+  "ok": true,
+  "detail": "33 rows vs count 33"
+ },
+ {
+  "lock": "CL13-F 'Showing n of N' and one chip",
+  "where": "1440",
+  "ok": true,
+  "detail": "Showing 33 of 37 Open now ✕ Clear all"
+ },
+ {
+  "lock": "CL13-F group headings read 'n of m'",
+  "where": "1440",
+  "ok": true,
+  "detail": "[\"2 OF 2\",\"3 OF 3\",\"1 OF 1\",\"1 OF 1\"]"
+ },
+ {
+  "lock": "CL13-F the search text is a chip too",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F a chip's ✕ removes just that one",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F nothing matches → the message and Clear",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F Clear returns the whole list and the line goes",
+  "where": "1440",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1440",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL13-F no filter line on an unfiltered list",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F live application: the option's count IS the rows shown",
+  "where": "1280",
+  "ok": true,
+  "detail": "33 rows vs count 33"
+ },
+ {
+  "lock": "CL13-F 'Showing n of N' and one chip",
+  "where": "1280",
+  "ok": true,
+  "detail": "Showing 33 of 37 Open now ✕ Clear all"
+ },
+ {
+  "lock": "CL13-F group headings read 'n of m'",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"2 OF 2\",\"3 OF 3\",\"1 OF 1\",\"1 OF 1\"]"
+ },
+ {
+  "lock": "CL13-F the search text is a chip too",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F a chip's ✕ removes just that one",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F nothing matches → the message and Clear",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL13-F Clear returns the whole list and the line goes",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]
