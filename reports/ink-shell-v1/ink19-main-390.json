@@ -1,0 +1,251 @@
+{
+  "/dashboard": {
+    ".ws-app": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-main": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-mobilebar": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 52,
+      "display": "block",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-window": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-wbody": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px 0px 100px"
+    },
+    ".ws-panel": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(230, 228, 224)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-pagebar": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px 24px"
+    },
+    ".sa-betastrip": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 71,
+      "display": "flex",
+      "bg": "rgb(250, 240, 234)",
+      "radius": "0px",
+      "pad": "8px 12px"
+    },
+    ".sa-tabbar, [data-shell='tabbar']": null
+  },
+  "/queries": {
+    ".ws-app": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-main": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-mobilebar": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 52,
+      "display": "block",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-window": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-wbody": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px 0px 100px"
+    },
+    ".ws-panel": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(230, 228, 224)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-pagebar": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px 24px"
+    },
+    ".sa-betastrip": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 71,
+      "display": "flex",
+      "bg": "rgb(250, 240, 234)",
+      "radius": "0px",
+      "pad": "8px 12px"
+    },
+    ".sa-tabbar, [data-shell='tabbar']": null
+  },
+  "/todo": {
+    ".ws-app": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-main": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-mobilebar": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 52,
+      "display": "block",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-window": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-wbody": {
+      "x": 0,
+      "y": 71,
+      "w": 390,
+      "h": 773,
+      "display": "flex",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "pad": "0px 0px 100px"
+    },
+    ".ws-panel": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(230, 228, 224)",
+      "radius": "0px",
+      "pad": "0px"
+    },
+    ".ws-pagebar": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "bg": "rgb(243, 242, 240)",
+      "radius": "0px",
+      "pad": "0px 24px"
+    },
+    ".sa-betastrip": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 71,
+      "display": "flex",
+      "bg": "rgb(250, 240, 234)",
+      "radius": "0px",
+      "pad": "8px 12px"
+    },
+    ".sa-tabbar, [data-shell='tabbar']": null
+  }
+}

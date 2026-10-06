@@ -329,8 +329,12 @@
     letter-spacing: 0;
     color: var(--ink-cream);
   }
+  /* ⚠️ THE TOGGLE SHRINKS, AS THE REF'S DOES. The ref states 28px but no `flex: none`, so in its own
+     render flexbox narrows it to its 16px icon (measured: 216.9–232.9) and the row — mark, wordmark,
+     BETA, toggle — fits its 220px. Held at 28 it overflowed the row by 11px into the sheet's gutter. */
   .ws-logo .sb-toggle {
-    flex: none;
+    flex: 0 1 28px;
+    min-width: 16px;
     margin-left: auto;
     width: 28px;
     height: 28px;
@@ -875,6 +879,10 @@
     right: auto;
     bottom: calc(var(--ink-sheet-b, 0px) + 20px);
   }
+  /* ⚠️ THE PANEL OPENS RIGHTWARDS FROM THAT CORNER. It hung off the dock's RIGHT edge and rose above
+     it (built for the old bottom-right FAB), so anchored at the sheet's left it spread back over the
+     sidebar and covered the very button that toggles it (INK13 found this). */
+  :root .sa-fbdock .sa-fbpanel { left: 0; right: auto; bottom: 0; }
 
   /* ⚠️ TOASTS RISE AT THE BOTTOM CENTRE OF THE SHEET, AS AN INK PILL WITH CREAM TEXT. Centred with
      left/right on the sheet's edges and `margin: auto` on a fit-content box — NEVER `translateX(-50%)`:
