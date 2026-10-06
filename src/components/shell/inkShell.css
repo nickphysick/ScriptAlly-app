@@ -298,3 +298,415 @@
   .ws-pagebar .ws-backapp:hover { background: rgba(var(--ink-cream-rgb), 0.08); border-color: rgba(var(--ink-cream-rgb), 0.22); color: var(--ink-cream-92); }
   .ws-pagebar .ws-esc { border-color: rgba(var(--ink-cream-rgb), 0.16); color: var(--ink-cream-42); }
 }
+
+@media (min-width: 768px) {
+
+  /* ── Phase 3 · the sidebar ───────────────────────────────────────────────────────────────────── */
+
+  /* ⚠️ THE PIN'S RHYTHM IS MARGINS NOW, NOT A FLEX `gap`. The ref spaces the logo row, the selector, the
+     group labels and the rows by different amounts (16 · 24/22 · 7 · 2), which a single gap cannot say. */
+  .ws-pin { gap: 0; padding: 16px 14px 12px; color: var(--ink-cream-66); }
+
+  /* the logo row: mark · wordmark · BETA · toggle */
+  .ws-logo {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 0 0 6px;
+  }
+  .ws-logo .ws-brand { flex: none; width: auto; padding: 0; gap: 8px; }
+  .ws-logo .ws-bmark { width: 34px; height: 34px; transition: opacity 0.16s ease; }
+  /* ⚠️ line-height 1.3, not the ref's inherited 1 — "QueryHawk" has a descender, and the box clips */
+  .ws-logo .ws-bwm {
+    margin-left: 0;
+    font-family: var(--sp-serif);
+    font-weight: 600;
+    font-size: 18.5px;
+    line-height: 1.3;
+    letter-spacing: 0;
+    color: var(--ink-cream);
+  }
+  .ws-logo .sb-toggle {
+    flex: none;
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    color: var(--ink-cream-42);
+    cursor: pointer;
+    transition: opacity 0.16s ease, background-color 0.14s ease, color 0.14s ease;
+  }
+  .ws-logo .sb-toggle:hover { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+
+  /* ── the manuscript selector: a translucent tile ── */
+  .ws-ms--side { margin-top: 16px; width: 100%; }
+  .ws-ms--side .ws-ms-btn {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(var(--ink-cream-rgb), 0.06);
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.10);
+    color: var(--ink-cream);
+    text-align: left;
+    transition: padding 0.24s var(--ink-ease), background-color 0.24s ease;
+  }
+  .ws-ms--side .ws-ms-btn:hover { background: rgba(var(--ink-cream-rgb), 0.09); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.16); }
+  .ws-ms--side.is-open .ws-ms-btn { box-shadow: inset 0 0 0 1.5px rgba(var(--ink-cream-rgb), 0.42); }
+  .ws-ms--side .ws-ms-tx { flex: 1; min-width: 0; gap: 3px; transition: opacity 0.16s ease; }
+  .ws-ms--side .ws-ms-t {
+    display: block;
+    font-family: var(--sp-type);
+    font-weight: 400;
+    font-size: 13.5px;
+    line-height: 1.3;
+    color: var(--ink-cream);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ws-ms--side .ws-ms-m {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-cream-42);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ws-ms--side .ws-ms-m em { font-style: normal; color: var(--ink-terra); }
+  .ws-ms--side .ws-ms-chev { color: var(--ink-cream-42); transform: none; transition: opacity 0.16s ease; }
+  .ws-ms--side.is-open .ws-ms-chev { transform: none; }
+  .ws-ms--side .ws-ms-cov--tile { width: 30px; height: 40px; }
+  .ws-ms--side .ws-ms-cov--img { border-radius: 3px; box-shadow: 0 2px 4px rgba(var(--ink-shell-rgb), 0.5); }
+
+  /* the portalled menu is paper, opening under the tile (or beside it, collapsed) */
+  .ws-ms-menu--port {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    z-index: 86;
+    transform-origin: top left;
+    box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3);
+  }
+  .ws-ms-menu--port[data-open="true"] {
+    opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+    transition: opacity 0.16s ease, transform 0.18s var(--ink-ease), visibility 0s;
+  }
+
+  /* ── the nav ── */
+  /* ⚠️ THE ROWS' 2px IS THEIR OWN `margin-bottom`, so the nav's flex `gap` (2px) goes to 0 — the two
+     together doubled the rhythm and cost 30px of a column that has none to spare. */
+  .ws-nav { gap: 0; }
+  .ws-ni .ws-lbl { margin-left: 11px; }
+  .ws-glabel {
+    margin: 22px 10px 7px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8.5px;
+    letter-spacing: 0.18em;
+    color: rgba(var(--ink-cream-rgb), 0.36);
+    transition: opacity 0.16s ease, height 0.24s var(--ink-ease), margin 0.24s var(--ink-ease);
+  }
+  .ws-nav > .ws-glabel:first-child { margin-top: 24px; }
+  /* no rules between groups — the spacing says it */
+  .ws-glabel::after { content: none; }
+  .ws-ni {
+    height: 33px;
+    margin-bottom: 2px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 15px;
+    color: var(--ink-cream-66);
+  }
+  .ws-ni .ws-ic { opacity: 0.55; }
+  .ws-ni .ws-ic svg { width: 15px; height: 15px; }
+  .ws-ni:not(.on):hover { background: rgba(var(--ink-cream-rgb), 0.06); color: var(--ink-cream-92); }
+  .ws-ni:not(.on):active { background: rgba(var(--ink-cream-rgb), 0.11); }
+  .ws-ni:hover .ws-ic { opacity: 0.85; }
+  /* ⚠️ THE SELECTED ROW IS A WASH, A 2px TERRACOTTA EDGE AND A TERRACOTTA ICON — the anthracite pill
+     retires (INK11). The edge is the row's own `::before`, inset on its left. */
+  .ws-ni.on {
+    background: rgba(var(--ink-cream-rgb), 0.09);
+    color: var(--ink-bright);
+    font-weight: 600;
+  }
+  .ws-ni.on::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--ink-terra);
+  }
+  .ws-ni.on .ws-ic { opacity: 1; color: var(--ink-terra); }
+  /* "needs you": the row goes bold and full-strength; its count is a terracotta pill with ink figures */
+  .ws-ni.att { color: var(--ink-bright); font-weight: 600; }
+  .ws-ct {
+    flex: none;
+    margin-left: auto;
+    box-sizing: border-box;
+    min-width: 22px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: var(--ink-terra);
+    color: var(--ink-shell);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+    transition: all 0.24s var(--ink-ease);
+  }
+
+  /* ── the founding-member feedback card, pinned above the foot ── */
+  /* ⚠️ NO TOP PAD (the ref has 12): the nav above is the grower and ends where the card begins, so the
+     pad bought nothing visible and cost 12px of the nav's height. (The fold threshold below is why.) */
+  .ws-fbk { flex: none; margin-top: auto; margin-bottom: 12px; padding-top: 0; }
+  /* the nav no longer grows into the slack — the card's `margin-top: auto` takes it, so the card sits
+     on the foot whatever the nav's length */
+  .ws-fbk ~ .ws-pfoot { margin-top: 0; }
+  .ws-fbc {
+    position: relative;
+    padding: 12px 12px 12px 13px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(var(--ink-terra-rgb), 0.16), rgba(var(--ink-terra-rgb), 0.08));
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-terra-rgb), 0.32);
+    white-space: normal;
+  }
+  .ws-fbm {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--ink-terra);
+  }
+  .ws-fbh {
+    display: block;
+    margin-top: 5px;
+    font-family: var(--sp-type);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--ink-cream);
+  }
+  .ws-fbl {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--sp-serif);
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--ink-cream-66);
+  }
+  .ws-fbtn {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 10px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--ink-terra);
+    color: var(--ink-shell);
+    font-family: var(--sp-serif);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter 0.14s ease;
+  }
+  .ws-fbtn:hover { filter: brightness(1.06); }
+  .ws-fbtn span, .ws-fbb span { font-family: inherit; }
+  .ws-fbb, .ws-fbi { display: none; }
+  .ws-fbb {
+    box-sizing: border-box;
+    width: 100%;
+    align-items: center;
+    gap: 9px;
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--ink-terra);
+    color: var(--ink-cream);
+    font-family: var(--sp-serif);
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+  .ws-fbb svg { width: 16px; height: 16px; color: var(--ink-terra); flex: none; }
+  .ws-fbb em {
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(var(--ink-terra-rgb), 0.18);
+    color: var(--ink-terra);
+    font-family: "JetBrains Mono", monospace;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+  }
+  .ws-fbi {
+    position: relative;
+    width: 42px;
+    height: 38px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    place-items: center;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--ink-terra);
+    color: var(--ink-terra);
+    cursor: pointer;
+  }
+  .ws-fbi svg { width: 17px; height: 17px; }
+  .ws-fbi i {
+    position: absolute;
+    right: -3px;
+    top: -3px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ink-terra);
+    box-shadow: 0 0 0 2px var(--ink-shell);
+  }
+
+  /* ── the foot: avatar, name and plan, the gear ── */
+  .ws-pfoot { margin-top: auto; }
+  .ws-pfrow { border-top: 1px solid rgba(var(--ink-cream-rgb), 0.08); padding: 12px 0 2px; }
+  .ws-uacct { color: var(--ink-cream); padding: 0 8px; border-radius: 9px; }
+  .ws-uacct:hover { background: rgba(var(--ink-cream-rgb), 0.06); }
+  .ws-av {
+    width: 32px;
+    height: 32px;
+    background: rgba(var(--ink-cream-rgb), 0.10);
+    box-shadow: none;
+    color: var(--ink-cream);
+  }
+  .ws-n { font-size: 14.5px; color: var(--ink-cream); line-height: 1.3; }
+  .ws-pl { font-size: 12px; color: var(--ink-cream-42); }
+  .ws-gear { color: var(--ink-cream-66); background: transparent; }
+  .ws-gear:hover { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+
+  /* ── settings mode's rail, on the same ink ── */
+  .ws-panel .set-backrail { color: var(--ink-cream-66); }
+  .ws-panel .set-backrail:hover { background: rgba(var(--ink-cream-rgb), 0.06); color: var(--ink-cream-92); }
+  .ws-panel .set-railhead { color: var(--ink-cream); }
+  .ws-panel .set-railrule { background: rgba(var(--ink-cream-rgb), 0.12); }
+  .ws-panel .set-railitem { color: var(--ink-cream-66); }
+  .ws-panel .set-railitem:hover:not([aria-selected="true"]) { background: rgba(var(--ink-cream-rgb), 0.06); color: var(--ink-cream-92); }
+  .ws-panel .set-railitem[aria-selected="true"] {
+    position: relative;
+    background: rgba(var(--ink-cream-rgb), 0.09);
+    color: var(--ink-bright);
+  }
+  .ws-panel .set-railitem[aria-selected="true"] svg { color: var(--ink-terra); }
+  .ws-panel .set-planstrip { background: rgba(var(--ink-cream-rgb), 0.06); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.10); border-color: transparent; }
+  .ws-panel .set-planstrip > svg, .ws-panel .set-planv { color: var(--ink-cream); }
+  .ws-panel .set-plank, .ws-panel .set-plannote { color: var(--ink-cream-42); }
+
+  /* ── the rail tips: cream on ink ── */
+  .dk-tip--rail {
+    background: var(--ink-shell);
+    border: 1px solid rgba(var(--ink-cream-rgb), 0.12);
+    box-shadow: 0 8px 22px rgba(var(--ink-shell-rgb), 0.4);
+    color: var(--ink-cream);
+  }
+  .dk-tip--rail .dk-railsub { color: var(--ink-cream-66); }
+  .dk-tip--rail .dk-railkbd { color: var(--ink-cream-42); }
+}
+
+/* ⚠️ THE CARD FOLDS TO THE OUTLINED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
+   MEASURED DEVIATION. The rule's intent is "fold when the column cannot hold the card", and measured
+   (1440 wide, eleven rows, five labels, the selector, the card and the foot) that point is ~917px: at 900
+   the literal 820 left the nav 17px short and Noteboard half under the card. The reference's own column
+   (~918px of content in an 878px frame) has the same shortfall. 820 and below still get the button. */
+@media (min-width: 768px) and (max-height: 920px) {
+  .ws-fbc { display: none; }
+  .ws-fbb { display: flex; }
+}
+
+@media (min-width: 768px) {
+  /* ── the title-page cover: a typed title page with a terracotta paperclip, all CSS, no asset ──
+     ⚠️ It may render inside the portalled menu (outside `.ws-app`), so it is not scoped to the panel. */
+  .ws-tp {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    border-radius: 2px;
+    background: var(--ink-tp-paper);
+    box-shadow: 0 1px 3px rgba(var(--ink-shell-rgb), 0.55);
+    overflow: hidden;
+  }
+  .ws-tp.ws-ms-cov--tile { width: 30px; height: 40px; }
+  .ws-tp.ws-ms-cov--row { width: 28px; height: 38px; }
+  .ws-tp::after { content: none; }
+  /* the typed rule along the head of the page */
+  .ws-tp::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 4px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, rgba(var(--ink-shell-rgb), 0.35) 0 2px, transparent 2px 3px);
+  }
+  .ws-tp i { position: absolute; display: block; border-radius: 1px; }
+  .ws-tp-t1, .ws-tp-t2 { height: 2px; background: var(--ink-on-light); }
+  .ws-tp-t1 { left: 7px; right: 7px; top: 15px; }
+  .ws-tp-t2 { left: 10px; right: 10px; top: 19px; }
+  .ws-tp-by { left: 11px; right: 11px; top: 25px; height: 1.5px; background: rgba(var(--ink-shell-rgb), 0.4); }
+  .ws-tp .ws-tp-clip {
+    top: -3px;
+    right: 6px;
+    width: 4px;
+    height: 11px;
+    box-sizing: border-box;
+    border: 1.4px solid var(--ink-tp-clip);
+    border-radius: 3px;
+    background: transparent;
+  }
+}
+
+@media (min-width: 768px) {
+  /* "Free plan · Upgrade" — the upgrade folded into the plan line, a quiet terracotta link */
+  .ws-acctline { display: flex; align-items: baseline; min-width: 0; white-space: nowrap; }
+  .ws-pldot { font-size: 12px; color: var(--ink-cream-42); white-space: pre; }
+  .ws-uplink {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-terra);
+    font-family: var(--sp-serif);
+    font-size: 12px;
+    line-height: 1.45;
+    cursor: pointer;
+  }
+  .ws-uplink:hover { text-decoration: underline; text-underline-offset: 2px; }
+}

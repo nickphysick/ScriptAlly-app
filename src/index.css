@@ -216,6 +216,9 @@
   --ink-on-light: #1c130f;
   /* the house ease, for the shell's own motion */
   --ink-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+  /* the title-page cover — the paper, its typed lines, and the deeper terracotta of the paperclip */
+  --ink-tp-paper: #f6f1e7;
+  --ink-tp-clip: #c0705a;
   /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
      and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
      its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */

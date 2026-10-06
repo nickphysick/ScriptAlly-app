@@ -203,10 +203,9 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
     expect(rule(".ws-ms-m")).toContain("font-size: 8px");         // switcher standing line
     expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
     expect(rule(".ws-pl")).toContain("font-size: 11.5px");        // plan line
-    // ⚠️ `.ws-upgrow` since Option D — the pill left the account ROW to become a full-width
-    // sibling beneath it, which is what bought the name its width. The SIZE is unchanged at 12px,
-    // which is what this table guards; only the selector moved.
-    expect(rule(".ws-upgrow")).toContain("font-size: 12px");       // upgrade pill
+    // ⚠️ `.ws-upgrow` IS RETIRED (ink shell v1): "Upgrade" folds into the plan line as `.ws-uplink`
+    // (inkShell.css, 12px). Its rules are deleted with it, so the row cannot quietly render again.
+    expect(cssRules).not.toMatch(/\.ws-upgrow\b/);
     expect(rule(".ws-bwm")).toContain("font-size: 20px");          // wordmark, beside a 30px mark
     expect(rule(".ws-ic svg")).toContain("width: 16px");          // nav icons
   });
@@ -445,7 +444,15 @@ describe("the sidebar", () => {
     expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*\{!sidebar\.collapsed && \(\s*<button\s+type="button"\s*$/);
     expect(foot.slice(gear)).toContain('aria-label="Settings"');
     expect(foot.slice(gear)).toContain('onClick={() => go("/account")}');
-    expect(foot).not.toContain("stopPropagation");
+    /* ⚠️ RETARGETED (ink shell v1): the GEAR needs no stopPropagation, being a sibling — still true.
+       The one stopPropagation in the foot is the plan line's "Upgrade" link, which sits INSIDE the row
+       that opens the account menu (the folded upgrade; see WorkspaceShell). Asserted as exactly that. */
+    expect(foot.slice(gear)).not.toContain("stopPropagation");
+    const stops = foot.match(/stopPropagation/g) ?? [];
+    expect(stops.length, "stopPropagation calls in the foot").toBeLessThanOrEqual(2);
+    for (const m of foot.matchAll(/stopPropagation/g)) {
+      expect(foot.slice(Math.max(0, m.index! - 260), m.index!), "a stopPropagation outside the Upgrade link").toContain('className="ws-uplink"');
+    }
     expect(rule(".ws-pfrow")).toContain("border-top: 1px solid var(--shell-hairline)");
     expect(rule(".ws-gear")).toContain("width: 30px; height: 30px");
     expect(rule(".ws-gear")).toContain("border-radius: 50%");

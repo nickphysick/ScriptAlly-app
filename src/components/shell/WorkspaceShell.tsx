@@ -774,7 +774,29 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   81px for a name, nine characters, and no amount of ellipsis styling buys width. */}
               <span className="ws-utext">
                 <span className="ws-n">{formatSidebarName(name)}</span>
-                <span className="ws-acctline"><span className="ws-pl">{plan.label}</span></span>
+                <span className="ws-acctline">
+                  <span className="ws-pl">{plan.label}</span>
+                  {/* ⚠️ INK SHELL v1 FOLDS "UPGRADE" BACK INTO THE PLAN LINE. The full-width row cost 44px
+                      the ink sidebar does not have: with the reference's feedback card above the foot,
+                      the nav needs ~896px of a 900px window and the row pushed the whole TASKS group
+                      under the card. The plan is the SECOND line, so the name keeps the first line's
+                      full width (the starvation that split the row out was the pill sharing the name's
+                      line). It stops propagation because it sits inside the row that opens the account
+                      menu; that menu and Settings remain the other ways to the upgrade. */}
+                  {plan.upgrade && !sidebar.collapsed && (
+                    <>
+                      <span className="ws-pldot" aria-hidden="true"> · </span>
+                      <button
+                        type="button"
+                        className="ws-uplink"
+                        onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        Upgrade
+                      </button>
+                    </>
+                  )}
+                </span>
               </span>
             </div>
             {!sidebar.collapsed && (
@@ -791,27 +813,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               </button>
             )}
             </div>
-            {/* ⚠️ ROW 2 — A SIBLING OF THE ACCOUNT ROW, NOT A CHILD, and that is the whole fix: a
-                full-width pill beneath cannot compete with the name for a line's width. It is
-                FILLED rather than ghost now because it finally has the width to carry a fill.
-
-                ⚠️ AND IT IS OUTSIDE THE ROW'S CLICK TARGET, so it no longer needs to stop
-                propagation — the old `stopPropagation` existed only because a pill nested inside a
-                row whose handler opened Settings would send the upsell to the one page that is not
-                the upgrade flow. Being a sibling retires the hazard rather than guarding it.
-
-                ⚠️ REMOVED ENTIRELY WHEN COLLAPSED, never squeezed into a 52px stub — Step 0
-                confirmed the upgrade path is reachable from the account menu and from Settings
-                ("View plans & upgrade"), so nothing becomes unreachable at 72px. */}
-            {plan.upgrade && !sidebar.collapsed && (
-              <button
-                type="button"
-                className="ws-upgrow"
-                onClick={() => onUpgrade?.()}
-              >
-                Upgrade
-              </button>
-            )}
+            {/* ⚠️ THE FULL-WIDTH UPGRADE ROW (`.ws-upgrow`) IS RETIRED by ink shell v1 — see the plan line
+                above, where "Upgrade" now sits. */}
           </div>
         </div>
 

@@ -146,14 +146,19 @@ describe("the rendered states", () => {
    * whole budget fix: sharing a line with an ~88px pill left the name about 81px, nine characters.
    * Stacked, the name's box measures 142px (browser-measured; see lib/displayName).
    */
-  it("⚠️ the Upgrade pill is stacked BELOW the account row, not inside it", () => {
+  /* ⚠️ RETARGETED (ink shell v1): the full-width row retires and "Upgrade" folds into the PLAN line —
+     the second line, so the name keeps line one's full width (the starvation Option D fixed was the pill
+     sharing the NAME's line). The row cost 44px the ink sidebar needs for its feedback card. */
+  it("⚠️ Upgrade sits in the plan line, never on the name's line, and the row is gone", () => {
     const html = renderShell(0);
-    const rowAt = html.indexOf('class="ws-uacct"');
-    const rowEnds = html.indexOf("</div>", html.indexOf('class="ws-utext"'));
-    const pillAt = html.indexOf("ws-upgrow");
-    expect(rowAt).toBeGreaterThan(-1);
-    expect(pillAt).toBeGreaterThan(rowEnds); // outside the row's markup, not nested in it
-    expect(html).not.toContain('class="ws-upg"'); // the inline pill is gone, not restyled
+    const name = html.indexOf('class="ws-n"');
+    const line = html.indexOf('class="ws-acctline"');
+    const link = html.indexOf('class="ws-uplink"');
+    expect(name).toBeGreaterThan(-1);
+    expect(line).toBeGreaterThan(name);
+    expect(link).toBeGreaterThan(line);
+    expect(html).not.toContain("ws-upgrow");
+    expect(html).not.toContain('class="ws-upg"');
   });
 
   /* ⚠️ THE PILL IS REMOVED AT 72px, NOT SQUEEZED. Step 0 confirmed upgrade stays reachable from
@@ -163,6 +168,7 @@ describe("the rendered states", () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
     try {
       expect(renderShell(0)).not.toContain("ws-upgrow");
+      expect(renderShell(0)).not.toContain("ws-uplink");
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }
