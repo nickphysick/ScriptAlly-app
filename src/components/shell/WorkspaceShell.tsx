@@ -36,7 +36,7 @@ import {
 } from "../../lib/workspaceShell";
 import { CountChip, searchShortcut } from "./primitives";
 import { BarSwitcher } from "./BarSwitcher";
-import { FEEDBACK_FAB } from "../../lib/beta";
+import { BETA_MODE, BETA_PILL, FEEDBACK_FAB } from "../../lib/beta";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
@@ -52,6 +52,9 @@ import { UserPlan } from "../../types";
 import { APP_MARK, artUrl } from "../../lib/appArt";
 import "./primitives.css";
 import "./workspaceShell.css";
+/* ⚠️ AFTER workspaceShell.css — the ink shell overrides it by order at equal specificity. */
+import "./inkShell.css";
+import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
@@ -479,6 +482,28 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      name survive into a page that has not been scrolled. */
   useEffect(() => { setBarScrolled(false); setBarNamed(false); }, [pathname]);
 
+  /**
+   * INK1 — THE BROWSER'S OWN CHROME TAKES THE SHELL'S INK, WHILE THE SHELL IS ON SCREEN AND ONLY AT
+   * ≥768px. `index.html` states `#e7e0d5` for every tier, marketing included; changing the file would
+   * retone the marketing pages and the phone's browser bar, both out of bounds. So the shell sets the
+   * meta while mounted, follows the breakpoint, and puts the original back when it unmounts.
+   */
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const created = !meta;
+    if (!meta) { meta = document.createElement("meta"); meta.name = "theme-color"; document.head.appendChild(meta); }
+    const original = meta.content;
+    const mq = window.matchMedia?.("(min-width: 768px)");
+    const apply = () => { meta!.content = !mq || mq.matches ? INK_THEME_COLOR : original; };
+    apply();
+    mq?.addEventListener?.("change", apply);
+    return () => {
+      mq?.removeEventListener?.("change", apply);
+      if (created) meta!.remove(); else meta!.content = original;
+    };
+  }, []);
+
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
@@ -528,6 +553,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
             <span className="ws-bwm">QueryHawk</span>
           </button>
+          {/* ⚠️ THE BETA STRIP RETIRES AT ≥768px (ink shell v1, Phase 1) and this chip says what it said.
+              Its other job — "tell us when you find one" — is the sidebar's feedback card now. */}
+          {BETA_MODE && <span className="ws-beta" data-shell="beta">{BETA_PILL.toUpperCase()}</span>}
 
           {/* ⚠️ THE MANUSCRIPT CARD HAS MOVED TO THE BAR (page header v2 §1) — `BarSwitcher`. There is
               exactly one switcher on a desktop page, and it is not in the sidebar. */}

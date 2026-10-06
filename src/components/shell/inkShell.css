@@ -1,0 +1,71 @@
+/* ══ THE INK SHELL (ink shell v1, 6 Oct; ref design-refs/shell/ink-shell-v1.html) ═══════════════════
+   The window is ink: the sidebar, the bar and the frame around the sheet are one ground, and the sheet
+   — each page's paper — is the only light surface. Every page renders inside it exactly as before.
+
+   ⚠️ EVERYTHING HERE IS DESKTOP-ONLY, AND THE MEDIA QUERY IS THE GUARD, NOT A CONVENIENCE. Below 768px
+   the panel is hidden, the bar is hidden and the mobile chrome renders in their place; INK19 holds the
+   phone's computed layout to `main`'s. A rule added outside these blocks reaches the phone.
+
+   ⚠️ THIS SHEET IS IMPORTED AFTER workspaceShell.css AND MOSTLY WINS BY ORDER AT EQUAL SPECIFICITY.
+   Where a workspace rule is more specific (the collapsed state's `.sb-collapsed …`, the dashboard's
+   `.dash-mode …`), the override here names the same chain rather than reaching for `!important`.
+
+   ⚠️ NO LITERAL COLOUR IN COMPONENT CSS: every colour below reads an `--ink-*` token (index.css) or the
+   cream/terracotta channels with an alpha. ═════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+  /* ── Phase 1 · the frame ─────────────────────────────────────────────────────────────────────── */
+
+  /* ⚠️ ONE PAPER, DECLARED WHERE THE BAR AND THE SHEET BOTH SIT. `.ws-main` holds the bar (and so the
+     tab) and the window; a route that retones `--ws-page` on `.ws-main` (the dashboard, the Query
+     Centre) retones the tab, its fillet and the sheet together, because all three read this. */
+  .ws-main { --ink-sheet: var(--ws-page); }
+
+  .ws-app { background: var(--ink-shell); }
+  /* ⚠️ THE FRAME PAINTS ITS GROUND INLINE (`--shell-chrome`, AppShell), and an inline style beats any
+     class — hence `!important` on this one rule. It shows wherever the workspace does not cover it. */
+  .sa-shellframe:has(> .sv2-app > .ws-app) { background-color: var(--ink-shell) !important; }
+
+  .ws-panel {
+    background: var(--ink-shell);
+    box-shadow: none;
+  }
+
+  /* the main column is ink; the sheet inside it is the paper */
+  .ws-main { background: var(--ink-shell); }
+
+  /* ⚠️ THE SHEET IS INSET 8 FROM THE RIGHT AND THE BOTTOM AND NOT AT THE TOP — the bar sits directly on
+     it, and the folder tab grows out of its square top-left corner. The inset is the wrapper's padding
+     so the window keeps filling its slot (`flex: 1; min-height: 0`) and every page's height chain is
+     unchanged. */
+  .ws-winwrap { padding: 0 8px 8px 0; box-sizing: border-box; }
+  .ws-window {
+    background: var(--ink-sheet);
+    border-radius: 0 12px 12px 12px;
+  }
+
+  /* ⚠️ THE BETA STRIP RETIRES ON THE DESKTOP AND STAYS ON THE PHONE. It carried four things: the Beta
+     pill (now the chip beside the wordmark), its sentence, "tell us when you find one" (the sidebar's
+     feedback card now opens the same panel) and a session dismiss. The known-issues link was never
+     wired. Below 768px the strip is the phone's only route to the feedback panel and is untouched. */
+  .sa-betastrip { display: none; }
+
+  /* the BETA chip, beside the wordmark — outlined, never filled */
+  .ws-beta {
+    flex: none;
+    margin-left: 2px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.22);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8px;
+    line-height: 1.25;
+    letter-spacing: 0.16em;
+    color: var(--ink-cream-42);
+    transition: opacity 0.16s ease;
+  }
+}
+/* the chip exists only in the desktop sidebar */
+@media (max-width: 767px) { .ws-beta { display: none; } }

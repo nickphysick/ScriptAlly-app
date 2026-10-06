@@ -191,6 +191,31 @@
      bounds; its one app reader (`.ws-app`) reads `--ws-page` now, so nothing in the app shows it. */
   --ws-page-rgb: 243, 242, 240;
   --ws-page: rgb(var(--ws-page-rgb));
+  /* ══ THE INK SHELL (ink shell v1, 6 Oct; ref design-refs/shell/ink-shell-v1.html) ══════════════════
+     The frame, the sidebar and the bar are one ink ground; the sheet is the only light surface. These
+     tokens are NEW and are the only values the ink chrome reads — every older shell token keeps its
+     value, because pages read several of them for their own content (`--ws-page`, `--ws-window`,
+     `--sp-anthracite`, `--shell-active-bg/-fg`) and re-valuing one would retone a page.
+     ⚠️ ONE PAPER: the tab, its fillet and the sheet all read `--ink-sheet`, declared on `.ws-main`
+     (inkShell.css) as `var(--ws-page)` so a route that retones its ground retones all three at once.
+     ⚠️ THE CREAM TIERS ARE CHANNELS PLUS ALPHA, never `color-mix()` (banned at runtime). The named
+     tiers are the ref's; the in-between alphas (6/9/10/16/36%) read the same channels. */
+  --ink-shell: #1b2433;
+  --ink-shell-rgb: 27, 36, 51;
+  --ink-cream: #f4eee5;
+  --ink-cream-rgb: 244, 238, 229;
+  --ink-cream-92: rgba(244, 238, 229, 0.92);
+  --ink-cream-66: rgba(244, 238, 229, 0.66);
+  --ink-cream-42: rgba(244, 238, 229, 0.42);
+  --ink-cream-12: rgba(244, 238, 229, 0.12);
+  --ink-terra: #d9967a;
+  --ink-terra-rgb: 217, 150, 122;
+  /* the full-strength text the ref writes as #fffaf3 — cream at its brightest, on ink */
+  --ink-bright: #fffaf3;
+  /* the ink figures and labels that sit ON cream or terracotta (Log a query, the to-do pill) */
+  --ink-on-light: #1c130f;
+  /* the house ease, for the shell's own motion */
+  --ink-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
   /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
      and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
      its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */
