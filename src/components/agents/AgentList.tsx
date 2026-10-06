@@ -85,6 +85,7 @@ import { matchGenre } from "../../lib/genreMatch";
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut, shortcutLabel } from "../../lib/shortcuts";
+import { AppFooter } from "../shell/AppFooter";
 import { PageGuide } from "../shell/PageGuide";
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { useWindowCorner } from "../shell/useWindowCorner";
@@ -1069,6 +1070,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </div>
         )}
         </div>
+        {/* v13 §9 — THE APP FOOTER, the group's last row (the Query Centre's arrangement), so its content
+            box is the column's. Over a list only: the empty state stays as v12 built it (§1.10). */}
+        {showList && <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
         </div>
         </>
         )}

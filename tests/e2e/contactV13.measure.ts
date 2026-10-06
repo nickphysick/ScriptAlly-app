@@ -8,7 +8,7 @@
  * its subject has FAILED: it reads null and says so.
  */
 import { expect, test } from "@playwright/test";
-import { AT_1512, INK, LOADED_ROW, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
+import { AT_1512, DIR, INK, LOADED_ROW, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
 import { openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
 
@@ -142,6 +142,12 @@ async function listState(page: import("@playwright/test").Page) {
     return JSON.stringify({ rows, ctl, line, strip, find });
   });
 }
+/** what differs between two listState snapshots — a red that names its part, not just "list changed" */
+function listDiff(a: string, b: string): string {
+  const A = JSON.parse(a) as Record<string, unknown>, B = JSON.parse(b) as Record<string, unknown>;
+  const keys = Object.keys(A).filter((k) => JSON.stringify(A[k]) !== JSON.stringify(B[k]));
+  return keys.length === 0 ? "same" : keys.map((k) => `${k}: ${JSON.stringify(A[k]).slice(0, 160)} → ${JSON.stringify(B[k]).slice(0, 160)}`).join(" | ");
+}
 const czState = (page: import("@playwright/test").Page) => page.evaluate(() => {
   const cz = [...document.querySelectorAll<HTMLElement>('.aglist [data-cz="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
   if (!cz) return null;
@@ -156,6 +162,7 @@ const czState = (page: import("@playwright/test").Page) => page.evaluate(() => {
 /* ── lock 3 · a figure fills the carousel and leaves the list identical ── */
 test("CL13-3 · figures fill the carousel, not the list", async ({ page }) => {
   const L = new Ledger("cl13-3");
+  let lsNow = "";
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
     const w = `${vp.width}`;
@@ -170,7 +177,7 @@ test("CL13-3 · figures fill the carousel, not the list", async ({ page }) => {
       L.check(`CL13-3 ${label}: the carousel holds exactly the figure's agents`, w, !!cz && cz.cards.length === fig, `${cz?.cards.length} cards vs figure ${fig}`);
       L.check(`CL13-3 ${label}: the head reads "${label} · ${fig}", the selector dims, Clear shows`, w, !!cz && cz.title === `${label} · ${fig}` && cz.pressed.length === 0 && cz.clear, JSON.stringify(cz));
       L.check(`CL13-3 ${label}: the cell is pressed`, w, (await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().getAttribute("aria-pressed")) === "true", "");
-      L.check(`CL13-3 ${label}: the list is IDENTICAL — rows, order, controls, filter line, index`, w, (await listState(page)) === before, "list changed");
+      L.check(`CL13-3 ${label}: the list is IDENTICAL — rows, order, controls, filter line, index`, w, (lsNow = await listState(page)) === before, listDiff(before, lsNow));
       /* pressing the figure again hands the carousel back */
       await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().click();
       await page.waitForTimeout(250);
@@ -187,7 +194,7 @@ test("CL13-3 · figures fill the carousel, not the list", async ({ page }) => {
     await page.waitForTimeout(200);
     const onNew = await czState(page);
     L.check("CL13-3 a selector choice clears the figure and shows its set", w, !!onNew && onNew.pressed.join() === "new" && !onNew.clear && (await page.locator('.aglist [data-cl13-fig="open"]').first().getAttribute("aria-pressed")) === "false", JSON.stringify(onNew));
-    L.check("CL13-3 after all of it, the list is still identical", w, (await listState(page)) === before, "list changed");
+    L.check("CL13-3 after all of it, the list is still identical", w, (lsNow = await listState(page)) === before, listDiff(before, lsNow));
     /* …and the other direction: narrowing the LIST leaves the carousel exactly as it was */
     await page.locator('.aglist [data-cz-set="fit"]').first().click();
     await page.waitForTimeout(200);
@@ -1197,4 +1204,49 @@ test("CL13-13 · page guide", async ({ page }) => {
   L.check("CL13-13 step 4 rings the Housekeeping tab and finishes with Got it", "1512", last.title === "Housekeeping" && last.btn === "Got it" && last.ring, JSON.stringify(last));
   await page.click(`${G} [data-qcv="guide-next"]`);
   L.done(10);
+});
+
+/* ── §9 · the footer, and the empty state as v12 built it ── */
+test("CL13-14 · footer and empty state", async ({ page }) => {
+  const L = new Ledger("cl13-14");
+  for (const vp of WIDTHS) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      const f = vis('.aglist [data-probe="app-footer"]'), fin = vis('.aglist [data-probe="app-footer-in"]');
+      const ws = vis('.aglist [data-wsp="contacts"]'), strip = vis('.aglist [data-cl13="strip"]');
+      const sc = f?.closest<HTMLElement>(".wpg-scroll");
+      const txt = f?.textContent ?? "";
+      return {
+        found: !!f, after: !!f && !!ws && f.getBoundingClientRect().top > ws.getBoundingClientRect().bottom,
+        /* the footer is the group's LAST row: nothing of the page's follows it in the scroller */
+        last: !!f && !!sc && [...sc.querySelectorAll<HTMLElement>(".clv-group > *")].every((e) => e === f || e.getBoundingClientRect().bottom <= f.getBoundingClientRect().top + 0.5),
+        fin: fin ? [fin.getBoundingClientRect().left, fin.getBoundingClientRect().width] : null,
+        col: strip ? [strip.getBoundingClientRect().left, strip.getBoundingClientRect().width] : null,
+        help: /Help centre/.test(txt), mail: /@/.test(txt),
+      };
+    });
+    L.check("CL13-14 the app footer follows the workspace, the group's last row", w, r.found && r.after && r.last, JSON.stringify(r));
+    L.check("CL13-14 its content box is the column's (the strip's x and width, ±1)", w, !!r.fin && !!r.col && near(r.fin[0], r.col[0], 1) && near(r.fin[1], r.col[1], 1), `${r.fin} vs ${r.col}`);
+    L.check("CL13-14 it is the shared footer (Help centre, the email)", w, r.help && r.mail, JSON.stringify(r));
+    await checkOverflow(page, L, w);
+  }
+  /* the empty state: no band, strip, carousel, list, tab or footer — v12's page, unchanged (§9) */
+  await openContacts(page, AT_1512);
+  await page.evaluate(() => { (window as unknown as { __SA_LH_COUNT?: number }).__SA_LH_COUNT = 0; window.dispatchEvent(new Event("sa:lh-count")); });
+  await page.locator(".aglist [data-clv-empty]").first().waitFor({ timeout: 8000 }).catch(() => {});
+  const e = await page.evaluate(() => {
+    const n = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].filter((x) => x.getBoundingClientRect().height > 0).length;
+    return { empty: n(".aglist [data-clv-empty]"), band: n(".aglist .ph--band"), strip: n('.aglist [data-cl13="strip"]'), cz: n('.aglist [data-cz="contacts"]'),
+      /* the empty state's own exhibition draws sample rows (v12 §4, by design); the LIST is any row outside it */
+      rows: [...document.querySelectorAll<HTMLElement>(".aglist [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0 && !x.closest("[data-clv-empty]")).length,
+      exhibitRows: [...document.querySelectorAll<HTMLElement>(".aglist [data-clv-empty] [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0).length, tab: n('[data-ftab="housekeeping"]'), footer: n('.aglist [data-probe="app-footer"]') };
+  });
+  L.check("CL13-14 the empty state shows, and none of the band, strip, carousel, list, tab or footer", "1512",
+    e.empty === 1 && e.exhibitRows > 0 && e.band === 0 && e.strip === 0 && e.cz === 0 && e.rows === 0 && e.tab === 0 && e.footer === 0, JSON.stringify(e));
+  await checkOverflow(page, L, "1512 empty");
+  await page.screenshot({ path: `${DIR}/empty-1512.png` });
+  await page.evaluate(() => { delete (window as unknown as { __SA_LH_COUNT?: number }).__SA_LH_COUNT; window.dispatchEvent(new Event("sa:lh-count")); });
+  L.done(14);
 });

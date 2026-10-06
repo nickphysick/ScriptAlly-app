@@ -79,6 +79,8 @@
 .clv-group > .cl13-strip { grid-column: 1 / -1; grid-row: 2; margin-top: var(--page-section-gap); }
 .clv-group > .cl13-cz { grid-column: 1 / -1; grid-row: 3; margin-top: var(--page-section-gap); min-width: 0; }
 .clv-group > .clv-main { grid-column: 1; grid-row: 4; padding-top: var(--page-section-gap); }
+/* v13 §9 — the app footer is the group's last row, so its content box is the column's (QC126-11's rule) */
+.clv-group > .af { grid-column: 1 / -1; grid-row: 5; min-width: 0; }
 /* v13 §2 — THE BAND'S DISC. The Archivist file is square on white, not pre-cut (the Query Centre's
    disc art is), so the circle is drawn here: 290 white, the drawing inset at 92% and nudged 4px down,
    the mock's `.disc`. ⚠️ `.ph-bdisc img` sets the shared art to 100%; this 0-2-1 rule wins honestly. */

@@ -9,8 +9,8 @@
  * two footers cannot come to disagree about what QueryHawk says about itself. `marketing.css` is NOT
  * imported: the tier styles itself under `.mk-scope`, and this footer has its own sheet.
  *
- * ⚠️ OPT-IN, LIKE THE PLATE WAS. A page mounts it at the foot of its own scroller; today only the Query
- * Centre does. "Help centre" stands where the marketing footer says "Open QueryHawk" — inside the app,
+ * ⚠️ OPT-IN, LIKE THE PLATE WAS. A page mounts it at the foot of its own scroller; today the Query Centre,
+ * Analytics and the Contact list do. "Help centre" stands where the marketing footer says "Open QueryHawk" — inside the app,
  * the app is already open.
  *
  * ⚠️ ITS CONTENT BOX IS THE CONTENT COLUMN'S, NOT THE WINDOW'S (QC126-11): the ground runs the main
