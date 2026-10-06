@@ -50,33 +50,32 @@ const shell = (collapsed = false) => {
   }
 };
 
-describe("SB1 — one capture control, in the sidebar, between the brand and the nav", () => {
-  it("exactly one, after the brand and before the nav; its main segment is named Log a query; the bar holds none", () => {
+/* ⚠️ SB1 RETARGETED (ink shell v1, Phase 2 — INK8): "Log a query" MOVED FROM THE SIDEBAR TO THE BAR.
+   The claim is unchanged in kind — exactly one capture control, never a copy — and its place inverts:
+   in the bar, and absent from the sidebar. In the bar there is no collapsed tile (the bar does not
+   narrow), so the collapsed case asserts the bar's split button survives the sidebar collapsing. */
+describe("SB1 — one capture control, in the bar, and none in the sidebar", () => {
+  it("exactly one, in the bar; its main segment is named Log a query; the sidebar holds none", () => {
     const html = shell();
     expect(html.match(/data-shell="capture"/g), "capture controls rendered").toHaveLength(1);
-    const brand = html.indexOf('class="ws-brand"');
-    const cap = html.indexOf('data-shell="capture"');
-    const nav = html.indexOf('<nav class="ws-nav"');
-    expect(brand).toBeGreaterThan(-1);
-    expect(cap).toBeGreaterThan(brand);
-    expect(nav).toBeGreaterThan(cap);
-    const capture = sliceBetween(html, 'data-shell="capture"', '<nav class="ws-nav"', "the capture control");
-    expect(capture).toMatch(/class="ws-capl"[^>]*>.*Log a query<\/span><\/button>/);
-    /* the bar: no capture control, no "+ New" */
     const bar = sliceBetween(html, 'data-probe="navrow"', "</header>", "the bar");
-    expect(bar).not.toContain("ws-cap");
-    expect(bar).not.toContain("Log a query");
+    expect(bar).toContain('data-shell="capture"');
+    expect(bar).toContain('data-placement="bar"');
+    expect(bar).toMatch(/class="ws-capl"[^>]*>.*Log a query<\/span><\/button>/);
     expect(bar).not.toContain("+ New");
+    const side = sliceBetween(html, 'id="ws-sidebar"', 'class="ws-main"', "the sidebar");
+    expect(side).not.toContain("ws-cap");
+    expect(side).not.toContain("Log a query");
   });
   it("the chevron declares its menu", () => {
     const html = shell();
     expect(html).toMatch(/class="ws-capr" aria-label="More ways to add" aria-haspopup="menu" aria-expanded="false"/);
   });
-  it("collapsed, it is one tile with the same accessible name", () => {
+  it("collapsing the sidebar leaves the bar's split button as it is — no tile", () => {
     const html = shell(true);
     expect(html.match(/data-shell="capture"/g)).toHaveLength(1);
-    expect(html).toMatch(/class="ws-capb ws-captile" aria-label="Log a query" aria-haspopup="menu"/);
-    expect(html).not.toContain('class="ws-capl"');
+    expect(html).toContain('class="ws-capl"');
+    expect(html).not.toContain("ws-captile");
   });
   it("is never called + New — in its file or its rules", () => {
     expect(readFileSync(resolve(__dirname, "SidebarCapture.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("+ New");

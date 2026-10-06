@@ -115,13 +115,15 @@ const renderShell = (todo: number) =>
   );
 
 describe("the rendered states", () => {
-  it("⚠️ the badge is the SAME CountChip, so no count still means no badge at all", () => {
+  /* ⚠️ RETARGETED (ink shell v1): the badge is the SAME terracotta pill in both states — collapsed, CSS
+     moves it to the icon's corner — so no count still means no badge at all. */
+  it("⚠️ the badge is the SAME pill, so no count still means no badge at all", () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
     try {
       const collapsed = renderShell(7);
       expect(collapsed).toContain("sb-collapsed");
-      expect(collapsed.match(/class="sp-ct"/g)?.length).toBe(1);
-      expect(renderShell(0)).not.toMatch(/["\s`]sp-ct["\s`]/);
+      expect(collapsed.match(/class="ws-ct"/g)?.length).toBe(1);
+      expect(renderShell(0)).not.toMatch(/["\s`]ws-ct["\s`]/);
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }

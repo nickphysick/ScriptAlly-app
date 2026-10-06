@@ -34,7 +34,10 @@ import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor,
 } from "../../lib/workspaceShell";
-import { CountChip, searchShortcut } from "./primitives";
+import { searchShortcut } from "./primitives";
+import { FolderTab, TabSibling } from "./FolderTab";
+import { inkTabAid } from "./inkTabAid";
+import { markPinnedToolbars } from "./pinnedToolbar";
 import { BarSwitcher } from "./BarSwitcher";
 import { BETA_MODE, BETA_PILL, FEEDBACK_FAB } from "../../lib/beta";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
@@ -127,6 +130,18 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
   if (ms.wordCount) bits.push(`${ms.wordCount.toLocaleString("en-GB")} words`);
   return bits.join(" · ");
 }
+
+/** The to-do pill's figure — "99+" above 99 (ink shell v1). */
+export function inkCount(n: number): string {
+  return n > 99 ? "99+" : String(n);
+}
+
+/** The feedback mark — the speech bubble the ref draws, shared by the card, the button and the icon. */
+const FEEDBACK_ICON = (
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 5.5h16v10H9l-5 4z" />
+  </svg>
+);
 
 /* ⚠️ THE LOCAL `initials` IS GONE — it now comes from lib/displayName, beside the formatter that
    shortens the name it stands for. Two copies of the splitting rules agree by coincidence; a
@@ -416,25 +431,23 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const winWrapRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLElement | null>(null);
-  const [barScrolled, setBarScrolled] = useState(false);
   /**
-   * THE QUIET BAR (quiet-bar v1): the page name appears only once the page's own title has scrolled
-   * up behind the bar — its rendered bottom at or above the bar's bottom. A route with no marked
-   * title shows its name with the hairline, at `scrollTop > 2`.
+   * ⚠️ THE QUIET BAR'S PAGE-NAME FADE IS RETIRED (ink shell v1, Phase 2) — the folder tab names the page
+   * from first paint on every route, so there is no title to wait for and no state to derive. What
+   * survives is the scroll reading itself, as `data-scrolled` on the bar, because the pinned-toolbar
+   * hairline (Phase 5) is the same question asked of the same scroller.
+   *
+   * ⚠️ THE LISTENER IS ON THE WRAP, IN THE CAPTURE PHASE, because `scroll` does not bubble; and the page's
+   * scroller is the OUTERMOST overflowing scroller between the event's target and the wrap — inner rails
+   * scroll too, and must not wake anything. The state is derived from the value on every read, never
+   * from an observer whose missed event is permanent.
    */
-  const [barNamed, setBarNamed] = useState(false);
+  const [barScrolled, setBarScrolled] = useState(false);
   useEffect(() => {
     const wrap = winWrapRef.current;
     if (!wrap) return undefined;
     let frame = 0;
     let last: HTMLElement | null = null;
-    /**
-     * ⚠️ THE PAGE'S SCROLLER IS THE OUTERMOST OVERFLOWING SCROLLER BETWEEN THE EVENT'S TARGET AND THE
-     * WRAP — never the target itself. Inner panels scroll too (the Birds-eye rail, the Housekeeping
-     * rail, the dashboard's lists, the comps rail), and the capture listener hears them all: read off
-     * the target, a rail scrolled with the page at the top woke the bar, and — having no title — showed
-     * the page's name through the no-title fallback. The page is what wakes the bar.
-     */
     const pageScroller = (t: HTMLElement): HTMLElement => {
       let sc = t;
       for (let p = t.parentElement; p && p !== wrap; p = p.parentElement) {
@@ -442,29 +455,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       }
       return sc;
     };
-    /**
-     * ⚠️ THE TITLE IS LOOKED UP FROM THE SCROLLER'S PAGE, NEVER THE DOCUMENT, AND ONLY A VISIBLE ONE
-     * COUNTS. Every page stays mounted, so the document holds several `[data-page-title]`s. The page
-     * root (`.wpg`) is where to look rather than the scroller alone: on Calendar and Noteboard the
-     * scrolling zone sits BELOW the header, so a lookup inside the scroller finds no title and the
-     * fallback would name the page while its title was still in plain view. On the stage-scrolled
-     * routes (Import, Plans, Help) the scroller holds other mounted pages too — hence visible only.
-     */
-    const titleFor = (sc: HTMLElement): HTMLElement | null => {
-      const root = (sc.closest(".wpg") as HTMLElement | null) ?? sc;
-      return ([...root.querySelectorAll<HTMLElement>("[data-page-title]")].find((e) => e.getBoundingClientRect().height > 0)) ?? null;
-    };
-    /* derived from the measured values on every read — never an observer, whose missed event is permanent */
     const measure = () => {
       frame = 0;
       const sc = last;
-      const bar = barRef.current;
-      if (!sc || !bar) return;
+      if (!sc) return;
       const top = sc.scrollTop;
-      const title = titleFor(sc);
-      const named = title ? title.getBoundingClientRect().bottom <= bar.getBoundingClientRect().bottom : top > 2;
       setBarScrolled((was) => (was === top > 2 ? was : top > 2));
-      setBarNamed((was) => (was === named ? was : named));
+      markPinnedToolbars(wrap, sc);
     };
     const read = (e: Event) => {
       const t = e.target as HTMLElement | null;
@@ -472,15 +469,37 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       last = pageScroller(t);
       if (!frame) frame = requestAnimationFrame(measure);
     };
-    const onResize = () => { if (last && !frame) frame = requestAnimationFrame(measure); };
     wrap.addEventListener("scroll", read, true);
-    window.addEventListener("resize", onResize);
-    return () => { wrap.removeEventListener("scroll", read, true); window.removeEventListener("resize", onResize); if (frame) cancelAnimationFrame(frame); };
+    return () => { wrap.removeEventListener("scroll", read, true); if (frame) cancelAnimationFrame(frame); };
   }, []);
   /* ⚠️ A ROUTE CHANGE STARTS A NEW PAGE AT REST, and its scroller is a new element that will never
-     announce the position the old one was left in. Without this the hairline and the old page's
-     name survive into a page that has not been scrolled. */
-  useEffect(() => { setBarScrolled(false); setBarNamed(false); }, [pathname]);
+     announce the position the old one was left in. */
+  useEffect(() => { setBarScrolled(false); }, [pathname]);
+
+  /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
+  const searchFieldRef = useRef<HTMLButtonElement | null>(null);
+  const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
+    searchFieldRef.current = el;
+    if (typeof searchAnchorRef === "function") searchAnchorRef(el);
+    else if (searchAnchorRef) (searchAnchorRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+  }, [searchAnchorRef]);
+
+  /* the folder tab: the page's group label and its OTHER pages, in the sidebar's order */
+  const tabSection = hit ? sections.find((sx) => sx.id === hit.section) ?? null : null;
+  const tabSiblingsBase: TabSibling[] = useMemo(
+    () => (tabSection?.children ?? [])
+      .filter((ch) => ch.id !== hit?.child)
+      .map((ch) => ({ id: ch.id, label: ch.label, path: ch.path, icon: icons[ch.icon ?? ch.id] ?? icons[tabSection!.id] })),
+    [tabSection, hit?.child, icons],
+  );
+  /* ⚠️ THE REVIEW AID IS GATED HERE, AT THE CALL SITE, so a production build drops the module entirely
+     (`import.meta.env.MODE` is replaced statically and the branch is dead). It injects hypothetical
+     pages into the current group for INK6's "lots of pages" overflow; it fabricates INPUT, never output. */
+  const tabSiblings = useMemo(
+    () => (import.meta.env.MODE !== "production" ? inkTabAid(tabSiblingsBase) : tabSiblingsBase),
+    [tabSiblingsBase],
+  );
+  const tabGroup = tabSection ? tabSection.label : null;
 
   /**
    * INK1 — THE BROWSER'S OWN CHROME TAKES THE SHELL'S INK, WHILE THE SHELL IS ON SCREEN AND ONLY AT
@@ -549,28 +568,53 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ⚠️ SO THE ~51.7%-INK TRAP LEAVES THIS FILE WITH THE ASSET. It still applies wherever
               the title PNG is used (SmartImportReview, SidebarNav, ScriptAllyLogo) — this mount
               simply no longer has an ink ratio to keep in step. */}
-          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
-            <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
-            <span className="ws-bwm">QueryHawk</span>
-          </button>
-          {/* ⚠️ THE BETA STRIP RETIRES AT ≥768px (ink shell v1, Phase 1) and this chip says what it said.
-              Its other job — "tell us when you find one" — is the sidebar's feedback card now. */}
-          {BETA_MODE && <span className="ws-beta" data-shell="beta">{BETA_PILL.toUpperCase()}</span>}
+          {/* ══ THE LOGO ROW (ink shell v1): the hawk mark, the wordmark, the BETA chip, and the collapse
+              toggle at the row's end. Collapsed, the toggle takes the mark's place while the mark is
+              hovered (inkShell.css) — so the row is the same element in both states and nothing reflows. */}
+          <div className="ws-logo" data-shell="logo">
+            {/* ⚠️ THE MARK IS ARTWORK; THE WORDMARK IS TYPE (audit pack P4) — the hawk-head roundel,
+                bare on the ground, and "QueryHawk" set in type. The mark doubles as the route home. */}
+            <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
+              <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
+              <span className="ws-bwm">QueryHawk</span>
+            </button>
+            {/* ⚠️ THE BETA STRIP RETIRES AT ≥768px (ink shell v1, Phase 1) and this chip says what it said.
+                Its other job — "tell us when you find one" — is the sidebar's feedback card now. */}
+            {BETA_MODE && <span className="ws-beta" data-shell="beta">{BETA_PILL.toUpperCase()}</span>}
+            {/* the collapse toggle — `[` and ⌘\ ride `aria-keyshortcuts` and the shortcuts registry */}
+            <button
+              type="button"
+              className="sb-toggle ws-tbcol"
+              onClick={sidebar.toggle}
+              aria-expanded={!sidebar.collapsed}
+              aria-controls="ws-sidebar"
+              aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
+              aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
+              </svg>
+            </button>
+          </div>
 
-          {/* ⚠️ THE MANUSCRIPT CARD HAS MOVED TO THE BAR (page header v2 §1) — `BarSwitcher`. There is
-              exactly one switcher on a desktop page, and it is not in the sidebar. */}
-
-          {/* THE CAPTURE BUTTON (sidebar metrics pass; ref design-refs/shell/sidebar-metrics-states.html)
-              — "Log a query", split, between the brand and the nav in the pin's 12px rhythm. The one
-              raised, lit surface in the sidebar. Its rows are existing flows through `onNavigate`;
-              collapsed it is a 40×36 tile whose flyout is portalled past the panel's clip. The tile's
-              rail tip is the shell's own, and stands down while the flyout is open. */}
-          <SidebarCapture
+          {/* ══ THE MANUSCRIPT SELECTOR, moved here from the bar (ink shell v1). It switches exactly as it
+              did: `pickMs` writes the shared key and re-opens the route; the menu, the M key, the shelved
+              group and "Now showing…" are the switcher's own. Its menu portals past the panel's clip. */}
+          <BarSwitcher
+            placement="side"
             collapsed={sidebar.collapsed}
-            onNavigate={onNavigate}
-            tipFor={(when) => railTipFor("Log a query", undefined, undefined, 120, sidebar.collapsed && when)}
-            onOpenMenu={hideTip}
+            manuscripts={manuscripts}
+            queries={queries}
+            activeId={activeMs?.id ?? null}
+            onPick={pickMs}
+            onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+            /* the active book's own page — the existing route and its `?m=` view param */
+            onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
           />
+
+          {/* ⚠️ "LOG A QUERY" HAS LEFT THE SIDEBAR FOR THE BAR (ink shell v1, Phase 2) — see the bar below.
+              One home: a copy here would be two capture buttons for one job (INK8). */}
 
           {/* v3: NO DIVIDER UNDER THE SWITCHER — the ref draws none, and the sidebar's own 12px gap is
               the only separation between the head and the nav. */}
@@ -596,11 +640,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <div className="ws-glabel">{sec.label}</div>
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
+                  /* ⚠️ A ROW WITH A LIVE COUNT ("needs you") GOES BOLD AND FULL-STRENGTH, and its count is a
+                     terracotta pill (ink shell v1). Today that is the To-do list; the rule is the count,
+                     not the row's name, so a second counted row would read the same way. */
+                  const att = typeof ch.count === "number" && ch.count > 0;
                   return (
                     <button
                       type="button"
                       key={ch.id}
-                      className={`ws-ni${on ? " on" : ""}`}
+                      className={`ws-ni${on ? " on" : ""}${att ? " att" : ""}`}
                       aria-current={on ? "page" : undefined}
                       /* v3 (L9): AN EXPLICIT NAME, identical to the label, so the link is named the
                          same way in both states rather than by a label span that collapses to 0px.
@@ -618,7 +666,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
                       <span className="ws-lbl">{ch.label}</span>
-                      {typeof ch.count === "number" && <CountChip count={ch.count} urgent={ch.urgent} />}
+                      {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
                     </button>
                   );
                 })}
@@ -651,6 +699,34 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
               ⚠️ THE AVATAR IS BACK. It said "NO avatar (the rail carries the face)" — and the rail
               no longer exists, so nothing carried it. */}
+          {/* ══ THE FOUNDING-MEMBER FEEDBACK CARD (ink shell v1), pinned above the foot. It opens the same
+              `FeedbackDock` the bar's "Give feedback" did; the control moved, the panel did not. Three
+              forms, one handler: the card; the outlined button below 820px of window height (CSS); and
+              the icon with its dot when the sidebar is collapsed (CSS). All three are always rendered so
+              the switch between them is a style, never a remount. */}
+          {onOpenFeedback && (
+            <div className="ws-fbk" data-shell="feedback">
+              <div className="ws-fbc">
+                <span className="ws-fbm">FOUNDING MEMBER</span>
+                <b className="ws-fbh">Shape QueryHawk</b>
+                <span className="ws-fbl">A snag, or a wish? Tell us.</span>
+                <button type="button" className="ws-fbtn" data-probe="feedback" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
+                  {FEEDBACK_ICON}<span>Give feedback</span>
+                </button>
+              </div>
+              <button type="button" className="ws-fbb" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
+                {FEEDBACK_ICON}<span className="ws-fbb-l">Give feedback</span><em>BETA</em>
+              </button>
+              <button
+                type="button" className="ws-fbi" onClick={onOpenFeedback} aria-expanded={feedbackOpen}
+                aria-label={FEEDBACK_FAB}
+                {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, sidebar.collapsed)}
+              >
+                {FEEDBACK_ICON}<i aria-hidden="true" />
+              </button>
+            </div>
+          )}
+
           <div className="ws-pfoot">
             {/* v3: the hairline is the user row's own `border-top` now — one element drawing its own
                 edge, as the ref's `.me` does — so the separate divider element is retired. */}
@@ -803,78 +879,45 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               could never report a failure (Step 0: `SaveState` is idle | saving | dirty), so removing
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
-          <header ref={barRef} className={`ws-pagebar${barNamed ? " ws-pagebar--named" : ""}${crumbRoute ? " ws-pagebar--crumb" : ""}`} data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"} data-named={barNamed ? "true" : "false"} data-crumb={crumbRoute ? "true" : undefined}>
-              {/* the collapse toggle — first in the bar, at the sidebar/content seam, and it does not
-                  move between states. `[` and ⌘\ ride `aria-keyshortcuts`. */}
-              {/* the sidebar toggle — first in the bar, 24px in from its left, and it does not move
-                  between states. `[` and ⌘\ ride `aria-keyshortcuts`. v2: a 38px ghost square. */}
-              <button
-                type="button"
-                className="sb-toggle ws-tbcol"
-                onClick={sidebar.toggle}
-                aria-expanded={!sidebar.collapsed}
-                aria-controls="ws-sidebar"
-                aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
-                aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
-              >
-                <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-                  <rect x="3" y="4" width="14" height="12" rx="2" /><path d="M8 4v12" />
-                </svg>
-              </button>
-              <span className="ws-bvr" aria-hidden="true" />
-              {/**
-                * §1 (page header v2) — THE PAGE NAME, and still no breadcrumb. The eyebrow is the sidebar
-                * heading the page sits under, the name its sidebar label; a page under no heading shows
-                * the name alone. The header below repeats the name as its title, by design.
-                */}
+          <header ref={barRef} className="ws-pagebar" data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
+              {/* ══ THE FOLDER TAB (ink shell v1) — the current page as paper growing out of the sheet, its
+                  group's other pages as recessed tabs. It names the page; the breadcrumb, the page-name
+                  fade and the bar's hairline are retired with it. */}
               {pageName && (
-                /* ⚠️ ALWAYS LAID OUT, ONLY HIDDEN: the slot keeps its box at rest so nothing in the bar moves
-                   when the name arrives (Q7). Hidden is `aria-hidden` plus `pointer-events: none` (CSS). */
-                /* LIVING HEADERS v3 §2 — on a living route the name is a BREADCRUMB, shown from first paint:
-                   `SECTION /` in mono, then the name in the typewriter face, on one baseline. */
-                <span className={`ws-pname${pageName.section ? "" : " ws-pname--solo"}${crumbRoute ? " ws-pname--crumb" : ""}`} data-shell="pagename" aria-hidden={barNamed || crumbRoute ? undefined : true}>
-                  {pageName.section && <small className="ws-pname-s">{crumbRoute ? `${pageName.section} /` : pageName.section}</small>}
-                  <span className="ws-pname-n">{pageName.name}</span>
-                </span>
+                <FolderTab
+                  group={tabGroup}
+                  name={pageName.name}
+                  siblings={tabSiblings}
+                  onGo={go}
+                  limitRef={searchFieldRef}
+                />
               )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
-              {/* §1 — THE MANUSCRIPT SWITCHER, moved here from the sidebar's card. It switches exactly
-                  as the card did: `pickMs` writes the shared key and re-opens the route. */}
-              <BarSwitcher
-                manuscripts={manuscripts}
-                queries={queries}
-                activeId={activeMs?.id ?? null}
-                onPick={pickMs}
-                onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
-                /* the active book's own page — the existing route and its `?m=` view param */
-                onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
-              />
-              {/* the right cluster — spacing is per-child `margin-left`, so a control that leaves in
-                  settings mode takes its space with it rather than leaving a gap behind. */}
+              {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is
+                  per-child `margin-left`, so a control that leaves in settings mode takes its space. */}
               <div className="ws-bright">
-                {/* ⚠️ ICON-ONLY, SAME PALETTE (D4). The accessible name and the tooltip carry what the
-                    pill's label and keycap used to; ⌘K is bound in `usePalette`, unchanged. The ref
-                    passed to the palette is this node, so the dropdown still anchors to the opener. */}
+                {/* ⚠️ A FIXED 168px FIELD THAT NEVER MOVES (fit rule 5). It opens the existing palette, the
+                    same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor. */}
                 <span className="ws-appctl">
                   <button
-                    ref={searchAnchorRef}
+                    ref={setSearchRefs}
                     type="button"
-                    className="ws-ibtn ws-search"
+                    className="ws-search ws-sfield"
                     data-probe="search"
                     onClick={onOpenSearch}
                     aria-label="Search (⌘K)"
                     aria-keyshortcuts="Meta+K Control+K"
-                    title={`Search  ${searchShortcut()}`}
                   >
-                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                      <circle cx="8.5" cy="8.5" r="5.5" /><path d="M13 13l4 4" />
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                      <circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" />
                     </svg>
+                    <span className="ws-sfield-l">Search</span>
+                    <kbd className="ws-sfield-k">{searchShortcut()}</kbd>
                   </button>
                 </span>
 
-                {/* ⚠️ "BACK TO APP" TAKES THE SEARCH'S SLOT IN SETTINGS MODE, AND IS MOUNTED ALWAYS so it
-                    can fade in and out. It is inert and out of the tab order until the mode is on. */}
+                {/* ⚠️ "BACK TO APP" TAKES THE WORKSPACE GROUP'S SLOT IN SETTINGS MODE, AND IS MOUNTED ALWAYS so
+                    it can fade in and out. It is inert and out of the tab order until the mode is on. */}
                 <button
                   type="button"
                   className="ws-setctl ws-backapp"
@@ -886,33 +929,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
-                {/* ⚠️ LABELLED — a discoverability decision for the beta, not a density one. v3 draws it
-                    as an OUTLINE button (D4): transparent, a 28% ink ring, 10px corners, Special Elite
-                    with the pencil. The handler is the dock's own, unchanged. */}
-                {onOpenFeedback && (
-                  <button
-                    type="button"
-                    className="ws-fb"
-                    data-probe="feedback"
-                    onClick={onOpenFeedback}
-                    aria-expanded={feedbackOpen}
-                    /* the accessible name survives the narrow state, where only the pencil is left */
-                    aria-label={FEEDBACK_FAB}
-                  >
-                    <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-                      <path d="M4 16l1-4 8-8 3 3-8 8z" />
-                    </svg>
-                    <span className="ws-fb-l">Give feedback</span>
-                  </button>
-                )}
+                {/* ══ "LOG A QUERY" — moved here from the sidebar (ink shell v1). Its two segments keep their
+                    contracts (`invokeCapture` and the add-manuscript route); only its place and skin moved. */}
+                <span className="ws-appctl ws-appctl--cap">
+                  <SidebarCapture placement="bar" collapsed={false} onNavigate={onNavigate} />
+                </span>
+
                 {/**
-                  * §4b (Query Centre v96) — THE `?` IS THE WAY BACK TO A PAGE GUIDE, and only on a
-                  * page that has one. Everywhere else it is what it has always been: one click to
-                  * the Help centre. §4b asks for the guide to be "reachable afterwards from the top
-                  * bar's ?" and this is the smallest change that makes that true — the alternative
-                  * was an item in `AppShell`'s help menu, which **nothing opens**: its FAB was
-                  * retired and no control sets `helpMenuOpen`, so the item would have been a
-                  * control nobody could press.
+                  * §4b (Query Centre v96) — THE `?` IS THE WAY BACK TO A PAGE GUIDE, and only on a page
+                  * that has one. Everywhere else it is one click to the Help centre. Ink shell v1 sets it
+                  * apart from the workspace group: an 18px gap and a hairline rule (CSS).
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
                   <button
@@ -922,9 +948,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     aria-haspopup={guidePage ? "menu" : undefined}
                     aria-expanded={guidePage ? helpOpen : undefined}
                   >
-                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                      <circle cx="10" cy="10" r="7.5" /><path d="M8 8a2 2 0 1 1 2.8 1.8c-.6.3-.8.7-.8 1.4M10 14h.01" />
-                    </svg>
+                    <span aria-hidden="true">?</span>
                   </button>
                   {guidePage && helpOpen && (
                     <div className="ws-helpmenu" role="menu" aria-label="Help">

@@ -337,29 +337,18 @@ describe("the breadcrumb is chrome", () => {
        */
       const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
       const words = bar.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-      /* ⚠️ RETARGETED (living headers v3, §2): on the six LIVING routes the bar carries the page's
-         breadcrumb — exactly ONE separator, after the section (`QUERIES /`), and nothing else of a trail.
-         Every other route still carries none (asserted below). */
-      const seps = (words.match(/\//g) ?? []).length;
-      if (isLivingRoute(route) && /ws-pname-s/.test(bar)) {
-        expect(seps, `${route}'s breadcrumb has exactly one separator`).toBe(1);
-        expect(bar, `${route}'s separator follows the section`).toMatch(/class="ws-pname-s">[^<]+ \/</);
-      } else {
-        expect(words, `${route}'s bar carries a separator`).not.toContain("/");
-      }
+      /* ⚠️ RETARGETED (ink shell v1, Phase 2): the FOLDER TAB names the page on every route — the
+         group as a small label, then the page — and there is no separator anywhere in the bar, living
+         route or not. The living-headers crumb (`QUERIES / Query Centre`) is retired with the quiet bar:
+         the tab says the same two things without a trail between them. */
+      expect(words, `${route}'s bar carries a separator`).not.toContain("/");
+      expect(bar, `${route} still renders the retired page-name slot`).not.toContain("ws-pname");
       expect(words, `${route}'s bar names no product root`).not.toContain("QueryHawk");
       /* the name comes from the NAV the shell is given; this file's fixture has no Agents section, so
          `/agents` is a page the bar cannot name, and it must then say nothing rather than guess */
       const pname = ({ "/queries/analytics": "Analytics", "/todo": "To-do list", "/agents": null } as Record<string, string | null>)[route];
-      if (pname) expect(html, `${route}'s bar names the page`).toMatch(new RegExp(`class="ws-pname-n">${pname}<`));
-      else expect(html, `${route} is in no section of this nav, so the bar names nothing`).not.toContain("ws-pname-n");
-    }
-    /* a route that is NOT living keeps the quiet bar: no separator, the eyebrow-and-name layout */
-    {
-      const html = at("/todo/calendar");
-      const bar = sliceBetween(html, 'data-probe="navrow"', 'class="ws-winwrap"', "the bar");
-      expect(bar.replace(/<[^>]*>/g, " ")).not.toContain("/");
-      expect(bar).not.toContain("ws-pname--crumb");
+      if (pname) expect(html, `${route}'s tab names the page`).toMatch(new RegExp(`class="ws-ftn"[^>]*>${pname}<`));
+      else expect(html, `${route} is in no section of this nav, so the bar names nothing`).not.toContain("ws-ftn");
     }
     /* …and the styling went with it, so nothing can quietly render the trail again and look right */
     for (const sel of [".ws-crumb", ".ws-seg", ".ws-sep", ".ws-cur"]) {
@@ -486,10 +475,13 @@ describe("the sidebar", () => {
   });
 
   /* ⚠️ RETARGETED — the badge survives on the panel row; only its rail ring died. */
-  it("only To-do carries a badge, and it is a burgundy dot with its count", () => {
+  /* ⚠️ RETARGETED (ink shell v1, Phase 3): the count is a TERRACOTTA PILL on ink (`.ws-ct`), and its
+     row goes bold (`.att`) — the burgundy-dot CountChip belonged to the light sidebar. Still exactly one. */
+  it("only To-do carries a badge, and it is the terracotta pill on a bold row", () => {
     const html = at("/dashboard");
-    expect(html).toContain("sp-ct");            // the shared CountChip
-    expect((html.match(/sp-ct"/g) ?? []).length).toBe(1);
+    expect(html).not.toContain("sp-ct");
+    expect((html.match(/class="ws-ct"/g) ?? []).length).toBe(1);
+    expect(html).toMatch(/class="ws-ni att"[^>]*>(?:(?!<\/button>).)*class="ws-ct"/s);
   });
 
   /* ⚠️ RETARGETED from "the panel's head zone carries the card's inset in both height and

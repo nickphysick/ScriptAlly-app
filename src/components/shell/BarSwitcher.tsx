@@ -22,7 +22,8 @@
  * and Tab (which does not trap). `M` opens the menu from anywhere except an editable field or an open
  * modal; its key comes from the shortcuts registry, like every other binding's.
  */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Manuscript, Query } from "../../types";
 import { isWithYou } from "../../lib/qcSummary";
 import { isClosedStatus } from "../../lib/qcStages";
@@ -61,10 +62,23 @@ export function switcherFacts(msQueries: readonly Pick<Query, "dateSent">[]): st
   return since ? `Querying since ${dayMonth(since)} · ${count}` : count;
 }
 
-/** The book: `coverUrl` when set, otherwise a tile in the manuscript's object colour (`--o-ms`). */
-const Cover: React.FC<{ ms: Manuscript; size: "tile" | "row" }> = ({ ms, size }) =>
+/**
+ * The title-page cover (ink shell v1): a typed title page with a terracotta paperclip, drawn entirely in
+ * CSS — no art asset. It is what a manuscript without `coverUrl` shows in the sidebar's selector.
+ */
+export const TitlePageCover: React.FC<{ size: "tile" | "row" }> = ({ size }) => (
+  <span className={`ws-ms-cov ws-ms-cov--${size} ws-tp`} data-cover="title-page" aria-hidden="true">
+    <i className="ws-tp-t1" /><i className="ws-tp-t2" /><i className="ws-tp-by" /><i className="ws-tp-clip" />
+  </span>
+);
+
+/** The book: `coverUrl` when set; otherwise the title-page cover in the sidebar, and a tile in the
+ *  manuscript's object colour (`--o-ms`) anywhere else. */
+const Cover: React.FC<{ ms: Manuscript; size: "tile" | "row"; titlePage?: boolean }> = ({ ms, size, titlePage }) =>
   ms.coverUrl ? (
     <img className={`ws-ms-cov ws-ms-cov--${size} ws-ms-cov--img`} data-cover="img" src={ms.coverUrl} alt="" aria-hidden="true" />
+  ) : titlePage ? (
+    <TitlePageCover size={size} />
   ) : (
     <span className={`ws-ms-cov ws-ms-cov--${size}`} data-cover="tile" aria-hidden="true" />
   );
@@ -83,10 +97,22 @@ export interface BarSwitcherProps {
   onAdd: () => void;
   /** "Open this manuscript" — the active book's own page, through the existing route and view param. */
   onOpenActive: () => void;
+  /**
+   * ⚠️ INK SHELL v1 MOVES THE SWITCHER TO THE SIDEBAR (`"side"`). The behaviour is unchanged — the menu,
+   * the M key, the shelved group, "Now showing…". What changes is the skin, the title-page cover, and
+   * that the menu is PORTALLED: the sidebar clips (`overflow: hidden`), so a menu inside it would be cut
+   * off at the panel's edge. Default `"bar"` keeps any other mount as it was.
+   */
+  placement?: "bar" | "side";
+  /** The sidebar is collapsed: the tile shows its cover only, and the menu opens to its right. */
+  collapsed?: boolean;
 }
 
-export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive }) => {
+export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive, placement = "bar", collapsed = false }) => {
+  const side = placement === "side";
   const [open, setOpen] = useState(false);
+  /* the portalled menu's place — measured from the tile when it opens, and on resize */
+  const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -109,12 +135,27 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   useEffect(() => {
     if (!open) return undefined;
     const onDown = (e: PointerEvent) => {
-      if (rootRef.current?.contains(e.target as Node)) return;
+      if (rootRef.current?.contains(e.target as Node) || menuRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
     document.addEventListener("pointerdown", onDown, true);
     return () => document.removeEventListener("pointerdown", onDown, true);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!side || !open) return undefined;
+    const place = () => {
+      const r = btnRef.current?.getBoundingClientRect();
+      if (!r) return;
+      setAt(collapsed ? { left: r.right + 10, top: r.top } : { left: r.left, top: r.bottom + 8 });
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [side, open, collapsed]);
+
+  /* the state flips between expanded and collapsed: whatever was open belongs to the other shape */
+  useEffect(() => { setOpen(false); }, [collapsed]);
 
   /* M, from anywhere — except in an editable field or with a modal open (the registry's guard) */
   useEffect(() => {
@@ -148,7 +189,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   /* ⚠️ NO BOOK YET: the switcher is the door to adding one. */
   if (!active) {
     return (
-      <div className="ws-ms" data-shell="switcher">
+      <div className={`ws-ms${side ? " ws-ms--side" : ""}`} data-shell="switcher" data-placement={placement}>
         <button type="button" className="ws-ms-btn" onClick={onAdd}>
           <span className="ws-ms-cov ws-ms-cov--tile ws-ms-cov--add" aria-hidden="true">+</span>
           <span className="ws-ms-tx"><b className="ws-ms-t">Add a manuscript</b></span>
@@ -180,7 +221,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
         className={`ws-ms-it${on ? " on" : ""}${isShelvedPresentation(m) ? " ws-ms-it--shelved" : ""}`}
         onClick={() => pick(m)}
       >
-        <Cover ms={m} size="row" />
+        <Cover ms={m} size="row" titlePage={side} />
         <span className="ws-ms-tx">
           <b className="ws-ms-t">{m.title}</b>
           {meta && <span className="ws-ms-rm" data-ms="meta">{meta}</span>}
@@ -192,7 +233,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   };
 
   return (
-    <div className={`ws-ms${open ? " is-open" : ""}`} data-shell="switcher" ref={rootRef}>
+    <div className={`ws-ms${side ? " ws-ms--side" : ""}${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
       <button
         ref={btnRef}
         type="button"
@@ -205,7 +246,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
         onClick={() => (open ? close(true) : openMenu())}
         onKeyDown={onBtnKey}
       >
-        <Cover ms={active} size="tile" />
+        <Cover ms={active} size="tile" titlePage={side} />
         <span className="ws-ms-tx">
           <b className="ws-ms-t">{active.title}</b>
           {standing.status && (
@@ -216,10 +257,21 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
           )}
         </span>
         <span className="ws-ms-chev" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8l4 4 4-4" /></svg>
+          {side ? (
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4" /></svg>
+          ) : (
+            <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8l4 4 4-4" /></svg>
+          )}
         </span>
       </button>
-      <div className="ws-ms-menu" role="menu" aria-label="Your manuscripts" ref={menuRef} onKeyDown={onMenuKey} data-open={open ? "true" : "false"}>
+      {(() => {
+        const menu = (
+      <div
+        className={`ws-ms-menu${side ? " ws-ms-menu--port" : ""}`}
+        role="menu" aria-label="Your manuscripts" ref={menuRef} onKeyDown={onMenuKey}
+        data-open={open ? "true" : "false"}
+        style={side && at ? { left: at.left, top: at.top } : undefined}
+      >
         <p className="ws-ms-h">YOUR MANUSCRIPTS</p>
         {current.map(row)}
         {shelved.length > 0 && <p className="ws-ms-h ws-ms-h--shelved" data-ms="shelved-h">SHELVED</p>}
@@ -235,6 +287,9 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
         </button>
         <p className="ws-ms-hint">↑ ↓ TO MOVE · ↵ TO SWITCH · {shortcutLabel("switchManuscript")} TO OPEN THIS MENU</p>
       </div>
+        );
+        return side && typeof document !== "undefined" ? createPortal(menu, document.body) : menu;
+      })()}
     </div>
   );
 };

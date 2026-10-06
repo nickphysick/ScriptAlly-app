@@ -74,9 +74,18 @@ export interface SidebarCaptureProps {
   tipFor?: (when: boolean) => Record<string, (e: React.SyntheticEvent<Element>) => void>;
   /** Called as the menu opens, so the shell can drop a rail tip that is already showing. */
   onOpenMenu?: () => void;
+  /**
+   * Where it is mounted. ⚠️ INK SHELL v1 MOVES IT TO THE BAR (`"bar"`): the split button, cream on ink,
+   * and never the collapsed tile — the bar does not narrow with the sidebar. The contracts below are
+   * untouched; only the place and the skin change. `"side"` survives for the class name it adds and
+   * for any future mount, and is the default so a caller that names nothing gets today's control.
+   */
+  placement?: "side" | "bar";
 }
 
-export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed, onNavigate, tipFor, onOpenMenu }) => {
+export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: collapsedIn, onNavigate, tipFor, onOpenMenu, placement = "side" }) => {
+  /* in the bar there is no collapsed form — the bar does not narrow with the sidebar */
+  const collapsed = placement === "bar" ? false : collapsedIn;
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -195,7 +204,7 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed, onNav
   }
 
   return (
-    <div ref={wrapRef} className={`ws-cap${open ? " is-open" : ""}`} data-shell="capture">
+    <div ref={wrapRef} className={`ws-cap${placement === "bar" ? " ws-cap--bar" : ""}${open ? " is-open" : ""}`} data-shell="capture" data-placement={placement}>
       <div className="ws-capb">
         <button type="button" className="ws-capl" onClick={() => { close(false); if (onNavigate) invokeCapture("query", onNavigate); }}>
           <span className="ws-capic">{QUILL(15)}</span>

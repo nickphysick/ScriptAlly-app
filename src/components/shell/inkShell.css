@@ -69,3 +69,232 @@
 }
 /* the chip exists only in the desktop sidebar */
 @media (max-width: 767px) { .ws-beta { display: none; } }
+
+@media (min-width: 768px) {
+
+  /* ── Phase 2 · the bar ───────────────────────────────────────────────────────────────────────── */
+
+  /* ⚠️ THE BAR SITS ON INK AND OVER THE SHEET'S TOP EDGE. It is positioned and stacked above the window
+     so the folder tab — which overlaps the sheet by 1px — paints over it rather than under it. No
+     padding on the left: the tab is flush to the sheet's left edge, which is the main column's. */
+  .ws-pagebar {
+    position: relative;
+    z-index: 3;
+    height: 64px;
+    padding: 0 22px 0 0;
+    gap: 0;
+    background: transparent;
+    color: var(--ink-cream-66);
+  }
+  /* the bar's hairline retires: there is no light bar left for it to sit under */
+  .ws-pagebar::after { content: none; display: none; }
+
+  /* ── the folder tab ── */
+  .ws-ftab {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    box-sizing: border-box;
+    height: 41px;
+    padding: 0 22px;
+    border-radius: 12px 12px 0 0;
+    background: var(--ink-sheet);
+    display: flex;
+    align-items: center;
+    color: var(--ink-on-light);
+    white-space: nowrap;
+  }
+  .ws-ftnm {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    transition: opacity 0.09s ease, transform 0.09s var(--ink-ease);
+  }
+  .ws-ftnm.is-out { opacity: 0; transform: translateY(4px); }
+  .ws-ftg {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(var(--ink-shell-rgb), 0.56);
+  }
+  .ws-ftn {
+    font-family: var(--sp-type);
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.3;
+  }
+  /* the one fillet: flush with the tab's foot, overlapping its body by 1px */
+  .ws-ftfl {
+    position: absolute;
+    right: -12px;
+    bottom: 0;
+    width: 13px;
+    height: 12px;
+    display: block;
+    fill: var(--ink-sheet);
+  }
+
+  /* ── the recessed sibling tabs ── */
+  .ws-ftsibs {
+    position: absolute;
+    bottom: 0;
+    height: 34px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .ws-ftsib {
+    box-sizing: border-box;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 10px 10px 0 0;
+    background: rgba(var(--ink-cream-rgb), 0.09);
+    color: var(--ink-cream-66);
+    font-family: var(--sp-type);
+    font-weight: 400;
+    font-size: 16px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.14s ease, color 0.14s ease;
+  }
+  .ws-ftsib:hover { background: rgba(var(--ink-cream-rgb), 0.16); color: var(--ink-bright); }
+  .ws-ftsib svg { width: 15px; height: 15px; opacity: 0.8; flex: none; }
+  .ws-ftsib--ic { padding: 0 11px; }
+  .ws-ftmore {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .ws-ftmore-wrap { position: relative; display: inline-flex; align-items: flex-end; height: 34px; }
+  /* the "+N" menu is paper */
+  .ws-ftmenu {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    z-index: 20;
+    min-width: 220px;
+    box-sizing: border-box;
+    padding: 6px;
+    border-radius: 12px;
+    background: var(--shell-control-bg);
+    box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3);
+    display: flex;
+    flex-direction: column;
+  }
+  .ws-ftmenu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 34px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-on-light);
+    font-family: var(--sp-serif);
+    font-size: 14.5px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .ws-ftmenu button:hover, .ws-ftmenu button:focus-visible { background: var(--shell-menu-on); outline: none; }
+  .ws-ftmenu svg { width: 15px; height: 15px; opacity: 0.7; flex: none; }
+  /* the measurer: laid out with the real tabs' type, seen by nothing */
+  .ws-ftmeasure { visibility: hidden; pointer-events: none; left: 0; top: 0; bottom: auto; }
+
+  /* ── the right: search · Log a query · (rule) · Help ── */
+  .ws-pagebar .ws-bright { --ws-bright-gap: 12px; }
+
+  /* ⚠️ A FIXED 168px FIELD (fit rule 5): it never grows, shrinks or moves, so the tabs can be fitted up
+     to 24px short of it and nothing else in the bar ever moves. */
+  .ws-sfield {
+    box-sizing: border-box;
+    flex: none;
+    width: 168px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(var(--ink-cream-rgb), 0.07);
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.11);
+    color: var(--ink-cream-42);
+    font-family: var(--sp-serif);
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background-color 0.14s ease;
+  }
+  .ws-sfield:hover { background: rgba(var(--ink-cream-rgb), 0.11); color: var(--ink-cream-66); }
+  .ws-sfield svg { flex: none; display: block; }
+  .ws-sfield-l { font-family: inherit; flex: 1; text-align: left; }
+  .ws-sfield-k {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(var(--ink-cream-rgb), 0.09);
+    color: var(--ink-cream-42);
+  }
+
+  /* "Log a query" — cream with ink text, the bar's one lit control */
+  .ws-cap--bar .ws-capb {
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ink-cream);
+    box-shadow: none;
+  }
+  .ws-cap--bar:hover .ws-capb { box-shadow: none; }
+  .ws-cap--bar.is-open .ws-capb { box-shadow: inset 0 0 0 1.5px var(--ink-on-light); }
+  .ws-cap--bar .ws-capl, .ws-cap--bar .ws-capr { color: var(--ink-on-light); }
+  .ws-cap--bar .ws-capl { gap: 8px; padding: 0 13px 0 12px; font-size: 14px; font-weight: 600; }
+  .ws-cap--bar .ws-capr { width: 30px; border-left: 1px solid rgba(var(--ink-shell-rgb), 0.14); }
+  .ws-cap--bar .ws-capl:hover, .ws-cap--bar .ws-capr:hover { background: rgba(var(--ink-shell-rgb), 0.06); }
+  /* its menu is paper, right-aligned under the button */
+  .ws-cap--bar .ws-capm {
+    left: auto;
+    right: 0;
+    width: 240px;
+    background: var(--shell-control-bg);
+    box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3);
+  }
+
+  /* ⚠️ HELP IS SET APART from the workspace group — an 18px gap and a 1px rule — and is quiet (cream
+     66%) until hovered. It is still `.ws-ibtn` for its behaviour; only its box changes. */
+  .ws-pagebar .ws-helpwrap { margin-left: 18px; position: relative; }
+  .ws-pagebar .ws-helpwrap::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 9px;
+    bottom: 9px;
+    width: 1px;
+    background: rgba(var(--ink-cream-rgb), 0.16);
+  }
+  .ws-pagebar .ws-help {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: var(--ink-cream-66);
+    font-family: var(--sp-serif);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .ws-pagebar .ws-help:hover { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+  /* the help menu is paper */
+  .ws-pagebar .ws-helpmenu { background: var(--shell-control-bg); box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3); }
+
+  /* "Back to app" in settings mode, on ink */
+  .ws-pagebar .ws-backapp { color: var(--ink-cream-66); }
+  .set-mode .ws-pagebar .ws-backapp { border-color: rgba(var(--ink-cream-rgb), 0.16); }
+  .ws-pagebar .ws-backapp:hover { background: rgba(var(--ink-cream-rgb), 0.08); border-color: rgba(var(--ink-cream-rgb), 0.22); color: var(--ink-cream-92); }
+  .ws-pagebar .ws-esc { border-color: rgba(var(--ink-cream-rgb), 0.16); color: var(--ink-cream-42); }
+}

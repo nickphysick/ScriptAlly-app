@@ -87,14 +87,15 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
     expect(workspace.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 
-  it("⚠️ the count chip + dot render EXACTLY ONCE, on the To-do list row", () => {
+  /* ⚠️ RETARGETED (ink shell v1, Phase 3): the count is the terracotta pill `.ws-ct` (no dot — the pill
+     IS the alert on ink), still exactly once and still on the list row. */
+  it("⚠️ the count pill renders EXACTLY ONCE, on the To-do list row", () => {
     const withCount = renderShell("/todo", 7);
-    // CountChip is `sp-ct` (+ `sp-ct-dot` when urgent) — one of each, riding the list row
-    expect(withCount.match(/class="sp-ct"/g)?.length).toBe(1);
-    expect(withCount.match(/sp-ct-dot/g)?.length).toBe(1);
+    expect(withCount.match(/class="ws-ct"/g)?.length).toBe(1);
+    expect(withCount).not.toContain("sp-ct");
     const listAt = withCount.indexOf(">To-do list<");
     const nextRowAt = withCount.indexOf(">Calendar<"); // the row after the list, since P1
-    const chipAt = withCount.indexOf("sp-ct");
+    const chipAt = withCount.indexOf("ws-ct");
     expect(chipAt).toBeGreaterThan(listAt);   // after the list row's label…
     expect(chipAt).toBeLessThan(nextRowAt);   // …and before the next row begins
     // the model behind it: count + urgent on the list child, nowhere else
@@ -103,7 +104,7 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
     expect(rows[0].urgent).toBe(true);
     expect(rows.slice(1).every((r) => r.count === undefined && r.urgent === undefined)).toBe(true);
     // and a quiet day renders no chip at all
-    expect(renderShell("/todo", 0)).not.toMatch(/["\s`]sp-ct["\s`]/);
+    expect(renderShell("/todo", 0)).not.toMatch(/["\s`]ws-ct["\s`]/);
   });
 });
 

@@ -153,28 +153,27 @@ describe("the feedback dock", () => {
     expect(source, "the FAB was a puck hovering over the reader's work").not.toMatch(/["\s`]sa-fbfab["\s`]/);
     expect(read("betaChrome.css")).not.toMatch(/\.sa-fbfab[\s{,:]/);
 
-    /* THE NEW HOME. Labelled, because a bare pencil among three glyphs is a control nobody
-       presses; and left of the divider, so it reads as the reader's action rather than as one
-       more piece of system furniture in the icon cluster. */
+    /* ⚠️ THE NEW HOME MOVED AGAIN (ink shell v1, Phase 3): the founding-member FEEDBACK CARD in the
+       sidebar, above the foot. The law is the same — a beta has a visible, labelled route to the panel —
+       and both halves are still pinned: the control exists and is labelled, and the bar holds none. */
     const html = bar(true);
-    /* app shell v3 (26 Sep): an OUTLINE button (`.ws-fb`), and the visible label is the accessible name's own words */
-    expect(html).toMatch(/class="ws-fb"/);
+    expect(html).toContain('data-shell="feedback"');
+    expect(html).toContain("FOUNDING MEMBER");
     expect(html).toContain(">Give feedback</span>");
-    /* The accessible name is on the BUTTON, not the label span, so it survives the narrow state
-       where the CSS folds the label away and only the pencil is left. */
+    /* the collapsed form is an icon, so its accessible name is on the button itself */
     expect(html).toContain(`aria-label="${FEEDBACK_FAB}"`);
     expect(FEEDBACK_FAB).toBe("Give feedback");
-
-    const cluster = html.indexOf('class="ws-bright"');
-    expect(cluster, "the bar must draw its right-hand cluster").toBeGreaterThan(-1);
-    const order = (needle: string) => {
-      const i = html.indexOf(needle, cluster);
-      expect(i, `the rendered bar must contain ${needle}`).toBeGreaterThan(-1);
-      return i;
-    };
-    /* The ORDER is what this asserts and it has not changed: search · feedback · help (v3's classes). */
-    expect(order('class="ws-ibtn ws-search"')).toBeLessThan(order('class="ws-fb"'));
-    expect(order('class="ws-fb"')).toBeLessThan(order('class="ws-ibtn ws-help"'));
+    const theBar = html.slice(html.indexOf('data-probe="navrow"'), html.indexOf("</header>"));
+    expect(theBar, "the bar must still draw its header").not.toBe("");
+    expect(theBar).not.toContain("Give feedback");
+    expect(theBar).not.toContain("ws-fb");
+    /* and the card is in the sidebar, after the nav and before the foot */
+    const nav = html.indexOf('<nav class="ws-nav"');
+    const card = html.indexOf('data-shell="feedback"');
+    const foot = html.indexOf('class="ws-pfoot"');
+    expect(nav).toBeGreaterThan(-1);
+    expect(card).toBeGreaterThan(nav);
+    expect(foot).toBeGreaterThan(card);
     expect(html).not.toMatch(/["\s]ws-bdiv["\s]/);
   });
 
@@ -197,6 +196,7 @@ describe("the feedback dock", () => {
     expect(unwired).toContain('class="ws-bright"');
     expect(unwired).not.toContain("ws-fbpill");
     expect(unwired).not.toContain("ws-bdiv");
+    expect(unwired).not.toContain('data-shell="feedback"');
   });
 
   it("offers all four kinds, including one that is not a complaint", () => {
