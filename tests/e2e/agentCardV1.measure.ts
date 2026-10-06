@@ -1420,7 +1420,8 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
       expect((await dock.locator("b").textContent())?.trim(), `${act}: the chip names the card`).toBe(name);
       /* read every status line at once, so a chip with none FAILS by name rather than waiting out the clock */
       expect((await dock.locator("small").allTextContents()).map((s) => s.trim()), `${act}: the chip's status is the card's own`).toEqual([tone]);
-      expect((await dock.locator(".qad-dk").textContent())?.trim()).toBe("Back to card");
+      /* Contact list v13 §7: at 1100px and wider the chip offers the card rather than going back to it */
+      expect((await dock.locator(".qad-dk").textContent())?.trim()).toBe("Show card");
       await expect(page.locator("[data-qad-from]"), `${act}: the drawer does not say where it came from`).toHaveText(`← ${name}`);
       const geo = await page.evaluate(() => {
         const d = document.querySelector("[data-qad-dock]")!.getBoundingClientRect();
@@ -1558,7 +1559,7 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
     bump(26);
   });
 
-  test("decision 8: ✕ with answers asks before discarding, the backdrop and \"← name\" park, and the dock chip with nothing answered goes straight back", async ({ page }) => {
+  test("decision 8: ✕ with answers asks before discarding, the backdrop and \"← name\" park, and the dock chip shows the card without parking or cancelling", async ({ page }) => {
     test.setTimeout(240_000);
     await openRoute(page, "/agents", { width: 1440, height: 900 });
     const scope = await visiblePage(page, ".agl-wpg");
@@ -1571,12 +1572,21 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
       await page.click(`${CARD} [data-ac="primary"]`);
       await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
     };
-    /* the dock chip with nothing answered: straight back to the card, nothing parked */
+    /* ⚠️ RETARGETED BY CONTACT LIST v13 §7: the chip no longer parks or cancels — at 1100px and wider it
+       shows the docked card above itself and hides it again, and the journey stays open throughout.
+       "Finish later" and ✕ are the ways out; the untouched ✕ below closes straight back. */
     await open();
     await page.click("[data-qad-dock]");
+    await expect(page.locator('[data-ac="overlay"][data-peek]'), "the chip did not show the card").toHaveCount(1, { timeout: 5_000 });
+    await expect(page.locator('[data-qad-drawer="resp"]'), "showing the card closed the journey").toBeVisible();
+    expect(await page.locator(PARK).count(), "the dock chip parked a journey").toBe(0);
+    await page.click("[data-qad-dock]");
+    await expect(page.locator('[data-ac="overlay"][data-peek]'), "the chip did not hide the card").toHaveCount(0, { timeout: 5_000 });
+    await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible();
+    await page.click(".qad-dx");
     await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
     await expect(page.locator(DOCKED)).toHaveCount(0, { timeout: 5_000 });
-    expect(await page.locator(PARK).count(), "the dock chip parked an untouched journey").toBe(0);
+    expect(await page.locator(PARK).count(), "✕ parked an untouched journey").toBe(0);
     /* ✕ with answers asks — Keep going keeps it; Discard throws it away and the card returns */
     await page.click(`${CARD} [data-ac="primary"]`);
     await expect(page.locator('[data-qad-drawer="resp"]')).toBeVisible({ timeout: 10_000 });
@@ -1655,11 +1665,13 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
     await page.waitForTimeout(500);
     const park = await box(PARK);
     console.log("[chips] mock", JSON.stringify(mock), "app", JSON.stringify({ dock, gap: drawer.left - (1440 - dock.right), park }));
-    expect(Math.abs(dock.h - mock.dock.h), `the dock chip is ${dock.h} tall against the mock's ${mock.dock.h}`).toBeLessThanOrEqual(2);
+    /* ⚠️ THE CHIP'S HEIGHT AND ITS GAP ARE CONTACT LIST v13 §7's NOW (6/16/6/6 padding, 24 from the drawer),
+       which supersedes this mock's 8px padding and 12px gap; its corners, fill and foot are unchanged */
+    expect(Math.abs(dock.h - 46), `the dock chip is ${dock.h} tall against v13's 46`).toBeLessThanOrEqual(2);
     expect(dock.radius).toBe(mock.dock.radius);
     expect(dock.bg).toBe(mock.dock.bg);
     expect(Math.abs(dock.bottom - mock.dock.bottom), "the dock chip's foot").toBeLessThanOrEqual(1);
-    expect(Math.abs(drawer.left - (1440 - dock.right) - mock.gap), `the dock chip is ${drawer.left - (1440 - dock.right)} from the drawer against the mock's ${mock.gap}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(drawer.left - (1440 - dock.right) - 24), `the dock chip is ${drawer.left - (1440 - dock.right)} from the drawer against v13's 24 (the v7 mock drew ${mock.gap})`).toBeLessThanOrEqual(1);
     expect(Math.abs(park.h - mock.park.h), `the parked chip is ${park.h} tall against the mock's ${mock.park.h}`).toBeLessThanOrEqual(2);
     expect([park.right, park.bottom, park.radius, park.bg]).toEqual([mock.park.right, mock.park.bottom, mock.park.radius, mock.park.bg]);
     /* tidy: nothing was saved, and nothing stays parked */

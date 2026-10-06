@@ -27,6 +27,8 @@ import { journeyDoing, journeyTitle } from "../../lib/queryActions/parking";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
 import { todayDay } from "../../lib/queryActions/dates";
 import { DrawerContext, initialsOf } from "./controls";
+import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/dockPeek";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";
@@ -228,6 +230,28 @@ export function QueryDrawer() {
     document.body.classList.toggle("qad-docked", docked);
     return () => { document.body.classList.remove("qad-docked"); };
   }, [docked]);
+  /* v13 §7 — the chip expands the docked card above itself, read-only, while the drawer stays open.
+     Offered only where there is room beside the drawer (≥1100px of window); below that the chip keeps
+     Agent card v1's behaviour. The peek never outlives the dock, and Escape folds it before the
+     drawer hears the key (ESC_LEVEL.dockPeek sits above the drawer's own layer). */
+  const peek = useDockPeek();
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && peekOffered(window.innerWidth));
+  useEffect(() => {
+    const on = () => setWide(peekOffered(window.innerWidth));
+    window.addEventListener("resize", on);
+    return () => window.removeEventListener("resize", on);
+  }, []);
+  useEffect(() => { if (!docked || !wide) setDockPeek(false); }, [docked, wide]);
+  useEffect(() => () => setDockPeek(false), []);
+  useEffect(() => {
+    document.body.classList.toggle("qad-peek", docked && peek);
+    return () => { document.body.classList.remove("qad-peek"); };
+  }, [docked, peek]);
+  useEscapeLayer(docked && peek, () => setDockPeek(false), ESC_LEVEL.dockPeek);
+  const onChip = useCallback(() => {
+    if (wide) setDockPeek(!peek);
+    else backToCard();
+  }, [wide, peek, backToCard]);
   const dockedTo = useRef<((d: boolean) => void) | undefined>(undefined);
   useEffect(() => {
     const cb = docked ? req?.onDock : undefined;
@@ -269,11 +293,23 @@ export function QueryDrawer() {
             </J>
           </div>
           {req?.dock && !hidden ? (
-            <button type="button" className="qad-dock" data-qad-dock onClick={backToCard} aria-label={`Back to ${req.dock.name}`}>
-              <span className="qad-av">{initialsOf(req.dock.name)}</span>
-              <span className="qad-dk-tx"><b>{req.dock.name}</b>{req.dock.status ? <small>{req.dock.status}</small> : null}</span>
-              <span className="qad-dk">Back to card</span>
-            </button>
+            wide ? (
+              <button type="button" className={`qad-dock qad-dock--peek${peek ? " open" : ""}`} data-qad-dock data-peek={peek ? "open" : "shut"}
+                onClick={onChip} aria-expanded={peek} aria-label={`${peek ? "Hide" : "Show"} ${req.dock.name}'s card`}>
+                <span className="qad-av">{initialsOf(req.dock.name)}</span>
+                <span className="qad-dk-tx"><b>{req.dock.name}</b>{req.dock.status ? <small>{req.dock.status}</small> : null}</span>
+                <span className="qad-dk" data-qad-dock-label>{peek ? "Hide card" : "Show card"}
+                  {/* drawn, not typed: ⌃ and ⌄ are in neither the mono face nor Special Elite */}
+                  <svg className="qad-dk-chev" viewBox="0 0 10 6" width="9" height="6" aria-hidden="true"><path d={peek ? "M1 1l4 4 4-4" : "M1 5l4-4 4 4"} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </span>
+              </button>
+            ) : (
+              <button type="button" className="qad-dock" data-qad-dock onClick={backToCard} aria-label={`Back to ${req.dock.name}`}>
+                <span className="qad-av">{initialsOf(req.dock.name)}</span>
+                <span className="qad-dk-tx"><b>{req.dock.name}</b>{req.dock.status ? <small>{req.dock.status}</small> : null}</span>
+                <span className="qad-dk">Back to card</span>
+              </button>
+            )
           ) : null}
         </DrawerContext.Provider>,
         document.body,

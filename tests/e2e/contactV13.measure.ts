@@ -9,6 +9,7 @@
  */
 import { expect, test } from "@playwright/test";
 import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
+import { openApp } from "./pageHeaderV2Lib";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
 
@@ -899,4 +900,115 @@ test("CL13-HKW · Later, Undo and the reminder chip, read back from Firestore", 
   }
 
   L.done(9);
+});
+
+/* ── lock 10 · the dock chip expands the docked card above itself, read-only (v13 §7), app-wide ── */
+type PeekBox = { cardR: number; cardB: number; cardW: number; cardL: number; cardT: number; drawerL: number; primPE: string | null; vw: number; vh: number; paint: number | null; onTop: boolean } | null;
+async function peekReading(page: import("@playwright/test").Page, card: string, prim: string): Promise<PeekBox> {
+  return page.evaluate(([card, prim]) => {
+    const c = [...document.querySelectorAll<HTMLElement>(card)].find((e) => e.getBoundingClientRect().height > 0);
+    const d = document.querySelector<HTMLElement>(".qad-root .qad-drawer");
+    if (!c || !d) return null;
+    const r = c.getBoundingClientRect();
+    const p = c.querySelector<HTMLElement>(prim);
+    /* PAINTED, not merely placed: the product of every opacity from the primary up to the body (a box
+       of the right size with an opacity-0 card inside it passed a geometry-only version of this), and
+       what the browser hits at the card's centre is the card, not the drawer's dim */
+    let op = 1; for (let e: HTMLElement | null = p; e; e = e.parentElement) op *= parseFloat(getComputedStyle(e).opacity || "1");
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(r.height / 2, 60));
+    return { cardR: r.right, cardB: r.bottom, cardW: r.width, cardL: r.left, cardT: r.top, drawerL: d.getBoundingClientRect().left, primPE: p ? getComputedStyle(p).pointerEvents : null, vw: innerWidth, vh: innerHeight,
+      paint: p ? Math.round(op * 100) / 100 : null, onTop: !!hit && c.contains(hit) };
+  }, [card, prim] as const);
+}
+/** one surface: the drawer is open from a card; prove the chip, the peek, the inert primary and the two Escapes */
+async function proveDockPeek(page: import("@playwright/test").Page, L: Ledger, where: string, card: string, prim: string, peekOn: string) {
+  const chip = page.locator("[data-qad-dock]");
+  await chip.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  const shut = await chip.getAttribute("data-peek").catch(() => null);
+  const label0 = ((await page.locator("[data-qad-dock-label]").textContent().catch(() => "")) ?? "").trim();
+  L.check("CL13-10 from the card's primary the chip shows, offering the card", where, shut === "shut" && /^Show card/.test(label0), `${shut} · ${label0}`);
+  const g = await page.evaluate(() => {
+    const c = document.querySelector("[data-qad-dock]")?.getBoundingClientRect();
+    const d = document.querySelector(".qad-root .qad-drawer")?.getBoundingClientRect();
+    return c && d ? { gap: d.left - c.right, bottom: innerHeight - c.bottom } : null;
+  });
+  L.check("CL13-10 the chip sits 24 left of the drawer and 24 off the foot", where, !!g && near(g.gap, 24, 1) && near(g.bottom, 24, 1), JSON.stringify(g));
+  await chip.click();
+  await page.locator(peekOn).first().waitFor({ state: "attached", timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(400);
+  const b = await peekReading(page, card, prim);
+  L.check("CL13-10 a click puts the card above the chip: right edge = drawer left − 24 (±2), bottom 84", where,
+    !!b && near(b.cardR, b.drawerL - 24, 2) && near(b.vh - b.cardB, 84, 2), JSON.stringify(b));
+  L.check("CL13-10 the peeked card does not overlap the drawer and stays on screen", where, !!b && b.cardR <= b.drawerL && b.cardL >= 0 && b.cardT >= 0, JSON.stringify(b));
+  L.check("CL13-10 the card is min(548, 100vw − 572) wide", where, !!b && near(b.cardW, Math.min(548, b.vw - 572), 1), JSON.stringify(b));
+  L.check("CL13-10 the card's primary takes no press while peeking", where, b?.primPE === "none", `${b?.primPE}`);
+  /* the primary is dimmed to .35 by design, so the card around it is fully painted when the chain reads .35 */
+  L.check("CL13-10 the peeked card is painted (the dimmed primary reads .35, nothing above it fades) and on top of the drawer's dim", where, !!b && b.paint === 0.35 && b.onTop, JSON.stringify({ paint: b?.paint, onTop: b?.onTop }));
+  const open = await chip.getAttribute("data-peek");
+  const label1 = ((await page.locator("[data-qad-dock-label]").textContent()) ?? "").trim();
+  const ring = await chip.evaluate((e) => getComputedStyle(e).boxShadow);
+  L.check("CL13-10 the chip says Hide card, with a 2px anthracite ring", where, open === "open" && /^Hide card/.test(label1) && /rgb\(42, 58, 82\) 0px 0px 0px 2px/.test(ring), `${open} · ${label1} · ${ring}`);
+  /* Escape folds the card before it touches the drawer */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  const after1 = await page.evaluate((peekOn) => ({ peek: !!document.querySelector(peekOn), drawer: !!document.querySelector(".qad-root.is-open") }), peekOn);
+  L.check("CL13-10 the first Escape folds the card and leaves the drawer open", where, !after1.peek && after1.drawer, JSON.stringify(after1));
+  /* the second reaches the drawer: an untouched journey cancels and the card comes back */
+  await page.keyboard.press("Escape");
+  await page.locator(".qad-root.is-open").waitFor({ state: "detached", timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(400);
+  const after2 = await page.evaluate(() => ({ drawer: !!document.querySelector(".qad-root.is-open"), chip: !!document.querySelector("[data-qad-dock]") }));
+  L.check("CL13-10 the second Escape reaches the drawer", where, !after2.drawer && !after2.chip, JSON.stringify(after2));
+}
+
+test("CL13-10 · the dock chip expands the card (agent card and the Query Centre's card)", async ({ page }) => {
+  const L = new Ledger("cl13-10");
+  page.setDefaultTimeout(15_000);
+  /* the agent card, opened from the list's tray */
+  await openContacts(page, AT_1512);
+  /* a never-queried row at an open door: its card's primary is Log a query, which opens a journey */
+  const row = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
+  await row.scrollIntoViewIfNeeded();
+  await row.hover();
+  await row.locator('[data-cl13="tray-open"]').click();
+  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 8000 });
+  await page.waitForTimeout(400);
+  await page.locator('[data-ac="card"] [data-ac="primary"]').first().click();
+  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
+  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
+  await page.waitForTimeout(400);
+  await proveDockPeek(page, L, "agent card", '[data-ac="card"]', '[data-ac="primary"]', '[data-ac="overlay"][data-peek]');
+  const back = await page.evaluate(() => ({ card: !!document.querySelector('[data-ac="overlay"]:not([data-docked])') }));
+  L.check("CL13-10 the agent card is back in its place after the drawer goes", "agent card", back.card, JSON.stringify(back));
+  await page.keyboard.press("Escape");
+  /* the Query Centre's centred card, opened from a list row */
+  await openApp(page, "/queries", AT_1512);
+  await page.evaluate(() => document.fonts.ready);
+  const qrow = page.locator('[data-qcv="row"]').first();
+  await qrow.waitFor({ timeout: 30_000 });
+  await qrow.click();
+  await page.locator('[data-qcv="qm-card"]').waitFor({ timeout: 8000 });
+  await page.waitForTimeout(400);
+  await page.locator('[data-qcv="qm-card"] [data-qcv="open-action"]').click();
+  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
+  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
+  await page.waitForTimeout(400);
+  await proveDockPeek(page, L, "query card", '[data-qcv="qm-card"]', '[data-qcv="open-action"]', ".qcv-qm--peek");
+  await page.keyboard.press("Escape");
+  /* below 1100px there is no room beside the drawer: the chip keeps Agent card v1's behaviour */
+  await openContacts(page, { width: 1080, height: 800 });
+  const nrow = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
+  await nrow.scrollIntoViewIfNeeded();
+  await nrow.hover();
+  await nrow.locator('[data-cl13="tray-open"]').click();
+  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 8000 });
+  await page.waitForTimeout(400);
+  await page.locator('[data-ac="card"] [data-ac="primary"]').first().click();
+  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
+  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
+  await page.waitForTimeout(400);
+  const narrow = await page.evaluate(() => { const c = document.querySelector("[data-qad-dock]"); return c ? { peek: c.getAttribute("data-peek"), text: (c.querySelector(".qad-dk")?.textContent ?? "").trim() } : null; });
+  L.check("CL13-10 below 1100px the chip keeps today's behaviour (Back to card, no peek)", "1080", !!narrow && narrow.peek === null && narrow.text === "Back to card", JSON.stringify(narrow));
+  await page.keyboard.press("Escape");
+  L.done(21);
 });

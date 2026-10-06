@@ -358,6 +358,22 @@
 .qad-dock .qad-dk-tx small { display: block; font: 400 8px var(--qad-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--qad-ink45); margin-top: 2px; }
 .qad-dock .qad-dk { margin-left: 6px; font: 400 8px var(--qad-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--qad-ink); padding: 5px 8px; border-radius: 999px; background: #f3eee7; }
 .qad-dock:hover .qad-dk { background: #ebe4da; }
+/* ===== v13 §7 — the chip that expands the card (≥1100px of window) =====
+   The mock's chip [right = drawer + 24, bottom 24, 6/16/6/6 padding, its own shadow]: initials · the
+   name over the standing in mono · a divider · "Show card". A click shows the docked card above it,
+   read-only; the chip then reads "Hide card" and takes a 2px anthracite ring. It never parks or
+   cancels — "Finish later" and ✕ in the drawer are the ways out of a journey. */
+.qad-dock.qad-dock--peek { right: calc(min(500px, 100vw) + 24px); gap: 10px; padding: 6px 16px 6px 6px; font-size: 14px;
+  box-shadow: 0 14px 30px -12px rgba(0,0,0,.4); }
+.qad-dock.qad-dock--peek .qad-av { font: 500 11px var(--qad-mono); letter-spacing: .04em; color: var(--qad-page); }
+.qad-dock.qad-dock--peek .qad-dk-tx b { font-weight: 600; }
+.qad-dock.qad-dock--peek .qad-dk-tx small { font-size: 8.5px; letter-spacing: .1em; }
+.qad-dock.qad-dock--peek .qad-dk { display: inline-flex; align-items: center; gap: 6px; margin-left: 14px; padding: 0 0 0 12px; border-radius: 0;
+  background: none; border-left: 1px solid var(--qad-hair); color: #3f566b; }
+.qad-dock.qad-dock--peek:hover .qad-dk { background: none; }
+.qad-dock.qad-dock--peek .qad-dk-chev { display: block; flex: none; }
+.qad-dock.qad-dock--peek.open { box-shadow: 0 0 0 2px var(--qad-btn), 0 14px 30px -12px rgba(0,0,0,.4); }
+
 /* "← name" in the drawer's header: where the journey came from, and the way back to it */
 .qad-root .qad-from { display: inline-block; border: 0; background: rgba(255,255,255,.14); color: #fff; border-radius: 999px; padding: 6px 12px; margin: 0 0 8px;
   font: 400 8.5px var(--qad-mono); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }

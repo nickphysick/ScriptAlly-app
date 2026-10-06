@@ -23,6 +23,7 @@
  */
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { setDockPeek, useDockPeek } from "../../../lib/queryActions/dockPeek";
 import "./qcvModal.css";
 
 export const QcQueryModal: React.FC<{
@@ -94,8 +95,22 @@ export const QcQueryModal: React.FC<{
     return () => { document.body.style.overflow = prev; };
   }, []);
 
+  /* v13 §7 — the dock chip shows this card above itself, read-only, while the drawer stays open. Its
+     doors are inert, the backdrop is gone, and the card's own ✕ (hidden in the modal) comes back to
+     fold it — a click on it is caught here, before the card's own close can run, so a peek is folded
+     rather than the query closed under a journey that is still open. */
+  const peeking = useDockPeek() && docked;
+  const foldOnClose = (e: React.MouseEvent) => {
+    if (!peeking) return;
+    if (!(e.target as HTMLElement).closest('[data-qcv="open-close"]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDockPeek(false);
+  };
+
   return createPortal(
-    <div className={`qcv-qm${docked ? " qcv-qm--docked" : ""}`} data-qcv="qm" role="dialog" aria-modal={!docked} aria-hidden={docked || undefined} aria-label="Query">
+    <div className={`qcv-qm${docked ? " qcv-qm--docked" : ""}${peeking ? " qcv-qm--peek" : ""}`} data-qcv="qm" role="dialog"
+      aria-modal={!docked} aria-hidden={(docked && !peeking) || undefined} aria-label="Query" onClickCapture={foldOnClose}>
       <div className="qcv-qm-back" data-qcv="qm-back" onClick={() => closeRef.current()} aria-hidden="true" />
       <div className="qcv-qm-card" data-qcv="qm-card">{children}</div>
       {/**

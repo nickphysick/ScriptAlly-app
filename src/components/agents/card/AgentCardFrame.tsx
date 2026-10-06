@@ -23,6 +23,7 @@
  */
 import React, { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { setDockPeek, useDockPeek } from "../../../lib/queryActions/dockPeek";
 import { useOverlay } from "../../shell/useOverlay";
 import type { AgentCardOrigin } from "../../../lib/agentCardStore";
 import "./agentCard.css";
@@ -138,8 +139,24 @@ export const AgentCardFrame = forwardRef<AgentCardFrameHandle, Props>(function A
     },
   }), []);
 
+  /* v13 §7 — the dock chip shows this card above itself, read-only, while the drawer stays open. The
+     card's ✕ then FOLDS it: the click is caught here, before the card's own close can run, so a peek
+     never closes the card under a journey that is still open.
+     ⚠️ THE PEEK IS AN ATTRIBUTE, NEVER A CLASS: the root's `is-docked` and `is-leaving` are added
+     imperatively, and a className that changed between renders would be rewritten by React and
+     take them with it. */
+  const peeking = useDockPeek() && docked;
+  const foldOnClose = (e: React.MouseEvent) => {
+    if (!peeking) return;
+    if (!(e.target as HTMLElement).closest('[data-ac="close"]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDockPeek(false);
+  };
+
   return createPortal(
-    <div className="ac-ov" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick} data-ac="overlay" data-docked={docked || undefined}>
+    <div className="ac-ov" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick} onClickCapture={foldOnClose}
+      data-ac="overlay" data-docked={docked || undefined} data-peek={peeking || undefined}>
       <div className="ac-scrim" data-ac="scrim" />
       <div
         ref={cardRef}

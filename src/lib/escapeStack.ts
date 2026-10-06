@@ -39,6 +39,9 @@ export const ESC_LEVEL = {
   cardPopup: 20,
   /** the query drawer, which stacks over a docked card */
   drawer: 30,
+  /** the docked card shown above its chip (v13 §7) — folds before the drawer hears the key, after a
+   *  popup inside the drawer (ruling Q5) */
+  dockPeek: 35,
   /** anything open inside the drawer */
   drawerPopup: 40,
 } as const;

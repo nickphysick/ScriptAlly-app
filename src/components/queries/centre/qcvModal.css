@@ -56,3 +56,33 @@
 }
 /* v126 §7 — docked under the action drawer: laid out, hidden, and out of the way of every press */
 .qcv-qm.qcv-qm--docked { visibility: hidden; pointer-events: none; }
+/**
+ * v13 §7 — PEEKING: the dock chip shows the docked card above itself while the drawer stays open,
+ * anchored to the chip [right = drawer 500 + 24, bottom 84, width min(548, 100vw − 572), max-height
+ * 100vh − 108, growing from .18 at its bottom-right corner over 260ms]. Read-only: the doors and the
+ * foot are dimmed and take no press, the card's own ✕ comes back to fold it, and the card takes a
+ * 1.5px anthracite inset — the whole card is the query here. The viewport offsets are honest: the
+ * drawer this sits beside is itself fixed to the viewport, top to bottom.
+ * ⚠️ `.qcv-qm.qcv-qm--docked.qcv-qm--peek` is 0-3-0 on purpose — it must beat the drawer sheet's
+ * `body.qad-docked .qcv-qm` (0-2-1), which fades and shrinks a docked card toward the chip.
+ */
+.qcv-qm.qcv-qm--docked.qcv-qm--peek { visibility: visible; pointer-events: none; opacity: 1; transform: none; transition: none; }
+.qcv-qm--peek .qcv-qm-back, .qcv-qm--peek .qcv-qm-x { display: none; }
+.qcv-qm--peek .qcv-qm-card {
+  /* a fixed box resolves its percentages against the viewport, which is what these are of */
+  position: fixed; right: calc(min(500px, 100%) + 24px); bottom: 84px;
+  width: min(548px, calc(100% - 572px)); max-height: calc(100% - 108px);
+  pointer-events: auto; transform-origin: 100% 100%;
+  animation: qcvQmPeek 0.26s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+@keyframes qcvQmPeek { from { transform: scale(0.18); opacity: 0 } to { transform: none; opacity: 1 } }
+.qcv-qm--peek .qcv-qm-card [data-qcv="open-close"] { display: inline-block; }
+.qcv-qm--peek .qcv-qm-card [data-qcv="open-foot"],
+.qcv-qm--peek .qcv-qm-card [data-qcv="open-doors"] { opacity: 0.35; pointer-events: none; }
+.qcv-qm--peek .qcv-qm-card > * { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+/* ⚠️ AND THE CARD INSIDE MUST BE BROUGHT BACK TOO: the drawer sheet's `body.qad-docked .qcv-open`
+   (0-2-1) fades and shrinks the card itself, not just this modal, so lifting the modal alone left a
+   correctly placed, correctly sized box with nothing painted in it — measured, and a geometry-only
+   lock passed over it. 0-3-0 wins. */
+.qcv-qm.qcv-qm--peek .qcv-open { opacity: 1; transform: none; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) { .qcv-qm--peek .qcv-qm-card { animation: none; } }

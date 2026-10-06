@@ -1,0 +1,9 @@
+{"lock":"CL13-10 chip 24 from the drawer","mutation":"peek chip right: drawer + 12","red":"gap 12 (agent card and query card)"}
+{"lock":"CL13-10 card placed above the chip","mutation":"QC peek card right: drawer + 4","red":"cardR 1008 against drawer left 1012 − 24"}
+{"lock":"CL13-10 primary inert","mutation":"agent card peek rule keeps opacity, drops pointer-events","red":"primary pointer-events auto"}
+{"lock":"CL13-10 Escape folds first","mutation":"peek escape layer never registered","red":"first Escape closed the drawer (agent + query card); the agent card did not come back"}
+{"lock":"CL13-10 Hide card ring","mutation":"open chip ring 2px → 0px","red":"box-shadow 0px ring (both surfaces)"}
+{"lock":"CL13-10 painted","mutation":"delete .qcv-qm.qcv-qm--peek .qcv-open override","red":"paint 0 on the query card — the fault the first green missed"}
+{"lock":"CL13-10 on top of the dim","mutation":"drop the peeked agent overlay's z-index 72","red":"onTop false"}
+{"lock":"CL13-10 below 1100 keeps today's chip","mutation":"PEEK_MIN_WIDTH 1100 → 1000","red":"1080: Show card offered"}
+{"lock":"unit: the agent card root keeps a constant className","mutation":"className={`ac-ov${peeking ? \" is-peek\" : \"\"}`} (run against a mutated copy of the source)","red":"constant-className regexes fail"}

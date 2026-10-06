@@ -57,6 +57,10 @@ const ALLOWED_CREAM = new Set([
      qcvBirdsDrawer.css and the banner/workspace as qcvListBanner.css (the band is in pageHeader.css,
      which paints no old cream). qcvExpanded.css is deleted and stays listed harmlessly. */
   "src/components/queries/centre/qcvBirdsDrawer.css", "src/components/queries/centre/qcvCarousel.css", "src/components/queries/centre/qcvListBanner.css",
+  /* added (Contact list v13 P6): Housekeeping's drawer HEAD is anthracite, and its five cream fills are
+     the view toggle, the session pill and the progress bar ON that head — cream on anthracite, §0.2's
+     category. Its body and rows paint no old cream (the sweep would name them). */
+  "src/components/agents/contact/housekeeping.css",
 ]);
 /* a declaration that PAINTS a ground with the old neutral: a background / page / ground / field token, or a fade */
 const GROUND = /(background(-color)?|--[a-z0-9-]*(page|ground)[a-z0-9-]*)\s*:[^;]*(#f5f1eb|#e7e3dc|rgba?\(\s*(245,\s*241,\s*235|231,\s*227,\s*220))/i;

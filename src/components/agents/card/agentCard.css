@@ -54,6 +54,32 @@
    it comes back exactly where it was — but it is out of reach: no clicks, and out of the
    accessibility tree, so the drawer is the only dialog in it. */
 .ac-ov.is-docked { visibility: hidden; pointer-events: none; }
+/* v13 §7 — PEEKING: the dock chip shows the docked card above itself while the drawer stays open,
+   anchored to the chip [right = drawer 500 + 24, bottom 84, width min(548, 100vw − 572), max-height
+   100vh − 108, growing from .18 at its bottom-right corner over 260ms]. The overlay stays out of the
+   way (no backdrop, no presses) and only the card takes them. Read-only: the actions, prev/next, the
+   edit control and "+ Add a note" are dimmed and inert, the query section takes a 1.5px anthracite
+   inset, and the card's ✕ folds it (caught in AgentCardFrame). The viewport offsets are honest: the
+   drawer this sits beside is itself fixed to the viewport, top to bottom.
+   ⚠️ KEYED ON `[data-peek]`, NEVER A CLASS — the root's `is-docked` is added imperatively and a
+   className React rewrote would take it with it. */
+/* ⚠️ ABOVE THE DRAWER'S DIM (70) — at its usual 63 the peeked card would sit under the dim, washed out
+   and unpressable, the dim catching every scroll. It never overlaps the drawer (71) or the chip (72). */
+.ac-ov.is-docked[data-peek] { visibility: visible; z-index: 72; }
+.ac-ov[data-peek] .ac-scrim { display: none; }
+.ac-ov[data-peek] .ac {
+  /* % of the overlay, which IS the viewport — the sheet's own rule (nothing sized from 100vh) */
+  left: auto; top: auto; right: calc(min(500px, 100%) + 24px); bottom: 84px;
+  width: min(548px, calc(100% - 572px)); max-height: calc(100% - 108px);
+  transform: none; transform-origin: 100% 100%; pointer-events: auto;
+  animation: acPeek 0.26s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+@keyframes acPeek { from { transform: scale(0.18); opacity: 0; } to { transform: none; opacity: 1; } }
+.ac-ov[data-peek] .ac :is([data-ac="primary"], [data-ac="secondary"], [data-ac="more"], [data-ac="prev"], button[data-ac="next"], [data-ac="edit"], [data-ac="open-compose"]) {
+  opacity: 0.35; pointer-events: none;
+}
+.ac-ov[data-peek] .ac .acq-q { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+@media (prefers-reduced-motion: reduce) { .ac-ov[data-peek] .ac { animation: none; } }
 
 /* ⚠️ THE CARD'S BOX MODEL IS DECLARED, NOT INHERITED — its width (548 / 780) includes the 6px rim. */
 .ac,
