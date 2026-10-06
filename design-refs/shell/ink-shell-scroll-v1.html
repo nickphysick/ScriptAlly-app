@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1b2433">
+<title>Fades in the ink shell</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--ink:#1c130f;--muted:rgba(28,19,15,.56);--hair:rgba(28,19,15,.12);--sh:#1b2433;--band:#2d3a50;--page:#f3f2f0;--cream:#f4eee5;--terra:#d9967a;
+--type:'Special Elite','Courier New',monospace;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono',ui-monospace,monospace;--hem:18px}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:#e3e0db;color:var(--ink);font-family:var(--serif)}
+#stage{width:1500px;margin:0 auto;transform-origin:top center;padding:44px 40px 90px}
+h1{margin:0 0 6px;font:400 34px/1.1 var(--type)}
+.sub{margin:0 0 18px;font-size:15px;color:var(--muted);max-width:1000px;line-height:1.6}
+.ctl{display:flex;gap:12px;align-items:center;margin:0 0 30px}
+.ctl button{font:500 10.5px var(--mono);letter-spacing:.12em;padding:10px 14px;border:0;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--hair);cursor:pointer;color:var(--muted)}
+.ctl button.on{background:var(--sh);color:var(--cream)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px 30px}
+.cell{min-width:0}
+.cell h2{margin:0 0 4px;font:400 20px var(--type)}
+.cell p{margin:0 0 12px;font-size:13.5px;line-height:1.55;color:rgba(28,19,15,.7);min-height:63px}
+.cell .st{font:600 9px var(--mono);letter-spacing:.14em;color:var(--muted);margin-top:8px}
+.cell .st b{color:var(--band)}
+
+/* the mini shell */
+.fr{height:520px;border-radius:14px;overflow:hidden;background:var(--sh);display:flex;box-shadow:0 14px 34px rgba(28,19,15,.16)}
+.rail{width:56px;flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0}
+.rail i{width:30px;height:26px;border-radius:7px;background:rgba(244,238,229,.07)}
+.rail i.on{background:rgba(244,238,229,.14);box-shadow:inset 2px 0 0 var(--terra)}
+.rail i.mk{width:28px;height:28px;border-radius:50%;background:#556070;margin-bottom:6px}
+.col{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{height:50px;flex:none;position:relative}
+.bar .srch{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:240px;height:30px;border-radius:8px;background:rgba(244,238,229,.07);box-shadow:inset 0 0 0 1px rgba(244,238,229,.11)}
+.bar .lq{position:absolute;right:14px;top:11px;width:94px;height:28px;border-radius:8px;background:var(--cream)}
+.ftab{position:absolute;left:20px;bottom:-1px;height:33px;padding:0 16px;border-radius:10px 10px 0 0;background:var(--page);display:flex;align-items:center;gap:8px}
+.ftab small{font:500 8px var(--mono);letter-spacing:.18em;color:var(--muted)}.ftab b{font:400 15px var(--type)}
+.ftab .fl{position:absolute;bottom:0;width:10px;height:10px;fill:var(--page)}.ftab .l{left:-10px}.ftab .r{right:-10px}
+.sw{flex:1;padding:0 7px 7px 0;display:flex;min-height:0}
+.sheet{flex:1;border-radius:11px;background:var(--page);position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+/* the one shared fade: a pair of hems on whatever scrolls */
+.scroller{position:relative;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(28,19,15,.2) transparent}
+.hemwrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.hem{position:absolute;left:0;right:0;height:var(--hem);pointer-events:none;opacity:0;transition:opacity .2s ease;z-index:3}
+.hem.top{top:0;background:linear-gradient(var(--page),rgba(243,242,240,0))}
+.hem.bot{bottom:0;background:linear-gradient(rgba(243,242,240,0),var(--page))}
+.hem.on{opacity:1}
+body.reveal .hem{background:rgba(217,150,122,.55)!important;outline:1px dashed #b05a3c}
+@media (prefers-reduced-motion:reduce){.hem{transition:none}}
+
+/* content */
+.pad{padding:16px 22px 22px}
+.hero{height:150px;border-radius:12px;background:var(--band);margin-bottom:14px;position:relative}
+.hero::after{content:"27 queries out";position:absolute;left:24px;top:30px;font:400 30px var(--type);color:var(--cream)}
+.desk{height:76px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.16);margin-bottom:16px}
+.h3{font:400 17px var(--type);margin:4px 0 10px}
+.card{height:58px;border-radius:9px;background:#fff;box-shadow:0 1px 2px rgba(28,19,15,.06),inset 0 0 0 1px rgba(28,19,15,.06);margin-bottom:8px;display:flex;align-items:center;gap:12px;padding:0 14px}
+.card i{width:28px;height:28px;border-radius:50%;background:var(--band);flex:none}
+.card b{display:block;height:8px;width:140px;border-radius:4px;background:rgba(28,19,15,.55)}
+.card span{display:block;height:6px;width:90px;border-radius:3px;background:rgba(28,19,15,.18);margin-top:6px}
+.card em{margin-left:auto;height:8px;width:70px;border-radius:4px;background:rgba(28,19,15,.15)}
+/* pinned toolbar */
+.toolbar{flex:none;height:48px;display:flex;align-items:center;gap:8px;padding:12px 22px 0;background:var(--page);position:relative;z-index:4}
+.toolbar i{height:30px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.12)}
+.toolbar i:nth-child(1){width:220px}.toolbar i:nth-child(2){width:70px}.toolbar i:nth-child(3){width:90px}
+.lettertabs{flex:none;height:44px;display:flex;gap:3px;align-items:center;padding:10px 22px 0;background:var(--page);position:relative;z-index:4}
+.lettertabs i{width:24px;height:30px;border-radius:6px 6px 0 0;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.10);font:400 12px/30px var(--type);text-align:center;font-style:normal}
+.lettertabs i.on{background:var(--band);color:var(--cream)}
+/* rail page */
+.two{display:grid;grid-template-columns:1fr 210px;gap:16px}
+.side{position:sticky;top:12px;align-self:start;height:260px;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.14);overflow:hidden}
+.side::before{content:"";display:block;height:70px;background:#e8c9bb}
+.pill{position:absolute;right:16px;bottom:16px;z-index:6;height:44px;width:200px;border-radius:12px;background:var(--sh);box-shadow:0 8px 20px rgba(0,0,0,.25);display:flex;align-items:center;padding:0 14px;color:var(--cream);font:400 14px var(--type)}
+.short .pad{padding-top:24px}
+
+/* ── clean edge mode ── */
+body.clean .hemwrap>.hem{display:none}
+.toolbar,.lettertabs{transition:box-shadow .2s ease}
+body.clean .toolbar.under{box-shadow:0 1px 0 rgba(28,19,15,.13)}
+/* small scrollers keep fades */
+.carwrap{position:relative;margin:0 0 16px}
+.car{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.car::-webkit-scrollbar{display:none}
+.car i{flex:none;width:150px;height:84px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.10)}
+.car i::before{content:"";display:block;height:20px;border-radius:9px 9px 0 0;background:#f2e9df}
+.xh{position:absolute;top:0;bottom:2px;width:34px;pointer-events:none;opacity:0;transition:opacity .2s}
+.xh.l{left:0;background:linear-gradient(90deg,var(--page),rgba(243,242,240,0))}
+.xh.r{right:0;background:linear-gradient(270deg,var(--page),rgba(243,242,240,0))}
+.xh.on{opacity:1}
+.side{display:flex;flex-direction:column;height:300px}
+.side::before{flex:none}
+.sidein{position:relative;flex:1;min-height:0}
+.sidesc{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:10px 12px}
+.sidesc i{display:block;height:34px;border-radius:7px;background:#f6f1ea;margin-bottom:7px}
+.ph{position:absolute;left:0;right:0;height:16px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2}
+.ph.t{top:0;background:linear-gradient(#fff,rgba(255,255,255,0))}.ph.b{bottom:0;background:linear-gradient(rgba(255,255,255,0),#fff)}
+.ph.on{opacity:1}
+body.reveal .xh,body.reveal .ph{background:rgba(217,150,122,.55)!important;outline:1px dashed #b05a3c}
+</style>
+</head>
+<body>
+<div id="stage">
+<h1>Fades, page by page — two ways</h1>
+<p class="sub"><b>Clean edge</b> (recommended) is how Linear and Slack do it: the main page clips cleanly at the paper's edge, a pinned toolbar gains a hairline once content runs under it, and fades survive only in small scrollers, here the Recently moved carousel and the Birds-eye panel. <b>Fades everywhere</b> is the version from before. Four live pages in the ink shell. Scroll each one, and turn on "Show the fade zones" to see where any fade sits.</p>
+<div class="ctl"><button id="cl" class="on">CLEAN EDGE · RECOMMENDED</button><button id="fd">FADES EVERYWHERE</button><button id="rv">SHOW THE FADE ZONES</button><span style="font:12.5px var(--serif);color:var(--muted)">Each card's line underneath reports its fades live.</span></div>
+<div class="grid" id="grid"></div>
+</div>
+<script>
+function tab(g,n){return '<span class="ftab"><svg class="fl l" viewBox="0 0 12 12"><path d="M12 0V12H0A12 12 0 0 0 12 0Z"/></svg><small>'+g+'</small><b>'+n+'</b><svg class="fl r" viewBox="0 0 12 12"><path d="M0 0V12H12A12 12 0 0 1 0 0Z"/></svg></span>'}
+function shell(g,n,inner,on){var r='<i class="mk"></i>';for(var i=0;i<8;i++)r+='<i'+(i===on?' class="on"':'')+'></i>';
+ return '<div class="fr"><div class="rail">'+r+'</div><div class="col"><div class="bar">'+tab(g,n)+'<span class="srch"></span><span class="lq"></span></div><div class="sw"><div class="sheet">'+inner+'</div></div></div></div>'}
+function cards(n){var s='';for(var i=0;i<n;i++)s+='<div class="card"><i></i><span style="flex:none"><b></b><span></span></span><em></em></div>';return s}
+function hems(content,extra){return '<div class="hemwrap"><div class="hem top"></div><div class="scroller">'+content+'</div><div class="hem bot"></div></div>'+(extra||'')}
+var P=[
+ {t:'Page that scrolls top to bottom',d:'Dashboard, Discover, Settings. The whole page scrolls under the tab and clips cleanly at the paper edge. The Recently moved carousel keeps its side fades, because that\'s where a fade earns its place: it tells you there\'s more to the side.',
+  h:shell('WORKSPACE','Dashboard',hems('<div class="pad"><div class="hero"></div><div class="desk"></div><div class="h3">Recently moved</div><div class="carwrap"><div class="car"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="xh l"></span><span class="xh r"></span></div><div class="h3">This week</div>'+cards(8)+'</div>'),0)},
+ {t:'Page with a pinned toolbar',d:'The To-do list (search, filter and group). The toolbar stays put. Once the list runs under it, a hairline appears beneath the toolbar, just as Linear does it. The Contact list\'s letter tabs behave the same way.',
+  h:shell('TASKS','To-do list','<div class="toolbar"><i></i><i></i><i></i></div>'+hems('<div class="pad" style="padding-top:12px">'+cards(10)+'</div>'),5)},
+ {t:'Page with a side panel that stays put',d:'The Query Centre with Birds-eye, or the Contact list with Housekeeping. The page clips cleanly. The Birds-eye panel scrolls on its own, so it keeps small fades of its own at its top and bottom. Scroll inside it. The floating pill sits above everything.',
+  h:shell('QUERIES','Query Centre',hems('<div class="pad"><div class="hero"></div><div class="two"><div><div class="h3">Your queries</div>'+cards(11)+'</div><div class="side"><div class="sidein"><div class="sidesc"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="ph t"></span><span class="ph b"></span></div></div></div></div>','<div class="pill">Birds-eye view</div>'),1)},
+ {t:'Short page',d:'Content that fits. There\'s nothing to fade and nothing to draw, in either mode.',
+  h:shell('AGENTS','Discover','<div class="short">'+hems('<div class="pad"><div class="h3">Ways to find agents</div>'+cards(3)+'</div>')+'</div>',3)}
+];
+document.getElementById('grid').innerHTML=P.map(function(p,i){return '<div class="cell"><h2>'+p.t+'</h2><p>'+p.d+'</p>'+p.h+'<div class="st" id="st'+i+'"></div></div>'}).join('');
+document.querySelectorAll('.cell').forEach(function(c,i){
+ var sc=c.querySelector('.scroller'),t=c.querySelector('.hem.top'),b=c.querySelector('.hem.bot'),st=c.querySelector('.st');
+ function upd(){var top=sc.scrollTop>2,more=sc.scrollTop+sc.clientHeight<sc.scrollHeight-2;t.classList.toggle('on',top);b.classList.toggle('on',more);
+  var cl=document.body.classList.contains('clean');st.innerHTML=cl?('PAGE EDGE <b>CLEAN</b>'+(c.querySelector('.toolbar')?' &nbsp;·&nbsp; TOOLBAR HAIRLINE <b>'+(top?'ON':'OFF')+'</b>':'')):('TOP FADE <b>'+(top?'ON':'OFF')+'</b> &nbsp;·&nbsp; BOTTOM FADE <b>'+(more?'ON':'OFF')+'</b>')+(sc.scrollHeight<=sc.clientHeight+2?' &nbsp;·&nbsp; <b>NOTHING TO SCROLL</b>':'')}
+ sc.addEventListener('scroll',upd);upd();
+});
+document.body.classList.add('clean');
+function mode(c){document.body.classList.toggle('clean',c);document.getElementById('cl').classList.toggle('on',c);document.getElementById('fd').classList.toggle('on',!c);document.querySelectorAll('.scroller').forEach(function(s){s.dispatchEvent(new Event('scroll'))})}
+document.getElementById('cl').onclick=function(){mode(true)};document.getElementById('fd').onclick=function(){mode(false)};
+document.querySelectorAll('.cell').forEach(function(c){var sc=c.querySelector('.scroller'),tb=c.querySelector('.toolbar');if(tb)sc.addEventListener('scroll',function(){tb.classList.toggle('under',sc.scrollTop>2)})});
+document.querySelectorAll('.carwrap').forEach(function(w){var s=w.querySelector('.car'),l=w.querySelector('.xh.l'),r=w.querySelector('.xh.r');function u(){l.classList.toggle('on',s.scrollLeft>2);r.classList.toggle('on',s.scrollLeft+s.clientWidth<s.scrollWidth-2)}s.addEventListener('scroll',u);u()});
+document.querySelectorAll('.sidein').forEach(function(w){var s=w.querySelector('.sidesc'),t2=w.querySelector('.ph.t'),b=w.querySelector('.ph.b');function u(){t2.classList.toggle('on',s.scrollTop>2);b.classList.toggle('on',s.scrollTop+s.clientHeight<s.scrollHeight-2)}s.addEventListener('scroll',u);u()});
+document.getElementById('rv').onclick=function(){document.body.classList.toggle('reveal');this.classList.toggle('on')};
+(function(){var W=1500;function fit(){var s=Math.min(1,innerWidth/W);var st=document.getElementById('stage');st.style.transform='scale('+s+')';document.body.style.height=st.getBoundingClientRect().height+80+'px'}addEventListener('resize',fit);addEventListener('load',fit);fit()})();
+</script>
+</body>
+</html>

@@ -150,7 +150,10 @@
     "design-refs/analytics-v17/ref-08-overtime@2x.png": "72c4332aaecb287498ea2e93d90319839d5613d81be14555c5317cbaa49b43b0",
     "design-refs/analytics-v17/ref-09-stand@2x.png": "8c181c28528c3529aa6defe604f6c057ce092c9e37f077949d73a6a677bbe8f7",
     "design-refs/analytics-v17/ref-10-reading-footer@2x.png": "d23350fd2dc57edfc1cfb3462bba809939a46950d9b611b07d26f2bb90d62d54",
-    "design-refs/analytics-v17/ref-11-section-menu@2x.png": "368797e466eaa405072c65ba9c2a82858b8f4a2ba77f8308a88dc236b785c6a9"
+    "design-refs/analytics-v17/ref-11-section-menu@2x.png": "368797e466eaa405072c65ba9c2a82858b8f4a2ba77f8308a88dc236b785c6a9",
+    "design-refs/shell/ink-shell-v1.html": "9ce160e3214172c7aa4b944f28f250c18bc56018f41f2db42f5e46ba777e9db3",
+    "design-refs/shell/ink-shell-scroll-v1.html": "d5311901629833b76d4d82849531448f83442cfc9e998259193b6c492eab5333",
+    "design-refs/shell/ink-folder-tab-golden-3x.png": "4513b3d0e35dad75d56d85e923fe88517750ff948c43683a60adcf8e5d2ca26a"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
