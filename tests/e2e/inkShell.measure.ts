@@ -88,8 +88,8 @@ test.describe("ink shell", () => {
 
   /* ── INK6 · tab fit ───────────────────────────────────────────────────────────────────────────── */
   /* ⚠️ RETARGETED FROM THE BRIEF'S "full names fit for every group at 1280" — a FALSE PREMISE, measured:
-     on Comparable titles and Submission packages the Materials row needs ~925px of a ~852px limit with
-     the sidebar expanded, so its last sibling drops to an icon (the fit rule working). The lock asserts
+     on all three Materials pages the row needs 643–656px of a 597px limit (bar-relative) with the
+     sidebar expanded, so its last sibling drops to an icon (the fit rule working). The lock asserts
      what holds and is stronger: full names everywhere at 1440 and 1710, and at 1280 a sibling is named
      EXACTLY when the measured row fits — the rule checked against its own arithmetic. */
   test("INK6 · full names at 1440 and 1710 for every group (and by the arithmetic at 1280); an eight-page group goes names → icons → +N", async ({ page }) => {

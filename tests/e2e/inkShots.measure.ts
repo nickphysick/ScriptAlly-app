@@ -31,3 +31,32 @@ test("ink shell shots", async ({ page }) => {
     }
   }
 });
+
+test("ink shell shots — the overflow and a toast", async ({ page }) => {
+  mkdirSync(OUT, { recursive: true });
+  /* "lots of pages": five hypothetical pages injected into Materials (the dev-only aid), "+N" open */
+  await page.addInitScript(() => { (window as unknown as { __SA_INK_TABS: number }).__SA_INK_TABS = 5; });
+  for (const w of WIDTHS) {
+    await openRoute(page, "/manuscripts", { width: w, height: 900 });
+    const more = page.locator(".ws-ftmore");
+    if (await more.count()) await more.click();
+    await page.screenshot({ path: `${OUT}/overflow-${w}.png` });
+  }
+});
+
+test("ink shell shots — a toast", async ({ page }) => {
+  mkdirSync(OUT, { recursive: true });
+  for (const w of WIDTHS) {
+    await openRoute(page, "/queries", { width: w, height: 900 });
+    const original = await page.evaluate(() => localStorage.getItem("scriptally_active_manuscript_id"));
+    await page.locator("#ws-sidebar [data-shell='switcher'] .ws-ms-btn").click();
+    const other = page.locator(".ws-ms-menu--port [role='menuitemradio'][aria-checked='false']").first();
+    if (await other.count()) {
+      await other.click();
+      await page.locator(".sa-toast").waitFor();
+      await page.screenshot({ path: `${OUT}/toast-${w}.png` });
+    }
+    if (original) await page.evaluate((o) => localStorage.setItem("scriptally_active_manuscript_id", o), original);
+  }
+});
+
