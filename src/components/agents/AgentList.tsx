@@ -84,6 +84,12 @@ import { matchGenre } from "../../lib/genreMatch";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
+import { SHORTCUTS, isEditableTarget, matchesShortcut, shortcutLabel } from "../../lib/shortcuts";
+import { PageGuide } from "../shell/PageGuide";
+import { useAgentsHold } from "../../lib/contactLoadHold";
+import { useWindowCorner } from "../shell/useWindowCorner";
+import { CONTACT_GUIDE, CONTACT_GUIDE_PAGE } from "./contact/contactGuide";
+import { ContactSkeleton } from "./contact/ContactSkeleton";
 import "./agentList.css";
 
 /**
@@ -310,6 +316,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       groupKey={groupKey} onGroup={setGroupKey}
       sortKey={sortKey} reversed={reversed} onSort={setSortKey} onReverse={() => setReversed((r) => !r)}
       pop={pop} msTitle={scoped?.title?.trim() || null} genreWord={genreWord}
+      findKey={where === "banner" ? <kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd> : undefined}
     />
   );
   const bannerRef = useRef<HTMLDivElement | null>(null);
@@ -388,9 +395,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * never restated here. See `contactListState` for why there are three of them and why the
    * unsaved stub is one of its inputs.
    */
+  /* v13 §8, lock 12 — the dev-only hold (gated HERE, at the call site, so production never reaches
+     the module): it holds the settling beat so the placeholders can be measured against the page */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const agentsHeld = import.meta.env.MODE !== "production" ? useAgentsHold() : false;
   const pageState = contactListState({
-    collectionsReady,
-    agentCount: agents.length,
+    /* as if the agents listener had not answered: not ready, and nothing on file yet (an agent on file
+       is a list whatever the flag says, so holding the flag alone holds nothing) */
+    collectionsReady: collectionsReady && !agentsHeld,
+    agentCount: agentsHeld ? 0 : agents.length,
     adding: false, /* the in-grid draft retired with the flip editor; P5's add card is an overlay */
   });
 
@@ -720,22 +733,42 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
   }, [agents, sandbox, currentUser]);
 
-  /* H opens Housekeeping — not in a field, not while a card, a drawer or a popover is open, and only
-     while this is the page on screen (Phase 7 puts it on the shared shortcut sheet) */
+  /* v13 §8 — the page guide sits above the Housekeeping tab: the tab is placed from the window's
+     measured corner, so the guide is too — the corner, plus the tab's OWN measured height, plus 24 —
+     never a literal for a box another element owns. */
+  const guideCorner = useWindowCorner(24);
+  const [tabH, setTabH] = useState(0);
+  useEffect(() => {
+    if (!active || !showList) return undefined;
+    const t = window.setTimeout(() => {
+      const tab = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]');
+      if (tab && tab.offsetHeight > 0) setTabH(tab.offsetHeight);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [active, showList]);
+
+  /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
+     Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
+     or a popover is open, and only while this is the page on screen. */
   const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false });
   hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0 };
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if (e.key !== "h" && e.key !== "H") return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const hk = matchesShortcut(SHORTCUTS.contactsHk, e);
+      const find = matchesShortcut(SHORTCUTS.contactsFind, e);
+      if (!hk && !find) return;
       const k = hkKeyState.current;
       if (!k.active || k.hkOpen || k.popOpen || k.cardOpen || !k.enabled) return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.closest("input, textarea, select, [contenteditable='true']"))) return;
+      if (isEditableTarget(e.target)) return;
       /* the query drawer over the page owns the keyboard while it is open */
       if (document.querySelector(".qad-root.is-open")) return;
       e.preventDefault();
-      setHkOpen(true);
+      if (hk) { setHkOpen(true); return; }
+      /* / — the banner's Find, scrolled into view first so the field a writer is typing into is on screen */
+      const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
+      if (!input) return;
+      bannerRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      input.focus({ preventScroll: true });
     };
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
@@ -812,7 +845,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <Housekeeping
             model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
             open={hkOpen} onOpen={() => setHkOpen(true)} onClose={() => setHkOpen(false)}
-            view={hkView} onView={setHkView} routeActive={active} keyHint="H"
+            view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
             onFix={onHkFix}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
             onShowAll={async () => { await updateUserPaths(showAllPath()); }}
@@ -824,6 +857,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onWishlistStill={onWishlistStill}
             onWishlistChanged={(id) => openAgentCard(id, { tab: "want", focus: "wishlist", from: "hk", sequence })}
           />
+        )}
+        {showList && active && guideCorner && tabH > 0 && (
+          <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
+            dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
+              style: { right: guideCorner.right, bottom: guideCorner.bottom + tabH + 24 } }} />
         )}
         {showList && (
           <StickyBar stuck={stuck} probe="contacts">
@@ -841,7 +879,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             {controlsFor("sticky")}
           </StickyBar>
         )}
-        <div className="clv-group">
+        {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
+        <div className="clv-group" data-loading={pageState === "settling" ? "" : undefined}
+          aria-busy={pageState === "settling" || undefined}
+          inert={pageState === "settling" || undefined}>
         {/* ⚠️ THE SHARED FULL HEADER (page header v2 §4): the Query Centre's component, frame and rule.
             It spans the whole group — column AND rail — so the Housekeeping rail starts below the
             rule, as the Birds-eye rail does. It renders over a LIST only: the blank account's pitch
@@ -863,6 +904,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             band
             art={<span className="clv-bdisc"><img src={`${CONTACT_BAND_DISC.src}?v=${CONTACT_BAND_DISC.version}`} width={CONTACT_BAND_DISC.width} height={CONTACT_BAND_DISC.height} alt="" /></span>}
           />
+        )}
+        {pageState === "settling" && (
+          <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}
+            controls={controlsFor("banner")}
+            perch={{ src: `${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`, width: CONTACT_HAWK.width, height: CONTACT_HAWK.height }} />
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
         {showList && <ContactStrip facts={strip} selected={figure} onPress={pressFigure} />}

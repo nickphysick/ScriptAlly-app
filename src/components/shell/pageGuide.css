@@ -50,3 +50,27 @@
 }
 .pgd-next:hover { text-decoration: underline; }
 .pgd-x:focus-visible, .pgd-next:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
+
+/* ── Contact list v13 §8 — the guide's dress (the mock's `.pg`): 340 wide, above the page's floating
+   tab, a mono kicker "How this page works · n of N", the title in the typewriter at 20, one paragraph,
+   dots then Back and a pill. Placement comes from the page (`dress.style`), because the tab it sits
+   above is placed from the window's measured box. Additive: the Query Centre's guide is untouched. */
+/* z 58: above the tab it stands on (55), UNDER every popover, drawer and card the reader opens (60+) —
+   at 66 it sat over the list pills' menus and took their clicks (measured, the first neighbour run) */
+.pgd.pgd--dress { width: 340px; z-index: 58; border-radius: 16px; padding: 18px 18px 14px;
+  box-shadow: 0 24px 54px -18px rgba(20, 14, 10, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.pgd--dress .pgd-k { display: block; font: 400 8.5px var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.pgd--dress .pgd-t { margin: 6px 0; font: 400 20px var(--sp-type); }
+.pgd--dress .pgd-x { top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; padding: 0; }
+.pgd--dress .pgd-f { gap: 8px; margin-top: 14px; }
+.pgd--dress .pgd-f i { margin-right: auto; }
+.pgd--dress .pgd-f em { width: 6px; height: 6px; background: rgba(28, 19, 15, 0.18); }
+.pgd--dress .pgd-f em.on { background: #2a3a52; }
+.pgd--dress .pgd-b, .pgd--dress .pgd-next {
+  margin: 0; border: 0; height: 32px; padding: 0 14px; border-radius: 16px; cursor: pointer;
+  font: 400 13.5px var(--sp-type); background: #f3f2f0; color: #1c130f;
+}
+.pgd--dress .pgd-next { background: #2a3a52; color: #f5f1eb; }
+.pgd--dress .pgd-next:hover { text-decoration: none; }
+/* the step's subject, ringed (the mock's `.gl-hl`) — a ring around a box, so it cannot move layout */
+.pgd-ring { box-shadow: 0 0 0 3px #e8c9bb, 0 0 0 7px rgba(232, 201, 187, 0.35) !important; border-radius: 16px; transition: box-shadow 0.2s; }

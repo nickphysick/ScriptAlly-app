@@ -12,6 +12,14 @@ import { expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 
+/**
+ * A list row that is DATA, not a loading placeholder (Phase 7). The loading beat draws the page's own
+ * `ContactRows` over placeholder agents inside `.clv-group[data-loading]`, so a bare `.clv-row` wait
+ * resolves on a placeholder before the agents land — measured: lock 8's reload read the filter line
+ * before it existed.
+ */
+export const LOADED_ROW = ".clv-group:not([data-loading]) .clv-row";
+
 export { box, near, pixel, sameRgb } from "./qc126Lib";
 
 /** §11: the three widths the pack measures at. */
@@ -50,7 +58,7 @@ export async function openContacts(page: Page, vp: { width: number; height: numb
     const had = await page.evaluate(() => { const v = sessionStorage.getItem("sa.contactList"); sessionStorage.removeItem("sa.contactList"); return v !== null && v !== JSON.stringify({ filters: { stand: [], fit: [], open: [], status: [], genres: [], locs: [], rating: [], profile: [] }, search: "", group: "letter", sort: "surname", reversed: false }); });
     if (had) { await page.reload(); await page.waitForLoadState("domcontentloaded"); }
   }
-  await page.locator(".clv-row").first().waitFor({ timeout: 30_000 }).catch(() => {});
+  await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   if (!opts.motion) await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
   await page.waitForTimeout(400);

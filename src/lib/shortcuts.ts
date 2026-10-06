@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "The agent card"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -54,6 +54,12 @@ export const SHORTCUTS = {
   calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
+  /* the Contact list's keys (v13 §8) — not in a field, and not while a card, the drawer or a popover is
+     open; the carousel's arrows act only while its track has focus */
+  contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsFind:     { chords: [k("/")], label: "Find an agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  carouselBack:     { chords: [k("ArrowLeft")], label: "Move the carousel back a card, while it has focus", scope: "Contact list", bound: "src/components/shell/Carousel.tsx", inFields: "stands down" },
+  carouselForward:  { chords: [k("ArrowRight")], label: "Move the carousel on a card, while it has focus", scope: "Contact list", bound: "src/components/shell/Carousel.tsx", inFields: "stands down" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only
      when no field has focus; the card's own handler stops them reaching a page beneath it */
   cardEdit:         { chords: [k("e")], label: "Edit the agent", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },

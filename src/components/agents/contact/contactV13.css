@@ -172,3 +172,37 @@
 .sbar .cl13-ctl { flex-wrap: nowrap; flex: none; }
 .sbar .lp em { display: none; }
 .sbar .cl13-sb-t, .sbar .cl13-sb-k { flex: none; }
+
+/* v13 §8 — the "/" key cap on the banner's Find (the mock's kbd: mono 9, a 1px ring in the ink's own
+   colour, faint). It names the key the registry binds (`shortcutLabel`), never a typed literal. */
+.cl13-find .cl13-kbd {
+  flex: none; margin-left: 6px; padding: 1px 5px; border-radius: 4px;
+  font: 500 9px var(--sp-mono); line-height: 1.4; color: inherit;
+  box-shadow: inset 0 0 0 1px currentColor; opacity: 0.6;
+}
+
+/* ── v13 §8 — the loading beat (the mock's `body.loading`, scoped to the page's group) ──
+   The page's own components, drawn over placeholder agents (ContactSkeleton): their text goes
+   transparent and a shimmer is painted on the blocks — band shapes on #34445e, page shapes
+   #e7e5e1 → #f1efec. The perched art, the dots, the selector, the arrows, the controls and the letter
+   bands are drawn but invisible, so every box is the box that replaces it. Under reduced motion the
+   shapes hold still. */
+@keyframes cl13Shim { to { background-position: -200% 0; } }
+.clv-group[data-loading] :is(.cl13-sl, .cl13-sf, .cl13-se, .cz-title, .cz-note, .cl13-ac, .clv-row, .ob-k, .ob-h, .ob-p, .clv-idx) {
+  color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 10px;
+  background: linear-gradient(90deg, #e7e5e1 0, #f1efec 40%, #e7e5e1 80%) 0 0 / 200% 100% !important;
+  animation: cl13Shim 1.3s linear infinite;
+}
+.clv-group[data-loading] .ph--band :is(.ph-title, .ph-intro, .ph-acts button) {
+  color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 10px;
+  background: linear-gradient(90deg, #34445e 0, #3d4e6a 40%, #34445e 80%) 0 0 / 200% 100% !important;
+  animation: cl13Shim 1.3s linear infinite;
+}
+.clv-group[data-loading] :is(.cl13-ac, .clv-row, .clv-idx, .cl13-spark, .cl13-sf, .cl13-se, .ob-k, .ob-p) * { visibility: hidden; }
+.clv-group[data-loading] .clv-bdisc { background: #34445e !important; box-shadow: none !important; }
+.clv-group[data-loading] .clv-bdisc img { visibility: hidden; }
+.clv-group[data-loading] :is(.ob-perch, .cz-dots, .cl13-seg, .cz-arw, .cl13-ctl, .clv-band2) { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .clv-group[data-loading] :is(.cl13-sl, .cl13-sf, .cl13-se, .cz-title, .cz-note, .cl13-ac, .clv-row, .ob-k, .ob-h, .ob-p, .clv-idx),
+  .clv-group[data-loading] .ph--band :is(.ph-title, .ph-intro, .ph-acts button) { animation: none; }
+}

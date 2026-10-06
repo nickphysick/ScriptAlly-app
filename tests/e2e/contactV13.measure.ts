@@ -8,8 +8,9 @@
  * its subject has FAILED: it reads null and says so.
  */
 import { expect, test } from "@playwright/test";
-import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
+import { AT_1512, INK, LOADED_ROW, Ledger, WIDTHS, box, checkOverflow, near, openContacts, pixel, sameRgb } from "./cl13Lib";
 import { openApp } from "./pageHeaderV2Lib";
+import { liftMotionSuppression } from "./measure";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
 
@@ -415,12 +416,12 @@ test("CL13-8 · remembered settings", async ({ page, browser }) => {
   L.check("CL13-8 set: Grouped: Agency and one filter", "1512", set.group.includes("Grouped: Agency") && set.filter.includes("Filters (1)"), JSON.stringify(set));
   /* the same tab, reloaded */
   await page.reload();
-  await page.locator(".clv-row").first().waitFor({ timeout: 30_000 });
+  await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 });
   const back = { group: await pillText(page, "group"), filter: await pillText(page, "filter"), chips: await page.locator('.aglist [data-cl13-chip]').count() };
   L.check("CL13-8 a reload in the same tab restores both", "1512", back.group.includes("Grouped: Agency") && back.filter.includes("Filters (1)") && back.chips === 1, JSON.stringify(back));
   /* the extra: to the Query Centre and back */
   await page.goto("/queries"); await page.waitForTimeout(1200);
-  await page.goto("/agents"); await page.locator(".clv-row").first().waitFor({ timeout: 30_000 });
+  await page.goto("/agents"); await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 });
   L.check("CL13-8 (extra) to the Query Centre and back, both restored", "1512", (await pillText(page, "group")).includes("Grouped: Agency") && (await pillText(page, "filter")).includes("Filters (1)"), "");
   /* a fresh session: a new context carries no sessionStorage */
   const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
@@ -698,13 +699,13 @@ test("CL13-HK · start here, the copy, the fixes and the toggle", async ({ page 
   const L = new Ledger("cl13-hk");
   await openContacts(page, AT_1512);
   await page.evaluate(() => { localStorage.removeItem("sa.hkGrouping"); sessionStorage.setItem("sa.hkGrouping", "agent"); });
-  await page.reload(); await page.locator(".clv-row").first().waitFor();
+  await page.reload(); await page.locator(LOADED_ROW).first().waitFor();
   await openHk(page);
   /* §9.9 the old session value is taken once, then deleted; the choice outlives a reload */
   const mig = await page.evaluate(() => ({ ss: sessionStorage.getItem("sa.hkGrouping"), ls: localStorage.getItem("sa.hkGrouping"), view: document.querySelector('[data-hdr="housekeeping"] [data-hkv="body-wrap"]')?.getAttribute("data-view") }));
   L.check("HK-9 the old sessionStorage key is taken on first read and removed", "1512", mig.ss === null && mig.ls === "agent" && mig.view === "agent", JSON.stringify(mig));
   await page.click(q('[data-hkv="view"][data-v="detail"]'));
-  await page.reload(); await page.locator(".clv-row").first().waitFor(); await openHk(page);
+  await page.reload(); await page.locator(LOADED_ROW).first().waitFor(); await openHk(page);
   const v2 = await page.evaluate(() => ({ ls: localStorage.getItem("sa.hkGrouping"), view: document.querySelector('[data-hdr="housekeeping"] [data-hkv="body-wrap"]')?.getAttribute("data-view") }));
   L.check("HK-9 the toggle persists across a reload in localStorage", "1512", v2.ls === "detail" && v2.view === "detail", JSON.stringify(v2));
   /* a broken toggle must fail HERE, by name — not as a missing row further down */
@@ -1011,4 +1012,189 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   L.check("CL13-10 below 1100px the chip keeps today's behaviour (Back to card, no peek)", "1080", !!narrow && narrow.peek === null && narrow.text === "Back to card", JSON.stringify(narrow));
   await page.keyboard.press("Escape");
   L.done(21);
+});
+
+/* ── lock 11 · shortcuts: / focuses Find, H does nothing while typing in it, ← → move the focused track ── */
+test("CL13-11 · shortcuts", async ({ page }) => {
+  const L = new Ledger("cl13-11");
+  page.setDefaultTimeout(15_000);
+  await page.addInitScript(() => { try { localStorage.setItem("sa.guide.contacts", "1"); } catch { /* */ } });
+  await openContacts(page, AT_1512);
+  /* the key caps name what the registry binds */
+  const caps = await page.evaluate(() => ({
+    find: [...document.querySelectorAll('[data-cl13="find-key"]')].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? null,
+    tab: [...document.querySelectorAll('[data-ftab="housekeeping"] [data-hkv="key"]')].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? null,
+  }));
+  L.check("CL13-11 the / and H hints show as key caps on Find and the tab", "1512", caps.find === "/" && caps.tab === "H", JSON.stringify(caps));
+  /* / — the list comes into view and Find takes focus */
+  await page.mouse.click(5, 5).catch(() => {});
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press("/");
+  await page.waitForTimeout(800);
+  const f = await page.evaluate(() => {
+    const a = document.activeElement as HTMLElement | null;
+    const ban = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
+    const r = ban?.getBoundingClientRect();
+    return { focused: !!a?.closest('[data-cl13-find="banner"]') && a?.tagName === "INPUT", bannerTop: r ? Math.round(r.top) : null, vh: innerHeight };
+  });
+  L.check("CL13-11 / scrolls to the list and focuses Find", "1512", f.focused && f.bannerTop !== null && f.bannerTop >= 0 && f.bannerTop < f.vh, JSON.stringify(f));
+  /* H while typing in Find types an h and opens nothing */
+  await page.keyboard.press("h");
+  await page.waitForTimeout(300);
+  const h = await page.evaluate(() => ({
+    drawer: [...document.querySelectorAll('[data-hdr="housekeeping"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+    value: (document.activeElement as HTMLInputElement | null)?.value ?? null,
+  }));
+  L.check("CL13-11 H does nothing while typing in Find (it types an h)", "1512", h.drawer === 0 && h.value === "h", JSON.stringify(h));
+  /* put the page back whichever way it went, so a failure here is reported HERE and not as a timeout
+     further down (an open drawer covers the carousel the next step presses) */
+  if (h.drawer) { await page.keyboard.press("Escape"); await page.waitForTimeout(300); }
+  else await page.keyboard.press("Backspace");
+  /* ← → on the focused track move it by one card */
+  await page.locator('.aglist [data-cz-set="new"]').first().click();
+  await page.waitForTimeout(300);
+  const track = page.locator('.aglist [data-cz="contacts"] [data-cz-track]').first();
+  await track.focus();
+  const step = await track.evaluate((t) => { const c = t.firstElementChild as HTMLElement; return c.offsetWidth + (parseFloat(getComputedStyle(t).columnGap) || 0); });
+  const s0 = await track.evaluate((t) => t.scrollLeft);
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(800);
+  const s1 = await track.evaluate((t) => t.scrollLeft);
+  await page.keyboard.press("ArrowLeft");
+  await page.waitForTimeout(800);
+  const s2 = await track.evaluate((t) => t.scrollLeft);
+  L.check("CL13-11 → on the focused track moves it on one card", "1512", near(s1 - s0, step, 2), `${s0} → ${s1} (step ${step})`);
+  L.check("CL13-11 ← on the focused track moves it back one card", "1512", near(s1 - s2, step, 2), `${s1} → ${s2} (step ${step})`);
+  /* the shortcut sheet lists the page's keys */
+  await page.mouse.click(5, 5).catch(() => {});
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press("?");
+  await page.locator('[data-shell="shortcuts"]').waitFor({ timeout: 5000 }).catch(() => {});
+  const sheet = await page.evaluate(() => ["contactsHk", "contactsFind", "carouselBack", "carouselForward"].map((id) => !!document.querySelector(`[data-shell="shortcuts"] [data-shortcut="${id}"]`)));
+  L.check("CL13-11 the shortcut sheet lists H, / and the carousel's arrows", "1512", sheet.every(Boolean), JSON.stringify(sheet));
+  await page.keyboard.press("Escape");
+  L.done(6);
+});
+
+/* ── lock 12 · loading: placeholders render while the agents are held, and the band's, the strip's and
+   the first row's boxes are within 2px of their loaded boxes ── */
+test("CL13-12 · loading", async ({ page }) => {
+  const L = new Ledger("cl13-12");
+  test.setTimeout(240_000);
+  const boxes = () => page.evaluate(() => {
+    const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
+    const b = (e?: HTMLElement) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; };
+    return { band: b(v('.aglist [data-probe="page-header"]')), strip: b(v(".aglist .cl13-strip")), row: b(v(".aglist .clv-row")) };
+  });
+  for (const vp of WIDTHS) {
+    const w = `${vp.width}`;
+    await page.addInitScript(() => { (window as unknown as { __SA_AGENTS_HOLD_MS?: number }).__SA_AGENTS_HOLD_MS = 12000; try { localStorage.setItem("sa.guide.contacts", "1"); } catch { /* */ } });
+    await openApp(page, "/agents", vp);
+    const held = await page.evaluate(() => {
+      const g = document.querySelector<HTMLElement>(".aglist .clv-group[data-loading]");
+      const card = g?.querySelector<HTMLElement>(".cl13-ac");
+      const vis = (s: string) => { const e = g?.querySelector<HTMLElement>(s); return e ? getComputedStyle(e).opacity : null; };
+      return {
+        loading: !!g, inert: !!g?.hasAttribute("inert"),
+        cards: g?.querySelectorAll(".cl13-ac").length ?? 0, rows: g?.querySelectorAll(".clv-row").length ?? 0,
+        shimmer: card ? getComputedStyle(card).backgroundImage.includes("gradient") : false,
+        perch: vis(".ob-perch"), ctl: vis(".cl13-ctl"), seg: vis(".cl13-seg"),
+        tab: !!document.querySelector('[data-ftab="housekeeping"]'),
+        bandShape: (() => { const t = g?.querySelector<HTMLElement>(".ph--band .ph-title"); return t ? getComputedStyle(t).backgroundImage.includes("52, 68, 94") || getComputedStyle(t).backgroundImage.includes("#34445e") : false; })(),
+      };
+    });
+    L.check("CL13-12 with the agents held, the placeholders render: three cards, five rows, shimmering, inert", w,
+      held.loading && held.inert && held.cards === 3 && held.rows === 5 && held.shimmer && held.bandShape, JSON.stringify(held));
+    L.check("CL13-12 the perched art, the pills and the selector wait for data; no Housekeeping tab", w,
+      held.perch === "0" && held.ctl === "0" && held.seg === "0" && !held.tab, JSON.stringify(held));
+    const a = await boxes();
+    await page.locator(".aglist .clv-group[data-loading]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(600);
+    const b = await boxes();
+    for (const k of ["band", "strip", "row"] as const) {
+      const x = a[k], y = b[k];
+      L.check(`CL13-12 the ${k}'s box is within 2px of its loaded box`, w,
+        !!x && !!y && near(x.l, y.l, 2) && near(x.t, y.t, 2) && near(x.w, y.w, 2) && near(x.h, y.h, 2), JSON.stringify({ held: x, loaded: y }));
+    }
+  }
+  /* the shimmer, BOTH directions: it moves normally and holds still under reduced motion.
+     ⚠️ openRoute injects `* { animation: none !important }` to freeze motion for measuring, so with it in
+     place "no animation" is the HARNESS's answer about every element — a reduced-motion reading taken
+     through it passed with the rule deleted (measured, 6 Oct). It is lifted before either reading. */
+  const shimmerOf = async (rm: "no-preference" | "reduce") => {
+    await page.emulateMedia({ reducedMotion: rm });
+    await page.addInitScript(() => { (window as unknown as { __SA_AGENTS_HOLD_MS?: number }).__SA_AGENTS_HOLD_MS = 12000; });
+    await openApp(page, "/agents", AT_1512);
+    await liftMotionSuppression(page);
+    return page.evaluate(() => { const c = document.querySelector<HTMLElement>(".aglist .clv-group[data-loading] .cl13-ac"); return c ? getComputedStyle(c).animationName : null; });
+  };
+  const moving = await shimmerOf("no-preference");
+  L.check("CL13-12 the shapes shimmer (with the harness's motion freeze lifted)", "1512", moving === "cl13Shim", `${moving}`);
+  const still = await shimmerOf("reduce");
+  L.check("CL13-12 under reduced motion the shapes don't shimmer", "1512", still === "none", `${still}`);
+  await page.emulateMedia({ reducedMotion: null });
+  L.done(17);
+});
+
+/* ── lock 13 · the page guide: first visit shows step 1; × sets sa.guide.contacts; a reload doesn't
+   show it; "Show the page guide" does ── */
+test("CL13-13 · page guide", async ({ page }) => {
+  const L = new Ledger("cl13-13");
+  page.setDefaultTimeout(15_000);
+  const G = '[data-guide="contacts"]';
+  await openContacts(page, AT_1512);
+  await page.evaluate(() => { localStorage.removeItem("sa.guide.contacts"); });
+  await page.reload(); await page.locator(LOADED_ROW).first().waitFor();
+  await page.locator(G).waitFor({ timeout: 10_000 }).catch(() => {});
+  await page.waitForTimeout(900); /* longer than a smooth scroll, so an arrival scroll would have landed */
+  const s1 = await page.evaluate((G) => {
+    const g = document.querySelector<HTMLElement>(G);
+    const tab = [...document.querySelectorAll<HTMLElement>('[data-ftab="housekeeping"]')].find((e) => e.getBoundingClientRect().height > 0);
+    const gr = g?.getBoundingClientRect(), tr = tab?.getBoundingClientRect();
+    return {
+      title: g?.querySelector('[data-qcv="guide-title"]')?.textContent ?? null, kick: g?.querySelector('[data-qcv="guide-n"]')?.textContent ?? null,
+      w: gr ? Math.round(gr.width) : null, above: !!gr && !!tr && gr.bottom <= tr.top + 0.5 && Math.abs(gr.right - tr.right) <= 1,
+      ring: !!document.querySelector('.aglist [data-cl13="strip"].pgd-ring'),
+      scrolled: [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.scrollTop),
+    };
+  }, G);
+  /* the guide stands above the tab and under anything the reader opens over it */
+  /* settle the pill in view first: a click that has to scroll lands as the page moves, and a scroll
+     closes an open pill menu */
+  await vis(page, '[data-cl13-ctl="banner"] [data-lp="group"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(400);
+  await vis(page, '[data-cl13-ctl="banner"] [data-lp="group"]').click();
+  await page.locator('[data-lpop="group"]').waitFor({ timeout: 4000 }).catch(() => {});
+  const zs = await page.evaluate((G) => {
+    const z = (sel: string) => { const e = [...document.querySelectorAll<HTMLElement>(sel)].find((x) => x.getBoundingClientRect().height > 0); return e ? Number(getComputedStyle(e).zIndex) : null; };
+    return { guide: z(G), tab: z('[data-ftab="housekeeping"]'), pop: z('[data-lpop="group"]') };
+  }, G);
+  await page.keyboard.press("Escape");
+  L.check("CL13-13 the guide is above the tab and under an open pill's menu", "1512", zs.guide !== null && zs.tab !== null && zs.pop !== null && zs.tab < zs.guide && zs.guide < zs.pop, JSON.stringify(zs));
+  L.check("CL13-13 the guide's arrival moves nothing: the page has not scrolled", "1512", s1.scrolled.length === 1 && s1.scrolled[0] === 0, JSON.stringify(s1.scrolled));
+  L.check("CL13-13 a first visit shows step 1, ringing the strip", "1512", s1.title === "Your list in numbers" && s1.kick === "How this page works · 1 of 4" && s1.ring, JSON.stringify(s1));
+  L.check("CL13-13 the guide is 340 wide, above the Housekeeping tab, flush with its right", "1512", s1.w === 340 && s1.above, JSON.stringify(s1));
+  await page.click(`${G} [data-qcv="guide-next"]`);
+  const s2 = await page.evaluate((G) => ({ title: document.querySelector(`${G} [data-qcv="guide-title"]`)?.textContent ?? null,
+    ring: !!document.querySelector('.aglist [data-cz="contacts"].pgd-ring'), stripRing: !!document.querySelector(".pgd-ring[data-cl13='strip']") }), G);
+  L.check("CL13-13 Next moves to step 2 and rings the carousel (the strip's ring is released)", "1512", s2.title === "Who to query next" && s2.ring && !s2.stripRing, JSON.stringify(s2));
+  await page.click(`${G} [data-qcv="guide-back"]`);
+  L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");
+  await page.click(`${G} [data-qcv="guide-x"]`);
+  const seen = await page.evaluate(() => localStorage.getItem("sa.guide.contacts"));
+  L.check("CL13-13 × closes it and sets sa.guide.contacts", "1512", seen === "1" && (await page.locator(G).count()) === 0 && (await page.locator(".pgd-ring").count()) === 0, `${seen}`);
+  await page.reload(); await page.locator(LOADED_ROW).first().waitFor();
+  await page.waitForTimeout(1500);
+  L.check("CL13-13 a reload doesn't show it", "1512", (await page.locator(G).count()) === 0, "");
+  await page.click('[data-shell="help"]');
+  await page.click('[data-shell="guide-again"]');
+  await page.locator(G).waitFor({ timeout: 5000 }).catch(() => {});
+  L.check("CL13-13 \"Show the page guide\" brings it back at step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent().catch(() => null)) === "Your list in numbers", "");
+  /* the last step finishes with Got it */
+  for (let i = 0; i < 3; i++) await page.click(`${G} [data-qcv="guide-next"]`);
+  const last = await page.evaluate((G) => ({ title: document.querySelector(`${G} [data-qcv="guide-title"]`)?.textContent ?? null, btn: document.querySelector(`${G} [data-qcv="guide-next"]`)?.textContent ?? null,
+    ring: !!document.querySelector('[data-ftab="housekeeping"].pgd-ring') }), G);
+  L.check("CL13-13 step 4 rings the Housekeeping tab and finishes with Got it", "1512", last.title === "Housekeeping" && last.btn === "Got it" && last.ring, JSON.stringify(last));
+  await page.click(`${G} [data-qcv="guide-next"]`);
+  L.done(10);
 });

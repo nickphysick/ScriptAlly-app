@@ -1,0 +1,15 @@
+{"lock":"CL13-11","mutation":"Find's key cap removed (findKey not passed)","red":"key caps · {\"find\":null,\"tab\":\"H\"}"}
+{"lock":"CL13-11","mutation":"/ handler does not focus Find","red":"/ scrolls to the list and focuses Find · {\"focused\":false}"}
+{"lock":"CL13-11","mutation":"isEditableTarget guard dropped from the H handler","red":"H does nothing while typing in Find · {\"drawer\":1,\"value\":null}"}
+{"lock":"CL13-11","mutation":"Carousel track onKeyDown removed","red":"→ / ← on the focused track · 2 → 2 (step 336)"}
+{"lock":"CL13-12","mutation":"placeholder carousel draws two cards","red":"three placeholder cards · cards 2"}
+{"lock":"CL13-12","mutation":"shimmer animation flattened","red":"the shapes shimmer · false"}
+{"lock":"CL13-12","mutation":"perched art shown while loading","red":"perched art appears only with data · 1"}
+{"lock":"CL13-12","mutation":"two-line placeholder wishlist","red":"first row's box within 2px at 1280 · 86 vs 80"}
+{"lock":"CL13-12","mutation":"reduced-motion rule removed","red":"under reduced motion the shapes don't shimmer · cl13Shim"}
+{"lock":"CL13-13","mutation":"subject ring not applied","red":"each step rings its subject · false"}
+{"lock":"CL13-13","mutation":"guide placed at the tab's bottom","red":"the guide sits above the tab · false"}
+{"lock":"CL13-13","mutation":"× does not write sa.guide.contacts","red":"× sets sa.guide.contacts · not seen; a reload shows it again"}
+{"lock":"CL13-13","mutation":"finish label 'Done'","red":"the last step says Got it · Done"}
+{"lock":"CL13-13","mutation":"the guide scrolls its subject on arrival (pre-fix behaviour)","red":"the guide's arrival moves nothing · [76]"}
+{"lock":"CL13-13","mutation":"the dressed guide at z 66","red":"above the tab and under an open pill menu · {guide:66,tab:55,pop:60}"}

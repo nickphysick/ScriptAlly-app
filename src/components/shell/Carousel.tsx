@@ -15,6 +15,7 @@
  * arrows stepping 336px past cards that are now 300 wide.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import "./carousel.css";
 
 export interface CarouselProps<T> {
@@ -81,7 +82,16 @@ export function Carousel<T>({
         <button type="button" className="cz-arw" aria-label="Previous" data-cz-prev="" onClick={() => by(-1)}>‹</button>
         <button type="button" className="cz-arw" aria-label="Next" data-cz-next="" onClick={() => by(1)}>›</button>
       </div>
-      <div ref={setTrack} className="cz-track" data-cz-track="" tabIndex={0} aria-label={`${label}; use the arrow keys`}>
+      {/* ← → move the track by one card while IT has focus (a card inside it is a different target) —
+          the keys its accessible name promises, from the shared registry */}
+      <div ref={setTrack} className="cz-track" data-cz-track="" tabIndex={0} aria-label={`${label}; use the arrow keys`}
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          const back = matchesShortcut(SHORTCUTS.carouselBack, e);
+          if (!back && !matchesShortcut(SHORTCUTS.carouselForward, e)) return;
+          e.preventDefault();
+          by(back ? -1 : 1);
+        }}>
         {items.length ? items.map((it, i) => (
           <div key={itemKey(it)} className="cz-item" data-cz-item="">{renderItem(it, i)}</div>
         )) : <div className="cz-empty">{empty}</div>}
