@@ -17,7 +17,7 @@
 import type { Agent, Manuscript, Query, QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
 import { isDoorOpen } from "./agentList";
-import { bookGenres, takesBook } from "./genreMatch";
+import { bookGenres, genreKey, takesBook } from "./genreMatch";
 import { joinGenres } from "./genreNoun";
 
 /** The rail's breathing room from the viewport's edges, and its height clamp (mock: the rail's
@@ -259,6 +259,8 @@ export interface AgentFacts {
   openKey: OpenKey;
   /** the status the filter's Query status section reads (v11 §5.1's seven) */
   statusKey: string;
+  /** v14 §4 (ruling Q6): the agent's query status for this manuscript, as the Status filter and grouping read it */
+  status14: StatusKey;
   rating: number | null;
   genres: string[];
   lastMs: number | null;
@@ -287,131 +289,167 @@ export function agentFacts(a: Agent, rows: readonly QcRow[], msId: string | null
     door: isDoorOpen(a) ? "open" : "closed",
     openKey: openKeyOf(a),
     statusKey,
+    status14: status14Of(standing.kind === "none" ? null : q),
     rating: typeof a.starRating === "number" ? a.starRating : null,
     genres: a.genres ?? [],
     lastMs: mine.length ? Math.max(...mine.map((r) => r.lastMs)) : null,
   };
 }
 
-/* ── the filter (v11 §5.1): six sections, OR within, AND across ── */
+/* ══ v14 §4 — FILTERS, GROUPING AND SORT: Nick's set (supersedes v13's ruling Q4) ═══════════════════════════════
+ * Filters, on one line: Status (tick several) · Action required (on/off) · Open for submissions · Queried or not ·
+ * Missing materials (on/off) · Always responds (on/off) · + Genre tokens (any | all). AND across the controls; OR
+ * within Status, and within the genres unless "all". Grouping: Letter (default) · Status · Action required · Country.
+ * Sort: Surname · Agency · Response time · Recent activity · Status, each with a direction toggle. */
 
 export const NOT_RECORDED = "Not recorded";
-/** §5.1's seven, verbatim — Full requested and R&R are deliberately not options (the mock's own
- *  list); a live one is reachable through Where-you-stand. Recorded, not smoothed over. */
-export const STATUS_OPTIONS = [
-  "Queried", "Partial requested", "Partial sent", "Full sent", "Offer", "Closed", "Not queried yet",
-] as const;
-export type RatingKey = 5 | 4 | 3 | 2 | 0; // 0 = Unrated; the ★★ chip takes 2 AND the folded 1
 
-/* ── v13 §5: the sections, in the panel's order. OR within a section, AND across. Every v12 facet
-   is kept (ruling Q4); "Open to queries" replaces the door's two-way and grows "Not stated"; "Where
-   you stand" grows Offer; "Fit for the book" and "Profile" are new. ── */
-export type WhereKey = StandKey | "offer";
-export type FitKey = "takes" | "doesnt";
-export type ProfileKey = "gaps";
+/** Ruling Q6: every status is reachable — eleven choices, this order, Revise & resubmit, Resubmitted and Signed
+ *  their own. "Closed" is Rejected, No response and Withdrawn. */
+export type StatusKey = "none" | "queried" | "pr" | "ps" | "fr" | "fs" | "rr" | "resub" | "offer" | "signed" | "closed";
+export const STATUS_CHOICES: { key: StatusKey; label: string }[] = [
+  { key: "none", label: "Not queried" },
+  { key: "queried", label: "Queried" },
+  { key: "pr", label: "Partial requested" },
+  { key: "ps", label: "Partial sent" },
+  { key: "fr", label: "Full requested" },
+  { key: "fs", label: "Full sent" },
+  { key: "rr", label: "Revise & resubmit" },
+  { key: "resub", label: "Resubmitted" },
+  { key: "offer", label: "Offer" },
+  { key: "signed", label: "Signed" },
+  { key: "closed", label: "Closed" },
+];
+export const STATUS_LABEL = Object.fromEntries(STATUS_CHOICES.map((c) => [c.key, c.label])) as Record<StatusKey, string>;
+/** grouped by Status: furthest along first, then Not queried, Closed last (ruling Q6) */
+export const STATUS_GROUP_ORDER: StatusKey[] = ["signed", "offer", "resub", "rr", "fs", "fr", "ps", "pr", "queried", "none", "closed"];
+
+/** the status of one query, as the filter names it; null (no query for this manuscript) is "none" */
+export function status14Of(q: Pick<QcRow, "status"> | null): StatusKey {
+  if (!q) return "none";
+  switch (String(q.status)) {
+    case "Queried": return "queried";
+    case "Partial Requested": return "pr";
+    case "Partial Sent": return "ps";
+    case "Full Requested": return "fr";
+    case "Full Sent": return "fs";
+    case "Revise & Resubmit": return "rr";
+    case "Resubmitted": return "resub";
+    case "Offer": return "offer";
+    case "Signed": return "signed";
+    default: return "closed"; // Rejected, No Response, Withdrawn
+  }
+}
+
+export type OpenChoice = "either" | "open" | "closed";
+export type QueriedChoice = "either" | "yes" | "no";
+export type GenreMode = "any" | "all";
 export interface ContactFilters {
-  stand: WhereKey[];
-  fit: FitKey[];
-  open: OpenKey[];
-  status: string[];
+  status: StatusKey[];
+  action: boolean;
+  open: OpenChoice;
+  queried: QueriedChoice;
+  mats: boolean;
+  always: boolean;
+  /** genre KEYS (`genreKey`) — canonical ids for anything picked from the app's genre list */
   genres: string[];
-  locs: string[];
-  rating: RatingKey[];
-  profile: ProfileKey[];
+  genreMode: GenreMode;
 }
 export const emptyContactFilters = (): ContactFilters =>
-  ({ stand: [], fit: [], open: [], status: [], genres: [], locs: [], rating: [], profile: [] });
+  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" });
+export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
+  { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
+];
+export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
+  { key: "either", label: "Either" }, { key: "yes", label: "Queried" }, { key: "no", label: "Not queried yet" },
+];
+export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres";
+export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres"];
+/** how many controls are on — "Clear all" shows while this is above 0 */
 export const contactFilterCount = (f: ContactFilters): number =>
-  f.stand.length + f.fit.length + f.open.length + f.status.length + f.genres.length + f.locs.length + f.rating.length + f.profile.length;
+  (f.status.length ? 1 : 0) + (f.action ? 1 : 0) + (f.open !== "either" ? 1 : 0) + (f.queried !== "either" ? 1 : 0)
+  + (f.mats ? 1 : 0) + (f.always ? 1 : 0) + (f.genres.length ? 1 : 0);
 
-/** what a filter needs to know that the facts alone cannot say: the book's genre, and the gaps */
-export interface FilterCtx {
-  fits: (x: AgentFacts) => boolean;
-  gaps: (x: AgentFacts) => boolean;
-}
-const NO_CTX: FilterCtx = { fits: () => false, gaps: () => false };
+/* the one-line facts each filter reads */
+export const isActionRequired = (x: Pick<AgentFacts, "stand">) => x.stand === "you";
+export const isQueried = (x: Pick<AgentFacts, "standing">) => x.standing.kind !== "none";
+export const isOpenNow = (x: Pick<AgentFacts, "openKey">) => x.openKey !== "closed";
+export const isMissingMaterials = (x: Pick<AgentFacts, "agent">) => (x.agent.materialsWanted ?? []).length === 0;
+export const isAlwaysResponds = (x: Pick<AgentFacts, "agent">) => x.agent.noResponseMeansNo === false;
 
-export const ratingKeyOf = (r: number | null): RatingKey => (r == null ? 0 : r <= 2 ? 2 : (r as RatingKey));
+const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => boolean> = {
+  status: (x, f) => f.status.length === 0 || f.status.includes(x.status14),
+  action: (x, f) => !f.action || isActionRequired(x),
+  open: (x, f) => f.open === "either" || (f.open === "open" ? isOpenNow(x) : !isOpenNow(x)),
+  queried: (x, f) => f.queried === "either" || (f.queried === "yes" ? isQueried(x) : !isQueried(x)),
+  mats: (x, f) => !f.mats || isMissingMaterials(x),
+  always: (x, f) => !f.always || isAlwaysResponds(x),
+  genres: (x, f) => {
+    if (f.genres.length === 0) return true;
+    const mine = new Set(x.genres.map(genreKey));
+    return f.genreMode === "all" ? f.genres.every((g) => mine.has(g)) : f.genres.some((g) => mine.has(g));
+  },
+};
+export const matchesContactFilters = (x: AgentFacts, f: ContactFilters, except?: FilterSection): boolean =>
+  FILTER_SECTIONS.every((k) => k === except || sectionMatch[k](x, f));
 
-const sectionMatch = {
-  /* "Your move" counts an offer too (the mock's `you`, and v12's union); Offer alone is the offer */
-  stand: (x: AgentFacts, v: string[]) => v.length === 0 || v.some((k) => (k === "offer" ? x.q?.court === "offer" : x.stand === k)),
-  fit: (x: AgentFacts, v: string[], c: FilterCtx) => v.length === 0 || v.some((k) => (k === "takes" ? c.fits(x) : !c.fits(x))),
-  open: (x: AgentFacts, v: string[]) => v.length === 0 || v.includes(x.openKey),
-  status: (x: AgentFacts, v: string[]) => v.length === 0 || v.includes(x.statusKey),
-  genres: (x: AgentFacts, v: string[]) =>
-    v.length === 0 || v.some((g) => (g === NOT_RECORDED ? x.genres.length === 0 : x.genres.includes(g))),
-  locs: (x: AgentFacts, v: string[]) =>
-    v.length === 0 || v.some((l) => (l === NOT_RECORDED ? x.loc == null : x.loc === l)),
-  rating: (x: AgentFacts, v: RatingKey[]) => v.length === 0 || v.includes(ratingKeyOf(x.rating)),
-  profile: (x: AgentFacts, v: string[], c: FilterCtx) => v.length === 0 || c.gaps(x),
-} as const;
-export type FilterSection = keyof typeof sectionMatch;
-export const FILTER_SECTIONS: FilterSection[] = ["stand", "fit", "open", "status", "genres", "locs", "rating", "profile"];
-
-export const matchesContactFilters = (x: AgentFacts, f: ContactFilters, except?: FilterSection, ctx: FilterCtx = NO_CTX): boolean =>
-  FILTER_SECTIONS.every((k) =>
-    k === except ? true : (sectionMatch[k] as (x: AgentFacts, v: unknown[], c: FilterCtx) => boolean)(x, f[k] as unknown[], ctx));
-
-/** The options each section offers, from the data (locations and genres present), with counts
- *  FACETED: every option counted under all the OTHER active narrowing (v11 §5.1) — the cards and
- *  Find included, which is what `pool` carries. */
-export function facetOptions(
-  facts: readonly AgentFacts[],
-  f: ContactFilters,
-  pool: (x: AgentFacts) => boolean,
-  ctx: FilterCtx = NO_CTX,
-): Record<FilterSection, { value: string; n: number }[]> {
-  const under = (except: FilterSection) =>
-    facts.filter((x) => pool(x) && matchesContactFilters(x, f, except, ctx));
-  const count = (xs: AgentFacts[], hit: (x: AgentFacts) => boolean) => xs.filter(hit).length;
-  const present = (pick: (x: AgentFacts) => string[]) =>
-    [...new Set(facts.flatMap(pick))].sort((a, b) => a.localeCompare(b));
-
-  const genresPresent = present((x) => x.genres);
-  const locsPresent = present((x) => (x.loc ? [x.loc] : []));
-  const P = Object.fromEntries(FILTER_SECTIONS.map((k) => [k, under(k)])) as Record<FilterSection, AgentFacts[]>;
-
+/** each control's count, FACETED — under every OTHER active control and Find (`pool`) */
+export function facetCounts(facts: readonly AgentFacts[], f: ContactFilters, pool: (x: AgentFacts) => boolean) {
+  const under = (k: FilterSection) => facts.filter((x) => pool(x) && matchesContactFilters(x, f, k));
+  const S = under("status");
   return {
-    stand: (["you", "agent", "offer", "none", "closed"] as WhereKey[]).map((k) => ({
-      value: k, n: count(P.stand, (x) => (k === "offer" ? x.q?.court === "offer" : x.stand === k)),
-    })),
-    fit: [
-      { value: "takes", n: count(P.fit, (x) => ctx.fits(x)) },
-      { value: "doesnt", n: count(P.fit, (x) => !ctx.fits(x)) },
-    ],
-    open: (["open", "closed", "unstated"] as OpenKey[]).map((k) => ({ value: k, n: count(P.open, (x) => x.openKey === k) })),
-    status: STATUS_OPTIONS.map((st) => ({ value: st, n: count(P.status, (x) => x.statusKey === st) })),
-    genres: [...genresPresent.map((g) => ({ value: g, n: count(P.genres, (x) => x.genres.includes(g)) })),
-      { value: NOT_RECORDED, n: count(P.genres, (x) => x.genres.length === 0) }],
-    locs: [...locsPresent.map((l) => ({ value: l, n: count(P.locs, (x) => x.loc === l) })),
-      { value: NOT_RECORDED, n: count(P.locs, (x) => x.loc == null) }],
-    rating: ([5, 4, 3, 2, 0] as RatingKey[]).map((r) => ({ value: String(r), n: count(P.rating, (x) => ratingKeyOf(x.rating) === r) })),
-    profile: [{ value: "gaps", n: count(P.profile, (x) => ctx.gaps(x)) }],
+    status: Object.fromEntries(STATUS_CHOICES.map((c) => [c.key, S.filter((x) => x.status14 === c.key).length])) as Record<StatusKey, number>,
+    action: under("action").filter(isActionRequired).length,
+    mats: under("mats").filter(isMissingMaterials).length,
+    always: under("always").filter(isAlwaysResponds).length,
+    open: { open: under("open").filter(isOpenNow).length, closed: under("open").filter((x) => !isOpenNow(x)).length },
+    queried: { yes: under("queried").filter(isQueried).length, no: under("queried").filter((x) => !isQueried(x)).length },
   };
 }
 
-/* ── grouping (v11 §5.2) — a PARTITION of the already-sorted list ── */
+/** "N on your list" — how many agents carry each genre key, over the whole list */
+export function genreTallies(facts: readonly AgentFacts[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const x of facts) for (const k of new Set(x.genres.map(genreKey))) m.set(k, (m.get(k) ?? 0) + 1);
+  return m;
+}
 
-export type GroupKey = "letter" | "stand" | "agency" | "loc" | "door" | "fit" | "status" | "none";
-/** v13 §5: the mock's order, plus Query status (kept, ruling Q4). `line` is the option's italic line. */
+/* ── grouping (v14 §4) — a PARTITION of the already-sorted list ── */
+export type GroupKey = "letter" | "status" | "action" | "country";
 export const GROUP_OPTIONS: { key: GroupKey; label: string; line?: string }[] = [
-  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z strip" },
-  { key: "stand", label: "Where you stand" },
-  { key: "agency", label: "Agency" },
-  { key: "loc", label: "Location" },
-  { key: "door", label: "Open to queries" },
-  { key: "fit", label: "Fit for your book" },
-  { key: "status", label: "Query status" },
-  { key: "none", label: "No grouping" },
+  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z index" },
+  { key: "status", label: "Status", line: "Furthest along first; closed last" },
+  { key: "action", label: "Action required", line: "What each agent needs from you" },
+  { key: "country", label: "Country", line: "Where the agent is based" },
 ];
-/** §5.2's status order, with one addition the prompt's table cannot avoid: a live Revise &
- *  resubmit has to land somewhere, and dropping the agent would be worse than naming the stage.
- *  It slots where the journey puts it, between Full sent and Offer. */
-const STATUS_GROUP_ORDER = [
-  "Offer", "Revise & resubmit", "Full sent", "Full requested", "Partial sent", "Partial requested",
-  "Queried", "Not queried yet", "Closed",
+/** Action required's groups, in order. Ruling Q6: Revise & resubmit is "Send the revision" (your move);
+ *  Resubmitted waits on the agent; Signed has nothing to do. */
+export type ActionKey = "offer" | "partial" | "full" | "revision" | "nudge" | "ready" | "waiting" | "shut" | "nothing";
+export const ACTION_GROUPS: { key: ActionKey; label: string }[] = [
+  { key: "offer", label: "Answer the offer" },
+  { key: "partial", label: "Send the partial" },
+  { key: "full", label: "Send the full" },
+  { key: "revision", label: "Send the revision" },
+  { key: "nudge", label: "Nudge due" },
+  { key: "ready", label: "Ready to query" },
+  { key: "waiting", label: "Waiting on the agent" },
+  { key: "shut", label: "Closed to queries for now" },
+  { key: "nothing", label: "Nothing to do" },
 ];
+/** what the agent needs from the writer — `takes` is the book-genre fact (ruling Q5) */
+export function actionOf(x: AgentFacts, takes: (x: AgentFacts) => boolean): ActionKey {
+  const st = x.status14;
+  if (st === "offer") return "offer";
+  if (st === "pr") return "partial";
+  if (st === "fr") return "full";
+  if (st === "rr") return "revision";
+  if (x.pastExpected) return "nudge";
+  if (st === "none") return !isOpenNow(x) ? "shut" : takes(x) ? "ready" : "nothing";
+  if (st === "queried" || st === "ps" || st === "fs" || st === "resub") return "waiting";
+  return "nothing";
+}
+/** Country, as the app records it — the country's name (ruling Q3); UK nations are not stored and never guessed */
+export const countryOf = (x: Pick<AgentFacts, "agent">): string => countryName(x.agent.country) || NOT_RECORDED;
 const deThe = (s: string) => s.replace(/^the\s+/i, "");
 
 /* ── v12: the surname and its initial (the card index's key) ──────────────────────────────
@@ -443,98 +481,61 @@ export function letterCounts(facts: readonly AgentFacts[]): Map<string, number> 
 }
 
 
-export interface ContactGroup { label: string; ids: string[]; extra?: string }
+export interface ContactGroup { label: string; ids: string[]; extra?: string; key?: string }
 
 export function contactGroups(
-  key: GroupKey, ordered: readonly AgentFacts[], ctx: { fits?: (x: AgentFacts) => boolean; genreWord?: string | null } = {},
+  key: GroupKey, ordered: readonly AgentFacts[], ctx: { takes?: (x: AgentFacts) => boolean } = {},
 ): ContactGroup[] {
-  const takes = `Takes ${ctx.genreWord ?? "your genre"}`, doesnt = `Doesn\u2019t list ${ctx.genreWord ?? "your genre"}`;
-  if (key === "none") return [{ label: "All agents", ids: ordered.map((x) => x.agent.id) }];
   const buckets = new Map<string, string[]>();
-  const put = (label: string, id: string) => {
-    const l = buckets.get(label);
-    if (l) l.push(id); else buckets.set(label, [id]);
-  };
+  const put = (k: string, id: string) => { const l = buckets.get(k); if (l) l.push(id); else buckets.set(k, [id]); };
+  const takes = ctx.takes ?? (() => false);
   for (const x of ordered) {
     if (key === "letter") put(surnameInitial(x.agent), x.agent.id);
-    else if (key === "stand") put(STAND_LABEL[x.stand], x.agent.id);
-    else if (key === "door") put(OPEN_LABEL[x.openKey], x.agent.id);
-    else if (key === "fit") put(ctx.fits?.(x) ? takes : doesnt, x.agent.id);
-    else if (key === "agency") put(x.agent.agency.trim() || "No agency", x.agent.id);
-    else if (key === "loc") put(x.loc ?? "Location not recorded", x.agent.id);
-    else put(x.statusKey === "Revise & resubmit" ? "Revise & resubmit" : x.statusKey, x.agent.id);
+    else if (key === "status") put(x.status14, x.agent.id);
+    else if (key === "action") put(actionOf(x, takes), x.agent.id);
+    else put(countryOf(x), x.agent.id);
   }
-  let labels = [...buckets.keys()];
-  if (key === "letter") labels.sort((a, b) => a.localeCompare(b));
-  else if (key === "stand") labels = (Object.values(STAND_LABEL)).filter((l) => buckets.has(l));
-  else if (key === "door") labels = [OPEN_LABEL.open, OPEN_LABEL.closed, OPEN_LABEL.unstated].filter((l) => buckets.has(l));
-  else if (key === "fit") labels = [takes, doesnt].filter((l) => buckets.has(l));
-  else if (key === "status") labels = STATUS_GROUP_ORDER.filter((l) => buckets.has(l));
-  else if (key === "agency") labels.sort((a, b) => (a === "No agency" ? 1 : b === "No agency" ? -1 : deThe(a).localeCompare(deThe(b))));
-  else labels.sort((a, b) => (a === "Location not recorded" ? 1 : b === "Location not recorded" ? -1 : a.localeCompare(b)));
-  return labels.map((label) => ({
-    label,
-    ids: buckets.get(label)!,
-    extra: key === "stand" && label === STAND_LABEL.you ? "Offers, requests and nudges" : undefined,
-  }));
+  if (key === "letter") return [...buckets.keys()].sort((a, b) => a.localeCompare(b)).map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));
+  if (key === "status") return STATUS_GROUP_ORDER.filter((k) => buckets.has(k)).map((k) => ({ label: STATUS_LABEL[k], key: k, ids: buckets.get(k)! }));
+  if (key === "action") return ACTION_GROUPS.filter((g) => buckets.has(g.key)).map((g) => ({ label: g.label, key: g.key, ids: buckets.get(g.key)! }));
+  return [...buckets.keys()]
+    .sort((a, b) => (a === NOT_RECORDED ? 1 : b === NOT_RECORDED ? -1 : a.localeCompare(b)))
+    .map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));
 }
 
-/* ── sorting (v11 §5.3) — within groups when grouped ── */
+/* ── sorting (v14 §4) — within groups when grouped ── */
 
-export type SortKey = "surname" | "due" | "name" | "agency" | "reply" | "rating" | "activity";
-/** v13 §5: the mock's seven, each with its italic line and the direction toggle's two words */
+export type SortKey = "surname" | "agency" | "reply" | "activity" | "status";
+/** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
-  { key: "surname", label: "Surname", line: "A to Z by family name", dir: ["A to Z", "Z to A"] },
-  { key: "name", label: "First name", line: "A to Z by first name", dir: ["A to Z", "Z to A"] },
-  { key: "agency", label: "Agency", line: "Agencies A to Z, then surname", dir: ["A to Z", "Z to A"] },
-  { key: "reply", label: "Replies fastest", line: "Shortest reply time first; unknown last", dir: ["Fastest first", "Slowest first"] },
-  { key: "due", label: "Next date", line: "Soonest answer, send-by or reply date first", dir: ["Soonest first", "Latest first"] },
-  { key: "rating", label: "Your rating", line: "Highest rated first", dir: ["Highest first", "Lowest first"] },
-  { key: "activity", label: "Latest activity", line: "Most recently changed first", dir: ["Most recent first", "Oldest first"] },
+  { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
+  { key: "agency", label: "Agency", line: "Agencies by name, \u201cThe\u201d ignored", dir: ["A to Z", "Z to A"] },
+  { key: "reply", label: "Response time", line: "Unknown last, either way", dir: ["Fastest first", "Slowest first"] },
+  { key: "activity", label: "Recent activity", line: "The latest change to each agent's query", dir: ["Most recent first", "Oldest first"] },
+  { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
 ];
 
-/** "Next action due": past dates first (most over first), then soonest; the dateless after —
- *  open before closed, and genre matches before the rest (v11 §5.3). */
-export function compareDue(a: AgentFacts, b: AgentFacts, genreHit: (x: AgentFacts) => boolean, nowMs: number): number {
-  const dateOf = (x: AgentFacts) => (x.q && x.q.court !== "closed" ? x.q.expectedMs : null);
-  const da = dateOf(a); const db = dateOf(b);
-  if (da != null && db != null) return da - db;
-  if (da != null) return -1;
-  if (db != null) return 1;
-  const openA = a.standing.kind === "open" || a.standing.kind === "none" ? 0 : 1;
-  const openB = b.standing.kind === "open" || b.standing.kind === "none" ? 0 : 1;
-  if (openA !== openB) return openA - openB;
-  const gA = genreHit(a) ? 0 : 1; const gB = genreHit(b) ? 0 : 1;
-  if (gA !== gB) return gA - gB;
-  void nowMs;
-  return 0;
-}
-
 /**
- * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law: an undated row sorts last in
- * either direction) — reversing a list whose tail is "no date" would otherwise lead with the agents
- * nobody can sort. Names are never missing, so the three A-to-Z sorts simply reverse.
+ * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law): reversing a list whose tail is
+ * "unknown" would otherwise lead with the agents nobody can sort. Names are never missing.
  */
-export function sortFacts(
-  facts: readonly AgentFacts[], key: SortKey, genreHit: (x: AgentFacts) => boolean, nowMs: number, reversed = false,
-): AgentFacts[] {
+export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed = false): AgentFacts[] {
   const by = [...facts];
   const name = (x: AgentFacts) => (x.agent.name.trim() || x.agent.agency).toLowerCase();
+  const sur = (a: AgentFacts, b: AgentFacts) => surnameOf(a.agent).localeCompare(surnameOf(b.agent)) || name(a).localeCompare(name(b));
   /* a stated window only — the quick-add stub 0 is "unknown", not "replies at once" */
   const weeks = (x: AgentFacts) => (typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0 ? x.agent.responseTimeWeeks : null);
-  const due = (x: AgentFacts) => (x.q && x.q.court !== "closed" ? x.q.expectedMs : null);
-  const active = (x: AgentFacts) => x.lastMs ?? (Date.parse(x.agent.dateAdded) || null);
+  const active = (x: AgentFacts) => x.lastMs ?? null;
+  const rank = (x: AgentFacts) => STATUS_GROUP_ORDER.indexOf(x.status14);
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
-    reply: (x) => weeks(x) == null, due: (x) => due(x) == null, rating: (x) => x.rating == null, activity: (x) => active(x) == null,
+    reply: (x) => weeks(x) == null, activity: (x) => active(x) == null,
   };
   switch (key) {
-    case "surname": by.sort((a, b) => surnameOf(a.agent).localeCompare(surnameOf(b.agent)) || name(a).localeCompare(name(b))); break;
-    case "due": by.sort((a, b) => compareDue(a, b, genreHit, nowMs) || name(a).localeCompare(name(b))); break;
-    case "name": by.sort((a, b) => name(a).localeCompare(name(b))); break;
-    case "agency": by.sort((a, b) => deThe(a.agent.agency || "\uffff").toLowerCase().localeCompare(deThe(b.agent.agency || "\uffff").toLowerCase()) || name(a).localeCompare(name(b))); break;
-    case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || name(a).localeCompare(name(b))); break;
-    case "rating": by.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || name(a).localeCompare(name(b))); break;
-    case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || name(a).localeCompare(name(b))); break;
+    case "surname": by.sort(sur); break;
+    case "agency": by.sort((a, b) => deThe(a.agent.agency || "\uffff").toLowerCase().localeCompare(deThe(b.agent.agency || "\uffff").toLowerCase()) || sur(a, b)); break;
+    case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || sur(a, b)); break;
+    case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
+    case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
   }
   if (!reversed) return by;
   const gone = missing[key];

@@ -122,178 +122,20 @@ test("CL13-S · strip", async ({ page }) => {
   L.done(45);
 });
 
-/** The list's whole visible state — its rows in order, the controls' labels and on-states, the filter
- *  line and the index strip. Lock 3 requires it IDENTICAL before and after a figure is pressed. */
-async function listState(page: import("@playwright/test").Page) {
-  return page.evaluate(() => {
-    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')].map((r) => r.getAttribute("data-agent") ?? r.textContent?.slice(0, 40));
-    /* the banner's controls: every pill's words and whether it is set (v13 P3; v12's .clv-ctl is retired) */
-    const ctl = [...root.querySelectorAll<HTMLElement>('[data-cl13-ctl="banner"] button')].map((b) => `${b.textContent?.trim()}|${b.className}|${b.getAttribute("aria-label") ?? ""}`);
-    const line = (root.querySelector('[data-cl13="fline"]') as HTMLElement | null)?.innerText ?? "";
-    const strip = (root.querySelector('[data-clv="idxwrap"]') as HTMLElement | null)?.innerText ?? "";
-    const find = [...root.querySelectorAll<HTMLInputElement>('input[placeholder="Find an agent"]')].map((i) => i.value);
-    /* a guard against a snapshot of nothing: the controls must be there to compare */
-    if (ctl.length < 4) throw new Error(`listState: the banner's controls are missing (${ctl.length}) — a snapshot of nothing compares equal to itself`);
-    return JSON.stringify({ rows, ctl, line, strip, find });
-  });
-}
-/** what differs between two listState snapshots — a red that names its part, not just "list changed" */
-function listDiff(a: string, b: string): string {
-  const A = JSON.parse(a) as Record<string, unknown>, B = JSON.parse(b) as Record<string, unknown>;
-  const keys = Object.keys(A).filter((k) => JSON.stringify(A[k]) !== JSON.stringify(B[k]));
-  return keys.length === 0 ? "same" : keys.map((k) => `${k}: ${JSON.stringify(A[k]).slice(0, 160)} → ${JSON.stringify(B[k]).slice(0, 160)}`).join(" | ");
-}
 /* CL13-3 (figures fill the carousel) and CL13-4 (carousel cards are the agent card) are RETIRED with the
    carousel (Contact list v14 §1.4): tests/e2e/RETIRED-contact-list-v14.md. CL13-4's card-signature half lives
    on as CL14-3 (the next-step section's card). */
 
 const vis = (page: import("@playwright/test").Page, sel: string) => page.locator(`.aglist ${sel}`).filter({ visible: true }).first();
-/* REWRITTEN (v14 §3): below 1440 the "Grouped:" and "Sort:" lead-ins hide, so the pill is read from its textContent —
-   the words it carries — rather than innerText, which drops hidden text */
-const pillText = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => [...e.childNodes].map((n) => n.textContent ?? "").join(" ").replace(/\s+/g, " ").trim());
-const WHITE = "rgb(255, 255, 255)";
-const pillBg = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => getComputedStyle(e).backgroundColor);
-const openPop = async (page: import("@playwright/test").Page, k: string) => {
-  await vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => e.scrollIntoView({ block: "center" }));
-  await vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).click();
-  await page.locator(`[data-lpop="${k}"]`).waitFor({ timeout: 4000 });
-};
-const popCount = (page: import("@playwright/test").Page) => page.locator(".lpop").count();
-
 /* CL13-B (the open banner) is RETIRED with the banner (Contact list v14 §3): the "Your agents" bar replaces it —
    CL14-5. tests/e2e/RETIRED-contact-list-v14.md. */
 
-/* ── lock 7 · the pills and their popovers ── */
-test("CL13-7 · pills", async ({ page }) => {
-  const L = new Ledger("cl13-7");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    L.check("CL13-7 at rest: 'Filters', 'Grouped: Letter', 'Sort: Surname', none set", w,
-      /^\S*\s*Filters$/.test(await pillText(page, "filter")) && (await pillText(page, "group")).includes("Grouped: Letter") && (await pillText(page, "sort")).includes("Sort: Surname") && (await pillBg(page, "filter")) === WHITE,
-      `${await pillText(page, "filter")} | ${await pillText(page, "group")} | ${await pillText(page, "sort")}`);
-    /* filters: tick two options with a count, in two sections */
-    await openPop(page, "filter");
-    const picks = await page.evaluate(() => {
-      const opts = [...document.querySelectorAll<HTMLElement>('[data-lpop="filter"] [data-opt]')].map((o) => ({ k: o.getAttribute("data-opt")!, n: Number(o.querySelector("small")?.textContent ?? "0") }));
-      const a = opts.find((o) => o.k.startsWith("open:") && o.n > 0), b = opts.find((o) => o.k.startsWith("genres:") && o.n > 0);
-      return [a?.k ?? null, b?.k ?? null];
-    });
-    L.check("CL13-7 two options with a count are on offer", w, !!picks[0] && !!picks[1], JSON.stringify(picks));
-    const pop = page.locator('[data-lpop="filter"]');
-    await pop.evaluate((e) => { e.scrollTop = 0; });
-    await page.locator(`[data-lpop="filter"] [data-opt="${picks[0]}"]`).click();
-    /* the panel keeps its scroll while you tick */
-    await pop.evaluate((e) => { e.scrollTop = 120; });
-    await page.locator(`[data-lpop="filter"] [data-opt="${picks[1]}"]`).evaluate((e) => (e as HTMLElement).click());
-    const kept = await pop.evaluate((e) => e.scrollTop);
-    L.check("CL13-7 the panel keeps its scroll while you tick", w, near(kept, 120, 2), `${kept}`);
-    /* REWRITTEN (v14 §3, 7 Oct): the controls sit on the ink bar, so a set pill stays WHITE and its value says it
-       is set (CL14-5 holds the white); v13's anthracite fill would vanish into the bar */
-    L.check("CL13-7 'Filters (2)' after two ticks, still white", w, (await pillText(page, "filter")).includes("Filters (2)") && (await pillBg(page, "filter")) === WHITE, `${await pillText(page, "filter")} ${await pillBg(page, "filter")}`);
-    /* one popover at a time: opening Group closes Filters */
-    await vis(page, '[data-cl13-ctl="banner"] [data-lp="group"]').click();
-    await page.waitForTimeout(150);
-    L.check("CL13-7 one popover at a time", w, (await popCount(page)) === 1 && (await page.locator('[data-lpop="group"]').count()) === 1, `${await popCount(page)}`);
-    await page.locator('[data-lpop="group"] [data-opt="group:stand"]').click();
-    await page.waitForTimeout(150);
-    L.check("CL13-7 'Grouped: Where you stand', white, and the popover closed", w, (await pillText(page, "group")).includes("Grouped: Where you stand") && (await pillBg(page, "group")) === WHITE && (await popCount(page)) === 0, `${await pillText(page, "group")}`);
-    await openPop(page, "sort");
-    await page.locator('[data-lpop="sort"] [data-opt="sort:due"]').click();
-    await page.waitForTimeout(150);
-    const dir = await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label");
-    L.check("CL13-7 'Sort: Next date', white; the direction says 'Soonest first'", w, (await pillText(page, "sort")).includes("Sort: Next date") && (await pillBg(page, "sort")) === WHITE && dir === "Sort order: Soonest first", `${await pillText(page, "sort")} ${dir}`);
-    await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').click();
-    L.check("CL13-7 the toggle names the reversed order and stays white", w, (await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label")) === "Sort order: Latest first" && (await pillBg(page, "dir")) === WHITE, "");
-    /* Escape with a popover open closes ONLY the popover */
-    const before = await listState(page);
-    await openPop(page, "group");
-    await page.keyboard.press("Escape");
-    await page.waitForTimeout(150);
-    const after = { pops: await popCount(page), card: await page.locator('[data-ac="overlay"]').count(), list: (await listState(page)) === before, group: await pillText(page, "group") };
-    L.check("CL13-7 Escape closes only the popover", w, after.pops === 0 && after.card === 0 && after.list && after.group.includes("Where you stand"), JSON.stringify(after));
-    /* an outside press closes it */
-    await openPop(page, "filter");
-    /* REWRITTEN (v14 §3): the outside press lands on the bar's title (the banner's heading retired) */
-    await page.locator('.aglist .cl14-bar-t h2').filter({ visible: true }).first().dispatchEvent("pointerdown", { bubbles: true });
-    await page.waitForTimeout(150);
-    L.check("CL13-7 an outside press closes it", w, (await popCount(page)) === 0, "");
-    await checkOverflow(page, L, w);
-  }
-  L.done(33);
-});
-
-/* ── §5 · the filter line ── */
-test("CL13-F · filter line", async ({ page }) => {
-  const L = new Ledger("cl13-f");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    L.check("CL13-F no filter line on an unfiltered list", w, (await page.locator('.aglist [data-cl13="fline"]').count()) === 0, "");
-    const total = await page.locator('.aglist [data-clv="row"]').count();
-    await openPop(page, "filter");
-    const k = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-lpop="filter"] [data-opt^="open:"]')].find((o) => Number(o.querySelector("small")?.textContent ?? 0) > 0)?.getAttribute("data-opt") ?? null);
-    const n = Number(await page.locator(`[data-lpop="filter"] [data-opt="${k}"] small`).textContent());
-    await page.locator(`[data-lpop="filter"] [data-opt="${k}"]`).click();
-    await page.locator("[data-lpop-done]").click();
-    await page.waitForTimeout(200);
-    const line = await vis(page, '[data-cl13="fline"]').innerText();
-    const rows = await page.locator('.aglist [data-clv="row"]').count();
-    L.check("CL13-F live application: the option's count IS the rows shown", w, rows === n, `${rows} rows vs count ${n}`);
-    L.check("CL13-F 'Showing n of N' and one chip", w, line.includes(`Showing ${n} of ${total}`) && (await page.locator('.aglist [data-cl13-chip]').count()) === 1, line.replace(/\n/g, " "));
-    const heads = await page.locator('.aglist [data-cl13="gcount"]').allInnerTexts();
-    L.check("CL13-F group headings read 'n of m'", w, heads.length > 0 && heads.every((t) => /^\d+ of \d+$/i.test(t.trim())), JSON.stringify(heads.slice(0, 4)));
-    /* the search joins the line as its own chip */
-    await vis(page, '[data-cl13-ctl="banner"] input').fill("a");
-    await page.waitForTimeout(200);
-    L.check("CL13-F the search text is a chip too", w, (await page.locator('.aglist [data-cl13-chip="find"]').count()) === 1, "");
-    await vis(page, '[data-cl13-chip="find"] button').click();
-    await page.waitForTimeout(150);
-    L.check("CL13-F a chip's ✕ removes just that one", w, (await page.locator('.aglist [data-cl13-chip]').count()) === 1, "");
-    /* nothing matches: say so, with a Clear button */
-    await vis(page, '[data-cl13-ctl="banner"] input').fill("zzqx no such agent");
-    await page.waitForTimeout(200);
-    L.check("CL13-F nothing matches → the message and Clear", w, (await page.locator('.aglist [data-cl13="none"]').count()) === 1 && (await page.locator('.aglist [data-cl13="none-clear"]').count()) === 1, "");
-    await vis(page, '[data-cl13="none-clear"]').click();
-    await page.waitForTimeout(200);
-    L.check("CL13-F Clear returns the whole list and the line goes", w, (await page.locator('.aglist [data-clv="row"]').count()) === total && (await page.locator('.aglist [data-cl13="fline"]').count()) === 0, "");
-    await checkOverflow(page, L, w);
-  }
-  L.done(27);
-});
-
-/* ── lock 8 · remembered for the visit ── */
-test("CL13-8 · remembered settings", async ({ page, browser }) => {
-  const L = new Ledger("cl13-8");
-  const vp = { width: 1512, height: 900 };
-  await openContacts(page, vp);
-  await openPop(page, "group");
-  await page.locator('[data-lpop="group"] [data-opt="group:agency"]').click();
-  await openPop(page, "filter");
-  const k = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-lpop="filter"] [data-opt^="open:"]')].find((o) => Number(o.querySelector("small")?.textContent ?? 0) > 0)?.getAttribute("data-opt") ?? null);
-  await page.locator(`[data-lpop="filter"] [data-opt="${k}"]`).click();
-  await page.locator("[data-lpop-done]").click();
-  const set = { group: await pillText(page, "group"), filter: await pillText(page, "filter") };
-  L.check("CL13-8 set: Grouped: Agency and one filter", "1512", set.group.includes("Grouped: Agency") && set.filter.includes("Filters (1)"), JSON.stringify(set));
-  /* the same tab, reloaded */
-  await page.reload();
-  await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 });
-  const back = { group: await pillText(page, "group"), filter: await pillText(page, "filter"), chips: await page.locator('.aglist [data-cl13-chip]').count() };
-  L.check("CL13-8 a reload in the same tab restores both", "1512", back.group.includes("Grouped: Agency") && back.filter.includes("Filters (1)") && back.chips === 1, JSON.stringify(back));
-  /* the extra: to the Query Centre and back */
-  await page.goto("/queries"); await page.waitForTimeout(1200);
-  await page.goto("/agents"); await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 });
-  L.check("CL13-8 (extra) to the Query Centre and back, both restored", "1512", (await pillText(page, "group")).includes("Grouped: Agency") && (await pillText(page, "filter")).includes("Filters (1)"), "");
-  /* a fresh session: a new context carries no sessionStorage */
-  const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
-  const p2 = await ctx.newPage();
-  await openContacts(p2, vp, { keep: true });
-  const fresh = { group: await pillText(p2, "group"), filter: await pillText(p2, "filter") };
-  L.check("CL13-8 a fresh session restores nothing", "1512", fresh.group.includes("Grouped: Letter") && !/\(/.test(fresh.filter), JSON.stringify(fresh));
-  await ctx.close();
-  L.done(4);
-});
+/* CL13-7 (the Filters pill and its popover), CL13-F (the filter line) and CL13-8 (remembered settings) are RETIRED
+   with v13's facet model (Contact list v14 §4, ruling: Nick's filter, group and sort set supersedes v13's Q4): the
+   filter strip replaces the Filters pill and the filter line, and the memory is versioned. Their surviving claims —
+   the Group and Sort pills, the direction, one popover at a time, Escape and an outside press closing only the
+   popover — moved to CL14-8; the strip is CL14-7 and CL14-10; the memory is CL14-9.
+   tests/e2e/RETIRED-contact-list-v14.md. */
 
 /* CL13-SB (the sticky slim bar) is RETIRED (v14, ruling Q7): the sticky column labels are the list's only sticky
    element. */

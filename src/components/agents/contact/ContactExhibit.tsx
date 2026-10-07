@@ -88,7 +88,7 @@ export const CONTACT_EXHIBIT_ROWS = 3;
 
 const ROWS = buildQcRows([...CONTACT_SAMPLE_QUERIES], [...CONTACT_SAMPLE_AGENTS], [], CONTACT_SAMPLE_NOW);
 const FACTS = CONTACT_SAMPLE_AGENTS.map((a) => agentFacts(a, ROWS, null));
-const ORDERED = sortFacts(FACTS, "surname", () => false, CONTACT_SAMPLE_NOW);
+const ORDERED = sortFacts(FACTS, "surname");
 const SHOWN = ORDERED.slice(0, CONTACT_EXHIBIT_ROWS);
 const GROUPS = contactGroups("letter", SHOWN);
 const BY_ID = new Map(SHOWN.map((x) => [x.agent.id, x]));

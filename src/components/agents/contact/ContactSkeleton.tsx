@@ -58,9 +58,9 @@ export const ContactSkeleton: React.FC<{
 }> = ({ msTitle, msGenre, controls, perch }) => {
   const nowMs = useMemo(() => Date.now(), []);
   const strip = useMemo(() => stripFacts(PLACEHOLDERS, msGenre ? [msGenre] : [], nowMs), [msGenre, nowMs]);
-  const facts = useMemo(() => sortFacts(PLACEHOLDERS.map((a) => agentFacts(a, [], null)), "surname", () => false, nowMs, false), [nowMs]);
+  const facts = useMemo(() => sortFacts(PLACEHOLDERS.map((a) => agentFacts(a, [], null)), "surname"), []);
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
-  const groups = useMemo(() => contactGroups("letter", facts, { fits: () => false, genreWord: null }), [facts]);
+  const groups = useMemo(() => contactGroups("letter", facts), [facts]);
   const counts = useMemo(() => letterCounts(facts), [facts]);
 
   return (
@@ -79,7 +79,8 @@ export const ContactSkeleton: React.FC<{
         <section className="cl14-ws" aria-hidden="true">
           <YourAgentsBar shown={0} total={0} book={msTitle} you={0} ready={0} youOn={false} readyOn={false}
             onYou={noop} onReady={noop} art={perch} controls={controls} />
-          <div className="cl14-frow" />
+          {/* the strip's one line, held at its loaded height (34 + its 18 below); the controls wait for data */}
+          <div className="cl14-frow"><div className="cl14-fbar" aria-hidden="true"><span className="cl14-fp" style={{ width: 420, visibility: "hidden" }} /></div></div>
           <div className="cl14-list">
           <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>

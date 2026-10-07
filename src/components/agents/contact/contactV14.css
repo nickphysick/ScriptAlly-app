@@ -238,8 +238,67 @@
 .cl14-bar .lp.is-set em { color: rgba(28, 19, 15, 0.5); }
 .cl14-bar .lp.is-set b { font-weight: 600; }
 /* the filter strip — #f7f9fb, a hairline below */
-.cl14-frow { background: #f7f9fb; border-bottom: 1px solid rgba(28, 19, 15, 0.08); padding: 18px 28px 2px; min-height: 34px; }
-.cl14-frow .cl13-fline { margin: 0 0 16px; }
+.cl14-frow { background: #f7f9fb; border-bottom: 1px solid rgba(28, 19, 15, 0.08); padding: 18px 28px 2px; }
+/* v14 §4 — THE FILTER STRIP, on one line (`nowrap`): when the row would wrap, the measured fold takes the three
+   on/off chips into "More filters" instead (ContactFilterStrip). The mock's `.fbar` / `.fp` / `.gtok` / `.tk`. */
+.cl14-fwrap { position: relative; }
+.cl14-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; margin: 0 0 18px; position: relative; z-index: 12; min-width: 0; }
+/* the measurer — the unfolded row, laid out at its natural width, never seen and never reached */
+.cl14-fmeasure { position: absolute; top: 0; left: 0; width: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }
+.cl14-fbar--measure { position: absolute; top: 0; left: 0; width: max-content; }
+.cl14-fp {
+  box-sizing: border-box; height: 34px; padding: 0 12px; border-radius: 17px; border: 0; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 500 13.5px var(--clv-serif); color: #1c130f;
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap; flex: none;
+}
+.cl14-fp:hover { box-shadow: inset 0 0 0 1px var(--clv-slate-ink); }
+.cl14-fp i { font-style: normal; font-size: 11px; color: rgba(28, 19, 15, 0.45); }
+.cl14-fp em { font-style: normal; font: 500 9.5px var(--sp-mono); color: rgba(28, 19, 15, 0.45); }
+.cl14-fp.on { background: var(--clv-slate-ink); color: #f5f1eb; box-shadow: none; }
+.cl14-fp.on :is(i, em) { color: rgba(245, 241, 235, 0.75); }
+.cl14-fp:focus-visible { outline: 2px solid var(--clv-slate-ink); outline-offset: 2px; }
+/* the genre field — predictive tokens from the app's genre list, never free text */
+.cl14-gtok {
+  box-sizing: border-box; position: relative; display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 6px;
+  min-height: 34px; padding: 3px 6px; border-radius: 17px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); cursor: text; min-width: 0; flex: none;
+}
+.cl14-gtok:not(.has)::before { content: "+"; font: 15px var(--clv-serif); color: rgba(28, 19, 15, 0.45); margin: 0 -2px 0 6px; }
+.cl14-gtok:focus-within, .cl14-gtok.has { box-shadow: inset 0 0 0 1.5px var(--clv-slate-ink); }
+.cl14-gtok input { border: 0; outline: 0; background: none; font: 14px var(--clv-serif); color: #1c130f; width: 76px; height: 26px; padding: 0 4px; line-height: normal; }
+.cl14-gtok:focus-within input, .cl14-gtok.has input { width: 110px; }
+.cl14-tk {
+  display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 4px 0 10px; border-radius: 13px;
+  background: var(--clv-slate-ink); color: #f5f1eb; font: 500 13px var(--clv-serif); white-space: nowrap;
+}
+.cl14-tk button { border: 0; background: none; color: rgba(245, 241, 235, 0.7); width: 20px; height: 20px; border-radius: 50%; font-size: 10px; cursor: pointer; }
+.cl14-tk button:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.cl14-gm { display: inline-flex; border-radius: 11px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); overflow: hidden; margin-right: 4px; }
+.cl14-gm button { border: 0; background: none; height: 22px; padding: 0 8px; font: 500 9px var(--sp-mono); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); cursor: pointer; }
+.cl14-gm button.on { background: var(--clv-slate-pale); color: var(--clv-slate-ink); }
+.cl14-gs {
+  position: absolute; top: calc(100% + 6px); left: 0; min-width: 280px; background: #fff; border-radius: 14px;
+  box-shadow: 0 22px 50px -18px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.1); padding: 6px; z-index: 30;
+}
+.cl14-gso {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px; width: 100%; border: 0; background: none;
+  padding: 9px 10px; border-radius: 9px; font: 15px var(--clv-serif); color: #1c130f; text-align: left; cursor: pointer;
+}
+.cl14-gso b { font-weight: 700; color: var(--clv-slate-ink); }
+.cl14-gso small { font: 500 9px var(--sp-mono); color: rgba(28, 19, 15, 0.45); white-space: nowrap; }
+.cl14-gso.on, .cl14-gso:hover { background: #eef2f5; }
+.cl14-gse { padding: 10px; font: italic 14px var(--clv-serif); color: rgba(28, 19, 15, 0.45); }
+.cl14-fclear {
+  border: 0; background: none; height: 34px; padding: 0 8px; font: 500 13px var(--clv-serif); color: var(--clv-slate-ink);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; flex: none;
+}
+/* a status with no agents stays in the menu, greyed (ruling Q6) */
+.cl14-zero { display: contents; }
+.cl14-zero > * { opacity: 0.45; }
+.cl14-popclear {
+  display: block; margin: 2px 8px 4px auto; border: 0; background: none; font: 500 13px var(--clv-serif);
+  color: var(--clv-slate-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
 /* the list — the A–Z tabs and the rows; its bottom corners rounded on its own element */
 .cl14-list { padding: 14px 18px 18px; border-radius: 0 0 24px 24px; }
 @media (max-width: 1439.5px) {

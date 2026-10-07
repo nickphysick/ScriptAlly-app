@@ -51,11 +51,22 @@ export class Ledger {
 /** Open the populated Contact list with motion stopped and fonts settled. */
 export async function openContacts(page: Page, vp: { width: number; height: number }, opts: { motion?: boolean; keep?: boolean } = {}) {
   await openApp(page, "/agents", vp);
-  /* ⚠️ THE LIST REMEMBERS ITS SETTINGS FOR THE VISIT (v13 §5, `sa.contactList`): a case that filtered at
+  /* ⚠️ THE LIST REMEMBERS ITS SETTINGS FOR THE VISIT (v14 §4, `sa.contactList.v2`): a case that filtered at
      one width would hand the next width a filtered list. Every open starts from the defaults unless the
-     case is the one measuring the memory (`keep`). */
+     case is the one measuring the memory (`keep`). A stored value that IS the defaults needs no reload. */
   if (!opts.keep) {
-    const had = await page.evaluate(() => { const v = sessionStorage.getItem("sa.contactList"); sessionStorage.removeItem("sa.contactList"); return v !== null && v !== JSON.stringify({ filters: { stand: [], fit: [], open: [], status: [], genres: [], locs: [], rating: [], profile: [] }, search: "", group: "letter", sort: "surname", reversed: false }); });
+    const had = await page.evaluate(() => {
+      const KEY = "sa.contactList.v2";
+      const v = sessionStorage.getItem(KEY);
+      sessionStorage.removeItem(KEY);
+      if (v === null) return false;
+      try {
+        const o = JSON.parse(v);
+        const empty = { status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" };
+        return !(o.group === "letter" && o.sort === "surname" && o.reversed === false && !o.search && o.density === "comfortable"
+          && JSON.stringify(o.filters) === JSON.stringify(empty));
+      } catch { return true; }
+    });
     if (had) { await page.reload(); await page.waitForLoadState("domcontentloaded"); }
   }
   await page.locator(LOADED_ROW).first().waitFor({ timeout: 30_000 }).catch(() => {});

@@ -54,18 +54,19 @@ import { useLocation } from "react-router-dom";
 import { CONTACT_BAND_DISC, CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
-  type AgentFacts, ContactFilters, FILTER_SECTIONS, type FilterCtx, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
+  type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
+  contactCensus, contactGroups, emptyContactFilters, facetCounts, genreTallies, heroFacts,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
-import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
+import { bookGenreHit, bookGenres, genreKey } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { ContactListControls, type ContactPop, filterValueLabel } from "./contact/ContactListControls";
+import { ContactListControls, type ContactPop } from "./contact/ContactListControls";
+import { ContactFilterStrip } from "./contact/ContactFilterStrip";
 import { YourAgentsBar } from "./contact/YourAgentsBar";
 import { usePopover } from "../shell/ListPills";
-import { readListMemory, writeListMemory } from "../../lib/contactListMemory";
+import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
@@ -162,9 +163,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "letter");
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
   const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
+  /* v14 §5 — the row density (Phase 6 draws its toggle); remembered with the rest */
+  const [density] = useState<Density>(() => remembered?.density ?? "comfortable");
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed }); }, [filters, search, groupKey, sortKey, reversed]);
+  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density }); }, [filters, search, groupKey, sortKey, reversed, density]);
   const pop = usePopover<ContactPop>();
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
@@ -251,7 +254,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
     [agents, qcRows, scoped],
   );
-  const genreHitFact = useCallback(
+  /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
+  const takesFact = useCallback(
     (x: { genres: string[] }) => x.genres.some(bookHit),
     [bookHit],
   );
@@ -259,23 +263,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search),
     [search],
   );
-  /* v13 §5: "Fit for the book" reads the hero's genre match; "Has gaps to fill" the four profile gaps
-     the mock names (reply time, genres, wishlist, what they want you to send) */
-  const filterCtx = useMemo<FilterCtx>(() => ({
-    fits: (x) => genreHitFact(x),
-    gaps: (x) => !(typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0)
-      || (x.agent.genres ?? []).length === 0 || !(x.agent.mswlNotes ?? "").trim() || (x.agent.materialsWanted ?? []).length === 0,
-  }), [genreHitFact]);
   const genreWord = book.length ? joinGenres(book) : null;
-  const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool, filterCtx), [factsAll, filters, inPool, filterCtx]);
+  /* v14 §4: every control's count is faceted — under every OTHER control and Find */
+  const counts = useMemo(() => facetCounts(factsAll, filters, inPool), [factsAll, filters, inPool]);
+  const tallies = useMemo(() => genreTallies(factsAll), [factsAll]);
   const visibleFacts = useMemo(
-    () => sortFacts(
-      factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters, undefined, filterCtx)),
-      sortKey, genreHitFact, nowMs, reversed,
-    ),
-    [factsAll, inPool, filters, filterCtx, sortKey, genreHitFact, nowMs, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
+    [factsAll, inPool, filters, sortKey, reversed],
   );
-  const groupCtx = useMemo(() => ({ fits: genreHitFact, genreWord }), [genreHitFact, genreWord]);
+  const groupCtx = useMemo(() => ({ takes: takesFact }), [takesFact]);
   const groups = useMemo(() => contactGroups(groupKey, visibleFacts, groupCtx), [groupKey, visibleFacts, groupCtx]);
   /* "n of m" on a group heading while the list is filtered: each group's size over every agent */
   const filtered = visibleFacts.length < factsAll.length;
@@ -289,35 +285,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   const shownGroups = groups;
   const visible = visibleFacts;
-  const anyActive =
-    contactFilterCount(filters) > 0 || search.trim() !== ""
-    || groupKey !== "letter" || sortKey !== "surname";
-  /* v13 §5 — the filter line's chips: one per active filter value, and the search text */
-  const lineChips = useMemo(() => {
-    const out: { key: string; label: string; remove: () => void }[] = [];
-    for (const sec of FILTER_SECTIONS) {
-      for (const v of filters[sec] as (string | number)[]) {
-        out.push({
-          key: `${sec}:${v}`, label: filterValueLabel(sec, String(v), genreWord),
-          remove: () => setFilters((f) => ({ ...f, [sec]: (f[sec] as unknown[]).filter((x) => x !== v) }) as ContactFilters),
-        });
-      }
-    }
-    if (search.trim()) out.push({ key: "find", label: `\u201c${search.trim()}\u201d`, remove: () => setSearch("") });
-    return out;
-  }, [filters, search, genreWord]);
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, []);
   /* "M NEED YOU" — the agents whose move it is (the v12 union: requests, offers and past-date nudges) */
   const needYou = useMemo(() => factsAll.filter((x) => x.stand === "you").length, [factsAll]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
-  const controlsFor = (where: "banner" | "sticky") => (
+  const controls = (
     <ContactListControls
-      where={where} find={search} onFind={setSearch}
-      filters={filters} onFilters={setFilters} options={filterOptions}
+      find={search} onFind={setSearch}
       groupKey={groupKey} onGroup={setGroupKey}
       sortKey={sortKey} reversed={reversed} onSort={setSortKey} onReverse={() => setReversed((r) => !r)}
-      pop={pop} msTitle={scoped?.title?.trim() || null} genreWord={genreWord}
-      findKey={where === "banner" ? <kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd> : undefined}
+      pop={pop}
+      findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>}
     />
   );
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
@@ -479,13 +457,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
          does the saved record still match the pool and the panel, and where does it land */
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
-      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters, undefined, filterCtx);
+      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsById.get(a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
-      const after = sortFacts(
-        afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters, undefined, filterCtx)),
-        sortKey, genreHitFact, nowMs, reversed,
-      );
+      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed);
       const index = after.findIndex((x) => x.agent.id === saved.id);
       const outcome: SaveOutcome = !survives
         ? { kind: "filtered-out" }
@@ -503,7 +478,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
          can play the move (rows carry data-agent-card, flip.ts's selector) */
       flipBefore.current = measureFlip(gridRef.current);
     },
-    [agents, filters, filterCtx, sortKey, reversed, genreHitFact, nowMs, qcRows, scoped, factsById, inPool],
+    [agents, filters, sortKey, reversed, qcRows, scoped, factsById, inPool],
   );
 
   /**
@@ -792,9 +767,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [userTasks, addUserTask, deleteUserTask]);
   /* v14 §3 — the two count pills: each sets the list's filters to EXACTLY its own set (lock 6). "Waiting on you"
      is v13's your-move standing; "ready to query" is the next-step section's ready set, the same filters See all
-     sets. A pill pressed again clears. */
-  const READY_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), open: ["open", "unstated"], stand: ["none"], fit: ["takes"] }), []);
-  const YOU_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), stand: ["you"] }), []);
+     sets — open now (Unknown counts as open), not queried, any of the book's genres. A pill pressed again clears. */
+  const READY_FILTERS = useMemo<ContactFilters>(
+    () => ({ ...emptyContactFilters(), open: "open", queried: "no", genres: [...new Set(book.map(genreKey))] }), [book]);
+  const YOU_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), action: true }), []);
   const sameFilters = (a: ContactFilters, b: ContactFilters) => JSON.stringify(a) === JSON.stringify(b);
   const youOn = !search.trim() && sameFilters(filters, YOU_FILTERS);
   const readyOn = !search.trim() && sameFilters(filters, READY_FILTERS);
@@ -803,8 +779,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setSearch("");
   }, [YOU_FILTERS, READY_FILTERS]);
   /* "See all N in the list": the list's filters set to exactly the ready set — open (Unknown counts as open),
-     not queried, takes the book — then the list scrolled into view. ⚠️ Phase 4 re-points this at v14's own
-     filter set; the set it selects does not change. */
+     not queried, takes the book — then the list scrolled into view. */
   const seeAllReady = useCallback(() => {
     setPillSet("ready");
     window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
@@ -933,7 +908,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}
-            controls={controlsFor("banner")}
+            controls={controls}
             perch={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }} />
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
@@ -970,21 +945,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             you={needYou} ready={step.ready.length} youOn={youOn} readyOn={readyOn}
             onYou={() => setPillSet(youOn ? null : "you")} onReady={() => setPillSet(readyOn ? null : "ready")}
             art={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }}
-            controls={controlsFor("banner")}
+            controls={controls}
           />
-          {/* the filter strip — what narrows the list (Phase 4 builds the filters into it) */}
+          {/* v14 §4 — the filter strip: on one line, folding into "More filters" when it would wrap */}
           <div className="cl14-frow" data-cl14="frow">
-          {filtered && (
-          <div className="cl13-fline" data-cl13="fline" role="status">
-            <span>Showing <b>{visibleFacts.length}</b> of {factsAll.length}</span>
-            {lineChips.map((c) => (
-              <span key={c.key} className="cl13-fchip" data-cl13-chip={c.key}>
-                {c.label}<button type="button" aria-label={`Remove ${c.label}`} onClick={c.remove}>{"\u2715"}</button>
-              </span>
-            ))}
-            <button type="button" className="cl13-clr" data-cl13="clear-all" onClick={clearFilters}>Clear all</button>
-          </div>
-        )}
+            <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} />
           </div>
           <div className="cl14-list" data-cl14="list">
         {groupKey === "letter" && (
@@ -1011,6 +976,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               byId={factsById}
               nowMs={nowMs}
               genreHit={bookHit}
+              /* §4: under Status and Action grouping the heading already says it */
+              hideYourMove={groupKey === "status" || groupKey === "action"}
               openId={openId}
               newId={newId}
               onOpen={onOpen}

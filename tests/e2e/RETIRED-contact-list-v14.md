@@ -26,3 +26,14 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 **Rewritten, not retired:** CL13-7 (a set pill stays white on the ink bar — v13's anthracite fill would vanish into it; CL14-5 holds the white), CL13-12 (the art waiting for data is the bar's `.cl14-art`).
 
 **Deleted components (their only reader was this page):** `shell/OpenBanner`, `shell/StickyBar` (+ `useStuckPast`), `shell/Workspace`, and their sheets.
+
+## Phase 4 — v13's facet model: the Filters pill, the filter line and the unversioned memory (v14 §4)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV13.measure.ts` | CL13-7 · pills | The Filters pill and its seven-section popover are replaced by the filter strip | The Group and Sort pills, the direction, one popover at a time, Escape and an outside press → CL14-8; the strip → CL14-7, CL14-10 |
+| `contactV13.measure.ts` | CL13-F · filter line | The "Showing n of N" line and its chips are retired; the strip shows its own state, and the bar says "Showing n of N" | CL14-7 (live application, Clear all); CL14-5 (the bar's line); the "No agents match" message and its Clear stay |
+| `contactV13.measure.ts` | CL13-8 · remembered settings | The memory is versioned (`sa.contactList.v2`) and validated | CL14-9 |
+| `src/lib/contactList.test.ts` | the v13 filter, grouping and sort cases (`facetOptions`, `stand`/`fit`/`profile`/`rating`/`locs`, Where you stand, Agency, Location, Open to queries, Fit, Next date, Your rating, First name) | Nick's filter, group and sort set supersedes v13's (ruling, 7 Oct) | The v14 cases in the same file |
+
+**Deleted with them:** `listState`/`listDiff` (their only reader was CL13-7), the `.cl13-fline`/`.cl13-fchip`/`.cl13-clr` rules, `filterValueLabel`, `facetOptions`, `FilterCtx`, `compareDue`, `STATUS_OPTIONS`.

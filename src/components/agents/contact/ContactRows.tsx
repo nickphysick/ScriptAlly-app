@@ -44,6 +44,8 @@ export interface ContactRowsProps {
   /** the manuscript's genre, matched — the ticked chip comes first */
   genreHit: (g: string) => boolean;
   openId: string | null;
+  /** v14 §4: under Status and Action grouping the YOUR MOVE tag is hidden — the heading already says it */
+  hideYourMove?: boolean;
   /** the just-added agent — its row wears the 2.4s ring (§8.4) */
   newId?: string | null;
   /** the row's own box rides with the open, so the agent card grows out of it (Agent card v1 §2) */
@@ -67,14 +69,15 @@ const Row: React.FC<{
   genreHit: (g: string) => boolean;
   current: boolean;
   fresh: boolean;
+  hideYourMove?: boolean;
   onOpen: (from: DOMRect) => void;
   onAddGenres: () => void;
   onAddWishlist: () => void;
   tray: CardPrimary;
   onAct: (act: CardAct) => void;
-}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
   const a = x.agent;
-  const yourMove = x.stand === "you";
+  const yourMove = x.stand === "you" && !hideYourMove;
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
   /* the manuscript's genre first, ticked (§6.2) */
   const genres = [...x.genres].sort((g1, g2) => Number(genreHit(g2)) - Number(genreHit(g1)));
@@ -199,7 +202,7 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 );
 
 export const ContactRows: React.FC<ContactRowsProps> = ({
-  groups, totals = null, byId, nowMs, genreHit, openId, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
+  groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
 }) => (
   <div className="clv-list" data-clv="list">
     {groups.map((g) => (
@@ -227,6 +230,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
               genreHit={genreHit}
               current={openId === id}
               fresh={newId === id}
+              hideYourMove={hideYourMove}
               onOpen={(from) => onOpen(id, from)}
               tray={trayFor(x)}
               onAct={(act) => onAct(id, act)}

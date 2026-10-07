@@ -97,19 +97,8 @@
 .cl13-st { display: inline-flex; align-items: center; gap: 8px; }
 .cl13-st0 { display: inline-block; width: 13px; }
 
-/* the filter line: under the banner, aligned with its text (the perch's column is 190) */
-.cl13-fline {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 14px 190px;
-  font-family: var(--clv-serif); font-size: 14px; color: var(--clv-ink-70);
-}
-.cl13-fline b { color: var(--clv-ink); }
-.cl13-fchip {
-  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 12px; border-radius: 14px;
-  background: #fff; box-shadow: inset 0 0 0 1px var(--clv-hair); font-size: 13px; color: var(--clv-ink);
-}
-.cl13-fchip button { border: 0; background: none; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; cursor: pointer; color: var(--clv-ink-70); }
-.cl13-fchip button:hover { background: var(--clv-parchment); }
-.cl13-clr, .cl13-none-clr {
+/* the filter line and its chips retired with v13's facet model (v14 §4: the filter strip states its own state) */
+.cl13-none-clr {
   border: 0; background: none; text-decoration: underline; color: var(--clv-ink-70); font: inherit; font-size: 13px; cursor: pointer;
 }
 .cl13-none-clr { margin-left: 8px; text-decoration: none; background: var(--clv-btn); color: #f5f1eb; height: 32px; padding: 0 14px; border-radius: 16px; font-family: var(--clv-type); }

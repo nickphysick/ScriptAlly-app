@@ -2,20 +2,28 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * contactListMemory — the Contact list's settings, remembered for the visit (v13 §5): filters,
- * search, grouping, sort and direction, in sessionStorage under `sa.contactList`.
+ * contactListMemory — the Contact list's settings, remembered for the visit (v14 §4): filters, search,
+ * grouping, sort and direction, and (Phase 6) the row density, in sessionStorage.
  *
- * ⚠️ PER-VIEWER CONVENIENCE, NEVER STATE THAT MUST PERSIST: sessionStorage can be empty or throw (a
- * private window, blocked storage), so every read and write is guarded and the page renders
- * correctly without it. A stored value is SANITISED on read — an unknown section, a key from a
- * retired build or a wrong type reads as the default, never as a filter nobody can see or clear.
- * ⚠️ Housekeeping's view keeps its own key (`sa.hkGrouping`), deliberately separate.
+ * ⚠️ THE KEY IS VERSIONED, AND EVERYTHING RESTORED IS VALIDATED AGAINST THE CURRENT OPTION SET (§4, lock 9). An
+ * earlier mock crashed when it restored a grouping that no longer existed. So: the key carries the shape's
+ * version (`sa.contactList.v2` — v13's `sa.contactList` held a different filter model and is read by nothing),
+ * the stored object carries `v`, and every field is checked on read — an unknown grouping, sort, status, choice
+ * or filter key reads as its default (Letter, Surname A to Z), never as a state nobody can see or clear.
+ *
+ * ⚠️ PER-VIEWER CONVENIENCE, NEVER STATE THAT MUST PERSIST: sessionStorage can be empty or throw (a private
+ * window, blocked storage), so every read and write is guarded and the page renders correctly without it.
+ * Housekeeping's view keeps its own key (`sa.hkGrouping`), deliberately separate.
  */
 import {
-  type ContactFilters, emptyContactFilters, FILTER_SECTIONS, GROUP_OPTIONS, type GroupKey, SORT_OPTIONS, type SortKey,
+  type ContactFilters, emptyContactFilters, GROUP_OPTIONS, type GroupKey, OPEN_CHOICES, type OpenChoice,
+  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 
-export const LIST_MEMORY_KEY = "sa.contactList";
+export const LIST_MEMORY_VERSION = 2;
+export const LIST_MEMORY_KEY = `sa.contactList.v${LIST_MEMORY_VERSION}`;
+
+export type Density = "comfortable" | "compact";
 
 export interface ListMemory {
   filters: ContactFilters;
@@ -23,27 +31,40 @@ export interface ListMemory {
   group: GroupKey;
   sort: SortKey;
   reversed: boolean;
+  density: Density;
 }
 
-/** A stored value made safe: every section an array of the right primitive, keys the build knows. */
+export const DEFAULT_LIST_MEMORY = (): ListMemory =>
+  ({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable" });
+
+const oneOf = <T extends string>(v: unknown, keys: readonly T[], fallback: T): T =>
+  (typeof v === "string" && (keys as readonly string[]).includes(v) ? (v as T) : fallback);
+
+/** A stored value made safe, field by field — anything the current build does not know reads as its default. */
 export function sanitiseListMemory(raw: unknown): ListMemory | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const f = emptyContactFilters();
-  const stored = (r.filters && typeof r.filters === "object" ? r.filters : {}) as Record<string, unknown>;
-  for (const sec of FILTER_SECTIONS) {
-    const v = stored[sec];
-    if (!Array.isArray(v)) continue;
-    (f as unknown as Record<string, unknown[]>)[sec] = sec === "rating"
-      ? v.filter((x) => typeof x === "number" && [5, 4, 3, 2, 0].includes(x))
-      : v.filter((x) => typeof x === "string");
-  }
+  if (r.v !== LIST_MEMORY_VERSION) return null;
+  const d = DEFAULT_LIST_MEMORY();
+  const sf = (r.filters && typeof r.filters === "object" ? r.filters : {}) as Record<string, unknown>;
+  const statusKeys = STATUS_CHOICES.map((c) => c.key);
+  const filters: ContactFilters = {
+    status: Array.isArray(sf.status) ? [...new Set(sf.status.filter((x): x is StatusKey => (statusKeys as string[]).includes(x as string)))] : [],
+    action: sf.action === true,
+    open: oneOf<OpenChoice>(sf.open, OPEN_CHOICES.map((c) => c.key), "either"),
+    queried: oneOf<QueriedChoice>(sf.queried, QUERIED_CHOICES.map((c) => c.key), "either"),
+    mats: sf.mats === true,
+    always: sf.always === true,
+    genres: Array.isArray(sf.genres) ? [...new Set(sf.genres.filter((x): x is string => typeof x === "string" && x.trim().length > 0 && x.length <= 80))].slice(0, 20) : [],
+    genreMode: sf.genreMode === "all" ? "all" : "any",
+  };
   return {
-    filters: f,
-    search: typeof r.search === "string" ? r.search : "",
-    group: GROUP_OPTIONS.some((g) => g.key === r.group) ? (r.group as GroupKey) : "letter",
-    sort: SORT_OPTIONS.some((s) => s.key === r.sort) ? (r.sort as SortKey) : "surname",
+    filters,
+    search: typeof r.search === "string" ? r.search.slice(0, 200) : d.search,
+    group: oneOf<GroupKey>(r.group, GROUP_OPTIONS.map((g) => g.key), d.group),
+    sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
     reversed: r.reversed === true,
+    density: r.density === "compact" ? "compact" : d.density,
   };
 }
 
@@ -57,5 +78,5 @@ export function readListMemory(): ListMemory | null {
 }
 
 export function writeListMemory(m: ListMemory): void {
-  try { window.sessionStorage.setItem(LIST_MEMORY_KEY, JSON.stringify(m)); } catch { /* storage refused: the page still works */ }
+  try { window.sessionStorage.setItem(LIST_MEMORY_KEY, JSON.stringify({ v: LIST_MEMORY_VERSION, ...m })); } catch { /* storage refused: the page still works */ }
 }
