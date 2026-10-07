@@ -103,7 +103,13 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+  /**
+   * v131 (desktop): the compact hero, the headerless desk 22 below it, "Recently updated" 44 below the
+   * desk and "Your queries" 44 below that. The open banner, the blush tray and the sticky bar are not
+   * drawn — the group headers pin instead. Below 768px the v126 page is unchanged.
+   */
+  v131?: boolean;
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -157,7 +163,7 @@ export const QcCentre: React.FC<{
      * the window's right edge, which is right while the page fills the window and strands it on a
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
-    <div ref={groupRef} className="qcv-group qcv-group--one qcv-own" data-qcv="group">
+    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined}>
       {/**
         * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
         * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the
@@ -182,6 +188,7 @@ export const QcCentre: React.FC<{
         band
         /* the band is a CARD in the sheet (ink shell v1 fix-ups) — the Query Centre's alone */
         card
+        compact={v131}
         art={<img src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} alt="" />}
       />
     {/**
@@ -202,14 +209,16 @@ export const QcCentre: React.FC<{
 
       {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
           are the list's own and their menus have not changed. */}
+      {v131 ? sentence : (
       <div className="qcv-lbw" data-qcv="ctl">
         {sentence}
       </div>
+      )}
 
       {/* v126 §4 — THE WORKSPACE: blush, radius 22, the two bands and their rows inside it. The rail
           is gone, so it spans the whole content column. */}
-      <div className="qcv-work" data-qcv="workspace">
-        {sticky?.(stuck)}
+      <div className={v131 ? "qc13-work" : "qcv-work"} data-qcv={v131 ? "listwrap" : "workspace"}>
+        {!v131 && sticky?.(stuck)}
       <div className="qcv-stage" data-qcv="stagegrid"
         /* ⚠️ BOUND HERE, NOT ON THE DOCUMENT. The drawer bound the arrows only while open; a docked card
            is always open, so a global binding would take the arrows from the whole page. Skipped in

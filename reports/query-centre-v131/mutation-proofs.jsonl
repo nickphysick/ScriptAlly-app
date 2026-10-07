@@ -1,0 +1,17 @@
+{"lock":"QC5","mutation":"Sunday-start weeks (WD map Sun:0)","verdict":"red","tests_run":8,"first_error":"4 of 8 cases failed: weekStart, deskWeeks, bucket ×2; restored from a path-named backup, 8/8 green"}
+{"lock":"QC1","mutation":"qc1-header","verdict":"red","tests_run":1,"first_error":"    Error: 1280: desk 6572.0 below the hero"}
+{"lock":"QC2","mutation":"qc2-tall","verdict":"red","tests_run":1,"first_error":"    Error: 1280: card 300 tall"}
+{"lock":"QC4","mutation":"qc4-zero","verdict":"red","tests_run":1,"first_error":"    Error: 1280 you: an empty week is 0px"}
+{"lock":"QC6","mutation":"qc6-swap","verdict":"red","tests_run":1,"first_error":"    Error: you bar 2"}
+{"lock":"QC7","mutation":"qc7-filter","verdict":"red","tests_run":1,"first_error":"    Error: you: the list is unchanged"}
+{"lock":"QC8","mutation":"qc8-pre","verdict":"red","tests_run":1,"first_error":"    Error: \"marsh\": the line says 83, the list renders 3"}
+{"lock":"QC9","mutation":"qc9-tray","verdict":"red","tests_run":1,"first_error":"    Error: 1280: blush surfaces"}
+{"lock":"QC10","mutation":"qc10-indent","verdict":"red","tests_run":1,"first_error":"    Error: 1280 group 0 agent row 0: text at 350.0, label at 307.0"}
+{"lock":"QC11","mutation":"qc11-static","verdict":"red","tests_run":1,"first_error":"    Error: 1280: label row at -274.3, header foot 118.0"}
+{"lock":"QC12","mutation":"qc12-margin","verdict":"red","tests_run":1,"first_error":"    Error: 1280: a over cell's text at 1049.0, column at 1039.0"}
+{"lock":"QC13","mutation":"qc13-tag","verdict":"red","tests_run":1,"first_error":"    Error: tags inside Your move"}
+{"lock":"QC14","mutation":"qc14-hard","verdict":"red","tests_run":1,"first_error":"    Error: the slot draws the supplied file"}
+{"lock":"QC15","mutation":"qc15-empty","verdict":"red","tests_run":1,"first_error":"    Error: empty-1440 differs from the pre-v131 page"}
+{"lock":"QC3","mutation":"qc3-wrap","verdict":"red","tests_run":1,"first_error":"    Error: 1280 you: \"1 offer to decide\" is on 3 lines"}
+{"lock":"qcV96 QC6 (re-pointed)","mutation":"the chip stays visible on hover/focus","verdict":"red","tests_run":1,"first_error":"the Coming-up line did not fade"}
+{"lock":"inkFixups HC4 (re-pointed)","mutation":".ph--compact padding-left 64px","verdict":"red","tests_run":1,"first_error":"1280 t-capp HC4: text starts 44px inside the compact card (v131 §1)"}

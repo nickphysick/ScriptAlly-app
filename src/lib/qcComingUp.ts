@@ -175,3 +175,25 @@ export function nextMove(card: BoardCard | undefined | null, row: QcRow, nowMs: 
   const door = primaryDoor(row.status);
   return door ? { label: door.label, request: { mode: door.mode, queryId: row.id } } : null;
 }
+
+/**
+ * v131 §5 — THE "COMING UP" CHIP, CLASSED FROM THE DATA, NEVER FROM THE STRING.
+ *
+ *   over  — the query's own expected date has gone        (#f8e0d8 on #a63d2f)
+ *   soon  — that date is today or within the next 7 days   (#f6ead0 on #7a5a12)
+ *   quiet — a passive wait: "Consider closing"             (plain, ink at 58%)
+ *   plain — everything else                                (plain, ink)
+ *
+ * ⚠️ A CLOSE IS NOT "OVERDUE" HERE, though `comingUp` marks it `over` for the v126 dot: the brief names
+ * "Consider closing" a passive wait, and a chip saying overdue on a judgement nobody owes reads as a
+ * deadline nobody set. The date is the row's `expectedMs` — the same one the line's own countdown uses.
+ */
+export type ComingTone = "over" | "soon" | "quiet" | "plain";
+export function comingTone(next: ComingUp | null, row: QcRow, nowMs: number): ComingTone | null {
+  if (!next) return null;
+  if (next.bucket === "close") return "quiet";
+  if (row.expectedMs == null) return "plain";
+  if (row.expectedMs < nowMs) return "over";
+  if (row.expectedMs < nowMs + 7 * DAY) return "soon";
+  return "plain";
+}

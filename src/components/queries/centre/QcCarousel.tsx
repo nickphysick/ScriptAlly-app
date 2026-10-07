@@ -24,6 +24,7 @@ import { CZ_SORT_LABEL, type CzSort } from "../../../lib/qcCarousel";
 import type { QcRow } from "../../../lib/qcSummary";
 import "./qcvPage.css";
 import "./qcvCarousel.css";
+import { QcSectionHead } from "./QcArtSlot";
 
 /** How far an arrow moves the track: two cards and their gaps. */
 const STEP = 600;
@@ -49,7 +50,13 @@ export const QcCarousel: React.FC<{
   total: number;
   onSeeAll: () => void;
   onBirdsEye: () => void;
-}> = ({ rows, title, countLine, chosen, onClear, sort, onSort, model, onOpen, total, onSeeAll, onBirdsEye }) => {
+  /**
+   * v131 §3 (desktop): the section head — the art slot, "Recently updated" or the chosen section's
+   * name, the "N queries · show recently updated" line while a section is chosen, and the sort and
+   * arrows on the right. No counter and no live sentence. Below 768px the v126 head is kept.
+   */
+  v131?: boolean;
+}> = ({ rows, title, countLine, chosen, onClear, sort, onSort, model, onOpen, total, onSeeAll, onBirdsEye, v131 = false }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
   const [sortOpen, setSortOpen] = useState(false);
@@ -87,7 +94,41 @@ export const QcCarousel: React.FC<{
   const by = (dx: number) => trackRef.current?.scrollBy({ left: dx, behavior: "smooth" });
 
   return (
-    <section className="qcv-cz" data-qcv="cz" aria-label={title}>
+    <section className={`qcv-cz${v131 ? " qc13-sec qc13-cz" : ""}`} data-qcv="cz" aria-label={chosen && v131 ? chosen.name : title}>
+      {v131 ? (
+        <QcSectionHead
+          spot="recently-updated"
+          probe="cz-head"
+          title={chosen ? chosen.name : "Recently updated"}
+          line={chosen ? (
+            <>{chosen.count} {chosen.count === 1 ? "query" : "queries"} · <button type="button" className="qc13-link" data-qcv="cz-clear" onClick={onClear}>show recently updated</button></>
+          ) : null}
+          controls={(
+            <>
+            <div className="qcv-cz-sortw" ref={sortRef}>
+            <button type="button" className="qcv-cz-sort" data-qcv="cz-sort" aria-haspopup="menu" aria-expanded={sortOpen}
+              onClick={() => setSortOpen((o) => !o)}
+              onKeyDown={(e) => { if (e.key === "Escape" && sortOpen) { e.preventDefault(); e.stopPropagation(); setSortOpen(false); } }}>
+              {CZ_SORT_LABEL[sort]} <span aria-hidden="true">⌄</span>
+            </button>
+            {sortOpen && (
+              <div className="qcv-cz-menu" role="menu" data-qcv="cz-menu"
+                onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setSortOpen(false); } }}>
+                {(Object.keys(CZ_SORT_LABEL) as CzSort[]).map((k) => (
+                  <button type="button" role="menuitemradio" aria-checked={sort === k} key={k}
+                    className={sort === k ? "on" : undefined} onClick={() => { onSort(k); setSortOpen(false); }}>
+                    {CZ_SORT_LABEL[k]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+              <button type="button" className="qcv-cz-ar" data-qcv="cz-prev" aria-label="Earlier cards" onClick={() => by(-STEP)}>‹</button>
+              <button type="button" className="qcv-cz-ar" data-qcv="cz-next" aria-label="Later cards" onClick={() => by(STEP)}>›</button>
+            </>
+          )}
+        />
+      ) : (
       <div className="qcv-cz-head" data-qcv="cz-head">
         <b className="qcv-cz-title">{chosen ? `${chosen.name} · ${chosen.count}` : title}</b>
         {chosen
@@ -117,7 +158,7 @@ export const QcCarousel: React.FC<{
         <button type="button" className="qcv-cz-ar" data-qcv="cz-prev" aria-label="Earlier cards" onClick={() => by(-STEP)}>‹</button>
         <button type="button" className="qcv-cz-ar" data-qcv="cz-next" aria-label="Later cards" onClick={() => by(STEP)}>›</button>
       </div>
-
+      )}
       <div className="qcv-cz-trackw">
         <div className="qcv-cz-track" data-qcv="cz-track" ref={trackRef} tabIndex={0} role="list"
           aria-label={chosen ? `${chosen.name}: ${chosen.count} queries` : `${title}: ${countLine.toLowerCase()}`}

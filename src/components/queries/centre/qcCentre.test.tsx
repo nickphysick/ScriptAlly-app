@@ -179,7 +179,9 @@ describe("the frame, rendered", () => {
     expect(src).toMatch(/const groupRef = useRef<HTMLDivElement>\(null\)/);
     expect(src).toMatch(/const el = groupRef\.current;[\s\S]{0,300}onDocked\(w >= DOCK_MIN_COLUMN\)/);
     /* …and the ref is ON the group element, which is what makes the two the same box */
-    expect(src).toMatch(/<div ref=\{groupRef\} className="qcv-group/);
+    /* RE-POINTED (v131): the class is a template now (it adds `qc13` on the desktop) — the claim is the
+       ref's ELEMENT, so either spelling of the group's class satisfies it */
+    expect(src).toMatch(/<div ref=\{groupRef\} className=(?:"|\{`)qcv-group/);
     expect(src, "the page column is measured for the dock again").not.toMatch(/ref=\{groupRef\}[^>]*className=\{`qcv-page/);
   });
   /**

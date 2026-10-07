@@ -93,6 +93,9 @@ import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
+import { QcDesk } from "./queries/centre/QcDesk";
+import { deskSections } from "../lib/qcDesk";
+import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageGuide, type GuideStep } from "./shell/PageGuide";
 
 /**
@@ -2347,6 +2350,8 @@ export const Queries: React.FC<{
    * retired; the carousel deals every query in the chosen court instead.
    */
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
+  /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
+  const qcDesk = useDeskWidth();
   const [qcCzSort, setQcCzSort] = useState<CzSort>("recent");
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
@@ -6561,6 +6566,7 @@ export const Queries: React.FC<{
             * the tiles' and the pills' job; the shell's search still narrows the list.
             */}
           <QcCentre
+            v131={qcDesk}
             loading={qcLoad.loading}
             blank={qcLoad.blank}
             entering={qcLoad.entering}
@@ -6590,7 +6596,7 @@ export const Queries: React.FC<{
                 onSort={setQcSort}
                 scope={qcScopeMenu}
                 scopeTitle={qcScopeTitle}
-                variant="banner"
+                variant={qcDesk ? "section" : "banner"}
                 needYou={rowsForTile(qcScoped, "you").length}
                 msTitle={qcLineTitle}
               />
@@ -6618,7 +6624,15 @@ export const Queries: React.FC<{
                 needYou={rowsForTile(qcScoped, "you").length}
               />
             )}
-            courts={showGridSkeleton ? <QcCourtsSkeleton /> : (
+            courts={qcDesk ? (
+              /* v131 §2 (desktop) — the headerless desk; the skeleton is the same component over no rows */
+              <QcDesk
+                sections={deskSections(showGridSkeleton ? [] : qcScoped, Date.now())}
+                active={qcCzCourt}
+                onCourt={pickCourt}
+                loading={showGridSkeleton}
+              />
+            ) : showGridSkeleton ? <QcCourtsSkeleton /> : (
               <QcCourts
                 tiles={courtTiles(qcScoped, Date.now())}
                 /* ⚠️ THE COUNTS READ `qcScoped`, THE MANUSCRIPT-SCOPED SET, AND NEVER `qcVisible`
@@ -6668,6 +6682,7 @@ export const Queries: React.FC<{
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
               return (
                 <QcCarousel
+                  v131={qcDesk}
                   rows={dealt}
                   title="Recently moved"
                   countLine={carouselCountLine(qcScoped.length, dealt.length, qcCzCourt)}
@@ -6728,6 +6743,9 @@ export const Queries: React.FC<{
                 </p>
               ) : (
                 <QcList
+                  v131={qcDesk}
+                  sort={qcSort}
+                  onSort={setQcSort}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
                      sort applies WITHIN each group for free (§2). A grouping that re-ordered would
                      be a second ordering pass disagreeing with the sort control. */

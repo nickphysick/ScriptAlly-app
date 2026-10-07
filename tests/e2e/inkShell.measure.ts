@@ -178,7 +178,10 @@ test.describe("ink shell", () => {
     expect(await page.locator("#ws-sidebar [data-shell='capture']").count(), "a capture control in the sidebar").toBe(0);
     await page.locator(".ws-cap--bar .ws-capr").click();
     const rows = await page.locator(".ws-cap--bar [role='menuitem']").allInnerTexts();
-    expect(rows.map((r) => r.trim())).toEqual(["Record a response", "Add an agent", "Add a manuscript"]);
+    /* RE-POINTED (follow-up 2, found by v131's Step 0): the third row carries its SOON tag now, so the
+       row's LABEL is its first line — and the row is disabled, which is follow-up 2's 1(b) */
+    expect(rows.map((r) => r.split("\n")[0].trim())).toEqual(["Record a response", "Add an agent", "Add a manuscript"]);
+    expect(await page.locator(".ws-cap--bar [data-cap='manuscript']").getAttribute("aria-disabled")).toBe("true");
     await page.keyboard.press("Escape");
     await page.locator(".ws-cap--bar .ws-capl").click();
     await expect(page.locator(".qad-root.is-open .qad-drawer"), "Log a query opens the query drawer").toBeVisible();

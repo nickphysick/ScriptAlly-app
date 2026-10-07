@@ -820,6 +820,75 @@
   }
 }
 
+/* ══ THE COMPACT CARD (Query Centre v131 §1) — a modifier of the card, the Query Centre's alone ══════════
+   178px tall, contents vertically centred: the title (Special Elite 40) over the living sentence (16.5/1.45)
+   on the left; the two pills STACKED, 40 tall with a 10px gap, to the left of a 150px disc. The text block
+   is `display: contents`, so the title, the sentence and the pills are cells of one grid with the disc —
+   the pills can then sit beside the disc without the markup changing. Desktop only, like the card. */
+@media (min-width: 768px) {
+  .ph--full.ph--band.ph--card.ph--compact {
+    height: 178px;
+    padding: 0 46px 0 44px;
+    display: flex;
+    align-items: center;
+  }
+  .ph--band.ph--card.ph--compact .ph-hin {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 150px;
+    grid-template-rows: auto auto;
+    grid-template-areas: "title acts disc" "intro acts disc";
+    column-gap: 40px;
+    row-gap: 0;
+    align-items: center;
+    justify-content: stretch;
+  }
+  .ph--band.ph--card.ph--compact .ph-text { display: contents; }
+  .ph--band.ph--card.ph--compact .ph-eyebrow { display: none; }
+  .ph--band.ph--card.ph--compact.ph--full .ph-title {
+    grid-area: title;
+    align-self: end;
+    margin: 0;
+    min-height: 0;
+    font-family: var(--sp-type);
+    font-size: 40px;
+    line-height: 1;
+  }
+  .ph--band.ph--card.ph--compact.ph--full .ph-intro {
+    grid-area: intro;
+    align-self: start;
+    margin: 12px 0 0;
+    min-height: 0;
+    max-width: 560px;
+    font-size: 16.5px;
+    line-height: 1.45;
+  }
+  .ph--band.ph--card.ph--compact.ph--full .ph-acts {
+    grid-area: acts;
+    margin: 0;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .ph--band.ph--card.ph--compact .ph-primary,
+  .ph--band.ph--card.ph--compact .ph-secondary {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 99px;
+    font-family: var(--sp-type);
+    font-size: 15px;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .ph--band.ph--card.ph--compact .ph-bdisc { grid-area: disc; width: 150px; justify-self: end; }
+  @container (max-width: 1099.5px) {
+    .ph--band.ph--card.ph--compact .ph-hin { grid-template-columns: minmax(0, 1fr) auto 150px; }
+  }
+  @container (max-width: 640px) {
+    .ph--band.ph--card.ph--compact .ph-hin { grid-template-columns: minmax(0, 1fr) auto 150px; }
+  }
+}
+
 /* ══ THE FIXED BAND (Analytics v17, 5 Oct; ref design-refs/analytics-v17.html, measured at 1512 and 390) ══
    A modifier of the band (`bandFixed`), Analytics' alone: 337px tall with its contents vertically centred, a
    250px disc 64px right of the text, no eyebrow, and the title capped at 15ch so it sets on two lines.

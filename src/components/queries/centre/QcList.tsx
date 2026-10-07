@@ -25,7 +25,10 @@ import { STAGE_NAME, factLine, shortDay, type QcRow } from "../../../lib/qcSumma
 import { elapsedPhrase } from "../../../lib/elapsed";
 import { sentRecordOf } from "../../../lib/queryActions/sentRecord";
 import type { Bucket } from "../../../lib/todoBuckets";
-import type { ComingUp } from "../../../lib/qcComingUp";
+import { comingTone, type ComingUp } from "../../../lib/qcComingUp";
+import type { QcSort } from "../../../lib/qcSummary";
+import { QcArtSlot, type SpotName } from "./QcArtSlot";
+import "./qcv131.css";
 import { QueryStatus } from "../../../types";
 import type { ListGroup } from "../../../lib/qcCalView";
 import "./qcvPage.css";
@@ -147,7 +150,12 @@ export const QcList: React.FC<{
   onAct?: (id: string, bucket: Exclude<Bucket, "note">) => void;
   onEdit?: (id: string) => void;
   onClose?: (id: string) => void;
-}> = ({ groups, selectedId, onOpen, nowMs, coming, packageName, onAct, onEdit, onClose }) => {
+  /** v131 (desktop): group headers with spot art, a sticky label row per group, the five-column grid. */
+  v131?: boolean;
+  /** v131 §4 — the label row sorts through the page's existing Sort state. */
+  sort?: QcSort;
+  onSort?: (s: QcSort) => void;
+}> = ({ groups, selectedId, onOpen, nowMs, coming, packageName, onAct, onEdit, onClose, v131 = false, sort, onSort }) => {
   const rows = groups.flatMap((g) => g.rows);
   const boxRef = useRef<HTMLDivElement>(null);
   /* selection follows the keyboard: when the open query changes while focus is IN the rows, focus
@@ -247,6 +255,111 @@ export const QcList: React.FC<{
       </div>
     );
   };
+
+  if (v131) {
+    const renderRow131 = (r: QcRow, inYourMove: boolean) => {
+      const on = r.id === selectedId;
+      const next = coming?.get(r.id) ?? null;
+      const tone = comingTone(next, r, nowMs);
+      const sentMs = r.sentMs;
+      const ago = sentMs != null ? `${elapsedPhrase(Math.max(0, Math.round((nowMs - sentMs) / DAY)))} ago` : null;
+      const verb = next ? `${next.verb}${next.tail ? `${next.tail.lead ? ` ${next.tail.lead} ` : " "}${next.tail.figure}` : ""}` : "";
+      return (
+        <div key={r.id} id={`query-row-${r.id}`} className={`qcv-row qc13-rw${r.withYou ? " qcv-row--you" : ""}`}
+          data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"}
+          role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
+          style={{ ["--qcv-state" as string]: `var(--state-${r.state})` }}
+          onClick={() => onOpen(r.id)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(r.id); } }}>
+          <div className="qc13-c qc13-ag" data-qcv="row-agent">
+            <span className="qc13-av" data-qcv="row-chip" aria-hidden="true">{r.initials}</span>
+            <span className="qc13-agt">
+              <b className="qc13-t1" data-qcv="row-name" title={r.agentName}>{r.agentName}</b>
+              <i className="qc13-t2a" title={r.agency}>{r.agency}</i>
+            </span>
+          </div>
+          <div className="qc13-c qc13-qd" data-qcv="row-queried">
+            <b className="qc13-t1" data-qcv="row-main">{ago ?? "Not dated"}</b>
+            <i className="qc13-dt">{sentMs != null ? queriedDate(sentMs, nowMs) : "SEND DATE NOT RECORDED"}</i>
+          </div>
+          <div className="qc13-c qc13-ws" data-qcv="row-sent"><span data-qcv="row-main"><SentCell row={r} packageName={packageName} /></span></div>
+          <div className="qc13-c qc13-st" data-qcv="row-stand">
+            <b className="qc13-st1" data-qcv="row-main">{STAGE_NAME[r.status]}</b>
+            <i className="qc13-dt" title={factLine(r, nowMs)}>
+              {r.withYou && !inYourMove && <em className="qcv-ym" data-qcv="your-move-tag">YOUR MOVE</em>}
+              {standSince(r, nowMs)}
+            </i>
+          </div>
+          <div className="qc13-c qc13-nx" data-qcv="row-next">
+            {next && (
+              <span className={`qc13-cu qc13-cu--${tone}`} data-qcv="row-verb" data-tone={tone ?? undefined} title={verb}>{verb}</span>
+            )}
+          </div>
+          <span className="qcv-qa" data-qcv="row-tray">
+            {next && (
+              <button type="button" className="qcv-qa-b qcv-qa-b1" data-qcv="row-act"
+                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next.bucket); }}>{next.action}</button>
+            )}
+            <button type="button" className="qcv-qa-b qcv-qa-q" data-qcv="row-edit"
+              onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }}
+              aria-label={`Edit the query to ${r.agentName}`}>Edit</button>
+            <button type="button" className="qcv-qa-b qcv-qa-q" data-qcv="row-close"
+              onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }}
+              aria-label={`Close the query to ${r.agentName}`}>Close</button>
+          </span>
+        </div>
+      );
+    };
+    /* the label row's sorting: a column, the existing Sort it drives, and its label (Sent has none) */
+    const COLS: { key: string; label: string; sort: QcSort | null }[] = [
+      { key: "agent", label: "Agent", sort: "agent" },
+      { key: "queried", label: "Queried", sort: "newest" },
+      { key: "sent", label: "Sent", sort: null },
+      { key: "stand", label: "Where it stands", sort: "activity" },
+      { key: "next", label: "Coming up", sort: "reply" },
+    ];
+    const art = (g: ListGroup): { spot: SpotName; tone: "you" | "agent" | "closed" | "other" } =>
+      g.label === "Your move" ? { spot: "group-your-move", tone: "you" }
+        : g.label === "Closed" ? { spot: "group-closed", tone: "closed" }
+          : g.key === "waiting" || g.key === "quiet" || g.label === "With the agent" ? { spot: "group-with-agent", tone: "agent" }
+            : { spot: "group-other", tone: "other" };
+    return (
+      <div className="qcv-list qc13-list" data-qcv="list" data-v="131" ref={boxRef}>
+        {groups.map((g) => {
+          const label = g.label || "All queries";
+          const a = art(g);
+          const yours = label === "Your move";
+          return (
+            <div key={g.key} className={`qc13-grp qc13-grp--${a.tone}`} data-qcv="grp" data-group={g.key}>
+              <div className="qc13-gh" data-qcv="gband" data-group={g.key}>
+                <QcArtSlot name={a.spot} size="group" tone={a.tone} />
+                <b className="qc13-gh-t">{label}</b>
+                <em className="qc13-gh-n" data-qcv="gband-n">{g.rows.length}</em>
+              </div>
+              <div className="qc13-body" data-qcv="gbody">
+                <div className="qc13-colh" data-qcv="colh">
+                  {COLS.map((c) => {
+                    const on = c.sort != null && sort === c.sort;
+                    return c.sort && onSort ? (
+                      <button key={c.key} type="button" className={`qc13-cl qc13-cl--${c.key}${on ? " is-on" : ""}`} data-qcv="colh-label" data-col={c.key}
+                        aria-pressed={on} onClick={() => onSort(c.sort!)}>
+                        {c.label}{on && <i aria-hidden="true"> ↓</i>}
+                      </button>
+                    ) : (
+                      <span key={c.key} className={`qc13-cl qc13-cl--${c.key}`} data-qcv="colh-label" data-col={c.key}>{c.label}</span>
+                    );
+                  })}
+                </div>
+                <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qcv-rows qc13-rows">
+                  {g.rows.map((r) => renderRow131(r, yours))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
   <div className="qcv-list" data-qcv="list">

@@ -17,6 +17,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureSignedIn, openRoute } from "./measure";
+import { retiredV131 } from "./inkRetired";
 
 const OUT = resolve("test-results/qc-v96");
 const LEDGER = resolve(OUT, "ledger.json");
@@ -62,6 +63,7 @@ test.beforeAll(() => { rmSync(LEDGER, { force: true }); });
 /* ── QC1 ─────────────────────────────────────────────────────────────────────────────────────── */
 
 test("QC1 · the desk's three sections are equal, and their feet sit at one y however the lines wrap", async ({ page }) => {
+  test.skip(true, retiredV131("the v96 desk's halves and their feet; v131's desk is three equal sections whose two facts never wrap", "QC3"));
   await qc(page);
   const read = () => page.evaluate(() => {
     const grp = [...document.querySelectorAll('[data-qcv="group"][data-qc96="on"]')][0] as HTMLElement;
@@ -126,6 +128,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
     await qc(page, width);
     for (const grouped of [false, true]) {
       if (grouped) {
+        /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
+        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.waitForTimeout(200);
         await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^Urgency$/ }).first().click();
@@ -164,6 +169,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
         found[`${width}/${grouped ? "grouped" : "flat"}/${hovered ? "hover" : "rest"}`] = clipped.clipped;
       }
       if (grouped) {
+        /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
+        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.waitForTimeout(200);
         await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^No grouping$/ }).first().click();
@@ -206,7 +214,8 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
        */
       cols: ['[data-qcv="row-agent"]', '[data-qcv="row-queried"]', '[data-qcv="row-sent"]', '[data-qcv="row-stand"]', '[data-qcv="row-next"]'].map(r),
       trayOpacity: tray ? getComputedStyle(tray).opacity : "absent",
-      verbOpacity: verb ? getComputedStyle(verb).opacity : "absent",
+      /* v131 hides the chip with `visibility` rather than fading it — either way the line is not seen */
+      verbOpacity: verb ? (getComputedStyle(verb).visibility === "hidden" ? "0" : getComputedStyle(verb).opacity) : "absent",
       verb: (verb?.textContent ?? "").replace(/\s+/g, " ").trim(),
       pill: (el.querySelector('[data-qcv="row-act"]')?.textContent ?? "").trim(),
       /**
@@ -308,6 +317,12 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
              overflow: cs.overflow, bg: cs.backgroundColor, edge: edge.backgroundImage };
   }, P);
   expect(cards, "fewer than three rows — the gap between cards is untested").not.toBeNull();
+  /* ⚠️ v131 retires the floating cards on desktop: rows are 64px lines in one white group body (QC9, QC10).
+     The card treatment below is v96's and is asserted only where v96 rows render. */
+  const v131 = await page.locator(`${P} .qc13-list`).count() > 0;
+  if (v131) {
+    expect([...new Set(cards!.gaps)], `v131 rows touch: ${cards!.gaps}`).toEqual([0]);
+  } else {
   expect([...new Set(cards!.gaps)], `the cards are ${cards!.gaps} apart`).toEqual([10]);
   expect(cards!.border, "a stroke on a floating card").toMatch(/^(none|solid)$/);
   expect(cards!.radius).toBe("12px");
@@ -315,6 +330,7 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
   expect(cards!.overflow, "the 6px edge escapes the radius without this").toBe("hidden");
   expect(cards!.bg).toBe("rgb(255, 255, 255)");
   expect(cards!.edge, "the 6px status edge is not painted").toMatch(/linear-gradient\(90deg[^)]*\)?.*6px/);
+  }
   note("QC6", { rest, hovered, focused, cards });
 });
 
@@ -497,7 +513,7 @@ test("QC13 · the guide shows on first visit, not after ×, and comes back from 
 test("the run measured what it claims to have measured", () => {
   const all = JSON.parse(readFileSync(LEDGER, "utf8")) as { n: number; notes: Record<string, unknown> };
   expect(Object.keys(all.notes).sort(), "a lock wrote no reading").toEqual(
-    ["QC1", "QC12", "QC13", "QC13place", "QC4", "QC6", "QC8"],
+    ["QC12", "QC13", "QC13place", "QC4", "QC6", "QC8"] /* QC1 retired by v131 (QC3) */,
   );
-  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(7);
+  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(6);
 });

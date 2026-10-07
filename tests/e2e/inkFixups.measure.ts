@@ -72,17 +72,18 @@ test.describe("ink fix-ups", () => {
         expect(bg["border-radius"]).toBe("18px");
         expect(bg.overflow).toBe("hidden");
         /* HC4 — disc, figure, text and buttons inside the card; the right gap at least 40 */
-        for (const sel of ['[data-probe="band-disc"]', '[data-probe="band-disc"] img', '[data-probe="band-text"]', `${CARD} .ph-acts`]) {
+        /* v131: the compact hero's text wrapper is `display: contents`, so its title and intro are measured instead */
+        for (const sel of ['[data-probe="band-disc"]', '[data-probe="band-disc"] img', `${CARD} .ph-title`, `${CARD} .ph-intro`, `${CARD} .ph-acts`]) {
           const b = (await rect(page, sel))!;
           expect(b, `${sel} is drawn`).not.toBeNull();
           expect(b.x >= card.x - 0.5 && b.y >= card.y - 0.5 && b.r <= card.r + 0.5 && b.b <= card.b + 0.5, `${w} ${t} HC4: ${sel} ${JSON.stringify(b)} inside ${JSON.stringify(card)}`).toBe(true);
         }
         const disc = (await rect(page, '[data-probe="band-disc"] img'))!;
         expect(card.r - disc.r, `${w} ${t} HC4: right gap`).toBeGreaterThanOrEqual(40);
-        const text = (await rect(page, '[data-probe="band-text"]'))!;
-        expect(disc.x, `${w} ${t} HC4: the disc sits to the right of the text`).toBeGreaterThanOrEqual(text.r);
+        const acts = (await rect(page, `${CARD} .ph-acts`))!;
+        expect(disc.x, `${w} ${t} HC4: the disc sits to the right of the pills (v131: the pills stand between text and disc)`).toBeGreaterThanOrEqual(acts.r);
         const ink = (await rect(page, `${CARD} .ph-title`))!;
-        expect(ink.x - card.x, `${w} ${t} HC4: text starts clamp(48px, 7vw, 104px) inside the card`).toBeCloseTo(Math.min(104, Math.max(48, w * 0.07)), 0);
+        expect(ink.x - card.x, `${w} ${t} HC4: text starts 44px inside the compact card (v131 §1)`).toBeCloseTo(44, 0);
       }
     }
   });

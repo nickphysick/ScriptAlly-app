@@ -212,6 +212,13 @@ export interface PageHeaderProps {
    */
   card?: boolean;
   /**
+   * THE COMPACT CARD (Query Centre v131 §1) — a modifier of `card`: 178px tall, the title in the
+   * typewriter at 40, the sentence at 16.5/1.45, the two pills STACKED to the left of a 150px disc, the
+   * contents vertically centred. ⚠️ Every rule names `.ph--compact`; ignored without `band` + `card`, so
+   * the empty state (which passes `card` alone) and every other band are untouched.
+   */
+  compact?: boolean;
+  /**
    * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
    * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
    *
@@ -288,6 +295,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   band = false,
   bandFixed = false,
   card = false,
+  compact = false,
   title,
   icon,
   primary,
@@ -486,7 +494,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}`}
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}${card && band && compact ? " ph--compact" : ""}`}
       data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >

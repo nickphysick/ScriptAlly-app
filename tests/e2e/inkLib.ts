@@ -49,6 +49,17 @@ const CSS_MUTATIONS: Record<string, string> = {
   "ms13-centre": ".acct-page .acct-work { margin-inline: auto !important; max-width: 760px !important; }",
   "ms14-green": ".acct-page .acct-toggle[aria-checked=\"true\"] { background: #5a8a5a !important; }",
   "ms15-desktop": "@media (max-width: 767px) { .acct-page .acct-plane { padding: 44px 56px 40px !important; } }",
+  /* Query Centre v131 */
+  "qc2-tall": ".ph--full.ph--band.ph--card.ph--compact { height: 300px !important; }",
+  "qc3-wrap": ".qc13-dc-fact { white-space: normal !important; width: 48px !important; }",
+  "qc4-zero": ".qc13-b[data-n='0'] { height: 0 !important; }",
+  "qc9-tray": ".qc13-work { background: rgb(244, 224, 212) !important; padding: 22px !important; border-radius: 22px !important; }",
+  "qc10-indent": ".qc13-colh .qc13-cl--agent { padding-left: 0 !important; }",
+  "qc11-static": ".qc13-colh { position: static !important; }",
+  "qc12-margin": ".qc13-cu--over, .qc13-cu--soon { margin-left: 0 !important; }",
+  /* v131: the spot art hard-coded — whatever file is supplied, the slot draws its SVG and never the image */
+  "qc14-hard": ".qc13-art img { display: none !important; }",
+  "qc15-empty": ".ph--full.ph--card:not(.ph--band) { height: 178px !important; padding: 0 46px 0 44px !important; }",
 };
 
 /** DOM mutations, by name — run in the page after load. */
@@ -83,6 +94,16 @@ const DOM_MUTATIONS: Record<string, string> = {
   /* a keycap for a key nothing binds */
   "ms10-j": `(() => { const fix = () => { const r = document.querySelector('.sp-res .sp-k'); if (r && !r.querySelector('[data-mut]')) { const k = document.createElement('span'); k.className = 'sp-kc'; k.setAttribute('data-mut', '1'); k.textContent = '⌘J'; r.appendChild(k); } };
     new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
+  /* v131: a header above the desk */
+  "qc1-header": `(() => { const d = document.querySelector('[data-qcv="courts"]'); if (!d) return; const h = document.createElement('h3'); h.setAttribute('data-mut', 'qc1'); h.textContent = 'At a glance'; h.style.cssText = 'margin:22px 0 0;font-size:24px'; d.parentElement.insertBefore(h, d); })()`,
+  /* v131: the bar tooltip shows the NEXT bar's week */
+  "qc6-swap": `(() => { new MutationObserver(() => { document.querySelectorAll('[data-qcv="bar-tip"]').forEach((t) => { if (t.dataset.mut) return; const b = t.parentElement; const n = b && b.nextElementSibling; if (n) { t.dataset.mut = '1'; t.textContent = n.getAttribute('aria-label'); } }); }).observe(document.body, { subtree: true, childList: true }); })()`,
+  /* v131: choosing a desk section filters the list too */
+  "qc7-filter": `(() => { document.addEventListener('click', (e) => { const p = e.target.closest && e.target.closest('[data-qcv="court-pick"]'); if (!p) return; const want = p.closest('[data-qcv="court"]').dataset.court === 'you'; setTimeout(() => document.querySelectorAll('.qc13-list [data-qcv="row"]').forEach((r) => { if ((r.dataset.you === 'true') !== want) r.remove(); }), 0); }, true); })()`,
+  /* v131: the showing line counts rows BEFORE Find and Filter */
+  "qc8-pre": `(() => { const fix = () => { const s = document.querySelector('[data-qcv="showing"]'); if (!s || s.dataset.mut === s.dataset.y) return; s.dataset.mut = s.dataset.y; s.dataset.x = s.dataset.y; const b = s.querySelector('b'); if (b) b.textContent = s.dataset.y; }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true }); })()`,
+  /* v131: the YOUR MOVE tag shown in the Your move group too */
+  "qc13-tag": `(() => { const fix = () => document.querySelectorAll('[data-qcv="grp"][data-group="you"] [data-qcv="row-stand"] .qc13-dt').forEach((d) => { if (d.querySelector('[data-qcv="your-move-tag"]')) return; const e = document.createElement('em'); e.className = 'qcv-ym'; e.setAttribute('data-qcv', 'your-move-tag'); e.textContent = 'YOUR MOVE'; d.prepend(e); }); fix(); new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
   /* the sidebar's own "Back to app" restored */
   "ms12-back": `(() => { const r = document.querySelector('#ws-sidebar .set-rail'); if (!r) return; const b = document.createElement('button'); b.className = 'set-backrail'; b.textContent = 'Back to app'; b.style.cssText = 'display:block;color:#f4eee5;font-family:Playfair Display,serif'; r.insertBefore(b, r.firstChild); })()`,
 };

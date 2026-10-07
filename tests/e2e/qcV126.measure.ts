@@ -7,6 +7,7 @@
  * scroller. Ledgers land in reports/qc-v126/ledger/. Probes are the `data-qcv` contract the v126
  * components carry; a lock that cannot find its subject has FAILED (it reads null and says so).
  */
+import { retiredV131 } from "./inkRetired";
 import { expect, test } from "@playwright/test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -138,6 +139,7 @@ test("QC126-3 · band", async ({ page }) => {
 
 /* ── QC126-4 · one 40px rhythm ── */
 test("QC126-4 · rhythm", async ({ page }) => {
+  test.skip(true, retiredV131("the v126 rhythm (band → desk → carousel → list banner, 40 each); v131 is 22 / 44 / 44", "QC1"));
   const L = new Ledger("qc126-4");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -217,6 +219,7 @@ test("QC126-7 · one card", async ({ page }) => {
 
 /* ── QC126-8 · the workspace ── */
 test("QC126-8 · workspace", async ({ page }) => {
+  test.skip(true, retiredV131("the blush workspace, the perched hawk, the anthracite group bands and the 10px row gap", "QC9, QC10, QC11"));
   const L = new Ledger("qc126-8");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -250,6 +253,7 @@ test("QC126-8 · workspace", async ({ page }) => {
 
 /* ── QC126-9 · the sticky controls ── */
 test("QC126-9 · sticky", async ({ page }) => {
+  test.skip(true, retiredV131("the slim sticky controls bar; v131's section header carries the controls and the group header and label row stick", "QC11"));
   const L = new Ledger("qc126-9");
   await openQc(page, AT_1512);
   const read = () => page.evaluate(() => {
@@ -277,6 +281,7 @@ test("QC126-9 · sticky", async ({ page }) => {
 
 /* ── QC126-10 · full width, rail gone ── */
 test("QC126-10 · full width", async ({ page }) => {
+  test.skip(true, retiredV131("rows spanning the blush workspace's inner width; v131's rows sit in a white group body", "QC9, QC10"));
   const L = new Ledger("qc126-10");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -302,10 +307,11 @@ test("QC126-11 · footer", async ({ page }) => {
     const w = `${vp.width}`;
     const r = await page.evaluate(() => {
       const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const f = vis('[data-probe="app-footer"]'), fin = vis('[data-probe="app-footer-in"]'), desk = vis('[data-qcv="courts"]'), ws = vis('[data-qcv="workspace"]');
+      const f = vis('[data-probe="app-footer"]'), fin = vis('[data-probe="app-footer-in"]'), desk = vis('[data-qcv="courts"]'), ws = vis('[data-qcv="workspace"]') ?? vis('[data-qcv="listwrap"]'); /* v131: the list's own wrapper */
       const txt = f?.textContent ?? "";
       return {
-        found: !!f, after: !!f && !!ws && f.getBoundingClientRect().top > ws.getBoundingClientRect().bottom,
+        found: !!f, /* ≥, not >: v131's footer sits flush on the list's own wrapper (no gap to measure) */
+        after: !!f && !!ws && f.getBoundingClientRect().top >= ws.getBoundingClientRect().bottom - 0.5,
         fin: fin ? [fin.getBoundingClientRect().left, fin.getBoundingClientRect().width] : null,
         desk: desk ? [desk.getBoundingClientRect().left, desk.getBoundingClientRect().width] : null,
         glyphs: f?.querySelectorAll('[data-probe="app-footer-glyphs"] svg').length ?? 0,

@@ -167,7 +167,11 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     const isBand = BAND_ROUTES.includes(p.route);
     if (isBand) bandsSeen.add(p.route);
     for (const [nm, x] of [["one", one], ["one-line subline", short]] as const) {
+      /* ⚠️ v131: the Query Centre's compact hero CENTRES its text vertically in a fixed 178px card (§1), so a
+         one-line intro moves the stack by design. The header's height (below) still may not move; QC2 holds the rest. */
+      const centred = p.route === "/queries" && nm === "one-line subline";
       for (const k of ["h1", "intro", "acts", "b1", "b2", "art"] as const) {
+        if (centred && (k === "h1" || k === "intro")) continue;
         if (isBand) {
           const a = x[k], b = many[k];
           L.check("LH1 (band) no vertical movement", ctx(`${nm}·${k}`), (a === null && b === null) || (!!a && !!b && near(a.t, b.t, 1) && near(a.h, b.h, 1)), `${s(a)} vs ${s(b)}`);
@@ -228,8 +232,11 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     } else if (isBand) {
       /* a band's text is centred with its disc, so it does not share the cards' left: the text lines
          share ONE left x among themselves, and the page below shares another */
-      const text = [edges.h1, edges.intro, edges.acts].filter((x) => x !== null) as number[];
-      L.check("LH4 (band) the text lines share one left x", ctx("data"), text.length === 3 && text.every((x) => near(x, text[0], 1)), text.map(f1).join(" "));
+      /* ⚠️ v131: the Query Centre's compact hero stacks its pills in a column right of the text (§1), so only
+         the title and the intro share the left x there; QC2 places the pills. */
+      const compact = p.route === "/queries";
+      const text = (compact ? [edges.h1, edges.intro] : [edges.h1, edges.intro, edges.acts]).filter((x) => x !== null) as number[];
+      L.check("LH4 (band) the text lines share one left x", ctx("data"), text.length === (compact ? 2 : 3) && text.every((x) => near(x, text[0], 1)), text.map(f1).join(" "));
       /* the page below is the band page's own (its rows sit inside the workspace's padding by design —
          QC126-8, CL13-5); reported here, not asserted */
       L.check("LH4 (band) the page's lefts (reported, not asserted)", ctx("data"), true, [edges.tile, edges.row].map(f1).join(" "));
