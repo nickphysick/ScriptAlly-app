@@ -33,6 +33,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { DISCOVER_LIVE, communityAgentFields } from "../lib/discoverShared";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { CommunityAgent, SubmissionStatus } from "../types";
 import { doc, updateDoc, increment } from "firebase/firestore";
@@ -75,25 +76,8 @@ interface DiscoverNewAgentsProps {
   ) => void;
 }
 
-/**
- * ⚠️ DISCOVER SHIPS AS A FEATURE PAGE AT LAUNCH — flip to `true` to restore the live matching view.
- *
- * The verified catalogue is not stocked yet, so a page that tried to match would spend its whole
- * life in an empty state. It states what the feature is instead, and says plainly that it is
- * coming — which is why there is NO empty state on the feature page: nothing attempts to match, so
- * nothing can come back empty.
- *
- * ⚠️ THIS IS A GATE, NOT A DELETION. Every derivation, handler and branch of the live view below is
- * intact and unreferenced while the flag is false — including all three branches of
- * `renderNoMatch()`, which are the LIVE view's first-run states and belong to it. Flipping this one
- * constant restores the page exactly as it was; nothing has to be rebuilt.
- *
- * ⚠️ AND IT IS TYPED `boolean`, NOT LEFT TO INFER `false`. A literal-`false` const narrows every
- * `DISCOVER_LIVE && …` to dead code, which is how a "temporarily gated" branch quietly rots: the
- * compiler stops checking the JSX inside it. Typed wide, the live view keeps being typechecked on
- * every build, so it is still correct on the day someone flips it.
- */
-const DISCOVER_LIVE: boolean = false;
+/* ⚠️ THE GATE LIVES IN lib/discoverShared (Contact list v14, ruling Q4): the Contact list's Discover links
+   read the same constant, so one flip restores the live view here and every link there. */
 
 /** Two display groups (the approved ref shows Strong / Possible only): the engine's `good` tier
  *  reads as a possible fit rather than earning its own band. */
@@ -221,28 +205,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
   const handleAdd = async (ca: CommunityAgent): Promise<string | null> => {
     setAdding(ca.id);
     try {
-      const result = await addAgent({
-        name: ca.name,
-        agency: ca.agency,
-        email: ca.email,
-        website: ca.website,
-        country: ca.country,
-        city: ca.city,
-        twitter: ca.twitter,
-        bluesky: ca.bluesky,
-        instagram: ca.instagram,
-        genres: ca.genres,
-        mswlNotes: ca.mswlNotes,
-        starRating: ca.starRating,
-        submissionStatus: ca.submissionStatus,
-        responseTimeWeeks: ca.responseTimeWeeks,
-        noResponseMeansNo: ca.noResponseMeansNo,
-        submissionMethod: ca.submissionMethod,
-        materialsWanted: ca.materialsWanted,
-        notes: selected
-          ? `Added from Discover — a genre/wish-list match for "${selected.title}".`
-          : "Added from Discover.",
-      });
+      const result = await addAgent(communityAgentFields(ca, selected?.title ?? null));
       if (result.success) {
         // Best-effort popularity bump on the shared catalogue doc (the only client write rules allow).
         try {

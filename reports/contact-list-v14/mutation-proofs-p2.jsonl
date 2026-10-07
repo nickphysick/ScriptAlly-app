@@ -1,0 +1,6 @@
+{"lock":"CL14-1 · CL14-3","mutation":"natural red — the build before Phase 2 (847b5f31 baseline): no next-step section","red":"every CL14-3 check and CL14-1's 44 read as failures (state null, card null, See all NaN), at both widths"}
+{"lock":"CL14-3","mutation":"fork the card — the section draws its own card markup instead of AgentCarouselCard","red":"the shared blocks' signature · 2 · (no s-genres/s-wishlist/s-materials) at 1512 and 1280; clicking the card opens nothing"}
+{"lock":"CL14-3","mutation":"the mock's natural-height card (bottom-anchored, not stretched)","red":"no space under the card · frame 384.6 card 324.1 (1512); frame 431.8 card 324.1 (1280)"}
+{"lock":"CL14-3","mutation":"See all drops the genre condition","red":"See all N leaves exactly N rows · button 2 rows 27 (both widths)"}
+{"lock":"lock 4 (unit: contactNextStep.test, contactNextStep.test.tsx)","mutation":"drop the not-queried condition from the ready set","red":"11 cases: Ready shows with no agent ready; reopening, gaps and done never reached"}
+{"lock":"ruling Q4 (unit: contactNextStep.test.tsx)","mutation":"ignore DISCOVER_LIVE (links and the browse note shown when off)","red":"off: the done state's Add an agent / no side list; off: the reopening and gaps feet hidden"}

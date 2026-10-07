@@ -47,14 +47,19 @@ export interface AgentCarouselCardProps {
   /** a torn slip's Add: the card's editor at that field (the row's slips do the same) */
   onAdd: (agentId: string, focus: "genres" | "wishlist" | "materials") => void;
   onAct: (agentId: string, act: CardAct) => void;
+  /** Contact list v14 §2: the next-step section names its card — "First up", "Reopens 1 Nov", "Genres missing" —
+   *  in place of the query tone. Absent, the card reads as it always has. */
+  chip?: string;
+  /** …and may give its button another job ("Remind me" that toggles, "Add genres"). `on` marks a toggle that is set. */
+  action?: { label: string; onClick: () => void; on?: boolean };
 }
 
-export const AgentCarouselCard: React.FC<AgentCarouselCardProps> = ({ agent, facts, q, genreHit, personal, fitWord, fits, onOpen, onAdd, onAct }) => {
+export const AgentCarouselCard: React.FC<AgentCarouselCardProps> = ({ agent, facts, q, genreHit, personal, fitWord, fits, onOpen, onAdd, onAct, chip: chipOver, action }) => {
   const tone = queryTone(facts, q);
   const primary = primaryFor(facts, q);
   const reopens = (agent.reopensOn ?? "").trim();
   const shut = facts.door === "closed";
-  const chip = shut && !q && reopens ? `Closed till ${day(reopens)}` : tone.label;
+  const chip = chipOver ?? (shut && !q && reopens ? `Closed till ${day(reopens)}` : tone.label);
   const rating = typeof agent.starRating === "number" ? agent.starRating : 0;
   const genres = useMemo(
     () => (agent.genres ?? []).map((g) => genreLabel(g, personal)).sort((a, b) => Number(genreHit(b)) - Number(genreHit(a))),
@@ -98,7 +103,12 @@ export const AgentCarouselCard: React.FC<AgentCarouselCardProps> = ({ agent, fac
           {shut ? (reopens ? `Reopens ${day(reopens)}` : "Closed to queries") : "Open to queries"}
           {fits && fitWord ? <><br />Fits {fitWord}</> : null}
         </small>
-        {primary.act !== "qc" && (
+        {action ? (
+          <button
+            type="button" className={`cl13-acgo${action.on ? " is-on" : ""}`} data-cl13="cgo" data-act="override" aria-pressed={action.on ?? undefined}
+            onClick={(e) => { e.stopPropagation(); action.onClick(); }}
+          >{action.label}</button>
+        ) : primary.act !== "qc" && (
           <button
             type="button" className="cl13-acgo" data-cl13="cgo" data-act={primary.act}
             onClick={(e) => { e.stopPropagation(); onAct(agent.id, primary.act); }}

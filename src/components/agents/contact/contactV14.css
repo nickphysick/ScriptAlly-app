@@ -1,0 +1,188 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v14 — the page's new surfaces (design-refs/contact-list-v14.html). Values are the oracle's,
+ * measured off its rendered DOM at 1512 × 900 and 1280 × 800 (its stylesheet is cumulative across rounds and
+ * is not read for values).
+ *
+ * ⚠️ The ink of the hero card and the workspace bar is v131's band colour, #2a3a52 (ruling Q2) — never the
+ * prompt's #1f2b3a.
+ */
+
+/* ══ §2 · the next-step section ════════════════════════════════════════════════════════════════════════ */
+.cl14-next {
+  --cl14-ink: #1c2733;
+  --cl14-t2: rgba(28, 39, 51, 0.62);
+  --cl14-powder: #e7f0f7;
+  --cl14-blue: #2f5f86;
+  --cl14-track: rgba(47, 95, 134, 0.15);
+  --cl14-hair: rgba(28, 19, 15, 0.1);
+  --cl14-rule: rgba(28, 39, 51, 0.09);
+  --cl14-disc: #f3ddd2;
+  --cl14-disc-ink: #7c3a2a;
+  --cl14-gold: #b8862f;
+  --cl14-btn: #2a3a52;
+  --cl14-cream: #f4eee5;
+  container-type: inline-size;
+  container-name: cl14next;
+  min-width: 0;
+}
+/* the frame: white, 24px corners, a 1px inset hairline; three columns — the well, the card, the side */
+.cl14-nx {
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 318px minmax(0, 1.12fr);
+  column-gap: 44px;
+  align-items: stretch;
+  padding: 10px 36px 10px 10px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--cl14-hair);
+  color: var(--cl14-ink);
+  font-family: var(--clv-serif);
+}
+@container cl14next (max-width: 1099.5px) {
+  .cl14-nx { grid-template-columns: minmax(0, 1fr) 290px minmax(0, 1fr); column-gap: 26px; }
+  /* the mock drops the side head's italic note at this width, so the heading keeps its one line */
+  .cl14-nl-h span { display: none; }
+}
+
+/* the left well: powder, 16px corners, stretched to the frame's full height */
+.cl14-nx-well {
+  box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 26px 28px 24px;
+  border-radius: 16px;
+  background: var(--cl14-powder);
+  min-width: 0;
+}
+.cl14-nx-well h2 { margin: 0; font: 400 28px/1.1 var(--sp-type) !important; color: var(--cl14-ink); }
+.cl14-nx-lede { margin: 0; font-size: 17px; line-height: 1.5; color: var(--cl14-ink); }
+.cl14-nx-lede b { font-weight: 600; }
+.cl14-nx-prog { display: flex; flex-direction: column; gap: 8px; padding-top: 2px; font-size: 14.5px; line-height: 1.45; color: var(--cl14-t2); }
+.cl14-nx-bar { display: block; width: 260px; max-width: 100%; height: 6px; border-radius: 3px; background: var(--cl14-track); overflow: hidden; }
+.cl14-nx-bar i { display: block; height: 100%; border-radius: 3px; background: var(--cl14-blue); }
+.cl14-nx-why { margin: 0; font-size: 14.5px; line-height: 1.5; font-style: italic; color: var(--cl14-t2); }
+.cl14-nx-well > .cl14-out { align-self: flex-start; margin-top: 4px; }
+
+/* the outlined button (the well's, and the side's small ones): a #2f5f86 ring and text, filled on hover */
+.cl14-out {
+  height: 40px; padding: 0 20px; border: 0; border-radius: 21px; background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--cl14-blue); color: var(--cl14-blue);
+  font: 400 15px/1 var(--clv-serif); white-space: nowrap; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.cl14-out:hover, .cl14-out:focus-visible { background: var(--cl14-blue); color: #fff; }
+.cl14-out:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: 2px; }
+.cl14-out.is-on { background: var(--cl14-blue); color: #fff; }
+.cl14-out--sm { height: 32px; padding: 0 14px; font-size: 14px; border-radius: 16px; }
+/* the ink pill (Log a query, Add an agent, Add to my list) */
+.cl14-go {
+  height: 32px; padding: 0 14px; border: 0; border-radius: 16px; background: var(--cl14-btn); color: var(--cl14-cream);
+  font: 500 13.5px/1 var(--clv-serif); white-space: nowrap; cursor: pointer;
+}
+.cl14-go:hover { background: #1b2433; }
+.cl14-go:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: 2px; }
+
+/* the card slot: STRETCHED to the frame's row, its foot 12 inside the frame's padding (22 above the frame's
+   foot) and its top 16 above the row (6 past the frame's top edge). ⚠️ The mock bottom-anchors a card of its
+   natural height, which only leaves no space because its sample card happens to be taller than the well; on
+   the harness account's first agent (338 against a 364 well) it left 26px of empty frame above the card. So
+   the card fills its row, its foot pinned to the bottom, and the frame is ALWAYS the card's height + 16 —
+   §2's "no space under the card" rule at every width and for every agent (reported). */
+.cl14-nxc { align-self: stretch; margin: -16px 0 12px; min-width: 0; position: relative; z-index: 1; display: flex; flex-direction: column; }
+.cl14-nxc > .cl13-ac, .cl14-nxc > .cl14-addc { flex: 1 1 auto; }
+.cl14-nxc .cl13-ac .cl13-acf { margin-top: auto; }
+.cl14-nxc .cl13-ac > .acq-s:last-of-type { padding-bottom: 14px; }
+/* ⚠️ brand.tsx names bare p/span/small/b as the sans face on every route; the well and the side state their
+   own. NOT the card: it keeps its own faces (its mono labels and chips) from the card's sheets. */
+.cl14-next :is(.cl14-nx-well, .cl14-nx-side) :is(p, span, small, b, i, li, div, button) { font-family: var(--clv-serif); }
+.cl14-next :is(.cl14-nx-well, .cl14-nx-side) :is(.cl14-disc, .cl14-cal small) { font-family: var(--sp-mono); }
+.cl14-next .cl14-nx-side .cl14-cal b { font-family: var(--sp-type); }
+.cl14-nxc .cl13-acchip { background: var(--cl14-blue); }
+
+/* the dashed "Add an agent" card (the done state) */
+.cl14-addc {
+  box-sizing: border-box; display: flex; flex-direction: column; min-height: 322px;
+  border-radius: 16px; background: #fff; box-shadow: none; border: 1.5px dashed rgba(47, 95, 134, 0.35); overflow: hidden;
+}
+.cl14-addc-b { height: 40px; display: flex; align-items: center; padding: 0 12px; background: var(--cl14-powder); flex: none; }
+.cl14-addc-b .cl13-acchip {
+  font: 500 8px/1 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+  background: var(--cl14-blue); padding: 4px 8px; border-radius: 10px;
+}
+.cl14-addc-in { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 22px 26px; text-align: center; }
+.cl14-addc-plus {
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1.5px var(--cl14-blue); color: var(--cl14-blue); font: 300 30px/1 var(--clv-serif);
+}
+.cl14-addc-in b { font: 500 19px/1.3 var(--clv-serif); color: var(--cl14-ink); }
+.cl14-addc-in p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--cl14-t2); }
+.cl14-addc-in .cl14-go { height: 40px; padding: 0 20px; border-radius: 20px; font-size: 15px; margin-top: 6px; }
+
+/* the side column: a head row, then ledger rows */
+.cl14-nx-side { padding: 18px 0 12px; min-width: 0; display: flex; flex-direction: column; }
+.cl14-nl-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cl14-rule); }
+.cl14-nl-h h3 { margin: 0; font: 400 19px/1 var(--sp-type) !important; color: var(--cl14-ink); white-space: nowrap; }
+.cl14-nl-h span { font-size: 13.5px; font-style: italic; color: var(--cl14-t2); white-space: nowrap; }
+.cl14-nl { list-style: none; margin: 0; padding: 0; }
+.cl14-nl-row {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  /* 10/10/10/6 — the rendered value; the mock's sheet also carries a stale 13 an earlier round overrode */
+  padding: 10px 10px 10px 6px; border-bottom: 1px solid var(--cl14-rule); border-radius: 10px;
+  cursor: pointer; transition: background 0.15s;
+}
+.cl14-nl-row:hover, .cl14-nl-row:focus-visible { background: #f7f9fb; }
+.cl14-nl-row:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: -2px; }
+/* ⚠️ initials discs are never coloured at random (§1.10): blush ground, burgundy letters */
+.cl14-disc {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--cl14-disc); color: var(--cl14-disc-ink); font: 500 10px/1 var(--sp-mono); letter-spacing: 0.04em;
+}
+.cl14-nl-main { min-width: 0; }
+.cl14-nl-top { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.cl14-nl-top b { font: 500 16px/1.35 var(--clv-serif); color: var(--cl14-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl14-nl-st { font-size: 11px; letter-spacing: 1px; color: var(--cl14-gold); white-space: nowrap; }
+.cl14-nl-st i { font-style: normal; color: rgba(28, 19, 15, 0.14); }
+.cl14-nl-main small { display: block; font-size: 13.5px; line-height: 1.4; color: var(--cl14-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl14-nl-main p { margin: 3px 0 0; font-size: 14px; line-height: 1.4; font-style: italic; color: var(--cl14-ink); opacity: 0.82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl14-nl-side { position: relative; min-width: 104px; display: flex; justify-content: flex-end; align-items: center; }
+.cl14-nl-wk { font-size: 14px; color: var(--cl14-t2); transition: opacity 0.15s; white-space: nowrap; }
+/* the ready rows: the reply time turns into the row's action on hover or focus */
+.cl14-nl-row:not(.cl14-nl-row--act) .cl14-nl-go { position: absolute; right: 0; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.15s; }
+.cl14-nl-row:not(.cl14-nl-row--act):hover .cl14-nl-go,
+.cl14-nl-row:not(.cl14-nl-row--act):focus-within .cl14-nl-go { opacity: 1; }
+.cl14-nl-row:not(.cl14-nl-row--act):hover .cl14-nl-wk,
+.cl14-nl-row:not(.cl14-nl-row--act):focus-within .cl14-nl-wk { opacity: 0; }
+.cl14-nl-when { font-style: italic; }
+/* the reopening rows' date tile, in place of the disc */
+.cl14-cal {
+  width: 36px; height: 40px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.cl14-cal b { font: 400 18px/1 var(--sp-type); color: var(--cl14-ink); }
+.cl14-cal small { font: 500 7.5px/1 var(--sp-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--cl14-blue); }
+.cl14-more {
+  align-self: flex-start; margin-top: 12px; border: 0; background: none; padding: 4px 0;
+  font: 500 14px var(--clv-serif); color: var(--cl14-blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.cl14-nx-foot { margin: 14px 0 0; font-size: 14px; color: var(--cl14-t2); }
+.cl14-link { border: 0; background: none; padding: 0; font: inherit; color: var(--cl14-blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cl14-out, .cl14-nl-row, .cl14-nl-wk, .cl14-nl-row .cl14-nl-go { transition: none; }
+}
+
+/* the section is the group's row 3 (the carousel's old row), the whole group's width, 44 under the strip */
+.clv-group > .cl14-next { grid-column: 1 / -1; grid-row: 3; margin-top: 44px; }
+/* while the page settles, the section is drawn over placeholder agents like everything else (v13 §8) */
+.clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) {
+  color: transparent !important; border-radius: 8px; background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  animation: cl13Shim 1.6s ease-in-out infinite;
+}
+.clv-group[data-loading] .cl14-next :is(.cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) * { visibility: hidden; }
+.clv-group[data-loading] .cl14-next :is(.cl14-out, .cl14-nl-h, .cl14-more) { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) { animation: none; }
+}

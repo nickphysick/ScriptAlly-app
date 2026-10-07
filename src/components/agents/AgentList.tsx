@@ -72,6 +72,12 @@ import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
+import "./contact/contactV14.css";
+import { ContactNextStep } from "./contact/ContactNextStep";
+import { nextStep, reopenReminderTask } from "../../lib/contactNextStep";
+import { DISCOVER_LIVE, communityAgentFields } from "../../lib/discoverShared";
+import { takesBook } from "../../lib/genreMatch";
+import { SubmissionStatus } from "../../types";
 import { ContactStrip } from "./contact/ContactStrip";
 import { stripFacts, fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -117,7 +123,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths,
+    currentUser, updateUserPaths, communityAgents, addAgent,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -755,6 +761,54 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
+  /* ── v14 §2 — THE NEXT-STEP SECTION ────────────────────────────────────────────────────────────
+     ⚠️ OVER THE UNFILTERED AGENT SET (§9): the list's filters and Find never reach it. The state, the ready
+     order, the progress and the done line all come from `lib/contactNextStep`; this is only wiring. */
+  const todayIso = useMemo(() => {
+    const d = new Date(nowMs);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, [nowMs]);
+  const step = useMemo(
+    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
+    [agents, queries, scoped, book, todayIso],
+  );
+  const allFactsById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x])), [factsAll]);
+  const qFor = useCallback((id: string) => cardQuery(cardRows(qcRows, id, scoped?.id ?? null)), [qcRows, scoped]);
+  const reminded = useCallback((a: Agent) => !!reopenReminderTask(a, userTasks ?? []), [userTasks]);
+  /* Remind me — a dated To-do on the day the agent reopens (the card's own `reopenReminder`); pressed again,
+     the task it found is deleted. The reminder is the To-do list's existing dated task, never a new store. */
+  const toggleRemind = useCallback(async (a: Agent) => {
+    const t = reopenReminderTask(a, userTasks ?? []);
+    if (t) { await deleteUserTask(t.id); return; }
+    const task = reopenReminder(a);
+    if (task) await addUserTask(task);
+  }, [userTasks, addUserTask, deleteUserTask]);
+  const toggleRemindAll = useCallback(async (list: readonly Agent[]) => {
+    const tasks = userTasks ?? [];
+    const allOn = list.every((a) => !!reopenReminderTask(a, tasks));
+    for (const a of list) {
+      const t = reopenReminderTask(a, tasks);
+      if (allOn && t) await deleteUserTask(t.id);
+      else if (!allOn && !t) { const task = reopenReminder(a); if (task) await addUserTask(task); }
+    }
+  }, [userTasks, addUserTask, deleteUserTask]);
+  /* "See all N in the list": the list's filters set to exactly the ready set — open (Unknown counts as open),
+     not queried, takes the book — then the list scrolled into view. ⚠️ Phase 4 re-points this at v14's own
+     filter set; the set it selects does not change. */
+  const seeAllReady = useCallback(() => {
+    setFilters({ ...emptyContactFilters(), open: ["open", "unstated"], stand: ["none"], fit: ["takes"] });
+    setSearch("");
+    window.setTimeout(() => mainColRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
+  }, []);
+  /* "In Discover" (live only): Discover agents who take the book and are open, and are not already on the list */
+  const discoverPicks = useMemo(() => {
+    if (!DISCOVER_LIVE || !book.length) return [];
+    const held = new Set(agents.map((a) => `${(a.name ?? "").trim().toLowerCase()}|${(a.agency ?? "").trim().toLowerCase()}`));
+    return (communityAgents ?? []).filter((ca) => takesBook(ca.genres, book) && ca.submissionStatus !== SubmissionStatus.CLOSED
+      && !held.has(`${(ca.name ?? "").trim().toLowerCase()}|${(ca.agency ?? "").trim().toLowerCase()}`));
+  }, [communityAgents, agents, book]);
+  const goDiscover = useCallback(() => { if (DISCOVER_LIVE && DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); }, [onNavigate]);
+
 
 
 
@@ -890,6 +944,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
         {showList && <ContactStrip facts={strip} />}
+        {/* v14 §2 — the next-step section, 44 under the strip: one of four states, from the writer's data */}
+        {showList && (
+          <ContactNextStep
+            step={step} bookTitle={scoped?.title?.trim() || null} genres={genreWord ?? ""}
+            factsById={allFactsById} qFor={qFor} genreHit={bookHit} personal={personalGenres} todayIso={todayIso}
+            reminded={reminded} discoverLive={DISCOVER_LIVE} discover={discoverPicks}
+            onOpen={(id, r) => onOpen(id, r)} onAct={actWithoutCard}
+            onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
+            onSeeAll={seeAllReady} onOpenHk={() => setHkOpen(true)}
+            onNewAgent={(r) => openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null })}
+            onDiscover={goDiscover} onRemind={(a) => void toggleRemind(a)} onRemindAll={(l) => void toggleRemindAll(l)}
+            onAddDiscover={(ca) => void addAgent(communityAgentFields(ca, scoped?.title?.trim() || null))}
+          />
+        )}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;

@@ -63,15 +63,10 @@ test("CL13-2 · rhythm", async ({ page }) => {
     const band = await box(page, '.aglist [data-probe="page-header"][data-band]');
     const strip = await box(page, '.aglist [data-cl13="strip"]');
     L.check("CL13-2 band → strip 40 (±1)", w, !!band && !!strip && near(strip.t - band.b, 40, 1), `${band && strip ? strip.t - band.b : "—"}`);
-    /* the section under the strip: the carousel's head from Phase 2b, the list's banner from Phase 3 */
-    const czHead = await box(page, '.aglist [data-cz="contacts"] [data-cz-head]');
-    const cz = await box(page, '.aglist [data-cz="contacts"]');
-    const next = czHead ?? await box(page, '.aglist [data-ob="contacts"]') ?? await box(page, ".aglist .clv-idxwrap");
-    L.check("CL13-2 strip → the next section 40 (±1)", w, !!strip && !!next && near(next.t - strip.b, 40, 1), `${strip && next ? next.t - strip.b : "—"}`);
-    if (cz) {
-      const after = await box(page, '.aglist [data-ob="contacts"]') ?? await box(page, ".aglist .clv-idxwrap");
-      L.check("CL13-2 carousel → the section under it 40 (±1)", w, !!after && near(after.t - cz.b, 40, 1), `${after ? after.t - cz.b : "—"}`);
-    }
+    /* REWRITTEN (Contact list v14 §2, 7 Oct): under the strip is the next-step section, 44 below it (CL14-1
+       holds the v14 rhythm); the carousel and its 40 below are retired with it. */
+    const next = await box(page, '.aglist [data-cl14="next"]');
+    L.check("CL13-2 strip → the next-step section 44 (±1)", w, !!strip && !!next && near(next.t - strip.b, 44, 1), `${strip && next ? next.t - strip.b : "—"}`);
     await checkOverflow(page, L, w);
   }
   L.done(9);

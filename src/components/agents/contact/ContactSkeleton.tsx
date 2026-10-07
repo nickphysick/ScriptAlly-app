@@ -25,6 +25,8 @@ import { OpenBanner } from "../../shell/OpenBanner";
 import { Workspace } from "../../shell/Workspace";
 import { ContactIndexStrip } from "./ContactIndexStrip";
 import { ContactRows } from "./ContactRows";
+import { ContactNextStep } from "./ContactNextStep";
+import { nextStep } from "../../../lib/contactNextStep";
 import type { CardPrimary } from "../../../lib/agentCard";
 
 /* ONE line, so a placeholder row sits at the row's own 80 floor at every width (a two-line wishlist
@@ -64,6 +66,15 @@ export const ContactSkeleton: React.FC<{
   return (
     <>
       <ContactStrip facts={strip} />
+      {/* v14 §2 — the next-step section over the same placeholders: they are open, take the genre and are
+          unqueried, so it draws its Ready state, the shape the page settles into most often */}
+      <ContactNextStep
+        step={nextStep({ agents: PLACEHOLDERS, queries: [], msId: null, book: ["Thriller"], todayIso: "2000-01-01" })}
+        bookTitle={msTitle} genres="thrillers" factsById={byId} qFor={() => null} genreHit={() => false} todayIso="2000-01-01"
+        reminded={() => false} discoverLive={false} discover={[]}
+        onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onOpenHk={noop} onNewAgent={noop} onDiscover={noop}
+        onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
+      />
       <div className="clv-main">
         <OpenBanner
           probe="contacts-sk"
