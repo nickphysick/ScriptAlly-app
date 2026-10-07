@@ -33,14 +33,15 @@ async function box(page: Page, sel: string) {
 test.describe("query drawer", () => {
   test.setTimeout(240_000);
 
-  test("§A geometry — 500 wide, right 0, the header's height against the mock's, the step bar sticky", async ({ page }) => {
+  test("§A geometry — 500 wide, 8px in from the window's right, the header's height against the mock's, the step bar sticky", async ({ page }) => {
     await ensureSignedIn(page);
     await openRoute(page, "/queries", { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     await openDrawer(page, { mode: "log" });
     const d = await box(page, "[data-qad-drawer]");
     ok(Math.abs(d.w - 500) < 0.5, `drawer width ${d.w}`);
-    ok(Math.abs(d.x + d.w - 1440) < 0.5, `drawer right edge ${d.x + d.w}`);
+    /* RE-POINTED (ink shell v1): drawers sit 8px in from the window's top, right and bottom — INK16 */
+    ok(Math.abs(d.x + d.w - (1440 - 8)) < 0.5, `drawer right edge ${d.x + d.w}`);
     const head = await box(page, "[data-qad-head]");
     await page.screenshot({ path: `${OUT}/app-log-empty-1440.png` });
 

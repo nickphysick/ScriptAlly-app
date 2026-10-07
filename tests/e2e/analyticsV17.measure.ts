@@ -21,6 +21,7 @@ import {
   ANTH, AT_1512, DESKTOP, DIR, FILLS, Ledger, PHONE, ROUTE, RUST, STATE_RGB, checkOverflow, near, openAn, pixel,
   readDesk, sameRgb, scrollToSec,
 } from "./an17Lib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.AN17_TIMEOUT ?? 900_000) });
 const rgb = (s: string | null) => (s?.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
@@ -33,6 +34,7 @@ const isGreenOrRed = (c: string) => {
 
 /* ── AN17-1 · the shell on this route ── */
 test("AN17-1 · shell", async ({ page }) => {
+  test.skip(true, retired("the light shell around Analytics (bar ground, sidebar ground, bar rule)", "INK1"));
   const L = new Ledger("an17-1");
   for (const vp of DESKTOP) {
     await openAn(page, vp);
@@ -87,7 +89,8 @@ test("AN17-2 · band", async ({ page }) => {
     L.check("AN17-2 anthracite", w, d.bandBg === ANTH, `${d.bandBg}`);
     L.check("AN17-2 starts at the top bar's bottom edge", w, near(d.band.t, d.bar.b, 1), `band ${d.band.t} bar ${d.bar.b}`);
     const y = d.band.t + 20;
-    const left = await pixel(page, d.main.l + 3, y), right = await pixel(page, d.main.r - 3, y);
+    /* RE-POINTED (ink shell v1): the main column's last 8px are the ink frame; the band spans the SHEET, whose right is the column's − 8 — INK1 */
+    const left = await pixel(page, d.main.l + 3, y), right = await pixel(page, d.main.r - 8 - 3, y);
     L.check("AN17-2 spans the main column (pixel at each edge)", w, sameRgb(left, [42, 58, 82], 3) && sameRgb(right, [42, 58, 82], 3), `left ${left} right ${right}`);
     L.check("AN17-2 the title", w, d.bandTitle === "Less guesswork, better results", `${d.bandTitle}`);
     if (vp.width === 1512) L.check("AN17-2 337px tall at 1512 (±2)", w, near(d.band.h, 337, 2), `${d.band.h}`);
@@ -121,6 +124,7 @@ async function readQcBand(page: Page) {
   });
 }
 test("AN17-3 · the Query Centre's band", async ({ page }) => {
+  test.skip(true, retired("the Query Centre's band at its v126 box — it became a card in the sheet (fix-ups)", "HC1–HC4"));
   const L = new Ledger("an17-3");
   const now = await readQcBand(page);
   if (process.env.AN17_CAPTURE_QC === "1") {
@@ -459,7 +463,8 @@ test("AN17-15 · tab", async ({ page }) => {
     const a = await tabRead(page);
     L.check("AN17-15 the tab exists", w, !!a.tab, JSON.stringify(a.tab));
     L.check("AN17-15 fixed", w, a.position === "fixed", `${a.position}`);
-    L.check("AN17-15 24px from the window box's right and bottom (±1)", w, !!a.tab && !!a.win && near(a.win.r - a.tab.r, 24, 1) && near(a.win.b - a.tab.b, 24, 1),
+    /* RE-POINTED (ink shell v1): floating tabs sit 20px in from the sheet's corner — INK17 */
+    L.check("AN17-15 20px from the window box's right and bottom (±1)", w, !!a.tab && !!a.win && near(a.win.r - a.tab.r, 20, 1) && near(a.win.b - a.tab.b, 20, 1),
       `${a.tab && a.win ? `${(a.win.r - a.tab.r).toFixed(1)} / ${(a.win.b - a.tab.b).toFixed(1)}` : "—"}`);
     L.check("AN17-15 before the first section it reads Under the hood", w, a.name === "Under the hood", `${a.name}`);
     if (vp.width === 1512) {
@@ -472,7 +477,7 @@ test("AN17-15 · tab", async ({ page }) => {
       const p = await tabRead(page);
       const vw = await page.evaluate(() => ({ w: document.documentElement.clientWidth, h: document.documentElement.clientHeight }));
       L.check("AN17-15 precondition: the window is pulled in from the viewport", w, !!p.win && vw.w - p.win.r >= 30 && vw.h - p.win.b >= 20, p.win ? `${(vw.w - p.win.r).toFixed(1)} / ${(vw.h - p.win.b).toFixed(1)}` : "—");
-      L.check("AN17-15 the tab follows the window, not the viewport (±1)", w, !!p.tab && !!p.win && near(p.win.r - p.tab.r, 24, 1) && near(p.win.b - p.tab.b, 24, 1),
+      L.check("AN17-15 the tab follows the window, not the viewport (±1)", w, !!p.tab && !!p.win && near(p.win.r - p.tab.r, 20, 1) && near(p.win.b - p.tab.b, 20, 1),
         `${p.tab && p.win ? `${(p.win.r - p.tab.r).toFixed(1)} / ${(p.win.b - p.tab.b).toFixed(1)}` : "—"}`);
       await perturb.evaluate((el) => (el as Element).remove());
       await page.waitForTimeout(300);

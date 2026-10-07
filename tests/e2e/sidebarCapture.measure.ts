@@ -19,6 +19,7 @@ import { test, expect, Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { liftMotionSuppression } from "./measure";
 import { openShell } from "./shellV3Lib";
+import { retired } from "./inkRetired";
 
 const OUT = "reports/sidebar-metrics";
 const WIDTHS = [
@@ -83,6 +84,7 @@ async function tx(page: Page, sel: string, pseudo?: string) {
 
 for (const vp of WIDTHS) {
   test(`the sidebar at ${vp.width} — the capture button, the metrics, the foot, the rail`, async ({ page }) => {
+    test.skip(true, retired("the capture button between the brand and the nav, and the sidebar metrics around it — it moved to the bar", "INK8, INK11"));
     mkdirSync(OUT, { recursive: true });
     const rows: Row[] = [];
     const check = (lock: string, ok: boolean, detail: string) => rows.push({ lock, ok: !!ok, detail });

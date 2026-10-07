@@ -1670,10 +1670,11 @@ test.describe("phase 5 — hand-off, docking, parking and reload", () => {
     expect(Math.abs(dock.h - 46), `the dock chip is ${dock.h} tall against v13's 46`).toBeLessThanOrEqual(2);
     expect(dock.radius).toBe(mock.dock.radius);
     expect(dock.bg).toBe(mock.dock.bg);
-    expect(Math.abs(dock.bottom - mock.dock.bottom), "the dock chip's foot").toBeLessThanOrEqual(1);
+    /* RE-POINTED (ink shell v1): the chips anchor to the SHEET — 20px above its foot, which is 8px above the window's (INK17) */
+    expect(Math.abs(dock.bottom - 28), `the dock chip's foot is ${dock.bottom} against the sheet's 8 + 20`).toBeLessThanOrEqual(1);
     expect(Math.abs(drawer.left - (1440 - dock.right) - 24), `the dock chip is ${drawer.left - (1440 - dock.right)} from the drawer against v13's 24 (the v7 mock drew ${mock.gap})`).toBeLessThanOrEqual(1);
     expect(Math.abs(park.h - mock.park.h), `the parked chip is ${park.h} tall against the mock's ${mock.park.h}`).toBeLessThanOrEqual(2);
-    expect([park.right, park.bottom, park.radius, park.bg]).toEqual([mock.park.right, mock.park.bottom, mock.park.radius, mock.park.bg]);
+    expect([Math.round(park.right), Math.round(park.bottom), park.radius, park.bg], "the parked chip: 20px in from the sheet's corner (8 + 20), the mock's corners and fill").toEqual([28, 28, mock.park.radius, mock.park.bg]);
     /* tidy: nothing was saved, and nothing stays parked */
     await page.click(`${PARK} [data-qad-park="x"]`);
     await page.click(`${PARK} [data-qad-park="drop"]`);

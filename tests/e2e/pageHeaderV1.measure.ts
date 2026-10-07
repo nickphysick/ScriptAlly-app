@@ -9,6 +9,7 @@
  * strip at the very top to stand for dev's beta strip; it is not part of this design, so a claim
  * measured from the window's top would be a claim about that strip.
  */
+import { retired } from "./inkRetired";
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -46,6 +47,7 @@ async function openApp(page: Page, path: string, w: number, h: number) {
 
 /* ── §1 · the bar ── */
 test("§1 · the bar is full width, 64px, and carries no breadcrumb", async ({ page }) => {
+  test.skip(true, retired("the bar is ink, not a full-width light 64px strip", "INK1"));
   for (const w of [1280, 1440, 1920]) {
     await openApp(page, "/queries", w, 900);
     const r = await page.evaluate(() => {
@@ -97,6 +99,7 @@ test("§1 · the bar is full width, 64px, and carries no breadcrumb", async ({ p
  * and it stays true if anyone ever does put it inside the scroller.
  */
 test("§1 · the bar holds its place while the page scrolls, and gains its shadow", async ({ page }) => {
+  test.skip(true, retired("the ink bar carries no shadow on scroll", "INK1"));
   /**
    * ⚠️ THE ROUTE HAS TO BE ONE THAT REALLY SCROLLS, and several do not: the Tasks family and the
    * Query Centre FILL the row and scroll inside their panes, so a scroll driven at the row moves
@@ -197,13 +200,15 @@ test("§2 · the content column is centred, capped and equally margined", async 
       if (!r) continue;
       record({ area: "column", what: `§2 · ${route} at ${w}`, got: r, want: "reported" });
       /* equal margins, ±1 */
-      const leftGap = r.left - r.mainL, rightGap = r.winW - r.right;
+      /* RE-POINTED (ink shell v1): the right margin is measured to the SHEET, 8px in from the window — INK1 */
+      const leftGap = r.left - r.mainL, rightGap = r.winW - 8 - r.right;
       near("column", `§2 · equal left and right margins on ${route} at ${w} (${leftGap} / ${rightGap})`, leftGap - rightGap, 0, 1);
       /* the gutter is the clamp, of the WINDOW */
       near("column", `§2 · the gutter is clamp(28, 3.2vw, 52) at ${w}`, r.gut, Math.min(52, Math.max(28, w * 0.032)), 0.6);
       /* content width = min(1360, main) − 2 × gutter */
       near("column", `§2 · the content is min(1360, main) − 2 gutters on ${route} at ${w}`,
-        r.contentW, Math.min(1360, r.mainW) - 2 * r.gut, 1.2);
+        /* RE-POINTED (ink shell v1): the sheet is .ws-main less the 8px frame on its right — INK1 */
+        r.contentW, Math.min(1360, r.mainW - 8) - 2 * r.gut, 1.2);
       is("column", `§2 · …capped at 1360 (${route} at ${w})`, r.max, "1360px");
       /* ⚠️ AND `border-box`, or the padding is ADDED to the cap and every margin reading still passes */
       is("column", `§2 · …with the gutter inside the cap (${route} at ${w})`, r.boxSizing, "border-box");

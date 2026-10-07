@@ -12,6 +12,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 import { AT_1512, INK, Ledger, WIDTHS, box, checkOverflow, near, openDrawer, openQc, pixel, sameRgb } from "./qc126Lib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.QC126_TIMEOUT ?? 900_000) });
 const rgb = (s: string) => (s.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
@@ -19,6 +20,7 @@ const rgba = (s: string) => (s.match(/[\d.]+/g) ?? []).map(Number);
 
 /* ── QC126-1 · the shell goes greige ── */
 test("QC126-1 · shell", async ({ page }) => {
+  test.skip(true, retired("the light shell around the Query Centre (page ground, sidebar ground, bar rule)", "INK1"));
   const L = new Ledger("qc126-1");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -94,6 +96,7 @@ test("QC126-2 · no stragglers", async () => {
 
 /* ── QC126-3 · the header band ── */
 test("QC126-3 · band", async ({ page }) => {
+  test.skip(true, retired("the Query Centre's full-bleed band — it became a card in the sheet (fix-ups)", "HC1–HC4"));
   const L = new Ledger("qc126-3");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -325,7 +328,8 @@ test("QC126-12 · tab", async ({ page }) => {
     await openQc(page, vp);
     const w = `${vp.width}`;
     const t = await box(page, '[data-qcv="bvd-tab"]'), win = await box(page, ".ws-window");
-    L.check("QC126-12 24 from the window box's right and bottom", w, !!t && !!win && near(win.r - t.r, 24, 1) && near(win.b - t.b, 24, 1), `${t && win ? `${win.r - t.r} / ${win.b - t.b}` : "—"}`);
+    /* RE-POINTED (ink shell v1): floating tabs sit 20px in from the sheet's corner — INK17 */
+    L.check("QC126-12 20 from the window box's right and bottom", w, !!t && !!win && near(win.r - t.r, 20, 1) && near(win.b - t.b, 20, 1), `${t && win ? `${win.r - t.r} / ${win.b - t.b}` : "—"}`);
     if (vp.width === 1512) {
       await page.keyboard.press("b");
       await page.waitForTimeout(500);

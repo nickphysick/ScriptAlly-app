@@ -15,6 +15,7 @@ import { openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
 import { ManuscriptStatus } from "../../src/types";
 import { SHORTCUTS, keycaps, type ShortcutId } from "../../src/lib/shortcuts";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.SW_TIMEOUT ?? 900_000) });
 const SIZES = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const;
@@ -36,6 +37,7 @@ const focused = (page: Page) => page.evaluate(() => {
 
 for (const vp of SIZES) {
   test(`S1, S2, S3 · the tile and the menu at ${vp.width}`, async ({ page }) => {
+    test.skip(true, retired("the switcher's tile and menu geometry in the bar — it is a sidebar tile with a portalled menu", "INK10"));
     const L = new Ledger(`sw-tile-menu-${vp.width}`);
     execFileSync("node", ["tests/e2e/seedSwitcherShelved.mjs"], { stdio: "inherit" });
     try {
@@ -231,7 +233,9 @@ test("S8 · motion: stated durations, instant under reduced motion", async ({ br
       L.check("S8 · reduce: the chevron's turn is instant", c, instant(r.chev), r.chev);
     } else {
       L.check("S8 · no preference: the menu fades 0.16s and drops 0.18s", c, /^0\.16s, 0\.18s/.test(r.menu), r.menu);
-      L.check("S8 · no preference: the chevron turns over 0.2s", c, r.chev === "0.2s", r.chev);
+      /* ⚠️ RETARGETED (ink shell v1): in the sidebar the chevron is an up/down mark and does not turn (the
+         reference draws it still); what survives is that it is not instant — it fades with the labels. */
+      L.check("S8 · no preference: the chevron is not instant", c, r.chev.split(",").some((x) => parseFloat(x) > 0), r.chev);
     }
     await cx.close();
   }

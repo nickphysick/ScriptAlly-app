@@ -11,6 +11,7 @@ import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
 import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.QB_TIMEOUT ?? 900_000) });
 const SIZES = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const;
@@ -18,6 +19,7 @@ const near = (a: number, b: number, t: number) => Number.isFinite(a) && Math.abs
 
 for (const vp of SIZES) {
   test(`Q1–Q5, Q7 · the quiet bar on every route at ${vp.width}`, async ({ page }) => {
+    test.skip(true, retired("the quiet bar — page ground, at-rest hairline, page-name fade — is the ink bar now", "INK1, INK6"));
     const L = new Ledger(`qb-bar-${vp.width}`);
     const tally = { titled: 0, untitled: 0, fixedTitle: 0, still: 0, living: 0 };
     for (const route of BAR_ROUTES) {
@@ -101,6 +103,7 @@ for (const vp of SIZES) {
 }
 
 test("Q6 · a route change starts the new page's bar at rest", async ({ page }) => {
+  test.skip(true, retired("the quiet bar's per-route rest state (no page-name fade left to reset)", "INK6"));
   const L = new Ledger("qb-route");
   for (const vp of SIZES) {
     /* ⚠️ RETARGETED BY LIVING HEADERS v3: /agents is living (its crumb shows from first paint), so the
@@ -124,6 +127,7 @@ test("Q6 · a route change starts the new page's bar at rest", async ({ page }) 
 });
 
 test("Q9 · reduced motion makes both changes instant", async ({ browser }) => {
+  test.skip(true, retired("the quiet bar's name and hairline transitions (neither exists on the ink bar)", "INK14"));
   const L = new Ledger("qb-motion");
   for (const reducedMotion of ["reduce", "no-preference"] as const) {
     const ctx = await browser.newContext({ reducedMotion, storageState: "tests/e2e/.auth/state.json" });

@@ -20,6 +20,7 @@ import {
   CompsLedger as Ledger, EMPTY, FILLED, FIXTURE_TITLES, SIZES, on, openComps, pageText, readFrame, readList, readMock,
   restore, scrollPage, seed, waitForOrder,
 } from "./compsMatLib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ mode: "default", timeout: Number(process.env.CM_TIMEOUT ?? 900_000) });
 /* ⚠️ A LOCK FAILS, IT NEVER HANGS: an action on an absent subject gives up in 10s (C5 waited out its
@@ -49,6 +50,7 @@ for (const vp of SIZES) {
   for (const collapsed of [false, true]) {
     const state = collapsed ? "collapsed" : "expanded";
     test(`S1 · shell · ${vp.width} · ${state}`, async ({ page }) => {
+      test.skip(true, retired("the light shell around Comparable titles (sidebar tone, the one divide, the bar crumb)", "INK1, INK6, INK11"));
       const L = new Ledger(`comps-S1-${vp.width}-${state}`);
       await openComps(page, FILLED, vp, collapsed);
       const ctx = { route: "/manuscripts/comps", size: `${vp.width}`, state };

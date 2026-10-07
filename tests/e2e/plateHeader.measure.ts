@@ -18,6 +18,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { readBar, scrollTo, suppressMotion, tagScroller } from "./quietBarLib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 900_000) });
 const SIZES = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const;
@@ -259,6 +260,7 @@ test("PH5 · the plate is the Query Centre's alone", async ({ page }) => {
 /* PH6 · the hairline at rest, everywhere; the name keeps its rule */
 for (const vp of SIZES) {
   test(`PH6 · the bar's hairline at rest on every route at ${vp.width}`, async ({ page }) => {
+    test.skip(true, retired("the bar's at-rest hairline (4 Oct ruling, retired with a reason: no light bar left to sit under)", "INK1"));
     const L = new Ledger(`ph6-${vp.width}`);
     const tally = { routes: 0, living: 0, scrolled: 0 };
     for (const route of BAR_ROUTES) {

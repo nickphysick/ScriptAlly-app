@@ -120,8 +120,10 @@ test("⚠️ the window's surface is dissolved in settings, as it is everywhere 
   /* ⚠️ ASSERTED AS A CHANGE, NOT AS A PINNED COLOUR. A pinned value goes red on every legitimate
      retone and trains the next reader to rebaseline it without looking; "it was opaque and now it
      is not" is the claim, and it survives any palette. */
-  expect(off!.background, "v3: the window is transparent off-mode too").toMatch(/rgba\(0, 0, 0, 0\)/);
-  expect(on!.background, "the window's fill did not dissolve in settings").toMatch(/rgba\(0, 0, 0, 0\)/);
+  /* RE-POINTED (ink shell v1): the window IS the sheet now — it paints the page ground on ink in both
+     modes. The claim that survives is that settings mode paints the SAME surface, never its own. */
+  expect(off!.background, "ink: the window paints the sheet").not.toMatch(/rgba\(0, 0, 0, 0\)/);
+  expect(on!.background, "settings mode paints the same sheet as everywhere else").toBe(off!.background);
   /* v3: the border is gone by WIDTH (`border: 0`), so its colour falls back to currentColor — the
      width is the claim now, not the colour */
   expect(on!.borderTopWidth, "the window's border did not dissolve").toBe("0px");

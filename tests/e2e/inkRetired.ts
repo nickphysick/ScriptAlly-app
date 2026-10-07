@@ -1,0 +1,8 @@
+/**
+ * Ink shell v1 — a retired case says why, and what measures its claim now.
+ * Used as `test.skip(true, retired("…", "INK1"))` at the top of a case whose subject the ink shell
+ * replaced. Listed in tests/e2e/RETIRED-ink-shell-v1.md. A skip is not a pass: the report counts them.
+ */
+export function retired(why: string, by: string): string {
+  return `RETIRED by ink shell v1 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-ink-shell-v1.md).`;
+}

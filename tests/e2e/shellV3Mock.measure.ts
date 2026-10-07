@@ -16,6 +16,7 @@ import { expect, test, Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { openShell, SIZES } from "./shellV3Lib";
+import { retired } from "./inkRetired";
 
 const OUT = "reports/app-shell-v3/compare";
 const MOCK = "file://" + resolve("design-refs/shell/app-shell-v3.html");
@@ -80,6 +81,7 @@ async function readShell(page: Page, mock: boolean) {
 }
 
 test("the app against the mock, by one ruler", async ({ page, browser }) => {
+  test.skip(true, retired("the app against the shell v3 mock — that mock is superseded by design-refs/shell/ink-shell-v1.html", "INK1–INK19"));
   mkdirSync(OUT, { recursive: true });
   const rows: string[] = ["| size | state | probe | field | mock | app | Δ | note |", "|---|---|---|---|---|---|---|---|"];
   const over: string[] = [];

@@ -27,11 +27,13 @@
 import { expect, test } from "@playwright/test";
 import { openRoute } from "./measure";
 import { COLLAPSE_KEY, Ledger, ROUTES, SIZES, SURFACE, judge, openShell, probeShell } from "./shellV3Lib";
+import { retired } from "./inkRetired";
 
 for (const vp of SIZES) {
   for (const collapsed of [false, true]) {
     const state = collapsed ? "collapsed" : "expanded";
     test(`shell v3 · ${vp.width} · ${state}`, async ({ page }) => {
+      test.skip(true, retired("shell v3's light sidebar, page-ground bar, anthracite row and bar order", "INK1, INK7, INK9, INK11"));
       const L = new Ledger(`${vp.width}-${state}`);
       for (const r of ROUTES) {
         await openShell(page, r.path, vp, collapsed);
@@ -100,6 +102,8 @@ test("L9 collapse · persistence behaves as before (guard)", async ({ page }) =>
   const w1 = await page.evaluate(() => document.getElementById("ws-sidebar")!.getBoundingClientRect().width);
   const exp1 = await toggle.getAttribute("aria-expanded");
   L.check("L9 persist · collapse survives reload", ctx, stored1 === "1" && w1 < w0 && exp1 === "false", `stored ${stored1} w ${w0}→${w1} expanded ${exp1}`);
+  /* RE-POINTED (ink shell v1): collapsed, the toggle takes the mark's place while the mark is hovered (INK14) */
+  await page.locator("#ws-sidebar .ws-logo").hover(); await page.waitForTimeout(200);
   await toggle.click(); await page.waitForTimeout(400);
   await page.reload(); await page.waitForTimeout(1500);
   const w2 = await page.evaluate(() => document.getElementById("ws-sidebar")!.getBoundingClientRect().width);
@@ -112,6 +116,7 @@ test("L9 collapse · persistence behaves as before (guard)", async ({ page }) =>
 
 /* ── L10 themes: under .t-bold and .t-edn the shell's colours are non-transparent and come from tokens ── */
 test("L10 themes · bold and editorial resolve the shell tokens", async ({ page }) => {
+  test.skip(true, retired("shell v3's per-theme shell tokens — the ink shell reads none of them and is identical in every theme", "INK1 (three themes)"));
   const L = new Ledger("L10-themes");
   await openShell(page, "/queries", { width: 1440, height: 900 }, false);
   for (const theme of ["t-capp", "t-bold", "t-edn"]) {
@@ -191,6 +196,7 @@ test("L11 save-failure · a denied display-name save shows an error (guard)", as
    "Back to app" hover (`.qc-card` has no renderer; `.sa-inline` and the Manuscripts cards render
    only inside the unrouted AllManuscripts). It is read, and must equal what it painted before. */
 test("L12 surfaces · card and control surfaces keep today's colour", async ({ page }) => {
+  test.skip(true, retired("shell v3's light card/control surfaces in the bar (the bar is ink)", "INK1, INK7, INK9"));
   const L = new Ledger("L12-surfaces");
   await openShell(page, "/account/profile", { width: 1440, height: 900 }, false);
   const back = page.locator(".ws-backapp");

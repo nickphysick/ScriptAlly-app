@@ -40,7 +40,8 @@ test("CL13-1 · band", async ({ page }) => {
     L.check("CL13-1 anthracite rgb(42,58,82)", w, r.bg === INK, `${r.bg}`);
     L.check("CL13-1 starts at the top bar's bottom (±1)", w, near(r.band.t, r.bar.b, 1), `band ${r.band.t} bar ${r.bar.b}`);
     const y = r.band.t + Math.min(30, r.band.h / 2);
-    const left = await pixel(page, r.main.l + 3, y), right = await pixel(page, r.main.r - 3, y);
+    /* RE-POINTED (ink shell v1): the main column's last 8px are the ink frame; the band spans the SHEET, whose right is the column's − 8 — INK1 */
+    const left = await pixel(page, r.main.l + 3, y), right = await pixel(page, r.main.r - 8 - 3, y);
     L.check("CL13-1 the band spans the main column (pixel at each edge)", w, sameRgb(left, [42, 58, 82], 3) && sameRgb(right, [42, 58, 82], 3), `left ${left} right ${right}`);
     L.check("CL13-1 the disc is 290 (±2), white, round", w, !!r.disc && near(r.disc.w, 290, 2) && near(r.disc.h, 290, 2) && r.discBg === "rgb(255, 255, 255)", `${JSON.stringify(r.disc)} ${r.discBg}`);
     L.check("CL13-1 the disc holds contact-archivist.png", w, /\/images\/contact-archivist\.png/.test(r.img ?? ""), `${r.img}`);
@@ -663,7 +664,8 @@ test("CL13-9 · housekeeping drawer", async ({ page }) => {
       const a = win.getBoundingClientRect(), b = tab.getBoundingClientRect();
       return { right: Math.round((a.right - b.right) * 10) / 10, bottom: Math.round((a.bottom - b.bottom) * 10) / 10, vis: getComputedStyle(tab).visibility, op: getComputedStyle(tab).opacity };
     });
-    L.check("CL13-9 the tab sits 24 ±1 from the main window's right and bottom", w, !!t && near(t.right, 24, 1) && near(t.bottom, 24, 1) && t.vis === "visible", JSON.stringify(t));
+    /* RE-POINTED (ink shell v1): floating tabs sit 20px in from the sheet's corner — INK17 */
+    L.check("CL13-9 the tab sits 20 ±1 from the main window's right and bottom", w, !!t && near(t.right, 20, 1) && near(t.bottom, 20, 1) && t.vis === "visible", JSON.stringify(t));
     await openHk(page);
     const d = await box(page, HDR);
     const want = vp.width === 1512 ? 780 : vp.width === 1280 ? 717 : Math.min(780, vp.width * 0.56);
@@ -940,13 +942,14 @@ async function proveDockPeek(page: import("@playwright/test").Page, L: Ledger, w
     const d = document.querySelector(".qad-root .qad-drawer")?.getBoundingClientRect();
     return c && d ? { gap: d.left - c.right, bottom: innerHeight - c.bottom } : null;
   });
-  L.check("CL13-10 the chip sits 24 left of the drawer and 24 off the foot", where, !!g && near(g.gap, 24, 1) && near(g.bottom, 24, 1), JSON.stringify(g));
+  /* RE-POINTED (ink shell v1): the chip's foot is 20px above the SHEET's foot, which is 8px above the window's — INK17 */
+  L.check("CL13-10 the chip sits 24 left of the drawer and 28 off the foot", where, !!g && near(g.gap, 24, 1) && near(g.bottom, 28, 1), JSON.stringify(g));
   await chip.click();
   await page.locator(peekOn).first().waitFor({ state: "attached", timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(400);
   const b = await peekReading(page, card, prim);
-  L.check("CL13-10 a click puts the card above the chip: right edge = drawer left − 24 (±2), bottom 84", where,
-    !!b && near(b.cardR, b.drawerL - 24, 2) && near(b.vh - b.cardB, 84, 2), JSON.stringify(b));
+  L.check("CL13-10 a click puts the card above the chip: right edge = drawer left − 24 (±2), bottom 88", where,
+    !!b && near(b.cardR, b.drawerL - 24, 2) && near(b.vh - b.cardB, 88, 2), JSON.stringify(b));
   L.check("CL13-10 the peeked card does not overlap the drawer and stays on screen", where, !!b && b.cardR <= b.drawerL && b.cardL >= 0 && b.cardT >= 0, JSON.stringify(b));
   L.check("CL13-10 the card is min(548, 100vw − 572) wide", where, !!b && near(b.cardW, Math.min(548, b.vw - 572), 1), JSON.stringify(b));
   L.check("CL13-10 the card's primary takes no press while peeking", where, b?.primPE === "none", `${b?.primPE}`);

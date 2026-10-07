@@ -22,6 +22,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 import { Ledger, near, f1 } from "./shellV3Lib";
 import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: 1_800_000 });
 
@@ -312,6 +313,7 @@ test("LH3 · a tile row never grows: one digit and three at 1280", async ({ page
 });
 
 test("LH5 · the breadcrumb is in the bar from first paint, and there is no eyebrow", async ({ page }) => {
+  test.skip(true, retired("the living routes' SECTION / Name breadcrumb in the bar — the folder tab names the page", "INK6"));
   const L = new Ledger("lh3-crumb");
   await page.addInitScript(() => {
     const seen: { route: string; headerFirst: boolean; crumb: string; op: string }[] = [];

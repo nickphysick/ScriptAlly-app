@@ -15,21 +15,23 @@ import { Ledger } from "./shellV3Lib";
 async function pressBarGap(page: Page) {
   const at = await page.evaluate(() => {
     const bar = [...document.querySelectorAll<HTMLElement>('[data-probe="navrow"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-    const t = bar.querySelector('[aria-controls="ws-sidebar"]')!.getBoundingClientRect();
-    const sw = bar.querySelector('[data-shell="switcher"]')!.getBoundingClientRect();
+    /* RE-POINTED (ink shell v1): the toggle and the switcher left the bar; its spacer is the inert gap */
+    const g = bar.querySelector('[data-shell="spacer"]')!.getBoundingClientRect();
     const b = bar.getBoundingClientRect();
-    return { x: (t.right + sw.left) / 2, y: b.top + b.height / 2 };
+    return { x: g.left + g.width / 2, y: b.top + b.height / 2 };
   });
   await page.mouse.click(at.x, at.y);
 }
 import { BAND_ROUTES, PLATE_ROUTES } from "./plateRoutes";
 import { BAR_ROUTES, LIVING_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
+import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.PH_TIMEOUT ?? 600_000) });
 
 /* ── §1 · the bar, on every route ── */
 for (const vp of SIZES) {
   test(`§1 · the bar at ${vp.width}`, async ({ page }) => {
+    test.skip(true, retired("page header v2's light bar (page ground, toggle at +24, page name at rest, switcher in the bar)", "INK1, INK5, INK10"));
     const L = new Ledger(`v2-bar-${vp.width}`);
     let scrolledEnough = 0;
     for (const route of BAR_ROUTES) {

@@ -620,6 +620,7 @@ test("L6 empty-examples", async ({ browser }, info) => {
    Both frames are the shell's (a 248px sidebar, the shared column), so the column-level containers
    must sit where the mock draws them: x and width within 1px at 1440 and 1280. The hero is v12's
    (F5), so its height — and every y below it — differs, and is printed rather than asserted. */
+const INK_FRAME = 8;
 for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
   test(`geometry vs mock @ ${vp.width}`, async () => {
     await openMs(page, vp);
@@ -650,11 +651,15 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     for (const k of ["shelf", "versions", "activity"] as const) {
       expect(app[k] && mock[k], `${k} measured on both`).toBeTruthy();
       expect(Math.abs(app[k]![0] - mock[k]![0]), `${k} x vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
-      expect(Math.abs(app[k]![2] - mock[k]![2]), `${k} width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+      /* RE-POINTED (ink shell v1): the ink sheet ends INK_FRAME px inside the window's right edge, and
+         the mock was drawn on the old flush window — so the column is the mock's less the frame. */
+      expect(Math.abs(app[k]![2] - (mock[k]![2] - INK_FRAME)), `${k} width vs the mock's less the ink frame @${vp.width}`).toBeLessThanOrEqual(1);
       ck(3);
     }
-    expect(Math.abs(app.card![2] - mock.card![2]), `first shelf card width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
-    expect(Math.abs(app.vtile![2] - mock.vtile![2]), `version tile width vs the mock's @${vp.width}`).toBeLessThanOrEqual(1);
+    /* the tracks inside scale with the narrower column: each is the mock's share of it */
+    const ratio = app.shelf![2] / mock.shelf![2];
+    expect(Math.abs(app.card![2] - mock.card![2] * ratio), `first shelf card width vs the mock's share @${vp.width}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(app.vtile![2] - mock.vtile![2] * ratio), `version tile width vs the mock's share @${vp.width}`).toBeLessThanOrEqual(1);
     ck(2);
   });
 }

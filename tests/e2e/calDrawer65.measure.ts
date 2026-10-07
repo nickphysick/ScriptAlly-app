@@ -61,7 +61,8 @@ test("⚠️ (§D) 420px from the right; opening it CLOSES the card; it outranks
   const d = await openDrawerOn(page, true);
   expect(d, "no drawer opened").not.toBeNull();
   expect(d!.width, "the drawer is not 420 wide").toBe(420);
-  expect(d!.right, "the drawer is not flush right").toBeLessThanOrEqual(1);
+  /* RE-POINTED (ink shell v1): every drawer is inset 8px from the window's right — INK16 */
+  expect(Math.abs(d!.right - 8), "the drawer is not 8px in from the right").toBeLessThanOrEqual(1);
   expect(d!.card, "the card survived the drawer opening — two read surfaces at once").toBe(0);
   expect(d!.footer, "no Query Centre footer").toContain("Open in Query Centre");
   /* ⚠️ THE RAIL IS z50 INSIDE THE BOARD, so the board must ISOLATE or it paints over the drawer.
