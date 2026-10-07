@@ -59,6 +59,9 @@ const CSS_MUTATIONS: Record<string, string> = {
   "qc12-margin": ".qc13-cu--over, .qc13-cu--soon { margin-left: 0 !important; }",
   /* v131: the spot art hard-coded — whatever file is supplied, the slot draws its SVG and never the image */
   "qc14-hard": ".qc13-art img { display: none !important; }",
+  "qc16-tall": ".qc13-list .qcv-row.qcv-row--sk { height: 80px !important; }",
+  "qc16-jump": ".qc13-cz[data-sk] .qcv-cz-trackw { display: none !important; }",
+  "qc16-zero": ".qc13-desk .qc13-sk, .qc13-desk .qc13-sk b { color: rgb(28, 19, 15) !important; }",
   "qc15-empty": ".ph--full.ph--card:not(.ph--band) { height: 178px !important; padding: 0 46px 0 44px !important; }",
 };
 

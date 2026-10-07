@@ -36,17 +36,19 @@ export const QcDesk: React.FC<{
           <div key={s.key} role="group" aria-label={s.label}
             className={`qc13-dc qc13-dc--${s.key}${active === s.key ? " is-on" : ""}`} data-qcv="court" data-court={s.key}>
             <button type="button" className="qc13-dc-hit" data-qcv="court-pick" aria-pressed={active === s.key}
-              disabled={loading} aria-label={label} onClick={() => onCourt(s.key)} />
+              disabled={loading} aria-label={loading ? `${s.label}: loading` : label} onClick={() => onCourt(s.key)} />
             <small className="qc13-dc-eb" data-qcv="court-eyebrow">{s.label}</small>
             <div className="qc13-dc-row1">
-              <i className="qc13-dc-n" data-qcv="court-count">{s.total}</i>
+              {/* ⚠️ WHILE LOADING THE NUMBERS ARE NOT KNOWN, so nothing states one: the same boxes, their text
+                  kept for its line box and painted over (`qc13-sk`). "0 offers to decide" would be a claim. */}
+              <i className={`qc13-dc-n${loading ? " qc13-sk" : ""}`} data-qcv="court-count">{loading ? "00" : s.total}</i>
               <div className="qc13-dc-ln">
                 {s.facts.map((f, i) => (
-                  <span key={i} className="qc13-dc-fact" data-qcv="court-fact"><b>{f.n}</b> {f.text}</span>
+                  <span key={i} className={`qc13-dc-fact${loading ? " qc13-sk" : ""}`} data-qcv="court-fact"><b>{loading ? "00" : f.n}</b> {f.text}</span>
                 ))}
               </div>
               <div className={`qc13-vz${hov != null ? " is-hov" : ""}`} data-qcv="court-bars">
-                <div className="qc13-bars" role="list" aria-label={`${s.label}, the last twelve weeks`}>
+                <div className={`qc13-bars${loading ? " qcv-skw" : ""}`} role="list" aria-label={`${s.label}, the last twelve weeks`} aria-hidden={loading || undefined}>
                   {s.bars.counts.map((n, i) => {
                     const text = barText(s.key, s.bars.weeks[i], n);
                     return (
@@ -66,7 +68,7 @@ export const QcDesk: React.FC<{
               </div>
             </div>
             <div className="qc13-dc-nx" data-qcv="court-foot">
-              <span data-qcv="court-when">{s.foot.label} {s.foot.date ?? "—"}</span>
+              <span className={loading ? "qc13-sk" : undefined} data-qcv="court-when">{s.foot.label} {loading ? "00 XXX" : s.foot.date ?? "—"}</span>
               <span className="qc13-dc-cap" data-qcv="court-cap">{s.caption}</span>
             </div>
           </div>

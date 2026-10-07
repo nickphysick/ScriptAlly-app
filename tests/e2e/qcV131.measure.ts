@@ -381,4 +381,56 @@ test.describe("Query Centre v131", () => {
       expect(v.equals(readFileSync(f)), `${k} differs from the pre-v131 page`).toBe(true);
     }
   });
+
+  /* ── QC16 · the list skeleton on desktop ──────────────────────────────────────────────────────── */
+  test("QC16 · while loading, the desktop list is the v131 list's frames — header, label row, rows — and none moves when the data lands", async ({ page }) => {
+    const read = () => page.evaluate(() => {
+      const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      const R = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: +b.left.toFixed(1), y: +b.top.toFixed(1), w: +b.width.toFixed(1), h: +b.height.toFixed(1) }; };
+      const row = vis('.qc13-list [data-qcv="sk-row"], .qc13-list [data-qcv="row"]');
+      return {
+        v126Rows: document.querySelectorAll('.qcv-row.qcv-row--sk:not(.qc13-rw)').length,
+        skRows: document.querySelectorAll('.qc13-list [data-qcv="sk-row"]').length,
+        list: R(vis(".qc13-list")),
+        desk: R(vis('[data-qcv="courts"]')),
+        cz: R(vis('[data-qcv="cz"]')),
+        /* the desk's numbers: what a reader can see, painted-over text excluded */
+        deskStated: [...document.querySelectorAll<HTMLElement>('[data-qcv="court-count"], [data-qcv="court-fact"], [data-qcv="court-when"]')]
+          .filter((e) => getComputedStyle(e).color !== "rgba(0, 0, 0, 0)").map((e) => e.innerText.trim()),
+        gh: R(vis(".qc13-list .qc13-gh")),
+        colh: R(vis(".qc13-list .qc13-colh")),
+        labels: [...(vis(".qc13-list .qc13-colh")?.children ?? [])].map((c) => +c.getBoundingClientRect().left.toFixed(1)),
+        row: R(row),
+        cells: row ? [...row.querySelectorAll(":scope > .qc13-c")].map((c) => +c.getBoundingClientRect().left.toFixed(1)) : [],
+      };
+    });
+    for (const w of [1280, 1440]) {
+      await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS: number }).__SA_QC_HOLD_MS = 6000; });
+      await inkOpen(page, "/queries", w, { scope: "qc16" });
+      await expect(page.locator('.qc13-list [data-qcv="sk-row"]').first(), `${w}: the desktop skeleton is drawn`).toBeVisible();
+      const sk = await read();
+      await expect(page.locator('.qc13-list [data-qcv="row"]').first(), `${w}: the list loaded`).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(900);
+      const real = await read();
+      expect(sk.skRows, `${w}: eight skeleton rows`).toBe(8);
+      expect(sk.v126Rows, `${w}: no v126 skeleton rows on desktop`).toBe(0);
+      for (const k of ["gh", "colh", "row"] as const) {
+        expect(sk[k] && real[k], `${w}: ${k} measured in both states`).toBeTruthy();
+        expect(Math.abs(sk[k]!.h - real[k]!.h), `${w}: ${k} height ${sk[k]!.h} → ${real[k]!.h}`).toBeLessThanOrEqual(1);
+        expect(Math.abs(sk[k]!.x - real[k]!.x) <= 1 && Math.abs(sk[k]!.w - real[k]!.w) <= 1, `${w}: ${k} box ${JSON.stringify(sk[k])} → ${JSON.stringify(real[k])}`).toBe(true);
+      }
+      expect(sk.labels.length, `${w}: five labels`).toBe(5);
+      expect(sk.labels.every((x, i) => Math.abs(x - real.labels[i]) <= 1), `${w}: labels ${sk.labels} → ${real.labels}`).toBe(true);
+      expect(sk.cells.length, `${w}: five cells`).toBe(5);
+      expect(sk.cells.every((x, i) => Math.abs(x - real.cells[i]) <= 1), `${w}: cells ${sk.cells} → ${real.cells}`).toBe(true);
+      for (const k of ["list", "desk", "cz"] as const) {
+        expect(sk[k] && real[k], `${w}: ${k} measured in both states`).toBeTruthy();
+        expect(Math.abs(sk[k]!.y - real[k]!.y) <= 2 && Math.abs(sk[k]!.h - (k === "list" ? sk[k]!.h : real[k]!.h)) <= 2,
+          `${w}: ${k} ${JSON.stringify(sk[k])} → ${JSON.stringify(real[k])}`).toBe(true);
+      }
+      expect(sk.deskStated, `${w}: the desk states no number while loading`).toEqual([]);
+      expect(real.deskStated.length, `${w}: the loaded desk states its numbers (3 totals, 6 facts, 3 feet)`).toBe(12);
+      console.log(`QC16 ${w}: list top ${sk.list?.y} → ${real.list?.y}, carousel h ${sk.cz?.h} → ${real.cz?.h}, desk h ${sk.desk?.h} → ${real.desk?.h}`);
+    }
+  });
 });

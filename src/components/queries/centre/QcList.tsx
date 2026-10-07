@@ -402,7 +402,45 @@ export const QcList: React.FC<{
  * both folds — a hand-built placeholder with its own template agrees with the page at exactly the
  * width it was tuned at, and this list's columns move twice.
  */
-export const QcListSkeleton: React.FC = () => (
+/**
+ * v131 (desktop) — THE SAME FRAMES AS THE LOADED LIST: one group in the real classes (a 54px header,
+ * the 32px label row with its real words, 64px rows on the five-column grid), so nothing moves when
+ * the data lands. Every height here is stated by the list's own rules; the bars inside only pulse.
+ */
+const SK_LABEL = { agent: "Agent", queried: "Queried", sent: "Sent", stand: "Where it stands", next: "Coming up" } as const;
+const QcListSkeleton131: React.FC = () => (
+  <div className="qcv-list qc13-list" data-qcv="list" data-v="131" aria-hidden="true">
+    <div className="qc13-grp qc13-grp--other" data-qcv="sk-grp">
+      <div className="qc13-gh" data-qcv="sk-gband">
+        <span className="qcv-sk qcv-sk--r" style={{ width: 32, height: 32 }} />
+        <span className="qcv-sk qcv-skw" style={{ width: 120, height: 14 }} />
+      </div>
+      <div className="qc13-body">
+        <div className="qc13-colh" data-qcv="sk-colh">
+          {(["agent", "queried", "sent", "stand", "next"] as const).map((k) => (
+            <span key={k} className={`qc13-cl qc13-cl--${k}`}>{SK_LABEL[k]}</span>
+          ))}
+        </div>
+        <div className="qcv-rows qc13-rows qcv-skw">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="qcv-row qc13-rw qcv-row--sk" data-qcv="sk-row">
+              <div className="qc13-c qc13-ag">
+                <span className="qcv-sk qcv-sk--r" style={{ width: 32, height: 32 }} />
+                <span className="qc13-agt" style={{ flex: 1 }}><span className="qcv-sk" style={{ width: "62%", height: 12 }} /><span className="qcv-sk qcv-sk--t" style={{ width: "44%", height: 10 }} /></span>
+              </div>
+              <div className="qc13-c qc13-qd"><span className="qcv-sk" style={{ width: "78%", height: 12 }} /><span className="qcv-sk qcv-sk--t" style={{ width: "48%", height: 9 }} /></div>
+              <div className="qc13-c qc13-ws"><span className="qcv-sk" style={{ width: 72, height: 20 }} /></div>
+              <div className="qc13-c qc13-st"><span className="qcv-sk" style={{ width: "54%", height: 12 }} /><span className="qcv-sk qcv-sk--t" style={{ width: "70%", height: 9 }} /></div>
+              <div className="qc13-c qc13-nx">{i % 3 !== 2 && <span className="qcv-sk qcv-sk--p" style={{ width: "58%", height: 20 }} />}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export const QcListSkeleton: React.FC<{ v131?: boolean }> = ({ v131 = false }) => v131 ? <QcListSkeleton131 /> : (
   <div className="qcv-list" aria-hidden="true">
     <div className="qcv-rows qcv-skw">
       {Array.from({ length: 8 }, (_, i) => (

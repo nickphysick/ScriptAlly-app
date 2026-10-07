@@ -31,6 +31,29 @@ const STEP = 600;
 /** The dots stop at eight; past that they stop being a count anyone reads. */
 const MAX_DOTS = 8;
 
+/**
+ * v131 (desktop) — THE CAROUSEL WHILE LOADING: the same section, head and track in the real classes,
+ * with card-sized placeholders, so the list below does not drop 468px when the data lands.
+ * ⚠️ 316 IS THE QUERY CARD'S MEASURED HEIGHT (282 wide, the item's own width). The card is sized by its
+ * content, so this is a reading, not an owned value: QC16 measures the list's top across the load
+ * and fails the day the card's height moves away from it.
+ */
+export const QcCarouselSkeleton: React.FC = () => (
+  <section className="qcv-cz qc13-sec qc13-cz" data-qcv="cz" data-sk="true" aria-hidden="true">
+    <QcSectionHead spot="recently-updated" probe="cz-head" title="Recently updated" />
+    <div className="qcv-cz-trackw">
+      <div className="qcv-cz-track qcv-skw" data-qcv="cz-track" style={{ overflow: "hidden" }}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="qcv-cz-item" data-qcv="sk-card">
+            <span className="qcv-sk" style={{ width: 282, height: 316, borderRadius: 12 }} />
+          </div>
+        ))}
+      </div>
+    </div>
+    <div className="qcv-cz-dots" aria-hidden="true" />
+  </section>
+);
+
 export const QcCarousel: React.FC<{
   /** what the carousel deals, already chosen and ordered (`carouselRows`) */
   rows: readonly QcRow[];

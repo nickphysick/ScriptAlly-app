@@ -71,6 +71,10 @@
   .qc13-dc-ln { min-width: 0; }
   .qc13-dc-fact { display: block; white-space: nowrap; font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: rgba(28, 19, 15, 0.58); }
   .qc13-dc-fact b { font-weight: 600; color: var(--qc13-ink); }
+  /* loading: the text keeps its line box and is painted over — no number is stated before it is known */
+  .qc13-desk .qc13-sk, .qc13-desk .qc13-sk b { color: transparent; }
+  .qc13-desk .qc13-sk { background: #efe9e0; border-radius: 5px; width: fit-content; animation: qcv-pulse 1.4s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .qc13-desk .qc13-sk { animation: none; } }
   .qc13-dc-nx {
     display: flex;
     gap: 8px;
@@ -301,6 +305,9 @@
   .qc13-list .qcv-row.qc13-rw:first-child { border-top: 0; }
   .qc13-list .qc13-rows .qcv-row.qc13-rw:last-child { border-radius: 0 0 14px 14px; }
   .qc13-list .qcv-row.qc13-rw:hover { background: #fcfaf6; transform: none; box-shadow: none; }
+  /* a skeleton row has no status, so it draws no status edge, and it takes no hover */
+  .qc13-list .qcv-row.qcv-row--sk::before { display: none; }
+  .qc13-list .qcv-row.qcv-row--sk:hover { background: transparent; }
   .qc13-list .qcv-row.qc13-rw[aria-selected="true"] { background: #fcfaf6; box-shadow: inset 0 0 0 1.6px var(--qc13-ink); }
   /* the 3px status edge, inset on the left */
   .qc13-list .qcv-row.qc13-rw::before {

@@ -247,6 +247,17 @@ describe("the rows, rendered", () => {
     expect(html.split("qcv-skw").length - 1).toBe(1);
     expect(html).toContain('class="qcv-row qcv-row--sk"');
   });
+  it("v131 (desktop): the skeleton is the v131 list's own frames — one group, the label row's words, eight rows on the five-column grid", () => {
+    const html = renderToStaticMarkup(<QcListSkeleton v131 />);
+    expect(html).toContain('class="qcv-list qc13-list"');
+    expect(html.split('class="qc13-gh"').length - 1, "one group header").toBe(1);
+    expect(html.split('class="qc13-colh"').length - 1, "one label row").toBe(1);
+    for (const w of ["Agent", "Queried", "Sent", "Where it stands", "Coming up"]) expect(html).toContain(`>${w}</span>`);
+    expect(html.split('data-qcv="sk-row"').length - 1).toBe(8);
+    expect(html.split('class="qcv-row qc13-rw qcv-row--sk"').length - 1, "rows wear the real v131 row class").toBe(8);
+    expect(html, "the v126 rows are not drawn").not.toMatch(/class="qcv-row qcv-row--sk"/);
+    expect(html, "no button in a skeleton").not.toContain("<button");
+  });
 });
 
 describe("the open query, docked", () => {

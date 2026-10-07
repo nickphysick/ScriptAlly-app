@@ -15,3 +15,6 @@
 {"lock":"QC3","mutation":"qc3-wrap","verdict":"red","tests_run":1,"first_error":"    Error: 1280 you: \"1 offer to decide\" is on 3 lines"}
 {"lock":"qcV96 QC6 (re-pointed)","mutation":"the chip stays visible on hover/focus","verdict":"red","tests_run":1,"first_error":"the Coming-up line did not fade"}
 {"lock":"inkFixups HC4 (re-pointed)","mutation":".ph--compact padding-left 64px","verdict":"red","tests_run":1,"first_error":"1280 t-capp HC4: text starts 44px inside the compact card (v131 §1)"}
+{"lock":"QC16","mutation":"qc16-tall (skeleton rows 80px)","verdict":"red","tests_run":1,"first_error":"1280: row height 80 → 64"}
+{"lock":"QC16","mutation":"qc16-jump (no carousel skeleton track)","verdict":"red","tests_run":1,"first_error":"1280: list y 655.7 → 1003.7"}
+{"lock":"QC16","mutation":"qc16-zero (desk placeholder text visible)","verdict":"red","tests_run":1,"first_error":"1280: the desk states no number while loading (+ \"00 passed\")"}

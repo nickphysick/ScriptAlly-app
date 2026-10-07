@@ -144,7 +144,7 @@ import {
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
 import { cardsByQuery, comingUp, nextMove, trayRequest, type ComingUp, type NextMove } from "../lib/qcComingUp";
-import { QcCarousel } from "./queries/centre/QcCarousel";
+import { QcCarousel, QcCarouselSkeleton } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
 import { fanCardModel } from "../lib/qcFanModel";
@@ -6677,7 +6677,7 @@ export const Queries: React.FC<{
               />
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
-            carousel={showGridSkeleton ? null : (() => {
+            carousel={showGridSkeleton ? (qcDesk ? <QcCarouselSkeleton /> : null) : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
               return (
@@ -6723,7 +6723,7 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                <QcListSkeleton />
+                <QcListSkeleton v131={qcDesk} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's

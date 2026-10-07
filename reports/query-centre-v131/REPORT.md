@@ -88,10 +88,21 @@ public/images/qc/spots/group-other.png        group, 32px
 - **The sticky controls bar is retired on desktop.** The section header carries the controls; the group header (top 0) and the label row (top 54) are what stick.
 - **The desk's initials discs are gone** (in v126 they opened queries). A section still chooses for the carousel; nothing on the desk opens a query now.
 - **Mobile keeps the v126 page**, so the banner, the hawk and the blush tray are retired on desktop only and remain in the code for the phone.
-- **The list skeleton is still v126-shaped on desktop** — a brief frame of the old list while data loads. Follow-up.
+- ~~The list skeleton is still v126-shaped on desktop.~~ Fixed — see *The desktop loading state* below.
 - **The page guide still opens over the list** (bottom-right, "Your desk, in three bands"). Its words still hold for v131's desk, but its steps were not re-checked against the new layout. Follow-up.
 - The hero is `PageHeader`'s new `compact` modifier (only with `card` + `band`); no other page passes it.
 
 ## Shots (1440)
 
 `reports/query-centre-v131/shots/` — `{before,after,ref}-{top,desk,find,group2}-1440.png`. Before = `bd64166e` (pre-v131).
+
+## The desktop loading state (follow-up, QC16)
+
+The loading cover was drawing v126 rows under v131 chrome, and two worse things beside them that the follow-up note had not named:
+
+1. **No carousel while loading**, so the list dropped **468px** when the data landed (top 535.7 → 1003.7 at 1440).
+2. **The desk stated "0 offers to decide", "0 past the date"** and so on — numbers the page did not yet know, written as facts.
+
+Now, on desktop only: `QcListSkeleton v131` is one group in the real v131 classes (54px header, the label row's real words, eight 64px rows on the five-column grid, no status edge); `QcCarouselSkeleton` is the section and its track at the loaded 424px with card-sized placeholders; the desk keeps its boxes and paints over its text (`qc13-sk`), stating nothing. Measured at 1280 and 1440: list top 1003.7 → 1003.7, carousel 424 → 424, desk 129.6 → 129.6, header / label row / row boxes and every column edge within 1px.
+
+QC16 asserts all of that across a real load (held with the dev-only `__SA_QC_HOLD_MS`), proved red three ways: skeleton rows at 80px, the carousel skeleton's track removed, and the desk's placeholder text made visible. ⚠️ The carousel placeholder's 316px is the query card's MEASURED height (the card sizes to its content); QC16 is what fails if it drifts. The phone's skeleton is unchanged.
