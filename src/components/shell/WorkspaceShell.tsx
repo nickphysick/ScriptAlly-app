@@ -743,7 +743,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               no longer exists, so nothing carried it. */}
           {/* ══ THE FOUNDING-MEMBER FEEDBACK CARD (ink shell v1), pinned above the foot. It opens the same
               `FeedbackDock` the bar's "Give feedback" did; the control moved, the panel did not. Three
-              forms, one handler: the card; the filled terracotta button below 920px of window height (CSS); and
+              forms, one handler: the card; the outlined terracotta button below 920px of window height (CSS); and
               the icon with its dot when the sidebar is collapsed (CSS). All three are always rendered so
               the switch between them is a style, never a remount. */}
           {onOpenFeedback && (
@@ -989,7 +989,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <button
                     type="button" className="ws-ibtn ws-help" data-shell="help"
                     onClick={() => (guidePage ? setHelpOpen((o) => !o) : onOpenHelp())}
-                    aria-label="Help" title={guidePage ? "Help" : "Help centre"}
+                    aria-label="Help" title="Help and shortcuts"
                     aria-haspopup={guidePage ? "menu" : undefined}
                     aria-expanded={guidePage ? helpOpen : undefined}
                   >

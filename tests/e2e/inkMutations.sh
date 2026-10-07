@@ -9,7 +9,7 @@ typeset -A M
 M=(
   INK1 ink1-stone   INK2 ink2-literal   INK3 ink3-overlap   INK4 ink4-gradient   INK5 ink5-inset
   INK6 ink6-current INK7 ink7-centre    INK8 ink8-copy      INK9 ink9-feedback   INK10 ink10-tile
-  INK11 ink11-anthracite INK12 ink12-plain INK13 ink13-outlined INK14 ink14-motion INK15 ink15-fade
+  INK11 ink11-anthracite INK12 ink12-plain INK13 ink13-filled INK14 ink14-motion INK15 ink15-fade
   INK16 ink16-full  INK17 ink17-window  INK18 ink18-left    INK19 ink19-ink
 )
 for lock in INK1 INK2 INK3 INK4 INK5 INK6 INK7 INK8 INK9 INK10 INK11 INK12 INK13 INK14 INK15 INK16 INK17 INK18 INK19; do

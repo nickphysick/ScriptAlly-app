@@ -19,3 +19,16 @@
 {"lock":"INK19","mutation":"ink19-ink","verdict":"red","tests_run":1,"first_error":"    Error: the phone's shell against main's"}
 {"lock": "INK4", "mutation": "ink4-gradient", "verdict": "red", "tests_run": 1, "first_error": "pixels off the golden in the fillet's own region: 112 > 60 (re-run after the fillet-region assertion was added; the whole-crop 0.5% budget alone stayed green at 0.081%)"}
 {"lock": "INK13", "mutation": "ink13-outlined", "verdict": "red", "tests_run": 1, "first_error": "900: filled with the card button's terracotta \u2014 expected rgb(217, 150, 122), received rgba(0, 0, 0, 0) (follow-up, 7 Oct: the folded state is filled)"}
+{"lock":"HC1","mutation":"hc1-bleed","verdict":"red","tests_run":1,"first_error":"Error: 1280 t-capp HC1: card left 228.953125 vs strip 288.953125"}
+{"lock":"HC2","mutation":"hc2-nogap","verdict":"red","tests_run":1,"first_error":"Error: 1280 t-capp: top gap 0"}
+{"lock":"HC4","mutation":"hc4-figure","verdict":"red","tests_run":1,"first_error":"Error: 1280 t-capp HC4: [data-probe=\"band-disc\"] img {\"x\":961.046875,\"y\":132,\"w\":290,\"h\":259.4375,\"r\":1251.046875,\"b\":391.4375} inside {\"x\":"}
+{"lock":"HC5","mutation":"hc5-outside","verdict":"red","tests_run":1,"first_error":"Error: 1280: empty top gap 18"}
+{"lock":"HC6","mutation":"hc6-ring","verdict":"red","tests_run":1,"first_error":"Error: 1280: ring pixel rgb(27, 36, 51) vs ink rgb(27, 36, 51)"}
+{"lock":"HC6","mutation":"hc6-rule","verdict":"red","tests_run":1,"first_error":"Error: 1280: rule pixels near 9px left of the circle"}
+{"lock":"HC7","mutation":"hc7-filled","verdict":"red","tests_run":1,"first_error":"Error: 1280: no fill"}
+{"lock": "HC3", "mutation": "hc3-square", "verdict": "red", "tests_run": 1, "first_error": "Error: 1280 t-capp HC3: top-left corner pixel rgb(42, 58, 82) (re-run with the pixel claim checked before the computed radius)"}
+{"lock": "INK13", "mutation": "ink13-filled", "verdict": "red", "tests_run": 1, "first_error": "Error: 900: no fill (fix-ups, 7 Oct: the folded state is the reference's outlined .fbb again)"}
+{"lock": "INK3", "mutation": "ink3-overlap", "scale": "zoom 90% (dsf 0.9, viewport \u00f70.9)", "sheet_top_device_px": "57.6", "verdict": "red", "tests_run": 1, "first_error": "colours across the tab's foot: + rgb(189, 190, 192) \u2014 a seam row where the sheet expected rgb(243, 242, 240)"}
+{"lock": "INK3", "mutation": "ink3-overlap", "scale": "zoom 110% (dsf 1.1, viewport \u00f71.1)", "sheet_top_device_px": "70.4", "verdict": "red", "tests_run": 1, "first_error": "colours across the tab's foot: + rgb(189, 190, 192) \u2014 a seam row"}
+{"lock": "INK3", "mutation": "ink3-overlap", "scale": "deviceScaleFactor 1.25", "sheet_top_device_px": "80.0 (whole)", "verdict": "GREEN", "tests_run": 1, "first_error": "the sheet's top lands on a whole device pixel at 1.25 (64 \u00d7 1.25 = 80), so the two edges abut with no seam \u2014 not a fault, the case the overlap is not needed for"}
+{"lock": "INK3", "mutation": "ink3-overlap", "scale": "deviceScaleFactor 3", "sheet_top_device_px": "192 (whole)", "verdict": "GREEN", "tests_run": 1, "first_error": "whole device pixels, as above"}

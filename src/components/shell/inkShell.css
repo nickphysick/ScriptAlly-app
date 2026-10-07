@@ -267,28 +267,42 @@
     box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3);
   }
 
-  /* ⚠️ HELP IS SET APART from the workspace group — an 18px gap and a 1px rule — and is quiet (cream
-     66%) until hovered. It is still `.ws-ibtn` for its behaviour; only its box changes. */
-  .ws-pagebar .ws-helpwrap { margin-left: 18px; position: relative; }
+  /* ⚠️ HELP IS A QUIET BUTTON SET APART from the workspace group (fix-ups, 7 Oct — the bare "?" read as
+     stray text): a 34×34 circle with a 1px cream-16% ring at rest; the "?" in the serif, 600, 15px, cream
+     66%. Hover fills cream 8%, lifts the "?" to 92% and the ring to 28%, over 140ms. An 18px gap after
+     "Log a query" with a 1px cream-16% rule, 18px tall, at the gap's midpoint (9px left of the circle).
+     It is still `.ws-ibtn` for its behaviour; only its box changes. */
+  .ws-pagebar .ws-helpwrap { margin-left: 18px; position: relative; align-items: center; }
   .ws-pagebar .ws-helpwrap::before {
     content: "";
     position: absolute;
-    left: -10px;
-    top: 9px;
-    bottom: 9px;
+    left: -9.5px;
+    top: 50%;
     width: 1px;
+    height: 18px;
+    transform: translateY(-50%);
     background: rgba(var(--ink-cream-rgb), 0.16);
   }
   .ws-pagebar .ws-help {
+    box-sizing: border-box;
     width: 34px;
     height: 34px;
     border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.16);
     color: var(--ink-cream-66);
     font-family: var(--sp-serif);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1;
+    transition: background-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease;
   }
-  .ws-pagebar .ws-help:hover { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+  .ws-pagebar .ws-help span { font-family: inherit; }
+  .ws-pagebar .ws-help:hover {
+    background: rgba(var(--ink-cream-rgb), 0.08);
+    color: var(--ink-cream-92);
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.28);
+  }
   /* the help menu is paper */
   .ws-pagebar .ws-helpmenu { background: var(--shell-control-bg); box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3); }
 
@@ -546,9 +560,9 @@
   .ws-fbtn:hover { filter: brightness(1.06); }
   .ws-fbtn span, .ws-fbb span { font-family: inherit; }
   .ws-fbb, .ws-fbi { display: none; }
-  /* ⚠️ THE FOLDED CARD IS A FILLED TERRACOTTA BUTTON (follow-up ruling, 7 Oct) — the same fill and
-     ink text as the card's own "Give feedback" (`.ws-fbtn`), so folding the card changes its size and
-     never its colour. The BETA tag stays, dressed for terracotta. (It was outlined in v1.) */
+  /* ⚠️ THE FOLDED CARD IS THE REFERENCE'S `.fbb` — OUTLINED (fix-ups, 7 Oct, superseding the filled
+     version of the earlier follow-up): no fill, a 1.5px terracotta inset ring, the label in cream, the
+     message icon in terracotta, and the BETA tag on a terracotta 18% wash. */
   .ws-fbb {
     box-sizing: border-box;
     width: 100%;
@@ -558,23 +572,23 @@
     padding: 0 12px;
     border: 0;
     border-radius: 10px;
-    background: var(--ink-terra);
-    box-shadow: none;
-    color: var(--ink-shell);
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--ink-terra);
+    color: var(--ink-cream);
     font-family: var(--sp-serif);
     font-weight: 600;
     font-size: 14.5px;
     cursor: pointer;
-    transition: filter 0.14s ease;
+    transition: background-color 0.14s ease;
   }
-  .ws-fbb:hover { filter: brightness(1.06); }
-  .ws-fbb svg { width: 16px; height: 16px; color: var(--ink-shell); flex: none; }
+  .ws-fbb:hover { background: rgba(var(--ink-terra-rgb), 0.08); }
+  .ws-fbb svg { width: 16px; height: 16px; color: var(--ink-terra); flex: none; }
   .ws-fbb em {
     margin-left: auto;
     padding: 2px 6px;
     border-radius: 5px;
-    background: rgba(var(--ink-shell-rgb), 0.14);
-    color: var(--ink-shell);
+    background: rgba(var(--ink-terra-rgb), 0.18);
+    color: var(--ink-terra);
     font-family: "JetBrains Mono", monospace;
     font-style: normal;
     font-weight: 600;
@@ -651,7 +665,7 @@
   .dk-tip--rail .dk-railkbd { color: var(--ink-cream-42); }
 }
 
-/* ⚠️ THE CARD FOLDS TO THE FILLED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
+/* ⚠️ THE CARD FOLDS TO THE OUTLINED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
    MEASURED DEVIATION. The rule's intent is "fold when the column cannot hold the card", and measured
    (1440 wide, eleven rows, five labels, the selector, the card and the foot) that point is ~917px: at 900
    the literal 820 left the nav 17px short and Noteboard half under the card. The reference's own column

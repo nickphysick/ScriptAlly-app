@@ -52,3 +52,25 @@ describe("ink shell — the tokens", () => {
     expect(INK).toMatch(/\.ws-window\s*\{[^}]*background:\s*var\(--ink-sheet\)/);
   });
 });
+
+describe("ink fix-ups — the header card is the Query Centre's alone", () => {
+  const PH = strip(readFileSync("src/components/shell/pageHeader.css", "utf8"));
+  const block = PH.slice(PH.indexOf(".ph--full.ph--card"), PH.indexOf(".ph--full.ph--band.ph--bandfix"));
+  it("every card rule names .ph--card, so the other bands cannot move", () => {
+    expect(block.length, "the card block is found").toBeGreaterThan(100);
+    for (const sel of block.match(/(^|\n|\})\s*([^{}@\n][^{}]*)\{/g) ?? []) {
+      const s = sel.replace(/^[}\s]+/, "").replace(/\{$/, "").trim();
+      if (!s) continue;
+      expect(s, `a card-block rule without .ph--card: ${s}`).toContain(".ph--card");
+    }
+  });
+  it("only the Query Centre passes `card`; Analytics and the Contact list keep `band` alone", () => {
+    const qc = readFileSync("src/components/queries/centre/QcCentre.tsx", "utf8");
+    const empty = readFileSync("src/components/queries/centre/QcEmpty.tsx", "utf8");
+    expect(qc).toMatch(/\n\s+card\n/);
+    expect(empty).toMatch(/\n\s+card\n/);
+    for (const f of ["src/components/QueryAnalytics.tsx", "src/components/agents/AgentList.tsx"]) {
+      expect(readFileSync(f, "utf8"), f).not.toMatch(/\n\s+card\n|\bcard=\{/);
+    }
+  });
+});

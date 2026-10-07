@@ -44,6 +44,8 @@ export const QcEmpty: React.FC<QcEmptyProps> = ({ manuscriptTitle, onLog, onReco
     <PageHeader
       variant="full"
       title="Query Centre"
+      /* the empty state shares the populated card's column edges and 20px top gap, and keeps its light look */
+      card
       living={{ count: 0, copy: () => ({ headline: "", subline: [] }), empty: { heading: QC_EMPTY_HEADING, subline: qcEmptySubline(manuscriptTitle) } }}
       primaryRef={logRef}
       primary={{ label: "+ Log a query", onClick: onLog }}

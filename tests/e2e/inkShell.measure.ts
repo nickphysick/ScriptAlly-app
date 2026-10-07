@@ -269,15 +269,13 @@ test.describe("ink shell", () => {
   });
 
   /* ── INK13 · feedback ─────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ AMENDED (follow-up, 7 Oct): the fold stays at 920px and the folded state is a FILLED terracotta
-     button — the card button's own fill and ink text, BETA tag kept. Asserted at 900 (inside the fold,
-     where the literal 820 would still have shown the card) and at 800. */
-  test("INK13 · the card opens FeedbackDock; below 920px a filled terracotta button; collapsed, the icon with its dot", async ({ page }) => {
+  /* ⚠️ AMENDED TWICE (7 Oct): the fold stays at 920px, and — superseding the filled version of the earlier
+     follow-up — the folded state is the reference's `.fbb`: no fill, a 1.5px terracotta ring, a cream
+     label, a terracotta icon, the BETA tag on an 18% wash. Asserted at 900 (inside the fold) and 800. */
+  test("INK13 · the card opens FeedbackDock; below 920px the outlined .fbb; collapsed, the icon with its dot", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { height: 1000, scope: "ink13" });
     await expect(page.locator(".ws-fbc"), "the card at 1000px tall").toBeVisible();
     await expect(page.locator(".ws-fbb")).toBeHidden();
-    const cardBtn = (await css(page, ".ws-fbtn", ["background-color", "color"]))!;
-    expect(cardBtn["background-color"], "the card's button is terracotta").toBe(TERRA);
     await page.locator(".ws-fbtn").click();
     await expect(page.locator(".sa-fbpanel")).toBeVisible();
     await page.locator(".ws-fbtn").click();
@@ -287,9 +285,9 @@ test.describe("ink shell", () => {
       await expect(page.locator(".ws-fbb"), `the folded button at ${h}px tall`).toBeVisible();
       await expect(page.locator(".ws-fbc")).toBeHidden();
       const fb = (await css(page, ".ws-fbb", ["background-color", "color", "box-shadow"]))!;
-      expect(fb["background-color"], `${h}: filled with the card button's terracotta`).toBe(cardBtn["background-color"]);
-      expect(fb.color, `${h}: ink text, as the card button`).toBe(cardBtn.color);
-      expect(fb["box-shadow"], `${h}: not an outline`).toBe("none");
+      expect(fb["background-color"], `${h}: no fill`).toBe("rgba(0, 0, 0, 0)");
+      expect(fb["box-shadow"], `${h}: the terracotta ring`).toBe("rgb(217, 150, 122) 0px 0px 0px 1.5px inset");
+      expect(fb.color, `${h}: a cream label`).toBe("rgb(244, 238, 229)");
       await expect(page.locator(".ws-fbb em"), `${h}: the BETA tag`).toHaveText("BETA");
       await page.locator(".ws-fbb").click();
       await expect(page.locator(".sa-fbpanel"), `${h}: it opens the dock`).toBeVisible();
@@ -299,7 +297,7 @@ test.describe("ink shell", () => {
     await inkOpen(page, "/queries", 1440, { collapsed: true, scope: "ink13" });
     await expect(page.locator(".ws-fbi"), "the icon when collapsed").toBeVisible();
     await expect(page.locator(".ws-fbb")).toBeHidden();
-    const dot = (await css(page, ".ws-fbi i", ["background-color", "width"]))!;
+    const dot = (await css(page, ".ws-fbi i", ["background-color"]))!;
     expect(dot["background-color"], "the icon keeps its dot").toBe(TERRA);
   });
 
@@ -531,3 +529,39 @@ test.describe("ink shell at 3×", () => {
     expect(f.bad, "pixels off the golden in the fillet's own region").toBeLessThanOrEqual(Number(process.env.INK4_FILLET_MAX ?? 60));
   });
 });
+
+/* ── INK3 at fractional scales (follow-up, 7 Oct) ─────────────────────────────────────────────────
+   ⚠️ WHY: at whole-pixel layout the tab's foot and the sheet's top meet on a device-pixel boundary, so
+   "remove the 1px overlap" drew no seam and the 3× case could not see it. The overlap exists for
+   FRACTIONAL layouts, where both edges land mid-pixel and the two anti-aliased edges composite into a
+   darker row. Browser zoom is emulated as Chromium applies it — the device-pixel ratio times the zoom,
+   the CSS viewport divided by it — since Playwright cannot set page zoom itself. */
+const FRACTIONAL: { name: string; dsf: number; zoom: number }[] = [
+  { name: "zoom 90%", dsf: 0.9, zoom: 0.9 },
+  { name: "zoom 110%", dsf: 1.1, zoom: 1.1 },
+  { name: "deviceScaleFactor 1.25", dsf: 1.25, zoom: 1 },
+];
+for (const v of FRACTIONAL) {
+  test.describe(`ink shell · INK3 at ${v.name}`, () => {
+    test.use({ deviceScaleFactor: v.dsf });
+    test(`INK3 · ${v.name} · every pixel across the rows either side of the tab's foot is the sheet's colour`, async ({ page }) => {
+      for (const w of WIDTHS) {
+        const cssW = Math.round(w / v.zoom);
+        const cssH = Math.round(900 / v.zoom);
+        await inkOpen(page, "/todo", cssW, { height: cssH, scope: "ink3" });
+        const tab = (await rect(page, ".ws-ftab"))!;
+        const win = (await rect(page, ".ws-window"))!;
+        expect(tab, "the tab is drawn").not.toBeNull();
+        const sheet = (await css(page, ".ws-window", ["background-color"]))!["background-color"];
+        /* the precondition this case exists for: the sheet's top edge lands MID-pixel at this scale */
+        const devTop = win.y * v.dsf;
+        const fractional = Math.abs(devTop - Math.round(devTop)) > 0.01;
+        console.log(`INK3 ${v.name} at ${w} (css ${cssW}×${cssH}): sheet top ${win.y}px → device ${devTop.toFixed(2)} (${fractional ? "fractional" : "whole"})`);
+        const foot = tab.b - 1;
+        const shot = await page.screenshot({ clip: { x: tab.x + 13, y: foot - 2, width: tab.w - 26, height: 4 } });
+        const colours = await rowColours(page, shot, Array.from({ length: 12 }, (_, i) => i), 0, 100000);
+        expect(colours, `${v.name} at ${w}: colours across the tab's foot`).toEqual([sheet]);
+      }
+    });
+  });
+}

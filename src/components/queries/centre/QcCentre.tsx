@@ -180,6 +180,8 @@ export const QcCentre: React.FC<{
            white disc on the text's right. The plate is retired on this page (it stays on PageHeader for
            anyone else); `QcEmpty` keeps the open header and `hero-courier-map.png`. */
         band
+        /* the band is a CARD in the sheet (ink shell v1 fix-ups) — the Query Centre's alone */
+        card
         art={<img src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} alt="" />}
       />
     {/**

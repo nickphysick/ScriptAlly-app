@@ -203,6 +203,15 @@ export interface PageHeaderProps {
    */
   bandFixed?: boolean;
   /**
+   * THE HEADER CARD (ink shell v1 fix-ups, 7 Oct) — opt-in, and the Query Centre's alone (both its states).
+   * With `band`, the full-bleed band becomes a rounded card (radius 18, clipped) sitting inside the sheet:
+   * 20px of paper above it so the folder tab joins paper, its edges on the page's content column, its
+   * contents laid out against the card. Without `band` (the light empty state) it only takes the card's
+   * top gap — the empty state keeps its look. ⚠️ A MODIFIER: every rule names `.ph--card`, so Analytics and
+   * the Contact list, which pass `band` and not this, keep their full-bleed bands.
+   */
+  card?: boolean;
+  /**
    * §4 (page header v2) — A PANEL ONE OF THE ACTIONS OPENS, anchored to the actions row: the
    * Contact list's quick-add card drops 10px below "+ Add an agent". `full` only.
    *
@@ -278,6 +287,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   artFigure,
   band = false,
   bandFixed = false,
+  card = false,
   title,
   icon,
   primary,
@@ -476,7 +486,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}`}
+      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}`}
       data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >

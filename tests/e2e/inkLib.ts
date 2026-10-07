@@ -26,7 +26,14 @@ const CSS_MUTATIONS: Record<string, string> = {
   "ink7-centre": ".ws-pagebar .ws-bright > .ws-appctl:first-child { position: absolute !important; left: 50% !important; }",
   "ink11-anthracite": ".ws-ni.on { background: #2a3a52 !important; }",
   "ink12-plain": ".ws-ct { background: transparent !important; color: inherit !important; }",
-  "ink13-outlined": ".ws-fbb { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--ink-terra) !important; color: var(--ink-cream) !important; }",
+  "ink13-filled": ".ws-fbb { background: #d9967a !important; color: #1b2433 !important; box-shadow: none !important; }",
+  "hc1-bleed": ".ph--full.ph--band.ph--card { margin-left: -60px !important; margin-right: -60px !important; }",
+  "hc2-nogap": ".ph--full.ph--card { margin-top: 0 !important; }",
+  "hc3-square": ".ph--full.ph--band.ph--card { border-radius: 0 !important; }",
+  "hc4-figure": "[data-probe='band-disc'] img { transform: translateX(60px) !important; }",
+  "hc6-ring": ".ws-pagebar .ws-help { box-shadow: none !important; }",
+  "hc6-rule": ".ws-pagebar .ws-helpwrap::before { display: none !important; }",
+  "hc7-filled": ".ws-fbb { background: #d9967a !important; color: #1b2433 !important; box-shadow: none !important; }",
   "ink14-motion": "@media (prefers-reduced-motion: reduce) { .ws-panel.sb-ready { transition: width 0.24s ease !important; } }",
   "ink15-fade": ".sv2-fade { display: block !important; opacity: 1 !important; }",
   "ink16-full": ":root .bvd { top: 0 !important; bottom: 0 !important; right: 0 !important; }",
@@ -45,6 +52,8 @@ const DOM_MUTATIONS: Record<string, string> = {
     const x = document.createElement('button'); x.className = 'ws-fb'; x.textContent = 'Give feedback'; b.insertBefore(x, b.lastElementChild); })()`,
   /* the old book-tile cover in place of the title page */
   "ink10-tile": `(() => { document.querySelectorAll('#ws-sidebar .ws-tp').forEach((e) => { e.className = 'ws-ms-cov ws-ms-cov--tile'; e.setAttribute('data-cover', 'tile'); e.innerHTML = ''; }); })()`,
+  /* the empty state rendered outside the card (its modifier taken away) */
+  "hc5-outside": `(() => { document.querySelectorAll('[data-qcv-empty] [data-probe="page-header"]').forEach((e) => e.classList.remove('ph--card')); })()`,
   /* the card removed, leaving only the bar's (absent) route */
   "ink13-nocard": `(() => { document.querySelectorAll('.ws-fbk').forEach((e) => e.remove()); })()`,
 };
