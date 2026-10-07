@@ -153,6 +153,19 @@ export function canonicalGenreById(id: string): CanonicalGenre | undefined {
 }
 
 /**
+ * The canonical id a stored or typed genre stands for — itself when it IS a canonical id, the id its label
+ * or alias resolves to otherwise, and null when it is neither (a personal genre, or free text). Contact list
+ * v14 (Q5) compares genres through this, so "science-fiction" (an agent's stored id) and "Science fiction"
+ * (a manuscript's label) are the same genre — the old lower-case comparison only matched one-word genres.
+ */
+export function canonicalIdOf(raw: string): string | null {
+  const s = String(raw ?? "").trim();
+  if (!s) return null;
+  if (CANON_BY_ID.has(s)) return s;
+  return CANON_INDEX.get(matchKey(s)) ?? null;
+}
+
+/**
  * Resolution — the guardrail pipeline (3b). Normalise → alias/canonical → the user's personal list
  * → (only if all three miss, and under the cap) a NEW personal genre. Reject junk outright.
  */

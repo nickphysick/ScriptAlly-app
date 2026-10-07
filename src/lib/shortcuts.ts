@@ -55,11 +55,9 @@ export const SHORTCUTS = {
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* the Contact list's keys (v13 §8) — not in a field, and not while a card, the drawer or a popover is
-     open; the carousel's arrows act only while its track has focus */
+     open */
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsFind:     { chords: [k("/")], label: "Find an agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
-  carouselBack:     { chords: [k("ArrowLeft")], label: "Move the carousel back a card, while it has focus", scope: "Contact list", bound: "src/components/shell/Carousel.tsx", inFields: "stands down" },
-  carouselForward:  { chords: [k("ArrowRight")], label: "Move the carousel on a card, while it has focus", scope: "Contact list", bound: "src/components/shell/Carousel.tsx", inFields: "stands down" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only
      when no field has focus; the card's own handler stops them reaching a page beneath it */
   cardEdit:         { chords: [k("e")], label: "Edit the agent", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },

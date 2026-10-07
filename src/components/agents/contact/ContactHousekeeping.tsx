@@ -18,6 +18,7 @@
  * first would remove the row before it could say it was done; a refused save brings it back and the
  * foot says why.
  */
+import { bookGenreHit } from "../../../lib/genreMatch";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { dayMonth } from "../../../lib/dates";
 import type { Agent } from "../../../types";
@@ -178,7 +179,8 @@ const Fix: React.FC<FixProps> = ({ item, book, today, agents, h, where, onSave, 
           <div className="hkv-chips">
             {chips.map((g) => {
               const on = picked.includes(g);
-              const hit = !!book.genre && g.toLowerCase() === book.genre.toLowerCase();
+              /* v14 (Q5): a chip is the book's when it matches the main genre or any subGenre */
+              const hit = bookGenreHit(book.genres.length ? book.genres : book.genre ? [book.genre] : [])(g);
               return (
                 <button key={g} type="button" className={`hkv-ch${on ? " on" : ""}${hit ? " hit" : ""}`} aria-pressed={on} data-hkv="genre-chip"
                   onClick={() => setPicked((p) => (on ? p.filter((x) => x !== g) : [...p, g]))}>

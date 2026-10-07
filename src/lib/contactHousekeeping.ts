@@ -25,7 +25,7 @@ import { QueryStatus, type Agent, type Query } from "../types";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { isDoorOpen } from "./agentList";
 import { agentPrimary } from "./agentDisplay";
-import { genrePluralLower } from "./contactStrip";
+import { joinGenres } from "./genreNoun";
 import { formatDate } from "./dates";
 import { addMonths, dayKey, earliestLater, itemKey, type ContactPrefs } from "./contactPrefs";
 import type { AgentCardField, AgentCardTab } from "./agentCardStore";
@@ -73,7 +73,9 @@ export interface HkAgentCtx {
 }
 
 /** The manuscript the copy names: its title and genre, either of which may be absent. */
-export interface HkBook { title: string | null; genre: string | null }
+/** the book in scope: its title, its MAIN genre (said in brackets, and the genre chips suggest), and its
+ *  whole genre list — main plus subGenres (Contact list v14, ruling Q5) — which "takes …" copy names */
+export interface HkBook { title: string | null; genre: string | null; genres: readonly string[] }
 
 export interface HkItem {
   agent: Agent;
@@ -161,7 +163,7 @@ export function gapCopy(item: Pick<HkItem, "agent" | "gap" | "live" | "fits">, b
       return {
         title: `What ${f} is hoping to find`,
         why: item.fits && book.genre
-          ? [`${f} takes ${genrePluralLower(book.genre)}. Their wishlist tells you whether a book like `, ms, " is what they want right now."]
+          ? [`${f} takes ${joinGenres(book.genres.length ? book.genres : [book.genre])}. Their wishlist tells you whether a book like `, ms, " is what they want right now."]
           : ["In their own words, what they’re looking for. It helps you judge whether to query them."],
         where: "Copy a line or two from their MSWL or agency profile, for example “twisty thrillers set outside London”.",
       };

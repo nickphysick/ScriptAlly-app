@@ -17,8 +17,8 @@
 import type { Agent, Manuscript, Query, QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
 import { isDoorOpen } from "./agentList";
-import { isGenreMatch, matchGenre } from "./genreMatch";
-import { genrePluralLower } from "./contactStrip";
+import { bookGenres, takesBook } from "./genreMatch";
+import { joinGenres } from "./genreNoun";
 
 /** The rail's breathing room from the viewport's edges, and its height clamp (mock: the rail's
  *  JS writes an inline height; CSS carries `position: sticky; top: 16px; max-height: 860px`).
@@ -151,13 +151,14 @@ export function heroFacts(
   standing: ReadonlyMap<string, ContactStanding>,
   ms: Manuscript | null,
 ): HeroFacts {
-  const match = matchGenre(ms?.genre);
-  const wanters = match ? agents.filter((a) => (a.genres ?? []).some((g) => isGenreMatch(g, match))) : [];
+  /* v14 (Q5): the book's genres — main plus subGenres — and one definition of taking it */
+  const book = bookGenres(ms);
+  const wanters = book.length ? agents.filter((a) => takesBook(a.genres, book)) : [];
   return {
     total: agents.length,
     msTitle: ms?.title ?? null,
-    /* v13: the lower-case PLURAL ("want thrillers"), the strip's and Housekeeping's own word for it */
-    genre: ms?.genre && match ? genrePluralLower(ms.genre) : null,
+    /* v14: the book's genres as the strip says them ("want thrillers or crime") — the genre-noun table */
+    genre: book.length ? joinGenres(book) : null,
     want: wanters.length,
     fresh: wanters.filter((a) => standing.get(a.id)?.kind === "none").length,
   };

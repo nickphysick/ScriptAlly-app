@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import type { Agent } from "../types";
 import { SubmissionStatus } from "../types";
-import { fitsGenre, genrePluralLower, statedWeeks, stripFacts } from "./contactStrip";
+import { fitsGenre, statedWeeks, stripFacts } from "./contactStrip";
 import { formatDate } from "./dates";
 
 /* the house formatter, never a literal: ICU says "Sep" in node and "Sept" in Chrome */
@@ -29,17 +29,6 @@ describe("statedWeeks — the stub 0 and an absent value are both not stated", (
   });
 });
 
-describe("genrePluralLower", () => {
-  it("countable genres pluralise; mass nouns and '… fiction' stay", () => {
-    expect(genrePluralLower("Thriller")).toBe("thrillers");
-    expect(genrePluralLower("Mystery")).toBe("mysteries");
-    expect(genrePluralLower("Crime")).toBe("crime");
-    expect(genrePluralLower("Literary fiction")).toBe("literary fiction");
-    expect(genrePluralLower("Fantasy")).toBe("fantasy");
-    expect(genrePluralLower("Thrillers")).toBe("thrillers");
-  });
-});
-
 describe("stripFacts", () => {
   const A = [
     ag({ name: "Tom Ellery", agency: "Ellery & Finch", genres: ["Thriller", "Crime"], responseTimeWeeks: 4, dateAdded: "2026-10-02T09:00:00.000Z" }),
@@ -49,7 +38,7 @@ describe("stripFacts", () => {
     ag({ name: "Felix Underwood", agency: "Underwood Agency", responseTimeWeeks: 0, dateAdded: "2026-05-03T09:00:00.000Z" }),
     ag({ name: "Zoe Kaminski", agency: "", genres: ["Literary"], dateAdded: "2025-12-01T09:00:00.000Z" }),
   ];
-  const f = stripFacts(A, "Thriller", NOW);
+  const f = stripFacts(A, ["Thriller"], NOW);
 
   it("On file: every agent, and agencies counted once, case- and space-blind, nameless ones out", () => {
     expect(f.onFile).toBe(6);
@@ -64,8 +53,8 @@ describe("stripFacts", () => {
   it("Fit your book: agents whose genres include the manuscript's, queried or not; the line is the plural", () => {
     expect(f.fit).toBe(2);
     expect(f.fitLine).toBe("take thrillers");
-    expect(stripFacts(A, null, NOW).fitLine).toBeNull();
-    expect(stripFacts(A, null, NOW).fit).toBe(0);
+    expect(stripFacts(A, [], NOW).fitLine).toBeNull();
+    expect(stripFacts(A, [], NOW).fit).toBe(0);
   });
 
   it("Open now: not Closed; the line counts the closed", () => {
@@ -76,26 +65,35 @@ describe("stripFacts", () => {
   it("Typical reply: the MEDIAN of stated windows, the stub 0 and absent values excluded", () => {
     /* stated: 4, 4, 6, 8 → median (4 + 6) / 2 = 5 */
     expect(f.medianWeeks).toBe(5);
-    expect(stripFacts(A.slice(0, 3), "Thriller", NOW).medianWeeks).toBe(4);
-    expect(stripFacts([A[4], A[5]], "Thriller", NOW).medianWeeks).toBeNull();
+    expect(stripFacts(A.slice(0, 3), ["Thriller"], NOW).medianWeeks).toBe(4);
+    expect(stripFacts([A[4], A[5]], ["Thriller"], NOW).medianWeeks).toBeNull();
   });
 
   it("the fastest: the lowest window, a tie broken by name", () => {
     expect(f.fastest).toEqual({ name: "Anita Rao", weeks: 4 });
-    expect(stripFacts([A[4], A[5]], "Thriller", NOW).fastest).toBeNull();
+    expect(stripFacts([A[4], A[5]], ["Thriller"], NOW).fastest).toBeNull();
   });
 
   it("Added this month: by dateAdded in the current calendar month; last is the newest overall", () => {
     expect(f.addedThisMonth).toBe(2);
     expect(f.last).toEqual({ name: "Anita Rao", date: dm("2026-10-09T09:00:00.000Z") });
-    const none = stripFacts(A.slice(2), "Thriller", NOW);
+    const none = stripFacts(A.slice(2), ["Thriller"], NOW);
     expect(none.addedThisMonth).toBe(0);
     expect(none.last).toEqual({ name: "Kwame Mensah", date: dm("2026-09-12T09:00:00.000Z") });
   });
 
-  it("fitsGenre is the v12 hero's match", () => {
-    expect(fitsGenre(A[0], "Thriller")).toBe(true);
-    expect(fitsGenre(A[2], "Thriller")).toBe(false);
-    expect(fitsGenre(A[0], null)).toBe(false);
+  /* v14 (ruling Q5): the book's main genre OR any subGenre, compared by canonical key */
+  it("fitsGenre: the main genre or any subGenre, by canonical key", () => {
+    expect(fitsGenre(A[0], ["Thriller"])).toBe(true);
+    expect(fitsGenre(A[2], ["Thriller"])).toBe(false);
+    expect(fitsGenre(A[2], ["Thriller", "Crime"]), "a subGenre is enough").toBe(true);
+    expect(fitsGenre(A[0], []), "no book, no claim").toBe(false);
+    /* the old lower-case comparison failed this: a stored id against a manuscript's label */
+    expect(fitsGenre(ag({ genres: ["science-fiction"] }), ["Science fiction"])).toBe(true);
+    expect(fitsGenre(ag({ genres: ["crime fiction"] }), ["Crime"]), "an alias is the genre").toBe(true);
+  });
+  it("the Fit line names every genre of the book, joined with 'or'", () => {
+    expect(stripFacts(A, ["Thriller", "Crime"], NOW).fitLine).toBe("take thrillers or crime");
+    expect(stripFacts(A, ["Thriller", "Crime"], NOW).fit).toBe(3);
   });
 });

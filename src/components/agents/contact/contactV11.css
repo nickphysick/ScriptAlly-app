@@ -90,6 +90,9 @@
   box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.6);
 }
 .ph-bdisc .clv-bdisc img { width: 92%; height: 92%; object-fit: contain; transform: translateY(4px); }
+/* v14 §1.2 — inside v131's compact hero card the disc slot is 150 (the shared sheet's `.ph--compact .ph-bdisc`), so
+   the white circle follows it; 0-2-0 beats the 290 above */
+.ph--compact .clv-bdisc { width: 150px; height: 150px; }
 
 /* ── the quick-add card "+ Add an agent" drops (§4; the mock's `.qa`) ── */
 /* the quick-add drop card is RETIRED (v12 P1 — "+ Add an agent" opens the centred card directly) */

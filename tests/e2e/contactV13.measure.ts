@@ -25,7 +25,7 @@ test("CL13-1 · band", async ({ page }) => {
       const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
       const band = vis('.aglist [data-probe="page-header"][data-band]');
       return {
-        band: b(band), bg: band ? getComputedStyle(band).backgroundColor : null,
+        band: b(band), bg: band ? getComputedStyle(band).backgroundColor : null, radius: band ? getComputedStyle(band).borderTopLeftRadius : null,
         bar: b(vis('[data-probe="navrow"]')), main: b(vis(".ws-main")),
         disc: b(band?.querySelector(".clv-bdisc") ?? null),
         discBg: band?.querySelector(".clv-bdisc") ? getComputedStyle(band.querySelector(".clv-bdisc")!).backgroundColor : null,
@@ -38,12 +38,11 @@ test("CL13-1 · band", async ({ page }) => {
     L.check("CL13-1 the band exists on the Contact list", w, !!r.band, JSON.stringify(r.band));
     if (!r.band || !r.bar || !r.main) { await checkOverflow(page, L, w); continue; }
     L.check("CL13-1 anthracite rgb(42,58,82)", w, r.bg === INK, `${r.bg}`);
-    L.check("CL13-1 starts at the top bar's bottom (±1)", w, near(r.band.t, r.bar.b, 1), `band ${r.band.t} bar ${r.bar.b}`);
-    const y = r.band.t + Math.min(30, r.band.h / 2);
-    /* RE-POINTED (ink shell v1): the main column's last 8px are the ink frame; the band spans the SHEET, whose right is the column's − 8 — INK1 */
-    const left = await pixel(page, r.main.l + 3, y), right = await pixel(page, r.main.r - 8 - 3, y);
-    L.check("CL13-1 the band spans the main column (pixel at each edge)", w, sameRgb(left, [42, 58, 82], 3) && sameRgb(right, [42, 58, 82], 3), `left ${left} right ${right}`);
-    L.check("CL13-1 the disc is 290 (±2), white, round", w, !!r.disc && near(r.disc.w, 290, 2) && near(r.disc.h, 290, 2) && r.discBg === "rgb(255, 255, 255)", `${JSON.stringify(r.disc)} ${r.discBg}`);
+    /* REWRITTEN (Contact list v14 §1.2, 7 Oct): the band is v131's COMPACT HERO CARD in the sheet — the shared
+       PageHeader's own `card compact` — so it no longer starts at the bar or spans the column edge to edge,
+       and its disc slot is 150, not 290. The colour stays the band's (ruling Q2). */
+    L.check("CL13-1 the compact hero card: 178 tall (±1), 18px corners", w, near(r.band.h, 178, 1) && r.radius === "18px", `${r.band.h} ${r.radius}`);
+    L.check("CL13-1 the disc is 150 (±2), white, round", w, !!r.disc && near(r.disc.w, 150, 2) && near(r.disc.h, 150, 2) && r.discBg === "rgb(255, 255, 255)", `${JSON.stringify(r.disc)} ${r.discBg}`);
     L.check("CL13-1 the disc holds contact-archivist.png", w, /\/images\/contact-archivist\.png/.test(r.img ?? ""), `${r.img}`);
     L.check("CL13-1 title 'N agents on file'", w, /^(\d+ agents|One agent) on file$/.test((r.title ?? "").trim()), `${r.title}`);
     /* the mutation this exists for: restore the v12 reply-time clause → red */
@@ -52,7 +51,7 @@ test("CL13-1 · band", async ({ page }) => {
     L.check("CL13-1 buttons: + Add an agent · Discover agents", w, r.buttons.includes("+ Add an agent") && r.buttons.includes("Discover agents"), JSON.stringify(r.buttons));
     await checkOverflow(page, L, w);
   }
-  L.done(33);
+  L.done(27);
 });
 
 /* ── lock 2 · the 40px rhythm: band → strip → carousel head → list banner ── */
@@ -115,7 +114,8 @@ test("CL13-S · strip", async ({ page }) => {
     L.check("CL13-S the strip is the group's full width", w, near(r.w, r.group ?? -1, 1), `${r.w} vs ${r.group}`);
     L.check("CL13-S white, 16px corners", w, r.bg === "rgb(255, 255, 255)" && r.radius === "16px", `${r.bg} ${r.radius}`);
     L.check("CL13-S figures are Special Elite at 34px", w, r.cells.every((c) => /Special Elite/.test(c.figFont) && c.figSize === "34px"), JSON.stringify(r.cells.map((c) => [c.figFont.slice(0, 20), c.figSize])));
-    L.check("CL13-S exactly Fit your book, Open now and Added this month are pressable", w, JSON.stringify(r.cells.filter((c) => c.pressable).map((c) => c.label)) === JSON.stringify(["Fit your book", "Open now", "Added this month"]), "");
+    /* REWRITTEN (v14 §1.3): the figures filled the carousel, which is retired — no cell is pressable now */
+    L.check("CL13-S no figure is pressable", w, r.cells.every((c) => !c.pressable), JSON.stringify(r.cells.filter((c) => c.pressable).map((c) => c.label)));
     const onFile = Number(r.cells[0].fig), title = Number((r.title.match(/^(\d+)/) ?? [])[1] ?? (/^One/.test(r.title) ? 1 : NaN));
     L.check("CL13-S On file = the band's count", w, onFile === title, `${onFile} vs "${r.title}"`);
     L.check("CL13-S On file's line names the agencies; six spark bars", w, /^agents, across \d+ agenc(y|ies)$/.test(r.cells[0].line) && r.spark === 6, `${r.cells[0].line} · ${r.spark}`);
@@ -149,128 +149,9 @@ function listDiff(a: string, b: string): string {
   const keys = Object.keys(A).filter((k) => JSON.stringify(A[k]) !== JSON.stringify(B[k]));
   return keys.length === 0 ? "same" : keys.map((k) => `${k}: ${JSON.stringify(A[k]).slice(0, 160)} → ${JSON.stringify(B[k]).slice(0, 160)}`).join(" | ");
 }
-const czState = (page: import("@playwright/test").Page) => page.evaluate(() => {
-  const cz = [...document.querySelectorAll<HTMLElement>('.aglist [data-cz="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
-  if (!cz) return null;
-  return {
-    title: cz.querySelector(".cz-title")?.textContent ?? "",
-    cards: [...cz.querySelectorAll<HTMLElement>('[data-cl13="ccard"]')].map((c) => c.getAttribute("data-agent")),
-    pressed: [...cz.querySelectorAll<HTMLElement>("[data-cz-set]")].filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.getAttribute("data-cz-set")),
-    clear: !!cz.querySelector('[data-cl13="cz-clear"]'),
-  };
-});
-
-/* ── lock 3 · a figure fills the carousel and leaves the list identical ── */
-test("CL13-3 · figures fill the carousel, not the list", async ({ page }) => {
-  const L = new Ledger("cl13-3");
-  let lsNow = "";
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const before = await listState(page);
-    const cz0 = await czState(page);
-    L.check("CL13-3 the carousel exists, on a set", w, !!cz0 && cz0.pressed.length === 1 && !cz0.clear, JSON.stringify(cz0));
-    for (const [label, key] of [["Fit your book", "fit"], ["Open now", "open"], ["Added this month", "added"]] as const) {
-      const fig = Number((await page.locator(`.aglist [data-cl13-fig="${key}"] .cl13-sf`).first().textContent() ?? "").replace("+", ""));
-      await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().click();
-      await page.waitForTimeout(250);
-      const cz = await czState(page);
-      L.check(`CL13-3 ${label}: the carousel holds exactly the figure's agents`, w, !!cz && cz.cards.length === fig, `${cz?.cards.length} cards vs figure ${fig}`);
-      L.check(`CL13-3 ${label}: the head reads "${label} · ${fig}", the selector dims, Clear shows`, w, !!cz && cz.title === `${label} · ${fig}` && cz.pressed.length === 0 && cz.clear, JSON.stringify(cz));
-      L.check(`CL13-3 ${label}: the cell is pressed`, w, (await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().getAttribute("aria-pressed")) === "true", "");
-      L.check(`CL13-3 ${label}: the list is IDENTICAL — rows, order, controls, filter line, index`, w, (lsNow = await listState(page)) === before, listDiff(before, lsNow));
-      /* pressing the figure again hands the carousel back */
-      await page.locator(`.aglist [data-cl13-fig="${key}"]`).first().click();
-      await page.waitForTimeout(250);
-      const back = await czState(page);
-      L.check(`CL13-3 ${label}: pressed again, the previous set is back`, w, JSON.stringify(back) === JSON.stringify(cz0), `${JSON.stringify(back)} vs ${JSON.stringify(cz0)}`);
-    }
-    /* Clear and a selector choice also hand it back */
-    await page.locator('.aglist [data-cl13-fig="open"]').first().click();
-    await page.locator('.aglist [data-cl13="cz-clear"]').first().click();
-    await page.waitForTimeout(200);
-    L.check("CL13-3 Clear returns the carousel to where it was", w, JSON.stringify(await czState(page)) === JSON.stringify(cz0), "");
-    await page.locator('.aglist [data-cl13-fig="open"]').first().click();
-    await page.locator('.aglist [data-cz-set="new"]').first().click();
-    await page.waitForTimeout(200);
-    const onNew = await czState(page);
-    L.check("CL13-3 a selector choice clears the figure and shows its set", w, !!onNew && onNew.pressed.join() === "new" && !onNew.clear && (await page.locator('.aglist [data-cl13-fig="open"]').first().getAttribute("aria-pressed")) === "false", JSON.stringify(onNew));
-    L.check("CL13-3 after all of it, the list is still identical", w, (lsNow = await listState(page)) === before, listDiff(before, lsNow));
-    /* …and the other direction: narrowing the LIST leaves the carousel exactly as it was */
-    await page.locator('.aglist [data-cz-set="fit"]').first().click();
-    await page.waitForTimeout(200);
-    const czBefore = await czState(page);
-    const find = page.locator('.aglist [data-cl13-ctl="banner"] input').first();
-    await find.evaluate((e) => e.scrollIntoView({ block: "center" }));
-    await find.fill("zzqx no such agent");
-    await page.waitForTimeout(300);
-    L.check("CL13-3 a Find that empties the list leaves the carousel identical", w, JSON.stringify(await czState(page)) === JSON.stringify(czBefore), `${JSON.stringify(await czState(page))} vs ${JSON.stringify(czBefore)}`);
-    await find.fill("");
-    await page.waitForTimeout(200);
-    await checkOverflow(page, L, w);
-  }
-  L.done(60);
-});
-
-/* ── lock 4 · the carousel's cards are the agent card ── */
-test("CL13-4 · carousel cards are the agent card", async ({ page }) => {
-  const L = new Ledger("cl13-4");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    /* the set with the most cards, so the track scrolls and the peek shows */
-    await page.locator('.aglist [data-cz-set="new"]').first().click();
-    await page.waitForTimeout(200);
-    const r = await page.evaluate(() => {
-      const cz = [...document.querySelectorAll<HTMLElement>('.aglist [data-cz="contacts"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-      const cards = [...cz.querySelectorAll<HTMLElement>('[data-cl13="ccard"]')];
-      const track = cz.querySelector<HTMLElement>("[data-cz-track]")!;
-      const c0 = cards[0], c1 = cards[1];
-      return {
-        n: cards.length,
-        sig: cards.every((c) => c.classList.contains("ac") && !!c.querySelector('[data-cl13-blk="head"] .acq-ini') && !!c.querySelector('[data-cl13-blk="s-genres"] .acq-lab') && !!c.querySelector('[data-cl13-blk="s-wishlist"] .acq-lab') && !!c.querySelector('[data-cl13-blk="s-materials"] .acq-lab')),
-        acMarks: cz.querySelectorAll("[data-ac]").length,
-        ids: cards.filter((c) => c.querySelector("[id]")).length,
-        w: c0?.getBoundingClientRect().width ?? 0,
-        gap: c0 && c1 ? c1.getBoundingClientRect().left - c0.getBoundingClientRect().right : null,
-        peek: track.scrollWidth > track.clientWidth && cards.some((c) => { const b = c.getBoundingClientRect(), t = track.getBoundingClientRect(); return b.left < t.right && b.right > t.right; }),
-        agent: c0?.getAttribute("data-agent") ?? null,
-        genres: c0?.querySelector('[data-cl13-blk="s-genres"]')?.innerHTML.replace(/data-(ac|cl13-blk)=/g, "data-x=") ?? null,
-      };
-    });
-    L.check("CL13-4 cards render", w, r.n >= 2, `${r.n}`);
-    L.check("CL13-4 every card is an agent card (.ac) built of the shared blocks", w, r.sig, "");
-    L.check("CL13-4 no card carries an id (a carousel cannot duplicate the quick view's)", w, r.ids === 0, `${r.ids}`);
-    L.check("CL13-4 no card carries a data-ac marker (the open card's probes stay unambiguous)", w, r.acMarks === 0, `${r.acMarks}`);
-    L.check("CL13-4 318 wide, 18 apart, the last card peeking", w, near(r.w, 318, 1) && near(r.gap ?? -1, 18, 1) && r.peek, `${r.w} ${r.gap} peek ${r.peek}`);
-    /* the same agent's blocks in the quick view are the same markup */
-    await page.locator(`.aglist [data-cl13="ccard"][data-agent="${r.agent}"]`).first().click();
-    await page.locator('[data-ac="overlay"] [data-ac="s-genres"]').first().waitFor({ timeout: 6000 }).catch(() => {});
-    const qv = await page.evaluate(() => ({
-      genres: document.querySelector('[data-ac="overlay"] [data-ac="s-genres"]')?.innerHTML.replace(/data-(ac|cl13-blk)=/g, "data-x=") ?? null,
-    }));
-    L.check("CL13-4 clicking a card opens the agent card", w, qv.genres !== null, "");
-    L.check("CL13-4 the quick view's genres block IS the carousel card's", w, qv.genres === r.genres, `${qv.genres?.slice(0, 80)} vs ${r.genres?.slice(0, 80)}`);
-    await page.keyboard.press("Escape");
-    await page.locator('[data-ac="overlay"]').waitFor({ state: "detached", timeout: 4000 }).catch(() => {});
-    /* the card's button opens the journey directly — the drawer, with no agent card over the page */
-    const go = page.locator('.aglist [data-cl13="ccard"] [data-cl13="cgo"][data-act="log"]').first();
-    if (await go.count()) {
-      await go.click();
-      await page.locator("[data-qad-drawer]:visible").first().waitFor({ timeout: 6000 }).catch(() => {});
-      const st = await page.evaluate(() => ({
-        drawer: [...document.querySelectorAll("[data-qad-drawer]")].filter((e) => e.getBoundingClientRect().height > 0).length,
-        card: [...document.querySelectorAll('[data-ac="overlay"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
-      }));
-      L.check("CL13-4 the card's Log a query opens the drawer and no agent card", w, st.drawer === 1 && st.card === 0, JSON.stringify(st));
-      await page.locator(".qad-dx").first().click();
-      { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click(); }
-      await page.locator("[data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
-    } else L.check("CL13-4 a Log a query card was on the set", w, false, "none");
-    await checkOverflow(page, L, w);
-  }
-  L.done(27);
-});
+/* CL13-3 (figures fill the carousel) and CL13-4 (carousel cards are the agent card) are RETIRED with the
+   carousel (Contact list v14 §1.4): tests/e2e/RETIRED-contact-list-v14.md. CL13-4's card-signature half lives
+   on as CL14-3 (the next-step section's card). */
 
 const vis = (page: import("@playwright/test").Page, sel: string) => page.locator(`.aglist ${sel}`).filter({ visible: true }).first();
 const pillText = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).innerText().then((t) => t.replace(/\s+/g, " ").trim());
@@ -1057,33 +938,19 @@ test("CL13-11 · shortcuts", async ({ page }) => {
   }));
   L.check("CL13-11 H does nothing while typing in Find (it types an h)", "1512", h.drawer === 0 && h.value === "h", JSON.stringify(h));
   /* put the page back whichever way it went, so a failure here is reported HERE and not as a timeout
-     further down (an open drawer covers the carousel the next step presses) */
+     further down (an open drawer covers what the next step reads) */
   if (h.drawer) { await page.keyboard.press("Escape"); await page.waitForTimeout(300); }
   else await page.keyboard.press("Backspace");
-  /* ← → on the focused track move it by one card */
-  await page.locator('.aglist [data-cz-set="new"]').first().click();
-  await page.waitForTimeout(300);
-  const track = page.locator('.aglist [data-cz="contacts"] [data-cz-track]').first();
-  await track.focus();
-  const step = await track.evaluate((t) => { const c = t.firstElementChild as HTMLElement; return c.offsetWidth + (parseFloat(getComputedStyle(t).columnGap) || 0); });
-  const s0 = await track.evaluate((t) => t.scrollLeft);
-  await page.keyboard.press("ArrowRight");
-  await page.waitForTimeout(800);
-  const s1 = await track.evaluate((t) => t.scrollLeft);
-  await page.keyboard.press("ArrowLeft");
-  await page.waitForTimeout(800);
-  const s2 = await track.evaluate((t) => t.scrollLeft);
-  L.check("CL13-11 → on the focused track moves it on one card", "1512", near(s1 - s0, step, 2), `${s0} → ${s1} (step ${step})`);
-  L.check("CL13-11 ← on the focused track moves it back one card", "1512", near(s1 - s2, step, 2), `${s1} → ${s2} (step ${step})`);
   /* the shortcut sheet lists the page's keys */
   await page.mouse.click(5, 5).catch(() => {});
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press("?");
   await page.locator('[data-shell="shortcuts"]').waitFor({ timeout: 5000 }).catch(() => {});
-  const sheet = await page.evaluate(() => ["contactsHk", "contactsFind", "carouselBack", "carouselForward"].map((id) => !!document.querySelector(`[data-shell="shortcuts"] [data-shortcut="${id}"]`)));
-  L.check("CL13-11 the shortcut sheet lists H, / and the carousel's arrows", "1512", sheet.every(Boolean), JSON.stringify(sheet));
+  /* the carousel's ← → left with the carousel (v14 §1.4) */
+  const sheet = await page.evaluate(() => ["contactsHk", "contactsFind"].map((id) => !!document.querySelector(`[data-shell="shortcuts"] [data-shortcut="${id}"]`)));
+  L.check("CL13-11 the shortcut sheet lists H and /", "1512", sheet.every(Boolean), JSON.stringify(sheet));
   await page.keyboard.press("Escape");
-  L.done(6);
+  L.done(4);
 });
 
 /* ── lock 12 · loading: placeholders render while the agents are held, and the band's, the strip's and
@@ -1102,21 +969,22 @@ test("CL13-12 · loading", async ({ page }) => {
     await openApp(page, "/agents", vp);
     const held = await page.evaluate(() => {
       const g = document.querySelector<HTMLElement>(".aglist .clv-group[data-loading]");
-      const card = g?.querySelector<HTMLElement>(".cl13-ac");
+      const card = g?.querySelector<HTMLElement>(".clv-row");
       const vis = (s: string) => { const e = g?.querySelector<HTMLElement>(s); return e ? getComputedStyle(e).opacity : null; };
       return {
         loading: !!g, inert: !!g?.hasAttribute("inert"),
-        cards: g?.querySelectorAll(".cl13-ac").length ?? 0, rows: g?.querySelectorAll(".clv-row").length ?? 0,
+        rows: g?.querySelectorAll(".clv-row").length ?? 0,
         shimmer: card ? getComputedStyle(card).backgroundImage.includes("gradient") : false,
-        perch: vis(".ob-perch"), ctl: vis(".cl13-ctl"), seg: vis(".cl13-seg"),
+        perch: vis(".ob-perch"), ctl: vis(".cl13-ctl"),
         tab: !!document.querySelector('[data-ftab="housekeeping"]'),
         bandShape: (() => { const t = g?.querySelector<HTMLElement>(".ph--band .ph-title"); return t ? getComputedStyle(t).backgroundImage.includes("52, 68, 94") || getComputedStyle(t).backgroundImage.includes("#34445e") : false; })(),
       };
     });
-    L.check("CL13-12 with the agents held, the placeholders render: three cards, five rows, shimmering, inert", w,
-      held.loading && held.inert && held.cards === 3 && held.rows === 5 && held.shimmer && held.bandShape, JSON.stringify(held));
-    L.check("CL13-12 the perched art, the pills and the selector wait for data; no Housekeeping tab", w,
-      held.perch === "0" && held.ctl === "0" && held.seg === "0" && !held.tab, JSON.stringify(held));
+    /* v14 §1.4: the carousel's three placeholder cards went with it */
+    L.check("CL13-12 with the agents held, the placeholders render: five rows, shimmering, inert", w,
+      held.loading && held.inert && held.rows === 5 && held.shimmer && held.bandShape, JSON.stringify(held));
+    L.check("CL13-12 the perched art and the pills wait for data; no Housekeeping tab", w,
+      held.perch === "0" && held.ctl === "0" && !held.tab, JSON.stringify(held));
     const a = await boxes();
     await page.locator(".aglist .clv-group[data-loading]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(600);
@@ -1136,7 +1004,7 @@ test("CL13-12 · loading", async ({ page }) => {
     await page.addInitScript(() => { (window as unknown as { __SA_AGENTS_HOLD_MS?: number }).__SA_AGENTS_HOLD_MS = 12000; });
     await openApp(page, "/agents", AT_1512);
     await liftMotionSuppression(page);
-    return page.evaluate(() => { const c = document.querySelector<HTMLElement>(".aglist .clv-group[data-loading] .cl13-ac"); return c ? getComputedStyle(c).animationName : null; });
+    return page.evaluate(() => { const c = document.querySelector<HTMLElement>(".aglist .clv-group[data-loading] .clv-row"); return c ? getComputedStyle(c).animationName : null; });
   };
   const moving = await shimmerOf("no-preference");
   L.check("CL13-12 the shapes shimmer (with the harness's motion freeze lifted)", "1512", moving === "cl13Shim", `${moving}`);
@@ -1186,8 +1054,9 @@ test("CL13-13 · page guide", async ({ page }) => {
   L.check("CL13-13 the guide is 340 wide, above the Housekeeping tab, flush with its right", "1512", s1.w === 340 && s1.above, JSON.stringify(s1));
   await page.click(`${G} [data-qcv="guide-next"]`);
   const s2 = await page.evaluate((G) => ({ title: document.querySelector(`${G} [data-qcv="guide-title"]`)?.textContent ?? null,
-    ring: !!document.querySelector('.aglist [data-cz="contacts"].pgd-ring'), stripRing: !!document.querySelector(".pgd-ring[data-cl13='strip']") }), G);
-  L.check("CL13-13 Next moves to step 2 and rings the carousel (the strip's ring is released)", "1512", s2.title === "Who to query next" && s2.ring && !s2.stripRing, JSON.stringify(s2));
+    stripRing: !!document.querySelector(".pgd-ring[data-cl13='strip']") }), G);
+  /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-13 holds it) */
+  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the strip's ring is released)", "1512", s2.title === "Your next step" && !s2.stripRing, JSON.stringify(s2));
   await page.click(`${G} [data-qcv="guide-back"]`);
   L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");
   await page.click(`${G} [data-qcv="guide-x"]`);

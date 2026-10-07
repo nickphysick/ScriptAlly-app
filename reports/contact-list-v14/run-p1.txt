@@ -1,0 +1,46 @@
+
+Running 29 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.0s)
+  ✓   2 [measure] › tests/e2e/contactV13.measure.ts:18:1 › CL13-1 · band (13.9s)
+  ✓   3 [measure] › tests/e2e/contactV13.measure.ts:58:1 › CL13-2 · rhythm (14.4s)
+  ✓   4 [measure] › tests/e2e/contactV13.measure.ts:81:1 › CL13-S · strip (13.9s)
+  ✓   5 [measure] › tests/e2e/contactV13.measure.ts:167:1 › CL13-B · banner (13.7s)
+  ✓   6 [measure] › tests/e2e/contactV13.measure.ts:198:1 › CL13-7 · pills (19.6s)
+  ✓   7 [measure] › tests/e2e/contactV13.measure.ts:255:1 › CL13-F · filter line (21.0s)
+  ✓   8 [measure] › tests/e2e/contactV13.measure.ts:294:1 › CL13-8 · remembered settings (17.5s)
+  ✓   9 [measure] › tests/e2e/contactV13.measure.ts:326:1 › CL13-SB · sticky bar (21.1s)
+  ✓  10 [measure] › tests/e2e/contactV13.measure.ts:382:1 › CL13-5 · workspace (15.3s)
+  ✓  11 [measure] › tests/e2e/contactV13.measure.ts:426:1 › CL13-6 · row edge (14.5s)
+  ✓  12 [measure] › tests/e2e/contactV13.measure.ts:477:1 › CL13-T · hover tray (6.9s)
+  ✓  13 [measure] › tests/e2e/contactV13.measure.ts:536:1 › CL13-9 · housekeeping drawer (18.0s)
+  ✓  14 [measure] › tests/e2e/contactV13.measure.ts:586:1 › CL13-HK · start here, the copy, the fixes and the toggle (10.0s)
+  ✓  15 [measure] › tests/e2e/contactV13.measure.ts:688:1 › CL13-HKW · Later, Undo and the reminder chip, read back from Firestore (27.6s)
+  ✓  16 [measure] › tests/e2e/contactV13.measure.ts:856:1 › CL13-10 · the dock chip expands the card (agent card and the Query Centre's card) (19.7s)
+  ✓  17 [measure] › tests/e2e/contactV13.measure.ts:909:1 › CL13-11 · shortcuts (6.5s)
+  ✓  18 [measure] › tests/e2e/contactV13.measure.ts:958:1 › CL13-12 · loading (49.5s)
+  ✓  19 [measure] › tests/e2e/contactV13.measure.ts:1019:1 › CL13-13 · page guide (11.7s)
+  ✓  20 [measure] › tests/e2e/contactV13.measure.ts:1082:1 › CL13-14 · footer and empty state (19.0s)
+  ✓  21 [measure] › tests/e2e/contactV14.measure.ts:21:1 › CL14-1 · order (9.5s)
+  ✓  22 [measure] › tests/e2e/contactV14.measure.ts:47:1 › CL14-2 · figures inert (13.6s)
+LEDGER lh3-shape: {"LH0 population":{"pass":20,"fail":0},"LH1 (band) no vertical movement":{"pass":80,"fail":0},"LH1 no movement":{"pass":184,"fail":0},"LH6 only text differs":{"pass":20,"fail":0},"LH2 one line":{"pass":104,"fail":0},"LH4 (band) the text lines share one left x":{"pass":8,"fail":0},"LH4 (band) the page's lefts (reported, not asserted)":{"pass":8,"fail":0},"LH4 rail stacked (reported, not asserted)":{"pass":8,"fail":0},"LH7 empty mode":{"pass":20,"fail":0},"LH7 (band) no rule either side; the band is the populated header's":{"pass":8,"fail":0},"LH7 no eyebrow":{"pass":20,"fail":0},"LH7 (band) cross-state boxes skipped: the empty state is the open header, the populated one the band":{"pass":24,"fail":0},"LH4 one left x":{"pass":12,"fail":0},"LH4 hero right = rail right":{"pass":12,"fail":0},"LH7 no rule":{"pass":12,"fail":0},"LH7 same x and size":{"pass":24,"fail":0},"LH0 (band) skipped: the band's ref is the page's own (QC126-3 / CL13-1)":{"pass":2,"fail":0},"LH0 ref: header height":{"pass":3,"fail":0},"LH0 ref: title top":{"pass":3,"fail":0},"LH0 ref: title box":{"pass":3,"fail":0},"LH0 ref: subline under title":{"pass":3,"fail":0},"LH0 ref: art width":{"pass":2,"fail":0}}
+LH3 shape reads: 204
+  ✓  23 [measure] › tests/e2e/livingHeadersV3.measure.ts:140:1 › LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edge, only the text, the empty page (4.1m)
+LEDGER lh3-tiles: {"LH3 population":{"pass":3,"fail":0},"LH3 same height, 1 vs 148":{"pass":3,"fail":0}}
+  ✓  24 [measure] › tests/e2e/livingHeadersV3.measure.ts:302:1 › LH3 · a tile row never grows: one digit and three at 1280 (13.4s)
+  -  25 [measure] › tests/e2e/livingHeadersV3.measure.ts:322:1 › LH5 · the breadcrumb is in the bar from first paint, and there is no eyebrow
+LEDGER lh3-exhibit: {"LH8 population":{"pass":5,"fail":0},"LH8 inert":{"pass":5,"fail":0},"LH8 no links":{"pass":5,"fail":0},"LH8 not hit-testable":{"pass":5,"fail":0},"LH8 not in the tab order":{"pass":5,"fail":0},"LH8 no data read while shown":{"pass":5,"fail":0},"LH8 absent with data":{"pass":5,"fail":0},"LH8 absent when caught up":{"pass":1,"fail":0}}
+  ✓  26 [measure] › tests/e2e/livingHeadersV3.measure.ts:360:1 › LH8 · the exhibition is inert, reads nothing live, and is never on a page with data (30.7s)
+LEDGER lh3-filtered: {"LH9 population":{"pass":3,"fail":0},"LH9 hero kept":{"pass":3,"fail":0},"LH9 no exhibition":{"pass":3,"fail":0}}
+  ✓  27 [measure] › tests/e2e/livingHeadersV3.measure.ts:412:1 › LH9 · a page filtered to nothing keeps its hero (15.5s)
+LEDGER lh3-flash: {"LH10 population":{"pass":5,"fail":0},"LH10 never the page name":{"pass":5,"fail":0},"LH10 one headline, the settled one":{"pass":5,"fail":0},"LH10 pending draws no text":{"pass":5,"fail":0}}
+  ✓  28 [measure] › tests/e2e/livingHeadersV3.measure.ts:465:1 › LH10 · the page name never flashes in the headline, and neither does a wrong count (24.3s)
+LEDGER lh3-states: {"LH11 list":{"pass":1,"fail":0},"LH11 all caught up":{"pass":1,"fail":0},"LH11 nothing yet":{"pass":1,"fail":0}}
+  ✓  29 [measure] › tests/e2e/livingHeadersV3.measure.ts:497:1 › LH11 · the To-do list's three states (6.9s)
+
+  Slow test file: [measure] › tests/e2e/livingHeadersV3.measure.ts (5.6m)
+  Slow test file: [measure] › tests/e2e/contactV13.measure.ts (5.6m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 skipped
+  28 passed (11.9m)
+done

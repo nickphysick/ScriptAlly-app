@@ -22,5 +22,12 @@ export const PLATE_ROUTES: readonly string[] = [];
  * its header geometry belongs to `analyticsV17` AN17-2/AN17-3.
  */
 export const BAND_ROUTES: readonly string[] = ["/queries", "/agents", "/queries/analytics"];
+/**
+ * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
+ * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The
+ * Query Centre since v131; the Contact list since Contact list v14 (§1.2). A living-headers lock that exempts
+ * the compact card's centring or its pill column reads THIS set, never a route compared by hand.
+ */
+export const COMPACT_ROUTES: readonly string[] = ["/queries", "/agents"];
 /** The plate's text inset — its 38px of horizontal padding, which PH1 measures against the brief. */
 export const PLATE_PAD_X = 38;

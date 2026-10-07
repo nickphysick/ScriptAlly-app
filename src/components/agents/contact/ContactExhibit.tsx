@@ -102,7 +102,7 @@ const HK = hkModel(
   },
   contactPrefsOf(null, new Date(CONTACT_SAMPLE_NOW)),
 );
-const HK_BOOK = { title: null, genre: null };
+const HK_BOOK = { title: null, genre: null, genres: [] };
 
 const noop = () => {};
 

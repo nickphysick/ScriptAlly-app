@@ -21,7 +21,7 @@ import { resolve } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 import { Ledger, near, f1 } from "./shellV3Lib";
-import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, COMPACT_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: 1_800_000 });
@@ -167,9 +167,9 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     const isBand = BAND_ROUTES.includes(p.route);
     if (isBand) bandsSeen.add(p.route);
     for (const [nm, x] of [["one", one], ["one-line subline", short]] as const) {
-      /* ⚠️ v131: the Query Centre's compact hero CENTRES its text vertically in a fixed 178px card (§1), so a
+      /* ⚠️ v131 (and the Contact list since v14 — COMPACT_ROUTES): the compact hero CENTRES its text vertically in a fixed 178px card (§1), so a
          one-line intro moves the stack by design. The header's height (below) still may not move; QC2 holds the rest. */
-      const centred = p.route === "/queries" && nm === "one-line subline";
+      const centred = COMPACT_ROUTES.includes(p.route) && nm === "one-line subline";
       for (const k of ["h1", "intro", "acts", "b1", "b2", "art"] as const) {
         if (centred && (k === "h1" || k === "intro")) continue;
         if (isBand) {
@@ -234,7 +234,7 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
          share ONE left x among themselves, and the page below shares another */
       /* ⚠️ v131: the Query Centre's compact hero stacks its pills in a column right of the text (§1), so only
          the title and the intro share the left x there; QC2 places the pills. */
-      const compact = p.route === "/queries";
+      const compact = COMPACT_ROUTES.includes(p.route);
       const text = (compact ? [edges.h1, edges.intro] : [edges.h1, edges.intro, edges.acts]).filter((x) => x !== null) as number[];
       L.check("LH4 (band) the text lines share one left x", ctx("data"), text.length === (compact ? 2 : 3) && text.every((x) => near(x, text[0], 1)), text.map(f1).join(" "));
       /* the page below is the band page's own (its rows sit inside the workspace's padding by design —

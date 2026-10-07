@@ -22,10 +22,10 @@ const NOW = new Date(2026, 9, 4, 12); // 4 Oct 2026, local
 const A = CONTACT_FIXTURE_AGENTS;
 const rows = buildQcRows(CONTACT_FIXTURE_QUERIES, A, [], NOW.getTime());
 const by = (id: string) => A.find((a) => a.id === id)!;
-const BOOK: HkBook = { title: "Murphy’s Day Out", genre: FIXTURE_GENRE };
+const BOOK: HkBook = { title: "Murphy’s Day Out", genre: FIXTURE_GENRE, genres: [FIXTURE_GENRE] };
 const ctxOf = (a: Agent, over: Partial<HkAgentCtx> = {}): HkAgentCtx => ({
   live: agentRows(rows, a.id, null).some((r) => r.court !== "closed"),
-  fits: fitsGenre(a, FIXTURE_GENRE),
+  fits: fitsGenre(a, [FIXTURE_GENRE]),
   queried: CONTACT_FIXTURE_QUERIES.some((q) => q.agentId === a.id),
   passedOn: hasPassedOn(a, CONTACT_FIXTURE_QUERIES, null),
   hasReopenTask: false,

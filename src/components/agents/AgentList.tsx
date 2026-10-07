@@ -59,7 +59,7 @@ import {
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
-import { isGenreMatch } from "../../lib/genreMatch";
+import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop, filterValueLabel } from "./contact/ContactListControls";
@@ -72,15 +72,12 @@ import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
-import { ContactStrip, type FigureKey } from "./contact/ContactStrip";
-import { stripFacts, fitsGenre, genrePluralLower } from "../../lib/contactStrip";
-import { Carousel } from "../shell/Carousel";
-import { AgentCarouselCard } from "./card/AgentCarouselCard";
-import { FIGURE_LABEL, SET_LABEL, carouselSet, figureSet, type CarouselSet } from "../../lib/contactCarousel";
+import { ContactStrip } from "./contact/ContactStrip";
+import { stripFacts, fitsGenre } from "../../lib/contactStrip";
+import { joinGenres } from "../../lib/genreNoun";
 import { cardQuery, cardRows, primaryFor, type CardAct } from "../../lib/agentCard";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
-import { matchGenre } from "../../lib/genreMatch";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -134,10 +131,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return resolveScopedManuscript(manuscripts, id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the key is the switch's signal
   }, [manuscripts, locationKey]);
-  /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the
-     count cards through the same value, so a card can never count an agent whose chip is not
-     tinted. */
-  const tintGenre = useMemo(() => matchGenre(scoped?.genre), [scoped]);
+  /* v14 (ruling Q5): THE BOOK'S GENRES — the main genre plus any subGenres — and ONE test of a genre
+     against them. The strip, the section, the pills, "See all" and the row ticks all read these two. */
+  const book = useMemo(() => bookGenres(scoped), [scoped]);
+  const bookHit = useMemo(() => bookGenreHit(book), [book]);
 
   /* ⚠️ THE QUERY CENTRE'S OWN ROWS — one derivation for courts, expected dates and past-the-date,
      so this page and the QC cannot disagree (v11 §10). The clock freezes per data change. */
@@ -244,17 +241,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
-     A pressed figure fills the carousel (Phase 2b) and never touches the list's filters. */
-  const strip = useMemo(() => stripFacts(agents, scoped?.genre ?? null, nowMs), [agents, scoped, nowMs]);
-  const [figure, setFigure] = useState<FigureKey | null>(null);
-  const pressFigure = useCallback((k: FigureKey) => setFigure((f) => (f === k ? null : k)), []);
+     v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
+  const strip = useMemo(() => stripFacts(agents, book, nowMs), [agents, book, nowMs]);
   const factsAll = useMemo(
     () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
     [agents, qcRows, scoped],
   );
   const genreHitFact = useCallback(
-    (x: { genres: string[] }) => !!tintGenre && x.genres.some((g) => isGenreMatch(g, tintGenre)),
-    [tintGenre],
+    (x: { genres: string[] }) => x.genres.some(bookHit),
+    [bookHit],
   );
   const inPool = useCallback(
     (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search),
@@ -267,7 +262,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     gaps: (x) => !(typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0)
       || (x.agent.genres ?? []).length === 0 || !(x.agent.mswlNotes ?? "").trim() || (x.agent.materialsWanted ?? []).length === 0,
   }), [genreHitFact]);
-  const genreWord = scoped?.genre && tintGenre ? genrePluralLower(scoped.genre) : null;
+  const genreWord = book.length ? joinGenres(book) : null;
   const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool, filterCtx), [factsAll, filters, inPool, filterCtx]);
   const visibleFacts = useMemo(
     () => sortFacts(
@@ -527,31 +522,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
   const [newId, setNewId] = useState<string | null>(null);
 
-  /* ── v13 §4 — "Who to query next" ─────────────────────────────────────────────────────────────
-     ⚠️ A PRESSED FIGURE REPLACES THE SET; IT NEVER TOUCHES THE LIST. Its key lives in `figure` and
-     nothing in the list's filter/search/group/sort reads it (lock 3). A selector choice, Clear, or the
-     figure pressed again hands the carousel back to the set it was showing. */
-  const [czSet, setCzSet] = useState<CarouselSet>("fit");
-  /* ⚠️ THE CAROUSEL READS EVERY AGENT'S FACTS, NEVER THE LIST'S FILTERED `factsById` — a Find or a
-     filter on the list must not empty the carousel (lock 3 holds both directions). */
-  const czFactsById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x])), [factsAll]);
   /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
   const remindRef = useRef<(a: Agent) => void>(() => {});
-  const czInput = useMemo(() => ({
-    agents,
-    queried: (a: Agent) => (czFactsById.get(a.id)?.standing.kind ?? "none") !== "none",
-    msGenre: scoped?.genre ?? null,
-    nowMs,
-  }), [agents, czFactsById, scoped, nowMs]);
-  const czCounts = useMemo(() => ({
-    fit: carouselSet("fit", czInput).length, new: carouselSet("new", czInput).length, reopen: carouselSet("reopen", czInput).length,
-  }), [czInput]);
-  const czItems = useMemo(() => (figure ? figureSet(figure, czInput) : carouselSet(czSet, czInput)), [figure, czSet, czInput]);
-  const czMs = scoped?.title?.trim() || null;
-  const czNote = figure
-    ? { fit: `Take ${scoped?.genre ? genrePluralLower(scoped.genre) : "your genre"} · not queried first`, open: "Open to queries · not queried first", added: "Newest first" }[figure]
-    : { fit: czMs ? `Fit ${czMs} · not queried yet` : "Not queried yet", new: `The last ${czCounts.new} you added`, reopen: "Closed now, reopening soon" }[czSet];
-  const fitWord = scoped?.genre && tintGenre ? genrePluralLower(scoped.genre) : null;
   /** a card's (and, from Phase 4, a row tray's) next step, WITHOUT the card: the same journey the card's
    *  button opens, straight to the drawer (§4: "its button opens the journey directly") */
   const actWithoutCard = useCallback((agentId: string, act: CardAct) => {
@@ -634,19 +606,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     for (const a of agents) {
       m.set(a.id, {
         live: agentRows(qcRows, a.id, null).some((r) => r.court !== "closed"),
-        fits: fitsGenre(a, scoped?.genre ?? null),
+        fits: fitsGenre(a, book),
         queried: queries.some((q) => q.agentId === a.id && (!msId || q.manuscriptId === msId)),
         passedOn: hasPassedOn(a, queries, msId),
         hasReopenTask: hkReopenTaskById.get(a.id) ?? false,
       });
     }
     return m;
-  }, [agents, qcRows, queries, scoped, hkReopenTaskById]);
+  }, [agents, qcRows, queries, scoped, book, hkReopenTaskById]);
   const hkCtxOf = useCallback((a: Agent): HkAgentCtx => hkCtxById.get(a.id)
     ?? { live: false, fits: false, queried: false, passedOn: false, hasReopenTask: false }, [hkCtxById]);
   const hk = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
-  const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null }), [scoped]);
+  const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
@@ -703,7 +675,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     const after = applyPatch(agent, patch);
     return {
       ok: true,
-      line: savedLine(item, { weeks: fix.kind === "weeks" ? fix.weeks : undefined, genres: fix.kind === "genres" ? fix.genres : undefined, fitsAfter: fitsGenre(after, hkBook.genre), book: hkBook }),
+      line: savedLine(item, { weeks: fix.kind === "weeks" ? fix.weeks : undefined, genres: fix.kind === "genres" ? fix.genres : undefined, fitsAfter: fitsGenre(after, hkBook.genres), book: hkBook }),
       undo: r.undo,
     };
   }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
@@ -904,6 +876,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             /* v13 §2 — THE BAND (the Query Centre's, `PageHeader band`): full-bleed anthracite under the
                top bar, the Archivist in a 290px white disc on the text's right. */
             band
+            /* v14 §1.2 — Query Centre v131's compact hero CARD in the sheet (the shared PageHeader's own
+               `card compact`, not restyled): 178 tall, 18px corners, the pills stacked beside a 150 disc */
+            card
+            compact
             art={<span className="clv-bdisc"><img src={`${CONTACT_BAND_DISC.src}?v=${CONTACT_BAND_DISC.version}`} width={CONTACT_BAND_DISC.width} height={CONTACT_BAND_DISC.height} alt="" /></span>}
           />
         )}
@@ -913,49 +889,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             perch={{ src: `${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`, width: CONTACT_HAWK.width, height: CONTACT_HAWK.height }} />
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
-        {showList && <ContactStrip facts={strip} selected={figure} onPress={pressFigure} />}
-        {/* v13 §4 — "Who to query next": the shared carousel shell, the agent card in its carousel dress */}
-        {showList && (
-          <Carousel
-            probe="contacts"
-            className={`cl13-cz${figure ? " is-fig" : ""}`}
-            label="Who to query next"
-            title={figure ? `${FIGURE_LABEL[figure]} · ${czItems.length}` : "Who to query next"}
-            note={czNote}
-            resetKey={figure ?? czSet}
-            controls={(
-              <>
-                {figure && <button type="button" className="cl13-clear" data-cl13="cz-clear" onClick={() => setFigure(null)}>{"✕"} Clear</button>}
-                <div className="cl13-seg" role="group" aria-label="Choose what the carousel shows" data-cl13="cz-seg">
-                  {(["fit", "new", "reopen"] as CarouselSet[]).map((k) => (
-                    <button key={k} type="button" aria-pressed={!figure && czSet === k} data-cz-set={k}
-                      onClick={() => { setFigure(null); setCzSet(k); }}>
-                      {SET_LABEL[k]}<em>{czCounts[k]}</em>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-            items={czItems}
-            itemKey={(a) => a.id}
-            empty={figure ? "No agents here." : { fit: "No open agent who fits is left to query.", new: "No agents yet.", reopen: "Nobody is closed to queries." }[czSet]}
-            renderItem={(a) => {
-              const f = czFactsById.get(a.id);
-              if (!f) return null;
-              return (
-                <AgentCarouselCard
-                  agent={a} facts={f}
-                  q={cardQuery(cardRows(qcRows, a.id, scoped?.id ?? null))}
-                  genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
-                  fitWord={fitWord} fits={fitsGenre(a, scoped?.genre ?? null)}
-                  onOpen={(id, rect) => onOpen(id, rect)}
-                  onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
-                  onAct={actWithoutCard}
-                />
-              );
-            }}
-          />
-        )}
+        {showList && <ContactStrip facts={strip} />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -1021,7 +955,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               totals={filtered ? groupTotals : null}
               byId={factsById}
               nowMs={nowMs}
-              genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
+              genreHit={bookHit}
               openId={openId}
               newId={newId}
               onOpen={onOpen}

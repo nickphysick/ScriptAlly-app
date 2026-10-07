@@ -53,7 +53,7 @@ describe("ink shell — the tokens", () => {
   });
 });
 
-describe("ink fix-ups — the header card is the Query Centre's alone", () => {
+describe("ink fix-ups — the header card (the Query Centre's, and the Contact list's since v14)", () => {
   const PH = strip(readFileSync("src/components/shell/pageHeader.css", "utf8"));
   const block = PH.slice(PH.indexOf(".ph--full.ph--card"), PH.indexOf(".ph--full.ph--band.ph--bandfix"));
   it("every card rule names .ph--card, so the other bands cannot move", () => {
@@ -73,12 +73,16 @@ describe("ink fix-ups — the header card is the Query Centre's alone", () => {
     expect(media, "the card block sits inside a ≥768 media query").toBeGreaterThan(-1);
     expect(raw.slice(media, at)).not.toMatch(/\n\}/);
   });
-  it("only the Query Centre passes `card`; Analytics and the Contact list keep `band` alone", () => {
+  /* REWRITTEN (Contact list v14 §1.2, 7 Oct): the Contact list's hero is v131's compact card — it passes the
+     shared PageHeader's own `card compact`, unrestyled. Analytics still keeps `band` alone. */
+  it("the Query Centre and the Contact list pass `card`; Analytics keeps `band` alone", () => {
     const qc = readFileSync("src/components/queries/centre/QcCentre.tsx", "utf8");
     const empty = readFileSync("src/components/queries/centre/QcEmpty.tsx", "utf8");
+    const contacts = readFileSync("src/components/agents/AgentList.tsx", "utf8");
     expect(qc).toMatch(/\n\s+card\n/);
     expect(empty).toMatch(/\n\s+card\n/);
-    for (const f of ["src/components/QueryAnalytics.tsx", "src/components/agents/AgentList.tsx"]) {
+    expect(contacts).toMatch(/\n\s+card\n\s+compact\n/);
+    for (const f of ["src/components/QueryAnalytics.tsx"]) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/\n\s+card\n|\bcard=\{/);
     }
   });

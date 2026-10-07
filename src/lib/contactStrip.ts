@@ -18,7 +18,8 @@
 import type { Agent } from "../types";
 import { agentPrimary } from "./agentDisplay";
 import { isDoorOpen } from "./agentList";
-import { isGenreMatch, matchGenre } from "./genreMatch";
+import { takesBook } from "./genreMatch";
+import { joinGenres } from "./genreNoun";
 import { formatDate } from "./dates";
 
 /** A stated reply window: a positive number of weeks. The quick-add stub `0` and an absent value
@@ -26,22 +27,10 @@ import { formatDate } from "./dates";
 export const statedWeeks = (a: Pick<Agent, "responseTimeWeeks">): number | null =>
   typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
 
-/** Does the agent take the manuscript's genre? The v12 hero's own match (`heroFacts`). */
-export function fitsGenre(a: Pick<Agent, "genres">, msGenre: string | null | undefined): boolean {
-  const match = matchGenre(msGenre);
-  return !!match && (a.genres ?? []).some((g) => isGenreMatch(g, match));
-}
-
-/**
- * A genre as a lower-case plural, the way the strip and Housekeeping say it: "takes thrillers",
- * "takes mysteries". Mass nouns and "… fiction" stay as they are: nobody "takes crimes".
- */
-const MASS = /(fiction|crime|horror|fantasy|romance|noir|suspense|sci-fi|science fiction|non-fiction|nonfiction|lit|ya|young adult|middle grade|upmarket|literary|commercial|historical|speculative|cosy|cozy)$/;
-export function genrePluralLower(genre: string): string {
-  const g = genre.trim().toLowerCase();
-  if (!g || MASS.test(g) || g.endsWith("s")) return g;
-  if (/[^aeiou]y$/.test(g)) return `${g.slice(0, -1)}ies`;
-  return `${g}s`;
+/** Does the agent take the book — its main genre or any subGenre (Contact list v14, ruling Q5; `book` is
+ *  `bookGenres(manuscript)`). One definition for the strip, the section, the pills and the row ticks. */
+export function fitsGenre(a: Pick<Agent, "genres">, book: readonly string[]): boolean {
+  return takesBook(a.genres, book);
 }
 
 const monthKey = (d: Date) => d.getFullYear() * 12 + d.getMonth();
@@ -68,7 +57,7 @@ export interface StripFacts {
   last: { name: string; date: string } | null;
 }
 
-export function stripFacts(agents: readonly Agent[], msGenre: string | null | undefined, nowMs: number): StripFacts {
+export function stripFacts(agents: readonly Agent[], book: readonly string[], nowMs: number): StripFacts {
   const agencies = new Set(agents.map((a) => (a.agency ?? "").trim().toLowerCase()).filter(Boolean)).size;
 
   const now = new Date(nowMs);
@@ -86,8 +75,7 @@ export function stripFacts(agents: readonly Agent[], msGenre: string | null | un
     if (t <= nowMs && (!last || t > last.t)) last = { a, t };
   }
 
-  const fit = msGenre ? agents.filter((a) => fitsGenre(a, msGenre)).length : 0;
-  const match = matchGenre(msGenre);
+  const fit = book.length ? agents.filter((a) => fitsGenre(a, book)).length : 0;
   const open = agents.filter((a) => isDoorOpen(a)).length;
 
   const stated = agents
@@ -108,7 +96,7 @@ export function stripFacts(agents: readonly Agent[], msGenre: string | null | un
     agencies,
     spark,
     fit,
-    fitLine: msGenre && match ? `take ${genrePluralLower(msGenre)}` : null,
+    fitLine: book.length ? `take ${joinGenres(book)}` : null,
     open,
     closed: agents.length - open,
     medianWeeks,
