@@ -153,7 +153,8 @@
     "design-refs/analytics-v17/ref-11-section-menu@2x.png": "368797e466eaa405072c65ba9c2a82858b8f4a2ba77f8308a88dc236b785c6a9",
     "design-refs/shell/ink-shell-v1.html": "9ce160e3214172c7aa4b944f28f250c18bc56018f41f2db42f5e46ba777e9db3",
     "design-refs/shell/ink-shell-scroll-v1.html": "d5311901629833b76d4d82849531448f83442cfc9e998259193b6c492eab5333",
-    "design-refs/shell/ink-folder-tab-golden-3x.png": "4513b3d0e35dad75d56d85e923fe88517750ff948c43683a60adcf8e5d2ca26a"
+    "design-refs/shell/ink-folder-tab-golden-3x.png": "4513b3d0e35dad75d56d85e923fe88517750ff948c43683a60adcf8e5d2ca26a",
+    "design-refs/shell/shell-menus-settings-v1.html": "e7d448f7a0835d98c415766ee91f0c8a86c21878a35c4926554292c84598c9e6"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

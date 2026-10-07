@@ -43,8 +43,24 @@ const firstFace = (f: string) => f.split(",")[0].replace(/["']/g, "").trim();
  * colour, its text the pixel furthest from that in luminance. WCAG's ratio between the two.
  */
 async function pixelContrast(page: Page, sel: string, index = 0): Promise<number> {
-  const el = page.locator(sel).nth(index);
-  const png = await el.screenshot();
+  /* ⚠️ THE TEXT'S OWN BOX, NEVER THE ELEMENT'S. The first version screenshotted the whole element and
+     read 16:1 for an eyebrow at ink 42%: an eyebrow's box takes in the menu's rounded corner, where the
+     dark page shows through, and a row's box takes in its icon, whose semi-transparent strokes overlap
+     and composite darker than their stated ink. Clipped to the first text run's Range, the reading is
+     the glyphs on their own ground and nothing else. */
+  const box = await page.locator(sel).nth(index).evaluate((root) => {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n: Node | null;
+    while ((n = w.nextNode())) {
+      if (!(n.textContent || "").trim()) continue;
+      const r = document.createRange(); r.selectNodeContents(n);
+      const b = r.getBoundingClientRect();
+      if (b.width > 0) return { x: b.left, y: b.top, width: b.width, height: b.height };
+    }
+    return null;
+  });
+  if (!box) throw new Error(`${sel}[${index}]: no text to measure`);
+  const png = await page.screenshot({ clip: { x: box.x - 2, y: box.y, width: box.width + 4, height: box.height } });
   return page.evaluate(async (b64) => {
     const img = await new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = `data:image/png;base64,${b64}`; });
     const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;

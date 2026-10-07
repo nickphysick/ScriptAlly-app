@@ -32,3 +32,18 @@
 {"lock": "INK3", "mutation": "ink3-overlap", "scale": "zoom 110% (dsf 1.1, viewport \u00f71.1)", "sheet_top_device_px": "70.4", "verdict": "red", "tests_run": 1, "first_error": "colours across the tab's foot: + rgb(189, 190, 192) \u2014 a seam row"}
 {"lock": "INK3", "mutation": "ink3-overlap", "scale": "deviceScaleFactor 1.25", "sheet_top_device_px": "80.0 (whole)", "verdict": "GREEN", "tests_run": 1, "first_error": "the sheet's top lands on a whole device pixel at 1.25 (64 \u00d7 1.25 = 80), so the two edges abut with no seam \u2014 not a fault, the case the overlap is not needed for"}
 {"lock": "INK3", "mutation": "ink3-overlap", "scale": "deviceScaleFactor 3", "sheet_top_device_px": "192 (whole)", "verdict": "GREEN", "tests_run": 1, "first_error": "whole device pixels, as above"}
+{"lock":"MS1","mutation":"ms1-swap","verdict":"red","tests_run":1,"first_error":"    Error: 1280: the arrow opened Help"}
+{"lock":"MS2","mutation":"ms2-swap","verdict":"red","tests_run":1,"first_error":"    Error: 1280: \"?\" opened the capture menu"}
+{"lock":"MS3","mutation":"ms3-cream","verdict":"red","tests_run":1,"first_error":"    Error: capture · \"Record a response\": 1.14:1"}
+{"lock":"MS4","mutation":"ms4-enable","verdict":"red","tests_run":1,"first_error":"    Error: capture menu: aria-disabled"}
+{"lock":"MS5","mutation":"ms5-sans","verdict":"red","tests_run":1,"first_error":"    Error: 1280 capture · \"Record a response\": Arial, sans-serif"}
+{"lock":"MS6","mutation":"ms6-offset","verdict":"red","tests_run":1,"first_error":"    Error: 1280 capture: top 78 vs control foot + 8 58"}
+{"lock":"MS7","mutation":"ms7-window","verdict":"red","tests_run":1,"first_error":"    Error: 1280: centre 640 vs the sheet's 760"}
+{"lock":"MS8","mutation":"ms8-hub","verdict":"red","tests_run":1,"first_error":"    Error: expect(received).not.toContain(expected) // indexOf"}
+{"lock":"MS9","mutation":"ms9-grid","verdict":"red","tests_run":1,"first_error":"    Error: \"Dashboard\""}
+{"lock":"MS10","mutation":"ms10-j","verdict":"red","tests_run":1,"first_error":"    Error: keycap \"⌘J\" is not a bound key"}
+{"lock":"MS11","mutation":"ms11-lilac","verdict":"red","tests_run":1,"first_error":"    Error: 1280: the plan tile"}
+{"lock":"MS12","mutation":"ms12-back","verdict":"red","tests_run":1,"first_error":"    Error: 1280: one visible Back to app, in the bar"}
+{"lock":"MS13","mutation":"ms13-centre","verdict":"red","tests_run":1,"first_error":"    Error: 1280 /account/profile: content at 132 from the sheet"}
+{"lock":"MS14","mutation":"ms14-green","verdict":"red","tests_run":1,"first_error":"    Error: expect(received).toBe(expected) // Object.is equality"}
+{"lock":"MS15","mutation":"ms15-desktop","verdict":"red","tests_run":1,"first_error":"    Error: /account/profile at 390 differs from main"}
