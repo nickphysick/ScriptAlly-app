@@ -260,7 +260,10 @@
   .ws-app:not(.set-mode) .ws-appctl--cap { overflow: visible; }
   /* open, the ARROW half stays lit (follow-up 2, 1a) — the button itself takes no ring */
   .ws-cap--bar.is-open .ws-capb { box-shadow: none; }
-  .ws-cap--bar.is-open .ws-capr { background: rgba(var(--ink-shell-rgb), 0.1); }
+  /* `:hover` named too — the pointer is still on the arrow it just pressed, and the hover rule below
+     would otherwise win at equal weight and drop the lit state to 6% (MS1 found it) */
+  .ws-cap--bar.is-open .ws-capr,
+  .ws-cap--bar.is-open .ws-capr:hover { background: rgba(var(--ink-shell-rgb), 0.1); }
   .ws-cap--bar .ws-capl, .ws-cap--bar .ws-capr { color: var(--ink-on-light); }
   .ws-cap--bar .ws-capl { gap: 8px; padding: 0 13px 0 12px; font-size: 14px; font-weight: 600; }
   .ws-cap--bar .ws-capr { width: 30px; border-left: 1px solid rgba(var(--ink-shell-rgb), 0.14); }

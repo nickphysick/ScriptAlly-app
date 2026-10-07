@@ -110,7 +110,9 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   );
 
   /* a SOON row is shown and never chosen: the selection starts on, and moves through, the others */
-  const firstPickable = useCallback((list: PaletteItem[]) => Math.max(0, list.findIndex((it) => !it.soon)), []);
+  /* −1 when every row is SOON: nothing is selected and Enter does nothing (MS4 found the SOON row
+     pre-selected when it was the only result) */
+  const firstPickable = useCallback((list: PaletteItem[]) => list.findIndex((it) => !it.soon), []);
   // The selection can never point past the list — the term changes under it on every keystroke.
   useEffect(() => { setSel(firstPickable(rows)); }, [term, rows, firstPickable]);
 

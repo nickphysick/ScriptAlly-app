@@ -40,6 +40,15 @@ const CSS_MUTATIONS: Record<string, string> = {
   "ink17-window": ".bvd-tab { right: 20px !important; bottom: 20px !important; }",
   "ink18-left": ":root .sa-toasts { left: 20px !important; right: auto !important; margin: 0 !important; }",
   "ink19-ink": "@media (max-width: 767px) { .ws-app, .ws-main { background: #1b2433 !important; } }",
+  /* follow-up 2 — the menus, search and Settings */
+  "ms3-cream": ".sa-mi, .sa-mi * { color: #f4eee5 !important; }",
+  "ms5-sans": ".sa-mi, .sa-mi * { font-family: Arial, sans-serif !important; }",
+  "ms6-offset": ".sa-pop { margin-top: 20px !important; }",
+  "ms7-window": ".sp-pal--ink { left: calc(50vw - 330px) !important; }",
+  "ms11-lilac": ".am-iplan { background: var(--slate-tint) !important; }",
+  "ms13-centre": ".acct-page .acct-work { margin-inline: auto !important; max-width: 760px !important; }",
+  "ms14-green": ".acct-page .acct-toggle[aria-checked=\"true\"] { background: #5a8a5a !important; }",
+  "ms15-desktop": "@media (max-width: 767px) { .acct-page .acct-plane { padding: 44px 56px 40px !important; } }",
 };
 
 /** DOM mutations, by name — run in the page after load. */
@@ -56,6 +65,26 @@ const DOM_MUTATIONS: Record<string, string> = {
   "hc5-outside": `(() => { document.querySelectorAll('[data-qcv-empty] [data-probe="page-header"]').forEach((e) => e.classList.remove('ph--card')); })()`,
   /* the card removed, leaving only the bar's (absent) route */
   "ink13-nocard": `(() => { document.querySelectorAll('.ws-fbk').forEach((e) => e.remove()); })()`,
+  /* the arrow and "?" swap handlers: each click is stopped before React sees it and the OTHER is pressed */
+  "ms1-swap": `(() => { const a = document.querySelector('.ws-cap--bar .ws-capr'); const h = document.querySelector('[data-shell="help"]');
+    a && a.addEventListener('click', (e) => { if (e.isTrusted) { e.stopImmediatePropagation(); h && h.click(); } }, true); })()`,
+  "ms2-swap": `(() => { const a = document.querySelector('.ws-cap--bar .ws-capr'); const h = document.querySelector('[data-shell="help"]');
+    h && h.addEventListener('click', (e) => { if (e.isTrusted) { e.stopImmediatePropagation(); a && a.click(); } }, true); })()`,
+  /* Add a manuscript re-enabled: the disabled mark taken off every entry as it appears */
+  "ms4-enable": `(() => { const strip = () => document.querySelectorAll('[data-cap="manuscript"], [data-ms="add"], .sp-res--soon').forEach((e) => e.removeAttribute('aria-disabled'));
+    strip(); new MutationObserver(strip).observe(document.body, { subtree: true, childList: true, attributes: true }); })()`,
+  /* "Queries Hub" put back in search */
+  "ms8-hub": `(() => { const fix = () => document.querySelectorAll('.sp-pal .sp-t1').forEach((e) => { if (e.textContent === 'Query Centre') e.textContent = 'Queries Hub'; });
+    new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, characterData: true }); })()`,
+  /* the generic grid on every Go-to row */
+  "ms9-grid": `(() => { const G = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>';
+    const fix = () => document.querySelectorAll('.sp-res[data-kind="page"] .sp-ic').forEach((e) => { if (!e.hasAttribute('data-mut')) { e.setAttribute('data-mut', '1'); e.innerHTML = G; } });
+    new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
+  /* a keycap for a key nothing binds */
+  "ms10-j": `(() => { const fix = () => { const r = document.querySelector('.sp-res .sp-k'); if (r && !r.querySelector('[data-mut]')) { const k = document.createElement('span'); k.className = 'sp-kc'; k.setAttribute('data-mut', '1'); k.textContent = '⌘J'; r.appendChild(k); } };
+    new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
+  /* the sidebar's own "Back to app" restored */
+  "ms12-back": `(() => { const r = document.querySelector('#ws-sidebar .set-rail'); if (!r) return; const b = document.createElement('button'); b.className = 'set-backrail'; b.textContent = 'Back to app'; b.style.cssText = 'display:block;color:#f4eee5;font-family:Playfair Display,serif'; r.insertBefore(b, r.firstChild); })()`,
 };
 
 export async function applyMutation(page: Page, scope: string): Promise<void> {
