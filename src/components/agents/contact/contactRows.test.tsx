@@ -2,38 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v13 §6 — the row's state edge and its hover tray. The edge is the query's state
- * family (deep), read off the same facts the row states; the tray offers the CARD's own next step
- * (`primaryFor`), never a ghost way-out, then Open card.
+ * Contact list v14 §6 — the row: v131's table grammar in the Contact list's columns. No coloured edge for anyone
+ * (v13's state edge and `rowEdge` are retired); a closed agent is marked for the grey disc; missing data is the
+ * dashed add pill; the tray offers the CARD's own next step (`primaryFor`), never a ghost way-out, then Open card.
  */
 import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { rowEdge } from "./ContactRows";
-import { QueryStatus } from "../../../types";
 
-describe("rowEdge — the 6px left edge is the query's state, deep", () => {
-  const q = (court: string, status: QueryStatus) => ({ court, status }) as never;
-  it("a never-queried agent has no edge, whatever their door says", () => {
-    expect(rowEdge({ stand: "none" }, null)).toBe("none");
-  });
-  it("an offer is the offer's edge, ahead of 'your move'", () => {
-    expect(rowEdge({ stand: "you" }, q("offer", QueryStatus.OFFER))).toBe("offer");
-  });
-  it("your move — including an agent's-court query past its date (the page's union)", () => {
-    expect(rowEdge({ stand: "you" }, q("you", QueryStatus.PARTIAL_REQUESTED))).toBe("you");
-    expect(rowEdge({ stand: "you" }, q("agent", QueryStatus.QUERIED))).toBe("you");
-  });
-  it("with the agent: Queried is sand, a later stage sage", () => {
-    expect(rowEdge({ stand: "agent" }, q("agent", QueryStatus.QUERIED))).toBe("queried");
-    expect(rowEdge({ stand: "agent" }, q("agent", QueryStatus.FULL_SENT))).toBe("agent");
-  });
-  it("closed is the closed edge", () => {
-    expect(rowEdge({ stand: "closed" }, q("closed", QueryStatus.REJECTED))).toBe("closed");
-  });
-});
-
-describe("the row emits its edge and a tray whose step is the card's", async () => {
+describe("the row: no edge, the closed mark, the add pills, and a tray whose step is the card's", async () => {
   const { ContactRows } = await import("./ContactRows");
   const agent = { id: "a1", name: "Ada Reed", agency: "Reed & Co", genres: [], mswlNotes: "" } as never;
   const facts = { agent, standing: { kind: "none" }, stand: "none", q: null, pastExpected: false, loc: null, door: "open",
@@ -43,8 +20,16 @@ describe("the row emits its edge and a tray whose step is the card's", async () 
     openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
     trayFor: () => (ghost ? { label: "Open in Query Centre", act: "qc" as const, ghost: true } : { label: "Log a query", act: "log" as const }),
   }));
-  it("data-edge rides the row", () => {
-    expect(html(false)).toMatch(/data-clv="row"[^>]*data-edge="none"/);
+  it("no row carries a state edge any more (§6: no coloured row edges)", () => {
+    expect(html(false)).not.toContain("data-edge");
+  });
+  it("missing wishlist and genres are the dashed add pills, saying what to add", () => {
+    const h = html(false);
+    expect(h).toMatch(/class="clv-miss"[^>]*data-clv="torn-wish"[^>]*>\+ Add their wishlist</);
+    expect(h).toMatch(/class="clv-miss"[^>]*data-clv="torn"[^>]*>\+ Add genres</);
+  });
+  it("replies: an unstated window reads Not stated over the door", () => {
+    expect(html(false)).toMatch(/<b class="unk">Not stated<\/b><small>Open to queries<\/small>/);
   });
   it("the row is a div role=button (it holds real buttons), and the tray's controls are buttons", () => {
     const h = html(false);
@@ -60,6 +45,17 @@ describe("the row emits its edge and a tray whose step is the card's", async () 
     const g = html(true);
     expect(g).not.toContain('data-cl13="tray-act"');
     expect(g).not.toContain("Open in Query Centre");
+  });
+  it("a closed door with nothing queried marks the row shut (the grey disc), and says till when", () => {
+    const shutFacts = { ...(facts as object), door: "closed", agent: { ...(agent as object), reopensOn: "2026-11-01" } } as never;
+    const h = renderToStaticMarkup(React.createElement(ContactRows, {
+      groups: [{ label: "R", ids: ["a1"] }] as never, byId: new Map([["a1", shutFacts]]), nowMs: 0, genreHit: () => false,
+      openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
+      trayFor: () => ({ label: "Remind me", act: "remind" as const }),
+    }));
+    expect(h).toMatch(/data-clv="row"[^>]*data-shut="true"/);
+    expect(h).toContain("Closed till 1 Nov");
+    expect(html(false)).not.toContain("data-shut");
   });
   it("the v11 Log query mini retired into the tray", () => {
     expect(html(false)).not.toContain('data-clv="mini-log"');

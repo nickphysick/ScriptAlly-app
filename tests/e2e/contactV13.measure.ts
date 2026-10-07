@@ -144,58 +144,10 @@ const vis = (page: import("@playwright/test").Page, sel: string) => page.locator
    and its ink bar replace the slate workspace and the banner's perch — CL14-5; the group headers and rows are
    Phase 5's. */
 
-/* ── lock 6 · the row's edge is the query's state colour, deep ── */
-test("CL13-6 · row edge", async ({ page }) => {
-  const L = new Ledger("cl13-6");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const probe = document.createElement("i"); document.body.appendChild(probe);
-      const tok = (v: string) => { probe.style.background = `var(${v})`; return getComputedStyle(probe).backgroundColor; };
-      const want = { you: tok("--state-you-deep"), agent: tok("--state-agent-deep"), queried: tok("--state-queried-deep"), offer: tok("--state-offer-deep"), closed: tok("--state-closed-deep") };
-      probe.remove();
-      const rows = [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')];
-      const seen: Record<string, { n: number; bad: string[] }> = {};
-      let topRules = 0;
-      for (const x of rows) {
-        const edge = x.getAttribute("data-edge") ?? "none";
-        const before = getComputedStyle(x, "::before");
-        const bg = before.backgroundColor, wpx = before.width, left = before.left, top = before.top, bottom = before.bottom;
-        const ok = edge === "none" ? bg === "rgba(0, 0, 0, 0)" : bg === (want as Record<string, string>)[edge];
-        (seen[edge] ??= { n: 0, bad: [] }).n++;
-        if (!ok || wpx !== "6px" || left !== "0px" || top !== "0px" || bottom !== "0px") seen[edge].bad.push(`${bg} ${wpx} ${left}/${top}/${bottom}`);
-        if (parseFloat(getComputedStyle(x, "::after").height) === 3) topRules++;
-      }
-      return { want, seen, topRules, n: rows.length };
-    });
-    L.check("CL13-6 the five deep tokens resolve (the two-nothings guard)", w, Object.values(r.want).every((v) => v !== "rgba(0, 0, 0, 0)" && v !== ""), JSON.stringify(r.want));
-    for (const k of ["you", "agent", "queried", "closed", "none"]) {
-      const s = r.seen[k];
-      L.check(`CL13-6 ${k}: population, and a 6px left band in its colour`, w, !!s && s.n > 0 && s.bad.length === 0, s ? `${s.n} rows, bad ${s.bad.slice(0, 2).join(" | ")}` : "none on the fixture");
-    }
-    /* the account holds no agent whose standing query is an offer — the branch is ENTERED in the lab
-       below; here it is only held to its colour wherever it does appear */
-    L.check("CL13-6 offer: any offer row on the account wears its own colour", w, !r.seen.offer || r.seen.offer.bad.length === 0, r.seen.offer ? `${r.seen.offer.n} rows` : "none on the account (entered in the lab)");
-    L.check("CL13-6 no 3px top rule anywhere", w, r.topRules === 0, `${r.topRules}`);
-    await checkOverflow(page, L, w);
-  }
-  /* the offer branch, entered: the lab's cast carries an offer (fq-7 on fx-bare) — no sign-in */
-  await page.goto("/#/contact-lab");
-  await page.waitForSelector('[data-lab-view="cast"]');
-  await page.click('[data-lab-view="cast"]');
-  await page.waitForSelector('[data-clv="row"]');
-  const lab = await page.evaluate(() => {
-    const probe = document.createElement("i"); document.body.appendChild(probe);
-    probe.style.background = "var(--state-offer-deep)"; const want = getComputedStyle(probe).backgroundColor; probe.remove();
-    const rows = [...document.querySelectorAll<HTMLElement>('[data-clv="row"][data-edge="offer"]')].filter((x) => x.getBoundingClientRect().height > 0);
-    return { want, n: rows.length, bad: rows.map((x) => getComputedStyle(x, "::before")).filter((b) => b.backgroundColor !== want || b.width !== "6px").map((b) => `${b.backgroundColor} ${b.width}`) };
-  });
-  L.check("CL13-6 offer (the lab): population, and a 6px left band in the offer's deep slate", "lab", lab.n > 0 && lab.bad.length === 0 && lab.want !== "rgba(0, 0, 0, 0)", JSON.stringify(lab));
-  L.done(28);
-});
+/* CL13-6 (the row's 6px state edge) is RETIRED (v14 §6: "No coloured row edges"): the row is v131's table grammar
+   now, and a closed agent is marked by its grey disc instead — CL14-11 holds both (no edge on any row; the grey disc).
+   tests/e2e/RETIRED-contact-list-v14.md. */
 
-/* ── §5 · the hover tray: the next step, then Open card; the step opens the journey without the card ── */
 test("CL13-T · hover tray", async ({ page }) => {
   const L = new Ledger("cl13-t");
   await openContacts(page, AT_1512);

@@ -1,0 +1,119 @@
+/*
+ * The table list's shared pieces (Contact list v14 §5–§6, ruling Q1; v131's table grammar, lifted for the
+ * Contact list and named for a swap). Values are the mock's, read off its render (design-refs/contact-list-v14.html).
+ * The panel owns `--lt-cols` (the columns) and `--lt-stick` (where its labels pin); the labels and the rows
+ * read them, so a column starts in one place.
+ */
+.lt-panel {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 34px -22px rgba(28, 19, 15, 0.28);
+  /* ⚠️ clip, never hidden: `hidden` makes the panel a scroll container and every sticky inside it would pin to
+     the PANEL, which never scrolls — the labels and dividers would simply ride along (the clipper law) */
+  overflow: clip;
+}
+.lt-labels {
+  position: sticky;
+  top: var(--lt-stick, 0px);
+  z-index: 5;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: var(--lt-cols);
+  column-gap: 20px;
+  align-items: center;
+  height: 40px;
+  padding: 0 22px 0 18px;
+  background: #fff;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.08);
+  transition: box-shadow 0.2s;
+}
+/* §7.5 — the labels lift once they pin */
+.lt-labels.is-stuck { box-shadow: 0 10px 16px -14px rgba(28, 19, 15, 0.35); }
+.lt-lab {
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+  font: 600 8.5px var(--sp-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.42);
+  white-space: nowrap;
+}
+.lt-labels .lt-lab:first-child { padding-left: 43px; }
+.lt-lab.end { text-align: right; }
+button.lt-lab { cursor: pointer; }
+button.lt-lab:hover { color: #1c130f; }
+.lt-lab.on { color: #1c130f; }
+.lt-lab i { font-style: normal; }
+.lt-lab:focus-visible { outline: 2px solid #3f566b; outline-offset: 2px; border-radius: 3px; }
+
+/* §5 — the group header: sticky at the scroller's top, the powder band */
+.lt-gh {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+  scroll-margin-top: 0;
+}
+.lt-gh--powder { background: #e9f1f8; border-radius: 12px; padding: 0 16px; margin-top: 10px; }
+.lt-gh > b { font: 400 19px var(--sp-type) !important; color: #1c130f; }
+.lt-gh em {
+  font-style: normal;
+  font: 500 9px var(--sp-mono);
+  border-radius: 9px;
+  padding: 2px 8px;
+}
+.lt-gh--powder em { background: #fff; color: #2f5f86; }
+.lt-gart {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lt-gh--powder .lt-gart { background: #fff; color: #2f5f86; }
+.lt-gh + .lt-panel { margin-top: 6px; }
+
+/* the letter divider, inside the one panel (Letter grouping): a quiet band, sticky under the labels */
+.lt-div {
+  position: sticky;
+  top: calc(var(--lt-stick, 0px) + 40px);
+  z-index: 4;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 22px 0 18px;
+  background: #f7f9fb;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.06);
+  /* a jump to a letter lands its divider just under the pinned labels — stated NET of the scroller's own
+     `scroll-padding-top`, which adds to every landing (the v12 divider law, measured) */
+  scroll-margin-top: calc(var(--lt-stick, 0px) + 40px - var(--wpg-scroll-pad, 12px));
+}
+.lt-dtab {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #e4ebf1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lt-dtab b { font: 400 15px var(--sp-type) !important; color: #3f566b; }
+.lt-div em {
+  font-style: normal;
+  font: 500 8.5px var(--sp-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3f566b;
+}
+@media (prefers-reduced-motion: reduce) { .lt-labels { transition: none; } }

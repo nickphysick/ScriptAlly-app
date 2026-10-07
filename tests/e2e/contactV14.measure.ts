@@ -331,6 +331,19 @@ test("CL14-8 · grouping", async ({ page }) => {
       L.check(`CL14-8 ${word}: YOUR MOVE absent — the heading already says it`, w, (await page.locator('.aglist [data-clv="ym"]').filter({ visible: true }).count()) === 0, "");
       L.check(`CL14-8 ${word}: a partition — nobody lost`, w, (await rowCount(page)) === total, `${await rowCount(page)} of ${total}`);
       L.check(`CL14-8 ${word}: no A–Z tabs (Letter only)`, w, (await page.locator('.aglist [data-clv="idxwrap"]').filter({ visible: true }).count()) === 0, "");
+      /* §5 — the powder band: #e9f1f8, 54 tall, 12px corners; the art circle white, the count pill white on #2f5f86 */
+      const band = await page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+        const h = root?.querySelector<HTMLElement>(".lt-gh");
+        if (!h) return null;
+        const cs = getComputedStyle(h), em = h.querySelector("em"), art = h.querySelector(".lt-gart");
+        return { bg: cs.backgroundColor, h: h.getBoundingClientRect().height, r: cs.borderTopLeftRadius, pos: cs.position,
+          em: em ? [getComputedStyle(em).backgroundColor, getComputedStyle(em).color] : null, art: art ? getComputedStyle(art).backgroundColor : null };
+      });
+      L.check(`CL14-8 ${word}: the powder band rgb(233,241,248), 54 tall, 12px corners, sticky`, w,
+        !!band && band.bg === "rgb(233, 241, 248)" && near(band.h, 54, 0.5) && band.r === "12px" && band.pos === "sticky", JSON.stringify(band));
+      L.check(`CL14-8 ${word}: the count pill white on #2f5f86, the art circle white`, w,
+        !!band && JSON.stringify(band.em) === JSON.stringify(["rgb(255, 255, 255)", "rgb(47, 95, 134)"]) && band.art === "rgb(255, 255, 255)", JSON.stringify(band));
     }
     await pickGroup(page, "country");
     const c = await headings(page);
@@ -347,7 +360,7 @@ test("CL14-8 · grouping", async ({ page }) => {
     L.check("CL14-8 the toggle names the reversed order", w, (await v14(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label")) === "Sort order: Slowest first", "");
     await checkOverflow(page, L, w);
   }
-  L.done(38);
+  L.done(46);
 });
 
 /* ── lock 9 · remembered settings: versioned and validated — stale state reads as the defaults ── */
@@ -410,6 +423,12 @@ test("CL14-10 · genre field", async ({ page }) => {
     if (!(await input.count())) { L.check("CL14-10 the field renders", w, false, "no field"); continue; }
     await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
     await input.click();
+    /* lock 10's own words: typing "thr" lists Thriller first */
+    await input.pressSequentially("thr", { delay: 20 });
+    await page.waitForTimeout(200);
+    const thr = await page.locator('.aglist [data-cl14="genre-list"] [data-cl14-sugg]').first().textContent({ timeout: 3000 }).catch(() => "");
+    L.check("CL14-10 'thr' lists Thriller first", w, /^Thriller\d+ on your list$/.test((thr ?? "").trim()), `${thr}`);
+    await input.fill("");
     /* "ro" offers several (Romance, Romantasy, Crime…), so ↓ has somewhere to go */
     await input.pressSequentially("ro", { delay: 20 });
     await page.waitForTimeout(200);
@@ -461,5 +480,89 @@ test("CL14-10 · genre field", async ({ page }) => {
     L.check("CL14-10 every token gone → the whole list", w, (await rowCount(page)) === total, `${await rowCount(page)} of ${total}`);
     await checkOverflow(page, L, w);
   }
-  L.done(26);
+  L.done(28);
+});
+
+/* ── Phase 5 · the rows and the table (§5–§6): the panel, the sticky labels and dividers, the row grammar ── */
+test("CL14-11 · rows", async ({ page }) => {
+  const L = new Ledger("cl14-11");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+      if (!root) return null;
+      const lbl = root.querySelector<HTMLElement>(".lt-labels"), div = root.querySelector<HTMLElement>(".lt-div");
+      const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')];
+      const open = rows.find((x) => !x.hasAttribute("data-shut")), shut = rows.find((x) => x.hasAttribute("data-shut"));
+      const col = (e: Element | null) => (e ? Math.round(e.getBoundingClientRect().left) : null);
+      const labs = lbl ? [...lbl.querySelectorAll<HTMLElement>(".lt-lab")] : [];
+      const cell = (x: HTMLElement | undefined, sel: string) => x?.querySelector(sel) ?? null;
+      return {
+        lbl: lbl ? { pos: getComputedStyle(lbl).position, top: getComputedStyle(lbl).top, h: lbl.getBoundingClientRect().height } : null,
+        div: div ? { pos: getComputedStyle(div).position, top: getComputedStyle(div).top, h: div.getBoundingClientRect().height } : null,
+        panels: root.querySelectorAll(".lt-panel").length,
+        rowMin: open ? open.getBoundingClientRect().height : 0,
+        edges: rows.map((x) => getComputedStyle(x, "::before").backgroundColor).filter((c) => c !== "rgba(0, 0, 0, 0)").length,
+        disc: cell(open, ".clv-ini") ? [getComputedStyle(cell(open, ".clv-ini")!).backgroundColor, cell(open, ".clv-ini")!.getBoundingClientRect().width] : null,
+        shutDisc: cell(shut, ".clv-ini") ? getComputedStyle(cell(shut, ".clv-ini")!).backgroundColor : null,
+        shutName: cell(shut, ".clv-rwn b") ? getComputedStyle(cell(shut, ".clv-rwn b")!).color : null,
+        pill: (() => { const m = root.querySelector<HTMLElement>(".clv-miss"); return m ? [m.textContent, getComputedStyle(m).outlineStyle, m.getBoundingClientRect().height] : null; })(),
+        tick: (() => { const h = root.querySelector(".clv-hit"); return h ? getComputedStyle(h, "::before").content : null; })(),
+        rep: rows.map((x) => x.querySelector(".clv-rrep")?.textContent ?? ""),
+        /* composition: each label starts where its column's cell starts, in the same row grid */
+        cols: open && labs.length === 4 && cell(open, ".clv-rq") ? {
+          agent: [col(labs[0]) , col(cell(open, ".clv-rwho"))], want: [col(labs[1]), col(cell(open, ".clv-rfit"))],
+          rep: [col(labs[2]), col(cell(open, ".clv-rrep"))],
+          q: [Math.round(labs[3].getBoundingClientRect().right), Math.round(cell(open, ".clv-rq")!.getBoundingClientRect().right)],
+        } : null,
+      };
+    });
+    if (!r) { L.check("CL14-11 the list renders", w, false, "no list"); continue; }
+    L.check("CL14-11 Letter: one panel", w, r.panels === 1, `${r.panels}`);
+    L.check("CL14-11 the labels: sticky at 0, 40 tall", w, !!r.lbl && r.lbl.pos === "sticky" && r.lbl.top === "0px" && near(r.lbl.h, 40, 0.5), JSON.stringify(r.lbl));
+    L.check("CL14-11 the letter divider: sticky at 40, 38 tall", w, !!r.div && r.div.pos === "sticky" && r.div.top === "40px" && near(r.div.h, 38, 0.5), JSON.stringify(r.div));
+    L.check("CL14-11 a row is at least 80 tall", w, r.rowMin >= 79.5, `${r.rowMin}`);
+    L.check("CL14-11 no row carries a coloured edge", w, r.edges === 0, `${r.edges}`);
+    L.check("CL14-11 the disc: 38, #2a3a52", w, !!r.disc && r.disc[0] === "rgb(42, 58, 82)" && near(Number(r.disc[1]), 38, 0.5), JSON.stringify(r.disc));
+    L.check("CL14-11 a closed agent: the grey disc #b5aca4 and a softer name", w, r.shutDisc === "rgb(181, 172, 164)" && r.shutName === "rgba(28, 19, 15, 0.7)", `${r.shutDisc} ${r.shutName}`);
+    L.check("CL14-11 missing data: the dashed pill saying what to add", w, !!r.pill && /^\+ Add (their wishlist|genres)$/.test(String(r.pill[0])) && r.pill[1] === "dashed" && near(Number(r.pill[2]), 24, 0.5), JSON.stringify(r.pill));
+    L.check("CL14-11 a chip that matches the book carries a tick", w, r.tick === '"✓"', `${r.tick}`);
+    L.check("CL14-11 replies: '~N wks' or 'Not stated', over the door", w, r.rep.length > 3 && r.rep.every((t) => /^(~\d+ wks|Not stated)(Open to queries|Closed till \d+ \w+|Closed to queries)$/.test(t)), JSON.stringify(r.rep.slice(0, 4)));
+    L.check("CL14-11 every label starts on its column", w, !!r.cols && Object.values(r.cols).every(([a, b]) => a != null && b != null && Math.abs(Number(a) - Number(b)) <= 1), JSON.stringify(r.cols));
+    /* the labels lift once they pin: scroll the list under the scroller's top */
+    const stuck = await page.evaluate(async () => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const sc = root.querySelector<HTMLElement>(".wpg-scroll") ?? root.closest<HTMLElement>(".wpg-scroll") ?? document.querySelector<HTMLElement>(".wpg-scroll")!;
+      const panel = root.querySelector<HTMLElement>(".lt-panel"), lbl = root.querySelector<HTMLElement>(".lt-labels");
+      /* ⚠️ a missing panel is a failed READING, never a crash */
+      if (!panel || !lbl || !sc) return { before: true, after: false, shadow: "none", gap: NaN };
+      const before = lbl.classList.contains("is-stuck");
+      sc.scrollTop += panel.getBoundingClientRect().top - sc.getBoundingClientRect().top + 400;
+      await new Promise((res) => setTimeout(res, 400));
+      return { before, after: lbl.classList.contains("is-stuck"), shadow: getComputedStyle(lbl).boxShadow, gap: lbl.getBoundingClientRect().top - sc.getBoundingClientRect().top };
+    });
+    L.check("CL14-11 the labels pin at the scroller's top and lift (a shadow) once pinned", w,
+      !stuck.before && stuck.after && stuck.shadow !== "none" && near(stuck.gap, 0, 1), JSON.stringify(stuck));
+    /* the marquee: a wishlist too long for its line scrolls on row hover (the Web Animations API) */
+    const mq = await page.evaluate(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const sp = root.querySelector<HTMLElement>('[data-clv="wish"] .clv-mq');
+      if (!sp) return null;
+      sp.textContent = "Literary suspense with a dark heart, slow-burn family secrets, unreliable narrators and coastal towns in winter, told with real restraint";
+      const row = sp.closest<HTMLElement>('[data-clv="row"]')!;
+      row.scrollIntoView({ block: "center" });
+      return row.getAttribute("data-agent-card");
+    });
+    if (!mq) { L.check("CL14-11 the marquee: population (a wishlist row)", w, false, "none"); continue; }
+    await page.locator(`.aglist [data-agent-card="${mq}"]`).filter({ visible: true }).first().hover();
+    await page.waitForTimeout(1600);
+    const moved = await page.evaluate((id) => {
+      const sp = document.querySelector<HTMLElement>(`[data-agent-card="${id}"] .clv-mq`);
+      return sp ? new DOMMatrix(getComputedStyle(sp).transform).m41 : null;
+    }, mq);
+    L.check("CL14-11 the marquee: a long wishlist scrolls on hover", w, moved != null && moved < -5, `${moved}`);
+    await checkOverflow(page, L, w);
+  }
+  L.done(28);
 });

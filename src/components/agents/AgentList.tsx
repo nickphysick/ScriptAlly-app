@@ -978,6 +978,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               genreHit={bookHit}
               /* §4: under Status and Action grouping the heading already says it */
               hideYourMove={groupKey === "status" || groupKey === "action"}
+              /* §5: Letter draws one panel with letter dividers; any other grouping a powder band per group */
+              byLetter={groupKey === "letter"}
+              /* §6: the sortable column labels drive the page's own sort */
+              sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
               openId={openId}
               newId={newId}
               onOpen={onOpen}

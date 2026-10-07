@@ -37,3 +37,12 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 | `src/lib/contactList.test.ts` | the v13 filter, grouping and sort cases (`facetOptions`, `stand`/`fit`/`profile`/`rating`/`locs`, Where you stand, Agency, Location, Open to queries, Fit, Next date, Your rating, First name) | Nick's filter, group and sort set supersedes v13's (ruling, 7 Oct) | The v14 cases in the same file |
 
 **Deleted with them:** `listState`/`listDiff` (their only reader was CL13-7), the `.cl13-fline`/`.cl13-fchip`/`.cl13-clr` rules, `filterValueLabel`, `facetOptions`, `FilterCtx`, `compareDue`, `STATUS_OPTIONS`.
+
+## Phase 5 — the v13 rows and their dividers (v14 §5–§6)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV13.measure.ts` | CL13-6 · row edge | §6: "No coloured row edges" — the rows are v131's table grammar, a closed agent marked by a grey disc | CL14-11 (no edge on any row; the grey disc and softer name) |
+| `src/components/agents/contact/contactRows.test.tsx` | `rowEdge` (five cases) and "data-edge rides the row" | `rowEdge` is deleted with the edge it computed | The same file: no `data-edge`, the closed mark, the add pills, the replies line |
+
+**Deleted with them:** the v12/v13 dossier-row and `.clv-band2` divider rules in `contactV11.css` (one authoritative block for the rows now lives in `contactV14.css`; the panel, labels, powder header and letter divider in `shell/listTable`), the v11 `.clv-ini`/`.clv-gch` duplicates, and the torn-slip `.clv-torn`/`.clv-mini` styles (the missing-data treatment is the dashed add pill, which keeps the `torn-wish`/`torn` probes).

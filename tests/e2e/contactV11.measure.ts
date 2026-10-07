@@ -109,7 +109,8 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
         return { over: b.scrollWidth > b.clientWidth + 1 };
       }),
       bands: [...document.querySelectorAll(`${scope} [data-clv="band"]`)].map((b) => ({
-        label: b.querySelector("b")?.textContent, n: b.querySelector("small")?.textContent ?? null,
+        /* v14 P5: the count sits in the shared divider's `em` (data-cl13="gcount"), where v12/v13 used a <small> */
+        label: b.querySelector("b")?.textContent, n: b.querySelector('[data-cl13="gcount"]')?.textContent ?? null,
       })),
     };
   }, scope);
@@ -589,7 +590,8 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
         if (el.matches("[data-agent-card]")) n += 1;
       }
       /* v12 P3: the divider's <i> became the RULE; the count is the <small>'s leading number */
-      return { letter: b.dataset.letter ?? "", band: parseInt(b.querySelector("small")?.textContent ?? "", 10), rows: n };
+      /* v14 P5: the count is the shared divider's `em` (data-cl13="gcount") now */
+      return { letter: b.dataset.letter ?? "", band: parseInt(b.querySelector('[data-cl13="gcount"]')?.textContent ?? "", 10), rows: n };
     });
     const perCell = cells.map((c) => ({
       letter: c.dataset.letter ?? "",
@@ -690,7 +692,10 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
 
 /* v12 §10.4 (the slate divider tab on the ground) is RETIRED by v13 P4 — the tab is anthracite on a 2px rule inside the workspace (contactV13 CL13-5). RETIRED-contact-list-v13.md */
 
-test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped wishlist", async ({ page }) => {
+/* REWRITTEN (v14 P5): the row is v131's table grammar — four columns with the disc INSIDE the Agent column (its
+   own 34px track retired), 22px right padding, and the wishlist on ONE line with a hover marquee, where v12 clamped
+   it to two. The four-track, one-italic-line and every-row-has-a-wishlist-or-pill claims stand. */
+test("v12 §10.5 — the dossier row: four tracks, one italic line, the one-line wishlist", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   const read = (w: number) => page.evaluate((scope) => {
@@ -704,7 +709,8 @@ test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped 
     const minH = Math.min(...rows.map((x) => x.getBoundingClientRect().height));
     return {
       n: rows.length, cols, firstCol: parseFloat(cols[0] ?? "0"),
-      qRight: Math.round((first.getBoundingClientRect().right - 18 - q.getBoundingClientRect().right) * 10) / 10,
+      qRight: Math.round((first.getBoundingClientRect().right - 22 - q.getBoundingClientRect().right) * 10) / 10,
+      disc: (first.querySelector(".clv-ini") as HTMLElement | null)?.getBoundingClientRect().width ?? 0,
       pace, italics, minH,
       wishes: [...document.querySelectorAll(`${scope} .clv-rwish`)].length,
       tornWish: document.querySelectorAll(`${scope} [data-clv="torn-wish"]`).length,
@@ -714,7 +720,7 @@ test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped 
   const r = await read(1440);
   expect(r.n, "population first").toBeGreaterThan(10);
   expect(r.cols.length, "four tracks at 1440").toBe(4);
-  expect(r.firstCol, "the disc track (v13: the mock's 34)").toBe(34);
+  expect(r.disc, "the disc sits in the Agent column at the mock's 38").toBe(38);
   expect(Math.abs(r.qRight), "the query column ends on the row's padding edge").toBeLessThanOrEqual(1);
   expect(r.pace, "the v11 paceBits line is retired").toBe(0);
   expect(r.italics.length, "population: the one italic who line renders").toBeGreaterThan(5);
@@ -722,19 +728,19 @@ test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped 
   expect(r.wishes + r.tornWish, "every row carries a wishlist or its torn slip").toBe(r.n);
   bump(7 + r.italics.length);
 
-  /* the clamp, under STRESS (the house law: growth must push, never overflow) — inject a long
-     wishlist and the box holds at two lines with the clamp visibly engaged */
+  /* the one line, under STRESS (the house law: growth must push, never overflow) — inject a long
+     wishlist and the box holds at ONE line, its text running on past the box (v14: the marquee shows the rest) */
   const clamp = await page.evaluate((scope) => {
-    const w = document.querySelector(`${scope} .clv-rwish`) as HTMLElement | null;
-    if (!w) return null;
+    const w = document.querySelector(`${scope} .clv-rwish .clv-mq`) as HTMLElement | null;
+    const box = w?.parentElement as HTMLElement | null;
+    if (!w || !box) return null;
     w.textContent = "Dark academia with a conscience, locked-room mysteries on moving vehicles, sisters who ruin each other politely, climate grief with jokes, heists where the real theft is emotional, and any book whose narrator lies to the reader for a structurally good reason.";
-    const cs = getComputedStyle(w);
-    const twoLines = 2 * parseFloat(cs.lineHeight);
-    return { h: w.getBoundingClientRect().height, twoLines, clipped: w.scrollHeight > w.clientHeight + 1 };
+    const oneLine = parseFloat(getComputedStyle(box).lineHeight);
+    return { h: box.getBoundingClientRect().height, twoLines: oneLine, clipped: w.scrollWidth > box.clientWidth + 1 };
   }, scope);
   expect(clamp, "no wishlist on the account to stress").not.toBeNull();
-  expect(clamp!.h, `the wish holds at two lines (${clamp!.h} vs ${clamp!.twoLines})`).toBeLessThanOrEqual(clamp!.twoLines + 2);
-  expect(clamp!.clipped, "the clamp visibly engaged on the injected text").toBe(true);
+  expect(clamp!.h, `the wish holds at one line (${clamp!.h} vs ${clamp!.twoLines})`).toBeLessThanOrEqual(clamp!.twoLines + 1);
+  expect(clamp!.clipped, "the line visibly runs on past its box on the injected text").toBe(true);
   bump(3);
 
   /* 1280: the same four columns on the narrow floors, 86px rows */
@@ -742,7 +748,7 @@ test("v12 §10.5 — the dossier row: four tracks, one italic line, the clamped 
   await page.waitForTimeout(250);
   const nr = await read(1280);
   expect(nr.cols.length, "still four tracks at 1280 — the v11 two-deck fold is retired").toBe(4);
-  expect(nr.firstCol).toBe(34);
+  expect(nr.disc).toBe(38);
   /* v13 P4: with the rail gone the column at 1280 is no longer under the 720 container boundary, so
      the row keeps the mock's full template and its 80px floor (the 86 belonged to the narrow fold) */
   expect(nr.minH, "the row floors at the mock's 80").toBeGreaterThanOrEqual(79.5);

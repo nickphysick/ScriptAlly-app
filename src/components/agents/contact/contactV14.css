@@ -316,3 +316,119 @@
 @media (prefers-reduced-motion: reduce) {
   .clv-group[data-loading] .cl14-bar :is(.cl14-bar-t h2, .cl14-bar-k) { animation: none; }
 }
+
+/* ══ v14 §6 — THE ROWS: v131's table rows in the Contact list's columns (shell/listTable owns the panel, the
+   labels, the powder header and the letter divider; this block owns the Contact list's cells). One authoritative
+   block — the v12/v13 dossier rows and their dividers are deleted from contactV11.css. Values are the mock's
+   render (design-refs/contact-list-v14.html, booted as y-index y-agent y-grey m-ghost GV-powder). ══ */
+.clv-row {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: var(--lt-cols);
+  column-gap: 20px;
+  align-items: center;
+  min-height: 80px;
+  padding: 10px 22px 10px 18px;
+  background: #fff;
+  cursor: pointer;
+  font-family: var(--clv-serif);
+  color: #1c130f;
+  text-align: left;
+}
+/* inset hairlines, so the panel's edges stay clean — none on the last row, none before a divider */
+.clv-row::after { content: ""; position: absolute; left: 18px; right: 22px; bottom: 0; height: 1px; background: rgba(28, 19, 15, 0.07); }
+.clv-row:last-child::after, .clv-row:has(+ .lt-div)::after { display: none; }
+.clv-row:hover { background: #fdfbf8; }
+.clv-row:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: -2px; }
+.clv-row[aria-current="true"] { box-shadow: inset 0 0 0 1.5px var(--clv-ink); }
+/* Agent: the initials disc, the name, then "agency · city" */
+.clv-rwho { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.clv-ini {
+  flex: none; width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #2a3a52; color: #f5f1eb;
+  font: 500 11px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.04em;
+}
+.clv-rwn { min-width: 0; }
+.clv-rwn b { display: block; font: 600 17px/1.4 var(--clv-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clv-ragy { display: block; margin-top: 2px; font: italic 13.5px/1.4 var(--clv-serif); color: rgba(28, 19, 15, 0.58); }
+/* §6 — a CLOSED agent: the grey disc and a softer name; nobody gets a coloured edge */
+.clv-row[data-shut] .clv-ini { background: #b5aca4; color: #fff; }
+.clv-row[data-shut] .clv-rwn b { color: rgba(28, 19, 15, 0.7); }
+/* What they want: the wishlist on ONE line (the marquee runs on hover — ContactRows), the chips under it */
+.clv-rfit { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.clv-rwish {
+  margin: 0 0 5px; max-width: 100%;
+  font: 15px/21px var(--clv-serif); color: #1c130f;
+  white-space: nowrap; overflow: hidden;
+}
+.clv-rwish.is-long {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.clv-row:hover .clv-rwish.is-long {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+}
+.clv-mq { display: inline-block; will-change: transform; }
+.clv-gch { display: flex; flex-wrap: wrap; gap: 5px; max-width: 100%; }
+.clv-gch span {
+  display: inline-flex; align-items: center; gap: 4px; height: 21px; padding: 0 8px; border-radius: 5px;
+  background: #f7f3ee; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+  font: 500 8.5px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.7); white-space: nowrap;
+}
+/* a chip that matches the book: white, an ink ring, and a tick */
+.clv-gch span.clv-hit { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.7); }
+.clv-gch span.clv-hit::before { content: "\2713"; font-size: 9px; }
+/* §6 — missing data: the dashed slate link pill */
+.clv-miss {
+  display: inline-flex; align-items: center; box-sizing: border-box; height: 24px; padding: 0 10px; margin: 0 6px 4px 0;
+  border-radius: 12px; outline: 1px dashed rgba(63, 86, 107, 0.45); outline-offset: -1px;
+  font: 500 12.5px var(--clv-serif); color: var(--clv-slate-ink); white-space: nowrap; cursor: pointer;
+}
+.clv-miss:hover { background: #eef2f5; outline-color: var(--clv-slate-ink); }
+.clv-miss:focus-visible { outline: 2px solid var(--clv-slate-ink); outline-offset: 1px; }
+/* Replies: "~N wks" over the door */
+.clv-rrep b { display: block; font: 400 14.5px var(--clv-type) !important; color: #1c130f; }
+.clv-rrep b.unk { color: rgba(28, 19, 15, 0.45); }
+.clv-rrep small {
+  display: block; margin-top: 5px;
+  font: 600 8px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.42); white-space: nowrap;
+}
+/* Query status: StatusDot and the standing, the date line under it, right-aligned */
+.clv-rq { min-width: 0; justify-self: end; text-align: right; }
+.clv-ql {
+  display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px;
+  font: 400 13px var(--clv-type); color: rgba(28, 19, 15, 0.58); white-space: nowrap;
+}
+.clv-ql--none { color: rgba(28, 19, 15, 0.58); }
+.clv-qd {
+  display: block; margin-top: 5px;
+  font: 600 7.5px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.42); white-space: nowrap;
+}
+.clv-qd--over { color: #1c130f; font-weight: 700; }
+.clv-ym {
+  display: inline-flex; align-items: center; height: 18px; padding: 1px 7px 0; border-radius: 4px;
+  color: #7c3a2a; box-shadow: inset 0 0 0 1px currentColor;
+  font: 700 7px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+}
+/* the hover tray: over the query column, on hover or keyboard focus */
+.clv-rtray {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 6px; padding-left: 30px;
+  background: linear-gradient(90deg, transparent, #fdfbf8 18px);
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.clv-row:hover .clv-rtray, .clv-row:focus-within .clv-rtray { opacity: 1; pointer-events: auto; }
+.clv-trb {
+  display: inline-flex; align-items: center; height: 32px; padding: 0 13px; border: 0; border-radius: 16px;
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+  font: 400 13px var(--clv-type); color: #1c130f; white-space: nowrap; cursor: pointer;
+}
+.clv-trb.p { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
+.clv-trb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .clv-rtray { transition: none; } }
