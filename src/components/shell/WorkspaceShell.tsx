@@ -761,6 +761,19 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               forms, one handler: the card; the outlined terracotta button below 920px of window height (CSS); and
               the icon with its dot when the sidebar is collapsed (CSS). All three are always rendered so
               the switch between them is a style, never a remount. */}
+          {/* ══ SETTINGS MODE'S RAIL — in the sidebar's own column (ink shell v1, follow-up 2 §5) ══
+              ⚠️ IT MOVED INSIDE `.ws-pin`, BETWEEN THE NAV AND THE FEEDBACK CARD. It used to be a sibling
+              laid over the WHOLE panel (`inset: 0`), which hid the logo row and the foot with the nav;
+              the reference keeps both, so in settings mode the column is: the logo row, the SETTINGS
+              eyebrow and its sections, the plan tile, the foot row. The nav, the selector and the
+              feedback card step out (`.set-mode` in inkShell.css); below 768px the rail is not drawn. */}
+          <SettingsRail
+            live={settingsMode}
+            active={settingsSection}
+            onSelect={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+            onExit={leaveSettings}
+            plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
+          />
           {onOpenFeedback && (
             <div className="ws-fbk" data-shell="feedback">
               <div className="ws-fbc">
@@ -875,22 +888,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           </div>
         </div>
 
-        {/* ══ THE SECOND LAYER — settings mode's rail, over the app nav in the SAME slot ══
-            ⚠️ A SIBLING OF `.ws-pin`, ABSOLUTELY POSITIONED OVER IT. The nav stays in flow and
-            keeps sizing the panel; this layer takes `inset: 0` and neither one can move the
-            other. That is what makes the swap a cross-fade rather than a relayout — the panel's
-            width never changes, so nothing to the right of it reflows.
-
-            ⚠️ NOT ONE MARKUP CHANGE TO THE NAV. Its outgoing state is expressed entirely from
-            `.set-mode .ws-pin` in the stylesheet, which is why the nav component is untouched
-            while the file that hosts it is not. */}
-        <SettingsRail
-          live={settingsMode}
-          active={settingsSection}
-          onSelect={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
-          onExit={leaveSettings}
-          plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
-        />
       </div>
       {accountMenu}
       {/* the one rail tooltip — portalled to the fixed layer, so the panel's overflow cannot
@@ -945,7 +942,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   fade and the bar's hairline are retired with it. */}
               {pageName && (
                 <FolderTab
-                  group={tabGroup}
+                  /* off-nav routes name their group from barPageName — Settings reads ACCOUNT · Settings */
+                  group={tabGroup ?? pageName.section}
                   name={pageName.name}
                   siblings={tabSiblings}
                   onGo={go}
@@ -985,6 +983,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   tabIndex={settingsMode ? 0 : -1}
                   aria-hidden={settingsMode ? undefined : true}
                 >
+                  <svg className="ws-backapp-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>
                   Back to app
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>

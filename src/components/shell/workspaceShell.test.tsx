@@ -433,7 +433,9 @@ describe("the sidebar", () => {
      than widening the slice. SB5's rendered half (the gear routes, absent collapsed) is
      tests/e2e/sidebarCapture.measure.ts. */
   it("⚠️ SB5 the foot is a hairline over the user row AND the gear, as siblings — and the nav has no Settings", () => {
-    const foot = sliceBetween(srcCode, 'className="ws-pfoot"', "<SettingsRail", "the sidebar foot");
+    /* RE-ANCHORED (follow-up 2): the settings rail now mounts INSIDE the column, above the foot, so the
+       foot's end anchor is the account menu mounted after the panel */
+    const foot = sliceBetween(srcCode, 'className="ws-pfoot"', "{accountMenu}", "the sidebar foot");
     const row = foot.indexOf('className="ws-pfrow"');
     const user = foot.indexOf('className="ws-uacct"');
     const gear = foot.indexOf('className="ws-gear"');

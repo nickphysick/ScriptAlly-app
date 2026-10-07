@@ -34,7 +34,7 @@ import React from "react";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../../lib/accountRoutes";
 import { SECTION_BANDS } from "./sectionBands";
 import { planAllowanceLine } from "../../lib/planComparison";
-import { ChevronLeft, BookMarked } from "lucide-react";
+import { BookMarked } from "lucide-react";
 import "./settingsRail.css";
 
 /** The one id the mode's focus contract addresses — entering settings lands here. */
@@ -50,7 +50,9 @@ export interface SettingsRailProps {
   plan: "free" | "pro";
 }
 
-export const SettingsRail: React.FC<SettingsRailProps> = ({ active, live, onSelect, onExit, plan }) => {
+/* `onExit` stays on the props — the shell passes it, and the bar's Back to app and Escape are its
+   callers now; the rail no longer draws its own exit row. */
+export const SettingsRail: React.FC<SettingsRailProps> = ({ active, live, onSelect, plan }) => {
   const idx = ACCOUNT_ROUTES.findIndex((r) => r.id === active);
 
   /* ⚠️ THE ROVING TAB INDEX NEEDS A LANDING PLACE WHEN NOTHING IS ACTIVE. `idx` is -1 on every
@@ -81,17 +83,11 @@ export const SettingsRail: React.FC<SettingsRailProps> = ({ active, live, onSele
 
   return (
     <div className="set-rail" aria-hidden={live ? undefined : true}>
-      {/* ⚠️ THE EXIT IS A ROW, NOT A CRUMB. It is the first thing in the column because leaving is
-          the one action this mode has that the page cannot offer — every other row goes deeper. */}
-      <button type="button" className="set-backrail" onClick={onExit}>
-        <ChevronLeft aria-hidden="true" /> Back to app
-      </button>
-
-      <hr className="set-railrule" />
-
-      {/* ⚠️ `tabIndex={-1}` SO IT CAN BE FOCUSED WITHOUT BEING TABBED TO. Entering the mode moves
-          focus here so a screen reader announces where it has arrived; it must not then sit in the
-          tab order as a stop that does nothing. */}
+      {/* ⚠️ "BACK TO APP" IS IN THE BAR, ONCE (follow-up 2 §5). The rail's own exit row and the rule
+          under it are retired: the bar's ghost button and Escape are the two ways out. */}
+      {/* ⚠️ THE HEADING IS NOW THE RAIL'S EYEBROW — mono capitals, as the nav's group labels. It stays
+          the focus target the mode moves to on entry, so a screen reader still announces it. The
+          Playfair "Settings" heading is retired (follow-up 2 §5). */}
       <h2 className="set-railhead" id={SETTINGS_RAIL_HEADING_ID} tabIndex={-1}>Settings</h2>
 
       <div
@@ -128,6 +124,9 @@ export const SettingsRail: React.FC<SettingsRailProps> = ({ active, live, onSele
           problem that belonged to a grid this mode no longer has. What survives is the only part
           that ever said anything: the plan, and the line derived from `PLAN_ROWS` so the rail and
           the comparison two clicks away cannot come to disagree. */}
+      {/* ⚠️ THE PLAN TILE IS THE FEEDBACK CARD'S STYLE (follow-up 2 §5): a terracotta wash, the plan
+          in the typewriter, the allowance line derived from `PLAN_ROWS` (so the rail and the comparison
+          cannot disagree), and the one link a plan needs — to Plan & billing. */}
       <div className="set-railfoot">
         <div className="set-planstrip">
           <BookMarked aria-hidden="true" strokeWidth={1.3} />
@@ -135,6 +134,9 @@ export const SettingsRail: React.FC<SettingsRailProps> = ({ active, live, onSele
             <span className="set-plank">Your plan</span>
             <span className="set-planv">{plan === "pro" ? "Pro" : "Free"}</span>
             <span className="set-plannote">{planAllowanceLine(plan)}.</span>
+            <button type="button" className="set-planlink" onClick={() => onSelect("plan")} tabIndex={live ? 0 : -1}>
+              Plan &amp; billing <span aria-hidden="true">›</span>
+            </button>
           </div>
         </div>
       </div>

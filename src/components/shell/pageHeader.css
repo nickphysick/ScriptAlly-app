@@ -791,28 +791,33 @@
    ⚠️ THE CONTENTS ARE LAID OUT AGAINST THE CARD: the text starts clamp(48px, 7vw, 104px) inside its left
    edge, and the disc sits on the right, wholly inside, at least 40px from the card's right edge (the
    right padding's floor). The height is whatever the contents need. */
-.ph--full.ph--card { margin-top: 20px; }
-.ph--full.ph--band.ph--card {
-  box-sizing: border-box;
-  padding: 48px 40px 30px clamp(48px, 7vw, 104px);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: none;
-  clip-path: none;
-}
-/* ⚠️ THE DISC STAYS TO THE RIGHT OF THE TEXT AT EVERY DESKTOP WIDTH. The band's own container query stacks
-   it below 1100px of column, and the card's padding takes the column under that at 1710 too — the card
-   grew from 337 to 567 there on the first build. A flexible text column beside the 290 disc fits at
-   1280 (measured), so the card holds the pair side by side and only stacks when the card itself is
-   narrower than the pair can be. The right padding is the brief's 40px floor, flat. */
-.ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr) 290px; column-gap: 48px; justify-content: stretch; }
-@container (max-width: 1099.5px) {
-  .ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr) 290px; row-gap: 0; }
-  .ph--band.ph--card .ph-bdisc { justify-self: end; }
-}
-@container (max-width: 640px) {
-  .ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr); row-gap: 24px; }
-  .ph--band.ph--card .ph-bdisc { justify-self: start; }
+/* ⚠️ DESKTOP ONLY, LIKE EVERY INK RULE (follow-up 2 found it): ungated, the card applied on the phone too,
+   where its 48px of left padding against a 390px column ran the title and the buttons off the card's
+   right edge. Below 768px the Query Centre keeps `main`'s full-bleed band. */
+@media (min-width: 768px) {
+  .ph--full.ph--card { margin-top: 20px; }
+  .ph--full.ph--band.ph--card {
+    box-sizing: border-box;
+    padding: 48px 40px 30px clamp(48px, 7vw, 104px);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: none;
+    clip-path: none;
+  }
+  /* ⚠️ THE DISC STAYS TO THE RIGHT OF THE TEXT AT EVERY DESKTOP WIDTH. The band's own container query stacks
+     it below 1100px of column, and the card's padding takes the column under that at 1710 too — the card
+     grew from 337 to 567 there on the first build. A flexible text column beside the 290 disc fits at
+     1280 (measured), so the card holds the pair side by side and only stacks when the card itself is
+     narrower than the pair can be. The right padding is the brief's 40px floor, flat. */
+  .ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr) 290px; column-gap: 48px; justify-content: stretch; }
+  @container (max-width: 1099.5px) {
+    .ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr) 290px; row-gap: 0; }
+    .ph--band.ph--card .ph-bdisc { justify-self: end; }
+  }
+  @container (max-width: 640px) {
+    .ph--band.ph--card .ph-hin { grid-template-columns: minmax(0, 1fr); row-gap: 24px; }
+    .ph--band.ph--card .ph-bdisc { justify-self: start; }
+  }
 }
 
 /* ══ THE FIXED BAND (Analytics v17, 5 Oct; ref design-refs/analytics-v17.html, measured at 1512 and 390) ══

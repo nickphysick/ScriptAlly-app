@@ -60,9 +60,18 @@ describe("ink fix-ups — the header card is the Query Centre's alone", () => {
     expect(block.length, "the card block is found").toBeGreaterThan(100);
     for (const sel of block.match(/(^|\n|\})\s*([^{}@\n][^{}]*)\{/g) ?? []) {
       const s = sel.replace(/^[}\s]+/, "").replace(/\{$/, "").trim();
-      if (!s) continue;
+      /* the block is indented inside its ≥768 media query now (follow-up 2), so an indented at-rule can
+         reach this match; at-rules are wrappers, not rules */
+      if (!s || s.startsWith("@")) continue;
       expect(s, `a card-block rule without .ph--card: ${s}`).toContain(".ph--card");
     }
+  });
+  it("the card is desktop-only: the phone keeps main's full-bleed band (follow-up 2)", () => {
+    const raw = readFileSync("src/components/shell/pageHeader.css", "utf8");
+    const at = raw.indexOf(".ph--full.ph--card {");
+    const media = raw.lastIndexOf("@media (min-width: 768px) {", at);
+    expect(media, "the card block sits inside a ≥768 media query").toBeGreaterThan(-1);
+    expect(raw.slice(media, at)).not.toMatch(/\n\}/);
   });
   it("only the Query Centre passes `card`; Analytics and the Contact list keep `band` alone", () => {
     const qc = readFileSync("src/components/queries/centre/QcCentre.tsx", "utf8");

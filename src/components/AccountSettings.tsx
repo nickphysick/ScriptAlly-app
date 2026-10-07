@@ -250,6 +250,7 @@ const Toggle: React.FC<{
     role="switch"
     aria-checked={on}
     aria-label={label}
+    className="acct-toggle"
     onClick={() => onChange(!on)}
     style={{
       width: 38,
@@ -266,6 +267,7 @@ const Toggle: React.FC<{
   >
     <span
       aria-hidden="true"
+      className="acct-toggle-k"
       style={{
         position: "absolute",
         top: 2,
@@ -449,7 +451,7 @@ const DeleteAccountModal: React.FC<{
               )}
             </div>
             <div className="flex items-center justify-between" style={{ gap: 12, marginTop: 14 }}>
-              <button onClick={onClose} style={{ ...ghostBtn, borderColor: "#d8cdc0", color: "#6a5a50" }}>
+              <button onClick={onClose} className="acct-btn acct-btn--ghost" style={{ ...ghostBtn, borderColor: "#d8cdc0", color: "#6a5a50" }}>
                 Cancel
               </button>
               {/* ⚠️ DISABLED UNTIL THE WORD MATCHES EXACTLY — the gate, not a decoration. */}
@@ -794,12 +796,14 @@ export const AccountSettings: React.FC<{
           exactly this reason.
           The dashboard's "Add a photo +", which navigated here and found nothing, was retired with
           its tile in dashboard stages 2–3 (17 Sep), so nothing arrives here looking for one. */}
-      <SettingsCard heading="You" headingId="acct-h-profile">
+      <SettingsCard heading="You" headingId="acct-h-profile" aside="How you appear in QueryHawk.">
         <IdentityRow name={currentUser.name} email={currentUser.email} />
       </SettingsCard>
 
       <SettingsCard
         heading="Details"
+        aside="Used across the app and on anything you export."
+        saveLine
         note="Your name saves when you press Save. Everything else saves as you change it."
         /* ⚠️ THE SAVE IS ABSENT UNTIL THE FIELD DIVERGES, not present-and-disabled. A permanently
            greyed button spends its whole life saying no; its ARRIVAL is the page telling you there
@@ -810,11 +814,12 @@ export const AccountSettings: React.FC<{
             <button
               onClick={saveName}
               disabled={!nameValid || nameStatus.type === "saving"}
+              className="acct-btn acct-btn--primary"
               style={{ ...primaryBtn, opacity: !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: nameValid ? "pointer" : "not-allowed" }}
             >
               {nameStatus.type === "saving" ? "Saving…" : "Save"}
             </button>
-            <button onClick={discardName} disabled={nameStatus.type === "saving"} style={ghostBtn}>
+            <button onClick={discardName} disabled={nameStatus.type === "saving"} className="acct-btn acct-btn--ghost" style={ghostBtn}>
               Discard
             </button>
           </span>
@@ -903,7 +908,7 @@ export const AccountSettings: React.FC<{
                   one page with the identical accessible name and different effects. A screen reader
                   announcing "Change, button" twice cannot distinguish them, and neither can a voice
                   command. The column is wide enough for the noun. */}
-              <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
+              <button onClick={() => onNavigate("contact")} className="acct-btn acct-btn--ghost" style={ghostBtn}>Change email</button>
             </>
           }
         />
@@ -923,7 +928,7 @@ export const AccountSettings: React.FC<{
                     {verifyMsg}
                   </span>
                 )}
-                <button onClick={resendVerification} disabled={verifyMsg === "sending"} style={ghostBtn}>
+                <button onClick={resendVerification} disabled={verifyMsg === "sending"} className="acct-btn acct-btn--ghost" style={ghostBtn}>
                   {verifyMsg === "sending" ? "Sending…" : "Resend"}
                 </button>
               </>
@@ -971,7 +976,7 @@ export const AccountSettings: React.FC<{
               new provider list rather than holding the form's own "done" state for ever. */
           <SettingsRow key={`pw-${authKey}`} label="Password" description={PASSWORD_ABSENT_NOTE} full>
             <div style={{ marginTop: 10 }}>
-              <AddPassword buttonStyle={ghostBtn} onAdded={refreshAuthFacts} />
+              <AddPassword buttonStyle={ghostBtn} buttonClassName="acct-btn acct-btn--ghost" onAdded={refreshAuthFacts} />
             </div>
           </SettingsRow>
         ) : (
@@ -984,7 +989,7 @@ export const AccountSettings: React.FC<{
             control={
               <>
                 {resetMsg && <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>{resetMsg}</span>}
-                <button onClick={sendReset} style={ghostBtn}>
+                <button onClick={sendReset} className="acct-btn acct-btn--ghost" style={ghostBtn}>
                   <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change password
                 </button>
               </>
@@ -1018,7 +1023,7 @@ export const AccountSettings: React.FC<{
         <SettingsRow
           label={currentUser.plan === UserPlan.PRO ? "Pro" : "Free"}
           description={planAllowanceLine(currentUser.plan === UserPlan.PRO ? "pro" : "free") + "."}
-          control={<button onClick={() => onNavigate("plans")} style={ghostBtn}>See Pro plans</button>}
+          control={<button onClick={() => onNavigate("plans")} className="acct-btn acct-btn--ghost" style={ghostBtn}>See Pro plans</button>}
         />
         <SettingsRow
           label="Smart Import"
@@ -1069,7 +1074,7 @@ export const AccountSettings: React.FC<{
         honoured from the day it does.
       </InertNotice>
 
-      <SettingsCard heading="About your querying" headingId="acct-h-notifications" note={ALWAYS_SENT_LINE}>
+      <SettingsCard heading="About your querying" headingId="acct-h-notifications" note={ALWAYS_SENT_LINE} aside="Reminders that keep your queries moving.">
         <SettingsRow
           label="Nudge reminders"
           description="When a query is due a nudge."
@@ -1090,7 +1095,7 @@ export const AccountSettings: React.FC<{
           ⚠️ ITS OWN CARD RATHER THAN A GROUP INSIDE THE ONE ABOVE, because the separation is the
           legal point — transactional and marketing email are different things with different rules,
           and a shared card says they are two settings of one kind. */}
-      <SettingsCard heading="News from QueryHawk" note={`Sent to ${currentUser.email}.`}>
+      <SettingsCard heading="News from QueryHawk" note={`Sent to ${currentUser.email}.`} aside="Off unless you turn it on.">
         <SettingsRow
           label="Product news"
           description="Occasional news about new QueryHawk features. Off unless you turn it on, and one click to stop."
@@ -1124,7 +1129,7 @@ export const AccountSettings: React.FC<{
           label="Theme"
           description="The look of your workspace."
           control={
-            <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
+            <div role="radiogroup" aria-label="Workspace theme" className="acct-seg" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
               {/* ⚠️ THE FULL NAMES. They were shortened to "Capp" / "Bold" to fit the control column
                   and that renamed two themes: "Capp" is not a word, and the app calls them
                   Cappuccino, Bold Pastille and Editorial everywhere else — including the rail's own
@@ -1144,6 +1149,7 @@ export const AccountSettings: React.FC<{
                        second word is the palette's name rather than the theme's, and the rail's
                        switcher does the same. The accessible name carries both. */
                     aria-label={val === "bold" ? "Bold Pastille" : label}
+                    className="acct-seg-b"
                     onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
                     style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 11px", cursor: "pointer" }}
                   >
@@ -1281,7 +1287,7 @@ export const AccountSettings: React.FC<{
           label="Everything you've put in"
           description={exportCoverageLine()}
           control={
-            <button onClick={exportData} style={ghostBtn}>
+            <button onClick={exportData} className="acct-btn acct-btn--ghost" style={ghostBtn}>
               <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Download a copy
             </button>
           }
@@ -1293,14 +1299,14 @@ export const AccountSettings: React.FC<{
         <SettingsRow
           label="Correct something we hold"
           description="Most things you can edit yourself. For anything you can't, write to us and we'll put it right."
-          control={<button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>}
+          control={<button onClick={() => onNavigate("contact")} className="acct-btn acct-btn--ghost" style={ghostBtn}>Get in touch</button>}
         />
 
         <SettingsRow
           label="Import agents and queries"
           description="Bring in your existing tracking from a spreadsheet."
           control={
-            <button onClick={() => onNavigate("import")} style={ghostBtn}>
+            <button onClick={() => onNavigate("import")} className="acct-btn acct-btn--ghost" style={ghostBtn}>
               <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
             </button>
           }
@@ -1326,7 +1332,7 @@ export const AccountSettings: React.FC<{
           description="Ends this session and takes you back to the QueryHawk home page. Your work stays where it is."
           /* No confirm: leaving is not destructive, and signing back in costs a password. */
           control={
-            <button onClick={() => { void logout(); }} style={ghostBtn}>
+            <button onClick={() => { void logout(); }} className="acct-btn acct-btn--ghost" style={ghostBtn}>
               <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out
             </button>
           }
@@ -1364,7 +1370,7 @@ export const AccountSettings: React.FC<{
                   if you need it done by a particular date.
                 </>
               }
-              control={<button onClick={cancelDeletion} style={ghostBtn}>Cancel deletion</button>}
+              control={<button onClick={cancelDeletion} className="acct-btn acct-btn--ghost" style={ghostBtn}>Cancel deletion</button>}
             />
           </div>
         ) : (
@@ -1380,7 +1386,7 @@ export const AccountSettings: React.FC<{
               control={
                 <button
                   onClick={() => setShowDelete(true)}
-                  style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
+                  className="acct-btn acct-btn--danger" style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
                 >
                   <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
                 </button>

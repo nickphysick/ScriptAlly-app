@@ -814,6 +814,11 @@
   visibility: hidden; pointer-events: none;
   transition: opacity 0.16s ease, transform 0.18s cubic-bezier(.22, .8, .3, 1), visibility 0s linear 0.18s;
 }
+/* ⚠️ THE PORTALLED MENU IS FIXED AT EVERY WIDTH (follow-up 2). The sidebar's selector portals its menu
+   to <body>; absolute there, the hidden 486px menu sat at the body's foot and made every phone page
+   490px taller than `main`'s (the selector moved to the sidebar in the ink pass; INK19 reads layout,
+   not document height, so it did not see it). Fixed, it takes no room. The desktop places it inline. */
+.ws-ms-menu--port { position: fixed; top: 0; left: 0; right: auto; }
 .ws-ms.is-open .ws-ms-menu {
   opacity: 1; transform: none; visibility: visible; pointer-events: auto;
   transition: opacity 0.16s ease, transform 0.18s cubic-bezier(.22, .8, .3, 1), visibility 0s;

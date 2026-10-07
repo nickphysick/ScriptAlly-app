@@ -27,6 +27,8 @@ import { validateNewPassword, PASSWORD_MIN } from "../../lib/accountValidation";
 export interface AddPasswordProps {
   /** Rendered as the row's control — the page owns the button styling. */
   buttonStyle: React.CSSProperties;
+  /** A class for the buttons, so the desktop sheet can dress them (follow-up 2 §5). */
+  buttonClassName?: string;
   /** Called after a successful link, so the page can re-read the auth facts. */
   onAdded: () => void;
 }
@@ -37,7 +39,7 @@ type Status =
   | { kind: "error"; msg: string }
   | { kind: "done" };
 
-export const AddPassword: React.FC<AddPasswordProps> = ({ buttonStyle, onAdded }) => {
+export const AddPassword: React.FC<AddPasswordProps> = ({ buttonStyle, buttonClassName, onAdded }) => {
   const [open, setOpen] = useState(false);
   const [pw, setPw] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -75,7 +77,7 @@ export const AddPassword: React.FC<AddPasswordProps> = ({ buttonStyle, onAdded }
     return (
       <button
         type="button"
-        style={buttonStyle}
+        className={buttonClassName} style={buttonStyle}
         onClick={() => {
           setOpen(true);
           setStatus({ kind: "idle" });
@@ -123,12 +125,12 @@ export const AddPassword: React.FC<AddPasswordProps> = ({ buttonStyle, onAdded }
       )}
 
       <div className="ap-acts">
-        <button type="button" style={buttonStyle} onClick={() => void submit()} disabled={status.kind === "saving"}>
+        <button type="button" className={buttonClassName} style={buttonStyle} onClick={() => void submit()} disabled={status.kind === "saving"}>
           {status.kind === "saving" ? "Saving…" : "Save password"}
         </button>
         <button
           type="button"
-          style={buttonStyle}
+          className={buttonClassName} style={buttonStyle}
           onClick={() => { setOpen(false); setPw(""); setConfirm(""); setStatus({ kind: "idle" }); }}
         >
           Cancel

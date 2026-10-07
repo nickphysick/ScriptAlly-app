@@ -21,6 +21,7 @@
 import React from "react";
 import { initialsOf } from "../../lib/searchSuggestionsCore";
 import "./settingsCards.css";
+import "./settingsInk.css";
 
 /**
  * The page's title block — the section's name and one line about it.
@@ -51,6 +52,18 @@ export interface SettingsCardProps {
   /** The deletion card only. Warms the hairline and the heading; it does not fill. */
   danger?: boolean;
   headingId?: string;
+  /**
+   * The section's description in the left column on the desktop (follow-up 2 §5). Only four sections
+   * have one, taken from the reference; the rest are left empty for Nick to write — nothing invented.
+   * ⚠️ DESKTOP ONLY (`.sc-ch-aside` is not drawn below 768px), so the phone's page is `main`'s.
+   */
+  aside?: string;
+  /**
+   * The card's footer is its save line — a strip inside the card, the note on the left and the
+   * button on the right, present whether or not the button is (follow-up 2 §5). Without it a note
+   * sits under the card in italics.
+   */
+  saveLine?: boolean;
   children: React.ReactNode;
 }
 
@@ -67,16 +80,17 @@ export interface SettingsCardProps {
  * shell's notification desk already states, applied to the one card that could be tempted.
  */
 export const SettingsCard: React.FC<SettingsCardProps> = ({
-  heading, blurb, note, action, danger, headingId, children,
+  heading, blurb, note, action, danger, headingId, aside, saveLine, children,
 }) => (
   <section className={`sc-card${danger ? " sc-card--danger" : ""}`}>
     <div className="sc-ch">
       <h2 className="sc-ch-h" id={headingId}>{heading}</h2>
       {blurb && <p className="sc-ch-p">{blurb}</p>}
+      {aside && <p className="sc-ch-p sc-ch-aside">{aside}</p>}
     </div>
     <div className="sc-cb">{children}</div>
     {(note || action) && (
-      <div className="sc-cf">
+      <div className={`sc-cf${saveLine || action !== undefined ? " sc-cf--strip" : ""}`}>
         <span className="sc-cf-note">{note}</span>
         {action}
       </div>
