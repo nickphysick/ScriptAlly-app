@@ -14,6 +14,9 @@
 
 /** The hawk, cropped from `/images/contact/hero-archivist.png` with the drawn card removed. */
 export const CONTACT_HAWK = { src: "/images/contact/contact-hawk.webp", version: "1", width: 389, height: 344 };
+/** v14 §3: the hawk at a card-index box — the "Your agents" bar's art (640 × 569, transparent), drawn 160 wide
+ *  in a 138 × 72 slot so its head rises above the bar's top edge. */
+export const CONTACT_INDEX_HAWK = { src: "/images/contact/contact-index-hawk.webp", version: "1", width: 160, height: 142 };
 
 /** v13 §2: the band's white disc holds the Archivist at the desk — the marketing Contact page's own
  *  drawing (`src/marketing/ContactPage.tsx`), READ from its public path rather than copied, so the

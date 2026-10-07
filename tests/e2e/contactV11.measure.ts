@@ -571,7 +571,7 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
 
 /* ══════════════════════════ v12 P2 — the index strip (§10.2) and the re-dressed head (§10.3) ══════════════════════════ */
 
-test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider clear of the slim bar, marked", async ({ page }) => {
+test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider on its margin, marked", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope} [data-clv="idx"]`);
@@ -656,7 +656,8 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     };
   }, [scope, target] as const);
   expect(Math.abs(landed.off), `the divider lands on its own scroll margin — ${landed.detail}`).toBeLessThanOrEqual(2);
-  expect(landed.clear ?? -1, `the divider lands clear of the slim bar — ${landed.detail}`).toBeGreaterThanOrEqual(8);
+  /* RETIRED (Contact list v14, ruling Q7, 7 Oct): "the divider lands clear of the slim bar" — the slim bar retired
+     with the open banner (RETIRED-contact-list-v14.md). The landing on its own margin and the mark still hold. */
   expect(landed.marked, "the picked cell is marked").toBe(true);
   expect(landed.inkMatch, `the marked cell wears the discs' own ink — ${landed.detail}`).toBe(true);
 
@@ -681,7 +682,7 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     marked: !!document.querySelector(`${scope} [data-clv="ixtab"].on`),
   }), scope);
   expect(cleared.marked, "All clears the marked cell").toBe(false);
-  bump(5);
+  bump(4);
 });
 
 /* v12 §10.3 (the head row: dashed title, tally, the controls dropping under) is RETIRED by v13 P3 — the

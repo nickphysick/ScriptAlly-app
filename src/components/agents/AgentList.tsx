@@ -51,7 +51,7 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
-import { CONTACT_BAND_DISC, CONTACT_HAWK } from "./contact/ContactHeader";
+import { CONTACT_BAND_DISC, CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
   type AgentFacts, ContactFilters, FILTER_SECTIONS, type FilterCtx, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
@@ -63,9 +63,7 @@ import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop, filterValueLabel } from "./contact/ContactListControls";
-import { OpenBanner } from "../shell/OpenBanner";
-import { StickyBar, useStuckPast } from "../shell/StickyBar";
-import { Workspace } from "../shell/Workspace";
+import { YourAgentsBar } from "./contact/YourAgentsBar";
 import { usePopover } from "../shell/ListPills";
 import { readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -322,7 +320,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       findKey={where === "banner" ? <kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd> : undefined}
     />
   );
-  const bannerRef = useRef<HTMLDivElement | null>(null);
+  /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
+  const wsRef = useRef<HTMLElement | null>(null);
 
   const resetList = useCallback(() => {
     setFilters(emptyContactFilters());
@@ -419,9 +418,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
   const showList = pageState === "list" && !showEmpty;
-  /* v13 §5 — the sticky slim bar: on once the banner has scrolled off, gone once the list has. ⚠️ Read
-     BELOW `showList` (a TS2448 caught it above), and bound again when the list arrives. */
-  const stuck = useStuckPast(bannerRef, mainColRef, showList);
+  /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
+     are the only sticky element in the list. */
 
   /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
      Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
@@ -744,10 +742,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       if (document.querySelector(".qad-root.is-open")) return;
       e.preventDefault();
       if (hk) { setHkOpen(true); return; }
-      /* / — the banner's Find, scrolled into view first so the field a writer is typing into is on screen */
+      /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
       const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
       if (!input) return;
-      bannerRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      wsRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
       input.focus({ preventScroll: true });
     };
     window.addEventListener("keydown", on);
@@ -792,14 +790,25 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       else if (!allOn && !t) { const task = reopenReminder(a); if (task) await addUserTask(task); }
     }
   }, [userTasks, addUserTask, deleteUserTask]);
+  /* v14 §3 — the two count pills: each sets the list's filters to EXACTLY its own set (lock 6). "Waiting on you"
+     is v13's your-move standing; "ready to query" is the next-step section's ready set, the same filters See all
+     sets. A pill pressed again clears. */
+  const READY_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), open: ["open", "unstated"], stand: ["none"], fit: ["takes"] }), []);
+  const YOU_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), stand: ["you"] }), []);
+  const sameFilters = (a: ContactFilters, b: ContactFilters) => JSON.stringify(a) === JSON.stringify(b);
+  const youOn = !search.trim() && sameFilters(filters, YOU_FILTERS);
+  const readyOn = !search.trim() && sameFilters(filters, READY_FILTERS);
+  const setPillSet = useCallback((k: "you" | "ready" | null) => {
+    setFilters(k === "you" ? YOU_FILTERS : k === "ready" ? READY_FILTERS : emptyContactFilters());
+    setSearch("");
+  }, [YOU_FILTERS, READY_FILTERS]);
   /* "See all N in the list": the list's filters set to exactly the ready set — open (Unknown counts as open),
      not queried, takes the book — then the list scrolled into view. ⚠️ Phase 4 re-points this at v14's own
      filter set; the set it selects does not change. */
   const seeAllReady = useCallback(() => {
-    setFilters({ ...emptyContactFilters(), open: ["open", "unstated"], stand: ["none"], fit: ["takes"] });
-    setSearch("");
-    window.setTimeout(() => mainColRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
-  }, []);
+    setPillSet("ready");
+    window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
+  }, [setPillSet]);
   /* "In Discover" (live only): Discover agents who take the book and are open, and are not already on the list */
   const discoverPicks = useMemo(() => {
     if (!DISCOVER_LIVE || !book.length) return [];
@@ -891,22 +900,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
               style: { right: guideCorner.right, bottom: guideCorner.bottom + tabH + 24 } }} />
         )}
-        {showList && (
-          <StickyBar stuck={stuck} probe="contacts">
-            <b className="cl13-sb-t">Every agent</b>
-            <span className="cl13-sb-k">{visibleFacts.length} {visibleFacts.length === 1 ? "AGENT" : "AGENTS"}</span>
-            {groupKey === "letter" && (
-              <span className="cl13-mz" data-cl13="mz">
-                {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((L) => (
-                  <button key={L} type="button" className={`${stripCounts.get(L) ? "" : "off"}${markedLetter === L ? " on" : ""}`}
-                    disabled={!stripCounts.get(L)} onClick={() => pickLetter(L)}>{L}</button>
-                ))}
-              </span>
-            )}
-            <span className="cl13-sb-sp" />
-            {controlsFor("sticky")}
-          </StickyBar>
-        )}
+
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         <div className="clv-group" data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
@@ -940,7 +934,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}
             controls={controlsFor("banner")}
-            perch={{ src: `${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`, width: CONTACT_HAWK.width, height: CONTACT_HAWK.height }} />
+            perch={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }} />
         )}
         {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
         {showList && <ContactStrip facts={strip} />}
@@ -966,23 +960,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {!showList ? null : (
         <>
 
-        {/* v13 §5 — THE OPEN BANNER: the perched Archivist, "N AGENTS · M NEED YOU", the heading, the
-            sentence, and the controls right-aligned. It replaces v12's head row (ContactControls). */}
+        {/* v14 §3 — "YOUR AGENTS": the white panel, 20px wider than the content above on each side, 56 under the
+            next-step section — the ink bar (the hawk, the title, the line, the two pills; the controls on white),
+            the filter strip, then the list. It replaces v13's open banner, slim bar and slate workspace. */}
         {showList && (
-          <OpenBanner
-            probe="contacts" bannerRef={bannerRef}
-            figure={{ src: `${CONTACT_HAWK.src}?v=${CONTACT_HAWK.version}`, width: CONTACT_HAWK.width, height: CONTACT_HAWK.height }}
-            eyebrow={<span data-cl13="lk">{agents.length} {agents.length === 1 ? "agent" : "agents"} {"\u00b7"} {needYou} need you</span>}
-            heading="Every agent, on file."
-            sentence={scoped?.title?.trim()
-              ? <>Your card index for <b>{scoped.title.trim()}</b>: what each agent wants, how fast they reply, and where your query to them stands.</>
-              : <>Your card index: what each agent wants, how fast they reply, and where your query to them stands.</>}
+        <section className="cl14-ws" data-cl14="ws" ref={wsRef} aria-label="Your agents">
+          <YourAgentsBar
+            shown={visibleFacts.length} total={factsAll.length} book={scoped?.title?.trim() || null}
+            you={needYou} ready={step.ready.length} youOn={youOn} readyOn={readyOn}
+            onYou={() => setPillSet(youOn ? null : "you")} onReady={() => setPillSet(readyOn ? null : "ready")}
+            art={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }}
             controls={controlsFor("banner")}
           />
-        )}
-        {/* v13 §5 — the filter line, while anything narrows the list: what is showing, a chip per
-            filter and the search, and Clear all. It replaces v12's floating bar (ContactBar). */}
-        {showList && filtered && (
+          {/* the filter strip — what narrows the list (Phase 4 builds the filters into it) */}
+          <div className="cl14-frow" data-cl14="frow">
+          {filtered && (
           <div className="cl13-fline" data-cl13="fline" role="status">
             <span>Showing <b>{visibleFacts.length}</b> of {factsAll.length}</span>
             {lineChips.map((c) => (
@@ -993,13 +985,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <button type="button" className="cl13-clr" data-cl13="clear-all" onClick={clearFilters}>Clear all</button>
           </div>
         )}
-        {/* v13 §6 — THE WORKSPACE: the slate ground the list sits on, under the banner (the shared
-            component, slate here as blush is the Query Centre's). The A–Z strip heads it, white and
-            no longer sticky; the letter dividers and the rows are floating cards on it. */}
-        {showList && (
-        <Workspace tray="var(--clv-slate-tray)" probe="contacts">
-        {/* ⚠️ v12 §4: THE INDEX STRIP — it indexes the SAME filtered set the list shows (one derivation,
-            two readers). Letters only, as the mock's (`display: none` under any other grouping). */}
+          </div>
+          <div className="cl14-list" data-cl14="list">
         {groupKey === "letter" && (
           <ContactIndexStrip
             total={visibleFacts.length}
@@ -1034,7 +1021,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             />
           )}
         </div>
-        </Workspace>
+          </div>
+        </section>
         )}
         </>
         )}

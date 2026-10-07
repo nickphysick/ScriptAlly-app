@@ -149,7 +149,10 @@ function listDiff(a: string, b: string): string {
    on as CL14-3 (the next-step section's card). */
 
 const vis = (page: import("@playwright/test").Page, sel: string) => page.locator(`.aglist ${sel}`).filter({ visible: true }).first();
-const pillText = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).innerText().then((t) => t.replace(/\s+/g, " ").trim());
+/* REWRITTEN (v14 §3): below 1440 the "Grouped:" and "Sort:" lead-ins hide, so the pill is read from its textContent —
+   the words it carries — rather than innerText, which drops hidden text */
+const pillText = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => [...e.childNodes].map((n) => n.textContent ?? "").join(" ").replace(/\s+/g, " ").trim());
+const WHITE = "rgb(255, 255, 255)";
 const pillBg = (page: import("@playwright/test").Page, k: string) => vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => getComputedStyle(e).backgroundColor);
 const openPop = async (page: import("@playwright/test").Page, k: string) => {
   await vis(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`).evaluate((e) => e.scrollIntoView({ block: "center" }));
@@ -158,36 +161,8 @@ const openPop = async (page: import("@playwright/test").Page, k: string) => {
 };
 const popCount = (page: import("@playwright/test").Page) => page.locator(".lpop").count();
 
-/* ── §5 · the open banner ── */
-test("CL13-B · banner", async ({ page }) => {
-  const L = new Ledger("cl13-b");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const ob = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
-      if (!ob) return null;
-      const h = ob.querySelector<HTMLElement>(".ob-h")!, k = ob.querySelector<HTMLElement>(".ob-k")!, img = ob.querySelector<HTMLImageElement>("[data-ob-perch]");
-      const ctl = ob.querySelector<HTMLElement>("[data-ob-ctl]"), p = ob.querySelector<HTMLElement>(".ob-p")!;
-      const b = ob.getBoundingClientRect(), cb = ctl?.getBoundingClientRect();
-      return {
-        k: k.innerText, kUpper: getComputedStyle(k).textTransform, h: h.textContent, hFace: getComputedStyle(h).fontFamily, hSize: getComputedStyle(h).fontSize,
-        p: p.innerText, img: img?.getAttribute("src") ?? null, imgW: img?.getBoundingClientRect().width ?? 0,
-        ctlIn: !!cb && cb.left >= b.left - 0.5 && cb.right <= b.right + 0.5, ctlRight: cb ? b.right - cb.right : null,
-        pills: [...(ctl?.querySelectorAll("[data-lp]") ?? [])].map((x) => x.getAttribute("data-lp")),
-      };
-    });
-    L.check("CL13-B the banner exists", w, !!r, "");
-    if (!r) continue;
-    L.check("CL13-B eyebrow 'N agents · M need you', set in capitals", w, /^\d+ agents? · \d+ need you$/i.test(r.k.trim()) && r.kUpper === "uppercase", `${r.k} ${r.kUpper}`);
-    L.check("CL13-B heading 'Every agent, on file.' in Special Elite 42", w, r.h === "Every agent, on file." && /Special Elite/.test(r.hFace) && r.hSize === "42px", `${r.h} ${r.hFace.slice(0, 20)} ${r.hSize}`);
-    L.check("CL13-B the sentence is the card index's", w, /^Your card index( for .+)?: what each agent wants, how fast they reply, and where your query to them stands\.$/.test(r.p.trim()), r.p);
-    L.check("CL13-B the perched Archivist, 170 wide", w, /contact-hawk\.webp/.test(r.img ?? "") && near(r.imgW, 170, 1), `${r.img} ${r.imgW}`);
-    L.check("CL13-B the controls: Find, Filters, Grouped, Sort and its direction, right-aligned inside the banner", w, r.ctlIn && near(r.ctlRight ?? -1, 0, 1) && JSON.stringify(r.pills) === JSON.stringify(["filter", "group", "sort", "dir"]), `${r.ctlIn} ${r.ctlRight} ${JSON.stringify(r.pills)}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(21);
-});
+/* CL13-B (the open banner) is RETIRED with the banner (Contact list v14 §3): the "Your agents" bar replaces it —
+   CL14-5. tests/e2e/RETIRED-contact-list-v14.md. */
 
 /* ── lock 7 · the pills and their popovers ── */
 test("CL13-7 · pills", async ({ page }) => {
@@ -196,7 +171,7 @@ test("CL13-7 · pills", async ({ page }) => {
     await openContacts(page, vp);
     const w = `${vp.width}`;
     L.check("CL13-7 at rest: 'Filters', 'Grouped: Letter', 'Sort: Surname', none set", w,
-      /^\S*\s*Filters$/.test(await pillText(page, "filter")) && (await pillText(page, "group")).includes("Grouped: Letter") && (await pillText(page, "sort")).includes("Sort: Surname") && (await pillBg(page, "filter")) !== INK,
+      /^\S*\s*Filters$/.test(await pillText(page, "filter")) && (await pillText(page, "group")).includes("Grouped: Letter") && (await pillText(page, "sort")).includes("Sort: Surname") && (await pillBg(page, "filter")) === WHITE,
       `${await pillText(page, "filter")} | ${await pillText(page, "group")} | ${await pillText(page, "sort")}`);
     /* filters: tick two options with a count, in two sections */
     await openPop(page, "filter");
@@ -214,21 +189,23 @@ test("CL13-7 · pills", async ({ page }) => {
     await page.locator(`[data-lpop="filter"] [data-opt="${picks[1]}"]`).evaluate((e) => (e as HTMLElement).click());
     const kept = await pop.evaluate((e) => e.scrollTop);
     L.check("CL13-7 the panel keeps its scroll while you tick", w, near(kept, 120, 2), `${kept}`);
-    L.check("CL13-7 'Filters (2)' after two ticks, anthracite", w, (await pillText(page, "filter")).includes("Filters (2)") && (await pillBg(page, "filter")) === INK, `${await pillText(page, "filter")} ${await pillBg(page, "filter")}`);
+    /* REWRITTEN (v14 §3, 7 Oct): the controls sit on the ink bar, so a set pill stays WHITE and its value says it
+       is set (CL14-5 holds the white); v13's anthracite fill would vanish into the bar */
+    L.check("CL13-7 'Filters (2)' after two ticks, still white", w, (await pillText(page, "filter")).includes("Filters (2)") && (await pillBg(page, "filter")) === WHITE, `${await pillText(page, "filter")} ${await pillBg(page, "filter")}`);
     /* one popover at a time: opening Group closes Filters */
     await vis(page, '[data-cl13-ctl="banner"] [data-lp="group"]').click();
     await page.waitForTimeout(150);
     L.check("CL13-7 one popover at a time", w, (await popCount(page)) === 1 && (await page.locator('[data-lpop="group"]').count()) === 1, `${await popCount(page)}`);
     await page.locator('[data-lpop="group"] [data-opt="group:stand"]').click();
     await page.waitForTimeout(150);
-    L.check("CL13-7 'Grouped: Where you stand', anthracite, and the popover closed", w, (await pillText(page, "group")).includes("Grouped: Where you stand") && (await pillBg(page, "group")) === INK && (await popCount(page)) === 0, `${await pillText(page, "group")}`);
+    L.check("CL13-7 'Grouped: Where you stand', white, and the popover closed", w, (await pillText(page, "group")).includes("Grouped: Where you stand") && (await pillBg(page, "group")) === WHITE && (await popCount(page)) === 0, `${await pillText(page, "group")}`);
     await openPop(page, "sort");
     await page.locator('[data-lpop="sort"] [data-opt="sort:due"]').click();
     await page.waitForTimeout(150);
     const dir = await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label");
-    L.check("CL13-7 'Sort: Next date', anthracite; the direction says 'Soonest first'", w, (await pillText(page, "sort")).includes("Sort: Next date") && (await pillBg(page, "sort")) === INK && dir === "Sort order: Soonest first", `${await pillText(page, "sort")} ${dir}`);
+    L.check("CL13-7 'Sort: Next date', white; the direction says 'Soonest first'", w, (await pillText(page, "sort")).includes("Sort: Next date") && (await pillBg(page, "sort")) === WHITE && dir === "Sort order: Soonest first", `${await pillText(page, "sort")} ${dir}`);
     await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').click();
-    L.check("CL13-7 the toggle names the reversed order and turns anthracite", w, (await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label")) === "Sort order: Latest first" && (await pillBg(page, "dir")) === INK, "");
+    L.check("CL13-7 the toggle names the reversed order and stays white", w, (await vis(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label")) === "Sort order: Latest first" && (await pillBg(page, "dir")) === WHITE, "");
     /* Escape with a popover open closes ONLY the popover */
     const before = await listState(page);
     await openPop(page, "group");
@@ -238,7 +215,8 @@ test("CL13-7 · pills", async ({ page }) => {
     L.check("CL13-7 Escape closes only the popover", w, after.pops === 0 && after.card === 0 && after.list && after.group.includes("Where you stand"), JSON.stringify(after));
     /* an outside press closes it */
     await openPop(page, "filter");
-    await page.locator('.aglist [data-ob="contacts"] .ob-h').dispatchEvent("pointerdown", { bubbles: true });
+    /* REWRITTEN (v14 §3): the outside press lands on the bar's title (the banner's heading retired) */
+    await page.locator('.aglist .cl14-bar-t h2').filter({ visible: true }).first().dispatchEvent("pointerdown", { bubbles: true });
     await page.waitForTimeout(150);
     L.check("CL13-7 an outside press closes it", w, (await popCount(page)) === 0, "");
     await checkOverflow(page, L, w);
@@ -317,105 +295,12 @@ test("CL13-8 · remembered settings", async ({ page, browser }) => {
   L.done(4);
 });
 
-/* ── §5 · the sticky slim bar ── */
-test("CL13-SB · sticky bar", async ({ page }) => {
-  const L = new Ledger("cl13-sb");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const read = () => page.evaluate(() => {
-      const bar = [...document.querySelectorAll<HTMLElement>('.aglist [data-sbar="contacts"]')].find((e) => e.isConnected)!;
-      const inner = bar?.querySelector<HTMLElement>(".sbar-in");
-      const sc = bar?.closest<HTMLElement>(".wpg-scroll");
-      const ib = inner?.getBoundingClientRect(), sb = sc?.getBoundingClientRect();
-      return {
-        stuck: bar?.hasAttribute("data-stuck") ?? false, inert: inner?.hasAttribute("inert") ?? false,
-        vis: inner ? getComputedStyle(inner).visibility : "",
-        visible: !!ib && !!sb && ib.bottom > sb.top + 1, bg: inner ? getComputedStyle(inner).backgroundColor : "",
-        mz: !!bar?.querySelector('[data-cl13="mz"]') && getComputedStyle(bar.querySelector('[data-cl13="mz"]')!).display !== "none",
-        filter: bar?.querySelector('[data-lp="filter"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
-        /* every control inside the bar's own box: the mock clips its controls at 1512; the build must not */
-        clipped: (() => { const row = bar?.querySelector<HTMLElement>(".sbar-row"); if (!row) return -1; const rr = row.getBoundingClientRect();
-          const ctl = row.querySelector<HTMLElement>(".cl13-ctl")?.getBoundingClientRect();
-          const out = [...row.querySelectorAll<HTMLElement>("[data-lp], .cl13-find")].filter((c) => { const b = c.getBoundingClientRect(); return b.right > rr.right + 0.5 || b.left < rr.left - 0.5; }).length;
-          /* …and no mini-A–Z letter runs under the controls (a shrunk container with letters overflowing it) */
-          const under = ctl ? [...row.querySelectorAll<HTMLElement>(".cl13-mz button")].filter((c) => c.getBoundingClientRect().width > 0 && c.getBoundingClientRect().right > ctl.left + 0.5).length : 0;
-          return out + under; })(),
-      };
-    });
-    const rest = await read();
-    L.check("CL13-SB at rest: off, out of sight, inert, and visibility hidden (so nothing targets its inputs)", w, !rest.stuck && !rest.visible && rest.inert && rest.vis === "hidden", JSON.stringify(rest));
-    /* scroll until the banner has gone under the bar */
-    await page.evaluate(() => {
-      const ob = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sc = ob.closest<HTMLElement>(".wpg-scroll")!;
-      sc.scrollTop += ob.getBoundingClientRect().bottom - sc.getBoundingClientRect().top + 60;
-    });
-    await page.waitForTimeout(400);
-    const on = await read();
-    L.check("CL13-SB once the banner is gone: on, in sight, not inert, visible", w, on.stuck && on.visible && !on.inert && on.vis === "visible", JSON.stringify(on));
-    L.check("CL13-SB on the slate tray at .94", w, on.bg === "rgba(214, 223, 230, 0.94)", on.bg);
-    L.check("CL13-SB the mini A–Z only at 1441px and wider", w, on.mz === (vp.width >= 1441), `${on.mz}`);
-    L.check("CL13-SB no control is clipped by the bar (the mock's own fault, not copied)", w, on.clipped === 0, `${on.clipped} clipped`);
-    /* the bar's pills share state with the banner's */
-    /* ⚠️ CLICKED IN PLACE: Playwright's click scrolls its target into view, and scrolling to a sticky pill
-       takes the page back to the top, where the bar hides — the click would land on the shell's bar */
-    await page.locator('.aglist [data-sbar="contacts"] [data-lp="filter"]').evaluate((e) => (e as HTMLElement).click());
-    await page.locator('[data-lpop="filter"]').waitFor({ timeout: 4000 });
-    const k = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-lpop="filter"] [data-opt^="open:"]')].find((o) => Number(o.querySelector("small")?.textContent ?? 0) > 0)?.getAttribute("data-opt") ?? null);
-    await page.locator(`[data-lpop="filter"] [data-opt="${k}"]`).evaluate((e) => (e as HTMLElement).click());
-    await page.locator("[data-lpop-done]").evaluate((e) => (e as HTMLElement).click());
-    await page.waitForTimeout(200);
-    const banner = await page.evaluate(() => document.querySelector('.aglist [data-cl13-ctl="banner"] [data-lp="filter"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "");
-    L.check("CL13-SB a filter set in the bar shows on the banner's pill too", w, (await read()).filter.includes("(1)") && banner.includes("(1)"), `${banner}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(21);
-});
+/* CL13-SB (the sticky slim bar) is RETIRED (v14, ruling Q7): the sticky column labels are the list's only sticky
+   element. */
 
-/* ── lock 5 · the workspace: slate, the perch, the letter tabs, the rows' spacing ── */
-test("CL13-5 · workspace", async ({ page }) => {
-  const L = new Ledger("cl13-5");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const ws = [...document.querySelectorAll<HTMLElement>('.aglist [data-wsp="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
-      const ob = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
-      if (!ws || !ob) return null;
-      const wb = ws.getBoundingClientRect(), perch = ob.querySelector<HTMLElement>("[data-ob-perch]")?.getBoundingClientRect();
-      const tabs = [...ws.querySelectorAll<HTMLElement>('[data-clv="band"] b')];
-      const rule = ws.querySelector<HTMLElement>('[data-clv="band"] i');
-      const rows = [...ws.querySelectorAll<HTMLElement>('[data-clv="row"]')].slice(0, 6).map((x) => x.getBoundingClientRect());
-      const gaps: number[] = [];
-      for (let i = 1; i < rows.length; i++) if (Math.abs(rows[i].left - rows[i - 1].left) < 1 && rows[i].top > rows[i - 1].bottom - 1 && rows[i].top - rows[i - 1].bottom < 40) gaps.push(Math.round((rows[i].top - rows[i - 1].bottom) * 10) / 10);
-      const strip = ws.querySelector<HTMLElement>('[data-clv="idx"]');
-      return {
-        bannerBg: getComputedStyle(ob).backgroundColor, wsBg: getComputedStyle(ws).backgroundColor, radius: getComputedStyle(ws).borderTopLeftRadius,
-        perchDrop: perch ? Math.round((perch.bottom - wb.top) * 10) / 10 : null,
-        tabBg: tabs[0] ? getComputedStyle(tabs[0]).backgroundColor : null, tabColour: tabs[0] ? getComputedStyle(tabs[0]).color : null,
-        tabFace: tabs[0] ? getComputedStyle(tabs[0]).fontFamily : null,
-        ruleH: rule ? getComputedStyle(rule).height : null, ruleBg: rule ? getComputedStyle(rule).backgroundColor : null,
-        gaps, stripIn: !!strip && ws.contains(strip), stripBg: strip ? getComputedStyle(strip).backgroundColor : null,
-        stripSticky: strip ? getComputedStyle(strip.parentElement!).position : null,
-        railGone: document.querySelectorAll('.aglist [data-clv="rail"]').length === 0,
-        wsW: wb.width, colW: ws.parentElement!.getBoundingClientRect().width,
-      };
-    });
-    L.check("CL13-5 the workspace and the banner exist", w, !!r, "");
-    if (!r) continue;
-    L.check("CL13-5 the banner is transparent", w, r.bannerBg === "rgba(0, 0, 0, 0)", r.bannerBg);
-    L.check("CL13-5 the workspace is slate rgb(214,223,230), 22px corners", w, r.wsBg === "rgb(214, 223, 230)" && r.radius === "22px", `${r.wsBg} ${r.radius}`);
-    L.check("CL13-5 the perch's feet 14 (±2) into the workspace", w, near(r.perchDrop ?? -99, 14, 2), `${r.perchDrop}`);
-    L.check("CL13-5 the letter tabs are anthracite, cream, Special Elite", w, r.tabBg === INK && r.tabColour === "rgb(245, 241, 235)" && /Special Elite/.test(r.tabFace ?? ""), `${r.tabBg} ${r.tabColour} ${r.tabFace?.slice(0, 20)}`);
-    L.check("CL13-5 the tab sits on a 2px anthracite rule", w, r.ruleH === "2px" && r.ruleBg === INK, `${r.ruleH} ${r.ruleBg}`);
-    L.check("CL13-5 rows 10 apart (±1)", w, r.gaps.length >= 2 && r.gaps.every((g) => near(g, 10, 1)), JSON.stringify(r.gaps));
-    L.check("CL13-5 the A–Z strip is inside the workspace, white, and not sticky", w, r.stripIn && r.stripBg === "rgb(255, 255, 255)" && r.stripSticky !== "sticky", `${r.stripIn} ${r.stripBg} ${r.stripSticky}`);
-    L.check("CL13-5 the rail is gone; the workspace is the column's full width", w, r.railGone && near(r.wsW, r.colW, 1), `${r.railGone} ${r.wsW} vs ${r.colW}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(30);
-});
+/* CL13-5 (the slate workspace, the perch, the letter tabs, the rows' spacing) is RETIRED (v14 §3): the white panel
+   and its ink bar replace the slate workspace and the banner's perch — CL14-5; the group headers and rows are
+   Phase 5's. */
 
 /* ── lock 6 · the row's edge is the query's state colour, deep ── */
 test("CL13-6 · row edge", async ({ page }) => {
@@ -919,7 +804,8 @@ test("CL13-11 · shortcuts", async ({ page }) => {
   await page.waitForTimeout(800);
   const f = await page.evaluate(() => {
     const a = document.activeElement as HTMLElement | null;
-    const ban = [...document.querySelectorAll<HTMLElement>('.aglist [data-ob="contacts"]')].find((e) => e.getBoundingClientRect().height > 0);
+    /* REWRITTEN (v14 §3): "/" scrolls the "Your agents" panel into view (the open banner retired) */
+    const ban = [...document.querySelectorAll<HTMLElement>('.aglist [data-cl14="ws"]')].find((e) => e.getBoundingClientRect().height > 0);
     const r = ban?.getBoundingClientRect();
     return { focused: !!a?.closest('[data-cl13-find="banner"]') && a?.tagName === "INPUT", bannerTop: r ? Math.round(r.top) : null, vh: innerHeight };
   });
@@ -970,7 +856,7 @@ test("CL13-12 · loading", async ({ page }) => {
         loading: !!g, inert: !!g?.hasAttribute("inert"),
         rows: g?.querySelectorAll(".clv-row").length ?? 0,
         shimmer: card ? getComputedStyle(card).backgroundImage.includes("gradient") : false,
-        perch: vis(".ob-perch"), ctl: vis(".cl13-ctl"),
+        perch: vis(".cl14-art"), ctl: vis(".cl13-ctl"),
         tab: !!document.querySelector('[data-ftab="housekeeping"]'),
         bandShape: (() => { const t = g?.querySelector<HTMLElement>(".ph--band .ph-title"); return t ? getComputedStyle(t).backgroundImage.includes("52, 68, 94") || getComputedStyle(t).backgroundImage.includes("#34445e") : false; })(),
       };
@@ -1082,7 +968,8 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
     const r = await page.evaluate(() => {
       const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const f = vis('.aglist [data-probe="app-footer"]'), fin = vis('.aglist [data-probe="app-footer-in"]');
-      const ws = vis('.aglist [data-wsp="contacts"]'), strip = vis('.aglist [data-cl13="strip"]');
+      /* REWRITTEN (v14 §3): the footer follows the "Your agents" panel (the slate workspace retired) */
+      const ws = vis('.aglist [data-cl14="ws"]'), strip = vis('.aglist [data-cl13="strip"]');
       const sc = f?.closest<HTMLElement>(".wpg-scroll");
       const txt = f?.textContent ?? "";
       return {

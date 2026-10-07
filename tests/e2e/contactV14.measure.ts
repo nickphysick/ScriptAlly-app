@@ -32,6 +32,7 @@ test("CL14-1 · order", async ({ page }) => {
         heroCard: !!hero?.classList.contains("ph--card") && !!hero?.classList.contains("ph--compact"),
         strip: b(pick('.aglist [data-cl13="strip"]')),
         next: b(pick('.aglist [data-cl14="next"]')),
+        ws: b(pick('.aglist [data-cl14="ws"]')),
         /* the carousel and every part it brought: the shell, its items, its track, its selector */
         carousel: document.querySelectorAll('.aglist [data-cz], .aglist .cz-item, .aglist [data-cz-track], .aglist [data-cz-set], .aglist .cl13-seg').length,
       };
@@ -40,9 +41,10 @@ test("CL14-1 · order", async ({ page }) => {
     L.check("CL14-1 the strip follows the hero", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
     L.check("CL14-1 no carousel in the DOM", w, r.carousel === 0, `${r.carousel}`);
     L.check("CL14-1 the next-step section follows the strip, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
+    L.check("CL14-1 the workspace follows the section, 56 (±2) under it", w, !!r.next && !!r.ws && near(r.ws.t - r.next.b, 56, 2), `${r.next && r.ws ? r.ws.t - r.next.b : "—"}`);
     await checkOverflow(page, L, w);
   }
-  L.done(10);
+  L.done(12);
 });
 
 /* ── lock 2 · the figures are inert: clicking any of them changes nothing on the page ── */
@@ -144,4 +146,69 @@ test("CL14-3 · next step", async ({ page }) => {
     await page.keyboard.press("Escape");
   } else L.check("CL14-3 a Next-in-line row exists on the fixture", "1512", false, "no ledger row");
   L.done(18);
+});
+
+/* ── lock 5 · the workspace: 20 wider than the strip each side, the ink bar, the hawk above it, the controls white ── */
+test("CL14-5 · workspace", async ({ page }) => {
+  const L = new Ledger("cl14-5");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const r = await page.evaluate(() => {
+      const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      const ws = pick('.aglist [data-cl14="ws"]'), strip = pick('.aglist [data-cl13="strip"]'), bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? null;
+      const img = ws?.querySelector<HTMLImageElement>('[data-cl14="art"] img') ?? null;
+      const bg = (e: Element | null) => (e ? getComputedStyle(e).backgroundColor : null);
+      const box = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, r: x.right, t: x.top, b: x.bottom }; };
+      return {
+        ws: box(ws), strip: box(strip), bar: box(bar), img: box(img), imgSrc: img?.getAttribute("src") ?? null, imgLoaded: !!img && img.complete && img.naturalWidth > 0,
+        wsBg: bg(ws), wsRadius: ws ? getComputedStyle(ws).borderTopLeftRadius : null, barBg: bg(bar),
+        find: bg(ws?.querySelector('[data-cl13-find="banner"]') ?? null),
+        group: bg(ws?.querySelector('[data-cl13-ctl="banner"] [data-lp="group"]') ?? null),
+        sort: bg(ws?.querySelector('[data-cl13-ctl="banner"] [data-lp="sort"]') ?? null),
+        title: ws?.querySelector(".cl14-bar-t h2")?.textContent ?? null,
+        line: (ws?.querySelector('[data-cl14="showing"]') as HTMLElement | null)?.innerText ?? null,
+      };
+    });
+    L.check("CL14-5 the panel is 20 (±1) wider than the strip on each side", w,
+      !!r.ws && !!r.strip && near(r.strip.l - r.ws.l, 20, 1) && near(r.ws.r - r.strip.r, 20, 1), `${r.ws && r.strip ? `${(r.strip.l - r.ws.l).toFixed(1)} / ${(r.ws.r - r.strip.r).toFixed(1)}` : "—"}`);
+    L.check("CL14-5 the panel is white with 24px corners", w, r.wsBg === "rgb(255, 255, 255)" && r.wsRadius === "24px", `${r.wsBg} ${r.wsRadius}`);
+    L.check("CL14-5 the bar is rgb(42,58,82) (ruling Q2)", w, r.barBg === INK14, `${r.barBg}`);
+    L.check("CL14-5 the hawk at the card-index box, its top above the bar's top", w,
+      /contact-index-hawk\.webp/.test(r.imgSrc ?? "") && r.imgLoaded && !!r.img && !!r.bar && r.img.t < r.bar.t, `${r.imgSrc} loaded ${r.imgLoaded} img ${r.img?.t.toFixed(1)} bar ${r.bar?.t.toFixed(1)}`);
+    L.check("CL14-5 Find, Grouped and Sort are white", w, r.find === "rgb(255, 255, 255)" && r.group === "rgb(255, 255, 255)" && r.sort === "rgb(255, 255, 255)", `${r.find} ${r.group} ${r.sort}`);
+    L.check("CL14-5 'Your agents' and 'Showing n of N for {book}'", w, r.title === "Your agents" && /^Showing \d+ of \d+( for .+)?$/.test((r.line ?? "").trim()), `${r.title} · ${r.line}`);
+    await checkOverflow(page, L, w);
+  }
+  L.done(14);
+});
+
+/* ── lock 6 · the pills: each pill's number equals the rows it produces (rows read, not the counter) ── */
+test("CL14-6 · pills", async ({ page }) => {
+  const L = new Ledger("cl14-6");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    for (const k of ["you", "ready"] as const) {
+      const pill = page.locator(`.aglist [data-cl14="pill-${k}"]`).filter({ visible: true }).first();
+      /* ⚠️ a missing pill is a failed READING, never a timeout */
+      if (!(await pill.count())) {
+        L.check(`CL14-6 "${k}": the pill exists`, w, false, "no pill");
+        L.check(`CL14-6 "${k}": the pill reads as pressed`, w, false, "no pill");
+        continue;
+      }
+      const n = Number(((await pill.textContent()) ?? "").match(/\d+/)?.[0] ?? NaN);
+      await pill.click();
+      /* wait out the live count and the reflow (Phase 6), then read the ROWS */
+      await page.waitForTimeout(900);
+      const rows = await page.locator(`.aglist ${LOADED_ROW}`).filter({ visible: true }).count();
+      const pressed = await pill.getAttribute("aria-pressed");
+      L.check(`CL14-6 "${k}": the pill's number is the rows it leaves`, w, Number.isFinite(n) && n > 0 && rows === n, `pill ${n} rows ${rows}`);
+      L.check(`CL14-6 "${k}": the pill reads as pressed`, w, pressed === "true", `${pressed}`);
+      await pill.click();
+      await page.waitForTimeout(500);
+    }
+    await checkOverflow(page, L, w);
+  }
+  L.done(10);
 });

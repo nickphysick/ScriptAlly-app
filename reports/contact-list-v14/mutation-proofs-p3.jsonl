@@ -1,0 +1,6 @@
+{"lock":"CL14-5 · CL14-6","mutation":"natural red — the baseline build (847b5f31): no panel, no pills","red":"every CL14-5 check reads null; CL14-6 'the pill exists' false (both pills, both widths)"}
+{"lock":"CL14-1","mutation":"40 above the panel instead of 56","red":"the workspace follows the section, 56 (±2) under it · 40 (1512, 1280)"}
+{"lock":"CL14-5","mutation":"the panel not widened (margin 0)","red":"20 (±1) wider than the strip on each side · 0.0 / 0.0 (both widths)"}
+{"lock":"CL14-5","mutation":"the bar in the mock's #1f2b3a","red":"the bar is rgb(42,58,82) · rgb(31, 43, 58) (both widths)"}
+{"lock":"CL14-5","mutation":"the hawk not raised (top 0)","red":"its top above the bar's top · img 937.2 bar 913.2 (1512); 984.5 / 960.5 (1280)"}
+{"lock":"CL14-6","mutation":"'waiting on you' sets the agent's-court set instead of your move","red":"the pill's number is the rows it leaves · pill 3 rows 2 (both widths)"}

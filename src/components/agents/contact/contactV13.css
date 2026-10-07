@@ -114,32 +114,7 @@
 }
 .cl13-none-clr { margin-left: 8px; text-decoration: none; background: var(--clv-btn); color: #f5f1eb; height: 32px; padding: 0 14px; border-radius: 16px; font-family: var(--clv-type); }
 
-/* the sticky slim bar's contents (the shell draws the bar); full-bleed like the band */
-.aglist .sbar-in { box-shadow: 0 0 0 100vmax rgba(214, 223, 230, 0.94); clip-path: inset(0 -100vmax); }
-.cl13-sb-t { font-family: var(--clv-type); font-weight: 400; font-size: 20px; white-space: nowrap; color: var(--clv-ink); }
-.cl13-sb-k { font: 400 9px/1 var(--sp-mono); letter-spacing: 0.14em; color: var(--clv-ink-45); white-space: nowrap; }
-.cl13-sb-sp { flex: 1; }
-/* ⚠️ THE MOCK CLIPS ITS OWN STICKY CONTROLS AT 1512 ("Grouped: Letter ⌄" runs off the bar). The build
-   lets the mini A–Z give way instead — its letters narrow from 18 to 11 — and the sticky copies drop
-   their "Grouped:"/"Sort:" lead-ins, so every control stays inside the bar (CL13-SB holds it). */
-.cl13-mz { display: flex; gap: 1px; margin-left: 8px; flex: 0 1 auto; min-width: 0; }
-.cl13-mz button {
-  border: 0; background: none; flex: 0 1 18px; min-width: 11px; height: 26px; padding: 0; border-radius: 4px;
-  font-family: var(--clv-type); font-size: 13px; color: var(--clv-ink); cursor: pointer;
-}
-.cl13-mz button.off { color: rgba(28, 19, 15, 0.28); cursor: default; }
-.cl13-mz button.on { background: var(--clv-btn); color: #f5f1eb; }
-/* the mini A–Z only at 1441px and wider (the mock's own boundary); the sticky copy's Find narrows */
-@media (max-width: 1440px) {
-  .cl13-mz { display: none !important; }
-  .sbar .cl13-find { width: 170px; }
-}
-.sbar .cl13-find { width: 200px; height: 34px; }
-.sbar .lp { height: 34px; }
-.sbar .lp.lp-dir { width: 34px; }
-.sbar .cl13-ctl { flex-wrap: nowrap; flex: none; }
-.sbar .lp em { display: none; }
-.sbar .cl13-sb-t, .sbar .cl13-sb-k { flex: none; }
+/* the sticky slim bar and its mini A–Z retired with the open banner (v14, ruling Q7) */
 
 /* v13 §8 — the "/" key cap on the banner's Find (the mock's kbd: mono 9, a 1px ring in the ink's own
    colour, faint). It names the key the registry binds (`shortcutLabel`), never a typed literal. */
@@ -169,7 +144,7 @@
 .clv-group[data-loading] :is(.cl13-ac, .clv-row, .clv-idx, .cl13-spark, .cl13-sf, .cl13-se, .ob-k, .ob-p) * { visibility: hidden; }
 .clv-group[data-loading] .clv-bdisc { background: #34445e !important; box-shadow: none !important; }
 .clv-group[data-loading] .clv-bdisc img { visibility: hidden; }
-.clv-group[data-loading] :is(.ob-perch, .cz-dots, .cl13-seg, .cz-arw, .cl13-ctl, .clv-band2) { opacity: 0; }
+.clv-group[data-loading] :is(.cl13-ctl, .clv-band2) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .clv-group[data-loading] :is(.cl13-sl, .cl13-sf, .cl13-se, .cz-title, .cz-note, .cl13-ac, .clv-row, .ob-k, .ob-h, .ob-p, .clv-idx),
   .clv-group[data-loading] .ph--band :is(.ph-title, .ph-intro, .ph-acts button) { animation: none; }

@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Contact list v13 §8 — THE LOADING BEAT. While the agents load, the page draws the strip, the
- * banner's text, the A–Z strip and five rows as shimmering shapes (v14 retired the carousel);
+ * next-step section, the "Your agents" bar's text, the A–Z strip and five rows as shimmering shapes;
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
- * placeholder IS its real counterpart — the same `ContactStrip`, `OpenBanner`, `Workspace`, `ContactIndexStrip` and `ContactRows` — drawn over a handful of
+ * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
+ * `ContactRows` — drawn over a handful of
  * PLACEHOLDER agents through the page's own derivations, in the same parents, with their text made
  * transparent and a shimmer painted on (contactV13.css, `[data-loading]`). A box drawn by hand to
  * look the right size is right until the component it imitates changes.
@@ -21,8 +22,7 @@ import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
 import { stripFacts } from "../../../lib/contactStrip";
 import { ContactStrip } from "./ContactStrip";
-import { OpenBanner } from "../../shell/OpenBanner";
-import { Workspace } from "../../shell/Workspace";
+import { YourAgentsBar } from "./YourAgentsBar";
 import { ContactIndexStrip } from "./ContactIndexStrip";
 import { ContactRows } from "./ContactRows";
 import { ContactNextStep } from "./ContactNextStep";
@@ -76,17 +76,11 @@ export const ContactSkeleton: React.FC<{
         onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
       />
       <div className="clv-main">
-        <OpenBanner
-          probe="contacts-sk"
-          figure={perch}
-          eyebrow={<span>Agents on file</span>}
-          heading="Every agent, on file."
-          sentence={msTitle
-            ? <>Your card index for <b>{msTitle}</b>: what each agent wants, how fast they reply, and where your query to them stands.</>
-            : <>Your card index: what each agent wants, how fast they reply, and where your query to them stands.</>}
-          controls={controls}
-        />
-        <Workspace tray="var(--clv-slate-tray)" probe="contacts-sk">
+        <section className="cl14-ws" aria-hidden="true">
+          <YourAgentsBar shown={0} total={0} book={msTitle} you={0} ready={0} youOn={false} readyOn={false}
+            onYou={noop} onReady={noop} art={perch} controls={controls} />
+          <div className="cl14-frow" />
+          <div className="cl14-list">
           <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>
             <ContactRows
@@ -95,7 +89,8 @@ export const ContactSkeleton: React.FC<{
               trayFor={() => PRIMARY} onAct={noop}
             />
           </div>
-        </Workspace>
+          </div>
+        </section>
       </div>
     </>
   );
