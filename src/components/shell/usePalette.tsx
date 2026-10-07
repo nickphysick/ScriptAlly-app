@@ -22,10 +22,21 @@ import { useScriptAllyDb } from "../../lib/db";
 import { buildCorpus, rankItems } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { SearchPalette } from "./SearchPalette";
+import { resolveScopedManuscript } from "../../lib/shellSidebar";
+
+/** The workspace's active manuscript id — the same key the shell's selector writes. */
+const readActiveMs = (): string | null => {
+  try { return typeof window === "undefined" ? null : localStorage.getItem("scriptally_active_manuscript_id"); } catch { return null; }
+};
 
 export interface UsePaletteInput {
   onNavigate: (tab: string, subPageName?: string) => void;
   onNavigatePath: (path: string) => void;
+  /**
+   * The sidebar's own icon for a page path (follow-up 2, §3): a Go-to row shows the SAME mark its
+   * sidebar row does, never a generic grid. The host owns the icon map; null means "not a sidebar page".
+   */
+  pageIcon?: (path: string) => React.ReactNode | null;
   setSearchQuery: (v: string) => void;
 }
 
@@ -38,7 +49,7 @@ export interface PaletteHandle {
   palette: React.ReactElement;
 }
 
-export function usePalette({ onNavigate, onNavigatePath, setSearchQuery }: UsePaletteInput): PaletteHandle {
+export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIcon }: UsePaletteInput): PaletteHandle {
   const { pathname } = useLocation();
   const { agents, queries, manuscripts } = useScriptAllyDb();
 
@@ -94,6 +105,8 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery }: UsePa
       desktopOpenerRef={desktopSearchRef}
       term={term}
       setTerm={setTerm}
+      pageIcon={pageIcon}
+      activeManuscriptTitle={open ? resolveScopedManuscript(manuscripts, readActiveMs())?.title : undefined}
     />
   );
 

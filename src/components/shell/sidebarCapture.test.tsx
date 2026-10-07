@@ -16,7 +16,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { sliceBetween } from "../../test/sliceBetween";
 import { SHORTCUTS } from "../../lib/shortcuts";
-import { CAPTURE_FLYOUT_ROWS, CAPTURE_MENU_ROWS, runCaptureRow } from "./SidebarCapture";
+import { CAPTURE_FLYOUT_ROWS, CAPTURE_MENU_ROWS, MANUSCRIPT_SOON, runCaptureRow } from "./SidebarCapture";
 import { RAIL_CAPTURES } from "./railNav";
 
 import { SIDEBAR_COLLAPSED_KEY } from "./useSidebarCollapsed";
@@ -84,7 +84,9 @@ describe("SB1 — one capture control, in the bar, and none in the sidebar", () 
 });
 
 describe("SB2 — every row is an existing contract", () => {
-  it("Log a query, Record a response and Add an agent are invokeCapture's contracts; Add a manuscript is the switcher footer's call", () => {
+  /* AMENDED (ink shell v1, follow-up 2 · 1b): Add a manuscript is SOON — shown, disabled, and it
+     navigates nowhere. The three capture contracts are unchanged. */
+  it("Log a query, Record a response and Add an agent are invokeCapture's contracts; Add a manuscript does nothing (SOON)", () => {
     const calls: [string, string | undefined][] = [];
     const nav = (t: string, s?: string) => { calls.push([t, s]); };
     for (const id of ["query", "record", "agent", "manuscript"] as const) runCaptureRow(id, nav);
@@ -92,22 +94,25 @@ describe("SB2 — every row is an existing contract", () => {
       [RAIL_CAPTURES.query.tab, RAIL_CAPTURES.query.sub],
       [RAIL_CAPTURES.record.tab, RAIL_CAPTURES.record.sub],
       [RAIL_CAPTURES.agent.tab, RAIL_CAPTURES.agent.sub],
-      ["manuscripts", "Add a manuscript"],
     ]);
-    /* the switcher's footer makes exactly this call — two derivations, one string */
+    expect(MANUSCRIPT_SOON).toBe(true);
+    /* the zero-manuscript tile keeps its add — a writer with no manuscript must be able to make one */
     const shellSrc = readFileSync(resolve(__dirname, "WorkspaceShell.tsx"), "utf8");
     expect(shellSrc).toContain('onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}');
   });
   it("the menu's rows, in order, and the flyout puts Log a query first", () => {
     expect(CAPTURE_MENU_ROWS.map((r) => r.id)).toEqual(["record", "agent", "manuscript"]);
     expect(CAPTURE_FLYOUT_ROWS.map((r) => r.id)).toEqual(["query", "record", "agent", "manuscript"]);
-    expect(CAPTURE_MENU_ROWS.find((r) => r.id === "agent")!.sep, "the hairline sits between Record and Add an agent").toBe(true);
+    /* AMENDED (follow-up 2): the hairline sets Add a manuscript apart, as the reference draws it */
+    expect(CAPTURE_MENU_ROWS.find((r) => r.id === "manuscript")!.sep, "the hairline sits above Add a manuscript").toBe(true);
+    expect(CAPTURE_MENU_ROWS.find((r) => r.id === "agent")!.sep).toBeFalsy();
   });
   it("no new path: the file navigates only through invokeCapture and runCaptureRow, and writes nothing", () => {
     const calls = [...SRC.matchAll(/\b(navigate|onNavigate)\(/g)].length;
-    /* `navigate(` appears exactly once — inside runCaptureRow's manuscript branch */
-    expect(calls).toBe(1);
-    expect(SRC).toContain('if (id === "manuscript") navigate("manuscripts", "Add a manuscript");');
+    /* AMENDED (follow-up 2): with Add a manuscript SOON, nothing in the file calls navigate directly —
+       every route is invokeCapture's */
+    expect(calls).toBe(0);
+    expect(SRC).toContain('if (id === "manuscript") return;');
     expect(SRC).not.toMatch(/useScriptAllyDb|addQuery|updateQuery|setDoc|addDoc/);
   });
 });

@@ -19,6 +19,8 @@
  * limit is 24px short of the search field. Re-fitting is measured, synchronous and unanimated, so
  * the tabs settle in one frame on a route change, a collapse or a resize.
  */
+import { moveInMenu } from "../../lib/menuKeys";
+import "./shellMenus.css";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export interface TabSibling { id: string; label: string; path: string; icon: React.ReactNode }
@@ -80,6 +82,8 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
   const [start, setStart] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const moreRef = useRef<HTMLSpanElement>(null);
+  const moreBtnRef = useRef<HTMLButtonElement>(null);
+  const moreMenuRef = useRef<HTMLSpanElement>(null);
 
   /* ── the name swap: the old name drops out, the new one rises in, 180ms in all ── */
   const [shown, setShown] = useState({ group, name });
@@ -133,7 +137,7 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
   useEffect(() => {
     if (!menuOpen) return undefined;
     const away = (e: PointerEvent) => { if (!moreRef.current?.contains(e.target as Node)) setMenuOpen(false); };
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setMenuOpen(false); moreBtnRef.current?.focus(); } };
     document.addEventListener("pointerdown", away, true);
     document.addEventListener("keydown", key);
     return () => { document.removeEventListener("pointerdown", away, true); document.removeEventListener("keydown", key); };
@@ -180,20 +184,29 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
           {rest.length > 0 && (
             <span className="ws-ftmore-wrap" ref={moreRef}>
               <button
+                ref={moreBtnRef}
                 type="button"
                 className="ws-ftsib ws-ftmore"
                 data-sib="more"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 aria-label={`${rest.length} more pages`}
-                onClick={() => setMenuOpen((o) => !o)}
+                onClick={(e) => {
+                  const viaKeys = e.detail === 0;
+                  setMenuOpen((o) => !o);
+                  if (viaKeys) requestAnimationFrame(() => moreMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
+                }}
               >
                 +{rest.length}
               </button>
               {menuOpen && (
-                <span className="ws-ftmenu" role="menu" aria-label="More pages" data-shell="tab-more-menu">
+                <span
+                  ref={moreMenuRef}
+                  className="ws-ftmenu sa-pop" role="menu" aria-label="More pages" data-shell="tab-more-menu"
+                  onKeyDown={(e) => { moveInMenu(e, moreMenuRef.current); }}
+                >
                   {rest.map((sb) => (
-                    <button type="button" role="menuitem" key={sb.id} data-sib={sb.id}
+                    <button type="button" role="menuitem" className="sa-mi" key={sb.id} data-sib={sb.id}
                       onClick={() => { setMenuOpen(false); onGo(sb.path); }}>
                       {sb.icon}<span>{sb.label}</span>
                     </button>

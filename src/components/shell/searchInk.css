@@ -1,0 +1,194 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * SEARCH ON INK (ink shell v1, follow-up 2 §3 · ref shell-menus-settings-v1.html, sections 1 and 2:
+ * `.pal` `.pin` `.pbody` `.pr` `.pfoot`). The field drops from the bar as an ink band with the results
+ * on paper beneath it, centred on the sheet, the whole window dimmed behind.
+ *
+ * ⚠️ DESKTOP ONLY. `SearchPalette` renders this presentation only at ≥768px (`sp-pal--ink`, the dim,
+ * the one-line rows); the phone's palette is untouched, and every rule here is scoped to the class
+ * the component adds there, inside the same breakpoint.
+ *
+ * ⚠️ NO SANS-SERIF IN SEARCH. The palette portals to the body, where `brand.tsx` hands bare elements
+ * Source Sans 3 at runtime — every text element here names its face.
+ */
+@media (min-width: 768px) {
+  .sp-dim { position: fixed; inset: 0; z-index: 80; background: rgba(10, 14, 22, 0.42); }
+
+  /* the bar's search field, while it is the one open — a 1.5px cream ring at 55% and a 10% fill */
+  :root:root .ws-pagebar .ws-sfield.is-active {
+    background: rgba(var(--ink-cream-rgb), 0.1);
+    box-shadow: inset 0 0 0 1.5px rgba(var(--ink-cream-rgb), 0.55);
+    color: var(--ink-cream-92);
+  }
+
+  .sp-pal.sp-pal--ink {
+    z-index: 81;
+    border: 0;
+    border-radius: 12px;
+    background: var(--ink-paper);
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 44px rgba(8, 12, 20, 0.32), 0 2px 6px rgba(8, 12, 20, 0.12);
+    font-family: var(--sp-serif);
+    color: var(--ink-on-light);
+  }
+  .sp-pal--ink * { font-family: inherit; }
+
+  /* ── the input band: 62px of ink ── */
+  .sp-pal--ink .sp-in {
+    height: 62px;
+    gap: 12px;
+    padding: 0 16px 0 18px;
+    background: var(--ink-shell);
+    border-bottom: 0;
+  }
+  .sp-pal--ink .sp-in-ico { width: 19px; height: 19px; flex: none; color: var(--ink-cream-42); }
+  .sp-pal--ink .sp-in input {
+    font-family: var(--sp-serif);
+    font-size: 19px;
+    color: var(--ink-cream-92);
+    caret-color: var(--ink-terra);
+  }
+  .sp-pal--ink .sp-in input::placeholder { color: var(--ink-cream-42); opacity: 1; }
+  .sp-pal--ink .sp-esc {
+    padding: 4px 7px;
+    border: 0;
+    border-radius: 5px;
+    background: rgba(var(--ink-cream-rgb), 0.1);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-cream-66);
+  }
+
+  /* ── the body: paper ── */
+  .sp-pal--ink .sp-list { padding: 4px 0 8px; background: var(--ink-paper); }
+  .sp-pal--ink .sp-list::-webkit-scrollbar-thumb { background: rgba(28, 19, 15, 0.16); }
+  .sp-pal--ink .sp-grp {
+    padding: 12px 14px 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(28, 19, 15, 0.42);
+  }
+
+  .sp-pal--ink .sp-res {
+    box-sizing: border-box;
+    height: 46px;
+    gap: 12px;
+    margin: 0 8px;
+    padding: 0 10px;
+    border-radius: 9px;
+  }
+  .sp-pal--ink .sp-res.sel { background: rgba(var(--ink-terra-rgb), 0.14); box-shadow: inset 2px 0 0 var(--ink-terra); }
+  .sp-pal--ink .sp-res--soon { cursor: default; }
+  .sp-pal--ink .sp-res--soon .sp-t1,
+  .sp-pal--ink .sp-res--soon .sp-t2 { color: rgba(28, 19, 15, 0.42); }
+
+  /* the tile, by kind */
+  .sp-pal--ink .sp-ic {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(28, 19, 15, 0.05);
+    color: rgba(28, 19, 15, 0.66);
+  }
+  .sp-pal--ink .sp-ic svg { width: 16px; height: 16px; stroke-width: 1.6; }
+  .sp-pal--ink .sp-ic[data-tile="act"] { background: rgba(var(--ink-terra-rgb), 0.16); color: var(--ink-terra-deep); }
+  .sp-pal--ink .sp-ic[data-tile="agent"] { border-radius: 50%; background: var(--ink-band); color: var(--ink-cream); }
+  .sp-pal--ink .sp-av { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 9.5px; color: var(--ink-cream); }
+  .sp-pal--ink .sp-ic[data-tile="query"] { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  /* selected: the tile turns paper with a terracotta ring (the agent disc keeps its blue) */
+  .sp-pal--ink .sp-res.sel .sp-ic { background: var(--ink-paper); color: var(--ink-terra-deep); box-shadow: 0 0 0 1px rgba(var(--ink-terra-rgb), 0.4); }
+  .sp-pal--ink .sp-res.sel .sp-ic[data-tile="agent"] { background: var(--ink-band); color: var(--ink-cream); }
+
+  /* one line: the title, then the description inline, cut off with an ellipsis */
+  .sp-pal--ink .sp-tx--line { display: flex; align-items: baseline; gap: 8px; min-width: 0; overflow: hidden; }
+  .sp-pal--ink .sp-t1 {
+    display: inline;
+    flex: none;
+    max-width: 100%;
+    font-family: var(--sp-serif);
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--ink-on-light);
+  }
+  .sp-pal--ink .sp-t2 {
+    display: inline;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--sp-serif);
+    font-size: 13.5px;
+    color: rgba(28, 19, 15, 0.58);
+  }
+  .sp-pal--ink .sp-t1 mark {
+    background: rgba(var(--ink-terra-rgb), 0.32);
+    color: inherit;
+    font-weight: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .sp-pal--ink .sp-k { margin-left: auto; display: flex; align-items: center; gap: 6px; flex: none; }
+  .sp-pal--ink .sp-st,
+  .sp-pal--ink .sp-meta {
+    padding: 3px 7px;
+    border-radius: 99px;
+    background: rgba(28, 19, 15, 0.06);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(28, 19, 15, 0.58);
+    white-space: nowrap;
+  }
+  .sp-pal--ink .sp-kc,
+  .sp-pal--ink .sp-foot i {
+    padding: 2px 6px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--ink-paper);
+    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+    font-family: "JetBrains Mono", monospace;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 9.5px;
+    line-height: 1.3;
+    color: rgba(28, 19, 15, 0.58);
+  }
+  /* SOON, as in the menus */
+  .sp-pal--ink .sa-soon {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(var(--ink-terra-rgb), 0.16);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    color: var(--ink-terra-deep);
+  }
+
+  .sp-pal--ink .sp-empty { font-family: var(--sp-serif); font-size: 14.5px; color: rgba(28, 19, 15, 0.58); }
+
+  /* ── the footer: 40px of the second paper ── */
+  .sp-pal--ink .sp-foot--ink {
+    box-sizing: border-box;
+    height: 40px;
+    gap: 16px;
+    padding: 0 16px;
+    background: var(--ink-paper-2);
+    border-top: 1px solid rgba(28, 19, 15, 0.1);
+  }
+  .sp-pal--ink .sp-foot--ink span {
+    gap: 4px;
+    font-family: var(--sp-serif);
+    font-size: 12.5px;
+    color: rgba(28, 19, 15, 0.58);
+  }
+  .sp-pal--ink .sp-foot--ink i { margin-right: 2px; }
+}

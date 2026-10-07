@@ -298,8 +298,16 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
      because it lived HERE, inside the workspace shell — which meant the top-nav shell had no
      palette at all: on /dashboard the search pill opened nothing and ⌘K did nothing. Copying the
      block into the second shell would have registered ⌘K twice. */
+  /* a Go-to row in search shows its sidebar row's own icon (follow-up 2, §3) — one map, one lookup */
+  const pageIcon = useCallback((path: string) => {
+    for (const sec of sections) {
+      const ch = sec.children?.find((c) => c.path === path);
+      if (ch) return WORKSPACE_ICONS[ch.icon ?? ch.id] ?? WORKSPACE_ICONS[sec.id] ?? null;
+    }
+    return null;
+  }, [sections]);
   const { openPalette, searchOpenerRef, desktopSearchRef, palette } = usePalette({
-    onNavigate, onNavigatePath: (to) => goPath(to), setSearchQuery,
+    onNavigate, onNavigatePath: (to) => goPath(to), setSearchQuery, pageIcon,
   });
 
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the

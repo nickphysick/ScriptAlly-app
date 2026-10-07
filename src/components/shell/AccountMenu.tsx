@@ -25,6 +25,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { placeMenu } from "../../lib/todoMenu";
 import { Settings, SlidersHorizontal, HelpCircle, LogOut } from "lucide-react";
+import { InkAccountMenu } from "./InkAccountMenu";
 import { UserPlan } from "../../types";
 import { AvatarChip } from "./primitives";
 import { planLine } from "../../lib/shellSidebar";
@@ -51,7 +52,23 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   open, onClose, name, email, plan, onNavigatePath, onSignOut, anchor,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number; width?: number } | null>(null);
+
+  /**
+   * ⚠️ THE INK VARIANT (follow-up 2, §4): opened from the workspace sidebar's foot on the desktop, the
+   * menu is the house language — it opens ABOVE the foot row, 8px away, its left edge on the sidebar's
+   * inner edge and as wide as the sidebar's inner column, with the plan on an ink tile. Every other
+   * opener (the phone's bar, the marketing nav, the dev shells) keeps the menu it had.
+   */
+  const footRow = (anchor?.closest?.(".ws-pfrow") as HTMLElement | null) ?? null;
+  const ink = !!footRow && typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 768px)").matches;
+
+  /* the foot row stays lit while its menu is open */
+  useEffect(() => {
+    if (!open || !ink || !footRow) return undefined;
+    footRow.classList.add("is-lit");
+    return () => footRow.classList.remove("is-lit");
+  }, [open, ink, footRow]);
 
   /**
    * ⚠️ PLACED FROM THE TRIGGER'S RECT, AFTER FIRST PAINT — the menu's height depends on whether the
@@ -66,11 +83,20 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   useLayoutEffect(() => {
     const el = ref.current;
     if (!open || !el || !anchor) return;
+    if (ink && footRow) {
+      /* the foot row IS the sidebar's inner column (its left edge is the inner edge). ⚠️ The column is
+         220 wide; the menu is the brief's 232, so it runs 12px past the column's right edge and stays
+         2px inside the 248px sidebar — the left edge is the one that lines up. */
+      const rr = footRow.getBoundingClientRect();
+      const width = Math.max(232, rr.width);
+      setPos({ left: rr.left, top: Math.max(8, rr.top - 8 - el.offsetHeight), width });
+      return;
+    }
     const r = anchor.getBoundingClientRect();
     const p = placeMenu(r, { w: el.offsetWidth, h: el.offsetHeight },
       { w: window.innerWidth, h: window.innerHeight }, 8, "left");
     setPos({ left: p.left, top: p.top });
-  }, [open, anchor]);
+  }, [open, anchor, ink, footRow]);
 
   /* Placement is per-opening: a stale position from the last time would place the menu against a
      trigger that may since have moved (the rail collapses, the window resizes). */
@@ -115,6 +141,23 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   if (!open) return null;
   const line = planLine(plan);
   const go = (path: string) => () => { onClose(); onNavigatePath(path); };
+  /* one way out, shared by both menus — no confirm: leaving is not destructive */
+  const signOut = () => { onClose(); onSignOut(); };
+
+  if (ink) {
+    return createPortal(
+      <InkAccountMenu
+        ref={ref}
+        name={name}
+        email={email}
+        upgrade={line.upgrade}
+        pos={pos}
+        go={go}
+        onSignOut={signOut}
+      />,
+      document.body,
+    );
+  }
 
   /**
    * ⚠️ PORTALLED TO `document.body`, AND THAT IS THE FIX. Mounted inline in `WorkspaceShell` this
@@ -216,7 +259,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
       {/* ⚠️ ONE STEP LIGHTER, NEVER RED. Leaving is not destructive and signing back in costs a
           password; a red row would rank it beside deleting an account. */}
       <div className="am-group">
-        <button type="button" className="am-row am-out" role="menuitem" onClick={() => { onClose(); onSignOut(); }}>
+        <button type="button" className="am-row am-out" role="menuitem" onClick={signOut}>
           <LogOut aria-hidden="true" /><span>Sign out</span>
         </button>
       </div>

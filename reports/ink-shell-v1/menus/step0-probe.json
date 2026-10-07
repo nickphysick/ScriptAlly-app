@@ -1,0 +1,86 @@
+{
+  "fonts": [
+    "JetBrains Mono",
+    "Playfair Display",
+    "Source Sans 3",
+    "Source Serif 4",
+    "Special Elite"
+  ],
+  "barButtons": [
+    {
+      "cls": "ws-ftsib",
+      "label": "Analytics"
+    },
+    {
+      "cls": "ws-search ws-sfield",
+      "label": "Search (⌘K)"
+    },
+    {
+      "cls": "ws-setctl ws-backapp",
+      "label": "Back to appesc"
+    },
+    {
+      "cls": "ws-capl",
+      "label": "Log a query"
+    },
+    {
+      "cls": "ws-capr",
+      "label": "More ways to add"
+    },
+    {
+      "cls": "ws-capi",
+      "label": "Record a response"
+    },
+    {
+      "cls": "ws-capi",
+      "label": "Add an agent"
+    },
+    {
+      "cls": "ws-capi",
+      "label": "Add a manuscript"
+    },
+    {
+      "cls": "ws-ibtn ws-help",
+      "label": "Help"
+    }
+  ],
+  "arrow": [
+    {
+      "cls": "ws-capm is-open",
+      "text": "Record a response Add an agent Add a manuscript",
+      "font": "\"Source Serif 4\", Georgia, serif",
+      "bg": "rgb(255, 255, 255)",
+      "color": "rgb(28, 19, 15)"
+    },
+    {
+      "cls": "ws-ms-menu ws-ms-menu--port",
+      "text": "",
+      "font": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+      "bg": "rgb(255, 255, 255)",
+      "color": "rgb(28, 19, 15)"
+    }
+  ],
+  "help": [
+    {
+      "cls": "ws-capm",
+      "text": "",
+      "font": "\"Source Serif 4\", Georgia, serif",
+      "bg": "rgb(255, 255, 255)",
+      "color": "rgb(28, 19, 15)"
+    },
+    {
+      "cls": "ws-helpmenu",
+      "text": "Help centre Show the page guide",
+      "font": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+      "bg": "rgb(255, 255, 255)",
+      "color": "rgba(244, 238, 229, 0.66)"
+    },
+    {
+      "cls": "ws-ms-menu ws-ms-menu--port",
+      "text": "",
+      "font": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+      "bg": "rgb(255, 255, 255)",
+      "color": "rgb(28, 19, 15)"
+    }
+  ]
+}

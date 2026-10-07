@@ -176,7 +176,7 @@
   /* the "+N" menu is paper */
   .ws-ftmenu {
     position: absolute;
-    top: 40px;
+    top: calc(100% + 8px);
     left: 0;
     z-index: 20;
     min-width: 220px;
@@ -253,18 +253,26 @@
     box-shadow: none;
   }
   .ws-cap--bar:hover .ws-capb { box-shadow: none; }
-  .ws-cap--bar.is-open .ws-capb { box-shadow: inset 0 0 0 1.5px var(--ink-on-light); }
+  /* ⚠️ THE ARROW'S MENU WAS OPENING AND BEING CLIPPED (follow-up 2, 1a). `.ws-appctl` is `overflow:
+     hidden` so it can fold to nothing in settings mode; the capture menu hangs below it and was cut
+     off at the button's foot, so a click on the arrow appeared to do nothing. Outside settings mode
+     nothing in the slot needs clipping. */
+  .ws-app:not(.set-mode) .ws-appctl--cap { overflow: visible; }
+  /* open, the ARROW half stays lit (follow-up 2, 1a) — the button itself takes no ring */
+  .ws-cap--bar.is-open .ws-capb { box-shadow: none; }
+  .ws-cap--bar.is-open .ws-capr { background: rgba(var(--ink-shell-rgb), 0.1); }
   .ws-cap--bar .ws-capl, .ws-cap--bar .ws-capr { color: var(--ink-on-light); }
   .ws-cap--bar .ws-capl { gap: 8px; padding: 0 13px 0 12px; font-size: 14px; font-weight: 600; }
   .ws-cap--bar .ws-capr { width: 30px; border-left: 1px solid rgba(var(--ink-shell-rgb), 0.14); }
   .ws-cap--bar .ws-capl:hover, .ws-cap--bar .ws-capr:hover { background: rgba(var(--ink-shell-rgb), 0.06); }
-  /* its menu is paper, right-aligned under the button */
+  /* its menu (the house language, shellMenus.css) opens 8px below the button, right edges together,
+     as wide as its longest row and never under 220 (follow-up 2, 1a) */
   .ws-cap--bar .ws-capm {
     left: auto;
     right: 0;
-    width: 240px;
-    background: var(--shell-control-bg);
-    box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3);
+    top: calc(100% + 8px);
+    width: max-content;
+    min-width: 220px;
   }
 
   /* ⚠️ HELP IS A QUIET BUTTON SET APART from the workspace group (fix-ups, 7 Oct — the bare "?" read as
@@ -303,8 +311,21 @@
     color: var(--ink-cream-92);
     box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.28);
   }
-  /* the help menu is paper */
-  .ws-pagebar .ws-helpmenu { background: var(--shell-control-bg); box-shadow: 0 14px 34px rgba(var(--ink-shell-rgb), 0.3); }
+  /* the Help menu (the house language) opens 8px under the "?", right edges together, 256 wide */
+  .ws-pagebar .ws-helpmenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    width: 256px;
+    z-index: 30;
+  }
+  /* while it is open, the "?" is lit — the ref's `.hp.on` */
+  .ws-pagebar .ws-help[aria-expanded="true"] {
+    background: rgba(var(--ink-cream-rgb), 0.1);
+    color: var(--ink-cream-92);
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
+  }
 
   /* "Back to app" in settings mode, on ink */
   .ws-pagebar .ws-backapp { color: var(--ink-cream-66); }

@@ -47,6 +47,15 @@ export type PaletteGroup = "Actions" | "Pages" | "Agents" | "Queries" | "Manuscr
  * ⚠️ PAGES MOVED FROM LAST TO SECOND. Under the old order a page match sat beneath every agent,
  * query and manuscript, so typing "packages" scrolled past records to reach the page you named.
  */
+/** The group eyebrows as the palette prints them (follow-up 2, §3). The ids stay as they are. */
+export const GROUP_LABEL: Record<PaletteGroup, string> = {
+  Actions: "Start something",
+  Pages: "Go to",
+  Agents: "Agents",
+  Queries: "Queries",
+  Manuscripts: "Manuscripts",
+};
+
 export const GROUP_ORDER: PaletteGroup[] = [
   "Actions", "Pages", "Agents", "Queries", "Manuscripts",
 ];
@@ -67,6 +76,11 @@ export interface PaletteItem {
   shortcut?: string;
   /** Query rows carry their status so the row can render the REAL StatusDot. Never a local circle. */
   status?: string;
+  /**
+   * "Coming soon" (ink shell v1, follow-up 2 · 1b): shown, never chosen — not an arrow-key stop, and
+   * Enter or a click does nothing. Add a manuscript, while the beta allows one manuscript.
+   */
+  soon?: boolean;
   run: PaletteRun;
 }
 
@@ -77,12 +91,16 @@ export interface PaletteItem {
 export const PALETTE_ACTIONS: PaletteItem[] = [
   {
     id: "act:query", group: "Actions", kind: "act",
-    title: "Log a query", subtitle: "Start a new query", shortcut: "⌘L",
+    /* ⚠️ NO KEYCAP: ⌘L is bound nowhere (lib/shortcuts.ts has no entry, no listener reads it), so the
+       chip taught a key that did nothing (follow-up 2, Step 0 audit). The subtitle names the active
+       manuscript at render time — SearchPalette's job, since this table has no user state. */
+    title: "Log a query", subtitle: "Start a new query",
     run: { kind: "capture", capture: "query" },
   },
   {
     id: "act:record", group: "Actions", kind: "act",
-    title: "Record a response", subtitle: "Log what an agent said", shortcut: "⌘R",
+    /* no keycap: ⌘R is bound nowhere either (and is the browser's reload) */
+    title: "Record a response", subtitle: "Log what an agent said",
     run: { kind: "capture", capture: "record" },
   },
   {
@@ -92,7 +110,7 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
   },
   {
     id: "act:manuscript", group: "Actions", kind: "act",
-    title: "Add a manuscript", subtitle: "Start a new project",
+    title: "Add a manuscript", subtitle: "Start a new project", soon: true,
     run: { kind: "navigate", tab: "manuscripts", sub: "Add a manuscript" },
   },
   {
@@ -109,7 +127,7 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
  */
 export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:dashboard", group: "Pages", kind: "page", title: "Dashboard", subtitle: "Your desk", run: { kind: "path", path: "/dashboard" } },
-  { id: "page:queries", group: "Pages", kind: "page", title: "Queries Hub", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
+  { id: "page:queries", group: "Pages", kind: "page", title: "Query Centre", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
   /* ⚠️ ALL FOUR INDEXED SEPARATELY. One "To-do" entry would make the palette the only place in the
      app that treats the workspace as a single page — and ⌘K is global by definition (audit 9).
      ⚠️ DERIVED FROM `TODO_ROUTES` (sidebar-IA fix, 6 Aug): these four restated the routes' labels
@@ -368,7 +386,7 @@ export function jumpToItem(ranked: PaletteItem[]): PaletteItem | null {
     kind: "act",
     title: `Log a query to ${agent.run.name}`,
     subtitle: "Start a new query with this agent",
-    shortcut: "⌘↵",
+    /* no keycap: Enter opens the selected row; nothing reads ⌘↵ */
     run: { kind: "logQueryTo", agentId: agent.run.agentId, name: agent.run.name },
   };
 }

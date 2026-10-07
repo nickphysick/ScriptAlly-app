@@ -219,6 +219,14 @@
   /* the title-page cover — the paper, its typed lines, and the deeper terracotta of the paperclip */
   --ink-tp-paper: #f6f1e7;
   --ink-tp-clip: #c0705a;
+  /* follow-up 2 — the menus' and Settings' paper (shell-menus-settings-v1.html). One language for
+     everything that pops up from the shell: paper on the ink, a terracotta wash and edge for the row
+     under the pointer, the band blue for Settings' controls. At :root because every menu portals. */
+  --ink-paper: #fffdf9;
+  --ink-paper-2: #f7f4ef;
+  --ink-terra-deep: #9a5638;
+  --ink-band: #2d3a50;
+  --ink-band-rgb: 45, 58, 80;
   /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
      and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
      its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */

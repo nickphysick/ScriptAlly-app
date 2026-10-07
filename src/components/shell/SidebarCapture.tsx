@@ -33,6 +33,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { invokeCapture } from "./railNav";
+import { menuRows, moveInMenu } from "../../lib/menuKeys";
+import "./shellMenus.css";
 
 type Navigate = (tab: string, sub?: string) => void;
 
@@ -50,8 +52,9 @@ const BOOKS = svg(15, <path d="M5 4v16M9 4v16M13 4l5 16" />);
 /** The split menu's three rows; the rail's flyout puts "Log a query" first and then these. */
 export const CAPTURE_MENU_ROWS: Row[] = [
   { id: "record", label: "Record a response", icon: MAIL },
-  { id: "agent", label: "Add an agent", icon: PERSON, sep: true },
-  { id: "manuscript", label: "Add a manuscript", icon: BOOKS },
+  { id: "agent", label: "Add an agent", icon: PERSON },
+  /* set apart: the one row the beta does not offer yet */
+  { id: "manuscript", label: "Add a manuscript", icon: BOOKS, sep: true },
 ];
 export const CAPTURE_FLYOUT_ROWS: Row[] = [
   { id: "query", label: "Log a query", icon: QUILL(15, 1.7) },
@@ -63,9 +66,16 @@ export const CAPTURE_FLYOUT_ROWS: Row[] = [
  * the manuscript row is the switcher footer's exact call.
  */
 export function runCaptureRow(id: Row["id"], navigate: Navigate): void {
-  if (id === "manuscript") navigate("manuscripts", "Add a manuscript");
-  else invokeCapture(id, navigate);
+  if (id === "manuscript") return; /* SOON — see MANUSCRIPT_SOON */
+  invokeCapture(id, navigate);
 }
+
+/**
+ * ⚠️ ADD A MANUSCRIPT IS "COMING SOON" (follow-up 2, 1b). The beta allows one manuscript, so the row is
+ * shown and disabled: `aria-disabled`, a SOON tag, no navigation, and never an arrow-key stop. The
+ * add form's own Free-tier check stays where it was; this is the shell no longer offering the door.
+ */
+export const MANUSCRIPT_SOON = true;
 
 export interface SidebarCaptureProps {
   collapsed: boolean;
@@ -93,7 +103,7 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
 
   const rows = collapsed ? CAPTURE_FLYOUT_ROWS : CAPTURE_MENU_ROWS;
-  const items = () => [...(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [])];
+  const items = () => menuRows(menuRef.current);
 
   const close = useCallback((returnFocus: boolean) => {
     setOpen(false);
@@ -139,6 +149,7 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
   }, [open, close]);
 
   const pick = (id: Row["id"]) => {
+    if (id === "manuscript" && MANUSCRIPT_SOON) return;
     close(false);
     if (onNavigate) runCaptureRow(id, onNavigate);
   };
@@ -147,13 +158,8 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
     if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") { e.preventDefault(); openMenu(true); }
   };
   const onMenuKey = (e: React.KeyboardEvent) => {
-    const list = items();
-    const i = list.indexOf(document.activeElement as HTMLButtonElement);
-    if (e.key === "ArrowDown") { e.preventDefault(); list[(i + 1) % list.length]?.focus(); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); list[(i - 1 + list.length) % list.length]?.focus(); }
-    else if (e.key === "Home") { e.preventDefault(); list[0]?.focus(); }
-    else if (e.key === "End") { e.preventDefault(); list[list.length - 1]?.focus(); }
-    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
+    if (moveInMenu(e, menuRef.current)) return;
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
     /* ⚠️ Tab CLOSES WITHOUT TRAPPING — no preventDefault, so focus moves on as it would anyway. In
        the rail the flyout is portalled to the end of the body, so Tab from it would leave the page's
        order; focus goes back to the tile first and the browser carries on from there. */
@@ -163,22 +169,31 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
   const menu = (
     <div
       ref={menuRef}
-      className={`ws-capm${collapsed ? " ws-capm--fly" : ""}${open ? " is-open" : ""}`}
+      className={`ws-capm sa-pop${collapsed ? " ws-capm--fly" : ""}${open ? " is-open" : ""}`}
       role="menu"
       aria-label="Ways to add"
       data-shell="capture-menu"
       onKeyDown={onMenuKey}
       style={collapsed && at ? { left: at.left, top: at.top } : undefined}
     >
-      {rows.map((r) => (
-        <React.Fragment key={r.id}>
-          {r.sep && <div className="ws-capsep" role="separator" />}
-          <button type="button" role="menuitem" tabIndex={-1} className="ws-capi" data-cap={r.id} onClick={() => pick(r.id)}>
-            <span className="ws-capic">{r.icon}</span>
-            <span className="ws-capt">{r.label}</span>
-          </button>
-        </React.Fragment>
-      ))}
+      {placement === "bar" && <p className="sa-peb" aria-hidden="true">Add something</p>}
+      {rows.map((r) => {
+        const soon = r.id === "manuscript" && MANUSCRIPT_SOON;
+        return (
+          <React.Fragment key={r.id}>
+            {r.sep && <div className="ws-capsep sa-hr" role="separator" />}
+            <button
+              type="button" role="menuitem" tabIndex={-1} className="ws-capi sa-mi" data-cap={r.id}
+              aria-disabled={soon ? true : undefined}
+              onClick={() => pick(r.id)}
+            >
+              <span className="ws-capic">{r.icon}</span>
+              <span className="ws-capt">{r.label}</span>
+              {soon && <span className="sa-soon" aria-label="coming soon">SOON</span>}
+            </button>
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 

@@ -165,10 +165,14 @@ describe("⚠️ every action dispatches to an EXISTING handler", () => {
     expect(new Set(captures)).toEqual(new Set(["query", "record", "agent"]));
   });
 
-  it("the runnable actions carry their shortcuts — the palette is where they are learnt", () => {
+  /* AMENDED (ink shell v1, follow-up 2 · Step 0 audit): ⌘L and ⌘R were never bound — no registry
+     entry, no listener — so the chips taught keys that did nothing. Only a bound key shows a keycap. */
+  it("no action advertises a key that nothing binds", () => {
+    for (const a of PALETTE_ACTIONS) expect(a.shortcut, `${a.id} shows a keycap`).toBeUndefined();
+  });
+  it("Add a manuscript is shown and SOON — the beta allows one manuscript", () => {
     const byId = Object.fromEntries(PALETTE_ACTIONS.map((a) => [a.id, a]));
-    expect(byId["act:query"].shortcut).toBe("⌘L");
-    expect(byId["act:record"].shortcut).toBe("⌘R");
+    expect(byId["act:manuscript"].soon).toBe(true);
   });
 });
 
@@ -237,7 +241,7 @@ describe("Jump to — the contextual action", () => {
     const rows = rankItems(corpus, "aisha");
     expect(rows[0].group).toBe("Actions");
     expect(rows[0].title).toBe("Log a query to Aisha Kapoor");
-    expect(rows[0].shortcut).toBe("⌘↵");
+    expect(rows[0].shortcut, "⌘↵ is bound nowhere (follow-up 2)").toBeUndefined();
     // the EXISTING seam — LogQueryFocusForm's initialAgentId, not a new handler
     expect(rows[0].run).toEqual({ kind: "logQueryTo", agentId: "a1", name: "Aisha Kapoor" });
   });

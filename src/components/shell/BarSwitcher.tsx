@@ -22,6 +22,8 @@
  * and Tab (which does not trap). `M` opens the menu from anywhere except an editable field or an open
  * modal; its key comes from the shortcuts registry, like every other binding's.
  */
+import { menuRows } from "../../lib/menuKeys";
+import "./shellMenus.css";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Manuscript, Query } from "../../types";
@@ -118,7 +120,8 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   const menuRef = useRef<HTMLDivElement>(null);
   const notify = useOptionalToast();
 
-  const items = () => [...(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"], [role="menuitem"]') ?? [])];
+  /* rows a person can choose — Add a manuscript (SOON) is never an arrow-key stop */
+  const items = () => menuRows(menuRef.current);
   const openMenu = useCallback(() => setOpen(true), []);
   const close = useCallback((returnFocus: boolean) => {
     setOpen(false);
@@ -267,23 +270,31 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
       {(() => {
         const menu = (
       <div
-        className={`ws-ms-menu${side ? " ws-ms-menu--port" : ""}`}
+        className={`ws-ms-menu${side ? " ws-ms-menu--port sa-pop" : ""}`}
         role="menu" aria-label="Your manuscripts" ref={menuRef} onKeyDown={onMenuKey}
         data-open={open ? "true" : "false"}
         style={side && at ? { left: at.left, top: at.top } : undefined}
       >
-        <p className="ws-ms-h">YOUR MANUSCRIPTS</p>
+        <p className={`ws-ms-h${side ? " sa-peb" : ""}`}>YOUR MANUSCRIPTS</p>
         {current.map(row)}
-        {shelved.length > 0 && <p className="ws-ms-h ws-ms-h--shelved" data-ms="shelved-h">SHELVED</p>}
+        {shelved.length > 0 && <p className={`ws-ms-h ws-ms-h--shelved${side ? " sa-peb" : ""}`} data-ms="shelved-h">SHELVED</p>}
         {shelved.map(row)}
-        <div className="ws-ms-sep" />
-        <button type="button" role="menuitem" className="ws-ms-act" data-ms="open" onClick={() => { close(false); onOpenActive(); }}>
+        <div className={`ws-ms-sep${side ? " sa-hr" : ""}`} />
+        <button type="button" role="menuitem" className={`ws-ms-act${side ? " sa-mi" : ""}`} data-ms="open" onClick={() => { close(false); onOpenActive(); }}>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 4.5h10.5a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z" /><path d="M5 18a2 2 0 0 1 2-2h10.5" /></svg>
           Open this manuscript
         </button>
-        <button type="button" role="menuitem" className="ws-ms-act ws-ms-add" data-ms="add" onClick={() => { close(false); onAdd(); }}>
+        {/* ⚠️ SOON (follow-up 2, 1b): the beta allows one manuscript, so the row is shown and disabled —
+            no navigation, never an arrow-key stop, a SOON tag saying why. (The zero-manuscript tile
+            above keeps its add: a writer with no manuscript must still be able to make the one.) */}
+        <button
+          type="button" role="menuitem" className={`ws-ms-act ws-ms-add${side ? " sa-mi" : ""}`} data-ms="add"
+          aria-disabled="true" tabIndex={-1}
+          onClick={(e) => e.preventDefault()}
+        >
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           Add a manuscript
+          <span className="sa-soon" aria-label="coming soon">SOON</span>
         </button>
         <p className="ws-ms-hint">↑ ↓ TO MOVE · ↵ TO SWITCH · {shortcutLabel("switchManuscript")} TO OPEN THIS MENU</p>
       </div>

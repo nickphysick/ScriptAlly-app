@@ -130,3 +130,4 @@
 @media (prefers-reduced-motion: reduce) {
   .am-row, .am-planbtn, .am-planmanage { transition: none; }
 }
+

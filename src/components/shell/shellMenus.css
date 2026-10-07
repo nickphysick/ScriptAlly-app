@@ -1,0 +1,131 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ONE MENU LANGUAGE (ink shell v1, follow-up 2 · ref shell-menus-pack/shell-menus-settings-v1.html,
+ * its `.pop` `.peb` `.mi` `.kc` `.hr`). The capture menu, the Help menu, your menu, the manuscript
+ * selector's menu and the "+N" tab menu all wear it: paper on the ink, 36px rows in the serif, and the
+ * sidebar's selected style made smaller for the row under the pointer or the keyboard.
+ *
+ * ⚠️ DESKTOP ONLY, LIKE EVERY INK RULE. The phone's chrome is out of bounds, so the language lives in
+ * one ≥768px block and a 390px render is `main`'s (MS15).
+ *
+ * ⚠️ `:root:root` IS THE SPECIFICITY THE LANGUAGE NEEDS, AND IT IS STATED ONCE HERE. Each menu still
+ * has its own two-class rules (`.ws-cap--bar .ws-capm`, `.ws-pagebar .ws-helpmenu`), which keep their
+ * POSITIONING; the language's colours, type and row geometry must win over them without a per-menu
+ * override, and 0-3-0 does. Positioning is never set here.
+ *
+ * ⚠️ NEVER A SANS-SERIF OR PLAYFAIR IN A MENU. `brand.tsx` names bare spans and buttons as Source Sans 3
+ * at runtime; every element a row draws inherits the serif from `.sa-mi` explicitly, so it cannot leak.
+ */
+@media (min-width: 768px) {
+  :root:root .sa-pop {
+    box-sizing: border-box;
+    background: var(--ink-paper);
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 44px rgba(8, 12, 20, 0.32), 0 2px 6px rgba(8, 12, 20, 0.12);
+    padding: 0 0 6px;
+    overflow: hidden;
+    font-family: var(--sp-serif);
+    color: var(--ink-on-light);
+    display: flex;
+    flex-direction: column;
+  }
+  /* a menu with no eyebrow opens with the same 6px its rows keep at the foot */
+  :root:root .sa-pop > .sa-mi:first-child { margin-top: 6px; }
+
+  :root:root .sa-peb {
+    margin: 0;
+    padding: 12px 14px 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8.5px;
+    letter-spacing: 0.2em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: rgba(28, 19, 15, 0.42);
+  }
+
+  :root:root .sa-mi {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: auto;
+    height: 36px;
+    min-height: 36px;
+    margin: 0 6px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    font-family: var(--sp-serif);
+    font-weight: 400;
+    font-size: 14.5px;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--ink-on-light);
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.12s ease;
+  }
+  :root:root .sa-mi * { font-family: inherit; }
+  :root:root .sa-mi svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    stroke-width: 1.6;
+    opacity: 1;
+    color: rgba(28, 19, 15, 0.62);
+  }
+  /* hover and keyboard focus — the sidebar's selected row, smaller */
+  :root:root .sa-mi:hover:not([aria-disabled="true"]),
+  :root:root .sa-mi:focus-visible:not([aria-disabled="true"]) {
+    background: rgba(var(--ink-terra-rgb), 0.13);
+    box-shadow: inset 2px 0 0 var(--ink-terra);
+  }
+  :root:root .sa-mi:hover:not([aria-disabled="true"]) svg,
+  :root:root .sa-mi:focus-visible:not([aria-disabled="true"]) svg { color: var(--ink-terra-deep); }
+
+  :root:root .sa-mi--mute { color: rgba(28, 19, 15, 0.58); }
+  :root:root .sa-mi[aria-disabled="true"] { color: rgba(28, 19, 15, 0.42); cursor: default; }
+  :root:root .sa-mi[aria-disabled="true"] svg { color: rgba(28, 19, 15, 0.42); }
+
+  /* the keycap, on the row's right */
+  :root:root .sa-kc {
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--ink-paper);
+    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 9.5px;
+    line-height: 1.3;
+    color: rgba(28, 19, 15, 0.58);
+  }
+  /* the SOON tag (1b) — a disabled row's only mark of why */
+  :root:root .sa-soon {
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(var(--ink-terra-rgb), 0.16);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    line-height: 1.3;
+    color: var(--ink-terra-deep);
+  }
+
+  :root:root .sa-hr {
+    height: 1px;
+    margin: 6px 0;
+    border: 0;
+    background: rgba(28, 19, 15, 0.1);
+  }
+}

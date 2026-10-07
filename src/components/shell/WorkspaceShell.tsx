@@ -45,7 +45,9 @@ import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
-import { ShortcutsSheet } from "./ShortcutsSheet";
+import { ShortcutsSheet, OPEN_SHORTCUTS_EVENT } from "./ShortcutsSheet";
+import { moveInMenu } from "../../lib/menuKeys";
+import "./shellMenus.css";
 import { SidebarCapture } from "./SidebarCapture";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
@@ -68,6 +70,16 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
    ink and a ~17px cap therefore needed a 33px element — a measured compensation for a specific
    asset. The v2 brand is TYPE (a Playfair "S" in an ink square), so there is no ink ratio to
    compensate for and nothing to keep the number in step with. */
+
+/** The Help menu's three marks — the reference's own paths (book · map · keyboard), 16px, 1.6 stroke. */
+const helpIcon = (d: React.ReactNode) => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
+);
+const HELP_ICONS = {
+  book: helpIcon(<><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" /><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" /></>),
+  map: helpIcon(<><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z" /><path d="M9 4v14M15 6v14" /></>),
+  kb: helpIcon(<><rect x="2.5" y="6" width="19" height="12" rx="2" /><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" /></>),
+};
 
 export interface WorkspaceShellProps {
   /** The IA — owned by the caller, never by this component. */
@@ -283,6 +295,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const [helpOpen, setHelpOpen] = useState(false);
   const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
   const helpWrapRef = useRef<HTMLSpanElement>(null);
+  const helpBtnRef = useRef<HTMLButtonElement>(null);
+  const helpMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setGuidePage(registeredPageGuide());
     return subscribePageGuide(() => setGuidePage(registeredPageGuide()));
@@ -291,7 +305,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   useEffect(() => {
     if (!helpOpen) return;
     const away = (e: PointerEvent) => { if (!helpWrapRef.current?.contains(e.target as Node)) setHelpOpen(false); };
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setHelpOpen(false); };
+    /* Escape closes and hands focus back to the "?" (follow-up 2, §2) */
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setHelpOpen(false); helpBtnRef.current?.focus(); } };
     document.addEventListener("pointerdown", away);
     document.addEventListener("keydown", key);
     return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", key); };
@@ -986,21 +1001,51 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   * apart from the workspace group: an 18px gap and a hairline rule (CSS).
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
+                  {/* ⚠️ "?" ALWAYS OPENS THE HELP MENU NOW (follow-up 2, 1c) — Help centre, the page guide
+                      where the page has one, and Keyboard shortcuts (the existing ShortcutsSheet, through
+                      its own event). It was a direct link to /help on every page without a guide. */}
                   <button
+                    ref={helpBtnRef}
                     type="button" className="ws-ibtn ws-help" data-shell="help"
-                    onClick={() => (guidePage ? setHelpOpen((o) => !o) : onOpenHelp())}
+                    onClick={(e) => {
+                      const viaKeys = e.detail === 0;
+                      setHelpOpen((o) => !o);
+                      if (viaKeys) requestAnimationFrame(() => helpMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown" && !helpOpen) {
+                        e.preventDefault();
+                        setHelpOpen(true);
+                        requestAnimationFrame(() => helpMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
+                      }
+                    }}
                     aria-label="Help" title="Help and shortcuts"
-                    aria-haspopup={guidePage ? "menu" : undefined}
-                    aria-expanded={guidePage ? helpOpen : undefined}
+                    aria-haspopup="menu"
+                    aria-expanded={helpOpen}
                   >
                     <span aria-hidden="true">?</span>
                   </button>
-                  {guidePage && helpOpen && (
-                    <div className="ws-helpmenu" role="menu" aria-label="Help">
-                      <button type="button" role="menuitem" data-shell="help-centre"
-                        onClick={() => { setHelpOpen(false); onOpenHelp(); }}>Help centre</button>
-                      <button type="button" role="menuitem" data-shell="guide-again"
-                        onClick={() => { setHelpOpen(false); requestPageGuide(); }}>Show the page guide</button>
+                  {helpOpen && (
+                    <div
+                      ref={helpMenuRef}
+                      className="ws-helpmenu sa-pop" role="menu" aria-label="Help" data-shell="help-menu"
+                      onKeyDown={(e) => { moveInMenu(e, helpMenuRef.current); }}
+                    >
+                      <p className="sa-peb" aria-hidden="true">Help</p>
+                      <button type="button" role="menuitem" className="sa-mi" data-shell="help-centre"
+                        onClick={() => { setHelpOpen(false); onOpenHelp(); }}>
+                        {HELP_ICONS.book}<span>Help centre</span>
+                      </button>
+                      {guidePage && (
+                        <button type="button" role="menuitem" className="sa-mi" data-shell="guide-again"
+                          onClick={() => { setHelpOpen(false); requestPageGuide(); }}>
+                          {HELP_ICONS.map}<span>Show the page guide</span>
+                        </button>
+                      )}
+                      <button type="button" role="menuitem" className="sa-mi" data-shell="help-shortcuts"
+                        onClick={() => { setHelpOpen(false); window.dispatchEvent(new Event(OPEN_SHORTCUTS_EVENT)); }}>
+                        {HELP_ICONS.kb}<span>Keyboard shortcuts</span><kbd className="sa-kc">?</kbd>
+                      </button>
                     </div>
                   )}
                 </span>
