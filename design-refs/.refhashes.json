@@ -155,7 +155,10 @@
     "design-refs/shell/ink-shell-scroll-v1.html": "d5311901629833b76d4d82849531448f83442cfc9e998259193b6c492eab5333",
     "design-refs/shell/ink-folder-tab-golden-3x.png": "4513b3d0e35dad75d56d85e923fe88517750ff948c43683a60adcf8e5d2ca26a",
     "design-refs/shell/shell-menus-settings-v1.html": "e7d448f7a0835d98c415766ee91f0c8a86c21878a35c4926554292c84598c9e6",
-    "design-refs/query-centre/query-centre-v131.html": "9a08e2646e2cb90d1856aa01d470f959aa7e62e5b56f8b6b57dbeda31d8c450c"
+    "design-refs/query-centre/query-centre-v131.html": "9a08e2646e2cb90d1856aa01d470f959aa7e62e5b56f8b6b57dbeda31d8c450c",
+    "design-refs/desk-ledger-v6.html": "9acb494dcca05c80120481bfdb72d47bbfa7966506a3e7ab99585fe7ca6b32ad",
+    "design-refs/qc-v131-1/ref-desk-ledger@2x.png": "1a59afab1b5a2c9fe6193c82b454852c19b77b6f1d9a793bad6d7bda2a400f9c",
+    "design-refs/qc-v131-1/ref-desk-ledger-selected@2x.png": "268139e9f42ba6da5be768e23694682ba7996f7b256a849b51d1ac22c6df9237"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

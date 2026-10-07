@@ -1,10 +1,11 @@
 /**
- * Query Centre v131 — the desk's facts and foot (§2), its bar heights, and the Coming-up chip's class
- * (§5), from the data rather than the string.
+ * Query Centre v131.1 — the desk's lines, its trend and stamp; and (v131 §5) the Coming-up chip's class,
+ * from the data rather than the string.
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus, type Query } from "../types";
-import { barHeights, deskSections } from "./qcDesk";
+import { deskSections, trendLabel, trendStartLabel, trendTip } from "./qcDesk";
+import { stampText } from "./qcCourtHistory";
 import { comingTone, type ComingUp } from "./qcComingUp";
 import type { QcRow } from "./qcSummary";
 
@@ -19,50 +20,66 @@ function row(id: string, status: QueryStatus, o: Partial<Pick<QcRow, "expectedMs
   } as unknown as QcRow;
 }
 
-describe("§2 · the desk's facts", () => {
+describe("v131.1 · the desk's lines", () => {
+  /* Mon 3 Nov 2025 12:00 GMT: this London week runs Mon 3 Nov 00:00 to Mon 10 Nov 00:00 */
   const rows = [
     row("o1", QueryStatus.OFFER, { expectedMs: NOW + 9 * DAY }),
     row("p1", QueryStatus.PARTIAL_REQUESTED, { expectedMs: NOW + 2 * DAY }),
     row("f1", QueryStatus.FULL_REQUESTED),
     row("a1", QueryStatus.QUERIED, { expectedMs: NOW - DAY, pastExpected: true }),
     row("a2", QueryStatus.FULL_SENT, { expectedMs: NOW + 3 * DAY }),
-    row("a3", QueryStatus.PARTIAL_SENT, { expectedMs: NOW + 20 * DAY }),
-    row("c1", QueryStatus.REJECTED, { stageStartMs: Date.parse("2025-10-20T09:00:00Z"), closedHow: "passed" }),
-    row("c2", QueryStatus.NO_RESPONSE, { stageStartMs: Date.parse("2025-10-28T09:00:00Z"), closedHow: "noReply" }),
+    row("a3", QueryStatus.PARTIAL_SENT, { expectedMs: NOW + 6.4 * DAY }),    /* Sun 9 Nov, evening — this week */
+    row("a4", QueryStatus.QUERIED, { expectedMs: NOW + 7 * DAY }),          /* Mon 10 Nov — next week */
+    row("c1", QueryStatus.REJECTED, { closedHow: "passed" }),
+    row("c2", QueryStatus.NO_RESPONSE, { closedHow: "noReply" }),
+    row("w1", QueryStatus.WITHDRAWN, { closedHow: "withdrawn" }),
   ];
   const [you, agent, closed] = deskSections(rows, NOW);
 
-  it("with you: offers to decide, and the rest to send; the foot is the earliest due action", () => {
+  it("with you: offers to consider (rust when any), then what is owed, by kind", () => {
+    expect(you.label).toBe("With you");
     expect(you.total).toBe(3);
-    expect(you.facts).toEqual([{ n: 1, text: "offer to decide" }, { n: 2, text: "to send" }]);
-    expect(you.foot).toEqual({ label: "NEXT DUE", date: "5 NOV" });
-    expect(you.caption).toBe("REQUESTS & OFFERS IN");
+    expect(you.lines).toEqual([{ n: 1, text: "offer to consider", hot: true }, { n: 2, text: "requests to send", hot: false }]);
   });
-  it("with the agent: past the date, and due within seven days; the foot is the next reply due", () => {
-    expect(agent.total).toBe(3);
-    expect(agent.facts).toEqual([{ n: 1, text: "past the date" }, { n: 1, text: "due this week" }]);
-    expect(agent.foot).toEqual({ label: "NEXT REPLY DUE", date: "6 NOV" });
+  it("what is owed is named by kind: all partials, all fulls, else requests; singular at 1", () => {
+    const owedOf = (st: QueryStatus[]) => deskSections(st.map((x, i) => row(`r${i}`, x)), NOW)[0].lines[1].text;
+    expect(owedOf([QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_REQUESTED])).toBe("partials to send");
+    expect(owedOf([QueryStatus.PARTIAL_REQUESTED])).toBe("partial to send");
+    expect(owedOf([QueryStatus.FULL_REQUESTED, QueryStatus.FULL_REQUESTED])).toBe("fulls to send");
+    expect(owedOf([QueryStatus.FULL_REQUESTED])).toBe("full to send");
+    expect(owedOf([QueryStatus.PARTIAL_REQUESTED, QueryStatus.REVISE_RESUBMIT])).toBe("requests to send");
+    expect(owedOf([QueryStatus.REVISE_RESUBMIT])).toBe("request to send");
+    expect(owedOf([])).toBe("requests to send");
   });
-  it("closed: passed and no reply; the foot is the most recent close", () => {
-    expect(closed.facts).toEqual([{ n: 1, text: "passed" }, { n: 1, text: "no reply" }]);
-    expect(closed.foot).toEqual({ label: "LAST CLOSED", date: "28 OCT" });
+  it("with agents: responses overdue (rust when any), and due inside this London week, Monday to Sunday", () => {
+    expect(agent.label).toBe("With agents");
+    expect(agent.total).toBe(4);
+    expect(agent.lines).toEqual([{ n: 1, text: "response overdue", hot: true }, { n: 2, text: "due this week", hot: false }]);
   });
-  it("an offer leads the with-you foot when it is the earliest", () => {
-    const [y] = deskSections([row("o", QueryStatus.OFFER, { expectedMs: NOW + DAY }), row("p", QueryStatus.FULL_REQUESTED, { expectedMs: NOW + 5 * DAY })], NOW);
-    expect(y.foot).toEqual({ label: "OFFER DUE", date: "4 NOV" });
-    expect(y.facts[0]).toEqual({ n: 1, text: "offer to decide" });
+  it("closed: rejections and no response — a withdrawal on neither line; the big number is v131's", () => {
+    expect(closed.lines).toEqual([{ n: 1, text: "rejection", hot: false }, { n: 1, text: "no response", hot: false }]);
+    expect(closed.total).toBe(2);
   });
-  it("no date to state is an em dash, not a dropped clause", () => {
-    const [, a] = deskSections([], NOW);
-    expect(a.foot.date).toBeNull();
+  it("no count is rust at zero", () => {
+    const [y, a] = deskSections([], NOW);
+    expect(y.lines[0]).toEqual({ n: 0, text: "offers to consider", hot: false });
+    expect(a.lines[0]).toEqual({ n: 0, text: "responses overdue", hot: false });
   });
-});
-
-describe("§2 · bar heights", () => {
-  it("the tallest is 30, others to scale (never under 4), an empty week 2", () => {
-    expect(barHeights([0, 1, 4, 2])).toEqual([2, 7.5, 30, 15]);
-    expect(barHeights([0, 1, 20])[1]).toBe(4);
-    expect(barHeights([0, 0])).toEqual([2, 2]);
+  it("the trend has ten points and its last is the big number; the stamp is a true minus", () => {
+    for (const s of [you, agent, closed]) {
+      expect(s.trend.values.length).toBe(10);
+      expect(s.trend.values[9]).toBe(s.total);
+    }
+    expect(stampText(3)).toBe("+3 this month");
+    expect(stampText(-3)).toBe("\u22123 this month");
+    expect(stampText(0)).toBe("No change this month");
+  });
+  it("the chart's words: the first month, the label and the tooltip", () => {
+    const mon = Date.parse("2025-08-04T00:00:00+01:00");
+    expect(trendStartLabel(mon)).toBe("Aug");
+    expect(trendLabel("With agents", mon, 14, 19)).toBe("With agents: 14 in early August, 19 now");
+    expect(trendLabel("With agents", Date.parse("2025-08-25T00:00:00+01:00"), 14, 19)).toBe("With agents: 14 in late August, 19 now");
+    expect(trendTip("agent", Date.parse("2025-09-29T00:00:00+01:00"), 20)).toBe("W/C 29 SEP · 20 with agents");
   });
 });
 

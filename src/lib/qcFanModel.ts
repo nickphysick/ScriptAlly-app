@@ -38,7 +38,8 @@ const shortDate = (ms: number): string =>
 function courtOfRow(row: QcRow): QueryCardModel["court"] {
   if (row.status === QueryStatus.OFFER) return { label: "An offer", band: "rose" };
   if (CLOSED.includes(row.status)) return { label: "Closed", band: "stone" };
-  return row.withYou ? { label: "With you", band: "rose" } : { label: "With the agent", band: "sand" };
+  /* v131.1 — the band names the court the desk calls "With agents" (D2: nothing on the route reads "With the agent") */
+  return row.withYou ? { label: "With you", band: "rose" } : { label: "With agents", band: "sand" };
 }
 
 /**

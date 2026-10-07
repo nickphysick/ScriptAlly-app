@@ -12,13 +12,15 @@
 import { test, expect, Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { WIDTHS, inkOpen, rect, applyMutation } from "./inkLib";
+import { retiredV1311 } from "./inkRetired";
 import { openRoute } from "./measure";
 
 const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
 
 async function openQc(page: Page, w: number, scope: string) {
   await inkOpen(page, "/queries", w, { scope });
-  await expect(page.locator('.qc13 [data-qcv="courts"][data-v="131"]'), "the v131 desk is on the page").toBeVisible();
+  /* v131.1 — RE-POINTED: the desk is the ledger cards' ("131.1"); the page is still v131's */
+  await expect(page.locator('.qc13 [data-qcv="courts"][data-v^="131"]'), "the v131 desk is on the page").toBeVisible();
   await expect(page.locator('.qc13-list [data-qcv="row"]').first()).toBeVisible();
   await page.waitForTimeout(300);
 }
@@ -81,6 +83,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC3 · the desk's text ────────────────────────────────────────────────────────────────────── */
   test("QC3 · each section: an eyebrow, a total, exactly two facts on one line each, a date left and a caption right", async ({ page }) => {
+    test.skip(true, retiredV1311("the v131 desk's eyebrow, two facts, foot date and caption; v131.1's cards have a name, a stamp and two tiled lines, and no foot", "QC131-1 D2, D3, D4"));
     for (const w of WIDTHS) {
       await openQc(page, w, "qc3");
       const secs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].map((s) => {
@@ -113,6 +116,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC4 · the bars ───────────────────────────────────────────────────────────────────────────── */
   test("QC4 · twelve bars a section; the last is this week in full colour; an empty week 2px; the tallest 30", async ({ page }) => {
+    test.skip(true, retiredV1311("the twelve weekly bars; v131.1 draws a ten-week running-count trend instead", "QC131-1 D5 (and D6, the unit test of the count)"));
     const FULL: Record<string, string> = { you: "rgb(217, 150, 122)", agent: "rgb(139, 155, 179)", closed: "rgb(181, 172, 164)" };
     let empties = 0;
     for (const w of WIDTHS) {
@@ -136,6 +140,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC6 · bar hover ──────────────────────────────────────────────────────────────────────────── */
   test("QC6 · hovering bar i shows its own week and count; the accessible label matches", async ({ page }) => {
+    test.skip(true, retiredV1311("the bars' hover tooltip and their list role; the trend's weeks carry the tooltip now", "QC131-1 D5 (its tooltip case)"));
     await openQc(page, 1440, "qc6");
     for (const court of ["you", "agent", "closed"]) {
       for (const i of [2, 7, 10]) {
@@ -167,7 +172,8 @@ test.describe("Query Centre v131", () => {
     expect(await page.locator('[data-qcv="cz-head-line"]').count(), "no line with nothing chosen").toBe(0);
     const before = await ids();
     expect(before.length, "the list has rows (precondition)").toBeGreaterThan(10);
-    for (const [court, name] of [["you", "With you"], ["agent", "With the agent"], ["closed", "Closed"]]) {
+    /* v131.1 — RE-POINTED: the court is "With agents" on the desk and in the carousel's title */
+    for (const [court, name] of [["you", "With you"], ["agent", "With agents"], ["closed", "Closed"]]) {
       await page.locator(`[data-qcv="court"][data-court="${court}"] [data-qcv="court-pick"]`).click();
       await page.waitForTimeout(250);
       await expect(title).toHaveText(name);
@@ -395,7 +401,8 @@ test.describe("Query Centre v131", () => {
         desk: R(vis('[data-qcv="courts"]')),
         cz: R(vis('[data-qcv="cz"]')),
         /* the desk's numbers: what a reader can see, painted-over text excluded */
-        deskStated: [...document.querySelectorAll<HTMLElement>('[data-qcv="court-count"], [data-qcv="court-fact"], [data-qcv="court-when"]')]
+        /* v131.1 — RE-POINTED: the cards state a total, two tiles and a stamp (the facts and the foot retired) */
+        deskStated: [...document.querySelectorAll<HTMLElement>('[data-qcv="court-count"], [data-qcv="court-tile"], [data-qcv="court-stamp"]')]
           .filter((e) => getComputedStyle(e).color !== "rgba(0, 0, 0, 0)").map((e) => e.innerText.trim()),
         gh: R(vis(".qc13-list .qc13-gh")),
         colh: R(vis(".qc13-list .qc13-colh")),
@@ -429,7 +436,7 @@ test.describe("Query Centre v131", () => {
           `${w}: ${k} ${JSON.stringify(sk[k])} → ${JSON.stringify(real[k])}`).toBe(true);
       }
       expect(sk.deskStated, `${w}: the desk states no number while loading`).toEqual([]);
-      expect(real.deskStated.length, `${w}: the loaded desk states its numbers (3 totals, 6 facts, 3 feet)`).toBe(12);
+      expect(real.deskStated.length, `${w}: the loaded desk states its numbers (3 totals, 6 tiles, 3 stamps)`).toBe(12);
       console.log(`QC16 ${w}: list top ${sk.list?.y} → ${real.list?.y}, carousel h ${sk.cz?.h} → ${real.cz?.h}, desk h ${sk.desk?.h} → ${real.desk?.h}`);
     }
   });
