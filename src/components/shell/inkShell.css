@@ -546,6 +546,9 @@
   .ws-fbtn:hover { filter: brightness(1.06); }
   .ws-fbtn span, .ws-fbb span { font-family: inherit; }
   .ws-fbb, .ws-fbi { display: none; }
+  /* ⚠️ THE FOLDED CARD IS A FILLED TERRACOTTA BUTTON (follow-up ruling, 7 Oct) — the same fill and
+     ink text as the card's own "Give feedback" (`.ws-fbtn`), so folding the card changes its size and
+     never its colour. The BETA tag stays, dressed for terracotta. (It was outlined in v1.) */
   .ws-fbb {
     box-sizing: border-box;
     width: 100%;
@@ -555,21 +558,23 @@
     padding: 0 12px;
     border: 0;
     border-radius: 10px;
-    background: transparent;
-    box-shadow: inset 0 0 0 1.5px var(--ink-terra);
-    color: var(--ink-cream);
+    background: var(--ink-terra);
+    box-shadow: none;
+    color: var(--ink-shell);
     font-family: var(--sp-serif);
     font-weight: 600;
     font-size: 14.5px;
     cursor: pointer;
+    transition: filter 0.14s ease;
   }
-  .ws-fbb svg { width: 16px; height: 16px; color: var(--ink-terra); flex: none; }
+  .ws-fbb:hover { filter: brightness(1.06); }
+  .ws-fbb svg { width: 16px; height: 16px; color: var(--ink-shell); flex: none; }
   .ws-fbb em {
     margin-left: auto;
     padding: 2px 6px;
     border-radius: 5px;
-    background: rgba(var(--ink-terra-rgb), 0.18);
-    color: var(--ink-terra);
+    background: rgba(var(--ink-shell-rgb), 0.14);
+    color: var(--ink-shell);
     font-family: "JetBrains Mono", monospace;
     font-style: normal;
     font-weight: 600;
@@ -646,7 +651,7 @@
   .dk-tip--rail .dk-railkbd { color: var(--ink-cream-42); }
 }
 
-/* ⚠️ THE CARD FOLDS TO THE OUTLINED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
+/* ⚠️ THE CARD FOLDS TO THE FILLED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
    MEASURED DEVIATION. The rule's intent is "fold when the column cannot hold the card", and measured
    (1440 wide, eleven rows, five labels, the selector, the card and the foot) that point is ~917px: at 900
    the literal 820 left the nav 17px short and Noteboard half under the card. The reference's own column

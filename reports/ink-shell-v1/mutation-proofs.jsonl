@@ -18,3 +18,4 @@
 {"lock":"INK18","mutation":"ink18-left","verdict":"red","tests_run":1,"first_error":"    Error: toast centre 131.421875 vs sheet 840"}
 {"lock":"INK19","mutation":"ink19-ink","verdict":"red","tests_run":1,"first_error":"    Error: the phone's shell against main's"}
 {"lock": "INK4", "mutation": "ink4-gradient", "verdict": "red", "tests_run": 1, "first_error": "pixels off the golden in the fillet's own region: 112 > 60 (re-run after the fillet-region assertion was added; the whole-crop 0.5% budget alone stayed green at 0.081%)"}
+{"lock": "INK13", "mutation": "ink13-outlined", "verdict": "red", "tests_run": 1, "first_error": "900: filled with the card button's terracotta \u2014 expected rgb(217, 150, 122), received rgba(0, 0, 0, 0) (follow-up, 7 Oct: the folded state is filled)"}

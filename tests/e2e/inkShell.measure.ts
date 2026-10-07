@@ -269,18 +269,38 @@ test.describe("ink shell", () => {
   });
 
   /* ── INK13 · feedback ─────────────────────────────────────────────────────────────────────────── */
-  test("INK13 · the card opens FeedbackDock; below 820px it is the outlined button; collapsed, the icon", async ({ page }) => {
+  /* ⚠️ AMENDED (follow-up, 7 Oct): the fold stays at 920px and the folded state is a FILLED terracotta
+     button — the card button's own fill and ink text, BETA tag kept. Asserted at 900 (inside the fold,
+     where the literal 820 would still have shown the card) and at 800. */
+  test("INK13 · the card opens FeedbackDock; below 920px a filled terracotta button; collapsed, the icon with its dot", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { height: 1000, scope: "ink13" });
     await expect(page.locator(".ws-fbc"), "the card at 1000px tall").toBeVisible();
+    await expect(page.locator(".ws-fbb")).toBeHidden();
+    const cardBtn = (await css(page, ".ws-fbtn", ["background-color", "color"]))!;
+    expect(cardBtn["background-color"], "the card's button is terracotta").toBe(TERRA);
     await page.locator(".ws-fbtn").click();
     await expect(page.locator(".sa-fbpanel")).toBeVisible();
     await page.locator(".ws-fbtn").click();
     await expect(page.locator(".sa-fbpanel")).toHaveCount(0);
-    await inkOpen(page, "/queries", 1440, { height: 800, scope: "ink13" });
-    await expect(page.locator(".ws-fbb"), "the outlined button below 820").toBeVisible();
-    await expect(page.locator(".ws-fbc")).toBeHidden();
+    for (const h of [900, 800]) {
+      await inkOpen(page, "/queries", 1440, { height: h, scope: "ink13" });
+      await expect(page.locator(".ws-fbb"), `the folded button at ${h}px tall`).toBeVisible();
+      await expect(page.locator(".ws-fbc")).toBeHidden();
+      const fb = (await css(page, ".ws-fbb", ["background-color", "color", "box-shadow"]))!;
+      expect(fb["background-color"], `${h}: filled with the card button's terracotta`).toBe(cardBtn["background-color"]);
+      expect(fb.color, `${h}: ink text, as the card button`).toBe(cardBtn.color);
+      expect(fb["box-shadow"], `${h}: not an outline`).toBe("none");
+      await expect(page.locator(".ws-fbb em"), `${h}: the BETA tag`).toHaveText("BETA");
+      await page.locator(".ws-fbb").click();
+      await expect(page.locator(".sa-fbpanel"), `${h}: it opens the dock`).toBeVisible();
+      await page.locator(".ws-fbb").click();
+      await expect(page.locator(".sa-fbpanel")).toHaveCount(0);
+    }
     await inkOpen(page, "/queries", 1440, { collapsed: true, scope: "ink13" });
     await expect(page.locator(".ws-fbi"), "the icon when collapsed").toBeVisible();
+    await expect(page.locator(".ws-fbb")).toBeHidden();
+    const dot = (await css(page, ".ws-fbi i", ["background-color", "width"]))!;
+    expect(dot["background-color"], "the icon keeps its dot").toBe(TERRA);
   });
 
   /* ── INK14 · collapse ─────────────────────────────────────────────────────────────────────────── */

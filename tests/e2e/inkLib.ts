@@ -26,6 +26,7 @@ const CSS_MUTATIONS: Record<string, string> = {
   "ink7-centre": ".ws-pagebar .ws-bright > .ws-appctl:first-child { position: absolute !important; left: 50% !important; }",
   "ink11-anthracite": ".ws-ni.on { background: #2a3a52 !important; }",
   "ink12-plain": ".ws-ct { background: transparent !important; color: inherit !important; }",
+  "ink13-outlined": ".ws-fbb { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--ink-terra) !important; color: var(--ink-cream) !important; }",
   "ink14-motion": "@media (prefers-reduced-motion: reduce) { .ws-panel.sb-ready { transition: width 0.24s ease !important; } }",
   "ink15-fade": ".sv2-fade { display: block !important; opacity: 1 !important; }",
   "ink16-full": ":root .bvd { top: 0 !important; bottom: 0 !important; right: 0 !important; }",

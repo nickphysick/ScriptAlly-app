@@ -743,7 +743,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               no longer exists, so nothing carried it. */}
           {/* ══ THE FOUNDING-MEMBER FEEDBACK CARD (ink shell v1), pinned above the foot. It opens the same
               `FeedbackDock` the bar's "Give feedback" did; the control moved, the panel did not. Three
-              forms, one handler: the card; the outlined button below 820px of window height (CSS); and
+              forms, one handler: the card; the filled terracotta button below 920px of window height (CSS); and
               the icon with its dot when the sidebar is collapsed (CSS). All three are always rendered so
               the switch between them is a style, never a remount. */}
           {onOpenFeedback && (
