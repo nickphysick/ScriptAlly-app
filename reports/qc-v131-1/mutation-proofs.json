@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "D1",
+  "mutation": "    gap: 18px;\n    background: #fff; border-radius: 16px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1);\n  }",
+  "red": true,
+  "reading": [
+   "Error: 1280: no shared frame {\"bg\":\"rgb(255, 255, 255)\",\"sh\":\"rgba(28, 19, 15, 0.1) 0px 0px 0px 1px\",\"bd\":\"0px\"}",
+   "Expected: true",
+   "Received: false"
+  ]
+ },
+ {
+  "lock": "D2",
+  "mutation": "\"past the date\"",
+  "red": true,
+  "reading": [
+   "Error: 1280 agent line 1",
+   "Expected pattern: /^\\d+ responses? overdue$/",
+   "Received string:  \"34 past the date\""
+  ]
+ },
+ {
+  "lock": "D3",
+  "mutation": ".qc131-tile.is-hotX { background: #f6ddd2; color: #a2452a; }",
+  "red": true,
+  "reading": [
+   "Error: 1280 you line 1: rust"
+  ]
+ },
+ {
+  "lock": "D4",
+  "mutation": "    const som = new Date(nowMs); som.setDate(1); som.setHours(0, 0, 0, 0);\n    const d = countAt(rows, key, nowMs, nowMs) - countAt(rows, key, som.getTime(), no",
+  "red": true,
+  "reading": [
+   "Error: 1280 you: now 13 − four weeks ago 10",
+   "Expected: \"+3 this month\"",
+   "Received: \"+1 this month\""
+  ]
+ },
+ {
+  "lock": "D5",
+  "mutation": "  const trend = (key: TileCourt) => ({ weeks: series.weeks, values: series[key].map((v, i, a) => (i ? Math.max(0, v - a[i - 1]) : v)) });",
+  "red": true,
+  "reading": [
+   "Error: 1280 you: the last point is the big number",
+   "Expected: 13",
+   "Received: 1"
+  ]
+ },
+ {
+  "lock": "D7",
+  "mutation": "    setQcCzCourt((c) => (c === key ? null : key));\n    pickQcFilter(`court:${key}` as QcFilter);\n",
+  "red": true,
+  "reading": [
+   "Error: you: the list is unchanged"
+  ]
+ },
+ {
+  "lock": "D8",
+  "mutation": "  .qc131-chart { margin-top: 14px; }\n  .qc131-card[data-loading=\"true\"] .qc131-chart { margin-top: 0; }",
+  "red": true,
+  "reading": [
+   "Error: 1280 card 0: {\"x\":289,\"y\":284,\"w\":302,\"h\":195.5,\"loading\":true} → {\"x\":289,\"y\":284,\"w\":302,\"h\":209.5,\"loading\":false}",
+   "Expected: true",
+   "Received: false"
+  ]
+ }
+]

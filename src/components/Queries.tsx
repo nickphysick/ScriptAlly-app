@@ -94,7 +94,7 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
-import { deskSections } from "../lib/qcDesk";
+import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageGuide, type GuideStep } from "./shell/PageGuide";
 
@@ -108,7 +108,7 @@ const QC_GUIDE: readonly GuideStep[] = [
   {
     title: "Your desk, in three bands",
     body: [
-      "The desk at the top counts what's with you, with the agents, and closed. Click a section to see all of them in the cards below it.",
+      "The desk at the top counts what's with you, with agents, and closed. Click a section to see all of them in the cards below it.",
       "The desk only chooses the cards. The list underneath always shows every query, whatever the desk says.",
     ],
   },
@@ -6686,7 +6686,7 @@ export const Queries: React.FC<{
                   rows={dealt}
                   title="Recently moved"
                   countLine={carouselCountLine(qcScoped.length, dealt.length, qcCzCourt)}
-                  chosen={tile ? { name: tile.name, count: tile.count } : null}
+                  chosen={tile ? { name: DESK_LABEL[tile.key], count: tile.count } : null}
                   onClear={() => setQcCzCourt(null)}
                   sort={qcCzSort}
                   onSort={setQcCzSort}

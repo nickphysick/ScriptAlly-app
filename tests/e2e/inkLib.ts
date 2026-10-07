@@ -61,7 +61,8 @@ const CSS_MUTATIONS: Record<string, string> = {
   "qc14-hard": ".qc13-art img { display: none !important; }",
   "qc16-tall": ".qc13-list .qcv-row.qcv-row--sk { height: 80px !important; }",
   "qc16-jump": ".qc13-cz[data-sk] .qcv-cz-trackw { display: none !important; }",
-  "qc16-zero": ".qc13-desk .qc13-sk, .qc13-desk .qc13-sk b { color: rgb(28, 19, 15) !important; }",
+  /* v131.1 — the desk's skeleton is the ledger cards' (`.qc131-desk`) */
+  "qc16-zero": ".qc131-desk .qc13-sk, .qc131-desk .qc13-sk b { color: rgb(28, 19, 15) !important; }",
   "qc15-empty": ".ph--full.ph--card:not(.ph--band) { height: 178px !important; padding: 0 46px 0 44px !important; }",
 };
 

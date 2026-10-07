@@ -785,15 +785,17 @@ test("QC126-2.7 · court name", async ({ page }) => {
     const t = document.body.innerText;
     const hits = (t.match(/with the agency/gi) ?? []).length;
     const desk = [...document.querySelectorAll<HTMLElement>('[data-qcv="court-when"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.textContent?.replace(/\s+/g, " ").trim());
-    return { hits, agent: (t.match(/with the agent\b/gi) ?? []).length, desk };
+    /* v131.1 — RE-POINTED: the court's name on the route is "With agents" (QC131-1 D2) */
+    return { hits, agent: (t.match(/with agents\b/gi) ?? []).length, desk };
   });
   const a = await read();
   L.check("QC126-2.7 no rendered 'With the agency' (any case)", "1512", a.hits === 0 && a.agent > 0, `agency ${a.hits} agent ${a.agent}`);
-  L.check("QC126-2.7 the desk foot never reads a dash where a date has passed", "1512", a.desk.length > 0 && a.desk.every((s) => !/^next (due|reply expected) —$/.test(s ?? "")), JSON.stringify(a.desk));
+  /* v131.1 — the desk-foot reading is RETIRED with the foot: the ledger cards have no foot (tests/e2e/RETIRED-query-centre-v131-1.md).
+     The court-name half stands, and QC131-1 D2 asserts it on the desk, the carousel and the route. */
   await openDrawer(page).catch(() => {});
   const b = await read();
   L.check("QC126-2.7 nor in the drawer", "1512", b.hits === 0, `${b.hits}`);
-  L.done(3);
+  L.done(2);
 });
 
 /* ── QC126-2.8 · the header: one row when the DRAWER is 880 or wider, v126's block below ──
