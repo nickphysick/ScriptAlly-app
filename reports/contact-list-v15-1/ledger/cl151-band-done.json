@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "y 203.8125 band 183.8125–605.390625 sheet 64–892"
+ },
+ {
+  "lock": "B1 precondition: the reference line above the band is page ground, on screen",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "yp 163.8125 desk 119.8125 sheet 64"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "left 233,230,224 (want 233,230,224) right 230,227,221 (want 230,227,221) inside 233,230,224; sheet 248–1504; box 296–1456"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 64 (±2)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 72 (±2)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "73.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 72 (±2)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "73.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "B2 the panel sits 39 (±2) inside the band's top edge",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "39.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512 · done",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "y 203.671875 band 183.671875–589.25 sheet 64–792"
+ },
+ {
+  "lock": "B1 precondition: the reference line above the band is page ground, on screen",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "yp 163.671875 desk 131.671875 sheet 64"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "left 233,230,224 (want 233,230,224) right 230,227,221 (want 230,227,221) inside 233,230,224; sheet 248–1272; box 289–1231"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 52 (±2)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "52.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 64 (±2)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "65.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 64 (±2)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "65.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "B2 the panel sits 31 (±2) inside the band's top edge",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280 · done",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "y 203.8125 band 183.8125–605.390625 sheet 64–1072"
+ },
+ {
+  "lock": "B1 precondition: the reference line above the band is page ground, on screen",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "yp 163.8125 desk 119.8125 sheet 64"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "left 233,230,224 (want 233,230,224) right 230,227,221 (want 230,227,221) inside 233,230,224; sheet 248–1912; box 452–1708"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 64 (±2)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 72 (±2)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "73.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 72 (±2)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "73.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "B2 the panel sits 39 (±2) inside the band's top edge",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "39.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920 · done",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

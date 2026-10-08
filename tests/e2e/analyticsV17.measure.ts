@@ -417,27 +417,12 @@ test("AN17-14 · workspace + footer", async ({ page }) => {
     L.check("AN17-14 four white cards", w, d?.wsCards.length === 4 && d.wsCards.every((c) => c === "rgb(255, 255, 255)"), `${d?.wsCards.join(" ")}`);
     L.check("AN17-14 the footer is mounted", w, !!d?.foot && !!d?.footIn, `${!!d?.foot}`);
     if (d?.footIn) L.check("AN17-14 footer content box = the content column (±1)", w, near(d.footIn.l, d.col.l, 1) && near(d.footIn.r, d.col.r, 1), `${d.footIn.l}–${d.footIn.r} vs ${d.col.l}–${d.col.r}`);
-    if (d?.foot && d.main) {
-      /* scroll the footer into view, then sample its top rule at both edges of the main column */
-      await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0); f?.scrollIntoView({ block: "center" }); });
-      await page.waitForTimeout(250);
-      const f = await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0)!; const r = f.getBoundingClientRect(); return { t: r.top }; });
-      /* ⚠️ A 1px RULE AT A FRACTIONAL y IS BLENDED ACROSS ROWS, so no single pixel has a fixed value. The
-         claim is that the rule runs the main column's width: the COLUMN of rows −3…+1 at each edge of the
-         scroller's client box (clear of a classic scrollbar, which darkens the last 15px) must equal the same
-         column at the centre (±3), and that column must carry a row darker than the page above it (the rule). */
-      const f2 = await page.evaluate(() => { const f = [...document.querySelectorAll<HTMLElement>('[data-probe="app-footer"]')].find((e) => e.getBoundingClientRect().height > 0)!; const sc = f.closest(".wpg-scroll") as HTMLElement; const r = sc.getBoundingClientRect(); return { l: r.left, cw: sc.clientWidth }; });
-      const column = async (x: number) => { const out: number[] = []; for (let dy = -3; dy <= 1; dy++) out.push((await pixel(page, x, Math.floor(f.t) + dy))[0]); return out; };
-      const cl = await column(f2.l + 3), cc = await column(f2.l + f2.cw / 2), cr = await column(f2.l + f2.cw - 3);
-      /* compared as PROFILES, each column against its own top row: the window's right edge carries a shade that
-         darkens every row there by ~7 (measured, page rows included), which says nothing about the rule */
-      const same = (a: number[], b: number[]) => a.every((v, i) => Math.abs((v - a[0]) - (b[i] - b[0])) <= 3);
-      const ruled = Math.min(...cc) <= cc[0] - 4;
-      L.check("AN17-14 the footer's top rule spans the main column", w, ruled && same(cl, cc) && same(cr, cc), `left ${cl} centre ${cc} right ${cr}`);
-    }
+    /* ⚠️ RETIRED BY CONTACT LIST v15.1 §5 (8 Oct): "the footer's top rule spans the main column". The shared footer
+       has no ground of its own now and its one hairline runs the CONTENT column, on its inner wrapper — measured on
+       this route by tests/e2e/contactV151.measure.ts, F1. */
     await checkOverflow(page, L, w);
   }
-  L.done(32);
+  L.done(28);
 });
 
 /* ── AN17-15 · the section tab ── */

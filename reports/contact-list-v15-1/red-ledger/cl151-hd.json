@@ -1,0 +1,272 @@
+[
+ {
+  "lock": "CL15.1 population: header, drawing and desk render, the page at rest, the drawing loaded",
+  "where": "1512",
+  "ok": true,
+  "detail": "scrollTop 0 natural 576 cards 3"
+ },
+ {
+  "lock": "H1 the drawing is 490 wide (±1)",
+  "where": "1512",
+  "ok": false,
+  "detail": "400.0"
+ },
+ {
+  "lock": "H2 the drawing's right edge is the desk's right edge (±2)",
+  "where": "1512",
+  "ok": false,
+  "detail": "img 1377.9 desk 1455.6"
+ },
+ {
+  "lock": "H3 precondition: the rule is on screen",
+  "where": "1512",
+  "ok": true,
+  "detail": "rule 367.96875 vh 900"
+ },
+ {
+  "lock": "H3 the drawing's bottom is 12–24 below the header's hairline",
+  "where": "1512",
+  "ok": false,
+  "detail": "-11.0"
+ },
+ {
+  "lock": "H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too",
+  "where": "1512",
+  "ok": false,
+  "detail": "below DIV on rule HEADER"
+ },
+ {
+  "lock": "H3 the hairline is 1px ink at 12–14%",
+  "where": "1512",
+  "ok": true,
+  "detail": "1px solid rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)",
+  "where": "1512",
+  "ok": false,
+  "detail": "text 221.0 layout 225.0 drop 0 (static)"
+ },
+ {
+  "lock": "H4 the drop is visual only: the header is no taller than the drawing's layout box plus 14",
+  "where": "1512",
+  "ok": true,
+  "detail": "header 277.0 drawing 266.0"
+ },
+ {
+  "lock": "H5 the drawing's top is 30 (±3) below the page sheet's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "D1 the header's hairline to the desk's top is 72 (±2)",
+  "where": "1512",
+  "ok": false,
+  "detail": "28.0"
+ },
+ {
+  "lock": "D2 card titles are Special Elite at 16px",
+  "where": "1512",
+  "ok": false,
+  "detail": "18px 18px 18px"
+ },
+ {
+  "lock": "D2 the header row to the body row is 16 (±1)",
+  "where": "1512",
+  "ok": false,
+  "detail": "8.0 8.0 8.0"
+ },
+ {
+  "lock": "D2 every card is 212px tall or less",
+  "where": "1512",
+  "ok": true,
+  "detail": "195.0 195.0 195.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: header, drawing and desk render, the page at rest, the drawing loaded",
+  "where": "1280",
+  "ok": true,
+  "detail": "scrollTop 0 natural 576 cards 3"
+ },
+ {
+  "lock": "H1 the drawing is 380 wide (±1)",
+  "where": "1280",
+  "ok": false,
+  "detail": "310.0"
+ },
+ {
+  "lock": "H2 the drawing's right edge is the desk's right edge (±2)",
+  "where": "1280",
+  "ok": false,
+  "detail": "img 1152.8 desk 1231.0"
+ },
+ {
+  "lock": "H3 precondition: the rule is on screen",
+  "where": "1280",
+  "ok": true,
+  "detail": "rule 304.125 vh 800"
+ },
+ {
+  "lock": "H3 the drawing's bottom is 12–24 below the header's hairline",
+  "where": "1280",
+  "ok": false,
+  "detail": "-11.0"
+ },
+ {
+  "lock": "H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too",
+  "where": "1280",
+  "ok": false,
+  "detail": "below DIV on rule HEADER"
+ },
+ {
+  "lock": "H3 the hairline is 1px ink at 12–14%",
+  "where": "1280",
+  "ok": true,
+  "detail": "1px solid rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)",
+  "where": "1280",
+  "ok": true,
+  "detail": "text 187.1 layout 191.1 drop 0 (static)"
+ },
+ {
+  "lock": "H4 the drop is visual only: the header is no taller than the drawing's layout box plus 14",
+  "where": "1280",
+  "ok": true,
+  "detail": "header 217.1 drawing 206.1"
+ },
+ {
+  "lock": "H5 the drawing's top is 24 (±3) below the page sheet's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "24.0"
+ },
+ {
+  "lock": "D1 the header's hairline to the desk's top is 60 (±2)",
+  "where": "1280",
+  "ok": false,
+  "detail": "28.0"
+ },
+ {
+  "lock": "D2 card titles are Special Elite at 14px",
+  "where": "1280",
+  "ok": false,
+  "detail": "15px 15px 15px"
+ },
+ {
+  "lock": "D2 the header row to the body row is 12 (±1)",
+  "where": "1280",
+  "ok": false,
+  "detail": "8.0 8.0 8.0"
+ },
+ {
+  "lock": "D2 every card is 194px tall or less",
+  "where": "1280",
+  "ok": true,
+  "detail": "181.0 181.0 181.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: header, drawing and desk render, the page at rest, the drawing loaded",
+  "where": "1920",
+  "ok": true,
+  "detail": "scrollTop 0 natural 576 cards 3"
+ },
+ {
+  "lock": "H1 the drawing is 490 wide (±1)",
+  "where": "1920",
+  "ok": false,
+  "detail": "400.0"
+ },
+ {
+  "lock": "H2 the drawing's right edge is the desk's right edge (±2)",
+  "where": "1920",
+  "ok": false,
+  "detail": "img 1533.5 desk 1708.0"
+ },
+ {
+  "lock": "H3 precondition: the rule is on screen",
+  "where": "1920",
+  "ok": true,
+  "detail": "rule 367.96875 vh 1080"
+ },
+ {
+  "lock": "H3 the drawing's bottom is 12–24 below the header's hairline",
+  "where": "1920",
+  "ok": false,
+  "detail": "-11.0"
+ },
+ {
+  "lock": "H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too",
+  "where": "1920",
+  "ok": false,
+  "detail": "below DIV on rule HEADER"
+ },
+ {
+  "lock": "H3 the hairline is 1px ink at 12–14%",
+  "where": "1920",
+  "ok": true,
+  "detail": "1px solid rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)",
+  "where": "1920",
+  "ok": false,
+  "detail": "text 221.0 layout 225.0 drop 0 (static)"
+ },
+ {
+  "lock": "H4 the drop is visual only: the header is no taller than the drawing's layout box plus 14",
+  "where": "1920",
+  "ok": true,
+  "detail": "header 277.0 drawing 266.0"
+ },
+ {
+  "lock": "H5 the drawing's top is 30 (±3) below the page sheet's top",
+  "where": "1920",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "D1 the header's hairline to the desk's top is 72 (±2)",
+  "where": "1920",
+  "ok": false,
+  "detail": "28.0"
+ },
+ {
+  "lock": "D2 card titles are Special Elite at 16px",
+  "where": "1920",
+  "ok": false,
+  "detail": "18px 18px 18px"
+ },
+ {
+  "lock": "D2 the header row to the body row is 16 (±1)",
+  "where": "1920",
+  "ok": false,
+  "detail": "8.0 8.0 8.0"
+ },
+ {
+  "lock": "D2 every card is 212px tall or less",
+  "where": "1920",
+  "ok": true,
+  "detail": "195.0 195.0 195.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

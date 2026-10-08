@@ -58,3 +58,16 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 | Suite | Case | Why | Now |
 |---|---|---|---|
 | `src/components/agents/contact/contactNextStep.test.tsx` | "off: the all-queried state has no Discover list or link…" (the empty side) | While Discover is off the panel is the coming-soon panel, not empty | "off: the all-queried panel is the coming-soon panel…" and "off: the request button reads as set once asked for" in the same file; CL15-6 on the rendered page |
+
+## v15.1 — spacing, the hawk on the rule, the band, the footer (8 Oct)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV15.measure.ts` | CL15-1 "the drawing starts 56 (36) after the text block" | The drawing sits at the content column's right edge; the gap is a minimum, and on the harness account it is 44 at 1512 (see the report) | CL15.1 H2 |
+| `contactV15.measure.ts` | CL15-1 "the drawing is 400 / 310 wide" | 490 / 380 | CL15.1 H1 |
+| `contactV15.measure.ts` | CL15-1 "the hairline: 1px ink at 12%" | 14%; re-pointed in place, not removed | CL15-1 (14%), CL15.1 H3 |
+| `contactV15.measure.ts` | CL15-2 "the drawing's top is 8px or more below the top bar" (the whole lock) | The header has no top margin; the drawing's drop is the headroom | CL15.1 H5 |
+| `contactV15.measure.ts` | CL15-3 "every card is 200 / 186 tall or less" | 212 / 194, with 16 (12) under the header row | CL15.1 D2 |
+| `contactV15.measure.ts` | CL15-3 "the desk is 28 (±1) under the header's hairline" | 72 / 60 | CL15.1 D1 |
+| `contactV15.measure.ts` | CL15-5a "the desk-to-panel gap is 66 (56)" and "the panel-to-workspace gap is 58 (50)" | The section sits on a band; the gaps are the band's | CL15.1 B2 |
+| `analyticsV17.measure.ts` | AN17-14 "the footer's top rule spans the main column" | The shared footer has no ground; its one hairline runs the content column, on the inner wrapper | CL15.1 F1 (measured on `/queries/analytics` too) |

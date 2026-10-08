@@ -20,7 +20,10 @@ test.beforeEach(async ({ page }) => {
 const SUB = "Your agent data underpins everything. Collate and manage it here.";
 
 /* ── lock 1 · the open header: no container behind the title; 72 / 58; the exact subheader; the text block and the
-   drawing centred against each other; the drawing 56 (36) after the text; the hairline ── */
+   drawing centred against each other; the hairline.
+   ⚠️ RETIRED BY v15.1 (8 Oct): "the drawing starts 56 (36) after the text block" (the drawing sits at the column's right
+   edge now and the gap is a minimum — CL15.1 H2) and "the drawing is 400 / 310 wide" (490 / 380 — H1). The hairline is
+   ink at 14% (H3). ── */
 test("CL15-1 · header", async ({ page }) => {
   const L = new Ledger("cl15-1");
   for (const vp of WIDTHS15) {
@@ -63,36 +66,21 @@ test("CL15-1 · header", async ({ page }) => {
     L.check("CL15-1 the two buttons: + Add an agent · Discover agents", w, r.add === "+ Add an agent" && r.disc === "Discover agents", `${r.add} · ${r.disc}`);
     const ct = r.txt ? (r.txt.t + r.txt.b) / 2 : NaN, ca = r.art ? (r.art.t + r.art.b) / 2 : NaN;
     L.check("CL15-1 the text block's centre and the drawing's are within 4px", w, Math.abs(ct - ca) <= 4, `text ${ct.toFixed(1)} drawing ${ca.toFixed(1)}`);
-    L.check(`CL15-1 the drawing starts ${narrow ? 36 : 56} (±2) after the text block`, w, !!r.txt && !!r.art && near(r.art.l - r.txt.r, narrow ? 36 : 56, 2), `${r.txt && r.art ? (r.art.l - r.txt.r).toFixed(1) : "—"}`);
-    L.check(`CL15-1 the drawing is ${narrow ? 310 : 400} wide`, w, r.imgW !== null && near(r.imgW, narrow ? 310 : 400, 1), `${r.imgW}`);
-    L.check("CL15-1 the hairline: 1px ink at 12%", w, r.line === "1px solid rgba(28, 19, 15, 0.12)", `${r.line}`);
+    L.check("CL15-1 the hairline: 1px ink at 14%", w, r.line === "1px solid rgba(28, 19, 15, 0.14)", `${r.line}`);
     await checkOverflow(page, L, w);
   }
-  L.done(20);
+  L.done(16);
 });
 
-/* ── lock 2 · headroom: the drawing's top clears the top bar by 8px or more ── */
-test("CL15-2 · headroom", async ({ page }) => {
-  const L = new Ledger("cl15-2");
-  for (const vp of WIDTHS15) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const img = pick('.aglist [data-cl15="header-art"] img');
-      const bar = pick(".ws-pagebar");
-      const sc = img?.closest<HTMLElement>(".wpg-scroll") ?? null;
-      return { img: img ? img.getBoundingClientRect().top : null, bar: bar ? bar.getBoundingClientRect().bottom : null, scrollTop: sc?.scrollTop ?? null };
-    });
-    L.check("CL15-2 precondition: the page is at rest (scrollTop 0)", w, r.scrollTop === 0, `${r.scrollTop}`);
-    L.check("CL15-2 the drawing's top is 8px or more below the top bar", w, r.img !== null && r.bar !== null && r.img - r.bar >= 8, `img ${r.img} bar ${r.bar} gap ${r.img !== null && r.bar !== null ? (r.img - r.bar).toFixed(1) : "—"}`);
-  }
-  L.done(4);
-});
+/* ── lock 2 · headroom — RETIRED BY v15.1 (8 Oct). "The drawing's top is 8px or more below the top bar" held a header
+   with a top margin of its own; the header has none now and the drawing's drop IS the headroom. CL15.1 H5 replaces it:
+   the drawing's top is 30 (24) ±3 below the page sheet's top (tests/e2e/contactV151.measure.ts). ── */
 
-/* ── lock 3 · the desk: three cards in one row; their heights; ink titles; Queried's bars and Profiles' progress bar; no
+/* ── lock 3 · the desk: three cards in one row; ink titles; Queried's bars and Profiles' progress bar; no
    text overflowing; every stamp's text clear of its inner rule; no stamp fact repeated in a row; and the presses — On
-   file changes nothing, Queried filters the list to exactly its figure, Profiles opens Housekeeping ── */
+   file changes nothing, Queried filters the list to exactly its figure, Profiles opens Housekeeping.
+   ⚠️ RETIRED BY v15.1 (8 Oct): "every card is 200 / 186 tall or less" (212 / 194 — CL15.1 D2) and "the desk is 28 under
+   the header's hairline" (72 / 60 — D1). ── */
 test("CL15-3 · desk", async ({ page }) => {
   const L = new Ledger("cl15-3");
   let deskSeen = false;
@@ -141,10 +129,8 @@ test("CL15-3 · desk", async ({ page }) => {
     const by = Object.fromEntries(r.cards.map((c) => [c.key, c]));
     L.check("CL15-3 three cards in one row: On file, Queried, Profiles complete", w,
       r.cards.map((c) => c.key).join(",") === "file,queried,profiles" && r.cards.every((c) => near(c.y, r.cards[0].y, 1)), JSON.stringify(r.cards.map((c) => [c.key, Math.round(c.y)])));
-    L.check(`CL15-3 every card is ${narrow ? "186" : "200"}px tall or less`, w, r.cards.every((c) => c.h <= (narrow ? 186 : 200)), r.cards.map((c) => c.h.toFixed(1)).join(" "));
     L.check(`CL15-3 equal widths, ${narrow ? 16 : 24} apart`, w, r.cards.length === 3 && near(r.cards[0].w, r.cards[1].w, 1) && near(r.cards[1].w, r.cards[2].w, 1)
       && near(r.cards[1].x - (r.cards[0].x + r.cards[0].w), narrow ? 16 : 24, 1), r.cards.map((c) => `${c.x.toFixed(1)}+${c.w.toFixed(1)}`).join(" "));
-    L.check("CL15-3 the desk is 28 (±1) under the header's hairline", w, r.gap !== null && near(r.gap, 28, 1), `${r.gap}`);
     L.check("CL15-3 titles are ink", w, r.cards.every((c) => c.titleColour === "rgb(28, 19, 15)"), r.cards.map((c) => c.titleColour).join(" "));
     L.check("CL15-3 Queried's chart is bars (≥ 8), this week solid and the rest at 45%", w,
       by.queried?.bars >= 8 && by.queried.barOpac[by.queried.barOpac.length - 1] === "1" && by.queried.barOpac.slice(0, -1).every((o: string) => o === "0.45"), `${by.queried?.bars} ${by.queried?.barOpac.join(",")}`);
@@ -189,7 +175,7 @@ test("CL15-3 · desk", async ({ page }) => {
   const hk = await page.evaluate(() => !![...document.querySelectorAll('[data-hdr="housekeeping"]')].find((e) => e.classList.contains("is-in")));
   L.check("CL15-3 Profiles complete opens Housekeeping", "1512", hk, `${hk}`);
   await page.keyboard.press("Escape");
-  L.done(31);
+  L.done(27);
 });
 
 /* ── the ready-only list mode (§4): what the page says about it, read in one place ── */
@@ -302,6 +288,8 @@ test("CL15-5 · pill = section = rows", async ({ page }) => {
 
 /* ── lock 5a · the section's layout (§4a): the text on the page, the card over the white panel's left edge, the
    pickable list. The gaps are to the PANEL (66 / 58; 56 / 50 below 1440); the card overlaps it by 150 (130). ── */
+/* ⚠️ RETIRED BY v15.1 (8 Oct): "the desk-to-panel gap is 66 (56)" and "the panel-to-workspace gap is 58 (50)". The
+   section sits on a band now and its gaps are the band's — CL15.1 B2. */
 test("CL15-5a · layout", async ({ page }) => {
   const L = new Ledger("cl15-5a");
   /* three ready agents, so there is a third row to pick (the shared account holds two; see CL15-5) */
@@ -337,8 +325,6 @@ test("CL15-5a · layout", async ({ page }) => {
       const r = await read();
       if (r.state !== "ready" || !r.card || !r.panel || !r.desk || !r.ws || !r.lede) { L.check("CL15-5a population: the Ready state on the stage", w, false, JSON.stringify({ state: r.state, card: !!r.card, panel: !!r.panel })); continue; }
       L.check("CL15-5a population: the Ready state on the stage", w, true, "");
-      L.check(`CL15-5a the desk-to-panel gap is ${narrow ? 56 : 66} (±3)`, w, near(r.panel.t - r.desk.b, narrow ? 56 : 66, 3), `${(r.panel.t - r.desk.b).toFixed(1)}`);
-      L.check(`CL15-5a the panel-to-workspace gap is ${narrow ? 50 : 58} (±3)`, w, near(r.ws.t - r.panel.b, narrow ? 50 : 58, 3), `${(r.ws.t - r.panel.b).toFixed(1)}`);
       L.check(`CL15-5a the card overlaps the panel by ${narrow ? 130 : 150} (±4)`, w, near(r.card.r - r.panel.l, narrow ? 130 : 150, 4), `${(r.card.r - r.panel.l).toFixed(1)}`);
       L.check(`CL15-5a the card is ${narrow ? 270 : 300} wide, vertically centred on the panel, 34 (±3) inside it top and bottom at most`, w,
         near(r.card.w, narrow ? 270 : 300, 1) && near((r.card.t + r.card.b) / 2, (r.panel.t + r.panel.b) / 2, 2) && r.card.t - r.panel.t >= 31, `w ${r.card.w} centres ${((r.card.t + r.card.b) / 2).toFixed(1)} / ${((r.panel.t + r.panel.b) / 2).toFixed(1)} inset ${(r.card.t - r.panel.t).toFixed(1)}`);
@@ -384,7 +370,7 @@ test("CL15-5a · layout", async ({ page }) => {
   } finally {
     execSync("node tests/e2e/seedReadyUnknown.mjs --clean", { stdio: "inherit" });
   }
-  L.done(34);
+  L.done(30);
 });
 
 /* ── lock 5b · load state: a fresh load shows all N agents. Counting the pill's number must not leave the ready-only

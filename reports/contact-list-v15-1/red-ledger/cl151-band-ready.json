@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1512 · ready",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1512 · ready",
+  "ok": true,
+  "detail": "y 203.96875 band 183.96875–714.046875 sheet 64–892"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "left 243,242,240 right 240,239,237 inside 243,242,240; sheet 248–1504; box 296–1456"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1512 · ready",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 64 (±2)",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 72 (±2)",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "100.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 72 (±2)",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "92.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the panel sits 39 (±2) inside the band's top edge",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "66.0"
+ },
+ {
+  "lock": "B2 the floating card's ring is 1px ink at 10%, its drop shadow unchanged",
+  "where": "1512 · ready",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.08) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 24px 46px -24px"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512 · ready",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1280 · ready",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1280 · ready",
+  "ok": true,
+  "detail": "y 204.125 band 184.125–696.203125 sheet 64–792"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "left 243,242,240 right 240,239,237 inside 243,242,240; sheet 248–1272; box 289–1231"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1280 · ready",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 52 (±2)",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 64 (±2)",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "90.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 64 (±2)",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "84.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the panel sits 31 (±2) inside the band's top edge",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "56.0"
+ },
+ {
+  "lock": "B2 the floating card's ring is 1px ink at 10%, its drop shadow unchanged",
+  "where": "1280 · ready",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.08) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 24px 46px -24px"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280 · ready",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.1 population: the band, the stage, the desk and the workspace bar render in this state",
+  "where": "1920 · ready",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1 the band's background is rgb(233, 230, 224), with no border and no radius",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) · 0px 0px 0px · 0px"
+ },
+ {
+  "lock": "B1 precondition: the sampled line is inside the band and on screen",
+  "where": "1920 · ready",
+  "ok": true,
+  "detail": "y 203.96875 band 183.96875–714.046875 sheet 64–1072"
+ },
+ {
+  "lock": "B1 the tint is painted to the page sheet's left and right content edges (±1)",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "left 243,242,240 right 240,239,237 inside 243,242,240; sheet 248–1912; box 452–1708"
+ },
+ {
+  "lock": "B1 the band's box is narrower than the sheet where the column is (the tint is painted past the box, not laid out past it)",
+  "where": "1920 · ready",
+  "ok": true,
+  "detail": "over 0"
+ },
+ {
+  "lock": "B2 the desk's bottom to the band's top is 64 (±2)",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the band's top to the section grid is 72 (±2)",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "100.0"
+ },
+ {
+  "lock": "B2 the section grid to the band's bottom is 72 (±2)",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "92.0"
+ },
+ {
+  "lock": "B2 the band's bottom to the workspace bar is 56 (±2)",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "B2 the panel sits 39 (±2) inside the band's top edge",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "66.0"
+ },
+ {
+  "lock": "B2 the floating card's ring is 1px ink at 10%, its drop shadow unchanged",
+  "where": "1920 · ready",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.08) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 24px 46px -24px"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1920 · ready",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

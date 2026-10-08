@@ -9,12 +9,14 @@
 /* the header is the group's first row, across both tracks (where the band's `.ph` sat) */
 .clv-group > .cl15-hd { grid-column: 1 / -1; grid-row: 1; }
 
-/* ── §2 · THE OPEN HEADER: the text block and the drawing, centred against each other; the hairline under ── */
+/* ── §2 · THE OPEN HEADER (v15.1): the text block centred against the drawing, which sits at the column's right edge
+   and hangs over the hairline. No top margin: the drawing's own drop is the headroom. The 56 (36) gap is a minimum. ── */
 .cl15-hd {
   box-sizing: border-box;
+  --cl15-drop: 30px;
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
-  margin-top: 28px; padding-bottom: 18px;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.12);
+  margin-top: 0; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .cl15-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 /* ⚠️ brand.tsx forces `h1:not(.wsh-title)` (0-1-1) at runtime, injected last: 0-2-1 and !important win honestly */
@@ -33,15 +35,20 @@
 .cl15-hd .cl15-b1:hover { background: #22304a; }
 .cl15-hd .cl15-b2:hover { background: #f6f3ee; }
 .cl15-hd button:disabled { cursor: default; }
-/* the drawing: in the flow at the start of its column, 8px over the hairline */
-.cl15-art { justify-self: start; min-width: 0; }
-.cl15-art img { display: block; width: 400px; height: auto; margin-bottom: -8px; }
+/* the drawing: at the END of its column, so its right edge is the content column's. Its LAYOUT box sets the row's height
+   and is what the text centres against; `top` then drops it without growing the header, and being positioned it paints
+   over the header's own hairline. The width is stated in CSS pixels, so a later 2× file needs no change here.
+   ⚠️ THE DRAWING KEEPS ITS WIDTH AND ITS RIGHT EDGE; THE GAP IS WHAT GIVES. Preflight's `max-width: 100%` squeezed it to
+   478 at 1512 (measured: "37 agents on file" is 625.5 wide, the column 1160, so the track is 478). `max-width: none` and
+   a right-aligned flex slot let it overhang its track to the LEFT, into the gap, by the shortfall (12px there). */
+.cl15-art { justify-self: end; min-width: 0; display: flex; justify-content: flex-end; }
+.cl15-art img { display: block; flex: none; max-width: none; position: relative; top: var(--cl15-drop); z-index: 1; width: 490px; height: auto; }
 
 @media (max-width: 1439.5px) {
-  .cl15-hd { column-gap: 36px; margin-top: 24px; }
+  .cl15-hd { column-gap: 36px; --cl15-drop: 24px; }
   .cl15-hd .cl15-txt h1.cl15-title { font-size: 58px !important; }
   .cl15-hd .cl15-sub { font-size: 17px; }
-  .cl15-art img { width: 310px; }
+  .cl15-art img { width: 380px; }
 }
 
 /* loading: the same boxes, their text kept for its line box and painted over */
@@ -52,8 +59,9 @@
 }
 @media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }
 
-/* ── §3 · THE DESK: the group's second row, 28 under the header's hairline (shell/desk draws the cards) ── */
-.clv-group > .cl15-desk { grid-column: 1 / -1; grid-row: 2; margin-top: 28px; }
+/* ── §3 · THE DESK: the group's second row, 72 (60) under the header's hairline (shell/desk draws the cards) ── */
+.clv-group > .cl15-desk { grid-column: 1 / -1; grid-row: 2; margin-top: 72px; }
+@media (max-width: 1439.5px) { .clv-group > .cl15-desk { margin-top: 60px; } }
 /* loading: the cards hold their size; their text and charts are painted over */
 .clv-group[data-loading] .dsk-card :is(.dsk-title, .dsk-stamp, .dsk-big b, .dsk-big small, .dsk-tile, .dsk-lb, .dsk-ax span) {
   color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 6px;
