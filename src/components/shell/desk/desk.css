@@ -28,13 +28,13 @@
 .dsk-card > *:not(.dsk-hit) { position: relative; z-index: 1; pointer-events: none; }
 
 /* ⚠️ min-height 28, NOT the mock's 34: the row's tallest content is the 28px icon and the stamp's 28px layout box (its −3°
-   rotation adds no layout height). The mock's 34 is what puts its own cards at 201 / 187, past the brief's 200 / 186
-   ceilings; at 28 they land on the brief's targets, 195 / 181. */
+   rotation adds no layout height). v15.1 moved the ceilings to 212 / 194 with 16 (12) under this row; at 28 the cards
+   sit inside them. */
 .dsk-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 28px; }
 /* ⚠️ brand.tsx forces `h3` (0-0-1) at runtime: a class and an element (0-1-1) plus !important win honestly */
 .dsk-hd h3.dsk-title {
   display: flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap; min-width: 0;
-  font: 400 18px/normal var(--sp-type) !important; color: #1c130f;
+  font: 400 16px/normal var(--sp-type) !important; color: #1c130f;
 }
 .dsk-ic {
   flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
@@ -56,7 +56,8 @@
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.32'/%3E%3C/filter%3E%3Crect width='120' height='40' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.dsk-body { display: flex; align-items: center; gap: 18px; margin-top: 8px; min-width: 0; }
+/* v15.1: 16 (12) between the header row and the body row */
+.dsk-body { display: flex; align-items: center; gap: 18px; margin-top: 16px; min-width: 0; }
 .dsk-big { display: flex; flex-direction: column; flex: 0 0 auto; padding-right: 18px; border-right: 1px solid rgba(28, 19, 15, 0.12); }
 .dsk-big b { font: 400 44px/1 var(--sp-type); color: #1c130f; }
 .dsk-big small { margin-top: 3px; font: 400 13px var(--sp-type); color: rgba(28, 19, 15, 0.55); }
@@ -97,9 +98,9 @@
   .dsk-row-grid { gap: 16px; }
   .dsk-card { padding: 14px 16px 10px; }
   .dsk-hd { gap: 6px; }
-  .dsk-hd h3.dsk-title { font-size: 15px !important; gap: 6px; }
+  .dsk-hd h3.dsk-title { font-size: 14px !important; gap: 6px; }
   .dsk-hd .dsk-stamp { font-size: 11px; padding: 5px 10px; }
-  .dsk-body { gap: 12px; }
+  .dsk-body { gap: 12px; margin-top: 12px; }
   .dsk-big { padding-right: 12px; }
   .dsk-big b { font-size: 38px; }
   .dsk-tile { min-width: 26px; height: 24px; font-size: 13px; }

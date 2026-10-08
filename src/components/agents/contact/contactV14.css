@@ -48,7 +48,7 @@
 .cl14-go:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: 2px; }
 
 /* the card on the stage: the oracle's ring and deep shadow, over the card's own carousel shadow (contactV13.css, 0-2-0) */
-.cl14-next .fs-card > .cl13-ac { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
+.cl14-next .fs-card > .cl13-ac { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
 
 /* the dashed "Add an agent" card (the all-queried state, and no manuscript) */
 .cl14-addc {
@@ -90,7 +90,21 @@
 @media (prefers-reduced-motion: reduce) { .cl14-out { transition: none; } }
 
 /* the section is the group's row 3, the whole group's width; its gaps are the stage's own margins (v15 §4a) */
-.clv-group > .cl14-next { grid-column: 1 / -1; grid-row: 3; margin-top: 0; }
+/* ── v15.1 §4 · THE BAND: the next-step section sits on a tinted band the full width of the page sheet. The box stays the
+   content column (so the grid inside is unchanged and nothing overflows); the tint reaches the sheet's edges as a spread
+   shadow clipped back to the band's own height — the footer's old trick. No border, radius or drop shadow.
+   64 (52) above it, 56 below; 73 (65) of padding puts the grid 72 (64) ±1 inside and the panel, with its 34 overhang,
+   39 (31) inside the band's edges — the oracle's own rendered figures. The stage's own margins are zeroed here. */
+.clv-group > .cl14-next {
+  grid-column: 1 / -1; grid-row: 3;
+  --cl15-band: #e9e6e0;
+  margin: 64px 0 56px; padding: 73px 0;
+  background: var(--cl15-band);
+  box-shadow: 0 0 0 100vmax var(--cl15-band);
+  clip-path: inset(0 -100vmax);
+}
+.clv-group > .cl14-next > .fs { margin-top: 0; margin-bottom: 0; }
+@media (max-width: 1439.5px) { .clv-group > .cl14-next { margin-top: 52px; padding: 65px 0; } }
 /* while the page settles, the section is drawn over placeholder agents like everything else (v13 §8) */
 .clv-group[data-loading] .cl14-next :is(.fs-title, .fs-sentence, .fs-row) {
   color: transparent !important; border-radius: 8px; background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
@@ -112,8 +126,9 @@
   --cl14-ink: #2a3a52;
   --cl14-cream: #f4eee5;
   position: relative;
-  /* 60 below it to the footer — the mock's workspace margin; without it the footer butts against the panel */
-  margin: 0 -20px 60px;
+  /* 20 below it, and the footer brings its own 40 (v15.1 §5): 60 from the panel to the footer's hairline, the mock's
+     rendered figure. It was 60 here while the footer had a ground of its own and no top margin. */
+  margin: 0 -20px 20px;
   border-radius: 24px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45);

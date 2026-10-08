@@ -4,30 +4,25 @@
  *
  * AppFooter (Query Centre v126 §5; values measured off design-refs/query-centre-v126.html at 1512).
  *
- * ⚠️ THE GROUND IS FULL-BLEED AND THE BOX IS THE COLUMN. `.af` sits in the page's own column — so its
- * content box IS the desk's (QC126-11) — and paints its ground across the main column with the band's
- * trick: a spread shadow clipped back to its own height, so the ground reaches both edges of the main
- * column without the element being any wider than its column (no horizontal overflow).
+ * ⚠️ THE FOOTER HAS NO GROUND OF ITS OWN (Contact list v15.1 §5, 8 Oct). It is the page's colour, read from the
+ * page's token and never restated, and it is set off by space and ONE hairline on its inner wrapper, which is the
+ * content column's width. `.af` sits in the page's own column, so its content box IS the desk's (QC126-11).
+ * History: until v15.1 it painted a full-bleed #ebe9e5 ground and a top rule as two spread shadows.
  */
 .af {
   box-sizing: border-box;
-  --af-ground: #ebe9e5;
   --af-ink: #3a1c14;
   --af-mute: #8a7a6c;
   position: relative;
-  padding: 60px 0 26px;
-  background: var(--af-ground);
-  /* the ground and its 1px top rule are both spread shadows: the second sits 1px higher than the
-     first and shows only as that pixel. Shadows add nothing to scrollable overflow; a positioned
-     pseudo-element 100vmax wide did, and gave the scroller a horizontal scrollbar. */
-  box-shadow: 0 0 0 100vmax var(--af-ground), 0 -1px 0 100vmax rgba(28, 19, 15, 0.1);
-  clip-path: inset(-1px -100vmax -100vmax -100vmax);
+  margin-top: 40px;
+  padding: 0 0 26px;
+  background: var(--ws-page);
   border-top: 0;
   color: var(--af-ink);
   font-family: var(--sp-serif);
   font-size: 16px;
 }
-.af-in { box-sizing: border-box; }
+.af-in { box-sizing: border-box; border-top: 1px solid rgba(28, 19, 15, 0.14); padding-top: 52px; }
 .af-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px; align-items: start; }
 .af-brand { display: flex; align-items: center; gap: 11px; }
 .af-brand img { width: 38px; height: 38px; display: block; }

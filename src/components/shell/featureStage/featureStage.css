@@ -7,6 +7,7 @@
  *
  * ⚠️ THE GAPS ARE THE SECTION'S MARGINS PLUS THE PANEL'S 34px OVERHANG: 66 desk → panel = 100 − 34, and 58 panel → next =
  *    92 − 34 (90/84 below 1440, giving 56/50). Change the overhang and both margins move with it.
+ *    A host that puts the stage on a band of its own (the Contact list, v15.1) zeroes these margins and pads the band.
  */
 .fs {
   --fs-over: 34px;
@@ -32,7 +33,7 @@
 .fs .fs-go.is-on { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 
 .fs-card { grid-area: 1 / 2; z-index: 3; align-self: center; min-width: 0; display: flex; justify-content: center; }
-.fs-card > * { width: 100%; box-sizing: border-box; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
+.fs-card > * { width: 100%; box-sizing: border-box; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
 
 .fs-panel {
   grid-area: 1 / 3; z-index: 1; align-self: stretch; box-sizing: border-box; min-width: 0;

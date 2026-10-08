@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/agents · 1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/agents · 1512",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/agents · 1512",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1512px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1512px · inset(-1px -1512px -1512px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/agents · 1512",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/agents · 1512",
+  "ok": true,
+  "detail": "1159.25 vs 1159.25"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/agents · 1512",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/agents · 1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/agents · 1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/agents · 1280",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/agents · 1280",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1280px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1280px · inset(-1px -1280px -1280px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/agents · 1280",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/agents · 1280",
+  "ok": true,
+  "detail": "942.09375 vs 942.09375"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/agents · 1280",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/agents · 1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/queries · 1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/queries · 1512",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/queries · 1512",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1512px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1512px · inset(-1px -1512px -1512px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/queries · 1512",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/queries · 1512",
+  "ok": true,
+  "detail": "1159.25 vs 1159.25"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/queries · 1512",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/queries · 1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/queries · 1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/queries · 1280",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/queries · 1280",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1280px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1280px · inset(-1px -1280px -1280px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/queries · 1280",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/queries · 1280",
+  "ok": true,
+  "detail": "942.09375 vs 942.09375"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/queries · 1280",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/queries · 1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/queries/analytics · 1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/queries/analytics · 1512",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/queries/analytics · 1512",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1512px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1512px · inset(-1px -1512px -1512px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/queries/analytics · 1512",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/queries/analytics · 1512",
+  "ok": true,
+  "detail": "1159.25 vs 1159.25"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/queries/analytics · 1512",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/queries/analytics · 1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL15.1 population: the footer renders on this route, with its three columns",
+  "where": "/queries/analytics · 1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "F1 the footer's background is the page's background (and the page paints one)",
+  "where": "/queries/analytics · 1280",
+  "ok": false,
+  "detail": "footer rgb(235, 233, 229) page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "F1 no top border, no shadow ground, no clip",
+  "where": "/queries/analytics · 1280",
+  "ok": false,
+  "detail": "0px · rgb(235, 233, 229) 0px 0px 0px 1280px, rgba(28, 19, 15, 0.1) 0px -1px 0px 1280px · inset(-1px -1280px -1280px)"
+ },
+ {
+  "lock": "F1 the inner wrapper carries the one hairline: 1px ink at 14%, 52 of padding under it",
+  "where": "/queries/analytics · 1280",
+  "ok": false,
+  "detail": "0px solid rgb(58, 28, 20) · 0px"
+ },
+ {
+  "lock": "F1 the hairline runs the content column's width (the inner wrapper is the footer's own box)",
+  "where": "/queries/analytics · 1280",
+  "ok": true,
+  "detail": "942.09375 vs 942.09375"
+ },
+ {
+  "lock": "F1 40 above the footer; the bottom row's rule is ink at 10%",
+  "where": "/queries/analytics · 1280",
+  "ok": false,
+  "detail": "0px · 1px solid rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "/queries/analytics · 1280",
+  "ok": true,
+  "detail": "0"
+ }
+]
