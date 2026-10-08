@@ -93,6 +93,8 @@ import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
+import { useQcListKeys } from "./queries/centre/useQcListKeys";
+import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -131,7 +133,7 @@ const QC_GUIDE: readonly GuideStep[] = [
 ];
 import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
-import { QcList132, QcList132Skeleton } from "./queries/centre/QcList132";
+import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList132";
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
@@ -2347,8 +2349,11 @@ export const Queries: React.FC<{
   }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
-  /* v132 §2 — row density, the workspace's own control (persisted in Phase 4) */
-  const [qcDensity, setQcDensity] = useState<QcDensity>("comfortable");
+  /* v132 §2/§4 — row density, the workspace's own control, remembered on this device under its own
+     versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
+  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
+  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ density: d }); }, []);
+  const qcFindRef = useRef<HTMLInputElement>(null);
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
@@ -2359,6 +2364,16 @@ export const Queries: React.FC<{
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
+     ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
+     const is a temporal-dead-zone throw. */
+  const qcKeys = useQcListKeys({
+    active: routeActive && qcDesk,
+    find: qcFind,
+    onFind: setQcFind,
+    findRef: qcFindRef,
+    onOpen: (id) => onOpenQuery?.(id),
+  });
   const [qcCzSort, setQcCzSort] = useState<CzSort>("recent");
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
@@ -6605,6 +6620,8 @@ export const Queries: React.FC<{
                 density={qcDensity}
                 onDensity={setQcDensity}
                 scope={qcScopeMenu}
+                findRef={qcFindRef}
+                loading={showGridSkeleton}
               />
             ) : (
               <QcSentence
@@ -6771,6 +6788,11 @@ export const Queries: React.FC<{
             body={
               showGridSkeleton ? (
                 qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
+              ) : qcDesk && (emptyKind === "filtered" || emptyKind === "nomatch") ? (
+                /* v132 §4 — the desktop dead end: the inkwell and one way back (a search before a filter) */
+                <QcDeadEnd find={qcFind} book={qcLineTitle}
+                  onClearFind={() => setQcFind("")}
+                  onClearFilters={() => { clearQcFilter(); setQcScope(null); }} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6796,6 +6818,8 @@ export const Queries: React.FC<{
                   onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
                   packageOf={qcPackageOf}
                   density={qcDensity}
+                  find={qcFind}
+                  ringId={qcKeys.ringId}
                   sort={qcSort}
                   onSort={setQcSort}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the

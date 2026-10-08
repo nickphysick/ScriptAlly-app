@@ -145,3 +145,35 @@
     .qcw-list .qcw-chev, .qcw-list .qcw-row, .qcw-list .qcw-tray, .qcw-list .qcw-nxt, .qcw-list .qcw-sub { transition: none; }
   }
 }
+
+@media (min-width: 768px) {
+  /* ── §4 · the keyboard's row ring, the search mark, the reflow ── */
+  .qcw-list .qcw-row.kf { box-shadow: inset 3px 0 0 #2f5f86; background: #f6f9fc; }
+  .qcw-list mark { background: #fde9a8; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .qcw-list .qcw-rows--in .qcw-row { animation: qcwRin 0.28s ease both; }
+  @keyframes qcwRin { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+  /* ── §4 · Compact ── */
+  .qcw-list[data-density="compact"] .qcw-row { padding: 9px 22px; }
+  .qcw-list[data-density="compact"] .qcw-disc { width: 30px; height: 30px; font-size: 9.5px; }
+  .qcw-list[data-density="compact"] .qcw-ag { gap: 10px; }
+  .qcw-list[data-density="compact"] .qcw-agt b { font-size: 16px; }
+  .qcw-list[data-density="compact"] .qcw-agt small,
+  .qcw-list[data-density="compact"] .qcw-st .qcw-sub { display: none; }
+  .qcw-list[data-density="compact"] .qcw-ws1 { font-size: 15px; }
+  .qcw-list[data-density="compact"] .qcw-band { height: 44px; }
+  .qcw-list[data-density="compact"] .qcw-tile { width: 28px; height: 28px; border-radius: 8px; }
+  .qcw-list[data-density="compact"] .qcw-tile svg { width: 18px; height: 18px; }
+  .qcw-list[data-density="compact"] .qcw-pkg { height: 28px; }
+
+  /* ── §4 · the dead end ── */
+  .qcw-list .qcw-dead { display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: center; padding: 40px 60px 46px; margin: 10px 0; border-radius: 16px; background: #faf8f5; }
+  .qcw-list .qcw-dead img { width: 110px; height: auto; display: block; }
+  .qcw-list .qcw-dead .qcw-dead-t { margin: 0 0 8px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 24px; line-height: 1.3; color: #1c130f; }
+  .qcw-list .qcw-dead .qcw-dead-p { margin: 0 0 16px; font-family: var(--sp-serif); font-weight: 400; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.72); }
+
+  /* ── loading: the real elements, their text painted over ── */
+  .qcw-list .qcw-skt { display: inline-block; color: transparent; border-radius: 4px; line-height: inherit; }
+
+  @media (prefers-reduced-motion: reduce) { .qcw-list .qcw-rows--in .qcw-row { animation: none; } }
+}

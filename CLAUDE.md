@@ -907,6 +907,22 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ ANY `seed-query-N` PAST THE END OF THE TABLE IS DELETED.** `batch.set` overwrites the ids it writes and knows nothing about the ones it used to write, so shortening the table would strand the tail on the account for ever — rendering, counted, attributable to nothing. No orphan was found; it is the guard, not the repair.
 - **⚠️ `seedThinCases.mjs` IS NOT THE PROBLEM AND ITS 400-DAY QUERY IS DELIBERATE.** `thin-q-close` is a `Queried` query sent 400 days ago against a 6-week window so the Close journey has a fixture at all; the file uses relative dates, deterministic `thin-` ids and `--clean`. **A send date from last year on that account is evidence of a designed fixture before it is evidence of a leak** — check which seeder owns an id before reworking the wrong file.
 
+## Query Centre — v132 (8 Oct; ref = design-refs/query-centre/query-centre-v132.html + design-refs/qc-v132/*.png; report reports/qc-v132/REPORT.md; on branch `qc-v132`, NOT merged; AMENDS v126/v131 below the desk on the DESKTOP — the phone keeps the v126 page)
+- **Below the desk the desktop page is two things:** "Recently updated" (`QcRecent` + `lib/qcRecent`: a lede and one featured card over the "Also moved" panel) and the "Your queries" workspace (`QcWorkspace` head + `QcList132` rows, in a white panel under an ink bar with the flying hawk).
+- **A desk section chooses for "Recently updated" and never filters the list** (R2). "See all N" is the list's own count.
+- **The list's filter is ONE `QcFilter` value.** Pills and chips are one-at-a-time choices over it; pressing the pressed one returns to "all". There are no AND facets. "Your move" is `court:you` (offers included), "Overdue" is `past` (`pastExpected`, the desk's "responses overdue"). Both pills are held equal to the desk's numbers (W2).
+- **Sort is the list's own `SORT_OPTIONS`**, never the drawer's `SORT_BY_OPTIONS`. No direction button.
+- **⚠️ The four coloured bands appear under Grouped: urgency.** The default grouping is "No grouping", which is two bands (Your move, Everything else). `URGENCY_GROUPS` reads Your move · Past the date · Waiting · Closed.
+- **The row's words are `lib/qcRowLines`:** `STAND_VERB` + `standLine`, `nextLine`, `sentCell`. Every `QueryStatus` needs a verb in `STAND_VERB` AND in `qcRecent`'s table; both are locked over the enum.
+- **⚠️ "What you sent" lights a package's tiles from the EDITION THAT WENT** (`sentPackageEdition`), never the package as it is now. A package no longer on file keeps its chip, says so, and its tiles read "Not recorded", never "Not sent".
+- **⚠️ The row popups are portalled to `document.body`**: `.qcv-page` is `container-type: inline-size`, which contains fixed children. Nothing in a row carries a native `title` (W7).
+- **⚠️ The hawk overhangs the bar, so `.qcv-page.qcw` may not clip** (W1).
+- **Keys are registered in `lib/shortcuts` ("Query Centre" scope) and bound in `useQcListKeys`:** `/` Find, j/k/↓/↑, Enter, L, Escape. They stand down while typing, under any escape-stack layer and behind the open drawer.
+- **Density is the only remembered list setting:** `localStorage["sa.qcList.v1"]` (`lib/qcListMemory`), validated on restore.
+- **⚠️ At 1280 with the sidebar open the panel is about 964px**, so a loaded row wraps and is taller than its loading placeholder. W10 compares row height at 1512 and 1920 only. Open question for Nick.
+- **Built beside the Contact list's, not lifted** (`agents/**` was another session's): the ink bar and pills, the filter strip, `CountTo`, density, the key card, the dead end. Lift candidates.
+- **Locks:** `tests/e2e/qcV132.measure.ts` R1–R3, R5, W1–W10 and `qcRecent.test.ts` (R4); proofs in `reports/qc-v132/mutation-proofs.json`. Retired: `tests/e2e/RETIRED-query-centre-v132.md`.
+
 ## Query Centre — v126 + v126.2 (5 Oct; refs = design-refs/query-centre-v126.html for the page, design-refs/query-centre-v130.html for the Birds-eye drawer; reports reports/qc-v126/REPORT.md and reports/qc-v126-2/REPORT.md) — THE CURRENT BUILD
 - **v126 + v126.2 ARE THE QUERY CENTRE ON `main`.** The v96 section below and everything older describe pages this one replaced in part; where they disagree, this section wins.
 - **The page (v126):** the shell is greige (`--ws-page` `#f3f2f0`, sidebar `#e6e4e0`; `--ws-ground` is UNCHANGED because marketing reads it); the header is `PageHeader band`; then the desk, which chooses for the **carousel** ("Recently moved") and NEVER filters the list; then the open banner, the blush workspace with its sticky bar, the list, and the app footer. **The fan, the rail (`QcRail`) and the expanded card (`QcExpanded`) are DELETED** — `QcBirdsEye`, `qcvRail.css` and `QcSentence`'s `head` variant survive only because the empty state's exhibition draws them.
@@ -1523,6 +1539,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Query Centre v132 is DONE on branch `qc-v132` (four commits), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v132/REPORT.md`: the false premises, the 1280 row wrap, and the pieces now built twice.
+
 **Contact list v14 is DONE on `main` and PUSHED (Phases 1–7, `31a1af05` → Phase 7), NOT deployed anywhere** — Nick deploys to dev himself. Read `reports/contact-list-v14/REPORT.md` first: the false premises, the deviations and the follow-ups (the Query Centre adopting `shell/listTable`; `AgentCardHost`/`contactEdit` still reading the main genre only; the Reminder wording).
 
 **Contact list v13 is DONE on `main` and PUSHED (`5e2e4747` → Phase 8 + the report), NOT deployed anywhere.** Read `reports/contact-list-v13/REPORT.md` first: the false premises, the deviations from the mock, and the follow-ups (the Query Centre adopting the shared shell parts, the three racing `todoPrefs` writers, QC126-2 red on `a17.css`).

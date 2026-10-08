@@ -22,9 +22,21 @@ import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import { SORT_OPTIONS, STAGE_NAME, type FilterOption, type QcFilter, type QcSort } from "../../../lib/qcSummary";
 import { QcMenu, type QcMenuGroup } from "./QcMenu";
 import { QC_LIST_FLIGHT } from "./qcArt";
+import { SHORTCUTS, keycaps, isMac, type ShortcutId } from "../../../lib/shortcuts";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import "./qcvWorkspace.css";
 
-export type QcDensity = "comfortable" | "compact";
+/* the keyboard card's lines, from the one registry — a key shown here is a key the list binds */
+const KEY_LINES: { ids: ShortcutId[]; label: string }[] = [
+  { ids: ["qcFind"], label: "Find a query" },
+  { ids: ["qcDown", "qcUp"], label: "Move through the list" },
+  { ids: ["qcOpen"], label: "Open the query" },
+  { ids: ["qcAct"], label: "Start its next action" },
+  { ids: ["qcLetGo"], label: "Clear the search, then the row" },
+];
+
+export type { QcDensity } from "../../../lib/qcListMemory";
+import type { QcDensity } from "../../../lib/qcListMemory";
 
 const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 /** The live count, counting to its new value as the Contact list's does (`ContactTouches.CountTo`). */
@@ -72,9 +84,20 @@ export const QcWorkspaceHead: React.FC<{
   density: QcDensity;
   onDensity: (d: QcDensity) => void;
   scope: ScopeMenu | null;
-  /** the keyboard card (Phase 4) */
-  keys?: React.ReactNode;
-}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, keys }) => {
+  /** while the data loads: the bar and the strip are real, their figures are placeholders (W10) */
+  loading?: boolean;
+}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false }) => {
+  /* the keyboard card: a click outside or Escape closes it */
+  const [keysOpen, setKeysOpen] = useState(false);
+  const keysRef = useRef<HTMLSpanElement>(null);
+  useEscapeLayer(keysOpen, () => setKeysOpen(false), ESC_LEVEL.page);
+  useEffect(() => {
+    if (!keysOpen) return undefined;
+    const away = (e: PointerEvent) => { if (!keysRef.current?.contains(e.target as Node)) setKeysOpen(false); };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+  }, [keysOpen]);
+  const fig = (n: number) => (loading ? <span className="qcv-sk qcw-skn" aria-hidden="true">00</span> : n);
   const [pop, setPop] = useState<Pop>(null);
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const open = (p: Pop, el: HTMLElement) => { setAnchor(el); setPop((cur) => (cur === p ? null : p)); };
@@ -128,7 +151,7 @@ export const QcWorkspaceHead: React.FC<{
 
   const chip = (f: QcFilter, label: string, k: string) => (
     <button key={k} type="button" className="qcw-chip" data-qcv="ws-chip" data-k={k} data-fold="" aria-pressed={filter === f} onClick={() => toggle(f)}>
-      {label} <sup>{count(f)}</sup>
+      {label} <sup>{fig(count(f))}</sup>
     </button>
   );
   const chips = [chip("court:you", "Your move", "you"), chip("past", "Overdue", "past"), chip("offers", "Offers", "offers"), chip("closed", "Closed", "closed")];
@@ -155,15 +178,15 @@ export const QcWorkspaceHead: React.FC<{
           <div className="qcw-t">
             <h2 className="qcw-title" data-qcv="ws-title">Your queries</h2>
             <span className="qcw-k" data-qcv="showing" data-x={shown} data-y={total}>
-              Showing <b><CountTo value={shown} /></b> of <b>{total}</b>{book ? <> for <b>{book}</b></> : null}
+              Showing <b>{loading ? fig(0) : <CountTo value={shown} />}</b> of <b>{fig(total)}</b>{book ? <> for <b>{book}</b></> : null}
             </span>
           </div>
           <span className="qcw-pills">
             <button type="button" className="qcw-pill qcw-pill--move" data-qcv="ws-pill" data-k="you" aria-pressed={filter === "court:you"} onClick={() => toggle("court:you")}>
-              <i aria-hidden="true" /><b>{count("court:you")}</b> your move
+              <i aria-hidden="true" /><b>{fig(count("court:you"))}</b> your move
             </button>
             <button type="button" className="qcw-pill qcw-pill--over" data-qcv="ws-pill" data-k="past" aria-pressed={filter === "past"} onClick={() => toggle("past")}>
-              <i aria-hidden="true" /><b>{count("past")}</b> overdue
+              <i aria-hidden="true" /><b>{fig(count("past"))}</b> overdue
             </button>
           </span>
         </div>
@@ -184,7 +207,25 @@ export const QcWorkspaceHead: React.FC<{
               <button key={d} type="button" aria-pressed={density === d} data-d={d} onClick={() => onDensity(d)}>{d.toUpperCase()}</button>
             ))}
           </span>
-          {keys}
+          <span className="qcw-kbw" ref={keysRef}>
+            <button type="button" className="qcw-kbh" data-qcv="ws-keys" aria-label="Keyboard shortcuts for this list" aria-haspopup="dialog" aria-expanded={keysOpen}
+              onClick={() => setKeysOpen((o) => !o)}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5" /><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7 14h10" /></svg>
+            </button>
+            {keysOpen && (
+              <div className="qcw-kpop" role="dialog" aria-label="Keyboard shortcuts" data-qcv="ws-keycard">
+                <h4>Keys for this list</h4>
+                <dl>
+                  {KEY_LINES.map((l) => (
+                    <React.Fragment key={l.label}>
+                      <dt>{l.ids.flatMap((id) => keycaps(SHORTCUTS[id].chords[0], isMac())).map((c) => <kbd key={c}>{c}</kbd>)}</dt>
+                      <dd>{l.label}</dd>
+                    </React.Fragment>
+                  ))}
+                </dl>
+              </div>
+            )}
+          </span>
         </div>
       </div>
       <div className="qcw-strip" data-qcv="ws-strip" ref={stripRef}>

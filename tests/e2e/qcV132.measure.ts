@@ -410,3 +410,117 @@ test.describe("Query Centre v132 — the list", () => {
     }
   });
 });
+
+/* ── Phase 4 · the touches and the loading frames ─────────────────────────────────────────────────── */
+test.describe("Query Centre v132 — touches", () => {
+  const ring = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"][data-ring]')].map((r) => r.dataset.qid!));
+  const rowIds = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].map((r) => r.dataset.qid!));
+
+  test("W9 · J moves the ring, Enter opens that query, Esc clears the search then the ring, Find ignores J/K, density survives a reload, a no-match search dead-ends at the inkwell", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+      await page.mouse.click(5, 300); /* focus nowhere in particular */
+      const ids = await rowIds(page);
+      expect(ids.length, `${w}: rows to move through`).toBeGreaterThan(3);
+      expect(await ring(page), `${w}: no ring at rest`).toEqual([]);
+      await page.keyboard.press("j"); await page.waitForTimeout(120);
+      expect(await ring(page), `${w}: J rings the first row`).toEqual([ids[0]]);
+      await page.keyboard.press("j"); await page.waitForTimeout(120);
+      expect(await ring(page), `${w}: J moves to the next visible row`).toEqual([ids[1]]);
+      await page.keyboard.press("k"); await page.waitForTimeout(120);
+      expect(await ring(page), `${w}: K moves back`).toEqual([ids[0]]);
+      /* Enter opens that query */
+      await page.keyboard.press("Enter");
+      await expect(page.locator('[data-qcv="qm-card"]').first(), `${w}: Enter opens the query`).toBeVisible({ timeout: 6000 });
+      expect(new URL(page.url()).searchParams.get("q"), `${w}: and it is the ringed query`).toBe(ids[0]);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      await expect(page.locator('[data-qcv="qm-card"]'), `${w}: the card closed`).toHaveCount(0);
+
+      /* typing in Find ignores J/K */
+      const findBox = page.locator('[data-qcv="find"] input');
+      await page.keyboard.press("Escape"); await page.waitForTimeout(100);
+      await page.keyboard.press("/"); await page.waitForTimeout(120);
+      await expect(findBox, `${w}: / focuses Find`).toBeFocused();
+      await page.keyboard.type("jk"); await page.waitForTimeout(250);
+      await expect(findBox, `${w}: J and K are letters in Find`).toHaveValue("jk");
+      expect(await ring(page), `${w}: and move no ring`).toEqual([]);
+      /* Esc clears the search first */
+      await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+      await expect(findBox, `${w}: Esc clears the search`).toHaveValue("");
+      await findBox.blur();
+      await page.keyboard.press("j"); await page.waitForTimeout(120);
+      expect((await ring(page)).length, `${w}: a ring to clear`).toBe(1);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+      expect(await ring(page), `${w}: then Esc clears the ring`).toEqual([]);
+
+      /* a no-match search dead-ends at the inkwell */
+      await findBox.fill("zzqqxx"); await page.waitForTimeout(350);
+      const dead = await page.evaluate(() => {
+        const d = document.querySelector<HTMLElement>('[data-qcv="dead"]'), img = d?.querySelector<HTMLImageElement>('[data-qcv="dead-art"]');
+        return d ? { kind: d.dataset.kind, title: d.querySelector('[data-qcv="dead-title"]')?.textContent ?? "", art: !!img && img.complete && img.naturalWidth > 0, artW: img?.offsetWidth ?? 0, rows: document.querySelectorAll('.qcw-list [data-qcv="row"]').length } : null;
+      });
+      expect(dead, `${w}: the dead end shows`).toBeTruthy();
+      expect(dead!.kind).toBe("search");
+      expect(dead!.title, `${w}: it names the term`).toContain("zzqqxx");
+      expect(dead!.art && dead!.artW === 110, `${w}: the inkwell is drawn at 110 (${dead!.artW})`).toBe(true);
+      expect(dead!.rows).toBe(0);
+      await page.locator('[data-qcv="dead-clear"]').click(); await page.waitForTimeout(350);
+      expect((await rowIds(page)).length, `${w}: Clear the search brings the rows back`).toBe(ids.length);
+    }
+    /* density survives a reload (once: it is one stored value) */
+    await openQc(page, 1512);
+    await page.locator('[data-qcv="ws-density"] [data-d="compact"]').click(); await page.waitForTimeout(200);
+    expect(await page.locator(".qcw-list").getAttribute("data-density")).toBe("compact");
+    try {
+      await page.reload();
+      await expect(page.locator('.qcw-list [data-qcv="row"]').first()).toBeVisible({ timeout: 20_000 });
+      expect(await page.locator(".qcw-list").getAttribute("data-density"), "density survives a reload").toBe("compact");
+      const h = await page.locator('.qcw-list [data-qcv="gband"]').first().evaluate((e) => e.getBoundingClientRect().height);
+      expect(near(h, 44), `a compact band is 44 (${h})`).toBe(true);
+    } finally {
+      await page.locator('[data-qcv="ws-density"] [data-d="comfortable"]').click(); await page.waitForTimeout(200);
+    }
+    expect(await page.evaluate(() => localStorage.getItem("sa.qcList.v1"))).toContain("comfortable");
+  });
+
+  test("W10 · no jump: the loading frames and the loaded page agree at Recently updated, the bar, the first band and the row", async ({ page }) => {
+    const read = () => page.evaluate(() => {
+      const sc = document.querySelector<HTMLElement>('[data-qcv="ru"]')?.closest<HTMLElement>(".wpg-scroll");
+      const top0 = sc ? sc.getBoundingClientRect().top - sc.scrollTop : 0;
+      const T = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); return e ? +(e.getBoundingClientRect().top - top0).toFixed(1) : null; };
+      const H = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); return e ? +e.getBoundingClientRect().height.toFixed(1) : null; };
+      return {
+        ru: T('[data-qcv="ru"]'), bar: T('[data-qcv="ws-bar"]'), band: T('.qcw-list [data-qcv="sk-gband"], .qcw-list [data-qcv="gband"]'),
+        rowH: H('.qcw-list [data-qcv="sk-row"], .qcw-list [data-qcv="row"]'), bandH: H('.qcw-list [data-qcv="sk-gband"], .qcw-list [data-qcv="gband"]'),
+        sk: document.querySelectorAll('.qcw-list [data-qcv="sk-row"]').length, ruSk: !!document.querySelector('[data-qcv="ru"][data-sk]'),
+        /* a loaded row whose status or dated line wraps is taller than the one-line placeholder by those lines */
+        wraps: (() => { const r = document.querySelector<HTMLElement>('.qcw-list [data-qcv="row"]'); if (!r) return false; const a = r.querySelector<HTMLElement>(".qcw-ws1"), b = r.querySelector<HTMLElement>(".qcw-st .qcw-sub"); return (a?.offsetHeight ?? 0) > 26 || (b?.offsetHeight ?? 0) > 14; })(),
+      };
+    });
+    let rowCompared = 0;
+    for (const w of WIDTHS) {
+      await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS: number }).__SA_QC_HOLD_MS = 6000; });
+      await inkOpen(page, "/queries", w, { scope: "qc132w10" });
+      await expect(page.locator('.qcw-list [data-qcv="sk-row"]').first(), `${w}: the loading rows are drawn`).toBeVisible();
+      const sk = await read();
+      await expect(page.locator('.qcw-list [data-qcv="row"]').first(), `${w}: the list loaded`).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(900);
+      const real = await read();
+      expect(sk.sk, `${w}: five row placeholders`).toBe(5);
+      expect(sk.ruSk, `${w}: Recently updated was in its loading frame`).toBe(true);
+      expect(real.sk, `${w}: none once loaded`).toBe(0);
+      /* ⚠️ THE ROW'S HEIGHT IS COMPARED ONLY WHERE THE LOADED ROW IS ONE LINE PER TIER. At an app 1280 with
+         the sidebar open the two flexible columns are ~136px and the status wraps (a finding the report
+         states); the placeholder is the comfortable one-line row, which is what the brief asks for. */
+      const keys = (real.wraps ? ["ru", "bar", "band", "bandH"] : ["ru", "bar", "band", "bandH", "rowH"]) as ("ru" | "bar" | "band" | "bandH" | "rowH")[];
+      if (!real.wraps) rowCompared++;
+      for (const k of keys) {
+        expect(sk[k] != null && real[k] != null, `${w}: ${k} measured in both states`).toBe(true);
+        expect(Math.abs(sk[k]! - real[k]!), `${w}: ${k} ${sk[k]} → ${real[k]}`).toBeLessThanOrEqual(1);
+      }
+      console.log(`[W10] ${w}: ${JSON.stringify({ sk, real })}`);
+    }
+    expect(rowCompared, "the row placeholder was compared with a one-line row at some width").toBeGreaterThan(0);
+  });
+});

@@ -28,6 +28,7 @@ import type { QcRow, QcSort } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
 import { STAGE_NAME } from "../../../lib/qcSummary";
+import { QC_INKWELL } from "./qcArt";
 import "./qcvList132.css";
 
 type Tone = "you" | "quiet" | "waiting" | "closed";
@@ -140,13 +141,29 @@ export const QcList132: React.FC<{
   sort: QcSort;
   onSort?: (s: QcSort) => void;
   density?: "comfortable" | "compact";
-}> = ({ groups, groupBy, selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, sort, onSort, density = "comfortable" }) => {
+  /** the search term: its first match in a name or agency is marked */
+  find?: string;
+  /** the row the keyboard holds (J/K): an inset edge, and its tray showing */
+  ringId?: string | null;
+}> = ({ groups, groupBy, selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, sort, onSort, density = "comfortable", find = "", ringId = null }) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
   const stuck = useStuckPast(boxRef, labelsRef, 0);
   const [folded, setFolded] = useState<ReadonlySet<string>>(new Set());
   const tip = useTip(boxRef);
   const rows = groups.flatMap((g) => g.rows);
+  /* §4 · the gentle reflow: when the SET changes the rows fade up 3px — never on first load, so the
+     loading frame hands over without a move (W10) */
+  const sig = rows.map((r) => r.id).join("|");
+  const lastSig = useRef(sig);
+  const [flow, setFlow] = useState(0);
+  useEffect(() => { if (lastSig.current !== sig) { lastSig.current = sig; setFlow((n) => n + 1); } }, [sig]);
+  const hl = (text: string): React.ReactNode => {
+    const q = find.trim();
+    if (!q) return text;
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    return i < 0 ? text : <>{text.slice(0, i)}<mark>{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>;
+  };
 
   const col = (label: string, key: QcSort | null, align?: "end"): ListColumn => ({
     label, align,
@@ -170,7 +187,7 @@ export const QcList132: React.FC<{
     const pkgId = r.query.sentPackageId || r.query.packageId || null;
     const pkg = pkgId ? packageOf?.(pkgId) ?? null : null;
     return (
-      <div key={r.id} id={`query-row-${r.id}`} className={`qcw-row${closed ? " qcw-row--closed" : ""}`}
+      <div key={r.id} id={`query-row-${r.id}`} className={`qcw-row${closed ? " qcw-row--closed" : ""}${ringId === r.id ? " kf" : ""}`} data-ring={ringId === r.id || undefined}
         data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
@@ -178,8 +195,8 @@ export const QcList132: React.FC<{
         <div className="qcw-ag" data-qcv="row-agent">
           <span className={`qcw-disc${closed ? " qcw-disc--closed" : ""}`} data-qcv="row-chip" aria-hidden="true">{r.initials}</span>
           <span className="qcw-agt">
-            <b data-qcv="row-name">{r.agentName}</b>
-            <small data-qcv="row-agency">{r.agency}</small>
+            <b data-qcv="row-name">{hl(r.agentName)}</b>
+            <small data-qcv="row-agency">{hl(r.agency)}</small>
           </span>
         </div>
         <div className="qcw-st" data-qcv="row-stand">
@@ -229,7 +246,7 @@ export const QcList132: React.FC<{
               <span className="qcw-chev" aria-hidden="true">▾</span>
             </button>
             {!shut && (
-              <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qcw-rows">
+              <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className={`qcw-rows${flow > 0 ? " qcw-rows--in" : ""}`} key={flow}>
                 {g.rows.map(renderRow)}
               </div>
             )}
@@ -248,18 +265,42 @@ export const QcList132Skeleton: React.FC = () => (
     <div className="qcw-grp">
       <div className="qcw-band qcw-band--waiting" data-qcv="sk-gband">
         <span className="qcw-gart" />
-        <span className="qcv-sk" style={{ width: 140, height: 16 }} />
+        <b className="qcw-gt"><span className="qcv-sk qcw-skt">Loading queries</span></b>
       </div>
-      <div className="qcw-rows">
+      <div className="qcw-rows qcv-skw">
         {Array.from({ length: 5 }, (_, i) => (
           <div key={i} className="qcw-row qcw-row--sk" data-qcv="sk-row">
-            <div className="qcw-ag"><span className="qcw-disc qcv-sk" /><span className="qcw-agt"><span className="qcv-sk" style={{ width: "62%", height: 16, display: "block" }} /><span className="qcv-sk" style={{ width: "44%", height: 12, display: "block", marginTop: 6 }} /></span></div>
-            <div className="qcw-st"><span className="qcv-sk" style={{ width: "58%", height: 16, display: "block" }} /><span className="qcv-sk" style={{ width: "72%", height: 10, display: "block", marginTop: 8 }} /></div>
+            {/* ⚠️ THE REAL ELEMENTS, THEIR TEXT PAINTED OVER: the row's height is its line boxes', so a
+                placeholder with its own bars would be a different height from the row it stands for */}
+            <div className="qcw-ag"><span className="qcw-disc" /><span className="qcw-agt"><b><span className="qcv-sk qcw-skt">Agent name here</span></b><small><span className="qcv-sk qcw-skt">Agency name</span></small></span></div>
+            <div className="qcw-st"><div className="qcw-ws1"><span className="qcv-sk qcw-skt">Status reached</span></div><div className="qcw-sub"><span className="qcv-sk qcw-skt">VERB 00 MON · DAY 00</span></div></div>
             <div className="qcw-snt"><div className="qcw-mats"><span className="qcw-pkg qcw-pkg--none" /><i className="qcw-sep" />{[0, 1, 2, 3].map((k) => <span key={k} className="qcw-tile" />)}</div></div>
-            <div className="qcw-nx"><span className="qcv-sk" style={{ width: 110, height: 16, display: "block" }} /><span className="qcv-sk" style={{ width: 130, height: 10, display: "block", marginTop: 8 }} /></div>
+            <div className="qcw-nx"><div className="qcw-nxt"><span className="qcv-sk qcw-skt">Next move</span></div><div className="qcw-sub"><span className="qcv-sk qcw-skt">BY 00 MON</span></div></div>
           </div>
         ))}
       </div>
     </div>
   </div>
 );
+
+/**
+ * §4 · THE DEAD END: nothing matches, so the rows give way to the inkwell and one way back. A search
+ * and a filter are different dead ends with different exits; the search wins where both are on.
+ */
+export const QcDeadEnd: React.FC<{ find: string; book: string | null; onClearFind: () => void; onClearFilters: () => void }> = ({ find, book, onClearFind, onClearFilters }) => {
+  const q = find.trim();
+  return (
+    <div className="qcv-list qcw-list" data-qcv="list" data-v="132" data-dead="true">
+      <div className="qcw-dead" data-qcv="dead" data-kind={q ? "search" : "filters"}>
+        <img src={`${QC_INKWELL.src}?v=${QC_INKWELL.version}`} width={QC_INKWELL.width} height={QC_INKWELL.height} alt="" aria-hidden="true" data-qcv="dead-art" />
+        <div>
+          <h3 className="qcw-dead-t" data-qcv="dead-title">{q ? `No queries match \u201c${q}\u201d` : "Nothing matches those filters"}</h3>
+          <p className="qcw-dead-p" data-qcv="dead-line">
+            {q ? `Try the agency\u2019s name, or part of the agent\u2019s surname. It searches every query${book ? ` for ${book}` : ""}.` : "Every query is still here. Take a filter off to see them."}
+          </p>
+          <button type="button" className="qcw-pillbtn" data-qcv="dead-clear" onClick={q ? onClearFind : onClearFilters}>{q ? "Clear the search" : "Clear the filters"}</button>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -148,7 +148,8 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
            * and what this list has always done with a name. What must never truncate is a string
            * the app chose: a status, a verb, a date, a label.
            */
-          const APP = ['[data-qcv="row-verb"]', ".qcv-st .qcv-t1", ".qcv-st .qcv-t2", ".qcv-qd .qcv-t1", ".qcv-qd .qcv-t2", ".qcv-nr"];
+          /* v132 — RE-POINTED: the v132 row's own app-chosen strings (the status, both dated lines, the next move) */
+          const APP = ['[data-qcv="row-verb"]', ".qcv-st .qcv-t1", ".qcv-st .qcv-t2", ".qcv-qd .qcv-t1", ".qcv-qd .qcv-t2", ".qcv-nr", ".qcw-ws1 > span", '[data-qcv="row-standline"]', '[data-qcv="row-nextline"]'];
           const out: string[] = [];
           for (const r of rows) {
             for (const s of APP) {

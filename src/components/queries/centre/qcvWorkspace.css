@@ -78,3 +78,21 @@
 
   @media (prefers-reduced-motion: reduce) { .qcw .qcw-pill { transition: none; } .qcw .qcw-pill:hover { transform: none; } }
 }
+
+@media (min-width: 768px) {
+  /* the keyboard button and its card (§4) */
+  .qcw .qcw-kbw { position: relative; flex: none; }
+  .qcw .qcw-kbh { width: 40px; height: 40px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); color: #fff; cursor: pointer; }
+  .qcw .qcw-kbh:focus-visible { outline: 2px solid #8fb2d2; outline-offset: 2px; }
+  .qcw .qcw-kpop {
+    position: absolute; right: 0; top: 50px; z-index: 40; box-sizing: border-box; width: 290px; padding: 16px 18px;
+    background: #fff; border-radius: 14px; box-shadow: 0 22px 50px -20px rgba(28, 19, 15, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.08);
+  }
+  .qcw .qcw-kpop h4 { margin: 0 0 10px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 17px; line-height: 1.3; color: #1c130f; }
+  .qcw .qcw-kpop dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0; font-family: var(--sp-serif); font-weight: 400; font-size: 14.5px; line-height: 1.4; color: #1c130f; }
+  .qcw .qcw-kpop dt { text-align: right; display: flex; gap: 4px; justify-content: flex-end; }
+  .qcw .qcw-kpop dd { margin: 0; }
+  .qcw .qcw-kpop kbd { font-family: var(--sp-mono); font-weight: 600; font-size: 11px; border: 1px solid rgba(28, 19, 15, 0.3); border-radius: 5px; padding: 1px 6px; }
+  /* a loading figure: its own line box, painted over */
+  .qcw .qcw-skn { display: inline-block; color: transparent; border-radius: 4px; line-height: inherit; }
+}

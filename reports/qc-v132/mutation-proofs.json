@@ -110,5 +110,25 @@
    "Error: 1280: the hawk is clipped by qcv-page qcv-own qcw",
    "Received: \"qcv-page qcv-own qcw\""
   ]
+ },
+ {
+  "lock": "W9",
+  "mutation": "bind J while typing",
+  "red": true,
+  "reading": [
+   "Error: 1280: J and K are letters in Find",
+   "Expected: \"jk\"",
+   "Received: \"\""
+  ]
+ },
+ {
+  "lock": "W10",
+  "mutation": "shorten the row placeholder",
+  "red": true,
+  "reading": [
+   "Error: 1512: rowH 54.6 → 74.6",
+   "Expected: <= 1",
+   "Received:    19.999999999999993"
+  ]
  }
 ]

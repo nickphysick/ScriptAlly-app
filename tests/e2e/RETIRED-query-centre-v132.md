@@ -61,3 +61,12 @@ Re-pointed, claims intact:
 Unit: `qcList.test.tsx`'s v131 skeleton case is rewritten for `QcList132Skeleton`.
 
 Mutations in `inkLib.ts` named `qc10-indent`, `qc11-static`, `qc12-margin`, `qc14-hard`, `qc16-tall` target classes deleted in this phase; their locks are retired, and the entries stay only as history.
+
+## Phase 4 — keys, density, the dead end, loading
+
+Nothing retired.
+
+Re-pointed, claims intact:
+
+- `qcV96` QC4: the app side of its no-truncation sweep reads the v132 row's strings (name, agency, status, dated line, phrase and its line).
+- `qcV131` QC16's claim (the frames do not move when the list loads) is now QC132 W10, which compares the head's and the first row's tops held against loaded at all three widths, and the row's height where the loaded row does not wrap (1512 and 1920).
