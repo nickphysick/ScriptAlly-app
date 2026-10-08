@@ -33,3 +33,13 @@ leaving the mode; the mode not remembered.
 Neighbours on the Phase 3 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 41 passed,
 1 failed (CL13-12, the loading beat: the placeholder section 31px taller than the loaded one); fixed in the skeleton
 and re-run green.
+
+## Phase 4 — CL15-5a against 8093d64f
+`1 failed · 1 passed`. CL15-5a: "population: the Ready state on the stage" at both widths (no stage, no card slot, no
+panel). Mutations A–J each red at the assertion they name (`mutation-proofs-p4.jsonl`): v14's 44 gap (10 to the
+panel), the panel 100 under the card, the card under the panel, the text in a well, every card "First up", the first
+row tinted whatever is picked, a 120ms rise, the agency in place of "Genres not recorded", the reply time shown
+below 1440, the workspace 30 under the section. A and J bite at 1512 only: below 1440 the margins are the media
+rule's own.
+
+Neighbours on the Phase 4 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 43 passed.

@@ -64,8 +64,9 @@
 @media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }
 
 /* ── §4 · THE NEXT STEP's v15 parts ── */
-/* the all-queried split line: serif 14.5, ink 60% */
-.cl14-nx-well .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
+/* the all-queried split line (serif 14.5, ink 60%) and the reason note (italic 14) */
+.cl14-next .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
+.cl14-next .cl15-nx-note { margin: 0; font: italic 400 14px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.55); }
 /* the ready-only mode's marker on the "Showing" line, and its ✕ */
 .cl14-ws .cl14-bar-k .cl15-ro { font-style: italic; }
 .cl14-ws .cl14-bar-k .cl15-ro button {

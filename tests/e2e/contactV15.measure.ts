@@ -206,7 +206,7 @@ const listState = (page: P15) => page.evaluate((rowSel) => {
     rows: [...root.querySelectorAll<HTMLElement>(rowSel)].filter((e) => e.getBoundingClientRect().height > 0).length,
     state: next?.getAttribute("data-state") ?? null,
     section: num(next?.querySelector('[data-cl14="see-all"]')?.textContent),
-    lede: next?.querySelector(".cl14-nx-lede, [data-fs=\"lede\"]")?.textContent ?? "",
+    lede: next?.querySelector('[data-fs-part="sentence"]')?.textContent ?? "",
     pill: num(pill?.textContent), pressed: pill?.getAttribute("aria-pressed") ?? null,
     marker: root.querySelector('[data-cl15="ready-only"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
     showing: root.querySelector('[data-cl14="showing"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
@@ -298,6 +298,93 @@ test("CL15-5 · pill = section = rows", async ({ page }) => {
     execSync("node tests/e2e/seedReadyUnknown.mjs --clean", { stdio: "inherit" });
   }
   L.done(15);
+});
+
+/* ── lock 5a · the section's layout (§4a): the text on the page, the card over the white panel's left edge, the
+   pickable list. The gaps are to the PANEL (66 / 58; 56 / 50 below 1440); the card overlaps it by 150 (130). ── */
+test("CL15-5a · layout", async ({ page }) => {
+  const L = new Ledger("cl15-5a");
+  /* three ready agents, so there is a third row to pick (the shared account holds two; see CL15-5) */
+  execSync("node tests/e2e/seedReadyUnknown.mjs", { stdio: "inherit" });
+  try {
+    for (const vp of WIDTHS15) {
+      await openContacts(page, vp);
+      const w = `${vp.width}`;
+      const narrow = vp.width < 1440;
+      const read = () => page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+        const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+        const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
+        const fs = q(".fs"), lede = q('[data-fs-part="lede"]'), slot = q('[data-fs-part="card"]'), card = slot?.firstElementChild as HTMLElement | null, panel = q('[data-fs-part="panel"]');
+        const title = q('[data-fs-part="title"]'), go = q(".fs-go");
+        const rows = [...(root?.querySelectorAll<HTMLElement>("[data-fs-row]") ?? [])];
+        const cs = (e: Element | null) => (e ? getComputedStyle(e) : null);
+        return {
+          state: fs?.getAttribute("data-state") ?? null,
+          desk: b(q('[data-cl15="desk"]')), ws: b(q('[data-cl14="ws"]')), lede: b(lede), card: b(card), panel: b(panel),
+          ledeBg: cs(lede)?.backgroundColor ?? null, ledeImg: cs(lede)?.backgroundImage ?? null,
+          panelBg: cs(panel)?.backgroundColor ?? null, panelRadius: cs(panel)?.borderTopLeftRadius ?? null,
+          titleSize: cs(title)?.fontSize ?? null, titleFace: cs(title)?.fontFamily ?? null,
+          go: b(go), goBg: cs(go)?.backgroundColor ?? null,
+          cardAgent: card?.getAttribute("data-agent") ?? null, chip: card?.querySelector('[data-cl13="ctone"]')?.textContent?.trim() ?? null,
+          rows: rows.map((r) => ({ id: r.getAttribute("data-fs-row"), on: r.classList.contains("is-on"), bg: getComputedStyle(r).backgroundColor, text: (r.textContent ?? "").replace(/\s+/g, " ").trim(),
+            wk: (() => { const k = r.querySelector<HTMLElement>(".fs-wk"); return k ? getComputedStyle(k).display : null; })() })),
+          head: q('[data-fs-part="panel-head"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+          log: root?.querySelectorAll('[data-cl14="nl-log"], .cl14-nx, .cl14-nx-well').length ?? -1,
+          rise: card ? card.getAnimations().map((a) => Number(a.effect?.getTiming().duration)) : [],
+        };
+      });
+      const r = await read();
+      if (r.state !== "ready" || !r.card || !r.panel || !r.desk || !r.ws || !r.lede) { L.check("CL15-5a population: the Ready state on the stage", w, false, JSON.stringify({ state: r.state, card: !!r.card, panel: !!r.panel })); continue; }
+      L.check("CL15-5a population: the Ready state on the stage", w, true, "");
+      L.check(`CL15-5a the desk-to-panel gap is ${narrow ? 56 : 66} (±3)`, w, near(r.panel.t - r.desk.b, narrow ? 56 : 66, 3), `${(r.panel.t - r.desk.b).toFixed(1)}`);
+      L.check(`CL15-5a the panel-to-workspace gap is ${narrow ? 50 : 58} (±3)`, w, near(r.ws.t - r.panel.b, narrow ? 50 : 58, 3), `${(r.ws.t - r.panel.b).toFixed(1)}`);
+      L.check(`CL15-5a the card overlaps the panel by ${narrow ? 130 : 150} (±4)`, w, near(r.card.r - r.panel.l, narrow ? 130 : 150, 4), `${(r.card.r - r.panel.l).toFixed(1)}`);
+      L.check(`CL15-5a the card is ${narrow ? 270 : 300} wide, vertically centred on the panel, 34 (±3) inside it top and bottom at most`, w,
+        near(r.card.w, narrow ? 270 : 300, 1) && near((r.card.t + r.card.b) / 2, (r.panel.t + r.panel.b) / 2, 2) && r.card.t - r.panel.t >= 31, `w ${r.card.w} centres ${((r.card.t + r.card.b) / 2).toFixed(1)} / ${((r.panel.t + r.panel.b) / 2).toFixed(1)} inset ${(r.card.t - r.panel.t).toFixed(1)}`);
+      L.check("CL15-5a the text is straight on the page (no well, no background)", w, r.ledeBg === "rgba(0, 0, 0, 0)" && r.ledeImg === "none" && r.log === 0, `${r.ledeBg} ${r.ledeImg} old parts ${r.log}`);
+      L.check("CL15-5a the panel is white with 22px corners", w, r.panelBg === "rgb(255, 255, 255)" && r.panelRadius === "22px", `${r.panelBg} ${r.panelRadius}`);
+      L.check(`CL15-5a the title is Special Elite ${narrow ? 34 : 40}`, w, r.titleSize === (narrow ? "34px" : "40px") && /Special Elite/.test(r.titleFace ?? ""), `${r.titleSize} ${r.titleFace}`);
+      L.check("CL15-5a one filled ink pill, 46 tall", w, !!r.go && near(r.go.h, 46, 0.5) && r.goBg === "rgb(42, 58, 82)", `${r.go?.h} ${r.goBg}`);
+      L.check("CL15-5a the list: 'Next in line · best fit first', at most five rows, three on this fixture", w, /^Next in line\s*best fit first$/.test(r.head ?? "") && r.rows.length === 3, `${r.head} · ${r.rows.length}`);
+      L.check("CL15-5a on load the first agent is picked: its row alone is tinted, the card shows it as First up", w,
+        r.rows.filter((x) => x.on).length === 1 && r.rows[0].on && r.rows[0].bg === "rgb(234, 241, 247)" && r.cardAgent === r.rows[0].id && r.chip === "First up", `${r.cardAgent} ${r.chip} ${JSON.stringify(r.rows.map((x) => x.on))}`);
+      L.check("CL15-5a an agent with no genres reads 'Genres not recorded' in place of the agency", w, r.rows.some((x) => /Genres not recorded/.test(x.text)), JSON.stringify(r.rows.map((x) => x.text)));
+      L.check(`CL15-5a the reply time ${narrow ? "is hidden below 1440" : "shows on the right"}`, w, r.rows.every((x) => (narrow ? x.wk === "none" : x.wk !== "none" && x.wk !== null)), JSON.stringify(r.rows.map((x) => x.wk)));
+      /* the card is ABOVE the panel where they overlap — asked of the pixel, with the point proved on screen first */
+      await page.locator('.aglist [data-fs-part="card"]').filter({ visible: true }).first().evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(200);
+      const top = await page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+        const card = root.querySelector<HTMLElement>('[data-fs-part="card"]')!.firstElementChild as HTMLElement, panel = root.querySelector<HTMLElement>('[data-fs-part="panel"]')!;
+        const c = card.getBoundingClientRect(), p = panel.getBoundingClientRect();
+        const x = (p.left + c.right) / 2, y = (c.top + c.bottom) / 2;
+        const on = x > 0 && y > 0 && x < innerWidth && y < innerHeight;
+        const hit = on ? document.elementFromPoint(x, y) : null;
+        return { on, inCard: !!hit && card.contains(hit) };
+      });
+      L.check("CL15-5a the card is above the panel where they overlap", w, top.on && top.inCard, JSON.stringify(top));
+      /* picking the third row */
+      const third = r.rows[2].id;
+      await page.locator(`.aglist [data-fs-row="${third}"]`).filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {});
+      const mid = await read();
+      await page.waitForTimeout(500);
+      const p3 = await read();
+      L.check("CL15-5a clicking the third row puts that agent on the card as Next up, and tints only that row", w,
+        p3.cardAgent === third && p3.chip === "Next up" && p3.rows.filter((x) => x.on).length === 1 && p3.rows[2].on, `${p3.cardAgent} ${p3.chip} ${JSON.stringify(p3.rows.map((x) => x.on))}`);
+      L.check("CL15-5a the picked card rises over 280ms", w, mid.rise.includes(280), JSON.stringify(mid.rise));
+      /* Enter on the focused first row picks it back */
+      await page.locator(`.aglist [data-fs-row="${r.rows[0].id}"]`).filter({ visible: true }).first().focus();
+      await page.keyboard.press("Enter");
+      await page.waitForTimeout(500);
+      const p1 = await read();
+      L.check("CL15-5a Enter on the focused first row picks it back: First up", w, p1.cardAgent === r.rows[0].id && p1.chip === "First up" && p1.rows[0].on && !p1.rows[2].on, `${p1.cardAgent} ${p1.chip}`);
+      await checkOverflow(page, L, w);
+    }
+  } finally {
+    execSync("node tests/e2e/seedReadyUnknown.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(34);
 });
 
 /* ── lock 5b · load state: a fresh load shows all N agents. Counting the pill's number must not leave the ready-only

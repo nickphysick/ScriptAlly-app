@@ -40,7 +40,12 @@ const render = (agents: Agent[], queries: Query[], over: Partial<ContactNextStep
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;|&rsquo;|’/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ")
   /* a tag boundary is not a space a reader sees before punctuation ("<i>Book</i>." reads "Book.") */
   .replace(/\s+([.,])/g, "$1").trim();
-const slice = (html: string, cls: string) => { const i = html.indexOf(`data-cl14="${cls}"`); expect(i, `the ${cls} part`).toBeGreaterThan(-1); return html.slice(i); };
+/** from a part of the stage (`data-fs-part`) or a contact probe (`data-cl14`) to the end of the markup */
+const slice = (html: string, cls: string) => {
+  const i = Math.max(html.indexOf(`data-fs-part="${cls}"`), html.indexOf(`data-cl14="${cls}"`));
+  expect(i, `the ${cls} part`).toBeGreaterThan(-1);
+  return html.slice(i);
+};
 
 describe("the three states (v15 §4)", () => {
   it("ready: title, the v15 sentence, the agent card as First up, Next in line 'best fit first'", () => {
@@ -59,10 +64,29 @@ describe("the three states (v15 §4)", () => {
     const card = slice(html, "card");
     expect(card).toContain('data-cl13="ccard"');
     expect(card).toContain('data-agent="a"');
-    expect(text(card.slice(0, card.indexOf('data-cl14="side"')))).toContain("First up");
-    const side = text(slice(html, "side"));
+    expect(text(card.slice(0, card.indexOf('data-fs-part="panel"')))).toContain("First up");
+    const side = text(slice(html, "panel"));
     expect(side).toContain("Next in line");
     expect(side).toContain("best fit first");
+  });
+  it("ready, the list (§4a): the first five rows with the first picked, 'Genres not recorded' for an agent with none, 'and N more'", () => {
+    const agents = [
+      ...["a", "b", "c", "d"].map((id, i) => ag(id, { starRating: (5 - i) as 1 | 2 | 3 | 4 | 5, responseTimeWeeks: 6 })),
+      ag("bare1", { genres: [] }), ag("bare2", { genres: [] }), ag("bare3", { genres: [] }),
+    ];
+    const { html, step } = render(agents, []);
+    expect(step.ready).toHaveLength(7);
+    const rows = [...html.matchAll(/data-fs-row="([^"]+)"/g)].map((m) => m[1]);
+    expect(rows).toEqual(["a", "b", "c", "d", "bare1"]);
+    /* exactly one row is the picked one, and it is the first: the card shows that agent as First up */
+    expect([...html.matchAll(/class="fs-row is-on[^"]*" data-fs-row="([^"]+)"/g)].map((m) => m[1])).toEqual(["a"]);
+    expect(html).toMatch(/data-fs-part="card" data-card-key="a"/);
+    const panel = text(slice(html, "panel"));
+    expect(panel).toContain("Agent A A Agency ~6 wks");
+    expect(panel).toContain("Agent BARE1 Genres not recorded");
+    expect(panel).toContain("and 2 more");
+    /* the rows pick; they carry no action of their own (the card has the Log a query button) */
+    expect(html).not.toContain('data-cl14="nl-log"');
   });
   it("ready with unknown genres: the sentence adds how many, and they come after the fits", () => {
     const { html, step } = render([ag("bare1", { genres: [] }), ag("fit"), ag("bare2", { genres: [] })], []);
@@ -98,8 +122,8 @@ describe("the three states (v15 §4)", () => {
     expect(t).toContain("Remind me about both");
     const card = slice(html, "card");
     expect(card).toContain('data-agent="soon"');
-    expect(text(card.slice(0, card.indexOf('data-cl14="side"')))).toMatch(/Reopens 1 Nov.*Remind me/);
-    const side = text(slice(html, "side"));
+    expect(text(card.slice(0, card.indexOf('data-fs-part="panel"')))).toMatch(/Reopens 1 Nov.*Remind me/);
+    const side = text(slice(html, "panel"));
     expect(side).toContain("Also reopening");
     expect(side).toMatch(/Reopens in 39 days/);
   });
