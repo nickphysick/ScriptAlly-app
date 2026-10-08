@@ -34,5 +34,33 @@
   "reading": [
    "Error: you: the list is untouched"
   ]
+ },
+ {
+  "lock": "W1",
+  "mutation": "the bar painted white",
+  "red": true,
+  "reading": [
+   "Error: 1280: the bar is anthracite",
+   "Expected: \"rgb(42, 58, 82)\"",
+   "Received: \"rgb(255, 255, 255)\""
+  ]
+ },
+ {
+  "lock": "W2",
+  "mutation": "your move counts 'you' (offers excluded) instead of the desk's court",
+  "red": true,
+  "reading": [
+   "Error: 1280: your move = the desk's With you",
+   "Expected: 13",
+   "Received: 12"
+  ]
+ },
+ {
+  "lock": "W3",
+  "mutation": "Clear all leaves the filter on",
+  "red": true,
+  "reading": [
+   "Error: 1280: Clear all leaves nothing pressed"
+  ]
  }
 ]

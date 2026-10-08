@@ -27,7 +27,6 @@
   /* ── §1 · the page order: hero, desk 22 below, Recently updated 44 below, Your queries 44 below ── */
   .qc13 .qc131-desk { margin-top: 22px; }
   .qc13 .qcv-page { padding-top: 0; margin-top: 44px; }
-  .qc13 .qc13-qs { margin: 0; }
   .qc13 .qc13-work { margin: 0; padding: 0; background: transparent; border-radius: 0; }
 
   /* ── §2 · the desk, v131.1: three ledger cards (ref design-refs/desk-ledger-v6.html, data-sub=tile) ──
@@ -150,74 +149,9 @@
     pointer-events: none;
   }
 
-  /* ── §3 · the section heads ── */
-  .qc13-sh {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(28, 19, 15, 0.14);
-  }
-  .qc13-sh-l { min-width: 0; }
-  .qc13 .qc13-sh .qc13-sh-t {
-    margin: 0;
-    font-family: var(--sp-type) !important;
-    font-weight: 400;
-    font-size: 26px;
-    line-height: 1.05;
-    color: var(--qc13-ink);
-  }
-  .qc13-sh-p { margin: 4px 0 0; font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: rgba(28, 19, 15, 0.58); }
-  .qc13-sh-p b { font-weight: 600; color: var(--qc13-ink); }
-  .qc13-sh-p span { font-family: inherit; }
-  .qc13-link {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    font: inherit;
-    color: #9a5638;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .qc13-sh-r { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
-  /* the list's controls, restyled: white, 36 tall, a 1px ring at ink 16%, radius 9 */
-  .qc13-ctl { display: flex; align-items: center; gap: 8px; }
-  .qc13-ctl .qcv-lh-ops { display: flex; gap: 8px; }
-  .qc13 .qc13-ctl .qcv-lh-find {
-    box-sizing: border-box;
-    width: 220px;
-    height: 36px;
-    padding: 0 11px;
-    gap: 8px;
-    border: 0;
-    border-radius: 9px;
-    background: #fff;
-    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
-    font-family: var(--sp-serif);
-    font-size: 14px;
-  }
-  .qc13 .qc13-ctl .qcv-lh-find input { font-family: var(--sp-serif); font-size: 14px; }
-  .qc13 .qc13-ctl .qcv-op {
-    box-sizing: border-box;
-    height: 36px;
-    padding: 0 12px;
-    gap: 7px;
-    border: 0;
-    border-radius: 9px;
-    background: #fff;
-    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
-    font-family: var(--sp-serif);
-    font-size: 14px;
-    color: var(--qc13-ink);
-  }
-
   /* ── the spot-art slot ── */
   .qc13-art { display: grid; place-items: center; flex: none; border-radius: 50%; overflow: hidden; }
   .qc13-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .qc13-art--section { width: 52px; height: 52px; background: #f6dccf; color: #9a5638; }
-  .qc13-art--section svg { width: 26px; height: 26px; }
   .qc13-art--group { width: 32px; height: 32px; }
   .qc13-art--group svg { width: 17px; height: 17px; }
   .qc13-art--group.qc13-art--you { background: #f6dccf; color: #9a5638; }

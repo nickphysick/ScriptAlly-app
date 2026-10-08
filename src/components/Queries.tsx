@@ -92,6 +92,7 @@ import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
+import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -2343,6 +2344,8 @@ export const Queries: React.FC<{
   }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
+  /* v132 §2 — row density, the workspace's own control (persisted in Phase 4) */
+  const [qcDensity, setQcDensity] = useState<QcDensity>("comfortable");
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
@@ -6579,7 +6582,28 @@ export const Queries: React.FC<{
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}
-            sentence={
+            sentence={qcDesk ? (
+              /* v132 §2 — "Your queries": the ink bar, the pills, the controls and the strip. One filter
+                 value (`qcFilter`), set by every pill and chip; "your move" is the desk's own court. */
+              <QcWorkspaceHead
+                shown={qcVisible.length}
+                total={qcScoped.length}
+                book={qcLineTitle}
+                filter={qcFilter}
+                onFilter={pickQcFilter}
+                options={filterOptions(qcScoped)}
+                countOf={(f) => qcScoped.filter((r) => matchesFilter(r, f)).length}
+                find={qcFind}
+                onFind={setQcFind}
+                group={qcGroup}
+                onGroup={setQcGroup}
+                sort={qcSort}
+                onSort={setQcSort}
+                density={qcDensity}
+                onDensity={setQcDensity}
+                scope={qcScopeMenu}
+              />
+            ) : (
               <QcSentence
                 find={qcFind}
                 onFind={setQcFind}
@@ -6597,11 +6621,11 @@ export const Queries: React.FC<{
                 onSort={setQcSort}
                 scope={qcScopeMenu}
                 scopeTitle={qcScopeTitle}
-                variant={qcDesk ? "section" : "banner"}
+                variant="banner"
                 needYou={rowsForTile(qcScoped, "you").length}
                 msTitle={qcLineTitle}
               />
-            }
+            )}
             sticky={(stuck) => (
               <QcSentence
                 find={qcFind}

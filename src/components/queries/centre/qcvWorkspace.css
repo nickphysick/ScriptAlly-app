@@ -1,0 +1,72 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * "YOUR QUERIES" — the workspace's head (Query Centre v132 §2; ref design-refs/query-centre/query-centre-v132.html
+ * `#ws .bar` and `#frow`). Values are the ref's; the Contact list's v14 bar carries the same ones in its own
+ * sheet (`contactV14.css`), which this page does not import — that sheet belongs to another page.
+ *
+ * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE (the page's 0-1-0 font reset lands later), AND
+ * `!important` ON THE TITLE (brand.tsx forces h2 faces at runtime).
+ */
+@media (min-width: 768px) {
+  /* ⚠️ 0-3-0, to beat `.qc13 .qcv-page`'s 44 (qcv131.css) — the hawk rises 74 into this gap */
+  .qc13 .qcv-page.qcw { margin-top: 96px; margin-right: -20px; }
+  .qcw .qcw-head { position: relative; }
+  .qcw .qcw-bar { position: relative; background: #2a3a52; border-radius: 24px 24px 0 0; }
+  .qcw .qcw-hawk {
+    position: absolute; left: 8px; top: -74px; width: 210px; height: auto; pointer-events: none; z-index: 2;
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.22)); transform: rotate(-4deg);
+  }
+  .qcw .qcw-r1 { display: flex; align-items: center; gap: 18px; box-sizing: border-box; min-height: 104px; padding: 24px 28px 18px 236px; }
+  .qcw .qcw-t { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; min-width: 0; }
+  .qcw .qcw-title { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 32px; line-height: 1.2; color: #f4eee5; }
+  .qcw .qcw-k { font-family: var(--sp-serif); font-weight: 400; font-size: 15.5px; line-height: 1.4; color: rgba(244, 238, 229, 0.7); }
+  .qcw .qcw-k b { font-weight: 600; color: #f4eee5; }
+  .qcw .qcw-pills { margin-left: auto; display: flex; gap: 8px; flex: none; }
+  .qcw .qcw-pill {
+    display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box; height: 34px; padding: 0 15px; border: 0; border-radius: 17px; cursor: pointer; white-space: nowrap;
+    font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 1;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .qcw .qcw-pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .qcw .qcw-pill b { font-weight: 600; }
+  .qcw .qcw-pill--move { background: #f3ddd2; color: #7c3a2a; }
+  .qcw .qcw-pill--over { background: #dbe9f5; color: #24476b; }
+  .qcw .qcw-pill:hover { transform: translateY(-1px); }
+  .qcw .qcw-pill[aria-pressed="true"] { box-shadow: 0 0 0 2px #2a3a52, 0 0 0 4px currentColor; }
+
+  .qcw .qcw-r2 { display: flex; gap: 8px; align-items: center; padding: 0 28px 22px; }
+  .qcw .qcw-find { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 40px; padding: 0 10px 0 16px; border-radius: 20px; background: #fff; color: rgba(28, 19, 15, 0.45); }
+  .qcw .qcw-find input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; font-family: var(--sp-serif); font-weight: 400; font-size: 15.5px; line-height: normal; color: #1c130f; }
+  .qcw .qcw-find kbd { font-family: var(--sp-mono); font-weight: 600; font-size: 11px; border: 1px solid rgba(28, 19, 15, 0.3); border-radius: 5px; padding: 1px 6px; color: rgba(28, 19, 15, 0.58); }
+  .qcw .qcw-find:focus-within { box-shadow: 0 0 0 2px #8fb2d2; }
+  .qcw .qcw-ctl {
+    display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: #fff; cursor: pointer; white-space: nowrap;
+    font-family: var(--sp-type); font-weight: 400; font-size: 14.5px; line-height: 1; color: #1c130f;
+  }
+  .qcw .qcw-ctl em { font-style: normal; color: rgba(28, 19, 15, 0.45); }
+  .qcw .qcw-ctl i { font-style: normal; font-size: 11px; color: rgba(28, 19, 15, 0.45); }
+  .qcw .qcw-dens { display: flex; gap: 2px; padding: 3px; border-radius: 20px; background: rgba(255, 255, 255, 0.12); flex: none; }
+  .qcw .qcw-dens button { height: 34px; padding: 0 13px; border: 0; border-radius: 17px; background: none; cursor: pointer; font-family: var(--sp-mono); font-weight: 600; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(244, 238, 229, 0.6); }
+  .qcw .qcw-dens button[aria-pressed="true"] { background: #fff; color: #2a3a52; }
+
+  /* ── the filter strip: one line, nothing wraps; what does not fit folds into "More filters" ── */
+  .qcw .qcw-strip { position: relative; display: flex; align-items: center; gap: 8px; padding: 16px 28px; background: #f7f9fb; border-bottom: 1px solid rgba(28, 19, 15, 0.07); flex-wrap: nowrap; overflow: hidden; }
+  .qcw .qcw-chip {
+    display: inline-flex; align-items: center; gap: 7px; flex: none; box-sizing: border-box; height: 34px; padding: 0 13px; border: 0; border-radius: 17px; cursor: pointer; white-space: nowrap;
+    background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+    font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 1; color: #1c130f;
+  }
+  .qcw .qcw-chip sup { font-family: var(--sp-mono); font-weight: 600; font-size: 9.5px; vertical-align: 0; color: rgba(28, 19, 15, 0.45); }
+  .qcw .qcw-chip i { font-style: normal; font-size: 11px; color: rgba(28, 19, 15, 0.45); }
+  .qcw .qcw-chip[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+  .qcw .qcw-chip[aria-pressed="true"] sup, .qcw .qcw-chip[aria-pressed="true"] i { color: rgba(244, 238, 229, 0.7); }
+  .qcw .qcw-chip--add { color: rgba(28, 19, 15, 0.45); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .qcw .qcw-clear { margin-left: auto; flex: none; padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap; font-family: var(--sp-serif); font-weight: 400; font-size: 14px; color: #2f5f86; text-decoration: underline; text-underline-offset: 3px; }
+  /* the unfolded row, laid out where nobody sees it, so its width is measurable */
+  .qcw .qcw-strip-measure { position: absolute; left: 0; top: 0; display: flex; gap: 8px; padding: 0 28px; visibility: hidden; pointer-events: none; white-space: nowrap; }
+  .qcw :is(.qcw-pill, .qcw-ctl, .qcw-chip, .qcw-dens button, .qcw-clear):focus-visible { outline: 2px solid #8fb2d2; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) { .qcw .qcw-pill { transition: none; } .qcw .qcw-pill:hover { transform: none; } }
+}

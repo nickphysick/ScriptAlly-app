@@ -50,7 +50,7 @@ test.describe("Query Centre v131", () => {
         const desk = document.querySelector<HTMLElement>('[data-qcv="courts"]')!;
         const prev = desk.previousElementSibling as HTMLElement | null;
         return {
-          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('.qc13-qs'),
+          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('[data-qcv="ws-head"]'),
           prevIsHero: !!prev && prev.matches('[data-probe="page-header"]'),
           headers: [...document.querySelectorAll('.qc13 h1, .qc13 h2, .qc13 h3')].filter((h) => h.getBoundingClientRect().top > (document.querySelector('[data-probe="page-header"]')!.getBoundingClientRect().bottom) && h.getBoundingClientRect().bottom <= desk.getBoundingClientRect().top + 1).length,
         };
@@ -58,7 +58,8 @@ test.describe("Query Centre v131", () => {
       expect(g.hero && g.desk && g.cz && g.qs, `${w}: all four parts measured`).toBeTruthy();
       expect(near(g.desk!.t - g.hero!.b, 22), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the hero`).toBe(true);
       expect(near(g.cz!.t - g.desk!.b, 44), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);
-      expect(near(g.qs!.t - g.cz!.b, 44), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
+      /* v132 §2 — RE-POINTED: the workspace starts 96 below Recently updated (the ref's #ws margin), room for the hawk's 74px rise */
+      expect(near(g.qs!.t - g.cz!.b, 96), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
       expect(g.prevIsHero, `${w}: the desk follows the hero directly`).toBe(true);
       expect(g.headers, `${w}: no heading between the hero and the desk`).toBe(0);
     }

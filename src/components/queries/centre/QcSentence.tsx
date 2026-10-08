@@ -40,7 +40,6 @@ import { FILTER_ICON, GROUP_ICON, SORT_ICON } from "../../shared/listControlIcon
 import { QC_LIST_PERCH } from "./qcArt";
 import "./qcvPage.css";
 import "./qcvListBanner.css";
-import { QcSectionHead } from "./QcArtSlot";
 
 export interface ScopeOption { id: string; title: string; count: number }
 
@@ -71,8 +70,8 @@ export const QcSentence: React.FC<{
    * `sticky` is the slim bar that pins once the banner has scrolled away. Every variant renders the
    * SAME controls and the same menus — only the house changes.
    */
-  /** `section` is v131's "Your queries" head (desktop); the others are the v126 page's (the phone). */
-  variant?: "head" | "banner" | "sticky" | "section";
+  /** the v126 page's (the phone); the desktop's "Your queries" head is `QcWorkspaceHead` (v132). */
+  variant?: "head" | "banner" | "sticky";
   /** banner: how many of the rows are the writer's move ("N NEED YOU") */
   needYou?: number;
   /** banner: the manuscript the list is for, named in bold; null across all manuscripts */
@@ -173,26 +172,6 @@ export const QcSentence: React.FC<{
    * then the count line, the headline, one sentence and the controls on its row. Its feet stand on
    * the workspace's top edge (a negative bottom margin, painted above it).
    */
-  /**
-   * v131 §3 — "YOUR QUERIES": the art slot, the title, ONE line — "Showing x of y for <manuscript>",
-   * x the rows the list renders after Find and Filter, y the manuscript's total — and the four controls
-   * on the right. No other sentence: the banner's headline, its eyebrow and the hawk are retired here.
-   */
-  if (variant === "section") {
-    return (
-      <section className="qc13-sec qc13-qs" data-qcv="lbanner" aria-label="Your queries">
-        <QcSectionHead
-          spot="your-queries"
-          probe="qs-head"
-          title="Your queries"
-          line={<span data-qcv="showing" data-x={count} data-y={total}>Showing <b>{count}</b> of <b>{total}</b>{msTitle ? <> for <b>{msTitle}</b></> : " across your manuscripts"}</span>}
-          controls={loading ? null : <div className="qc13-ctl" data-qcv="lb-ctl">{controls}</div>}
-        />
-        {menus}
-      </section>
-    );
-  }
-
   if (variant === "banner") {
     const n = total;
     return (

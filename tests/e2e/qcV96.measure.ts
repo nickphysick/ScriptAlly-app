@@ -129,9 +129,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
     for (const grouped of [false, true]) {
       if (grouped) {
         /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
-        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.locator(`${P} [data-qcv="ws-head"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
         await page.waitForTimeout(200);
-        await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
+        await page.locator(`${P} [data-qcv="ws-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^Urgency$/ }).first().click();
         await page.waitForTimeout(600);
@@ -158,7 +158,8 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
             }
           }
           /* the head's own controls and the group headings are the app's words too */
-          for (const s of ['[data-qcv="lh-title"]', ".qcv-op", '[data-qcv="grp"]']) {
+          /* v132 §2 — RE-POINTED: the workspace head's title, controls, pills and chips */
+          for (const s of ['[data-qcv="ws-title"]', ".qcw-ctl", ".qcw-pill", ".qcw-chip", '[data-qcv="grp"]']) {
             for (const e of [...pg.querySelectorAll(s)] as HTMLElement[]) {
               if (e.scrollWidth > e.clientWidth + 1) out.push(`${s} :: ${(e.textContent ?? "").trim().slice(0, 40)}`);
             }
@@ -170,9 +171,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
       }
       if (grouped) {
         /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
-        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.locator(`${P} [data-qcv="ws-head"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
         await page.waitForTimeout(200);
-        await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
+        await page.locator(`${P} [data-qcv="ws-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^No grouping$/ }).first().click();
         await page.waitForTimeout(500);

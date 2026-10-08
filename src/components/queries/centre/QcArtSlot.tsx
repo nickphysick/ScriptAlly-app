@@ -33,7 +33,7 @@ const SPOT_ICON: Record<SpotName, React.ReactNode> = {
 /** Where Nick's illustration for a slot goes. */
 export const spotSrc = (name: SpotName): string => `/images/qc/spots/${name}.png`;
 
-export const QcArtSlot: React.FC<{ name: SpotName; size: "section" | "group"; tone?: "you" | "agent" | "closed" | "other" }> = ({ name, size, tone = "you" }) => {
+export const QcArtSlot: React.FC<{ name: SpotName; size: "group"; tone?: "you" | "agent" | "closed" | "other" }> = ({ name, size, tone = "you" }) => {
   const [loaded, setLoaded] = useState(false);
   return (
     <span className={`qc13-art qc13-art--${size} qc13-art--${tone}`} data-qcv="art-slot" data-spot={name} data-art={loaded ? "image" : "icon"} aria-hidden="true">
@@ -45,21 +45,3 @@ export const QcArtSlot: React.FC<{ name: SpotName; size: "section" | "group"; to
     </span>
   );
 };
-
-/** A section's head (§3): the art slot, the title, an optional line under it, controls on the right. */
-export const QcSectionHead: React.FC<{
-  spot: SpotName;
-  title: React.ReactNode;
-  line?: React.ReactNode;
-  controls?: React.ReactNode;
-  probe: string;
-}> = ({ spot, title, line, controls, probe }) => (
-  <div className="qc13-sh" data-qcv={probe}>
-    <QcArtSlot name={spot} size="section" />
-    <div className="qc13-sh-l">
-      <h3 className="qc13-sh-t" data-qcv={`${probe}-title`}>{title}</h3>
-      {line && <p className="qc13-sh-p" data-qcv={`${probe}-line`}>{line}</p>}
-    </div>
-    {controls && <div className="qc13-sh-r">{controls}</div>}
-  </div>
-);

@@ -204,8 +204,8 @@ export const QcCentre: React.FC<{
       */}
     {courts}
     {carousel}
-    <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
-      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
+    <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
+      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 
       {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
           are the list's own and their menus have not changed. */}

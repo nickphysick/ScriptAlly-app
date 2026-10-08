@@ -28,7 +28,7 @@ async function openQc(page: Page, w: number) {
 }
 const listState = (page: Page) => page.evaluate(() => ({
   ids: [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => r.dataset.qid).join(","),
-  counts: [...document.querySelectorAll<HTMLElement>('[data-qcv="showing"], [data-qcv="ws-showing"], [data-qcv="gband"]')].map((e) => e.innerText.replace(/\s+/g, " ").trim()).join("|"),
+  counts: [...document.querySelectorAll<HTMLElement>('[data-qcv="showing"], [data-qcv="showing"], [data-qcv="gband"]')].map((e) => e.innerText.replace(/\s+/g, " ").trim()).join("|"),
 }));
 const listRows = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => ({ id: r.dataset.qid!, name: r.dataset.name ?? "", status: r.dataset.status ?? "" })));
 
@@ -119,5 +119,110 @@ test.describe("Query Centre v132 — Recently updated", () => {
     expect(after.on, "row 3 is marked featured").toEqual([false, false, true, false, false]);
     const more = (await page.locator('[data-qcv="ru-more"]').innerText()).trim();
     expect(more, "and N more").toBe(`and ${total - 5} more`);
+  });
+});
+
+test.describe("Query Centre v132 — Your queries", () => {
+  test("W1 · the ink bar: anthracite, 104 tall at least, the hawk 210 wide breaking its top, the title and the live count", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const r = await page.evaluate(() => {
+        const q = (s: string) => document.querySelector<HTMLElement>(`[data-qcv="${s}"]`);
+        const bar = q("ws-bar"), hawk = q("ws-hawk") as HTMLImageElement | null, title = q("ws-title"), sh = q("showing");
+        if (!bar || !hawk || !title || !sh) return null;
+        const b = bar.getBoundingClientRect(), h = hawk.getBoundingClientRect(), r1 = bar.querySelector<HTMLElement>(".qcw-r1")!.getBoundingClientRect();
+        return {
+          bg: getComputedStyle(bar).backgroundColor, r1H: r1.height,
+          hawkW: hawk.offsetWidth, hawkLeft: hawk.offsetLeft, hawkTop: hawk.offsetTop, loaded: hawk.complete && hawk.naturalWidth > 0, hawkAbove: h.top < b.top,
+          face: getComputedStyle(title).fontFamily, size: getComputedStyle(title).fontSize, text: title.innerText.trim(),
+          x: Number(sh.dataset.x), y: Number(sh.dataset.y), rows: document.querySelectorAll('[data-qcv="row"]').length,
+          titleLeft: title.getBoundingClientRect().left - b.left,
+        };
+      });
+      expect(r, `${w}: the bar's parts`).toBeTruthy();
+      expect(r!.bg, `${w}: the bar is anthracite`).toBe("rgb(42, 58, 82)");
+      expect(r!.r1H, `${w}: the title row is at least 104`).toBeGreaterThanOrEqual(104);
+      expect(r!.hawkW, `${w}: the hawk is 210 wide`).toBe(210);
+      expect(r!.loaded, `${w}: the hawk's image loaded`).toBe(true);
+      expect(near(r!.hawkLeft, 8) && near(r!.hawkTop, -74), `${w}: the hawk at 8/-74, got ${r!.hawkLeft}/${r!.hawkTop}`).toBe(true);
+      expect(r!.hawkAbove, `${w}: the hawk breaks the bar's top`).toBe(true);
+      expect(near(r!.titleLeft, 236), `${w}: the title starts 236 in, got ${r!.titleLeft}`).toBe(true);
+      expect(r!.face, `${w}: the title is the typewriter`).toMatch(/Special Elite/);
+      expect(r!.size, `${w}: 32px`).toBe("32px");
+      expect(r!.text).toBe("Your queries");
+      expect(r!.y, `${w}: the total`).toBeGreaterThan(10);
+      expect(r!.x, `${w}: "Showing" counts the rows drawn`).toBe(r!.rows);
+    }
+  });
+
+  const deskYou = (page: Page) => page.locator('[data-qcv="court"][data-court="you"] [data-qcv="court-count"]').first().innerText().then((t) => Number(t.replace(/\D/g, "")));
+  const deskOverdue = (page: Page) => page.evaluate(() => {
+    /* the desk prints the number (court-tile) and its words (court-label) as two elements of one line */
+    const line = [...document.querySelectorAll<HTMLElement>('[data-qcv="court"][data-court="agent"] [data-qcv="court-line"]')]
+      .find((l) => /overdue/i.test(l.querySelector<HTMLElement>('[data-qcv="court-label"]')?.innerText ?? ""));
+    return line ? Number(line.querySelector<HTMLElement>('[data-qcv="court-tile"]')?.innerText.trim() ?? NaN) : NaN;
+  });
+  const shownIds = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => r.dataset.qid!));
+
+  test("W2 · the two pills: the desk's own numbers, each filters the list to exactly that set, and a second press clears", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const all = await listRows(page);
+      expect(all.length, `${w}: the list has rows`).toBeGreaterThan(10);
+      const you = await deskYou(page), over = await deskOverdue(page);
+      expect(you, `${w}: the desk says something is with you`).toBeGreaterThan(0);
+      expect(Number.isFinite(over), `${w}: the desk's overdue line was found`).toBe(true);
+      const pill = (k: string) => page.locator(`[data-qcv="ws-pill"][data-k="${k}"]`);
+      expect(Number((await pill("you").locator("b").innerText()).trim()), `${w}: your move = the desk's With you`).toBe(you);
+      expect(Number((await pill("past").locator("b").innerText()).trim()), `${w}: overdue = the desk's responses overdue`).toBe(over);
+      await pill("you").click();
+      await page.waitForTimeout(300);
+      await expect(pill("you")).toHaveAttribute("aria-pressed", "true");
+      const ids = await shownIds(page);
+      const st = new Map(all.map((r) => [r.id, r.status]));
+      expect(ids.length, `${w}: your move shows the desk's number`).toBe(you);
+      expect(ids.every((id) => COURT[st.get(id)!] === "you"), `${w}: every row is with you`).toBe(true);
+      await pill("you").click();
+      await page.waitForTimeout(300);
+      await expect(pill("you")).toHaveAttribute("aria-pressed", "false");
+      expect((await shownIds(page)).length, `${w}: a second press returns everything`).toBe(all.length);
+      if (over > 0) {
+        await pill("past").click(); await page.waitForTimeout(300);
+        expect((await shownIds(page)).length, `${w}: overdue shows the desk's number`).toBe(over);
+        await pill("past").click(); await page.waitForTimeout(300);
+      }
+    }
+  });
+
+  test("W3 · the strip: one line, one value at a time, and Clear all puts everything back", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const total = (await listRows(page)).length;
+      const line = await page.evaluate(() => {
+        const s = document.querySelector<HTMLElement>('[data-qcv="ws-strip"]')!;
+        const kids = [...s.querySelectorAll<HTMLElement>(':scope > [data-qcv="ws-chip"], :scope > [data-qcv="ws-more"]')];
+        const tops = kids.map((k) => Math.round(k.getBoundingClientRect().top));
+        const sr = s.getBoundingClientRect();
+        return { n: kids.length, oneTop: new Set(tops).size === 1, inside: kids.every((k) => k.getBoundingClientRect().right <= sr.right + 0.5), h: sr.height, keys: kids.map((k) => k.dataset.k ?? "more") };
+      });
+      expect(line.n, `${w}: the strip has chips`).toBeGreaterThanOrEqual(3);
+      expect(line.keys, `${w}: More filters is always there`).toContain("more");
+      expect(line.oneTop, `${w}: one line`).toBe(true);
+      expect(line.inside, `${w}: nothing runs past the strip`).toBe(true);
+      expect(near(line.h, 67, 1.5), `${w}: the strip is one row tall, got ${line.h}`).toBe(true);
+      const chip = (k: string) => page.locator(`[data-qcv="ws-strip"] > [data-qcv="ws-chip"][data-k="${k}"]`);
+      const pressed = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="ws-chip"][aria-pressed="true"], [data-qcv="ws-pill"][aria-pressed="true"]')].filter((e) => e.closest('[data-qcv="ws-strip"]') ? !e.closest(".qcw-strip-measure") : true).map((e) => `${e.dataset.qcv}:${e.dataset.k}`));
+      await chip("you").click(); await page.waitForTimeout(250);
+      expect((await pressed()).sort(), `${w}: Your move is pressed, and its pill with it`).toEqual(["ws-chip:you", "ws-pill:you"]);
+      await chip("closed").click(); await page.waitForTimeout(250);
+      expect(await pressed(), `${w}: one value at a time`).toEqual(["ws-chip:closed"]);
+      await page.locator('[data-qcv="find"] input').fill("zz");
+      await page.waitForTimeout(250);
+      await page.locator('[data-qcv="ws-clear"]').click(); await page.waitForTimeout(300);
+      expect(await pressed(), `${w}: Clear all leaves nothing pressed`).toEqual([]);
+      await expect(page.locator('[data-qcv="find"] input'), `${w}: and empties Find`).toHaveValue("");
+      expect((await shownIds(page)).length, `${w}: and returns every row`).toBe(total);
+      await expect(page.locator('[data-qcv="ws-clear"]'), `${w}: Clear all goes when nothing is on`).toHaveCount(0);
+    }
   });
 });

@@ -25,3 +25,13 @@ A retired case is skipped with `retiredV132(why, by)` (`inkRetired.ts`); a skip 
 
 - `qcV126` QC126-2: three `a17.css` rules (Analytics) paint the old neutral ground. Recorded in CLAUDE.md.
 - `qcV131` QC15: needs its reference captured from the pre-v131 build (`QC15_CAPTURE=1`); the file is absent in this worktree.
+
+## Phase 2 — the "Your queries" workspace head
+
+Nothing retired: every case that read the old head still asserts its claim, through the new one.
+
+- `qcV131` QC1: the workspace starts 96 below Recently updated (the ref's `#ws` margin, room for the hawk's 74px rise), measured at `[data-qcv="ws-head"]`. It was 44 to the v131 section head.
+- `qcV131` QC8: unchanged. The live count keeps the `data-qcv="showing"` probe and its `data-x`/`data-y`.
+- `qcV96` QC4: reaches the grouping through `ws-head` / `ws-group`, and its no-truncation sweep covers the head's title, controls, pills and chips.
+
+Deleted with the old head: `QcSentence`'s `section` variant (desktop only, no caller once the workspace head replaced it), `QcSectionHead` (its only caller), and their `.qc13-sh*`, `.qc13-ctl`, `.qc13-link`, `.qc13-qs` and `.qc13-art--section` rules.
