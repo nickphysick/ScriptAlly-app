@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "H1",
+  "mutation": "restore band card",
+  "red": true,
+  "reading": [
+   "Error: 1512: the open header, loaded",
+   "Expected: visible",
+   "Error: element(s) not found"
+  ]
+ },
+ {
+  "lock": "H2",
+  "mutation": "drop the drawing's left margin",
+  "red": true,
+  "reading": [
+   "Error: 1512: the drawing starts 56 after the text",
+   "Expected: <= 2",
+   "Received:    56"
+  ]
+ },
+ {
+  "lock": "H3",
+  "mutation": "bottom padding 28",
+  "red": true,
+  "reading": [
+   "Error: 1512: hairline 379 / 368.96875",
+   "Expected: <= 2",
+   "Received:    10.03125"
+  ]
+ },
+ {
+  "lock": "H4",
+  "mutation": "remove the top margin",
+  "red": true,
+  "reading": [
+   "Error: 1512: the drawing's top 60 against the bar's bottom 64",
+   "Expected: >= 8",
+   "Received:    -4"
+  ]
+ },
+ {
+  "lock": "H5",
+  "mutation": "swap the handlers",
+  "red": true,
+  "reading": [
+   "Error: 1512: + Log a query opens the log flow",
+   "Expected: \"log\"",
+   "Received: \"resp\""
+  ]
+ },
+ {
+  "lock": "H6",
+  "mutation": "shorten the loading title",
+  "red": true,
+  "reading": [
+   "Error: 1512: title width 233.8 → 535.4",
+   "Expected: <= 1",
+   "Received:    301.59999999999997"
+  ]
+ }
+]

@@ -38,7 +38,10 @@ interface Pg {
   exPart: string;
 }
 const PAGES: Pg[] = [
-  { route: "/queries", key: "qc", name: "Query Centre", section: "QUERIES", empty: "Nothing out yet", tile: '[data-qcv="court"]', num: ".qcv-court-n", row: '[data-qcv="row"]', rail: ".qcv-rail", exPart: '[data-qcv="row"]' },
+  /* THE QUERY CENTRE LEFT ON 8 OCT (Query Centre v133): its populated header is page-local now (QcOpenHeader;
+     OWN_HEADER_ROUTES) — the living "{N} queries out" as the title over a fixed line, no living sentence — and is
+     locked by tests/e2e/qcV133.measure.ts H1–H6. Its EMPTY state (QcEmpty) still draws the shared living header.
+     Three pages here now. */
   /* THE CONTACT LIST LEFT ON 8 OCT (Contact list v15 §2): its populated header is page-local now (OWN_HEADER_ROUTES in
      plateRoutes.ts) — the count as the title and a fixed line, no living sentence — and is locked by
      tests/e2e/contactV15.measure.ts CL15-1/CL15-2 instead. Its EMPTY state still draws the shared living header; that page
@@ -421,30 +424,8 @@ test("LH9 · a page filtered to nothing keeps its hero", async ({ page }) => {
     L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : BAND_ROUTES.includes(route) ? h.band : h.rule > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate} band ${h.band}`);
     L.check("LH9 no exhibition", ctx, (await page.evaluate(() => [...document.querySelectorAll('[data-lh="band"]')].filter((e) => e.getBoundingClientRect().height > 0).length)) === 0, "");
   };
-  if (!ONLY || ONLY === "qc") {
-    await openApp(page, "/queries", { width: 1440, height: H });
-    const menuPick = async (pick: (items: { i: number; label: string; n: number }[]) => number) => {
-      await page.locator('[data-qcv="pk-filter"]').filter({ visible: true }).first().click();
-      const items = await page.locator('.qcv-menu [role="menuitemradio"]').evaluateAll((els) =>
-        els.map((e, i) => { const t = (e as HTMLElement).innerText.trim(); const m = t.match(/(\d+)\s*$/); return { i, label: t, n: m ? Number(m[1]) : -1 }; }));
-      const i = pick(items);
-      if (i < 0) { await page.keyboard.press("Escape"); return null; }
-      await page.locator('.qcv-menu [role="menuitemradio"]').nth(i).click();
-      await page.waitForTimeout(400);
-      return items[i].label;
-    };
-    const zero = (items: { i: number; n: number }[]) => items.find((x) => x.n === 0)?.i ?? -1;
-    let picked = await menuPick(zero);
-    if (!picked) {
-      await menuPick((items) => {
-        const from = items.findIndex((x) => /^All manuscripts/.test(x.label));
-        const books = from < 0 ? [] : items.slice(from + 1).filter((x) => x.n > 0 && !/^Not assigned/.test(x.label));
-        return books.sort((a, b) => a.n - b.n)[0]?.i ?? -1;
-      });
-      picked = await menuPick(zero);
-    }
-    await kept("/queries", `filtered to ${picked}`, ".qcv-none, .qcv-empty-card, [data-qc-empty]");
-  }
+  /* (the Query Centre left this suite in v133 — its header is page-local, and a filtered-to-nothing list is QC132 W9's
+     dead end. Its branch here opened the v126 filter pill, `pk-filter`, which v132 replaced on the desktop.) */
   /* (the Contact list left this suite in v15 — its header is page-local; a filtered-to-nothing list is CL14-14's dead end) */
   if (!ONLY || ONLY === "td") {
     await openApp(page, "/todo", { width: 1440, height: H });

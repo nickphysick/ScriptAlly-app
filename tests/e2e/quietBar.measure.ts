@@ -217,7 +217,10 @@ test("Q8 · every full header starts on the column's left, level with the first 
   const all = { route: "*", size: "*", state: "tally" };
   /* a plate's drawing sits 24 in from its right by design (PH1–PH4 own it), so each plate route takes its
      drawing out of this tally at both sizes — 6 open drawings became 4 when the Query Centre became a plate */
-  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6 - 2 * (PLATE_ROUTES.length + BAND_ROUTES.length), `full ${full} compact ${compact} drawn ${drawn}`);
+  /* ⚠️ v133: the Query Centre's drawing left with its header (OWN_HEADER_ROUTES). The Contact list's had already left
+     in v15 without this tally noticing, because Analytics joined the band register the same week: the one own-header
+     route the old formula happened to absorb is the `- 1`. */
+  L.check("population · full and compact headers both measured, and every drawing", all, full >= 8 && compact >= 8 && drawn >= 6 - 2 * (PLATE_ROUTES.length + BAND_ROUTES.length + OWN_HEADER_ROUTES.length - 1), `full ${full} compact ${compact} drawn ${drawn}`);
   L.write();
   console.log(`Q8 tally: full ${full} compact ${compact} drawn ${drawn}`);
   expect([...platesSeen].sort(), "Q8's plate exemptions are not the register's").toEqual([...PLATE_ROUTES].sort());

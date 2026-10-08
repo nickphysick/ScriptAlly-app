@@ -18,6 +18,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../../shell/primitives.css";
 import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { QC_COURIER_DISC } from "./qcArt";
+import { QcOpenHeader } from "./QcOpenHeader";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
@@ -174,6 +175,12 @@ export const QcCentre: React.FC<{
         * full header draws for every page that has one, so the page states its content and nothing
         * about its arrangement. The facts line becomes the intro; the art is unchanged.
         */}
+      {v131 ? (
+        /* v133 — THE OPEN HEADER on the desktop: no band, no card, no disc, and the fixed line in
+           place of the living facts sentence (the desk carries those facts). */
+        <QcOpenHeader living={living} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} />
+      ) : (
+      /* below 768px the v126 page is unchanged: the shared header's band and its courier disc */
       <PageHeader
         variant="full"
         title="Query Centre"
@@ -182,15 +189,11 @@ export const QcCentre: React.FC<{
         primaryRef={logRef}
         primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled || loading }}
         secondary={{ label: "Record a response", onClick: onRecord, disabled: loading }}
-        /* THE BAND (v126 §2, 5 Oct): a full-bleed anthracite band under the top bar, the courier in a
-           white disc on the text's right. The plate is retired on this page (it stays on PageHeader for
-           anyone else); `QcEmpty` keeps the open header and `hero-courier-map.png`. */
         band
-        /* the band is a CARD in the sheet (ink shell v1 fix-ups) — the Query Centre's alone */
         card
-        compact={v131}
         art={<img src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} alt="" />}
       />
+      )}
     {/**
       * §1 (v95) — THE DESK IS A FULL-SPAN BAND, like the header above it, and the rail starts in
       * the row BELOW it. It used to render inside `.qcv-page`, in the first track only, which is

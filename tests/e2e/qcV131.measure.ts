@@ -12,7 +12,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { WIDTHS, inkOpen, rect, applyMutation } from "./inkLib";
-import { retiredV1311, retiredV132 } from "./inkRetired";
+import { retiredV1311, retiredV132, retiredV133 } from "./inkRetired";
 import { openRoute } from "./measure";
 
 const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
@@ -42,7 +42,7 @@ async function textLeft(page: Page, el: import("@playwright/test").Locator): Pro
 
 test.describe("Query Centre v131", () => {
   /* ── QC1 · order ──────────────────────────────────────────────────────────────────────────────── */
-  test("QC1 · hero, desk 22 below, Recently updated 44 below, Your queries 44 below; no header on the desk", async ({ page }) => {
+  test("QC1 · header, desk 28 below its hairline, Recently updated 44 below, Your queries 96 below; no header on the desk", async ({ page }) => {
     for (const w of WIDTHS) {
       await openQc(page, w, "qc1");
       const g = await page.evaluate(() => {
@@ -50,13 +50,14 @@ test.describe("Query Centre v131", () => {
         const desk = document.querySelector<HTMLElement>('[data-qcv="courts"]')!;
         const prev = desk.previousElementSibling as HTMLElement | null;
         return {
-          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('[data-qcv="ws-head"]'),
-          prevIsHero: !!prev && prev.matches('[data-probe="page-header"]'),
-          headers: [...document.querySelectorAll('.qc13 h1, .qc13 h2, .qc13 h3')].filter((h) => h.getBoundingClientRect().top > (document.querySelector('[data-probe="page-header"]')!.getBoundingClientRect().bottom) && h.getBoundingClientRect().bottom <= desk.getBoundingClientRect().top + 1).length,
+          hero: R('.qc13 [data-qcv="open-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('[data-qcv="ws-head"]'),
+          prevIsHero: !!prev && prev.matches('[data-qcv="open-header"]'),
+          headers: [...document.querySelectorAll('.qc13 h1, .qc13 h2, .qc13 h3')].filter((h) => h.getBoundingClientRect().top > (document.querySelector('.qc13 [data-qcv="open-header"]')!.getBoundingClientRect().bottom) && h.getBoundingClientRect().bottom <= desk.getBoundingClientRect().top + 1).length,
         };
       });
       expect(g.hero && g.desk && g.cz && g.qs, `${w}: all four parts measured`).toBeTruthy();
-      expect(near(g.desk!.t - g.hero!.b, 22), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the hero`).toBe(true);
+      /* v133 — RE-POINTED: the hero is the open header, and the desk is 28 under its hairline (the Contact list's gap; QC133 H3) */
+      expect(near(g.desk!.t - g.hero!.b, 28), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the header`).toBe(true);
       expect(near(g.cz!.t - g.desk!.b, 44), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);
       /* v132 §2 — RE-POINTED: the workspace starts 96 below Recently updated (the ref's #ws margin), room for the hawk's 74px rise */
       expect(near(g.qs!.t - g.cz!.b, 96), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
@@ -67,6 +68,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC2 · the hero ───────────────────────────────────────────────────────────────────────────── */
   test("QC2 · the hero card is 178 tall, its pills stacked left of the art, the disc 150", async ({ page }) => {
+    test.skip(true, retiredV133("the 178px hero card, its stacked pills and the 150px disc; the open header has no card and no disc", "QC133 H1, H2"));
     for (const w of WIDTHS) {
       await openQc(page, w, "qc2");
       const card = (await rect(page, '.qc13 [data-probe="page-header"]'))!;

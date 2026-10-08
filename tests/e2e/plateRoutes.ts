@@ -21,20 +21,20 @@ export const PLATE_ROUTES: readonly string[] = [];
  * Analytics v17 (5 Oct) opens on the same band (`PageHeader band bandFixed`), so it is named here too;
  * its header geometry belongs to `analyticsV17` AN17-2/AN17-3.
  */
-export const BAND_ROUTES: readonly string[] = ["/queries", "/queries/analytics"];
+export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
 /**
  * THE OWN-HEADER REGISTER (Contact list v15, 8 Oct) — routes whose header is PAGE-LOCAL (`data-own-header`), neither the
  * shared open header, a plate nor a band. The Contact list left the band in v15 for an open header the shared component
  * cannot draw (a 72px typewriter title, no eyebrow, the drawing in the flow beside the text); its geometry belongs to
  * `contactV15` CL15-1/CL15-2. The open-header claims skip it by NAME and assert that what they skipped IS this set.
  */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents"];
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The
  * Query Centre since v131 (the Contact list carried it in v14 and left it in v15). A living-headers lock that exempts
  * the compact card's centring or its pill column reads THIS set, never a route compared by hand.
  */
-export const COMPACT_ROUTES: readonly string[] = ["/queries"];
+export const COMPACT_ROUTES: readonly string[] = [];
 /** The plate's text inset — its 38px of horizontal padding, which PH1 measures against the brief. */
 export const PLATE_PAD_X = 38;

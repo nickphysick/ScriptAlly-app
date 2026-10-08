@@ -20,7 +20,8 @@
 
   /* ── §1 · the page order: hero, desk 22 below, Recently updated 44 below (qcvRecent.css); since v132
      "Your queries" is the workspace panel 96 below that (qcvWorkspace.css overrides the 44 here) ── */
-  .qc13 .qc131-desk { margin-top: 22px; }
+  /* 28 under the open header's hairline, as the Contact list's desk is (v133; it was 22 under the band) */
+  .qc13 .qc131-desk { margin-top: 28px; }
   .qc13 .qcv-page { padding-top: 0; margin-top: 44px; }
   .qc13 .qc13-work { margin: 0; padding: 0; background: transparent; border-radius: 0; }
 

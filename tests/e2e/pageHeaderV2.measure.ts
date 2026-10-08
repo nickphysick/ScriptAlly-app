@@ -107,7 +107,10 @@ for (const vp of SIZES) {
     await openApp(page, "/queries", vp);
     const r = await readFull(page, '[data-qcv="rail"]');
     const ctx = { route: "/queries", size: `${vp.width}`, state: "expanded" };
-    L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
+    /* ⚠️ RETARGETED BY QUERY CENTRE v133: the header is page-local (OWN_HEADER_ROUTES), an open header the shared
+       component does not draw, so there is no shared full header to find; QC133 H1–H6 own its geometry. */
+    const own = OWN_HEADER_ROUTES.includes("/queries");
+    if (!own) L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
     /* ⚠️ RETARGETED BY THE PLATE (4 Oct): the Query Centre's full header is a plate, so the open
        header's geometry (the 18 below the bar, the 55% text block, art standing on the rule, the rail
        at the rule + 24) is not its geometry — plateHeader.measure.ts PH1–PH4 own it. What stays here is
@@ -123,9 +126,15 @@ for (const vp of SIZES) {
     } else if (band) {
       const isBand = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0));
       L.check("§2 · (band) the Query Centre's header is the band — its geometry is QC126-3's", ctx, isBand, `band ${isBand}`);
+    } else if (own) {
+      const seen = await page.evaluate(() => ({
+        own: !![...document.querySelectorAll('[data-qcv="open-header"][data-own-header]')].find((e) => e.getBoundingClientRect().height > 0),
+        shared: !![...document.querySelectorAll('[data-probe="page-header"]')].find((e) => e.getBoundingClientRect().height > 0),
+      }));
+      L.check("§2 · (own) the Query Centre draws its own open header and no shared one — its geometry is QC133's", ctx, seen.own && !seen.shared, JSON.stringify(seen));
     } else if (r) judgeFull(L, r, ctx, mock);
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(plate || band ? 2 : 15);
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(own ? 1 : plate || band ? 2 : 15);
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }

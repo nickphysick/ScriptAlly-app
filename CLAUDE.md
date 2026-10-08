@@ -907,6 +907,17 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ ANY `seed-query-N` PAST THE END OF THE TABLE IS DELETED.** `batch.set` overwrites the ids it writes and knows nothing about the ones it used to write, so shortening the table would strand the tail on the account for ever — rendering, counted, attributable to nothing. No orphan was found; it is the guard, not the repair.
 - **⚠️ `seedThinCases.mjs` IS NOT THE PROBLEM AND ITS 400-DAY QUERY IS DELIBERATE.** `thin-q-close` is a `Queried` query sent 400 days ago against a 6-week window so the Close journey has a fixture at all; the file uses relative dates, deterministic `thin-` ids and `--clean`. **A send date from last year on that account is evidence of a designed fixture before it is evidence of a leak** — check which seeder owns an id before reworking the wrong file.
 
+## Query Centre — v133, the open header (8 Oct; ref = design-refs/query-centre/query-centre-v133.html + design-refs/qc-v133/*.png; report reports/qc-v133/REPORT.md; on branch `qc-v133`, NOT merged)
+- **On the desktop the Query Centre opens with `QcOpenHeader`, the Contact list v15 header's shape:** no band, no card, no disc. The living "{N} queries out" is the 72px typewriter title (58 below 1440), over the fixed line "Send, track, and chase them from this page.", two buttons, and the figure-only courier (`QC_PLATE_FIGURE`) in the flow beside them, closed by a hairline. Nothing below the header changed.
+- **The living facts sentence is gone from the populated page**; the desk carries those facts. `qcHeaderCopy`'s headline is still the title's source.
+- **⚠️ The rhythm is the Contact list's, held by measurement (QC133 H3):** header top, hairline y and desk top on `/queries` equal `/agents` at 1512 × 900 and 1280 × 800. The desk's 28px under the hairline is `.qc13 .qc131-desk`'s margin in `qcv131.css`.
+- **⚠️ The drawing is 266px in a 258px row** (`margin: -4px 0`): the Contact list's hawk is 266 with 8px over its hairline, so its row is 258, and the same row is what puts this hairline on the same y while the drawing stays centred on the text.
+- **Built beside `ContactOpenHeader`, not shared** (`agents/**` was another session's). Both are lift candidates into `shell/`.
+- **`/queries` is in `OWN_HEADER_ROUTES`** (tests/e2e/plateRoutes.ts); `BAND_ROUTES` is `/queries/analytics` alone and `COMPACT_ROUTES` is empty.
+- **The phone (under 768px) keeps the v126 page**, so `PageHeader band card` and `QC_COURIER_DISC` are still drawn there. `QcEmpty` keeps its own open header.
+- **⚠️ The loading title is "00 queries out" painted over.** Special Elite's digits are not one width, so the drawing can move a few pixels when the count arrives; H6 allows 8.
+- **Locks:** `tests/e2e/qcV133.measure.ts` H1–H6, proofs in `reports/qc-v133/mutation-proofs.json`; unit `qcOpenHeader.test.tsx`. Retired and re-pointed: `tests/e2e/RETIRED-query-centre-v133.md`.
+
 ## Query Centre — v132 (8 Oct; ref = design-refs/query-centre/query-centre-v132.html + design-refs/qc-v132/*.png; report reports/qc-v132/REPORT.md; on branch `qc-v132`, NOT merged; AMENDS v126/v131 below the desk on the DESKTOP — the phone keeps the v126 page)
 - **Below the desk the desktop page is two things:** "Recently updated" (`QcRecent` + `lib/qcRecent`: a lede and one featured card over the "Also moved" panel) and the "Your queries" workspace (`QcWorkspace` head + `QcList132` rows, in a white panel under an ink bar with the flying hawk).
 - **A desk section chooses for "Recently updated" and never filters the list** (R2). "See all N" is the list's own count.
@@ -1554,6 +1565,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Query Centre v133 (the open header) is DONE on branch `qc-v133`, deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v133/REPORT.md`.
+
 **Contact list v15 is DONE on `main` and PUSHED (six phases, `a309cb8e` → Phase 6), NOT deployed anywhere** — Nick deploys to dev himself. Read `reports/contact-list-v15/REPORT.md` first: the false premises, the deviations from the mock, and the follow-ups (unifying `shell/featureStage` and the desk's stamp with the Query Centre's v132, which reached `main` the same day; a completion history for the Profiles stamp; prod rules are untouched by this pack).
 
 **Query Centre v132 is DONE on branch `qc-v132` (four commits, a merge of `main` and a follow-ups commit), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v132/REPORT.md`: the false premises, the 1280 row wrap, and the pieces now built twice.
