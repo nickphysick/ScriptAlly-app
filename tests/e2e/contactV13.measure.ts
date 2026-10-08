@@ -730,7 +730,7 @@ test("CL13-13 · page guide", async ({ page }) => {
   await page.click(`${G} [data-qcv="guide-next"]`);
   const s2 = await page.evaluate((G) => ({ title: document.querySelector(`${G} [data-qcv="guide-title"]`)?.textContent ?? null,
     stripRing: !!document.querySelector(".pgd-ring[data-cl13='strip']") }), G);
-  /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-13 holds it) */
+  /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-16 holds it) */
   L.check("CL13-13 Next moves to step 2, \"Your next step\" (the strip's ring is released)", "1512", s2.title === "Your next step" && !s2.stripRing, JSON.stringify(s2));
   await page.click(`${G} [data-qcv="guide-back"]`);
   L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");

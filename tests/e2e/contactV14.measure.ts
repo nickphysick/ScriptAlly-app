@@ -769,3 +769,50 @@ test("CL14-15 · reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   L.done(6);
 });
+
+/* ── lock 16 · the page guide (§8): the four steps' words, verbatim, each ringing its own subject — the
+   strip, the next-step section, the workspace, the Housekeeping tab — and a steered step brings its subject
+   into view. (A fresh context: this file's beforeEach marks the guide seen on every navigation.) ── */
+const GUIDE14 = [
+  { title: "Your list in numbers", sel: '[data-cl13="strip"]',
+    body: "How many agents you have on file, how many fit your book, who’s open, how fast they reply, and what you added this month." },
+  { title: "Your next step", sel: '[data-cl14="next"]',
+    body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, who might fit, or where to find more." },
+  { title: "Your agents", sel: '[data-cl14="ws"]',
+    body: "Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card." },
+  { title: "Housekeeping", sel: '[data-ftab="housekeeping"]',
+    body: "The details missing from your agents’ profiles, and why each one helps. Fill them in here, a few at a time." },
+] as const;
+test("CL14-16 · page guide", async ({ browser }) => {
+  const L = new Ledger("cl14-16");
+  for (const vp of WIDTHS14) {
+    const w = `${vp.width}`;
+    const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
+    const page = await ctx.newPage();
+    page.setDefaultTimeout(15_000);
+    await page.addInitScript(() => { try { if (!sessionStorage.getItem("cl14-16")) { localStorage.removeItem("sa.guide.contacts"); sessionStorage.setItem("cl14-16", "1"); } } catch { /* private mode */ } });
+    await openContacts(page, vp, { keep: true });
+    const G = '[data-guide="contacts"]';
+    await page.locator(G).waitFor({ timeout: 10_000 }).catch(() => {});
+    for (let i = 0; i < GUIDE14.length; i++) {
+      const s = GUIDE14[i];
+      if (i > 0) { await page.click(`${G} [data-qcv="guide-next"]`); await page.waitForTimeout(900); }
+      const r = await page.evaluate(({ G, sel }) => {
+        const g = document.querySelector<HTMLElement>(G);
+        const ringed = [...document.querySelectorAll<HTMLElement>(".pgd-ring")];
+        const subj = [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+        const b = subj?.getBoundingClientRect();
+        return {
+          title: g?.querySelector('[data-qcv="guide-title"]')?.textContent ?? null,
+          body: [...(g?.querySelectorAll("p") ?? [])].map((p) => p.textContent).join(" "),
+          rings: ringed.length, onSubject: !!subj && ringed.length === 1 && ringed[0] === subj,
+          inView: !!b && b.bottom > 0 && b.top < window.innerHeight,
+        };
+      }, { G, sel: s.sel });
+      L.check(`CL14-16 step ${i + 1} reads "${s.title}" with the pack's words`, w, r.title === s.title && r.body === s.body, `${r.title} | ${r.body}`);
+      L.check(`CL14-16 step ${i + 1} rings exactly its subject, ${s.sel}, and it is on screen`, w, r.onSubject && r.inView, JSON.stringify(r));
+    }
+    await ctx.close();
+  }
+  L.done(16);
+});
