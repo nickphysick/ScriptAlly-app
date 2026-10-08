@@ -12,7 +12,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { WIDTHS, inkOpen, rect, applyMutation } from "./inkLib";
-import { retiredV1311 } from "./inkRetired";
+import { retiredV1311, retiredV132 } from "./inkRetired";
 import { openRoute } from "./measure";
 
 const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
@@ -50,7 +50,7 @@ test.describe("Query Centre v131", () => {
         const desk = document.querySelector<HTMLElement>('[data-qcv="courts"]')!;
         const prev = desk.previousElementSibling as HTMLElement | null;
         return {
-          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('.qc13-cz'), qs: R('.qc13-qs'),
+          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('.qc13-qs'),
           prevIsHero: !!prev && prev.matches('[data-probe="page-header"]'),
           headers: [...document.querySelectorAll('.qc13 h1, .qc13 h2, .qc13 h3')].filter((h) => h.getBoundingClientRect().top > (document.querySelector('[data-probe="page-header"]')!.getBoundingClientRect().bottom) && h.getBoundingClientRect().bottom <= desk.getBoundingClientRect().top + 1).length,
         };
@@ -165,6 +165,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC7 · Recently updated ───────────────────────────────────────────────────────────────────── */
   test("QC7 · the title follows the chosen section, the link clears it, and the list does not move", async ({ page }) => {
+    test.skip(true, retiredV132("the carousel's title, its \"show recently updated\" line and its clear link; a desk card now sets Recently updated's heading and a second press clears it", "QC132 R2"));
     await openQc(page, 1440, "qc7");
     const title = page.locator('[data-qcv="cz-head-title"]');
     const ids = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qc13-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","));
@@ -337,9 +338,10 @@ test.describe("Query Centre v131", () => {
     const centre = async () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="art-slot"]')].filter((e) => e.getBoundingClientRect().width > 0).map((e) => ({ spot: e.dataset.spot, art: e.dataset.art })));
     await openQc(page, 1440, "qc14");
     const before = await centre();
-    expect(before.length, "art slots on the page").toBeGreaterThanOrEqual(3);
+    /* v132 §1 — "Recently updated" lost its spot with the carousel; the group headers' slots remain */
+    expect(before.length, "art slots on the page").toBeGreaterThanOrEqual(2);
     for (const s of before) expect(s.art, `${s.spot}: an icon until a file exists`).toBe("icon");
-    const slot = page.locator('[data-qcv="art-slot"][data-spot="recently-updated"]');
+    const slot = page.locator(`[data-qcv="art-slot"][data-spot="${before[0].spot}"]`).first();
     const shotA = await slot.screenshot();
     await page.route("**/images/qc/spots/*.png", (r) => r.fulfill({ status: 200, contentType: "image/png", body: png }));
     await openQc(page, 1440, "qc14");
@@ -399,7 +401,8 @@ test.describe("Query Centre v131", () => {
         skRows: document.querySelectorAll('.qc13-list [data-qcv="sk-row"]').length,
         list: R(vis(".qc13-list")),
         desk: R(vis('[data-qcv="courts"]')),
-        cz: R(vis('[data-qcv="cz"]')),
+        /* v132 §1 — RE-POINTED: "Recently updated" replaced the carousel, and keeps its frame while loading */
+        cz: R(vis('[data-qcv="ru"]')),
         /* the desk's numbers: what a reader can see, painted-over text excluded */
         /* v131.1 — RE-POINTED: the cards state a total, two tiles and a stamp (the facts and the foot retired) */
         deskStated: [...document.querySelectorAll<HTMLElement>('[data-qcv="court-count"], [data-qcv="court-tile"], [data-qcv="court-stamp"]')]

@@ -7,6 +7,7 @@
  *
  * Every case asserts its population first, so a probe that finds nothing fails rather than passing.
  */
+import { retiredV132 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 
@@ -160,6 +161,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D7 · a card fills the carousel only; the list's rows, order and counts are identical", async ({ page }) => {
+    test.skip(true, retiredV132("the carousel D7 watched; a desk card now scopes Recently updated, and R2 asserts the same list-is-untouched claim over it", "QC132 R2"));
     await openQc(page, 1512);
     const list = () => page.evaluate(() => ({
       ids: [...document.querySelectorAll<HTMLElement>('.qc13-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","),

@@ -159,7 +159,19 @@
     "design-refs/desk-ledger-v6.html": "9acb494dcca05c80120481bfdb72d47bbfa7966506a3e7ab99585fe7ca6b32ad",
     "design-refs/qc-v131-1/ref-desk-ledger@2x.png": "1a59afab1b5a2c9fe6193c82b454852c19b77b6f1d9a793bad6d7bda2a400f9c",
     "design-refs/qc-v131-1/ref-desk-ledger-selected@2x.png": "268139e9f42ba6da5be768e23694682ba7996f7b256a849b51d1ac22c6df9237",
-    "design-refs/contact-list-v14.html": "6a3e18f2203a0406faaa632fe6647d371071dbbd10ddd1b06ae9de85facdeb4e"
+    "design-refs/contact-list-v14.html": "6a3e18f2203a0406faaa632fe6647d371071dbbd10ddd1b06ae9de85facdeb4e",
+    "design-refs/query-centre/query-centre-v132.html": "5ecd705e45fa563fd24b5def134bd60c16fc476e41a01de716bc1b8b23bf4c9d",
+    "design-refs/qc-v132/ref-ru-1280@2x.png": "0cdd8eac70072645da925e1ef789648ec273a882fb1e313291d7a09a43aef4f4",
+    "design-refs/qc-v132/ref-ru-1512@2x.png": "dc9d787f3b288ea7baf5fdfd7105ae511eb7e3d686c206e97864a7b45a5e94a7",
+    "design-refs/qc-v132/ref-ru-agents-1512@2x.png": "23568deab8ecb47945487e57ed9c6737195fca2cebd04e2964f6c7294510d070",
+    "design-refs/qc-v132/ref-ws-1280@2x.png": "e7083cd804e91e14f2dedd5e852effcd0ef6d7b6316feb0b7362935d0cdac13b",
+    "design-refs/qc-v132/ref-ws-1512@2x.png": "87ea235f22ced1bd455650f4c40e99ee9bbcfb156684b292e758146b50db689d",
+    "design-refs/qc-v132/ref-ws-compact-1512@2x.png": "dd3bf0af40e2d309dbc0a4e47fc405cd9aad9fbb2697cb240457203ca1c123b0",
+    "design-refs/qc-v132/ref-ws-dead-1512@2x.png": "c131f8eadd0dca0d5d365d15ed65e84ebba89b49f8a6f76945e802467d02ebae",
+    "design-refs/qc-v132/ref-ws-hover-1512@2x.png": "191215d60671957d1805403cfd6603b4c82a60143cd804bf0c704f9d6514afac",
+    "design-refs/qc-v132/ref-ws-package-1512@2x.png": "e5b7a7d70e441bac0662f45e1835ee22547d55fe4d5e9477c05a77433bc678f0",
+    "design-refs/qc-v132/ref-ws-pill-overdue-1512@2x.png": "6048a075505ec731c38099abde688d9646e22a3220f6a9ba4fdf9525b4042254",
+    "design-refs/qc-v132/ref-ws-unrecorded-1512@2x.png": "d54ab6875bee7dc87e93584bd999dd76e8aa161e6f1861f7c3faf6e51bf53d01"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

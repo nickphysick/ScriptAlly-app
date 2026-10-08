@@ -94,6 +94,7 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
+import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageGuide, type GuideStep } from "./shell/PageGuide";
@@ -144,7 +145,7 @@ import {
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
 import { cardsByQuery, comingUp, nextMove, trayRequest, type ComingUp, type NextMove } from "../lib/qcComingUp";
-import { QcCarousel, QcCarouselSkeleton } from "./queries/centre/QcCarousel";
+import { QcCarousel } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
 import { fanCardModel } from "../lib/qcFanModel";
@@ -6677,12 +6678,31 @@ export const Queries: React.FC<{
               />
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
-            carousel={showGridSkeleton ? (qcDesk ? <QcCarouselSkeleton /> : null) : (() => {
+            carousel={qcDesk ? (
+              /* v132 §1 (desktop) — "Recently updated": the lede, the featured card and "Also moved".
+                 The desk scopes it and nothing else; the button's number is the LIST's total. */
+              <QcRecent
+                loading={showGridSkeleton}
+                rows={qcScoped}
+                court={qcCzCourt}
+                title={qcCzCourt ? DESK_LABEL[qcCzCourt] : "Recently updated"}
+                listTotal={qcScoped.length}
+                nowMs={Date.now()}
+                onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                model={(row) => {
+                  const door = primaryDoor(row.status);
+                  return {
+                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null,
+                      door ? () => openQueryDrawer({ mode: door.mode, queryId: row.id }) : () => onOpenQuery?.(row.id)),
+                    actionLabel: door ? door.label : "Open",
+                  };
+                }}
+              />
+            ) : showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
               return (
                 <QcCarousel
-                  v131={qcDesk}
                   rows={dealt}
                   title="Recently moved"
                   countLine={carouselCountLine(qcScoped.length, dealt.length, qcCzCourt)}

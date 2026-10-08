@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "R1",
+  "mutation": "the card back in a column beside the panel",
+  "red": true,
+  "reading": [
+   "Error: 1280: panel starts 318 right of the card",
+   "Expected: true",
+   "Received: false"
+  ]
+ },
+ {
+  "lock": "R3",
+  "mutation": "use the court's count",
+  "red": true,
+  "reading": [
+   "Error: expect(locator).toHaveText(expected) failed",
+   "Expected: \"See all 83 in the list\"",
+   "Received: \"See all 13 in the list\""
+  ]
+ },
+ {
+  "lock": "R5",
+  "mutation": "drop the featured row from the list",
+  "red": true,
+  "reading": [
+   "Error: the rows do not change when one is featured"
+  ]
+ },
+ {
+  "lock": "R2",
+  "mutation": "let the desk filter the list",
+  "red": true,
+  "reading": [
+   "Error: you: the list is untouched"
+  ]
+ }
+]

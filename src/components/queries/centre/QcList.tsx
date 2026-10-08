@@ -266,7 +266,7 @@ export const QcList: React.FC<{
       const verb = next ? `${next.verb}${next.tail ? `${next.tail.lead ? ` ${next.tail.lead} ` : " "}${next.tail.figure}` : ""}` : "";
       return (
         <div key={r.id} id={`query-row-${r.id}`} className={`qcv-row qc13-rw${r.withYou ? " qcv-row--you" : ""}`}
-          data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"}
+          data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
           role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
           style={{ ["--qcv-state" as string]: `var(--state-${r.state})` }}
           onClick={() => onOpen(r.id)}

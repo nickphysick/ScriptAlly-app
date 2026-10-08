@@ -67,7 +67,9 @@
 .qcv-cz-item:focus-visible .qcard { box-shadow: 0 0 0 2px var(--qcv-navy), 0 10px 22px -12px rgba(28, 19, 15, 0.45); }
 
 /* ── the card's landing dress ──────────────────────────────────────────────────────────────── */
-.qcv-cz .qcard {
+/* v132 — `.qcr-feat` ("Recently updated"'s featured card) wears the same dress: one card, one dress,
+   never a second. Its width and natural height are set in qcvRecent.css. */
+:is(.qcv-cz, .qcr-feat) .qcard {
   position: relative; z-index: auto; width: 282px; height: 316px; border: 0; border-radius: 12px;
   box-shadow: 0 10px 22px -12px rgba(28, 19, 15, 0.45), 0 1px 3px rgba(28, 19, 15, 0.12);
   animation: none; transition: transform 0.2s cubic-bezier(.2, .8, .2, 1), box-shadow 0.2s;
@@ -76,37 +78,37 @@
   transform: translateY(-4px);
   box-shadow: 0 22px 40px -18px rgba(28, 19, 15, 0.5), 0 2px 6px rgba(28, 19, 15, 0.1);
 }
-.qcv-cz .qcard-band { padding: 10px 14px; font-size: 8px; letter-spacing: 0.12em; color: var(--qcv-ink); }
-.qcv-cz .qcard-band span:last-child { color: rgba(28, 19, 15, 0.7); }
-.qcv-cz .qcard-who {
+:is(.qcv-cz, .qcr-feat) .qcard-band { padding: 10px 14px; font-size: 8px; letter-spacing: 0.12em; color: var(--qcv-ink); }
+:is(.qcv-cz, .qcr-feat) .qcard-band span:last-child { color: rgba(28, 19, 15, 0.7); }
+:is(.qcv-cz, .qcr-feat) .qcard-who {
   grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; row-gap: 11px; padding: 13px 16px 0;
 }
-.qcv-cz .qcard-av { width: 34px; height: 34px; border: 0; background: var(--qcv-navy); color: #f5f1eb; font-weight: 700; font-size: 10px; }
-.qcv-cz .qcard-name b { font: 600 16px/1.15 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-cz .qcard-name small { margin-top: 3px; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcv-cz .qcard-st {
+:is(.qcv-cz, .qcr-feat) .qcard-av { width: 34px; height: 34px; border: 0; background: var(--qcv-navy); color: #f5f1eb; font-weight: 700; font-size: 10px; }
+:is(.qcv-cz, .qcr-feat) .qcard-name b { font: 600 16px/1.15 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.qcv-cz, .qcr-feat) .qcard-name small { margin-top: 3px; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.qcv-cz, .qcr-feat) .qcard-st {
   grid-column: 1 / -1; justify-self: start; border: 0; background: #f6f1ea;
   padding: 4px 10px; font: 400 12.5px/1.3 var(--sp-serif);
 }
-.qcv-cz .qcard-how { padding: 6px 16px 0; }
-.qcv-cz .qcard-ms { margin: 10px 16px 0; padding: 9px 11px; border: 0; border-radius: 8px; background: #f6f1ea; }
-.qcv-cz .qcard-ms .qcard-k { font-size: 7.5px; margin: 0; }
-.qcv-cz .qcard-ms b { font-size: 16px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.qcv-cz, .qcr-feat) .qcard-how { padding: 6px 16px 0; }
+:is(.qcv-cz, .qcr-feat) .qcard-ms { margin: 10px 16px 0; padding: 9px 11px; border: 0; border-radius: 8px; background: #f6f1ea; }
+:is(.qcv-cz, .qcr-feat) .qcard-ms .qcard-k { font-size: 7.5px; margin: 0; }
+:is(.qcv-cz, .qcr-feat) .qcard-ms b { font-size: 16px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* the tab row is the popover's affordance; a dealt card is a glance */
-.qcv-cz .qcard-tabs { display: none; }
-.qcv-cz .qcard-tl { padding: 0; margin: 10px 16px 12px; overflow: hidden; }
-.qcv-cz .qcard-ev { grid-template-columns: 14px 1fr auto; gap: 9px; align-items: center; padding: 4px 0; }
-.qcv-cz .qcard-ev::before { display: none; }
-.qcv-cz .qcard-g { margin: 0; width: 14px; }
-.qcv-cz .qcard-ev b { font: 400 12.5px/1.35 var(--sp-serif); }
-.qcv-cz .qcard-d { padding: 0; }
-.qcv-cz .qcard-foot { margin: auto 0 0; padding: 10px 12px 12px 16px; border-top: 1px solid rgba(28, 19, 15, 0.1); gap: 10px; }
-.qcv-cz .qcard-exp { flex: 1; min-width: 0; font-size: 8px; letter-spacing: 0.08em; line-height: 1.45; color: rgba(28, 19, 15, 0.5); }
-.qcv-cz .qcard-foot button {
+:is(.qcv-cz, .qcr-feat) .qcard-tabs { display: none; }
+:is(.qcv-cz, .qcr-feat) .qcard-tl { padding: 0; margin: 10px 16px 12px; overflow: hidden; }
+:is(.qcv-cz, .qcr-feat) .qcard-ev { grid-template-columns: 14px 1fr auto; gap: 9px; align-items: center; padding: 4px 0; }
+:is(.qcv-cz, .qcr-feat) .qcard-ev::before { display: none; }
+:is(.qcv-cz, .qcr-feat) .qcard-g { margin: 0; width: 14px; }
+:is(.qcv-cz, .qcr-feat) .qcard-ev b { font: 400 12.5px/1.35 var(--sp-serif); }
+:is(.qcv-cz, .qcr-feat) .qcard-d { padding: 0; }
+:is(.qcv-cz, .qcr-feat) .qcard-foot { margin: auto 0 0; padding: 10px 12px 12px 16px; border-top: 1px solid rgba(28, 19, 15, 0.1); gap: 10px; }
+:is(.qcv-cz, .qcr-feat) .qcard-exp { flex: 1; min-width: 0; font-size: 8px; letter-spacing: 0.08em; line-height: 1.45; color: rgba(28, 19, 15, 0.5); }
+:is(.qcv-cz, .qcr-feat) .qcard-foot button {
   flex: none; height: 30px; padding: 1px 12px 0; border-radius: 18px; background: var(--qcv-navy); color: #ffffff;
   font: 400 12px/1 var(--sp-type); text-decoration: none;
 }
-.qcv-cz .qcard-foot button:hover { background: var(--qcv-navy-hov); color: #ffffff; }
+:is(.qcv-cz, .qcr-feat) .qcard-foot button:hover { background: var(--qcv-navy-hov); color: #ffffff; }
 
 /* the track's end: two ways on */
 .qcv-cz-end {
@@ -123,6 +125,6 @@
 .qcv-cz-dots i.on { width: 20px; border-radius: 4px; background: var(--qcv-navy); }
 
 @media (prefers-reduced-motion: reduce) {
-  .qcv-cz .qcard, .qcv-cz-dots i { transition: none; }
+  :is(.qcv-cz, .qcr-feat) .qcard, .qcv-cz-dots i { transition: none; }
   .qcv-cz-item:hover .qcard { transform: none; }
 }

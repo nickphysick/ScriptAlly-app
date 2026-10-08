@@ -24,35 +24,11 @@ import { CZ_SORT_LABEL, type CzSort } from "../../../lib/qcCarousel";
 import type { QcRow } from "../../../lib/qcSummary";
 import "./qcvPage.css";
 import "./qcvCarousel.css";
-import { QcSectionHead } from "./QcArtSlot";
 
 /** How far an arrow moves the track: two cards and their gaps. */
 const STEP = 600;
 /** The dots stop at eight; past that they stop being a count anyone reads. */
 const MAX_DOTS = 8;
-
-/**
- * v131 (desktop) — THE CAROUSEL WHILE LOADING: the same section, head and track in the real classes,
- * with card-sized placeholders, so the list below does not drop 468px when the data lands.
- * ⚠️ 316 IS THE QUERY CARD'S MEASURED HEIGHT (282 wide, the item's own width). The card is sized by its
- * content, so this is a reading, not an owned value: QC16 measures the list's top across the load
- * and fails the day the card's height moves away from it.
- */
-export const QcCarouselSkeleton: React.FC = () => (
-  <section className="qcv-cz qc13-sec qc13-cz" data-qcv="cz" data-sk="true" aria-hidden="true">
-    <QcSectionHead spot="recently-updated" probe="cz-head" title="Recently updated" />
-    <div className="qcv-cz-trackw">
-      <div className="qcv-cz-track qcv-skw" data-qcv="cz-track" style={{ overflow: "hidden" }}>
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="qcv-cz-item" data-qcv="sk-card">
-            <span className="qcv-sk" style={{ width: 282, height: 316, borderRadius: 12 }} />
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="qcv-cz-dots" aria-hidden="true" />
-  </section>
-);
 
 export const QcCarousel: React.FC<{
   /** what the carousel deals, already chosen and ordered (`carouselRows`) */
@@ -73,13 +49,7 @@ export const QcCarousel: React.FC<{
   total: number;
   onSeeAll: () => void;
   onBirdsEye: () => void;
-  /**
-   * v131 §3 (desktop): the section head — the art slot, "Recently updated" or the chosen section's
-   * name, the "N queries · show recently updated" line while a section is chosen, and the sort and
-   * arrows on the right. No counter and no live sentence. Below 768px the v126 head is kept.
-   */
-  v131?: boolean;
-}> = ({ rows, title, countLine, chosen, onClear, sort, onSort, model, onOpen, total, onSeeAll, onBirdsEye, v131 = false }) => {
+}> = ({ rows, title, countLine, chosen, onClear, sort, onSort, model, onOpen, total, onSeeAll, onBirdsEye }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
   const [sortOpen, setSortOpen] = useState(false);
@@ -117,41 +87,7 @@ export const QcCarousel: React.FC<{
   const by = (dx: number) => trackRef.current?.scrollBy({ left: dx, behavior: "smooth" });
 
   return (
-    <section className={`qcv-cz${v131 ? " qc13-sec qc13-cz" : ""}`} data-qcv="cz" aria-label={chosen && v131 ? chosen.name : title}>
-      {v131 ? (
-        <QcSectionHead
-          spot="recently-updated"
-          probe="cz-head"
-          title={chosen ? chosen.name : "Recently updated"}
-          line={chosen ? (
-            <>{chosen.count} {chosen.count === 1 ? "query" : "queries"} · <button type="button" className="qc13-link" data-qcv="cz-clear" onClick={onClear}>show recently updated</button></>
-          ) : null}
-          controls={(
-            <>
-            <div className="qcv-cz-sortw" ref={sortRef}>
-            <button type="button" className="qcv-cz-sort" data-qcv="cz-sort" aria-haspopup="menu" aria-expanded={sortOpen}
-              onClick={() => setSortOpen((o) => !o)}
-              onKeyDown={(e) => { if (e.key === "Escape" && sortOpen) { e.preventDefault(); e.stopPropagation(); setSortOpen(false); } }}>
-              {CZ_SORT_LABEL[sort]} <span aria-hidden="true">⌄</span>
-            </button>
-            {sortOpen && (
-              <div className="qcv-cz-menu" role="menu" data-qcv="cz-menu"
-                onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setSortOpen(false); } }}>
-                {(Object.keys(CZ_SORT_LABEL) as CzSort[]).map((k) => (
-                  <button type="button" role="menuitemradio" aria-checked={sort === k} key={k}
-                    className={sort === k ? "on" : undefined} onClick={() => { onSort(k); setSortOpen(false); }}>
-                    {CZ_SORT_LABEL[k]}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-              <button type="button" className="qcv-cz-ar" data-qcv="cz-prev" aria-label="Earlier cards" onClick={() => by(-STEP)}>‹</button>
-              <button type="button" className="qcv-cz-ar" data-qcv="cz-next" aria-label="Later cards" onClick={() => by(STEP)}>›</button>
-            </>
-          )}
-        />
-      ) : (
+    <section className="qcv-cz" data-qcv="cz" aria-label={title}>
       <div className="qcv-cz-head" data-qcv="cz-head">
         <b className="qcv-cz-title">{chosen ? `${chosen.name} · ${chosen.count}` : title}</b>
         {chosen
@@ -181,7 +117,6 @@ export const QcCarousel: React.FC<{
         <button type="button" className="qcv-cz-ar" data-qcv="cz-prev" aria-label="Earlier cards" onClick={() => by(-STEP)}>‹</button>
         <button type="button" className="qcv-cz-ar" data-qcv="cz-next" aria-label="Later cards" onClick={() => by(STEP)}>›</button>
       </div>
-      )}
       <div className="qcv-cz-trackw">
         <div className="qcv-cz-track" data-qcv="cz-track" ref={trackRef} tabIndex={0} role="list"
           aria-label={chosen ? `${chosen.name}: ${chosen.count} queries` : `${title}: ${countLine.toLowerCase()}`}

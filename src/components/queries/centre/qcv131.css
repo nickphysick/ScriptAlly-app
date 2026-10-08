@@ -26,7 +26,6 @@
 
   /* ── §1 · the page order: hero, desk 22 below, Recently updated 44 below, Your queries 44 below ── */
   .qc13 .qc131-desk { margin-top: 22px; }
-  .qc13 .qcv-cz.qc13-cz { margin-top: 44px; }
   .qc13 .qcv-page { padding-top: 0; margin-top: 44px; }
   .qc13 .qc13-qs { margin: 0; }
   .qc13 .qc13-work { margin: 0; padding: 0; background: transparent; border-radius: 0; }
@@ -183,10 +182,6 @@
     text-underline-offset: 3px;
   }
   .qc13-sh-r { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
-  /* the carousel's own controls, in the head */
-  .qc13-cz .qcv-cz-sort { font-family: var(--sp-type); font-size: 15px; border-bottom: 1px dashed rgba(28, 19, 15, 0.35); padding-bottom: 2px; margin-right: 4px; }
-  .qc13-cz .qcv-cz-ar { width: 38px; height: 38px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
-  .qc13-cz .qcv-cz-trackw { margin-top: 4px; }
   /* the list's controls, restyled: white, 36 tall, a 1px ring at ink 16%, radius 9 */
   .qc13-ctl { display: flex; align-items: center; gap: 8px; }
   .qc13-ctl .qcv-lh-ops { display: flex; gap: 8px; }
