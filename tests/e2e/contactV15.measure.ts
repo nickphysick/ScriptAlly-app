@@ -206,7 +206,7 @@ const listState = (page: P15) => page.evaluate((rowSel) => {
     rows: [...root.querySelectorAll<HTMLElement>(rowSel)].filter((e) => e.getBoundingClientRect().height > 0).length,
     state: next?.getAttribute("data-state") ?? null,
     section: num(next?.querySelector('[data-cl14="see-all"]')?.textContent),
-    lede: next?.querySelector(".cl14-nx-lede, [data-fs=\"lede\"]")?.textContent ?? "",
+    lede: next?.querySelector('[data-fs-part="sentence"]')?.textContent ?? "",
     pill: num(pill?.textContent), pressed: pill?.getAttribute("aria-pressed") ?? null,
     marker: root.querySelector('[data-cl15="ready-only"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
     showing: root.querySelector('[data-cl14="showing"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
@@ -300,6 +300,93 @@ test("CL15-5 · pill = section = rows", async ({ page }) => {
   L.done(15);
 });
 
+/* ── lock 5a · the section's layout (§4a): the text on the page, the card over the white panel's left edge, the
+   pickable list. The gaps are to the PANEL (66 / 58; 56 / 50 below 1440); the card overlaps it by 150 (130). ── */
+test("CL15-5a · layout", async ({ page }) => {
+  const L = new Ledger("cl15-5a");
+  /* three ready agents, so there is a third row to pick (the shared account holds two; see CL15-5) */
+  execSync("node tests/e2e/seedReadyUnknown.mjs", { stdio: "inherit" });
+  try {
+    for (const vp of WIDTHS15) {
+      await openContacts(page, vp);
+      const w = `${vp.width}`;
+      const narrow = vp.width < 1440;
+      const read = () => page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+        const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+        const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
+        const fs = q(".fs"), lede = q('[data-fs-part="lede"]'), slot = q('[data-fs-part="card"]'), card = slot?.firstElementChild as HTMLElement | null, panel = q('[data-fs-part="panel"]');
+        const title = q('[data-fs-part="title"]'), go = q(".fs-go");
+        const rows = [...(root?.querySelectorAll<HTMLElement>("[data-fs-row]") ?? [])];
+        const cs = (e: Element | null) => (e ? getComputedStyle(e) : null);
+        return {
+          state: fs?.getAttribute("data-state") ?? null,
+          desk: b(q('[data-cl15="desk"]')), ws: b(q('[data-cl14="ws"]')), lede: b(lede), card: b(card), panel: b(panel),
+          ledeBg: cs(lede)?.backgroundColor ?? null, ledeImg: cs(lede)?.backgroundImage ?? null,
+          panelBg: cs(panel)?.backgroundColor ?? null, panelRadius: cs(panel)?.borderTopLeftRadius ?? null,
+          titleSize: cs(title)?.fontSize ?? null, titleFace: cs(title)?.fontFamily ?? null,
+          go: b(go), goBg: cs(go)?.backgroundColor ?? null,
+          cardAgent: card?.getAttribute("data-agent") ?? null, chip: card?.querySelector('[data-cl13="ctone"]')?.textContent?.trim() ?? null,
+          rows: rows.map((r) => ({ id: r.getAttribute("data-fs-row"), on: r.classList.contains("is-on"), bg: getComputedStyle(r).backgroundColor, text: (r.textContent ?? "").replace(/\s+/g, " ").trim(),
+            wk: (() => { const k = r.querySelector<HTMLElement>(".fs-wk"); return k ? getComputedStyle(k).display : null; })() })),
+          head: q('[data-fs-part="panel-head"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+          log: root?.querySelectorAll('[data-cl14="nl-log"], .cl14-nx, .cl14-nx-well').length ?? -1,
+          rise: card ? card.getAnimations().map((a) => Number(a.effect?.getTiming().duration)) : [],
+        };
+      });
+      const r = await read();
+      if (r.state !== "ready" || !r.card || !r.panel || !r.desk || !r.ws || !r.lede) { L.check("CL15-5a population: the Ready state on the stage", w, false, JSON.stringify({ state: r.state, card: !!r.card, panel: !!r.panel })); continue; }
+      L.check("CL15-5a population: the Ready state on the stage", w, true, "");
+      L.check(`CL15-5a the desk-to-panel gap is ${narrow ? 56 : 66} (±3)`, w, near(r.panel.t - r.desk.b, narrow ? 56 : 66, 3), `${(r.panel.t - r.desk.b).toFixed(1)}`);
+      L.check(`CL15-5a the panel-to-workspace gap is ${narrow ? 50 : 58} (±3)`, w, near(r.ws.t - r.panel.b, narrow ? 50 : 58, 3), `${(r.ws.t - r.panel.b).toFixed(1)}`);
+      L.check(`CL15-5a the card overlaps the panel by ${narrow ? 130 : 150} (±4)`, w, near(r.card.r - r.panel.l, narrow ? 130 : 150, 4), `${(r.card.r - r.panel.l).toFixed(1)}`);
+      L.check(`CL15-5a the card is ${narrow ? 270 : 300} wide, vertically centred on the panel, 34 (±3) inside it top and bottom at most`, w,
+        near(r.card.w, narrow ? 270 : 300, 1) && near((r.card.t + r.card.b) / 2, (r.panel.t + r.panel.b) / 2, 2) && r.card.t - r.panel.t >= 31, `w ${r.card.w} centres ${((r.card.t + r.card.b) / 2).toFixed(1)} / ${((r.panel.t + r.panel.b) / 2).toFixed(1)} inset ${(r.card.t - r.panel.t).toFixed(1)}`);
+      L.check("CL15-5a the text is straight on the page (no well, no background)", w, r.ledeBg === "rgba(0, 0, 0, 0)" && r.ledeImg === "none" && r.log === 0, `${r.ledeBg} ${r.ledeImg} old parts ${r.log}`);
+      L.check("CL15-5a the panel is white with 22px corners", w, r.panelBg === "rgb(255, 255, 255)" && r.panelRadius === "22px", `${r.panelBg} ${r.panelRadius}`);
+      L.check(`CL15-5a the title is Special Elite ${narrow ? 34 : 40}`, w, r.titleSize === (narrow ? "34px" : "40px") && /Special Elite/.test(r.titleFace ?? ""), `${r.titleSize} ${r.titleFace}`);
+      L.check("CL15-5a one filled ink pill, 46 tall", w, !!r.go && near(r.go.h, 46, 0.5) && r.goBg === "rgb(42, 58, 82)", `${r.go?.h} ${r.goBg}`);
+      L.check("CL15-5a the list: 'Next in line · best fit first', at most five rows, three on this fixture", w, /^Next in line\s*best fit first$/.test(r.head ?? "") && r.rows.length === 3, `${r.head} · ${r.rows.length}`);
+      L.check("CL15-5a on load the first agent is picked: its row alone is tinted, the card shows it as First up", w,
+        r.rows.filter((x) => x.on).length === 1 && r.rows[0].on && r.rows[0].bg === "rgb(234, 241, 247)" && r.cardAgent === r.rows[0].id && r.chip === "First up", `${r.cardAgent} ${r.chip} ${JSON.stringify(r.rows.map((x) => x.on))}`);
+      L.check("CL15-5a an agent with no genres reads 'Genres not recorded' in place of the agency", w, r.rows.some((x) => /Genres not recorded/.test(x.text)), JSON.stringify(r.rows.map((x) => x.text)));
+      L.check(`CL15-5a the reply time ${narrow ? "is hidden below 1440" : "shows on the right"}`, w, r.rows.every((x) => (narrow ? x.wk === "none" : x.wk !== "none" && x.wk !== null)), JSON.stringify(r.rows.map((x) => x.wk)));
+      /* the card is ABOVE the panel where they overlap — asked of the pixel, with the point proved on screen first */
+      await page.locator('.aglist [data-fs-part="card"]').filter({ visible: true }).first().evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(200);
+      const top = await page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+        const card = root.querySelector<HTMLElement>('[data-fs-part="card"]')!.firstElementChild as HTMLElement, panel = root.querySelector<HTMLElement>('[data-fs-part="panel"]')!;
+        const c = card.getBoundingClientRect(), p = panel.getBoundingClientRect();
+        const x = (p.left + c.right) / 2, y = (c.top + c.bottom) / 2;
+        const on = x > 0 && y > 0 && x < innerWidth && y < innerHeight;
+        const hit = on ? document.elementFromPoint(x, y) : null;
+        return { on, inCard: !!hit && card.contains(hit) };
+      });
+      L.check("CL15-5a the card is above the panel where they overlap", w, top.on && top.inCard, JSON.stringify(top));
+      /* picking the third row */
+      const third = r.rows[2].id;
+      await page.locator(`.aglist [data-fs-row="${third}"]`).filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {});
+      const mid = await read();
+      await page.waitForTimeout(500);
+      const p3 = await read();
+      L.check("CL15-5a clicking the third row puts that agent on the card as Next up, and tints only that row", w,
+        p3.cardAgent === third && p3.chip === "Next up" && p3.rows.filter((x) => x.on).length === 1 && p3.rows[2].on, `${p3.cardAgent} ${p3.chip} ${JSON.stringify(p3.rows.map((x) => x.on))}`);
+      L.check("CL15-5a the picked card rises over 280ms", w, mid.rise.includes(280), JSON.stringify(mid.rise));
+      /* Enter on the focused first row picks it back */
+      await page.locator(`.aglist [data-fs-row="${r.rows[0].id}"]`).filter({ visible: true }).first().focus();
+      await page.keyboard.press("Enter");
+      await page.waitForTimeout(500);
+      const p1 = await read();
+      L.check("CL15-5a Enter on the focused first row picks it back: First up", w, p1.cardAgent === r.rows[0].id && p1.chip === "First up" && p1.rows[0].on && !p1.rows[2].on, `${p1.cardAgent} ${p1.chip}`);
+      await checkOverflow(page, L, w);
+    }
+  } finally {
+    execSync("node tests/e2e/seedReadyUnknown.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(34);
+});
+
 /* ── lock 5b · load state: a fresh load shows all N agents. Counting the pill's number must not leave the ready-only
    mode switched on, and an older remembered shape cannot switch it on either. ── */
 test("CL15-5b · load state", async ({ page, browser }) => {
@@ -325,4 +412,109 @@ test("CL15-5b · load state", async ({ page, browser }) => {
   L.check("CL15-5b an older remembered shape cannot switch the mode on", "1512", !!old && old.rows === old.total && old.marker === null, JSON.stringify(old && { rows: old.rows, total: old.total, marker: old.marker }));
   await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v2"));
   L.done(5);
+});
+
+/* ── lock 6 · all queried (§4): two fixtures on their own manuscript (`seedAllQueried.mjs`, removed in the same run).
+   A — everyone queried: "all N agents", no note. B — three known mismatches: "N−3 of your N agents" and "The other 3
+   don't take {genres}." In both: queried + mismatches + closed = N, the split line's parts sum to queried, the desk's
+   Queried figure is the sentence's, the panel is ≤ 350 tall at 1512, the Add card is solid white, and "Tell me when
+   it's ready" survives a reload. ── */
+test("CL15-6 · all queried", async ({ page }) => {
+  test.setTimeout(420_000);
+  const L = new Ledger("cl15-6");
+  const MS = "aqfx-ms";
+  const openDone = async (vp: { width: number; height: number }) => {
+    await openContacts(page, vp);
+    await page.evaluate((id) => localStorage.setItem("scriptally_active_manuscript_id", id), MS);
+    await page.reload();
+    await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(1200);
+  };
+  const read = () => page.evaluate(() => {
+    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+    const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+    const tx = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    const cs = (e: Element | null) => (e ? getComputedStyle(e) : null);
+    const panel = q('[data-fs-part="panel"]'), add = q('[data-cl14="addcard"]'), addIn = q(".cl14-addc-in"), plus = q(".cl14-addc-plus");
+    const soon = q('[data-cl15="discover-soon"]');
+    const dq = q('[data-dk="queried"]');
+    const notify = q('[data-cl15="discover-notify"]');
+    return {
+      state: q('[data-cl14="next"]')?.getAttribute("data-state") ?? null,
+      title: tx(q('[data-fs-part="title"]')), titleSize: cs(q('[data-fs-part="title"]'))?.fontSize ?? null,
+      sentence: tx(q('[data-fs-part="sentence"]')), split: q('[data-cl15="split"]') ? tx(q('[data-cl15="split"]')) : null, note: q('[data-cl15="note"]') ? tx(q('[data-cl15="note"]')) : null,
+      buttons: root?.querySelectorAll('[data-fs-part="lede"] button').length ?? -1,
+      total: Number(tx(q('[data-cl15="header"] h1')).match(/^(\d+)/)?.[1] ?? NaN),
+      deskBig: Number(tx(dq?.querySelector('[data-dk-part="big"]') ?? null).match(/^(\d+)/)?.[1] ?? NaN), deskAll: tx(dq?.querySelector('[data-dk-part="big"]') ?? null),
+      pill: Number(tx(q('[data-cl14="pill-ready"]')).match(/\d+/)?.[0] ?? NaN),
+      panelH: panel ? panel.getBoundingClientRect().height : null,
+      addBg: cs(add)?.backgroundColor ?? null, addBorder: cs(add)?.borderTopStyle ?? null, addPad: cs(addIn)?.padding ?? null, plusW: plus ? plus.getBoundingClientRect().width : null,
+      soon: soon ? { head: tx(soon.querySelector('[data-fs-part="panel-head"]')), p: tx(soon.querySelector(".cl15-dt-p")), rows: soon.querySelectorAll(".cl15-dt-l li").length, rowText: tx(soon.querySelector(".cl15-dt-l")).replace(/\+ Add/g, "").trim() } : null,
+      notify: notify ? { text: tx(notify), pressed: notify.getAttribute("aria-pressed") } : null,
+    };
+  });
+  type R = Awaited<ReturnType<typeof read>>;
+  const parts = (r: R) => {
+    const all = r.sentence.match(/has gone to all (\d+) agents on your list\.$/);
+    const some = r.sentence.match(/has gone to (\d+) of your (\d+) agents\.$/);
+    const sp = (r.split ?? "").match(/^(\d+) reading · (\d+) asked for more · (\d+) passed(?: · (\d+) withdrawn)?$/);
+    return {
+      form: all ? "all" : some ? "some" : "none",
+      queried: all ? Number(all[1]) : some ? Number(some[1]) : NaN, N: all ? Number(all[1]) : some ? Number(some[2]) : NaN,
+      split: sp ? sp.slice(1).map((x) => (x === undefined ? 0 : Number(x))) : null, withdrawnShown: !!sp && sp[4] !== undefined,
+      mis: Number((r.note ?? "").match(/^The other (\d+) don’t take /)?.[1] ?? 0), closed: Number((r.note ?? "").match(/(\d+) (?:is|are) closed to submissions\./)?.[1] ?? 0),
+    };
+  };
+  try {
+    for (const fx of ["A", "B"] as const) {
+      execSync(`node tests/e2e/seedAllQueried.mjs ${fx}`, { stdio: "inherit" });
+      for (const vp of WIDTHS15) {
+        await openDone(vp);
+        const w = `${fx} · ${vp.width}`;
+        const narrow = vp.width < 1440;
+        const r = await read();
+        if (r.state !== "done") { L.check("CL15-6 population: the all-queried state renders on the fixture", w, false, `${r.state} · ${r.sentence}`); continue; }
+        L.check("CL15-6 population: the all-queried state renders on the fixture", w, true, "");
+        const p = parts(r);
+        L.check(`CL15-6 the title is "You’ve queried all your agents", Special Elite ${narrow ? 30 : 34}`, w, r.title === "You’ve queried all your agents" && r.titleSize === (narrow ? "30px" : "34px"), `${r.title} ${r.titleSize}`);
+        if (fx === "A") {
+          L.check("CL15-6 A: the sentence reads “… has gone to all N agents on your list.” and there is no note", w, p.form === "all" && p.N === r.total && r.note === null, `${r.sentence} | note ${r.note}`);
+        } else {
+          L.check("CL15-6 B: the sentence reads “… has gone to N−3 of your N agents.”", w, p.form === "some" && p.N === r.total && p.queried === r.total - 3, r.sentence);
+          L.check("CL15-6 B: the note reads “The other 3 don’t take {genres}.” and nothing else", w, /^The other 3 don’t take [a-z ,]+\.$/.test(r.note ?? ""), `${r.note}`);
+          L.check("CL15-6 B: the withdrawn query is the split line's fourth part", w, p.withdrawnShown && (p.split?.[3] ?? 0) === 1, `${r.split}`);
+        }
+        L.check("CL15-6 every agent is accounted for: queried + don’t take the genre + closed = N", w, p.queried + p.mis + p.closed === r.total, `${p.queried} + ${p.mis} + ${p.closed} vs ${r.total}`);
+        L.check("CL15-6 the split line's parts sum to queried", w, !!p.split && p.split.reduce((a, b) => a + b, 0) === p.queried && p.split[0] > 0 && p.split[1] > 0 && p.split[2] > 0, `${r.split} vs ${p.queried}`);
+        L.check("CL15-6 the desk's Queried figure is the sentence's", w, r.deskBig === p.queried, `desk ${r.deskAll} sentence ${p.queried}`);
+        L.check("CL15-6 no button and nobody ready: the pill reads 0", w, r.buttons === 0 && r.pill === 0, `buttons ${r.buttons} pill ${r.pill}`);
+        L.check("CL15-6 the Add an agent card is solid white with a dashed ring, tightened (20 22 18, a 46px plus)", w,
+          r.addBg === "rgb(255, 255, 255)" && r.addBorder === "dashed" && r.addPad === "20px 22px 18px" && r.plusW !== null && near(r.plusW, 46, 0.5), `${r.addBg} ${r.addBorder} ${r.addPad} ${r.plusW}`);
+        L.check("CL15-6 the panel is Discover, coming soon: the heading, the pill, the sentence, two nameless rows", w,
+          !!r.soon && r.soon.head === "Discover agentsComing soon" && r.soon.p === "Find agents by genre, see who’s open, and add them to your list in one click." && r.soon.rows === 2 && r.soon.rowText === "", JSON.stringify(r.soon));
+        if (!narrow) L.check("CL15-6 the panel is no taller than 350 at 1512", w, r.panelH !== null && r.panelH <= 350, `${r.panelH}`);
+        else L.check("CL15-6 the panel's height at 1280 (reported)", w, r.panelH !== null, `${r.panelH}`);
+        await checkOverflow(page, L, w);
+      }
+    }
+    /* "Tell me when it's ready": the request is stored on the writer's profile, so it survives a reload (fixture B is up) */
+    await openDone(WIDTHS15[0]);
+    const before = await read();
+    L.check("CL15-6 the request starts unset: “Tell me when it’s ready”", "1512", before.notify?.text === "Tell me when it’s ready" && before.notify.pressed === "false", JSON.stringify(before.notify));
+    await page.locator('.aglist [data-cl15="discover-notify"]').filter({ visible: true }).first().click({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    const on = await read();
+    L.check("CL15-6 pressing it reads “✓ We’ll let you know”", "1512", on.notify?.text === "✓ We’ll let you know" && on.notify.pressed === "true", JSON.stringify(on.notify));
+    await page.reload();
+    await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const kept = await read();
+    L.check("CL15-6 the request survives a reload", "1512", kept.notify?.text === "✓ We’ll let you know" && kept.notify.pressed === "true", JSON.stringify(kept.notify));
+    await page.evaluate(() => localStorage.removeItem("scriptally_active_manuscript_id"));
+  } finally {
+    /* removes the manuscript, its queries and their logs, and the `notifyPrefs.discover` leaf the press wrote */
+    execSync("node tests/e2e/seedAllQueried.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(47);
 });

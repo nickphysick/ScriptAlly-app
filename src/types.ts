@@ -134,7 +134,7 @@ export interface User {
   /* Settings → Notifications. ONE MAP (the todoPrefs precedent): one allowlist entry, one write
      path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
      lib/accountPrefs. */
-  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean };
+  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean };
   /* ⚠️ ITS OWN FIELD, NOT A KEY IN `notifyPrefs` — a consent RECORD, with the moment it was made.
      UK PECR wants affirmative, evidenced and withdrawable; absent === never granted, and nothing
      but a person clicking may create it. Withdrawal REWRITES it with granted:false rather than

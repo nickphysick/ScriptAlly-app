@@ -75,6 +75,7 @@ import "./contact/contactV14.css";
 import { ContactNextStep } from "./contact/ContactNextStep";
 import { nextStep, reopenReminderTask } from "../../lib/contactNextStep";
 import { DISCOVER_LIVE, communityAgentFields } from "../../lib/discoverShared";
+import { notifyPrefs } from "../../lib/accountPrefs";
 import { takesBook } from "../../lib/genreMatch";
 import { SubmissionStatus } from "../../types";
 import { ContactDesk } from "./contact/ContactDesk";
@@ -850,6 +851,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return (communityAgents ?? []).filter((ca) => takesBook(ca.genres, book) && ca.submissionStatus !== SubmissionStatus.CLOSED
       && !held.has(`${(ca.name ?? "").trim().toLowerCase()}|${(ca.agency ?? "").trim().toLowerCase()}`));
   }, [communityAgents, agents, book]);
+  /* v15 §4 — "Tell me when it's ready": the request is one leaf on the writer's profile, `notifyPrefs.discover`,
+     written as a dotted path so the map's other keys are left alone (Settings saves the whole map from its reader,
+     which carries this key through). */
+  const notifyDiscover = notifyPrefs(currentUser?.notifyPrefs).discover;
+  const toggleNotifyDiscover = useCallback(() => { void updateUserPaths({ "notifyPrefs.discover": !notifyDiscover }).catch(() => {}); }, [updateUserPaths, notifyDiscover]);
   const goDiscover = useCallback(() => { if (DISCOVER_LIVE && DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); }, [onNavigate]);
 
 
@@ -968,6 +974,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             step={step} hasBook={!!scoped} bookTitle={scoped?.title?.trim() || null} genres={genreWord ?? ""}
             factsById={allFactsById} qFor={qFor} genreHit={bookHit} personal={personalGenres} todayIso={todayIso}
             reminded={reminded} discoverLive={DISCOVER_LIVE} discover={discoverPicks}
+            notifyDiscover={notifyDiscover} onNotifyDiscover={toggleNotifyDiscover}
             onOpen={(id, r) => onOpen(id, r)} onAct={actWithoutCard}
             onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
             onSeeAll={seeAllReady}

@@ -64,8 +64,36 @@
 @media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }
 
 /* ── §4 · THE NEXT STEP's v15 parts ── */
-/* the all-queried split line: serif 14.5, ink 60% */
-.cl14-nx-well .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
+/* the all-queried split line (serif 14.5, ink 60%) and the reason note (italic 14) */
+.cl14-next .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
+.cl14-next .cl15-nx-note { margin: 0; font: italic 400 14px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.55); }
+/* the all-queried panel while Discover is off: "Discover agents · Coming soon", one sentence, two faded placeholder
+   rows and the request button. The panel is tighter in this state (16 above, 10 below), so it stays under 350. */
+.cl14-next .fs[data-state="done"] .fs-panel { padding-top: 16px; padding-bottom: 10px; }
+.cl15-dt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cl15-dt .fs-ph { align-items: center; }
+.cl14-next .cl15-dt-soon {
+  display: inline-block; font: normal 600 10px var(--clv-serif); letter-spacing: 0.06em; text-transform: uppercase; color: #2f5f86;
+  background: #e3eef6; border-radius: 11px; padding: 4px 10px;
+}
+.cl14-next .cl15-dt-p { margin: 0; font: 400 14px/1.5 var(--clv-serif); color: rgba(28, 39, 51, 0.7); }
+.cl15-dt-l { list-style: none; margin: 0; padding: 0; position: relative; }
+/* the rows fade out downwards: a mask, never a painted rectangle over them */
+.cl15-dt-l { -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 95%); mask-image: linear-gradient(180deg, #000 30%, transparent 95%); }
+.cl15-dt-l li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(28, 39, 51, 0.07); }
+.cl15-dt-d { width: 34px; height: 34px; border-radius: 50%; background: #eef2f5; }
+.cl15-dt-m { display: flex; flex-direction: column; gap: 6px; }
+.cl15-dt-m i { display: block; width: 120px; height: 11px; border-radius: 6px; background: #e6ebf0; }
+.cl15-dt-m i + i { width: 84px; height: 9px; background: #eef2f5; }
+.cl14-next .cl15-dt-a { font: 500 13px var(--clv-serif); color: rgba(47, 95, 134, 0.45); border: 1px dashed rgba(47, 95, 134, 0.3); border-radius: 14px; padding: 4px 10px; }
+.cl14-next .cl15-dt-btn {
+  align-self: flex-start; margin-top: 2px; height: 38px; padding: 0 18px; border-radius: 19px; border: 0; cursor: pointer;
+  background: #fff; box-shadow: inset 0 0 0 1.5px #2f5f86; color: #2f5f86; font: 500 14.5px var(--clv-serif);
+}
+.cl14-next .cl15-dt-btn:hover { background: #2f5f86; color: #fff; }
+.cl14-next .cl15-dt-btn:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
+.cl14-next .cl15-dt-btn.is-on { background: #e3eef6; box-shadow: none; color: #2f5f86; }
+
 /* the ready-only mode's marker on the "Showing" line, and its ✕ */
 .cl14-ws .cl14-bar-k .cl15-ro { font-style: italic; }
 .cl14-ws .cl14-bar-k .cl15-ro button {

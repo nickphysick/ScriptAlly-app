@@ -30,7 +30,7 @@ const render = (agents: Agent[], queries: Query[], over: Partial<ContactNextStep
   const props: ContactNextStepProps = {
     step, hasBook: true, bookTitle: "Murphy's Day Out", genres: "thrillers",
     factsById: new Map(agents.map((a) => [a.id, agentFacts(a, [], null)])), qFor: () => null, genreHit: (g) => /thriller/i.test(g), todayIso: TODAY,
-    reminded: () => false, discoverLive: false, discover: [],
+    reminded: () => false, discoverLive: false, discover: [], notifyDiscover: false, onNotifyDiscover: noop,
     onOpen: noop, onAct: noop, onAdd: noop, onSeeAll: noop, onNewAgent: noop, onDiscover: noop,
     onRemind: noop, onRemindAll: noop, onAddDiscover: noop, ...over,
   };
@@ -40,7 +40,12 @@ const render = (agents: Agent[], queries: Query[], over: Partial<ContactNextStep
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;|&rsquo;|’/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ")
   /* a tag boundary is not a space a reader sees before punctuation ("<i>Book</i>." reads "Book.") */
   .replace(/\s+([.,])/g, "$1").trim();
-const slice = (html: string, cls: string) => { const i = html.indexOf(`data-cl14="${cls}"`); expect(i, `the ${cls} part`).toBeGreaterThan(-1); return html.slice(i); };
+/** from a part of the stage (`data-fs-part`) or a contact probe (`data-cl14`) to the end of the markup */
+const slice = (html: string, cls: string) => {
+  const i = Math.max(html.indexOf(`data-fs-part="${cls}"`), html.indexOf(`data-cl14="${cls}"`));
+  expect(i, `the ${cls} part`).toBeGreaterThan(-1);
+  return html.slice(i);
+};
 
 describe("the three states (v15 §4)", () => {
   it("ready: title, the v15 sentence, the agent card as First up, Next in line 'best fit first'", () => {
@@ -59,10 +64,29 @@ describe("the three states (v15 §4)", () => {
     const card = slice(html, "card");
     expect(card).toContain('data-cl13="ccard"');
     expect(card).toContain('data-agent="a"');
-    expect(text(card.slice(0, card.indexOf('data-cl14="side"')))).toContain("First up");
-    const side = text(slice(html, "side"));
+    expect(text(card.slice(0, card.indexOf('data-fs-part="panel"')))).toContain("First up");
+    const side = text(slice(html, "panel"));
     expect(side).toContain("Next in line");
     expect(side).toContain("best fit first");
+  });
+  it("ready, the list (§4a): the first five rows with the first picked, 'Genres not recorded' for an agent with none, 'and N more'", () => {
+    const agents = [
+      ...["a", "b", "c", "d"].map((id, i) => ag(id, { starRating: (5 - i) as 1 | 2 | 3 | 4 | 5, responseTimeWeeks: 6 })),
+      ag("bare1", { genres: [] }), ag("bare2", { genres: [] }), ag("bare3", { genres: [] }),
+    ];
+    const { html, step } = render(agents, []);
+    expect(step.ready).toHaveLength(7);
+    const rows = [...html.matchAll(/data-fs-row="([^"]+)"/g)].map((m) => m[1]);
+    expect(rows).toEqual(["a", "b", "c", "d", "bare1"]);
+    /* exactly one row is the picked one, and it is the first: the card shows that agent as First up */
+    expect([...html.matchAll(/class="fs-row is-on[^"]*" data-fs-row="([^"]+)"/g)].map((m) => m[1])).toEqual(["a"]);
+    expect(html).toMatch(/data-fs-part="card" data-card-key="a"/);
+    const panel = text(slice(html, "panel"));
+    expect(panel).toContain("Agent A A Agency ~6 wks");
+    expect(panel).toContain("Agent BARE1 Genres not recorded");
+    expect(panel).toContain("and 2 more");
+    /* the rows pick; they carry no action of their own (the card has the Log a query button) */
+    expect(html).not.toContain('data-cl14="nl-log"');
   });
   it("ready with unknown genres: the sentence adds how many, and they come after the fits", () => {
     const { html, step } = render([ag("bare1", { genres: [] }), ag("fit"), ag("bare2", { genres: [] })], []);
@@ -98,8 +122,8 @@ describe("the three states (v15 §4)", () => {
     expect(t).toContain("Remind me about both");
     const card = slice(html, "card");
     expect(card).toContain('data-agent="soon"');
-    expect(text(card.slice(0, card.indexOf('data-cl14="side"')))).toMatch(/Reopens 1 Nov.*Remind me/);
-    const side = text(slice(html, "side"));
+    expect(text(card.slice(0, card.indexOf('data-fs-part="panel"')))).toMatch(/Reopens 1 Nov.*Remind me/);
+    const side = text(slice(html, "panel"));
     expect(side).toContain("Also reopening");
     expect(side).toMatch(/Reopens in 39 days/);
   });
@@ -163,10 +187,29 @@ describe("every Discover link follows DISCOVER_LIVE (v14 ruling Q4), both branch
   const ca = (id: string): CommunityAgent => ({ id, name: `Disc ${id}`, agency: "Lumen", city: "London", genres: ["Thriller"], responseTimeWeeks: 5, submissionStatus: SubmissionStatus.OPEN }) as unknown as CommunityAgent;
   const doneAgents = [ag("r")], doneQ = [q("r", QueryStatus.QUERIED)];
   const reopenFx = () => [[ag("s"), ag("c", { submissionStatus: SubmissionStatus.CLOSED, reopensOn: "2026-12-01" })], [q("s", QueryStatus.QUERIED)]] as const;
-  it("off: the all-queried state has no Discover list or link, and the reopening foot is hidden", () => {
+  it("off: the all-queried panel is the coming-soon panel — heading, pill, sentence, two nameless rows, the request button", () => {
     const done = render(doneAgents, doneQ, { discoverLive: false, discover: [ca("1"), ca("2")] });
-    expect(done.html).not.toContain('data-cl14="nl"');
     expect(done.html).not.toContain('data-cl14="discover-add"');
+    expect(done.html).toContain('data-cl15="discover-soon"');
+    const panel = slice(done.html, "panel");
+    const t = text(panel);
+    expect(t).toContain("Discover agents Coming soon");
+    expect(t).toContain("Find agents by genre, see who's open, and add them to your list in one click.");
+    expect(t).toContain("Tell me when it's ready");
+    /* two placeholder rows, hidden from assistive tech, and no name in them: not a Discover agent's, not an invented one */
+    const list = panel.slice(panel.indexOf('class="cl15-dt-l"'), panel.indexOf("</ol>"));
+    expect(list).toContain('aria-hidden="true"');
+    expect((list.match(/<li>/g) ?? []).length).toBe(2);
+    expect(text(list).replace(/\+ Add/g, "").replace(/class="[^"]*"|aria-hidden="true">?/g, "").trim()).toBe("");
+    expect(done.html).not.toContain("Disc 1");
+  });
+  it("off: the request button reads as set once asked for", () => {
+    const { html } = render(doneAgents, doneQ, { notifyDiscover: true });
+    expect(text(html)).toContain("✓ We'll let you know");
+    expect(html).toMatch(/data-cl15="discover-notify" aria-pressed="true"/);
+    expect(text(html)).not.toContain("Tell me when it's ready");
+  });
+  it("off: the reopening foot is hidden", () => {
     const [a, qs] = reopenFx();
     const reopen = render([...a], [...qs], { discoverLive: false });
     expect(reopen.html).not.toContain('data-cl14="discover-foot"');
@@ -175,6 +218,7 @@ describe("every Discover link follows DISCOVER_LIVE (v14 ruling Q4), both branch
   it("on: In Discover replaces the panel, with 'and N more'; the reopening foot returns", () => {
     const { html } = render(doneAgents, doneQ, { discoverLive: true, discover: [ca("1"), ca("2"), ca("3"), ca("4")] });
     const t = text(html);
+    expect(html).not.toContain('data-cl15="discover-soon"');
     expect(t).toContain("In Discover");
     expect((html.match(/data-cl14="discover-add"/g) ?? []).length).toBe(3);
     expect(t).toContain("and 1 more in Discover");

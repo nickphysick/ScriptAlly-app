@@ -25,6 +25,10 @@ export interface NotifyPrefs {
   nudges: boolean;
   /** The Monday summary. */
   weeklyDigest: boolean;
+  /** "Tell me when it's ready" on the Contact list's Discover coming-soon panel (v15 §4): the writer asked to be
+   *  told when Discover opens. Written by that panel as ONE leaf (`notifyPrefs.discover`); it is here so that Settings,
+   *  which saves the WHOLE map from this reader, carries it through instead of dropping it. Off until asked for. */
+  discover: boolean;
 }
 
 /**
@@ -36,13 +40,14 @@ export interface NotifyPrefs {
  * shipping a new setting at the behaviour it already had — and the behaviour it has is that a
  * writer who never opens this page would expect their reminders to work.
  */
-export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true };
+export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true, discover: false };
 
 export function notifyPrefs(stored: Partial<NotifyPrefs> | undefined | null): NotifyPrefs {
   const s = stored ?? {};
   return {
     nudges: typeof s.nudges === "boolean" ? s.nudges : NOTIFY_DEFAULT.nudges,
     weeklyDigest: typeof s.weeklyDigest === "boolean" ? s.weeklyDigest : NOTIFY_DEFAULT.weeklyDigest,
+    discover: typeof s.discover === "boolean" ? s.discover : NOTIFY_DEFAULT.discover,
   };
 }
 

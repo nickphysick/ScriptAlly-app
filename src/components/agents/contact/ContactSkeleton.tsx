@@ -74,7 +74,7 @@ export const ContactSkeleton: React.FC<{
       <ContactNextStep
         step={nextStep({ agents: PLACEHOLDERS.slice(0, 2), queries: [], msId: null, book: ["Thriller"], todayIso: "2000-01-01" })}
         hasBook bookTitle={msTitle} genres="thrillers" factsById={byId} qFor={() => null} genreHit={() => false} todayIso="2000-01-01"
-        reminded={() => false} discoverLive={false} discover={[]}
+        reminded={() => false} discoverLive={false} discover={[]} notifyDiscover={false} onNotifyDiscover={noop}
         onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onNewAgent={noop} onDiscover={noop}
         onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
       />

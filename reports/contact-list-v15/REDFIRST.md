@@ -33,3 +33,26 @@ leaving the mode; the mode not remembered.
 Neighbours on the Phase 3 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 41 passed,
 1 failed (CL13-12, the loading beat: the placeholder section 31px taller than the loaded one); fixed in the skeleton
 and re-run green.
+
+## Phase 4 — CL15-5a against 8093d64f
+`1 failed · 1 passed`. CL15-5a: "population: the Ready state on the stage" at both widths (no stage, no card slot, no
+panel). Mutations A–J each red at the assertion they name (`mutation-proofs-p4.jsonl`): v14's 44 gap (10 to the
+panel), the panel 100 under the card, the card under the panel, the text in a well, every card "First up", the first
+row tinted whatever is picked, a 120ms rise, the agency in place of "Genres not recorded", the reply time shown
+below 1440, the workspace 30 under the section. A and J bite at 1512 only: below 1440 the margins are the media
+rule's own.
+
+Neighbours on the Phase 4 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 43 passed.
+
+## Phase 5 — CL15-6 against 8093d64f
+`1 failed · 1 passed`. The fixtures put v14's own done state on the page, so the reds are readings, not a missing
+subject: v14's title ("Every agent queried"), its sentence, no split line, no accounting, the Add card at 22 26 with
+a 56px plus, no coming-soon panel, no request button.
+
+Mutations A–I each red at the assertion they name (`mutation-proofs-p5.jsonl`): queried counting only the agents who
+fit ("0 of your 37"), the split line without its withdrawn part, the Add card at v14's 322 minimum (the panel 390),
+the Add card see-through, the prefs reader dropping the request (the press does not hold), the mismatch note shown
+whatever the count, the "of your N" sentence when everyone is queried; and at unit, a past reopening date not counted
+as closed, and the desk counting queries rather than agents.
+
+Neighbours on the Phase 5 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 44 passed.

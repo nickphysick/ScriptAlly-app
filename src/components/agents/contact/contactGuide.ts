@@ -19,7 +19,7 @@ export const CONTACT_GUIDE: readonly GuideStep[] = [
   },
   {
     title: "Your next step",
-    body: ["The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, who might fit, or where to find more."],
+    body: ["The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, or where the book has been."],
     subject: '[data-cl14="next"]',
   },
   {

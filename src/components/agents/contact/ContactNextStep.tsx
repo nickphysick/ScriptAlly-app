@@ -2,28 +2,30 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE NEXT-STEP SECTION (Contact list v15 §4, v14 §2). One frame and three states — ready, reopening, all
- * queried — chosen by `lib/contactNextStep` from the writer's data. It always says the most useful next thing to
- * do with your agents for this book. v14's fourth state (the agents with no genres recorded) is retired: those
- * agents are ready now, by the one ready rule the section, the pill and See all share.
+ * THE NEXT-STEP SECTION (Contact list v15 §4, §4a; v14 §2). Three states — ready, reopening, all queried — chosen
+ * by `lib/contactNextStep` from the writer's data. It always says the most useful next thing to do with your
+ * agents for this book. v14's fourth state (the agents with no genres recorded) is retired: those agents are
+ * ready now, by the one ready rule the section, the pill and See all share.
+ *
+ * ⚠️ THE LAYOUT IS `shell/featureStage` (§4a): the text straight on the page, the agent card floating over the left
+ * edge of a white panel, and the list in the panel. In the ready state the list is PICKABLE: a click (or Enter /
+ * Space on the focused row) puts that agent on the card, which reads "First up" for the first and "Next up" for
+ * any other. The first agent is picked on load.
  *
  * ⚠️ THE CARD IS `AgentCarouselCard`, NOT THE QUICK VIEW (ruling, 7 Oct). The quick view is the modal's own
  * content — an Escape layer whose last step closes the card, a window key listener, a hard-coded heading id —
  * and none of that may run inline on a page. `AgentCarouselCard` is built from the quick view's shared blocks
  * (`AgentCardParts`), so the two cannot fork; it only gains a chip and a button override here.
  *
- * ⚠️ THE FRAME TAKES ITS HEIGHT FROM ITS CONTENT, AND THE CARD IS BOTTOM-ANCHORED 22 ABOVE ITS FOOT. The card's
- * slot ends 12 inside the frame's 10px padding (22 in all) and starts 56 above its own row, so a card taller
- * than the well rises just past the frame's top edge rather than leaving space under itself (the mock's own
- * construction, measured). Where the well's text wraps taller than the card (1280), the frame grows with the
- * well and the card still sits on its foot — the mock does exactly that (reported).
- *
  * ⚠️ EVERY DISCOVER LINK IS GATED ON `DISCOVER_LIVE` (ruling Q4) through the `discoverLive` prop, which the
- * page passes from the one constant. The render tests hold both branches.
+ * page passes from the one constant. The render tests hold both branches. While it is off, the all-queried state's
+ * panel is the COMING-SOON panel: a heading with a pill, one sentence, two faded placeholder rows that name nobody,
+ * and "Tell me when it's ready", which stores the request on the writer's profile. The day the constant is true,
+ * v14's "In Discover" list takes the panel with no other change.
  *
  * No pronouns for agents, no appraisal words, and QueryHawk writes nothing for the writer.
  */
-import React from "react";
+import React, { useState } from "react";
 import type { Agent, CommunityAgent } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
 import type { QcRow } from "../../../lib/qcSummary";
@@ -31,9 +33,10 @@ import type { CardAct } from "../../../lib/agentCard";
 import type { PersonalGenre } from "../../../lib/genres";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { formatDate } from "../../../lib/dates";
-import { daysUntil, dayOf, type NextStep } from "../../../lib/contactNextStep";
+import { daysUntil, dayOf, genresUnknown, type NextStep } from "../../../lib/contactNextStep";
 import { statedWeeks } from "../../../lib/contactStrip";
 import { AgentCarouselCard } from "../card/AgentCarouselCard";
+import { FeatureList, FeaturePanelHead, FeatureStage, type FeatureRow } from "../../shell/featureStage/FeatureStage";
 
 export interface ContactNextStepProps {
   step: NextStep;
@@ -52,6 +55,9 @@ export interface ContactNextStepProps {
   reminded: (a: Agent) => boolean;
   /** `DISCOVER_LIVE` — gates every Discover link and the "In Discover" list */
   discoverLive: boolean;
+  /** the writer asked to be told when Discover opens (`notifyPrefs.discover`), and the toggle that stores it */
+  notifyDiscover: boolean;
+  onNotifyDiscover: () => void;
   /** Discover agents who take the book's genres and are open, not already on the list — read only while live */
   discover: readonly CommunityAgent[];
   onOpen: (agentId: string, rect?: DOMRect) => void;
@@ -75,45 +81,23 @@ const tile = (iso: string) => {
   const d = new Date(t);
   return { d: String(d.getDate()), m: formatDate(d, { month: "short" }) };
 };
-const weeks = (a: Pick<Agent, "responseTimeWeeks">) => { const w = statedWeeks(a); return w ? `~${w} wks` : "Not known"; };
-const where = (a: Pick<Agent, "name" | "agency" | "city">) =>
-  [(a.name ?? "").trim() ? (a.agency ?? "").trim() : "", (a.city ?? "").trim()].filter(Boolean).join(", ");
-const stars = (r: number | undefined) => {
-  const n = typeof r === "number" ? r : 0;
-  if (!n) return null;
-  return <span className="cl14-nl-st" aria-label={`Rated ${n} of 5`}>{"★".repeat(n)}<i aria-hidden="true">{"★".repeat(5 - n)}</i></span>;
-};
+const weeks = (a: Pick<Agent, "responseTimeWeeks">) => { const w = statedWeeks(a); return w ? `~${w} wks` : "—"; };
+/** the line under a row's name: the agency (the city where the agency IS the name) */
+const where = (a: Pick<Agent, "name" | "agency" | "city">) => ((a.name ?? "").trim() ? (a.agency ?? "").trim() : (a.city ?? "").trim());
 /** "1 agent" / "N agents" */
 const agentsN = (n: number) => `${n} ${n === 1 ? "agent" : "agents"}`;
+/** how many rows the panel lists (§4a) */
+export const LIST_ROWS = 5;
 
 const Book: React.FC<{ t: string | null }> = ({ t }) => (t ? <i>{t}</i> : <>your book</>);
-
-/** The ledger row: a blush disc, the name with the writer's stars, agency and city, the one-line wishlist, and
- *  the reply time on the right that becomes the row's action on hover or focus. */
-const LedgerRow: React.FC<{
-  a: Agent; side: React.ReactNode; action: React.ReactNode; sub?: React.ReactNode; onOpen: (id: string, r?: DOMRect) => void;
-  /** in place of the initials disc (the reopening rows' date tile) */
-  lead?: React.ReactNode;
-  /** the action shows at rest, not only on hover (reopening) */
-  standing?: boolean;
-}> = ({ a, side, action, sub, onOpen, lead, standing }) => (
-  <li className={`cl14-nl-row${standing ? " cl14-nl-row--act" : ""}`} data-cl14="nl-row" data-agent={a.id} tabIndex={0}
-    onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; onOpen(a.id, e.currentTarget.getBoundingClientRect()); }}
-    onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); onOpen(a.id, e.currentTarget.getBoundingClientRect()); } }}>
-    {lead ?? <span className="cl14-disc" aria-hidden="true">{agentInitials(a)}</span>}
-    <div className="cl14-nl-main">
-      <div className="cl14-nl-top"><b>{agentPrimary(a)}</b>{stars(a.starRating)}</div>
-      {where(a) && <small>{where(a)}</small>}
-      {sub ?? ((a.mswlNotes ?? "").trim() ? <p>{(a.mswlNotes ?? "").trim()}</p> : null)}
-    </div>
-    <div className="cl14-nl-side">{side}{action}</div>
-  </li>
-);
+const Disc: React.FC<{ a: Parameters<typeof agentInitials>[0] }> = ({ a }) => <span className="cl14-disc">{agentInitials(a)}</span>;
 
 export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
   const { step, bookTitle, genres } = p;
   const s = step.state;
   const live = p.discoverLive;
+  /* the ready state's pick: the first agent until the writer picks another; a pick that has left the list falls back */
+  const [pick, setPick] = useState<string | null>(null);
 
   const card = (a: Agent, chip: string, action?: { label: string; onClick: () => void; on?: boolean }) => {
     const f = p.factsById.get(a.id);
@@ -144,125 +128,122 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
     </article>
   );
 
-  let title: string, lede: React.ReactNode, split: React.ReactNode = null, why: React.ReactNode = null, cta: React.ReactNode = null;
-  let middle: React.ReactNode = null, side: React.ReactNode = null;
+  let title: string, sentence: React.ReactNode, extra: React.ReactNode = null, action: React.ReactNode = null;
+  let middle: React.ReactNode = null, cardKey = "add", panel: React.ReactNode | null = null, compact = false;
 
   if (!p.hasBook) {
     /* no manuscript is in scope: "this book" names nothing, so the section says what would help */
     title = "Your next step";
-    lede = <>Choose a manuscript and the agents on your list who haven&rsquo;t seen it yet will show up here.</>;
+    sentence = <>Choose a manuscript and the agents on your list who haven&rsquo;t seen it yet will show up here.</>;
     middle = addCard;
   } else if (s === "ready") {
-    const n = step.ready.length, u = step.unknown, first = step.ready[0], rest = step.ready.slice(1, 4), more = Math.max(0, n - 4);
+    const n = step.ready.length, u = step.unknown;
+    const shown = step.ready.slice(0, LIST_ROWS), more = Math.max(0, n - LIST_ROWS);
+    const at = Math.max(0, shown.findIndex((a) => a.id === pick));
+    const cur = shown[at];
     title = "Ready to query";
-    lede = (
+    sentence = (
       <>
         <b>{agentsN(n)}</b> {n === 1 ? "is" : "are"} open and {n === 1 ? "hasn’t" : "haven’t"} seen <Book t={bookTitle} /> yet.
         {u > 0 && <> <b>{u}</b> {u === 1 ? "has" : "have"} no genres recorded.</>}
       </>
     );
-    cta = <button type="button" className="cl14-out" data-cl14="see-all" onClick={p.onSeeAll}>See all {n} in the list</button>;
-    middle = card(first, "First up");
-    side = (
+    action = <button type="button" className="fs-go" data-cl14="see-all" onClick={p.onSeeAll}>See all {n} in the list</button>;
+    middle = card(cur, at === 0 ? "First up" : "Next up");
+    cardKey = cur.id;
+    const rows: FeatureRow[] = shown.map((a) => ({
+      id: a.id, lead: <Disc a={a} />, name: agentPrimary(a),
+      sub: genresUnknown(a) ? "Genres not recorded" : where(a),
+      side: <span className="fs-wk">{weeks(a)}</span>,
+    }));
+    panel = (
       <>
-        <div className="cl14-nl-h"><h3>Next in line</h3><span>best fit first</span></div>
-        <ol className="cl14-nl" data-cl14="nl">
-          {rest.map((a) => (
-            <LedgerRow key={a.id} a={a} onOpen={p.onOpen}
-              side={<span className="cl14-nl-wk">{weeks(a)}</span>}
-              action={<button type="button" className="cl14-go cl14-nl-go" data-cl14="nl-log" onClick={() => p.onAct(a.id, "log")}>Log a query</button>} />
-          ))}
-        </ol>
-        {more > 0 && <button type="button" className="cl14-more" data-cl14="nl-more" onClick={p.onSeeAll}>and {more} more</button>}
+        <FeaturePanelHead title="Next in line" note="best fit first" />
+        <FeatureList rows={rows} picked={cur.id} onPick={setPick} />
+        {more > 0 && <button type="button" className="fs-more" data-cl14="nl-more" onClick={p.onSeeAll}>and {more} more</button>}
       </>
     );
   } else if (s === "reopening") {
-    const n = step.reopening.length, first = step.reopening[0], rest = step.reopening.slice(1, 4);
+    const n = step.reopening.length, first = step.reopening[0], rest = step.reopening.slice(1, LIST_ROWS);
     const allOn = step.reopening.every(p.reminded);
     title = "Reopening soon";
-    lede = <>Everyone open on your list has seen <Book t={bookTitle} />. <b>{n} more</b> {n === 1 ? "opens" : "open"} to submissions again soon.</>;
-    cta = (
-      <button type="button" className={`cl14-out${allOn ? " is-on" : ""}`} data-cl14="remind-all" aria-pressed={allOn} onClick={() => p.onRemindAll(step.reopening)}>
+    sentence = <>Everyone open on your list has seen <Book t={bookTitle} />. <b>{n} more</b> {n === 1 ? "opens" : "open"} to submissions again soon.</>;
+    action = (
+      <button type="button" className={`fs-go${allOn ? " is-on" : ""}`} data-cl14="remind-all" aria-pressed={allOn} onClick={() => p.onRemindAll(step.reopening)}>
         {allOn ? (n === 1 ? "✓ Reminder set" : "✓ Reminders set") : n === 1 ? "Remind me" : n === 2 ? "Remind me about both" : `Remind me about all ${n}`}
       </button>
     );
     middle = card(first, `Reopens ${dayShort(first.reopensOn ?? "")}`, remindAction(first));
-    side = (
+    cardKey = first.id;
+    const rows: FeatureRow[] = rest.map((a) => {
+      const t = tile(a.reopensOn ?? "");
+      const d = daysUntil(a.reopensOn ?? "", p.todayIso);
+      return {
+        id: a.id, lead: <span className="cl14-cal"><b>{t.d}</b><small>{t.m}</small></span>, name: agentPrimary(a),
+        sub: <>Reopens in {d} {d === 1 ? "day" : "days"}</>, action: remindButton(a),
+      };
+    });
+    const foot = live ? <p className="cl14-nx-foot" data-cl14="discover-foot">Don&rsquo;t want to wait? <button type="button" className="cl14-link" onClick={p.onDiscover}>Find more agents in Discover</button></p> : null;
+    panel = rows.length || foot ? (
       <>
-        {rest.length > 0 && (
-          <>
-            <div className="cl14-nl-h"><h3>Also reopening</h3><span>soonest first</span></div>
-            <ol className="cl14-nl" data-cl14="nl">
-              {rest.map((a) => {
-                const t = tile(a.reopensOn ?? "");
-                const d = daysUntil(a.reopensOn ?? "", p.todayIso);
-                return (
-                  <LedgerRow key={a.id} a={a} onOpen={p.onOpen} standing
-                    lead={<span className="cl14-cal" aria-hidden="true"><b>{t.d}</b><small>{t.m}</small></span>}
-                    sub={<p className="cl14-nl-when">Reopens in {d} {d === 1 ? "day" : "days"}</p>}
-                    side={null} action={remindButton(a)} />
-                );
-              })}
-            </ol>
-          </>
-        )}
-        {live && <p className="cl14-nx-foot" data-cl14="discover-foot">Don&rsquo;t want to wait? <button type="button" className="cl14-link" onClick={p.onDiscover}>Find more agents in Discover</button></p>}
+        {rows.length > 0 && <><FeaturePanelHead title="Also reopening" note="soonest first" /><FeatureList rows={rows} picked={null} /></>}
+        {foot}
       </>
-    );
+    ) : null;
   } else {
     /* ALL QUERIED — every agent on the list is accounted for: queried + don't take the genre + closed to
        submissions = N (lib/contactNextStep), and the split line's parts sum to queried. */
     const { reading, asked, passed, withdrawn } = step.outcomes;
     const N = step.total, m = step.mismatches, c = step.closed;
     title = "You’ve queried all your agents";
-    lede = step.queried === N
+    compact = true;
+    sentence = step.queried === N
       ? <><Book t={bookTitle} /> has gone to {N === 1 ? <>the <b>1 agent</b></> : <>all <b>{N} agents</b></>} on your list.</>
       : <><Book t={bookTitle} /> has gone to <b>{step.queried} of your {agentsN(N)}</b>.</>;
-    split = <>{reading} reading · {asked} asked for more · {passed} passed{withdrawn > 0 ? <> · {withdrawn} withdrawn</> : null}</>;
     const notes = [
       m > 0 && genres ? `The other ${m} ${m === 1 ? "doesn’t" : "don’t"} take ${genres}.` : "",
       c > 0 ? `${c} ${c === 1 ? "is" : "are"} closed to submissions.` : "",
     ].filter(Boolean);
-    why = notes.length ? notes.join(" ") : null;
+    extra = (
+      <>
+        <p className="cl15-nx-split" data-cl15="split">{reading} reading · {asked} asked for more · {passed} passed{withdrawn > 0 ? <> · {withdrawn} withdrawn</> : null}</p>
+        {notes.length > 0 && <p className="cl15-nx-note" data-cl15="note">{notes.join(" ")}</p>}
+      </>
+    );
     middle = addCard;
     const shown = p.discover.slice(0, 3), rest = Math.max(0, p.discover.length - 3);
-    side = live && shown.length > 0 ? (
+    panel = live && shown.length > 0 ? (
       <>
-        <div className="cl14-nl-h"><h3>In Discover</h3><span>take {genres}, open now</span></div>
-        <ol className="cl14-nl" data-cl14="nl">
-          {shown.map((ca) => (
-            <li key={ca.id} className="cl14-nl-row" data-cl14="nl-row">
-              <span className="cl14-disc" aria-hidden="true">{agentInitials(ca)}</span>
-              <div className="cl14-nl-main">
-                <div className="cl14-nl-top"><b>{agentPrimary(ca)}</b></div>
-                {where(ca) && <small>{where(ca)}</small>}
-                {(ca.genres ?? []).length > 0 && <p>{(ca.genres ?? []).join(", ")}</p>}
-              </div>
-              <div className="cl14-nl-side">
-                <span className="cl14-nl-wk">{weeks(ca)}</span>
-                <button type="button" className="cl14-go cl14-nl-go" data-cl14="discover-add" onClick={() => p.onAddDiscover(ca)}>Add to my list</button>
-              </div>
-            </li>
+        <FeaturePanelHead title="In Discover" note={<>take {genres}, open now</>} />
+        <FeatureList picked={null} rows={shown.map((ca) => ({
+          id: ca.id, lead: <Disc a={ca} />, name: agentPrimary(ca), sub: where(ca),
+          side: <span className="fs-wk">{weeks(ca)}</span>,
+          action: <button type="button" className="cl14-go" data-cl14="discover-add" onClick={() => p.onAddDiscover(ca)}>Add to my list</button>,
+        }))} />
+        {rest > 0 && <button type="button" className="fs-more" data-cl14="discover-rest" onClick={p.onDiscover}>and {rest} more in Discover</button>}
+      </>
+    ) : live ? null : (
+      <div className="cl15-dt" data-cl15="discover-soon">
+        <FeaturePanelHead title="Discover agents" note={<b className="cl15-dt-soon">Coming soon</b>} />
+        <p className="cl15-dt-p">Find agents by genre, see who&rsquo;s open, and add them to your list in one click.</p>
+        {/* two faded placeholder rows: shapes only, no names (nobody real, and nobody invented) */}
+        <ol className="cl15-dt-l" aria-hidden="true">
+          {[0, 1].map((i) => (
+            <li key={i}><span className="cl15-dt-d" /><span className="cl15-dt-m"><i /><i /></span><span className="cl15-dt-a">+ Add</span></li>
           ))}
         </ol>
-        {rest > 0 && <button type="button" className="cl14-more" data-cl14="discover-rest" onClick={p.onDiscover}>and {rest} more in Discover</button>}
-      </>
-    ) : null;
+        <button type="button" className={`cl15-dt-btn${p.notifyDiscover ? " is-on" : ""}`} data-cl15="discover-notify" aria-pressed={p.notifyDiscover} onClick={p.onNotifyDiscover}>
+          {p.notifyDiscover ? "✓ We\u2019ll let you know" : "Tell me when it\u2019s ready"}
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="cl14-next" data-cl14="next" data-state={p.hasBook ? s : "nobook"}>
-      <section className="cl14-nx" aria-label="Your next step">
-        <div className="cl14-nx-well" data-cl14="well">
-          <h2>{title}</h2>
-          <p className="cl14-nx-lede">{lede}</p>
-          {split && <p className="cl15-nx-split" data-cl15="split">{split}</p>}
-          {why && <p className="cl14-nx-why" data-cl15="note">{why}</p>}
-          {cta}
-        </div>
-        <div className="cl14-nxc" data-cl14="card">{middle}</div>
-        <div className="cl14-nx-side" data-cl14="side">{side}</div>
-      </section>
+      <FeatureStage probe="next" state={p.hasBook ? s : "nobook"} label="Your next step"
+        title={title} titleSize={compact ? "compact" : "default"} sentence={sentence} extra={extra} action={action}
+        card={middle} cardClass="cl14-nxc" cardKey={cardKey} panel={panel} />
     </div>
   );
 };

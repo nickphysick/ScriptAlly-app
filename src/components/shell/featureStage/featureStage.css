@@ -1,0 +1,76 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE FEATURE STAGE (shell/featureStage) — values read off the rendered oracle (design-refs/contact-list-v15.html, the QF
+ * format) at 1512 × 900 and 1280 × 800. "Below 1440" is `max-width: 1439.5px`.
+ *
+ * ⚠️ THE GAPS ARE THE SECTION'S MARGINS PLUS THE PANEL'S 34px OVERHANG: 66 desk → panel = 100 − 34, and 58 panel → next =
+ *    92 − 34 (90/84 below 1440, giving 56/50). Change the overhang and both margins move with it.
+ */
+.fs {
+  --fs-over: 34px;
+  position: relative; box-sizing: border-box;
+  display: grid; grid-template-columns: minmax(0, 0.86fr) 300px minmax(0, 1.3fr); gap: 0; align-items: center;
+  margin-top: calc(66px + var(--fs-over)); margin-bottom: calc(58px + var(--fs-over));
+}
+/* ⚠️ brand.tsx names bare p/span/b as the sans face on every route (0-0-1): the lede and the panel state the serif at
+   0-1-0, under every specific rule below. NOT the card: it keeps its own faces. */
+.fs :where(.fs-lede, .fs-panel) :where(p, span, small, b, i, em, li, div, button) { font-family: var(--sp-serif); }
+.fs-lede { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; min-width: 0; padding-right: 44px; }
+/* ⚠️ brand.tsx forces `h2` (0-0-1) at runtime: a class and an element (0-1-1) plus !important win honestly */
+.fs-lede h2.fs-title { margin: 0; font: 400 40px/1.08 var(--sp-type) !important; color: #1c130f; }
+.fs-lede h2.fs-title.is-compact { font-size: 34px !important; }
+.fs .fs-sentence { margin: 0; max-width: 34ch; font: 400 17px/1.55 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.fs .fs-sentence b { font-weight: 600; color: #1c130f; }
+.fs .fs-go {
+  margin-top: 8px; box-sizing: border-box; height: 46px; padding: 0 24px; border-radius: 23px; border: 0; cursor: pointer;
+  background: #2a3a52; color: #f4eee5; font: 400 15px var(--sp-type); white-space: nowrap;
+}
+.fs .fs-go:hover { background: #1b2433; }
+.fs .fs-go:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
+.fs .fs-go.is-on { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+
+.fs-card { grid-area: 1 / 2; z-index: 3; align-self: center; min-width: 0; display: flex; justify-content: center; }
+.fs-card > * { width: 100%; box-sizing: border-box; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
+
+.fs-panel {
+  grid-area: 1 / 3; z-index: 1; align-self: stretch; box-sizing: border-box; min-width: 0;
+  display: flex; flex-direction: column; justify-content: flex-start;
+  margin: calc(-1 * var(--fs-over)) 0 calc(-1 * var(--fs-over)) -150px; padding: 26px 26px 20px 178px;
+  background: #fff; border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 18px 40px -34px rgba(28, 19, 15, 0.35);
+}
+.fs-ph { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+.fs-ph h3 { margin: 0; font: 400 20px var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.fs-ph > span { font: italic 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.fs-list { list-style: none; margin: 0; padding: 0; }
+.fs-row {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  padding: 11px 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.07); border-radius: 10px;
+  transition: background 0.15s;
+}
+.fs-row.is-pick { cursor: pointer; }
+.fs-row:last-child { border-bottom: 0; }
+.fs-row.is-pick:hover { background: #f7f9fb; }
+.fs-row.is-on { background: #eaf1f7; border-bottom-color: transparent; }
+.fs-row:focus-visible { outline: 2px solid #2f5f86; outline-offset: -2px; }
+.fs-lead { display: inline-flex; }
+.fs-m { min-width: 0; display: flex; flex-direction: column; }
+.fs .fs-m b { display: block; font: 500 16.5px var(--sp-serif); color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs .fs-m i { display: block; font: italic 400 14px var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs .fs-side { display: inline-flex; align-items: center; gap: 10px; font: 400 13px var(--sp-serif); color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+.fs .fs-more {
+  align-self: flex-start; margin-top: 10px; border: 0; background: none; padding: 2px 0; cursor: pointer;
+  font: 500 15px var(--sp-serif); color: #2a3a52; text-decoration: underline; text-underline-offset: 3px;
+}
+
+@media (max-width: 1439.5px) {
+  .fs { grid-template-columns: minmax(0, 0.8fr) 270px minmax(0, 1.2fr); margin-top: calc(56px + var(--fs-over)); margin-bottom: calc(50px + var(--fs-over)); }
+  .fs-lede { padding-right: 30px; }
+  .fs-lede h2.fs-title { font-size: 34px !important; }
+  .fs-lede h2.fs-title.is-compact { font-size: 30px !important; }
+  .fs-panel { margin-left: -130px; padding-left: 152px; padding-right: 20px; }
+  .fs .fs-side .fs-wk { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .fs-row { transition: none; } }

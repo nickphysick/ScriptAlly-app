@@ -42,8 +42,10 @@ test("CL14-1 · order", async ({ page }) => {
     L.check("CL14-1 the header is v15's open header (no band, no card behind it)", w, r.heroCard && r.heroBg === "rgba(0, 0, 0, 0)", `${r.heroCard} ${r.heroBg}`);
     L.check("CL14-1 the desk follows the header", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
     L.check("CL14-1 no carousel in the DOM", w, r.carousel === 0, `${r.carousel}`);
-    L.check("CL14-1 the next-step section follows the desk, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
-    L.check("CL14-1 the workspace follows the section, 56 (±2) under it", w, !!r.next && !!r.ws && near(r.ws.t - r.next.b, 56, 2), `${r.next && r.ws ? r.ws.t - r.next.b : "—"}`);
+    /* RETIRED (Contact list v15 §4a): "44 under the desk" and "56 above the workspace" — the section's gaps are the
+       feature stage's (66 / 58 to its PANEL; 56 / 50 below 1440), held by CL15-5a. The order still stands here. */
+    L.check("CL14-1 the next-step section follows the desk", w, !!r.strip && !!r.next && r.next.t >= r.strip.b, `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
+    L.check("CL14-1 the workspace follows the section", w, !!r.next && !!r.ws && r.ws.t >= r.next.b, `${r.next && r.ws ? r.ws.t - r.next.b : "—"}`);
     await checkOverflow(page, L, w);
   }
   L.done(12);
@@ -63,10 +65,10 @@ test("CL14-3 · next step", async ({ page }) => {
       const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { t: x.top, b: x.bottom, h: x.height, w: x.width }; };
       const next = pick('.aglist [data-cl14="next"]');
-      const frame = next?.querySelector<HTMLElement>(".cl14-nx") ?? null;
-      const card = next?.querySelector<HTMLElement>('[data-cl14="card"] > .cl13-ac') ?? null;
+      /* REPOINTED (v15 §4a): the card sits on the feature stage's card slot */
+      const card = next?.querySelector<HTMLElement>('[data-fs-part="card"] > .cl13-ac') ?? null;
       return {
-        state: next?.getAttribute("data-state") ?? null, frame: b(frame), card: b(card),
+        state: next?.getAttribute("data-state") ?? null, card: b(card),
         /* the shared blocks' signature: the identity and the three blocks, marked as a carousel card's */
         blocks: card ? [...card.querySelectorAll("[data-cl13-blk]")].map((e) => e.getAttribute("data-cl13-blk")).sort().join(",") : "",
         classes: card ? ["acq-head", "acq-ini"].filter((c) => card.querySelector(`.${c}`)).length : 0,
@@ -81,9 +83,8 @@ test("CL14-3 · next step", async ({ page }) => {
     L.check("CL14-3 the card carries the shared blocks' signature (identity + genres + wishlist + materials)", w,
       r.classes === 2 && /genres/.test(r.blocks) && /wishlist/.test(r.blocks) && /materials/.test(r.blocks), `${r.classes} · ${r.blocks}`);
     L.check("CL14-3 none of the quick view's hooks (no id, no data-ac)", w, r.ids === 0 && r.dataAc === 0, `ids ${r.ids} data-ac ${r.dataAc}`);
-    L.check("CL14-3 the frame's bottom is 22 (±2) below the card's", w, !!r.frame && !!r.card && near(r.frame.b - r.card.b, 22, 2), `${r.frame && r.card ? (r.frame.b - r.card.b).toFixed(1) : "—"}`);
-    L.check("CL14-3 no space under the card: the frame is no taller than the card + 22", w, !!r.frame && !!r.card && r.frame.h <= r.card.h + 22 + 0.5, `frame ${r.frame?.h.toFixed(1)} card ${r.card?.h.toFixed(1)}`);
-    L.check("CL14-3 the card is 318 wide at 1512, 290 at 1280", w, !!r.card && near(r.card.w, vp.width >= 1440 ? 318 : 290, 1), `${r.card?.w}`);
+    /* RETIRED (v15 §4a): the white frame, its 22px foot under the card and the 318 / 290 card — the stage has no
+       frame and its card is 300 / 270, vertically centred (CL15-5a). */
     /* See all N: the list shows exactly the ready set (read the rows, not the counter) */
     const n = Number((r.seeAll ?? "").match(/\d+/)?.[0] ?? NaN);
     /* ⚠️ a missing button is a failed READING, never a timeout — a crash names a line, not the property */
@@ -98,7 +99,7 @@ test("CL14-3 · next step", async ({ page }) => {
   }
   /* clicking the card opens the agent card; a ledger row's Log a query opens the drawer */
   await openContacts(page, { width: 1512, height: 900 });
-  const cardBlock = page.locator('.aglist [data-cl14="card"] .cl13-ac [data-cl13-blk="s-wishlist"]').filter({ visible: true }).first();
+  const cardBlock = page.locator('.aglist [data-fs-part="card"] .cl13-ac [data-cl13-blk="s-wishlist"]').filter({ visible: true }).first();
   if (await cardBlock.count()) {
     await cardBlock.click();
     await page.locator('[data-ac="overlay"]').first().waitFor({ state: "attached", timeout: 5000 }).catch(() => {});
@@ -107,16 +108,17 @@ test("CL14-3 · next step", async ({ page }) => {
   L.check("CL14-3 clicking the card opens the agent card", "1512", opened > 0, `${opened}`);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
-  const row = page.locator('.aglist [data-cl14="nl-row"]').filter({ visible: true }).first();
-  if (await row.count()) {
-    await row.hover();
-    await row.locator('[data-cl14="nl-log"]').click();
+  /* RETIRED (v15 §4a): "a Next-in-line row's Log a query opens the journey" — a row picks its agent onto the card
+     now (CL15-5a); the card's own button logs the query. That door is held here instead. */
+  const go = page.locator('.aglist [data-fs-part="card"] .cl13-ac [data-cl13="cgo"]').filter({ visible: true }).first();
+  if (await go.count()) {
+    await go.click();
     await page.locator(".qad-root.is-open").first().waitFor({ state: "attached", timeout: 5000 }).catch(() => {});
     const drawer = await page.locator(".qad-root.is-open").count();
-    L.check("CL14-3 a Next-in-line row's Log a query opens the journey", "1512", drawer > 0, `${drawer}`);
+    L.check("CL14-3 the card's Log a query opens the journey", "1512", drawer > 0, `${drawer}`);
     await page.keyboard.press("Escape");
-  } else L.check("CL14-3 a Next-in-line row exists on the fixture", "1512", false, "no ledger row");
-  L.done(18);
+  } else L.check("CL14-3 the card's Log a query opens the journey", "1512", false, "no button on the card");
+  L.done(12);
 });
 
 /* ── lock 5 · the workspace: 20 wider than the strip each side, the ink bar, the hawk above it, the controls white ── */
@@ -754,7 +756,7 @@ const GUIDE14 = [
   { title: "Your list in numbers", sel: '[data-cl15="desk"]',
     body: "How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are." },
   { title: "Your next step", sel: '[data-cl14="next"]',
-    body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, who might fit, or where to find more." },
+    body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, or where the book has been." },
   { title: "Your agents", sel: '[data-cl14="ws"]',
     body: "Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card." },
   { title: "Housekeeping", sel: '[data-ftab="housekeeping"]',
