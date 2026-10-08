@@ -43,3 +43,16 @@ below 1440, the workspace 30 under the section. A and J bite at 1512 only: below
 rule's own.
 
 Neighbours on the Phase 4 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 43 passed.
+
+## Phase 5 — CL15-6 against 8093d64f
+`1 failed · 1 passed`. The fixtures put v14's own done state on the page, so the reds are readings, not a missing
+subject: v14's title ("Every agent queried"), its sentence, no split line, no accounting, the Add card at 22 26 with
+a 56px plus, no coming-soon panel, no request button.
+
+Mutations A–I each red at the assertion they name (`mutation-proofs-p5.jsonl`): queried counting only the agents who
+fit ("0 of your 37"), the split line without its withdrawn part, the Add card at v14's 322 minimum (the panel 390),
+the Add card see-through, the prefs reader dropping the request (the press does not hold), the mismatch note shown
+whatever the count, the "of your N" sentence when everyone is queried; and at unit, a past reopening date not counted
+as closed, and the desk counting queries rather than agents.
+
+Neighbours on the Phase 5 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 44 passed.

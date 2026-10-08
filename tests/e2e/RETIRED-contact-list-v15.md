@@ -52,3 +52,9 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 | `contactV14.measure.ts` | CL14-3 "a Next-in-line row's Log a query opens the journey" | A row picks its agent onto the card; rows carry no action of their own | CL15-5a (the pick); CL14-3 "the card's Log a query opens the journey" |
 
 **Deleted:** the v14 frame, well, side column and ledger-row rules (`.cl14-nx`, `.cl14-nx-well`, `.cl14-nx-lede`, `.cl14-nx-why`, `.cl14-nx-side`, `.cl14-nl*`, `.cl14-more`, the `cl14next` container), and the per-row writer's stars and wishlist line they drew.
+
+## Phase 5 — all queried (v15 §4)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `src/components/agents/contact/contactNextStep.test.tsx` | "off: the all-queried state has no Discover list or link…" (the empty side) | While Discover is off the panel is the coming-soon panel, not empty | "off: the all-queried panel is the coming-soon panel…" and "off: the request button reads as set once asked for" in the same file; CL15-6 on the rendered page |

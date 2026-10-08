@@ -30,7 +30,7 @@ const render = (agents: Agent[], queries: Query[], over: Partial<ContactNextStep
   const props: ContactNextStepProps = {
     step, hasBook: true, bookTitle: "Murphy's Day Out", genres: "thrillers",
     factsById: new Map(agents.map((a) => [a.id, agentFacts(a, [], null)])), qFor: () => null, genreHit: (g) => /thriller/i.test(g), todayIso: TODAY,
-    reminded: () => false, discoverLive: false, discover: [],
+    reminded: () => false, discoverLive: false, discover: [], notifyDiscover: false, onNotifyDiscover: noop,
     onOpen: noop, onAct: noop, onAdd: noop, onSeeAll: noop, onNewAgent: noop, onDiscover: noop,
     onRemind: noop, onRemindAll: noop, onAddDiscover: noop, ...over,
   };
@@ -187,10 +187,29 @@ describe("every Discover link follows DISCOVER_LIVE (v14 ruling Q4), both branch
   const ca = (id: string): CommunityAgent => ({ id, name: `Disc ${id}`, agency: "Lumen", city: "London", genres: ["Thriller"], responseTimeWeeks: 5, submissionStatus: SubmissionStatus.OPEN }) as unknown as CommunityAgent;
   const doneAgents = [ag("r")], doneQ = [q("r", QueryStatus.QUERIED)];
   const reopenFx = () => [[ag("s"), ag("c", { submissionStatus: SubmissionStatus.CLOSED, reopensOn: "2026-12-01" })], [q("s", QueryStatus.QUERIED)]] as const;
-  it("off: the all-queried state has no Discover list or link, and the reopening foot is hidden", () => {
+  it("off: the all-queried panel is the coming-soon panel — heading, pill, sentence, two nameless rows, the request button", () => {
     const done = render(doneAgents, doneQ, { discoverLive: false, discover: [ca("1"), ca("2")] });
-    expect(done.html).not.toContain('data-cl14="nl"');
     expect(done.html).not.toContain('data-cl14="discover-add"');
+    expect(done.html).toContain('data-cl15="discover-soon"');
+    const panel = slice(done.html, "panel");
+    const t = text(panel);
+    expect(t).toContain("Discover agents Coming soon");
+    expect(t).toContain("Find agents by genre, see who's open, and add them to your list in one click.");
+    expect(t).toContain("Tell me when it's ready");
+    /* two placeholder rows, hidden from assistive tech, and no name in them: not a Discover agent's, not an invented one */
+    const list = panel.slice(panel.indexOf('class="cl15-dt-l"'), panel.indexOf("</ol>"));
+    expect(list).toContain('aria-hidden="true"');
+    expect((list.match(/<li>/g) ?? []).length).toBe(2);
+    expect(text(list).replace(/\+ Add/g, "").replace(/class="[^"]*"|aria-hidden="true">?/g, "").trim()).toBe("");
+    expect(done.html).not.toContain("Disc 1");
+  });
+  it("off: the request button reads as set once asked for", () => {
+    const { html } = render(doneAgents, doneQ, { notifyDiscover: true });
+    expect(text(html)).toContain("✓ We'll let you know");
+    expect(html).toMatch(/data-cl15="discover-notify" aria-pressed="true"/);
+    expect(text(html)).not.toContain("Tell me when it's ready");
+  });
+  it("off: the reopening foot is hidden", () => {
     const [a, qs] = reopenFx();
     const reopen = render([...a], [...qs], { discoverLive: false });
     expect(reopen.html).not.toContain('data-cl14="discover-foot"');
@@ -199,6 +218,7 @@ describe("every Discover link follows DISCOVER_LIVE (v14 ruling Q4), both branch
   it("on: In Discover replaces the panel, with 'and N more'; the reopening foot returns", () => {
     const { html } = render(doneAgents, doneQ, { discoverLive: true, discover: [ca("1"), ca("2"), ca("3"), ca("4")] });
     const t = text(html);
+    expect(html).not.toContain('data-cl15="discover-soon"');
     expect(t).toContain("In Discover");
     expect((html.match(/data-cl14="discover-add"/g) ?? []).length).toBe(3);
     expect(t).toContain("and 1 more in Discover");

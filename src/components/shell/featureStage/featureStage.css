@@ -42,7 +42,7 @@
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 18px 40px -34px rgba(28, 19, 15, 0.35);
 }
 .fs-ph { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
-.fs-ph h3 { display: flex; align-items: center; gap: 10px; margin: 0; font: 400 20px var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.fs-ph h3 { margin: 0; font: 400 20px var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
 .fs-ph > span { font: italic 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
 .fs-list { list-style: none; margin: 0; padding: 0; }
 .fs-row {

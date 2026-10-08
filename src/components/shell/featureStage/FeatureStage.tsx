@@ -70,10 +70,10 @@ export const FeatureStage: React.FC<{
   );
 };
 
-/** The panel's header row: a title on the left, an italic note on the right, a hairline under. */
-export const FeaturePanelHead: React.FC<{ title: React.ReactNode; note?: React.ReactNode; aside?: React.ReactNode }> = ({ title, note, aside }) => (
+/** The panel's header row: a title on the left, a note on the right (italic text, or the page's own pill), a hairline under. */
+export const FeaturePanelHead: React.FC<{ title: React.ReactNode; note?: React.ReactNode }> = ({ title, note }) => (
   <div className="fs-ph" data-fs-part="panel-head">
-    <h3>{title}{aside}</h3>
+    <h3>{title}</h3>
     {note && <span>{note}</span>}
   </div>
 );

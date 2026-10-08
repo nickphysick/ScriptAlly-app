@@ -27,6 +27,14 @@ describe("notifyPrefs is total — absent, partial and nonsense all resolve", ()
     expect(notifyPrefs({ nudges: false }).weeklyDigest).toBe(NOTIFY_DEFAULT.weeklyDigest);
   });
 
+  it("the Discover request is off until asked for, and a stored one survives the reader (Contact list v15 §4)", () => {
+    expect(notifyPrefs(undefined).discover).toBe(false);
+    expect(notifyPrefs({ nudges: false }).discover).toBe(false);
+    /* Settings saves the WHOLE map from this reader: a leaf it dropped would be wiped by the next toggle there */
+    expect({ ...notifyPrefs({ discover: true }), nudges: false }).toEqual({ nudges: false, weeklyDigest: true, discover: true });
+    expect(notifyPrefs({ discover: "yes" as unknown as boolean }).discover).toBe(false);
+  });
+
   it("a nonsense value resolves to the default rather than propagating", () => {
     expect(notifyPrefs({ nudges: "yes" as unknown as boolean }).nudges).toBe(true);
   });

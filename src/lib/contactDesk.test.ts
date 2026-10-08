@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import type { Agent, Query } from "../types";
 import { QueryStatus, SubmissionStatus } from "../types";
 import { deskModel, monthStamp } from "./contactDesk";
+import { nextStep } from "./contactNextStep";
 
 const NOW = new Date(2026, 9, 15, 12); // Thu 15 Oct 2026, local
 let n = 0;
@@ -69,6 +70,23 @@ describe("the desk (v15 §3)", () => {
     expect([m.profiles.big, m.profiles.small, m.profiles.stamp]).toEqual(["76%", null, null]);
     expect(m.profiles.rows.map((r) => [r.n, r.text])).toEqual([[14, "gaps to fill"], [10, "agents affected"]]);
     expect(m.profiles.bar.label).toBe("31 of 41 profiles complete");
+  });
+  it("the desk's Queried figure IS the next step's queried count (v15 lock 6) — two derivations against each other", () => {
+    const a = ag(), b = ag({ genres: ["romance"] }), c = ag({ submissionStatus: SubmissionStatus.CLOSED }), d = ag(), e = ag({ genres: [] });
+    const agents = [a, b, c, d, e];
+    const queries = [
+      q(a.id, QueryStatus.QUERIED, "2026-10-05"), q(a.id, QueryStatus.REJECTED, "2026-06-01"),
+      q(b.id, QueryStatus.WITHDRAWN, "2026-08-01"), q(c.id, QueryStatus.NO_RESPONSE, undefined),
+      q(d.id, QueryStatus.QUERIED, "2026-10-05", { manuscriptId: "ms2" }),
+      /* a query whose agent has left the list counts on neither side */
+      q("gone", QueryStatus.QUERIED, "2026-10-05"),
+    ];
+    for (const msId of ["ms1", "ms2", null]) {
+      const desk = deskModel({ agents, queries, msId, now: NOW, hk: HK });
+      const step = nextStep({ agents, queries, msId, book: ["Thriller"], todayIso: "2026-10-15" });
+      expect(Number(desk.queried.big), `msId ${msId}`).toBe(step.queried);
+      expect(desk.queried.small).toBe(`of ${step.total}`);
+    }
   });
   it("a zero month says so, the Query Centre desk's way", () => {
     expect(monthStamp(0)).toBe("No change this month");

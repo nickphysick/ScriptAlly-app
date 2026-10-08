@@ -413,3 +413,108 @@ test("CL15-5b · load state", async ({ page, browser }) => {
   await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v2"));
   L.done(5);
 });
+
+/* ── lock 6 · all queried (§4): two fixtures on their own manuscript (`seedAllQueried.mjs`, removed in the same run).
+   A — everyone queried: "all N agents", no note. B — three known mismatches: "N−3 of your N agents" and "The other 3
+   don't take {genres}." In both: queried + mismatches + closed = N, the split line's parts sum to queried, the desk's
+   Queried figure is the sentence's, the panel is ≤ 350 tall at 1512, the Add card is solid white, and "Tell me when
+   it's ready" survives a reload. ── */
+test("CL15-6 · all queried", async ({ page }) => {
+  test.setTimeout(420_000);
+  const L = new Ledger("cl15-6");
+  const MS = "aqfx-ms";
+  const openDone = async (vp: { width: number; height: number }) => {
+    await openContacts(page, vp);
+    await page.evaluate((id) => localStorage.setItem("scriptally_active_manuscript_id", id), MS);
+    await page.reload();
+    await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(1200);
+  };
+  const read = () => page.evaluate(() => {
+    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+    const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+    const tx = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    const cs = (e: Element | null) => (e ? getComputedStyle(e) : null);
+    const panel = q('[data-fs-part="panel"]'), add = q('[data-cl14="addcard"]'), addIn = q(".cl14-addc-in"), plus = q(".cl14-addc-plus");
+    const soon = q('[data-cl15="discover-soon"]');
+    const dq = q('[data-dk="queried"]');
+    const notify = q('[data-cl15="discover-notify"]');
+    return {
+      state: q('[data-cl14="next"]')?.getAttribute("data-state") ?? null,
+      title: tx(q('[data-fs-part="title"]')), titleSize: cs(q('[data-fs-part="title"]'))?.fontSize ?? null,
+      sentence: tx(q('[data-fs-part="sentence"]')), split: q('[data-cl15="split"]') ? tx(q('[data-cl15="split"]')) : null, note: q('[data-cl15="note"]') ? tx(q('[data-cl15="note"]')) : null,
+      buttons: root?.querySelectorAll('[data-fs-part="lede"] button').length ?? -1,
+      total: Number(tx(q('[data-cl15="header"] h1')).match(/^(\d+)/)?.[1] ?? NaN),
+      deskBig: Number(tx(dq?.querySelector('[data-dk-part="big"]') ?? null).match(/^(\d+)/)?.[1] ?? NaN), deskAll: tx(dq?.querySelector('[data-dk-part="big"]') ?? null),
+      pill: Number(tx(q('[data-cl14="pill-ready"]')).match(/\d+/)?.[0] ?? NaN),
+      panelH: panel ? panel.getBoundingClientRect().height : null,
+      addBg: cs(add)?.backgroundColor ?? null, addBorder: cs(add)?.borderTopStyle ?? null, addPad: cs(addIn)?.padding ?? null, plusW: plus ? plus.getBoundingClientRect().width : null,
+      soon: soon ? { head: tx(soon.querySelector('[data-fs-part="panel-head"]')), p: tx(soon.querySelector(".cl15-dt-p")), rows: soon.querySelectorAll(".cl15-dt-l li").length, rowText: tx(soon.querySelector(".cl15-dt-l")).replace(/\+ Add/g, "").trim() } : null,
+      notify: notify ? { text: tx(notify), pressed: notify.getAttribute("aria-pressed") } : null,
+    };
+  });
+  type R = Awaited<ReturnType<typeof read>>;
+  const parts = (r: R) => {
+    const all = r.sentence.match(/has gone to all (\d+) agents on your list\.$/);
+    const some = r.sentence.match(/has gone to (\d+) of your (\d+) agents\.$/);
+    const sp = (r.split ?? "").match(/^(\d+) reading · (\d+) asked for more · (\d+) passed(?: · (\d+) withdrawn)?$/);
+    return {
+      form: all ? "all" : some ? "some" : "none",
+      queried: all ? Number(all[1]) : some ? Number(some[1]) : NaN, N: all ? Number(all[1]) : some ? Number(some[2]) : NaN,
+      split: sp ? sp.slice(1).map((x) => (x === undefined ? 0 : Number(x))) : null, withdrawnShown: !!sp && sp[4] !== undefined,
+      mis: Number((r.note ?? "").match(/^The other (\d+) don’t take /)?.[1] ?? 0), closed: Number((r.note ?? "").match(/(\d+) (?:is|are) closed to submissions\./)?.[1] ?? 0),
+    };
+  };
+  try {
+    for (const fx of ["A", "B"] as const) {
+      execSync(`node tests/e2e/seedAllQueried.mjs ${fx}`, { stdio: "inherit" });
+      for (const vp of WIDTHS15) {
+        await openDone(vp);
+        const w = `${fx} · ${vp.width}`;
+        const narrow = vp.width < 1440;
+        const r = await read();
+        if (r.state !== "done") { L.check("CL15-6 population: the all-queried state renders on the fixture", w, false, `${r.state} · ${r.sentence}`); continue; }
+        L.check("CL15-6 population: the all-queried state renders on the fixture", w, true, "");
+        const p = parts(r);
+        L.check(`CL15-6 the title is "You’ve queried all your agents", Special Elite ${narrow ? 30 : 34}`, w, r.title === "You’ve queried all your agents" && r.titleSize === (narrow ? "30px" : "34px"), `${r.title} ${r.titleSize}`);
+        if (fx === "A") {
+          L.check("CL15-6 A: the sentence reads “… has gone to all N agents on your list.” and there is no note", w, p.form === "all" && p.N === r.total && r.note === null, `${r.sentence} | note ${r.note}`);
+        } else {
+          L.check("CL15-6 B: the sentence reads “… has gone to N−3 of your N agents.”", w, p.form === "some" && p.N === r.total && p.queried === r.total - 3, r.sentence);
+          L.check("CL15-6 B: the note reads “The other 3 don’t take {genres}.” and nothing else", w, /^The other 3 don’t take [a-z ,]+\.$/.test(r.note ?? ""), `${r.note}`);
+          L.check("CL15-6 B: the withdrawn query is the split line's fourth part", w, p.withdrawnShown && (p.split?.[3] ?? 0) === 1, `${r.split}`);
+        }
+        L.check("CL15-6 every agent is accounted for: queried + don’t take the genre + closed = N", w, p.queried + p.mis + p.closed === r.total, `${p.queried} + ${p.mis} + ${p.closed} vs ${r.total}`);
+        L.check("CL15-6 the split line's parts sum to queried", w, !!p.split && p.split.reduce((a, b) => a + b, 0) === p.queried && p.split[0] > 0 && p.split[1] > 0 && p.split[2] > 0, `${r.split} vs ${p.queried}`);
+        L.check("CL15-6 the desk's Queried figure is the sentence's", w, r.deskBig === p.queried, `desk ${r.deskAll} sentence ${p.queried}`);
+        L.check("CL15-6 no button and nobody ready: the pill reads 0", w, r.buttons === 0 && r.pill === 0, `buttons ${r.buttons} pill ${r.pill}`);
+        L.check("CL15-6 the Add an agent card is solid white with a dashed ring, tightened (20 22 18, a 46px plus)", w,
+          r.addBg === "rgb(255, 255, 255)" && r.addBorder === "dashed" && r.addPad === "20px 22px 18px" && r.plusW !== null && near(r.plusW, 46, 0.5), `${r.addBg} ${r.addBorder} ${r.addPad} ${r.plusW}`);
+        L.check("CL15-6 the panel is Discover, coming soon: the heading, the pill, the sentence, two nameless rows", w,
+          !!r.soon && r.soon.head === "Discover agentsComing soon" && r.soon.p === "Find agents by genre, see who’s open, and add them to your list in one click." && r.soon.rows === 2 && r.soon.rowText === "", JSON.stringify(r.soon));
+        if (!narrow) L.check("CL15-6 the panel is no taller than 350 at 1512", w, r.panelH !== null && r.panelH <= 350, `${r.panelH}`);
+        else L.check("CL15-6 the panel's height at 1280 (reported)", w, r.panelH !== null, `${r.panelH}`);
+        await checkOverflow(page, L, w);
+      }
+    }
+    /* "Tell me when it's ready": the request is stored on the writer's profile, so it survives a reload (fixture B is up) */
+    await openDone(WIDTHS15[0]);
+    const before = await read();
+    L.check("CL15-6 the request starts unset: “Tell me when it’s ready”", "1512", before.notify?.text === "Tell me when it’s ready" && before.notify.pressed === "false", JSON.stringify(before.notify));
+    await page.locator('.aglist [data-cl15="discover-notify"]').filter({ visible: true }).first().click({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    const on = await read();
+    L.check("CL15-6 pressing it reads “✓ We’ll let you know”", "1512", on.notify?.text === "✓ We’ll let you know" && on.notify.pressed === "true", JSON.stringify(on.notify));
+    await page.reload();
+    await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const kept = await read();
+    L.check("CL15-6 the request survives a reload", "1512", kept.notify?.text === "✓ We’ll let you know" && kept.notify.pressed === "true", JSON.stringify(kept.notify));
+    await page.evaluate(() => localStorage.removeItem("scriptally_active_manuscript_id"));
+  } finally {
+    /* removes the manuscript, its queries and their logs, and the `notifyPrefs.discover` leaf the press wrote */
+    execSync("node tests/e2e/seedAllQueried.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(47);
+});

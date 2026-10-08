@@ -18,7 +18,10 @@
  * (`AgentCardParts`), so the two cannot fork; it only gains a chip and a button override here.
  *
  * ⚠️ EVERY DISCOVER LINK IS GATED ON `DISCOVER_LIVE` (ruling Q4) through the `discoverLive` prop, which the
- * page passes from the one constant. The render tests hold both branches.
+ * page passes from the one constant. The render tests hold both branches. While it is off, the all-queried state's
+ * panel is the COMING-SOON panel: a heading with a pill, one sentence, two faded placeholder rows that name nobody,
+ * and "Tell me when it's ready", which stores the request on the writer's profile. The day the constant is true,
+ * v14's "In Discover" list takes the panel with no other change.
  *
  * No pronouns for agents, no appraisal words, and QueryHawk writes nothing for the writer.
  */
@@ -52,6 +55,9 @@ export interface ContactNextStepProps {
   reminded: (a: Agent) => boolean;
   /** `DISCOVER_LIVE` — gates every Discover link and the "In Discover" list */
   discoverLive: boolean;
+  /** the writer asked to be told when Discover opens (`notifyPrefs.discover`), and the toggle that stores it */
+  notifyDiscover: boolean;
+  onNotifyDiscover: () => void;
   /** Discover agents who take the book's genres and are open, not already on the list — read only while live */
   discover: readonly CommunityAgent[];
   onOpen: (agentId: string, rect?: DOMRect) => void;
@@ -216,7 +222,21 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
         }))} />
         {rest > 0 && <button type="button" className="fs-more" data-cl14="discover-rest" onClick={p.onDiscover}>and {rest} more in Discover</button>}
       </>
-    ) : null;
+    ) : live ? null : (
+      <div className="cl15-dt" data-cl15="discover-soon">
+        <FeaturePanelHead title="Discover agents" note={<b className="cl15-dt-soon">Coming soon</b>} />
+        <p className="cl15-dt-p">Find agents by genre, see who&rsquo;s open, and add them to your list in one click.</p>
+        {/* two faded placeholder rows: shapes only, no names (nobody real, and nobody invented) */}
+        <ol className="cl15-dt-l" aria-hidden="true">
+          {[0, 1].map((i) => (
+            <li key={i}><span className="cl15-dt-d" /><span className="cl15-dt-m"><i /><i /></span><span className="cl15-dt-a">+ Add</span></li>
+          ))}
+        </ol>
+        <button type="button" className={`cl15-dt-btn${p.notifyDiscover ? " is-on" : ""}`} data-cl15="discover-notify" aria-pressed={p.notifyDiscover} onClick={p.onNotifyDiscover}>
+          {p.notifyDiscover ? "✓ We\u2019ll let you know" : "Tell me when it\u2019s ready"}
+        </button>
+      </div>
+    );
   }
 
   return (
