@@ -62,3 +62,13 @@
 }
 .clv-group[data-loading] .dsk-card :is(.dsk-ic, .dsk-plot, .dsk-bars, .dsk-pgw) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }
+
+/* ── §4 · THE NEXT STEP's v15 parts ── */
+/* the all-queried split line: serif 14.5, ink 60% */
+.cl14-nx-well .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
+/* the ready-only mode's marker on the "Showing" line, and its ✕ */
+.cl14-ws .cl14-bar-k .cl15-ro { font-style: italic; }
+.cl14-ws .cl14-bar-k .cl15-ro button {
+  border: 0; padding: 0 2px; background: none; color: inherit; cursor: pointer; font: inherit; font-style: normal; font-size: 11px;
+}
+.cl14-ws .cl14-bar-k .cl15-ro button:hover { color: var(--cl14-cream); }

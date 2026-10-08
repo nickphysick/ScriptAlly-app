@@ -2,18 +2,28 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE NEXT STEP — what to do next with your agents for this book (Contact list v14 §2, §9). One frame, four
- * states, picked from the writer's data in this order:
+ * THE NEXT STEP — what to do next with your agents for this book (Contact list v15 §4; v14 §2, §9). One frame,
+ * THREE states, picked from the writer's data in this order:
  *
- *   ready      any agent who takes the book, is open, and has no query for this manuscript
- *   reopening  none ready, but some who take the book are Closed with a `reopensOn` still ahead
- *   gaps       none of those, but some not-queried agents have no genres recorded (we cannot tell yet)
- *   done       none of the above — every agent who takes the book has it
+ *   ready      any agent who is READY TO QUERY (below)
+ *   reopening  none ready, but some agents who are not a known mismatch are Closed with a `reopensOn` still ahead
+ *   done       neither — every agent on the list is queried, doesn't take the genre, or is closed to submissions
  *
- * ⚠️ MATCHING IS BY FACT, NEVER BY SCORE (§1.5). An agent is "ready" by three facts the app already holds —
- * genre, open door, not queried — and nothing here weighs, percentages or ranks a fit. The ORDER of the
- * ready list is the writer's own rating, then the agent's stated reply time, then surname; where the book has
- * subGenres, agents who take its MAIN genre come first.
+ * ⚠️ READY TO QUERY IS ONE RULE, AND THE SECTION, THE "ready to query" PILL AND "See all" ALL READ IT (§4): the
+ *    agent is open (`submissionStatus !== Closed`; Unknown reads open), has no query for this manuscript, and
+ *    EITHER takes one of the book's genres OR has no genres recorded. An agent whose genres ARE recorded and take
+ *    none of the book's is a KNOWN MISMATCH: never ready, never reopening, counted only in the done line's note.
+ * ⚠️ v14's fourth state ("A few more might fit", the no-genres agents) IS RETIRED: those agents are ready now.
+ * ⚠️ THE DONE STATE ACCOUNTS FOR EVERY AGENT (§4, ruling Q3): queried + known mismatches + closed to submissions = N.
+ *    "Closed to submissions" is every other unqueried agent — Closed with no reopening date, OR with one already past
+ *    (a past date is not a reopening; the note's wording, "are closed to submissions", is true of both).
+ * ⚠️ THE SPLIT LINE SUMS TO QUERIED (ruling Q1): each queried agent's LATEST query (by sent date) is still reading,
+ *    asked for more, passed, or withdrawn — the fourth part shown only when non-zero.
+ *
+ * ⚠️ MATCHING IS BY FACT, NEVER BY SCORE. An agent is "ready" by facts the app already holds — genre (or its absence),
+ * open door, not queried — and nothing here weighs, percentages or ranks a fit. The ORDER of the ready list: agents who
+ * take the book before those whose genres are unknown; then (where the book has subGenres) main-genre takers before
+ * subGenre-only; then the writer's rating; then the agent's stated reply time; then surname.
  *
  * ⚠️ EVERY COUNT IS OVER THE UNFILTERED AGENT SET (§9): the list's filters and Find never reach this.
  */
@@ -23,7 +33,7 @@ import { takesBook, takesMain } from "./genreMatch";
 import { statedWeeks } from "./contactStrip";
 import { surnameOf } from "./contactList";
 
-export type NextState = "ready" | "reopening" | "gaps" | "done";
+export type NextState = "ready" | "reopening" | "done";
 
 export interface NextStepInput {
   agents: readonly Agent[];
@@ -38,18 +48,22 @@ export interface NextStepInput {
 
 export interface NextStep {
   state: NextState;
-  /** takes the book · open · not queried — in the §9 order */
+  /** ready to query, in the §4 order */
   ready: Agent[];
-  /** takes the book · Closed · `reopensOn` ahead — soonest first */
+  /** of them, those with no genres recorded ("{u} have no genres recorded") */
+  unknown: number;
+  /** not queried · not a known mismatch · Closed · `reopensOn` ahead — soonest first */
   reopening: Agent[];
-  /** not queried · no genres recorded — by surname */
-  gaps: Agent[];
-  /** f — every agent who takes the book */
-  takers: number;
-  /** m — those of them with a query for this manuscript */
-  sent: number;
-  /** the done state's line: still reading · asked to see more · passed (each agent's latest query) */
-  outcomes: { reading: number; more: number; passed: number };
+  /** N — every agent on the list */
+  total: number;
+  /** agents with any query for this manuscript */
+  queried: number;
+  /** not queried · genres recorded · take none of the book's */
+  mismatches: number;
+  /** not queried · not a mismatch · Closed with no reopening date ahead */
+  closed: number;
+  /** the done state's split line, each queried agent's latest query: sums to `queried` */
+  outcomes: { reading: number; asked: number; passed: number; withdrawn: number };
 }
 
 /** the date part of a stored date, so "2026-11-01" and "2026-11-01T00:00:00.000Z" compare as one day */
@@ -66,11 +80,20 @@ const queryTime = (q: Query): number => {
   return Number.isFinite(t) ? t : 0;
 };
 
-/** The §9 ready order: main-genre takers first (only where the book has subGenres), then the writer's rating
- *  (highest first, unrated last), then the stated reply time (fastest first, not stated last), then surname. */
+/** no genres recorded — we cannot tell whether the agent takes the book */
+export const genresUnknown = (a: Pick<Agent, "genres">): boolean => (a.genres ?? []).filter((g) => String(g).trim()).length === 0;
+/** genres recorded, and none of them the book's — never ready (a book with no genres mismatches nobody) */
+export const knownMismatch = (a: Pick<Agent, "genres">, book: readonly string[]): boolean =>
+  book.length > 0 && !genresUnknown(a) && !takesBook(a.genres, book);
+
+/** The §4 ready order: takers before unknown genres; main-genre takers first (only where the book has subGenres); then
+ *  the writer's rating (highest first, unrated last); then the stated reply time (fastest first, not stated last);
+ *  then surname. */
 export function readyOrder(book: readonly string[]): (a: Agent, b: Agent) => number {
   const split = book.length > 1;
   return (a, b) => {
+    const ua = genresUnknown(a) ? 1 : 0, ub = genresUnknown(b) ? 1 : 0;
+    if (ua !== ub) return ua - ub;
     if (split) {
       const ma = takesMain(a.genres, book) ? 0 : 1, mb = takesMain(b.genres, book) ? 0 : 1;
       if (ma !== mb) return ma - mb;
@@ -84,6 +107,11 @@ export function readyOrder(book: readonly string[]): (a: Agent, b: Agent) => num
   };
 }
 
+/** THE ONE READY RULE (§4): open, no query for this manuscript, and the genres take the book or are unknown. */
+export function isReady(a: Agent, queried: (a: Agent) => boolean, book: readonly string[]): boolean {
+  return a.submissionStatus !== SubmissionStatus.CLOSED && !queried(a) && !knownMismatch(a, book);
+}
+
 export function nextStep(input: NextStepInput): NextStep {
   const { agents, queries, msId, book, todayIso } = input;
   const mine = (q: Query) => !msId || q.manuscriptId === msId;
@@ -95,32 +123,32 @@ export function nextStep(input: NextStepInput): NextStep {
     byAgent.set(q.agentId, list);
   }
   const queried = (a: Agent) => (byAgent.get(a.id)?.length ?? 0) > 0;
-  const takers = agents.filter((a) => takesBook(a.genres, book));
 
-  const ready = takers
-    .filter((a) => a.submissionStatus !== SubmissionStatus.CLOSED && !queried(a))
-    .sort(readyOrder(book));
-  const reopening = takers
-    .filter((a) => a.submissionStatus === SubmissionStatus.CLOSED && dayOf(a.reopensOn) > todayIso)
+  const ready = agents.filter((a) => isReady(a, queried, book)).sort(readyOrder(book));
+  const reopening = agents
+    .filter((a) => !queried(a) && !knownMismatch(a, book) && a.submissionStatus === SubmissionStatus.CLOSED && dayOf(a.reopensOn) > todayIso)
     .sort((a, b) => dayOf(a.reopensOn).localeCompare(dayOf(b.reopensOn)) || surnameOf(a).localeCompare(surnameOf(b)));
-  const gaps = agents
-    .filter((a) => !queried(a) && (a.genres ?? []).length === 0)
-    .sort((a, b) => surnameOf(a).localeCompare(surnameOf(b)));
 
-  const outcomes = { reading: 0, more: 0, passed: 0 };
-  let sent = 0;
-  for (const a of takers) {
+  let nQueried = 0, mismatches = 0, closed = 0;
+  const outcomes = { reading: 0, asked: 0, passed: 0, withdrawn: 0 };
+  for (const a of agents) {
     const qs = byAgent.get(a.id);
-    if (!qs?.length) continue;
-    sent += 1;
-    const latest = [...qs].sort((p, q) => queryTime(q) - queryTime(p))[0];
-    if (latest.status === QueryStatus.QUERIED) outcomes.reading += 1;
-    else if (ASKED_MORE.has(latest.status)) outcomes.more += 1;
-    else if (PASSED.has(latest.status)) outcomes.passed += 1;
+    if (qs?.length) {
+      nQueried += 1;
+      const latest = [...qs].sort((p, q) => queryTime(q) - queryTime(p))[0];
+      if (ASKED_MORE.has(latest.status)) outcomes.asked += 1;
+      else if (PASSED.has(latest.status)) outcomes.passed += 1;
+      else if (latest.status === QueryStatus.WITHDRAWN) outcomes.withdrawn += 1;
+      else outcomes.reading += 1;
+    } else if (knownMismatch(a, book)) mismatches += 1;
+    else if (a.submissionStatus === SubmissionStatus.CLOSED && !(dayOf(a.reopensOn) > todayIso)) closed += 1;
   }
 
-  const state: NextState = ready.length ? "ready" : reopening.length ? "reopening" : gaps.length ? "gaps" : "done";
-  return { state, ready, reopening, gaps, takers: takers.length, sent, outcomes };
+  const state: NextState = ready.length ? "ready" : reopening.length ? "reopening" : "done";
+  return {
+    state, ready, unknown: ready.filter(genresUnknown).length, reopening,
+    total: agents.length, queried: nQueried, mismatches, closed, outcomes,
+  };
 }
 
 /** The writer's reminder for the day this agent reopens — an undone dated task on that agent for exactly

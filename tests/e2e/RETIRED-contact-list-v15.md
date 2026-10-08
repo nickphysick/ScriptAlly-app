@@ -29,3 +29,16 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 **Repointed, not retired:** CL14-1 and CL14-5 (the strip's place in the rhythm is the desk's), CL14-16 (guide step 1 rings the desk, with Nick's wording), CL13-12 / CL13-13 / CL13-14 (the loading beat and the empty state read the desk).
 
 **Deleted:** `ContactStrip.tsx`, `stripFacts` / `StripFacts` and their helpers (`lib/contactStrip`), the strip's rules in `contactV13.css`.
+
+## Phase 3 — one ready rule, three states (v15 §4)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `src/components/agents/contact/contactNextStep.test.tsx` | "gaps: title, copy, the first agent without genres as the card…" | v14's fourth state is retired: an agent with no genres recorded is ready now | lock 7 in the same file (the fixture that drew it is Ready; neither the lib nor the component names the state) |
+| `src/components/agents/contact/contactNextStep.test.tsx` | the v14 copy in the ready, reopening and done cases (the "who take {genres}" sentences, the progress line, the ordering note, "Every agent queried") | §4 and §5 replace the copy; the progress bar and the ordering note are gone | the three-state cases in the same file |
+| `src/components/agents/contact/contactNextStep.test.tsx` | "off: the reopening and gaps feet are hidden", "on: the reopening foot and the gaps foot return" | the gaps foot went with its state | the reopening foot is held in both Discover branches |
+| `src/lib/contactNextStep.test.ts` | the gaps-state cases and the takers-only progress figures (`takers`, `sent`, `outcomes.more`) | the lib returns the v15 accounting (`total`, `queried`, `mismatches`, `closed`, four outcomes) | lock 4 and the accounting cases in the same file |
+
+**Repointed, not retired:** CL14-9 and `cl13Lib.openContacts` (the memory key is `sa.contactList.v3`; a v2 value is an older shape and is refused). CL14-6 stands unchanged: the ready pill's number is still the rows it leaves, now through the ready-only mode.
+
+**Deleted:** the `gaps` state and its copy, the progress bar (`.cl14-nx-prog`, `.cl14-nx-bar`), `READY_FILTERS` (the pill's genre-filter set).

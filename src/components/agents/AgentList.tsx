@@ -57,7 +57,7 @@ import {
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
-import { bookGenreHit, bookGenres, genreKey } from "../../lib/genreMatch";
+import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop } from "./contact/ContactListControls";
@@ -158,7 +158,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      to the page puts the list back as it was; a fresh session starts from the defaults. A search
      handed in from the shell wins over a remembered one. */
   const remembered = useMemo(() => readListMemory(), []);
-  const [filters, setFilters] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
+  const [filters, setFiltersRaw] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
+  /* v15 §4 — THE READY-ONLY LIST MODE: the list shows exactly the agents the next-step section calls ready (fits the
+     book OR genres unknown — a set no plain filter can express). The pill and "See all" switch it on; ✕ or touching
+     any filter leaves it; remembered and validated with the rest. Every filter write goes through `setFilters`,
+     which leaves the mode — the pill is the one caller that uses the raw setter. */
+  const [readyOnly, setReadyOnly] = useState<boolean>(() => remembered?.readyOnly ?? false);
+  const setFilters = useCallback((f: ContactFilters) => { setReadyOnly(false); setFiltersRaw(f); }, []);
   const [search, setSearch] = useState(() => searchQuery?.trim() || remembered?.search || "");
   /* v12 §9: the page opens on the card index — grouped by letter, ordered by surname */
   const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "letter");
@@ -168,7 +174,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [density, setDensity] = useState<Density>(() => remembered?.density ?? "comfortable");
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density }); }, [filters, search, groupKey, sortKey, reversed, density]);
+  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, readyOnly }); }, [filters, search, groupKey, sortKey, reversed, density, readyOnly]);
   const pop = usePopover<ContactPop>();
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
@@ -248,6 +254,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
+  /* ── v15 §4 — THE NEXT STEP, over the UNFILTERED agent set (§9): the list's filters and Find never reach it.
+     ⚠️ DECLARED HERE, above `inPool` — the ready-only mode reads `readyIds` at render (the TDZ order rule). */
+  const todayIso = useMemo(() => {
+    const d = new Date(nowMs);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, [nowMs]);
+  const step = useMemo(
+    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
+    [agents, queries, scoped, book, todayIso],
+  );
+  const readyIds = useMemo(() => new Set(step.ready.map((a) => a.id)), [step]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
   const factsAll = useMemo(
@@ -259,9 +276,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: { genres: string[] }) => x.genres.some(bookHit),
     [bookHit],
   );
+  /* the pool: Find, and (in the ready-only mode) the next-step section's own ready set — so every count is faceted under it */
   const inPool = useCallback(
-    (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search),
-    [search],
+    (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search) && (!readyOnly || readyIds.has(x.agent.id)),
+    [search, readyOnly, readyIds],
   );
   const genreWord = book.length ? joinGenres(book) : null;
   /* v14 §4: every control's count is faceted — under every OTHER control and Find */
@@ -302,7 +320,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const railLetters = useMemo(() => new Set(groupKey === "letter" ? groups.map((g) => g.label) : []), [groups, groupKey]);
   const shownGroups = groups;
   const visible = visibleFacts;
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, []);
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, [setFilters]);
   /* "M NEED YOU" — the agents whose move it is (the v12 union: requests, offers and past-date nudges) */
   const needYou = useMemo(() => factsAll.filter((x) => x.stand === "you").length, [factsAll]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
@@ -325,7 +343,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setSearch("");
     setGroupKey("letter");
     setSortKey("surname");
-  }, [setSortKey]);
+  }, [setSortKey, setFilters]);
 
   /* ── v12 §4 / v13 §6: the marked letter ───────────────────────────────────
    * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
@@ -786,17 +804,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
-  /* ── v14 §2 — THE NEXT-STEP SECTION ────────────────────────────────────────────────────────────
-     ⚠️ OVER THE UNFILTERED AGENT SET (§9): the list's filters and Find never reach it. The state, the ready
-     order, the progress and the done line all come from `lib/contactNextStep`; this is only wiring. */
-  const todayIso = useMemo(() => {
-    const d = new Date(nowMs);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }, [nowMs]);
-  const step = useMemo(
-    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
-    [agents, queries, scoped, book, todayIso],
-  );
+  /* ── v15 §4 — THE NEXT-STEP SECTION's wiring (`step` itself is derived above, beside the pipeline) ── */
   const allFactsById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x])), [factsAll]);
   const qFor = useCallback((id: string) => cardQuery(cardRows(qcRows, id, scoped?.id ?? null)), [qcRows, scoped]);
   const reminded = useCallback((a: Agent) => !!reopenReminderTask(a, userTasks ?? []), [userTasks]);
@@ -817,21 +825,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       else if (!allOn && !t) { const task = reopenReminder(a); if (task) await addUserTask(task); }
     }
   }, [userTasks, addUserTask, deleteUserTask]);
-  /* v14 §3 — the two count pills: each sets the list's filters to EXACTLY its own set (lock 6). "Waiting on you"
-     is v13's your-move standing; "ready to query" is the next-step section's ready set, the same filters See all
-     sets — open now (Unknown counts as open), not queried, any of the book's genres. A pill pressed again clears. */
-  const READY_FILTERS = useMemo<ContactFilters>(
-    () => ({ ...emptyContactFilters(), open: "open", queried: "no", genres: [...new Set(book.map(genreKey))] }), [book]);
+  /* v14 §3 / v15 §4 — the two count pills: each leaves the list showing EXACTLY its own set. "Waiting on you" is
+     v13's your-move standing, a plain filter. "Ready to query" is the ready-only MODE over the next-step section's
+     own ready set (one rule: the section, the pill and See all) — no filters, no Find, the mode on. A pill pressed
+     again clears. */
   const YOU_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), action: true }), []);
   const sameFilters = (a: ContactFilters, b: ContactFilters) => JSON.stringify(a) === JSON.stringify(b);
-  const youOn = !search.trim() && sameFilters(filters, YOU_FILTERS);
-  const readyOn = !search.trim() && sameFilters(filters, READY_FILTERS);
+  const youOn = !readyOnly && !search.trim() && sameFilters(filters, YOU_FILTERS);
+  const readyOn = readyOnly && !search.trim() && sameFilters(filters, emptyContactFilters());
   const setPillSet = useCallback((k: "you" | "ready" | null) => {
-    setFilters(k === "you" ? YOU_FILTERS : k === "ready" ? READY_FILTERS : emptyContactFilters());
+    setFiltersRaw(k === "you" ? YOU_FILTERS : emptyContactFilters());
+    setReadyOnly(k === "ready");
     setSearch("");
-  }, [YOU_FILTERS, READY_FILTERS]);
-  /* "See all N in the list": the list's filters set to exactly the ready set — open (Unknown counts as open),
-     not queried, takes the book — then the list scrolled into view. */
+  }, [YOU_FILTERS]);
+  /* "See all N in the list": the ready-only mode, then the list scrolled into view. */
   const seeAllReady = useCallback(() => {
     setPillSet("ready");
     window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
@@ -955,15 +962,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             }}
             onProfiles={() => setHkOpen(true)} />
         )}
-        {/* v14 §2 — the next-step section, 44 under the strip: one of four states, from the writer's data */}
+        {/* v15 §4 — the next-step section: one of three states, from the writer's data */}
         {showList && (
           <ContactNextStep
-            step={step} bookTitle={scoped?.title?.trim() || null} genres={genreWord ?? ""}
+            step={step} hasBook={!!scoped} bookTitle={scoped?.title?.trim() || null} genres={genreWord ?? ""}
             factsById={allFactsById} qFor={qFor} genreHit={bookHit} personal={personalGenres} todayIso={todayIso}
             reminded={reminded} discoverLive={DISCOVER_LIVE} discover={discoverPicks}
             onOpen={(id, r) => onOpen(id, r)} onAct={actWithoutCard}
             onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
-            onSeeAll={seeAllReady} onOpenHk={() => setHkOpen(true)}
+            onSeeAll={seeAllReady}
             onNewAgent={(r) => openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null })}
             onDiscover={goDiscover} onRemind={(a) => void toggleRemind(a)} onRemindAll={(l) => void toggleRemindAll(l)}
             onAddDiscover={(ca) => void addAgent(communityAgentFields(ca, scoped?.title?.trim() || null))}
@@ -985,6 +992,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <YourAgentsBar
             shown={visibleFacts.length} total={factsAll.length} book={scoped?.title?.trim() || null}
             you={needYou} ready={step.ready.length} youOn={youOn} readyOn={readyOn}
+            readyOnly={readyOnly} onLeaveReady={() => setReadyOnly(false)}
             onYou={() => setPillSet(youOn ? null : "you")} onReady={() => setPillSet(readyOn ? null : "ready")}
             art={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }}
             controls={controls}

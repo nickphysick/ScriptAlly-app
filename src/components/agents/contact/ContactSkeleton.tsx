@@ -67,13 +67,15 @@ export const ContactSkeleton: React.FC<{
   return (
     <>
       <ContactDesk model={desk} onQueried={noop} onProfiles={noop} />
-      {/* v14 §2 — the next-step section over the same placeholders: they are open, take the genre and are
-          unqueried, so it draws its Ready state, the shape the page settles into most often */}
+      {/* v15 §4 — the next-step section over the placeholders: they are open, take the genre and are unqueried,
+          so it draws its Ready state, the shape the page settles into most often. Over TWO of them, so the card
+          sets the section's height and the list beside it never does: how many agents are ready is the writer's
+          data, and a longer placeholder list held the section 31px taller than it loaded (measured, CL13-12). */}
       <ContactNextStep
-        step={nextStep({ agents: PLACEHOLDERS, queries: [], msId: null, book: ["Thriller"], todayIso: "2000-01-01" })}
-        bookTitle={msTitle} genres="thrillers" factsById={byId} qFor={() => null} genreHit={() => false} todayIso="2000-01-01"
+        step={nextStep({ agents: PLACEHOLDERS.slice(0, 2), queries: [], msId: null, book: ["Thriller"], todayIso: "2000-01-01" })}
+        hasBook bookTitle={msTitle} genres="thrillers" factsById={byId} qFor={() => null} genreHit={() => false} todayIso="2000-01-01"
         reminded={() => false} discoverLive={false} discover={[]}
-        onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onOpenHk={noop} onNewAgent={noop} onDiscover={noop}
+        onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onNewAgent={noop} onDiscover={noop}
         onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
       />
       <div className="clv-main">

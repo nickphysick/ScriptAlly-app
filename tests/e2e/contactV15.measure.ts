@@ -9,7 +9,8 @@
  * ⚠️ RUN AT ONE WORKER (`--workers=1`): the writing cases share the harness account with every other contact suite.
  */
 import { test } from "@playwright/test";
-import { Ledger, WIDTHS15, checkOverflow, near, openContacts } from "./cl15Lib";
+import { execSync } from "node:child_process";
+import { Ledger, LOADED_ROW, WIDTHS15, checkOverflow, near, openContacts } from "./cl15Lib";
 
 test.beforeEach(async ({ page }) => {
   /* the page guide auto-opens on a first visit; every lock but the guide's reads the page without it */
@@ -189,4 +190,139 @@ test("CL15-3 · desk", async ({ page }) => {
   L.check("CL15-3 Profiles complete opens Housekeeping", "1512", hk, `${hk}`);
   await page.keyboard.press("Escape");
   L.done(31);
+});
+
+/* ── the ready-only list mode (§4): what the page says about it, read in one place ── */
+const KEY15 = "sa.contactList.v3";
+const EMPTY_FILTERS = { status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" };
+type P15 = import("@playwright/test").Page;
+const listState = (page: P15) => page.evaluate((rowSel) => {
+  const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+  if (!root) return null;
+  const num = (s: string | null | undefined) => Number((s ?? "").match(/\d+/)?.[0] ?? NaN);
+  const next = root.querySelector<HTMLElement>('[data-cl14="next"]');
+  const pill = root.querySelector<HTMLElement>('[data-cl14="pill-ready"]');
+  return {
+    rows: [...root.querySelectorAll<HTMLElement>(rowSel)].filter((e) => e.getBoundingClientRect().height > 0).length,
+    state: next?.getAttribute("data-state") ?? null,
+    section: num(next?.querySelector('[data-cl14="see-all"]')?.textContent),
+    lede: next?.querySelector(".cl14-nx-lede, [data-fs=\"lede\"]")?.textContent ?? "",
+    pill: num(pill?.textContent), pressed: pill?.getAttribute("aria-pressed") ?? null,
+    marker: root.querySelector('[data-cl15="ready-only"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+    showing: root.querySelector('[data-cl14="showing"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+    total: num(root.querySelector('[data-cl15="header"] h1')?.textContent),
+  };
+}, LOADED_ROW);
+
+/* ── lock 5 · pill = section = rows: one ready rule everywhere. After the pill, the rows shown, the pill's number and
+   the section's number are equal; ✕ or any filter leaves the mode; the mode is remembered for the visit. ── */
+test("CL15-5 · pill = section = rows", async ({ page }) => {
+  const L = new Ledger("cl15-5");
+  /* ⚠️ THE "OR UNKNOWN" HALF HAS NO SUBJECT ON THE SHARED ACCOUNT (every ready agent there fits): `seedReadyUnknown.mjs`
+     adds one open, unqueried agent with no genres, and this case removes it in the same run. */
+  execSync("node tests/e2e/seedReadyUnknown.mjs", { stdio: "inherit" });
+  try {
+  const pill = () => page.locator('.aglist [data-cl14="pill-ready"]').filter({ visible: true }).first();
+  for (const vp of WIDTHS15) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const at = await listState(page);
+    if (!at || at.state !== "ready" || !(await pill().count())) {
+      L.check("CL15-5 population: the fixture's state is Ready, with the pill drawn", w, false, JSON.stringify(at));
+      continue;
+    }
+    L.check("CL15-5 population: the fixture's state is Ready, with the pill drawn", w, true, "");
+    await pill().click({ timeout: 8000 });
+    await page.waitForTimeout(900);
+    const on = (await listState(page))!;
+    L.check("CL15-5 after the pill: rows = the pill's number = the section's number", w,
+      on.pill > 0 && on.rows === on.pill && on.pill === on.section, `rows ${on.rows} pill ${on.pill} section ${on.section}`);
+    L.check("CL15-5 the pill reads as pressed and the line says so", w,
+      on.pressed === "true" && on.marker !== null && /· ready to query/.test(on.marker) && new RegExp(`^Showing ${on.rows} of ${on.total}\\b`).test(on.showing), `${on.pressed} | ${on.showing}`);
+    /* ✕ leaves the mode */
+    await page.locator('.aglist [data-cl15="ready-only-x"]').filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(700);
+    const off = (await listState(page))!;
+    L.check("CL15-5 ✕ leaves the mode: every agent again, no marker, the pill not pressed", w,
+      off.rows === off.total && off.marker === null && off.pressed === "false", `rows ${off.rows} of ${off.total} marker ${off.marker} pressed ${off.pressed}`);
+    /* See all applies the same mode */
+    await page.locator('.aglist [data-cl14="see-all"]').filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+    const all = (await listState(page))!;
+    L.check("CL15-5 See all applies the same mode: the same rows", w, all.rows === on.rows && all.marker !== null, `rows ${all.rows} marker ${all.marker}`);
+    /* touching any filter leaves the mode */
+    /* "Action required" is a chip on the strip, or (folded, at 1280) an option under "More filters"; scroll the strip in
+       first — the first click on a strip dropdown scrolls the page, and the popover closes on scroll */
+    const v = (sel: string) => page.locator(`.aglist ${sel}`).filter({ visible: true }).first();
+    const touchAction = async () => {
+      await v('[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" })).catch(() => {});
+      await page.waitForTimeout(200);
+      if ((await v('[data-cl14-dd="more"]').count()) > 0) {
+        await v('[data-cl14-dd="more"]').click({ timeout: 5000 }).catch(() => {});
+        await page.locator('[data-lpop="more"] [data-opt="more:action"]').click({ timeout: 3000 }).catch(() => {});
+        await page.keyboard.press("Escape");
+      } else await v('[data-cl14-chip="action"]').click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(700);
+    };
+    await touchAction();
+    const fl = (await listState(page))!;
+    L.check("CL15-5 touching a filter leaves the mode", w, fl.marker === null && fl.pressed === "false", `marker ${fl.marker} pressed ${fl.pressed} rows ${fl.rows}`);
+    await touchAction();
+    await checkOverflow(page, L, w);
+  }
+  /* the branches the rule separates, both entered on this fixture (a monoculture would prove nothing):
+     an agent with no genres is IN the ready set, and an open, unqueried known mismatch is OUT of it */
+  await openContacts(page, WIDTHS15[0]);
+  const base = (await listState(page))!;
+  L.check("CL15-5 population: some ready agents have no genres recorded", "1512", /no genres recorded/.test(base.lede), base.lede.slice(0, 160));
+  await page.evaluate(([k, f]) => sessionStorage.setItem(k as string, JSON.stringify({ v: 3, filters: f, search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", readyOnly: false })),
+    [KEY15, { ...EMPTY_FILTERS, open: "open", queried: "no" }] as const);
+  await page.reload();
+  await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+  await page.waitForTimeout(900);
+  const plain = (await listState(page))!;
+  L.check("CL15-5 population: the plain Open + Not queried filter shows MORE rows than are ready (known mismatches exist)", "1512",
+    plain.rows > base.pill, `plain ${plain.rows} ready ${base.pill}`);
+  /* the mode is remembered for the visit, like any other list setting */
+  await page.evaluate((k) => sessionStorage.removeItem(k), KEY15);
+  await openContacts(page, WIDTHS15[0]);
+  await pill().click({ timeout: 8000 });
+  await page.waitForTimeout(700);
+  await page.reload();
+  await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+  await page.waitForTimeout(900);
+  const kept = (await listState(page))!;
+  L.check("CL15-5 the mode survives a reload", "1512", kept.marker !== null && kept.rows === base.pill, `rows ${kept.rows} ready ${base.pill} marker ${kept.marker}`);
+  await page.evaluate((k) => sessionStorage.removeItem(k), KEY15);
+  } finally {
+    execSync("node tests/e2e/seedReadyUnknown.mjs --clean", { stdio: "inherit" });
+  }
+  L.done(15);
+});
+
+/* ── lock 5b · load state: a fresh load shows all N agents. Counting the pill's number must not leave the ready-only
+   mode switched on, and an older remembered shape cannot switch it on either. ── */
+test("CL15-5b · load state", async ({ page, browser }) => {
+  const L = new Ledger("cl15-5b");
+  for (const vp of WIDTHS15) {
+    const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
+    const p2 = await ctx.newPage();
+    await p2.addInitScript(() => { try { localStorage.setItem("sa.guide.contacts", "1"); } catch { /* private mode */ } });
+    await openContacts(p2, vp, { keep: true });
+    const s = await listState(p2);
+    const w = `${vp.width}`;
+    L.check("CL15-5b a fresh load shows all N agents", w, !!s && s.total > 0 && s.rows === s.total, JSON.stringify(s && { rows: s.rows, total: s.total }));
+    L.check("CL15-5b the pill has its number, and the mode is off (no marker, not pressed)", w, !!s && s.pill > 0 && s.marker === null && s.pressed === "false", JSON.stringify(s && { pill: s.pill, marker: s.marker, pressed: s.pressed }));
+    await ctx.close();
+  }
+  /* v14's key carried no mode: a v2 value claiming one is an older shape and is refused whole */
+  await openContacts(page, WIDTHS15[0]);
+  await page.evaluate(() => sessionStorage.setItem("sa.contactList.v2", JSON.stringify({ v: 2, filters: {}, group: "letter", sort: "surname", readyOnly: true })));
+  await page.reload();
+  await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
+  await page.waitForTimeout(900);
+  const old = await listState(page);
+  L.check("CL15-5b an older remembered shape cannot switch the mode on", "1512", !!old && old.rows === old.total && old.marker === null, JSON.stringify(old && { rows: old.rows, total: old.total, marker: old.marker }));
+  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v2"));
+  L.done(5);
 });

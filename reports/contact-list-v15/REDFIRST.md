@@ -19,3 +19,17 @@ bar solid, a Profiles stamp, a Queried press that does not filter, the stamp's p
 header, a Profiles press that does nothing, titles in the card's colour.
 
 Neighbours on the Phase 2 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 40 passed.
+
+## Phase 3 — lock 4, lock 7 (unit), CL15-5, CL15-5b (rendered)
+Against 8093d64f: CL15-5 red on eleven readings (the pill leaves the genre-filtered set, no mode marker, no ✕, the
+v14 sentence, plain = ready); CL15-5b red on its first reading (the v15 header's count is not there to read). The
+unit locks have no baseline run: their subject (`isReady`, the three-state type) does not exist before v15.
+
+Mutations (`mutation-proofs-p3.jsonl`), each red at the assertion it names: an agent with no genres treated as a
+mismatch (lock 4); the old picker restored (lock 7); the pill using the plain Open + Not queried filter (28 rows
+against a pill of 3); the mode on by default (CL15-5b: 2 rows of 37); the ✕ doing nothing; a filter change not
+leaving the mode; the mode not remembered.
+
+Neighbours on the Phase 3 build, one worker: `contactV15` + `contactV14` + `contactV13` + `contactV11` — 41 passed,
+1 failed (CL13-12, the loading beat: the placeholder section 31px taller than the loaded one); fixed in the skeleton
+and re-run green.

@@ -336,7 +336,7 @@ test("CL14-8 · grouping", async ({ page }) => {
 
 /* ── lock 9 · remembered settings: versioned and validated — stale state reads as the defaults ── */
 const seedMemory = async (page: P, value: unknown) => {
-  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v2", JSON.stringify(v)), value);
+  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v3", JSON.stringify(v)), value);
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
@@ -347,14 +347,14 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   const w = "1512";
   await openContacts(page, vp);
   const total = await rowCount(page);
-  /* a good v2 state restores */
-  const good = { v: 2, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable" };
+  /* a good state restores (v15 moved the key to v3 with the ready-only mode) */
+  const good = { v: 3, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable", readyOnly: false };
   await seedMemory(page, good);
   L.check("CL14-9 a good state restores: Grouped: Status, Sort: Response time, Action required on", w,
     (await pillWords(page, "group")).includes("Status") && (await pillWords(page, "sort")).includes("Response time")
     && (await v14(page, '[data-cl14-chip="action"]').getAttribute("aria-pressed").catch(() => null)) === "true", `${await pillWords(page, "group")} | ${await pillWords(page, "sort")}`);
   /* a stale state — a grouping, a sort and a status that no longer exist, and v13's facets — reads as the defaults, and the page still renders */
-  await seedMemory(page, { v: 2, filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
+  await seedMemory(page, { v: 3, readyOnly: "yes", filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
   const stale = { group: await pillWords(page, "group"), sort: await pillWords(page, "sort"), rows: await rowCount(page), clear: await page.locator('.aglist [data-cl14="clear-all"]').filter({ visible: true }).count(), boundary: await page.getByText(/Something went wrong/i).count() };
   L.check("CL14-9 stale state: Letter, Surname A to Z, nothing on, every row, no error", w,
     stale.group.includes("Letter") && stale.sort.includes("Surname, A to Z") && stale.rows === total && stale.clear === 0 && stale.boundary === 0, JSON.stringify(stale));
@@ -365,12 +365,17 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   L.check("CL14-9 stale state: the list itself is grouped by letter (A–Z tabs, letter headings)", w,
     idx === 1 && heads.length > 1 && heads.every((h) => /^[A-Z#]$/.test(h)), `idx ${idx} ${JSON.stringify(heads.slice(0, 6))}`);
   /* v13's unversioned key is read by nothing */
-  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList.v2"); sessionStorage.setItem("sa.contactList", JSON.stringify({ filters: { stand: ["you"] }, group: "agency", sort: "due" })); });
+  await page.evaluate(() => {
+    sessionStorage.removeItem("sa.contactList.v3");
+    sessionStorage.setItem("sa.contactList", JSON.stringify({ filters: { stand: ["you"] }, group: "agency", sort: "due" }));
+    /* v14's key too: a v2 value is an older shape, refused whole */
+    sessionStorage.setItem("sa.contactList.v2", JSON.stringify({ v: 2, filters: {}, group: "status", sort: "reply", readyOnly: true }));
+  });
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
-  L.check("CL14-9 v13's unversioned key is ignored", w, (await pillWords(page, "group")).includes("Letter") && (await rowCount(page)) === total, await pillWords(page, "group"));
-  await page.evaluate(() => sessionStorage.removeItem("sa.contactList"));
+  L.check("CL14-9 v13's unversioned key and v14's v2 key are ignored", w, (await pillWords(page, "group")).includes("Letter") && (await rowCount(page)) === total, await pillWords(page, "group"));
+  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList"); sessionStorage.removeItem("sa.contactList.v2"); });
   /* a fresh session restores nothing */
   await seedMemory(page, good);
   const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
@@ -379,7 +384,7 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   await openContacts(p2, vp, { keep: true });
   L.check("CL14-9 a fresh session restores nothing", w, (await pillWords(p2, "group")).includes("Letter"), await pillWords(p2, "group"));
   await ctx.close();
-  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v2"));
+  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v3"));
   L.done(5);
 });
 
