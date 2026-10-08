@@ -912,16 +912,17 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **A desk section chooses for "Recently updated" and never filters the list** (R2). "See all N" is the list's own count.
 - **The list's filter is ONE `QcFilter` value.** Pills and chips are one-at-a-time choices over it; pressing the pressed one returns to "all". There are no AND facets. "Your move" is `court:you` (offers included), "Overdue" is `past` (`pastExpected`, the desk's "responses overdue"). Both pills are held equal to the desk's numbers (W2).
 - **Sort is the list's own `SORT_OPTIONS`**, never the drawer's `SORT_BY_OPTIONS`. No direction button.
-- **⚠️ The four coloured bands appear under Grouped: urgency.** The default grouping is "No grouping", which is two bands (Your move, Everything else). `URGENCY_GROUPS` reads Your move · Past the date · Waiting · Closed.
+- **The default grouping is Urgency** (the four coloured bands; ruled 8 Oct, superseding the 3 Oct "No grouping" default). `URGENCY_GROUPS` reads Your move · Past the date · Waiting · Closed. "No grouping" is still two bands (Your move, Everything else).
 - **The row's words are `lib/qcRowLines`:** `STAND_VERB` + `standLine`, `nextLine`, `sentCell`. Every `QueryStatus` needs a verb in `STAND_VERB` AND in `qcRecent`'s table; both are locked over the enum.
 - **⚠️ "What you sent" lights a package's tiles from the EDITION THAT WENT** (`sentPackageEdition`), never the package as it is now. A package no longer on file keeps its chip, says so, and its tiles read "Not recorded", never "Not sent".
 - **⚠️ The row popups are portalled to `document.body`**: `.qcv-page` is `container-type: inline-size`, which contains fixed children. Nothing in a row carries a native `title` (W7).
 - **⚠️ The hawk overhangs the bar, so `.qcv-page.qcw` may not clip** (W1).
 - **Keys are registered in `lib/shortcuts` ("Query Centre" scope) and bound in `useQcListKeys`:** `/` Find, j/k/↓/↑, Enter, L, Escape. They stand down while typing, under any escape-stack layer and behind the open drawer.
-- **Density is the only remembered list setting:** `localStorage["sa.qcList.v1"]` (`lib/qcListMemory`), validated on restore.
-- **⚠️ At 1280 with the sidebar open the panel is about 964px**, so a loaded row wraps and is taller than its loading placeholder. W10 compares row height at 1512 and 1920 only. Open question for Nick.
+- **The list remembers density and grouping:** `localStorage["sa.qcList.v1"]`, version 2 inside it (`lib/qcListMemory`). A version-1 record is refused whole; a junk field reads as its default.
+- **⚠️ THE NARROW PANEL (a container query on `.qcv-page`, under 1100px — a 1280 window with the sidebar open):** the slot is its 34px mark (the package's name is in its popup title), Next move is 220, Edit and Close in the tray are icon buttons (the longest tray is 258px against a 220px cell), and the two text columns are 0.96fr / 1.04fr with slightly tighter type. W12 holds one-line statuses, whole names and one tile x; W8 holds the tray clear.
+- **⚠️ The harness account is shared and other sessions seed it mid-run.** A lock comparing two numbers reads both in ONE `evaluate` (W2's `deskAndList`), or it fails on weather.
 - **Built beside the Contact list's, not lifted** (`agents/**` was another session's): the ink bar and pills, the filter strip, `CountTo`, density, the key card, the dead end. Lift candidates.
-- **Locks:** `tests/e2e/qcV132.measure.ts` R1–R3, R5, W1–W10 and `qcRecent.test.ts` (R4); proofs in `reports/qc-v132/mutation-proofs.json`. Retired: `tests/e2e/RETIRED-query-centre-v132.md`.
+- **Locks:** `tests/e2e/qcV132.measure.ts` R1–R3, R5, W1–W10, W12 and `qcRecent.test.ts` (R4); proofs in `reports/qc-v132/mutation-proofs.json`. Retired: `tests/e2e/RETIRED-query-centre-v132.md`.
 
 ## Query Centre — v126 + v126.2 (5 Oct; refs = design-refs/query-centre-v126.html for the page, design-refs/query-centre-v130.html for the Birds-eye drawer; reports reports/qc-v126/REPORT.md and reports/qc-v126-2/REPORT.md) — THE CURRENT BUILD
 - **v126 + v126.2 ARE THE QUERY CENTRE ON `main`.** The v96 section below and everything older describe pages this one replaced in part; where they disagree, this section wins.
@@ -1539,7 +1540,7 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
-**Query Centre v132 is DONE on branch `qc-v132` (four commits), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v132/REPORT.md`: the false premises, the 1280 row wrap, and the pieces now built twice.
+**Query Centre v132 is DONE on branch `qc-v132` (four commits, a merge of `main` and a follow-ups commit), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v132/REPORT.md`: the false premises, the 1280 row wrap, and the pieces now built twice.
 
 **Contact list v14 is DONE on `main` and PUSHED (Phases 1–7, `31a1af05` → Phase 7), NOT deployed anywhere** — Nick deploys to dev himself. Read `reports/contact-list-v14/REPORT.md` first: the false premises, the deviations and the follow-ups (the Query Centre adopting `shell/listTable`; `AgentCardHost`/`contactEdit` still reading the main genre only; the Reminder wording).
 

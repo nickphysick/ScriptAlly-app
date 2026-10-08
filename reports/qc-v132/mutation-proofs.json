@@ -36,16 +36,6 @@
   ]
  },
  {
-  "lock": "W2",
-  "mutation": "your move counts 'you' (offers excluded) instead of the desk's court",
-  "red": true,
-  "reading": [
-   "Error: 1280: your move = the desk's With you",
-   "Expected: 13",
-   "Received: 12"
-  ]
- },
- {
   "lock": "W3",
   "mutation": "Clear all leaves the filter on",
   "red": true,
@@ -129,6 +119,36 @@
    "Error: 1512: rowH 54.6 → 74.6",
    "Expected: <= 1",
    "Received:    19.999999999999993"
+  ]
+ },
+ {
+  "lock": "W12",
+  "mutation": "remove the narrow-panel breakpoint",
+  "red": true,
+  "reading": [
+   "Error: Tobias Hark: the status is one line",
+   "Expected: 1",
+   "Received: 2"
+  ]
+ },
+ {
+  "lock": "W12b",
+  "mutation": "default grouping back to No grouping",
+  "red": true,
+  "reading": [
+   "Error: the default grouping",
+   "Expected pattern: /urgency/i",
+   "Received string:  \"Grouped: none ⌄\""
+  ]
+ },
+ {
+  "lock": "W2",
+  "mutation": "your move counts 'you' (offers excluded) instead of the desk's court",
+  "red": true,
+  "reading": [
+   "Error: 1280: your move = the desk's With you",
+   "Expected: 13",
+   "Received: 12"
   ]
  }
 ]

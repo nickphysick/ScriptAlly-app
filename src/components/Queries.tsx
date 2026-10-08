@@ -2313,8 +2313,10 @@ export const Queries: React.FC<{
      reads it; nothing the reader can reach does. */
   const QC_UNASSIGNED = "__unassigned__";
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
-  /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
-  const [qcGroup, setQcGroup] = useState<GroupBy>("none");
+  /** The list's grouping. Urgency by default (v132 follow-up, 8 Oct — supersedes the 3 Oct "No grouping"
+   *  default), and remembered on this device beside density (lib/qcListMemory). */
+  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => readQcListMemory().group);
+  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcListMemory({ ...readQcListMemory(), group: g }); }, []);
   /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
   const [qcFind, setQcFind] = useState("");
 
@@ -2352,7 +2354,7 @@ export const Queries: React.FC<{
   /* v132 §2/§4 — row density, the workspace's own control, remembered on this device under its own
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
-  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ density: d }); }, []);
+  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
   const qcFindRef = useRef<HTMLInputElement>(null);
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);

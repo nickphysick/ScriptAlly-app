@@ -4,29 +4,33 @@
  *
  * THE QUERY CENTRE LIST'S MEMORY (v132 §4) — what the list remembers between visits, on this device.
  *
- * ⚠️ THERE WAS NO LIST MEMORY BEFORE THIS: the list's grouping, sort and filter are page state and
- * start at their defaults on every load. So this holds DENSITY alone, under its own versioned key,
- * rather than "alongside group and sort" as the brief assumed.
+ * It holds DENSITY and the GROUPING (v132 follow-up, 8 Oct: the default grouping is Urgency, and a
+ * writer's own choice is remembered). Sort and filter are page state and start at their defaults.
  *
- * ⚠️ VERSIONED AND VALIDATED ON RESTORE. An older or unknown shape is refused whole; a junk field
- * reads as its default.
+ * ⚠️ THE KEY STAYS `sa.qcList.v1`; THE VERSION INSIDE IT IS 2. A version-1 record (density alone) is
+ * refused whole, like any other shape that is not this version's; a junk field reads as its default.
  */
+import type { GroupBy } from "./qcCalView";
 export type QcDensity = "comfortable" | "compact";
 export const QC_LIST_MEMORY_KEY = "sa.qcList.v1";
-export const QC_LIST_MEMORY_VERSION = 1;
-export interface QcListMemory { density: QcDensity }
-export const QC_LIST_DEFAULTS: QcListMemory = { density: "comfortable" };
+export const QC_LIST_MEMORY_VERSION = 2;
+export interface QcListMemory { density: QcDensity; group: GroupBy }
+export const QC_LIST_DEFAULTS: QcListMemory = { density: "comfortable", group: "attention" };
+const GROUPS: readonly GroupBy[] = ["attention", "status", "action", "package", "none"];
 
 /** Parse what was stored. Anything that is not this version's shape is the defaults. */
 export function parseQcListMemory(raw: string | null | undefined): QcListMemory {
   if (!raw) return { ...QC_LIST_DEFAULTS };
   try {
-    const o = JSON.parse(raw) as { v?: unknown; density?: unknown } | null;
+    const o = JSON.parse(raw) as { v?: unknown; density?: unknown; group?: unknown } | null;
     if (!o || typeof o !== "object" || o.v !== QC_LIST_MEMORY_VERSION) return { ...QC_LIST_DEFAULTS };
-    return { density: o.density === "compact" ? "compact" : "comfortable" };
+    return {
+      density: o.density === "compact" ? "compact" : "comfortable",
+      group: GROUPS.includes(o.group as GroupBy) ? (o.group as GroupBy) : QC_LIST_DEFAULTS.group,
+    };
   } catch { return { ...QC_LIST_DEFAULTS }; }
 }
-export const serialiseQcListMemory = (m: QcListMemory): string => JSON.stringify({ v: QC_LIST_MEMORY_VERSION, density: m.density });
+export const serialiseQcListMemory = (m: QcListMemory): string => JSON.stringify({ v: QC_LIST_MEMORY_VERSION, density: m.density, group: m.group });
 
 export function readQcListMemory(): QcListMemory {
   try { return parseQcListMemory(typeof localStorage !== "undefined" ? localStorage.getItem(QC_LIST_MEMORY_KEY) : null); }

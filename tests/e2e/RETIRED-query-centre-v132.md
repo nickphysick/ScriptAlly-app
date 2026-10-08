@@ -70,3 +70,15 @@ Re-pointed, claims intact:
 
 - `qcV96` QC4: the app side of its no-truncation sweep reads the v132 row's strings (name, agency, status, dated line, phrase and its line).
 - `qcV131` QC16's claim (the frames do not move when the list loads) is now QC132 W10, which compares the head's and the first row's tops held against loaded at all three widths, and the row's height where the loaded row does not wrap (1512 and 1920).
+
+## Follow-ups (8 Oct) — the narrow panel, the Urgency default
+
+Nothing retired.
+
+Re-pointed, claims intact:
+
+- QC132 W5 and W6: the last two columns are 284 / 284 and the slot 112 in a panel of 1100px or more; 206 / 220 and 34 below it (W12 owns the narrow layout).
+- QC132 W2: the desk and the list are read in one `evaluate`, because another session seeds the shared account mid-run. Its mutation still reds (13 against 12).
+- `contactV13` CL13-10: opens the Query Centre's card from the agent's name. A row's centre is its "What you sent" cell.
+
+No lock asserted the old "No grouping" default: QC126-19 and `qcV96` QC4 choose it explicitly.

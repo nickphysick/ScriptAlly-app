@@ -386,7 +386,8 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   await page.evaluate(() => document.fonts.ready);
   const qrow = page.locator('[data-qcv="row"]').first();
   await qrow.waitFor({ timeout: 30_000 });
-  await qrow.click();
+  /* v132: a row's centre is its "What you sent" cell, whose slot opens the edit drawer; the agent's name opens the card */
+  await qrow.locator('[data-qcv="row-agent"]').click();
   await page.locator('[data-qcv="qm-card"]').waitFor({ timeout: 8000 });
   await page.waitForTimeout(400);
   await page.locator('[data-qcv="qm-card"] [data-qcv="open-action"]').click();

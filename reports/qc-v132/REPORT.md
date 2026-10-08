@@ -102,3 +102,43 @@ W10 compares row height at 1512 and 1920 only. At 1280 a loaded row wraps (§1.9
 - Production build: clean, no CSS warnings.
 - Vitest: 538 files, 8,443 passed, 3 skipped (baseline 535 / 8,417 / 3).
 - e2e, Query Centre suites on the Phase 4 build: 50 passed, 21 skipped (the retired cases), 2 failed. The two failures are QC126-2 and QC15, both red before this pass (§3).
+
+## 8. Follow-ups after review (8 Oct)
+
+One commit on `qc-v132`, after merging `origin/main`.
+
+### 8.1 The merge
+
+`origin/main` at `a0900cbe` (Contact list v15, phases 1 to 3 of 6) merged into `qc-v132`. One conflict, in `design-refs/.refhashes.json`: both sides added refs at the same place. Both are kept; the ref check passes (172 refs). No source file conflicted.
+
+### 8.2 What changed
+
+1. **The narrow panel.** Under 1100px of workspace panel the package chip is its 34px box, the slot is 34px on every row, and Next move is 220. Agent and Where it stands take the freed width.
+2. **Two things the brief's three changes did not cover, found by measuring:**
+   - The longest tray (an offer's action, Edit, Close) is 258px, wider than a 220px cell. In the narrow panel Edit and Close are icon buttons; each keeps its accessible name.
+   - "Revise & resubmit" with its YOUR MOVE stamp is 226px and the status column was 208. The two text columns are now 0.96fr / 1.04fr there, with slightly tighter type (status 15px, name 16.5px, stamp padding).
+3. **Urgency is the default grouping**, remembered beside density in `sa.qcList.v1` under version 2. A version-1 record is refused whole, so a device that had chosen Compact starts at Comfortable once.
+4. **"+ Add"** is drawn as a plus alone in the narrow panel.
+
+### 8.3 W12
+
+At 1280 with the sidebar open (panel 982px, 83 rows, 18 package chips): every status and dated line is one line, no agent name is cut, every slot is 34px, the first tile shares one x, the chip shows its box alone with the name as the popup title, the default grouping is Urgency, and a chosen grouping survives a reload. All rows are 73px.
+
+| Mutation | Red reading |
+|---|---|
+| remove the breakpoint | "Tobias Hark: the status is one line", 2 against 1 |
+| default grouping back to No grouping | "the default grouping": "Grouped: none" |
+
+Green on the restored build. W10 now compares row height at all three widths (74.6 → 74.6 at 1280).
+
+### 8.4 Gates on the merged branch
+
+- `tsc --noEmit`: 0 errors (root and `functions/`).
+- Production build: clean.
+- Vitest: 538 files, 8,440 passed, 3 skipped. `origin/main` alone in a throwaway checkout: 534 files passed, 8,404 passed, 3 skipped, plus `functions/src/email.test.ts`, which could not load there (no `functions/node_modules`). The branch adds three test files.
+- Query Centre e2e: 49 passed, 21 skipped, 4 failed on the first run. Two are QC126-2 and QC15, red before v132. The other two were W2 and W4, which read counts that another session was changing on the shared account during the run (overdue read 35, 37 and 39 in three consecutive runs). W4 passed on re-run unchanged. W2 now reads the desk and the list in one instant, passed twice, and was re-proved red.
+- Contact list e2e (`contactV11`, `V13`, `V14`, `V15`): 40 passed, 2 failed on the first run. CL13-10 clicked the centre of a Query Centre row, which is now the "+ Add" slot; it is re-pointed to the agent's name and passes. CL15-5b passed on re-run unchanged (the same shared-account seeding).
+
+### 8.5 Shots
+
+`shots/ws-1280.png` and `shots/ws-1512.png` show the workspace top grouped by urgency. All eighteen shots were retaken on this build.

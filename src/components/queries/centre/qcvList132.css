@@ -5,7 +5,7 @@
  * "YOUR QUERIES" — THE LIST (Query Centre v132 §3; ref design-refs/query-centre/query-centre-v132.html
  * `#ws .body`, `.cols`, `.gband`, `.row`, `.mats`, `#tip`). Values are the ref's.
  *
- * ⚠️ ONE GRID: the labels and every row read `--qcw-cols` (`minmax(0,1fr) minmax(0,1fr) 284px 284px`,
+ * ⚠️ ONE GRID: the labels and every row read `--qcw-cols` (`minmax(0,1fr) minmax(0,1fr) 284px 284px`; 206px 220px in a panel under 1100px,
  * gap 20). The shared `ListLabels` reads `--lt-cols`, so the list sets both to the same value.
  *
  * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE (the page's 0-1-0 font reset lands later in the bundle).
@@ -96,6 +96,8 @@
     background: #2a3a52; color: #f4eee5; font-family: var(--sp-type); font-weight: 400; font-size: 13px; white-space: nowrap; cursor: pointer;
   }
   .qcw-list .qcw-pillbtn:hover { background: #1c130f; }
+  .qcw-list .qcw-ghost svg { display: none; width: 14px; height: 14px; flex: none; }
+  .qcw-list .qcw-ghost .qcw-gw { font-family: inherit; }
   .qcw-list .qcw-ghost {
     display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 0; border-radius: 15px;
     background: #fff; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.4); color: #2a3a52;
@@ -116,6 +118,28 @@
   .qcw-list .qcw-pkg--add { color: rgba(28, 19, 15, 0.45); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; padding: 0 12px; }
   .qcw-list .qcw-pkg--add:hover, .qcw-list .qcw-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
   .qcw-list .qcw-pkg--none { pointer-events: none; }
+
+  /* ── THE NARROW PANEL (v132 follow-up, 8 Oct). Below 1100px of workspace panel — a 1280 window with
+     the sidebar open is about 964 — the slot collapses to its 34px mark (the package's name is in its
+     popup title, "{Name} package"; "+ Add" is its plus), so the tiles still share one x down the list,
+     and Next move narrows from 284 to 220. Agent and Where it stands take the 142px that frees.
+     The container is `.qcv-page` (inline-size); 206 = 34 + 5 + 9 + 5 + 151, the slot, rule and tiles. ── */
+  @container (max-width: 1099.98px) {
+    .qcw-list .qcw-pkg { width: 34px; padding: 0; justify-content: center; gap: 0; }
+    .qcw-list .qcw-pkg .qcw-pkg-word { display: none; }
+    /* The longest tray (an offer's action, Edit, Close) is 258px and the Next move cell is 220, so
+       Edit and Close are their marks here; each keeps its accessible name. W8 holds the 8px. */
+    .qcw-list .qcw-tray .qcw-ghost { width: 30px; padding: 0; justify-content: center; }
+    .qcw-list .qcw-tray .qcw-ghost .qcw-gw { display: none; }
+    .qcw-list .qcw-tray .qcw-ghost svg { display: block; }
+    /* The two text columns share 416px. "Revise & resubmit" with its stamp is 226 at rest and a
+       long agent line 210, so the status column takes a little more and both lines tighten. */
+    .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) 206px 220px; }
+    .qcw-list .qcw-ag { gap: 10px; }
+    .qcw-list .qcw-agt b { font-size: 16.5px; }
+    .qcw-list .qcw-ws1 { gap: 6px; font-size: 15px; }
+    .qcw-list .qcw-ym { letter-spacing: 0.08em; padding: 2px 4px; }
+  }
   .qcw-list .qcw-tile {
     flex: none; box-sizing: border-box; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
     color: rgba(28, 19, 15, 0.2); background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);

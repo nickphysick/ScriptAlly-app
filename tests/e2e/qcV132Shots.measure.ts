@@ -66,6 +66,6 @@ test("v132 shots", async ({ page }) => {
     await page.screenshot({ path: `${OUT}/ws-dead-${w}.png` });
     await page.locator('[data-qcv="dead-clear"]').click(); await page.waitForTimeout(300);
     await page.locator('[data-qcv="ws-group"]').click(); await page.waitForTimeout(250);
-    await page.getByRole("menuitemradio", { name: /^No grouping$/ }).first().click(); await page.waitForTimeout(300);
+    await page.getByRole("menuitemradio", { name: /^Urgency$/ }).first().click(); await page.waitForTimeout(300);
   }
 });

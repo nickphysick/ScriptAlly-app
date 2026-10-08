@@ -35,6 +35,7 @@ type Tone = "you" | "quiet" | "waiting" | "closed";
 const URGENCY_TONE: Record<string, Tone> = { you: "you", quiet: "quiet", waiting: "waiting", closed: "closed", rest: "waiting" };
 
 const ICON = {
+  x: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 4l8 8M12 4l-8 8" /></svg>,
   pen: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 2.5l3 3-7.5 7.5H3v-3z" /><path d="M9 4l3 3" /></svg>,
   clock: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   glass: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2h8M4 14h8M5 2c0 4 6 4 6 6s-6 2-6 6M11 2c0 4-6 4-6 6s6 2 6 6" /></svg>,
@@ -104,12 +105,12 @@ const SentCell132: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: 
       {m.slot.kind === "package" ? (
         <button type="button" className="qcw-pkg qcw-pkg--on" data-qcv="row-pkg" data-tip={m.slot.title} data-tl={m.slot.line}
           onClick={(e) => { e.stopPropagation(); onPackage(); }}>
-          {ICON.pkg}<span>{m.slot.name}</span>
+          {ICON.pkg}<span className="qcw-pkg-word">{m.slot.name}</span>
         </button>
       ) : m.slot.kind === "add" ? (
         <button type="button" className="qcw-pkg qcw-pkg--add" data-qcv="row-add" data-tip={m.slot.title} data-tl={m.slot.line}
           onClick={(e) => { e.stopPropagation(); onAdd(); }}>
-          <span>+ Add</span>
+          <span className="qcw-pkg-plus" aria-hidden="true">+</span><span className="qcw-pkg-word">Add</span>
         </button>
       ) : (
         <span className="qcw-pkg qcw-pkg--none" data-qcv="row-pkg-none" aria-hidden="true" />
@@ -217,10 +218,10 @@ export const QcList132: React.FC<{
                 onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next.bucket); }}>{next.action}</button>
             )}
             <button type="button" className="qcw-ghost" data-qcv="row-edit"
-              onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }} aria-label={`Edit the query to ${r.agentName}`}>Edit</button>
+              onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }} aria-label={`Edit the query to ${r.agentName}`}><span className="qcw-gw">Edit</span>{ICON.pen}</button>
             {!closed && (
               <button type="button" className="qcw-ghost" data-qcv="row-close"
-                onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }} aria-label={`Close the query to ${r.agentName}`}>Close</button>
+                onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }} aria-label={`Close the query to ${r.agentName}`}><span className="qcw-gw">Close</span>{ICON.x}</button>
             )}
           </span>
         </div>
