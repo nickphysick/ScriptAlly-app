@@ -11,7 +11,7 @@
 import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows } from "./qcSummary";
-import { contactHeaderCopy, dayDate, nudgesDue, numberWords, pressingSentence, qcHeaderCopy, type PressingContext } from "./livingHeaders";
+import { dayDate, nudgesDue, numberWords, pressingSentence, qcHeaderCopy, type PressingContext } from "./livingHeaders";
 import { runsText, type LivingLine } from "./livingLine";
 
 const DAY = 86_400_000;
@@ -32,7 +32,6 @@ const AGENTS = [
   ag("a3", "Aisha Kapoor", "The Lantern Agency"),
 ];
 /** n agents, the first three the named cast — so a count and its list agree, as on the page */
-const agentsN = (n: number): Agent[] => Array.from({ length: n }, (_, i) => AGENTS[i] ?? ag(`x${i}`, `Agent ${i}`, `Agency ${i}`));
 const ctxOf = (qs: Query[], agents: Agent[] = AGENTS): PressingContext => ({
   rows: buildQcRows(qs, agents, [], NOW), agentsById: new Map(agents.map((a) => [a.id, a])), nowMs: NOW,
 });
@@ -107,68 +106,20 @@ describe("the Query Centre's two lines", () => {
   });
 });
 
-describe("the Contact list's two lines", () => {
-  it("one agent, never queried — and 'them', never a guessed pronoun", () => {
-    const l = contactHeaderCopy(1, { ...ctxOf([], [AGENTS[2]]), agents: [AGENTS[2]] });
-    expect(l.headline).toBe("One agent on file");
-    expect(sub(l)).toBe("Aisha Kapoor at The Lantern Agency, and you haven’t queried them yet.");
-    expect(sub(l)).not.toMatch(/\b(her|his|him|she|he)\b/);
-  });
-  it("one agent, queried: the date the query went", () => {
-    const qs = [q({ agentId: "a3", dateSent: ago(36) })];
-    expect(sub(contactHeaderCopy(1, { ...ctxOf(qs, [AGENTS[2]]), agents: [AGENTS[2]] }))).toBe("Aisha Kapoor at The Lantern Agency, and your query went on 14 Aug.");
-  });
-  it("one agent with no agency names the agent alone", () => {
-    const solo = ag("a9", "Greg Panetta", "");
-    expect(sub(contactHeaderCopy(1, { ...ctxOf([], [solo]), agents: [solo] }))).toBe("Greg Panetta, and you haven’t queried them yet.");
-  });
-  /* ⚠️ RETARGETED TWICE. Contact list v12 §3 made the many-case the CARD INDEX's sentence — the
-     bold number is want∧not-queried (the oracle's `hit && st.startsWith('no')`), words to twenty
-     then digits. v13 §2 then dropped its second sentence (the list's average reply time): the
-     numbers strip under the band owns that figure now, so the header states one sentence. */
-  it("many: 'n agents on file', the fresh count in words, the title run — and no reply clause", () => {
-    const l = contactHeaderCopy(16, { ...ctxOf([nudgeDue()]), agents: AGENTS, facts: { want: 12, fresh: 11, genre: "thrillers", msTitle: "Murphy's Day Out" } });
-    expect(l.headline).toBe("16 agents on file");
-    expect(sub(l)).toBe("Eleven of them want thrillers and haven’t seen Murphy's Day Out yet.");
-    expect(sub(l)).not.toMatch(/reply|week/i);
-    /* the title is an {ms} RUN (Special Elite), the number is a {b} run */
-    expect(l.subline.some((r) => typeof r === "object" && "ms" in r && r.ms === "Murphy's Day Out")).toBe(true);
-    expect(l.subline.some((r) => typeof r === "object" && "b" in r && r.b === "Eleven")).toBe(true);
-  });
-  it("past twenty the number is digits", () => {
-    const l = contactHeaderCopy(40, { ...ctxOf([]), agents: AGENTS, facts: { want: 30, fresh: 23, genre: "fantasy", msTitle: "T" } });
-    expect(sub(l)).toBe("23 of them want fantasy and haven’t seen T yet.");
-  });
-  it("nobody matches → the spec's none-case, as v12 has it", () => {
-    const none = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 0, fresh: 0, genre: "thrillers", msTitle: "M" } });
-    expect(sub(none)).toBe("None of them want thrillers yet.");
-    const two = contactHeaderCopy(16, { ...ctxOf([]), agents: AGENTS, facts: { want: 3, fresh: 2, genre: "crime", msTitle: "M" } });
-    expect(sub(two)).toBe("Two of them want crime and haven’t seen M yet.");
-  });
-  it("no manuscript in scope → the queried/to-go line stays, so the subline is never empty", () => {
-    expect(sub(contactHeaderCopy(3, { ...ctxOf([]), agents: AGENTS }))).toBe("None queried yet.");
-    const all = [q({ agentId: "a1" }), q({ agentId: "a2" }), q({ agentId: "a3" })];
-    expect(sub(contactHeaderCopy(3, { ...ctxOf(all), agents: AGENTS }))).toBe("All of them queried.");
-  });
-});
-
+/* ⚠️ RETIRED (Contact list v15 §2): "the Contact list's two lines" — `contactHeaderCopy` is deleted with the header it fed. */
 describe("LH9 · the rules that hold everywhere", () => {
   const counts = [1, 2, 9, 13, 27, 148];
   const lines = counts.flatMap((c) => [
     qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue(), q({ agentId: "a3", dateSent: ago(57) })])),
-    /* the Contact list's count IS its agent list's length — a fixture where they differ is one no page builds */
-    contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c) }),
   ]);
   it("the headline is the count alone: 'One …' at 1, the figure otherwise", () => {
     counts.forEach((c, i) => {
-      expect(lines[i * 2].headline).toBe(c === 1 ? "One query out" : `${c} queries out`);
-      /* v12: the Contact list's headline carries "on file" (the oracle's own h1) */
-      expect(lines[i * 2 + 1].headline).toBe(c === 1 ? "One agent on file" : `${c} agents on file`);
+      expect(lines[i].headline).toBe(c === 1 ? "One query out" : `${c} queries out`);
     });
   });
   it("no subline carries the page's count, and every count inside a sentence is in words", () => {
     counts.forEach((c, i) => {
-      for (const l of [lines[i * 2], lines[i * 2 + 1]]) {
+      for (const l of [lines[i]]) {
         if (c > 1) expect(sub(l), `${c}: ${sub(l)}`).not.toMatch(new RegExp(`\\b${c}\\b`));
         expect(sub(l)).not.toMatch(/\b\d+ (nudges?|queries|agents)\b/);
       }
@@ -249,11 +200,11 @@ describe("the To-do list's two lines, and all caught up", () => {
   });
 });
 
-describe("LH12 · the v3 rules across all five (Analytics retired its living header in v13)", () => {
+describe("LH12 · the v3 rules across all four (Analytics retired its living header in v13, the Contact list in v15)", () => {
   const counts = [1, 2, 9, 13, 27, 148];
   const all = counts.flatMap((c) => [
     { c, l: qcHeaderCopy(c, ctxOf([partialDue(14), nudgeDue()])) },
-    { c, l: contactHeaderCopy(c, { ...ctxOf([waiting()]), agents: c === 1 ? [AGENTS[2]] : agentsN(c), facts: { want: 9, fresh: 7, genre: "crime", msTitle: "M" } }) },
+    /* the Contact list left this set in v15 — its header is page-local, with no derived sentence */
     { c, l: packagesHeaderCopy(c, { lead: { name: "Standard", sent: 11, answered: 8, requests: 3 }, firstLiveName: "Standard" }) },
     { c, l: compsHeaderCopy(c, { missing: 3, inLetter: ["The Dry"], firstTitle: "The Dry" }) },
     /* a SEPTEMBER date, so the "Sept" sweep below has something to catch (an October-only fixture cannot) */

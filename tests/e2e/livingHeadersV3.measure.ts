@@ -39,16 +39,16 @@ interface Pg {
 }
 const PAGES: Pg[] = [
   { route: "/queries", key: "qc", name: "Query Centre", section: "QUERIES", empty: "Nothing out yet", tile: '[data-qcv="court"]', num: ".qcv-court-n", row: '[data-qcv="row"]', rail: ".qcv-rail", exPart: '[data-qcv="row"]' },
-  /* v12 P2 (3 Oct): the Contact list's count cards retired with the card index — its "tiles" are
-     the INDEX STRIP's cells now (the All cell is first in DOM at the column's left edge, so LH4's
-     one-left-x reads the strip's own edge), and the number is each lettered cell's <i>. */
-  { route: "/agents", key: "cl", name: "Contact list", section: "AGENTS", empty: "No agents on your list yet", tile: ".clv-ixtab", num: "i", row: "[data-agent-card]", rail: ".clv-rail", exPart: ".clv-rwho" },
+  /* THE CONTACT LIST LEFT ON 8 OCT (Contact list v15 §2): its populated header is page-local now (OWN_HEADER_ROUTES in
+     plateRoutes.ts) — the count as the title and a fixed line, no living sentence — and is locked by
+     tests/e2e/contactV15.measure.ts CL15-1/CL15-2 instead. Its EMPTY state still draws the shared living header; that page
+     is held by contactV13 CL13-14. Four pages here now. */
   { route: "/todo", key: "td", name: "To-do list", section: "TASKS", empty: "Nothing to do yet", tile: ".tdv2-tile:not(.tdv2-tile--sk)", num: ".tdv2-num", row: '[data-todo-v2="row"]', rail: ".tdv2-group > .tdv2-rail", exPart: '[data-todo-v2="row"]' },
   { route: "/manuscripts/packages", key: "sp", name: "Submission packages", section: "MATERIALS", empty: "No packages yet", tile: null, num: null, row: '[data-ppv="pkg"]', rail: '[data-ppv="rail"]', exPart: '[data-ppv="pkg"]' },
   { route: "/manuscripts/comps", key: "ct", name: "Comparable titles", section: "MATERIALS", empty: "No comp titles yet", tile: null, num: null, row: '[data-cpv="comp"]', rail: ".cpv-group > .sa-prail", exPart: '[data-cpv="comp"]' },
   /* ANALYTICS LEFT ON 3 OCT (analytics v13, a feature container) and stays out under v17 (5 Oct): it
      opens on the shared band (BAND_ROUTES), with no living-header tally, and is locked by
-     tests/e2e/analyticsV17.measure.ts instead. Five pages here now. */
+     tests/e2e/analyticsV17.measure.ts instead. */
 ];
 const ONLY = process.env.LH_ONLY;
 const RUN = ONLY ? PAGES.filter((p) => p.key === ONLY) : PAGES;
@@ -167,7 +167,7 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     const isBand = BAND_ROUTES.includes(p.route);
     if (isBand) bandsSeen.add(p.route);
     for (const [nm, x] of [["one", one], ["one-line subline", short]] as const) {
-      /* ⚠️ v131 (and the Contact list since v14 — COMPACT_ROUTES): the compact hero CENTRES its text vertically in a fixed 178px card (§1), so a
+      /* ⚠️ v131 (COMPACT_ROUTES; the Contact list carried it in v14 and left in v15): the compact hero CENTRES its text vertically in a fixed 178px card (§1), so a
          one-line intro moves the stack by design. The header's height (below) still may not move; QC2 holds the rest. */
       const centred = COMPACT_ROUTES.includes(p.route) && nm === "one-line subline";
       for (const k of ["h1", "intro", "acts", "b1", "b2", "art"] as const) {
@@ -445,12 +445,7 @@ test("LH9 · a page filtered to nothing keeps its hero", async ({ page }) => {
     }
     await kept("/queries", `filtered to ${picked}`, ".qcv-none, .qcv-empty-card, [data-qc-empty]");
   }
-  if (!ONLY || ONLY === "cl") {
-    await openApp(page, "/agents", { width: 1440, height: H });
-    await page.getByPlaceholder("Find an agent").filter({ visible: true }).first().fill("zzqx no such agent");
-    await page.waitForTimeout(400);
-    await kept("/agents", "find-empty", ".agl-empty");
-  }
+  /* (the Contact list left this suite in v15 — its header is page-local; a filtered-to-nothing list is CL14-14's dead end) */
   if (!ONLY || ONLY === "td") {
     await openApp(page, "/todo", { width: 1440, height: H });
     await page.getByPlaceholder(/Search tasks/).filter({ visible: true }).first().fill("zzqx no such task");

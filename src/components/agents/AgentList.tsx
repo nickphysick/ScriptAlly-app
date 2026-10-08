@@ -28,9 +28,7 @@ import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { ContactEmpty } from "./contact/ContactEmpty";
 import { ContactExhibit } from "./contact/ContactExhibit";
-import { contactHeaderCopy } from "../../lib/livingHeaders";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
-import type { LivingHeader } from "../shell/PageHeader";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
@@ -51,11 +49,11 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
-import { CONTACT_BAND_DISC, CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
-import { PageHeader } from "../shell/PageHeader";
+import { CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
+import { ContactOpenHeader } from "./contact/ContactOpenHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies, heroFacts,
+  contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
@@ -149,7 +147,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const qcRows = useMemo(() => buildQcRows(queries, agents, activities, Date.now()), [queries, agents, activities]);
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
   const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
-  const facts = useMemo(() => heroFacts(agents, census.standing, scoped), [agents, census, scoped]);
   /* ⚠️ THE COUNT CARDS LEFT WITH v12: the card index took the list mount (P2 — their pool
      narrowing, the cardSel state and the bar's "Showing" chips went with them), and P5's empty
      state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
@@ -624,17 +621,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [hkOpen, setHkOpen] = useState(false);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
-  /* v12: the subline is the card index's sentence — `facts` (want/fresh/genre/title, the page's
-     own derivation). v13 §2: its second sentence (the stated-windows mean) is gone; the numbers
-     strip states the typical reply. The living memo still reads no `hk`. */
-  const living = useMemo<LivingHeader>(() => {
-    const rows = scoped ? qcRows.filter((r) => r.query.manuscriptId === scoped.id) : qcRows;
-    const agentsById = new Map(agents.map((a) => [a.id, a]));
-    return {
-      count: pageState === "list" ? (lhOverride ?? agents.length) : null,
-      copy: (n) => contactHeaderCopy(n, { rows, agentsById, nowMs: Date.now(), agents, facts }),
-    };
-  }, [pageState, lhOverride, agents, qcRows, scoped, facts]);
+  /* v15 §2: the open header's title is the living count — the LivingHeaders review aid's override wins in dev */
+  const headerCount = pageState === "list" ? (lhOverride ?? agents.length) : null;
 
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
      the snapshot first, the reply-time deadline fan-out in the same batch, the data-quality flag, and
@@ -941,31 +929,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <div className="clv-group" data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
-        {/* ⚠️ THE SHARED FULL HEADER (page header v2 §4): the Query Centre's component, frame and rule.
-            It spans the whole group — column AND rail — so the Housekeeping rail starts below the
-            rule, as the Birds-eye rail does. It renders over a LIST only: the blank account's pitch
-            is its own page, and a header stating figures about nothing would be the empty-desk fault. */}
-        {/* v12 §3: the living header carries the whole sentence (no description line); the
-            anthracite pill opens the centred add card DIRECTLY — the quick-add drop and the
-            "Paste a link" pill are retired (the link door lives inside the card); the art is
-            the full painting, in the shared art box, never behind the text. */}
+        {/* v15 §2 — THE OPEN HEADER (page-local, ruling 8): the count as the title, one line, two buttons, and the
+            flying hawk to their right, centred against each other over a hairline. It renders over a LIST only
+            (and while settling, painted over): the blank account's pitch is ContactEmpty, with its own header. */}
         {(showList || pageState === "settling") && (
-          <PageHeader
-            variant="full"
-            title="Contact list"
-            living={living}
-            primaryRef={addBtnRef}
-            primary={{ label: "+ Add an agent", onClick: openAdd }}
-            secondary={{ label: "Discover agents", onClick: () => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); } }}
-            /* v13 §2 — THE BAND (the Query Centre's, `PageHeader band`): full-bleed anthracite under the
-               top bar, the Archivist in a 290px white disc on the text's right. */
-            band
-            /* v14 §1.2 — Query Centre v131's compact hero CARD in the sheet (the shared PageHeader's own
-               `card compact`, not restyled): 178 tall, 18px corners, the pills stacked beside a 150 disc */
-            card
-            compact
-            art={<span className="clv-bdisc"><img src={`${CONTACT_BAND_DISC.src}?v=${CONTACT_BAND_DISC.version}`} width={CONTACT_BAND_DISC.width} height={CONTACT_BAND_DISC.height} alt="" /></span>}
-          />
+          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd}
+            onDiscover={() => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); }} />
         )}
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}

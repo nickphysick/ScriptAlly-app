@@ -159,7 +159,8 @@
     "design-refs/desk-ledger-v6.html": "9acb494dcca05c80120481bfdb72d47bbfa7966506a3e7ab99585fe7ca6b32ad",
     "design-refs/qc-v131-1/ref-desk-ledger@2x.png": "1a59afab1b5a2c9fe6193c82b454852c19b77b6f1d9a793bad6d7bda2a400f9c",
     "design-refs/qc-v131-1/ref-desk-ledger-selected@2x.png": "268139e9f42ba6da5be768e23694682ba7996f7b256a849b51d1ac22c6df9237",
-    "design-refs/contact-list-v14.html": "6a3e18f2203a0406faaa632fe6647d371071dbbd10ddd1b06ae9de85facdeb4e"
+    "design-refs/contact-list-v14.html": "6a3e18f2203a0406faaa632fe6647d371071dbbd10ddd1b06ae9de85facdeb4e",
+    "design-refs/contact-list-v15.html": "b672f519f736156252110c436119fa9374df4093006aff09bdf4b1d26cb9d68f"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

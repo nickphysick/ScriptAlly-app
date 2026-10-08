@@ -22,7 +22,7 @@ async function pressBarGap(page: Page) {
   });
   await page.mouse.click(at.x, at.y);
 }
-import { BAND_ROUTES, PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, OWN_HEADER_ROUTES, PLATE_ROUTES } from "./plateRoutes";
 import { BAR_ROUTES, LIVING_ROUTES, SIZES, judgeFull, openApp, readBar, readFull, readMockHeader, readQuick, readTops, switchAndCompare, scrollAndRead } from "./pageHeaderV2Lib";
 import { retired } from "./inkRetired";
 
@@ -141,13 +141,24 @@ for (const vp of SIZES) {
     await openApp(page, "/agents", vp);
     const r = await readFull(page, ".clv-rail");
     const ctx = { route: "/agents", size: `${vp.width}`, state: "expanded" };
-    L.check("§4 · the full header was found", ctx, !!r, JSON.stringify(r));
+    /* (the shared full header is looked for only where the page has one — an own-header route has none, by design) */
+    if (!OWN_HEADER_ROUTES.includes("/agents")) L.check("§4 · the full header was found", ctx, !!r, JSON.stringify(r));
     /* ⚠️ RETARGETED BY THE BAND (Contact list v13 §2): the Contact list's full header is the band, so
        the open header's geometry (18 below the bar, art standing on the rule, the panel at the rule +
        24) is not its geometry — contactV13 CL13-1 and CL13-2 own it. What stays here is that it is
        the shared header, that it IS the register's band, and that the disc holds the Archivist. */
     const band = BAND_ROUTES.includes("/agents");
-    if (band) {
+    /* ⚠️ RETARGETED BY CONTACT LIST v15 §2: the header is page-local (OWN_HEADER_ROUTES), an open header the shared
+       component cannot draw — its geometry is contactV15 CL15-1/CL15-2's. What stays here is that it IS its own
+       header and that no shared header renders over the list. */
+    const own = OWN_HEADER_ROUTES.includes("/agents");
+    if (own) {
+      const o = await page.evaluate(() => ({
+        own: !![...document.querySelectorAll("[data-own-header]")].find((e) => e.getBoundingClientRect().height > 0),
+        shared: [...document.querySelectorAll('[data-probe="page-header"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+      }));
+      L.check("§4 · (own) the Contact list's header is its own — its geometry is CL15-1's", ctx, o.own && o.shared === 0, JSON.stringify(o));
+    } else if (band) {
       const b = await page.evaluate(() => {
         const hd = [...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0);
         const img = hd?.querySelector<HTMLImageElement>(".ph-bdisc img") ?? null;
@@ -161,7 +172,7 @@ for (const vp of SIZES) {
       if (r) L.check("§4 · the index strip starts at the rule + 24", ctx, Math.abs(counts - (r.rule + 24)) <= 1, `strip ${counts.toFixed(1)} rule ${r.rule.toFixed(1)}`);
     }
     L.write();
-    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(band ? 3 : (mock ? 18 : 17));
+    expect(L.rows.length, "population floor").toBeGreaterThanOrEqual(own ? (mock ? 2 : 1) : band ? 3 : (mock ? 18 : 17));
     expect(L.failures().map((f) => `${f.lock} — ${f.detail}`)).toEqual([]);
   });
 }
@@ -217,7 +228,7 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
        the OPEN headers left are Comparable titles and Submission packages, held to each other; each
        framed route is held to being its register's band or plate. */
     const qcPlate = PLATE_ROUTES.includes("/queries");
-    const framed = (route: string) => PLATE_ROUTES.includes(route) || BAND_ROUTES.includes(route);
+    const framed = (route: string) => PLATE_ROUTES.includes(route) || BAND_ROUTES.includes(route) || OWN_HEADER_ROUTES.includes(route);
     const open = ([["the Query Centre", "/queries", q], ["the Contact list", "/agents", c], ["Comparable titles", "/manuscripts/comps", m], ["Submission packages", "/manuscripts/packages", pk]] as [string, string, typeof q][])
       .filter(([, route]) => !framed(route));
     const [anchorName, , anchor] = open[0];
@@ -237,6 +248,11 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
       const isBand = await page.evaluate(() => !![...document.querySelectorAll('[data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0));
       L.check(`§4.4 · (band) ${route} is exempt because it is the register's band`, ctx, isBand, `band ${isBand}`);
     }
+    for (const route of OWN_HEADER_ROUTES) {
+      await openApp(page, route, vp);
+      const isOwn = await page.evaluate(() => !![...document.querySelectorAll("[data-own-header]")].find((e) => e.getBoundingClientRect().height > 0));
+      L.check(`§4.4 · (own) ${route} is exempt because its header is the page's own`, ctx, isOwn, `own ${isOwn}`);
+    }
     L.check("§4.4 · no full header carries an eyebrow", ctx, [q, c, m, pk].every((x) => !Number.isFinite(x.eyebrow) && !x.eyebrowText), JSON.stringify([q, c, m, pk].map((x) => x.eyebrowText)));
   }
   L.write();
@@ -249,8 +265,8 @@ test("§4.4 · the full headers are one header", async ({ page }) => {
   /* framed among THESE four only: a band route that is not one of them (Analytics v17) adds its own band
      row through the loop above and takes no open header away */
   const FOUR = ["/queries", "/agents", "/manuscripts/comps", "/manuscripts/packages"];
-  const openN = FOUR.filter((r) => !PLATE_ROUTES.includes(r) && !BAND_ROUTES.includes(r)).length;
-  expect(L.rows.length).toBe(SIZES.length * (2 * (openN - 1) + 1 + (PLATE_ROUTES.includes("/queries") ? 1 : 0) + BAND_ROUTES.length));
+  const openN = FOUR.filter((r) => !PLATE_ROUTES.includes(r) && !BAND_ROUTES.includes(r) && !OWN_HEADER_ROUTES.includes(r)).length;
+  expect(L.rows.length).toBe(SIZES.length * (2 * (openN - 1) + 1 + (PLATE_ROUTES.includes("/queries") ? 1 : 0) + BAND_ROUTES.length + OWN_HEADER_ROUTES.length));
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });
 
@@ -271,13 +287,14 @@ test("§4.6 · the add door (v12 P1: the quick-add drop and the paste pill are r
   const L = new Ledger("v2-quickadd");
   const ctx = { route: "/agents", size: "1440", state: "add-door" };
   await openApp(page, "/agents", { width: 1440, height: 900 });
-  const add = page.locator('[data-probe="page-header"] .ph-primary').filter({ hasText: "+ Add an agent" }).first();
+  /* v15 §2: the Contact list's header is its own (OWN_HEADER_ROUTES) — its buttons are `[data-cl15]` */
+  const add = page.locator('[data-cl15="add"]').filter({ visible: true }).first();
   L.check("§4.6 · no quick-add card exists at rest", ctx, (await page.locator('[data-clv="quickadd"]').count()) === 0, "");
   /* ⚠️ read the VISIBLE header's pill — every page stays mounted, and `.first()` answers for a
      hidden page's copy (the house hidden-copy law; the old row survived it only via hasText) */
   const secondaryText = await page.evaluate(() => {
-    const hd = [...document.querySelectorAll(".ph--full")].find((e) => e.getBoundingClientRect().height > 0);
-    return hd?.querySelector(".ph-secondary")?.textContent ?? "";
+    const hd = [...document.querySelectorAll('[data-cl15="header"]')].find((e) => e.getBoundingClientRect().height > 0);
+    return hd?.querySelector('[data-cl15="discover"]')?.textContent ?? "";
   });
   L.check("§4.6 · no Paste-a-link pill — the secondary is Discover", ctx, secondaryText.includes("Discover agents"), secondaryText);
   await add.click({ timeout: 5000 }).catch(() => {});

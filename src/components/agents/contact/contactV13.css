@@ -131,8 +131,6 @@
   animation: cl13Shim 1.3s linear infinite;
 }
 .clv-group[data-loading] :is(.cl13-ac, .clv-row, .clv-idx, .cl13-spark, .cl13-sf, .cl13-se, .ob-k, .ob-p) * { visibility: hidden; }
-.clv-group[data-loading] .clv-bdisc { background: #34445e !important; box-shadow: none !important; }
-.clv-group[data-loading] .clv-bdisc img { visibility: hidden; }
 .clv-group[data-loading] :is(.cl13-ctl, .lt-div, .lt-gh) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .clv-group[data-loading] :is(.cl13-sl, .cl13-sf, .cl13-se, .cz-title, .cz-note, .cl13-ac, .clv-row, .ob-k, .ob-h, .ob-p, .clv-idx),

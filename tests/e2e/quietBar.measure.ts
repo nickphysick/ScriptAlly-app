@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import { Ledger } from "./shellV3Lib";
 import { BAR_ROUTES, LIVING_ROUTES, openApp } from "./pageHeaderV2Lib";
 import { liftMotionSuppression } from "./measure";
-import { BAND_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
+import { BAND_ROUTES, OWN_HEADER_ROUTES, PLATE_PAD_X, PLATE_ROUTES } from "./plateRoutes";
 import { readBar, readLeft, scrollTo, suppressMotion, tagScroller, titleGoneAt, transparent } from "./quietBarLib";
 import { retired } from "./inkRetired";
 
@@ -160,10 +160,21 @@ test("Q8 · every full header starts on the column's left, level with the first 
   let full = 0, compact = 0, drawn = 0;
   const platesSeen = new Set<string>();
   const bandsSeen = new Set<string>();
+  const ownSeen = new Set<string>();
   for (const vp of SIZES) {
     for (const route of BAR_ROUTES) {
       await openApp(page, route, vp);
       await suppressMotion(page);
+      /* ⚠️ AN OWN-HEADER ROUTE (Contact list v15): its header is page-local (`data-own-header`), so the shared header's
+         left-edge law is not its law — CL15-1 owns its placement. What stays here is that the header IS its own. */
+      if (OWN_HEADER_ROUTES.includes(route)) {
+        await page.locator("[data-own-header]").filter({ visible: true }).first().waitFor({ timeout: 8000 }).catch(() => {});
+        const own = await page.evaluate(() => !![...document.querySelectorAll("[data-own-header]")].find((e) => e.getBoundingClientRect().height > 0)
+          && ![...document.querySelectorAll('[data-probe="page-header"]')].some((e) => e.getBoundingClientRect().height > 0));
+        ownSeen.add(route);
+        L.check("Q8 · (own) the header is the page's own, and no shared header renders", { route, size: `${vp.width}`, state: "own" }, own, `own ${own}`);
+        continue;
+      }
       /* a route that has a header must be read with it rendered — /agents at 1280 once read before it was */
       await page.locator('[data-probe="page-header"]').filter({ visible: true }).first().waitFor({ timeout: 8000 }).catch(() => {});
       const r = await readLeft(page);
@@ -211,5 +222,6 @@ test("Q8 · every full header starts on the column's left, level with the first 
   console.log(`Q8 tally: full ${full} compact ${compact} drawn ${drawn}`);
   expect([...platesSeen].sort(), "Q8's plate exemptions are not the register's").toEqual([...PLATE_ROUTES].sort());
   expect([...bandsSeen].sort(), "Q8's band exemptions are not the register's").toEqual([...BAND_ROUTES].sort());
+  expect([...ownSeen].sort(), "Q8's own-header exemptions are not the register's").toEqual(OWN_HEADER_ROUTES.filter((r) => (BAR_ROUTES as readonly string[]).includes(r)).slice().sort());
   expect(L.failures().map((f) => `${f.lock} · ${f.route} ${f.size} — ${f.detail}`)).toEqual([]);
 });

@@ -26,10 +26,11 @@ test("CL14-1 · order", async ({ page }) => {
     const r = await page.evaluate(() => {
       const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { t: x.top, b: x.bottom, h: x.height }; };
-      const hero = pick('.aglist [data-probe="page-header"][data-band]');
+      /* REPOINTED (Contact list v15 §2): the hero is the page-local open header — CL15-1 owns its geometry */
+      const hero = pick('.aglist [data-cl15="header"]');
       return {
         hero: b(hero), heroBg: hero ? getComputedStyle(hero).backgroundColor : null,
-        heroCard: !!hero?.classList.contains("ph--card") && !!hero?.classList.contains("ph--compact"),
+        heroCard: !!hero && !document.querySelector('.aglist [data-probe="page-header"][data-band]'),
         strip: b(pick('.aglist [data-cl13="strip"]')),
         next: b(pick('.aglist [data-cl14="next"]')),
         ws: b(pick('.aglist [data-cl14="ws"]')),
@@ -37,7 +38,7 @@ test("CL14-1 · order", async ({ page }) => {
         carousel: document.querySelectorAll('.aglist [data-cz], .aglist .cz-item, .aglist [data-cz-track], .aglist [data-cz-set], .aglist .cl13-seg').length,
       };
     });
-    L.check("CL14-1 the hero is v131's compact card, in rgb(42,58,82)", w, r.heroCard && r.heroBg === INK14, `${r.heroCard} ${r.heroBg}`);
+    L.check("CL14-1 the header is v15's open header (no band, no card behind it)", w, r.heroCard && r.heroBg === "rgba(0, 0, 0, 0)", `${r.heroCard} ${r.heroBg}`);
     L.check("CL14-1 the strip follows the hero", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
     L.check("CL14-1 no carousel in the DOM", w, r.carousel === 0, `${r.carousel}`);
     L.check("CL14-1 the next-step section follows the strip, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);

@@ -14,63 +14,9 @@ import { liftMotionSuppression } from "./measure";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
 
-/* ── lock 1 · the band ── */
-test("CL13-1 · band", async ({ page }) => {
-  const L = new Ledger("cl13-1");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const vis = (s: string, root: ParentNode = document) => [...root.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
-      const band = vis('.aglist [data-probe="page-header"][data-band]');
-      return {
-        band: b(band), bg: band ? getComputedStyle(band).backgroundColor : null, radius: band ? getComputedStyle(band).borderTopLeftRadius : null,
-        bar: b(vis('[data-probe="navrow"]')), main: b(vis(".ws-main")),
-        disc: b(band?.querySelector(".clv-bdisc") ?? null),
-        discBg: band?.querySelector(".clv-bdisc") ? getComputedStyle(band.querySelector(".clv-bdisc")!).backgroundColor : null,
-        img: (band?.querySelector(".clv-bdisc img") as HTMLImageElement | null)?.getAttribute("src") ?? null,
-        title: band?.querySelector("h1")?.textContent ?? null,
-        intro: (band?.querySelector(".ph-intro") as HTMLElement | null)?.innerText ?? null,
-        buttons: [...(band?.querySelectorAll("button") ?? [])].map((x) => x.textContent?.trim() ?? ""),
-      };
-    });
-    L.check("CL13-1 the band exists on the Contact list", w, !!r.band, JSON.stringify(r.band));
-    if (!r.band || !r.bar || !r.main) { await checkOverflow(page, L, w); continue; }
-    L.check("CL13-1 anthracite rgb(42,58,82)", w, r.bg === INK, `${r.bg}`);
-    /* REWRITTEN (Contact list v14 §1.2, 7 Oct): the band is v131's COMPACT HERO CARD in the sheet — the shared
-       PageHeader's own `card compact` — so it no longer starts at the bar or spans the column edge to edge,
-       and its disc slot is 150, not 290. The colour stays the band's (ruling Q2). */
-    L.check("CL13-1 the compact hero card: 178 tall (±1), 18px corners", w, near(r.band.h, 178, 1) && r.radius === "18px", `${r.band.h} ${r.radius}`);
-    L.check("CL13-1 the disc is 150 (±2), white, round", w, !!r.disc && near(r.disc.w, 150, 2) && near(r.disc.h, 150, 2) && r.discBg === "rgb(255, 255, 255)", `${JSON.stringify(r.disc)} ${r.discBg}`);
-    L.check("CL13-1 the disc holds contact-archivist.png", w, /\/images\/contact-archivist\.png/.test(r.img ?? ""), `${r.img}`);
-    L.check("CL13-1 title 'N agents on file'", w, /^(\d+ agents|One agent) on file$/.test((r.title ?? "").trim()), `${r.title}`);
-    /* the mutation this exists for: restore the v12 reply-time clause → red */
-    L.check("CL13-1 the sentence has no reply-time clause", w, !!r.intro && !/reply|weeks?\b/i.test(r.intro), `${r.intro}`);
-    L.check("CL13-1 the sentence is ONE sentence", w, !!r.intro && (r.intro.trim().match(/[.!?](\s|$)/g) ?? []).length === 1, `${r.intro}`);
-    L.check("CL13-1 buttons: + Add an agent · Discover agents", w, r.buttons.includes("+ Add an agent") && r.buttons.includes("Discover agents"), JSON.stringify(r.buttons));
-    await checkOverflow(page, L, w);
-  }
-  L.done(27);
-});
-
-/* ── lock 2 · the 40px rhythm: band → strip → carousel head → list banner ── */
-test("CL13-2 · rhythm", async ({ page }) => {
-  const L = new Ledger("cl13-2");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const band = await box(page, '.aglist [data-probe="page-header"][data-band]');
-    const strip = await box(page, '.aglist [data-cl13="strip"]');
-    L.check("CL13-2 band → strip 40 (±1)", w, !!band && !!strip && near(strip.t - band.b, 40, 1), `${band && strip ? strip.t - band.b : "—"}`);
-    /* REWRITTEN (Contact list v14 §2, 7 Oct): under the strip is the next-step section, 44 below it (CL14-1
-       holds the v14 rhythm); the carousel and its 40 below are retired with it. */
-    const next = await box(page, '.aglist [data-cl14="next"]');
-    L.check("CL13-2 strip → the next-step section 44 (±1)", w, !!strip && !!next && near(next.t - strip.b, 44, 1), `${strip && next ? next.t - strip.b : "—"}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(9);
-});
+/* CL13-1 (the band — v14's compact hero card) and CL13-2 (the band → strip → next-step rhythm) are RETIRED (Contact list
+   v15 §2): the header is the page-local open header, held by contactV15 CL15-1/CL15-2; the rhythm under it is the desk's
+   and the section's (CL15 Phase 2/4 locks). tests/e2e/RETIRED-contact-list-v15.md. */
 
 /* ── §3 · the numbers strip: five cells, its figures, three of them pressable ── */
 test("CL13-S · strip", async ({ page }) => {
@@ -80,7 +26,8 @@ test("CL13-S · strip", async ({ page }) => {
     const w = `${vp.width}`;
     const r = await page.evaluate(() => {
       const strip = [...document.querySelectorAll<HTMLElement>('.aglist [data-cl13="strip"]')].find((e) => e.getBoundingClientRect().height > 0);
-      const band = [...document.querySelectorAll<HTMLElement>('.aglist [data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0);
+      /* REPOINTED (Contact list v15 §2): the header is the page-local open header; its title still states the count */
+      const band = [...document.querySelectorAll<HTMLElement>('.aglist [data-cl15="header"]')].find((e) => e.getBoundingClientRect().height > 0);
       if (!strip) return null;
       const cells = [...strip.querySelectorAll<HTMLElement>("[data-cl13-cell]")];
       const sb = strip.getBoundingClientRect();
@@ -103,8 +50,7 @@ test("CL13-S · strip", async ({ page }) => {
     if (!r) continue;
     L.check("CL13-S five cells, the mock's labels in order", w, JSON.stringify(r.cells.map((c) => c.label)) === JSON.stringify(["On file", "Fit your book", "Open now", "Typical reply", "Added this month"]), JSON.stringify(r.cells.map((c) => c.label)));
     L.check("CL13-S every label on one top (a <button> cell does not centre its content)", w, r.cells.every((c) => near(c.labelTop, r.cells[0].labelTop, 1)), r.cells.map((c) => c.labelTop.toFixed(1)).join(" "));
-    const want = (r.intro.match(/want ([^.]+?) and haven/) ?? [])[1] ?? null, take = (r.cells[1].line.match(/^take (.+)$/) ?? [])[1] ?? null;
-    L.check("CL13-S the band and the strip name the genre one way", w, !take || want === take, `band "${want}" strip "${take}"`);
+    /* RETIRED (Contact list v15 §2): "the band and the strip name the genre one way" — the open header names no genre */
     L.check("CL13-S equal cells (±1)", w, r.cells.length === 5 && r.cells.every((c) => near(c.w, r.cells[0].w, 1)), r.cells.map((c) => c.w.toFixed(1)).join(" "));
     L.check("CL13-S the strip is the group's full width", w, near(r.w, r.group ?? -1, 1), `${r.w} vs ${r.group}`);
     L.check("CL13-S white, 16px corners", w, r.bg === "rgb(255, 255, 255)" && r.radius === "16px", `${r.bg} ${r.radius}`);
@@ -112,14 +58,14 @@ test("CL13-S · strip", async ({ page }) => {
     /* REWRITTEN (v14 §1.3): the figures filled the carousel, which is retired — no cell is pressable now */
     L.check("CL13-S no figure is pressable", w, r.cells.every((c) => !c.pressable), JSON.stringify(r.cells.filter((c) => c.pressable).map((c) => c.label)));
     const onFile = Number(r.cells[0].fig), title = Number((r.title.match(/^(\d+)/) ?? [])[1] ?? (/^One/.test(r.title) ? 1 : NaN));
-    L.check("CL13-S On file = the band's count", w, onFile === title, `${onFile} vs "${r.title}"`);
+    L.check("CL13-S On file = the header's count", w, onFile === title, `${onFile} vs "${r.title}"`);
     L.check("CL13-S On file's line names the agencies; six spark bars", w, /^agents, across \d+ agenc(y|ies)$/.test(r.cells[0].line) && r.spark === 6, `${r.cells[0].line} · ${r.spark}`);
     L.check("CL13-S Open now's line counts the closed", w, /^\d+ closed for now$/.test(r.cells[2].line), r.cells[2].line);
     L.check("CL13-S Typical reply reads 'N wks' and names the fastest", w, (/^\d+wks$/.test(r.cells[3].fig) && /^fastest: .+, \d+ wks?$/.test(r.cells[3].line)) || r.cells[3].fig === "—", `${r.cells[3].fig} · ${r.cells[3].line}`);
     L.check("CL13-S Added this month reads '+N'", w, /^\+\d+$/.test(r.cells[4].fig), r.cells[4].fig);
     await checkOverflow(page, L, w);
   }
-  L.done(45);
+  L.done(42); /* v15: one reading per width retired with the band's genre sentence */
 });
 
 /* CL13-3 (figures fill the carousel) and CL13-4 (carousel cards are the agent card) are RETIRED with the
@@ -636,7 +582,8 @@ test("CL13-12 · loading", async ({ page }) => {
   const boxes = () => page.evaluate(() => {
     const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
     const b = (e?: HTMLElement) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; };
-    return { band: b(v('.aglist [data-probe="page-header"]')), strip: b(v(".aglist .cl13-strip")), row: b(v(".aglist .clv-row")) };
+    /* REPOINTED (Contact list v15 §2): the header is the page-local open header (`[data-cl15="header"]`), not the band */
+    return { band: b(v('.aglist [data-cl15="header"]')), strip: b(v(".aglist .cl13-strip")), row: b(v(".aglist .clv-row")) };
   });
   for (const vp of WIDTHS) {
     const w = `${vp.width}`;
@@ -652,7 +599,8 @@ test("CL13-12 · loading", async ({ page }) => {
         shimmer: card ? getComputedStyle(card).backgroundImage.includes("gradient") : false,
         perch: vis(".cl14-art"), ctl: vis(".cl13-ctl"),
         tab: !!document.querySelector('[data-ftab="housekeeping"]'),
-        bandShape: (() => { const t = g?.querySelector<HTMLElement>(".ph--band .ph-title"); return t ? getComputedStyle(t).backgroundImage.includes("52, 68, 94") || getComputedStyle(t).backgroundImage.includes("#34445e") : false; })(),
+        /* v15 §2: the open header's title holds its line box, painted over */
+        bandShape: (() => { const t = g?.querySelector<HTMLElement>('[data-cl15="header"] .cl15-title'); return t ? getComputedStyle(t).backgroundImage.includes("gradient") : false; })(),
       };
     });
     /* v14 §1.4: the carousel's three placeholder cards went with it */

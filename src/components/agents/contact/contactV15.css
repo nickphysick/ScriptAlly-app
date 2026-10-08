@@ -1,0 +1,53 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v15 (design-refs/contact-list-v15.html). One authoritative block per part; values read off the
+ * rendered oracle at 1512 × 900 and 1280 × 800. "Below 1440" is `max-width: 1439.5px`, as v14's sheet states it.
+ */
+
+/* the header is the group's first row, across both tracks (where the band's `.ph` sat) */
+.clv-group > .cl15-hd { grid-column: 1 / -1; grid-row: 1; }
+
+/* ── §2 · THE OPEN HEADER: the text block and the drawing, centred against each other; the hairline under ── */
+.cl15-hd {
+  box-sizing: border-box;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
+  margin-top: 28px; padding-bottom: 18px;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.12);
+}
+.cl15-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+/* ⚠️ brand.tsx forces `h1:not(.wsh-title)` (0-1-1) at runtime, injected last: 0-2-1 and !important win honestly */
+.cl15-hd .cl15-txt h1.cl15-title {
+  margin: 0; white-space: nowrap;
+  font: 400 72px/0.98 var(--sp-type) !important; color: #1c130f;
+}
+.cl15-hd .cl15-sub { margin: 12px 0 0; font: 400 19px/1.4 var(--clv-serif); color: rgba(28, 19, 15, 0.66); }
+.cl15-acts { display: flex; gap: 10px; margin-top: 22px; }
+.cl15-hd .cl15-b1, .cl15-hd .cl15-b2 {
+  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
+  font: 400 15.5px var(--sp-type); white-space: nowrap;
+}
+.cl15-hd .cl15-b1 { background: #2a3a52; color: #f4eee5; }
+.cl15-hd .cl15-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl15-hd .cl15-b1:hover { background: #22304a; }
+.cl15-hd .cl15-b2:hover { background: #f6f3ee; }
+.cl15-hd button:disabled { cursor: default; }
+/* the drawing: in the flow at the start of its column, 8px over the hairline */
+.cl15-art { justify-self: start; min-width: 0; }
+.cl15-art img { display: block; width: 400px; height: auto; margin-bottom: -8px; }
+
+@media (max-width: 1439.5px) {
+  .cl15-hd { column-gap: 36px; margin-top: 24px; }
+  .cl15-hd .cl15-txt h1.cl15-title { font-size: 58px !important; }
+  .cl15-hd .cl15-sub { font-size: 17px; }
+  .cl15-art img { width: 310px; }
+}
+
+/* loading: the same boxes, their text kept for its line box and painted over */
+.cl15-hd[data-loading] :is(.cl15-title, .cl15-sub, .cl15-b1, .cl15-b2) {
+  color: transparent !important; box-shadow: none; border-radius: 10px;
+  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  animation: cl13Shim 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }

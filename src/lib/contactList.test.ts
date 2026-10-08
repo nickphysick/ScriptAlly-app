@@ -46,7 +46,7 @@ describe("railHeight — the rail derives its height from its own measured top",
 /* ══ phase 2 — standing, cards, facts and the hero's placement ══════════════════════════════ */
 import { buildQcRows } from "./qcSummary";
 import {
-  agentRows, contactCensus, contactStanding, heroFacts,
+  agentRows, contactCensus, contactStanding,
   matchesCards, rowYourMove,
 } from "./contactList";
 import {
@@ -105,20 +105,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
     expect(matchesCards(new Set(["active", "closed"]), s)).toBe(false);
   });
 
-  /* v14: the genre is the genre-noun join the strip says ("want thrillers or crime"), through the one helper */
-  it("the facts sentence: totals, the genre as the lower-case plural, and the fresh tail", () => {
-    const { standing } = contactCensus(CONTACT_FIXTURE_AGENTS, rows, MS.id);
-    const f = heroFacts(CONTACT_FIXTURE_AGENTS, standing, MS);
-    expect(f.total).toBe(CONTACT_FIXTURE_AGENTS.length);
-    expect(f.msTitle).toBe(MS.title);
-    expect(f.genre).toBe(joinGenres(bookGenres(MS)));
-    expect(f.want, "genre matches over the whole list").toBeGreaterThan(0);
-    expect(f.fresh, "the bold tail counts matches never queried").toBeLessThanOrEqual(f.want);
-    /* no manuscript in scope → the sentence has no subject and no tail */
-    const bare = heroFacts(CONTACT_FIXTURE_AGENTS, standing, null);
-    expect(bare.msTitle).toBeNull();
-    expect(bare.genre).toBeNull();
-  });
+  /* ⚠️ RETIRED (Contact list v15 §2): "the facts sentence" — `heroFacts` is deleted with the header it fed. */
 });
 
 /* ⚠️ RETIRED (page header v2 §4): "heroLayout — the mock's own chain, reproduced from the width".

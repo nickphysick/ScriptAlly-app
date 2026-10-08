@@ -25,7 +25,7 @@ const bump = (n = 1) => { asserts += n; };
 /** The add card's door since v12 P1 (3 Oct): "+ Add an agent" opens the centred card DIRECTLY —
  * the quick-add drop and the Paste-a-link pill are retired (the go-ahead's ask 2). */
 const openAddCard = async (page: import("@playwright/test").Page, scope: string) => {
-  await page.click(`${scope} [data-probe="page-header"] .ph-primary`);
+  await page.click(`${scope} [data-cl15="add"]`); /* v15 §2: the open header's own button */
 };
 
 test.beforeAll(async () => { await assertLocalBundleIsDev(); });
@@ -557,7 +557,7 @@ test("Log query opens the query drawer on this page — no navigation, the agent
 test("v12 P1 — + Add an agent opens the centred card directly; no quick-add exists; Discover navigates", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
-  await page.click(`${scope} [data-probe="page-header"] .ph-primary`);
+  await page.click(`${scope} [data-cl15="add"]`); /* v15 §2: the open header's own button */
   /* (P3: the add card is the agent card's editor, opened empty) */
   await page.waitForSelector('[data-ac="card"] [data-ae-mode="new"]');
   await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.getAttribute("data-ae") ?? ""),
@@ -565,7 +565,7 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
   expect(await page.locator('[data-clv="quickadd"]').count(), "the quick-add drop came back").toBe(0);
   await page.keyboard.press("Escape");
   await page.waitForSelector('[data-ac="card"]', { state: "detached" });
-  await page.click(`${scope} [data-probe="page-header"] .ph-secondary`);
+  await page.click(`${scope} [data-cl15="discover"]`);
   await page.waitForURL(/\/agents\/discover/);
   bump(3);
 });
