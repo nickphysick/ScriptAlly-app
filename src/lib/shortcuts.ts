@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "The agent card"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Query Centre" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Query Centre", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -63,6 +63,13 @@ export const SHORTCUTS = {
   contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
+  qcFind:           { chords: [k("/")], label: "Find a query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
+  qcDown:           { chords: [k("j"), k("ArrowDown")], label: "Next query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
+  qcUp:             { chords: [k("k"), k("ArrowUp")], label: "Previous query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
+  qcOpen:           { chords: [k("Enter")], label: "Open the query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
+  qcAct:            { chords: [k("l")], label: "Start the query's next action", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
+  qcLetGo:          { chords: [k("Escape")], label: "Clear the search, then let go of the query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "works" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only
      when no field has focus; the card's own handler stops them reaching a page beneath it */
   cardEdit:         { chords: [k("e")], label: "Edit the agent", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },

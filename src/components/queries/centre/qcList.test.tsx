@@ -16,6 +16,7 @@ import { Agent, Query, QueryStatus } from "../../../types";
 import { buildQcRows, isWithYou, type QcRow } from "../../../lib/qcSummary";
 import { MATERIAL_ROW_NAMES } from "../../../lib/agentMaterials";
 import { MATERIAL_SLOTS } from "../../../lib/queryCardFacts";
+import { QcList132Skeleton } from "./QcList132";
 import { QcList, QcListSkeleton } from "./QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./QcOpenCard";
 
@@ -247,15 +248,15 @@ describe("the rows, rendered", () => {
     expect(html.split("qcv-skw").length - 1).toBe(1);
     expect(html).toContain('class="qcv-row qcv-row--sk"');
   });
-  it("v131 (desktop): the skeleton is the v131 list's own frames — one group, the label row's words, eight rows on the five-column grid", () => {
-    const html = renderToStaticMarkup(<QcListSkeleton v131 />);
-    expect(html).toContain('class="qcv-list qc13-list"');
-    expect(html.split('class="qc13-gh"').length - 1, "one group header").toBe(1);
-    expect(html.split('class="qc13-colh"').length - 1, "one label row").toBe(1);
-    for (const w of ["Agent", "Queried", "Sent", "Where it stands", "Coming up"]) expect(html).toContain(`>${w}</span>`);
-    expect(html.split('data-qcv="sk-row"').length - 1).toBe(8);
-    expect(html.split('class="qcv-row qc13-rw qcv-row--sk"').length - 1, "rows wear the real v131 row class").toBe(8);
-    expect(html, "the v126 rows are not drawn").not.toMatch(/class="qcv-row qcv-row--sk"/);
+  /* v132 §3/§4 — REWRITTEN: the desktop skeleton is the v132 list's own frames (QcList132Skeleton) */
+  it("v132 (desktop): the skeleton is the v132 list's own frames — the label row's four words, one band, five rows", () => {
+    const html = renderToStaticMarkup(<QcList132Skeleton />);
+    expect(html).toContain('class="qcv-list qcw-list"');
+    expect(html.split('data-qcv="sk-gband"').length - 1, "one band").toBe(1);
+    expect(html.split('data-lt="labels"').length - 1, "one label row").toBe(1);
+    for (const w of ["Agent", "Where it stands", "What you sent", "Next move"]) expect(html).toContain(`>${w}</span>`);
+    expect(html.split('data-qcv="sk-row"').length - 1).toBe(5);
+    expect(html.split('class="qcw-row qcw-row--sk"').length - 1, "rows wear the real v132 row class").toBe(5);
     expect(html, "no button in a skeleton").not.toContain("<button");
   });
 });

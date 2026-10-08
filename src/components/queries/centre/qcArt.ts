@@ -85,3 +85,11 @@ export const QC_PLATE_FIGURE: QcArt = {
  */
 export const QC_COURIER_DISC: QcArt = { src: "/images/qc/qc-courier-disc.png", version: "d09517cf", width: 560, height: 501 };
 export const QC_LIST_PERCH: QcArt = { src: "/images/qc/qc-list-perch.png", version: "e1faf886", width: 464, height: 480 };
+
+/**
+ * Query Centre v132 — the "Your queries" workspace's flying hawk (210 wide, rising 74 above the ink
+ * bar, rotated −4° in CSS) and the dead end's inkwell (110 wide). From the v132 pack, hashes verified
+ * at enrolment; used exactly as supplied — never recoloured or cropped.
+ */
+export const QC_LIST_FLIGHT: QcArt = { src: "/images/qc/qc-list-flight.png", version: "6cf0cb8e", width: 640, height: 478 };
+export const QC_INKWELL: QcArt = { src: "/images/qc/qc-inkwell.png", version: "567d2cc7", width: 316, height: 400 };

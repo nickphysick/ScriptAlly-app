@@ -1,0 +1,119 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * "RECENTLY UPDATED" (Query Centre v132 §1; ref design-refs/query-centre/query-centre-v132.html `#ruA`).
+ *
+ * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE: the page's 0-1-0 font reset (`.qcv-own :where(span, …)`)
+ * lands later in the bundle and beats a single class on source order (found in v131.1).
+ *
+ * ⚠️ NO PANEL AROUND THE SECTION — the lede is on the page background; only "Also moved" is a panel,
+ * and the featured card lies over it.
+ */
+@media (min-width: 768px) {
+  .qc13 .qcr { margin-top: 44px; }
+  .qcr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 44px;
+    align-items: center;
+    /* the right edge steps 20px into the margin, as the workspace panel does below */
+    margin-right: -20px;
+  }
+
+  /* ── the lede ── */
+  .qcr .qcr-lede { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+  .qcr .qcr-title {
+    margin: 0 0 16px;
+    font-family: var(--sp-type) !important; font-weight: 400; font-size: 42px; line-height: 1.05; letter-spacing: -0.01em;
+    color: #1c130f;
+  }
+  .qcr .qcr-say { margin: 0 0 26px; max-width: 34ch; font-family: var(--sp-serif); font-weight: 400; font-size: 17px; line-height: 1.55; color: rgba(28, 19, 15, 0.72); }
+  .qcr .qcr-say b { font-weight: 600; color: #1c130f; }
+  .qcr .qcr-all {
+    display: inline-block; box-sizing: border-box; height: 48px; padding: 0 24px; border: 0; border-radius: 24px;
+    background: #2a3a52; color: #f4eee5; cursor: pointer; white-space: nowrap;
+    font-family: var(--sp-type); font-weight: 400; font-size: 15.5px; line-height: 48px;
+    transition: background-color 0.15s;
+  }
+  .qcr .qcr-all:hover { background: #1c130f; }
+  .qcr .qcr-all:focus-visible { outline: 2px solid #2f5f86; outline-offset: 3px; }
+
+  /* ── the stage: the panel, and the card lying over its left 150px ── */
+  .qcr .qcr-stage { position: relative; padding: 0 0 30px; min-width: 0; }
+  .qcr .qcr-panel {
+    margin-left: 150px; box-sizing: border-box;
+    padding: 22px 26px 18px 178px;
+    display: flex; flex-direction: column;
+    background: #fff; border-radius: 18px;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 50px -40px rgba(28, 19, 15, 0.4);
+  }
+  .qcr .qcr-ph { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.12); }
+  .qcr .qcr-ph b { font-family: var(--sp-type); font-weight: 400; font-size: 21px; line-height: 1.2; color: #1c130f; }
+  .qcr .qcr-ph span { font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 13px; color: rgba(28, 19, 15, 0.45); }
+  .qcr .qcr-rows { list-style: none; margin: 0; padding: 0; }
+  .qcr .qcr-row {
+    display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+    box-sizing: border-box; width: 100%; height: 61px; padding: 10px 8px; margin: 0;
+    border: 0; border-bottom: 1px solid rgba(28, 19, 15, 0.07); border-radius: 10px;
+    background: transparent; text-align: left; cursor: pointer; color: inherit;
+    transition: background-color 0.15s;
+  }
+  .qcr .qcr-row:hover { background: #faf8f5; }
+  .qcr .qcr-row.on { background: #f6efe9; }
+  .qcr .qcr-row:focus-visible { outline: 2px solid #2f5f86; outline-offset: -2px; }
+  .qcr .qcr-disc {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--sp-mono); font-weight: 700; font-size: 10px; letter-spacing: 0.04em;
+  }
+  .qcr .qcr-row--you .qcr-disc { background: #f6e2d8; color: #b0603e; }
+  .qcr .qcr-row--agent .qcr-disc { background: #e2e7ef; color: #3d5070; }
+  .qcr .qcr-row--closed .qcr-disc { background: #ece8e3; color: #7c7168; }
+  .qcr .qcr-who { min-width: 0; }
+  .qcr .qcr-who b { display: block; font-family: var(--sp-serif); font-weight: 400; font-size: 16px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1c130f; }
+  .qcr .qcr-who small { display: block; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 14px; line-height: 1.35; color: rgba(28, 19, 15, 0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qcr .qcr-date { font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 12.5px; color: rgba(28, 19, 15, 0.58); white-space: nowrap; }
+  .qcr .qcr-more {
+    align-self: flex-start; margin-top: 12px; padding: 0; border: 0; background: none; cursor: pointer;
+    font-family: var(--sp-serif); font-weight: 400; font-size: 14.5px; line-height: 1.4; color: #2f5f86;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+
+  /* ── the featured card: above the panel, its natural height, never stretched ── */
+  .qcr .qcr-feat { position: absolute; left: 0; top: 34px; width: 300px; z-index: 2; }
+  .qcr .qcr-feat .qcard {
+    width: 300px; height: auto;
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 44px -22px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.14);
+  }
+  .qcr .qcr-featin { animation: qcrPop 0.25s ease both; }
+  @keyframes qcrPop { from { opacity: 0.4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ── loading: the same three blocks, the same boxes ── */
+  .qcr .qcr-sk-title { display: block; width: 300px; height: 44px; border-radius: 8px; }
+  .qcr .qcr-say .qcr-sk-line { display: block; width: 100%; height: 18px; margin: 4px 0; border-radius: 5px; }
+  .qcr .qcr-say .qcr-sk-short { width: 60%; }
+  .qcr .qcr-sk-btn { display: block; width: 210px; height: 48px; border-radius: 24px; }
+  .qcr .qcr-row--sk { display: grid; cursor: default; }
+  .qcr .qcr-sk-disc { width: 34px; height: 34px; border-radius: 50%; }
+  .qcr .qcr-sk-name { height: 16px; width: 70%; border-radius: 5px; }
+  .qcr .qcr-sk-card { display: block; width: 300px; height: 330px; border-radius: 14px; }
+
+  /* ── below 1180: tighter ── */
+  @media (max-width: 1179px) {
+    .qcr { gap: 32px; }
+    .qcr .qcr-title { font-size: 36px; }
+    .qcr .qcr-feat, .qcr .qcr-feat .qcard { width: 270px; }
+    .qcr .qcr-panel { margin-left: 130px; padding-left: 158px; }
+  }
+  /* ── below 1101: stacked — the lede, then the card above the panel ── */
+  @media (max-width: 1100px) {
+    .qcr { grid-template-columns: minmax(0, 1fr); align-items: start; }
+    .qcr .qcr-stage { display: flex; flex-direction: column-reverse; gap: 18px; }
+    .qcr .qcr-feat { position: static; }
+    .qcr .qcr-panel { margin-left: 0; padding-left: 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .qcr .qcr-featin { animation: none; }
+    .qcr .qcr-row, .qcr .qcr-all { transition: none; }
+  }
+}

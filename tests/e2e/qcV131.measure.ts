@@ -12,7 +12,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { WIDTHS, inkOpen, rect, applyMutation } from "./inkLib";
-import { retiredV1311 } from "./inkRetired";
+import { retiredV1311, retiredV132 } from "./inkRetired";
 import { openRoute } from "./measure";
 
 const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
@@ -21,7 +21,7 @@ async function openQc(page: Page, w: number, scope: string) {
   await inkOpen(page, "/queries", w, { scope });
   /* v131.1 — RE-POINTED: the desk is the ledger cards' ("131.1"); the page is still v131's */
   await expect(page.locator('.qc13 [data-qcv="courts"][data-v^="131"]'), "the v131 desk is on the page").toBeVisible();
-  await expect(page.locator('.qc13-list [data-qcv="row"]').first()).toBeVisible();
+  await expect(page.locator('.qcw-list [data-qcv="row"]').first()).toBeVisible();
   await page.waitForTimeout(300);
 }
 
@@ -50,7 +50,7 @@ test.describe("Query Centre v131", () => {
         const desk = document.querySelector<HTMLElement>('[data-qcv="courts"]')!;
         const prev = desk.previousElementSibling as HTMLElement | null;
         return {
-          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('.qc13-cz'), qs: R('.qc13-qs'),
+          hero: R('.qc13 [data-probe="page-header"]'), desk: R('[data-qcv="courts"]'), cz: R('[data-qcv="ru"]'), qs: R('[data-qcv="ws-head"]'),
           prevIsHero: !!prev && prev.matches('[data-probe="page-header"]'),
           headers: [...document.querySelectorAll('.qc13 h1, .qc13 h2, .qc13 h3')].filter((h) => h.getBoundingClientRect().top > (document.querySelector('[data-probe="page-header"]')!.getBoundingClientRect().bottom) && h.getBoundingClientRect().bottom <= desk.getBoundingClientRect().top + 1).length,
         };
@@ -58,7 +58,8 @@ test.describe("Query Centre v131", () => {
       expect(g.hero && g.desk && g.cz && g.qs, `${w}: all four parts measured`).toBeTruthy();
       expect(near(g.desk!.t - g.hero!.b, 22), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the hero`).toBe(true);
       expect(near(g.cz!.t - g.desk!.b, 44), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);
-      expect(near(g.qs!.t - g.cz!.b, 44), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
+      /* v132 §2 — RE-POINTED: the workspace starts 96 below Recently updated (the ref's #ws margin), room for the hawk's 74px rise */
+      expect(near(g.qs!.t - g.cz!.b, 96), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
       expect(g.prevIsHero, `${w}: the desk follows the hero directly`).toBe(true);
       expect(g.headers, `${w}: no heading between the hero and the desk`).toBe(0);
     }
@@ -165,9 +166,10 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC7 · Recently updated ───────────────────────────────────────────────────────────────────── */
   test("QC7 · the title follows the chosen section, the link clears it, and the list does not move", async ({ page }) => {
+    test.skip(true, retiredV132("the carousel's title, its \"show recently updated\" line and its clear link; a desk card now sets Recently updated's heading and a second press clears it", "QC132 R2"));
     await openQc(page, 1440, "qc7");
     const title = page.locator('[data-qcv="cz-head-title"]');
-    const ids = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qc13-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","));
+    const ids = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","));
     await expect(title).toHaveText("Recently updated");
     expect(await page.locator('[data-qcv="cz-head-line"]').count(), "no line with nothing chosen").toBe(0);
     const before = await ids();
@@ -189,7 +191,7 @@ test.describe("Query Centre v131", () => {
     await openQc(page, 1440, "qc8");
     const read = () => page.evaluate(() => {
       const s = document.querySelector<HTMLElement>('[data-qcv="showing"]')!;
-      return { x: +s.dataset.x!, y: +s.dataset.y!, shown: +(s.querySelector("b")?.textContent ?? "NaN"), rows: document.querySelectorAll('.qc13-list [data-qcv="row"]').length };
+      return { x: +s.dataset.x!, y: +s.dataset.y!, shown: +(s.querySelector("b")?.textContent ?? "NaN"), rows: document.querySelectorAll('.qcw-list [data-qcv="row"]').length };
     });
     const a = await read();
     expect(a.x, "nothing narrowed: x = y").toBe(a.y);
@@ -204,6 +206,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC9 · retirements ────────────────────────────────────────────────────────────────────────── */
   test("QC9 · no blush tray, no anthracite group band, no perched hawk, no banner headline", async ({ page }) => {
+    test.skip(true, retiredV132("v131's absences (no blush tray, no anthracite band, no perched hawk, no banner headline); v132 draws the workspace panel, court bands and the flying hawk", "QC132 W1, W4"));
     for (const w of WIDTHS) {
       await openQc(page, w, "qc9");
       const r = await page.evaluate(() => {
@@ -229,6 +232,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC10 · column alignment ──────────────────────────────────────────────────────────────────── */
   test("QC10 · every label's text starts where each row's main text starts (Agent: the name)", async ({ page }) => {
+    test.skip(true, retiredV132("the v131 label row inside each group, whose text started on each row's main text", "QC132 W5 (one label row; labels and cells share x-edges)"));
     const COLS: [string, string][] = [
       ["agent", '[data-qcv="row-name"]'], ["queried", '[data-qcv="row-queried"] [data-qcv="row-main"]'],
       ["sent", '[data-qcv="row-sent"] [data-qcv="row-main"]'], ["stand", '[data-qcv="row-stand"] [data-qcv="row-main"]'],
@@ -259,6 +263,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC11 · sticky labels ─────────────────────────────────────────────────────────────────────── */
   test("QC11 · 400px into the second group, its header is at the scroller's top and the label row right under it", async ({ page }) => {
+    test.skip(true, retiredV132("the v131 group header and per-group label row sticking at the scroller's top; v132 has one label row for the panel", "QC132 W5"));
     for (const w of WIDTHS) {
       await openQc(page, w, "qc11");
       const r = await page.evaluate(async () => {
@@ -282,6 +287,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC12 · chips ─────────────────────────────────────────────────────────────────────────────── */
   test("QC12 · chips are classed from the data, their text starts on the column line, and none wraps", async ({ page }) => {
+    test.skip(true, retiredV132("v131's urgency chips in \"Coming up\"; v132's Next move phrase and dated line replace them", "src/lib/qcRowLines.test.ts (nextLine) and QC132 W4–W8"));
     const tally: Record<string, number> = {};
     for (const w of WIDTHS) {
       await openQc(page, w, "qc12");
@@ -309,6 +315,7 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC13 · the YOUR MOVE tag ─────────────────────────────────────────────────────────────────── */
   test("QC13 · no YOUR MOVE tag inside Your move; still on a your-move row when grouped by Stage", async ({ page }) => {
+    test.skip(true, retiredV132("the YOUR MOVE tag held back inside the Your move group; v132 §3 stamps every with-you row", "QC132 W4 (the bands) and the brief §3"));
     await openQc(page, 1440, "qc13");
     const yours = page.locator('[data-qcv="grp"][data-group="you"]');
     await expect(yours, "a Your move group (precondition)").toHaveCount(1);
@@ -323,23 +330,25 @@ test.describe("Query Centre v131", () => {
     await page.getByRole("menuitemradio", { name: "Status" }).or(page.locator(".qcv-menu button", { hasText: "Status" })).first().click();
     await page.waitForTimeout(400);
     expect(await page.locator('[data-qcv="grp"][data-group="you"]').count(), "grouped by Stage now (precondition)").toBe(0);
-    const tags = await page.locator('.qc13-list [data-qcv="row"][data-you="true"] [data-qcv="your-move-tag"]').count();
-    const yourRows = await page.locator('.qc13-list [data-qcv="row"][data-you="true"]').count();
+    const tags = await page.locator('.qcw-list [data-qcv="row"][data-you="true"] [data-qcv="your-move-tag"]').count();
+    const yourRows = await page.locator('.qcw-list [data-qcv="row"][data-you="true"]').count();
     expect(yourRows, "your-move rows (precondition)").toBeGreaterThan(0);
     expect(tags, "each your-move row carries the tag when grouped by Stage").toBe(yourRows);
   });
 
   /* ── QC14 · art slots ─────────────────────────────────────────────────────────────────────────── */
   test("QC14 · the section and group art comes from a slot: a PNG dropped in changes the pixels, no code change", async ({ page }) => {
+    test.skip(true, retiredV132("the section and group spot-art slots; v132's bands carry fixed line icons and QcArtSlot is deleted", "QC132 W4"));
     /* a 64×64 solid magenta PNG, served for every spot file */
     const png = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAdklEQVR4nO3PQQkAMAzAwPo33Yno4xgEIuAyO/t1wwUNaEEDWtCAFjSgBQ1oQQNa0IAWNKAFDWhBA1rQgBY0oAUNaEEDWtCAFjSgBQ1oQQNa0IAWNKAFDWhBA1rQgBY0oAUNaEEDWtCAFjSgBQ1oQQNa0IAWHHtBp+HSthEAJgAAAABJRU5ErkJggg==", "base64");
     const centre = async () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="art-slot"]')].filter((e) => e.getBoundingClientRect().width > 0).map((e) => ({ spot: e.dataset.spot, art: e.dataset.art })));
     await openQc(page, 1440, "qc14");
     const before = await centre();
-    expect(before.length, "art slots on the page").toBeGreaterThanOrEqual(3);
+    /* v132 §1 — "Recently updated" lost its spot with the carousel; the group headers' slots remain */
+    expect(before.length, "art slots on the page").toBeGreaterThanOrEqual(2);
     for (const s of before) expect(s.art, `${s.spot}: an icon until a file exists`).toBe("icon");
-    const slot = page.locator('[data-qcv="art-slot"][data-spot="recently-updated"]');
+    const slot = page.locator(`[data-qcv="art-slot"][data-spot="${before[0].spot}"]`).first();
     const shotA = await slot.screenshot();
     await page.route("**/images/qc/spots/*.png", (r) => r.fulfill({ status: 200, contentType: "image/png", body: png }));
     await openQc(page, 1440, "qc14");
@@ -390,16 +399,18 @@ test.describe("Query Centre v131", () => {
 
   /* ── QC16 · the list skeleton on desktop ──────────────────────────────────────────────────────── */
   test("QC16 · while loading, the desktop list is the v131 list's frames — header, label row, rows — and none moves when the data lands", async ({ page }) => {
+    test.skip(true, retiredV132("the v131 list's loading frames (one group, the five-column label row, eight rows)", "QC132 W10 (Phase 4)"));
     const read = () => page.evaluate(() => {
       const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const R = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: +b.left.toFixed(1), y: +b.top.toFixed(1), w: +b.width.toFixed(1), h: +b.height.toFixed(1) }; };
-      const row = vis('.qc13-list [data-qcv="sk-row"], .qc13-list [data-qcv="row"]');
+      const row = vis('.qc13-list [data-qcv="sk-row"], .qcw-list [data-qcv="row"]');
       return {
         v126Rows: document.querySelectorAll('.qcv-row.qcv-row--sk:not(.qc13-rw)').length,
         skRows: document.querySelectorAll('.qc13-list [data-qcv="sk-row"]').length,
         list: R(vis(".qc13-list")),
         desk: R(vis('[data-qcv="courts"]')),
-        cz: R(vis('[data-qcv="cz"]')),
+        /* v132 §1 — RE-POINTED: "Recently updated" replaced the carousel, and keeps its frame while loading */
+        cz: R(vis('[data-qcv="ru"]')),
         /* the desk's numbers: what a reader can see, painted-over text excluded */
         /* v131.1 — RE-POINTED: the cards state a total, two tiles and a stamp (the facts and the foot retired) */
         deskStated: [...document.querySelectorAll<HTMLElement>('[data-qcv="court-count"], [data-qcv="court-tile"], [data-qcv="court-stamp"]')]
@@ -416,7 +427,7 @@ test.describe("Query Centre v131", () => {
       await inkOpen(page, "/queries", w, { scope: "qc16" });
       await expect(page.locator('.qc13-list [data-qcv="sk-row"]').first(), `${w}: the desktop skeleton is drawn`).toBeVisible();
       const sk = await read();
-      await expect(page.locator('.qc13-list [data-qcv="row"]').first(), `${w}: the list loaded`).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('.qcw-list [data-qcv="row"]').first(), `${w}: the list loaded`).toBeVisible({ timeout: 20_000 });
       await page.waitForTimeout(900);
       const real = await read();
       expect(sk.skRows, `${w}: eight skeleton rows`).toBe(8);

@@ -17,7 +17,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureSignedIn, openRoute } from "./measure";
-import { retiredV131 } from "./inkRetired";
+import { retiredV131, retiredV132 } from "./inkRetired";
 
 const OUT = resolve("test-results/qc-v96");
 const LEDGER = resolve(OUT, "ledger.json");
@@ -129,9 +129,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
     for (const grouped of [false, true]) {
       if (grouped) {
         /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
-        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.locator(`${P} [data-qcv="ws-head"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
         await page.waitForTimeout(200);
-        await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
+        await page.locator(`${P} [data-qcv="ws-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^Urgency$/ }).first().click();
         await page.waitForTimeout(600);
@@ -148,7 +148,8 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
            * and what this list has always done with a name. What must never truncate is a string
            * the app chose: a status, a verb, a date, a label.
            */
-          const APP = ['[data-qcv="row-verb"]', ".qcv-st .qcv-t1", ".qcv-st .qcv-t2", ".qcv-qd .qcv-t1", ".qcv-qd .qcv-t2", ".qcv-nr"];
+          /* v132 — RE-POINTED: the v132 row's own app-chosen strings (the status, both dated lines, the next move) */
+          const APP = ['[data-qcv="row-verb"]', ".qcv-st .qcv-t1", ".qcv-st .qcv-t2", ".qcv-qd .qcv-t1", ".qcv-qd .qcv-t2", ".qcv-nr", ".qcw-ws1 > span", '[data-qcv="row-standline"]', '[data-qcv="row-nextline"]'];
           const out: string[] = [];
           for (const r of rows) {
             for (const s of APP) {
@@ -158,7 +159,8 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
             }
           }
           /* the head's own controls and the group headings are the app's words too */
-          for (const s of ['[data-qcv="lh-title"]', ".qcv-op", '[data-qcv="grp"]']) {
+          /* v132 §2 — RE-POINTED: the workspace head's title, controls, pills and chips */
+          for (const s of ['[data-qcv="ws-title"]', ".qcw-ctl", ".qcw-pill", ".qcw-chip", '[data-qcv="grp"]']) {
             for (const e of [...pg.querySelectorAll(s)] as HTMLElement[]) {
               if (e.scrollWidth > e.clientWidth + 1) out.push(`${s} :: ${(e.textContent ?? "").trim().slice(0, 40)}`);
             }
@@ -170,9 +172,9 @@ test("QC4 · nothing the app chooses truncates, at four widths, flat and grouped
       }
       if (grouped) {
         /* v131: the section header does not stick, so bring it on screen first — a menu scrolled to closes */
-        await page.locator(`${P} [data-qcv="lbanner"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
+        await page.locator(`${P} [data-qcv="ws-head"]`).first().evaluate((e) => e.scrollIntoView({ block: "start" }));
         await page.waitForTimeout(200);
-        await page.locator(`${P} [data-qcv="pk-group"]`).first().click();
+        await page.locator(`${P} [data-qcv="ws-group"]`).first().click();
         await page.waitForTimeout(300);
         await page.getByRole("menuitemradio", { name: /^No grouping$/ }).first().click();
         await page.waitForTimeout(500);
@@ -225,7 +227,9 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
        */
       offset: (() => {
         const t = el.querySelector('[data-qcv="row-tray"]');
-        const v = el.querySelector('[data-qcv="row-verb"]');
+        /* v132 — RE-POINTED: the tray replaces the Next move phrase AND its dated line, so it centres on
+           the cell that holds both (row-next), not on the phrase alone */
+        const v = el.querySelector('[data-qcv="row-next"]');
         if (!t || !v) return null;
         const a = t.getBoundingClientRect(), b = v.getBoundingClientRect();
         return Math.round(((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) * 10) / 10;
@@ -297,9 +301,17 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
     const r = (document.querySelector(sel) as HTMLElement).querySelector('[data-qcv="row"]') as HTMLElement;
     return Math.round(parseFloat(getComputedStyle(r).minHeight));
   }, P);
+  /* v132 — RE-POINTED: the flat row states no min-height (its height is its content's), so "the tray
+     takes no space" is asserted as the mechanism instead: the tray is out of the flow. */
+  const v132 = await page.locator(`${P} .qcw-list`).count() > 0;
+  if (v132) {
+    const pos = await row.evaluate((el) => getComputedStyle(el.querySelector('[data-qcv="row-tray"]')!).position);
+    expect(pos, "the tray is in the flow, so it takes space in every row").toBe("absolute");
+  } else {
   expect(stated, "the row states no minimum height, so this claim has no floor to check").toBeGreaterThan(0);
   expect(rest.h, `the row is ${rest.h}px against its stated ${stated}px — something in it is taking space`)
     .toBe(stated);
+  }
   /**
    * §1 (v96.1) · THE ROWS ARE FLOATING CARDS, AND THE AIR BETWEEN THEM IS MEASURED. v96 drew them
    * butted together — gap 0 against the reference's 10 — because the 10px lived as a `gap` on the
@@ -319,7 +331,7 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
   expect(cards, "fewer than three rows — the gap between cards is untested").not.toBeNull();
   /* ⚠️ v131 retires the floating cards on desktop: rows are 64px lines in one white group body (QC9, QC10).
      The card treatment below is v96's and is asserted only where v96 rows render. */
-  const v131 = await page.locator(`${P} .qc13-list`).count() > 0;
+  const v131 = v132 || await page.locator(`${P} .qc13-list`).count() > 0;
   if (v131) {
     expect([...new Set(cards!.gaps)], `v131 rows touch: ${cards!.gaps}`).toEqual([0]);
   } else {
@@ -337,6 +349,7 @@ test("QC6 · the tray appears on hover AND focus, says the Coming-up verb, and m
 /* ── QC8 ────────────────────────────────────────────────────────────────────────────────────── */
 
 test("QC8 · what you sent: a package chip, the four icons, or Add — one treatment per row, never two", async ({ page }) => {
+  test.skip(true, retiredV132("v96's three treatments (a chip, the icons, or Add) as alternatives; v132 draws a 112px slot AND the four tiles on every row, and an individual send's slot is empty", "QC132 W6"));
   await qc(page);
   const seen = await page.evaluate((sel) => {
     const pg = document.querySelector(sel) as HTMLElement;
@@ -393,7 +406,10 @@ test("QC12 · a your-move row's tray is action · Edit · Close; a waiting row's
     const read = (r: HTMLElement) => [...r.querySelectorAll('[data-qcv="row-tray"] button')]
       .map((b) => ((b as HTMLElement).textContent ?? "").trim());
     const withAction = rows.filter((r) => r.querySelector('[data-qcv="row-act"]'));
-    const without = rows.filter((r) => !r.querySelector('[data-qcv="row-act"]'));
+    /* v132 §3 — a CLOSED row's tray is Edit alone; it is measured as its own kind */
+    const CLOSED = new Set(["Rejected", "No Response", "Withdrawn", "Signed"]);
+    const closedRows = rows.filter((r) => CLOSED.has(r.dataset.status ?? ""));
+    const without = rows.filter((r) => !r.querySelector('[data-qcv="row-act"]') && !CLOSED.has(r.dataset.status ?? ""));
     return {
       rows: rows.length,
       trays: rows.filter((r) => r.querySelector('[data-qcv="row-tray"]')).length,
@@ -401,6 +417,8 @@ test("QC12 · a your-move row's tray is action · Edit · Close; a waiting row's
       /* every DISTINCT shape the two kinds produce, so one odd row cannot hide behind a sample */
       shapesWithAction: [...new Set(withAction.map((r) => read(r).slice(1).join(" · ")))],
       shapesWithout: [...new Set(without.map((r) => read(r).join(" · ")))],
+      closed: closedRows.length,
+      shapesClosed: [...new Set(closedRows.map((r) => read(r).join(" · ")))],
       counts: [...new Set(rows.map((r) => read(r).length))].sort(),
       anySnooze: pg.innerText.includes("Snooze"),
       anyMore: !!pg.querySelector('[data-qcv="row-more"]'),
@@ -414,7 +432,10 @@ test("QC12 · a your-move row's tray is action · Edit · Close; a waiting row's
   /* the action's own words vary by bucket; what is fixed is what FOLLOWS it */
   expect(seen.shapesWithAction, "a your-move tray is not action · Edit · Close").toEqual(["Edit · Close"]);
   expect(seen.shapesWithout, "a waiting tray is not Edit · Close").toEqual(["Edit · Close"]);
-  expect(seen.counts, "a tray with a fourth control, or a missing one").toEqual([2, 3]);
+  /* v132 — RE-WRITTEN: closed rows get Edit only (brief §3), so the tray has 1, 2 or 3 controls */
+  expect(seen.closed, "no closed row, so the Edit-only tray is untested").toBeGreaterThan(0);
+  expect(seen.shapesClosed, "a closed tray is not Edit alone").toEqual(["Edit"]);
+  expect(seen.counts, "a tray with a fourth control, or a missing one").toEqual([1, 2, 3]);
   expect(seen.anySnooze, "Snooze is back on the page").toBe(false);
   expect(seen.anyMore, "the ⋯ is back").toBe(false);
 });
@@ -513,7 +534,7 @@ test("QC13 · the guide shows on first visit, not after ×, and comes back from 
 test("the run measured what it claims to have measured", () => {
   const all = JSON.parse(readFileSync(LEDGER, "utf8")) as { n: number; notes: Record<string, unknown> };
   expect(Object.keys(all.notes).sort(), "a lock wrote no reading").toEqual(
-    ["QC12", "QC13", "QC13place", "QC4", "QC6", "QC8"] /* QC1 retired by v131 (QC3) */,
+    ["QC12", "QC13", "QC13place", "QC4", "QC6"] /* QC1 retired by v131 (QC3); QC8 retired by v132 (W6) */,
   );
-  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(6);
+  expect(all.n, `only ${all.n} readings were written`).toBeGreaterThanOrEqual(5);
 });

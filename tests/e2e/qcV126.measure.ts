@@ -7,7 +7,7 @@
  * scroller. Ledgers land in reports/qc-v126/ledger/. Probes are the `data-qcv` contract the v126
  * components carry; a lock that cannot find its subject has FAILED (it reads null and says so).
  */
-import { retiredV131 } from "./inkRetired";
+import { retiredV131, retiredV132 } from "./inkRetired";
 import { expect, test } from "@playwright/test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -156,6 +156,7 @@ test("QC126-4 · rhythm", async ({ page }) => {
 
 /* ── QC126-5 · the carousel ── */
 test("QC126-5 · carousel", async ({ page }) => {
+  test.skip(true, retiredV132("the desktop carousel (eight cards, newest first); Recently updated lists five, newest first, and the carousel is the phone's alone", "QC132 R5"));
   const L = new Ledger("qc126-5");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -181,7 +182,8 @@ test("QC126-6 · desk ≠ list", async ({ page }) => {
   const read = () => page.evaluate(() => ({
     rows: [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.qid),
     bands: [...document.querySelectorAll<HTMLElement>('[data-qcv="gband"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.querySelector('[data-qcv="gband-n"]')?.textContent ?? ""),
-    cards: document.querySelectorAll('[data-qcv="cz-item"]').length,
+    /* v132 §1 — the desk scopes "Recently updated", which lists five; the carousel is the phone's now */
+    cards: document.querySelectorAll('[data-qcv="ru-row"]').length,
     you: Number([...document.querySelectorAll<HTMLElement>('[data-qcv="court"][data-court="you"] [data-qcv="court-count"]')][0]?.textContent ?? NaN),
   }));
   const before = await read();
@@ -189,13 +191,13 @@ test("QC126-6 · desk ≠ list", async ({ page }) => {
   await page.locator('[data-qcv="court"][data-court="you"]').first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
   const sel = await read();
-  L.check("QC126-6 the carousel shows every with-you query", "1512", Number.isFinite(sel.you) && sel.cards === sel.you, `cards ${sel.cards} desk ${sel.you}`);
+  L.check("QC126-6 Recently updated lists the with-you queries (five at most)", "1512", Number.isFinite(sel.you) && sel.cards === Math.min(5, sel.you), `rows ${sel.cards} desk ${sel.you}`);
   L.check("QC126-6 the list's rows and order are identical", "1512", JSON.stringify(sel.rows) === JSON.stringify(before.rows), `${sel.rows.length} vs ${before.rows.length}`);
   L.check("QC126-6 the band counts are identical", "1512", JSON.stringify(sel.bands) === JSON.stringify(before.bands), `${sel.bands} vs ${before.bands}`);
   await page.locator('[data-qcv="court"][data-court="you"]').first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
   const cleared = await read();
-  L.check("QC126-6 clearing restores the 8", "1512", cleared.cards === 8, `${cleared.cards}`);
+  L.check("QC126-6 clearing restores five", "1512", cleared.cards === Math.min(5, before.rows.length), `${cleared.cards}`);
   await checkOverflow(page, L, "1512");
   L.done(6);
 });
@@ -204,8 +206,9 @@ test("QC126-6 · desk ≠ list", async ({ page }) => {
 test("QC126-7 · one card", async ({ page }) => {
   const L = new Ledger("qc126-7");
   await openQc(page, AT_1512);
-  const carousel = await page.evaluate(() => [...document.querySelectorAll('[data-qcv="cz-item"]')].map((e) => !!e.querySelector(":scope > .qcard, .qcard")));
-  L.check("QC126-7 every carousel card is the app's QueryCard (.qcard)", "1512", carousel.length > 0 && carousel.every(Boolean), JSON.stringify(carousel));
+  /* v132 §1 — on the desktop the one card on the page is "Recently updated"'s featured card */
+  const carousel = await page.evaluate(() => [...document.querySelectorAll('[data-qcv="ru-feat"]')].map((e) => !!e.querySelector(".qcard")));
+  L.check("QC126-7 the featured card is the app's QueryCard (.qcard)", "1512", carousel.length === 1 && carousel.every(Boolean), JSON.stringify(carousel));
   /* no second card component under queries/: the card-named files are exactly today's */
   /* the card-named components that existed before v126 (captured 5 Oct); a fifth is a fork */
   const KNOWN = new Set(["src/components/queries/PaneCard.tsx", "src/components/queries/QueryCard.tsx", "src/components/queries/QueryEmptyCard.tsx", "src/components/queries/centre/QcOpenCard.tsx"]);
@@ -562,7 +565,9 @@ test("QC126-20 · one door", async ({ page }) => {
   const closeAll = async () => { for (let i = 0; i < 4; i++) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); } };
   await openQc(page, AT_1512);
   /* the card's footer button */
-  await page.locator('[data-qcv="row"]').first().click({ timeout: 8000 });
+  /* v132 — RE-POINTED: a row's centre is now its "What you sent" cell, whose "+ Add" opens the edit
+     drawer; the row is opened from the agent's name, which is what a reader clicks */
+  await page.locator('[data-qcv="row"] [data-qcv="row-agent"]').first().click({ timeout: 8000 });
   await page.waitForTimeout(500);
   await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): the card's primary door; `.qcv-open-actions` named no element */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
@@ -577,10 +582,10 @@ test("QC126-20 · one door", async ({ page }) => {
   L.check("QC126-20 a row's tray action opens the drawer", "1512", !!t.mode && MODES.has(t.mode) && t.others === 0, JSON.stringify(t));
   await closeAll();
   /* a carousel card's footer button */
-  await page.locator('[data-qcv="cz-item"] [data-qcv="cz-act"]').first().click({ timeout: 4000 }).catch(() => {});
+  await page.locator('[data-qcv="ru-feat"] [data-qcv="ru-act"]').first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
   const z = await drawer();
-  L.check("QC126-20 a carousel card's button opens the drawer", "1512", !!z.mode && MODES.has(z.mode) && z.others === 0, JSON.stringify(z));
+  L.check("QC126-20 the featured card's button opens the drawer", "1512", !!z.mode && MODES.has(z.mode) && z.others === 0, JSON.stringify(z));
   await closeAll();
   /* a Birds-eye row's button */
   await openDrawer(page).catch(() => {});

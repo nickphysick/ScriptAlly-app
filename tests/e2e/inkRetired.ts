@@ -13,6 +13,11 @@ export function retiredV1311(why: string, by: string): string {
   return `RETIRED by Query Centre v131.1 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-query-centre-v131-1.md).`;
 }
 
+/** Query Centre v132 — the same, for a desktop case whose subject "Recently updated" or the new workspace replaced. Listed in RETIRED-query-centre-v132.md. */
+export function retiredV132(why: string, by: string): string {
+  return `RETIRED by Query Centre v132 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-query-centre-v132.md).`;
+}
+
 export function retired(why: string, by: string): string {
   return `RETIRED by ink shell v1 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-ink-shell-v1.md).`;
 }

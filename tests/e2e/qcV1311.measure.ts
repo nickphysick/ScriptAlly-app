@@ -7,6 +7,7 @@
  *
  * Every case asserts its population first, so a probe that finds nothing fails rather than passing.
  */
+import { retiredV132 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 
@@ -17,7 +18,7 @@ const TINT: Record<string, string> = { you: "rgb(246, 226, 216)", agent: "rgb(22
 
 async function openQc(page: Page, w: number) {
   await inkOpen(page, "/queries", w, { scope: "qc1311" });
-  await expect(page.locator('.qc13-list [data-qcv="row"]').first(), "the list loaded").toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.qcw-list [data-qcv="row"]').first(), "the list loaded").toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(400);
 }
 
@@ -160,10 +161,11 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D7 · a card fills the carousel only; the list's rows, order and counts are identical", async ({ page }) => {
+    test.skip(true, retiredV132("the carousel D7 watched; a desk card now scopes Recently updated, and R2 asserts the same list-is-untouched claim over it", "QC132 R2"));
     await openQc(page, 1512);
     const list = () => page.evaluate(() => ({
-      ids: [...document.querySelectorAll<HTMLElement>('.qc13-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","),
-      counts: [...document.querySelectorAll<HTMLElement>('.qc13-list .qc13-gh, [data-qcv="showing"]')].map((e) => e.innerText.replace(/\s+/g, " ").trim()).join("|"),
+      ids: [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].map((r) => r.dataset.id).join(","),
+      counts: [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="gband"], [data-qcv="showing"]')].map((e) => e.innerText.replace(/\s+/g, " ").trim()).join("|"),
     }));
     const title = page.locator('[data-qcv="cz-head-title"]');
     const before = await list();
@@ -193,7 +195,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
         .map((e) => { const b = e.getBoundingClientRect(); return { x: +b.left.toFixed(1), y: +b.top.toFixed(1), w: +b.width.toFixed(1), h: +b.height.toFixed(1), loading: e.dataset.loading === "true" }; }));
       await expect(page.locator('[data-qcv="court"][data-loading="true"]').first(), `${w}: placeholders drawn`).toBeVisible();
       const sk = await read();
-      await expect(page.locator('.qc13-list [data-qcv="row"]').first()).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('.qcw-list [data-qcv="row"]').first()).toBeVisible({ timeout: 20_000 });
       await page.waitForTimeout(900);
       const real = await read();
       expect(sk.length === 3 && sk.every((s) => s.loading) && real.length === 3 && real.every((s) => !s.loading), `${w}: three placeholders, then three cards`).toBe(true);

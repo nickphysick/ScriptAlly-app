@@ -1,0 +1,154 @@
+[
+ {
+  "lock": "R1",
+  "mutation": "the card back in a column beside the panel",
+  "red": true,
+  "reading": [
+   "Error: 1280: panel starts 318 right of the card",
+   "Expected: true",
+   "Received: false"
+  ]
+ },
+ {
+  "lock": "R3",
+  "mutation": "use the court's count",
+  "red": true,
+  "reading": [
+   "Error: expect(locator).toHaveText(expected) failed",
+   "Expected: \"See all 83 in the list\"",
+   "Received: \"See all 13 in the list\""
+  ]
+ },
+ {
+  "lock": "R5",
+  "mutation": "drop the featured row from the list",
+  "red": true,
+  "reading": [
+   "Error: the rows do not change when one is featured"
+  ]
+ },
+ {
+  "lock": "R2",
+  "mutation": "let the desk filter the list",
+  "red": true,
+  "reading": [
+   "Error: you: the list is untouched"
+  ]
+ },
+ {
+  "lock": "W3",
+  "mutation": "Clear all leaves the filter on",
+  "red": true,
+  "reading": [
+   "Error: 1280: Clear all leaves nothing pressed"
+  ]
+ },
+ {
+  "lock": "W4",
+  "mutation": "restore \"Gone quiet\"",
+  "red": true,
+  "reading": [
+   "Error: 1280: quiet's label",
+   "Expected: \"Past the date\"",
+   "Received: \"Gone quiet\""
+  ]
+ },
+ {
+  "lock": "W5",
+  "mutation": "shadow always on",
+  "red": true,
+  "reading": [
+   "Error: 1280: no shadow at rest",
+   "Expected: \"none\"",
+   "Received: \"rgba(28, 19, 15, 0.35) 0px 10px 18px -14px\""
+  ]
+ },
+ {
+  "lock": "W6",
+  "mutation": "size the chip to its text",
+  "red": true,
+  "reading": [
+   "Error: 1280: a add slot is 57.09375 wide",
+   "Expected: <= 0.5",
+   "Received:    54.90625"
+  ]
+ },
+ {
+  "lock": "W8",
+  "mutation": "add a fourth tray button",
+  "red": true,
+  "reading": [
+   "Error: 1280 row 0: tray 854.03125 vs sent 907.046875",
+   "Expected: >= 8",
+   "Received:    -53.015625"
+  ]
+ },
+ {
+  "lock": "W7",
+  "mutation": "restore the native title",
+  "red": true,
+  "reading": [
+   "Error: 1280 [data-qcv=\"sent-tile\"][data-state=\"sent\"]: no native title",
+   "Received: \"Covering letter: Sent 7 Sep\""
+  ]
+ },
+ {
+  "lock": "W1",
+  "mutation": "overflow: hidden on the panel (the hawk is clipped)",
+  "red": true,
+  "reading": [
+   "Error: 1280: the hawk is clipped by qcv-page qcv-own qcw",
+   "Received: \"qcv-page qcv-own qcw\""
+  ]
+ },
+ {
+  "lock": "W9",
+  "mutation": "bind J while typing",
+  "red": true,
+  "reading": [
+   "Error: 1280: J and K are letters in Find",
+   "Expected: \"jk\"",
+   "Received: \"\""
+  ]
+ },
+ {
+  "lock": "W10",
+  "mutation": "shorten the row placeholder",
+  "red": true,
+  "reading": [
+   "Error: 1512: rowH 54.6 → 74.6",
+   "Expected: <= 1",
+   "Received:    19.999999999999993"
+  ]
+ },
+ {
+  "lock": "W12",
+  "mutation": "remove the narrow-panel breakpoint",
+  "red": true,
+  "reading": [
+   "Error: Tobias Hark: the status is one line",
+   "Expected: 1",
+   "Received: 2"
+  ]
+ },
+ {
+  "lock": "W12b",
+  "mutation": "default grouping back to No grouping",
+  "red": true,
+  "reading": [
+   "Error: the default grouping",
+   "Expected pattern: /urgency/i",
+   "Received string:  \"Grouped: none ⌄\""
+  ]
+ },
+ {
+  "lock": "W2",
+  "mutation": "your move counts 'you' (offers excluded) instead of the desk's court",
+  "red": true,
+  "reading": [
+   "Error: 1280: your move = the desk's With you",
+   "Expected: 13",
+   "Received: 12"
+  ]
+ }
+]

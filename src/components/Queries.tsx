@@ -92,8 +92,12 @@ import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
+import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
+import { useQcListKeys } from "./queries/centre/useQcListKeys";
+import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
+import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageGuide, type GuideStep } from "./shell/PageGuide";
@@ -129,6 +133,7 @@ const QC_GUIDE: readonly GuideStep[] = [
 ];
 import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
+import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList132";
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
@@ -144,7 +149,7 @@ import {
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
 import { cardsByQuery, comingUp, nextMove, trayRequest, type ComingUp, type NextMove } from "../lib/qcComingUp";
-import { QcCarousel, QcCarouselSkeleton } from "./queries/centre/QcCarousel";
+import { QcCarousel } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
 import { fanCardModel } from "../lib/qcFanModel";
@@ -2308,8 +2313,10 @@ export const Queries: React.FC<{
      reads it; nothing the reader can reach does. */
   const QC_UNASSIGNED = "__unassigned__";
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
-  /** §2 (v95) — the list's grouping. Local to the page, like the sort: no route, no param, no memory. */
-  const [qcGroup, setQcGroup] = useState<GroupBy>("none");
+  /** The list's grouping. Urgency by default (v132 follow-up, 8 Oct — supersedes the 3 Oct "No grouping"
+   *  default), and remembered on this device beside density (lib/qcListMemory). */
+  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => readQcListMemory().group);
+  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcListMemory({ ...readQcListMemory(), group: g }); }, []);
   /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
   const [qcFind, setQcFind] = useState("");
 
@@ -2327,6 +2334,8 @@ export const Queries: React.FC<{
    * view's placement effect once already.
    */
   const qcPackageName = useCallback((id: string) => packages.find((pk) => pk.id === id)?.packageName ?? null, [packages]);
+  /* v132 §3 — the stored package a send names, so its tiles can light from the edition that went */
+  const qcPackageOf = useCallback((id: string) => packages.find((pk) => pk.id === id) ?? null, [packages]);
   const qcBoardCards = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     const { cols } = assembleBoardColumns({
@@ -2342,6 +2351,11 @@ export const Queries: React.FC<{
   }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
   const [qcScope, setQcScope] = useState<string | null>(null);
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
+  /* v132 §2/§4 — row density, the workspace's own control, remembered on this device under its own
+     versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
+  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
+  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
+  const qcFindRef = useRef<HTMLInputElement>(null);
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
@@ -2352,6 +2366,16 @@ export const Queries: React.FC<{
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
+     ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
+     const is a temporal-dead-zone throw. */
+  const qcKeys = useQcListKeys({
+    active: routeActive && qcDesk,
+    find: qcFind,
+    onFind: setQcFind,
+    findRef: qcFindRef,
+    onOpen: (id) => onOpenQuery?.(id),
+  });
   const [qcCzSort, setQcCzSort] = useState<CzSort>("recent");
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
@@ -6578,7 +6602,30 @@ export const Queries: React.FC<{
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}
-            sentence={
+            sentence={qcDesk ? (
+              /* v132 §2 — "Your queries": the ink bar, the pills, the controls and the strip. One filter
+                 value (`qcFilter`), set by every pill and chip; "your move" is the desk's own court. */
+              <QcWorkspaceHead
+                shown={qcVisible.length}
+                total={qcScoped.length}
+                book={qcLineTitle}
+                filter={qcFilter}
+                onFilter={pickQcFilter}
+                options={filterOptions(qcScoped)}
+                countOf={(f) => qcScoped.filter((r) => matchesFilter(r, f)).length}
+                find={qcFind}
+                onFind={setQcFind}
+                group={qcGroup}
+                onGroup={setQcGroup}
+                sort={qcSort}
+                onSort={setQcSort}
+                density={qcDensity}
+                onDensity={setQcDensity}
+                scope={qcScopeMenu}
+                findRef={qcFindRef}
+                loading={showGridSkeleton}
+              />
+            ) : (
               <QcSentence
                 find={qcFind}
                 onFind={setQcFind}
@@ -6596,11 +6643,11 @@ export const Queries: React.FC<{
                 onSort={setQcSort}
                 scope={qcScopeMenu}
                 scopeTitle={qcScopeTitle}
-                variant={qcDesk ? "section" : "banner"}
+                variant="banner"
                 needYou={rowsForTile(qcScoped, "you").length}
                 msTitle={qcLineTitle}
               />
-            }
+            )}
             sticky={(stuck) => (
               <QcSentence
                 find={qcFind}
@@ -6677,12 +6724,31 @@ export const Queries: React.FC<{
               />
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
-            carousel={showGridSkeleton ? (qcDesk ? <QcCarouselSkeleton /> : null) : (() => {
+            carousel={qcDesk ? (
+              /* v132 §1 (desktop) — "Recently updated": the lede, the featured card and "Also moved".
+                 The desk scopes it and nothing else; the button's number is the LIST's total. */
+              <QcRecent
+                loading={showGridSkeleton}
+                rows={qcScoped}
+                court={qcCzCourt}
+                title={qcCzCourt ? DESK_LABEL[qcCzCourt] : "Recently updated"}
+                listTotal={qcScoped.length}
+                nowMs={Date.now()}
+                onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                model={(row) => {
+                  const door = primaryDoor(row.status);
+                  return {
+                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null,
+                      door ? () => openQueryDrawer({ mode: door.mode, queryId: row.id }) : () => onOpenQuery?.(row.id)),
+                    actionLabel: door ? door.label : "Open",
+                  };
+                }}
+              />
+            ) : showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
               return (
                 <QcCarousel
-                  v131={qcDesk}
                   rows={dealt}
                   title="Recently moved"
                   countLine={carouselCountLine(qcScoped.length, dealt.length, qcCzCourt)}
@@ -6723,7 +6789,12 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                <QcListSkeleton v131={qcDesk} />
+                qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
+              ) : qcDesk && (emptyKind === "filtered" || emptyKind === "nomatch") ? (
+                /* v132 §4 — the desktop dead end: the inkwell and one way back (a search before a filter) */
+                <QcDeadEnd find={qcFind} book={qcLineTitle}
+                  onClearFind={() => setQcFind("")}
+                  onClearFilters={() => { clearQcFilter(); setQcScope(null); }} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6742,10 +6813,39 @@ export const Queries: React.FC<{
                   <button type="button" onClick={clearQcFilter}>Show all queries</button>
                 </p>
               ) : (
-                <QcList
-                  v131={qcDesk}
+                qcDesk ? (
+                <QcList132
+                  groupBy={qcGroup}
+                  /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */
+                  onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
+                  packageOf={qcPackageOf}
+                  density={qcDensity}
+                  find={qcFind}
+                  ringId={qcKeys.ringId}
                   sort={qcSort}
                   onSort={setQcSort}
+                  /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
+                     sort applies WITHIN each group for free (§2). A grouping that re-ordered would
+                     be a second ordering pass disagreeing with the sort control. */
+                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
+                  selectedId={selectedQueryId} onOpen={(id) => { cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
+                  coming={qcComing}
+                  /* ⚠️ THE TRAY'S PRIMARY IS THE PAGE'S OWN ACTION ENGINE, never a second write
+                     path: it opens the query and offers its verb, exactly as pressing the row and
+                     then the card's primary does. Nothing in the tray is destructive in one click —
+                     `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
+                  /* v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER in the journey its bucket names
+                     (`trayRequest`); nothing here opens its own modal for an action any more. */
+                  onAct={(id, bucket) => {
+                    const r = qcById.get(id);
+                    const req = r ? trayRequest(bucket, r.status, id) : null;
+                    if (req) openQueryDrawer(req); else onOpenQuery?.(id);
+                  }}
+                  /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
+                  onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
+                  onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                ) : (
+                <QcList
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
                      sort applies WITHIN each group for free (§2). A grouping that re-ordered would
                      be a second ordering pass disagreeing with the sort control. */
@@ -6767,6 +6867,7 @@ export const Queries: React.FC<{
                   /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
                   onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
                   onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                )
               )
             }
           />
