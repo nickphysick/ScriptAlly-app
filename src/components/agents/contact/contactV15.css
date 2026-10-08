@@ -51,3 +51,14 @@
   animation: cl13Shim 1.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }
+
+/* ── §3 · THE DESK: the group's second row, 28 under the header's hairline (shell/desk draws the cards) ── */
+.clv-group > .cl15-desk { grid-column: 1 / -1; grid-row: 2; margin-top: 28px; }
+/* loading: the cards hold their size; their text and charts are painted over */
+.clv-group[data-loading] .dsk-card :is(.dsk-title, .dsk-stamp, .dsk-big b, .dsk-big small, .dsk-tile, .dsk-lb, .dsk-ax span) {
+  color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 6px;
+  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  animation: cl13Shim 1.6s ease-in-out infinite;
+}
+.clv-group[data-loading] .dsk-card :is(.dsk-ic, .dsk-plot, .dsk-bars, .dsk-pgw) { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }

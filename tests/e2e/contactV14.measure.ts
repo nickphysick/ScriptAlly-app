@@ -31,7 +31,8 @@ test("CL14-1 · order", async ({ page }) => {
       return {
         hero: b(hero), heroBg: hero ? getComputedStyle(hero).backgroundColor : null,
         heroCard: !!hero && !document.querySelector('.aglist [data-probe="page-header"][data-band]'),
-        strip: b(pick('.aglist [data-cl13="strip"]')),
+        /* REPOINTED (v15 §3): the desk replaced the strip */
+        strip: b(pick('.aglist [data-cl15="desk"]')),
         next: b(pick('.aglist [data-cl14="next"]')),
         ws: b(pick('.aglist [data-cl14="ws"]')),
         /* the carousel and every part it brought: the shell, its items, its track, its selector */
@@ -39,49 +40,18 @@ test("CL14-1 · order", async ({ page }) => {
       };
     });
     L.check("CL14-1 the header is v15's open header (no band, no card behind it)", w, r.heroCard && r.heroBg === "rgba(0, 0, 0, 0)", `${r.heroCard} ${r.heroBg}`);
-    L.check("CL14-1 the strip follows the hero", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
+    L.check("CL14-1 the desk follows the header", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
     L.check("CL14-1 no carousel in the DOM", w, r.carousel === 0, `${r.carousel}`);
-    L.check("CL14-1 the next-step section follows the strip, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
+    L.check("CL14-1 the next-step section follows the desk, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
     L.check("CL14-1 the workspace follows the section, 56 (±2) under it", w, !!r.next && !!r.ws && near(r.ws.t - r.next.b, 56, 2), `${r.next && r.ws ? r.ws.t - r.next.b : "—"}`);
     await checkOverflow(page, L, w);
   }
   L.done(12);
 });
 
-/* ── lock 2 · the figures are inert: clicking any of them changes nothing on the page ── */
-test("CL14-2 · figures inert", async ({ page }) => {
-  const L = new Ledger("cl14-2");
-  for (const vp of WIDTHS14) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    /* the page's whole state, as text a reader could compare: the list's markup, the scroll, the URL, and
-       whatever overlays are open */
-    const snap = () => page.evaluate(() => {
-      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sc = root.closest<HTMLElement>(".wpg-scroll") ?? root.querySelector<HTMLElement>(".wpg-scroll");
-      return JSON.stringify({
-        html: root.outerHTML.length, rows: [...root.querySelectorAll("[data-agent-card]")].map((r) => r.getAttribute("data-agent-card")).join(","),
-        pressed: root.querySelectorAll('[aria-pressed="true"]').length, scroll: sc?.scrollTop ?? -1, href: location.href,
-        overlays: document.querySelectorAll('[data-ac="overlay"], [data-hdr], .qad-root.is-open, .lpop').length,
-      });
-    });
-    const cells = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.aglist [data-cl13="strip"] [data-cl13-cell]')]
-      .filter((c) => c.getBoundingClientRect().height > 0)
-      .map((c) => ({ label: c.getAttribute("data-cl13-cell"), tag: c.tagName, cursor: getComputedStyle(c).cursor, tab: c.tabIndex })));
-    L.check("CL14-2 five figures, none a control (no button, no pointer, not focusable)", w,
-      cells.length === 5 && cells.every((c) => c.tag !== "BUTTON" && c.cursor !== "pointer" && c.tab < 0), JSON.stringify(cells));
-    for (const c of cells) {
-      const before = await snap();
-      await page.locator(`.aglist [data-cl13="strip"] [data-cl13-cell="${c.label}"]`).first().click();
-      await page.waitForTimeout(300);
-      const after = await snap();
-      L.check(`CL14-2 clicking "${c.label}" changes nothing`, w, after === before, after === before ? "" : `${before} → ${after}`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(14);
-});
-
+/* CL14-2 (the strip's five figures are inert) is RETIRED with the strip (Contact list v15 §3): the desk replaces it, and
+   its presses are CL15-3's — On file inert, Queried filters the list, Profiles opens Housekeeping.
+   tests/e2e/RETIRED-contact-list-v15.md. */
 
 /* ── lock 3 · the next-step section: Ready on the fixture, the card is the agent card, no space under it ── */
 test("CL14-3 · next step", async ({ page }) => {
@@ -157,7 +127,7 @@ test("CL14-5 · workspace", async ({ page }) => {
     const w = `${vp.width}`;
     const r = await page.evaluate(() => {
       const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const ws = pick('.aglist [data-cl14="ws"]'), strip = pick('.aglist [data-cl13="strip"]'), bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? null;
+      const ws = pick('.aglist [data-cl14="ws"]'), strip = pick('.aglist [data-cl15="desk"]') /* v15 §3: the desk */, bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? null;
       const img = ws?.querySelector<HTMLImageElement>('[data-cl14="art"] img') ?? null;
       const bg = (e: Element | null) => (e ? getComputedStyle(e).backgroundColor : null);
       const box = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, r: x.right, t: x.top, b: x.bottom }; };
@@ -775,8 +745,9 @@ test("CL14-15 · reduced motion", async ({ page }) => {
    strip, the next-step section, the workspace, the Housekeeping tab — and a steered step brings its subject
    into view. (A fresh context: this file's beforeEach marks the guide seen on every navigation.) ── */
 const GUIDE14 = [
-  { title: "Your list in numbers", sel: '[data-cl13="strip"]',
-    body: "How many agents you have on file, how many fit your book, who’s open, how fast they reply, and what you added this month." },
+  /* v15 §3 (ruling 7): step 1 rings the desk, in Nick's words */
+  { title: "Your list in numbers", sel: '[data-cl15="desk"]',
+    body: "How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are." },
   { title: "Your next step", sel: '[data-cl14="next"]',
     body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, who might fit, or where to find more." },
   { title: "Your agents", sel: '[data-cl14="ws"]',

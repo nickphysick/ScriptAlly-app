@@ -88,3 +88,105 @@ test("CL15-2 · headroom", async ({ page }) => {
   }
   L.done(4);
 });
+
+/* ── lock 3 · the desk: three cards in one row; their heights; ink titles; Queried's bars and Profiles' progress bar; no
+   text overflowing; every stamp's text clear of its inner rule; no stamp fact repeated in a row; and the presses — On
+   file changes nothing, Queried filters the list to exactly its figure, Profiles opens Housekeeping ── */
+test("CL15-3 · desk", async ({ page }) => {
+  const L = new Ledger("cl15-3");
+  let deskSeen = false;
+  for (const vp of WIDTHS15) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const narrow = vp.width < 1440;
+    const r = await page.evaluate(() => {
+      const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      const desk = pick('.aglist [data-cl15="desk"]');
+      const hd = pick('.aglist [data-cl15="header"]');
+      const cards = desk ? [...desk.querySelectorAll<HTMLElement>("[data-dk]")] : [];
+      const over = (e: Element | null) => (e ? (e as HTMLElement).scrollWidth - (e as HTMLElement).clientWidth : 0);
+      return {
+        found: !!desk, gap: desk && hd ? desk.getBoundingClientRect().top - hd.getBoundingClientRect().bottom : null,
+        cards: cards.map((c) => {
+          const b = c.getBoundingClientRect();
+          const title = c.querySelector<HTMLElement>('[data-dk-part="title"]');
+          const stamp = c.querySelector<HTMLElement>('[data-dk-part="stamp"]');
+          /* the stamp's TEXT must sit inside its inner rule: the text's box inset at least 4px from the stamp's on each side */
+          let clear: boolean | null = null;
+          if (stamp) {
+            const rg = document.createRange(); rg.selectNodeContents(stamp);
+            const t = rg.getBoundingClientRect(), s = stamp.getBoundingClientRect();
+            clear = t.left - s.left >= 4 && s.right - t.right >= 4 && t.top - s.top >= 3 && s.bottom - t.bottom >= 3 && over(stamp) <= 1;
+          }
+          const rows = [...c.querySelectorAll<HTMLElement>('[data-dk-part="row"]')];
+          return {
+            key: c.getAttribute("data-dk"), x: b.left, y: b.top, w: b.width, h: b.height,
+            titleColour: title ? getComputedStyle(title).color : null, titleOver: over(title),
+            stamp: stamp?.textContent ?? null, clear,
+            rows: rows.map((x) => x.textContent ?? ""), rowOver: Math.max(0, ...rows.map((x) => Math.max(over(x), over(x.querySelector(".dsk-lb"))))),
+            bars: c.querySelectorAll('[data-dk-chart="bars"] i').length,
+            barOpac: [...c.querySelectorAll<HTMLElement>('[data-dk-chart="bars"] i')].map((i) => getComputedStyle(i).opacity),
+            progress: !!c.querySelector('[data-dk-chart="progress"] [role="progressbar"]'),
+            paths: c.querySelectorAll("path").length,
+            big: c.querySelector('[data-dk-part="big"]')?.textContent ?? null,
+            pressable: !!c.querySelector("[data-dk-press]"),
+          };
+        }),
+        headerCount: Number((hd?.querySelector("h1")?.textContent ?? "").match(/^(\d+)/)?.[1] ?? NaN),
+      };
+    });
+    if (!r.found) { L.check("CL15-3 population: the desk renders", w, false, "no desk"); continue; }
+    deskSeen = true;
+    const by = Object.fromEntries(r.cards.map((c) => [c.key, c]));
+    L.check("CL15-3 three cards in one row: On file, Queried, Profiles complete", w,
+      r.cards.map((c) => c.key).join(",") === "file,queried,profiles" && r.cards.every((c) => near(c.y, r.cards[0].y, 1)), JSON.stringify(r.cards.map((c) => [c.key, Math.round(c.y)])));
+    L.check(`CL15-3 every card is ${narrow ? "186" : "200"}px tall or less`, w, r.cards.every((c) => c.h <= (narrow ? 186 : 200)), r.cards.map((c) => c.h.toFixed(1)).join(" "));
+    L.check(`CL15-3 equal widths, ${narrow ? 16 : 24} apart`, w, r.cards.length === 3 && near(r.cards[0].w, r.cards[1].w, 1) && near(r.cards[1].w, r.cards[2].w, 1)
+      && near(r.cards[1].x - (r.cards[0].x + r.cards[0].w), narrow ? 16 : 24, 1), r.cards.map((c) => `${c.x.toFixed(1)}+${c.w.toFixed(1)}`).join(" "));
+    L.check("CL15-3 the desk is 28 (±1) under the header's hairline", w, r.gap !== null && near(r.gap, 28, 1), `${r.gap}`);
+    L.check("CL15-3 titles are ink", w, r.cards.every((c) => c.titleColour === "rgb(28, 19, 15)"), r.cards.map((c) => c.titleColour).join(" "));
+    L.check("CL15-3 Queried's chart is bars (≥ 8), this week solid and the rest at 45%", w,
+      by.queried?.bars >= 8 && by.queried.barOpac[by.queried.barOpac.length - 1] === "1" && by.queried.barOpac.slice(0, -1).every((o: string) => o === "0.45"), `${by.queried?.bars} ${by.queried?.barOpac.join(",")}`);
+    L.check("CL15-3 Profiles' chart is a progress bar (no <path>)", w, !!by.profiles?.progress && by.profiles.paths === 0, `${by.profiles?.progress} paths ${by.profiles?.paths}`);
+    L.check("CL15-3 no text overflows a title or a row", w, r.cards.every((c) => c.titleOver <= 1 && c.rowOver <= 1), r.cards.map((c) => `${c.key} ${c.titleOver}/${c.rowOver}`).join(" "));
+    L.check("CL15-3 every stamp's text fits inside its inner rule", w, r.cards.filter((c) => c.stamp !== null).every((c) => c.clear === true), r.cards.map((c) => `${c.key} ${c.stamp} ${c.clear}`).join(" | "));
+    L.check("CL15-3 the Profiles stamp is hidden (no completion history exists)", w, by.profiles?.stamp === null && by.file?.stamp !== null && by.queried?.stamp !== null, r.cards.map((c) => c.stamp).join(" | "));
+    L.check("CL15-3 no row repeats its card's stamp", w, r.cards.every((c) => !c.stamp || c.rows.every((t: string) => !/this month/.test(t))), JSON.stringify(r.cards.map((c) => c.rows)));
+    L.check("CL15-3 On file's figure is the header's count", w, Number(by.file?.big) === r.headerCount, `${by.file?.big} vs ${r.headerCount}`);
+    L.check("CL15-3 On file is not pressable; Queried and Profiles are", w, !by.file?.pressable && !!by.queried?.pressable && !!by.profiles?.pressable, r.cards.map((c) => `${c.key}:${c.pressable}`).join(" "));
+    await checkOverflow(page, L, w);
+  }
+  /* no desk: fail on the population reading, never by waiting out a click on a card that is not there */
+  if (!deskSeen) { L.done(31); return; }
+  /* the presses, at 1512 */
+  await openContacts(page, WIDTHS15[0]);
+  const snap = () => page.evaluate(() => {
+    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const sc = root.closest<HTMLElement>(".wpg-scroll") ?? root.querySelector<HTMLElement>(".wpg-scroll");
+    return JSON.stringify({
+      rows: [...root.querySelectorAll("[data-agent-card]")].map((x) => x.getAttribute("data-agent-card")).join(","),
+      pressed: root.querySelectorAll('[aria-pressed="true"]').length, scroll: sc?.scrollTop ?? -1, href: location.href,
+      overlays: document.querySelectorAll('[data-ac="overlay"], [data-hdr="housekeeping"].is-in, .qad-root.is-open, .lpop').length,
+    });
+  });
+  const before = await snap();
+  await page.locator('.aglist [data-dk="file"]').filter({ visible: true }).first().click();
+  await page.waitForTimeout(300);
+  L.check("CL15-3 clicking On file changes nothing", "1512", (await snap()) === before, "");
+  const fig = Number(await page.locator('.aglist [data-dk="queried"] [data-dk-part="big"]').filter({ visible: true }).first().textContent());
+  await page.locator('.aglist [data-dk-press="queried"]').filter({ visible: true }).first().click();
+  await page.waitForTimeout(900);
+  const q = await page.evaluate(() => {
+    const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const ws = root.querySelector<HTMLElement>('[data-cl14="ws"]');
+    return { rows: root.querySelectorAll('[data-clv="row"]').length, wsTop: ws ? ws.getBoundingClientRect().top : null, queried: root.querySelector('[data-cl14-dd="queried"]')?.textContent ?? null };
+  });
+  L.check("CL15-3 Queried filters the list to exactly its figure, and scrolls to it", "1512", q.rows === fig && q.wsTop !== null && q.wsTop < 400, `${q.rows} rows vs ${fig}; ws top ${q.wsTop}; ${q.queried}`);
+  await openContacts(page, WIDTHS15[0]);
+  await page.locator('.aglist [data-dk-press="profiles"]').filter({ visible: true }).first().click();
+  await page.waitForFunction(() => !![...document.querySelectorAll('[data-hdr="housekeeping"]')].find((e) => e.classList.contains("is-in")), undefined, { timeout: 5000 }).catch(() => {});
+  const hk = await page.evaluate(() => !![...document.querySelectorAll('[data-hdr="housekeeping"]')].find((e) => e.classList.contains("is-in")));
+  L.check("CL15-3 Profiles complete opens Housekeeping", "1512", hk, `${hk}`);
+  await page.keyboard.press("Escape");
+  L.done(31);
+});

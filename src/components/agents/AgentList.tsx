@@ -77,8 +77,9 @@ import { nextStep, reopenReminderTask } from "../../lib/contactNextStep";
 import { DISCOVER_LIVE, communityAgentFields } from "../../lib/discoverShared";
 import { takesBook } from "../../lib/genreMatch";
 import { SubmissionStatus } from "../../types";
-import { ContactStrip } from "./contact/ContactStrip";
-import { stripFacts, fitsGenre } from "../../lib/contactStrip";
+import { ContactDesk } from "./contact/ContactDesk";
+import { deskModel } from "../../lib/contactDesk";
+import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
 import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
 import { CANONICAL_GENRES } from "../../lib/genres";
@@ -249,7 +250,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const nowMs = useMemo(() => Date.now(), [qcRows]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
-  const strip = useMemo(() => stripFacts(agents, book, nowMs), [agents, book, nowMs]);
   const factsAll = useMemo(
     () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
     [agents, qcRows, scoped],
@@ -619,6 +619,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
+  /* v15 §3 — THE DESK's three cards, over the unfiltered agents: Profiles reads Housekeeping's own completeness (`hk`) */
+  const desk = useMemo(() => deskModel({
+    agents, queries, msId: scoped?.id ?? null, now: new Date(nowMs),
+    hk: { complete: hk.complete, total: hk.total, gaps: hk.items.length, gapAgents: hk.gapAgents },
+  }), [agents, queries, scoped, nowMs, hk]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* v15 §2: the open header's title is the living count — the LivingHeaders review aid's override wins in dev */
@@ -941,8 +946,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             controls={controls}
             perch={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }} />
         )}
-        {/* v13 §3 — the numbers strip, one rhythm step under the band, the whole group's width */}
-        {showList && <ContactStrip facts={strip} />}
+        {/* v15 §3 — the desk, 28 under the header's hairline: three cards; Queried filters the list, Profiles opens Housekeeping */}
+        {showList && (
+          <ContactDesk model={desk}
+            onQueried={() => {
+              setFilters({ ...emptyContactFilters(), queried: "yes" }); setSearch("");
+              window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
+            }}
+            onProfiles={() => setHkOpen(true)} />
+        )}
         {/* v14 §2 — the next-step section, 44 under the strip: one of four states, from the writer's data */}
         {showList && (
           <ContactNextStep

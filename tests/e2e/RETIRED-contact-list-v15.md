@@ -16,3 +16,16 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 **Repointed, not retired:** CL13-12 (the loading header is the open header), CL14-1 (the header is v15's open header, not v131's card), `pageHeaderV2` §4 / §4.4 / §4.6 and `quietBar` Q8 (`/agents` is in the new `OWN_HEADER_ROUTES` register, exempt by name; §4.6's add door reads the header's own buttons).
 
 **Deleted (their only reader was the band):** `CONTACT_BAND_DISC`, the `.clv-bdisc` rules, `contactHeaderCopy` / `ContactCopyContext` (`lib/livingHeaders`), `heroFacts` / `HeroFacts` (`lib/contactList`). `/images/contact-archivist.png` stays: the marketing Contact page reads it.
+
+## Phase 2 — the desk (v15 §3)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV13.measure.ts` | CL13-S · the numbers strip | The five-cell strip is replaced by the desk of three cards | CL15-3 (desk) |
+| `contactV14.measure.ts` | CL14-2 · the strip's figures are inert | The strip is gone. On file is inert; Queried and Profiles complete are pressable by design | CL15-3 (On file changes nothing; Queried filters to its figure; Profiles opens Housekeeping) |
+| `src/components/agents/contact/contactStrip.test.tsx` | the whole file | `ContactStrip` is deleted | `src/lib/contactDesk.test.ts` |
+| `src/lib/contactStrip.test.ts` | the `stripFacts` cases | `stripFacts` / `StripFacts` are deleted with the strip | `src/lib/contactDesk.test.ts`. The `statedWeeks` and `fitsGenre` cases stay |
+
+**Repointed, not retired:** CL14-1 and CL14-5 (the strip's place in the rhythm is the desk's), CL14-16 (guide step 1 rings the desk, with Nick's wording), CL13-12 / CL13-13 / CL13-14 (the loading beat and the empty state read the desk).
+
+**Deleted:** `ContactStrip.tsx`, `stripFacts` / `StripFacts` and their helpers (`lib/contactStrip`), the strip's rules in `contactV13.css`.
