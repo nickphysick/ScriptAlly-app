@@ -130,56 +130,8 @@ export function qcHeaderCopy(count: number, ctx: PressingContext): LivingLine {
   return { headline, subline: pressingSentence(ctx) };
 }
 
-export interface ContactCopyContext extends PressingContext {
-  agents: readonly Agent[];
-  /** v12: the hero facts the page already derives (want/fresh/genre/msTitle) — never recounted here */
-  facts?: { want: number; fresh: number; genre: string | null; msTitle: string | null } | null;
-}
-
-/** Contact list: "One agent" / "‹n› agents", and the sentence. */
-export function contactHeaderCopy(count: number, ctx: ContactCopyContext): LivingLine {
-  if (count === 1 && ctx.agents.length === 1) {
-    const a = ctx.agents[0];
-    const name = agentPrimary(a);
-    const agency = (a.agency ?? "").trim();
-    const theirs = ctx.rows.filter((r) => r.query.agentId === a.id && r.sentMs != null);
-    const last = theirs.length ? Math.max(...theirs.map((r) => r.sentMs as number)) : null;
-    const who: LivingRun[] = agency && agency !== name ? [{ b: name }, ` at ${agency}`] : [{ b: name }];
-    return {
-      headline: "One agent on file",
-      subline: [...who, last != null ? `, and your query went on ${dayMonth(last)}.` : ", and you haven’t queried them yet."],
-    };
-  }
-  /* v12 — THE CARD INDEX'S SENTENCE (the oracle's own arithmetic): the bold number is the agents
-     who want the manuscript's genre AND haven't been queried (`facts.fresh` — the mock's
-     `hit && st.startsWith('no')`), words up to twenty then digits. The spec's none-case sentence covers
-     fresh === 0 (the delivered mock cannot reach it, so the text governs that branch). */
-  const headline = count === 1 ? "One agent on file" : `${count} agents on file`;
-  const f = ctx.facts;
-  const runs: LivingRun[] = [];
-  if (f?.genre && f.msTitle) {
-    if (f.fresh > 0) {
-      const w = wordsToTwenty(f.fresh);
-      runs.push({ b: w.charAt(0).toUpperCase() + w.slice(1) }, ` of them want ${f.genre} and haven\u2019t seen `, { ms: f.msTitle }, " yet.");
-    } else {
-      runs.push(`None of them want ${f.genre} yet.`);
-    }
-  } else {
-    /* no manuscript in scope — the queried/to-go line stays, so the subline is never empty */
-    const queried = new Set(ctx.rows.filter((r) => r.sentMs != null).map((r) => r.query.agentId));
-    const nQueried = ctx.agents.filter((a) => queried.has(a.id)).length;
-    const toGo = ctx.agents.length - nQueried;
-    runs.push(...(nQueried === 0
-      ? (["None queried yet."] as LivingRun[])
-      : toGo === 0
-        ? ([{ b: "All of them queried" }, "."] as LivingRun[])
-        : ([{ b: `${nQueried} queried` }, `, and ${toGo} still to go.`] as LivingRun[])));
-  }
-  /* ⚠️ v13 §2 — ONE SENTENCE. The v12 subline went on to the list's average reply time; the numbers
-     strip under the band now states the typical reply (a median, with the fastest agent), and two
-     surfaces stating one fact two ways is the disagreement the strip was built to end. */
-  return { headline, subline: runs };
-}
+/* ⚠️ RETIRED (Contact list v15 §2): `contactHeaderCopy` and `ContactCopyContext`. The Contact list's header is page-local
+   now (ContactOpenHeader) — the count as the title and a fixed line, no derived sentence. */
 
 /* ══ v3 — THE FOUR NEW PAGES ══════════════════════════════════════════════════════════════════
    Each takes FACTS the page already derives (never a new engine) and returns the two lines. */

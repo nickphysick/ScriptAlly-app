@@ -133,36 +133,8 @@ export function contactCensus(agents: readonly Agent[], rows: readonly QcRow[], 
 export const matchesCards = (sel: ReadonlySet<ContactCardKey>, s: ContactStanding): boolean =>
   sel.size === 0 || sel.has(s.kind === "open" ? "active" : s.kind === "none" ? "never" : "closed");
 
-/* ── the facts sentence (v11 §3.1) ────────────────────────────────────────────────────────── */
-
-export interface HeroFacts {
-  total: number;
-  /** The manuscript's title, in the typewriter face — null drops the scope clause. */
-  msTitle: string | null;
-  /** The genre as the writer recorded it, lowercased for the sentence; null drops the tail. */
-  genre: string | null;
-  want: number;
-  /** Genre matches the writer has never queried for this manuscript — the bold tail. */
-  fresh: number;
-}
-
-export function heroFacts(
-  agents: readonly Agent[],
-  standing: ReadonlyMap<string, ContactStanding>,
-  ms: Manuscript | null,
-): HeroFacts {
-  /* v14 (Q5): the book's genres — main plus subGenres — and one definition of taking it */
-  const book = bookGenres(ms);
-  const wanters = book.length ? agents.filter((a) => takesBook(a.genres, book)) : [];
-  return {
-    total: agents.length,
-    msTitle: ms?.title ?? null,
-    /* v14: the book's genres as the strip says them ("want thrillers or crime") — the genre-noun table */
-    genre: book.length ? joinGenres(book) : null,
-    want: wanters.length,
-    fresh: wanters.filter((a) => standing.get(a.id)?.kind === "none").length,
-  };
-}
+/* ⚠️ RETIRED (Contact list v15 §2): `heroFacts` / `HeroFacts` — the facts sentence's derivation; its one reader was the
+   v12–v14 living header, which the open header replaced. */
 
 /* ⚠️ THE HERO'S PLACEMENT CHAIN IS RETIRED (page header v2 §4): `ART`, `HERO_CARD_W`,
    `HERO_STACK_BELOW` and `heroLayout` solved where the blank card sat inside the Archivist's

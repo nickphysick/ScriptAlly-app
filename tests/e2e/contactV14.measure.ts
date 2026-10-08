@@ -26,61 +26,32 @@ test("CL14-1 · order", async ({ page }) => {
     const r = await page.evaluate(() => {
       const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { t: x.top, b: x.bottom, h: x.height }; };
-      const hero = pick('.aglist [data-probe="page-header"][data-band]');
+      /* REPOINTED (Contact list v15 §2): the hero is the page-local open header — CL15-1 owns its geometry */
+      const hero = pick('.aglist [data-cl15="header"]');
       return {
         hero: b(hero), heroBg: hero ? getComputedStyle(hero).backgroundColor : null,
-        heroCard: !!hero?.classList.contains("ph--card") && !!hero?.classList.contains("ph--compact"),
-        strip: b(pick('.aglist [data-cl13="strip"]')),
+        heroCard: !!hero && !document.querySelector('.aglist [data-probe="page-header"][data-band]'),
+        /* REPOINTED (v15 §3): the desk replaced the strip */
+        strip: b(pick('.aglist [data-cl15="desk"]')),
         next: b(pick('.aglist [data-cl14="next"]')),
         ws: b(pick('.aglist [data-cl14="ws"]')),
         /* the carousel and every part it brought: the shell, its items, its track, its selector */
         carousel: document.querySelectorAll('.aglist [data-cz], .aglist .cz-item, .aglist [data-cz-track], .aglist [data-cz-set], .aglist .cl13-seg').length,
       };
     });
-    L.check("CL14-1 the hero is v131's compact card, in rgb(42,58,82)", w, r.heroCard && r.heroBg === INK14, `${r.heroCard} ${r.heroBg}`);
-    L.check("CL14-1 the strip follows the hero", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
+    L.check("CL14-1 the header is v15's open header (no band, no card behind it)", w, r.heroCard && r.heroBg === "rgba(0, 0, 0, 0)", `${r.heroCard} ${r.heroBg}`);
+    L.check("CL14-1 the desk follows the header", w, !!r.hero && !!r.strip && r.strip.t > r.hero.b, `${JSON.stringify(r.hero)} ${JSON.stringify(r.strip)}`);
     L.check("CL14-1 no carousel in the DOM", w, r.carousel === 0, `${r.carousel}`);
-    L.check("CL14-1 the next-step section follows the strip, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
+    L.check("CL14-1 the next-step section follows the desk, 44 (±1) under it", w, !!r.strip && !!r.next && near(r.next.t - r.strip.b, 44, 1), `${r.strip && r.next ? r.next.t - r.strip.b : "—"}`);
     L.check("CL14-1 the workspace follows the section, 56 (±2) under it", w, !!r.next && !!r.ws && near(r.ws.t - r.next.b, 56, 2), `${r.next && r.ws ? r.ws.t - r.next.b : "—"}`);
     await checkOverflow(page, L, w);
   }
   L.done(12);
 });
 
-/* ── lock 2 · the figures are inert: clicking any of them changes nothing on the page ── */
-test("CL14-2 · figures inert", async ({ page }) => {
-  const L = new Ledger("cl14-2");
-  for (const vp of WIDTHS14) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    /* the page's whole state, as text a reader could compare: the list's markup, the scroll, the URL, and
-       whatever overlays are open */
-    const snap = () => page.evaluate(() => {
-      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sc = root.closest<HTMLElement>(".wpg-scroll") ?? root.querySelector<HTMLElement>(".wpg-scroll");
-      return JSON.stringify({
-        html: root.outerHTML.length, rows: [...root.querySelectorAll("[data-agent-card]")].map((r) => r.getAttribute("data-agent-card")).join(","),
-        pressed: root.querySelectorAll('[aria-pressed="true"]').length, scroll: sc?.scrollTop ?? -1, href: location.href,
-        overlays: document.querySelectorAll('[data-ac="overlay"], [data-hdr], .qad-root.is-open, .lpop').length,
-      });
-    });
-    const cells = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.aglist [data-cl13="strip"] [data-cl13-cell]')]
-      .filter((c) => c.getBoundingClientRect().height > 0)
-      .map((c) => ({ label: c.getAttribute("data-cl13-cell"), tag: c.tagName, cursor: getComputedStyle(c).cursor, tab: c.tabIndex })));
-    L.check("CL14-2 five figures, none a control (no button, no pointer, not focusable)", w,
-      cells.length === 5 && cells.every((c) => c.tag !== "BUTTON" && c.cursor !== "pointer" && c.tab < 0), JSON.stringify(cells));
-    for (const c of cells) {
-      const before = await snap();
-      await page.locator(`.aglist [data-cl13="strip"] [data-cl13-cell="${c.label}"]`).first().click();
-      await page.waitForTimeout(300);
-      const after = await snap();
-      L.check(`CL14-2 clicking "${c.label}" changes nothing`, w, after === before, after === before ? "" : `${before} → ${after}`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(14);
-});
-
+/* CL14-2 (the strip's five figures are inert) is RETIRED with the strip (Contact list v15 §3): the desk replaces it, and
+   its presses are CL15-3's — On file inert, Queried filters the list, Profiles opens Housekeeping.
+   tests/e2e/RETIRED-contact-list-v15.md. */
 
 /* ── lock 3 · the next-step section: Ready on the fixture, the card is the agent card, no space under it ── */
 test("CL14-3 · next step", async ({ page }) => {
@@ -156,7 +127,7 @@ test("CL14-5 · workspace", async ({ page }) => {
     const w = `${vp.width}`;
     const r = await page.evaluate(() => {
       const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const ws = pick('.aglist [data-cl14="ws"]'), strip = pick('.aglist [data-cl13="strip"]'), bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? null;
+      const ws = pick('.aglist [data-cl14="ws"]'), strip = pick('.aglist [data-cl15="desk"]') /* v15 §3: the desk */, bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? null;
       const img = ws?.querySelector<HTMLImageElement>('[data-cl14="art"] img') ?? null;
       const bg = (e: Element | null) => (e ? getComputedStyle(e).backgroundColor : null);
       const box = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, r: x.right, t: x.top, b: x.bottom }; };
@@ -365,7 +336,7 @@ test("CL14-8 · grouping", async ({ page }) => {
 
 /* ── lock 9 · remembered settings: versioned and validated — stale state reads as the defaults ── */
 const seedMemory = async (page: P, value: unknown) => {
-  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v2", JSON.stringify(v)), value);
+  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v3", JSON.stringify(v)), value);
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
@@ -376,14 +347,14 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   const w = "1512";
   await openContacts(page, vp);
   const total = await rowCount(page);
-  /* a good v2 state restores */
-  const good = { v: 2, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable" };
+  /* a good state restores (v15 moved the key to v3 with the ready-only mode) */
+  const good = { v: 3, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable", readyOnly: false };
   await seedMemory(page, good);
   L.check("CL14-9 a good state restores: Grouped: Status, Sort: Response time, Action required on", w,
     (await pillWords(page, "group")).includes("Status") && (await pillWords(page, "sort")).includes("Response time")
     && (await v14(page, '[data-cl14-chip="action"]').getAttribute("aria-pressed").catch(() => null)) === "true", `${await pillWords(page, "group")} | ${await pillWords(page, "sort")}`);
   /* a stale state — a grouping, a sort and a status that no longer exist, and v13's facets — reads as the defaults, and the page still renders */
-  await seedMemory(page, { v: 2, filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
+  await seedMemory(page, { v: 3, readyOnly: "yes", filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
   const stale = { group: await pillWords(page, "group"), sort: await pillWords(page, "sort"), rows: await rowCount(page), clear: await page.locator('.aglist [data-cl14="clear-all"]').filter({ visible: true }).count(), boundary: await page.getByText(/Something went wrong/i).count() };
   L.check("CL14-9 stale state: Letter, Surname A to Z, nothing on, every row, no error", w,
     stale.group.includes("Letter") && stale.sort.includes("Surname, A to Z") && stale.rows === total && stale.clear === 0 && stale.boundary === 0, JSON.stringify(stale));
@@ -394,12 +365,17 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   L.check("CL14-9 stale state: the list itself is grouped by letter (A–Z tabs, letter headings)", w,
     idx === 1 && heads.length > 1 && heads.every((h) => /^[A-Z#]$/.test(h)), `idx ${idx} ${JSON.stringify(heads.slice(0, 6))}`);
   /* v13's unversioned key is read by nothing */
-  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList.v2"); sessionStorage.setItem("sa.contactList", JSON.stringify({ filters: { stand: ["you"] }, group: "agency", sort: "due" })); });
+  await page.evaluate(() => {
+    sessionStorage.removeItem("sa.contactList.v3");
+    sessionStorage.setItem("sa.contactList", JSON.stringify({ filters: { stand: ["you"] }, group: "agency", sort: "due" }));
+    /* v14's key too: a v2 value is an older shape, refused whole */
+    sessionStorage.setItem("sa.contactList.v2", JSON.stringify({ v: 2, filters: {}, group: "status", sort: "reply", readyOnly: true }));
+  });
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
-  L.check("CL14-9 v13's unversioned key is ignored", w, (await pillWords(page, "group")).includes("Letter") && (await rowCount(page)) === total, await pillWords(page, "group"));
-  await page.evaluate(() => sessionStorage.removeItem("sa.contactList"));
+  L.check("CL14-9 v13's unversioned key and v14's v2 key are ignored", w, (await pillWords(page, "group")).includes("Letter") && (await rowCount(page)) === total, await pillWords(page, "group"));
+  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList"); sessionStorage.removeItem("sa.contactList.v2"); });
   /* a fresh session restores nothing */
   await seedMemory(page, good);
   const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
@@ -408,7 +384,7 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   await openContacts(p2, vp, { keep: true });
   L.check("CL14-9 a fresh session restores nothing", w, (await pillWords(p2, "group")).includes("Letter"), await pillWords(p2, "group"));
   await ctx.close();
-  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v2"));
+  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v3"));
   L.done(5);
 });
 
@@ -774,8 +750,9 @@ test("CL14-15 · reduced motion", async ({ page }) => {
    strip, the next-step section, the workspace, the Housekeeping tab — and a steered step brings its subject
    into view. (A fresh context: this file's beforeEach marks the guide seen on every navigation.) ── */
 const GUIDE14 = [
-  { title: "Your list in numbers", sel: '[data-cl13="strip"]',
-    body: "How many agents you have on file, how many fit your book, who’s open, how fast they reply, and what you added this month." },
+  /* v15 §3 (ruling 7): step 1 rings the desk, in Nick's words */
+  { title: "Your list in numbers", sel: '[data-cl15="desk"]',
+    body: "How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are." },
   { title: "Your next step", sel: '[data-cl14="next"]',
     body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, who might fit, or where to find more." },
   { title: "Your agents", sel: '[data-cl14="ws"]',

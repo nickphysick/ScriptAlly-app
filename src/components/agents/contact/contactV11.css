@@ -76,23 +76,11 @@
    the open header's rule + 24; the rail keeps level with the column until it retires (v13 §6). */
 /* v13 §3–4 — the numbers strip is row 2 and the carousel row 3, each the whole group's width; the
    column and the rail are row 4. Each section is one rhythm step under the last. */
-.clv-group > .cl13-strip { grid-column: 1 / -1; grid-row: 2; margin-top: var(--page-section-gap); }
 .clv-group > .cl13-cz { grid-column: 1 / -1; grid-row: 3; margin-top: var(--page-section-gap); min-width: 0; }
 .clv-group > .clv-main { grid-column: 1; grid-row: 4; padding-top: var(--page-section-gap); }
 /* v13 §9 — the app footer is the group's last row, so its content box is the column's (QC126-11's rule) */
 .clv-group > .af { grid-column: 1 / -1; grid-row: 5; min-width: 0; }
-/* v13 §2 — THE BAND'S DISC. The Archivist file is square on white, not pre-cut (the Query Centre's
-   disc art is), so the circle is drawn here: 290 white, the drawing inset at 92% and nudged 4px down,
-   the mock's `.disc`. ⚠️ `.ph-bdisc img` sets the shared art to 100%; this 0-2-1 rule wins honestly. */
-.clv-bdisc {
-  width: 290px; height: 290px; border-radius: 50%; background: #fff; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.6);
-}
-.ph-bdisc .clv-bdisc img { width: 92%; height: 92%; object-fit: contain; transform: translateY(4px); }
-/* v14 §1.2 — inside v131's compact hero card the disc slot is 150 (the shared sheet's `.ph--compact .ph-bdisc`), so
-   the white circle follows it; 0-2-0 beats the 290 above */
-.ph--compact .clv-bdisc { width: 150px; height: 150px; }
+/* ⚠️ RETIRED (Contact list v15 §2): the band's disc (`.clv-bdisc`) went with the band — the header is the open one now. */
 
 /* ── the quick-add card "+ Add an agent" drops (§4; the mock's `.qa`) ── */
 /* the quick-add drop card is RETIRED (v12 P1 — "+ Add an agent" opens the centred card directly) */

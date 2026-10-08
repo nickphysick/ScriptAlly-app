@@ -2,9 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE NEXT-STEP SECTION (Contact list v14 §2; ref design-refs/contact-list-v14.html `.kk-band`). One frame and
- * four states — ready, reopening, gaps, done — chosen by `lib/contactNextStep` from the writer's data. It
- * replaces v13's carousel and always says the most useful next thing to do with your agents for this book.
+ * THE NEXT-STEP SECTION (Contact list v15 §4, v14 §2). One frame and three states — ready, reopening, all
+ * queried — chosen by `lib/contactNextStep` from the writer's data. It always says the most useful next thing to
+ * do with your agents for this book. v14's fourth state (the agents with no genres recorded) is retired: those
+ * agents are ready now, by the one ready rule the section, the pill and See all share.
  *
  * ⚠️ THE CARD IS `AgentCarouselCard`, NOT THE QUICK VIEW (ruling, 7 Oct). The quick view is the modal's own
  * content — an Escape layer whose last step closes the card, a window key listener, a hard-coded heading id —
@@ -36,6 +37,8 @@ import { AgentCarouselCard } from "../card/AgentCarouselCard";
 
 export interface ContactNextStepProps {
   step: NextStep;
+  /** a manuscript is in scope (with none, "this book" names nothing and the section says so) */
+  hasBook: boolean;
   /** the book's title, or null (no manuscript in scope) */
   bookTitle: string | null;
   /** `joinGenres(book)` — "thrillers or crime"; "" when the book has no genre */
@@ -55,7 +58,6 @@ export interface ContactNextStepProps {
   onAct: (agentId: string, act: CardAct) => void;
   onAdd: (agentId: string, focus: "genres" | "wishlist" | "materials") => void;
   onSeeAll: () => void;
-  onOpenHk: () => void;
   onNewAgent: (from?: DOMRect) => void;
   onDiscover: () => void;
   onRemind: (a: Agent) => void;
@@ -86,20 +88,13 @@ const agentsN = (n: number) => `${n} ${n === 1 ? "agent" : "agents"}`;
 
 const Book: React.FC<{ t: string | null }> = ({ t }) => (t ? <i>{t}</i> : <>your book</>);
 
-const Progress: React.FC<{ fill: number; line: React.ReactNode }> = ({ fill, line }) => (
-  <div className="cl14-nx-prog" data-cl14="prog">
-    <span className="cl14-nx-bar" aria-hidden="true"><i style={{ width: `${Math.round(Math.max(0, Math.min(1, fill)) * 100)}%` }} /></span>
-    <span>{line}</span>
-  </div>
-);
-
 /** The ledger row: a blush disc, the name with the writer's stars, agency and city, the one-line wishlist, and
  *  the reply time on the right that becomes the row's action on hover or focus. */
 const LedgerRow: React.FC<{
   a: Agent; side: React.ReactNode; action: React.ReactNode; sub?: React.ReactNode; onOpen: (id: string, r?: DOMRect) => void;
   /** in place of the initials disc (the reopening rows' date tile) */
   lead?: React.ReactNode;
-  /** the action shows at rest, not only on hover (reopening, gaps) */
+  /** the action shows at rest, not only on hover (reopening) */
   standing?: boolean;
 }> = ({ a, side, action, sub, onOpen, lead, standing }) => (
   <li className={`cl14-nl-row${standing ? " cl14-nl-row--act" : ""}`} data-cl14="nl-row" data-agent={a.id} tabIndex={0}
@@ -149,30 +144,28 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
     </article>
   );
 
-  let title: string, lede: React.ReactNode, prog: React.ReactNode = null, why: React.ReactNode = null, cta: React.ReactNode = null;
+  let title: string, lede: React.ReactNode, split: React.ReactNode = null, why: React.ReactNode = null, cta: React.ReactNode = null;
   let middle: React.ReactNode = null, side: React.ReactNode = null;
 
-  if (!genres) {
-    /* the book has no genre (or no book is in scope): nothing can take it, so the section says what would help */
+  if (!p.hasBook) {
+    /* no manuscript is in scope: "this book" names nothing, so the section says what would help */
     title = "Your next step";
-    lede = bookTitle
-      ? <>Add a genre to <Book t={bookTitle} /> and the agents on your list who take it will show up here.</>
-      : <>Choose a manuscript and the agents on your list who take its genres will show up here.</>;
+    lede = <>Choose a manuscript and the agents on your list who haven&rsquo;t seen it yet will show up here.</>;
     middle = addCard;
   } else if (s === "ready") {
-    const n = step.ready.length, first = step.ready[0], rest = step.ready.slice(1, 4), more = Math.max(0, n - 4);
+    const n = step.ready.length, u = step.unknown, first = step.ready[0], rest = step.ready.slice(1, 4), more = Math.max(0, n - 4);
     title = "Ready to query";
-    lede = n === 1
-      ? <><b>1 agent</b> on your list takes {genres}, is open to submissions and hasn&rsquo;t seen <Book t={bookTitle} /> yet.</>
-      : <><b>{n} agents</b> on your list take {genres}, are open to submissions and haven&rsquo;t seen <Book t={bookTitle} /> yet.</>;
-    prog = <Progress fill={step.takers ? step.sent / step.takers : 0}
-      line={<>You&rsquo;ve sent it to {step.sent} of the {agentsN(step.takers)} on your list who {step.takers === 1 ? "takes" : "take"} {genres}.</>} />;
-    why = "Your highest-rated agents come first. If two share a rating, the one who usually replies sooner goes first.";
+    lede = (
+      <>
+        <b>{agentsN(n)}</b> {n === 1 ? "is" : "are"} open and {n === 1 ? "hasn’t" : "haven’t"} seen <Book t={bookTitle} /> yet.
+        {u > 0 && <> <b>{u}</b> {u === 1 ? "has" : "have"} no genres recorded.</>}
+      </>
+    );
     cta = <button type="button" className="cl14-out" data-cl14="see-all" onClick={p.onSeeAll}>See all {n} in the list</button>;
     middle = card(first, "First up");
     side = (
       <>
-        <div className="cl14-nl-h"><h3>Next in line</h3><span>sorted by your rating, then reply time</span></div>
+        <div className="cl14-nl-h"><h3>Next in line</h3><span>best fit first</span></div>
         <ol className="cl14-nl" data-cl14="nl">
           {rest.map((a) => (
             <LedgerRow key={a.id} a={a} onOpen={p.onOpen}
@@ -187,9 +180,7 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
     const n = step.reopening.length, first = step.reopening[0], rest = step.reopening.slice(1, 4);
     const allOn = step.reopening.every(p.reminded);
     title = "Reopening soon";
-    lede = <>Every open agent who takes {genres} has seen <Book t={bookTitle} />. <b>{n} more</b> {n === 1 ? "opens" : "open"} to submissions again soon.</>;
-    prog = <Progress fill={1} line={<>You&rsquo;ve sent it to every agent on your list who takes {genres} and is open right now.</>} />;
-    why = "Set a reminder and we’ll let you know the day they reopen, so your query goes in early.";
+    lede = <>Everyone open on your list has seen <Book t={bookTitle} />. <b>{n} more</b> {n === 1 ? "opens" : "open"} to submissions again soon.</>;
     cta = (
       <button type="button" className={`cl14-out${allOn ? " is-on" : ""}`} data-cl14="remind-all" aria-pressed={allOn} onClick={() => p.onRemindAll(step.reopening)}>
         {allOn ? (n === 1 ? "✓ Reminder set" : "✓ Reminders set") : n === 1 ? "Remind me" : n === 2 ? "Remind me about both" : `Remind me about all ${n}`}
@@ -218,41 +209,21 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
         {live && <p className="cl14-nx-foot" data-cl14="discover-foot">Don&rsquo;t want to wait? <button type="button" className="cl14-link" onClick={p.onDiscover}>Find more agents in Discover</button></p>}
       </>
     );
-  } else if (s === "gaps") {
-    const n = step.gaps.length, first = step.gaps[0], rest = step.gaps.slice(1, 4);
-    title = "A few more might fit";
-    lede = <>You&rsquo;ve sent <Book t={bookTitle} /> to every agent who takes {genres}. <b>{agentsN(n)}</b> on your list {n === 1 ? "has" : "have"} no genres recorded, so we can&rsquo;t tell yet.</>;
-    prog = <Progress fill={1} line={<>Sent to all {agentsN(step.takers)} on your list who {step.takers === 1 ? "takes" : "take"} {genres}.</>} />;
-    why = <>Add their genres, and anyone who takes {genres} will show up here, ready to query.</>;
-    cta = <button type="button" className="cl14-out" data-cl14="open-hk" onClick={p.onOpenHk}>Open Housekeeping</button>;
-    middle = card(first, "Genres missing", { label: "Add genres", onClick: () => p.onAdd(first.id, "genres") });
-    side = (
-      <>
-        {rest.length > 0 && (
-          <>
-            <div className="cl14-nl-h"><h3>Also missing genres</h3></div>
-            <ol className="cl14-nl" data-cl14="nl">
-              {rest.map((a) => (
-                <LedgerRow key={a.id} a={a} onOpen={p.onOpen} side={null} standing
-                  action={<button type="button" className="cl14-out cl14-out--sm" data-cl14="add-genres" onClick={() => p.onAdd(a.id, "genres")}>Add genres</button>} />
-              ))}
-            </ol>
-          </>
-        )}
-        {live && <p className="cl14-nx-foot" data-cl14="discover-foot">Or <button type="button" className="cl14-link" onClick={p.onDiscover}>find more agents in Discover</button></p>}
-      </>
-    );
   } else {
-    const { reading, more, passed } = step.outcomes;
-    title = "Every agent queried";
-    lede = <><Book t={bookTitle} /> has gone to all <b>{agentsN(step.takers)}</b> on your list who {step.takers === 1 ? "takes" : "take"} {genres}.</>;
-    prog = <Progress fill={1} line={<>{reading} {reading === 1 ? "is" : "are"} still reading, {more} asked to see more and {passed} passed.</>} />;
-    why = live
-      ? <>To keep it moving, add agents you&rsquo;ve found elsewhere, or browse Discover for agents who take {genres}.</>
-      : <>To keep it moving, add agents you&rsquo;ve found elsewhere.</>;
-    cta = live
-      ? <button type="button" className="cl14-out" data-cl14="discover-more" onClick={p.onDiscover}>Discover more agents</button>
-      : <button type="button" className="cl14-out" data-cl14="add-agent" onClick={(e) => p.onNewAgent(e.currentTarget.getBoundingClientRect())}>Add an agent</button>;
+    /* ALL QUERIED — every agent on the list is accounted for: queried + don't take the genre + closed to
+       submissions = N (lib/contactNextStep), and the split line's parts sum to queried. */
+    const { reading, asked, passed, withdrawn } = step.outcomes;
+    const N = step.total, m = step.mismatches, c = step.closed;
+    title = "You’ve queried all your agents";
+    lede = step.queried === N
+      ? <><Book t={bookTitle} /> has gone to {N === 1 ? <>the <b>1 agent</b></> : <>all <b>{N} agents</b></>} on your list.</>
+      : <><Book t={bookTitle} /> has gone to <b>{step.queried} of your {agentsN(N)}</b>.</>;
+    split = <>{reading} reading · {asked} asked for more · {passed} passed{withdrawn > 0 ? <> · {withdrawn} withdrawn</> : null}</>;
+    const notes = [
+      m > 0 && genres ? `The other ${m} ${m === 1 ? "doesn’t" : "don’t"} take ${genres}.` : "",
+      c > 0 ? `${c} ${c === 1 ? "is" : "are"} closed to submissions.` : "",
+    ].filter(Boolean);
+    why = notes.length ? notes.join(" ") : null;
     middle = addCard;
     const shown = p.discover.slice(0, 3), rest = Math.max(0, p.discover.length - 3);
     side = live && shown.length > 0 ? (
@@ -280,13 +251,13 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
   }
 
   return (
-    <div className="cl14-next" data-cl14="next" data-state={genres ? s : "nobook"}>
+    <div className="cl14-next" data-cl14="next" data-state={p.hasBook ? s : "nobook"}>
       <section className="cl14-nx" aria-label="Your next step">
         <div className="cl14-nx-well" data-cl14="well">
           <h2>{title}</h2>
           <p className="cl14-nx-lede">{lede}</p>
-          {prog}
-          {why && <p className="cl14-nx-why">{why}</p>}
+          {split && <p className="cl15-nx-split" data-cl15="split">{split}</p>}
+          {why && <p className="cl14-nx-why" data-cl15="note">{why}</p>}
           {cta}
         </div>
         <div className="cl14-nxc" data-cl14="card">{middle}</div>

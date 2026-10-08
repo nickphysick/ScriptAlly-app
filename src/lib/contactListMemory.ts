@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * contactListMemory — the Contact list's settings, remembered for the visit (v14 §4): filters, search,
- * grouping, sort and direction, and (Phase 6) the row density, in sessionStorage.
+ * grouping, sort and direction, the row density, and (v15 §4) the ready-only list mode, in sessionStorage.
  *
  * ⚠️ THE KEY IS VERSIONED, AND EVERYTHING RESTORED IS VALIDATED AGAINST THE CURRENT OPTION SET (§4, lock 9). An
  * earlier mock crashed when it restored a grouping that no longer existed. So: the key carries the shape's
- * version (`sa.contactList.v2` — v13's `sa.contactList` held a different filter model and is read by nothing),
+ * version (`sa.contactList.v3` — v14's `.v2` had no ready-only mode and v13's `sa.contactList` a different filter
+ * model; neither is read by anything),
  * the stored object carries `v`, and every field is checked on read — an unknown grouping, sort, status, choice
  * or filter key reads as its default (Letter, Surname A to Z), never as a state nobody can see or clear.
  *
@@ -20,7 +21,7 @@ import {
   QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 
-export const LIST_MEMORY_VERSION = 2;
+export const LIST_MEMORY_VERSION = 3;
 export const LIST_MEMORY_KEY = `sa.contactList.v${LIST_MEMORY_VERSION}`;
 
 export type Density = "comfortable" | "compact";
@@ -32,10 +33,12 @@ export interface ListMemory {
   sort: SortKey;
   reversed: boolean;
   density: Density;
+  /** v15 §4 — the list shows only the agents who are ready to query (the next-step section's own rule) */
+  readyOnly: boolean;
 }
 
 export const DEFAULT_LIST_MEMORY = (): ListMemory =>
-  ({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable" });
+  ({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", readyOnly: false });
 
 const oneOf = <T extends string>(v: unknown, keys: readonly T[], fallback: T): T =>
   (typeof v === "string" && (keys as readonly string[]).includes(v) ? (v as T) : fallback);
@@ -65,6 +68,7 @@ export function sanitiseListMemory(raw: unknown): ListMemory | null {
     sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
     reversed: r.reversed === true,
     density: r.density === "compact" ? "compact" : d.density,
+    readyOnly: r.readyOnly === true,
   };
 }
 

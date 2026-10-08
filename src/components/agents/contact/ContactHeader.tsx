@@ -18,13 +18,8 @@ export const CONTACT_HAWK = { src: "/images/contact/contact-hawk.webp", version:
  *  in a 138 × 72 slot so its head rises above the bar's top edge. */
 export const CONTACT_INDEX_HAWK = { src: "/images/contact/contact-index-hawk.webp", version: "1", width: 160, height: 142 };
 
-/** v13 §2: the band's white disc holds the Archivist at the desk — the marketing Contact page's own
- *  drawing (`src/marketing/ContactPage.tsx`), READ from its public path rather than copied, so the
- *  two pages cannot drift. The file is square on white, not pre-cut to a circle (the Query Centre's
- *  disc art is), so the page's `.clv-bdisc` draws the white circle and insets the drawing in it.
- *  ⚠️ It replaces v12's `CONTACT_ARCHIVIST` (the full painting, `contact-list-hero-archivist-full.png`),
- *  whose only reader was the open header this band retires; that PNG is now referenced by nothing. */
-export const CONTACT_BAND_DISC = { src: "/images/contact-archivist.png", version: "a603d9cb", width: 800, height: 800 };
+/* ⚠️ RETIRED (Contact list v15 §2): `CONTACT_BAND_DISC` — the band's disc art; the header draws `CONTACT_HEADER_HAWK`
+   (ContactOpenHeader) now. `/images/contact-archivist.png` stays: the marketing Contact page still reads it. */
 
 /**
  * The intro, in runs from the one derivation — the manuscript's title in the typewriter face and

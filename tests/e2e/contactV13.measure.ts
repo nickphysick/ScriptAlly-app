@@ -14,181 +14,15 @@ import { liftMotionSuppression } from "./measure";
 
 test.describe.configure({ timeout: Number(process.env.CL13_TIMEOUT ?? 900_000) });
 
-/* ── lock 1 · the band ── */
-test("CL13-1 · band", async ({ page }) => {
-  const L = new Ledger("cl13-1");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const vis = (s: string, root: ParentNode = document) => [...root.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const b = (e: Element | null) => { if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
-      const band = vis('.aglist [data-probe="page-header"][data-band]');
-      return {
-        band: b(band), bg: band ? getComputedStyle(band).backgroundColor : null, radius: band ? getComputedStyle(band).borderTopLeftRadius : null,
-        bar: b(vis('[data-probe="navrow"]')), main: b(vis(".ws-main")),
-        disc: b(band?.querySelector(".clv-bdisc") ?? null),
-        discBg: band?.querySelector(".clv-bdisc") ? getComputedStyle(band.querySelector(".clv-bdisc")!).backgroundColor : null,
-        img: (band?.querySelector(".clv-bdisc img") as HTMLImageElement | null)?.getAttribute("src") ?? null,
-        title: band?.querySelector("h1")?.textContent ?? null,
-        intro: (band?.querySelector(".ph-intro") as HTMLElement | null)?.innerText ?? null,
-        buttons: [...(band?.querySelectorAll("button") ?? [])].map((x) => x.textContent?.trim() ?? ""),
-      };
-    });
-    L.check("CL13-1 the band exists on the Contact list", w, !!r.band, JSON.stringify(r.band));
-    if (!r.band || !r.bar || !r.main) { await checkOverflow(page, L, w); continue; }
-    L.check("CL13-1 anthracite rgb(42,58,82)", w, r.bg === INK, `${r.bg}`);
-    /* REWRITTEN (Contact list v14 §1.2, 7 Oct): the band is v131's COMPACT HERO CARD in the sheet — the shared
-       PageHeader's own `card compact` — so it no longer starts at the bar or spans the column edge to edge,
-       and its disc slot is 150, not 290. The colour stays the band's (ruling Q2). */
-    L.check("CL13-1 the compact hero card: 178 tall (±1), 18px corners", w, near(r.band.h, 178, 1) && r.radius === "18px", `${r.band.h} ${r.radius}`);
-    L.check("CL13-1 the disc is 150 (±2), white, round", w, !!r.disc && near(r.disc.w, 150, 2) && near(r.disc.h, 150, 2) && r.discBg === "rgb(255, 255, 255)", `${JSON.stringify(r.disc)} ${r.discBg}`);
-    L.check("CL13-1 the disc holds contact-archivist.png", w, /\/images\/contact-archivist\.png/.test(r.img ?? ""), `${r.img}`);
-    L.check("CL13-1 title 'N agents on file'", w, /^(\d+ agents|One agent) on file$/.test((r.title ?? "").trim()), `${r.title}`);
-    /* the mutation this exists for: restore the v12 reply-time clause → red */
-    L.check("CL13-1 the sentence has no reply-time clause", w, !!r.intro && !/reply|weeks?\b/i.test(r.intro), `${r.intro}`);
-    L.check("CL13-1 the sentence is ONE sentence", w, !!r.intro && (r.intro.trim().match(/[.!?](\s|$)/g) ?? []).length === 1, `${r.intro}`);
-    L.check("CL13-1 buttons: + Add an agent · Discover agents", w, r.buttons.includes("+ Add an agent") && r.buttons.includes("Discover agents"), JSON.stringify(r.buttons));
-    await checkOverflow(page, L, w);
-  }
-  L.done(27);
-});
+/* CL13-1 (the band — v14's compact hero card) and CL13-2 (the band → strip → next-step rhythm) are RETIRED (Contact list
+   v15 §2): the header is the page-local open header, held by contactV15 CL15-1/CL15-2; the rhythm under it is the desk's
+   and the section's (CL15 Phase 2/4 locks). tests/e2e/RETIRED-contact-list-v15.md. */
 
-/* ── lock 2 · the 40px rhythm: band → strip → carousel head → list banner ── */
-test("CL13-2 · rhythm", async ({ page }) => {
-  const L = new Ledger("cl13-2");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const band = await box(page, '.aglist [data-probe="page-header"][data-band]');
-    const strip = await box(page, '.aglist [data-cl13="strip"]');
-    L.check("CL13-2 band → strip 40 (±1)", w, !!band && !!strip && near(strip.t - band.b, 40, 1), `${band && strip ? strip.t - band.b : "—"}`);
-    /* REWRITTEN (Contact list v14 §2, 7 Oct): under the strip is the next-step section, 44 below it (CL14-1
-       holds the v14 rhythm); the carousel and its 40 below are retired with it. */
-    const next = await box(page, '.aglist [data-cl14="next"]');
-    L.check("CL13-2 strip → the next-step section 44 (±1)", w, !!strip && !!next && near(next.t - strip.b, 44, 1), `${strip && next ? next.t - strip.b : "—"}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(9);
-});
+/* CL13-S (the numbers strip) is RETIRED with the strip (Contact list v15 §3): the desk replaces it — CL15-3.
+   tests/e2e/RETIRED-contact-list-v15.md. */
 
-/* ── §3 · the numbers strip: five cells, its figures, three of them pressable ── */
-test("CL13-S · strip", async ({ page }) => {
-  const L = new Ledger("cl13-s");
-  for (const vp of WIDTHS) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const r = await page.evaluate(() => {
-      const strip = [...document.querySelectorAll<HTMLElement>('.aglist [data-cl13="strip"]')].find((e) => e.getBoundingClientRect().height > 0);
-      const band = [...document.querySelectorAll<HTMLElement>('.aglist [data-probe="page-header"][data-band]')].find((e) => e.getBoundingClientRect().height > 0);
-      if (!strip) return null;
-      const cells = [...strip.querySelectorAll<HTMLElement>("[data-cl13-cell]")];
-      const sb = strip.getBoundingClientRect();
-      return {
-        w: sb.width, bandW: band?.querySelector(".ph-hin")?.getBoundingClientRect().width ?? null,
-        group: strip.parentElement?.getBoundingClientRect().width ?? null,
-        bg: getComputedStyle(strip).backgroundColor, radius: getComputedStyle(strip).borderTopLeftRadius,
-        cells: cells.map((c) => ({
-          label: c.getAttribute("data-cl13-cell"), fig: c.querySelector(".cl13-sf")?.textContent?.trim() ?? "",
-          line: c.querySelector(".cl13-se")?.textContent?.trim() ?? "", pressable: c.tagName === "BUTTON",
-          figFont: getComputedStyle(c.querySelector(".cl13-sf")!).fontFamily, figSize: getComputedStyle(c.querySelector(".cl13-sf")!).fontSize,
-          w: c.getBoundingClientRect().width, labelTop: c.querySelector(".cl13-sl")?.getBoundingClientRect().top ?? NaN,
-        })),
-        intro: (band?.querySelector(".ph-intro") as HTMLElement | null)?.innerText ?? "",
-        spark: strip.querySelectorAll('[data-cl13="spark"] i').length,
-        title: band?.querySelector("h1")?.textContent ?? "",
-      };
-    });
-    L.check("CL13-S the strip exists", w, !!r, JSON.stringify(r));
-    if (!r) continue;
-    L.check("CL13-S five cells, the mock's labels in order", w, JSON.stringify(r.cells.map((c) => c.label)) === JSON.stringify(["On file", "Fit your book", "Open now", "Typical reply", "Added this month"]), JSON.stringify(r.cells.map((c) => c.label)));
-    L.check("CL13-S every label on one top (a <button> cell does not centre its content)", w, r.cells.every((c) => near(c.labelTop, r.cells[0].labelTop, 1)), r.cells.map((c) => c.labelTop.toFixed(1)).join(" "));
-    const want = (r.intro.match(/want ([^.]+?) and haven/) ?? [])[1] ?? null, take = (r.cells[1].line.match(/^take (.+)$/) ?? [])[1] ?? null;
-    L.check("CL13-S the band and the strip name the genre one way", w, !take || want === take, `band "${want}" strip "${take}"`);
-    L.check("CL13-S equal cells (±1)", w, r.cells.length === 5 && r.cells.every((c) => near(c.w, r.cells[0].w, 1)), r.cells.map((c) => c.w.toFixed(1)).join(" "));
-    L.check("CL13-S the strip is the group's full width", w, near(r.w, r.group ?? -1, 1), `${r.w} vs ${r.group}`);
-    L.check("CL13-S white, 16px corners", w, r.bg === "rgb(255, 255, 255)" && r.radius === "16px", `${r.bg} ${r.radius}`);
-    L.check("CL13-S figures are Special Elite at 34px", w, r.cells.every((c) => /Special Elite/.test(c.figFont) && c.figSize === "34px"), JSON.stringify(r.cells.map((c) => [c.figFont.slice(0, 20), c.figSize])));
-    /* REWRITTEN (v14 §1.3): the figures filled the carousel, which is retired — no cell is pressable now */
-    L.check("CL13-S no figure is pressable", w, r.cells.every((c) => !c.pressable), JSON.stringify(r.cells.filter((c) => c.pressable).map((c) => c.label)));
-    const onFile = Number(r.cells[0].fig), title = Number((r.title.match(/^(\d+)/) ?? [])[1] ?? (/^One/.test(r.title) ? 1 : NaN));
-    L.check("CL13-S On file = the band's count", w, onFile === title, `${onFile} vs "${r.title}"`);
-    L.check("CL13-S On file's line names the agencies; six spark bars", w, /^agents, across \d+ agenc(y|ies)$/.test(r.cells[0].line) && r.spark === 6, `${r.cells[0].line} · ${r.spark}`);
-    L.check("CL13-S Open now's line counts the closed", w, /^\d+ closed for now$/.test(r.cells[2].line), r.cells[2].line);
-    L.check("CL13-S Typical reply reads 'N wks' and names the fastest", w, (/^\d+wks$/.test(r.cells[3].fig) && /^fastest: .+, \d+ wks?$/.test(r.cells[3].line)) || r.cells[3].fig === "—", `${r.cells[3].fig} · ${r.cells[3].line}`);
-    L.check("CL13-S Added this month reads '+N'", w, /^\+\d+$/.test(r.cells[4].fig), r.cells[4].fig);
-    await checkOverflow(page, L, w);
-  }
-  L.done(45);
-});
-
-/* CL13-3 (figures fill the carousel) and CL13-4 (carousel cards are the agent card) are RETIRED with the
-   carousel (Contact list v14 §1.4): tests/e2e/RETIRED-contact-list-v14.md. CL13-4's card-signature half lives
-   on as CL14-3 (the next-step section's card). */
-
+/** the visible copy of a page element — every workspace page stays mounted (kept when CL13-S, which declared it, retired) */
 const vis = (page: import("@playwright/test").Page, sel: string) => page.locator(`.aglist ${sel}`).filter({ visible: true }).first();
-/* CL13-B (the open banner) is RETIRED with the banner (Contact list v14 §3): the "Your agents" bar replaces it —
-   CL14-5. tests/e2e/RETIRED-contact-list-v14.md. */
-
-/* CL13-7 (the Filters pill and its popover), CL13-F (the filter line) and CL13-8 (remembered settings) are RETIRED
-   with v13's facet model (Contact list v14 §4, ruling: Nick's filter, group and sort set supersedes v13's Q4): the
-   filter strip replaces the Filters pill and the filter line, and the memory is versioned. Their surviving claims —
-   the Group and Sort pills, the direction, one popover at a time, Escape and an outside press closing only the
-   popover — moved to CL14-8; the strip is CL14-7 and CL14-10; the memory is CL14-9.
-   tests/e2e/RETIRED-contact-list-v14.md. */
-
-/* CL13-SB (the sticky slim bar) is RETIRED (v14, ruling Q7): the sticky column labels are the list's only sticky
-   element. */
-
-/* CL13-5 (the slate workspace, the perch, the letter tabs, the rows' spacing) is RETIRED (v14 §3): the white panel
-   and its ink bar replace the slate workspace and the banner's perch — CL14-5; the group headers and rows are
-   Phase 5's. */
-
-/* CL13-6 (the row's 6px state edge) is RETIRED (v14 §6: "No coloured row edges"): the row is v131's table grammar
-   now, and a closed agent is marked by its grey disc instead — CL14-11 holds both (no edge on any row; the grey disc).
-   tests/e2e/RETIRED-contact-list-v14.md. */
-
-test("CL13-T · hover tray", async ({ page }) => {
-  const L = new Ledger("cl13-t");
-  await openContacts(page, AT_1512);
-  const row = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
-  await row.scrollIntoViewIfNeeded();
-  await row.hover();
-  await page.waitForTimeout(200);
-  const t = await row.evaluate((x) => {
-    const tray = x.querySelector<HTMLElement>('[data-cl13="tray"]');
-    const rr = x.getBoundingClientRect(), tr = tray?.getBoundingClientRect();
-    return {
-      op: tray ? getComputedStyle(tray).opacity : null, btns: [...(tray?.querySelectorAll("button, [role=button]") ?? [])].map((b) => (b.textContent ?? "").trim()),
-      dy: tr ? Math.round(((tr.top + tr.height / 2) - (rr.top + rr.height / 2)) * 10) / 10 : null, h: tr ? Math.round(tr.height * 10) / 10 : null,
-      inside: !!tr && tr.top >= rr.top - 0.5 && tr.bottom <= rr.bottom + 0.5 && tr.right <= rr.right + 0.5,
-    };
-  });
-  L.check("CL13-T hover shows the tray: the next step, then Open card", "1512", t.op === "1" && t.btns.length === 2 && t.btns[1] === "Open card" && t.btns[0] === "Log a query", JSON.stringify(t));
-  L.check("CL13-T the tray sits on the row's centre line, one line of 32px pills, wholly inside the row", "1512", t.dy !== null && Math.abs(t.dy) <= 1 && near(t.h ?? 0, 32, 1) && t.inside, JSON.stringify(t));
-  await row.locator('[data-cl13="tray-act"]').click();
-  await page.locator("[data-qad-drawer]:visible").first().waitFor({ timeout: 6000 }).catch(() => {});
-  const st = await page.evaluate(() => ({
-    drawer: [...document.querySelectorAll("[data-qad-drawer]")].filter((e) => e.getBoundingClientRect().height > 0).length,
-    card: [...document.querySelectorAll('[data-ac="overlay"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
-  }));
-  L.check("CL13-T the tray's step opens the journey without the card", "1512", st.drawer === 1 && st.card === 0, JSON.stringify(st));
-  /* put the page back whichever way it went — a guarded tidy-up, so a wrong route fails on the check
-     above rather than timing out here (measured: an unguarded ✕ waited 15 minutes for a drawer that
-     a broken step never opened) */
-  if (st.drawer) {
-    await page.locator(".qad-dx:visible").first().click({ timeout: 5000 }).catch(() => {});
-    { const d = page.getByRole("button", { name: "Discard" }); if (await d.count()) await d.click({ timeout: 3000 }).catch(() => {}); }
-    await page.locator("[data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
-  }
-  if (st.card) { await page.keyboard.press("Escape"); await page.locator('[data-ac="overlay"]').first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {}); }
-  await row.hover();
-  await row.locator('[data-cl13="tray-open"]').click();
-  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 6000 }).catch(() => {});
-  L.check("CL13-T Open card opens the agent card", "1512", (await page.locator('[data-ac="overlay"]').count()) === 1, "");
-  await page.keyboard.press("Escape");
-  L.done(4);
-});
 
 /* ── lock 9 + HK v2 §9 · Housekeeping in the floating tab and the half-screen drawer ─────────────── */
 const HDR = '[data-hdr="housekeeping"]';
@@ -636,7 +470,8 @@ test("CL13-12 · loading", async ({ page }) => {
   const boxes = () => page.evaluate(() => {
     const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
     const b = (e?: HTMLElement) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; };
-    return { band: b(v('.aglist [data-probe="page-header"]')), strip: b(v(".aglist .cl13-strip")), row: b(v(".aglist .clv-row")) };
+    /* REPOINTED (Contact list v15 §2): the header is the page-local open header (`[data-cl15="header"]`), not the band */
+    return { band: b(v('.aglist [data-cl15="header"]')), strip: b(v('.aglist [data-cl15="desk"]')) /* v15 §3: the desk holds the strip's place */, row: b(v(".aglist .clv-row")) };
   });
   for (const vp of WIDTHS) {
     const w = `${vp.width}`;
@@ -652,7 +487,8 @@ test("CL13-12 · loading", async ({ page }) => {
         shimmer: card ? getComputedStyle(card).backgroundImage.includes("gradient") : false,
         perch: vis(".cl14-art"), ctl: vis(".cl13-ctl"),
         tab: !!document.querySelector('[data-ftab="housekeeping"]'),
-        bandShape: (() => { const t = g?.querySelector<HTMLElement>(".ph--band .ph-title"); return t ? getComputedStyle(t).backgroundImage.includes("52, 68, 94") || getComputedStyle(t).backgroundImage.includes("#34445e") : false; })(),
+        /* v15 §2: the open header's title holds its line box, painted over */
+        bandShape: (() => { const t = g?.querySelector<HTMLElement>('[data-cl15="header"] .cl15-title'); return t ? getComputedStyle(t).backgroundImage.includes("gradient") : false; })(),
       };
     });
     /* v14 §1.4: the carousel's three placeholder cards went with it */
@@ -707,7 +543,7 @@ test("CL13-13 · page guide", async ({ page }) => {
     return {
       title: g?.querySelector('[data-qcv="guide-title"]')?.textContent ?? null, kick: g?.querySelector('[data-qcv="guide-n"]')?.textContent ?? null,
       w: gr ? Math.round(gr.width) : null, above: !!gr && !!tr && gr.bottom <= tr.top + 0.5 && Math.abs(gr.right - tr.right) <= 1,
-      ring: !!document.querySelector('.aglist [data-cl13="strip"].pgd-ring'),
+      ring: !!document.querySelector('.aglist [data-cl15="desk"].pgd-ring'), /* v15: step 1 rings the desk */
       scrolled: [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.scrollTop),
     };
   }, G);
@@ -725,13 +561,14 @@ test("CL13-13 · page guide", async ({ page }) => {
   await page.keyboard.press("Escape");
   L.check("CL13-13 the guide is above the tab and under an open pill's menu", "1512", zs.guide !== null && zs.tab !== null && zs.pop !== null && zs.tab < zs.guide && zs.guide < zs.pop, JSON.stringify(zs));
   L.check("CL13-13 the guide's arrival moves nothing: the page has not scrolled", "1512", s1.scrolled.length === 1 && s1.scrolled[0] === 0, JSON.stringify(s1.scrolled));
-  L.check("CL13-13 a first visit shows step 1, ringing the strip", "1512", s1.title === "Your list in numbers" && s1.kick === "How this page works · 1 of 4" && s1.ring, JSON.stringify(s1));
+  L.check("CL13-13 a first visit shows step 1, ringing the desk", "1512", s1.title === "Your list in numbers" && s1.kick === "How this page works · 1 of 4" && s1.ring, JSON.stringify(s1));
   L.check("CL13-13 the guide is 340 wide, above the Housekeeping tab, flush with its right", "1512", s1.w === 340 && s1.above, JSON.stringify(s1));
   await page.click(`${G} [data-qcv="guide-next"]`);
   const s2 = await page.evaluate((G) => ({ title: document.querySelector(`${G} [data-qcv="guide-title"]`)?.textContent ?? null,
-    stripRing: !!document.querySelector(".pgd-ring[data-cl13='strip']") }), G);
+    /* v15: step 1's ring is on the desk — a strip selector here would pass forever, there being no strip */
+    stripRing: !!document.querySelector(".pgd-ring[data-cl15='desk']") }), G);
   /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-16 holds it) */
-  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the strip's ring is released)", "1512", s2.title === "Your next step" && !s2.stripRing, JSON.stringify(s2));
+  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the desk's ring is released)", "1512", s2.title === "Your next step" && !s2.stripRing, JSON.stringify(s2));
   await page.click(`${G} [data-qcv="guide-back"]`);
   L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");
   await page.click(`${G} [data-qcv="guide-x"]`);
@@ -763,7 +600,7 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
       const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const f = vis('.aglist [data-probe="app-footer"]'), fin = vis('.aglist [data-probe="app-footer-in"]');
       /* REWRITTEN (v14 §3): the footer follows the "Your agents" panel (the slate workspace retired) */
-      const ws = vis('.aglist [data-cl14="ws"]'), strip = vis('.aglist [data-cl13="strip"]');
+      const ws = vis('.aglist [data-cl14="ws"]'), strip = vis('.aglist [data-cl15="desk"]'); /* v15 §3: the column is the desk's */
       const sc = f?.closest<HTMLElement>(".wpg-scroll");
       const txt = f?.textContent ?? "";
       return {
@@ -776,7 +613,7 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
       };
     });
     L.check("CL13-14 the app footer follows the workspace, the group's last row", w, r.found && r.after && r.last, JSON.stringify(r));
-    L.check("CL13-14 its content box is the column's (the strip's x and width, ±1)", w, !!r.fin && !!r.col && near(r.fin[0], r.col[0], 1) && near(r.fin[1], r.col[1], 1), `${r.fin} vs ${r.col}`);
+    L.check("CL13-14 its content box is the column's (the desk's x and width, ±1)", w, !!r.fin && !!r.col && near(r.fin[0], r.col[0], 1) && near(r.fin[1], r.col[1], 1), `${r.fin} vs ${r.col}`);
     L.check("CL13-14 it is the shared footer (Help centre, the email)", w, r.help && r.mail, JSON.stringify(r));
     await checkOverflow(page, L, w);
   }
@@ -786,7 +623,7 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
   await page.locator(".aglist [data-clv-empty]").first().waitFor({ timeout: 8000 }).catch(() => {});
   const e = await page.evaluate(() => {
     const n = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].filter((x) => x.getBoundingClientRect().height > 0).length;
-    return { empty: n(".aglist [data-clv-empty]"), band: n(".aglist .ph--band"), strip: n('.aglist [data-cl13="strip"]'), cz: n('.aglist [data-cz="contacts"]'),
+    return { empty: n(".aglist [data-clv-empty]"), band: n(".aglist .ph--band"), strip: n('.aglist [data-cl15="desk"]'), cz: n('.aglist [data-cz="contacts"]'),
       /* the empty state's own exhibition draws sample rows (v12 §4, by design); the LIST is any row outside it */
       rows: [...document.querySelectorAll<HTMLElement>(".aglist [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0 && !x.closest("[data-clv-empty]")).length,
       exhibitRows: [...document.querySelectorAll<HTMLElement>(".aglist [data-clv-empty] [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0).length, tab: n('[data-ftab="housekeeping"]'), footer: n('.aglist [data-probe="app-footer"]') };

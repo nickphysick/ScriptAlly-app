@@ -9,38 +9,7 @@
  * ⚠️ TOKENS ARE THE `--clv-*` FAMILY at `:root` (contactV11.css), so a portal still resolves them.
  */
 
-/* ══ §3 · the numbers strip ═════════════════════════════════════════════════════════════════════ */
-.cl13-strip {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: #fff; border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -22px rgba(28, 19, 15, 0.3);
-}
-/* ⚠️ A FLEX COLUMN, NOT A BLOCK: three cells are <button>s, and a button centres its content
-   vertically when the grid stretches it, so the labels would sit at two heights across one strip */
-.cl13-sc {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left;
-  padding: 18px 22px; border: 0; border-left: 1px solid var(--clv-hair);
-  background: none; font: inherit; color: var(--clv-ink); min-width: 0;
-}
-.cl13-sc:first-child { border-left: 0; border-radius: 16px 0 0 16px; }
-.cl13-sc:last-child { border-radius: 0 16px 16px 0; }
-.cl13-sl {
-  display: block; font: 400 8.5px/1.3 var(--sp-mono);
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--clv-ink-45);
-}
-.cl13-sf {
-  display: block; margin-top: 6px;
-  font-family: var(--clv-type); font-weight: 400; font-size: 34px; line-height: 1.1;
-}
-.cl13-sf i { font-style: normal; font-size: 16px; margin-left: 4px; color: var(--clv-ink-70); }
-.cl13-se {
-  display: block; margin-top: 4px; font-family: var(--clv-serif); font-style: italic;
-  font-size: 13px; line-height: 1.4; color: var(--clv-ink-70);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.cl13-spark { display: flex; align-items: flex-end; gap: 3px; height: 22px; margin-top: 8px; }
-.cl13-spark i { width: 7px; background: var(--clv-slate-pale); border-radius: 2px; }
-.cl13-spark i:last-child { background: var(--clv-btn); }
+/* ══ §3 · the numbers strip — RETIRED (Contact list v15 §3): the desk replaces it (shell/desk, ContactDesk) ══ */
 
 /* ══ §4 · the agent card in its carousel dress — the carousel is retired (v14); the card moves to the next-step section ══ */
 /* the card: the agent card (`.ac`) in the carousel's dress, 318 wide — the shared blocks' `.ac .acq-*`
@@ -131,8 +100,6 @@
   animation: cl13Shim 1.3s linear infinite;
 }
 .clv-group[data-loading] :is(.cl13-ac, .clv-row, .clv-idx, .cl13-spark, .cl13-sf, .cl13-se, .ob-k, .ob-p) * { visibility: hidden; }
-.clv-group[data-loading] .clv-bdisc { background: #34445e !important; box-shadow: none !important; }
-.clv-group[data-loading] .clv-bdisc img { visibility: hidden; }
 .clv-group[data-loading] :is(.cl13-ctl, .lt-div, .lt-gh) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .clv-group[data-loading] :is(.cl13-sl, .cl13-sf, .cl13-se, .cz-title, .cz-note, .cl13-ac, .clv-row, .ob-k, .ob-h, .ob-p, .clv-idx),

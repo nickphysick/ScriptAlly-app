@@ -53,7 +53,7 @@ describe("ink shell — the tokens", () => {
   });
 });
 
-describe("ink fix-ups — the header card (the Query Centre's, and the Contact list's since v14)", () => {
+describe("ink fix-ups — the header card (the Query Centre's; the Contact list carried it in v14 and left in v15)", () => {
   const PH = strip(readFileSync("src/components/shell/pageHeader.css", "utf8"));
   const block = PH.slice(PH.indexOf(".ph--full.ph--card"), PH.indexOf(".ph--full.ph--band.ph--bandfix"));
   it("every card rule names .ph--card, so the other bands cannot move", () => {
@@ -73,15 +73,17 @@ describe("ink fix-ups — the header card (the Query Centre's, and the Contact l
     expect(media, "the card block sits inside a ≥768 media query").toBeGreaterThan(-1);
     expect(raw.slice(media, at)).not.toMatch(/\n\}/);
   });
-  /* REWRITTEN (Contact list v14 §1.2, 7 Oct): the Contact list's hero is v131's compact card — it passes the
-     shared PageHeader's own `card compact`, unrestyled. Analytics still keeps `band` alone. */
-  it("the Query Centre and the Contact list pass `card`; Analytics keeps `band` alone", () => {
+  /* REWRITTEN (Contact list v15 §2, 8 Oct): the Contact list left the card for its own open header (ContactOpenHeader,
+     OWN_HEADER_ROUTES) and renders no shared PageHeader over the list. The Query Centre keeps `card`; Analytics keeps
+     `band` alone. */
+  it("the Query Centre passes `card`; the Contact list draws its own header; Analytics keeps `band` alone", () => {
     const qc = readFileSync("src/components/queries/centre/QcCentre.tsx", "utf8");
     const empty = readFileSync("src/components/queries/centre/QcEmpty.tsx", "utf8");
     const contacts = readFileSync("src/components/agents/AgentList.tsx", "utf8");
     expect(qc).toMatch(/\n\s+card\n/);
     expect(empty).toMatch(/\n\s+card\n/);
-    expect(contacts).toMatch(/\n\s+card\n\s+compact\n/);
+    expect(contacts).not.toMatch(/<PageHeader\b/);
+    expect(contacts).toMatch(/<ContactOpenHeader\b/);
     for (const f of ["src/components/QueryAnalytics.tsx"]) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/\n\s+card\n|\bcard=\{/);
     }

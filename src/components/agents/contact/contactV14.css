@@ -61,9 +61,6 @@
 .cl14-nx-well h2 { margin: 0; font: 400 28px/1.1 var(--sp-type) !important; color: var(--cl14-ink); }
 .cl14-nx-lede { margin: 0; font-size: 17px; line-height: 1.5; color: var(--cl14-ink); }
 .cl14-nx-lede b { font-weight: 600; }
-.cl14-nx-prog { display: flex; flex-direction: column; gap: 8px; padding-top: 2px; font-size: 14.5px; line-height: 1.45; color: var(--cl14-t2); }
-.cl14-nx-bar { display: block; width: 260px; max-width: 100%; height: 6px; border-radius: 3px; background: var(--cl14-track); overflow: hidden; }
-.cl14-nx-bar i { display: block; height: 100%; border-radius: 3px; background: var(--cl14-blue); }
 .cl14-nx-why { margin: 0; font-size: 14.5px; line-height: 1.5; font-style: italic; color: var(--cl14-t2); }
 .cl14-nx-well > .cl14-out { align-self: flex-start; margin-top: 4px; }
 
@@ -177,14 +174,14 @@
 /* the section is the group's row 3 (the carousel's old row), the whole group's width, 44 under the strip */
 .clv-group > .cl14-next { grid-column: 1 / -1; grid-row: 3; margin-top: 44px; }
 /* while the page settles, the section is drawn over placeholder agents like everything else (v13 §8) */
-.clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) {
+.clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl15-nx-split, .cl14-nx-why, .cl14-nl-row) {
   color: transparent !important; border-radius: 8px; background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
   animation: cl13Shim 1.6s ease-in-out infinite;
 }
-.clv-group[data-loading] .cl14-next :is(.cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) * { visibility: hidden; }
+.clv-group[data-loading] .cl14-next :is(.cl14-nx-lede, .cl15-nx-split, .cl14-nx-why, .cl14-nl-row) * { visibility: hidden; }
 .clv-group[data-loading] .cl14-next :is(.cl14-out, .cl14-nl-h, .cl14-more) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl14-nx-prog, .cl14-nx-why, .cl14-nl-row) { animation: none; }
+  .clv-group[data-loading] .cl14-next :is(.cl14-nx-well h2, .cl14-nx-lede, .cl15-nx-split, .cl14-nx-why, .cl14-nl-row) { animation: none; }
 }
 
 /* ══ §3 · the "Your agents" panel ═════════════════════════════════════════════════════════════════════
