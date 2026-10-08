@@ -86,9 +86,10 @@ The four values the rulings named are matched exactly: the panel's left margin �
 | 3 | `a0900cbe` | one ready rule, three states, the ready-only list mode |
 | 4 | `294efc5e` | the section's layout (`shell/featureStage`) |
 | 5 | `9b660a9e` | all queried: the Discover coming-soon panel, the stored request, the Add card |
-| 6 | this commit | CLAUDE.md and this report |
+| 6 | `bab83fcb` | CLAUDE.md and this report |
+| — | `091649ce` | the merge with the moved `origin/main` (below) |
 
-All six are pushed to `origin/main`.
+All are pushed to `origin/main`.
 
 ## Gates
 
@@ -118,6 +119,18 @@ established why that one load failed; my own build and unit gates were running o
 **Pre-existing reds, measured on `8093d64f` too and not this pack's:** `inkShell` INK19 (one phone-width element 360
 wide at x 15 against main's 390 at 0, on routes v15 does not touch) and `pageHeaderV2` §4.5 (the switcher's
 add-manuscript item is disabled for the harness account).
+
+## The merge
+
+While Phase 6's wide run was going, `origin/main` moved by seven commits: Query Centre v132 arrived from its own branch
+(tip `01d4a590`, which already contained this pack's Phases 1 to 5). Phase 6 was committed locally and `origin/main`
+merged into it (`091649ce`). One conflict, in CLAUDE.md's "Next session" paragraph: both streams had added a line, and
+both are kept. Nothing else overlapped; v132's one change in this pack's area is a single line in `contactV13`'s
+CL13-10 (how it opens a Query Centre row).
+
+Gates on the merged tree: tsc 0 · build clean · Vitest 538 files, 8,445 passed, 3 skipped · `contactV15` +
+`contactV14` + `contactV13` + `contactV11`, one worker: **44 passed**. The header and ink-shell suites were not run
+again on the merged tree; they last ran on Phase 5's tip (above), and v132 is the Query Centre's to answer for there.
 
 ## Locks, each with its red before green
 
