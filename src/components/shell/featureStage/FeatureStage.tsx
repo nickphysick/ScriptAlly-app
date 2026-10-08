@@ -46,7 +46,9 @@ export const FeatureStage: React.FC<{
   cardKey: string;
   /** null draws no panel (a state with nothing to list) */
   panel: React.ReactNode | null;
-}> = ({ probe, state, label, title, titleSize = "default", sentence, extra, action, card, cardClass, cardKey, panel }) => {
+  /** the page's own class on the panel (a panel with its own header strip clips and drops its padding) */
+  panelClass?: string;
+}> = ({ probe, state, label, title, titleSize = "default", sentence, extra, action, card, cardClass, cardKey, panel, panelClass }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const first = useRef(true);
   useEffect(() => {
@@ -65,7 +67,7 @@ export const FeatureStage: React.FC<{
         {action}
       </div>
       <div className={`fs-card${cardClass ? ` ${cardClass}` : ""}`} ref={cardRef} data-fs-part="card" data-card-key={cardKey}>{card}</div>
-      {panel != null && <div className="fs-panel" data-fs-part="panel">{panel}</div>}
+      {panel != null && <div className={`fs-panel${panelClass ? ` ${panelClass}` : ""}`} data-fs-part="panel">{panel}</div>}
     </section>
   );
 };

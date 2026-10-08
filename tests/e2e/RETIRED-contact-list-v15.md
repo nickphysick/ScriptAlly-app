@@ -71,3 +71,18 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 | `contactV15.measure.ts` | CL15-3 "the desk is 28 (±1) under the header's hairline" | 72 / 60 | CL15.1 D1 |
 | `contactV15.measure.ts` | CL15-5a "the desk-to-panel gap is 66 (56)" and "the panel-to-workspace gap is 58 (50)" | The section sits on a band; the gaps are the band's | CL15.1 B2 |
 | `analyticsV17.measure.ts` | AN17-14 "the footer's top rule spans the main column" | The shared footer has no ground; its one hairline runs the content column, on the inner wrapper | CL15.1 F1 (measured on `/queries/analytics` too) |
+
+## v15.2 — icon desk cards, Discover in plum, the ghost Add card, the banner (8 Oct)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV15.measure.ts` | CL15-3, everything about the v15 CARDS: the three titles, ink titles, the weekly bars, the striped progress bar, the stamps and their inner rule, the two-row lists, "no row repeats its stamp", "On file's figure is the header's count" | The desk is three icon cards: a disc, one line, a month-on-month line, a small chart | CL15.2 K1–K4. CL15-3 keeps the three PRESSES |
+| `contactV151.measure.ts` | D2 "card titles are Special Elite 16 / 14", "the header row to the body row is 16 (12)", "every card is 212 / 194 tall or less" | The cards have no title row; they are 165 / 141 tall | CL15.2 K1 |
+| `contactV151.measure.ts` | B2 "the band's bottom to the workspace bar is 56" | A banner sits between them; re-pointed in place, not removed: band → banner is 56 (48) | CL15.1 B2 (re-pointed), CL15.2 K8 (banner → bar 76 / 64) |
+| `contactV15.measure.ts` | CL15-6 "the panel is Discover, coming soon: the heading, the pill, the sentence, two nameless rows" and "the panel is no taller than 350 at 1512" | The panel has a plum header strip, three feature rows and the bird; the placeholder rows are gone | CL15.2 K7 |
+| `contactV15.measure.ts` | CL15-6 "the Add an agent card … tightened (20 22 18, a 46px plus)" | A ghost card replaced the plus; the reading keeps "solid white with a dashed ring" | CL15.2 K6 |
+| `contactV15.measure.ts` | CL15-1 "the two buttons: + Add an agent · Discover agents" | The second button is "View all agents"; re-pointed in place | CL15-1 (re-pointed), CL15.2 K9 |
+| `contactV14.measure.ts` | CL14-5 "'Your agents'", and the guide's "Your agents" step title | The bar reads "Agents on file"; re-pointed in place | CL14-5, CL14-16 (re-pointed), CL15.2 K9 |
+| `contactV11.measure.ts` | v12 P1 "Discover navigates" | The header's second button stays on the page; re-pointed to assert that | CL15.2 K9 |
+| `pageHeaderV2.measure.ts` | §4.6 "the secondary is Discover" | Re-pointed to "View all agents" | CL15.2 K9 |
+

@@ -294,9 +294,10 @@ test("§4.6 · the add door (v12 P1: the quick-add drop and the paste pill are r
      hidden page's copy (the house hidden-copy law; the old row survived it only via hasText) */
   const secondaryText = await page.evaluate(() => {
     const hd = [...document.querySelectorAll('[data-cl15="header"]')].find((e) => e.getBoundingClientRect().height > 0);
-    return hd?.querySelector('[data-cl15="discover"]')?.textContent ?? "";
+    return hd?.querySelector('[data-cl15="view-all"]')?.textContent ?? "";
   });
-  L.check("§4.6 · no Paste-a-link pill — the secondary is Discover", ctx, secondaryText.includes("Discover agents"), secondaryText);
+  /* RE-POINTED (Contact list v15.2 §5): the secondary read "Discover agents"; it is "View all agents" now */
+  L.check("§4.6 · no Paste-a-link pill — the secondary is View all agents", ctx, secondaryText.includes("View all agents"), secondaryText);
   await add.click({ timeout: 5000 }).catch(() => {});
   /* (Agent card v1 P3: the add card is the agent card's editor, opened empty, name focused) */
   await page.waitForSelector('[data-ac="card"] [data-ae-mode="new"]', { timeout: 5000 }).catch(() => {});

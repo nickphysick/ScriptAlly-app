@@ -101,14 +101,12 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     /* D1 */
     const gap = r.desk.t - r.hd.b;
     L.check(`D1 the header's hairline to the desk's top is ${narrow ? 60 : 72} (±2)`, w, near(gap, narrow ? 60 : 72, 2), `${gap.toFixed(1)}`);
-    /* D2 */
-    L.check(`D2 card titles are Special Elite at ${narrow ? 14 : 16}px`, w, r.cards.every((c) => c.size === (narrow ? "14px" : "16px") && /Special Elite/.test(c.face ?? "")), r.cards.map((c) => `${c.size}`).join(" "));
-    L.check(`D2 the header row to the body row is ${narrow ? 12 : 16} (±1)`, w, r.cards.every((c) => c.gap !== null && near(c.gap, narrow ? 12 : 16, 1)), r.cards.map((c) => c.gap?.toFixed(1)).join(" "));
-    L.check(`D2 every card is ${narrow ? 194 : 212}px tall or less`, w, r.cards.every((c) => c.h <= (narrow ? 194 : 212)), r.cards.map((c) => c.h.toFixed(1)).join(" "));
+    /* D2 — RETIRED BY v15.2 (8 Oct): the v15 cards' titles (16 / 14), the 16 (12) under the title row and the 212 / 194
+       ceilings. The desk is three icon cards with no title row: CL15.2 K1 (tests/e2e/contactV152.measure.ts). */
     await checkOverflow(page, L, w);
     await shot(page, "header-desk", vp);
   }
-  L.done(42);
+  L.done(33);
 });
 
 /* the band's boxes, with the band scrolled into the middle of the scroller so its pixels can be sampled */
@@ -116,7 +114,7 @@ async function readBand(page: Page) {
   return page.evaluate(() => {
     const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0) ?? null;
     const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
-    const band = q('[data-cl14="next"]'), fs = q(".fs"), panel = q('[data-fs-part="panel"]'), desk = q('[data-cl15="desk"]'), bar = q('[data-cl14="bar"]');
+    const band = q('[data-cl14="next"]'), fs = q(".fs"), panel = q('[data-fs-part="panel"]'), desk = q('[data-cl15="desk"]'), bar = q('[data-cl15="banner"]');
     const card = (q('[data-fs-part="card"]')?.firstElementChild ?? null) as HTMLElement | null;
     const sc = band?.closest<HTMLElement>(".wpg-scroll") ?? null;
     if (band && sc) sc.scrollTop += band.getBoundingClientRect().top - sc.getBoundingClientRect().top - 120;
@@ -146,8 +144,8 @@ const PAGE = [243, 242, 240];
 async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, state: string) {
   const r = await readBand(page);
   const where = `${w} · ${state}`;
-  if (!r.band || !r.fs || !r.panel || !r.desk || !r.bar || !r.sheet || r.state !== state) { L.check("CL15.1 population: the band, the stage, the desk and the workspace bar render in this state", where, false, JSON.stringify({ state: r.state, band: !!r.band, bar: !!r.bar })); return; }
-  L.check("CL15.1 population: the band, the stage, the desk and the workspace bar render in this state", where, true, "");
+  if (!r.band || !r.fs || !r.panel || !r.desk || !r.bar || !r.sheet || r.state !== state) { L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, false, JSON.stringify({ state: r.state, band: !!r.band, bar: !!r.bar })); return; }
+  L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, true, "");
   /* B1 — the tint itself, and where it is PAINTED (a box-shadow has no box to read: the pixels are the evidence) */
   L.check("B1 the band's background is rgb(233, 230, 224), with no border and no radius", where, r.bg === "rgb(233, 230, 224)" && r.border === "0px 0px 0px" && r.radius === "0px", `${r.bg} · ${r.border} · ${r.radius}`);
   const y = Math.min(r.band.t + 20, r.sheet.b - 4);
@@ -168,7 +166,9 @@ async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, sta
   L.check(`B2 the desk's bottom to the band's top is ${narrow ? 52 : 64} (±2)`, where, near(g1, narrow ? 52 : 64, 2), `${g1.toFixed(1)}`);
   L.check(`B2 the band's top to the section grid is ${narrow ? 64 : 72} (±2)`, where, near(g2, narrow ? 64 : 72, 2), `${g2.toFixed(1)}`);
   L.check(`B2 the section grid to the band's bottom is ${narrow ? 64 : 72} (±2)`, where, near(g3, narrow ? 64 : 72, 2), `${g3.toFixed(1)}`);
-  L.check("B2 the band's bottom to the workspace bar is 56 (±2)", where, near(g4, 56, 2), `${g4.toFixed(1)}`);
+  /* ⚠️ RE-POINTED BY v15.2 (8 Oct): the band's bottom used to meet the workspace bar 56 below; a banner sits between
+     them now, so the 56 (48 below 1440) of plain page is from the band to the BANNER (and K8 holds banner → bar). */
+  L.check(`B2 the band's bottom to the banner is ${narrow ? 48 : 56} (±2)`, where, near(g4, narrow ? 48 : 56, 2), `${g4.toFixed(1)}`);
   L.check(`B2 the panel sits ${narrow ? 31 : 39} (±2) inside the band's top edge`, where, near(r.panel.t - r.band.t, narrow ? 31 : 39, 2), `${(r.panel.t - r.band.t).toFixed(1)}`);
   if (state === "ready") L.check("B2 the floating card's ring is 1px ink at 10%, its drop shadow unchanged", where, /rgba\(28, 19, 15, 0\.1\) 0px 0px 0px 1px/.test(r.ring ?? "") && /rgba\(28, 19, 15, 0\.45\) 0px 24px 46px -24px/.test(r.ring ?? ""), `${r.ring}`);
   await checkOverflow(page, L, where);

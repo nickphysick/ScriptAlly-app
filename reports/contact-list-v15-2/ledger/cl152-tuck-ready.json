@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CL15.2 population: the ready state on the stage",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K5 ready: the card overlaps the panel by 150 (±4)",
+  "where": "1512",
+  "ok": true,
+  "detail": "150.0"
+ },
+ {
+  "lock": "CL15.2 population: the ready state on the stage",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K5 ready: the card overlaps the panel by 130 (±4)",
+  "where": "1280",
+  "ok": true,
+  "detail": "130.0"
+ }
+]

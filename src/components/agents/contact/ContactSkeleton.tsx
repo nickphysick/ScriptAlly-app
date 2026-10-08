@@ -22,6 +22,7 @@ import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
 import { deskModel } from "../../../lib/contactDesk";
 import { ContactDesk } from "./ContactDesk";
+import { CONTACT_BANNER_LINE } from "./ContactOpenHeader";
 import { YourAgentsBar } from "./YourAgentsBar";
 import { ContactIndexStrip } from "./ContactIndexStrip";
 import { ContactRows } from "./ContactRows";
@@ -78,6 +79,9 @@ export const ContactSkeleton: React.FC<{
         onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onNewAgent={noop} onDiscover={noop}
         onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
       />
+      {/* v15.2 §4 — the banner holds its place while the page loads (its words wait for data): without it every row
+          below sat 212 (176) higher than it loads (measured, CL13-12) */}
+      <section className="cl15-ban" aria-hidden="true"><p>{CONTACT_BANNER_LINE}</p></section>
       <div className="clv-main">
         <section className="cl14-ws" aria-hidden="true">
           <YourAgentsBar shown={0} total={0} book={msTitle} you={0} ready={0} youOn={false} readyOn={false}

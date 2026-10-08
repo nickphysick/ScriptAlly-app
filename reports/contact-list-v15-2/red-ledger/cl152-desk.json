@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "CL15.2 population: the desk renders three cards, each with a disc",
+  "where": "1512",
+  "ok": false,
+  "detail": "{\"found\":true,\"cards\":3,\"discs\":0}"
+ },
+ {
+  "lock": "CL15.2 population: the desk renders three cards, each with a disc",
+  "where": "1280",
+  "ok": false,
+  "detail": "{\"found\":true,\"cards\":3,\"discs\":0}"
+ }
+]

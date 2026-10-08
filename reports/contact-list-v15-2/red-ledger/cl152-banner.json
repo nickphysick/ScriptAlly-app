@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "CL15.2 population: the banner, the next-step band and the list's bar render",
+  "where": "1512",
+  "ok": false,
+  "detail": "{\"ban\":false,\"band\":true,\"bar\":true}"
+ },
+ {
+  "lock": "CL15.2 population: the banner, the next-step band and the list's bar render",
+  "where": "1280",
+  "ok": false,
+  "detail": "{\"ban\":false,\"band\":true,\"bar\":true}"
+ }
+]

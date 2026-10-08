@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "CL15.2 population: the all-queried state, with the Add card's ghost, the Discover header and the bird",
+  "where": "1512",
+  "ok": false,
+  "detail": "{\"state\":\"done\",\"ghost\":false,\"head\":false,\"bird\":false}"
+ },
+ {
+  "lock": "CL15.2 population: the all-queried state, with the Add card's ghost, the Discover header and the bird",
+  "where": "1280",
+  "ok": false,
+  "detail": "{\"state\":\"done\",\"ghost\":false,\"head\":false,\"bird\":false}"
+ },
+ {
+  "lock": "K6 the card's button still opens Add an agent",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"overlay\":1,\"text\":\"New agent✕ContactWishlistSubmissionsPaste a linkNameA name or an agency is neede\"}"
+ }
+]

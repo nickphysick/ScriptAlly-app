@@ -62,12 +62,8 @@
   font: 500 8px/1 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
   background: var(--cl14-blue); padding: 4px 8px; border-radius: 10px;
 }
-/* v15 §4: tightened — padding 20 22 18, a 46px plus */
-.cl14-addc-in { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 22px 18px; text-align: center; }
-.cl14-addc-plus {
-  width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;
-  background: #fff; box-shadow: inset 0 0 0 1.5px rgba(47, 95, 134, 0.45); color: var(--cl14-blue); font: 300 24px/1 var(--clv-serif);
-}
+/* v15.2 §3b: the ghost of a filled card sits above this block, so it starts 6 under it (the "+" circle is retired) */
+.cl14-addc-in { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 6px 22px 18px; text-align: center; }
 .cl14-addc-in b { font: 500 19px/1.3 var(--clv-serif); color: var(--cl14-ink); }
 .cl14-addc-in p { margin: 0 0 6px; font: 400 14px/1.45 var(--clv-serif); color: var(--cl14-t2); }
 .cl14-addc-in .cl14-go { height: 38px; padding: 0 18px; border-radius: 19px; font-size: 14.5px; }
@@ -93,7 +89,7 @@
 /* ── v15.1 §4 · THE BAND: the next-step section sits on a tinted band the full width of the page sheet. The box stays the
    content column (so the grid inside is unchanged and nothing overflows); the tint reaches the sheet's edges as a spread
    shadow clipped back to the band's own height — the footer's old trick. No border, radius or drop shadow.
-   64 (52) above it, 56 below; 73 (65) of padding puts the grid 72 (64) ±1 inside and the panel, with its 34 overhang,
+   64 (52) above it, 56 (48) below, to v15.2's banner; 73 (65) of padding puts the grid 72 (64) ±1 inside and the panel, with its 34 overhang,
    39 (31) inside the band's edges — the oracle's own rendered figures. The stage's own margins are zeroed here. */
 .clv-group > .cl14-next {
   grid-column: 1 / -1; grid-row: 3;
@@ -104,7 +100,7 @@
   clip-path: inset(0 -100vmax);
 }
 .clv-group > .cl14-next > .fs { margin-top: 0; margin-bottom: 0; }
-@media (max-width: 1439.5px) { .clv-group > .cl14-next { margin-top: 52px; padding: 65px 0; } }
+@media (max-width: 1439.5px) { .clv-group > .cl14-next { margin: 52px 0 48px; padding: 65px 0; } }
 /* while the page settles, the section is drawn over placeholder agents like everything else (v13 §8) */
 .clv-group[data-loading] .cl14-next :is(.fs-title, .fs-sentence, .fs-row) {
   color: transparent !important; border-radius: 8px; background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;

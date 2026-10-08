@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "K9 the header's buttons are “+ Add an agent” and “View all agents”; none reads “Discover agents”",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"View all agents\"]"
+ },
+ {
+  "lock": "K9 the list's workspace header reads “Agents on file”",
+  "where": "1512",
+  "ok": true,
+  "detail": "Agents on file · Agents on file"
+ },
+ {
+  "lock": "K9 precondition: the page really scrolled",
+  "where": "1512",
+  "ok": true,
+  "detail": "1365"
+ },
+ {
+  "lock": "K9 View all agents stops with the list's bar 24 (±4) under the scroller's top, on the same route",
+  "where": "1512",
+  "ok": true,
+  "detail": "24.0 · /agents"
+ },
+ {
+  "lock": "K9 and the caret is in the list's Find field",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "K9 the header's buttons are “+ Add an agent” and “View all agents”; none reads “Discover agents”",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"View all agents\"]"
+ },
+ {
+  "lock": "K9 the list's workspace header reads “Agents on file”",
+  "where": "1280",
+  "ok": true,
+  "detail": "Agents on file · Agents on file"
+ },
+ {
+  "lock": "K9 precondition: the page really scrolled",
+  "where": "1280",
+  "ok": true,
+  "detail": "1184"
+ },
+ {
+  "lock": "K9 View all agents stops with the list's bar 24 (±4) under the scroller's top, on the same route",
+  "where": "1280",
+  "ok": true,
+  "detail": "23.9 · /agents"
+ },
+ {
+  "lock": "K9 and the caret is in the list's Find field",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

@@ -554,7 +554,9 @@ test("Log query opens the query drawer on this page — no navigation, the agent
    Contact list v13 §2: the hero is the band, held by contactV13 CL13-1. It was already red on main
    before v13 (the QC's header became the band in v126). See RETIRED-contact-list-v13.md. */
 
-test("v12 P1 — + Add an agent opens the centred card directly; no quick-add exists; Discover navigates", async ({ page }) => {
+/* ⚠️ RE-POINTED BY v15.2 (8 Oct): "Discover navigates" — the header's second button is "View all agents" now and stays on
+   the page (CL15.2 K9 holds where it lands). Discover is reached from the page's tab and the sidebar. */
+test("v12 P1 — + Add an agent opens the centred card directly; no quick-add exists; View all agents stays on the page", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.click(`${scope} [data-cl15="add"]`); /* v15 §2: the open header's own button */
@@ -565,8 +567,10 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
   expect(await page.locator('[data-clv="quickadd"]').count(), "the quick-add drop came back").toBe(0);
   await page.keyboard.press("Escape");
   await page.waitForSelector('[data-ac="card"]', { state: "detached" });
-  await page.click(`${scope} [data-cl15="discover"]`);
-  await page.waitForURL(/\/agents\/discover/);
+  expect(await page.locator(`${scope} [data-cl15="discover"]`).count(), "the header's Discover button came back").toBe(0);
+  await page.click(`${scope} [data-cl15="view-all"]`);
+  await page.waitForTimeout(600);
+  expect(new URL(page.url()).pathname, "View all agents left the page").toBe("/agents");
   bump(3);
 });
 

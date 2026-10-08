@@ -1,0 +1,176 @@
+[
+ {
+  "lock": "CL15.2 population: the all-queried state, with the Add card's ghost, the Discover header and the bird",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K2 the desk's Queried figure equals the next-step section's queried count",
+  "where": "1512",
+  "ok": true,
+  "detail": "desk 37 · “The Salt Ledger has gone to all 37 agents on your list.”"
+ },
+ {
+  "lock": "K5 all queried: the card overlaps the panel by 44 (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "44.0"
+ },
+ {
+  "lock": "K6 the Add card has a ghost block, aria-hidden, with no words and nothing focusable, above the title",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"hidden\":\"true\",\"box\":{\"l\":613.15625,\"t\":814.90625,\"r\":911.15625,\"b\":980.90625,\"w\":298,\"h\":166},\"text\":\"\",\"title\":{\"l\":706.46875,\"t\":986.90625,\"r\":817.84375,\"b\":1011.59375,\"w\":111.375,\"h\":24.6875},\"focusable\":0}"
+ },
+ {
+  "lock": "K6 the “+” circle is gone",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "K7 the Discover header is plum, rgb(90, 61, 85), and spans the panel's width (±1) along its top edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(90, 61, 85) head 868.2–1455.6 @739.9 panel 868.2–1455.6 @739.9"
+ },
+ {
+  "lock": "K7 the title reads “Discover agents” at 21px",
+  "where": "1512",
+  "ok": true,
+  "detail": "Discover agents 21px"
+ },
+ {
+  "lock": "K7 “Coming soon” is VISIBLE: a non-zero box, inside the header",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"l\":1329.203125,\"t\":759.90625,\"r\":1429.609375,\"b\":780.90625,\"w\":100.40625,\"h\":21} block “Coming soon”"
+ },
+ {
+  "lock": "K7 the lede, exactly",
+  "where": "1512",
+  "ok": true,
+  "detail": "Find new agents and add them to your list in one click."
+ },
+ {
+  "lock": "K7 three feature rows with the exact copy, on pale plum circles with plum icons",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"t\":\"By genre\",\"s\":\"Only agents who take what you write.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"},{\"t\":\"Open now\",\"s\":\"See who’s accepting submissions today.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"},{\"t\":\"Their wishlist\",\"s\":\"What they want, and what to send.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"}]"
+ },
+ {
+  "lock": "K7 the placeholder rows are gone, and the request button is there",
+  "where": "1512",
+  "ok": true,
+  "detail": "rows 0 · Tell me when it’s ready"
+ },
+ {
+  "lock": "K7 the bird is loaded and 250 (±2) tall",
+  "where": "1512",
+  "ok": true,
+  "detail": "250.0 natural 523 alt “”"
+ },
+ {
+  "lock": "K7 the bird runs past the panel's bottom-right corner, and the panel clips it",
+  "where": "1512",
+  "ok": true,
+  "detail": "bird b 1187.5 r 1455.6 panel b 1181.5 r 1455.6 overflow hidden"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.2 population: the all-queried state, with the Add card's ghost, the Discover header and the bird",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K2 the desk's Queried figure equals the next-step section's queried count",
+  "where": "1280",
+  "ok": true,
+  "detail": "desk 37 · “The Salt Ledger has gone to all 37 agents on your list.”"
+ },
+ {
+  "lock": "K5 all queried: the card overlaps the panel by 36 (±2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "36.0"
+ },
+ {
+  "lock": "K6 the Add card has a ghost block, aria-hidden, with no words and nothing focusable, above the title",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"hidden\":\"true\",\"box\":{\"l\":530.421875,\"t\":685.859375,\"r\":798.421875,\"b\":851.859375,\"w\":268,\"h\":166},\"text\":\"\",\"title\":{\"l\":608.734375,\"t\":857.859375,\"r\":720.109375,\"b\":882.546875,\"w\":111.375,\"h\":24.6875},\"focusable\":0}"
+ },
+ {
+  "lock": "K6 the “+” circle is gone",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "K7 the Discover header is plum, rgb(90, 61, 85), and spans the panel's width (±1) along its top edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(90, 61, 85) head 763.4–1231.0 @610.9 panel 763.4–1231.0 @610.9"
+ },
+ {
+  "lock": "K7 the title reads “Discover agents” at 18px",
+  "where": "1280",
+  "ok": true,
+  "detail": "Discover agents 18px"
+ },
+ {
+  "lock": "K7 “Coming soon” is VISIBLE: a non-zero box, inside the header",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"l\":1110.640625,\"t\":630.859375,\"r\":1211.046875,\"b\":651.859375,\"w\":100.40625,\"h\":21} block “Coming soon”"
+ },
+ {
+  "lock": "K7 the lede, exactly",
+  "where": "1280",
+  "ok": true,
+  "detail": "Find new agents and add them to your list in one click."
+ },
+ {
+  "lock": "K7 three feature rows with the exact copy, on pale plum circles with plum icons",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"t\":\"By genre\",\"s\":\"Only agents who take what you write.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"},{\"t\":\"Open now\",\"s\":\"See who’s accepting submissions today.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"},{\"t\":\"Their wishlist\",\"s\":\"What they want, and what to send.\",\"iconBg\":\"rgb(238, 227, 236)\",\"iconInk\":\"rgb(90, 61, 85)\"}]"
+ },
+ {
+  "lock": "K7 the placeholder rows are gone, and the request button is there",
+  "where": "1280",
+  "ok": true,
+  "detail": "rows 0 · Tell me when it’s ready"
+ },
+ {
+  "lock": "K7 the bird is loaded and 196 (±2) tall",
+  "where": "1280",
+  "ok": true,
+  "detail": "196.0 natural 523 alt “”"
+ },
+ {
+  "lock": "K7 the bird runs past the panel's bottom-right corner, and the panel clips it",
+  "where": "1280",
+  "ok": true,
+  "detail": "bird b 1058.4 r 1231.0 panel b 1052.4 r 1231.0 overflow hidden"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "K6 the card's button still opens Add an agent",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"overlay\":1,\"text\":\"New agent✕ContactWishlistSubmissionsPaste a linkNameA name or an agency is neede\"}"
+ }
+]

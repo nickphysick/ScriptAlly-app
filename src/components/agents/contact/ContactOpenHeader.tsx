@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Contact list v15 §2 — THE OPEN HEADER: no card, no band, no container. A two-column grid on the page — the
- * text block (the count as the title, one line under it, two buttons) and the flying hawk to its right, the
+ * text block (the count as the title, one line under it, two buttons: Add an agent, and View all agents, which
+ * scrolls to the list) and the flying hawk to its right, the
  * two centred against each other — closed by a hairline.
  *
  * ⚠️ PAGE-LOCAL, NOT `PageHeader` (ruling 8): the shared header has no 72px typewriter title, no form without an
@@ -24,6 +25,9 @@ export const CONTACT_HEADER_HAWK = { src: "/images/contact/contact-header-hawk.p
 
 export const CONTACT_HEADER_SUB = "Your agent data underpins everything. Collate and manage it here.";
 
+/** the banner above the list (v15.2 §4) — exact */
+export const CONTACT_BANNER_LINE = "Your agent will be the one who champions your words.";
+
 /** "{N} agents on file" — one agent is "1 agent on file" */
 export const onFileTitle = (n: number): string => `${n} agent${n === 1 ? "" : "s"} on file`;
 
@@ -32,8 +36,9 @@ export const ContactOpenHeader: React.FC<{
   count: number | null;
   addRef?: React.Ref<HTMLButtonElement>;
   onAdd: () => void;
-  onDiscover: () => void;
-}> = ({ count, addRef, onAdd, onDiscover }) => {
+  /** scrolls to the list and puts the caret in its Find field (v15.2 §5) */
+  onViewAll: () => void;
+}> = ({ count, addRef, onAdd, onViewAll }) => {
   const loading = count === null;
   return (
     <header className="cl15-hd" data-cl15="header" data-own-header="" data-loading={loading ? "" : undefined}>
@@ -42,7 +47,7 @@ export const ContactOpenHeader: React.FC<{
         <p className="cl15-sub" data-cl15="sub">{CONTACT_HEADER_SUB}</p>
         <div className="cl15-acts">
           <button ref={addRef} type="button" className="cl15-b1" data-cl15="add" onClick={onAdd} disabled={loading}>+ Add an agent</button>
-          <button type="button" className="cl15-b2" data-cl15="discover" onClick={onDiscover} disabled={loading}>Discover agents</button>
+          <button type="button" className="cl15-b2" data-cl15="view-all" onClick={onViewAll} disabled={loading}>View all agents</button>
         </div>
       </div>
       <div className="cl15-art" data-cl15="header-art" aria-hidden="true">
