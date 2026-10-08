@@ -86,6 +86,10 @@ const stack = (): EscapeStack | null => {
 
 /** Register an Escape layer for as long as `active` is true. The handler is read through a ref,
  *  so a new closure every render never re-orders the stack. */
+/** How many layers are open app-wide — a card, a drawer, a popover each push one. A page's own keys stand down
+ *  while any is (the Contact list's keyboard rows read it, v14 §7.7). */
+export const escapeDepth = (): number => stack()?.depth() ?? 0;
+
 export function useEscapeLayer(active: boolean, handle: () => void, level: number = ESC_LEVEL.card): void {
   const latest = useRef(handle);
   latest.current = handle;

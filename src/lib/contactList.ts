@@ -414,6 +414,35 @@ export function genreTallies(facts: readonly AgentFacts[]): Map<string, number> 
   return m;
 }
 
+/* ── the helpful dead end (v14 §7.8) ─────────────────────────────────────────────────────────────────────────────
+   When the filters return nothing, each ACTIVE control (each genre token, and the Find text, counting as their own)
+   is offered as one drop: the label names it, the count is how many agents it brings back with everything else
+   left on. Up to four, most first; none that help means none is offered and the page says so. */
+export interface DropOption { key: string; label: string; n: number; drop: (f: ContactFilters) => ContactFilters; clearsSearch?: boolean }
+export function dropOptions(
+  facts: readonly AgentFacts[], f: ContactFilters, search: string,
+  matchesSearch: (x: AgentFacts, q: string) => boolean, genreLabel: (k: string) => string, limit = 4,
+): DropOption[] {
+  const cands: Omit<DropOption, "n">[] = [];
+  if (f.status.length) cands.push({ key: "status", label: f.status.length === 1 ? STATUS_LABEL[f.status[0]] : "Status", drop: (g) => ({ ...g, status: [] }) });
+  if (f.action) cands.push({ key: "action", label: "Action required", drop: (g) => ({ ...g, action: false }) });
+  if (f.open !== "either") cands.push({ key: "open", label: OPEN_CHOICES.find((c) => c.key === f.open)!.label, drop: (g) => ({ ...g, open: "either" }) });
+  if (f.queried !== "either") cands.push({ key: "queried", label: QUERIED_CHOICES.find((c) => c.key === f.queried)!.label, drop: (g) => ({ ...g, queried: "either" }) });
+  if (f.mats) cands.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
+  if (f.always) cands.push({ key: "always", label: "Always responds", drop: (g) => ({ ...g, always: false }) });
+  for (const gk of f.genres) cands.push({ key: `genre:${gk}`, label: genreLabel(gk), drop: (g) => ({ ...g, genres: g.genres.filter((x) => x !== gk) }) });
+  const q = search.trim();
+  if (q) cands.push({ key: "find", label: `\u201c${q}\u201d`, drop: (g) => g, clearsSearch: true });
+  return cands
+    .map((c) => {
+      const g = c.drop(f), qq = c.clearsSearch ? "" : q;
+      return { ...c, n: facts.filter((x) => (!qq || matchesSearch(x, qq)) && matchesContactFilters(x, g)).length };
+    })
+    .filter((c) => c.n > 0)
+    .sort((a, b) => b.n - a.n)
+    .slice(0, limit);
+}
+
 /* ── grouping (v14 §4) — a PARTITION of the already-sorted list ── */
 export type GroupKey = "letter" | "status" | "action" | "country";
 export const GROUP_OPTIONS: { key: GroupKey; label: string; line?: string }[] = [

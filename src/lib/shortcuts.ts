@@ -58,6 +58,11 @@ export const SHORTCUTS = {
      open */
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsFind:     { chords: [k("/")], label: "Find an agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsDown:     { chords: [k("j"), k("ArrowDown")], label: "Next agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsUp:       { chords: [k("k"), k("ArrowUp")], label: "Previous agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only
      when no field has focus; the card's own handler stops them reaching a page beneath it */
   cardEdit:         { chords: [k("e")], label: "Edit the agent", scope: "The agent card", bound: "src/components/agents/card/AgentQuickView.tsx", inFields: "stands down" },

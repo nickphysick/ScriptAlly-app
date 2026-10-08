@@ -432,3 +432,91 @@
 .clv-trb.p { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
 .clv-trb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .clv-rtray { transition: none; } }
+
+/* ══ v14 §7 — THE TOUCHES (the mock's own values) ══ */
+/* §7.1 — the live count takes a pale slate while it counts. ⚠️ `.cl14-ticking`, NOT `.cl14-tk`: that name is the
+   genre field's token, and the collision drew the token's ink pill behind the number (seen on the first screenshot). */
+.cl14-bar .cl14-ticking { color: #9fc0da; }
+/* §7.3 — the Find text, marked */
+.clv-mark { background: #f6dccd; color: inherit; border-radius: 3px; padding: 0 1px; box-shadow: 0 0 0 1px #f6dccd; }
+/* §7.7 — the keyboard's focus ring: a pale wash and a 3px slate edge, its tray showing */
+.clv-row.kf { background: #f6f8fa; box-shadow: inset 3px 0 0 #3d5468; }
+.clv-row.kf .clv-rtray { opacity: 1; pointer-events: auto; background: linear-gradient(90deg, transparent, #f6f8fa 18px); }
+/* a row the keyboard lands on scrolls clear of the pinned labels and the divider above it */
+.clv-row { scroll-margin-top: calc(94px - var(--wpg-scroll-pad, 12px)); scroll-margin-bottom: 12px; }
+/* §7.6 — Compact: 52-tall rows, no chips and no small lines, the type a step down */
+.clv-list--compact .clv-row { min-height: 52px; padding-top: 6px; padding-bottom: 6px; }
+.clv-list--compact .clv-gch, .clv-list--compact .clv-rrep small, .clv-list--compact .clv-qd { display: none; }
+.clv-list--compact .clv-ini { width: 28px; height: 28px; font-size: 9px; }
+.clv-list--compact .clv-rwn b { font-size: 15.5px; }
+.clv-list--compact .clv-ragy { font-size: 12.5px; }
+.clv-list--compact .clv-rwish { font-size: 14px; line-height: 19px; margin-bottom: 0; }
+.clv-list--compact .clv-miss { margin-bottom: 0; }
+/* §7.6–7.7 — the bar's extras, on the ink */
+.cl14-xt { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.cl14-dens { display: inline-flex; padding: 3px; border-radius: 17px; background: rgba(255, 255, 255, 0.12); }
+.cl14-dens button {
+  height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: transparent; cursor: pointer;
+  font: 500 9px var(--sp-mono); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 238, 229, 0.6);
+}
+.cl14-dens button.on { background: #fff; color: #2a3a52; }
+.cl14-dens button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+.cl14-kbh {
+  position: relative; width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.12); color: #fff; cursor: default; flex: none;
+}
+.cl14-kbh:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.cl14-kbp {
+  display: none; position: absolute; right: 0; top: 42px; width: 250px; z-index: 40; flex-direction: column; gap: 7px;
+  background: #1b2433; color: #f4eee5; border-radius: 12px; padding: 12px 14px; font: 13px var(--clv-serif); text-align: left;
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.5);
+}
+.cl14-kbh:hover .cl14-kbp, .cl14-kbh:focus .cl14-kbp, .cl14-kbh:focus-within .cl14-kbp { display: flex; }
+.cl14-kbp b { font: 600 8.5px var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #d9967a; }
+.cl14-kbl { display: flex; align-items: center; gap: 8px; }
+.cl14-kbk { display: inline-flex; gap: 3px; flex: none; min-width: 64px; }
+.cl14-kbp kbd {
+  display: inline-block; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 5px; background: rgba(244, 238, 229, 0.12);
+  font: 500 10px/20px var(--sp-mono); text-align: center; color: #f4eee5;
+}
+/* below 1440 the ⌨ hides (the row's room goes to Find) */
+@media (max-width: 1439.5px) { .cl14-kbh { display: none; } }
+/* §7.4 — the A–Z rail: frosted white at the sheet's right edge, vertically centred */
+.cl14-azr {
+  position: fixed; right: calc(var(--ink-sheet-r, 0px) + 20px); top: 50%; transform: translate(8px, -46%); z-index: 54;
+  display: flex; flex-direction: column; align-items: center; box-sizing: border-box; width: 26px; padding: 8px 3px; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 10px 24px -16px rgba(28, 19, 15, 0.35);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.25s; touch-action: none; user-select: none;
+}
+.cl14-azr.show { opacity: 1; pointer-events: auto; transform: translate(0, -46%); }
+.cl14-azr button {
+  width: 20px; height: 15px; border: 0; background: none; padding: 0; border-radius: 4px; cursor: pointer;
+  font: 600 9.5px/15px var(--sp-mono); color: var(--clv-slate-ink);
+}
+.cl14-azr button.off, .cl14-azr button:disabled { color: rgba(63, 86, 107, 0.25); cursor: default; }
+.cl14-azr button:not(.off):not(:disabled):hover { background: #e3ebf1; }
+.cl14-azr button.on { background: var(--clv-slate-ink); color: #fff; }
+.cl14-azb {
+  position: absolute; right: 34px; width: 46px; height: 46px; margin-top: -23px; border-radius: 50% 50% 8px 50%;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-45deg) scale(0.6); background: var(--clv-slate-ink); opacity: 0; pointer-events: none; transition: opacity 0.12s, transform 0.12s;
+}
+.cl14-azb.on { opacity: 1; transform: rotate(-45deg) scale(1); }
+.cl14-azb span { transform: rotate(45deg); font: 400 22px var(--clv-type); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .cl14-azr, .cl14-azb { transition: none; } }
+/* §7.8 — the helpful dead end */
+.cl14-none {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 44px 20px 40px; text-align: center;
+  background: #fff; border-radius: 16px; font: 15px var(--clv-serif); color: rgba(28, 19, 15, 0.58);
+}
+.cl14-none > b { font: 400 22px var(--clv-type) !important; color: #1c130f; }
+.cl14-lz { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 10px 0 4px; }
+.cl14-lz button {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 0; border-radius: 18px; cursor: pointer;
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 14px var(--clv-serif); color: #1c130f;
+}
+.cl14-lz button:hover { box-shadow: inset 0 0 0 1.5px var(--clv-slate-ink); }
+.cl14-lz em { font-style: normal; font-weight: 600; }
+.cl14-lz small { font: 500 9px var(--sp-mono); color: #fff; background: #3d5468; border-radius: 9px; padding: 3px 7px; }
+.cl14-lzc { border: 0; background: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; color: rgba(28, 19, 15, 0.58); font: 14px var(--clv-serif); }

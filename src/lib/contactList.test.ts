@@ -126,7 +126,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
 
 /* ══ phase 3 — row facts, the date line, filters, groups and sorts ══════════════════════════ */
 import {
-  ACTION_GROUPS, type ContactFilters, NOT_RECORDED, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
+  ACTION_GROUPS, type ContactFilters, NOT_RECORDED, dropOptions, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
   agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies,
   matchesContactFilters, rowDateLine, sortFacts, standingQuery,
 } from "./contactList";
@@ -367,5 +367,26 @@ describe("openKey — the record's own word", () => {
     expect(openKeyOf({ submissionStatus: "Unknown" } as never)).toBe("unstated");
     expect(openKeyOf({} as never)).toBe("unstated");
     expect(new Set(facts.map((x) => x.openKey)).size, "population: the cast has more than one door").toBeGreaterThan(1);
+  });
+});
+
+describe("v14 §7.8 — the helpful dead end: each drop's count is what that drop returns", () => {
+  const search = (x: { agent: { name: string; agency: string } }, q: string) => `${x.agent.name} ${x.agent.agency}`.toLowerCase().includes(q.toLowerCase());
+  const label = (k: string) => k;
+  it("offers each active control, counts it against everything else left on, most first, at most four", () => {
+    /* "not queried" and "action required" exclude each other (an action needs a query), so each drop alone helps */
+    const f: ContactFilters = { ...emptyContactFilters(), queried: "no", action: true };
+    expect(facts.filter((x) => matchesContactFilters(x, f)).length, "population: the set returns nothing").toBe(0);
+    const opts = dropOptions(facts, f, "", search, label);
+    expect(opts.map((o) => o.key).sort()).toEqual(["action", "queried"]);
+    for (const o of opts) expect(o.n, o.label).toBe(facts.filter((x) => matchesContactFilters(x, o.drop(f))).length);
+    for (let i = 1; i < opts.length; i += 1) expect(opts[i - 1].n).toBeGreaterThanOrEqual(opts[i].n);
+  });
+  it("the Find text is its own drop, and a drop that brings nobody back is not offered", () => {
+    const opts = dropOptions(facts, emptyContactFilters(), "zzqx-no-such-agent", search, label);
+    expect(opts.map((o) => o.key)).toEqual(["find"]);
+    expect(opts[0].n).toBe(facts.length);
+    const none = dropOptions(facts, { ...emptyContactFilters(), genres: ["no-such-genre-a", "no-such-genre-b"], genreMode: "all" }, "", search, label);
+    expect(none).toEqual([]);
   });
 });

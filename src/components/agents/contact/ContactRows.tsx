@@ -77,6 +77,22 @@ function startMarquee(p: HTMLElement | null): Animation | null {
   });
 }
 
+/** §7.3 — the Find text marked (#f6dccd) in a row's name and agency; case-insensitive, every match */
+export function Marked({ text, q }: { text: string; q: string }) {
+  const n = q.trim();
+  if (!n) return <>{text}</>;
+  const out: React.ReactNode[] = [];
+  const low = text.toLowerCase(), k = n.toLowerCase();
+  let i = 0;
+  for (let j = low.indexOf(k); j >= 0; j = low.indexOf(k, i)) {
+    if (j > i) out.push(text.slice(i, j));
+    out.push(<mark key={j} className="clv-mark">{text.slice(j, j + n.length)}</mark>);
+    i = j + n.length;
+  }
+  if (i < text.length) out.push(text.slice(i));
+  return <>{out}</>;
+}
+
 /** the dashed slate link pill (§6) — "+ Add their wishlist" / "+ Add genres"; it opens the editor at that field */
 const AddPill: React.FC<{ probe: string; label: string; onPress: () => void }> = ({ probe, label, onPress }) => (
   <span
@@ -95,12 +111,16 @@ const Row: React.FC<{
   current: boolean;
   fresh: boolean;
   hideYourMove?: boolean;
+  /** §7.7 — the keyboard's focus ring is on this row (its tray shows) */
+  focused?: boolean;
+  /** §7.3 — the Find text, marked in the name and agency */
+  highlight?: string;
   onOpen: (from: DOMRect) => void;
   onAddGenres: () => void;
   onAddWishlist: () => void;
   tray: CardPrimary;
   onAct: (act: CardAct) => void;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
   const a = x.agent;
   const yourMove = x.stand === "you" && !hideYourMove;
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
@@ -141,7 +161,7 @@ const Row: React.FC<{
     <div
       role="button"
       tabIndex={0}
-      className={`clv-row${fresh ? " clv-row--new" : ""}`}
+      className={`clv-row${fresh ? " clv-row--new" : ""}${focused ? " kf" : ""}`}
       data-clv="row"
       /* flip.ts's own default selector — the FLIP and the save-notice scroll both find rows by it */
       data-agent-card={a.id}
@@ -164,8 +184,8 @@ const Row: React.FC<{
       <span className="clv-rwho">
         <span className="clv-ini" aria-hidden="true">{agentInitials(a)}</span>
         <span className="clv-rwn">
-          <b>{agentPrimary(a)}</b>
-          {whoBits.length > 0 && <i className="clv-ragy">{whoBits.join(" · ")}</i>}
+          <b><Marked text={agentPrimary(a)} q={highlight} /></b>
+          {whoBits.length > 0 && <i className="clv-ragy"><Marked text={whoBits.join(" · ")} q={highlight} /></i>}
         </span>
       </span>
       {/* What they want: the wishlist on ONE line, the genre chips under it */}
@@ -231,9 +251,11 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 /** the column labels' sort control — the page's own sort state, so a label and the Sort pill cannot disagree */
 export interface ContactSortControl { key: SortKey; reversed: boolean; onSort: (k: SortKey) => void; onReverse: () => void }
 
-export const ContactRows: React.FC<ContactRowsProps & { byLetter?: boolean; sort?: ContactSortControl }> = ({
+export const ContactRows: React.FC<ContactRowsProps & {
+  byLetter?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
+}> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
-  byLetter = true, sort,
+  byLetter = true, sort, focusId = null, highlight = "", compact = false,
 }) => {
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
@@ -250,13 +272,14 @@ export const ContactRows: React.FC<ContactRowsProps & { byLetter?: boolean; sort
     return (
       <Row
         key={id} x={x} nowMs={nowMs} genreHit={genreHit} current={openId === id} fresh={newId === id} hideYourMove={hideYourMove}
+        focused={focusId === id} highlight={highlight}
         onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
         onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
       />
     );
   });
   return (
-    <div className="clv-list" data-clv="list">
+    <div className={`clv-list${compact ? " clv-list--compact" : ""}`} data-clv="list" data-density={compact ? "compact" : "comfortable"}>
       {byLetter ? (
         /* Letter: ONE panel — the labels, then each letter's divider and its rows as siblings */
         <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">

@@ -566,3 +566,206 @@ test("CL14-11 · rows", async ({ page }) => {
   }
   L.done(28);
 });
+
+/* ── Phase 6 · the touches (§7) ── */
+const scrollList = (page: P, by: number) => page.evaluate((by) => {
+  const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+  const sc = root.closest<HTMLElement>(".wpg-scroll") ?? root.querySelector<HTMLElement>(".wpg-scroll") ?? document.querySelector<HTMLElement>(".wpg-scroll")!;
+  const panel = root.querySelector<HTMLElement>(".lt-panel");
+  if (!panel) return false;
+  sc.scrollTop += panel.getBoundingClientRect().top - sc.getBoundingClientRect().top + by;
+  return true;
+}, by);
+
+/* lock 11 · the A–Z rail */
+test("CL14-12 · rail", async ({ page }) => {
+  const L = new Ledger("cl14-12");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const railShown = () => page.evaluate(() => { const r = document.querySelector<HTMLElement>('[data-cl14="rail"]'); return r ? { show: r.classList.contains("show"), op: getComputedStyle(r).opacity, w: r.getBoundingClientRect().width } : null; });
+    const top = await railShown();
+    L.check("CL14-12 hidden at the top of the page", w, !!top && !top.show && top.op === "0", JSON.stringify(top));
+    await scrollList(page, 200);
+    await page.waitForTimeout(400);
+    const inGroups = await railShown();
+    L.check("CL14-12 visible inside the letter groups, 26 wide", w, !!inGroups && inGroups.show && inGroups.op === "1" && near(inGroups.w, 26, 0.5), JSON.stringify(inGroups));
+    const m = page.locator('[data-cl14="rail"] [data-azl="M"]');
+    const mOn = (await m.count()) && !(await m.isDisabled());
+    L.check("CL14-12 population: M has agents on this account", w, !!mOn, "");
+    if (mOn) {
+      await m.click();
+      await page.waitForTimeout(500);
+      const land = await page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+        const d = root.querySelector<HTMLElement>('[data-clv="band"][data-letter="M"]'), lbl = root.querySelector<HTMLElement>(".lt-labels");
+        return d && lbl ? { gap: d.getBoundingClientRect().top - lbl.getBoundingClientRect().bottom, on: !!document.querySelector('[data-cl14="rail"] [data-azl="M"].on') } : null;
+      });
+      L.check("CL14-12 clicking M brings M's divider within 50px of the stuck labels", w, !!land && land.gap >= -1 && land.gap <= 50, JSON.stringify(land));
+      L.check("CL14-12 …and M is the rail's current letter (filled ink)", w, !!land && land.on, JSON.stringify(land));
+    }
+    /* under any other grouping the rail does not show */
+    await v14(page, '[data-cl13-ctl="banner"] [data-lp="group"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await pickGroup(page, "status");
+    await scrollList(page, 200);
+    await page.waitForTimeout(400);
+    const other = await railShown();
+    L.check("CL14-12 hidden under any grouping but Letter", w, !!other && !other.show, JSON.stringify(other));
+    await checkOverflow(page, L, w);
+  }
+  L.done(14);
+});
+
+/* lock 12 · keyboard rows */
+test("CL14-13 · keyboard", async ({ page }) => {
+  const L = new Ledger("cl14-13");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const ring = () => page.evaluate(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')];
+      const i = rows.findIndex((x) => x.classList.contains("kf"));
+      const tray = i >= 0 ? getComputedStyle(rows[i].querySelector(".clv-rtray")!).opacity : null;
+      return { i, n: rows.filter((x) => x.classList.contains("kf")).length, tray };
+    });
+    await scrollList(page, 0);
+    await page.mouse.move(5, 5);
+    await page.keyboard.press("j");
+    await page.waitForTimeout(150);
+    const a = await ring();
+    await page.keyboard.press("j");
+    await page.waitForTimeout(150);
+    const b = await ring();
+    L.check("CL14-13 J puts the ring on the first row, then moves it down one", w, a.i === 0 && b.i === 1 && b.n === 1, `${JSON.stringify(a)} → ${JSON.stringify(b)}`);
+    L.check("CL14-13 the ringed row's tray shows", w, b.tray === "1", `${b.tray}`);
+    await page.keyboard.press("k");
+    await page.waitForTimeout(150);
+    L.check("CL14-13 K moves it back up", w, (await ring()).i === 0, "");
+    /* L starts that row's action: the first row's tray step opens the query drawer */
+    const kfBefore = await ring();
+    await page.keyboard.press("l");
+    /* polled, never a strict-mode waitFor: count the open drawers */
+    const opened = await page.waitForFunction(() => document.querySelectorAll(".qad-root.is-open").length > 0, null, { timeout: 4000 }).then(() => true).catch(() => false);
+    L.check("CL14-13 L starts that row's next action (the drawer opens)", w, opened, `ring ${JSON.stringify(kfBefore)} active ${await page.evaluate(() => document.activeElement?.tagName)}`);
+    if (opened) {
+      /* an untouched drawer: Escape cancels it outright (decision 8 — no answers, nothing to park) */
+      await page.keyboard.press("Escape");
+      await page.waitForFunction(() => document.querySelectorAll(".qad-root.is-open").length === 0, null, { timeout: 4000 }).catch(() => {});
+      await page.waitForTimeout(300);
+    }
+    /* Esc lets go */
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(150);
+    L.check("CL14-13 Esc lets go", w, (await ring()).n === 0, "");
+    /* neither works while typing in Find */
+    const find = v14(page, '[data-cl13-find="banner"] input');
+    await find.click();
+    await page.keyboard.press("j");
+    await page.waitForTimeout(150);
+    const typed = { ring: (await ring()).n, value: await find.inputValue() };
+    await page.keyboard.press("l");
+    await page.waitForTimeout(300);
+    L.check("CL14-13 J and L stand down while typing in Find (they type)", w,
+      typed.ring === 0 && (await find.inputValue()) === "jl" && (await page.locator(".qad-root.is-open").count()) === 0, JSON.stringify(typed));
+    await find.fill("");
+    await checkOverflow(page, L, w);
+  }
+  L.done(14);
+});
+
+/* lock 13 · the helpful dead end */
+test("CL14-14 · dead end", async ({ page }) => {
+  const L = new Ledger("cl14-14");
+  for (const vp of WIDTHS14) {
+    await openContacts(page, vp);
+    const w = `${vp.width}`;
+    const setEmpty = async () => {
+      await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(200);
+      if ((await v14(page, '[data-cl14-dd="more"]').count()) > 0) {
+        await v14(page, '[data-cl14-dd="more"]').click();
+        await page.locator('[data-lpop="more"] [data-opt="more:action"]').click({ timeout: 3000 }).catch(() => {});
+        await page.keyboard.press("Escape");
+      } else {
+        await v14(page, '[data-cl14-chip="action"]').click();
+      }
+      await v14(page, '[data-cl14-dd="queried"]').click();
+      await page.locator('[data-lpop="queried"] [data-opt="queried:no"]').click({ timeout: 3000 }).catch(() => {});
+      await page.waitForTimeout(500);
+    };
+    await setEmpty();
+    const dead = await page.evaluate(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const n = root.querySelector<HTMLElement>('[data-cl13="none"]');
+      return n ? { text: n.querySelector("b")?.textContent, lead: n.querySelector("span")?.textContent,
+        drops: [...n.querySelectorAll<HTMLElement>("[data-cl14-drop]")].map((b) => ({ key: b.getAttribute("data-cl14-drop")!, n: Number(b.getAttribute("data-n")), label: b.textContent })),
+        clear: !!n.querySelector('[data-cl13="none-clear"]') } : null;
+    });
+    L.check("CL14-14 the dead end says so, and offers drops", w,
+      !!dead && dead.text === "No agents match all of these." && dead.lead === "Drop one filter to see some again:" && dead.drops.length >= 1 && dead.drops.length <= 4 && dead.clear, JSON.stringify(dead));
+    L.check("CL14-14 the drops are ordered most first", w, !!dead && dead.drops.every((d, i, a) => i === 0 || a[i - 1].n >= d.n), JSON.stringify(dead?.drops));
+    for (const d of dead?.drops ?? []) {
+      await v14(page, `[data-cl14-drop="${d.key}"]`).click();
+      await page.waitForTimeout(600);
+      const rows = await rowCount(page);
+      L.check(`CL14-14 "${d.label}": its number is what the drop returns`, w, rows === d.n, `rows ${rows} vs ${d.n}`);
+      await v14(page, '[data-cl14="clear-all"]').click({ timeout: 3000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      await setEmpty();
+    }
+    await v14(page, '[data-cl13="none-clear"]').click({ timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    await checkOverflow(page, L, w);
+  }
+  L.done(8);
+});
+
+/* lock 14 · reduced motion: no marquee, no reflow, no count animation — and each IS there without it */
+test("CL14-15 · reduced motion", async ({ page }) => {
+  const L = new Ledger("cl14-15");
+  const probe = async (w: string, rm: boolean) => {
+    await page.emulateMedia({ reducedMotion: rm ? "reduce" : "no-preference" });
+    await openContacts(page, { width: 1512, height: 900 }, { motion: true });
+    const tag = rm ? "reduced" : "full";
+    /* the count and the reflow: toggle a filter and read inside the first ~120ms */
+    await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await page.waitForTimeout(300);
+    const total = await rowCount(page);
+    await v14(page, '[data-cl14-chip="always"]').click();
+    const early = await page.evaluate(() => new Promise<{ ticking: boolean; shown: string; anims: number }>((res) => setTimeout(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const shown = root.querySelector<HTMLElement>('[data-cl14="shown"]');
+      const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')].slice(0, 14);
+      res({ ticking: !!root.querySelector(".cl14-ticking"), shown: shown?.textContent ?? "", anims: rows.reduce((n, r) => n + r.getAnimations().length, 0) });
+    }, 90)));
+    const final = String(await rowCount(page));
+    if (rm) {
+      L.check(`CL14-15 ${tag}: the count lands at once, no ticking`, w, !early.ticking && early.shown === final, `${JSON.stringify(early)} final ${final}`);
+      L.check(`CL14-15 ${tag}: no reflow animation on the rows`, w, early.anims === 0, `${early.anims}`);
+    } else {
+      L.check(`CL14-15 ${tag}: the count animates (ticking, mid-way)`, w, early.ticking && early.shown !== final, `${JSON.stringify(early)} final ${final} of ${total}`);
+      L.check(`CL14-15 ${tag}: the rows reflow`, w, early.anims > 0, `${early.anims}`);
+    }
+    await v14(page, '[data-cl14-chip="always"]').click();
+    await page.waitForTimeout(600);
+    /* the marquee */
+    const id = await page.evaluate(() => {
+      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const sp = root.querySelector<HTMLElement>('[data-clv="wish"] .clv-mq');
+      if (!sp) return null;
+      sp.textContent = "Literary suspense with a dark heart, slow-burn family secrets, unreliable narrators and coastal towns in winter, told with real restraint";
+      const row = sp.closest<HTMLElement>('[data-clv="row"]')!; row.scrollIntoView({ block: "center" });
+      return row.getAttribute("data-agent-card");
+    });
+    if (!id) { L.check(`CL14-15 ${tag}: population (a wishlist row)`, w, false, ""); return; }
+    await page.locator(`.aglist [data-agent-card="${id}"]`).filter({ visible: true }).first().hover();
+    await page.waitForTimeout(1600);
+    const x = await page.evaluate((id) => { const sp = document.querySelector<HTMLElement>(`[data-agent-card="${id}"] .clv-mq`); return sp ? new DOMMatrix(getComputedStyle(sp).transform).m41 : null; }, id);
+    L.check(`CL14-15 ${tag}: the marquee ${rm ? "stays still" : "runs"}`, w, rm ? x === 0 : x != null && x < -5, `${x}`);
+  };
+  await probe("1512", false);
+  await probe("1512", true);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  L.done(6);
+});

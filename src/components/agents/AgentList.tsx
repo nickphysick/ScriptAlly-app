@@ -55,7 +55,7 @@ import { CONTACT_BAND_DISC, CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
 import { PageHeader } from "../shell/PageHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactGroups, emptyContactFilters, facetCounts, genreTallies, heroFacts,
+  contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies, heroFacts,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
 import { ContactIndexStrip } from "./contact/ContactIndexStrip";
@@ -64,6 +64,8 @@ import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop } from "./contact/ContactListControls";
 import { ContactFilterStrip } from "./contact/ContactFilterStrip";
+import { ContactAzRail, ContactBarExtras, CountTo, useReflow } from "./contact/ContactTouches";
+import { escapeDepth } from "../../lib/escapeStack";
 import { YourAgentsBar } from "./contact/YourAgentsBar";
 import { usePopover } from "../shell/ListPills";
 import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
@@ -80,7 +82,8 @@ import { SubmissionStatus } from "../../types";
 import { ContactStrip } from "./contact/ContactStrip";
 import { stripFacts, fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
-import { cardQuery, cardRows, primaryFor, type CardAct } from "../../lib/agentCard";
+import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
+import { CANONICAL_GENRES } from "../../lib/genres";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 
@@ -164,7 +167,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
   const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
   /* v14 §5 — the row density (Phase 6 draws its toggle); remembered with the rest */
-  const [density] = useState<Density>(() => remembered?.density ?? "comfortable");
+  const [density, setDensity] = useState<Density>(() => remembered?.density ?? "comfortable");
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
   useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density }); }, [filters, search, groupKey, sortKey, reversed, density]);
@@ -283,6 +286,23 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
     [visibleFacts],
   );
+  /* §7.8 — the dead end's drops, only when the list is empty */
+  const drops = useMemo(
+    () => (visibleFacts.length > 0 ? [] : dropOptions(factsAll, filters, search, (x, q) => matchesAgentSearch(x.agent, q), (k) => CANONICAL_GENRES.find((g) => g.id === k)?.label ?? k)),
+    [visibleFacts.length, factsAll, filters, search],
+  );
+  /* §7.7 — the keyboard's focus ring: the rows in the order they are DRAWN (groups flattened) */
+  const [kfId, setKfId] = useState<string | null>(null);
+  const displayIds = useMemo(() => groups.flatMap((g) => g.ids), [groups]);
+  useEffect(() => { if (kfId && !displayIds.includes(kfId)) setKfId(null); }, [displayIds, kfId]);
+  /* §7.7 — what the row keys read, current on every render (the key handler is bound once). ⚠️ DECLARED HERE, above
+     every render-time reader (the trayFor assignment below), never beside the handler — the TDZ order rule. */
+  const rowKeys = useRef({ kfId, displayIds, factsById, trayFor: null as null | ((x: AgentFacts) => CardPrimary), onOpen: null as null | ((id: string, r?: DOMRect) => void), act: null as null | ((id: string, a: CardAct) => void) });
+  rowKeys.current = { ...rowKeys.current, kfId, displayIds, factsById };
+  /* §7.2 — the gentle reflow, on any filter, group, sort or Find change (never on first load) */
+  useReflow(gridRef, JSON.stringify([filters, groupKey, sortKey, reversed, search.trim()]));
+  /* §7.4 — the A–Z rail's letters: the dividers the list draws */
+  const railLetters = useMemo(() => new Set(groupKey === "letter" ? groups.map((g) => g.label) : []), [groups, groupKey]);
   const shownGroups = groups;
   const visible = visibleFacts;
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, []);
@@ -296,6 +316,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       sortKey={sortKey} reversed={reversed} onSort={setSortKey} onReverse={() => setReversed((r) => !r)}
       pop={pop}
       findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>}
+      /* §7.6–7.7 — Comfortable / Compact and the key sheet, at the controls row's right */
+      extra={<ContactBarExtras density={density} onDensity={setDensity} />}
     />
   );
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
@@ -516,6 +538,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [agents, scoped, qcRows, openCard]);
   /** v13 §6 — a row's hover tray offers the card's own next step (one derivation: the card's button) */
   const trayFor = useCallback((x: AgentFacts) => primaryFor(x, cardQuery(cardRows(qcRows, x.agent.id, scoped?.id ?? null))), [qcRows, scoped]);
+  rowKeys.current = { ...rowKeys.current, trayFor, onOpen: (id, r) => onOpen(id, r), act: actWithoutCard };
 
   /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
      dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
@@ -705,16 +728,52 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      or a popover is open, and only while this is the page on screen. */
   const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false });
   hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0 };
+
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const hk = matchesShortcut(SHORTCUTS.contactsHk, e);
       const find = matchesShortcut(SHORTCUTS.contactsFind, e);
-      if (!hk && !find) return;
+      const down = matchesShortcut(SHORTCUTS.contactsDown, e), up = matchesShortcut(SHORTCUTS.contactsUp, e);
+      const openK = matchesShortcut(SHORTCUTS.contactsOpen, e), actK = matchesShortcut(SHORTCUTS.contactsAct, e);
+      const letGo = matchesShortcut(SHORTCUTS.contactsLetGo, e);
+      if (!hk && !find && !down && !up && !openK && !actK && !letGo) return;
       const k = hkKeyState.current;
       if (!k.active || k.hkOpen || k.popOpen || k.cardOpen || !k.enabled) return;
       if (isEditableTarget(e.target)) return;
-      /* the query drawer over the page owns the keyboard while it is open */
-      if (document.querySelector(".qad-root.is-open")) return;
+      /* the query drawer over the page owns the keyboard while it is open — and so does any card, drawer or
+         popover anywhere (each pushes a layer on the one escape stack) */
+      if (document.querySelector(".qad-root.is-open") || escapeDepth() > 0) return;
+      /* §7.7 — the row keys: J K / ↑ ↓ move the ring (scrolling to keep it in view, its tray showing), Enter opens
+         the card, L starts the next action, Esc lets go. Enter, L and Esc act only while a ring is held, and Enter
+         only from the page itself — a focused control answers its own Enter. */
+      if (down || up || openK || actK || letGo) {
+        const r = rowKeys.current;
+        if ((openK || actK || letGo) && !r.kfId) return;
+        if (openK && e.target instanceof HTMLElement && e.target.closest("button, a, [role='button']") && !e.target.closest('[data-clv="row"]')) return;
+        e.preventDefault();
+        if (letGo) { setKfId(null); return; }
+        const id = r.kfId;
+        if (down || up) {
+          const ids = r.displayIds;
+          if (!ids.length) return;
+          const i = id ? ids.indexOf(id) : -1;
+          const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + (down ? 1 : -1)))];
+          setKfId(next);
+          requestAnimationFrame(() => {
+            const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
+            row?.scrollIntoView({ block: "nearest", behavior: "auto" });
+          });
+          return;
+        }
+        const row = id ? [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${id}"]`)].find((x) => x.getBoundingClientRect().height > 0) : null;
+        if (openK && id) { r.onOpen?.(id, row?.getBoundingClientRect()); return; }
+        if (actK && id) {
+          const x = r.factsById.get(id);
+          const tray = x && r.trayFor ? r.trayFor(x) : null;
+          if (tray && !tray.ghost) r.act?.(id, tray.act);
+        }
+        return;
+      }
       e.preventDefault();
       if (hk) { setHkOpen(true); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
@@ -870,6 +929,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onWishlistChanged={(id) => openAgentCard(id, { tab: "want", focus: "wishlist", from: "hk", sequence })}
           />
         )}
+        {/* §7.4 — the A–Z rail (portalled; gated on this page being on screen) */}
+        {showList && <ContactAzRail active={active} byLetter={groupKey === "letter"} listRef={mainColRef} letters={railLetters} />}
         {showList && active && guideCorner && tabH > 0 && (
           <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
             dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
@@ -946,6 +1007,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onYou={() => setPillSet(youOn ? null : "you")} onReady={() => setPillSet(readyOn ? null : "ready")}
             art={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }}
             controls={controls}
+            /* §7.1 — the live count */
+            shownNode={<CountTo value={visibleFacts.length} />}
           />
           {/* v14 §4 — the filter strip: on one line, folding into "More filters" when it would wrap */}
           <div className="cl14-frow" data-cl14="frow">
@@ -965,9 +1028,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             default selector, so a filter change still animates the reflow. */}
         <div ref={gridRef}>
           {visible.length === 0 ? (
-            <div className="agl-empty" data-cl13="none">
-              <div className="big">No agents match these filters.</div>
-              <div className="small">Loosen the filter, or clear the search. <button type="button" className="cl13-none-clr" data-cl13="none-clear" onClick={clearFilters}>Clear filters</button></div>
+            /* §7.8 — THE HELPFUL DEAD END: each active control offered as one drop, with how many it brings back */
+            <div className="cl14-none" data-cl13="none" role="status">
+              <b>No agents match all of these.</b>
+              <span>{drops.length ? "Drop one filter to see some again:" : "Even dropping one filter leaves nobody. Try clearing them."}</span>
+              {drops.length > 0 && (
+                <span className="cl14-lz" data-cl14="drops">
+                  {drops.map((d) => (
+                    <button key={d.key} type="button" data-cl14-drop={d.key} data-n={d.n} onClick={() => { if (d.clearsSearch) setSearch(""); else setFilters(d.drop(filters)); }}>
+                      Drop <em>{d.label}</em><small>{d.n} {d.n === 1 ? "agent" : "agents"}</small>
+                    </button>
+                  ))}
+                </span>
+              )}
+              <button type="button" className="cl14-lzc" data-cl13="none-clear" onClick={clearFilters}>Clear all filters</button>
             </div>
           ) : (
             <ContactRows
@@ -982,6 +1056,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               byLetter={groupKey === "letter"}
               /* §6: the sortable column labels drive the page's own sort */
               sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
+              /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */
+              focusId={kfId}
+              highlight={search.trim()}
+              compact={density === "compact"}
               openId={openId}
               newId={newId}
               onOpen={onOpen}
