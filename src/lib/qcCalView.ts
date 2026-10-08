@@ -416,7 +416,7 @@ export function attentionCounts(rows: readonly QcRow[], nowMs: number): Record<A
  * says "the grouping rule is the Birds-eye view's", which contradicts them. They are genuinely
  * different partitions: a with-you query whose date has gone is `overdue` to the expanded view and
  * *Your move* here, and an agent's-turn query sixty days into a sixteen-week window is `watch`
- * there and *Waiting on agents* here. The reference is the oracle, so these three win — and the
+ * there and *Waiting on agents* here (v132: *Waiting*, and *Gone quiet* is *Past the date*). The reference is the oracle, so these three win — and the
  * two senses of the word now differ on two surfaces, which is Nick's to settle, because unifying
  * them means editing the expanded view.
  *
@@ -429,17 +429,21 @@ export function attentionCounts(rows: readonly QcRow[], nowMs: number): Record<A
  * it draws, and "Closed" is the honest home for both.
  *
  * ⚠️ KNOWN IMPRECISION, STATED RATHER THAN ENGINEERED AROUND: an agent's-turn query whose agency
- * states no reply window has no expected date, so it is not `pastExpected` and lands in *Waiting on
- * agents* — where the group's NAME is true of it and the gloss "inside their reply window"
- * slightly overclaims, there being no window. A fourth live group would be inventing one the
+ * states no reply window has no expected date, so it is not `pastExpected` and lands in *Waiting*
+ * (v132's name for *Waiting on agents*) — where the group's NAME is true of it and the gloss "with
+ * agents, not yet due" slightly overclaims, there being no date. A fourth live group would be inventing one the
  * reference does not have.
  */
 export type UrgencyKey = "you" | "waiting" | "quiet" | "closed";
+/**
+ * v132 §3 — RELABELLED AND REORDERED, KEYS AND PREDICATE UNCHANGED: "Gone quiet" is "Past the date" and
+ * comes second, "Waiting on agents" is "Waiting". The band shows the hint in mono caps.
+ */
 export const URGENCY_GROUPS: readonly { key: UrgencyKey; label: string; hint: string }[] = [
-  { key: "you", label: "Your move", hint: "the ball is with you" },
-  { key: "waiting", label: "Waiting on agents", hint: "inside their reply window" },
-  { key: "quiet", label: "Gone quiet", hint: "past the window, no word" },
-  { key: "closed", label: "Closed", hint: "nothing more to do" },
+  { key: "you", label: "Your move", hint: "offers and requests" },
+  { key: "quiet", label: "Past the date", hint: "replies overdue" },
+  { key: "waiting", label: "Waiting", hint: "with agents, not yet due" },
+  { key: "closed", label: "Closed", hint: "passed or no response" },
 ];
 export function urgencyGroup(r: QcRow): UrgencyKey {
   const c = tileCourt(r.status);

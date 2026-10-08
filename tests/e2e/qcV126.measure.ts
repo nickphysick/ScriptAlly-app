@@ -565,7 +565,9 @@ test("QC126-20 · one door", async ({ page }) => {
   const closeAll = async () => { for (let i = 0; i < 4; i++) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); } };
   await openQc(page, AT_1512);
   /* the card's footer button */
-  await page.locator('[data-qcv="row"]').first().click({ timeout: 8000 });
+  /* v132 — RE-POINTED: a row's centre is now its "What you sent" cell, whose "+ Add" opens the edit
+     drawer; the row is opened from the agent's name, which is what a reader clicks */
+  await page.locator('[data-qcv="row"] [data-qcv="row-agent"]').first().click({ timeout: 8000 });
   await page.waitForTimeout(500);
   await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): the card's primary door; `.qcv-open-actions` named no element */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);

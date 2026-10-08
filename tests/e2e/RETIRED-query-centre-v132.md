@@ -35,3 +35,29 @@ Nothing retired: every case that read the old head still asserts its claim, thro
 - `qcV96` QC4: reaches the grouping through `ws-head` / `ws-group`, and its no-truncation sweep covers the head's title, controls, pills and chips.
 
 Deleted with the old head: `QcSentence`'s `section` variant (desktop only, no caller once the workspace head replaced it), `QcSectionHead` (its only caller), and their `.qc13-sh*`, `.qc13-ctl`, `.qc13-link`, `.qc13-qs` and `.qc13-art--section` rules.
+
+## Phase 3 — bands, rows, "What you sent", popups
+
+Retired (`retiredV132`):
+
+| Case | What it asserted | Superseded by |
+|---|---|---|
+| `qcV131` QC9 | v131's absences: no blush tray, no anthracite band, no perched hawk, no banner headline | QC132 W1, W4 |
+| `qcV131` QC10 | the label row inside each group, its text on each row's main text | QC132 W5 |
+| `qcV131` QC11 | a group header and its own label row sticking at the scroller's top | QC132 W5 (one label row for the panel) |
+| `qcV131` QC12 | the urgency chips in "Coming up" | `src/lib/qcRowLines.test.ts` (nextLine), QC132 W4–W8 |
+| `qcV131` QC13 | no YOUR MOVE tag inside the Your move group | the brief §3 stamps every with-you row |
+| `qcV131` QC14 | the section and group spot-art slots | QC132 W4 (bands carry fixed line icons; QcArtSlot deleted) |
+| `qcV131` QC16 | the v131 list's loading frames | QC132 W10 (Phase 4) |
+| `qcV96` QC8 | a chip, the icons or Add as alternatives | QC132 W6 (a slot and four tiles on every row) |
+
+Re-pointed, claims intact:
+
+- `qcV131` and `qcV1311` openers wait for `.qcw-list [data-qcv="row"]` (was `.qc13-list`); QC8 counts rows there.
+- `qcV96` QC6: the tray centres on the Next move CELL, which now holds the phrase and its dated line.
+- `qcV96` QC12: a closed row's tray is Edit alone (§3); the case measures closed rows as their own kind, 1–3 controls.
+- `qcV126` QC126-20: opens a row from the agent's name — a row's centre is its "What you sent" cell, whose "+ Add" opens the edit drawer.
+
+Unit: `qcList.test.tsx`'s v131 skeleton case is rewritten for `QcList132Skeleton`.
+
+Mutations in `inkLib.ts` named `qc10-indent`, `qc11-static`, `qc12-margin`, `qc14-hard`, `qc16-tall` target classes deleted in this phase; their locks are retired, and the entries stay only as history.

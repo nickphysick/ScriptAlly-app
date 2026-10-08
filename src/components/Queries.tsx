@@ -131,6 +131,7 @@ const QC_GUIDE: readonly GuideStep[] = [
 ];
 import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
+import { QcList132, QcList132Skeleton } from "./queries/centre/QcList132";
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
@@ -2329,6 +2330,8 @@ export const Queries: React.FC<{
    * view's placement effect once already.
    */
   const qcPackageName = useCallback((id: string) => packages.find((pk) => pk.id === id)?.packageName ?? null, [packages]);
+  /* v132 §3 — the stored package a send names, so its tiles can light from the edition that went */
+  const qcPackageOf = useCallback((id: string) => packages.find((pk) => pk.id === id) ?? null, [packages]);
   const qcBoardCards = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     const { cols } = assembleBoardColumns({
@@ -6767,7 +6770,7 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                <QcListSkeleton v131={qcDesk} />
+                qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6786,10 +6789,37 @@ export const Queries: React.FC<{
                   <button type="button" onClick={clearQcFilter}>Show all queries</button>
                 </p>
               ) : (
-                <QcList
-                  v131={qcDesk}
+                qcDesk ? (
+                <QcList132
+                  groupBy={qcGroup}
+                  /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */
+                  onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
+                  packageOf={qcPackageOf}
+                  density={qcDensity}
                   sort={qcSort}
                   onSort={setQcSort}
+                  /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
+                     sort applies WITHIN each group for free (§2). A grouping that re-ordered would
+                     be a second ordering pass disagreeing with the sort control. */
+                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
+                  selectedId={selectedQueryId} onOpen={(id) => { cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
+                  coming={qcComing}
+                  /* ⚠️ THE TRAY'S PRIMARY IS THE PAGE'S OWN ACTION ENGINE, never a second write
+                     path: it opens the query and offers its verb, exactly as pressing the row and
+                     then the card's primary does. Nothing in the tray is destructive in one click —
+                     `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
+                  /* v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER in the journey its bucket names
+                     (`trayRequest`); nothing here opens its own modal for an action any more. */
+                  onAct={(id, bucket) => {
+                    const r = qcById.get(id);
+                    const req = r ? trayRequest(bucket, r.status, id) : null;
+                    if (req) openQueryDrawer(req); else onOpenQuery?.(id);
+                  }}
+                  /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
+                  onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
+                  onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                ) : (
+                <QcList
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
                      sort applies WITHIN each group for free (§2). A grouping that re-ordered would
                      be a second ordering pass disagreeing with the sort control. */
@@ -6811,6 +6841,7 @@ export const Queries: React.FC<{
                   /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
                   onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
                   onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                )
               )
             }
           />

@@ -137,6 +137,10 @@ test.describe("Query Centre v132 — Your queries", () => {
           face: getComputedStyle(title).fontFamily, size: getComputedStyle(title).fontSize, text: title.innerText.trim(),
           x: Number(sh.dataset.x), y: Number(sh.dataset.y), rows: document.querySelectorAll('[data-qcv="row"]').length,
           titleLeft: title.getBoundingClientRect().left - b.left,
+          /* the panel against the page's content (the desk): 20px wider on each side */
+          panel: (() => { const p = bar.closest<HTMLElement>('[data-ws="true"]')?.getBoundingClientRect(), d = q("courts")?.getBoundingClientRect(); return p && d ? { l: d.left - p.left, r: p.right - d.right } : null; })(),
+          /* the hawk is clipped if any ancestor up to the scroller clips and does not contain its box */
+          clippedBy: (() => { for (let a = hawk.parentElement; a && !a.matches(".wpg-scroll"); a = a.parentElement) { const cs = getComputedStyle(a); if (cs.overflowY !== "visible" || cs.overflowX !== "visible") { const r = a.getBoundingClientRect(); if (h.top < r.top - 0.5 || h.left < r.left - 0.5) return a.className || a.tagName; } } return null; })(),
         };
       });
       expect(r, `${w}: the bar's parts`).toBeTruthy();
@@ -146,6 +150,9 @@ test.describe("Query Centre v132 — Your queries", () => {
       expect(r!.loaded, `${w}: the hawk's image loaded`).toBe(true);
       expect(near(r!.hawkLeft, 8) && near(r!.hawkTop, -74), `${w}: the hawk at 8/-74, got ${r!.hawkLeft}/${r!.hawkTop}`).toBe(true);
       expect(r!.hawkAbove, `${w}: the hawk breaks the bar's top`).toBe(true);
+      expect(r!.clippedBy, `${w}: the hawk is clipped by ${r!.clippedBy}`).toBeNull();
+      expect(r!.panel, `${w}: the panel and the desk measured`).toBeTruthy();
+      expect(near(r!.panel!.l, 20) && near(r!.panel!.r, 20), `${w}: the panel steps ${r!.panel!.l} / ${r!.panel!.r} into the margins`).toBe(true);
       expect(near(r!.titleLeft, 236), `${w}: the title starts 236 in, got ${r!.titleLeft}`).toBe(true);
       expect(r!.face, `${w}: the title is the typewriter`).toMatch(/Special Elite/);
       expect(r!.size, `${w}: 32px`).toBe("32px");
@@ -223,6 +230,183 @@ test.describe("Query Centre v132 — Your queries", () => {
       await expect(page.locator('[data-qcv="find"] input'), `${w}: and empties Find`).toHaveValue("");
       expect((await shownIds(page)).length, `${w}: and returns every row`).toBe(total);
       await expect(page.locator('[data-qcv="ws-clear"]'), `${w}: Clear all goes when nothing is on`).toHaveCount(0);
+    }
+  });
+});
+
+/* ── Phase 3 · the list ───────────────────────────────────────────────────────────────────────────── */
+const URG = [
+  { key: "you", label: "Your move", hint: "offers and requests", bg: "rgb(246, 226, 216)" },
+  { key: "quiet", label: "Past the date", hint: "replies overdue", bg: "rgb(226, 231, 239)" },
+  { key: "waiting", label: "Waiting", hint: "with agents, not yet due", bg: "rgb(226, 231, 239)" },
+  { key: "closed", label: "Closed", hint: "passed or no response", bg: "rgb(236, 232, 227)" },
+];
+async function groupBy(page: Page, label: RegExp) {
+  await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+  await page.waitForTimeout(200);
+  await page.locator('[data-qcv="ws-group"]').click();
+  await page.waitForTimeout(250);
+  await page.getByRole("menuitemradio", { name: label }).first().click();
+  await page.waitForTimeout(500);
+}
+
+test.describe("Query Centre v132 — the list", () => {
+  test("W4 · urgency bands: the table's order, labels and grounds, 54 tall, and a band folds its rows", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      await groupBy(page, /^Urgency$/);
+      const bands = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="gband"]')].map((b) => ({
+        key: b.dataset.group!, label: b.querySelector('[data-qcv="gband-t"]')?.textContent?.trim() ?? "",
+        hint: b.querySelector('[data-qcv="gband-h"]')?.textContent?.trim() ?? "", h: b.getBoundingClientRect().height, bg: getComputedStyle(b).backgroundColor,
+      })));
+      expect(bands.length, `${w}: bands drawn`).toBeGreaterThanOrEqual(3);
+      const order = URG.filter((u) => bands.some((b) => b.key === u.key)).map((u) => u.key);
+      expect(bands.map((b) => b.key), `${w}: the order is you · quiet · waiting · closed`).toEqual(order);
+      for (const b of bands) {
+        const u = URG.find((x) => x.key === b.key)!;
+        expect(b.label, `${w}: ${b.key}'s label`).toBe(u.label);
+        expect(b.hint.toLowerCase(), `${w}: ${b.key}'s hint`).toBe(u.hint);
+        expect(near(b.h, 54), `${w}: ${b.key} is ${b.h} tall`).toBe(true);
+        expect(b.bg, `${w}: ${b.key}'s ground`).toBe(u.bg);
+      }
+      const first = bands[0].key;
+      const rowsIn = () => page.evaluate((k) => document.querySelectorAll(`[data-qcv="grp"][data-group="${k}"] [data-qcv="row"]`).length, first);
+      const before = await rowsIn();
+      expect(before, `${w}: the first band has rows`).toBeGreaterThan(0);
+      await page.locator(`[data-qcv="gband"][data-group="${first}"]`).click();
+      await page.waitForTimeout(200);
+      expect(await rowsIn(), `${w}: clicking the band folds its rows`).toBe(0);
+      await page.locator(`[data-qcv="gband"][data-group="${first}"]`).click();
+      await page.waitForTimeout(200);
+      expect(await rowsIn(), `${w}: and again unfolds them`).toBe(before);
+    }
+  });
+
+  test("W5 · one grid: labels and cells share x-edges, the last two columns are 284, the labels lift only while stuck", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const g = await page.evaluate(() => {
+        const labs = [...document.querySelectorAll<HTMLElement>('.qcw-list [data-lt="labels"] > *')].map((e) => e.getBoundingClientRect());
+        const row = document.querySelector<HTMLElement>('.qcw-list [data-qcv="row"]')!;
+        const cells = [...row.children].filter((c) => !(c as HTMLElement).matches('[data-qcv="row-tray"]')).map((c) => c.getBoundingClientRect());
+        return { labs: labs.map((r) => ({ l: r.left, r: r.right, w: r.width })), cells: cells.map((r) => ({ l: r.left, r: r.right, w: r.width })) };
+      });
+      expect(g.labs.length, `${w}: four labels`).toBe(4);
+      expect(g.cells.length, `${w}: four cells`).toBe(4);
+      g.labs.forEach((l, i) => {
+        expect(near(l.l, g.cells[i].l), `${w}: column ${i} starts at ${l.l} / ${g.cells[i].l}`).toBe(true);
+        expect(near(l.r, g.cells[i].r), `${w}: column ${i} ends at ${l.r} / ${g.cells[i].r}`).toBe(true);
+      });
+      expect(near(g.cells[2].w, 284) && near(g.cells[3].w, 284), `${w}: sent ${g.cells[2].w}, next ${g.cells[3].w}`).toBe(true);
+      const shadow = () => page.evaluate(() => { const l = document.querySelector<HTMLElement>('.qcw-list [data-lt="labels"]')!; return { stuck: l.classList.contains("is-stuck"), sh: getComputedStyle(l).boxShadow, top: l.getBoundingClientRect().top, sc: l.closest(".wpg-scroll")!.getBoundingClientRect().top }; });
+      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+      await page.waitForTimeout(300);
+      const rest = await shadow();
+      expect(rest.stuck, `${w}: not stuck at rest`).toBe(false);
+      expect(rest.sh, `${w}: no shadow at rest`).toBe("none");
+      await page.locator('.qcw-list [data-qcv="row"]').nth(6).evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(400);
+      const pinned = await shadow();
+      expect(near(pinned.top, pinned.sc, 1.5), `${w}: the labels pinned at the scroller's top (${pinned.top} / ${pinned.sc})`).toBe(true);
+      expect(pinned.stuck, `${w}: stuck once pinned`).toBe(true);
+      expect(pinned.sh, `${w}: the lift shadow while stuck`).not.toBe("none");
+    }
+  });
+
+  test("W6 · what you sent: a 112 slot, the first tile on one line down the list, three branches, no title", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const c = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="sent"]')].map((s) => {
+        const slot = s.children[0] as HTMLElement, tiles = [...s.querySelectorAll<HTMLElement>('[data-qcv="sent-tile"]')];
+        return {
+          kind: s.dataset.slot!, known: s.dataset.known === "true", slotW: slot.getBoundingClientRect().width, tile0: tiles[0]?.getBoundingClientRect().left ?? NaN,
+          states: tiles.map((t) => t.dataset.state!), titles: s.querySelectorAll("[title]").length, chip: slot.textContent?.trim() ?? "",
+        };
+      }));
+      expect(c.length, `${w}: cells drawn`).toBeGreaterThan(10);
+      const tally: Record<string, number> = {};
+      for (const x of c) tally[x.kind] = (tally[x.kind] ?? 0) + 1;
+      expect(tally.package ?? 0, `${w}: a package send is on the page (${JSON.stringify(tally)})`).toBeGreaterThan(0);
+      const knownPkgs = c.filter((x) => x.kind === "package" && x.known).length;
+      expect(knownPkgs, `${w}: a package send whose edition is on file`).toBeGreaterThan(0);
+      tally.packageUnknown = c.filter((x) => x.kind === "package" && !x.known).length;
+      expect(tally.add ?? 0, `${w}: an unrecorded send is on the page (${JSON.stringify(tally)})`).toBeGreaterThan(0);
+      for (const x of c) expect(Math.abs(x.slotW - 112), `${w}: a ${x.kind} slot is ${x.slotW} wide`).toBeLessThanOrEqual(0.5);
+      const x0 = c[0].tile0;
+      for (const x of c) expect(Math.abs(x.tile0 - x0), `${w}: the first tile at ${x.tile0} against ${x0}`).toBeLessThanOrEqual(0.5);
+      for (const x of c) {
+        expect(x.titles, `${w}: no native title in a cell`).toBe(0);
+        expect(x.states.length).toBe(4);
+        if (x.kind === "add") expect(x.states.every((s) => s === "unrecorded"), `${w}: + Add lights nothing`).toBe(true);
+        /* a package whose edition is on file lights its contents; one no longer on file says Not recorded */
+        if (x.kind === "package" && x.known) expect(x.states.some((s) => s === "sent"), `${w}: a package lights its contents`).toBe(true);
+        if (x.kind === "package" && !x.known) expect(x.states.every((s) => s === "unrecorded"), `${w}: an unknown package claims nothing`).toBe(true);
+        if (x.kind === "empty") expect(x.chip, `${w}: an individual send's slot is empty`).toBe("");
+      }
+      console.log(`[W6] ${w}: ${JSON.stringify(tally)}`);
+    }
+  });
+
+  test("W7 · popups: hover and focus show the title and line within 200ms, 10 above, inside the window; Esc and scroll hide", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+      await page.waitForTimeout(300);
+      const targets = ['[data-qcv="row-pkg"]', '[data-qcv="row-add"]', '[data-qcv="sent-tile"][data-state="sent"]', '[data-qcv="sent-tile"][data-state="not"]', '[data-qcv="sent-tile"][data-state="unrecorded"]'];
+      let checked = 0;
+      for (const sel of targets) {
+        const t = page.locator(`.qcw-list ${sel}`).first();
+        if (!(await t.count())) continue;
+        await t.scrollIntoViewIfNeeded();
+        const want = await t.evaluate((e) => ({ title: (e as HTMLElement).dataset.tip, line: (e as HTMLElement).dataset.tl, native: e.getAttribute("title") }));
+        expect(want.native, `${w} ${sel}: no native title`).toBeNull();
+        expect(want.title, `${w} ${sel}: the target carries its popup's title`).toBeTruthy();
+        for (const how of ["hover", "focus"] as const) {
+          await page.mouse.move(2, 2); await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+          const t0 = Date.now();
+          if (how === "hover") await t.hover(); else await t.focus();
+          await page.waitForFunction(() => !!document.querySelector('[data-qcv="tip"].on'), null, { timeout: 2000 });
+          const dt = Date.now() - t0;
+          const r = await page.evaluate((s) => {
+            const tip = document.querySelector<HTMLElement>('[data-qcv="tip"]')!, el = document.querySelector<HTMLElement>(`.qcw-list ${s}`)!;
+            const a = tip.getBoundingClientRect(), b = el.getBoundingClientRect();
+            return { title: tip.querySelector("b")!.textContent, line: tip.querySelector("span")!.textContent, gap: b.top - a.bottom, l: a.left, rr: a.right, t: a.top, vw: innerWidth, desc: el.getAttribute("aria-describedby") === tip.id };
+          }, sel);
+          expect(dt, `${w} ${sel} ${how}: shown in ${dt}ms`).toBeLessThanOrEqual(200 + 120);
+          expect(r.title, `${w} ${sel}: title`).toBe(want.title);
+          expect(r.line, `${w} ${sel}: line`).toBe(want.line);
+          expect(Math.abs(r.gap - 10), `${w} ${sel}: ${r.gap}px above`).toBeLessThanOrEqual(2);
+          expect(r.l >= 0 && r.rr <= r.vw && r.t >= 0, `${w} ${sel}: inside the window`).toBe(true);
+          expect(r.desc, `${w} ${sel}: tied by aria-describedby`).toBe(true);
+          checked++;
+        }
+        await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+        expect(await page.locator('[data-qcv="tip"].on').count(), `${w} ${sel}: Esc hides it`).toBe(0);
+      }
+      expect(checked, `${w}: targets checked`).toBeGreaterThanOrEqual(6);
+      /* scroll hides it */
+      const t = page.locator('.qcw-list [data-qcv="sent-tile"]').first();
+      await t.hover(); await page.waitForFunction(() => !!document.querySelector('[data-qcv="tip"].on'), null, { timeout: 2000 });
+      await page.mouse.wheel(0, 120); await page.waitForTimeout(250);
+      expect(await page.locator('[data-qcv="tip"].on').count(), `${w}: scrolling hides it`).toBe(0);
+    }
+  });
+
+  test("W8 · the tray on hover stays clear of the What-you-sent cell by 8px or more", async ({ page }) => {
+    for (const w of WIDTHS) {
+      await openQc(page, w);
+      const n = Math.min(12, await page.locator('.qcw-list [data-qcv="row"]').count());
+      let seen = 0;
+      for (let i = 0; i < n; i++) {
+        const row = page.locator('.qcw-list [data-qcv="row"]').nth(i);
+        if (!(await row.locator('[data-qcv="row-act"]').count())) continue;
+        await row.scrollIntoViewIfNeeded(); await row.hover(); await page.waitForTimeout(220);
+        const g = await row.evaluate((r) => ({ tray: r.querySelector('[data-qcv="row-tray"]')!.getBoundingClientRect().left, sent: r.querySelector('[data-qcv="row-sent"]')!.getBoundingClientRect().right, op: getComputedStyle(r.querySelector('[data-qcv="row-tray"]')!).opacity }));
+        expect(g.op, `${w} row ${i}: the tray shows`).toBe("1");
+        expect(g.tray - g.sent, `${w} row ${i}: tray ${g.tray} vs sent ${g.sent}`).toBeGreaterThanOrEqual(8);
+        seen++;
+      }
+      expect(seen, `${w}: rows with an action hovered`).toBeGreaterThan(2);
     }
   });
 });

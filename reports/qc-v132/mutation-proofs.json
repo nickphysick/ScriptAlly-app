@@ -36,16 +36,6 @@
   ]
  },
  {
-  "lock": "W1",
-  "mutation": "the bar painted white",
-  "red": true,
-  "reading": [
-   "Error: 1280: the bar is anthracite",
-   "Expected: \"rgb(42, 58, 82)\"",
-   "Received: \"rgb(255, 255, 255)\""
-  ]
- },
- {
   "lock": "W2",
   "mutation": "your move counts 'you' (offers excluded) instead of the desk's court",
   "red": true,
@@ -61,6 +51,64 @@
   "red": true,
   "reading": [
    "Error: 1280: Clear all leaves nothing pressed"
+  ]
+ },
+ {
+  "lock": "W4",
+  "mutation": "restore \"Gone quiet\"",
+  "red": true,
+  "reading": [
+   "Error: 1280: quiet's label",
+   "Expected: \"Past the date\"",
+   "Received: \"Gone quiet\""
+  ]
+ },
+ {
+  "lock": "W5",
+  "mutation": "shadow always on",
+  "red": true,
+  "reading": [
+   "Error: 1280: no shadow at rest",
+   "Expected: \"none\"",
+   "Received: \"rgba(28, 19, 15, 0.35) 0px 10px 18px -14px\""
+  ]
+ },
+ {
+  "lock": "W6",
+  "mutation": "size the chip to its text",
+  "red": true,
+  "reading": [
+   "Error: 1280: a add slot is 57.09375 wide",
+   "Expected: <= 0.5",
+   "Received:    54.90625"
+  ]
+ },
+ {
+  "lock": "W8",
+  "mutation": "add a fourth tray button",
+  "red": true,
+  "reading": [
+   "Error: 1280 row 0: tray 854.03125 vs sent 907.046875",
+   "Expected: >= 8",
+   "Received:    -53.015625"
+  ]
+ },
+ {
+  "lock": "W7",
+  "mutation": "restore the native title",
+  "red": true,
+  "reading": [
+   "Error: 1280 [data-qcv=\"sent-tile\"][data-state=\"sent\"]: no native title",
+   "Received: \"Covering letter: Sent 7 Sep\""
+  ]
+ },
+ {
+  "lock": "W1",
+  "mutation": "overflow: hidden on the panel (the hawk is clipped)",
+  "red": true,
+  "reading": [
+   "Error: 1280: the hawk is clipped by qcv-page qcv-own qcw",
+   "Received: \"qcv-page qcv-own qcw\""
   ]
  }
 ]

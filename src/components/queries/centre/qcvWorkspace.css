@@ -11,7 +11,15 @@
  */
 @media (min-width: 768px) {
   /* ⚠️ 0-3-0, to beat `.qc13 .qcv-page`'s 44 (qcv131.css) — the hawk rises 74 into this gap */
-  .qc13 .qcv-page.qcw { margin-top: 96px; margin-right: -20px; }
+  /* the panel: white, radius 24, 20px into BOTH side margins (§2). The page's own 90px of air moves
+     outside it, or it would be empty white at the panel's foot. ⚠️ NEVER overflow:hidden here — the
+     hawk rises 74px above the bar's top edge (W1). */
+  .qc13 .qcv-page.qcw {
+    margin: 96px -20px 90px; padding-bottom: 0;
+    background: #fff; border-radius: 24px;
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45);
+  }
+  .qcw .qcv-foot { margin: 0; padding: 0 18px 18px; }
   .qcw .qcw-head { position: relative; }
   .qcw .qcw-bar { position: relative; background: #2a3a52; border-radius: 24px 24px 0 0; }
   .qcw .qcw-hawk {
