@@ -89,9 +89,12 @@ export const QcDesk: React.FC<{
           data-qcv="court" data-court={s.key} data-loading={loading ? "true" : "false"}>
           <button type="button" className="qc135-hit" data-qcv="court-pick" aria-pressed={active === s.key}
             disabled={loading} aria-label={loading ? `${s.label}: loading` : `${s.said}. Show them in Recently updated`} onClick={() => onCourt(s.key)} />
+          {/* ⚠️ THE BADGE IS A CHILD OF THE CARD, NOT OF THE STRIP (header panel v2, Part C). Inside the strip it sat in the
+              strip's own `z-index: 1` layer, and the card's inner border (`::before`, z-index 2) painted across the
+              disc. As the card's child its `z-index: 3` is compared with the border's directly, and the disc is solid.
+              ⚠️ WHILE LOADING IT IS A BLANK DISC: the same box, no number. */}
+          <span className="qc135-badge" data-qcv="court-badge"><b data-qcv="court-count">{loading ? "" : s.total}</b></span>
           <div className="qc135-strip" data-qcv="court-strip">
-            {/* ⚠️ WHILE LOADING THE BADGE IS A BLANK DISC: the same box, no number */}
-            <span className="qc135-badge" data-qcv="court-badge"><b data-qcv="court-count">{loading ? "" : s.total}</b></span>
             <b className="qc135-title" data-qcv="court-title">{DESK_TITLE[s.key]}</b>
             <span className={`qc135-art${art ? " qc135-art--img" : ""}`} data-qcv="court-art" aria-hidden="true">
               {art

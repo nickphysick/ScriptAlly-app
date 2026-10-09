@@ -52,8 +52,10 @@
   }
   .qc135-card .qc135-title { font-family: var(--sp-type); font-weight: 400; font-size: 18px; line-height: 1.2; letter-spacing: 0.005em; color: var(--qc135-c); white-space: nowrap; }
 
-  /* ── the number badge: breaks out of the card's top edge ── */
-  .qc135-card .qc135-badge {
+  /* ── the number badge: breaks out of the card's top edge. A SOLID white disc: it is the card's own child, above the
+     inner border (z-index 2) and the strip (1), so nothing shows through or over it.
+     ⚠️ 0-3-0: `.qc135-card > *:not(.qc135-hit)` is 0-2-0 and would otherwise set it relative at z-index 1. ── */
+  .qc135-card > .qc135-badge.qc135-badge {
     position: absolute; left: 16px; top: -26px; z-index: 3; box-sizing: border-box;
     width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
     background: #fff; color: var(--qc135-c);
@@ -97,7 +99,7 @@
   /* ── the page sheet wider than 1440: the full-size values ── */
   .ws-app.sheet-wide .qc135-card .qc135-strip { height: 72px; padding: 0 110px 0 112px; }
   .ws-app.sheet-wide .qc135-card .qc135-title { font-size: 21px; }
-  .ws-app.sheet-wide .qc135-card .qc135-badge { left: 20px; top: -30px; width: 76px; height: 76px; }
+  .ws-app.sheet-wide .qc135-card > .qc135-badge.qc135-badge { left: 20px; top: -30px; width: 76px; height: 76px; }
   .ws-app.sheet-wide .qc135-card .qc135-badge b { font-size: 36px; }
   .ws-app.sheet-wide .qc135-card .qc135-art { right: 16px; width: 76px; height: 56px; }
   .ws-app.sheet-wide .qc135-card .qc135-lb { font-size: 15.5px; }
