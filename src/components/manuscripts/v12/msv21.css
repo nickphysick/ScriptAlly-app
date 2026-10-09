@@ -22,30 +22,20 @@
    over the hairline. The art slot states the Contact list drawing's own height (326 / 253), so the
    two pages' hairlines sit at one y; the drawing is taller than its slot and its drop is what puts
    its foot below the line. ── */
-/* ── v135 · THE CENTRED PAIR (design-refs/query-centre/query-centre-v135.html). The text block and the drawing are ONE
-   GROUP, centred on the page sheet: two content-sized tracks, `justify-content: center`. The drawing is centred on the
-   text block (no drop) and sits clear of the flap: 34 of padding under the row. The gap is 56, and 80 where the PAGE
-   SHEET is wider than 1440 (`.sheet-wide`, measured by the shell — the viewport says nothing about the sheet).
-   ⚠️ THE SAME FOUR VALUES ON ALL THREE OPEN HEADERS (Query Centre, Contact list, Manuscripts); QC135 A4 holds them equal.
-   ⚠️ `minmax(0, auto)` ON THE TEXT TRACK: it is the text's own width whenever that fits, and may give when it cannot. ── */
-.ws-app.sheet-wide .ms21-hd { column-gap: 80px; }
-.ms21-hd {
-  box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: center; column-gap: 56px; align-items: center;
-  /* 30 above: the Contact list header's own top padding since its v15.3 (MS21 H1 holds the two equal) */
-  /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
-  margin-top: 0; padding: 30px 0 34px;
-}
+/* ── HEADER PANEL v2 (9 Oct; ref design-refs/shell/header-panel-v2.html). The header is the shared panel
+   (`.hpanel.hpanel--hero`, shell/headerPanel.css): the box, the blue, the padding and the two-column grid are the
+   panel's. This sheet states the title, the subheader with its chip, the buttons' sizes and the drawing, and reads the
+   panel's tokens for every colour. v135's centred pair and the header sheet are retired here. ── */
 .ms21-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .ms21-hd .ms21-txt h1.ms21-title {
   margin: 0; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
-  font: 400 72px/0.98 var(--sp-type) !important; letter-spacing: -0.015em; color: #1c130f;
+  font: 400 72px/0.98 var(--sp-type) !important; letter-spacing: -0.015em; color: var(--hpanel-fg);
 }
-.ms21-hd .ms21-sub { margin: 16px 0 0; max-width: 600px; font: 400 19px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
+.ms21-hd .ms21-sub { margin: 16px 0 0; max-width: 600px; font: 400 19px/1.4 var(--sp-serif); color: var(--hpanel-muted); }
 .ms21-hd .ms21-soon {
   display: inline-block; margin-left: 10px; padding: 3px 8px; border-radius: 6px; vertical-align: 2px;
   font: 600 8.5px/1.3 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
-  color: rgba(28, 19, 15, 0.6); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22);
+  color: var(--hpanel-muted); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.4);
 }
 .ms21-acts { display: flex; gap: 10px; margin-top: 22px; }
 .ms21 .ms21-b1, .ms21 .ms21-b2, .ms21 .ms21-pill {
@@ -57,14 +47,19 @@
 .ms21 .ms21-b1:hover, .ms21 .ms21-pill:hover { background: #22304a; }
 .ms21 .ms21-b2:hover { background: #f6f3ee; }
 .ms21 :is(.ms21-b1, .ms21-b2, .ms21-pill, .ms21-ring, .ms21-arw, .ms21-vc-go, .ms21-vo, .ms21-seeall, .ms21-more):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-/* the drawing: at the END of its column, so its right edge is the content column's. `max-width: none`
-   keeps its width when the track is narrower (preflight would squeeze it); positioned, so it paints
-   over the header's own hairline. */
-.ms21-art { justify-self: start; align-self: center; min-width: 0; display: flex; justify-content: flex-start; align-items: flex-start; }
-.ms21-art img { display: block; flex: none; max-width: none; position: relative; top: 0; z-index: 1; width: 330px; height: auto; }
+/* the buttons on the panel: the panel's primary and secondary treatment (they arrive as children, so the colours are
+   stated here from the panel's tokens rather than by class) */
+.ms21 .ms21-hd .ms21-b1 { background: var(--hpanel-primary-bg); color: var(--hpanel-primary-fg); }
+.ms21 .ms21-hd .ms21-b1:hover { background: #fff; }
+.ms21 .ms21-hd .ms21-b2 { background: transparent; color: var(--hpanel-fg); box-shadow: inset 0 0 0 1.5px var(--hpanel-ring); }
+.ms21 .ms21-hd .ms21-b2:hover { background: rgba(244, 238, 229, 0.1); }
+.ms21 .ms21-hd :is(.ms21-b1, .ms21-b2):focus-visible { outline: 2px solid var(--hpanel-stamp); outline-offset: 2px; }
+/* THE DRAWING: on the panel's white disc (`.hpanel-disc`), 206 (170) across, in the right column, centred on the text. */
+.ms21-art { justify-self: end; align-self: center; flex: none; box-sizing: border-box; width: 206px; padding: 14px; }
 @media (max-width: 1439.5px) {
   .ms21-hd .ms21-txt h1.ms21-title { font-size: 58px !important; }
   .ms21-hd .ms21-sub { font-size: 17px; }
+  .ms21-art { width: 170px; padding: 12px; }
   .ms21-art img { width: 260px; }
 }
 

@@ -580,6 +580,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       <WorkspacePageGrid className="dv-wpg" scrollLabel="Discover" masthead={
         <PageHeader
             variant="workspace"
+            panel
             mark="discover"
             title="Discover"
             description="Verified agents matched to your manuscript — with the reasons they fit."

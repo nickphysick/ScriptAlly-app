@@ -92,7 +92,7 @@ describe("no shell rule reads a token that does not exist", () => {
   // shellColumn.css went with the one-expanding-column shell it styled (shell-rebuild Phase 3);
   // workspaceShell.css and primitives.css are the surfaces that replaced it, and they are held
   // to the same no-raw-hex rule.
-  const shellFiles = ["./shellV2.css", "./workspaceShell.css", "./primitives.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css"];
+  const shellFiles = ["./shellV2.css", "./workspaceShell.css", "./primitives.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css", "./headerPanel.css"]; /* headerPanel.css: the panel's tokens are at :root there, and pageHeader.css reads them */
   /**
    * ⚠️ THE THREE TRANSLUCENCY TOKENS ARE RETIRED, AND THIS IS WHAT KEEPS THEM RETIRED.
    *

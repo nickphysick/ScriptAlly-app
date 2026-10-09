@@ -346,6 +346,7 @@ export const ComparableTitlesPage: React.FC<{
           <div className="cpv-head">
             <PageHeader
               variant="full"
+              panel
               title="Comparable titles"
               description={activeMs ? undefined : "Add a manuscript to build its comp list."}
               living={living}

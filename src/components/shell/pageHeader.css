@@ -923,3 +923,56 @@
   .ph--band.ph--bandfix .ph-primary, .ph--band.ph--bandfix .ph-secondary { width: 100%; height: 50px; }
   .ph--band.ph--bandfix .ph-bdisc { position: absolute; right: 0; top: 0; width: 100px; margin: 0; }
 }
+
+/* ══ THE PANEL (header panel v2, 9 Oct; ref design-refs/shell/header-panel-v2.html) — opt-in (`panel`) ══════════════
+   The header is the shared blue panel (`.hpanel`, shell/headerPanel.css). Everything here is AFTER the full, compact,
+   living and band blocks and at their specificity or above, so each tie settles in the panel's favour. Type sizes,
+   the order of the parts and the living cross-fade are the built ones; what changes is the surface, the ink, the
+   buttons (`.hpanel-b1` / `.hpanel-b2`) and where the drawing sits.
+   ⚠️ EVERY RULE NAMES `.ph--panel`, so a PageHeader without the prop cannot move (pageHeaderDefault.test.tsx). */
+.ph.ph--panel { margin-top: 28px; border: 1px solid var(--hpanel-line); min-height: 0; }
+.ph.ph--panel .ph-title { color: var(--hpanel-fg); }
+.ph.ph--panel .ph-eyebrow, .ph.ph--panel .ph-eyebrow b, .ph.ph--panel .ph-intro { color: var(--hpanel-muted); }
+.ph.ph--panel .ph-intro :is(strong, b, .ph-ms) { color: var(--hpanel-fg); }
+
+/* the full header: the hero's padding; the frame is the two-column grid, the drawing in the right column, centred, inside */
+.ph.ph--panel.ph--full { padding: 24px 26px 24px 30px; min-height: 0; }
+@media (min-width: 1440px) { .ph.ph--panel.ph--full { padding: 34px 36px 26px 40px; } }
+.ph.ph--panel .ph-hin { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center; min-height: 0; padding: 0; }
+@media (min-width: 1440px) { .ph.ph--panel .ph-hin { column-gap: 40px; } }
+.ph.ph--panel.ph--full .ph-text { max-width: none; min-width: 0; }
+/* the drawing: made for a light ground, so it stands on a white disc (the band's own construction), 206 (170) across */
+.ph.ph--panel.ph--full .ph-art { position: static; box-sizing: border-box; align-self: stretch; height: auto; }
+/* ⚠️ THE DISC IS FOR A DRAWING. An art slot with nothing in it (the To-do list's, until its art arrives) stays an empty
+   box of its built width — no disc and no placeholder. */
+.ph.ph--panel.ph--full .ph-art:has(img, svg) {
+  align-self: center; width: 170px; height: 170px; padding: 14px;
+  border-radius: 50%; background: #fff; overflow: hidden;
+}
+@media (min-width: 1440px) { .ph.ph--panel.ph--full .ph-art:has(img, svg) { width: 206px; height: 206px; padding: 16px; } }
+.ph.ph--panel.ph--full .ph-art :is(img, svg) { object-position: center; }
+
+/* the band as a panel (Analytics): its own type, title measure and buttons' sizes stay; the full bleed, the fixed
+   337px and the band's own blue go. The disc is 206 (170). */
+.ph.ph--panel.ph--band { background: var(--hpanel-bg); box-shadow: none; clip-path: none; height: auto; display: block; container-type: normal; }
+.ph.ph--panel.ph--band .ph-hin { width: auto; grid-template-columns: minmax(0, 1fr) auto; justify-content: normal; row-gap: 0; }
+.ph.ph--panel.ph--band .ph-bdisc { width: 170px; margin: 0; justify-self: end; position: static; }
+@media (min-width: 1440px) { .ph.ph--panel.ph--band .ph-bdisc { width: 206px; } }
+.ph.ph--panel.ph--band .ph-title { color: var(--hpanel-fg); }
+.ph.ph--panel.ph--band .ph-intro { color: var(--hpanel-muted); }
+
+/* the workspace masthead as a compact panel: its own two-column row, at the panel's 22 × 28 */
+.ph.ph--panel.ph--compact { padding: 22px 28px; align-items: center; }
+
+/* ⚠️ THE SPACE UNDER A PANEL THAT HAS NO DESK ROW BENEATH IT: 48 (40 below a 1440 viewport), `--hpanel-below`. A page's
+   own first row already stands some way under its header (24 under the full header, 17 under the masthead), so the
+   panel adds the difference. A page with a control row fixed directly under its masthead keeps that relationship. */
+.ph.ph--panel.ph--full:not(.ph--band) { margin-bottom: calc(var(--hpanel-below) - 24px); }
+/* Analytics' first section stands 32 under its header already (measured) */
+.ph.ph--panel.ph--band { margin-bottom: calc(var(--hpanel-below) - 32px); }
+
+@media (max-width: 767.98px) {
+  .ph.ph--panel.ph--full, .ph.ph--panel.ph--compact { padding: 20px; }
+  .ph.ph--panel .ph-hin { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+  .ph.ph--panel.ph--full .ph-art { display: none; }
+}

@@ -41,11 +41,14 @@ describe("/queries/analytics renders", () => {
     expect(html).toContain("At a glance");
   });
 
-  it("opens on the shared band — a PageHeader with `band`, fixed, and no living header", () => {
+  it("opens on the shared band as a PANEL (header panel v2) — a PageHeader with `band`, `bandFixed` and `panel`, and no living header", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     expect(html).toContain('data-probe="page-header"');
-    expect(html).toMatch(/class="ph ph--full ph--band ph--bandfix"/);
+    /* the band keeps its classes (its type and its disc are the band's) and gains the panel's: no full bleed, no fixed height */
+    expect(html).toMatch(/class="ph ph--full ph--panel hpanel ph--band ph--bandfix"/);
+    expect(html).toContain('data-hpanel=""');
+    expect(html).not.toContain("data-header-sheet");
     expect(html).not.toContain("data-living=");
   });
 

@@ -76,3 +76,11 @@
 @media (max-width: 767.98px) {
   .hpanel--hero, .hpanel--compact { padding: 20px; }
 }
+
+/* the workspace grid's chrome slab closes on a hairline of its own, 1px under the masthead: under a panel it would rule
+   across the page just beneath the panel's edge. The border stays (1px of layout) and stops painting. */
+.wpg > .wpg-scroll > .wpg-chrome:has(.hpanel) { border-bottom-color: transparent; }
+/* ⚠️ A MASTHEAD WITH NO CONTROL ROW UNDER IT (Discover) takes the full space beneath its panel: `--hpanel-below`, less the
+   17px its page already leaves. Where a control row is fixed directly under the masthead (Calendar, Noteboard) that
+   relationship is kept as built. */
+.wpg > .wpg-scroll > .wpg-chrome:has(.hpanel--compact):not(:has(~ .wpg-toolband)) { padding-bottom: calc(var(--hpanel-below) - 17px); }

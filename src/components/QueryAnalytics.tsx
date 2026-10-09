@@ -116,6 +116,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
               variant="full"
               band
               bandFixed
+              panel
               title="Less guesswork, better results"
               description="Patterns, stats and insights to help you query smarter."
               primary={{ label: "Take a look ↓", onClick: () => go(0) }}

@@ -26,6 +26,7 @@
  */
 import React from "react";
 import { HeaderSheet } from "./HeaderSheet";
+import "./headerPanel.css";
 import { MoreHorizontal, Plus } from "lucide-react";
 /* ⚠️ THE KICKER ARRIVES BY CONTEXT, NOT BY A ROUTER HOOK — see `mastheadSection.ts` for why. */
 /* ⚠️ THE TYPE ONLY — `OneScreenMark` IS NO LONGER RENDERED HERE. The masthead draws no mark at
@@ -197,6 +198,17 @@ export interface PageHeaderProps {
    */
   band?: boolean;
   /**
+   * THE PANEL (header panel v2, 9 Oct; ref design-refs/shell/header-panel-v2.html) — opt-in, and passed by the
+   * WORKSPACE pages only. The header is the shared blue panel (shell/headerPanel.css): no header sheet, no flap, the
+   * text on the left and the drawing on the right inside it. Content, order, sizes and the living cross-fade are
+   * unchanged. With `band` (Analytics) the band stops being full-bleed and takes the panel's box.
+   *
+   * ⚠️ A PROP PER PAGE, as `plate` and `band` are. A PageHeader without it renders exactly as before.
+   * ⚠️ NOT A PANEL IN THE EMPTY STATE: when `living.count` is 0 and the page shows its empty heading, the header
+   *    renders as it always did, whatever this says.
+   */
+  panel?: boolean;
+  /**
    * THE FIXED BAND (Analytics v17, 5 Oct; ref design-refs/analytics-v17.html) — a modifier of `band`, and
    * Analytics' alone: the band 337px tall with its contents vertically centred, a 250px disc rather than the
    * courier's 290, and no eyebrow. ⚠️ A MODIFIER, NOT A SECOND BAND: every rule it adds names `.ph--bandfix`,
@@ -294,6 +306,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   plate = false,
   artFigure,
   band = false,
+  panel = false,
   bandFixed = false,
   card = false,
   compact = false,
@@ -320,6 +333,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    * one page, each correct in its own file.
    */
   const section = useMastheadSection();
+  /* a panel only where the page has its populated (or loading) header: the empty state keeps the open header */
+  const isPanel = panel && !(living?.count === 0 && !!living.empty);
 
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   /* Whether THIS page's masthead scrolls away. Published by the grid; `true` outside one. */
@@ -454,8 +469,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     return (
       /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
          ground and scrolls away with the page. */
-      <header className="ph ph--compact hsheet-host" data-probe="page-header" data-size="compact">
-        <HeaderSheet />
+      <header className={panel ? "ph ph--compact ph--panel hpanel hpanel--compact" : "ph ph--compact hsheet-host"} data-probe="page-header" data-size="compact" data-hpanel={panel ? "" : undefined}>
+        {!panel && <HeaderSheet />}
         {/**
           * §3.2 — A TWO-COLUMN ROW: the eyebrow, the 44px title and the intro on the left; the
           * actions on the right, on one line, bottom-aligned with the text. The rule closes it.
@@ -474,10 +489,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {(primary || secondary) && (
           <div className="ph-acts" data-probe="actions">
             {primary && (
-              <button ref={primaryRef} type="button" className="ph-primary" onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
+              <button ref={primaryRef} type="button" className={isPanel ? "ph-primary hpanel-b1" : "ph-primary"} onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
             )}
             {secondary && (
-              <button type="button" className="ph-secondary" onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
+              <button type="button" className={isPanel ? "ph-secondary hpanel-b2" : "ph-secondary"} onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
             )}
           </div>
         )}
@@ -496,13 +511,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${band ? "" : " hsheet-host"}${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}${card && band && compact ? " ph--compact" : ""}`}
-      data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
+      className={`ph ph--full${isPanel ? " ph--panel hpanel" : band ? "" : " hsheet-host"}${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}${card && band && compact ? " ph--compact" : ""}`}
+      data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined} data-hpanel={isPanel ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >
       {/* app shell v2: the header sheet, behind everything the header paints. A BAND header is its own
           full-width ink field, so it takes none (headerSheetRoutes lists its route). */}
-      {!band && <HeaderSheet />}
+      {!band && !isPanel && <HeaderSheet />}
       {/**
         * THE HERO FRAME. The header spans the whole content column and its rule runs the column's full
         * width. Since the quiet bar the frame IS the column (page header v2's centred 920 is gone): the
@@ -540,10 +555,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {(primary || secondary) && (
           <div className="ph-acts" data-probe="actions">
             {primary && (
-              <button ref={primaryRef} type="button" className="ph-primary" onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
+              <button ref={primaryRef} type="button" className={isPanel ? "ph-primary hpanel-b1" : "ph-primary"} onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>
             )}
             {secondary && (
-              <button type="button" className="ph-secondary" onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
+              <button type="button" className={isPanel ? "ph-secondary hpanel-b2" : "ph-secondary"} onClick={secondary.onClick} disabled={secondary.disabled}>{secondary.label}</button>
             )}
             {actionsPopover}
           </div>

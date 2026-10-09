@@ -19,7 +19,7 @@
  */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
-import { HeaderSheet } from "../../shell/HeaderSheet";
+import "../../shell/headerPanel.css";
 import { QueryStatus } from "../../../types";
 import type { FeedSeg } from "../../../lib/dashFeed";
 import type { QueryLine } from "../../../lib/compsPage";
@@ -50,8 +50,7 @@ export const MsOpenHeader: React.FC<{
   soon?: boolean;
   children: React.ReactNode;
 }> = ({ title, sub, soon, children }) => (
-  <header className="ms21-hd hsheet-host" data-ms21="header" data-own-header="">
-    <HeaderSheet />
+  <header className="ms21-hd hpanel hpanel--hero" data-ms21="header" data-own-header="" data-hpanel="">
     <div className="ms21-txt" data-ms21="header-text">
       <h1 className="ms21-title" data-probe="title" data-page-title="">{title}</h1>
       <p className="ms21-sub" data-ms21="sub">
@@ -60,7 +59,8 @@ export const MsOpenHeader: React.FC<{
       </p>
       <div className="ms21-acts">{children}</div>
     </div>
-    <div className="ms21-art" data-ms21="header-art" aria-hidden="true"><img src={heroArt} alt="" /></div>
+    {/* the drawing was made for a light ground, so it stands on the panel's white disc; swappable by file */}
+    <div className="ms21-art hpanel-disc" data-ms21="header-art" aria-hidden="true"><img src={heroArt} alt="" /></div>
   </header>
 );
 

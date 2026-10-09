@@ -472,6 +472,7 @@ export const SubmissionPackages: React.FC = () => {
           <div className="ppv-head">
             <PageHeader
               variant="full"
+              panel
               title="Submission packages"
               description={activeMs ? undefined : "No manuscript yet."}
               living={living}

@@ -185,7 +185,7 @@ describe("the sheet", () => {
   it("every token it reads is a :root token", () => {
     const read = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
     const own = new Set([...css.matchAll(/(--ms21-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--font-mono", "--ws-page", "--ws-sheet", "--ws-band", "--hsheet-flap", "--hsheet-w", "--hsheet-clip"].includes(t), t).toBe(true);
+    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--font-mono", "--ws-page", "--ws-sheet", "--ws-band", "--hsheet-flap", "--hsheet-w", "--hsheet-clip"].includes(t) || /^--hpanel-/.test(t) /* the header panel's :root tokens (shell/headerPanel.css) */, t).toBe(true);
   });
   it("the deck and the doors stand still under reduced motion", () => {
     const rm = sliceBetween(css, "@media (prefers-reduced-motion: reduce)", ".ms21-band {", "the reduced-motion block");
