@@ -197,3 +197,45 @@ export const tallyGates = (n: number): number[] => {
   for (let left = Math.max(0, Math.floor(n)); left > 0; left -= 5) out.push(Math.min(5, left));
   return out;
 };
+
+/* ── Dashboard v58: the latest line under the tiles ─────────────────────────────────────────── */
+
+const LATEST_VERB: Record<ClosedBucketKey, string> = {
+  quiet: "didn't reply",
+  letter: "passed on your query",
+  partial: "passed on your partial",
+  full: "passed on your full",
+};
+
+export interface ClosedLatest { who: string; verb: string; when: string; queryId: string }
+
+/**
+ * The most recently closed query on the card, said as a fact: who, how far it got, how long ago.
+ * `closedOf` gives each query's closing moment (the page passes `closedAt`), so this file keeps to
+ * the tile and never learns a second rule for when a query closed.
+ */
+export function closedLatest(
+  tile: ClosedTile,
+  closedOf: (queryId: string) => number | null,
+  nameOf: (queryId: string) => string,
+  nowMs: number,
+): ClosedLatest | null {
+  let best: { id: string; key: ClosedBucketKey; at: number } | null = null;
+  for (const b of CLOSED_BUCKETS) {
+    for (const id of tile.members[b.key]) {
+      const at = closedOf(id);
+      if (at === null) continue;
+      if (!best || at > best.at) best = { id, key: b.key, at };
+    }
+  }
+  if (!best) return null;
+  const mid = (ms: number) => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
+  const days = Math.max(0, Math.round((mid(nowMs) - mid(best.at)) / 86_400_000));
+  const when = days === 0 ? "today" : days === 1 ? "yesterday" : days < 14 ? `${days} days ago`
+    : days < 91 ? `${Math.round(days / 7)} weeks ago` : `${Math.round(days / 30)} months ago`;
+  return { who: nameOf(best.id), verb: LATEST_VERB[best.key], when, queryId: best.id };
+}
+
+/** The filled arc on the v58 ring: the share of every query sent that has closed. */
+export const closedShare = (closedTotal: number, sentTotal: number): number =>
+  sentTotal <= 0 ? 0 : Math.min(1, Math.max(0, closedTotal / sentTotal));

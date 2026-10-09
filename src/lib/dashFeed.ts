@@ -31,6 +31,8 @@ import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus } from ".
 import { agentPrimary } from "./agentDisplay";
 import { requeryLine } from "./requery";
 import { eventShape, markSentOffered } from "./feedConversation";
+import { recordSpecFor } from "./todoCalendar";
+import { stageSentAt } from "./dashBreakdown";
 import type { State } from "./queryCardFacts";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
@@ -86,6 +88,20 @@ export interface FeedEntry {
   queryId: string | null;
   /** logged since the writer last had this page open */
   isNew: boolean;
+  /* ── Dashboard v58, the feed drawer ───────────────────────────────────────────────────────────
+     `dir` is AUTHORSHIP: "in" is something an agent did (asked for pages, passed, offered), "out"
+     is something the writer did (queried, sent, nudged, added an agent or a manuscript). It reads
+     `recordSpecFor`, the calendar record's own table, so the two cannot disagree about who wrote. */
+  dir: "in" | "out";
+  /** the event's own type, for a surface that words the writer's housekeeping itself */
+  activityType: string;
+  /** the subject's name as it appears in the sentence, and the agency behind a query event */
+  who: string;
+  agency: string;
+  /** a request (or an offer) the query still stands at: it still needs the writer */
+  need: { label: string } | null;
+  /** a request since answered: the day the pages went, "28 Sep" */
+  met: string | null;
 }
 
 export interface FeedDay {
@@ -102,6 +118,8 @@ export interface FeedInput {
   now: Date;
   /** when the writer last had the dashboard open; null on a device that has never shown it */
   seenAt: number | null;
+  /** where the window starts (ms). Absent, the last `FEED_DAYS` days. */
+  from?: number;
 }
 
 /* ── the pills ─────────────────────────────────────────────────────────────────────────────────── */
@@ -357,9 +375,32 @@ export const dayLabelFor = (at: number, now: Date): string => {
   return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
 };
 
+/** What an open request asks of the writer — the drawer's ink action on a reply card. */
+const NEED_LABEL: Partial<Record<QueryStatus, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Send the partial",
+  [QueryStatus.FULL_REQUESTED]: "Send the full",
+  [QueryStatus.REVISE_RESUBMIT]: "Send your revision",
+  [QueryStatus.OFFER]: "Offer: next steps",
+};
+
+/**
+ * The day a request was answered, or null. Only a send AFTER the request counts: an earlier Full
+ * sent does not answer a later revise-and-resubmit.
+ */
+const metOn = (status: QueryStatus | null, q: Query, log: readonly Activity[], askedAt: number): string | null => {
+  const stage = status === QueryStatus.PARTIAL_REQUESTED ? QueryStatus.PARTIAL_SENT
+    : status === QueryStatus.FULL_REQUESTED || status === QueryStatus.REVISE_RESUBMIT ? QueryStatus.FULL_SENT
+      : null;
+  if (!stage) return null;
+  const sent = stageSentAt(q, stage, log).ms;
+  if (sent === null || sent < askedAt) return null;
+  const d = new Date(sent);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+};
+
 export const feedEntries = (i: FeedInput): FeedEntry[] => {
   const nowMs = i.now.getTime();
-  const from = nowMs - FEED_DAYS * DAY;
+  const from = i.from ?? nowMs - FEED_DAYS * DAY;
   /* built over the WHOLE activity list, not the window: a query sent two months ago still anchors an
      event from last week, and windowing the anchor loses the elapsed clause on every older query */
   const queriedAt = queriedTimes(i.activities);
@@ -412,6 +453,13 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;
 
+    const dir: "in" | "out" = shape.kind === "housekeeping" ? "out"
+      : (recordSpecFor(String(a.activityType), a.resultingStatus)?.dir ?? "out");
+    const evQuery = a.queryId ? i.queries.find((x) => x.id === a.queryId) : undefined;
+    const need = evQuery && shape.status && NEED_LABEL[shape.status] && evQuery.status === shape.status
+      ? { label: NEED_LABEL[shape.status] as string } : null;
+    const met = need || !evQuery ? null : metOn(shape.status, evQuery, i.activities, t);
+
     const d = new Date(t);
     out.push({
       id: a.id,
@@ -434,6 +482,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       /* ⚠️ A DEVICE THAT HAS NEVER SHOWN THE PAGE MARKS NOTHING. Everything would be new, which puts a
          rust rule beside all thirty days of it and says nothing at all. */
       isNew: i.seenAt !== null && t > i.seenAt,
+      dir, activityType: String(a.activityType), who, agency: provenance, need, met,
     });
   }
   return out;
