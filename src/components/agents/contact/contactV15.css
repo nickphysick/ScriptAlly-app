@@ -79,18 +79,10 @@
 }
 @media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }
 
-/* ── §3 · THE DESK: the group's second row. Its CARDS start 72 (60) under the header's hairline; each card's disc rises
-   28 (24) into that room (v15.2), so a disc's top is 44 (36) under the hairline. shell/desk draws the cards. ── */
+/* ── §3 · THE DESK: the group's second row. Its CARDS start 72 (60) under the header panel; each card's number badge
+   rises 26 (30) into that room. The cards and their loading paint are contactDeskBadge.css's (header panel v2, Part D). ── */
 .clv-group > .cl15-desk { grid-column: 1 / -1; grid-row: 2; margin-top: 72px; }
 @media (max-width: 1439.5px) { .clv-group > .cl15-desk { margin-top: 60px; } }
-/* loading: the cards hold their size; their text and charts are painted over */
-.clv-group[data-loading] .dsk-card :is(.dsk-line, .dsk-mom, .dsk-chart small) {
-  color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 6px;
-  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
-  animation: cl13Shim 1.6s ease-in-out infinite;
-}
-.clv-group[data-loading] .dsk-card :is(.dsk-line b, .dsk-mom svg, .dsk-svg, .dsk-pg, .dsk-disc svg) { visibility: hidden; }
-@media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }
 
 /* ── §4 · THE NEXT STEP's v15 parts ── */
 /* the all-queried split line (serif 14.5, ink 60%) and the reason note (italic 14) */

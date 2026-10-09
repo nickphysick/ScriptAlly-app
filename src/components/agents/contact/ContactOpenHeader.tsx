@@ -31,6 +31,16 @@ import "./contactV15.css";
 /** the header's drawing: a flying hawk carrying an agent card, facing left, transparent */
 export const CONTACT_HEADER_HAWK = { src: "/images/contact/contact-header-hawk.png", width: 576, height: 383 };
 
+/**
+ * THE DESK'S THREE ILLUSTRATIONS (header panel v2, Part D) — SLOTS, EMPTY UNTIL THE ARTIST'S FILES ARRIVE. Each badge
+ * card's strip holds a 76 × 56 (60 × 50) box: a dashed placeholder reading "Art to come" while its slot is `null`, and
+ * the image in the same box, with no dashes, once it is set. No layout change either way.
+ */
+export interface ContactArt { src: string; width: number; height: number }
+export const CONTACT_DESK_ART_WEEK: ContactArt | null = null;
+export const CONTACT_DESK_ART_QUERIED: ContactArt | null = null;
+export const CONTACT_DESK_ART_PROFILES: ContactArt | null = null;
+
 export const CONTACT_HEADER_SUB = "Your agent data underpins everything. Collate and manage it here.";
 
 /** the banner above the list (v15.2 §4) — exact */

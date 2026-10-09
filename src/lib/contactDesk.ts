@@ -47,7 +47,8 @@ export type AgentQueryState = "active" | "closed" | "none";
 
 export interface DeskModel {
   /** "{n} added this week" — the figure, then the rest of the line; `bars` is 8 weeks, oldest first, this week last */
-  week: { figure: string; rest: string; label: string; mom: MoM; bars: number[]; total: number };
+  /** `month` is the agents added in the current calendar month (header panel v2: the badge card's second tile) */
+  week: { figure: string; rest: string; label: string; mom: MoM; bars: number[]; total: number; month: number };
   /** "{queried} of {N} queried" */
   queried: { figure: string; rest: string; label: string; mom: MoM | null; queried: number; active: number; closed: number; total: number };
   /** "{pct}% profiles complete" */
@@ -109,6 +110,8 @@ export function deskModel({ agents, queries, msId, now, hk }: DeskInput): DeskMo
   }
   const thisWeek = bars[WEEK_BARS - 1], lastWeek = bars[WEEK_BARS - 2];
   const total8 = bars.reduce((s, v) => s + v, 0);
+  /* added this month: `dateAdded` on or after the first of the current month, and not in the future */
+  const addedThisMonth = agents.filter((a) => { const t = ms(a.dateAdded); return t !== null && t >= start && t <= nowMs; }).length;
 
   /* ── Queried ── */
   let queried = 0, active = 0, closedQ = 0, firstThisMonth = 0;
@@ -126,7 +129,7 @@ export function deskModel({ agents, queries, msId, now, hk }: DeskInput): DeskMo
     week: {
       figure: String(thisWeek), rest: "added this week",
       label: `${thisWeek} ${thisWeek === 1 ? "agent" : "agents"} added this week, ${total8} in the last 8 weeks`,
-      mom: weekOnWeek(thisWeek, lastWeek), bars, total: total8,
+      mom: weekOnWeek(thisWeek, lastWeek), bars, total: total8, month: addedThisMonth,
     },
     queried: {
       figure: String(queried), rest: `of ${n} queried`,
