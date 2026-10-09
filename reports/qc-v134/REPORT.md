@@ -120,3 +120,21 @@ e2e: QC134 10 of 10. The older Query Centre suites (`qcV133`, `qcV132`, `qcV131`
 | `banner-1512.png`, `banner-1280.png` | `ref-banner-1512@2x.png`, `ref-banner-1280@2x.png` |
 
 The reference's header is the v133 mock; the built header keeps v133.1's geometry, as the brief says.
+
+## 10. The merge to `main` (9 Oct)
+
+Contact list v15.3 landed on `main` before the merge. It gave the Contact list's header 30px of top padding, so H3 (the equality with `/agents`) went red on the merged branch: hairline 401 against 430.8. By the standing ruling that `/queries` follows the Contact list's header, `QcOpenHeader` takes the same 30px.
+
+| | `/agents` v15.3 | `/queries` before | `/queries` now |
+|---|---|---|---|
+| **1512** header top | 64 | 64 | 64 |
+| hairline y | 430.8 | 401 | 431 |
+| desk top | 502.8 | 473 | 503 |
+| **1280** hairline y | 357.7 | 328 | 358 |
+| desk top | 417.7 | 388 | 418 |
+
+The header is 367px tall at 1512 and 294px at 1280 (it was 337 and 264). QC133 H4 is re-pointed: the drawing's top is the padding plus its drop, 60 (54) below the sheet's top, where it was 30 (24). H3 and H7 hold it equal to `/agents`.
+
+The merge had one conflict, in the design-ref manifest; both sides are kept. Contact list v15.3 has its own hero number and faces, so that lift candidate now has a counterpart.
+
+Gates on the merged tip: tsc 0; both builds clean; Vitest 541 files, 8473 passed, 3 skipped. e2e: QC133 H1–H7, QC134 (all ten) and `qcV131` QC1, 19 passed.

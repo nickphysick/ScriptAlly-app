@@ -13,7 +13,9 @@
   box-sizing: border-box;
   --qcoh-drop: 30px;
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
-  margin-top: 0; padding-bottom: 10px;
+  /* 30 of padding above (Contact list v15.3): with the hero number the text block is taller, and the header's
+     top, hairline and desk top are held equal to /agents (QC133 H3) */
+  margin-top: 0; padding: 30px 0 10px;
   border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }

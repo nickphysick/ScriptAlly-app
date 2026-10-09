@@ -105,13 +105,15 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H4 · headroom: the drawing's top is 30 (24) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
+  test("H4 · headroom: the drawing's top is 60 (54) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
       expect(Number.isFinite(g.sheetTop), `${w}: the sheet's top was found`).toBe(true);
       expect(Math.abs(g.sheetTop - g.barB), `${w}: the sheet starts at the top bar's bottom (${g.sheetTop} / ${g.barB})`).toBeLessThanOrEqual(1);
-      expect(Math.abs(g.art!.y - g.sheetTop - (wide(w) ? 30 : 24)), `${w}: the drawing's top is ${g.art!.y - g.sheetTop} below the sheet's`).toBeLessThanOrEqual(3);
+      /* RE-POINTED (Contact list v15.3): the header gained 30px of top padding, so the drawing's top is the padding plus
+         its drop — 60 (54) below the sheet's top, where it was 30 (24). H3 and H7 hold it equal to /agents. */
+      expect(Math.abs(g.art!.y - g.sheetTop - (wide(w) ? 60 : 54)), `${w}: the drawing's top is ${g.art!.y - g.sheetTop} below the sheet's`).toBeLessThanOrEqual(3);
       expect(g.overflowX, `${w}: the document overflows sideways`).toBeLessThanOrEqual(0);
       expect(g.scOverflowX, `${w}: the page's scroller overflows sideways`).toBeLessThanOrEqual(0);
     }
