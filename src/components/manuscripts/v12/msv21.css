@@ -22,13 +22,19 @@
    over the hairline. The art slot states the Contact list drawing's own height (326 / 253), so the
    two pages' hairlines sit at one y; the drawing is taller than its slot and its drop is what puts
    its foot below the line. ── */
+/* ── v135 · THE CENTRED PAIR (design-refs/query-centre/query-centre-v135.html). The text block and the drawing are ONE
+   GROUP, centred on the page sheet: two content-sized tracks, `justify-content: center`. The drawing is centred on the
+   text block (no drop) and sits clear of the flap: 34 of padding under the row. The gap is 56, and 80 where the PAGE
+   SHEET is wider than 1440 (`.sheet-wide`, measured by the shell — the viewport says nothing about the sheet).
+   ⚠️ THE SAME FOUR VALUES ON ALL THREE OPEN HEADERS (Query Centre, Contact list, Manuscripts); QC135 A4 holds them equal.
+   ⚠️ `minmax(0, auto)` ON THE TEXT TRACK: it is the text's own width whenever that fits, and may give when it cannot. ── */
+.ws-app.sheet-wide .ms21-hd { column-gap: 80px; }
 .ms21-hd {
   box-sizing: border-box;
-  --ms21-slot: 326px; --ms21-drop: 20px;
-  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
+  display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: center; column-gap: 56px; align-items: center;
   /* 30 above: the Contact list header's own top padding since its v15.3 (MS21 H1 holds the two equal) */
   /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
-  margin-top: 0; padding: 30px 0 10px;
+  margin-top: 0; padding: 30px 0 34px;
 }
 .ms21-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .ms21-hd .ms21-txt h1.ms21-title {
@@ -54,10 +60,9 @@
 /* the drawing: at the END of its column, so its right edge is the content column's. `max-width: none`
    keeps its width when the track is narrower (preflight would squeeze it); positioned, so it paints
    over the header's own hairline. */
-.ms21-art { justify-self: end; min-width: 0; height: var(--ms21-slot); display: flex; justify-content: flex-end; align-items: flex-start; }
-.ms21-art img { display: block; flex: none; max-width: none; position: relative; top: var(--ms21-drop); z-index: 1; width: 330px; height: auto; }
+.ms21-art { justify-self: start; align-self: center; min-width: 0; display: flex; justify-content: flex-start; align-items: flex-start; }
+.ms21-art img { display: block; flex: none; max-width: none; position: relative; top: 0; z-index: 1; width: 330px; height: auto; }
 @media (max-width: 1439.5px) {
-  .ms21-hd { column-gap: 36px; --ms21-slot: 253px; --ms21-drop: 12px; }
   .ms21-hd .ms21-txt h1.ms21-title { font-size: 58px !important; }
   .ms21-hd .ms21-sub { font-size: 17px; }
   .ms21-art img { width: 260px; }

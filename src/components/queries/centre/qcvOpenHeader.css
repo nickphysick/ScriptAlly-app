@@ -8,15 +8,21 @@
  */
 @import "./qcvPage.css";
 
+/* ── v135 · THE CENTRED PAIR (design-refs/query-centre/query-centre-v135.html). The text block and the drawing are ONE
+   GROUP, centred on the page sheet: two content-sized tracks, `justify-content: center`. The drawing is centred on the
+   text block (no drop) and sits clear of the flap: 34 of padding under the row. The gap is 56, and 80 where the PAGE
+   SHEET is wider than 1440 (`.sheet-wide`, measured by the shell — the viewport says nothing about the sheet).
+   ⚠️ THE SAME FOUR VALUES ON ALL THREE OPEN HEADERS (Query Centre, Contact list, Manuscripts); QC135 A4 holds them equal.
+   ⚠️ `minmax(0, auto)` ON THE TEXT TRACK: it is the text's own width whenever that fits, and may give when it cannot. ── */
+.ws-app.sheet-wide .qcoh { column-gap: 80px; }
 .qcv-group > .qcoh { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
 .qcoh {
   box-sizing: border-box;
-  --qcoh-drop: 30px;
-  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
+  display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: center; column-gap: 56px; align-items: center;
   /* 30 of padding above (Contact list v15.3): with the hero number the text block is taller, and the header's
      top, hairline and desk top are held equal to /agents (QC133 H3) */
   /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
-  margin-top: 0; padding: 30px 0 10px;
+  margin-top: 0; padding: 30px 0 34px;
 }
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 /* THE HERO NUMBER (v134 §1): the h1 is a baseline row of two spans — the count at 124 (98), its words at 42 (34).
@@ -65,13 +71,12 @@
    let it overhang its track to the LEFT when the title is long. The 56 (36) column gap is a minimum.
    ⚠️ `position: relative`, never absolute: it stays in the flow. */
 .qcoh .qcoh-art {
-  display: block; justify-self: end; height: 326px; width: auto; max-width: none; margin: 0;
-  position: relative; top: var(--qcoh-drop); z-index: 1;
+  display: block; justify-self: start; align-self: center; height: 326px; width: auto; max-width: none; margin: 0;
+  position: relative; top: 0; z-index: 1;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%); mask-image: linear-gradient(90deg, transparent 0, #000 6%);
 }
 
 @media (max-width: 1439.5px) {
-  .qcoh { column-gap: 36px; --qcoh-drop: 24px; }
   .qcoh .qcoh-txt h1.qcoh-title { gap: 14px; font-size: 34px !important; }
   .qcoh .qcoh-title .qcoh-hn { font-size: 98px !important; }
   .qcoh .qcoh-title .qcoh-ht { font-size: 34px !important; }
