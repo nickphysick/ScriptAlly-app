@@ -283,6 +283,9 @@ export interface BookVersion {
    * since been deleted simply stops offering the link (see `rrLink` in lib/bookVersions.ts).
    */
   fromActivityId?: string;
+  /** The book's length at this version, where the writer gave one (manuscripts v21). Absent on every
+   *  version saved before it, and never restated from the manuscript's own count. */
+  wordCount?: number;
 }
 
 export interface Manuscript {
