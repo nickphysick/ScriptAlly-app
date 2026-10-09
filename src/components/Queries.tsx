@@ -95,6 +95,7 @@ import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
 import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
+import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcDesk } from "./queries/centre/QcDesk";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -6596,6 +6597,9 @@ export const Queries: React.FC<{
             entering={qcLoad.entering}
             headLine={qcHeadLine}
             living={qcLiving}
+            /* v134 §1 — the faces read the hero number's own rows; a disc opens its query as a row does */
+            faces={qcLiving.count === null ? null : facesFor(qcLivingRows, Date.now())}
+            onFace={(id) => { cardSetRef.current = qcLivingRows.map((r) => r.id); onOpenQuery?.(id); }}
             onLog={() => onNavigate?.("queries", "Log a query")}
             /* the app-level Record-a-response host in App.tsx — an interception, never a navigation */
             onRecord={() => onNavigate?.("queries", "Record a response")}

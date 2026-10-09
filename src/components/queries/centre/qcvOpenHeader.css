@@ -17,12 +17,32 @@
   border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
-/* ⚠️ brand.tsx forces `h1:not(.wsh-title)` at runtime, injected last: 0-2-1 and !important win honestly */
+/* THE HERO NUMBER (v134 §1): the h1 is a baseline row of two spans — the count at 124 (98), its words at 42 (34).
+   ⚠️ brand.tsx forces `h1:not(.wsh-title)` at runtime and names bare spans as body sans, both injected last:
+   three classes and !important on the two spans win honestly. */
 .qcoh .qcoh-txt h1.qcoh-title {
-  margin: 0; white-space: nowrap;
-  font: 400 72px/0.98 var(--sp-type) !important; color: #1c130f;
+  margin: 0; white-space: nowrap; display: flex; align-items: baseline; gap: 18px;
+  font: 400 42px/1 var(--sp-type) !important; color: #1c130f;
 }
+.qcoh .qcoh-title .qcoh-hn { font: 400 124px/0.8 var(--sp-type) !important; letter-spacing: -0.03em; }
+.qcoh .qcoh-title .qcoh-ht { font: 400 42px/1 var(--sp-type) !important; }
 .qcoh .qcoh-txt .qcoh-sub { margin: 12px 0 0; font: 400 19px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
+
+/* THE FACES (v134 §1): 16 under the subheader, 22 above the buttons, one line. Each disc overlaps the one before
+   and wears a 3px halo in the page's own colour (`--ws-page`), earlier discs on top. Colour is the court's. */
+.qcoh .qcoh-faces { display: flex; align-items: center; min-height: 38px; margin-top: 16px; white-space: nowrap; }
+.qcoh .qcoh-faces .qcoh-fc {
+  box-sizing: border-box; flex: none; position: relative; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  font: 600 11px var(--sp-mono); letter-spacing: 0.02em;
+  box-shadow: 0 0 0 3px var(--ws-page);
+}
+.qcoh .qcoh-faces .qcoh-fc + .qcoh-fc { margin-left: -7px; }
+.qcoh .qcoh-faces .qcoh-fc--you { background: #b0603e; color: #f4eee5; }
+.qcoh .qcoh-faces .qcoh-fc--agent { background: #3d5070; color: #f4eee5; }
+.qcoh .qcoh-faces .qcoh-fc--closed { background: #b3aca5; color: #2b2622; }
+.qcoh .qcoh-faces .qcoh-fc--sk { background: #e7e5e1; cursor: default; }
+.qcoh .qcoh-faces .qcoh-more { margin-left: 12px; font: 400 15px var(--sp-serif); color: rgba(28, 19, 15, 0.62); }
 .qcoh .qcoh-acts { display: flex; gap: 10px; margin-top: 22px; }
 .qcoh .qcoh-acts .qcoh-b1, .qcoh .qcoh-acts .qcoh-b2 {
   box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
@@ -50,13 +70,18 @@
 
 @media (max-width: 1439.5px) {
   .qcoh { column-gap: 36px; --qcoh-drop: 24px; }
-  .qcoh .qcoh-txt h1.qcoh-title { font-size: 58px !important; }
+  .qcoh .qcoh-txt h1.qcoh-title { gap: 14px; font-size: 34px !important; }
+  .qcoh .qcoh-title .qcoh-hn { font-size: 98px !important; }
+  .qcoh .qcoh-title .qcoh-ht { font-size: 34px !important; }
+  .qcoh .qcoh-faces { min-height: 32px; }
+  .qcoh .qcoh-faces .qcoh-fc { width: 32px; height: 32px; font-size: 9.5px; }
+  .qcoh .qcoh-faces .qcoh-fc + .qcoh-fc { margin-left: -5px; }
   .qcoh .qcoh-txt .qcoh-sub { font-size: 17px; }
   .qcoh .qcoh-art { height: 253px; }
 }
 
 /* loading: the same boxes, their text kept for its line box and painted over */
-.qcoh[data-loading] :is(.qcoh-title, .qcoh-sub, .qcoh-b1, .qcoh-b2) {
+.qcoh[data-loading] :is(.qcoh-hn, .qcoh-ht, .qcoh-sub, .qcoh-b1, .qcoh-b2) {
   color: transparent !important; box-shadow: none; border-radius: 10px;
   background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
   animation: qcohShim 1.6s ease-in-out infinite;

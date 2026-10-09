@@ -177,7 +177,16 @@
     "design-refs/contact-list-v15.html": "b672f519f736156252110c436119fa9374df4093006aff09bdf4b1d26cb9d68f",
     "design-refs/query-centre/query-centre-v133.html": "b9204af6ad3de4be54b271287b6e0c0b6135a32606ca859fd37bf9b4814f350b",
     "design-refs/qc-v133/ref-header-1512@2x.png": "dff593a1755b1cc80ee262fec61508c744b4d3a3a21ed37a24859466d7b83f8d",
-    "design-refs/qc-v133/ref-header-1280@2x.png": "85367e54afb8958601f276f3730829183e4ea85febde73b675e57965ea463f08"
+    "design-refs/qc-v133/ref-header-1280@2x.png": "85367e54afb8958601f276f3730829183e4ea85febde73b675e57965ea463f08",
+    "design-refs/query-centre/query-centre-v134.html": "2f7d0e564cce9f7490699f4aa8be09d7071e2c7f0226c2ff87dbc8cdb75f8c61",
+    "design-refs/qc-v134/ref-band-1280@2x.png": "35a64397041fa64e336f789da2baa25e940a9b39b4da729da973d8c00fafa68d",
+    "design-refs/qc-v134/ref-band-1512@2x.png": "d2f2a3c9630807d9358e06b530b35774e8e88098f007d9e12a50b2f052e1deb6",
+    "design-refs/qc-v134/ref-banner-1280@2x.png": "632a9005ef81fbe6708f9fcbf6cc3157d1d3a23ea2164af2a48a7be87b8683f6",
+    "design-refs/qc-v134/ref-banner-1512@2x.png": "3ba3f36d588a5dc05a5970799d12ad6f966bef7175d382424e338ba20edb26f5",
+    "design-refs/qc-v134/ref-desk-selected-1512@2x.png": "803789a69e9004da2e78aa8f251d0d1e79f99e64fe5290ce1bbdab85a386d9ab",
+    "design-refs/qc-v134/ref-faces-hover-1512@2x.png": "fbd30cabedf175ea189d70ec129e092ad43f232cba1619393de4c9b19b12584a",
+    "design-refs/qc-v134/ref-header-desk-1280@2x.png": "11129410cd57fb8072a30a765f6a4edc847adbe7a9a91264a5961f3b82c472ff",
+    "design-refs/qc-v134/ref-header-desk-1512@2x.png": "d82cd6aaad841cf348f95485d3fd6f89a1a12582c0bca66fb0d1d320306dcde9"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

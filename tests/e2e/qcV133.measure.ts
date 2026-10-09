@@ -50,18 +50,17 @@ const readQc = (page: Page) => page.evaluate((HD) => {
 }, HD);
 
 test.describe("Query Centre v133 — the open header", () => {
-  test("H1 · open: no card or band around the title, Special Elite 72 (58), the exact line", async ({ page }) => {
+  test("H1 · open: no card or band around the title, Special Elite, the exact line", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
       expect(g.title, `${w}: the title was found`).not.toBeNull();
       expect(g.boxed, `${w}: an ancestor of the title has a ground or a radius`).toEqual([]);
       expect(g.band || g.disc, `${w}: the band or its disc is still drawn`).toBe(false);
+      /* v134 — RE-POINTED: the title is the hero number and its words now; its sizes and one-line claim are QC134 N1's */
       expect(g.font!.family, `${w}: the title's face`).toMatch(/Special Elite/);
-      expect(Math.abs(g.font!.size - (wide(w) ? 72 : 58)), `${w}: the title is ${g.font!.size}px`).toBeLessThanOrEqual(1);
-      expect(g.titleText, `${w}: the living title`).toMatch(/^(\d+ queries out|One query out|No queries out)$/);
+      expect(g.titleText, `${w}: the living title`).toMatch(/^\d+(queries|query) out$/);
       expect(g.pageTitle, `${w}: the title keeps data-page-title`).toBe(true);
-      expect(Math.round(g.title!.h / g.font!.lh), `${w}: the title is one line`).toBe(1);
       expect(g.sub, `${w}: the subheader`).toBe(SUB);
     }
   });
@@ -168,7 +167,8 @@ test.describe("Query Centre v133 — the open header", () => {
       /* ⚠️ ±8, NOT ±1: Special Elite's digits are not one width, so "00" and the real count can differ by a few
          pixels (measured 540.1 → 535.4), and the drawing, which starts after the text block, moves by the same. A
          placeholder that has lost its words is hundreds of pixels out (the mutation: 233.8 → 535.4). */
-      expect(Math.abs(a.titleW - b.titleW), `${w}: title width ${a.titleW} → ${b.titleW}`).toBeLessThanOrEqual(8);
+      /* v134: the placeholder is the hero NUMBER, "00" at 124px, so the digit-width difference is larger (measured 413.5 → 405.3) */
+      expect(Math.abs(a.titleW - b.titleW), `${w}: title width ${a.titleW} → ${b.titleW}`).toBeLessThanOrEqual(16);
       expect(Math.abs(a.art.x - b.art.x), `${w}: the drawing's x ${a.art.x} → ${b.art.x}`).toBeLessThanOrEqual(8);
       for (const k of ["y", "h"] as const) expect(Math.abs(a.art[k] - b.art[k]), `${w}: art ${k} ${a.art[k]} → ${b.art[k]}`).toBeLessThanOrEqual(1);
       for (const part of ["title", "sub", "b1"] as const) for (const k of ["x", "y", "h"] as const) expect(Math.abs(a[part][k] - b[part][k]), `${w}: ${part} ${k} ${a[part][k]} → ${b[part][k]}`).toBeLessThanOrEqual(1);

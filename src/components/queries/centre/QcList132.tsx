@@ -46,7 +46,8 @@ const TONE_ICON: Record<Tone, React.ReactNode> = { you: ICON.pen, quiet: ICON.cl
 
 /* ── the popup: one fixed element, placed 10px above its target, clamped 8px inside the window ── */
 interface Tip { el: HTMLElement; title: string; line: string }
-function useTip(rootRef: React.RefObject<HTMLElement | null>) {
+/* exported for the header's faces (v134 §1), which show this same popup */
+export function useTip(rootRef: React.RefObject<HTMLElement | null>) {
   const [tip, setTip] = useState<Tip | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number; ax: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);

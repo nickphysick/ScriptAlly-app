@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "N1",
+  "mutation": "render the number at 72",
+  "red": true,
+  "reading": [
+   "Error: 1512: the number is 72px",
+   "Expected: <= 1",
+   "Received:    52"
+  ]
+ },
+ {
+  "lock": "N2",
+  "mutation": "fill empty slots from other groups (unit: fixture B)",
+  "red": true,
+  "reading": [
+   "× facesFor > with you: past its date first, then the soonest date, a dateless one last 3ms"
+  ]
+ },
+ {
+  "lock": "N2-page",
+  "mutation": "a fourth with-you disc (cap 4) on the rendered page",
+  "red": true,
+  "reading": [
+   "Error: 1512: the groups, in order, each up to its cap and no further"
+  ]
+ },
+ {
+  "lock": "N3",
+  "mutation": "open the agent card instead",
+  "red": true,
+  "reading": [
+   "Error: 1512: the query's card opened",
+   "Expected: visible",
+   "Error: element(s) not found"
+  ]
+ }
+]
