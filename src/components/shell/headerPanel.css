@@ -1,0 +1,78 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE HEADER PANEL (header panel v2, 9 Oct; ref design-refs/shell/header-panel-v2.html).
+ *
+ * On every workspace page the header is a rounded panel in the Analytics band's blue, sitting on the page
+ * ground: 28px under the page sheet's top edge, the content column's width, radius 14, a hairline border,
+ * no shadow. It replaces the header sheet and its envelope flap on those pages.
+ *
+ * ⚠️ THE HEADER ELEMENT ITSELF IS THE PANEL (`.hpanel`). No wrapper and no layer behind it: a panel header
+ *    renders no `<HeaderSheet />` and is not an `hsheet-host`.
+ * ⚠️ THE TOKENS ARE STATED ONCE, HERE, AT `:root`. Each header's own sheet reads them for its type, its
+ *    buttons and its halo; none restates a value. `--hpanel-bg` is `--ink-band`, never `--ink-shell`.
+ * ⚠️ THE FOLDER TAB'S COLOUR FOLLOWS WHAT IS UNDER IT, AND THAT IS DECIDED IN inkShell.css BY WHAT IS ON
+ *    SCREEN — a visible header sheet — never by a list of routes. A panel has no sheet, so its tab is the
+ *    page's colour; an empty state on the same route still has its sheet and its matching tab.
+ * ⚠️ HERO vs COMPACT: `.hpanel--hero` is the two-column panel of the open headers and the full shared header
+ *    (text left, drawing right, vertically centred); `.hpanel--compact` is the workspace masthead's.
+ *    "Compact" VALUES in the hero follow the header's own query (the viewport, 1440), as each header does.
+ */
+:root {
+  --hpanel-bg: var(--ink-band);
+  --hpanel-fg: #f4eee5;
+  --hpanel-muted: rgba(244, 238, 229, 0.86);
+  --hpanel-line: rgba(244, 238, 229, 0.14);
+  --hpanel-stamp: #e0a188;
+  --hpanel-primary-bg: #f3eee6;
+  --hpanel-primary-fg: #1b2433;
+  --hpanel-ring: rgba(244, 238, 229, 0.7);
+  /* the space under a panel that has no desk row beneath it: 48, and 40 below a 1440 viewport */
+  --hpanel-below: 40px;
+}
+@media (min-width: 1440px) { :root { --hpanel-below: 48px; } }
+
+.hpanel {
+  box-sizing: border-box; position: relative;
+  margin-top: 28px;
+  background: var(--hpanel-bg); color: var(--hpanel-fg);
+  border: 1px solid var(--hpanel-line); border-radius: 14px;
+  box-shadow: none;
+}
+/* the two-column panel: text left, drawing right, centred on each other */
+.hpanel--hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
+  padding: 24px 26px 24px 30px;
+}
+@media (min-width: 1440px) { .hpanel--hero { column-gap: 40px; padding: 34px 36px 26px 40px; } }
+/* the workspace masthead's panel */
+.hpanel--compact { padding: 22px 28px; }
+
+/* the two buttons on a panel, whatever the header calls them */
+.hpanel .hpanel-b1 { background: var(--hpanel-primary-bg); color: var(--hpanel-primary-fg); box-shadow: none; }
+.hpanel .hpanel-b1:hover:not(:disabled) { background: #fff; }
+.hpanel .hpanel-b2 { background: transparent; color: var(--hpanel-fg); box-shadow: inset 0 0 0 1.5px var(--hpanel-ring); }
+.hpanel .hpanel-b2:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); }
+/* disabled stays legible on the blue: the same fills, never a 45% wash over a dark ground */
+.hpanel .hpanel-b1:disabled, .hpanel .hpanel-b2:disabled { opacity: 1; cursor: default; }
+.hpanel :is(button, a, [tabindex]):focus-visible { outline: 2px solid var(--hpanel-stamp); outline-offset: 2px; }
+
+/* a drawing made for a light ground stands on a white disc (the Analytics band's `BandDisc` construction) */
+.hpanel-disc { display: block; aspect-ratio: 1; border-radius: 50%; background: #fff; overflow: hidden; }
+.hpanel-disc > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* the rubber stamp (the Query Centre and the Contact list only): real text, outside the h1.
+   ⚠️ TWO CLASSES: the Query Centre's 0-1-0 font reset names bare spans and lands later in the bundle. */
+.hpanel .hpanel-stamp {
+  display: inline-block; flex: none; position: relative; top: -6px; white-space: nowrap;
+  padding: 8px 10px 7px; border: 1.5px solid var(--hpanel-stamp); border-radius: 5px;
+  font-family: "JetBrains Mono", var(--font-mono), monospace; font-weight: 700; font-size: 12px; line-height: 1;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--hpanel-stamp);
+  transform: rotate(-2deg);
+}
+
+/* below 768px a panel keeps its surface and its radius, at 20px of padding; each header stacks or hides its parts as it did */
+@media (max-width: 767.98px) {
+  .hpanel--hero, .hpanel--compact { padding: 20px; }
+}

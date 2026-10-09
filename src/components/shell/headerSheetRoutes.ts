@@ -9,15 +9,27 @@
  * so no sheet, and their tab stays the page colour: the dashboard (its greeting is content, not a
  * header) and the settings chassis (`/account/…`, which titles each section itself).
  *
- * ⚠️ ANALYTICS IS LISTED TOO, AND THAT ONE AWAITS A RULING. It has a page header, but the header is the
- *    anthracite BAND (`PageHeader band`), a full-width ink field of its own: a paper sheet behind it
- *    is either hidden by the band or hides it (measured: it hid it). It keeps its band and an oat tab.
- *
- * ⚠️ ONE REGISTER. The shell reads it for the tab's colour and `tests/e2e/sh2Lib.ts` reads it for the
- *    census, so a route cannot have a sheet with an oat tab above it, or the reverse.
+ * (Header panel v2 narrowed that to the routes outside the workspace set; see below.)
  */
-export const NO_HEADER_SHEET_ROUTES: readonly string[] = ["/dashboard", "/account", "/queries/analytics"];
+export const NO_HEADER_SHEET_ROUTES: readonly string[] = ["/dashboard", "/account"];
 
+/**
+ * HEADER PANEL v2 (9 Oct): every WORKSPACE page's header is the blue panel (shell/headerPanel.css), and a panel has no
+ * sheet under it. A header sheet is left on the pages outside that set that have a page header (Help centre, Plans,
+ * Import) and on every empty state. So this list answers "which routes show a PANEL when populated".
+ *
+ * ⚠️ THE SHELL NO LONGER READS THIS FILE. The folder tab's colour is decided in inkShell.css by whether a header sheet
+ *    is ON SCREEN, because an empty state shares its route with the populated page. The lists remain as the census the
+ *    locks are written against (tests/e2e/sh2Lib.ts, hp2Lib.ts).
+ */
+export const HEADER_PANEL_ROUTES: readonly string[] = ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard"];
+
+const under = (list: readonly string[], pathname: string) => list.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+/** the routes whose populated page has a panel header */
+export function hasHeaderPanel(pathname: string): boolean {
+  return HEADER_PANEL_ROUTES.includes(pathname);
+}
+/** the routes whose populated page has a header sheet: a page header, and not a panel */
 export function hasHeaderSheet(pathname: string): boolean {
-  return !NO_HEADER_SHEET_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+  return !under(NO_HEADER_SHEET_ROUTES, pathname) && !hasHeaderPanel(pathname);
 }

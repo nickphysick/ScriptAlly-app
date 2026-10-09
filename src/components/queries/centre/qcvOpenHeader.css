@@ -8,92 +8,72 @@
  */
 @import "./qcvPage.css";
 
-/* ── v135 · THE CENTRED PAIR (design-refs/query-centre/query-centre-v135.html). The text block and the drawing are ONE
-   GROUP, centred on the page sheet: two content-sized tracks, `justify-content: center`. The drawing is centred on the
-   text block (no drop) and sits clear of the flap: 34 of padding under the row. The gap is 56, and 80 where the PAGE
-   SHEET is wider than 1440 (`.sheet-wide`, measured by the shell — the viewport says nothing about the sheet).
-   ⚠️ THE SAME FOUR VALUES ON ALL THREE OPEN HEADERS (Query Centre, Contact list, Manuscripts); QC135 A4 holds them equal.
-   ⚠️ `minmax(0, auto)` ON THE TEXT TRACK: it is the text's own width whenever that fits, and may give when it cannot. ── */
-.ws-app.sheet-wide .qcoh { column-gap: 80px; }
+/* ── HEADER PANEL v2 (9 Oct; ref design-refs/shell/header-panel-v2.html). The header is the shared panel
+   (`.hpanel.hpanel--hero`, shell/headerPanel.css): the box, the blue, the padding and the two-column grid are the
+   panel's. This sheet states what is the Query Centre's own — the hero number, the faces, the buttons' sizes, the
+   drawing — and reads the panel's tokens for every colour. v135's centred pair and the header sheet are retired here.
+   The subheader is not rendered. ── */
 .qcv-group > .qcoh { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
-.qcoh {
-  box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: center; column-gap: 56px; align-items: center;
-  /* 30 of padding above (Contact list v15.3): with the hero number the text block is taller, and the header's
-     top, hairline and desk top are held equal to /agents (QC133 H3) */
-  /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
-  margin-top: 0; padding: 30px 0 34px;
-}
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+/* the title's row: the h1 and, after its words, the stamp — on the words' baseline (the stamp raises itself 6px) */
+.qcoh .qcoh-trow { display: flex; align-items: baseline; gap: 22px; max-width: 100%; }
 /* THE HERO NUMBER (v134 §1): the h1 is a baseline row of two spans — the count at 124 (98), its words at 42 (34).
    ⚠️ brand.tsx forces `h1:not(.wsh-title)` at runtime and names bare spans as body sans, both injected last:
    three classes and !important on the two spans win honestly. */
 .qcoh .qcoh-txt h1.qcoh-title {
   margin: 0; white-space: nowrap; display: flex; align-items: baseline; gap: 18px;
-  font: 400 42px/1 var(--sp-type) !important; color: #1c130f;
+  font: 400 42px/1 var(--sp-type) !important; color: var(--hpanel-fg);
 }
 .qcoh .qcoh-title .qcoh-hn { font: 400 124px/0.8 var(--sp-type) !important; letter-spacing: -0.03em; }
 .qcoh .qcoh-title .qcoh-ht { font: 400 42px/1 var(--sp-type) !important; }
-.qcoh .qcoh-txt .qcoh-sub { margin: 12px 0 0; font: 400 19px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
 
-/* THE FACES (v134 §1): 16 under the subheader, 22 above the buttons, one line. Each disc overlaps the one before
-   and wears a 3px halo in the header sheet's colour (`--ws-sheet`; app shell v2 — the faces sit on the sheet), earlier discs on top. Colour is the court's. */
-.qcoh .qcoh-faces { display: flex; align-items: center; min-height: 38px; margin-top: 16px; white-space: nowrap; }
+/* THE FACES: one row, 20 (16) under the title, 22 (20) above the buttons. Each disc overlaps the one before and wears
+   a 3px halo in the PANEL's colour (`--hpanel-bg`), earlier discs on top. Colour is the court's; with agents is
+   #6a81a8 here — the court's own #3d5070 disappears on the blue. */
+.qcoh .qcoh-faces { display: flex; align-items: center; min-height: 38px; margin-top: 20px; white-space: nowrap; }
 .qcoh .qcoh-faces .qcoh-fc {
   box-sizing: border-box; flex: none; position: relative; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer;
   font: 600 11px var(--sp-mono); letter-spacing: 0.02em;
-  box-shadow: 0 0 0 3px var(--ws-sheet);
+  box-shadow: 0 0 0 3px var(--hpanel-bg);
 }
 .qcoh .qcoh-faces .qcoh-fc + .qcoh-fc { margin-left: -7px; }
 .qcoh .qcoh-faces .qcoh-fc--you { background: #b0603e; color: #f4eee5; }
-.qcoh .qcoh-faces .qcoh-fc--agent { background: #3d5070; color: #f4eee5; }
+.qcoh .qcoh-faces .qcoh-fc--agent { background: #6a81a8; color: #f4eee5; }
 .qcoh .qcoh-faces .qcoh-fc--closed { background: #b3aca5; color: #2b2622; }
-.qcoh .qcoh-faces .qcoh-fc--sk { background: #e7e5e1; cursor: default; }
-.qcoh .qcoh-faces .qcoh-more { margin-left: 12px; font: 400 15px var(--sp-serif); color: rgba(28, 19, 15, 0.62); }
+.qcoh .qcoh-faces .qcoh-fc--sk { background: rgba(244, 238, 229, 0.16); cursor: default; }
+.qcoh .qcoh-faces .qcoh-more { margin-left: 12px; font: 400 15px var(--sp-serif); color: var(--hpanel-muted); }
 .qcoh .qcoh-acts { display: flex; gap: 10px; margin-top: 22px; }
 .qcoh .qcoh-acts .qcoh-b1, .qcoh .qcoh-acts .qcoh-b2 {
   box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
   font: 400 15.5px var(--sp-type); white-space: nowrap;
 }
-.qcoh .qcoh-acts .qcoh-b1 { background: #2a3a52; color: #f4eee5; }
-.qcoh .qcoh-acts .qcoh-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
-.qcoh .qcoh-acts .qcoh-b1:hover { background: #22304a; }
-.qcoh .qcoh-acts .qcoh-b2:hover { background: #f6f3ee; }
-.qcoh .qcoh-acts button:disabled { cursor: default; }
-.qcoh .qcoh-acts button:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
+/* the buttons' colours, their disabled state and their focus ring are the panel's (`.hpanel-b1` / `.hpanel-b2`) */
 
-/* THE DRAWING (v133.1, the Contact list v15.1 header's design): at the END of its column, so its right edge is the
-   content column's; 326 tall, the hawk's height. Its LAYOUT box sets the row's height and is what the text centres
-   against; `top` then drops it without growing the header, and being positioned it paints over the header's own
-   hairline, which it crosses by the drop less the bottom padding. No top margin: the drop is the headroom.
-   ⚠️ THE DRAWING KEEPS ITS SIZE AND ITS RIGHT EDGE; THE GAP IS WHAT GIVES. `max-width: none` and `justify-self: end`
-   let it overhang its track to the LEFT when the title is long. The 56 (36) column gap is a minimum.
-   ⚠️ `position: relative`, never absolute: it stays in the flow. */
-.qcoh .qcoh-art {
-  display: block; justify-self: start; align-self: center; height: 326px; width: auto; max-width: none; margin: 0;
-  position: relative; top: 0; z-index: 1;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%); mask-image: linear-gradient(90deg, transparent 0, #000 6%);
-}
+/* THE DRAWING: the courier on his white disc (`qc-courier-disc.png`), 206 (170) tall, in the right column, centred on the
+   text and wholly inside the panel. No drop, no mask, nothing crossing an edge. */
+.qcoh .qcoh-art { display: block; justify-self: end; align-self: center; height: 206px; width: auto; max-width: none; margin: 0; }
 
 @media (max-width: 1439.5px) {
   .qcoh .qcoh-txt h1.qcoh-title { gap: 14px; font-size: 34px !important; }
   .qcoh .qcoh-title .qcoh-hn { font-size: 98px !important; }
   .qcoh .qcoh-title .qcoh-ht { font-size: 34px !important; }
-  .qcoh .qcoh-faces { min-height: 32px; }
+  .qcoh .qcoh-faces { min-height: 32px; margin-top: 16px; }
+  .qcoh .qcoh-acts { margin-top: 20px; }
+  .qcoh .qcoh-trow { gap: 16px; }
   .qcoh .qcoh-faces .qcoh-fc { width: 32px; height: 32px; font-size: 9.5px; }
   .qcoh .qcoh-faces .qcoh-fc + .qcoh-fc { margin-left: -5px; }
-  .qcoh .qcoh-txt .qcoh-sub { font-size: 17px; }
-  .qcoh .qcoh-art { height: 253px; }
+  .qcoh .qcoh-art { height: 170px; }
 }
 
 /* loading: the same boxes, their text kept for its line box and painted over */
-.qcoh[data-loading] :is(.qcoh-hn, .qcoh-ht, .qcoh-sub, .qcoh-b1, .qcoh-b2) {
+.qcoh[data-loading] :is(.qcoh-hn, .qcoh-ht, .qcoh-b1, .qcoh-b2) {
   color: transparent !important; box-shadow: none; border-radius: 10px;
-  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  background: linear-gradient(90deg, rgba(244, 238, 229, 0.14), rgba(244, 238, 229, 0.24), rgba(244, 238, 229, 0.14)); background-size: 200% 100%;
   animation: qcohShim 1.6s ease-in-out infinite;
 }
 @keyframes qcohShim { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .qcoh[data-loading] * { animation: none !important; } }
 
 /* the desk's 72 (60) under the hairline is `.qc13 .qc131-desk`'s margin (qcv131.css) */
+/* below 768px the Query Centre renders the v126 page, not this header */

@@ -8,18 +8,23 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { hasHeaderSheet, NO_HEADER_SHEET_ROUTES } from "./headerSheetRoutes";
+import { hasHeaderPanel, hasHeaderSheet, HEADER_PANEL_ROUTES, NO_HEADER_SHEET_ROUTES } from "./headerSheetRoutes";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
-describe("which routes have a header sheet", () => {
-  it("every page-header route has one; the dashboard, the settings chassis and the band header do not", () => {
-    for (const r of ["/queries", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard", "/import", "/plans", "/help"]) expect(hasHeaderSheet(r), r).toBe(true);
-    for (const r of ["/dashboard", "/account", "/account/profile", "/account/security", "/queries/analytics"]) expect(hasHeaderSheet(r), r).toBe(false);
+describe("which routes have a header sheet, and which a panel", () => {
+  it("header panel v2: every workspace route has a panel and no sheet; Help, Plans and Import keep the sheet", () => {
+    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard"]) {
+      expect(hasHeaderPanel(r), r).toBe(true);
+      expect(hasHeaderSheet(r), r).toBe(false);
+    }
+    for (const r of ["/import", "/plans", "/help"]) { expect(hasHeaderSheet(r), r).toBe(true); expect(hasHeaderPanel(r), r).toBe(false); }
+    for (const r of ["/dashboard", "/account", "/account/profile", "/account/security"]) { expect(hasHeaderSheet(r), r).toBe(false); expect(hasHeaderPanel(r), r).toBe(false); }
   });
-  it("a listed route excludes its sub-routes and nothing that merely starts with its letters", () => {
-    expect(NO_HEADER_SHEET_ROUTES).toEqual(["/dashboard", "/account", "/queries/analytics"]);
+  it("the two lists are what they say", () => {
+    expect(NO_HEADER_SHEET_ROUTES).toEqual(["/dashboard", "/account"]);
+    expect(HEADER_PANEL_ROUTES.length).toBe(10);
     expect(hasHeaderSheet("/accounting")).toBe(true);
   });
 });
@@ -34,10 +39,13 @@ describe("the tokens", () => {
   it("the route-level redeclaration states the same page colour", () => {
     expect(decls(read("src/components/shell/workspaceShell.css"))).toMatch(/\.dash-mode \.ws-main, \.ground-mode \.ws-main \{ --ws-page-rgb: 242, 238, 232;/);
   });
-  it("the tab and its fillet read --ink-tab, which is the sheet's colour only in sheet-mode", () => {
+  it("the tab and its fillet read --ink-tab, which is the sheet's colour only where a header sheet is on screen", () => {
     const ink = decls(read("src/components/shell/inkShell.css"));
     expect(ink).toMatch(/\.ws-main \{ --ink-tab: var\(--ink-sheet\); \}/);
-    expect(ink).toMatch(/\.ws-app\.sheet-mode \.ws-main \{ --ink-tab: var\(--ws-sheet\); \}/);
+    /* header panel v2: decided by what is rendered (a visible sheet), never by a route class */
+    expect(ink).toContain(".ws-app:has([data-header-sheet]:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }");
+    expect(ink).not.toContain("sheet-mode");
+    expect(read("src/components/shell/AppShell.tsx")).toContain('data-stage-off={active ? undefined : ""}');
     expect(ink).toMatch(/\.ws-ftab \{[^}]*background: var\(--ink-tab\);/);
     expect(ink).toMatch(/\.ws-ftfl \{[^}]*fill: var\(--ink-tab\);/);
     /* the page sheet itself is still the page's colour */

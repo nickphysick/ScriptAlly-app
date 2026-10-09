@@ -6599,6 +6599,8 @@ export const Queries: React.FC<{
             living={qcLiving}
             /* v134 §1 — the faces read the hero number's own rows; a disc opens its query as a row does */
             faces={qcLiving.count === null ? null : facesFor(qcLivingRows, Date.now())}
+            /* header panel v2 — the stamp states the With you badge's own figure: the same call the desk makes */
+            withYou={showGridSkeleton || qcLiving.count === null ? null : (deskSections(qcScoped, Date.now()).find((s) => s.key === "you")?.total ?? 0)}
             onFace={(id) => { cardSetRef.current = qcLivingRows.map((r) => r.id); onOpenQuery?.(id); }}
             onLog={() => onNavigate?.("queries", "Log a query")}
             /* the app-level Record-a-response host in App.tsx — an interception, never a navigation */

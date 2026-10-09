@@ -112,6 +112,8 @@ export const StagePage: React.FC<{
   return (
     <div
       className={active && entering ? "stage-page-on" : undefined}
+      /* a page that is mounted and not on screen says so, for CSS that must ask what is VISIBLE (the folder tab's colour) */
+      data-stage-off={active ? undefined : ""}
       onAnimationEnd={(e) => { if (e.animationName === "pageIn") setEntering(false); }}
       style={{
         display: active ? (isFillCol ? "flex" : "block") : "none",

@@ -25,7 +25,7 @@
  */
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { FACE_ORDER, FACE_WORDS, type FacesModel } from "../../../lib/contactFaces";
-import { HeaderSheet } from "../../shell/HeaderSheet";
+import "../../shell/headerPanel.css";
 import "./contactV15.css";
 
 /** the header's drawing: a flying hawk carrying an agent card, facing left, transparent */
@@ -84,16 +84,18 @@ export const ContactOpenHeader: React.FC<{
   const shown = all.slice(0, Math.max(0, all.length - drop));
   const more = (faces?.total ?? 0) - shown.length;
   return (
-    <header ref={hdRef} className="cl15-hd hsheet-host" data-cl15="header" data-own-header="" data-loading={loading ? "" : undefined}>
-      <HeaderSheet />
+    <header ref={hdRef} className="cl15-hd hpanel hpanel--hero" data-cl15="header" data-own-header="" data-hpanel="" data-loading={loading ? "" : undefined}>
       <div className="cl15-txt" data-cl15="header-text">
+        {/* the title's row: the h1, then the stamp — real text, OUTSIDE the h1, hidden at 0 and while loading */}
+        <div className="cl15-trow">
         <h1 className="cl15-title" data-probe="title" data-page-title="" aria-label={onFileTitle(n)}>
           <span className="cl15-hn" data-cl15="hero-n">{loading ? "00" : n}</span>
           {/* a real space, so the title still READS "41 agents on file" as text (a flex row draws none; the gap is the sheet's) */}
           {" "}
           <span className="cl15-ht" data-cl15="hero-t">{n === 1 ? "agent on file" : "agents on file"}</span>
         </h1>
-        <p className="cl15-sub" data-cl15="sub">{CONTACT_HEADER_SUB}</p>
+        {!loading && !!faces && faces.counts.none > 0 && <span className="hpanel-stamp" data-cl15="stamp">{faces.counts.none} not queried</span>}
+        </div>
         <div ref={rowRef} className="cl15-faces" data-cl15="faces">
           {loading || !faces ? (
             <span className="cl15-fdiscs" aria-hidden="true">
@@ -110,19 +112,16 @@ export const ContactOpenHeader: React.FC<{
                 </span>
               )}
               {more > 0 && shown.length > 0 && <span className="cl15-fmore" data-cl15="faces-more">+{more} more</span>}
-              <span className="cl15-fkey" data-cl15="faces-key">
-                {FACE_ORDER.filter((s) => faces.counts[s] > 0).map((s) => (
-                  <span key={s} className="cl15-fk" data-cl15="key-item" data-state={s}>
-                    <i className={`is-${s}`} aria-hidden="true" />{faces.counts[s]} {FACE_WORDS[s].key}
-                  </span>
-                ))}
+              {/* the key is no longer drawn (header panel v2); its three counts stay, as one sentence a screen reader reads */}
+              <span className="sr-only" data-cl15="faces-said">
+                {FACE_ORDER.filter((st) => faces.counts[st] > 0).map((st) => `${faces.counts[st]} ${FACE_WORDS[st].key}`).join(", ")}.
               </span>
             </>
           )}
         </div>
         <div className="cl15-acts">
-          <button ref={addRef} type="button" className="cl15-b1" data-cl15="add" onClick={onAdd} disabled={loading}>+ Add an agent</button>
-          <button type="button" className="cl15-b2" data-cl15="view-all" onClick={onViewAll} disabled={loading}>View all agents</button>
+          <button ref={addRef} type="button" className="cl15-b1 hpanel-b1" data-cl15="add" onClick={onAdd} disabled={loading}>+ Add an agent</button>
+          <button type="button" className="cl15-b2 hpanel-b2" data-cl15="view-all" onClick={onViewAll} disabled={loading}>View all agents</button>
         </div>
       </div>
       <div className="cl15-art" data-cl15="header-art" aria-hidden="true">

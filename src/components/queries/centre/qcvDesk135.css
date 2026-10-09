@@ -18,13 +18,8 @@
 
 @media (min-width: 768px) {
   .qc135-desk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-  /* ⚠️ HEADROOM: THE BADGE AND ITS HALO MUST SIT BELOW THE FLAP'S SHADOW. The badge rises 26 (30) above its card and
-     its halo 9 more, and the halo is flat page colour — over the shadow it shows as a pale ring. Measured: the header
-     flap's shadow fades to within 3 levels of the page 29px under its outline, and the outline over the middle badge is
-     21px below the header's flat edge, so the halo's top must be 50 below that edge: 85 (89) to the card's top.
-     v134's 60 (72) put the middle halo in the darkest part of the shadow. 0-3-0, to beat `.qc13 .qc131-desk` (qcv131.css). */
-  .qc13 .qc131-desk.qc135-desk { margin-top: 88px; }
-  .ws-app.sheet-wide .qc13 .qc131-desk.qc135-desk { margin-top: 92px; }
+  /* the desk is 72 (60 below a 1440 viewport) under the header panel — `.qc13 .qc131-desk` (qcv131.css). v135's 88 (92)
+     existed only to clear the header flap's shadow, and the panel has neither a flap nor a shadow. */
 
   /* the courts: --c the colour, --cl the tint; its 40% (inner border) and 55% (placeholder dashes) pre-computed */
   .qc135-card--you { --qc135-c: #b0603e; --qc135-cl: #f6e2d8; --qc135-c40: rgba(176, 96, 62, 0.4); --qc135-c55: rgba(176, 96, 62, 0.55); }

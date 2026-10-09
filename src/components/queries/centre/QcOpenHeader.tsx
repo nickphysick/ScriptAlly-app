@@ -19,8 +19,8 @@
 import React, { useRef } from "react";
 import type { LivingHeader } from "../../shell/PageHeader";
 import type { Faces } from "../../../lib/qcFaces";
-import { HeaderSheet } from "../../shell/HeaderSheet";
-import { QC_PLATE_FIGURE } from "./qcArt";
+import { QC_COURIER_DISC } from "./qcArt";
+import "../../shell/headerPanel.css";
 import { useTip } from "./QcList132";
 import "./qcvOpenHeader.css";
 
@@ -65,27 +65,32 @@ export const QcOpenHeader: React.FC<{
   /** the faces under the subheader; null while the page settles */
   faces?: Faces | null;
   onFace?: (id: string) => void;
-}> = ({ living, loading, onLog, onRecord, logDisabled = false, logRef, faces = null, onFace }) => {
+  /** the With you court's count — the figure in the desk's With you badge. The stamp says it; absent at 0. */
+  withYou?: number | null;
+}> = ({ living, loading, onLog, onRecord, logDisabled = false, logRef, faces = null, onFace, withYou = null }) => {
   const pending = loading || !living || living.count === null;
   const n = pending ? 0 : (living!.count as number);
   return (
-    <header className="qcoh hsheet-host" data-qcv="open-header" data-own-header="" data-loading={pending ? "" : undefined} aria-busy={pending || undefined}>
-      <HeaderSheet />
+    <header className="qcoh hpanel hpanel--hero" data-qcv="open-header" data-own-header="" data-hpanel="" data-loading={pending ? "" : undefined} aria-busy={pending || undefined}>
       <div className="qcoh-txt" data-qcv="oh-text">
+        {/* the title's row: the h1, then the stamp — real text, OUTSIDE the h1, hidden at 0 and while loading */}
+        <div className="qcoh-trow">
         {/* THE HERO NUMBER (v134): the count set large, its words beside it on one baseline. One h1, two spans. */}
         <h1 className="qcoh-title" data-probe="title" data-page-title="" aria-label={pending ? undefined : `${n} ${heroWords(n)}`}>
           <span className="qcoh-hn" data-qcv="oh-hn">{pending ? PENDING_NUMBER : n}</span>
           <span className="qcoh-ht" data-qcv="oh-ht">{heroWords(pending ? 2 : n)}</span>
         </h1>
-        <p className="qcoh-sub" data-qcv="oh-sub">{QC_HEADER_SUB}</p>
+        {!pending && typeof withYou === "number" && withYou > 0 && <span className="hpanel-stamp" data-qcv="oh-stamp">{withYou} with you</span>}
+        </div>
         <FacesRow faces={pending ? null : faces} onFace={onFace} />
         <div className="qcoh-acts">
-          <button ref={logRef} type="button" className="qcoh-b1" data-qcv="oh-log" onClick={onLog} disabled={logDisabled || pending}>+ Log a query</button>
-          <button type="button" className="qcoh-b2" data-qcv="oh-record" onClick={onRecord} disabled={pending}>Record a response</button>
+          <button ref={logRef} type="button" className="qcoh-b1 hpanel-b1" data-qcv="oh-log" onClick={onLog} disabled={logDisabled || pending}>+ Log a query</button>
+          <button type="button" className="qcoh-b2 hpanel-b2" data-qcv="oh-record" onClick={onRecord} disabled={pending}>Record a response</button>
         </div>
       </div>
+      {/* the courier on its white disc: the figure was drawn for a light ground. Swappable by file (qcArt.ts). */}
       <img className="qcoh-art" data-qcv="oh-art" aria-hidden="true" alt=""
-        src={`${QC_PLATE_FIGURE.src}?v=${QC_PLATE_FIGURE.version}`} width={QC_PLATE_FIGURE.width} height={QC_PLATE_FIGURE.height} />
+        src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} />
     </header>
   );
 };

@@ -11,96 +11,70 @@
 
 /* ── §2 · THE OPEN HEADER (v15.1): the text block centred against the drawing, which sits at the column's right edge
    and hangs over the hairline. No top margin: the drawing's own drop is the headroom. The 56 (36) gap is a minimum. ── */
-/* ── v135 · THE CENTRED PAIR (design-refs/query-centre/query-centre-v135.html). The text block and the drawing are ONE
-   GROUP, centred on the page sheet: two content-sized tracks, `justify-content: center`. The drawing is centred on the
-   text block (no drop) and sits clear of the flap: 34 of padding under the row. The gap is 56, and 80 where the PAGE
-   SHEET is wider than 1440 (`.sheet-wide`, measured by the shell — the viewport says nothing about the sheet).
-   ⚠️ THE SAME FOUR VALUES ON ALL THREE OPEN HEADERS (Query Centre, Contact list, Manuscripts); QC135 A4 holds them equal.
-   ⚠️ `minmax(0, auto)` ON THE TEXT TRACK: it is the text's own width whenever that fits, and may give when it cannot. ── */
-.ws-app.sheet-wide .cl15-hd { column-gap: 80px; }
-.cl15-hd {
-  box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: center; column-gap: 56px; align-items: center;
-  /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
-  margin-top: 0; padding: 30px 0 34px;
-}
+/* ── HEADER PANEL v2 (9 Oct; ref design-refs/shell/header-panel-v2.html). The header is the shared panel
+   (`.hpanel.hpanel--hero`, shell/headerPanel.css): the box, the blue, the padding and the two-column grid are the panel's.
+   This sheet states what is the Contact list's own — the hero number, the faces, the buttons' sizes, the drawing — and
+   reads the panel's tokens for every colour. v135's centred pair and the header sheet are retired here. The subheader
+   and the faces' key are not drawn; the key's counts are a visually hidden sentence. ── */
 .cl15-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+/* the title's row: the h1 and, after its words, the stamp — on the words' baseline (the stamp raises itself 6px) */
+.cl15-hd .cl15-trow { display: flex; align-items: baseline; gap: 22px; max-width: 100%; }
 /* ⚠️ brand.tsx forces `h1:not(.wsh-title)` (0-1-1) at runtime, injected last: 0-2-1 and !important win honestly */
 /* v15.3 §2 — THE HERO NUMBER: the count large, "agents on file" smaller beside it, on one baseline and one line.
    The h1 itself carries the small size; the figure states its own. Both spans claw the face back from brand.tsx's
    bare-span rule by inheriting. */
 .cl15-hd .cl15-txt h1.cl15-title {
   margin: 0; white-space: nowrap; display: flex; align-items: baseline; gap: 18px;
-  font: 400 42px/1 var(--sp-type) !important; color: #1c130f;
+  font: 400 42px/1 var(--sp-type) !important; color: var(--hpanel-fg);
 }
 .cl15-hd .cl15-title .cl15-hn, .cl15-hd .cl15-title .cl15-ht { font-family: inherit; font-weight: 400; color: inherit; }
 .cl15-hd .cl15-title .cl15-hn { font-size: 124px; line-height: 0.8; letter-spacing: -0.03em; }
 .cl15-hd .cl15-title .cl15-ht { font-size: 42px; line-height: 1; }
-/* v15.3 §3 — THE FACES: 16 under the subheader, 22 above the buttons, one line. Earlier discs sit on top; the halo is
-   the page's own colour, so a disc reads as cut out of its neighbour. */
-.cl15-hd .cl15-faces { display: flex; align-items: center; gap: 12px; margin-top: 16px; height: 38px; white-space: nowrap; }
+/* THE FACES: one row, 20 (16) under the title, 22 (20) above the buttons. Earlier discs sit on top; the halo is the
+   PANEL's colour (`--hpanel-bg`), so a disc reads as cut out of its neighbour. Active is #6a81a8 with cream initials —
+   the list's own ink disappears on the blue. No key (its counts are a hidden sentence) and no subheader. */
+.cl15-hd .cl15-faces { display: flex; align-items: center; gap: 12px; margin-top: 20px; height: 38px; white-space: nowrap; }
 .cl15-hd .cl15-fdiscs { display: flex; flex: none; }
 .cl15-hd .cl15-face {
   box-sizing: border-box; position: relative; flex: none; width: 38px; height: 38px; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer;
   font: 600 11px var(--font-mono); letter-spacing: 0.02em; line-height: 1;
-  box-shadow: 0 0 0 3px var(--ws-sheet); /* app shell v2: the faces sit on the header sheet */
+  box-shadow: 0 0 0 3px var(--hpanel-bg);
 }
 .cl15-hd .cl15-face + .cl15-face { margin-left: -7px; }
-.cl15-hd .cl15-face.is-active { background: #2a3a52; color: #f4eee5; }
+.cl15-hd .cl15-face.is-active { background: #6a81a8; color: #f4eee5; }
 .cl15-hd .cl15-face.is-closed { background: #b3aca5; color: #2b2622; }
-.cl15-hd .cl15-face.is-none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 3px var(--ws-sheet); }
-.cl15-hd .cl15-face.is-ph { cursor: default; background: #e7e5e1; }
-.cl15-hd .cl15-fmore { flex: none; font: 400 15px var(--clv-serif); color: rgba(28, 19, 15, 0.62); }
-.cl15-hd .cl15-fkey {
-  display: flex; flex: none; gap: 14px; margin-left: 10px; padding-left: 14px; border-left: 1px solid rgba(28, 19, 15, 0.15);
-  font: 400 13.5px var(--clv-serif); color: rgba(28, 19, 15, 0.62);
-}
-.cl15-hd .cl15-fdiscs + .cl15-fkey, .cl15-hd .cl15-fmore + .cl15-fkey { margin-left: 10px; }
-.cl15-hd .cl15-faces > .cl15-fkey:first-child { margin-left: 0; padding-left: 0; border-left: 0; }
-.cl15-hd .cl15-fk { display: inline-flex; align-items: center; gap: 6px; font: inherit; color: inherit; }
-.cl15-hd .cl15-fk i { box-sizing: border-box; flex: none; width: 10px; height: 10px; border-radius: 50%; }
-.cl15-hd .cl15-fk i.is-active { background: #2a3a52; }
-.cl15-hd .cl15-fk i.is-closed { background: #b3aca5; }
-.cl15-hd .cl15-fk i.is-none { background: #fff; box-shadow: inset 0 0 0 1.3px #2a3a52; }
-.cl15-hd .cl15-sub { margin: 12px 0 0; font: 400 19px/1.4 var(--clv-serif); color: rgba(28, 19, 15, 0.66); }
+.cl15-hd .cl15-face.is-none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 3px var(--hpanel-bg); }
+.cl15-hd .cl15-face.is-ph { cursor: default; background: rgba(244, 238, 229, 0.16); }
+.cl15-hd .cl15-fmore { flex: none; font: 400 15px var(--clv-serif); color: var(--hpanel-muted); }
 .cl15-acts { display: flex; gap: 10px; margin-top: 22px; }
 .cl15-hd .cl15-b1, .cl15-hd .cl15-b2 {
   box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
   font: 400 15.5px var(--sp-type); white-space: nowrap;
 }
-.cl15-hd .cl15-b1 { background: #2a3a52; color: #f4eee5; }
-.cl15-hd .cl15-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
-.cl15-hd .cl15-b1:hover { background: #22304a; }
-.cl15-hd .cl15-b2:hover { background: #f6f3ee; }
-.cl15-hd button:disabled { cursor: default; }
-/* the drawing: at the END of its column, so its right edge is the content column's. Its LAYOUT box sets the row's height
-   and is what the text centres against; `top` then drops it without growing the header, and being positioned it paints
-   over the header's own hairline. The width is stated in CSS pixels, so a later 2× file needs no change here.
-   ⚠️ THE DRAWING KEEPS ITS WIDTH AND ITS RIGHT EDGE; THE GAP IS WHAT GIVES. Preflight's `max-width: 100%` squeezed it to
-   478 at 1512 (measured: "37 agents on file" is 625.5 wide, the column 1160, so the track is 478). `max-width: none` and
-   a right-aligned flex slot let it overhang its track to the LEFT, into the gap, by the shortfall (12px there). */
-.cl15-art { justify-self: start; align-self: center; min-width: 0; display: flex; justify-content: flex-start; }
-.cl15-art img { display: block; flex: none; max-width: none; position: relative; top: 0; z-index: 1; width: 490px; height: auto; }
+/* the buttons' colours, their disabled state and their focus ring are the panel's (`.hpanel-b1` / `.hpanel-b2`) */
+/* THE DRAWING: the hawk, bare (no disc), 214 (172) tall, in the right column, centred on the text and wholly inside the
+   panel. No drop, nothing crossing an edge. The height is stated in CSS pixels, so a later 2× file needs no change. */
+.cl15-art { justify-self: end; align-self: center; min-width: 0; display: flex; justify-content: flex-end; }
+.cl15-art img { display: block; flex: none; max-width: none; height: 214px; width: auto; }
 
 @media (max-width: 1439.5px) {
   .cl15-hd .cl15-txt h1.cl15-title { font-size: 34px !important; gap: 14px; }
   .cl15-hd .cl15-title .cl15-hn { font-size: 98px; }
   .cl15-hd .cl15-title .cl15-ht { font-size: 34px; }
-  .cl15-hd .cl15-faces { height: 32px; }
+  .cl15-hd .cl15-faces { height: 32px; margin-top: 16px; }
+  .cl15-acts { margin-top: 20px; }
+  .cl15-hd .cl15-trow { gap: 16px; }
   .cl15-hd .cl15-face { width: 32px; height: 32px; font-size: 9.5px; }
   .cl15-hd .cl15-face + .cl15-face { margin-left: -5px; }
-  .cl15-hd .cl15-fkey { gap: 10px; margin-left: 4px; padding-left: 10px; font-size: 12.5px; }
-  .cl15-hd .cl15-fdiscs + .cl15-fkey, .cl15-hd .cl15-fmore + .cl15-fkey { margin-left: 4px; }
-  .cl15-hd .cl15-sub { font-size: 17px; }
-  .cl15-art img { width: 380px; }
+  .cl15-art img { height: 172px; }
 }
 
 /* loading: the same boxes, their text kept for its line box and painted over */
 /* the hero number is painted as one box, the h1's (its spans inherit the transparent ink) */
-.cl15-hd[data-loading] :is(.cl15-title, .cl15-sub, .cl15-b1, .cl15-b2) {
+.cl15-hd[data-loading] :is(.cl15-title, .cl15-b1, .cl15-b2) {
   color: transparent !important; box-shadow: none; border-radius: 10px;
-  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  background: linear-gradient(90deg, rgba(244, 238, 229, 0.14), rgba(244, 238, 229, 0.24), rgba(244, 238, 229, 0.14)); background-size: 200% 100%;
   animation: cl13Shim 1.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }

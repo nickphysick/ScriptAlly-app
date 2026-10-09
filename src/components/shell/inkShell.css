@@ -21,10 +21,14 @@
      tab) and the window; a route that retones `--ws-page` on `.ws-main` (the dashboard, the Query
      Centre) retones the tab, its fillet and the sheet together, because all three read this. */
   .ws-main { --ink-sheet: var(--ws-page); }
-  /* app shell v2 (9 Oct): on a route whose header sits on the header sheet, the tab and its fillet take
-     the SHEET's colour, so tab and header read as one piece. The page sheet itself stays `--ink-sheet`. */
+  /* ⚠️ THE TAB'S COLOUR IS WHAT IS DIRECTLY UNDER IT (header panel v2, 9 Oct; app shell v2 before it). Where a header
+     sheet is ON SCREEN the tab and its fillet take the sheet's colour, so the two read as one piece; everywhere else —
+     a panel header, the dashboard, the settings chassis — they take the page's.
+     ⚠️ DECIDED BY WHAT IS RENDERED, NEVER BY A ROUTE LIST: every page stays mounted and an empty state shares its
+     route with the populated page, so a list would paint a paper tab over a blue panel. A hidden page's slot carries
+     `data-stage-off` (AppShell `StagePage`), and a sheet inside one does not count. */
   .ws-main { --ink-tab: var(--ink-sheet); }
-  .ws-app.sheet-mode .ws-main { --ink-tab: var(--ws-sheet); }
+  .ws-app:has([data-header-sheet]:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }
 
   .ws-app { background: var(--ink-shell); }
   /* ⚠️ THE FRAME PAINTS ITS GROUND INLINE (`--shell-chrome`, AppShell), and an inline style beats any

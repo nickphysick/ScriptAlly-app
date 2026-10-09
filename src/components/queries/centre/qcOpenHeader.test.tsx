@@ -9,30 +9,46 @@ import React from "react";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QcOpenHeader, QC_HEADER_SUB } from "./QcOpenHeader";
-import { QC_PLATE_FIGURE } from "./qcArt";
+import { QC_COURIER_DISC, QC_PLATE_FIGURE } from "./qcArt";
 
 const living = (count: number | null) => ({ count, copy: (n: number) => ({ headline: `${n} queries out`, subline: ["a living sentence the open header does not draw"] }) });
 const html = (count: number | null, o: { loading?: boolean; logDisabled?: boolean } = {}) =>
   renderToStaticMarkup(<QcOpenHeader living={living(count) as never} loading={!!o.loading} logDisabled={o.logDisabled} onLog={() => {}} onRecord={() => {}} />);
 
 describe("QcOpenHeader", () => {
-  it("draws the living title, the fixed line and both buttons", () => {
+  it("draws the living title and both buttons on the panel; no subheader (header panel v2)", () => {
     const h = html(27);
     expect(h).toMatch(/<h1 class="qcoh-title" data-probe="title" data-page-title="" aria-label="27 queries out">/);
     expect(h).toMatch(/<span class="qcoh-hn" data-qcv="oh-hn">27<\/span><span class="qcoh-ht" data-qcv="oh-ht">queries out<\/span>/);
     expect(html(1)).toMatch(/data-qcv="oh-hn">1<\/span><span class="qcoh-ht" data-qcv="oh-ht">query out<\/span>/);
+    /* header panel v2: the subheader is not rendered on this page (the constant stays for the phone's page) */
     expect(QC_HEADER_SUB).toBe("Send, track, and chase them from this page.");
-    expect(h).toContain(`>${QC_HEADER_SUB}</p>`);
+    expect(h).not.toContain(QC_HEADER_SUB);
+    expect(h, "the header is the panel, with no header sheet").toMatch(/<header class="qcoh hpanel hpanel--hero"[^>]*data-hpanel=""/);
+    expect(h).not.toContain("data-header-sheet");
     expect(h).toContain(">+ Log a query</button>");
     expect(h).toContain(">Record a response</button>");
     expect(h, "the living facts sentence is not drawn").not.toContain("a living sentence");
     expect(h, "an own-header route's marker").toContain('data-own-header=""');
   });
-  it("the drawing is the figure-only courier, aria-hidden, with no band or disc", () => {
+  it("the drawing is the courier on his white disc (header panel v2), aria-hidden, and it is not the shared band", () => {
     const h = html(27);
-    expect(h).toContain(`src="${QC_PLATE_FIGURE.src}?v=${QC_PLATE_FIGURE.version}"`);
+    expect(h).toContain(`src="${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}"`);
     expect(h).toMatch(/<img class="qcoh-art" data-qcv="oh-art" aria-hidden="true"/);
-    expect(h).not.toMatch(/ph--band|ph-bdisc|qc-courier-disc/);
+    expect(h).not.toMatch(/ph--band|ph-bdisc/);
+    expect(h).not.toContain(QC_PLATE_FIGURE.src);
+  });
+  it("the stamp: the With you count as real text outside the h1; absent at 0, absent while loading", () => {
+    const stamp = (n: number | null, o: { loading?: boolean } = {}) =>
+      renderToStaticMarkup(<QcOpenHeader living={living(27) as never} loading={!!o.loading} onLog={() => {}} onRecord={() => {}} withYou={n} />);
+    const h = stamp(4);
+    expect(h).toContain('<span class="hpanel-stamp" data-qcv="oh-stamp">4 with you</span>');
+    const h1 = h.slice(h.indexOf("<h1"), h.indexOf("</h1>"));
+    expect(h1, "the stamp is not inside the h1").not.toContain("hpanel-stamp");
+    expect(h.indexOf("hpanel-stamp")).toBeGreaterThan(h.indexOf("</h1>"));
+    expect(stamp(0)).not.toContain("hpanel-stamp");
+    expect(stamp(null)).not.toContain("hpanel-stamp");
+    expect(stamp(4, { loading: true })).not.toContain("hpanel-stamp");
   });
   it("loading: the title holds a shape and both buttons are disabled", () => {
     for (const h of [html(null), html(27, { loading: true })]) {
