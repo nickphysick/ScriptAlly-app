@@ -27,8 +27,8 @@
   --ms21-slot: 326px; --ms21-drop: 20px;
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
   /* 30 above: the Contact list header's own top padding since its v15.3 (MS21 H1 holds the two equal) */
+  /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
   margin-top: 0; padding: 30px 0 10px;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .ms21-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .ms21-hd .ms21-txt h1.ms21-title {

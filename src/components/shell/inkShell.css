@@ -21,6 +21,10 @@
      tab) and the window; a route that retones `--ws-page` on `.ws-main` (the dashboard, the Query
      Centre) retones the tab, its fillet and the sheet together, because all three read this. */
   .ws-main { --ink-sheet: var(--ws-page); }
+  /* app shell v2 (9 Oct): on a route whose header sits on the header sheet, the tab and its fillet take
+     the SHEET's colour, so tab and header read as one piece. The page sheet itself stays `--ink-sheet`. */
+  .ws-main { --ink-tab: var(--ink-sheet); }
+  .ws-app.sheet-mode .ws-main { --ink-tab: var(--ws-sheet); }
 
   .ws-app { background: var(--ink-shell); }
   /* ⚠️ THE FRAME PAINTS ITS GROUND INLINE (`--shell-chrome`, AppShell), and an inline style beats any
@@ -98,7 +102,7 @@
     height: 41px;
     padding: 0 22px;
     border-radius: 12px 12px 0 0;
-    background: var(--ink-sheet);
+    background: var(--ink-tab);
     display: flex;
     align-items: center;
     color: var(--ink-on-light);
@@ -133,7 +137,7 @@
     width: 13px;
     height: 12px;
     display: block;
-    fill: var(--ink-sheet);
+    fill: var(--ink-tab);
   }
 
   /* ── the recessed sibling tabs ── */

@@ -1,0 +1,52 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE HEADER SHEET AND ITS FLAP (app shell v2, 9 Oct; ref design-refs/shell/shell-v2-page.html).
+ * Desktop only, like the ink shell whose tab it joins: below 768px a header keeps its hairline.
+ *
+ * ⚠️ THE WIDTH IS THE PAGE SHEET'S, MEASURED — never the content column's and never a spread shadow.
+ *    The flap's point is the sheet's centre and its slopes end at the sheet's edges, so the layer
+ *    must BE the sheet's width: the shell publishes the sheet's left and right insets on <html>
+ *    (`--ink-sheet-l/-r`, WorkspaceShell), and the layer is centred on its header, which every page
+ *    centres in the sheet (SH2 S2 measures both edges). Exactly the sheet's width, so nothing
+ *    overflows sideways.
+ * ⚠️ THE HOST TAKES `z-index: 1`, NOT `isolation: isolate`. Either gives the layer's `-1` a stacking
+ *    context to stop in; `isolate` would also drop the header's own popovers (the To-do list's
+ *    Set-aside panel) beneath every positioned element that follows the header.
+ * ⚠️ THE SHADOW IS A FILTER ON THE OUTER ELEMENT. The inner one is clipped to the flap, and a clip
+ *    removes a box-shadow; a drop-shadow on the parent follows the clipped outline.
+ */
+:root { --hsheet-flap: 26px; }
+
+@media (min-width: 768px) {
+  .hsheet-host { position: relative; z-index: 1; }
+  .hsheet {
+    display: block; position: absolute; z-index: -1; pointer-events: none;
+    left: 50%; top: -600px; bottom: calc(-1 * var(--hsheet-flap));
+    width: calc(100vw - var(--ink-sheet-l, 0px) - var(--ink-sheet-r, 0px));
+    transform: translateX(-50%);
+    filter: drop-shadow(0 12px 12px rgba(28, 19, 15, 0.12));
+  }
+  .hsheet > i {
+    display: block; position: absolute; inset: 0;
+    background: var(--ws-sheet);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--hsheet-flap)), 50% 100%, 0 calc(100% - var(--hsheet-flap)));
+  }
+  /* the hairline every header closed on is retired: the flap is the edge */
+  .hsheet-host { border-bottom: 0 !important; }
+  /* ⚠️ THE SHARED `PageHeader` RESERVES THE FLAP'S DEPTH BENEATH ITSELF. Its pages start their content
+     24px (full) or 17px (compact) under the header, or closer (the Help centre's search field), so a
+     26px point would lie over the first thing on the page. The room is a TRANSPARENT bottom border:
+     a border cannot collapse into the next element's margin the way a margin would, it leaves the
+     header's own padding box (and so its art, which stands on the flat edge) exactly where it was,
+     and the layer's `bottom: -26px` — measured from the padding box — fills precisely that room.
+     The three open headers need none: 72 (60) of page already follows them.
+     The CARD header (the Query Centre's empty state) paints its own background, so it takes none. */
+  .ph.hsheet-host:not(.ph--card) { border-bottom: var(--hsheet-flap) solid transparent !important; }
+  /* the workspace grid's chrome slab closes on a hairline of its own, 1px under the masthead: with a
+     sheet inside it that line would rule straight across the flap's point. The border stays (1px of
+     layout, so nothing moves) and stops painting. */
+  .wpg > .wpg-scroll > .wpg-chrome:has(.hsheet-host) { border-bottom-color: transparent; }
+}
+@media (max-width: 767.98px) { .hsheet { display: none; } }

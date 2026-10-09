@@ -19,6 +19,7 @@
  */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
+import { HeaderSheet } from "../../shell/HeaderSheet";
 import { QueryStatus } from "../../../types";
 import type { FeedSeg } from "../../../lib/dashFeed";
 import type { QueryLine } from "../../../lib/compsPage";
@@ -49,7 +50,8 @@ export const MsOpenHeader: React.FC<{
   soon?: boolean;
   children: React.ReactNode;
 }> = ({ title, sub, soon, children }) => (
-  <header className="ms21-hd" data-ms21="header" data-own-header="">
+  <header className="ms21-hd hsheet-host" data-ms21="header" data-own-header="">
+    <HeaderSheet />
     <div className="ms21-txt" data-ms21="header-text">
       <h1 className="ms21-title" data-probe="title" data-page-title="">{title}</h1>
       <p className="ms21-sub" data-ms21="sub">

@@ -15,8 +15,8 @@
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
   /* 30 of padding above (Contact list v15.3): with the hero number the text block is taller, and the header's
      top, hairline and desk top are held equal to /agents (QC133 H3) */
+  /* app shell v2 (9 Oct): no hairline — the header sheet's flap is the edge (shell/headerSheet.css) */
   margin-top: 0; padding: 30px 0 10px;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 /* THE HERO NUMBER (v134 §1): the h1 is a baseline row of two spans — the count at 124 (98), its words at 42 (34).
@@ -31,13 +31,13 @@
 .qcoh .qcoh-txt .qcoh-sub { margin: 12px 0 0; font: 400 19px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
 
 /* THE FACES (v134 §1): 16 under the subheader, 22 above the buttons, one line. Each disc overlaps the one before
-   and wears a 3px halo in the page's own colour (`--ws-page`), earlier discs on top. Colour is the court's. */
+   and wears a 3px halo in the header sheet's colour (`--ws-sheet`; app shell v2 — the faces sit on the sheet), earlier discs on top. Colour is the court's. */
 .qcoh .qcoh-faces { display: flex; align-items: center; min-height: 38px; margin-top: 16px; white-space: nowrap; }
 .qcoh .qcoh-faces .qcoh-fc {
   box-sizing: border-box; flex: none; position: relative; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer;
   font: 600 11px var(--sp-mono); letter-spacing: 0.02em;
-  box-shadow: 0 0 0 3px var(--ws-page);
+  box-shadow: 0 0 0 3px var(--ws-sheet);
 }
 .qcoh .qcoh-faces .qcoh-fc + .qcoh-fc { margin-left: -7px; }
 .qcoh .qcoh-faces .qcoh-fc--you { background: #b0603e; color: #f4eee5; }

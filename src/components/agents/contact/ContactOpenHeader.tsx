@@ -25,6 +25,7 @@
  */
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { FACE_ORDER, FACE_WORDS, type FacesModel } from "../../../lib/contactFaces";
+import { HeaderSheet } from "../../shell/HeaderSheet";
 import "./contactV15.css";
 
 /** the header's drawing: a flying hawk carrying an agent card, facing left, transparent */
@@ -83,7 +84,8 @@ export const ContactOpenHeader: React.FC<{
   const shown = all.slice(0, Math.max(0, all.length - drop));
   const more = (faces?.total ?? 0) - shown.length;
   return (
-    <header ref={hdRef} className="cl15-hd" data-cl15="header" data-own-header="" data-loading={loading ? "" : undefined}>
+    <header ref={hdRef} className="cl15-hd hsheet-host" data-cl15="header" data-own-header="" data-loading={loading ? "" : undefined}>
+      <HeaderSheet />
       <div className="cl15-txt" data-cl15="header-text">
         <h1 className="cl15-title" data-probe="title" data-page-title="" aria-label={onFileTitle(n)}>
           <span className="cl15-hn" data-cl15="hero-n">{loading ? "00" : n}</span>

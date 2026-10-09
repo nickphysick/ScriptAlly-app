@@ -19,6 +19,7 @@
 import React, { useRef } from "react";
 import type { LivingHeader } from "../../shell/PageHeader";
 import type { Faces } from "../../../lib/qcFaces";
+import { HeaderSheet } from "../../shell/HeaderSheet";
 import { QC_PLATE_FIGURE } from "./qcArt";
 import { useTip } from "./QcList132";
 import "./qcvOpenHeader.css";
@@ -68,7 +69,8 @@ export const QcOpenHeader: React.FC<{
   const pending = loading || !living || living.count === null;
   const n = pending ? 0 : (living!.count as number);
   return (
-    <header className="qcoh" data-qcv="open-header" data-own-header="" data-loading={pending ? "" : undefined} aria-busy={pending || undefined}>
+    <header className="qcoh hsheet-host" data-qcv="open-header" data-own-header="" data-loading={pending ? "" : undefined} aria-busy={pending || undefined}>
+      <HeaderSheet />
       <div className="qcoh-txt" data-qcv="oh-text">
         {/* THE HERO NUMBER (v134): the count set large, its words beside it on one baseline. One h1, two spans. */}
         <h1 className="qcoh-title" data-probe="title" data-page-title="" aria-label={pending ? undefined : `${n} ${heroWords(n)}`}>
