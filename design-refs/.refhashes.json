@@ -212,7 +212,8 @@
     "design-refs/shell/shell-v2-in-shell.html": "8427a531595ba8b8f3221d6355aee9c730aeb5a8d6fcd633a8fd8cded6c2fe51",
     "design-refs/dashboard/dashboard-v58.html": "5024673e8b69295f33d5857024ba98e5c9e4e955e1b6bf8ab053bbd0807a6ef4",
     "design-refs/query-centre/query-centre-v135.html": "7cdc59e0b9881502e21eef8a40149948c0dfc47ef34535193903b3b5bcab1729",
-    "design-refs/query-centre/query-centre-v135-in-shell.html": "92fa002288c11d7b09057b83df99b8d93782dd30d21af8c559648bec4a0b3964"
+    "design-refs/query-centre/query-centre-v135-in-shell.html": "92fa002288c11d7b09057b83df99b8d93782dd30d21af8c559648bec4a0b3964",
+    "design-refs/shell/header-panel-v2.html": "f575aaa5bebdbafaae8eba01373872b67b766164d9de0dd8d8f26f15d7262f7c"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
