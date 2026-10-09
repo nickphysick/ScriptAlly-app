@@ -289,7 +289,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 });
 
-const BAND = [233, 230, 224], BLUSH = [243, 221, 210];
+const BAND = [251, 249, 245], BLUSH = [243, 221, 210]; /* the band is paper white, --ws-band, since app shell v2 (it was 233, 230, 224) */
 const LINES = ["One list to log them all, one list to find them,", "one list to hold your queries and in the darkness mind them."];
 /** scroll the page's own scroller so `sel`'s middle sits mid-viewport, and wait for it to settle */
 async function centre(page: Page, sel: string) {
@@ -306,7 +306,7 @@ async function spansSheet(page: Page, y: number, rgb: number[]) {
 }
 
 test.describe("Query Centre v134 — the band and the banner", () => {
-  test("B1 · band: Recently updated sits on #e9e6e0, edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
+  test("B1 · band: Recently updated sits on paper white (#fbf9f5; app shell v2), edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="ru"]');
@@ -325,7 +325,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
           ring: feat?.querySelector<HTMLElement>(".qcard") ? getComputedStyle(feat.querySelector<HTMLElement>(".qcard")!).boxShadow : "",
         };
       });
-      expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(233, 230, 224)");
+      expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(251, 249, 245)");
       expect(g.border === "0px" && g.radius === "0px" && g.shadow === "none", `${w}: no border, radius or shadow on the band (${g.border} ${g.radius} ${g.shadow})`).toBe(true);
       expect(Math.abs(g.ru.y - g.desk - (wide(w) ? 64 : 52)), `${w}: desk → band ${g.ru.y - g.desk}`).toBeLessThanOrEqual(2);
       expect(Math.abs(g.padT - (wide(w) ? 72 : 64)) <= 2 && Math.abs(g.padB - (wide(w) ? 72 : 64)) <= 2, `${w}: inner padding ${g.padT} / ${g.padB}`).toBe(true);
@@ -364,7 +364,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
     };
   });
 
-  test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, the arrow centred, the bar 104 (92) below", async ({ page }) => {
+  test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, no arrow (app shell v2: the flap, SH2 B2), the bar 130 (118) below", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="banner"]');
@@ -379,19 +379,16 @@ test.describe("Query Centre v134 — the band and the banner", () => {
       expect(g.colour === "rgb(91, 42, 31)" && g.align === "center", `${w}: ${g.colour} ${g.align}`).toBe(true);
       expect(Math.abs(g.minH - (wide(w) ? 136 : 112)) <= 0.5 && g.pad === (wide(w) ? "36px 34px" : "28px 26px"), `${w}: min-height ${g.minH}, padding ${g.pad}`).toBe(true);
       expect(Math.abs(g.box.y - g.ruB - (wide(w) ? 56 : 48)), `${w}: ${g.box.y - g.ruB} of page above the banner`).toBeLessThanOrEqual(2);
-      expect(Math.abs(g.barT - g.box.b - (wide(w) ? 104 : 92)), `${w}: banner → bar ${g.barT - g.box.b}`).toBeLessThanOrEqual(2);
+      /* app shell v2: 104 (92) + the flap's 26 */
+      expect(Math.abs(g.barT - g.box.b - (wide(w) ? 130 : 118)), `${w}: banner → bar ${g.barT - g.box.b}`).toBeLessThanOrEqual(2);
       /* painted edge to edge, with plain page above it */
       const mid = await spansSheet(page, g.box.y + g.box.h / 2, BLUSH);
       expect(mid.ok, `${w}: the banner's painted edges are the sheet's ${JSON.stringify(mid)}`).toBe(true);
       const gapPx = await pixel(page, mid.sheet.l + 2, g.box.y - 20);
       expect(!sameRgb(gapPx, BLUSH, 3) && !sameRgb(gapPx, BAND, 3), `${w}: plain page colour above the banner (${gapPx})`).toBe(true);
-      /* the arrow: 150 × 34 (120 × 28), centred on the banner's bottom edge, 1px inside it, and painted */
-      expect(Math.abs(g.arrow.h - (wide(w) ? 34 : 28)) <= 1 && Math.abs(g.arrow.w - (wide(w) ? 150 : 120)) <= 1, `${w}: the arrow is ${g.arrow.w} × ${g.arrow.h}`).toBe(true);
-      const cx = g.box.x + g.box.w / 2;
-      expect(Math.abs(parseFloat(g.arrow.left) - g.box.w / 2), `${w}: the arrow is centred (${g.arrow.left} of ${g.box.w})`).toBeLessThanOrEqual(1);
-      expect(Math.abs(parseFloat(g.arrow.top) - (g.box.h - 1)), `${w}: the arrow starts 1px inside the banner`).toBeLessThanOrEqual(1);
-      const tip = await pixel(page, cx, g.box.b + (wide(w) ? 20 : 16)), beside = await pixel(page, cx + 110, g.box.b + (wide(w) ? 20 : 16));
-      expect(sameRgb(tip, BLUSH, 3) && !sameRgb(beside, BLUSH, 3), `${w}: the arrow is painted below the banner's centre (${tip} / ${beside})`).toBe(true);
+      /* RETIRED (app shell v2, 9 Oct): the arrow. The banner's bottom edge is the header sheet's flap, in blush (SH2 B2 measures its
+         shape, depth and the absence of a shadow). What is held here is that no arrow is drawn. */
+      expect(!(g.arrow.w > 0) && !/svg/.test(g.arrow.bg), `${w}: no arrow (${g.arrow.w} × ${g.arrow.h} ${g.arrow.bg})`).toBe(true);
       const o = await noOverflow(page);
       expect(o.doc <= 0 && o.sc <= 0, `${w}: no sideways overflow ${JSON.stringify(o)}`).toBe(true);
     }

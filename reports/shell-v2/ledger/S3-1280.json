@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "x 262: 357 want 357.7 · x 350: 362 want 362.2 · x 760: 383 want 383.0 · x 1258: 357 want 357.7"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "x 262: 344 want 344.7 · x 350: 349 want 349.2 · x 760: 370 want 370.0 · x 1258: 344 want 344.7"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "x 262: 190 want 190.4 · x 350: 194 want 194.9 · x 760: 215 want 215.7 · x 1258: 190 want 190.4"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "25.3"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 223,218,213"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "x 262: 244 want 244.8 · x 350: 249 want 249.3 · x 760: 270 want 270.1 · x 1258: 244 want 244.8"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "25.9"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "x 262: 357 want 357.4 · x 350: 361 want 361.9 · x 760: 382 want 382.7 · x 1258: 357 want 357.4"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "25.3"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 223,218,213"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "x 262: 244 want 244.8 · x 350: 249 want 249.3 · x 760: 270 want 270.1 · x 1258: 244 want 244.8"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "25.9"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "x 262: 357 want 357.7 · x 350: 362 want 362.2 · x 760: 383 want 383.0 · x 1258: 357 want 357.7"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "x 262: 344 want 344.7 · x 350: 349 want 349.2 · x 760: 370 want 370.0 · x 1258: 344 want 344.7"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "x 262: 344 want 344.7 · x 350: 349 want 349.2 · x 760: 370 want 370.0 · x 1258: 344 want 344.7"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "x 262: 223 want 223.1 · x 350: 227 want 227.6 · x 760: 248 want 248.4 · x 1258: 223 want 223.1"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "25.6"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "x 262: 251 want 251.1 · x 350: 255 want 255.6 · x 760: 276 want 276.4 · x 1258: 251 want 251.1"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "25.6"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 224,219,214"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ },
+ {
+  "lock": "S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2)",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "x 262: 333 want 333.5 · x 350: 338 want 337.9 · x 760: 358 want 358.8 · x 1258: 333 want 333.5"
+ },
+ {
+  "lock": "S3 the point is 26 (±1) under the flat edge, at the page sheet's centre",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "25.3"
+ },
+ {
+  "lock": "S3 a drop shadow lies under the flap's outline",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "filter drop-shadow(rgba(28, 19, 15, 0.12) 0px 12px 12px) · 6px under the edge 223,218,213"
+ },
+ {
+  "lock": "S3 the face is clipped to the flap",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "polygon(0px 0px, 100% 0px, 100% calc(100% - 26px), 50% 100%, 0px calc(100% - 26px))"
+ }
+]

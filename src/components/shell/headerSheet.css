@@ -39,6 +39,16 @@
     background: var(--ws-sheet);
     clip-path: var(--hsheet-clip);
   }
+  /* ⚠️ A CLASSIC SCROLLBAR PUTS THE HEADER'S CENTRE HALF A SCROLLBAR LEFT OF THE SHEET'S, so a layer that is
+     exactly the sheet's width would leave a strip of page down the right. The flat part of the sheet
+     (everything above the flap) is therefore also painted far past both edges, where the scroller clips it;
+     only the flap needs the true width, and half a scrollbar off-centre is not visible in a 26px point.
+     ⚠️ AS A SPREAD SHADOW, NEVER AS A WIDER BOX: a box 100vmax past the edge is scrollable overflow — measured,
+     every scroller gained a viewport's width of sideways scroll (SH2 S2) — and a shadow is not. */
+  .hsheet::before {
+    content: ""; position: absolute; inset: 0 0 var(--hsheet-flap) 0;
+    background: var(--ws-sheet); box-shadow: 0 0 0 100vmax var(--ws-sheet); clip-path: inset(0 -100vmax);
+  }
   /* the hairline every header closed on is retired: the flap is the edge */
   .hsheet-host { border-bottom: 0 !important; }
   /* ⚠️ THE SHARED `PageHeader` RESERVES THE FLAP'S DEPTH BENEATH ITSELF. Its pages start their content

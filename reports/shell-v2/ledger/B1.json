@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "now t 811.7 1179.3×587.5 pad 72/72 · main t 812.7 1179.3×587.5 pad 72/72"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "2 ringed"
+ },
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "now t 727.9 1159.3×484.1 pad 73/73 · main t 728.9 1159.3×484.1 pad 73/73"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "2 ringed"
+ },
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "now t 1521.8 1159.3×424.5 pad 56/60 · main t 1496.8 1159.3×424.5 pad 56/60"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "3 ringed"
+ },
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "now t 690.6 962.1×571.5 pad 64/64 · main t 691.6 962.1×571.5 pad 64/64"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "2 ringed"
+ },
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "now t 607.9 942.1×468.1 pad 65/65 · main t 608.9 942.1×468.1 pad 65/65"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "2 ringed"
+ },
+ {
+  "lock": "B1 precondition: the band is on screen",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "top 204"
+ },
+ {
+  "lock": "B1 the band's colour",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B1 painted paper white at the page sheet's left and right edges",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245"
+ },
+ {
+  "lock": "B1 box and paddings unchanged from main (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "now t 1484.8 942.1×394.2 pad 48/52 · main t 1459.8 942.1×394.2 pad 48/52"
+ },
+ {
+  "lock": "B1 population: white cards inside the band",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1 every card in the band has a ring",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "3 ringed"
+ }
+]

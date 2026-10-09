@@ -59,7 +59,7 @@ const REF = pathToFileURL(resolve("design-refs/page-header/living-headers-v3.htm
 
 type Box = { l: number; t: number; w: number; h: number; r: number; b: number } | null;
 type Hero = {
-  living: string | null; rule: number; hd: Box; eyebrow: number; h1: Box; h1Text: string; h1Scroll: number; h1Client: number; h1Lines: number;
+  living: string | null; rule: number; reserve: number; hd: Box; eyebrow: number; h1: Box; h1Text: string; h1Scroll: number; h1Client: number; h1Lines: number;
   h2: Box; h2Text: string; intro: Box; introText: string; acts: Box; b1: Box; b2: Box; art: Box; artSrc: string; shape: string;
   /** the header is a plate (`data-plate`, the register in plateRoutes.ts) */
   plate: boolean;
@@ -104,7 +104,9 @@ async function readHero(page: Page): Promise<Hero> {
     clone.querySelectorAll('h1[data-probe="title"], [data-probe="intro"]').forEach((e) => { e.innerHTML = ""; });
     return {
       living: hd.getAttribute("data-living"),
-      rule: parseFloat(getComputedStyle(hd).borderBottomWidth) || 0,
+      /* a rule that PAINTS: app shell v2 keeps a transparent bottom border on the shared header (the flap's room), which is not a rule */
+      rule: (() => { const cs = getComputedStyle(hd); const m = cs.borderBottomColor.match(/rgba?\(([^)]+)\)/); const p = m ? m[1].split(",").map((v) => parseFloat(v)) : []; return (p.length > 3 ? p[3] : 1) > 0 ? parseFloat(cs.borderBottomWidth) || 0 : 0; })(),
+      reserve: (() => { const cs = getComputedStyle(hd); const m = cs.borderBottomColor.match(/rgba?\(([^)]+)\)/); const p = m ? m[1].split(",").map((v) => parseFloat(v)) : []; return (p.length > 3 ? p[3] : 1) > 0 ? 0 : parseFloat(cs.borderBottomWidth) || 0; })(),
       plate: hd.hasAttribute("data-plate"),
       band: hd.hasAttribute("data-band"),
       hd: { l: o.left, t: o.top, w: o.width, h: o.height, r: o.right, b: o.bottom },
@@ -260,7 +262,9 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
     /* a band route's empty mode is the OPEN empty header (the real empty page is too), so the band is on
        the populated side only — and neither side carries the rule */
     else if (isBand) L.check("LH7 (band) no rule either side; the band is the populated header's", ctx("0"), empty.rule === 0 && !empty.band && many.rule === 0 && many.band, `rule ${empty.rule}/${many.rule} band ${empty.band}/${many.band}`);
-    else L.check("LH7 no rule", ctx("0"), empty.rule === 0 && many.rule > 0, `rule ${empty.rule} (populated ${many.rule})`);
+    /* RE-POINTED (app shell v2, 9 Oct): no header paints a rule any more — the header sheet's flap is the edge (SH2 S4) —
+       so the empty page and the populated one agree: none. It was "the empty page has none, the populated one has one". */
+    else L.check("LH7 no rule", ctx("0"), empty.rule === 0 && many.rule === 0, `rule ${empty.rule} (populated ${many.rule})`);
     L.check("LH7 no eyebrow", ctx("0"), empty.eyebrow === 0 && many.eyebrow === 0, `${empty.eyebrow} / ${many.eyebrow}`);
     for (const k of ["b1", "b2", "art"] as const) {
       if (!many[k] && !empty[k]) continue;
@@ -283,7 +287,8 @@ test("LH1 · LH2 · LH4 · LH6 · LH7 · the fixed shape, one line, one left edg
       L.check("LH0 (band) skipped: the band's ref is the page's own (QC126-3 / CL13-1)", ctx("27"), many.band, `band ${many.band}`);
     } else if (w === 1440) {
       const r = await readRef(page, many.hd!.w, p.key, 27);
-      L.check("LH0 ref: header height", ctx("27"), near(many.hd!.h, r.hdH, 2), `${f1(many.hd!.h)} vs ref ${f1(r.hdH)}`);
+      /* app shell v2: the header's box now ends in the flap's transparent 26px of room where the ref ends in its 1px rule */
+      L.check("LH0 ref: header height", ctx("27"), near(many.hd!.h - many.reserve + (many.reserve ? 1 : 0), r.hdH, 2), `${f1(many.hd!.h)} (less ${many.reserve} of flap room) vs ref ${f1(r.hdH)}`);
       L.check("LH0 ref: title top", ctx("27"), near(many.h1!.t, r.h1!.t, 1), `${f1(many.h1!.t)} vs ref ${f1(r.h1!.t)}`);
       L.check("LH0 ref: title box", ctx("27"), near(many.h1!.h, r.h1!.h, 1), `${f1(many.h1!.h)} vs ref ${f1(r.h1!.h)}`);
       L.check("LH0 ref: subline under title", ctx("27"), near(many.intro!.t - many.h1!.b, r.sub!.t - (r.h1!.t + r.h1!.h), 1), `${f1(many.intro!.t - many.h1!.b)} vs ref ${f1(r.sub!.t - r.h1!.t - r.h1!.h)}`);
@@ -421,7 +426,7 @@ test("LH9 · a page filtered to nothing keeps its hero", async ({ page }) => {
     L.check("LH9 population", ctx, none, `no-match shown ${none}`);
     /* a plate route keeps its PLATE where an open header keeps its rule (4 Oct) */
     /* …and a band route keeps its BAND (v13) */
-    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : BAND_ROUTES.includes(route) ? h.band : h.rule > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate} band ${h.band}`);
+    L.check("LH9 hero kept", ctx, h.living === "settled" && !!h.h1 && (PLATE_ROUTES.includes(route) ? h.plate : BAND_ROUTES.includes(route) ? h.band : /* app shell v2: the open header closes on the flap's room, not a painted rule */ h.rule === 0 && h.reserve > 0) && !h.h2, `living ${h.living} "${h.h1Text}" rule ${h.rule} plate ${h.plate} band ${h.band}`);
     L.check("LH9 no exhibition", ctx, (await page.evaluate(() => [...document.querySelectorAll('[data-lh="band"]')].filter((e) => e.getBoundingClientRect().height > 0).length)) === 0, "");
   };
   /* (the Query Centre left this suite in v133 — its header is page-local, and a filtered-to-nothing list is QC132 W9's
@@ -496,7 +501,7 @@ test("LH11 · the To-do list's three states", async ({ page }) => {
   await setCount(page, null);
   const c = (state: string) => ({ route: "/todo", size: "1440", state });
   L.check("LH11 list", c("list"), list.h.living === "settled" && /things? to do$/.test(list.h.h1Text) && list.b.tiles && list.b.rows && !list.b.caught && list.b.rail && !list.b.band, JSON.stringify({ ...list.b, h1: list.h.h1Text }));
-  L.check("LH11 all caught up", c("caught"), caught.h.living === "settled" && caught.h.h1Text === "All caught up" && /^Nothing needs you today\./.test(caught.h.introText) && caught.h.rule > 0
+  L.check("LH11 all caught up", c("caught"), caught.h.living === "settled" && caught.h.h1Text === "All caught up" && /^Nothing needs you today\./.test(caught.h.introText) && /* app shell v2: no header paints a rule; the page still closes its header, on the flap */ caught.h.rule === 0
     && caught.b.tiles && !caught.b.rows && caught.b.caught && caught.b.rail && !caught.b.band
     && caught.b.caughtText.startsWith("Nothing is waiting on you"), JSON.stringify({ ...caught.b, h1: caught.h.h1Text, intro: caught.h.introText }));
   L.check("LH11 nothing yet", c("nothing"), nothing.h.living === "empty" && !nothing.h.h1 && nothing.h.h2Text === "Nothing to do yet" && nothing.b.band && !nothing.b.caught && !nothing.b.rail, JSON.stringify({ ...nothing.b, h2: nothing.h.h2Text }));

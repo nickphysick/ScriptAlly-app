@@ -210,7 +210,12 @@ export async function readFull(page: Page, sidePanelSel: string) {
     const pr = panel?.getBoundingClientRect() ?? null;
     return {
       colL, colR, colW: colR - colL,
-      hdL: h.left, hdR: h.right, hdT: h.top - b.bottom, hdH: h.height, rule: h.bottom - 1, barB: b.bottom,
+      hdL: h.left, hdR: h.right, hdT: h.top - b.bottom, hdH: h.height,
+      /* app shell v2 (9 Oct): "the rule" is the header's FLAT BOTTOM EDGE now — the padding box's bottom. The hairline is
+         retired, and the shared header ends in the flap's transparent 26px of room, which is not part of the header's face. */
+      rule: h.bottom - Math.max(1, parseFloat(getComputedStyle(hd).borderBottomWidth) || 0), barB: b.bottom,
+      /* the flap's room under the shared header (0 on main, 26 since app shell v2) */
+      flapRoom: Math.max(0, (parseFloat(getComputedStyle(hd).borderBottomWidth) || 0) - 1) > 0 ? parseFloat(getComputedStyle(hd).borderBottomWidth) : 0,
       frame: frame && { l: frame.left, r: frame.right, w: frame.width },
       textW: tb?.width ?? NaN, textR,
       art, eyebrowT: eyebrow ? eyebrow.top - h.top : NaN, titleT: tr && eyebrow ? tr.top - eyebrow.top : NaN,
@@ -257,7 +262,8 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
   L.check("§4.2 · the header spans the column", ctx, n(r.hdL, r.colL, 1) && n(r.hdR, r.colR, 1), `hd ${r.hdL.toFixed(1)}→${r.hdR.toFixed(1)} col ${r.colL.toFixed(1)}→${r.colR.toFixed(1)}`);
   L.check("§4.2 · its top is the bar's bottom + 18", ctx, n(r.hdT, 18, 1), `${r.hdT.toFixed(1)}`);
   if (r.panel) {
-    L.check("§4.2 · the side panel starts at the rule + 24", ctx, r.panel.t >= r.rule + 24 - 1 && n(r.panel.t, r.rule + 24, 1), `panel ${r.panel.t.toFixed(1)} rule ${r.rule.toFixed(1)}`);
+    /* app shell v2: + the flap's 26px of room, where the shared header reserves it — the panel keeps its 24 from the POINT */
+    L.check("§4.2 · the side panel starts at the rule + 24 (+ the flap's room)", ctx, r.panel.t >= r.rule + 24 + r.flapRoom - 1 && n(r.panel.t, r.rule + 24 + r.flapRoom, 1), `panel ${r.panel.t.toFixed(1)} rule ${r.rule.toFixed(1)} flap room ${r.flapRoom}`);
     const ov = r.panel.l < r.hdBox.r && r.hdBox.l < r.panel.r && r.panel.t < r.hdBox.b && r.hdBox.t < r.panel.b;
     L.check("§4.2 · the side panel does not overlap the header", ctx, !ov, JSON.stringify(r.panel));
   } else {
