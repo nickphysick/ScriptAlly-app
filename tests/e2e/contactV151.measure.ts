@@ -93,10 +93,12 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     /* H4 — the LAYOUT box is the painted rect less the drop */
     const layoutC = r.img.t - r.drop + r.img.h / 2, textC = (r.txt.t + r.txt.b) / 2;
     L.check("H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)", w, Math.abs(textC - layoutC) <= 4, `text ${textC.toFixed(1)} layout ${layoutC.toFixed(1)} drop ${r.drop} (${r.pos})`);
-    L.check("H4 the drop is visual only: the header is no taller than the drawing's layout box plus 14", w, r.hd.h <= r.img.h + 14, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
+    /* v15.3 gave the header 30px of top padding, so the allowance is 44 (30 above, 10 below, 4 spare), not 14 */
+    L.check("H4 the drop is visual only: the header is no taller than the drawing's layout box plus 44", w, r.hd.h <= r.img.h + 44, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
     /* H5 */
     const head = r.img.t - r.sheetTop;
-    L.check(`H5 the drawing's top is ${narrow ? 24 : 30} (±3) below the page sheet's top`, w, near(head, narrow ? 24 : 30, 3), `${head.toFixed(1)}`);
+    /* v15.3 re-pointed: the header's own 30px of top padding sits above the drop, so 30 + 30 (30 + 24) */
+    L.check(`H5 the drawing's top is ${narrow ? 54 : 60} (±3) below the page sheet's top`, w, near(head, narrow ? 54 : 60, 3), `${head.toFixed(1)}`);
 
     /* D1 */
     const gap = r.desk.t - r.hd.b;

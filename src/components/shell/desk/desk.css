@@ -52,7 +52,7 @@
 .dsk-chart { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none; }
 .dsk-card .dsk-chart small { display: block; font: 400 10.5px var(--sp-type); color: rgba(28, 19, 15, 0.42); white-space: nowrap; }
 .dsk-card .dsk-svg { display: block; }
-.dsk-card .dsk-svg--line { width: 112px; height: 38px; }
+.dsk-card .dsk-svg--bars { width: 112px; height: 38px; }
 /* the ring rises 14 above its foot row (the oracle's own offset), so its caption sits level with the other cards' */
 .dsk-card .dsk-svg--ring { width: 48px; height: 48px; margin-top: -14px; }
 .dsk-pg { display: block; width: 112px; height: 8px; margin-bottom: 4px; border-radius: 4px; background: #e6eaef; overflow: hidden; }
@@ -66,7 +66,7 @@
   .dsk-card .dsk-line b { font-size: 28px; }
   .dsk-card .dsk-mom { font-size: 13px; }
   .dsk-card .dsk-chart small { font-size: 9.5px; }
-  .dsk-card .dsk-svg--line { width: 84px; height: 30px; }
+  .dsk-card .dsk-svg--bars { width: 84px; height: 30px; }
   .dsk-card .dsk-svg--ring { width: 40px; height: 40px; }
   .dsk-pg { width: 84px; }
 }

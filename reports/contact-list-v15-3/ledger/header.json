@@ -1,0 +1,308 @@
+[
+ {
+  "lock": "N0 the hero number, the faces and the key are on the page",
+  "where": "1512",
+  "ok": true,
+  "detail": "hn true ht true discs 7 key 3"
+ },
+ {
+  "lock": "N1 .hn is the count on file (= the Queried card's “of N”)",
+  "where": "1512",
+  "ok": true,
+  "detail": "hn \"37\" · \"6 of 37 queried\""
+ },
+ {
+  "lock": "N1 .hn is 124px (±1) Special Elite",
+  "where": "1512",
+  "ok": true,
+  "detail": "124px \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "N1 .ht is 42px (±1) and reads “agent(s) on file”",
+  "where": "1512",
+  "ok": true,
+  "detail": "42px \"agents on file\""
+ },
+ {
+  "lock": "N1 the h1 is one line (height ≤ 1.1 × .hn's size) and keeps data-page-title",
+  "where": "1512",
+  "ok": true,
+  "detail": "h1 99.2 vs 136.4"
+ },
+ {
+  "lock": "N1 the title still reads “N agent(s) on file” as text",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 agents on file"
+ },
+ {
+  "lock": "N1 the figure and its words share a baseline: .ht sits inside .hn's box, to its right",
+  "where": "1512",
+  "ok": true,
+  "detail": "hn 128–227 ht 172–214"
+ },
+ {
+  "lock": "N1 the text block is centred against the drawing's layout box (±4)",
+  "where": "1512",
+  "ok": true,
+  "detail": "text 256.9 drawing 256.9"
+ },
+ {
+  "lock": "N2 the discs are ink, then grey, then white: a prefix of ≤4 active, ≤2 closed, ≤2 not queried",
+  "where": "1512",
+  "ok": true,
+  "detail": "shown active,active,active,active,closed,none,none · ideal active,active,active,active,closed,none,none"
+ },
+ {
+  "lock": "N2 discs are only ever dropped from the END, and only when the row would run into the drawing",
+  "where": "1512",
+  "ok": true,
+  "detail": "shown 7 of 7 · row right 902 + one more 31 vs drawing left 966 less the 56 gap"
+ },
+ {
+  "lock": "N2 earlier discs are on top: z-index falls along the row, and each overlaps the last",
+  "where": "1512",
+  "ok": true,
+  "detail": "7,6,5,4,3,2,1"
+ },
+ {
+  "lock": "N3 active discs are ink, closed grey, not queried white with an ink ring",
+  "where": "1512",
+  "ok": true,
+  "detail": "active:rgb(42, 58, 82) active:rgb(42, 58, 82) active:rgb(42, 58, 82) active:rgb(42, 58, 82) closed:rgb(179, 172, 165) none:rgb(255, 255, 255) none:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "N3 every disc is 38 round, mono, with a 3px halo in the page's colour, and aria-hidden with a tooltip",
+  "where": "1512",
+  "ok": true,
+  "detail": "DR|Douglas Renner · query active|38 · TA|Theo Abara · query active|38 · EV|Edda Voss · query active|38"
+ },
+ {
+  "lock": "N3 the Queried ring's closed arc is grey rgb(179, 172, 165), its active arc ink",
+  "where": "1512",
+  "ok": true,
+  "detail": "closed rgb(179, 172, 165) active rgb(42, 58, 82)"
+ },
+ {
+  "lock": "N3 the key's dots carry the same three colours",
+  "where": "1512",
+  "ok": true,
+  "detail": "active:rgb(42, 58, 82) closed:rgb(179, 172, 165) none:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "N4 the key's numbers sum to the count on file",
+  "where": "1512",
+  "ok": true,
+  "detail": "5 active + 1 closed + 31 not queried = 37 vs 37"
+ },
+ {
+  "lock": "N4 the key reads “{n} active · {n} closed · {n} not queried”, in order, a zero item hidden",
+  "where": "1512",
+  "ok": true,
+  "detail": "5 active · 1 closed · 31 not queried"
+ },
+ {
+  "lock": "N4 the key's active and closed are the Queried card's own (every agent, never the discs shown)",
+  "where": "1512",
+  "ok": true,
+  "detail": "6 of 37 agents queried: 5 active, 1 closed · key 5/1"
+ },
+ {
+  "lock": "N4 “+{n} more” is the count less the discs shown, hidden at 0",
+  "where": "1512",
+  "ok": true,
+  "detail": "+30 more · expected 30"
+ },
+ {
+  "lock": "N5 the faces sit 16 (±2) under the subheader",
+  "where": "1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "N5 the buttons sit 22 (±2) under the faces",
+  "where": "1512",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "N5 the row is one line: no taller than a disc + 2, with every part inside it",
+  "where": "1512",
+  "ok": true,
+  "detail": "row 38.0 disc 38"
+ },
+ {
+  "lock": "N5 the row never pushes into the drawing: the key ends 56 or more before the drawing begins",
+  "where": "1512",
+  "ok": true,
+  "detail": "key right 902.3 drawing left 965.6 gap 56"
+ },
+ {
+  "lock": "N5 the key is ruled off on its left",
+  "where": "1512",
+  "ok": true,
+  "detail": "1px"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "v15.3 header 1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "N0 the hero number, the faces and the key are on the page",
+  "where": "1280",
+  "ok": true,
+  "detail": "hn true ht true discs 6 key 3"
+ },
+ {
+  "lock": "N1 .hn is the count on file (= the Queried card's “of N”)",
+  "where": "1280",
+  "ok": true,
+  "detail": "hn \"37\" · \"6 of 37 queried\""
+ },
+ {
+  "lock": "N1 .hn is 98px (±1) Special Elite",
+  "where": "1280",
+  "ok": true,
+  "detail": "98px \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "N1 .ht is 34px (±1) and reads “agent(s) on file”",
+  "where": "1280",
+  "ok": true,
+  "detail": "34px \"agents on file\""
+ },
+ {
+  "lock": "N1 the h1 is one line (height ≤ 1.1 × .hn's size) and keeps data-page-title",
+  "where": "1280",
+  "ok": true,
+  "detail": "h1 78.4 vs 107.8"
+ },
+ {
+  "lock": "N1 the title still reads “N agent(s) on file” as text",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 agents on file"
+ },
+ {
+  "lock": "N1 the figure and its words share a baseline: .ht sits inside .hn's box, to its right",
+  "where": "1280",
+  "ok": true,
+  "detail": "hn 106–185 ht 141–175"
+ },
+ {
+  "lock": "N1 the text block is centred against the drawing's layout box (±4)",
+  "where": "1280",
+  "ok": true,
+  "detail": "text 220.3 drawing 220.3"
+ },
+ {
+  "lock": "N2 the discs are ink, then grey, then white: a prefix of ≤4 active, ≤2 closed, ≤2 not queried",
+  "where": "1280",
+  "ok": true,
+  "detail": "shown active,active,active,active,closed,none · ideal active,active,active,active,closed,none,none"
+ },
+ {
+  "lock": "N2 discs are only ever dropped from the END, and only when the row would run into the drawing",
+  "where": "1280",
+  "ok": true,
+  "detail": "shown 6 of 7 · row right 807 + one more 27 vs drawing left 851 less the 36 gap"
+ },
+ {
+  "lock": "N2 earlier discs are on top: z-index falls along the row, and each overlaps the last",
+  "where": "1280",
+  "ok": true,
+  "detail": "6,5,4,3,2,1"
+ },
+ {
+  "lock": "N3 active discs are ink, closed grey, not queried white with an ink ring",
+  "where": "1280",
+  "ok": true,
+  "detail": "active:rgb(42, 58, 82) active:rgb(42, 58, 82) active:rgb(42, 58, 82) active:rgb(42, 58, 82) closed:rgb(179, 172, 165) none:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "N3 every disc is 32 round, mono, with a 3px halo in the page's colour, and aria-hidden with a tooltip",
+  "where": "1280",
+  "ok": true,
+  "detail": "DR|Douglas Renner · query active|32 · TA|Theo Abara · query active|32 · EV|Edda Voss · query active|32"
+ },
+ {
+  "lock": "N3 the Queried ring's closed arc is grey rgb(179, 172, 165), its active arc ink",
+  "where": "1280",
+  "ok": true,
+  "detail": "closed rgb(179, 172, 165) active rgb(42, 58, 82)"
+ },
+ {
+  "lock": "N3 the key's dots carry the same three colours",
+  "where": "1280",
+  "ok": true,
+  "detail": "active:rgb(42, 58, 82) closed:rgb(179, 172, 165) none:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "N4 the key's numbers sum to the count on file",
+  "where": "1280",
+  "ok": true,
+  "detail": "5 active + 1 closed + 31 not queried = 37 vs 37"
+ },
+ {
+  "lock": "N4 the key reads “{n} active · {n} closed · {n} not queried”, in order, a zero item hidden",
+  "where": "1280",
+  "ok": true,
+  "detail": "5 active · 1 closed · 31 not queried"
+ },
+ {
+  "lock": "N4 the key's active and closed are the Queried card's own (every agent, never the discs shown)",
+  "where": "1280",
+  "ok": true,
+  "detail": "6 of 37 agents queried: 5 active, 1 closed · key 5/1"
+ },
+ {
+  "lock": "N4 “+{n} more” is the count less the discs shown, hidden at 0",
+  "where": "1280",
+  "ok": true,
+  "detail": "+31 more · expected 31"
+ },
+ {
+  "lock": "N5 the faces sit 16 (±2) under the subheader",
+  "where": "1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "N5 the buttons sit 22 (±2) under the faces",
+  "where": "1280",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "N5 the row is one line: no taller than a disc + 2, with every part inside it",
+  "where": "1280",
+  "ok": true,
+  "detail": "row 32.0 disc 32"
+ },
+ {
+  "lock": "N5 the row never pushes into the drawing: the key ends 36 or more before the drawing begins",
+  "where": "1280",
+  "ok": true,
+  "detail": "key right 807.4 drawing left 851.0 gap 36"
+ },
+ {
+  "lock": "N5 the key is ruled off on its left",
+  "where": "1280",
+  "ok": true,
+  "detail": "1px"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "v15.3 header 1280",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "N3 a disc opens that agent's card",
+  "where": "1280",
+  "ok": true,
+  "detail": "tip \"Douglas Renner · query active\" · card ‹ 31 of 37 › ★ ★ ★ ★ ★ ⋯ ✕ DR Douglas Renner RENNER & FROST "
+ }
+]
