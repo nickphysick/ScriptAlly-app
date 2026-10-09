@@ -7,7 +7,7 @@
  *
  * Every case asserts its population first, so a probe that finds nothing fails rather than passing.
  */
-import { retiredV132 } from "./inkRetired";
+import { retiredV132, retiredV134 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 
@@ -39,6 +39,7 @@ const cards = (page: Page) => page.evaluate(() => [...document.querySelectorAll<
       key: c.dataset.court!, x: b.left, r: b.right, y: b.top, w: b.width, h: b.height,
       bg: cs.backgroundColor, radius: cs.borderTopLeftRadius,
       name: c.querySelector<HTMLElement>('[data-qcv="court-name"]')?.innerText.trim() ?? null,
+      words: c.querySelector<HTMLElement>('[data-qcv="court-words"]')?.textContent ?? null,
       count: +(c.querySelector<HTMLElement>('[data-qcv="court-count"]')?.innerText ?? NaN),
       lines, stamp: stamp ? { text: stamp.innerText.trim(), tf: getComputedStyle(stamp).transform, ago: +(stamp.dataset.ago ?? NaN) } : null,
       svgs: svgs.length, svgH: svgs[0]?.getBoundingClientRect().height ?? NaN, pts, ax,
@@ -49,6 +50,7 @@ const cards = (page: Page) => page.evaluate(() => [...document.querySelectorAll<
 
 test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   test("D1 · three separate cards, 18px apart, each #fffdf9 at radius 16, no shared frame", async ({ page }) => {
+    test.skip(true, retiredV134("three #fffdf9 cards 18px apart; the v134 card is white, 24 (16) apart, with a disc above it", "QC134 K1"));
     for (const w of WIDTHS) {
       await openQc(page, w);
       const cs = await cards(page);
@@ -81,7 +83,8 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
       const cs = await cards(page);
       expect(cs.length, `${w}: three cards`).toBe(3);
       for (const c of cs) {
-        expect(c.name, `${w} ${c.key}: name`).toBe(NAME[c.key]);
+        /* v134 — RE-POINTED: the court's title row is retired; the card's line carries the court's words after its figure */
+        expect(c.words, `${w} ${c.key}: the line's words`).toBe(`${c.count}${NAME[c.key].toLowerCase()}`);
         expect(c.lines.length, `${w} ${c.key}: two lines`).toBe(2);
         c.lines.forEach((l, i) => {
           expect(l.text, `${w} ${c.key} line ${i + 1}`).toMatch(PAT[c.key][i]);
@@ -124,6 +127,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D4 · the stamp: the change against four weeks ago, rotated", async ({ page }) => {
+    test.skip(true, retiredV134("the rubber stamp and its change against four weeks ago; the v134 card states the change since the end of last month", "QC134 K2 and qcCourtHistory.test.ts (monthChange)"));
     for (const w of WIDTHS) {
       await openQc(page, w);
       for (const c of await cards(page)) {
@@ -139,6 +143,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D5 · the trend: one 52px chart, ten points, the last is the big number; month … Now; no bars", async ({ page }) => {
+    test.skip(true, retiredV134("the 52px pen-filtered trend, its month … Now axis and its accessible label; the v134 card draws a 112 × 38 line chart", "QC134 K3"));
     for (const w of WIDTHS) {
       await openQc(page, w);
       for (const c of await cards(page)) {

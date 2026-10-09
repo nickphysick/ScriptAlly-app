@@ -21,11 +21,10 @@
  * point is its last instant — or now, for the current week.
  */
 import { tileCourt, type QcRow, type TileCourt } from "./qcSummary";
-import { deskWeeks } from "./qcDeskWeeks";
+import { deskWeeks, monthStart } from "./qcDeskWeeks";
 
 /** Ten points, one a week; the last is now. */
 export const TREND_WEEKS = 10;
-const DAY = 86_400_000;
 
 /**
  * The court a query stood in at instant `t` — null when it had not been sent yet, or when its stage at
@@ -68,10 +67,14 @@ export function courtSeries(rows: readonly QcRow[], nowMs: number): CourtSeries 
   };
 }
 
-/** The stamp: the court's count now minus its count four weeks ago, from the same function. */
-export const courtChange = (rows: readonly QcRow[], court: TileCourt, nowMs: number): number =>
-  countAt(rows, court, nowMs, nowMs) - countAt(rows, court, nowMs - 28 * DAY, nowMs);
+/**
+ * MONTH ON MONTH (v134 §2): the court's count now, minus its count at the last instant of the previous
+ * London calendar month — two points of the same running count the chart draws. Nothing is estimated:
+ * a query whose move into today's stage is undated is in the "now" figure and in no earlier one, exactly
+ * as it is in the series.
+ */
+export const monthChange = (rows: readonly QcRow[], court: TileCourt, nowMs: number): number =>
+  countAt(rows, court, nowMs, nowMs) - countAt(rows, court, monthStart(nowMs) - 1, nowMs);
 
-/** "+2 this month", "−3 this month", "No change this month" — a true minus sign. */
-export const stampText = (d: number): string =>
-  d === 0 ? "No change this month" : `${d > 0 ? "+" : "−"}${Math.abs(d)} this month`;
+/** "3 since last month" beside its arrow; "No change since last month" with none. */
+export const monthText = (d: number): string => (d === 0 ? "No change since last month" : `${Math.abs(d)} since last month`);

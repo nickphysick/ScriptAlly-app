@@ -1,11 +1,10 @@
 /**
- * Query Centre v131.1 — the desk's lines, its trend and stamp; and (v131 §5) the Coming-up chip's class,
+ * Query Centre v131.1 / v134 — the desk's lines, its chart and month-on-month figure; and (v131 §5) the Coming-up chip's class,
  * from the data rather than the string.
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus, type Query } from "../types";
-import { deskSections, trendLabel, trendStartLabel, trendTip } from "./qcDesk";
-import { stampText } from "./qcCourtHistory";
+import { deskSections, trendStartLabel, COURT_WORDS } from "./qcDesk";
 import { comingTone, type ComingUp } from "./qcComingUp";
 import type { QcRow } from "./qcSummary";
 
@@ -65,21 +64,22 @@ describe("v131.1 · the desk's lines", () => {
     expect(y.lines[0]).toEqual({ n: 0, text: "offers to consider", hot: false });
     expect(a.lines[0]).toEqual({ n: 0, text: "responses overdue", hot: false });
   });
-  it("the trend has ten points and its last is the big number; the stamp is a true minus", () => {
+  it("the chart has ten points and its last is the card's figure", () => {
     for (const s of [you, agent, closed]) {
       expect(s.trend.values.length).toBe(10);
       expect(s.trend.values[9]).toBe(s.total);
     }
-    expect(stampText(3)).toBe("+3 this month");
-    expect(stampText(-3)).toBe("\u22123 this month");
-    expect(stampText(0)).toBe("No change this month");
   });
-  it("the chart's words: the first month, the label and the tooltip", () => {
-    const mon = Date.parse("2025-08-04T00:00:00+01:00");
-    expect(trendStartLabel(mon)).toBe("Aug");
-    expect(trendLabel("With agents", mon, 14, 19)).toBe("With agents: 14 in early August, 19 now");
-    expect(trendLabel("With agents", Date.parse("2025-08-25T00:00:00+01:00"), 14, 19)).toBe("With agents: 14 in late August, 19 now");
-    expect(trendTip("agent", Date.parse("2025-09-29T00:00:00+01:00"), 20)).toBe("W/C 29 SEP · 20 with agents");
+  it("the chart's caption starts with the first week's month", () => {
+    expect(trendStartLabel(Date.parse("2025-08-04T00:00:00+01:00"))).toBe("Aug");
+  });
+  it("v134: the line's words, and the card said aloud", () => {
+    expect(COURT_WORDS).toEqual({ you: "with you", agent: "with agents", closed: "closed" });
+    expect(you.said).toBe(`${you.total} with you: ${you.lines[0].n} ${you.lines[0].text}, ${you.lines[1].n} ${you.lines[1].text}; ${you.mom.dir === "none" ? "no change" : `${you.mom.dir} ${Math.abs(you.mom.delta)}`} since last month`);
+    for (const s of [you, agent, closed]) {
+      expect(s.mom.dir).toBe(s.mom.delta > 0 ? "up" : s.mom.delta < 0 ? "down" : "none");
+      expect(s.mom.text).toBe(s.mom.delta === 0 ? "No change since last month" : `${Math.abs(s.mom.delta)} since last month`);
+    }
   });
 });
 

@@ -58,6 +58,12 @@ export function deskWeeks(nowMs: number, n = DESK_WEEKS): number[] {
   return out;
 }
 
+/** The start (London 00:00 on the 1st) of the calendar month holding `ms`. */
+export function monthStart(ms: number): number {
+  const p = london(ms);
+  return londonMidnight(p.y, p.m, 1);
+}
+
 /** "W/C 11 AUG" — the week's Monday by the London calendar. */
 export function weekLabel(startMs: number): string {
   const p = london(startMs);

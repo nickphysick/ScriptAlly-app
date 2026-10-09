@@ -150,3 +150,140 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
     }
   });
 });
+
+const COURT_C: Record<string, string> = { you: "rgb(176, 96, 62)", agent: "rgb(61, 80, 112)", closed: "rgb(124, 113, 104)" };
+const COURT_WORDS: Record<string, string> = { you: "with you", agent: "with agents", closed: "closed" };
+const readDesk = (page: Page) => page.evaluate(() => {
+  const desk = document.querySelector<HTMLElement>('[data-qcv="courts"]')!;
+  const cards = [...desk.querySelectorAll<HTMLElement>('[data-qcv="court"]')];
+  const R = (e: Element) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, r: r.right, b: r.bottom }; };
+  return {
+    v: desk.dataset.v, stamps: desk.querySelectorAll('[data-qcv="court-stamp"], .qc131-stamp, [class*="stamp"]').length,
+    oldTrend: desk.querySelectorAll('[data-qcv="trend-hit"], [data-qcv="trend-tip"], .qc131-plot, [data-qcv="court-name"]').length,
+    deskBg: getComputedStyle(desk).backgroundColor, deskShadow: getComputedStyle(desk).boxShadow,
+    cards: cards.map((c) => {
+      const cs = getComputedStyle(c), disc = c.querySelector<HTMLElement>('[data-qcv="court-disc"]'), ds = disc ? getComputedStyle(disc) : null;
+      const words = c.querySelector<HTMLElement>('[data-qcv="court-words"]'), fig = c.querySelector<HTMLElement>('[data-qcv="court-count"]');
+      const mom = c.querySelector<HTMLElement>('[data-qcv="court-mom"]'), svg = c.querySelector<SVGSVGElement>('[data-qcv="court-trend"]'), line = c.querySelector<SVGPathElement>('[data-qcv="trend-line"]');
+      const chart = c.querySelector<HTMLElement>('[data-qcv="court-chart"]'), cap = c.querySelector<HTMLElement>('[data-qcv="trend-cap"]');
+      const after = getComputedStyle(c, "::after");
+      return {
+        key: c.dataset.court!, box: R(c), bg: cs.backgroundColor, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow, pad: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].join(" "),
+        label: c.getAttribute("aria-label") ?? "", pressed: c.querySelector('[data-qcv="court-pick"]')?.getAttribute("aria-pressed"),
+        disc: disc ? { box: R(disc), bg: ds!.backgroundColor, shadow: ds!.boxShadow, hidden: disc.getAttribute("aria-hidden"), icon: disc.querySelector("svg") ? R(disc.querySelector("svg")!) : null, stroke: disc.querySelector("svg") ? getComputedStyle(disc.querySelector("svg")!).stroke : "" } : null,
+        words: words?.textContent ?? "", wordsFace: words ? getComputedStyle(words).fontFamily : "", wordsSize: words ? parseFloat(getComputedStyle(words).fontSize) : 0, /* one line: the paragraph is no taller than its tallest glyph run, the 34px figure's own line box */
+        wordsLines: words && fig ? Math.round(words.offsetHeight / (parseFloat(getComputedStyle(fig).fontSize) * 1.15)) : 0,
+        figure: fig?.textContent ?? "", figSize: fig ? parseFloat(getComputedStyle(fig).fontSize) : 0,
+        tiles: [...c.querySelectorAll<HTMLElement>('[data-qcv="court-line"]')].map((l) => { const t = l.querySelector<HTMLElement>('[data-qcv="court-tile"]')!, ts = getComputedStyle(t); return { n: t.textContent ?? "", text: l.querySelector<HTMLElement>('[data-qcv="court-label"]')?.textContent ?? "", hot: l.dataset.hot === "true", bg: ts.backgroundColor, color: ts.color, h: t.getBoundingClientRect().height }; }),
+        mom: mom ? { text: mom.textContent ?? "", dir: mom.dataset.dir ?? "", delta: Number(mom.dataset.delta), color: getComputedStyle(mom).color, arrow: mom.querySelector("svg") ? { w: mom.querySelector("svg")!.getBoundingClientRect().width, fill: getComputedStyle(mom.querySelector("svg path")!).fill } : null, size: parseFloat(getComputedStyle(mom).fontSize), b: mom.getBoundingClientRect().bottom } : null,
+        svgs: c.querySelectorAll('[data-qcv="court-chart"] svg').length, svg: svg ? R(svg) : null, values: (svg?.dataset.values ?? "").split(",").filter(Boolean).map(Number),
+        vertices: (line?.getAttribute("d") ?? "").split(/[ML]/).filter(Boolean).length, stroke: line ? getComputedStyle(line).stroke : "", strokeW: line ? getComputedStyle(line).strokeWidth : "",
+        chartHidden: chart?.getAttribute("aria-hidden"), cap: cap?.textContent ?? "", capB: cap ? cap.getBoundingClientRect().bottom : 0,
+        afterBg: after.backgroundColor, afterH: after.height, afterL: after.left, afterR: after.right, afterContent: after.content,
+      };
+    }),
+  };
+});
+
+test.describe("Query Centre v134 — the icon desk cards", () => {
+  test("K1 · desk shape: three white cards, a court-coloured disc 28 (24) above each, no stamp; selected is the court's ring and foot bar", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      const d = await readDesk(page);
+      expect(d.cards.map((c) => c.key), `${w}: three cards`).toEqual(["you", "agent", "closed"]);
+      expect(d.stamps, `${w}: no stamp element in the desk`).toBe(0);
+      expect(d.oldTrend, `${w}: no title row, trend plot or trend tooltip`).toBe(0);
+      expect(d.deskBg === "rgba(0, 0, 0, 0)" && d.deskShadow === "none", `${w}: the grid has no surface`).toBe(true);
+      const gap = wide(w) ? 24 : 16;
+      for (let i = 1; i < 3; i++) expect(Math.abs(d.cards[i].box.x - d.cards[i - 1].box.r - gap), `${w}: gap ${d.cards[i].box.x - d.cards[i - 1].box.r}`).toBeLessThanOrEqual(1);
+      for (const c of d.cards) {
+        expect(c.bg, `${w} ${c.key}: the card is white`).toBe("rgb(255, 255, 255)");
+        expect(c.radius, `${w} ${c.key}: radius`).toBe("16px");
+        expect(c.pad, `${w} ${c.key}: padding`).toBe(wide(w) ? "50px 24px 16px 24px" : "42px 18px 16px 18px");
+        expect(c.shadow, `${w} ${c.key}: the hairline ring`).toMatch(/rgba\(28, 19, 15, 0\.09\) 0px 0px 0px 1px/);
+        expect(c.disc, `${w} ${c.key}: a disc`).not.toBeNull();
+        expect(Math.abs(c.box.y - c.disc!.box.y - (wide(w) ? 28 : 24)), `${w} ${c.key}: the disc's top is ${c.box.y - c.disc!.box.y} above the card`).toBeLessThanOrEqual(2);
+        expect(Math.abs(c.disc!.box.x - c.box.x - (wide(w) ? 22 : 16)), `${w} ${c.key}: the disc's left`).toBeLessThanOrEqual(1);
+        expect(Math.abs(c.disc!.box.w - (wide(w) ? 64 : 54)), `${w} ${c.key}: the disc is ${c.disc!.box.w}`).toBeLessThanOrEqual(0.5);
+        expect(c.disc!.bg, `${w} ${c.key}: the disc is the court's colour`).toBe(COURT_C[c.key]);
+        expect(c.disc!.shadow, `${w} ${c.key}: the 5px halo`).toMatch(/0px 0px 0px 5px/);
+        expect(c.disc!.hidden, `${w} ${c.key}: the disc is aria-hidden`).toBe("true");
+        expect(c.disc!.icon && Math.abs(c.disc!.icon.w - (wide(w) ? 46 : 38)) <= 0.5, `${w} ${c.key}: the icon is ${c.disc!.icon?.w}`).toBe(true);
+        expect(c.disc!.stroke, `${w} ${c.key}: a cream icon`).toBe("rgb(244, 238, 229)");
+        expect(c.pressed, `${w} ${c.key}: nothing selected at rest`).toBe("false");
+      }
+      const tops = d.cards.map((c) => Math.round(c.box.y)), bottoms = d.cards.map((c) => Math.round(c.box.b));
+      expect(new Set(tops).size === 1 && new Set(bottoms).size === 1, `${w}: one row, one height (${tops} / ${bottoms})`).toBe(true);
+      /* selected: the inset ring and the foot bar, in the court's colour */
+      await page.locator('[data-qcv="court"][data-court="agent"] [data-qcv="court-pick"]').click();
+      await page.waitForTimeout(350);
+      const s = (await readDesk(page)).cards[1];
+      expect(s.pressed, `${w}: With agents is pressed`).toBe("true");
+      expect(s.shadow, `${w}: the 1.5px inset ring in the court colour`).toMatch(/rgb\(61, 80, 112\) 0px 0px 0px 1\.5px inset/);
+      expect(s.afterBg, `${w}: the foot bar's colour`).toBe(COURT_C.agent);
+      expect(s.afterH, `${w}: the foot bar is 3px`).toBe("3px");
+      expect(s.afterL === (wide(w) ? "24px" : "18px") && s.afterR === s.afterL, `${w}: the bar is inset ${s.afterL} / ${s.afterR}`).toBe(true);
+      await page.locator('[data-qcv="court"][data-court="agent"] [data-qcv="court-pick"]').click();
+      await page.waitForTimeout(250);
+      const o = await noOverflow(page);
+      expect(o.doc <= 0 && o.sc <= 0, `${w}: no sideways overflow ${JSON.stringify(o)}`).toBe(true);
+    }
+  });
+
+  test("K2 · desk content: the line and its figure, v131.1's two tiles, and a neutral month-on-month", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      const d = await readDesk(page);
+      const dirs: Record<string, number> = {};
+      for (const c of d.cards) {
+        expect(c.figure, `${w} ${c.key}: a figure`).toMatch(/^\d+$/);
+        expect(c.words, `${w} ${c.key}: the line`).toBe(`${c.figure}${COURT_WORDS[c.key]}`);
+        expect(c.wordsFace, `${w} ${c.key}: Special Elite`).toMatch(/Special Elite/);
+        expect(Math.abs(c.wordsSize - (wide(w) ? 21 : 17)) <= 0.5 && Math.abs(c.figSize - (wide(w) ? 34 : 28)) <= 0.5, `${w} ${c.key}: ${c.wordsSize} / ${c.figSize}`).toBe(true);
+        expect(c.wordsLines, `${w} ${c.key}: the line is one line`).toBe(1);
+        /* the two tiles, as v131.1 built them */
+        expect(c.tiles.length, `${w} ${c.key}: two tiled lines`).toBe(2);
+        expect(c.tiles.reduce((n, t) => n + Number(t.n), 0), `${w} ${c.key}: the tiles do not exceed the figure`).toBeLessThanOrEqual(Number(c.figure));
+        for (const t of c.tiles) {
+          expect(Math.abs(t.h - 26), `${w} ${c.key}: a tile is ${t.h} tall`).toBeLessThanOrEqual(0.5);
+          if (t.hot) expect(t.color === "rgb(162, 69, 42)" && t.bg === "rgb(246, 221, 210)", `${w} ${c.key}: a hot tile is rust on blush (${t.color} on ${t.bg})`).toBe(true);
+          else if (Number(t.n) === 0) expect(t.bg, `${w} ${c.key}: a zero is the muted tile`).toBe("rgb(241, 238, 233)");
+          else expect(t.color, `${w} ${c.key}: a plain tile is the court's colour`).toBe(COURT_C[c.key]);
+        }
+        /* month on month: the words follow the figure, and the colour is ink at 58% whichever way it points */
+        const m = c.mom!;
+        expect(m, `${w} ${c.key}: a month-on-month line`).not.toBeNull();
+        expect(Number.isFinite(m.delta), `${w} ${c.key}: the figure was published`).toBe(true);
+        expect(m.dir, `${w} ${c.key}: the direction follows the figure`).toBe(m.delta > 0 ? "up" : m.delta < 0 ? "down" : "none");
+        expect(m.text, `${w} ${c.key}: the words`).toBe(m.delta === 0 ? "No change since last month" : `${Math.abs(m.delta)} since last month`);
+        expect(m.color, `${w} ${c.key}: neutral ink 58%, ${m.dir}`).toBe("rgba(28, 19, 15, 0.58)");
+        if (m.dir === "none") expect(m.arrow, `${w} ${c.key}: no arrow with no change`).toBeNull();
+        else { expect(Math.abs(m.arrow!.w - 11), `${w} ${c.key}: an 11px arrow`).toBeLessThanOrEqual(0.5); expect(m.arrow!.fill, `${w} ${c.key}: the arrow is the line's grey`).toBe("rgba(28, 19, 15, 0.58)"); }
+        expect(Math.abs(m.size - (wide(w) ? 14.5 : 13)), `${w} ${c.key}: ${m.size}px`).toBeLessThanOrEqual(0.3);
+        dirs[m.dir] = (dirs[m.dir] ?? 0) + 1;
+        expect(c.label, `${w} ${c.key}: the card said aloud`).toBe(`${c.figure} ${COURT_WORDS[c.key]}: ${c.tiles.map((t) => `${t.n} ${t.text}`).join(", ")}; ${m.dir === "none" ? "no change" : `${m.dir} ${Math.abs(m.delta)}`} since last month`);
+      }
+      console.log(`[K2] ${w}: directions ${JSON.stringify(dirs)} · ${d.cards.map((c) => `${c.key} ${c.figure} (${c.mom!.delta})`).join(", ")}`);
+    }
+  });
+
+  test("K3 · desk chart: one 112 × 38 (84 × 30) svg a card, ten points, the last is the figure, the court's stroke, aria-hidden", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      const d = await readDesk(page);
+      for (const c of d.cards) {
+        expect(c.svgs, `${w} ${c.key}: one svg`).toBe(1);
+        expect(Math.abs(c.svg!.w - (wide(w) ? 112 : 84)) <= 1 && Math.abs(c.svg!.h - (wide(w) ? 38 : 30)) <= 1, `${w} ${c.key}: ${c.svg!.w} × ${c.svg!.h}`).toBe(true);
+        expect(c.values.length, `${w} ${c.key}: ten points`).toBe(10);
+        expect(c.vertices, `${w} ${c.key}: the line has ten vertices`).toBe(10);
+        expect(c.values[9], `${w} ${c.key}: the last point is the card's figure`).toBe(Number(c.figure));
+        expect(c.stroke, `${w} ${c.key}: the court's stroke`).toBe(COURT_C[c.key]);
+        expect(c.strokeW, `${w} ${c.key}: 1.8px`).toBe("1.8px");
+        expect(c.chartHidden, `${w} ${c.key}: the chart is aria-hidden`).toBe("true");
+        expect(c.cap, `${w} ${c.key}: the caption`).toMatch(/^[A-Z][a-z]{2} → now$/);
+        expect(c.label, `${w} ${c.key}: the card carries the accessible label`).toMatch(/since last month$/);
+        expect(Math.abs(c.capB - c.mom!.b), `${w} ${c.key}: the foot's two halves share a bottom line (${c.capB} / ${c.mom!.b})`).toBeLessThanOrEqual(3);
+      }
+    }
+  });
+});

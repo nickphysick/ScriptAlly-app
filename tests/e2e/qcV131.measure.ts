@@ -19,8 +19,8 @@ const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
 
 async function openQc(page: Page, w: number, scope: string) {
   await inkOpen(page, "/queries", w, { scope });
-  /* v131.1 — RE-POINTED: the desk is the ledger cards' ("131.1"); the page is still v131's */
-  await expect(page.locator('.qc13 [data-qcv="courts"][data-v^="131"]'), "the v131 desk is on the page").toBeVisible();
+  /* v134 — RE-POINTED: the desk is the icon cards' (data-v "134"); the page is still v131's (`.qc13`) */
+  await expect(page.locator('.qc13 [data-qcv="courts"][data-v]'), "the desktop desk is on the page").toBeVisible();
   await expect(page.locator('.qcw-list [data-qcv="row"]').first()).toBeVisible();
   await page.waitForTimeout(300);
 }

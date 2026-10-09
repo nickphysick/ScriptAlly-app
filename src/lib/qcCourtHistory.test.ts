@@ -8,8 +8,8 @@
 import { describe, it, expect } from "vitest";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { buildQcRows } from "./qcSummary";
-import { deskWeeks } from "./qcDeskWeeks";
-import { courtAt, courtSeries, courtChange, TREND_WEEKS } from "./qcCourtHistory";
+import { deskWeeks, monthStart } from "./qcDeskWeeks";
+import { courtAt, courtSeries, monthChange, monthText, countAt, TREND_WEEKS } from "./qcCourtHistory";
 
 const DAY = 86_400_000;
 /* a Wednesday afternoon in London, well clear of the clock change */
@@ -50,13 +50,40 @@ describe("D6 · the court a query stood in, week by week", () => {
     expect(courtAt(r, mid(3), NOW)).toBeNull();
     expect(courtAt(r, mid(9), NOW)).toBe("agent");
   });
-  it("the last point is now and equals today's court counts; the stamp is now minus four weeks ago", () => {
+  it("the last point is now and equals today's court counts", () => {
     const a = mkQ({ dateSent: iso(mid(0)) });
     const b = mkQ({ dateSent: iso(mid(7)) });
     const rows = buildQcRows([a, b], [agent], [act(a, QueryStatus.QUERIED, mid(0)), act(b, QueryStatus.QUERIED, mid(7))], NOW);
     const s = courtSeries(rows, NOW);
     expect(s.weeks.length).toBe(TREND_WEEKS);
     expect(s.agent[TREND_WEEKS - 1]).toBe(2);
-    expect(courtChange(rows, "agent", NOW)).toBe(1);   /* b arrived inside the last four weeks */
+  });
+});
+
+describe("v134 · month on month: now minus the end of last month, from the same running count", () => {
+  /* NOW is Wed 7 Oct 2026; last month ended at the last instant of 30 Sep, London */
+  const END = monthStart(NOW) - 1;
+  it("the month starts at London midnight on the 1st (BST: 23:00 UTC the day before)", () => {
+    expect(new Date(monthStart(NOW)).toISOString()).toBe("2026-09-30T23:00:00.000Z");
+  });
+  it("a query sent this month is up one; one sent last month is no change", () => {
+    const before = mkQ({ dateSent: iso(END - 5 * DAY) });
+    const after = mkQ({ dateSent: iso(END + 2 * DAY) });
+    const rows = buildQcRows([before, after], [agent], [act(before, QueryStatus.QUERIED, END - 5 * DAY), act(after, QueryStatus.QUERIED, END + 2 * DAY)], NOW);
+    expect(countAt(rows, "agent", END, NOW)).toBe(1);
+    expect(monthChange(rows, "agent", NOW)).toBe(1);
+    expect(monthChange(rows, "you", NOW)).toBe(0);
+    expect(monthChange(rows, "agent", NOW), "it is the difference of two points of the one count").toBe(countAt(rows, "agent", NOW, NOW) - countAt(rows, "agent", END, NOW));
+  });
+  it("a query that moved from with agents to with you this month: agents down one, you up one", () => {
+    const q = mkQ({ dateSent: iso(END - 20 * DAY), status: QueryStatus.FULL_REQUESTED, fullRequestedDate: iso(END + 3 * DAY), lastStatusChange: iso(END + 3 * DAY) });
+    const rows = buildQcRows([q], [agent], [act(q, QueryStatus.QUERIED, END - 20 * DAY), act(q, QueryStatus.FULL_REQUESTED, END + 3 * DAY)], NOW);
+    expect(monthChange(rows, "agent", NOW)).toBe(-1);
+    expect(monthChange(rows, "you", NOW)).toBe(1);
+  });
+  it("the words: the figure without a sign (the arrow carries the direction), and no change", () => {
+    expect(monthText(3)).toBe("3 since last month");
+    expect(monthText(-2)).toBe("2 since last month");
+    expect(monthText(0)).toBe("No change since last month");
   });
 });

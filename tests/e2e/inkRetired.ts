@@ -23,6 +23,11 @@ export function retiredV133(why: string, by: string): string {
   return `RETIRED by Query Centre v133 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-query-centre-v133.md).`;
 }
 
+/** Query Centre v134 — the same, for a case whose subject was v131.1's ledger card (its title row, stamp or 52px trend). Listed in RETIRED-query-centre-v134.md. */
+export function retiredV134(why: string, by: string): string {
+  return `RETIRED by Query Centre v134 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-query-centre-v134.md).`;
+}
+
 export function retired(why: string, by: string): string {
   return `RETIRED by ink shell v1 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-ink-shell-v1.md).`;
 }
