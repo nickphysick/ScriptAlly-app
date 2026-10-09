@@ -1388,7 +1388,16 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ THE CAP TINTS ARE NAMED BY ROLE — `--cap-outgoing/incoming/pro/reference` — NEVER BY COLOUR AND NEVER BY MATERIAL.** They were `--pkgt-pro/let/syn/sam`, which is true on a page whose cards ARE materials and a coincidence anywhere else; they spent one commit as `--cap-slate/pink/sage/tan`, which is honest and says nothing. A letter is pink because **correspondence** is pink — the same semantic `StatusDot`'s direction colouring draws on. Packages keeps its material names and READS these; a lock forbids any colour-named cap token in either sheet. **The assignment is locked as a table anchored on the card** (`containers.test.tsx`), because the naming immediately exposed a real inconsistency: `Who holds what` and `Out with agents now` list the same thing — material out with an agent — and one was sage while the other was pink. **Where Pro and outgoing both apply, Pro wins.**
 - **⚠️ THE REAL-RENDER CHECK IS `tests/e2e/msProfileScroll.measure.ts` AND IT ASSERTS ITS PRECONDITION FIRST.** A sticky element on a non-scrolling ancestor does not idle, it CLAMPS — so "the CSS is present" proves nothing, and "unstuck at rest" is exactly what a row with nothing to scroll reports before never sticking at all. It measures the overflow (307px), then rest → scrolled → back, and counts nested scrollports (0).
 
-## Manuscripts — v13, the dashboard shelf (3 Oct; ref = design-refs/manuscripts/manuscripts-v13.html; report reports/manuscripts-v13/REPORT.md; SUPERSEDES every Manuscripts section below for the ROUTED page)
+## Manuscripts — v21, the Contact list look (9 Oct; ref = design-refs/manuscripts/manuscripts-v21.html; report reports/manuscripts-v21/REPORT.md; on branch `ms-v21`, NOT merged; SUPERSEDES v13 for the routed page)
+- **Manuscripts page: open header, the book and activity, a versions banner and stacked deck, three material doors on a band; the empty state shares the header.**
+- **The header is page-local (`MsOpenHeader`, `data-own-header`)** and `/manuscripts` is in `OWN_HEADER_ROUTES`. Its top, hairline and first content are held equal to `/agents` (MS21 H1): if the Contact list's header moves, H1 goes red and this one follows.
+- **An owed request is a rust "your move" row in Recent activity** and opens the drawer's "sent" journey; the owed list is gone. An owed row is never pushed out of the five by newer events.
+- **`BookVersion.wordCount` is optional** and only ever written when the writer gave one; a version without it shows no words line. The rules treat `bookVersions` as a list (not field by field), which a unit lock holds.
+- **The just-deleted state reads nothing that was deleted:** the page remembers the last book it showed (id and title, in memory). Nothing on the routed page deletes a manuscript.
+- **The footer is inside the page root**, as the Contact list's is inside its group: as the scroller's own child its `padding` shorthand zeroes the column's gutter.
+- Parts: `v12/Msv21Parts.tsx`, `Msv21Dialogs.tsx`, `msv21.css`, `lib/manuscriptV21.ts`. Locks: `tests/e2e/manuscriptsV21.measure.ts` (MS21), `msv21Smoke.test.tsx`, `manuscriptV21.test.ts`. Fixtures: `ms21-filled@`, `ms21-empty@`, `ms21-delete@scriptally.test`. Retired: `tests/e2e/RETIRED-manuscripts-v21.md`.
+
+## Manuscripts — v13, the dashboard shelf (⚠️ SUPERSEDED for the routed page by v21 above, 9 Oct — kept as history. 3 Oct; ref = design-refs/manuscripts/manuscripts-v13.html; report reports/manuscripts-v13/REPORT.md; SUPERSEDES every Manuscripts section below for the ROUTED page)
 
 **Context:**
 - `/manuscripts` has rendered `manuscripts/v12/ManuscriptPage` since 25 Sep (v12, which left no record here).
@@ -1577,6 +1586,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Manuscripts v21 is DONE on branch `ms-v21` and deployed to dev from the branch, NOT merged to `main`** — Nick reviews and merges. Read `reports/manuscripts-v21/REPORT.md`, the false premises first.
+
 **Query Centre v133 (the open header, in the Contact list v15.1 design) is DONE on `main` and deployed to dev (9 Oct).** Read `reports/qc-v133/REPORT.md`, §8 first.
 
 **Contact list v15.3 is DONE on `main` and PUSHED (one phase), NOT deployed anywhere.** Read `reports/contact-list-v15-3/REPORT.md` first: QC133 H3 is red by design until the Query Centre's header follows.
