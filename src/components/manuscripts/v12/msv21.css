@@ -312,7 +312,7 @@
 .ms21-sh { box-sizing: border-box; padding: 20px 22px 22px; background: #fdfcfa; border-radius: 18px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45); }
 .ms21 .ms21-sh h3 { margin-top: 18px; font: 400 20px/1.15 var(--sp-type) !important; color: #1c130f; }
 .ms21 .ms21-sh p { margin-top: 8px; font: 400 15px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.7); }
-.ms21-ghost { position: relative; box-sizing: border-box; height: 132px; border-radius: 12px; background: #f3f2f0; overflow: hidden; pointer-events: none; user-select: none; }
+.ms21-ghost { position: relative; box-sizing: border-box; height: 132px; border-radius: 12px; background: var(--ws-page); overflow: hidden; pointer-events: none; user-select: none; }
 .ms21-ghost i, .ms21-ghost b, .ms21-ghost s, .ms21-ghost em, .ms21-ghost span { display: block; font-style: normal; text-decoration: none; }
 .ms21-ghost--book { display: flex; gap: 16px; padding: 18px; }
 .ms21-ghost .g-c { flex: none; width: 62px; height: 92px; border-radius: 2px 6px 6px 2px; background: #c9d1db; }
@@ -354,14 +354,14 @@
 .ms21-fld--w { grid-column: 1 / -1; }
 .ms21-layer .ms21-fld label, .ms21-layer .ms21-fl { margin-bottom: 6px; font: 600 9px/12px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
 .ms21-fld input, .ms21-fld select, .ms21-fld textarea {
-  width: 100%; height: 41px; padding: 10px 12px; border: 0; border-radius: 10px; background: #f3f2f0;
+  width: 100%; height: 41px; padding: 10px 12px; border: 0; border-radius: 10px; background: var(--ws-page);
   font: 400 15px/normal var(--sp-serif); color: #1c130f;
 }
 .ms21-fld textarea { height: 68px; line-height: 1.45; resize: vertical; }
 .ms21-fld input:focus, .ms21-fld select:focus, .ms21-fld textarea:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .ms21-layer .ms21-hint { margin-top: 5px; font: 400 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
 .ms21-layer .ms21-ferr { margin-top: 5px; font: 400 12.5px/1.35 var(--sp-serif); color: #8a4a3c; }
-.ms21-seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 12px; background: #f3f2f0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.ms21-seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 12px; background: var(--ws-page); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
 .ms21-seg button { padding: 7px 12px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; white-space: nowrap; font: 400 13px/18px var(--sp-type); color: rgba(28, 19, 15, 0.6); }
 .ms21-seg button.is-on { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1), inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
 .ms21-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }

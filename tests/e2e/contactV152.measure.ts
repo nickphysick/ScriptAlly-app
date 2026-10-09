@@ -257,7 +257,7 @@ test("CL15.2-K5–K7 · all queried", async ({ page }) => {
 });
 
 /* ── K8 · the banner above the list ── */
-const BLUSH = [243, 221, 210], PAGE = [243, 242, 240];
+const BLUSH = [243, 221, 210], PAGE = [242, 238, 232];
 test("CL15.2-K8 · banner", async ({ page }) => {
   const L = new Ledger("cl152-banner");
   for (const vp of WIDTHS) {

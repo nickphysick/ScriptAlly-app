@@ -141,7 +141,7 @@ const shot = async (page: Page, name: string, vp: { width: number }) => {
   await page.screenshot({ path: `${DIR}/shots/${name}-${vp.width}.png`, animations: "disabled" });
 };
 const BAND = [233, 230, 224];
-const PAGE = [243, 242, 240];
+const PAGE = [242, 238, 232];
 
 async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, state: string) {
   const r = await readBand(page);
