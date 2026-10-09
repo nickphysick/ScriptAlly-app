@@ -1,0 +1,560 @@
+[
+ {
+  "lock": "F0",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "scroll 1011 against client 828"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900 sideways",
+  "ok": true,
+  "detail": "document 1512/1512 · scroller 1234/1234"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 activeFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closedFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closedBody",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 tiles",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 active population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 active inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 scrolling regions",
+  "ok": false,
+  "detail": "scrolls: none"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed inside the window",
+  "ok": false,
+  "detail": "closed card bottom undefined in 900"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 chart floor",
+  "ok": false,
+  "detail": "chart undefined"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 tab clear of the title",
+  "ok": false,
+  "detail": "tab top undefined · title bottom undefined"
+ },
+ {
+  "lock": "F0",
+  "where": "1440x760",
+  "ok": false,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x760",
+  "ok": false,
+  "detail": "scroll 1010 against client 688"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x760 sideways",
+  "ok": true,
+  "detail": "document 1440/1440 · scroller 1162/1162"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 activeFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closedFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closedBody",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 tiles",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 active population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 active inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 scrolling regions",
+  "ok": false,
+  "detail": "scrolls: none"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed inside the window",
+  "ok": false,
+  "detail": "closed card bottom undefined in 760"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x760 chart floor",
+  "ok": false,
+  "detail": "chart undefined"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 tab clear of the title",
+  "ok": false,
+  "detail": "tab top undefined · title bottom undefined"
+ },
+ {
+  "lock": "F0",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "scroll 1009 against client 728"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800 sideways",
+  "ok": true,
+  "detail": "document 1280/1280 · scroller 1002/1002"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 activeFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closedFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closedBody",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 tiles",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 active population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 active inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 scrolling regions",
+  "ok": false,
+  "detail": "scrolls: none"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed inside the window",
+  "ok": false,
+  "detail": "closed card bottom undefined in 800"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 chart floor",
+  "ok": false,
+  "detail": "chart undefined"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 tab clear of the title",
+  "ok": false,
+  "detail": "tab top undefined · title bottom undefined"
+ },
+ {
+  "lock": "F0",
+  "where": "1280x680",
+  "ok": false,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680",
+  "ok": false,
+  "detail": "scroll 1009 against client 608"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680 sideways",
+  "ok": true,
+  "detail": "document 1280/1280 · scroller 1002/1002"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 activeFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closedFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closedBody",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 tiles",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 active population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 active inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 scrolling regions",
+  "ok": false,
+  "detail": "scrolls: none"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed inside the window",
+  "ok": false,
+  "detail": "closed card bottom undefined in 680"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x680 chart floor",
+  "ok": false,
+  "detail": "chart undefined"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 tab clear of the title",
+  "ok": false,
+  "detail": "tab top undefined · title bottom undefined"
+ },
+ {
+  "lock": "F0",
+  "where": "1366x650",
+  "ok": false,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650",
+  "ok": false,
+  "detail": "scroll 1009 against client 578"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650 sideways",
+  "ok": true,
+  "detail": "document 1366/1366 · scroller 1088/1088"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 activeFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closedFrame",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closedBody",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 tiles",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 active population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 active inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus population",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus inside its card",
+  "ok": false,
+  "detail": "absent"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 scrolling regions",
+  "ok": false,
+  "detail": "scrolls: none"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed inside the window",
+  "ok": false,
+  "detail": "closed card bottom undefined in 650"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 chart floor",
+  "ok": false,
+  "detail": "chart undefined"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 tab clear of the title",
+  "ok": false,
+  "detail": "tab top undefined · title bottom undefined"
+ },
+ {
+  "lock": "F3",
+  "where": "the chart changes",
+  "ok": false,
+  "detail": "chart undefined → undefined"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 closed is its content's height",
+  "ok": false,
+  "detail": "in the page undefined · given 2400px of room undefined"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x680 closed is its content's height",
+  "ok": false,
+  "detail": "in the page undefined · given 2400px of room undefined"
+ }
+]

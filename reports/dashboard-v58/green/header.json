@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512x900 one h1",
+  "ok": true,
+  "detail": "1 h1 · title is H1"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 title",
+  "ok": true,
+  "detail": "\"The Smoke Test\" against the active manuscript \"The Smoke Test\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 byline",
+  "ok": true,
+  "detail": "\"by harness\" against \"by harness\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 eyebrow",
+  "ok": true,
+  "detail": "\"— NOW QUERYING —\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 no counts",
+  "ok": true,
+  "detail": "digits in the header: none"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 Add an agent",
+  "ok": true,
+  "detail": "add an agent visible: true at 1512"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 centred",
+  "ok": true,
+  "detail": "book 139.09375 · buttons 139.09375"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 no raised ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · none"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 typewriter, one line",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace · 1 line(s)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 one h1",
+  "ok": true,
+  "detail": "1 h1 · title is H1"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 title",
+  "ok": true,
+  "detail": "\"The Smoke Test\" against the active manuscript \"The Smoke Test\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 byline",
+  "ok": true,
+  "detail": "\"by harness\" against \"by harness\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 eyebrow",
+  "ok": true,
+  "detail": "\"— NOW QUERYING —\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 no counts",
+  "ok": true,
+  "detail": "digits in the header: none"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 Add an agent",
+  "ok": true,
+  "detail": "add an agent visible: false at 1280"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 centred",
+  "ok": true,
+  "detail": "book 132.6953125 · buttons 132.6875"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 no raised ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · none"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 typewriter, one line",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace · 1 line(s)"
+ }
+]

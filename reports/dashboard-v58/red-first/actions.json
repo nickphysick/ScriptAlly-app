@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "R3",
+  "where": "population",
+  "ok": false,
+  "detail": "focus undefined · 0 rows"
+ },
+ {
+  "lock": "R3",
+  "where": "the focus action opens the flow",
+  "ok": false,
+  "detail": "0 flow surface(s) open"
+ },
+ {
+  "lock": "R3",
+  "where": "nothing changed on press",
+  "ok": true,
+  "detail": "undefined → undefined · rows 0 → 0"
+ },
+ {
+  "lock": "R3",
+  "where": "a row has a tick",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "R3",
+  "where": "the tick opens the flow",
+  "ok": false,
+  "detail": "0 flow surface(s) open"
+ },
+ {
+  "lock": "R3",
+  "where": "the tick wrote nothing",
+  "ok": false,
+  "detail": "row null still listed: false"
+ },
+ {
+  "lock": "R3",
+  "where": "the account is as it was after a reload",
+  "ok": true,
+  "detail": "undefined · 0 → undefined · 0"
+ }
+]

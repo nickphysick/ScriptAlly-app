@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512x900 the tab",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 the tab's corner",
+  "ok": false,
+  "detail": "right undefined · bottom undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 no feed card on the page",
+  "ok": true,
+  "detail": "the feed lives in the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 opens",
+  "ok": false,
+  "detail": "the drawer is on screen"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 paper white",
+  "ok": false,
+  "detail": "body null · drawer null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 ink head",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 the oat wash, no dark dim",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 width",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 focus is inside",
+  "ok": false,
+  "detail": "focus moved into the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 summary",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 population, both kinds",
+  "ok": false,
+  "detail": "0 in · 0 out"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 a reply is a card with a state disc",
+  "ok": false,
+  "detail": "0 of 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 yours is a single line",
+  "ok": false,
+  "detail": "0 of 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 an open request shows its action",
+  "ok": true,
+  "detail": "0 of 0 open"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 a met request shows the day it went",
+  "ok": true,
+  "detail": "none met in this window"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 the end",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 \"From agents\" filters",
+  "ok": false,
+  "detail": "0 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 \"By you\" filters",
+  "ok": false,
+  "detail": "0 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 Esc closes and focus returns to the tab",
+  "ok": false,
+  "detail": "{\"gone\":true,\"back\":null}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 a press outside closes it",
+  "ok": false,
+  "detail": "{\"gone\":true,\"back\":null}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the tab",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the tab's corner",
+  "ok": false,
+  "detail": "right undefined · bottom undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 no feed card on the page",
+  "ok": true,
+  "detail": "the feed lives in the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 opens",
+  "ok": false,
+  "detail": "the drawer is on screen"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 paper white",
+  "ok": false,
+  "detail": "body null · drawer null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 ink head",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the oat wash, no dark dim",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 width",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 focus is inside",
+  "ok": false,
+  "detail": "focus moved into the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 summary",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 population, both kinds",
+  "ok": false,
+  "detail": "0 in · 0 out"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 a reply is a card with a state disc",
+  "ok": false,
+  "detail": "0 of 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 yours is a single line",
+  "ok": false,
+  "detail": "0 of 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 an open request shows its action",
+  "ok": true,
+  "detail": "0 of 0 open"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 a met request shows the day it went",
+  "ok": true,
+  "detail": "none met in this window"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 the end",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 \"From agents\" filters",
+  "ok": false,
+  "detail": "0 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 \"By you\" filters",
+  "ok": false,
+  "detail": "0 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 Esc closes and focus returns to the tab",
+  "ok": false,
+  "detail": "{\"gone\":true,\"back\":null}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 a press outside closes it",
+  "ok": false,
+  "detail": "{\"gone\":true,\"back\":null}"
+ }
+]
