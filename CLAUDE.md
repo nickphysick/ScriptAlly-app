@@ -907,6 +907,17 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ ANY `seed-query-N` PAST THE END OF THE TABLE IS DELETED.** `batch.set` overwrites the ids it writes and knows nothing about the ones it used to write, so shortening the table would strand the tail on the account for ever — rendering, counted, attributable to nothing. No orphan was found; it is the guard, not the repair.
 - **⚠️ `seedThinCases.mjs` IS NOT THE PROBLEM AND ITS 400-DAY QUERY IS DELIBERATE.** `thin-q-close` is a `Queried` query sent 400 days ago against a 6-week window so the Close journey has a fixture at all; the file uses relative dates, deterministic `thin-` ids and `--clean`. **A send date from last year on that account is evidence of a designed fixture before it is evidence of a leak** — check which seeder owns an id before reworking the wrong file.
 
+## Query Centre — v134: the hero number and faces, icon desk cards, the band and the banner (9 Oct; ref = design-refs/query-centre/query-centre-v134.html + design-refs/qc-v134/*.png; report reports/qc-v134/REPORT.md; on branch `qc-v134`, NOT merged)
+- **The title is one h1 holding two spans:** the count at 124px (98 below 1440) and "queries out" at 42 (34) on one baseline. **The number is always a figure** ("1 query out", "0 queries out"); the worded "One" / "No" titles are gone from the desktop.
+- **The faces (`lib/qcFaces`, `QcOpenHeader`):** up to 3 with you (past its date first, then soonest), 3 with agents (latest activity), 2 closed (most recently closed), coloured by the DESK'S court (`tileCourt`). **A group with fewer lends no slots.** No key. The discs are `aria-hidden`, `tabindex="-1"`, under one sentence; each shows the list's popup (`useTip`, exported from `QcList132`) and opens the query's card. A withdrawn or signed query is in the number and "+N more" and on no disc.
+- **The desk is three icon cards (`QcDesk.tsx`, the desk block in `qcv131.css`):** a disc in the COURT'S colour 28 (24) above the card, "13 with you" on one line, v131.1's two tiles unchanged, month on month, and a 112 × 38 chart of the ten-week running count. **The month-on-month arrow is neutral grey both ways.** Selection still scopes "Recently updated" only.
+- **⚠️ Month on month is `monthChange` (`qcCourtHistory`): now minus the count at the last instant of the previous LONDON CALENDAR MONTH**, two points of the one running count. Never estimated. The rubber stamp, the 52px trend and their code are deleted.
+- **"Recently updated" sits on a `#e9e6e0` band and a blush banner stands above "Your queries" (`qcvBand134.css`).** Full bleed is a 100vmax spread shadow on a PSEUDO-ELEMENT, clipped to the band's own height — never a clip on the section (it would cut the card's shadow and the banner's arrow). The banner is the group's fourth row; the workspace and footer move down one.
+- **⚠️ 104 (92) UNDER THE BANNER, NOT THE CONTACT LIST'S 76:** the flying hawk rises 74 above the bar and must clear the banner by 8 (B3; it clears by 22.9 and 10.9).
+- **The banner's copy is exact** (`QC_BANNER_LINES`): "…and in the darkness mind them." B2's mutation is the word "chaos".
+- **⚠️ OPEN: the page guide sits over the desk at 860px of window height** (`qcV96` QC13, red since v133.1). Nick's ruling.
+- **Locks:** `tests/e2e/qcV134.measure.ts` N1–N3, K1–K3, B1–B3, L1; unit `qcFaces.test.ts`, `qcCourtHistory.test.ts`. Retired and re-pointed: `tests/e2e/RETIRED-query-centre-v134.md`.
+
 ## Query Centre — v133, the open header (8 Oct; ref = design-refs/query-centre/query-centre-v133.html + design-refs/qc-v133/*.png; report reports/qc-v133/REPORT.md; merged to `main` 9 Oct)
 - **On the desktop the Query Centre opens with `QcOpenHeader`, the Contact list v15 header's shape:** no band, no card, no disc. The living "{N} queries out" is the 72px typewriter title (58 below 1440), over the fixed line "Send, track, and chase them from this page.", two buttons, and the figure-only courier (`QC_PLATE_FIGURE`) in the flow beside them, closed by a hairline. Nothing below the header changed.
 - **The living facts sentence is gone from the populated page**; the desk carries those facts. `qcHeaderCopy`'s headline is still the title's source.
@@ -1573,6 +1584,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Query Centre v134 is DONE on branch `qc-v134` (three commits), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v134/REPORT.md`.
+
 **Query Centre v133 (the open header, in the Contact list v15.1 design) is DONE on `main` and deployed to dev (9 Oct).** Read `reports/qc-v133/REPORT.md`, §8 first.
 
 **Contact list v15.2 is DONE on `main` and PUSHED (one phase), NOT deployed anywhere** — Nick deploys to dev himself. Read `reports/contact-list-v15-2/REPORT.md` first.

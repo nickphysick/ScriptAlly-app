@@ -1,0 +1,67 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v134 §3 — the tinted band under "Recently updated", and the blush banner above "Your queries"
+ * (ref design-refs/query-centre/query-centre-v134.html; the Contact list v15.1 band and v15.2 banner, built
+ * beside them). Desktop only. "Below 1440" is `max-width: 1439.5px`.
+ *
+ * ⚠️ FULL BLEED BY A SPREAD SHADOW, CLIPPED TO THE BAND'S OWN HEIGHT: `box-shadow: 0 0 0 100vmax` paints the
+ *    tint out to the sheet's edges and `clip-path: inset(0 -100vmax)` cuts it off above and below. A shadow
+ *    is not scrollable overflow, so nothing scrolls sideways; the sheet (`.ws-window`) clips it at its edge.
+ * ⚠️ THE TINT IS ON A PSEUDO-ELEMENT, NEVER THE SECTION: a clip-path on the section would cut the featured
+ *    card's shadow, and on the banner it would cut the arrow, which hangs below it.
+ */
+@media (min-width: 768px) {
+  /* ── "Recently updated" on a band: 64 (52) under the desk, 72 (64) of tint above and below the section.
+     0-3-0, to beat `.qc13 .qcr`'s 44 (qcvRecent.css). The section's own layout is untouched. ── */
+  .qcv-group.qc13 > .qcr { position: relative; isolation: isolate; margin-top: 64px; padding-top: 72px; padding-bottom: 72px; }
+  .qcv-group.qc13 > .qcr::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: #e9e6e0; box-shadow: 0 0 0 100vmax #e9e6e0; clip-path: inset(0 -100vmax);
+  }
+  /* the featured card holds its edge on the tint: its outer ring is ink at 10% (it was 14% on the page) */
+  .qcv-group.qc13 > .qcr .qcr-feat .qcard {
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 44px -22px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.1);
+  }
+
+  /* ── the banner: the group's fourth row, 56 (48) of plain page above it, the workspace's bar 104 (92) below.
+     The workspace and the footer move down a row. ── */
+  .qcv-group > .qc134-ban {
+    grid-column: 1 / -1; grid-row: 4; position: relative; box-sizing: border-box; min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 136px; padding: 36px 0 34px; margin: 56px 0 0;
+  }
+  .qcv-group > .qc134-ban ~ .qcv-page { grid-row: 5; }
+  .qcv-group > .qc134-ban ~ .af { grid-row: 6; }
+  /* ⚠️ 104, NOT THE CONTACT LIST'S 76: the flying hawk rises 74 above the bar and must clear the banner (B3).
+     0-4-0, to beat `.qc13 .qcv-page.qcw`'s 96 (qcvWorkspace.css). */
+  .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 104px; }
+  .qc134-ban::before {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    background: #f3ddd2; box-shadow: 0 0 0 100vmax #f3ddd2; clip-path: inset(0 -100vmax);
+  }
+  /* the arrow: a soft point, 150 × 34, starting 1px inside the banner so no seam shows */
+  .qc134-ban::after {
+    content: ""; position: absolute; left: 50%; top: calc(100% - 1px); z-index: 0;
+    width: 150px; height: 34px; transform: translateX(-50%);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0C40 0 58 22 70 31.5Q75 35 80 31.5C92 22 110 0 150 0Z' fill='%23f3ddd2'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  }
+  /* two lines, each a block; a line that cannot fit wraps naturally.
+     ⚠️ TWO CLASSES ON THE FACE: the page's font reset names `p` and `span` and lands later in the bundle. */
+  .qc134-ban .qc134-ban-p {
+    position: relative; z-index: 1; margin: 0; text-align: center;
+    font-family: var(--sp-type); font-weight: 400; font-size: 30px; line-height: 1.3; letter-spacing: -0.005em; color: #5b2a1f;
+  }
+  .qc134-ban .qc134-ban-p span { display: block; font-family: inherit; }
+  /* loading: the banner holds its size; its words arrive with the data */
+  .qc134-ban[data-loading] .qc134-ban-p { visibility: hidden; }
+
+  @media (max-width: 1439.5px) {
+    .qcv-group.qc13 > .qcr { margin-top: 52px; padding-top: 64px; padding-bottom: 64px; }
+    .qcv-group > .qc134-ban { min-height: 112px; padding: 28px 0 26px; margin-top: 48px; }
+    .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 92px; }
+    .qc134-ban::after { width: 120px; height: 28px; }
+    .qc134-ban .qc134-ban-p { font-size: 24px; }
+  }
+}

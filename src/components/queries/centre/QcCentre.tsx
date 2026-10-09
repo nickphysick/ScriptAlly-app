@@ -19,6 +19,7 @@ import "../../shell/primitives.css";
 import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { QC_COURIER_DISC } from "./qcArt";
 import { QcOpenHeader } from "./QcOpenHeader";
+import "./qcvBand134.css";
 import type { Faces } from "../../../lib/qcFaces";
 import "./qcvPage.css";
 import "./qcvEnter.css";
@@ -58,6 +59,12 @@ export function readBirdsEyeOpen(search: string): boolean {
   const v = new URLSearchParams(search).get("view");
   return v === "calendar" || v === "cal";
 }
+
+/** v134 §3 — the banner's two lines, exactly; the break falls after "find them,". */
+export const QC_BANNER_LINES = [
+  "One list to log them all, one list to find them,",
+  "one list to hold your queries and in the darkness mind them.",
+] as const;
 
 export const QcCentre: React.FC<{
   loading: boolean;
@@ -211,6 +218,13 @@ export const QcCentre: React.FC<{
       */}
     {courts}
     {carousel}
+    {/* v134 §3 — THE BANNER above "Your queries" (desktop): a blush band the sheet's full width, its bottom
+        edge an arrow pointing down at the list. The copy is exact, on two lines. */}
+    {v131 && (
+      <section className="qc134-ban" data-qcv="banner" aria-label="A note" data-loading={loading ? "" : undefined}>
+        <p className="qc134-ban-p"><span>{QC_BANNER_LINES[0]}</span> <span>{QC_BANNER_LINES[1]}</span></p>
+      </section>
+    )}
     <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 

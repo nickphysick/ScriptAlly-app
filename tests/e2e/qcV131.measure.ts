@@ -42,7 +42,7 @@ async function textLeft(page: Page, el: import("@playwright/test").Locator): Pro
 
 test.describe("Query Centre v131", () => {
   /* ── QC1 · order ──────────────────────────────────────────────────────────────────────────────── */
-  test("QC1 · header, desk 72 (60) below its hairline, Recently updated 44 below, Your queries 96 below; no header on the desk", async ({ page }) => {
+  test("QC1 · header, desk 72 (60) below its hairline, Recently updated 64 (52) below, then Your queries; no header on the desk", async ({ page }) => {
     for (const w of WIDTHS) {
       await openQc(page, w, "qc1");
       const g = await page.evaluate(() => {
@@ -58,9 +58,10 @@ test.describe("Query Centre v131", () => {
       expect(g.hero && g.desk && g.cz && g.qs, `${w}: all four parts measured`).toBeTruthy();
       /* v133 — RE-POINTED: the hero is the open header, and the desk is 72 (60 below 1440) under its hairline (the Contact list v15.1's gap; QC133 H3) */
       expect(near(g.desk!.t - g.hero!.b, w >= 1440 ? 72 : 60), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the header`).toBe(true);
-      expect(near(g.cz!.t - g.desk!.b, 44), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);
-      /* v132 §2 — RE-POINTED: the workspace starts 96 below Recently updated (the ref's #ws margin), room for the hawk's 74px rise */
-      expect(near(g.qs!.t - g.cz!.b, 96), `${w}: Your queries ${(g.qs!.t - g.cz!.b).toFixed(1)} below Recently updated`).toBe(true);
+      /* v134 — RE-POINTED: "Recently updated" sits on a band 64 (52 below 1440) under the desk, and the banner now stands
+         between it and "Your queries" (56 / 48 above it, 104 / 92 below); QC134 B1 and B2 own those gaps */
+      expect(near(g.cz!.t - g.desk!.b, w >= 1440 ? 64 : 52), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);
+      expect(g.qs!.t, `${w}: Your queries follows Recently updated`).toBeGreaterThan(g.cz!.b);
       expect(g.prevIsHero, `${w}: the desk follows the hero directly`).toBe(true);
       expect(g.headers, `${w}: no heading between the hero and the desk`).toBe(0);
     }

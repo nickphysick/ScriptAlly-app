@@ -64,5 +64,43 @@
    "Expected: 13",
    "Received: 1"
   ]
+ },
+ {
+  "lock": "B1",
+  "mutation": "confine the band to the column",
+  "red": true,
+  "reading": [
+   "Error: 1512: the band's painted edges are the sheet's {\"inL\":[243,242,240],\"inR\":[241,240,238],\"mid\":[233,230,224],\"outL\":[27,36,51],\"ok\":false,\"sheet\":{\"l\":248,\"r\":1504,\"t\":64,\"b\":892}}",
+   "Expected: true",
+   "Received: false"
+  ]
+ },
+ {
+  "lock": "B2",
+  "mutation": "restore \"chaos\"",
+  "red": true,
+  "reading": [
+   "Error: 1512: the text, exactly"
+  ]
+ },
+ {
+  "lock": "B3",
+  "mutation": "use the Contact list's 76 (64) gap",
+  "red": true,
+  "reading": [
+   "Error: 1512: the hawk's top 553.0384521484375 against the banner's bottom 558.171875",
+   "Expected: >= 8",
+   "Received:    -5.1334228515625"
+  ]
+ },
+ {
+  "lock": "L1",
+  "mutation": "shorten the desk placeholder",
+  "red": true,
+  "reading": [
+   "Error: 1512: card-you h 212.7 → 245.7",
+   "Expected: <= 1",
+   "Received:    33"
+  ]
  }
 ]

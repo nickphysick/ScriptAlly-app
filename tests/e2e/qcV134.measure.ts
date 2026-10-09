@@ -8,6 +8,7 @@
  */
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
+import { pixel, sameRgb } from "./qc126Lib";
 
 const SIZES = [[1512, 900], [1280, 800]] as const;
 const wide = (w: number) => w >= 1440;
@@ -284,6 +285,165 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
         expect(c.label, `${w} ${c.key}: the card carries the accessible label`).toMatch(/since last month$/);
         expect(Math.abs(c.capB - c.mom!.b), `${w} ${c.key}: the foot's two halves share a bottom line (${c.capB} / ${c.mom!.b})`).toBeLessThanOrEqual(3);
       }
+    }
+  });
+});
+
+const BAND = [233, 230, 224], BLUSH = [243, 221, 210];
+const LINES = ["One list to log them all, one list to find them,", "one list to hold your queries and in the darkness mind them."];
+/** scroll the page's own scroller so `sel`'s middle sits mid-viewport, and wait for it to settle */
+async function centre(page: Page, sel: string) {
+  await page.locator(sel).first().evaluate((e) => e.scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(350);
+}
+const sheet = (page: Page) => page.evaluate(() => { const r = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; });
+/** the painted run of `rgb` along the row at `y`: true when it reaches both of the sheet's edges and stops there */
+async function spansSheet(page: Page, y: number, rgb: number[]) {
+  const s = await sheet(page);
+  const at = async (x: number) => pixel(page, x, y);
+  const inL = await at(s.l + 2), inR = await at(s.r - 3), mid = await at((s.l + s.r) / 2 - 300), outL = await at(s.l - 3);
+  return { inL, inR, mid, outL, ok: sameRgb(inL, rgb, 3) && sameRgb(inR, rgb, 3) && !sameRgb(outL, rgb, 3), sheet: s };
+}
+
+test.describe("Query Centre v134 — the band and the banner", () => {
+  test("B1 · band: Recently updated sits on #e9e6e0, edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      await centre(page, '[data-qcv="ru"]');
+      const g = await page.evaluate(() => {
+        const ru = document.querySelector<HTMLElement>('[data-qcv="ru"]')!, cs = getComputedStyle(ru), bf = getComputedStyle(ru, "::before");
+        const R = (e: Element) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
+        const desk = Math.max(...[...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].map((e) => e.getBoundingClientRect().bottom));
+        const kids = [ru.querySelector<HTMLElement>('[data-qcv="ru-lede"]')!, ru.querySelector<HTMLElement>('[data-qcv="ru-stage"]')!];
+        const feat = ru.querySelector<HTMLElement>('[data-qcv="ru-feat"]'), panel = ru.querySelector<HTMLElement>('[data-qcv="ru-panel"]')!, lede = kids[0];
+        return {
+          ru: R(ru), desk, beforeBg: bf.backgroundColor, border: cs.borderTopWidth, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow,
+          padT: parseFloat(cs.paddingTop), padB: parseFloat(cs.paddingBottom),
+          innerTop: Math.min(...kids.map((k) => k.getBoundingClientRect().top)), innerBottom: Math.max(...kids.map((k) => k.getBoundingClientRect().bottom)),
+          /* the section's own R1 geometry: the card's left on the stage's, the panel 150 right, the card 34 down */
+          stage: R(kids[1]), panel: R(panel), feat: feat ? R(feat) : null, lede: R(lede),
+          ring: feat?.querySelector<HTMLElement>(".qcard") ? getComputedStyle(feat.querySelector<HTMLElement>(".qcard")!).boxShadow : "",
+        };
+      });
+      expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(233, 230, 224)");
+      expect(g.border === "0px" && g.radius === "0px" && g.shadow === "none", `${w}: no border, radius or shadow on the band (${g.border} ${g.radius} ${g.shadow})`).toBe(true);
+      expect(Math.abs(g.ru.y - g.desk - (wide(w) ? 64 : 52)), `${w}: desk → band ${g.ru.y - g.desk}`).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.padT - (wide(w) ? 72 : 64)) <= 2 && Math.abs(g.padB - (wide(w) ? 72 : 64)) <= 2, `${w}: inner padding ${g.padT} / ${g.padB}`).toBe(true);
+      expect(Math.abs(g.innerTop - g.ru.y - g.padT) <= 2 && g.ru.b - g.innerBottom >= g.padB - 2, `${w}: the section starts ${g.innerTop - g.ru.y} inside the band and ends ${g.ru.b - g.innerBottom} above its foot`).toBe(true);
+      /* painted: the tint reaches both of the sheet's edges on the band's own rows, and is not above or below it */
+      const mid = await spansSheet(page, g.ru.y + g.ru.h / 2, BAND);
+      expect(mid.ok, `${w}: the band's painted edges are the sheet's ${JSON.stringify(mid)}`).toBe(true);
+      const top = await spansSheet(page, g.ru.y + 4, BAND), bot = await spansSheet(page, g.ru.b - 4, BAND);
+      expect(top.ok && bot.ok, `${w}: the band's first and last rows are tinted edge to edge`).toBe(true);
+      const above = await pixel(page, mid.sheet.l + 2, g.ru.y - 6), below = await pixel(page, mid.sheet.l + 2, g.ru.b + 6);
+      expect(!sameRgb(above, BAND, 3) && !sameRgb(below, BAND, 3), `${w}: plain page above and below the band (${above} / ${below})`).toBe(true);
+      /* the section's own layout is unchanged (v132 R1) */
+      expect(g.feat, `${w}: a featured card`).not.toBeNull();
+      expect(Math.abs(g.feat!.x - g.stage.x), `${w}: the card on the stage's left`).toBeLessThanOrEqual(1);
+      expect(Math.abs(g.panel.x - g.stage.x - 150), `${w}: the panel ${g.panel.x - g.stage.x} right`).toBeLessThanOrEqual(1);
+      expect(Math.abs(g.feat!.y - g.stage.y - 34), `${w}: the card ${g.feat!.y - g.stage.y} down`).toBeLessThanOrEqual(1);
+      expect(g.ring, `${w}: the featured card's outer ring is ink at 10%`).toMatch(/rgba\(28, 19, 15, 0\.1\) 0px 0px 0px 1px/);
+      const o = await noOverflow(page);
+      expect(o.doc <= 0 && o.sc <= 0, `${w}: no sideways overflow ${JSON.stringify(o)}`).toBe(true);
+    }
+  });
+
+  const readBanner = (page: Page) => page.evaluate(() => {
+    const ban = document.querySelector<HTMLElement>('[data-qcv="banner"]')!, p = ban.querySelector<HTMLElement>("p")!, spans = [...p.querySelectorAll<HTMLElement>("span")];
+    const R = (e: Element) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
+    const bf = getComputedStyle(ban, "::before"), af = getComputedStyle(ban, "::after"), ps = getComputedStyle(p);
+    const lh = parseFloat(ps.lineHeight);
+    const ru = document.querySelector<HTMLElement>('[data-qcv="ru"]')!.getBoundingClientRect();
+    const bar = document.querySelector<HTMLElement>('[data-qcv="ws-bar"]')!.getBoundingClientRect();
+    const hawk = document.querySelector<HTMLElement>('[data-qcv="ws-hawk"]')!.getBoundingClientRect();
+    return {
+      tag: ban.tagName, label: ban.getAttribute("aria-label"), box: R(ban), lines: spans.map((s) => ({ text: s.textContent ?? "", rows: Math.round(s.getBoundingClientRect().height / lh), box: R(s), display: getComputedStyle(s).display })),
+      beforeBg: bf.backgroundColor, face: ps.fontFamily, size: parseFloat(ps.fontSize), colour: ps.color, align: ps.textAlign, minH: parseFloat(getComputedStyle(ban).minHeight), pad: `${getComputedStyle(ban).paddingTop} ${getComputedStyle(ban).paddingBottom}`,
+      arrow: { w: parseFloat(af.width), h: parseFloat(af.height), left: af.left, top: af.top, bg: af.backgroundImage.slice(0, 24) },
+      ruB: ru.bottom, barT: bar.top, hawkT: hawk.top, pCx: R(p).x + R(p).w / 2,
+    };
+  });
+
+  test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, the arrow centred, the bar 104 (92) below", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      await centre(page, '[data-qcv="banner"]');
+      const g = await readBanner(page);
+      expect(g.tag === "SECTION" && g.label === "A note", `${w}: a section labelled "A note" (${g.tag} ${g.label})`).toBe(true);
+      expect(g.lines.map((l) => l.text), `${w}: the text, exactly`).toEqual(LINES);
+      for (const l of g.lines) { expect(l.display, `${w}: each line is a block`).toBe("block"); expect(l.rows, `${w}: "${l.text.slice(0, 20)}…" is one row`).toBe(1); }
+      expect(g.lines[1].box.y, `${w}: two lines`).toBeGreaterThanOrEqual(g.lines[0].box.b - 1);
+      expect(g.beforeBg, `${w}: blush`).toBe("rgb(243, 221, 210)");
+      expect(g.face, `${w}: Special Elite`).toMatch(/Special Elite/);
+      expect(Math.abs(g.size - (wide(w) ? 30 : 24)), `${w}: ${g.size}px`).toBeLessThanOrEqual(0.5);
+      expect(g.colour === "rgb(91, 42, 31)" && g.align === "center", `${w}: ${g.colour} ${g.align}`).toBe(true);
+      expect(Math.abs(g.minH - (wide(w) ? 136 : 112)) <= 0.5 && g.pad === (wide(w) ? "36px 34px" : "28px 26px"), `${w}: min-height ${g.minH}, padding ${g.pad}`).toBe(true);
+      expect(Math.abs(g.box.y - g.ruB - (wide(w) ? 56 : 48)), `${w}: ${g.box.y - g.ruB} of page above the banner`).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.barT - g.box.b - (wide(w) ? 104 : 92)), `${w}: banner → bar ${g.barT - g.box.b}`).toBeLessThanOrEqual(2);
+      /* painted edge to edge, with plain page above it */
+      const mid = await spansSheet(page, g.box.y + g.box.h / 2, BLUSH);
+      expect(mid.ok, `${w}: the banner's painted edges are the sheet's ${JSON.stringify(mid)}`).toBe(true);
+      const gapPx = await pixel(page, mid.sheet.l + 2, g.box.y - 20);
+      expect(!sameRgb(gapPx, BLUSH, 3) && !sameRgb(gapPx, BAND, 3), `${w}: plain page colour above the banner (${gapPx})`).toBe(true);
+      /* the arrow: 150 × 34 (120 × 28), centred on the banner's bottom edge, 1px inside it, and painted */
+      expect(Math.abs(g.arrow.h - (wide(w) ? 34 : 28)) <= 1 && Math.abs(g.arrow.w - (wide(w) ? 150 : 120)) <= 1, `${w}: the arrow is ${g.arrow.w} × ${g.arrow.h}`).toBe(true);
+      const cx = g.box.x + g.box.w / 2;
+      expect(Math.abs(parseFloat(g.arrow.left) - g.box.w / 2), `${w}: the arrow is centred (${g.arrow.left} of ${g.box.w})`).toBeLessThanOrEqual(1);
+      expect(Math.abs(parseFloat(g.arrow.top) - (g.box.h - 1)), `${w}: the arrow starts 1px inside the banner`).toBeLessThanOrEqual(1);
+      const tip = await pixel(page, cx, g.box.b + (wide(w) ? 20 : 16)), beside = await pixel(page, cx + 110, g.box.b + (wide(w) ? 20 : 16));
+      expect(sameRgb(tip, BLUSH, 3) && !sameRgb(beside, BLUSH, 3), `${w}: the arrow is painted below the banner's centre (${tip} / ${beside})`).toBe(true);
+      const o = await noOverflow(page);
+      expect(o.doc <= 0 && o.sc <= 0, `${w}: no sideways overflow ${JSON.stringify(o)}`).toBe(true);
+    }
+  });
+
+  test("B3 · the flying hawk's top clears the banner's bottom edge by 8px or more", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await openQc(page, w, h);
+      await centre(page, '[data-qcv="banner"]');
+      const g = await readBanner(page);
+      expect(g.hawkT, `${w}: the hawk was measured`).toBeGreaterThan(0);
+      expect(g.hawkT - g.box.b, `${w}: the hawk's top ${g.hawkT} against the banner's bottom ${g.box.b}`).toBeGreaterThanOrEqual(8);
+      console.log(`[B3] ${w}: the hawk clears the banner by ${(g.hawkT - g.box.b).toFixed(1)}`);
+    }
+  });
+
+  test("L1 · no jump: the header, the desk cards, the band and the banner are the same boxes loading and loaded", async ({ page }) => {
+    const read = () => page.evaluate((HD) => {
+      const sc = document.querySelector<HTMLElement>(HD)?.closest<HTMLElement>(".wpg-scroll");
+      const y0 = sc ? sc.getBoundingClientRect().top - sc.scrollTop : 0;
+      const R = (e: Element | null | undefined) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: +r.left.toFixed(1), y: +(r.top - y0).toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) }; };
+      const hd = document.querySelector<HTMLElement>(HD);
+      return {
+        loading: !!hd?.hasAttribute("data-loading"),
+        parts: {
+          header: R(hd), number: R(hd?.querySelector('[data-qcv="oh-hn"]')) && { ...R(hd?.querySelector('[data-qcv="oh-hn"]'))!, w: 0 }, faces: R(hd?.querySelector('[data-qcv="oh-faces"]')) && { ...R(hd?.querySelector('[data-qcv="oh-faces"]'))!, w: 0 },
+          buttons: R(hd?.querySelector('[data-qcv="oh-log"]')),
+          ...Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].map((c) => [`card-${c.dataset.court}`, R(c)])),
+          band: R(document.querySelector('[data-qcv="ru"]')), banner: R(document.querySelector('[data-qcv="banner"]')),
+        } as Record<string, { x: number; y: number; w: number; h: number } | null>,
+        cardsLoading: [...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].filter((c) => c.dataset.loading === "true").length,
+        ruSk: !!document.querySelector('[data-qcv="ru"][data-sk]'),
+      };
+    }, HD);
+    for (const [w, h] of SIZES) {
+      await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS: number }).__SA_QC_HOLD_MS = 6000; });
+      await inkOpen(page, "/queries", w, { height: h, scope: "qc134" });
+      await expect(page.locator(`${HD}[data-loading]`), `${w}: the loading header`).toBeVisible();
+      await expect(page.locator('[data-qcv="court"][data-loading="true"]').first(), `${w}: the loading desk`).toBeVisible();
+      const a = await read();
+      await expect(page.locator('.qcw-list [data-qcv="row"]').first()).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(900);
+      const b = await read();
+      expect(a.loading && a.cardsLoading === 3 && a.ruSk, `${w}: measured loading (header ${a.loading}, cards ${a.cardsLoading}, band ${a.ruSk})`).toBe(true);
+      expect(!b.loading && b.cardsLoading === 0 && !b.ruSk, `${w}: then loaded`).toBe(true);
+      const keys = Object.keys(b.parts);
+      expect(keys.length, `${w}: parts measured`).toBeGreaterThanOrEqual(9);
+      for (const k of keys) {
+        expect(a.parts[k] && b.parts[k], `${w}: ${k} measured in both states`).toBeTruthy();
+        for (const d of ["x", "y", "w", "h"] as const) expect(Math.abs(a.parts[k]![d] - b.parts[k]![d]), `${w}: ${k} ${d} ${a.parts[k]![d]} → ${b.parts[k]![d]}`).toBeLessThanOrEqual(1);
+      }
+      console.log(`[L1] ${w}: ${keys.map((k) => `${k} ${b.parts[k]!.h}`).join(" · ")}`);
     }
   });
 });
