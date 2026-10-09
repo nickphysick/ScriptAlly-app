@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B3 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "1px rgba(176, 96, 62, 0.4) none"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "1px rgba(61, 80, 112, 0.4) none"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "1px rgba(124, 113, 104, 0.4) none"
+ },
+ {
+  "lock": "B3 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "1px rgba(176, 96, 62, 0.4) none"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "1px rgba(61, 80, 112, 0.4) none"
+ },
+ {
+  "lock": "B3 the inner border is drawn 6 (±0.5) inside every edge",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "block inset 6/6/6/6"
+ },
+ {
+  "lock": "B3 its line is the court's colour at 40%, and it takes no pointer",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "1px rgba(124, 113, 104, 0.4) none"
+ }
+]

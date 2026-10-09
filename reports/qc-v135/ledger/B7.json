@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "you true · agent false · closed false"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "1px, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(176, 96, 62) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "you false · agent true · closed false"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "1px, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(61, 80, 112) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "you false · agent false · closed true"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "x, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(124, 113, 104) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 Recently updated answers the choice",
+  "where": "@1512",
+  "ok": true,
+  "detail": "you \"With youNothing has moved this week. The last change was The…\" closed \"ClosedNothing has moved this week. The last change was Joan …\""
+ },
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "you true · agent false · closed false"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "1px, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(176, 96, 62) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "you false · agent true · closed false"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "1px, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(61, 80, 112) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 the pressed card says so, and only it",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "you false · agent false · closed true"
+ },
+ {
+  "lock": "B7 its outer ring is 2px in the court's colour",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "x, rgba(28, 19, 15, 0.4) 0px 14px 30px -26px, rgb(124, 113, 104) 0px 0px 0px 2px"
+ },
+ {
+  "lock": "B7 the list's count is untouched",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "\"Showing 83 of 83\" was \"Showing 83 of 83\""
+ },
+ {
+  "lock": "B7 Recently updated answers the choice",
+  "where": "@1280",
+  "ok": true,
+  "detail": "you \"With youNothing has moved this week. The last change was The…\" closed \"ClosedNothing has moved this week. The last change was Joan …\""
+ }
+]

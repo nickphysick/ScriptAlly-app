@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "art 257.0 text 257.0"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "top 0px"
+ },
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "art 256.9 text 256.9"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "top 0px"
+ },
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "art 261.8 text 261.8"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "top 0px"
+ },
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "art 220.5 text 220.5"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "top 0px"
+ },
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "art 220.3 text 220.3"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "top 0px"
+ },
+ {
+  "lock": "A2 the drawing's vertical centre is the text block's (±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "art 226.2 text 226.2"
+ },
+ {
+  "lock": "A2 the drawing has no drop",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "top 0px"
+ }
+]

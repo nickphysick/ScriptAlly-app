@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "296,64 1159×390 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first 296,64 1159×390 · 2 tracks center · settled 296,64 1159×390 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first 900.4,94.0 settled 896.3,94.0 (x moved -4.1)"
+ },
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "296,64 1159×390 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first 296,64 1159×390 · 2 tracks center · settled 296,64 1159×390 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first 942.2,94.0 settled 962.0,94.0 (x moved 19.8)"
+ },
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "296,64 1159×400 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "first 296,64 1159×400 · 2 tracks center · settled 296,64 1159×400 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "first 1042.5,94.0 settled 1042.5,94.0 (x moved 0.0)"
+ },
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "289,64 942×317 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first 289,64 942×317 · 2 tracks center · settled 289,64 942×317 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first 796.1,94.0 settled 796.1,94.0 (x moved 0.0)"
+ },
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "289,64 942×317 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first 289,64 942×317 · 2 tracks center · settled 289,64 942×317 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first 851.0,94.0 settled 851.0,94.0 (x moved 0.0)"
+ },
+ {
+  "lock": "A5 the loading frame is on the same grid (two tracks, centred)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "289,64 942×328 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the header's box is equal, loading and loaded (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "first 289,64 942×328 · 2 tracks center · settled 289,64 942×328 · 2 tracks center"
+ },
+ {
+  "lock": "A5 the drawing keeps its height and its size (±1); its x re-centres with the text",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "first 902.5,94.0 settled 902.5,94.0 (x moved 0.0)"
+ },
+ {
+  "lock": "A5 population: the loading state itself was read (the two held routes, at both widths)",
+  "where": "census",
+  "ok": true,
+  "detail": "4"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "34.0 (flat edge 454.0, art bottom 420.0)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "34.0 (flat edge 453.8, art bottom 419.8)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "34.0 (flat edge 463.5, art bottom 429.5)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "34.0 (flat edge 381.0, art bottom 347.0)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "34.0 (flat edge 380.7, art bottom 346.7)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3 the drawing's bottom is 30 or more above the flap's flat edge",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "34.0 (flat edge 392.4, art bottom 358.4)"
+ },
+ {
+  "lock": "A3 the header's padding-bottom is 34",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "34"
+ }
+]

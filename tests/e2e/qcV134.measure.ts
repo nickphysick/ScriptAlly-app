@@ -188,6 +188,7 @@ const readDesk = (page: Page) => page.evaluate(() => {
 
 test.describe("Query Centre v134 — the icon desk cards", () => {
   test("K1 · desk shape: three white cards, a court-coloured disc 28 (24) above each, no stamp; selected is the court's ring and foot bar", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the icon cards are replaced by the badge cards (QC135 B1–B4, B7)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -232,6 +233,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 
   test("K2 · desk content: the line and its figure, v131.1's two tiles, and a neutral month-on-month", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the line of words is gone; tiles and the month-on-month line are held by QC135 B5");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -269,6 +271,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 
   test("K3 · desk chart: one 112 × 38 (84 × 30) svg a card, ten points, the last is the figure, the court's stroke, aria-hidden", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the chart is 96 × 46 in the badge card's body (QC135 B5)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -438,7 +441,10 @@ test.describe("Query Centre v134 — the band and the banner", () => {
       expect(keys.length, `${w}: parts measured`).toBeGreaterThanOrEqual(9);
       for (const k of keys) {
         expect(a.parts[k] && b.parts[k], `${w}: ${k} measured in both states`).toBeTruthy();
-        for (const d of ["x", "y", "w", "h"] as const) expect(Math.abs(a.parts[k]![d] - b.parts[k]![d]), `${w}: ${k} ${d} ${a.parts[k]![d]} → ${b.parts[k]![d]}`).toBeLessThanOrEqual(1);
+        /* RE-POINTED (Query Centre v135): the header's text is not held in x — the centred pair re-centres by half the change in
+           the text's width when the count arrives (4px; QC135 A5 reports it). Everything else is held in all four. */
+        const dims = (["number", "faces", "buttons"].includes(k) ? ["y", "w", "h"] : ["x", "y", "w", "h"]) as ("x" | "y" | "w" | "h")[];
+        for (const d of dims) expect(Math.abs(a.parts[k]![d] - b.parts[k]![d]), `${w}: ${k} ${d} ${a.parts[k]![d]} → ${b.parts[k]![d]}`).toBeLessThanOrEqual(1);
       }
       console.log(`[L1] ${w}: ${keys.map((k) => `${k} ${b.parts[k]!.h}`).join(" · ")}`);
     }

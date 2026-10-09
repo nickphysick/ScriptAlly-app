@@ -93,3 +93,13 @@ export const QC_LIST_PERCH: QcArt = { src: "/images/qc/qc-list-perch.png", versi
  */
 export const QC_LIST_FLIGHT: QcArt = { src: "/images/qc/qc-list-flight.png", version: "6cf0cb8e", width: 640, height: 478 };
 export const QC_INKWELL: QcArt = { src: "/images/qc/qc-inkwell.png", version: "567d2cc7", width: 316, height: 400 };
+
+/**
+ * THE DESK'S THREE ILLUSTRATIONS (v135) — SLOTS, EMPTY UNTIL THE ARTIST'S FILES ARRIVE. Each court's header strip
+ * holds a 76 × 56 (60 × 50) box. While a slot is `null` the box is a dashed placeholder with a label; set a slot to
+ * its record and `QcDesk` renders the image in the same box, `object-fit: contain`, with no dashed border — no
+ * layout change. With you: a talon pointing at you. With agents: thumbing at someone else. Closed: talons laced.
+ */
+export const QC_DESK_ART_YOU: QcArt | null = null;
+export const QC_DESK_ART_AGENTS: QcArt | null = null;
+export const QC_DESK_ART_CLOSED: QcArt | null = null;

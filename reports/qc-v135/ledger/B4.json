@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B4 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "right inset 12.0, 549.0–599.0 in 542.0–606.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "574.0 vs 574.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Talon pointing at you\" hidden true"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "right inset 12.0, 549.0–599.0 in 542.0–606.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "574.0 vs 574.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Thumbing at someone else\" hidden true"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "right inset 12.0, 549.0–599.0 in 542.0–606.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "574.0 vs 574.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Talons laced, bad news\" hidden true"
+ },
+ {
+  "lock": "B4 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "right inset 12.0, 476.0–526.0 in 469.0–533.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "501.0 vs 501.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Talon pointing at you\" hidden true"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "right inset 12.0, 476.0–526.0 in 469.0–533.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "501.0 vs 501.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Thumbing at someone else\" hidden true"
+ },
+ {
+  "lock": "B4 the placeholder sits inside the strip, 12 (±1) from its right edge",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "right inset 12.0, 476.0–526.0 in 469.0–533.0"
+ },
+ {
+  "lock": "B4 its vertical centre is the strip's (±1)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "501.0 vs 501.0"
+ },
+ {
+  "lock": "B4 it is 60 × 50, dashed, labelled exactly, and aria-hidden",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "60×50 dashed 1 \"Talons laced, bad news\" hidden true"
+ }
+]

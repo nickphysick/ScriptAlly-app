@@ -57,7 +57,8 @@ test.describe("Query Centre v131", () => {
       });
       expect(g.hero && g.desk && g.cz && g.qs, `${w}: all four parts measured`).toBeTruthy();
       /* v133 — RE-POINTED: the hero is the open header, and the desk is 72 (60 below 1440) under its hairline (the Contact list v15.1's gap; QC133 H3) */
-      expect(near(g.desk!.t - g.hero!.b, w >= 1440 ? 72 : 60), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the header`).toBe(true);
+      /* RE-POINTED (Query Centre v135): 88 below the header where the page sheet is 1440 or narrower — the badges' headroom under the flap's shadow */
+      expect(near(g.desk!.t - g.hero!.b, w - 256 > 1440 ? 92 : 88), `${w}: desk ${(g.desk!.t - g.hero!.b).toFixed(1)} below the header`).toBe(true);
       /* v134 — RE-POINTED: "Recently updated" sits on a band 64 (52 below 1440) under the desk, and the banner now stands
          between it and "Your queries" (56 / 48 above it, 104 / 92 below); QC134 B1 and B2 own those gaps */
       expect(near(g.cz!.t - g.desk!.b, w >= 1440 ? 64 : 52), `${w}: Recently updated ${(g.cz!.t - g.desk!.b).toFixed(1)} below the desk`).toBe(true);

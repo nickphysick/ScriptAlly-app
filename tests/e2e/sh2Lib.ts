@@ -27,9 +27,10 @@ export const NO_SHEET_ROUTES = ROUTES.filter((r) => !hasHeaderSheet(r));
 export const OWN_ROUTES = OWN_HEADER_ROUTES.filter((r) => hasHeaderSheet(r));
 /** The drawing in each header that has one. `crosses`: it hangs over the header's bottom edge (the three open headers). */
 export const ART: Record<string, { sel: string; crosses: boolean }> = {
-  "/queries": { sel: ".qcoh img", crosses: true },
-  "/agents": { sel: '[data-cl15="header-art"] img', crosses: true },
-  "/manuscripts": { sel: ".ms21-art img", crosses: true },
+  /* Query Centre v135: the three open headers' drawings no longer cross the edge — they sit 34 above it (QC135 A3) */
+  "/queries": { sel: ".qcoh img", crosses: false },
+  "/agents": { sel: '[data-cl15="header-art"] img', crosses: false },
+  "/manuscripts": { sel: ".ms21-art img", crosses: false },
   "/manuscripts/packages": { sel: '.ph [data-probe="art"] img', crosses: false },
 };
 /** Section bands: the element whose box is the band, and where its tint is painted. */
@@ -146,7 +147,8 @@ export async function readPage(page: Page, artSel: string | null) {
     let hit: string | null = null, hitY: number | null = null;
     if (art && sheet && flat !== null) {
       const ab = art.getBoundingClientRect();
-      hitY = ab.bottom > flat + 6 ? flat + 4 : flat - 6;
+      /* a point inside the drawing AND on the sheet: just under the edge where the drawing crosses it, else near the drawing's foot */
+      hitY = ab.bottom > flat + 6 ? flat + 4 : Math.min(flat - 6, ab.bottom - 6);
       const was = sheet.style.pointerEvents; sheet.style.pointerEvents = "auto"; if (face) face.style.pointerEvents = "auto";
       const aw = art.style.pointerEvents; art.style.pointerEvents = "auto";
       const el = document.elementFromPoint(ab.left + ab.width / 2, hitY);

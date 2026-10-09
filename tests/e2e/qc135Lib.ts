@@ -81,10 +81,12 @@ export const MUTATIONS: Record<string, string> = {
   B6: ".qc135-card .qc135-ch svg { width: 260px !important; }",
   B7: ".qc135-card.is-on { box-shadow: 0 0 0 1px rgba(28,19,15,.09) !important; }",
   B8: '.qc135-card[data-loading="true"] .qc135-badge { display: none !important; }',
+  /* "ignore the slot": the image is not shown and the placeholder's dashes come back */
+  B9: ".qc135-card .qc135-art--img img { display: none !important; } .qc135-card .qc135-art--img { border: 1.5px dashed #999 !important; }",
 };
 export async function prepare(page: Page) {
   const css = process.env.QC135_MUTATE ? MUTATIONS[process.env.QC135_MUTATE] : "";
-  if (process.env.QC135_MUTATE && process.env.QC135_MUTATE !== "B9" && !css) throw new Error(`unknown QC135_MUTATE ${process.env.QC135_MUTATE}`);
+  if (process.env.QC135_MUTATE && !css) throw new Error(`unknown QC135_MUTATE ${process.env.QC135_MUTATE}`);
   await page.addInitScript((c) => {
     try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* private mode */ }
     if (!c) return;

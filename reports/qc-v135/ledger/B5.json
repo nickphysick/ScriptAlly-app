@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B5 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "\"1 since last month\" 16.9 tall, line-height 16.9"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "\"1 since last month\" 16.9 tall, line-height 16.9"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "\"No change since last month\" 16.9 tall, line-height 16.9"
+ },
+ {
+  "lock": "B5 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "\"1 since last month\" 16.9 tall, line-height 16.9"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "\"1 since last month\" 16.9 tall, line-height 16.9"
+ },
+ {
+  "lock": "B5 at least one tile, and one chart svg",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "2 tiles, 1 charts"
+ },
+ {
+  "lock": "B5 the chart is 96 × 46 (±1)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "96.0×46.0"
+ },
+ {
+  "lock": "B5 the month-on-month line is on one line",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "\"No change since last month\" 16.9 tall, line-height 16.9"
+ }
+]

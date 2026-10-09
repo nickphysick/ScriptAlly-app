@@ -133,7 +133,7 @@ for (const vp of SIZES) {
 }
 
 /* ── S5 · art ── */
-test("S5 · art: each drawing is painted above the sheet, crosses the flat edge by 12–24, and has not moved from main", async ({ page }) => {
+test("S5 · art: each drawing is painted above the sheet and keeps main's size (v135: the open headers' drawings sit clear of the flap)", async ({ page }) => {
   const L = new Ledger("S5");
   for (const vp of SIZES) for (const [route, a] of Object.entries(ART)) {
     await open(page, route, vp);
@@ -142,9 +142,12 @@ test("S5 · art: each drawing is painted above the sheet, crosses the flat edge 
     L.check("S5 precondition: the drawing and the sheet are on screen", w, !!r.art && !!r.sheet && r.art.b <= r.vh, `art ${!!r.art} sheet ${!!r.sheet}`);
     L.check("S5 the drawing is painted above the sheet", w, r.hit === "art", `at y ${r.hitY}: ${r.hit}`);
     if (a.crosses) L.check("S5 the drawing's bottom is 12–24 below the flat edge", w, !!r.art && r.flat !== null && r.art.b - r.flat >= 12 && r.art.b - r.flat <= 24, r.art && r.flat !== null ? (r.art.b - r.flat).toFixed(1) : "absent");
-    L.check("S5 position and size unchanged from main (±1)", w, !!r.art && !!b0 && near(r.art.l, b0.l, 1) && near(r.art.w, b0.w, 1) && near(r.art.h, b0.h, 1) && near(r.art.t, b0.t, 1), r.art && b0 ? `now ${r.art.l.toFixed(1)},${r.art.t.toFixed(1)} ${r.art.w.toFixed(1)}×${r.art.h.toFixed(1)} main ${b0.l.toFixed(1)},${b0.t.toFixed(1)} ${b0.w.toFixed(1)}×${b0.h.toFixed(1)}` : "no reading");
+/* RE-POINTED (Query Centre v135): on the three open headers the drawing's POSITION is v135's (the centred pair, QC135 A1–A3);
+       its size is still main's. On the shared header (Submission packages) position and size are both held. */
+    const own = OWN_ROUTES.includes(route);
+    L.check(own ? "S5 size unchanged from main (±1); position is the centred pair's (QC135)" : "S5 position and size unchanged from main (±1)", w, !!r.art && !!b0 && near(r.art.w, b0.w, 1) && near(r.art.h, b0.h, 1) && (own || (near(r.art.l, b0.l, 1) && near(r.art.t, b0.t, 1))), r.art && b0 ? `now ${r.art.l.toFixed(1)},${r.art.t.toFixed(1)} ${r.art.w.toFixed(1)}×${r.art.h.toFixed(1)} main ${b0.l.toFixed(1)},${b0.t.toFixed(1)} ${b0.w.toFixed(1)}×${b0.h.toFixed(1)}` : "no reading");
   }
-  L.check("S5 population: the three open headers are in the census", "census", OWN_ROUTES.every((r) => ART[r]?.crosses), OWN_ROUTES.join(" "));
+  L.check("S5 population: the three open headers are in the census", "census", OWN_ROUTES.every((r) => !!ART[r]), OWN_ROUTES.join(" "));
   L.done(Object.keys(ART).length * SIZES.length * 3);
 });
 

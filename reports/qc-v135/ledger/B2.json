@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B2 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "rgb(246, 226, 216)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "370.4×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "\"With you\" \"Special Elite\", \"Co rgb(176, 96, 62)"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "rgb(226, 231, 239)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "370.4×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "\"With agents\" \"Special Elite\", \"Co rgb(61, 80, 112)"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "rgb(236, 232, 227)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "370.4×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "\"Closed\" \"Special Elite\", \"Co rgb(124, 113, 104)"
+ },
+ {
+  "lock": "B2 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "rgb(246, 226, 216)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "298.0×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "\"With you\" \"Special Elite\", \"Co rgb(176, 96, 62)"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "rgb(226, 231, 239)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "298.0×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "\"With agents\" \"Special Elite\", \"Co rgb(61, 80, 112)"
+ },
+ {
+  "lock": "B2 the strip's background is the court's tint",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "rgb(236, 232, 227)"
+ },
+ {
+  "lock": "B2 the strip is 64 (±1) tall, at the card's top, the card's width",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "298.0×64.0"
+ },
+ {
+  "lock": "B2 the title is exact, Special Elite, in the court's colour",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "\"Closed\" \"Special Elite\", \"Co rgb(124, 113, 104)"
+ }
+]

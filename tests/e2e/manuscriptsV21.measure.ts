@@ -37,7 +37,7 @@ test.setTimeout(180_000);
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 260;
+const FLOOR = 250; /* 260 less the readings Query Centre v135 retired (the shared hairline y, the drawing's right edge) */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 const wide = (w: number) => w >= 1440;
@@ -214,8 +214,9 @@ for (const vp of VPS) {
     expect(t.size, "72 (58 below 1440)").toBe(wide(vp.width) ? 72 : 58);
     expect(t.hasHook, "the title keeps data-page-title").toBe(true);
     expect(Math.abs(hd.y - aHd.y), `header top ${hd.y} against the Contact list's ${aHd.y}`).toBeLessThanOrEqual(2);
-    expect(Math.abs(hd.b - aHd.b), `hairline y ${hd.b} against the Contact list's ${aHd.b}`).toBeLessThanOrEqual(2);
-    expect(Math.abs(first.y - aFirst.y), `first content top ${first.y} against the Contact list's ${aFirst.y}`).toBeLessThanOrEqual(2);
+    /* RETIRED (Query Centre v135): the two headers no longer end at one y. Each is its drawing plus 30 and 34 of padding, and this
+       drawing is 10 taller than the Contact list's; what they share is the centred pair's values (QC135 A4). */
+    /* RETIRED (Query Centre v135): the first content no longer starts at the Contact list's y — this header is 10 taller (its drawing is). */
     ck(8);
     await noOverflow(page, `H1 @ ${vp.width}`);
     await shot(page, `01-header-book-activity-${vp.width}`);
@@ -229,24 +230,13 @@ for (const vp of VPS) {
     const hd = await one(page, '[data-ms21="header"]');
     const img = await one(page, '[data-ms21="header-art"] img');
     expect(img.w, "the drawing is 330 wide (260 below 1440)").toBeCloseTo(wide(vp.width) ? 330 : 260, 0);
-    expect(Math.abs(img.r - hd.r), `the drawing's right edge ${img.r} is the column's ${hd.r}`).toBeLessThanOrEqual(2);
+    /* RETIRED (Query Centre v135): the drawing is not at the column's right edge — the pair is centred on the sheet (QC135 A1). */
     const hang = img.b - hd.b;
-    expect(hang, `the drawing's foot is 12–24 below the hairline (${hang})`).toBeGreaterThanOrEqual(12);
-    expect(hang).toBeLessThanOrEqual(24);
-    /* painted above: at a point on the hairline, inside the drawing, the drawing is what is on top */
-    const top = await page.evaluate(() => {
-      const sc = [...document.querySelectorAll(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!;
-      sc.scrollTop = 0;
-      const hd = [...document.querySelectorAll('[data-ms21="header"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-      const im = hd.querySelector('[data-ms21="header-art"] img')!.getBoundingClientRect();
-      const y = hd.getBoundingClientRect().bottom - 0.5, x = im.x + im.width / 2;
-      const onScreen = y < innerHeight && x < innerWidth;
-      const el = document.elementFromPoint(x, y);
-      return { onScreen, tag: el?.tagName ?? "", inArt: !!el?.closest('[data-ms21="header-art"]') };
-    });
-    expect(top.onScreen, "the probe point is on screen").toBe(true);
-    expect(top.inArt, `the drawing paints above the hairline (found ${top.tag})`).toBe(true);
-    ck(6);
+    /* RE-POINTED (Query Centre v135): the drawing sits clear of the flap, 30 or more above the header's flat edge (QC135 A3) */
+    expect(hang, `the drawing's foot is 30 or more above the header's edge (${hang})`).toBeLessThanOrEqual(-30);
+    /* RETIRED (Query Centre v135): "the drawing paints above the hairline" — there is no hairline and the drawing does not
+       reach the header's edge. That it paints above the header sheet is shell v2's S5. */
+    ck(4);
   });
 }
 

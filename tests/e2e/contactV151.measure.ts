@@ -83,23 +83,27 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     /* H1 */
     L.check(`H1 the drawing is ${narrow ? 380 : 490} wide (±1)`, w, near(r.img.w, narrow ? 380 : 490, 1), `${r.img.w.toFixed(1)}`);
     /* H2 */
-    L.check("H2 the drawing's right edge is the desk's right edge (±2)", w, near(r.img.r, r.desk.r, 2), `img ${r.img.r.toFixed(1)} desk ${r.desk.r.toFixed(1)}`);
+    /* RETIRED (Query Centre v135): the drawing is no longer at the column's right edge — the text and the drawing are one group
+       centred on the sheet (QC135 A1). */
     /* H3 — precondition first: the rule and the point under it are on screen, or elementFromPoint answers nothing */
     const under = r.img.b - (r.ruleTop + r.bw);
     L.check("H3 precondition: the rule is on screen", w, r.ruleTop > 0 && r.ruleTop + r.bw + 4 < r.vh, `rule ${r.ruleTop} vh ${r.vh}`);
-    L.check("H3 the drawing's bottom is 12–24 below the header's hairline", w, under >= 12 && under <= 24, `${under.toFixed(1)}`);
-    L.check("H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too", w, r.below === "IMG*" && r.onRule === "IMG*", `below ${r.below} on rule ${r.onRule}`);
+    /* RE-POINTED (Query Centre v135): the drawing no longer crosses the header's edge; it sits clear of the flap (QC135 A3). */
+    L.check("H3 the drawing's bottom is 30 or more above the header's flat edge (v135)", w, under <= -30, `${under.toFixed(1)}`);
+    /* RETIRED (Query Centre v135): "painted over the rule" — there is no rule and the drawing does not reach the edge. */
     /* RETIRED (app shell v2, 9 Oct): the hairline is gone; "the header's hairline" in H3 and D1 now reads "the header's flat bottom edge" (SH2 S3–S5). */
     L.check("H3 no hairline under the header (retired by app shell v2; SH2 S4)", w, /^0px/.test(r.line ?? ""), `${r.line}`);
     /* H4 — the LAYOUT box is the painted rect less the drop */
     const layoutC = r.img.t - r.drop + r.img.h / 2, textC = (r.txt.t + r.txt.b) / 2;
     L.check("H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)", w, Math.abs(textC - layoutC) <= 4, `text ${textC.toFixed(1)} layout ${layoutC.toFixed(1)} drop ${r.drop} (${r.pos})`);
     /* v15.3 gave the header 30px of top padding, so the allowance is 44 (30 above, 10 below, 4 spare), not 14 */
-    L.check("H4 the drop is visual only: the header is no taller than the drawing's layout box plus 44", w, r.hd.h <= r.img.h + 44, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
+    /* RE-POINTED (Query Centre v135): no drop; the header is the drawing plus its 30 and 34 of padding. */
+    L.check("H4 the header is no taller than the drawing's box plus 64", w, r.hd.h <= r.img.h + 64.5, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
     /* H5 */
     const head = r.img.t - r.sheetTop;
     /* v15.3 re-pointed: the header's own 30px of top padding sits above the drop, so 30 + 30 (30 + 24) */
-    L.check(`H5 the drawing's top is ${narrow ? 54 : 60} (±3) below the page sheet's top`, w, near(head, narrow ? 54 : 60, 3), `${head.toFixed(1)}`);
+    /* RE-POINTED (Query Centre v135): no drop, so the drawing's top is the header's 30 of padding. */
+    L.check("H5 the drawing's top is 30 (±3) below the page sheet's top", w, near(head, 30, 3), `${head.toFixed(1)}`);
 
     /* D1 */
     const gap = r.desk.t - r.hd.b;
@@ -109,7 +113,7 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     await checkOverflow(page, L, w);
     await shot(page, "header-desk", vp);
   }
-  L.done(33);
+  L.done(30); /* 33 less three readings Query Centre v135 retired */
 });
 
 /* the band's boxes, with the band scrolled into the middle of the scroller so its pixels can be sampled */
