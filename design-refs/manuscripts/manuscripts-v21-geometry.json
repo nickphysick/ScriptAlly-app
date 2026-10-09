@@ -1,0 +1,278 @@
+{
+ "1512": {
+  "sheet": {
+   "x": 0,
+   "y": 0,
+   "w": 1264,
+   "h": 828,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(243, 242, 240)"
+  },
+  "header": {
+   "x": 48,
+   "y": 0,
+   "w": 1167,
+   "h": 345,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "title": {
+   "x": 48,
+   "y": 74,
+   "w": 599,
+   "h": 71,
+   "font": "\"Special Elite\" 72px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "drawing": {
+   "x": 886,
+   "y": 30,
+   "w": 330,
+   "h": 335,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "book": {
+   "x": 48,
+   "y": 418,
+   "w": 763,
+   "h": 441,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "cover": {
+   "x": 70,
+   "y": 440,
+   "w": 136,
+   "h": 200,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(42, 58, 82)"
+  },
+  "activity": {
+   "x": 836,
+   "y": 418,
+   "w": 380,
+   "h": 441,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "banner": {
+   "x": 48,
+   "y": 915,
+   "w": 1167,
+   "h": 91,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "banner_text": {
+   "x": 48,
+   "y": 951,
+   "w": 1167,
+   "h": 21,
+   "font": "\"Special Elite\" 16.2px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions": {
+   "x": 48,
+   "y": 1082,
+   "w": 1167,
+   "h": 374,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions_art": {
+   "x": 48,
+   "y": 1190,
+   "w": 170,
+   "h": 158,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions_copy": {
+   "x": 244,
+   "y": 1170,
+   "w": 364,
+   "h": 199,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "deck": {
+   "x": 656,
+   "y": 1082,
+   "w": 560,
+   "h": 330,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "front_card": {
+   "x": 656,
+   "y": 1110,
+   "w": 460,
+   "h": 259,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(255, 255, 255)"
+  },
+  "materials_band": {
+   "x": 48,
+   "y": 1520,
+   "w": 1167,
+   "h": 422,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(233, 230, 224)"
+  },
+  "door": {
+   "x": 48,
+   "y": 1632,
+   "w": 376,
+   "h": 250,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "footer": {
+   "x": 0,
+   "y": 1981,
+   "w": 1264,
+   "h": 284,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ },
+ "1280": {
+  "sheet": {
+   "x": 0,
+   "y": 0,
+   "w": 1032,
+   "h": 728,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(243, 242, 240)"
+  },
+  "header": {
+   "x": 41,
+   "y": 0,
+   "w": 950,
+   "h": 274,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "title": {
+   "x": 41,
+   "y": 47,
+   "w": 482,
+   "h": 57,
+   "font": "\"Special Elite\" 58px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "drawing": {
+   "x": 731,
+   "y": 24,
+   "w": 260,
+   "h": 264,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "book": {
+   "x": 41,
+   "y": 335,
+   "w": 600,
+   "h": 529,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "cover": {
+   "x": 63,
+   "y": 357,
+   "w": 112,
+   "h": 166,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(42, 58, 82)"
+  },
+  "activity": {
+   "x": 661,
+   "y": 335,
+   "w": 330,
+   "h": 529,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "banner": {
+   "x": 41,
+   "y": 912,
+   "w": 950,
+   "h": 71,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "banner_text": {
+   "x": 41,
+   "y": 940,
+   "w": 950,
+   "h": 17,
+   "font": "\"Special Elite\" 13px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions": {
+   "x": 41,
+   "y": 1047,
+   "w": 950,
+   "h": 374,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions_art": {
+   "x": 41,
+   "y": 1178,
+   "w": 120,
+   "h": 112,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "versions_copy": {
+   "x": 179,
+   "y": 1125,
+   "w": 321,
+   "h": 218,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "deck": {
+   "x": 532,
+   "y": 1047,
+   "w": 459,
+   "h": 330,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  "front_card": {
+   "x": 532,
+   "y": 1075,
+   "w": 387,
+   "h": 280,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(255, 255, 255)"
+  },
+  "materials_band": {
+   "x": 41,
+   "y": 1473,
+   "w": 950,
+   "h": 391,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(233, 230, 224)"
+  },
+  "door": {
+   "x": 41,
+   "y": 1573,
+   "w": 306,
+   "h": 239,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgb(253, 252, 250)"
+  },
+  "footer": {
+   "x": 0,
+   "y": 1904,
+   "w": 1032,
+   "h": 284,
+   "font": "\"Source Serif 4\" 16px",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ }
+}
