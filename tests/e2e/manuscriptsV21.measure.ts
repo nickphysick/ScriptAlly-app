@@ -371,10 +371,8 @@ for (const vp of VPS) {
     expect(r.bWeight, "'versions' is underlined, not bold").toBe("400");
     expect(r.bLine).toContain("underline");
     expect(r.label, "labelled A note").toBe("A note");
-    /* the arrow: centred on the band */
-    const tx = Number(/matrix\([^)]*,\s*(-?[\d.]+),\s*-?[\d.]+\)/.exec(r.arrowTf)?.[1] ?? NaN);
-    expect(Math.abs(r.arrowLeft + tx + r.arrowW / 2 - r.banW / 2), "the arrow is centred").toBeLessThanOrEqual(2);
-    expect(r.arrowW, "150 (120 below 1440)").toBe(wide(vp.width) ? 150 : 120);
+    /* RETIRED (app shell v2, 9 Oct): the arrow. The banner's bottom edge is the header sheet's flap, in blush (SH2 B2). Held here: no arrow. */
+    expect(!(r.arrowW > 0), `no arrow hangs under the banner (${r.arrowW})`).toBe(true);
     /* painted edges: the blush reaches both edges of the sheet */
     const blush = [243, 221, 210];
     expect(r.mid, "the band's middle is on screen").toBeLessThan(vp.height);
@@ -382,10 +380,10 @@ for (const vp of VPS) {
     expect(near(left, blush), `the sheet's left edge is blush (${left})`).toBe(true);
     expect(near(right, blush), `the sheet's right edge is blush (${right})`).toBe(true);
     ck(15);
-    /* spacing: 56 (48) above from the book row, 76 (64) below to Versions */
+    /* spacing: 56 (48) above from the book row, 102 (90) below to Versions — 76 (64) plus the flap's 26 (app shell v2) */
     const row = await one(page, '[data-ms21="row"]'), ban = await one(page, '[data-ms21="banner"]'), vs = await one(page, '[data-ms21="versions"]');
     expect(Math.abs(ban.y - row.b - (wide(vp.width) ? 56 : 48)), "the band's top from the book row").toBeLessThanOrEqual(1);
-    expect(Math.abs(vs.y - ban.b - (wide(vp.width) ? 76 : 64)), "Versions from the band").toBeLessThanOrEqual(1);
+    expect(Math.abs(vs.y - ban.b - (wide(vp.width) ? 102 : 90)), "Versions from the band").toBeLessThanOrEqual(1);
     ck(2);
     await noOverflow(page, `V1 @ ${vp.width}`);
   });
@@ -538,9 +536,9 @@ for (const vp of VPS) {
       const b = band.getBoundingClientRect(), s = sc.getBoundingClientRect();
       return { x: s.x + 1, r: s.x + sc.clientWidth - 14, y: b.y + 20, bg: getComputedStyle(band).backgroundColor };
     });
-    expect(edge.bg).toBe("rgb(233, 230, 224)");
-    expect(near(await pixel(page, edge.x, edge.y), [233, 230, 224]), "the band reaches the sheet's left edge").toBe(true);
-    expect(near(await pixel(page, edge.r, edge.y), [233, 230, 224]), "…and its right").toBe(true);
+    expect(edge.bg).toBe("rgb(251, 249, 245)") /* paper white, --ws-band (app shell v2) */;
+    expect(near(await pixel(page, edge.x, edge.y), [251, 249, 245]), "the band reaches the sheet's left edge").toBe(true);
+    expect(near(await pixel(page, edge.r, edge.y), [251, 249, 245]), "…and its right").toBe(true);
     ck(8);
     await shot(page, `03-materials-${vp.width}`);
     await noOverflow(page, `M1 @ ${vp.width}`);

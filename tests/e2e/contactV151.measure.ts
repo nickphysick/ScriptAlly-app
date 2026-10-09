@@ -89,7 +89,8 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     L.check("H3 precondition: the rule is on screen", w, r.ruleTop > 0 && r.ruleTop + r.bw + 4 < r.vh, `rule ${r.ruleTop} vh ${r.vh}`);
     L.check("H3 the drawing's bottom is 12–24 below the header's hairline", w, under >= 12 && under <= 24, `${under.toFixed(1)}`);
     L.check("H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too", w, r.below === "IMG*" && r.onRule === "IMG*", `below ${r.below} on rule ${r.onRule}`);
-    L.check("H3 the hairline is 1px ink at 12–14%", w, /^1px solid rgba\(28, 19, 15, 0\.1[234]\)$/.test(r.line ?? ""), `${r.line}`);
+    /* RETIRED (app shell v2, 9 Oct): the hairline is gone; "the header's hairline" in H3 and D1 now reads "the header's flat bottom edge" (SH2 S3–S5). */
+    L.check("H3 no hairline under the header (retired by app shell v2; SH2 S4)", w, /^0px/.test(r.line ?? ""), `${r.line}`);
     /* H4 — the LAYOUT box is the painted rect less the drop */
     const layoutC = r.img.t - r.drop + r.img.h / 2, textC = (r.txt.t + r.txt.b) / 2;
     L.check("H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)", w, Math.abs(textC - layoutC) <= 4, `text ${textC.toFixed(1)} layout ${layoutC.toFixed(1)} drop ${r.drop} (${r.pos})`);
@@ -140,8 +141,8 @@ const shot = async (page: Page, name: string, vp: { width: number }) => {
   mkdirSync(`${DIR}/shots`, { recursive: true });
   await page.screenshot({ path: `${DIR}/shots/${name}-${vp.width}.png`, animations: "disabled" });
 };
-const BAND = [233, 230, 224];
-const PAGE = [243, 242, 240];
+const BAND = [251, 249, 245]; /* paper white, --ws-band (app shell v2; it was 233, 230, 224) */
+const PAGE = [242, 238, 232];
 
 async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, state: string) {
   const r = await readBand(page);
@@ -149,7 +150,7 @@ async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, sta
   if (!r.band || !r.fs || !r.panel || !r.desk || !r.bar || !r.sheet || r.state !== state) { L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, false, JSON.stringify({ state: r.state, band: !!r.band, bar: !!r.bar })); return; }
   L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, true, "");
   /* B1 — the tint itself, and where it is PAINTED (a box-shadow has no box to read: the pixels are the evidence) */
-  L.check("B1 the band's background is rgb(233, 230, 224), with no border and no radius", where, r.bg === "rgb(233, 230, 224)" && r.border === "0px 0px 0px" && r.radius === "0px", `${r.bg} · ${r.border} · ${r.radius}`);
+  L.check("B1 the band's background is rgb(251, 249, 245), with no border and no radius", where, r.bg === "rgb(251, 249, 245)" && r.border === "0px 0px 0px" && r.radius === "0px", `${r.bg} · ${r.border} · ${r.radius}`);
   const y = Math.min(r.band.t + 20, r.sheet.b - 4);
   L.check("B1 precondition: the sampled line is inside the band and on screen", where, y > r.band.t && y < r.band.b && y > r.sheet.t && y < r.sheet.b, `y ${y} band ${r.band.t}–${r.band.b} sheet ${r.sheet.t}–${r.sheet.b}`);
   /* ⚠️ THE SHEET SHADES ITS OWN LAST 10px (measured: the page ground reads 240,239,237 at the edge against 243,242,240

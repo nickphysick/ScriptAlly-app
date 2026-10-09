@@ -25,6 +25,7 @@
  * row does the anchoring.
  */
 import React from "react";
+import { HeaderSheet } from "./HeaderSheet";
 import { MoreHorizontal, Plus } from "lucide-react";
 /* ⚠️ THE KICKER ARRIVES BY CONTEXT, NOT BY A ROUTER HOOK — see `mastheadSection.ts` for why. */
 /* ⚠️ THE TYPE ONLY — `OneScreenMark` IS NO LONGER RENDERED HERE. The masthead draws no mark at
@@ -453,7 +454,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     return (
       /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
          ground and scrolls away with the page. */
-      <header className="ph ph--compact" data-probe="page-header" data-size="compact">
+      <header className="ph ph--compact hsheet-host" data-probe="page-header" data-size="compact">
+        <HeaderSheet />
         {/**
           * §3.2 — A TWO-COLUMN ROW: the eyebrow, the 44px title and the intro on the left; the
           * actions on the right, on one line, bottom-aligned with the text. The rule closes it.
@@ -494,10 +496,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * read as a card sitting on the page rather than as the page's own opening.
      */
     <header
-      className={`ph ph--full${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}${card && band && compact ? " ph--compact" : ""}`}
+      className={`ph ph--full${band ? "" : " hsheet-host"}${living ? " ph--living" : ""}${living?.count === 0 && living.empty ? " ph--empty" : ""}${plate ? " ph--plate" : ""}${band ? " ph--band" : ""}${band && bandFixed ? " ph--bandfix" : ""}${card ? " ph--card" : ""}${card && band && compact ? " ph--compact" : ""}`}
       data-probe="page-header" data-size="full" data-plate={plate ? "" : undefined} data-band={band ? "" : undefined}
       data-living={living ? (living.count === null ? "pending" : living.count === 0 && living.empty ? "empty" : "settled") : undefined}
     >
+      {/* app shell v2: the header sheet, behind everything the header paints. A BAND header is its own
+          full-width ink field, so it takes none (headerSheetRoutes lists its route). */}
+      {!band && <HeaderSheet />}
       {/**
         * THE HERO FRAME. The header spans the whole content column and its rule runs the column's full
         * width. Since the quiet bar the frame IS the column (page header v2's centred 920 is gone): the

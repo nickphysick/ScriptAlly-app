@@ -1,0 +1,368 @@
+[
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "248,-536 1256×992"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first 248,-536 1256×992 settled 248,-536 1256×992 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first 296,812 1179×587 settled 296,812 1179×587"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first 296,1455 1159×148 settled 296,1455 1159×148"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "248,-518 1256×888"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×888 settled 248,-518 1256×888 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "248,-518 1256×734"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×734 settled 248,-518 1256×734 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "248,-518 1256×788"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×788 settled 248,-518 1256×788 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "248,-536 1256×992"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first 248,-536 1256×992 settled 248,-536 1256×992 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first 296,728 1159×484 settled 296,728 1159×484"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first 296,1268 1159×136 settled 296,1268 1159×136"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "248,-518 1256×788"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×788 settled 248,-518 1256×788 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "248,-536 1256×992"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "first 248,-536 1256×992 settled 248,-536 1256×992 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "first 296,1522 1159×425 settled 296,1522 1159×425"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "first 296,932 1159×94 settled 296,932 1159×94"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "248,-518 1256×858"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×858 settled 248,-518 1256×888 · main's header settles by 30.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "248,-518 1256×858"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×858 settled 248,-518 1256×888 · main's header settles by 30.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/import @1512",
+  "ok": true,
+  "detail": "248,-518 1256×766"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/import @1512",
+  "ok": true,
+  "detail": "first 248,-518 1256×766 settled 248,-518 1256×766 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/plans @1512",
+  "ok": true,
+  "detail": "248,-490 1256×766"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/plans @1512",
+  "ok": true,
+  "detail": "first 248,-490 1256×766 settled 248,-490 1256×766 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/help @1512",
+  "ok": true,
+  "detail": "248,-454 1256×813"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/help @1512",
+  "ok": true,
+  "detail": "first 248,-454 1256×813 settled 248,-454 1256×813 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "248,-536 1024×919"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first 248,-536 1024×919 settled 248,-536 1024×919 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first 289,691 962×571 settled 289,691 962×571"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first 289,1310 942×116 settled 289,1310 942×116"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "248,-518 1024×888"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×888 settled 248,-518 1024×888 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "248,-518 1024×734"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×734 settled 248,-518 1024×734 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "248,-518 1024×788"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×788 settled 248,-518 1024×788 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "248,-536 1024×919"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first 248,-536 1024×919 settled 248,-536 1024×919 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first 289,608 942×468 settled 289,608 942×468"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first 289,1124 942×112 settled 289,1124 942×112"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "248,-518 1024×788"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×788 settled 248,-518 1024×788 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "248,-536 1024×919"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "first 248,-536 1024×919 settled 248,-536 1024×919 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the band's box, loading and loaded",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "first 289,1485 942×394 settled 289,1485 942×394"
+ },
+ {
+  "lock": "L1 the banner's box, loading and loaded",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "first 289,940 942×73 settled 289,940 942×73"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "248,-518 1024×858"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×858 settled 248,-518 1024×888 · main's header settles by 30.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "248,-518 1024×858"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×858 settled 248,-518 1024×888 · main's header settles by 30.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "248,-518 1024×766"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "first 248,-518 1024×766 settled 248,-518 1024×766 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "248,-490 1024×766"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "first 248,-490 1024×766 settled 248,-490 1024×766 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 the header sheet is there on the first frame the header is",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "248,-454 1024×813"
+ },
+ {
+  "lock": "L1 the sheet does not move, beyond the header's own settling on main",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "first 248,-454 1024×813 settled 248,-454 1024×813 · main's header settles by 0.0"
+ },
+ {
+  "lock": "L1 population: the loading state itself was read (the two held routes, at both widths)",
+  "where": "census",
+  "ok": true,
+  "detail": "24"
+ }
+]

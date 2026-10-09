@@ -181,10 +181,11 @@ describe("the dialogs", () => {
 
 describe("the sheet", () => {
   const css = read("msv21.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  /* app shell v2 (9 Oct): the page, sheet and band colours are the shell's `:root` tokens, read here rather than restated. */
   it("every token it reads is a :root token", () => {
     const read = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
     const own = new Set([...css.matchAll(/(--ms21-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--font-mono"].includes(t), t).toBe(true);
+    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--font-mono", "--ws-page", "--ws-sheet", "--ws-band", "--hsheet-flap", "--hsheet-w", "--hsheet-clip"].includes(t), t).toBe(true);
   });
   it("the deck and the doors stand still under reduced motion", () => {
     const rm = sliceBetween(css, "@media (prefers-reduced-motion: reduce)", ".ms21-band {", "the reduced-motion block");

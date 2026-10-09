@@ -52,11 +52,11 @@ test("AN17-1 · shell", async ({ page }) => {
       };
     });
     L.check("AN17-1 the v17 page is on the route", w, c.page, `${c.page}`);
-    L.check("AN17-1 main ground", w, c.main === "rgb(243, 242, 240)", `${c.main}`);
+    L.check("AN17-1 main ground", w, c.main === "rgb(242, 238, 232)", `${c.main}`);
     /* the page's own ground: transparent (showing the main) or the same greige — never cream */
-    L.check("AN17-1 page ground", w, c.scroller === "rgba(0, 0, 0, 0)" || c.scroller === "rgb(243, 242, 240)", `${c.scroller}`);
+    L.check("AN17-1 page ground", w, c.scroller === "rgba(0, 0, 0, 0)" || c.scroller === "rgb(242, 238, 232)", `${c.scroller}`);
     L.check("AN17-1 sidebar", w, c.side === "rgb(230, 228, 224)", `${c.side}`);
-    L.check("AN17-1 top bar on the page colour", w, c.bar === "rgb(243, 242, 240)", `${c.bar}`);
+    L.check("AN17-1 top bar on the page colour", w, c.bar === "rgb(242, 238, 232)", `${c.bar}`);
     L.check("AN17-1 top-bar rule", w, c.barRule === "rgba(28, 19, 15, 0.1)" && c.barRuleOp === "1", `${c.barRule} op ${c.barRuleOp}`);
     /* ⚠️ A PIXEL, BECAUSE A COMPUTED BACKGROUND CANNOT SEE A SURFACE PAINTED OVER IT (the brief's
        mutation paints the page cream): sample the ground between the strip and the first banner. */
@@ -70,7 +70,7 @@ test("AN17-1 · shell", async ({ page }) => {
       const y = (d2.strip!.b + d2.secs[0].box!.t) / 2;
       L.check("AN17-1 the sampled gap is on screen", w, y > 0 && y < vp.height, `${y.toFixed(1)}`);
       const px = await pixel(page, d2.col.l + 4, y);
-      L.check("AN17-1 the page ground is greige (pixel)", w, sameRgb(px, [243, 242, 240], 2), `${px}`);
+      L.check("AN17-1 the page ground is greige (pixel)", w, sameRgb(px, [242, 238, 232], 2), `${px}`);
     } else L.check("AN17-1 the page ground is greige (pixel)", w, false, "no strip / first banner to sample between");
     await checkOverflow(page, L, w);
   }

@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "S1 no literal #f3f2f0 / 243, 242, 240 in src outside marketing",
+  "where": "source",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/dashboard @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/import @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/account @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/plans @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/help @1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/dashboard @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the footer reads the page colour",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/account @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 the page sheet's background",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "S1 population: a footer was read on at least three routes per width",
+  "where": "census",
+  "ok": true,
+  "detail": "8"
+ }
+]

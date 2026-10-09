@@ -22,6 +22,7 @@
  *
  * ⚠️ THE IA IS A PROP. This component owns the grammar and no section list.
  */
+import { hasHeaderSheet } from "./headerSheetRoutes";
 import { isLivingRoute } from "../../lib/livingRoutes";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -190,6 +191,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      the top bar's controls. Three booleans would be three things to get out of step; the class on
      `.ws-app` is what the stylesheet keys every one of them off. */
   const settingsMode = isAccountPath(pathname);
+  /* app shell v2: a route with a header sheet paints its tab in the sheet's colour (headerSheetRoutes). */
+  const sheetMode = hasHeaderSheet(pathname);
   /**
    * ⚠️ THE DASHBOARD IS A MODE TOO, AND IT IS THE SETTINGS MODE'S PATTERN RATHER THAN A SECOND ONE.
    * One condition, DERIVED from the route and never held as state — a boolean would have to be
@@ -589,7 +592,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetMode ? " sheet-mode" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition

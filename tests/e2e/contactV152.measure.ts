@@ -257,7 +257,7 @@ test("CL15.2-K5–K7 · all queried", async ({ page }) => {
 });
 
 /* ── K8 · the banner above the list ── */
-const BLUSH = [243, 221, 210], PAGE = [243, 242, 240];
+const BLUSH = [243, 221, 210], PAGE = [242, 238, 232];
 test("CL15.2-K8 · banner", async ({ page }) => {
   const L = new Ledger("cl152-banner");
   for (const vp of WIDTHS) {
@@ -294,17 +294,15 @@ test("CL15.2-K8 · banner", async ({ page }) => {
     const pl = await shaded(r.sheet.l + 1), pr = await shaded(r.sheet.r - 2);
     L.check("K8 the blush is painted to the sheet's left and right content edges (±1)", w, sameRgb(pl.got, pl.want, 2) && sameRgb(pr.got, pr.want, 2), `left ${pl.got} (want ${pl.want}) right ${pr.got} (want ${pr.want})`);
     L.check(`K8 the gap above it is ${narrow ? 48 : 56} (±2) of PAGE colour, not band and not blush`, w, near(r.ban.t - r.band.b, narrow ? 48 : 56, 2) && sameRgb(await pixel(page, (r.ban.l + r.ban.r) / 2, yp), PAGE, 2), `${(r.ban.t - r.band.b).toFixed(1)}`);
-    /* the arrow: centred on the band, flush with its bottom edge (1px inside), 34 (28) tall */
-    const tx = /matrix\(1, 0, 0, 1, (-?[\d.]+), 0\)/.exec(r.arrow.tf);
-    const arrowL = r.ban.l + r.arrow.left + (tx ? Number(tx[1]) : 0), arrowC = arrowL + r.arrow.w / 2;
-    L.check(`K8 the arrow is centred on the band (±1), ${narrow ? 28 : 34} (±1) tall and ${narrow ? 120 : 150} wide`, w, near(arrowC, (r.ban.l + r.ban.r) / 2, 1) && near(r.arrow.h, narrow ? 28 : 34, 1) && near(r.arrow.w, narrow ? 120 : 150, 1) && /^url\("data:image\/svg/.test(r.arrow.img), `centre ${arrowC.toFixed(1)} vs ${((r.ban.l + r.ban.r) / 2).toFixed(1)} · ${r.arrow.w}×${r.arrow.h}`);
-    L.check("K8 the arrow starts flush with the band's bottom edge (1px inside it), and its tip is painted blush below the band", w,
-      near(r.arrow.top, r.ban.h - 1, 0.6) && sameRgb(await pixel(page, (r.ban.l + r.ban.r) / 2, r.ban.b + (narrow ? 14 : 18)), BLUSH, 3), `top ${r.arrow.top} vs ${r.ban.h - 1}`);
-    L.check(`K8 the banner's bottom to the list's bar is ${narrow ? 64 : 76} (±2)`, w, near(r.bar.t - r.ban.b, narrow ? 64 : 76, 2), `${(r.bar.t - r.ban.b).toFixed(1)}`);
+    /* RETIRED (app shell v2, 9 Oct): the arrow. The banner's bottom edge is the header sheet's flap, in blush, and SH2 B2 measures it
+       (shape, depth, no shadow). What is held here is that no arrow is drawn. */
+    L.check("K8 no arrow hangs under the banner (retired by app shell v2; SH2 B2)", w, !(r.arrow.w > 0) && !/svg/.test(r.arrow.img), `${r.arrow.w}×${r.arrow.h} ${r.arrow.img}`);
+    /* app shell v2: 76 (64) + the flap's 26 */
+    L.check(`K8 the banner's bottom to the list's bar is ${narrow ? 90 : 102} (±2)`, w, near(r.bar.t - r.ban.b, narrow ? 90 : 102, 2), `${(r.bar.t - r.ban.b).toFixed(1)}`);
     await checkOverflow(page, L, w);
     await shot(page, "banner", vp);
   }
-  L.done(22);
+  L.done(20); /* 22 less the arrow's two retired readings (app shell v2) */
 });
 
 /* ── K9 · the copy, and View all agents ── */
