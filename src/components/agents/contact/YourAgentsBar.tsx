@@ -4,7 +4,7 @@
  *
  * THE "YOUR AGENTS" BAR (Contact list v14 §3; ref design-refs/contact-list-v14.html `.lban` + `.ctlrow`): the ink
  * head of the workspace panel. Row 1 — the hawk at the card-index box in its art slot, rising above the bar's top
- * edge; "Your agents"; "Showing n of N for {book}" (and, in v15's ready-only mode, " · ready to query ✕"); and two
+ * edge; "Agents on file" (v15.2 §5; it read "Your agents"); "Showing n of N for {book}" (and, in v15's ready-only mode, " · ready to query ✕"); and two
  * count pills. Row 2 — the list's controls, on white.
  *
  * ⚠️ EACH PILL IS A BUTTON THAT SETS THE LIST'S FILTERS TO EXACTLY ITS OWN SET (§3, lock 6): its number is the
@@ -42,7 +42,7 @@ export const YourAgentsBar: React.FC<YourAgentsBarProps> = ({ shown, total, book
         <img src={art.src} width={art.width} height={art.height} alt="" />
       </span>
       <div className="cl14-bar-t">
-        <h2>Your agents</h2>
+        <h2>Agents on file</h2>
         <span className="cl14-bar-k" data-cl14="showing">
           Showing <b data-cl14="shown">{shownNode ?? shown}</b> of <b>{total}</b>{book ? <> for <b>{book}</b></> : null}
           {readyOnly && (

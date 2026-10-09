@@ -2,137 +2,104 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE DESK CARD — a ledger card in the Query Centre desk's language (Contact list v15 §3): a title with an icon circle,
- * a rubber stamp, a big figure beside two tiled rows, and a small chart. Built for the Contact list and named for a swap.
+ * THE DESK CARD (Contact list v15.2 §2; ref design-refs/contact-list-v15-2.html `.ic-it`): a white card with an ink
+ * disc icon breaking out of its top-left corner, one line of text, a month-on-month line and a small chart at the
+ * bottom right. Built for the Contact list and named for a swap.
  *
- * ⚠️ THE STAMP AND THE HATCHED TREND ARE COPIES OF THE QUERY CENTRE'S (ruling 2) — `QcDesk.tsx` (`Trend`, `smooth`,
- * `trendPoints`) and `qcv131.css` (`.qc131-stamp`). The Query Centre keeps its own until a later prompt unifies the two;
- * change one and you must look at the other.
- *
- * ⚠️ A CARD'S OWN COLOUR SHOWS ONLY IN ITS ICON CIRCLE, ITS STAMP AND ITS CHART (§1.6). The title is ink.
- * ⚠️ A PRESSABLE CARD is a group with a full-cover button behind its contents (the Query Centre desk's pattern), so the
- *    whole card answers a press and the contents stay plain text for a reader.
+ * ⚠️ v15's LEDGER CARD (title row, stamp, two tiled rows, hatched trend, weekly bars, striped bar) IS RETIRED FROM THIS
+ *    FILE. The Query Centre's own stamp and sparkline (`QcDesk.tsx`, `qcv131.css`) were never read from here and are
+ *    untouched.
+ * ⚠️ THE CHARTS ARE `aria-hidden`; THE CARD'S ACCESSIBLE LABEL SAYS WHAT THEY DRAW.
+ * ⚠️ A PRESSABLE CARD is a group with a full-cover button behind its contents, so the whole card answers a press and
+ *    the contents stay plain text for a reader.
  */
-import React, { useId } from "react";
+import React from "react";
 import "./desk.css";
 
-export interface DeskRowView { n: number; text: string; tone?: "blue" | "terra" }
+export interface DeskMoM { dir: "up" | "down" | "none"; text: string }
 
 export const DeskCard: React.FC<{
   probe: string;
-  title: string;
   icon: React.ReactNode;
-  /** the card's colour, and its 12% tint (pre-computed — never a runtime colour-mix) */
-  colour: string;
-  tint: string;
-  /** the progress stripe's second colour (absent = one colour) */
-  colour2?: string;
-  stamp: string | null;
-  big: string;
-  small: string | null;
-  rows: readonly DeskRowView[];
+  /** the line: the figure, then the rest ("41" + "agents on file") */
+  figure: string;
+  rest: string;
+  /** the whole card, said aloud (the charts are hidden from assistive tech) */
+  label: string;
+  /** the month-on-month line; null hides it (nothing true to say) */
+  mom: DeskMoM | null;
   chart: React.ReactNode;
   /** the full-cover press, and its accessible name; absent = the card is not pressable */
   onPress?: () => void;
   pressLabel?: string;
-}> = ({ probe, title, icon, colour, tint, colour2, stamp, big, small, rows, chart, onPress, pressLabel }) => (
-  <section className={`dsk-card${onPress ? " is-press" : ""}`} role="group" aria-label={title} data-dk={probe}
-    style={{ ["--dk-c" as string]: colour, ["--dk-tint" as string]: tint, ...(colour2 ? { ["--dk-c2" as string]: colour2 } : {}) } as React.CSSProperties}>
-    {onPress && <button type="button" className="dsk-hit" data-dk-press={probe} aria-label={pressLabel ?? title} onClick={onPress} />}
-    <header className="dsk-hd">
-      <h3 className="dsk-title" data-dk-part="title"><span className="dsk-ic" aria-hidden="true">{icon}</span>{title}</h3>
-      {stamp && <span className="dsk-stamp" data-dk-part="stamp">{stamp}</span>}
-    </header>
-    <div className="dsk-body">
-      <div className="dsk-big"><b data-dk-part="big">{big}</b>{small && <small data-dk-part="small">{small}</small>}</div>
-      <ul className="dsk-rows">
-        {rows.map((r, i) => (
-          <li key={i} className="dsk-row" data-dk-part="row">
-            <span className={`dsk-tile${r.tone ? ` is-${r.tone}` : ""}`}>{r.n}</span><span className="dsk-lb">{r.text}</span>
-          </li>
-        ))}
-      </ul>
+}> = ({ probe, icon, figure, rest, label, mom, chart, onPress, pressLabel }) => (
+  <section className={`dsk-card${onPress ? " is-press" : ""}`} role="group" aria-label={label} data-dk={probe}>
+    {onPress && <button type="button" className="dsk-hit" data-dk-press={probe} aria-label={pressLabel ?? label} onClick={onPress} />}
+    <span className="dsk-disc" data-dk-part="disc" aria-hidden="true">{icon}</span>
+    <p className="dsk-line" data-dk-part="line"><b data-dk-part="figure">{figure}</b> {rest}</p>
+    <div className="dsk-foot">
+      {mom ? (
+        <span className={`dsk-mom is-${mom.dir}`} data-dk-part="mom" data-dir={mom.dir}>
+          {mom.dir !== "none" && (
+            <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+              <path d={mom.dir === "up" ? "M6 2.2 10 7.4H2z" : "M6 9.8 2 4.6h8z"} fill="currentColor" />
+            </svg>
+          )}
+          {mom.text}
+        </span>
+      ) : <span />}
+      {chart}
     </div>
-    {chart}
   </section>
 );
 
-/* ── the charts ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* ── the charts ── */
 
-/** The trend's box: a 340×40 viewBox stretched to the card (the Query Centre's is 340×52; the brief's chart is 40). */
-const TW = 340, TH = 40;
-/** Points across the box, inset 4 at each end; heights to the series' own maximum. (Copied from QcDesk.) */
-function trendPoints(values: readonly number[]): [number, number][] {
-  const max = Math.max(1, ...values);
-  const min = Math.min(...values);
-  const span = Math.max(1, max - min);
-  const n = values.length;
-  return values.map((v, i) => [4 + (i * (TW - 8)) / Math.max(1, n - 1), TH - 5 - ((v - min) / span) * (TH - 14)]);
-}
-/** Catmull-Rom through the points, written as cubic Béziers. (Copied from QcDesk.) */
-function smooth(p: readonly [number, number][]): string {
-  let d = `M${p[0][0]} ${p[0][1]}`;
-  for (let i = 0; i < p.length - 1; i++) {
-    const p0 = p[i - 1] ?? p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] ?? p2;
-    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-    d += ` C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${p2[0]} ${p2[1]}`;
-  }
-  return d;
-}
-
-/** The hatched line: the running count as an inked line over hatching, ending in a ringed dot. (QcDesk's `Trend`.) */
-export const HatchedTrend: React.FC<{ values: readonly number[]; label: string; startLabel: string }> = ({ values, label, startLabel }) => {
-  const uid = useId().replace(/:/g, "");
-  const P = trendPoints(values.length > 1 ? values : [values[0] ?? 0, values[0] ?? 0]);
-  const line = smooth(P);
-  const last = P[P.length - 1];
+const LW = 112, LH = 38;
+/** A line: the values across a 112 × 38 box (inset 3 at each side, 6 from the top, 4 from the foot), a 7% fill under
+    it and an end dot. One `<path>` carries the line; its points are published for the lock. */
+export const LineChart: React.FC<{ values: readonly number[]; caption: string }> = ({ values, caption }) => {
+  const v = values.length > 1 ? values : [values[0] ?? 0, values[0] ?? 0];
+  const max = Math.max(...v), min = Math.min(...v), span = Math.max(1, max - min);
+  const pts = v.map((y, i) => [3 + (i * (LW - 6)) / (v.length - 1), LH - 4 - ((y - min) / span) * (LH - 10)] as const);
+  const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
   return (
-    <div className="dsk-chart" data-dk-chart="trend">
-      <div className="dsk-plot"><svg viewBox={`0 0 ${TW} ${TH}`} preserveAspectRatio="none" role="img" aria-label={label}>
-        <defs>
-          <filter id={`dkpen-${uid}`} x="-5%" y="-20%" width="110%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves={2} seed={3} />
-            <feDisplacementMap in="SourceGraphic" scale="1.3" />
-          </filter>
-          <pattern id={`dkhatch-${uid}`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-            <line x1="0" y1="0" x2="0" y2="5" stroke="var(--dk-c)" strokeWidth="1.1" opacity=".35" />
-          </pattern>
-        </defs>
-        <path d={`${line} L${last[0]} ${TH} L${P[0][0]} ${TH}Z`} fill={`url(#dkhatch-${uid})`} filter={`url(#dkpen-${uid})`} />
-        <path d={line} fill="none" stroke="var(--dk-c)" strokeWidth="2.2" strokeLinecap="round" filter={`url(#dkpen-${uid})`} />
-        <circle cx={last[0]} cy={last[1]} r="4" fill="var(--dk-c)" />
-        <circle cx={last[0]} cy={last[1]} r="7" fill="none" stroke="var(--dk-c)" strokeWidth="1" opacity=".5" />
-      </svg></div>
-      <div className="dsk-ax" aria-hidden="true"><span>{startLabel}</span><span>Now</span></div>
-    </div>
+    <span className="dsk-chart" data-dk-chart="line" aria-hidden="true">
+      <svg className="dsk-svg dsk-svg--line" viewBox={`0 0 ${LW} ${LH}`}>
+        <path d={`${d} L${last[0].toFixed(1)},${LH} L${pts[0][0].toFixed(1)},${LH} Z`} fill="#2a3a52" fillOpacity=".07" />
+        <path data-dk-line={values.join(",")} d={d} fill="none" stroke="#2a3a52" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={last[0]} cy={last[1]} r="3.2" fill="#2a3a52" />
+      </svg>
+      <small>{caption}</small>
+    </span>
   );
 };
 
-/** Weekly bars: this week solid, the earlier weeks at 45%; the axis names the first week's month, the series and Now. */
-export const WeekBarChart: React.FC<{ values: readonly number[]; label: string; startLabel: string; middle: string }> = ({ values, label, startLabel, middle }) => {
-  const max = Math.max(1, ...values);
+/** A ring from 12 o'clock on a 42-unit box (circumference 100): active in ink, closed in pale blue, the rest the track. */
+export const RingChart: React.FC<{ active: number; closed: number; total: number; caption: string }> = ({ active, closed, total, caption }) => {
+  const share = (n: number) => (total > 0 ? Math.max(0, Math.min(100, (n / total) * 100)) : 0);
+  const a = share(active), c = Math.min(100 - a, share(closed));
+  const arc = (len: number, from: number, colour: string, part: string) => len > 0 && (
+    <circle data-dk-arc={part} data-dk-share={len.toFixed(2)} r="15.915" cx="21" cy="21" fill="none" stroke={colour} strokeWidth="6"
+      strokeDasharray={`${len.toFixed(2)} ${(100 - len).toFixed(2)}`} strokeDashoffset={(25 - from).toFixed(2)} />
+  );
   return (
-    <div className="dsk-chart" data-dk-chart="bars">
-      <div className="dsk-bars" role="img" aria-label={label}>
-        {values.map((v, i) => (
-          <i key={i} className={i === values.length - 1 ? "is-now" : undefined} data-dk-bar={v} style={{ height: `${Math.max(7.5, (v / max) * 100)}%` }} />
-        ))}
-      </div>
-      <div className="dsk-ax" aria-hidden="true"><span>{startLabel}</span><span>{middle}</span><span>Now</span></div>
-    </div>
+    <span className="dsk-chart" data-dk-chart="ring" aria-hidden="true">
+      <svg className="dsk-svg dsk-svg--ring" viewBox="0 0 42 42">
+        <circle r="15.915" cx="21" cy="21" fill="none" stroke="#e6eaef" strokeWidth="6" />
+        {arc(a, 0, "#2a3a52", "active")}
+        {arc(c, a, "#9fb0c4", "closed")}
+      </svg>
+      <small>{caption}</small>
+    </span>
   );
 };
 
-/** A progress bar (not a line): a striped fill on a light track, the label on the left and nothing on the right. */
-export const ProgressChart: React.FC<{ filled: number; total: number; label: string }> = ({ filled, total, label }) => {
-  const pct = total ? Math.min(100, Math.max(0, (filled / total) * 100)) : 0;
-  return (
-    <div className="dsk-chart" data-dk-chart="progress">
-      <div className="dsk-pgw"><span className="dsk-pgb" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={filled} aria-label={label}>
-        <i style={{ width: `${pct}%` }} />
-      </span></div>
-      <div className="dsk-ax" aria-hidden="true"><span>{label}</span></div>
-    </div>
-  );
-};
+/** A bar: the share filled, in ink on a pale track. */
+export const BarChart: React.FC<{ pct: number; caption: string }> = ({ pct, caption }) => (
+  <span className="dsk-chart" data-dk-chart="bar" aria-hidden="true">
+    <span className="dsk-pg"><i data-dk-fill={pct} style={{ width: `${Math.max(0, Math.min(100, pct))}%` }} /></span>
+    <small>{caption}</small>
+  </span>
+);

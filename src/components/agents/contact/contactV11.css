@@ -77,9 +77,9 @@
 /* v13 §3–4 — the numbers strip is row 2 and the carousel row 3, each the whole group's width; the
    column and the rail are row 4. Each section is one rhythm step under the last. */
 .clv-group > .cl13-cz { grid-column: 1 / -1; grid-row: 3; margin-top: var(--page-section-gap); min-width: 0; }
-.clv-group > .clv-main { grid-column: 1; grid-row: 4; padding-top: var(--page-section-gap); }
+.clv-group > .clv-main { grid-column: 1; grid-row: 5; padding-top: var(--page-section-gap); } /* row 4 is v15.2's banner */
 /* v13 §9 — the app footer is the group's last row, so its content box is the column's (QC126-11's rule) */
-.clv-group > .af { grid-column: 1 / -1; grid-row: 5; min-width: 0; }
+.clv-group > .af { grid-column: 1 / -1; grid-row: 6; min-width: 0; }
 /* ⚠️ RETIRED (Contact list v15 §2): the band's disc (`.clv-bdisc`) went with the band — the header is the open one now. */
 
 /* ── the quick-add card "+ Add an agent" drops (§4; the mock's `.qa`) ── */

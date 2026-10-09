@@ -50,7 +50,7 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
 import { CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
-import { ContactOpenHeader } from "./contact/ContactOpenHeader";
+import { CONTACT_BANNER_LINE, ContactOpenHeader } from "./contact/ContactOpenHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
@@ -840,6 +840,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setSearch("");
   }, [YOU_FILTERS]);
   /* "See all N in the list": the ready-only mode, then the list scrolled into view. */
+  /* v15.2 §5 — "View all agents": the page scrolls until the list's bar is 24 under the scroller's top (smoothly, or
+     at once under reduced motion), and the caret goes to Find without a second scroll. */
+  const viewAllAgents = useCallback(() => {
+    const ws = wsRef.current;
+    const bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? ws;
+    const sc = bar?.closest<HTMLElement>(".wpg-scroll");
+    if (!bar || !sc) return;
+    const top = sc.scrollTop + bar.getBoundingClientRect().top - sc.getBoundingClientRect().top - 24;
+    sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    ws?.querySelector<HTMLInputElement>('[data-cl13-find="banner"] input')?.focus({ preventScroll: true });
+  }, []);
   const seeAllReady = useCallback(() => {
     setPillSet("ready");
     window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
@@ -951,8 +962,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             flying hawk to their right, centred against each other over a hairline. It renders over a LIST only
             (and while settling, painted over): the blank account's pitch is ContactEmpty, with its own header. */}
         {(showList || pageState === "settling") && (
-          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd}
-            onDiscover={() => { if (DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); }} />
+          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd} onViewAll={viewAllAgents} />
         )}
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}
@@ -983,6 +993,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onAddDiscover={(ca) => void addAgent(communityAgentFields(ca, scoped?.title?.trim() || null))}
           />
         )}
+        {/* v15.2 §4 — the banner above the list: a blush band the sheet's full width, its bottom edge an arrow down at
+            the list. 56 (48) of plain page above it, after the next-step band; the list's bar 76 (64) below. */}
+        {showList && (
+          <section className="cl15-ban" data-cl15="banner" aria-label="A note">
+            <p>{CONTACT_BANNER_LINE}</p>
+          </section>
+        )}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -995,7 +1012,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             next-step section — the ink bar (the hawk, the title, the line, the two pills; the controls on white),
             the filter strip, then the list. It replaces v13's open banner, slim bar and slate workspace. */}
         {showList && (
-        <section className="cl14-ws" data-cl14="ws" ref={wsRef} aria-label="Your agents">
+        <section className="cl14-ws" data-cl14="ws" ref={wsRef} aria-label="Agents on file">
           <YourAgentsBar
             shown={visibleFacts.length} total={factsAll.length} book={scoped?.title?.trim() || null}
             you={needYou} ready={step.ready.length} youOn={youOn} readyOn={readyOn}

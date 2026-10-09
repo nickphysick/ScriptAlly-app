@@ -150,7 +150,8 @@ test("CL14-5 · workspace", async ({ page }) => {
     L.check("CL14-5 the hawk at the card-index box, its top above the bar's top", w,
       /contact-index-hawk\.webp/.test(r.imgSrc ?? "") && r.imgLoaded && !!r.img && !!r.bar && r.img.t < r.bar.t, `${r.imgSrc} loaded ${r.imgLoaded} img ${r.img?.t.toFixed(1)} bar ${r.bar?.t.toFixed(1)}`);
     L.check("CL14-5 Find, Grouped and Sort are white", w, r.find === "rgb(255, 255, 255)" && r.group === "rgb(255, 255, 255)" && r.sort === "rgb(255, 255, 255)", `${r.find} ${r.group} ${r.sort}`);
-    L.check("CL14-5 'Your agents' and 'Showing n of N for {book}'", w, r.title === "Your agents" && /^Showing \d+ of \d+( for .+)?$/.test((r.line ?? "").trim()), `${r.title} · ${r.line}`);
+    /* v15.2 §5: the bar reads "Agents on file" (it read "Your agents") */
+    L.check("CL14-5 'Agents on file' and 'Showing n of N for {book}'", w, r.title === "Agents on file" && /^Showing \d+ of \d+( for .+)?$/.test((r.line ?? "").trim()), `${r.title} · ${r.line}`);
     await checkOverflow(page, L, w);
   }
   L.done(14);
@@ -757,7 +758,7 @@ const GUIDE14 = [
     body: "How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are." },
   { title: "Your next step", sel: '[data-cl14="next"]',
     body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, or where the book has been." },
-  { title: "Your agents", sel: '[data-cl14="ws"]',
+  { title: "Agents on file", sel: '[data-cl14="ws"]',
     body: "Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card." },
   { title: "Housekeeping", sel: '[data-ftab="housekeeping"]',
     body: "The details missing from your agents’ profiles, and why each one helps. Fill them in here, a few at a time." },

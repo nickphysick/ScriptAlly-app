@@ -51,7 +51,7 @@ test("CL15-1 · header", async ({ page }) => {
         oneLine: !!title && !!tcs && title.getBoundingClientRect().height < parseFloat(tcs.lineHeight) * 1.5,
         titleText: title?.textContent ?? null, pageTitle: title?.hasAttribute("data-page-title") ?? false,
         sub: hd?.querySelector('[data-cl15="sub"]')?.textContent ?? null,
-        add: hd?.querySelector('[data-cl15="add"]')?.textContent ?? null, disc: hd?.querySelector('[data-cl15="discover"]')?.textContent ?? null,
+        add: hd?.querySelector('[data-cl15="add"]')?.textContent ?? null, disc: hd?.querySelector('[data-cl15="view-all"]')?.textContent ?? null,
         txt: b(txt), art: b(art), img: b(img),
         line: hd ? `${getComputedStyle(hd).borderBottomWidth} ${getComputedStyle(hd).borderBottomStyle} ${getComputedStyle(hd).borderBottomColor}` : null,
         imgW: img ? img.getBoundingClientRect().width : null,
@@ -63,7 +63,7 @@ test("CL15-1 · header", async ({ page }) => {
     L.check(`CL15-1 the title is Special Elite at ${narrow ? 58 : 72} (±1), on one line`, w, r.size !== null && near(r.size, narrow ? 58 : 72, 1) && /Special Elite/.test(r.family ?? "") && r.oneLine, `${r.size} ${r.family} oneLine ${r.oneLine}`);
     L.check("CL15-1 the title is the count, \"N agents on file\", and carries data-page-title", w, /^\d+ agents? on file$/.test(r.titleText ?? "") && r.pageTitle, `${r.titleText} ${r.pageTitle}`);
     L.check("CL15-1 the subheader, exactly", w, r.sub === SUB, `${r.sub}`);
-    L.check("CL15-1 the two buttons: + Add an agent · Discover agents", w, r.add === "+ Add an agent" && r.disc === "Discover agents", `${r.add} · ${r.disc}`);
+    L.check("CL15-1 the two buttons: + Add an agent · View all agents (v15.2)", w, r.add === "+ Add an agent" && r.disc === "View all agents", `${r.add} · ${r.disc}`);
     const ct = r.txt ? (r.txt.t + r.txt.b) / 2 : NaN, ca = r.art ? (r.art.t + r.art.b) / 2 : NaN;
     L.check("CL15-1 the text block's centre and the drawing's are within 4px", w, Math.abs(ct - ca) <= 4, `text ${ct.toFixed(1)} drawing ${ca.toFixed(1)}`);
     L.check("CL15-1 the hairline: 1px ink at 14%", w, r.line === "1px solid rgba(28, 19, 15, 0.14)", `${r.line}`);
@@ -76,75 +76,19 @@ test("CL15-1 · header", async ({ page }) => {
    with a top margin of its own; the header has none now and the drawing's drop IS the headroom. CL15.1 H5 replaces it:
    the drawing's top is 30 (24) ±3 below the page sheet's top (tests/e2e/contactV151.measure.ts). ── */
 
-/* ── lock 3 · the desk: three cards in one row; ink titles; Queried's bars and Profiles' progress bar; no
-   text overflowing; every stamp's text clear of its inner rule; no stamp fact repeated in a row; and the presses — On
-   file changes nothing, Queried filters the list to exactly its figure, Profiles opens Housekeeping.
-   ⚠️ RETIRED BY v15.1 (8 Oct): "every card is 200 / 186 tall or less" (212 / 194 — CL15.1 D2) and "the desk is 28 under
-   the header's hairline" (72 / 60 — D1). ── */
-test("CL15-3 · desk", async ({ page }) => {
+/* ── lock 3 · the desk's PRESSES: On file changes nothing, Queried filters the list to exactly its figure, Profiles
+   opens Housekeeping.
+   ⚠️ RETIRED BY v15.2 (8 Oct): everything this lock said about the v15 CARDS — the three titles, ink titles, the
+   weekly bars, the striped progress bar, the stamps and their inner rule, the two-row lists, "no row repeats its stamp"
+   and "On file's figure is the header's count". The desk is three icon cards now: CL15.2 K1–K4
+   (tests/e2e/contactV152.measure.ts). ── */
+test("CL15-3 · desk presses", async ({ page }) => {
   const L = new Ledger("cl15-3");
-  let deskSeen = false;
-  for (const vp of WIDTHS15) {
-    await openContacts(page, vp);
-    const w = `${vp.width}`;
-    const narrow = vp.width < 1440;
-    const r = await page.evaluate(() => {
-      const pick = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      const desk = pick('.aglist [data-cl15="desk"]');
-      const hd = pick('.aglist [data-cl15="header"]');
-      const cards = desk ? [...desk.querySelectorAll<HTMLElement>("[data-dk]")] : [];
-      const over = (e: Element | null) => (e ? (e as HTMLElement).scrollWidth - (e as HTMLElement).clientWidth : 0);
-      return {
-        found: !!desk, gap: desk && hd ? desk.getBoundingClientRect().top - hd.getBoundingClientRect().bottom : null,
-        cards: cards.map((c) => {
-          const b = c.getBoundingClientRect();
-          const title = c.querySelector<HTMLElement>('[data-dk-part="title"]');
-          const stamp = c.querySelector<HTMLElement>('[data-dk-part="stamp"]');
-          /* the stamp's TEXT must sit inside its inner rule: the text's box inset at least 4px from the stamp's on each side */
-          let clear: boolean | null = null;
-          if (stamp) {
-            const rg = document.createRange(); rg.selectNodeContents(stamp);
-            const t = rg.getBoundingClientRect(), s = stamp.getBoundingClientRect();
-            clear = t.left - s.left >= 4 && s.right - t.right >= 4 && t.top - s.top >= 3 && s.bottom - t.bottom >= 3 && over(stamp) <= 1;
-          }
-          const rows = [...c.querySelectorAll<HTMLElement>('[data-dk-part="row"]')];
-          return {
-            key: c.getAttribute("data-dk"), x: b.left, y: b.top, w: b.width, h: b.height,
-            titleColour: title ? getComputedStyle(title).color : null, titleOver: over(title),
-            stamp: stamp?.textContent ?? null, clear,
-            rows: rows.map((x) => x.textContent ?? ""), rowOver: Math.max(0, ...rows.map((x) => Math.max(over(x), over(x.querySelector(".dsk-lb"))))),
-            bars: c.querySelectorAll('[data-dk-chart="bars"] i').length,
-            barOpac: [...c.querySelectorAll<HTMLElement>('[data-dk-chart="bars"] i')].map((i) => getComputedStyle(i).opacity),
-            progress: !!c.querySelector('[data-dk-chart="progress"] [role="progressbar"]'),
-            paths: c.querySelectorAll("path").length,
-            big: c.querySelector('[data-dk-part="big"]')?.textContent ?? null,
-            pressable: !!c.querySelector("[data-dk-press]"),
-          };
-        }),
-        headerCount: Number((hd?.querySelector("h1")?.textContent ?? "").match(/^(\d+)/)?.[1] ?? NaN),
-      };
-    });
-    if (!r.found) { L.check("CL15-3 population: the desk renders", w, false, "no desk"); continue; }
-    deskSeen = true;
-    const by = Object.fromEntries(r.cards.map((c) => [c.key, c]));
-    L.check("CL15-3 three cards in one row: On file, Queried, Profiles complete", w,
-      r.cards.map((c) => c.key).join(",") === "file,queried,profiles" && r.cards.every((c) => near(c.y, r.cards[0].y, 1)), JSON.stringify(r.cards.map((c) => [c.key, Math.round(c.y)])));
-    L.check(`CL15-3 equal widths, ${narrow ? 16 : 24} apart`, w, r.cards.length === 3 && near(r.cards[0].w, r.cards[1].w, 1) && near(r.cards[1].w, r.cards[2].w, 1)
-      && near(r.cards[1].x - (r.cards[0].x + r.cards[0].w), narrow ? 16 : 24, 1), r.cards.map((c) => `${c.x.toFixed(1)}+${c.w.toFixed(1)}`).join(" "));
-    L.check("CL15-3 titles are ink", w, r.cards.every((c) => c.titleColour === "rgb(28, 19, 15)"), r.cards.map((c) => c.titleColour).join(" "));
-    L.check("CL15-3 Queried's chart is bars (≥ 8), this week solid and the rest at 45%", w,
-      by.queried?.bars >= 8 && by.queried.barOpac[by.queried.barOpac.length - 1] === "1" && by.queried.barOpac.slice(0, -1).every((o: string) => o === "0.45"), `${by.queried?.bars} ${by.queried?.barOpac.join(",")}`);
-    L.check("CL15-3 Profiles' chart is a progress bar (no <path>)", w, !!by.profiles?.progress && by.profiles.paths === 0, `${by.profiles?.progress} paths ${by.profiles?.paths}`);
-    L.check("CL15-3 no text overflows a title or a row", w, r.cards.every((c) => c.titleOver <= 1 && c.rowOver <= 1), r.cards.map((c) => `${c.key} ${c.titleOver}/${c.rowOver}`).join(" "));
-    L.check("CL15-3 every stamp's text fits inside its inner rule", w, r.cards.filter((c) => c.stamp !== null).every((c) => c.clear === true), r.cards.map((c) => `${c.key} ${c.stamp} ${c.clear}`).join(" | "));
-    L.check("CL15-3 the Profiles stamp is hidden (no completion history exists)", w, by.profiles?.stamp === null && by.file?.stamp !== null && by.queried?.stamp !== null, r.cards.map((c) => c.stamp).join(" | "));
-    L.check("CL15-3 no row repeats its card's stamp", w, r.cards.every((c) => !c.stamp || c.rows.every((t: string) => !/this month/.test(t))), JSON.stringify(r.cards.map((c) => c.rows)));
-    L.check("CL15-3 On file's figure is the header's count", w, Number(by.file?.big) === r.headerCount, `${by.file?.big} vs ${r.headerCount}`);
-    L.check("CL15-3 On file is not pressable; Queried and Profiles are", w, !by.file?.pressable && !!by.queried?.pressable && !!by.profiles?.pressable, r.cards.map((c) => `${c.key}:${c.pressable}`).join(" "));
-    await checkOverflow(page, L, w);
-  }
+  await openContacts(page, WIDTHS15[0]);
+  const seen = await page.evaluate(() => { const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0); return root?.querySelectorAll('[data-cl15="desk"] [data-dk]').length ?? 0; });
+  L.check("CL15-3 population: the desk renders three cards", "1512", seen === 3, `${seen}`);
   /* no desk: fail on the population reading, never by waiting out a click on a card that is not there */
-  if (!deskSeen) { L.done(31); return; }
+  if (seen !== 3) { L.done(4); return; }
   /* the presses, at 1512 */
   await openContacts(page, WIDTHS15[0]);
   const snap = () => page.evaluate(() => {
@@ -160,7 +104,7 @@ test("CL15-3 · desk", async ({ page }) => {
   await page.locator('.aglist [data-dk="file"]').filter({ visible: true }).first().click();
   await page.waitForTimeout(300);
   L.check("CL15-3 clicking On file changes nothing", "1512", (await snap()) === before, "");
-  const fig = Number(await page.locator('.aglist [data-dk="queried"] [data-dk-part="big"]').filter({ visible: true }).first().textContent());
+  const fig = Number(await page.locator('.aglist [data-dk="queried"] [data-dk-part="figure"]').filter({ visible: true }).first().textContent());
   await page.locator('.aglist [data-dk-press="queried"]').filter({ visible: true }).first().click();
   await page.waitForTimeout(900);
   const q = await page.evaluate(() => {
@@ -175,7 +119,7 @@ test("CL15-3 · desk", async ({ page }) => {
   const hk = await page.evaluate(() => !![...document.querySelectorAll('[data-hdr="housekeeping"]')].find((e) => e.classList.contains("is-in")));
   L.check("CL15-3 Profiles complete opens Housekeeping", "1512", hk, `${hk}`);
   await page.keyboard.press("Escape");
-  L.done(27);
+  L.done(4);
 });
 
 /* ── the ready-only list mode (§4): what the page says about it, read in one place ── */
@@ -432,7 +376,7 @@ test("CL15-6 · all queried", async ({ page }) => {
       sentence: tx(q('[data-fs-part="sentence"]')), split: q('[data-cl15="split"]') ? tx(q('[data-cl15="split"]')) : null, note: q('[data-cl15="note"]') ? tx(q('[data-cl15="note"]')) : null,
       buttons: root?.querySelectorAll('[data-fs-part="lede"] button').length ?? -1,
       total: Number(tx(q('[data-cl15="header"] h1')).match(/^(\d+)/)?.[1] ?? NaN),
-      deskBig: Number(tx(dq?.querySelector('[data-dk-part="big"]') ?? null).match(/^(\d+)/)?.[1] ?? NaN), deskAll: tx(dq?.querySelector('[data-dk-part="big"]') ?? null),
+      deskBig: Number(tx(dq?.querySelector('[data-dk-part="figure"]') ?? null).match(/^(\d+)/)?.[1] ?? NaN), deskAll: tx(dq?.querySelector('[data-dk-part="figure"]') ?? null),
       pill: Number(tx(q('[data-cl14="pill-ready"]')).match(/\d+/)?.[0] ?? NaN),
       panelH: panel ? panel.getBoundingClientRect().height : null,
       addBg: cs(add)?.backgroundColor ?? null, addBorder: cs(add)?.borderTopStyle ?? null, addPad: cs(addIn)?.padding ?? null, plusW: plus ? plus.getBoundingClientRect().width : null,
@@ -475,12 +419,10 @@ test("CL15-6 · all queried", async ({ page }) => {
         L.check("CL15-6 the split line's parts sum to queried", w, !!p.split && p.split.reduce((a, b) => a + b, 0) === p.queried && p.split[0] > 0 && p.split[1] > 0 && p.split[2] > 0, `${r.split} vs ${p.queried}`);
         L.check("CL15-6 the desk's Queried figure is the sentence's", w, r.deskBig === p.queried, `desk ${r.deskAll} sentence ${p.queried}`);
         L.check("CL15-6 no button and nobody ready: the pill reads 0", w, r.buttons === 0 && r.pill === 0, `buttons ${r.buttons} pill ${r.pill}`);
-        L.check("CL15-6 the Add an agent card is solid white with a dashed ring, tightened (20 22 18, a 46px plus)", w,
-          r.addBg === "rgb(255, 255, 255)" && r.addBorder === "dashed" && r.addPad === "20px 22px 18px" && r.plusW !== null && near(r.plusW, 46, 0.5), `${r.addBg} ${r.addBorder} ${r.addPad} ${r.plusW}`);
-        L.check("CL15-6 the panel is Discover, coming soon: the heading, the pill, the sentence, two nameless rows", w,
-          !!r.soon && r.soon.head === "Discover agentsComing soon" && r.soon.p === "Find agents by genre, see who’s open, and add them to your list in one click." && r.soon.rows === 2 && r.soon.rowText === "", JSON.stringify(r.soon));
-        if (!narrow) L.check("CL15-6 the panel is no taller than 350 at 1512", w, r.panelH !== null && r.panelH <= 350, `${r.panelH}`);
-        else L.check("CL15-6 the panel's height at 1280 (reported)", w, r.panelH !== null, `${r.panelH}`);
+        /* ⚠️ RETIRED BY v15.2 (8 Oct): the card's "20 22 18, a 46px plus" (a ghost card replaced the plus — CL15.2 K6), the
+           coming-soon panel's "two nameless rows" and old sentence, and "the panel is no taller than 350" (the panel has a
+           header strip, three feature rows and the bird now — K7). */
+        L.check("CL15-6 the Add an agent card is solid white with a dashed ring", w, r.addBg === "rgb(255, 255, 255)" && r.addBorder === "dashed", `${r.addBg} ${r.addBorder}`);
         await checkOverflow(page, L, w);
       }
     }
@@ -502,5 +444,5 @@ test("CL15-6 · all queried", async ({ page }) => {
     /* removes the manuscript, its queries and their logs, and the `notifyPrefs.discover` leaf the press wrote */
     execSync("node tests/e2e/seedAllQueried.mjs --clean", { stdio: "inherit" });
   }
-  L.done(47);
+  L.done(39);
 });

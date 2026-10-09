@@ -187,21 +187,40 @@ describe("every Discover link follows DISCOVER_LIVE (v14 ruling Q4), both branch
   const ca = (id: string): CommunityAgent => ({ id, name: `Disc ${id}`, agency: "Lumen", city: "London", genres: ["Thriller"], responseTimeWeeks: 5, submissionStatus: SubmissionStatus.OPEN }) as unknown as CommunityAgent;
   const doneAgents = [ag("r")], doneQ = [q("r", QueryStatus.QUERIED)];
   const reopenFx = () => [[ag("s"), ag("c", { submissionStatus: SubmissionStatus.CLOSED, reopensOn: "2026-12-01" })], [q("s", QueryStatus.QUERIED)]] as const;
-  it("off: the all-queried panel is the coming-soon panel — heading, pill, sentence, two nameless rows, the request button", () => {
+  it("off: the all-queried panel is the coming-soon panel (v15.2 §3) — plum header and chip, the lede, three feature rows, the request button, the bird", () => {
     const done = render(doneAgents, doneQ, { discoverLive: false, discover: [ca("1"), ca("2")] });
     expect(done.html).not.toContain('data-cl14="discover-add"');
     expect(done.html).toContain('data-cl15="discover-soon"');
     const panel = slice(done.html, "panel");
     const t = text(panel);
     expect(t).toContain("Discover agents Coming soon");
-    expect(t).toContain("Find agents by genre, see who's open, and add them to your list in one click.");
+    expect(t).toContain("Find new agents and add them to your list in one click.");
+    /* the three feature rows, in order, exact */
+    expect(t).toContain("By genre Only agents who take what you write. Open now See who's accepting submissions today. Their wishlist What they want, and what to send.");
+    expect((panel.match(/class="cl15-dt-i"/g) ?? []).length).toBe(3);
     expect(t).toContain("Tell me when it's ready");
-    /* two placeholder rows, hidden from assistive tech, and no name in them: not a Discover agent's, not an invented one */
-    const list = panel.slice(panel.indexOf('class="cl15-dt-l"'), panel.indexOf("</ol>"));
-    expect(list).toContain('aria-hidden="true"');
-    expect((list.match(/<li>/g) ?? []).length).toBe(2);
-    expect(text(list).replace(/\+ Add/g, "").replace(/class="[^"]*"|aria-hidden="true">?/g, "").trim()).toBe("");
+    /* the chip is its own element in its own header — never the list header's note (the below-1440 fault's shape) */
+    expect(panel).toContain('data-cl15="discover-chip"');
+    expect(panel).not.toContain('data-fs-part="panel-head"');
+    /* the bird: decorative, and the panel carries the class that clips it */
+    expect(panel).toMatch(/<img class="cl15-dt-bird"[^>]*alt=""/);
+    expect(done.html).toMatch(/class="fs-panel cl15-dtp"/);
+    /* RETIRED (v15.2): the two placeholder rows and the old description */
+    expect(panel).not.toContain("cl15-dt-l");
+    expect(t).not.toContain("Find agents by genre, see who");
     expect(done.html).not.toContain("Disc 1");
+  });
+  /* K6's source half: the ghost comes before the title, is hidden from assistive tech, names nobody; the "+" is gone */
+  it("the Add card shows a ghost of a filled card above its title, and no plus circle", () => {
+    const done = render(doneAgents, doneQ, { discoverLive: false });
+    const card = done.html.slice(done.html.indexOf('data-cl14="addcard"'));
+    const g = card.indexOf('data-cl15="ghost"'), title = card.indexOf("<b>Add an agent</b>");
+    expect(g).toBeGreaterThan(-1);
+    expect(title).toBeGreaterThan(g);
+    expect(card.slice(g - 40, g + 60)).toContain('aria-hidden="true"');
+    expect(text(card.slice(g, title)).replace(/class="[^"]*"|data-cl15="ghost"|aria-hidden="true">?/g, "").trim()).toBe("");
+    expect(done.html).not.toMatch(/["\s]cl14-addc-plus["\s]/);
+    expect(card).toContain('data-cl14="addcard-go"');
   });
   it("off: the request button reads as set once asked for", () => {
     const { html } = render(doneAgents, doneQ, { notifyDiscover: true });

@@ -2,109 +2,71 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE DESK CARD (shell/desk) — Contact list v15 §3, values read off the rendered oracle (design-refs/contact-list-v15.html)
- * at 1512 × 900 and 1280 × 800. "Below 1440" is `max-width: 1439.5px`.
+ * THE DESK CARD (shell/desk) — Contact list v15.2 §2, values read off the rendered oracle
+ * (design-refs/contact-list-v15-2.html `.ic-it`) at 1512 × 900 and 1280 × 800. "Below 1440" is `max-width: 1439.5px`.
  *
- * ⚠️ THE STAMP IS A COPY OF THE QUERY CENTRE'S `.qc131-stamp` (queries/centre/qcv131.css): the double rule (a 1.6px border
- * and an inner ring in the card colour, a paper-coloured gap between), −3°, the noise mask. The Query Centre keeps its own
- * until a later prompt unifies the two — change one and look at the other. The padding is the brief's (6 × 13, 5 × 10 below
- * 1440), wider than the Query Centre's, so the text clears the inner rule.
+ * ⚠️ THE DISC'S HALO IS THE PAGE'S COLOUR, READ FROM THE PAGE'S TOKEN (`--ws-page`) — it is what makes the disc read as
+ *    breaking out of the card over the page, so it must follow the page if the page is ever retoned.
+ * ⚠️ THE DISC RISES 28 (24) ABOVE THE CARD: the host leaves that room above the row (the Contact list's desk does).
  */
 .dsk-row-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 
 .dsk-card {
   position: relative; box-sizing: border-box; min-width: 0;
-  display: flex; flex-direction: column;
-  background: #fdfcfa; border-radius: 18px; padding: 18px 22px 12px;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -26px rgba(28, 19, 15, 0.4);
+  display: flex; flex-direction: column; align-items: stretch; gap: 6px;
+  background: #fff; border-radius: 16px; padding: 50px 24px 16px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09), 0 14px 30px -26px rgba(28, 19, 15, 0.4);
 }
-/* a pressable card: the full-cover button behind the contents (the Query Centre desk's pattern) */
+/* a pressable card: the full-cover button behind the contents */
 .dsk-hit {
   position: absolute; inset: 0; z-index: 0; border: 0; padding: 0; margin: 0; border-radius: inherit;
   background: transparent; cursor: pointer;
 }
-.dsk-card.is-press:hover { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 18px 34px -24px rgba(28, 19, 15, 0.45); }
-.dsk-hit:focus-visible { outline: 2px solid var(--dk-c); outline-offset: 2px; }
+.dsk-card.is-press:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 34px -24px rgba(28, 19, 15, 0.45); }
+.dsk-hit:focus-visible { outline: 2px solid #2f5f86; outline-offset: 6px; }
+/* the contents sit over the button and let a press through to it */
 .dsk-card > *:not(.dsk-hit) { position: relative; z-index: 1; pointer-events: none; }
 
-/* ⚠️ min-height 28, NOT the mock's 34: the row's tallest content is the 28px icon and the stamp's 28px layout box (its −3°
-   rotation adds no layout height). v15.1 moved the ceilings to 212 / 194 with 16 (12) under this row; at 28 the cards
-   sit inside them. */
-.dsk-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 28px; }
-/* ⚠️ brand.tsx forces `h3` (0-0-1) at runtime: a class and an element (0-1-1) plus !important win honestly */
-.dsk-hd h3.dsk-title {
-  display: flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap; min-width: 0;
-  font: 400 16px/normal var(--sp-type) !important; color: #1c130f;
+/* the ink disc, breaking out of the card's top-left corner (0-2-0: it must beat the rule above, which is 0-2-0 too and earlier) */
+.dsk-card > .dsk-disc {
+  position: absolute; top: -28px; left: 22px; box-sizing: border-box;
+  width: 64px; height: 64px; padding: 9px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #2a3a52; color: #f4eee5;
+  box-shadow: 0 0 0 5px var(--ws-page), 0 8px 16px -8px rgba(28, 19, 15, 0.5);
 }
-.dsk-ic {
-  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--dk-tint); color: var(--dk-c);
-}
-.dsk-ic svg { display: block; width: 18px; height: 18px; }
-.dsk-hd .dsk-stamp {
-  flex: 0 0 auto; display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap;
-  font-family: var(--sp-type); font-size: 13px; line-height: 1; font-weight: 400; letter-spacing: 0.02em;
-  color: var(--dk-c);
-  padding: 6px 13px;
-  border: 1.6px solid var(--dk-c);
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 1.5px #fdfcfa, inset 0 0 0 2.6px var(--dk-c);
-  transform: rotate(-3deg);
-  opacity: 0.95;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.32'/%3E%3C/filter%3E%3Crect width='120' height='40' filter='url(%23n)'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.32'/%3E%3C/filter%3E%3Crect width='120' height='40' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+.dsk-card .dsk-disc svg { display: block; width: 100%; height: 100%; }
 
-/* v15.1: 16 (12) between the header row and the body row */
-.dsk-body { display: flex; align-items: center; gap: 18px; margin-top: 16px; min-width: 0; }
-.dsk-big { display: flex; flex-direction: column; flex: 0 0 auto; padding-right: 18px; border-right: 1px solid rgba(28, 19, 15, 0.12); }
-.dsk-big b { font: 400 44px/1 var(--sp-type); color: #1c130f; }
-.dsk-big small { margin-top: 3px; font: 400 13px var(--sp-type); color: rgba(28, 19, 15, 0.55); }
-.dsk-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; min-width: 0; flex: 1 1 0; }
-.dsk-row { display: flex; align-items: center; gap: 10px; max-width: 100%; white-space: nowrap; }
-.dsk-tile {
-  flex: 0 0 auto; box-sizing: border-box; min-width: 30px; height: 28px; padding: 0 7px; border-radius: 7px;
-  display: inline-flex; align-items: center; justify-content: center;
-  font: 400 15px var(--sp-type); background: rgba(28, 19, 15, 0.06); color: rgba(28, 19, 15, 0.62);
-}
-.dsk-tile.is-blue { background: #dfeaf4; color: #2f5f86; }
-.dsk-tile.is-terra { background: #f6e4da; color: #a0633f; }
-.dsk-card .dsk-lb { font: 400 16px/1.2 var(--sp-serif); color: #1c130f; overflow: hidden; text-overflow: ellipsis; }
+/* the line: Special Elite 21, the figure at 34, one line */
+.dsk-card .dsk-line { margin: 0; font: 400 21px/1.15 var(--sp-type); color: #1c130f; white-space: nowrap; }
+.dsk-card .dsk-line b { font: 400 34px/1.15 var(--sp-type); letter-spacing: -0.01em; margin-right: 2px; }
 
-/* the chart: 40 tall, 12 under the body; the axis 3 under it */
-.dsk-chart { margin-top: 12px; min-width: 0; }
-.dsk-plot { position: relative; height: 40px; }
-.dsk-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; display: block; }
-.dsk-bars { display: flex; align-items: flex-end; gap: 5px; height: 40px; }
-.dsk-bars i { flex: 1 1 0; min-height: 3px; border-radius: 3px 3px 0 0; background: var(--dk-c); opacity: 0.45; }
-.dsk-bars i.is-now { opacity: 1; }
-.dsk-pgw { height: 40px; display: flex; align-items: flex-end; }
-.dsk-pgb {
-  display: block; width: 100%; height: 14px; border-radius: 7px; overflow: hidden;
-  background: rgba(28, 19, 15, 0.07); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.05);
-}
-.dsk-pgb i {
-  display: block; height: 100%; border-radius: 7px;
-  background: repeating-linear-gradient(45deg, var(--dk-c) 0 6px, var(--dk-c2, var(--dk-c)) 6px 12px);
-}
-.dsk-card .dsk-ax {
-  display: flex; justify-content: space-between; margin-top: 3px;
-  font: 400 11px var(--sp-type); color: rgba(28, 19, 15, 0.45);
-}
-.dsk-card .dsk-ax span { font-family: inherit; white-space: nowrap; }
+/* the foot: month on month left, the chart right, on one bottom line */
+.dsk-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.dsk-card .dsk-mom { display: flex; align-items: center; gap: 5px; padding-bottom: 2px; font: 400 14.5px var(--sp-serif); white-space: nowrap; }
+.dsk-card .dsk-mom.is-up { color: #4f7a4b; }
+.dsk-card .dsk-mom.is-down { color: #a0633f; }
+.dsk-card .dsk-mom.is-none { color: rgba(28, 19, 15, 0.45); }
+.dsk-card .dsk-mom svg { display: block; flex: none; }
+
+.dsk-chart { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none; }
+.dsk-card .dsk-chart small { display: block; font: 400 10.5px var(--sp-type); color: rgba(28, 19, 15, 0.42); white-space: nowrap; }
+.dsk-card .dsk-svg { display: block; }
+.dsk-card .dsk-svg--line { width: 112px; height: 38px; }
+/* the ring rises 14 above its foot row (the oracle's own offset), so its caption sits level with the other cards' */
+.dsk-card .dsk-svg--ring { width: 48px; height: 48px; margin-top: -14px; }
+.dsk-pg { display: block; width: 112px; height: 8px; margin-bottom: 4px; border-radius: 4px; background: #e6eaef; overflow: hidden; }
+.dsk-pg i { display: block; height: 100%; border-radius: 4px; background: #2a3a52; }
 
 @media (max-width: 1439.5px) {
   .dsk-row-grid { gap: 16px; }
-  .dsk-card { padding: 14px 16px 10px; }
-  .dsk-hd { gap: 6px; }
-  .dsk-hd h3.dsk-title { font-size: 14px !important; gap: 6px; }
-  .dsk-hd .dsk-stamp { font-size: 11px; padding: 5px 10px; }
-  .dsk-body { gap: 12px; margin-top: 12px; }
-  .dsk-big { padding-right: 12px; }
-  .dsk-big b { font-size: 38px; }
-  .dsk-tile { min-width: 26px; height: 24px; font-size: 13px; }
-  .dsk-row { gap: 8px; }
-  .dsk-card .dsk-lb { font-size: 14.5px; }
+  .dsk-card { padding: 42px 18px 16px; }
+  .dsk-card > .dsk-disc { top: -24px; left: 16px; width: 54px; height: 54px; padding: 8px; }
+  .dsk-card .dsk-line { font-size: 17px; }
+  .dsk-card .dsk-line b { font-size: 28px; }
+  .dsk-card .dsk-mom { font-size: 13px; }
+  .dsk-card .dsk-chart small { font-size: 9.5px; }
+  .dsk-card .dsk-svg--line { width: 84px; height: 30px; }
+  .dsk-card .dsk-svg--ring { width: 40px; height: 40px; }
+  .dsk-pg { width: 84px; }
 }
-@media (prefers-reduced-motion: reduce) { .dsk-card { transition: none; } }

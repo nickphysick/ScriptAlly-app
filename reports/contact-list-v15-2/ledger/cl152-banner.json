@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "CL15.2 population: the banner, the next-step band and the list's bar render",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K8 it is a section labelled “A note”, and its text is exact",
+  "where": "1512",
+  "ok": true,
+  "detail": "SECTION “A note” “Your agent will be the one who champions your words.”"
+ },
+ {
+  "lock": "K8 the text is Special Elite 38 in rgb(91, 42, 31)",
+  "where": "1512",
+  "ok": true,
+  "detail": "38px \"Special Elite\", \"Co rgb(91, 42, 31)"
+ },
+ {
+  "lock": "K8 the band is blush, rgb(243, 221, 210), at least 136 tall",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(243, 221, 210) h 136.0"
+ },
+ {
+  "lock": "K8 precondition: the sampled lines are on screen — one inside the banner, one in the gap above it",
+  "where": "1512",
+  "ok": true,
+  "detail": "y 284 yp 244 sheet 64–892 band b 208"
+ },
+ {
+  "lock": "K8 the blush is painted to the sheet's left and right content edges (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "left 243,221,210 (want 243,221,210) right 240,218,208 (want 240,218,207)"
+ },
+ {
+  "lock": "K8 the gap above it is 56 (±2) of PAGE colour, not band and not blush",
+  "where": "1512",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "K8 the arrow is centred on the band (±1), 34 (±1) tall and 150 wide",
+  "where": "1512",
+  "ok": true,
+  "detail": "centre 876.0 vs 876.0 · 150×34"
+ },
+ {
+  "lock": "K8 the arrow starts flush with the band's bottom edge (1px inside it), and its tip is painted blush below the band",
+  "where": "1512",
+  "ok": true,
+  "detail": "top 135 vs 135"
+ },
+ {
+  "lock": "K8 the banner's bottom to the list's bar is 76 (±2)",
+  "where": "1512",
+  "ok": true,
+  "detail": "76.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.2 population: the banner, the next-step band and the list's bar render",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K8 it is a section labelled “A note”, and its text is exact",
+  "where": "1280",
+  "ok": true,
+  "detail": "SECTION “A note” “Your agent will be the one who champions your words.”"
+ },
+ {
+  "lock": "K8 the text is Special Elite 29 in rgb(91, 42, 31)",
+  "where": "1280",
+  "ok": true,
+  "detail": "29px \"Special Elite\", \"Co rgb(91, 42, 31)"
+ },
+ {
+  "lock": "K8 the band is blush, rgb(243, 221, 210), at least 112 tall",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(243, 221, 210) h 112.0"
+ },
+ {
+  "lock": "K8 precondition: the sampled lines are on screen — one inside the banner, one in the gap above it",
+  "where": "1280",
+  "ok": true,
+  "detail": "y 284 yp 244 sheet 64–792 band b 216"
+ },
+ {
+  "lock": "K8 the blush is painted to the sheet's left and right content edges (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "left 243,221,210 (want 243,221,210) right 240,218,208 (want 240,218,207)"
+ },
+ {
+  "lock": "K8 the gap above it is 48 (±2) of PAGE colour, not band and not blush",
+  "where": "1280",
+  "ok": true,
+  "detail": "48.0"
+ },
+ {
+  "lock": "K8 the arrow is centred on the band (±1), 28 (±1) tall and 120 wide",
+  "where": "1280",
+  "ok": true,
+  "detail": "centre 760.0 vs 760.0 · 120×28"
+ },
+ {
+  "lock": "K8 the arrow starts flush with the band's bottom edge (1px inside it), and its tip is painted blush below the band",
+  "where": "1280",
+  "ok": true,
+  "detail": "top 111 vs 111"
+ },
+ {
+  "lock": "K8 the banner's bottom to the list's bar is 64 (±2)",
+  "where": "1280",
+  "ok": true,
+  "detail": "64.0"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "CL15.2 population: the desk renders three cards, each with a disc",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1 each disc's top is 28 (±2) above its card's top",
+  "where": "1512",
+  "ok": true,
+  "detail": "28.0 28.0 28.0"
+ },
+ {
+  "lock": "K1 each disc is ink, rgb(42, 58, 82), with a halo in the page's colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba · rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba · rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "K1 a disc's top is 44 (±2) under the header's hairline",
+  "where": "1512",
+  "ok": true,
+  "detail": "44.0 44.0 44.0"
+ },
+ {
+  "lock": "K1 nothing in the desk is a stamp, and nothing says “this month”",
+  "where": "1512",
+  "ok": true,
+  "detail": "stamps 0 · 37 agents on file4 since last monthMay → now6 of 37 queriedNo change since last "
+ },
+ {
+  "lock": "K1 every card is 170px tall or less, and the three are one height",
+  "where": "1512",
+  "ok": true,
+  "detail": "164.1 164.1 164.1"
+ },
+ {
+  "lock": "K2 the lines: “N agents on file”, “q of N queried”, “p% profiles complete”",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 agents on file | 6 of 37 queried | 3% profiles complete"
+ },
+ {
+  "lock": "K2 On file's figure is the header's count",
+  "where": "1512",
+  "ok": true,
+  "detail": "37 vs 37"
+ },
+ {
+  "lock": "K2 each line is Special Elite 21, on one line, with nothing cut",
+  "where": "1512",
+  "ok": true,
+  "detail": "21px over 0 h 39.1 · 21px over 0 h 39.1 · 21px over 0 h 39.1"
+ },
+ {
+  "lock": "K3 population: On file and Queried each carry a month-on-month line; Profiles carries none (no snapshot exists)",
+  "where": "1512",
+  "ok": true,
+  "detail": "file true queried true profiles null"
+ },
+ {
+  "lock": "K3 up is ▲ in rgb(79, 122, 75), down ▼ in rust, none “No change since last month” in ink 45%",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"dir\":\"up\",\"text\":\"4 since last month\",\"colour\":\"rgb(79, 122, 75)\",\"arrow\":\"M6 2.2 10 7.4H2z\"},{\"dir\":\"none\",\"text\":\"No change since last month\",\"colour\":\"rgba(28, 19, 15, 0.45)\",\"arrow\":null}]"
+ },
+ {
+  "lock": "K3 (tally) the directions this account shows",
+  "where": "1512",
+  "ok": true,
+  "detail": "up,none"
+ },
+ {
+  "lock": "K4 On file is ONE line path of 6 points whose last value is N",
+  "where": "1512",
+  "ok": true,
+  "detail": "paths 1 pts 6 values 31,31,33,33,33,37 N 37"
+ },
+ {
+  "lock": "K4 Queried is a ring whose arcs (active · closed) sum to queried / N (±0.5%)",
+  "where": "1512",
+  "ok": true,
+  "detail": "arcs [{\"part\":\"active\",\"share\":13.51,\"dash\":\"13.51 86.49\"},{\"part\":\"closed\",\"share\":2.7,\"dash\":\"2.70 97.30\"}] vs 6/37"
+ },
+ {
+  "lock": "K4 the ring's active arc is the label's active count, and active + closed = queried",
+  "where": "1512",
+  "ok": true,
+  "detail": "6 of 37 agents queried: 5 active, 1 closed · active arc 13.51"
+ },
+ {
+  "lock": "K4 Profiles is a bar whose fill is the percentage (±1%)",
+  "where": "1512",
+  "ok": true,
+  "detail": "fill 3.0% vs 3%"
+ },
+ {
+  "lock": "K4 every chart is aria-hidden and every card carries its accessible label",
+  "where": "1512",
+  "ok": true,
+  "detail": "true “37 agents on file” · true “6 of 37 agents queried: 5 active, 1 closed” · true “3% of profiles complete: 1 of 37”"
+ },
+ {
+  "lock": "K4 the captions: “{month} → now”, “active · closed”, “{filled} of {N}”",
+  "where": "1512",
+  "ok": true,
+  "detail": "May → now | active · closed | 1 of 37"
+ },
+ {
+  "lock": "K4 On file is not pressable; Queried and Profiles are",
+  "where": "1512",
+  "ok": true,
+  "detail": "file:false queried:true profiles:true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "found true over 0"
+ },
+ {
+  "lock": "CL15.2 population: the desk renders three cards, each with a disc",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1 each disc's top is 24 (±2) above its card's top",
+  "where": "1280",
+  "ok": true,
+  "detail": "24.0 24.0 24.0"
+ },
+ {
+  "lock": "K1 each disc is ink, rgb(42, 58, 82), with a halo in the page's colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba · rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba · rgb(42, 58, 82) | rgb(243, 242, 240) 0px 0px 0px 5px, rgba page rgb(243, 242, 240)"
+ },
+ {
+  "lock": "K1 a disc's top is 36 (±2) under the header's hairline",
+  "where": "1280",
+  "ok": true,
+  "detail": "36.0 36.0 36.0"
+ },
+ {
+  "lock": "K1 nothing in the desk is a stamp, and nothing says “this month”",
+  "where": "1280",
+  "ok": true,
+  "detail": "stamps 0 · 37 agents on file4 since last monthMay → now6 of 37 queriedNo change since last "
+ },
+ {
+  "lock": "K1 every card is 146px tall or less, and the three are one height",
+  "where": "1280",
+  "ok": true,
+  "detail": "140.2 140.2 140.2"
+ },
+ {
+  "lock": "K2 the lines: “N agents on file”, “q of N queried”, “p% profiles complete”",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 agents on file | 6 of 37 queried | 3% profiles complete"
+ },
+ {
+  "lock": "K2 On file's figure is the header's count",
+  "where": "1280",
+  "ok": true,
+  "detail": "37 vs 37"
+ },
+ {
+  "lock": "K2 each line is Special Elite 17, on one line, with nothing cut",
+  "where": "1280",
+  "ok": true,
+  "detail": "17px over 0 h 32.2 · 17px over 0 h 32.2 · 17px over 0 h 32.2"
+ },
+ {
+  "lock": "K3 population: On file and Queried each carry a month-on-month line; Profiles carries none (no snapshot exists)",
+  "where": "1280",
+  "ok": true,
+  "detail": "file true queried true profiles null"
+ },
+ {
+  "lock": "K3 up is ▲ in rgb(79, 122, 75), down ▼ in rust, none “No change since last month” in ink 45%",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"dir\":\"up\",\"text\":\"4 since last month\",\"colour\":\"rgb(79, 122, 75)\",\"arrow\":\"M6 2.2 10 7.4H2z\"},{\"dir\":\"none\",\"text\":\"No change since last month\",\"colour\":\"rgba(28, 19, 15, 0.45)\",\"arrow\":null}]"
+ },
+ {
+  "lock": "K3 (tally) the directions this account shows",
+  "where": "1280",
+  "ok": true,
+  "detail": "up,none"
+ },
+ {
+  "lock": "K4 On file is ONE line path of 6 points whose last value is N",
+  "where": "1280",
+  "ok": true,
+  "detail": "paths 1 pts 6 values 31,31,33,33,33,37 N 37"
+ },
+ {
+  "lock": "K4 Queried is a ring whose arcs (active · closed) sum to queried / N (±0.5%)",
+  "where": "1280",
+  "ok": true,
+  "detail": "arcs [{\"part\":\"active\",\"share\":13.51,\"dash\":\"13.51 86.49\"},{\"part\":\"closed\",\"share\":2.7,\"dash\":\"2.70 97.30\"}] vs 6/37"
+ },
+ {
+  "lock": "K4 the ring's active arc is the label's active count, and active + closed = queried",
+  "where": "1280",
+  "ok": true,
+  "detail": "6 of 37 agents queried: 5 active, 1 closed · active arc 13.51"
+ },
+ {
+  "lock": "K4 Profiles is a bar whose fill is the percentage (±1%)",
+  "where": "1280",
+  "ok": true,
+  "detail": "fill 3.0% vs 3%"
+ },
+ {
+  "lock": "K4 every chart is aria-hidden and every card carries its accessible label",
+  "where": "1280",
+  "ok": true,
+  "detail": "true “37 agents on file” · true “6 of 37 agents queried: 5 active, 1 closed” · true “3% of profiles complete: 1 of 37”"
+ },
+ {
+  "lock": "K4 the captions: “{month} → now”, “active · closed”, “{filled} of {N}”",
+  "where": "1280",
+  "ok": true,
+  "detail": "May → now | active · closed | 1 of 37"
+ },
+ {
+  "lock": "K4 On file is not pressable; Queried and Profiles are",
+  "where": "1280",
+  "ok": true,
+  "detail": "file:false queried:true profiles:true"
+ },
+ {
+  "lock": "no horizontal overflow of the scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "found true over 0"
+ }
+]

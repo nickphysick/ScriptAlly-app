@@ -23,7 +23,7 @@ export const CONTACT_GUIDE: readonly GuideStep[] = [
     subject: '[data-cl14="next"]',
   },
   {
-    title: "Your agents",
+    title: "Agents on file",
     body: ["Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card."],
     subject: '[data-cl14="ws"]',
   },

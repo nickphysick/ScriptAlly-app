@@ -59,43 +59,89 @@
 }
 @media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }
 
-/* ── §3 · THE DESK: the group's second row, 72 (60) under the header's hairline (shell/desk draws the cards) ── */
+/* ── §3 · THE DESK: the group's second row. Its CARDS start 72 (60) under the header's hairline; each card's disc rises
+   28 (24) into that room (v15.2), so a disc's top is 44 (36) under the hairline. shell/desk draws the cards. ── */
 .clv-group > .cl15-desk { grid-column: 1 / -1; grid-row: 2; margin-top: 72px; }
 @media (max-width: 1439.5px) { .clv-group > .cl15-desk { margin-top: 60px; } }
 /* loading: the cards hold their size; their text and charts are painted over */
-.clv-group[data-loading] .dsk-card :is(.dsk-title, .dsk-stamp, .dsk-big b, .dsk-big small, .dsk-tile, .dsk-lb, .dsk-ax span) {
+.clv-group[data-loading] .dsk-card :is(.dsk-line, .dsk-mom, .dsk-chart small) {
   color: transparent !important; border-color: transparent !important; box-shadow: none !important; border-radius: 6px;
   background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
   animation: cl13Shim 1.6s ease-in-out infinite;
 }
-.clv-group[data-loading] .dsk-card :is(.dsk-ic, .dsk-plot, .dsk-bars, .dsk-pgw) { visibility: hidden; }
+.clv-group[data-loading] .dsk-card :is(.dsk-line b, .dsk-mom svg, .dsk-svg, .dsk-pg, .dsk-disc svg) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .clv-group[data-loading] .dsk-card * { animation: none !important; } }
 
 /* ── §4 · THE NEXT STEP's v15 parts ── */
 /* the all-queried split line (serif 14.5, ink 60%) and the reason note (italic 14) */
 .cl14-next .cl15-nx-split { margin: 0; font: 400 14.5px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.6); }
 .cl14-next .cl15-nx-note { margin: 0; font: italic 400 14px/1.45 var(--clv-serif); color: rgba(28, 19, 15, 0.55); }
-/* the all-queried panel while Discover is off: "Discover agents · Coming soon", one sentence, two faded placeholder
-   rows and the request button. The panel is tighter in this state (16 above, 10 below), so it stays under 350. */
-.cl14-next .fs[data-state="done"] .fs-panel { padding-top: 16px; padding-bottom: 10px; }
-.cl15-dt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.cl15-dt .fs-ph { align-items: center; }
-.cl14-next .cl15-dt-soon {
-  display: inline-block; font: normal 600 10px var(--clv-serif); letter-spacing: 0.06em; text-transform: uppercase; color: #2f5f86;
-  background: #e3eef6; border-radius: 11px; padding: 4px 10px;
+/* ── v15.2 §3 · THE ALL-QUERIED STATE ──
+   §3a: the Add card only just tucks over the panel — 44 (36), where the ready and reopening states keep 150 (130). */
+.cl14-next .fs[data-state="done"] { grid-template-columns: minmax(0, 0.86fr) 300px minmax(0, 1.48fr); }
+.cl14-next .fs[data-state="done"] .fs-panel { margin-left: -44px; padding-left: 72px; }
+/* the In-Discover list (Discover live) keeps v15's tighter padding; the coming-soon panel sets its own below */
+.cl14-next .fs[data-state="done"] .fs-panel:not(.cl15-dtp) { padding-top: 16px; padding-bottom: 10px; }
+/* §3c: the coming-soon panel has a header strip along its whole top edge, so it has no padding above or below and
+   clips to its own rounded corners (which is also what cuts the bird's branch off at the panel's edge) */
+.cl14-next .fs .fs-panel.cl15-dtp { padding-top: 0; padding-bottom: 0; overflow: hidden; }
+
+/* §3b: the ghost of a filled agent card inside the Add card — shapes only */
+.cl15-gh { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 18px 22px 4px; flex: none; }
+.cl15-gh i { display: block; }
+.cl15-gh::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); pointer-events: none; }
+.cl15-gh-id { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.cl15-gh-id > span { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.cl15-gh-disc { flex: none; width: 40px; height: 40px; border-radius: 50%; background: #e6ebf0; }
+.cl15-gh-l { height: 10px; border-radius: 6px; background: #edf0f3; }
+.cl15-gh-l.is-s { height: 8px; background: #f0f2f5; }
+.cl15-gh-l.is-60 { width: 62%; } .cl15-gh-l.is-40 { width: 42%; } .cl15-gh-l.is-90 { width: 90%; } .cl15-gh-l.is-70 { width: 70%; }
+.cl15-gh-cap { width: 86px; height: 6px; margin-top: 6px; border-radius: 6px; background: #e6eaee; }
+.cl15-gh-chips { display: flex; gap: 6px; }
+.cl15-gh-chips i { width: 66px; height: 20px; border-radius: 5px; box-shadow: inset 0 0 0 1.2px #e3e7eb; }
+
+/* §3c–d: Discover, coming soon — a plum header strip, the copy, and the binoculars bird */
+.cl15-dt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.cl15-dt-h {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: none;
+  margin: 0 -26px 0 -72px; padding: 20px 26px 16px 72px; background: #5a3d55;
 }
-.cl14-next .cl15-dt-p { margin: 0; font: 400 14px/1.5 var(--clv-serif); color: rgba(28, 39, 51, 0.7); }
-.cl15-dt-l { list-style: none; margin: 0; padding: 0; position: relative; }
-/* the rows fade out downwards: a mask, never a painted rectangle over them */
-.cl15-dt-l { -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 95%); mask-image: linear-gradient(180deg, #000 30%, transparent 95%); }
-.cl15-dt-l li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(28, 39, 51, 0.07); }
-.cl15-dt-d { width: 34px; height: 34px; border-radius: 50%; background: #eef2f5; }
-.cl15-dt-m { display: flex; flex-direction: column; gap: 6px; }
-.cl15-dt-m i { display: block; width: 120px; height: 11px; border-radius: 6px; background: #e6ebf0; }
-.cl15-dt-m i + i { width: 84px; height: 9px; background: #eef2f5; }
-.cl14-next .cl15-dt-a { font: 500 13px var(--clv-serif); color: rgba(47, 95, 134, 0.45); border: 1px dashed rgba(47, 95, 134, 0.3); border-radius: 14px; padding: 4px 10px; }
+/* ⚠️ brand.tsx forces `h3` (0-0-1) at runtime: a class and an element plus !important win honestly */
+.cl15-dt-h h3.cl15-dt-t { margin: 0; font: 400 21px/1 var(--sp-type) !important; color: #f6eef3; white-space: nowrap; }
+/* ⚠️ THE CHIP SHOWS AT EVERY WIDTH. `display` is stated here at 0-2-0, and the chip is not the list header's note, so
+   nothing that hides that note below 1440 can reach it. */
+.cl14-next .cl15-dt-soon {
+  display: block; flex: none; font: normal 600 10px var(--clv-serif); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  color: #f6eef3; background: rgba(255, 255, 255, 0.14); border-radius: 11px; padding: 4px 10px;
+}
+.cl15-dt-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 8px; align-items: end; min-height: 0; }
+.cl15-dt-copy { align-self: start; display: flex; flex-direction: column; gap: 16px; padding: 22px 0 24px; min-width: 0; }
+.cl14-next .cl15-dt-p { margin: 0; max-width: 44ch; font: 400 17px/1.4 var(--clv-serif); color: #1c130f; }
+.cl15-dt-f { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cl15-dt-f li { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; align-items: center; }
+.cl15-dt-i { grid-row: 1 / 3; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #eee3ec; color: #5a3d55; }
+.cl15-dt-i svg { display: block; }
+.cl14-next .cl15-dt-f b { display: block; font: 400 15px/1.2 var(--sp-type); color: #1c130f; }
+.cl14-next .cl15-dt-f small { display: block; font: 400 13.5px/1.3 var(--clv-serif); color: rgba(28, 19, 15, 0.62); }
+.cl15-dt-fig { position: relative; align-self: stretch; min-height: 200px; }
+/* the bird: 250 (196) tall at the column's bottom right, running past the panel's edge, where the panel clips it */
+.cl15-dt-fig .cl15-dt-bird { position: absolute; right: -26px; bottom: -6px; height: 250px; width: auto; max-width: none; display: block; }
+@media (max-width: 1439.5px) {
+  .cl14-next .fs[data-state="done"] { grid-template-columns: minmax(0, 0.78fr) 270px minmax(0, 1.4fr); }
+  .cl14-next .fs[data-state="done"] .fs-panel { margin-left: -36px; padding-left: 56px; }
+  .cl15-dt-h { margin: 0 -20px 0 -56px; padding: 20px 20px 16px 56px; }
+  .cl15-dt-h h3.cl15-dt-t { font-size: 18px !important; }
+  .cl15-dt-body { grid-template-columns: minmax(0, 1fr) 170px; }
+  .cl14-next .cl15-dt-p { font-size: 15.5px; }
+  .cl15-dt-f { gap: 9px; }
+  .cl15-dt-f li { grid-template-columns: 30px minmax(0, 1fr); }
+  .cl15-dt-i { width: 30px; height: 30px; }
+  .cl14-next .cl15-dt-f b { font-size: 14px; }
+  .cl14-next .cl15-dt-f small { font-size: 12.5px; }
+  .cl15-dt-fig .cl15-dt-bird { right: -20px; height: 196px; }
+}
 .cl14-next .cl15-dt-btn {
-  align-self: flex-start; margin-top: 2px; height: 38px; padding: 0 18px; border-radius: 19px; border: 0; cursor: pointer;
+  align-self: flex-start; margin-top: 6px; height: 38px; padding: 0 18px; border-radius: 19px; border: 0; cursor: pointer;
   background: #fff; box-shadow: inset 0 0 0 1.5px #2f5f86; color: #2f5f86; font: 500 14.5px var(--clv-serif);
 }
 .cl14-next .cl15-dt-btn:hover { background: #2f5f86; color: #fff; }
@@ -108,3 +154,35 @@
   border: 0; padding: 0 2px; background: none; color: inherit; cursor: pointer; font: inherit; font-style: normal; font-size: 11px;
 }
 .cl14-ws .cl14-bar-k .cl15-ro button:hover { color: var(--cl14-cream); }
+
+/* ── v15.2 §4 · THE BANNER ABOVE THE LIST: a blush band the page sheet's full width, its bottom edge an arrow pointing
+   down at the list. The group's fourth row: 56 (48) of plain page above it (the next-step band's own bottom margin),
+   and the list's bar 76 (64) below.
+   ⚠️ THE TINT IS ON `::before` (the full-bleed spread shadow, clipped to the band's height) SO THE CLIP NEVER REACHES
+      THE ARROW, which is `::after` and hangs below the band. */
+.clv-group > .cl15-ban {
+  grid-column: 1 / -1; grid-row: 4; position: relative; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 136px; padding: 36px 0 34px; margin: 0 0 76px;
+}
+.cl15-ban::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: #f3ddd2; box-shadow: 0 0 0 100vmax #f3ddd2; clip-path: inset(0 -100vmax);
+}
+/* the arrow: a soft point, 150 × 34, starting 1px inside the band so no seam shows */
+.cl15-ban::after {
+  content: ""; position: absolute; left: 50%; top: calc(100% - 1px); z-index: 0;
+  width: 150px; height: 34px; transform: translateX(-50%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0C40 0 58 22 70 31.5Q75 35 80 31.5C92 22 110 0 150 0Z' fill='%23f3ddd2'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+.clv-group > .cl15-ban p {
+  position: relative; z-index: 1; margin: 0; text-align: center;
+  font: 400 38px/1.15 var(--sp-type); letter-spacing: -0.005em; color: #5b2a1f;
+}
+@media (max-width: 1439.5px) {
+  .clv-group > .cl15-ban { min-height: 112px; padding: 28px 0 26px; margin: 0 0 64px; }
+  .cl15-ban::after { width: 120px; height: 28px; }
+  .clv-group > .cl15-ban p { font-size: 29px; }
+}
+/* loading: the band holds its size; its words appear with the data */
+.clv-group[data-loading] .cl15-ban p { visibility: hidden; }
