@@ -4,7 +4,8 @@
  *
  * Query Centre v133 — THE OPEN HEADER (design-refs/query-centre/query-centre-v133.html). No card, no
  * band, no disc: the living "{N} queries out" as a 72px typewriter title, one fixed line, two buttons,
- * and the courier drawn beside them in the flow, all closed by a hairline.
+ * and the courier at the column's right, hanging over the hairline that closes the header (the
+ * Contact list v15.1 header's design, by Nick's ruling of 9 Oct, which supersedes the mock's placement).
  *
  * ⚠️ IT IS THE CONTACT LIST v15 HEADER'S SHAPE, BUILT BESIDE IT. `src/components/agents/**` is another
  * session's, so the values are restated here (qcvOpenHeader.css) rather than imported. The two are a

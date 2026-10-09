@@ -28,3 +28,10 @@ in `tests/e2e/plateRoutes.ts`.
 - `qcV131` QC15 (reference capture absent).
 - `inkShell` INK19 (the phone's shell against main's): red on the build before v133.
 - `plateHeader` PH1–PH4 and PH5, and `pageHeaderV2` §4.5: see the report.
+
+## v133.1 (9 Oct) — the Contact list v15.1 design
+
+- QC133 H2 rewritten: the drawing's right edge is the desk's (±2), 326 / 253 tall, the text centred on its layout box. The "112 after the text" claim is retired with the left margin.
+- QC133 H4 rewritten: the drawing's top is 30 ±3 (24 ±3) below the sheet's top.
+- QC133 H7 added: the drawing crosses the hairline as the hawk does on `/agents`.
+- `qcV131` QC1: the desk is 72 (60 below 1440) under the hairline.

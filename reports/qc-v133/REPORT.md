@@ -95,3 +95,58 @@ e2e: QC133 6 of 6. A run of every suite that reads the header (`qcV133`, `qcV132
 ## 7. Shots
 
 `reports/qc-v133/shots/`: `queries-1512.png`, `queries-1280.png`, and the same crop of the Contact list, `agents-1512.png`, `agents-1280.png`. They sit beside `design-refs/qc-v133/ref-header-1512@2x.png` and `ref-header-1280@2x.png`. The reference's typewriter text falls back to a monospace, as v132's did.
+
+## 8. v133.1 — the Contact list v15.1 design in full (9 Oct), then the merge
+
+Contact list v15.1 landed on `main` after v133 was reviewed and moved its header. After merging `main` into the branch, H3 went red (header top 92 against 64). By Nick's ruling the Query Centre follows v15.1's header design in full.
+
+### 8.1 What changed in `QcOpenHeader`
+
+- No top margin. The hairline is 1px ink at 14%.
+- The courier is 326px tall (253 below 1440), the hawk's height, at the END of its column: its right edge is the content column's. The 56 / 36 left margin and the "112 after the text" rule are retired; the 56 / 36 column gap is a minimum.
+- It hangs over the hairline: `position: relative; top: 30px` (24 below 1440), `z-index: 1`. The left-edge mask stays.
+- The text block centres on the drawing's layout box, not the dropped one.
+- The desk is 72px under the hairline (60 below 1440).
+
+**One value differs from the ruling.** It asked for 18px of bottom padding. The Contact list v15.1 uses 10. With 18 the hairline sits 8px below `/agents`' (H3 red) and the drawing ends 11px below it, outside the 12–24 the ruling also asks for. I used 10.
+
+### 8.2 Before and after, both pages
+
+| | `/agents` v15 | `/agents` v15.1 | `/queries` v133 as reviewed | `/queries` now |
+|---|---|---|---|---|
+| **1512 × 900** header top | 92 | 64 | 92 | 64 |
+| hairline y | 369.0 | 400.8 | 369 | 401 |
+| desk top | 397.0 | 472.8 | 397 | 473 |
+| drawing height | 266 | 325.8 | 266 | 326 |
+| drawing below hairline | 8 over, by margin | 19 | 0 | 19 |
+| **1280 × 800** header top | 88 | 64 | 88 | 64 |
+| hairline y | 305.1 | 327.7 | 305 | 328 |
+| desk top | 333.1 | 387.7 | 333 | 388 |
+| drawing height | 206 | 252.7 | 206 | 253 |
+| drawing below hairline | 8 over, by margin | 13 | 0 | 13 |
+
+The header is 337px tall at 1512 and 264px at 1280, loading and loaded.
+
+### 8.3 Locks
+
+| Lock | Now asserts | Mutation | Red reading |
+|---|---|---|---|
+| H1 | unchanged | restore `band card` | the open header is not found |
+| H2 (rewritten) | 326 / 253 tall; the drawing's right edge on the desk's and the column's (±2); text centred on the layout box (±4) | `justify-self: start` | "the drawing's right 1308.5 against the desk's 1455.6" |
+| H3 | unchanged: an equality with `/agents` | bottom padding 28 | "hairline 419 / 400.8" |
+| H4 (rewritten) | the drawing's top is 30 ±3 (24 ±3) below the sheet's top; no sideways overflow | double the drop | "the drawing's top is 60 below the sheet's" |
+| H5 | unchanged | swap the handlers | Log opens "resp" |
+| H6 | unchanged | shorten the loading title | "title width 233.8 → 535.4" |
+| H7 (new) | the drawing crosses the hairline, positioned with z-index 1, 12–24 below it, and within 2px of the hawk's overshoot on `/agents`; equal heights | `top: 0` | "the drawing ends -11 below the hairline" |
+
+All seven pass at both sizes. `qcV131` QC1 is re-pointed again: the desk is 72 (60) under the hairline.
+
+### 8.4 The merge and the gates
+
+`origin/main` at `92b0b33b` (Contact list v15.1) merged into the branch. Two conflicts, both kept on both sides: the design-ref manifest and the "Next session" paragraph of `CLAUDE.md`. No source file conflicted.
+
+- `tsc --noEmit`: 0 errors. Production and dev builds clean.
+- Vitest: 539 files, 8,450 passed, 3 skipped.
+- e2e on the merged build (`qcV133`, `qcV132`, `qcV131`, `qcV1311`, `contactV15`, `quietBar` Q8, `pageHeaderV2` §2): 47 passed, 13 skipped, 1 failed. The failure is `qcV131` QC15, red before v132.
+
+The shots in `shots/` were retaken on this build.

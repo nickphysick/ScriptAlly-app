@@ -2,18 +2,19 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v133 — the open header. One authoritative block. The rhythm (top margin, bottom
- * padding, hairline, the gap to the desk) is the Contact list v15 header's, measured on /agents at
- * 1512 × 900 and 1280 × 800 and held equal by QC133 H3. "Below 1440" is `max-width: 1439.5px`.
+ * Query Centre v133 — the open header. One authoritative block. The design (no top margin, the bottom
+ * padding, the hairline, the dropped drawing at the column's right, the gap to the desk) is the Contact
+ * list v15.1 header's, and QC133 H3 holds the two pages' header top, hairline and desk top equal. "Below 1440" is `max-width: 1439.5px`.
  */
 @import "./qcvPage.css";
 
 .qcv-group > .qcoh { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
 .qcoh {
   box-sizing: border-box;
+  --qcoh-drop: 30px;
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
-  margin-top: 28px; padding-bottom: 18px;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.12);
+  margin-top: 0; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.14);
 }
 .qcoh .qcoh-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 /* ⚠️ brand.tsx forces `h1:not(.wsh-title)` at runtime, injected last: 0-2-1 and !important win honestly */
@@ -34,22 +35,24 @@
 .qcoh .qcoh-acts button:disabled { cursor: default; }
 .qcoh .qcoh-acts button:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
 
-/* THE DRAWING: in the flow at the start of its column, 56 further right than the column gap, so its
-   left edge is 112 after the text block (deliberately further than the Contact list's hawk).
-   ⚠️ 266 TALL IN A 258 ROW: the Contact list's drawing is 266 with 8px over its hairline, which makes
-   that header's row 258. The same row height is what puts this hairline on the same y (H3), so the
-   drawing gives up 4px above and 4px below and stays centred on the text block (H2).
-   ⚠️ `.f12-root svg/img` rules make images block; `display: block` is stated so nothing depends on it. */
+/* THE DRAWING (v133.1, the Contact list v15.1 header's design): at the END of its column, so its right edge is the
+   content column's; 326 tall, the hawk's height. Its LAYOUT box sets the row's height and is what the text centres
+   against; `top` then drops it without growing the header, and being positioned it paints over the header's own
+   hairline, which it crosses by the drop less the bottom padding. No top margin: the drop is the headroom.
+   ⚠️ THE DRAWING KEEPS ITS SIZE AND ITS RIGHT EDGE; THE GAP IS WHAT GIVES. `max-width: none` and `justify-self: end`
+   let it overhang its track to the LEFT when the title is long. The 56 (36) column gap is a minimum.
+   ⚠️ `position: relative`, never absolute: it stays in the flow. */
 .qcoh .qcoh-art {
-  display: block; justify-self: start; height: 266px; width: auto; max-width: none; margin: -4px 0 -4px 56px;
+  display: block; justify-self: end; height: 326px; width: auto; max-width: none; margin: 0;
+  position: relative; top: var(--qcoh-drop); z-index: 1;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%); mask-image: linear-gradient(90deg, transparent 0, #000 6%);
 }
 
 @media (max-width: 1439.5px) {
-  .qcoh { column-gap: 36px; margin-top: 24px; }
+  .qcoh { column-gap: 36px; --qcoh-drop: 24px; }
   .qcoh .qcoh-txt h1.qcoh-title { font-size: 58px !important; }
   .qcoh .qcoh-txt .qcoh-sub { font-size: 17px; }
-  .qcoh .qcoh-art { height: 206px; margin-left: 36px; }
+  .qcoh .qcoh-art { height: 253px; }
 }
 
 /* loading: the same boxes, their text kept for its line box and painted over */
@@ -61,4 +64,4 @@
 @keyframes qcohShim { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .qcoh[data-loading] * { animation: none !important; } }
 
-/* the desk's 28px under the hairline is `.qc13 .qc131-desk`'s margin (qcv131.css) */
+/* the desk's 72 (60) under the hairline is `.qc13 .qc131-desk`'s margin (qcv131.css) */

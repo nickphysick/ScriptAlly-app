@@ -1,5 +1,5 @@
 /**
- * Query Centre v133 — the open header (design-refs/query-centre/query-centre-v133.html). QC133 H1–H6,
+ * Query Centre v133 — the open header (design-refs/query-centre/query-centre-v133.html). QC133 H1–H7,
  * each on the rendered page at 1512 × 900 and 1280 × 800, each red first under its named mutation
  * (reports/qc-v133/mutation-proofs.json).
  *
@@ -42,6 +42,9 @@ const readQc = (page: Page) => page.evaluate((HD) => {
     band: !!vis(".ph--band"), disc: !!vis('[data-probe="band-disc"]'),
     barB: bar ? bar.getBoundingClientRect().bottom : NaN, overflowX: doc.scrollWidth - doc.clientWidth,
     scOverflowX: (() => { const sc = hd?.closest<HTMLElement>(".wpg-scroll"); return sc ? sc.scrollWidth - sc.clientWidth : NaN; })(),
+    artTop: art ? parseFloat(getComputedStyle(art).top) || 0 : 0, artZ: art ? getComputedStyle(art).zIndex : "",
+    deskR: (() => { const cs = [...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].filter((e) => e.getBoundingClientRect().height > 0); return cs.length ? Math.max(...cs.map((e) => e.getBoundingClientRect().right)) : NaN; })(),
+    sheetTop: (() => { const sc = hd?.closest<HTMLElement>(".wpg-scroll"); return sc ? sc.getBoundingClientRect().top : NaN; })(),
     artHidden: art?.getAttribute("aria-hidden") === "true", artPos: art ? getComputedStyle(art).position : "", artMask: art ? (getComputedStyle(art).maskImage || getComputedStyle(art).webkitMaskImage) : "",
   };
 }, HD);
@@ -63,16 +66,21 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H2 · centred: text and drawing share a centre, the drawing 266 (206) tall, 112 (72) after the text", async ({ page }) => {
+  test("H2 · the drawing: 326 (253) tall, its right edge on the desk's, the text centred on its layout box", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
       expect(g.art && g.txt, `${w}: the text block and the drawing were found`).toBeTruthy();
-      expect(Math.abs(g.art!.cy - g.txt!.cy), `${w}: centres ${g.txt!.cy} / ${g.art!.cy}`).toBeLessThanOrEqual(4);
-      expect(Math.abs(g.art!.h - (wide(w) ? 266 : 206)), `${w}: the drawing is ${g.art!.h} tall`).toBeLessThanOrEqual(1);
-      expect(Math.abs(g.art!.x - g.txt!.r - (wide(w) ? 112 : 72)), `${w}: the drawing starts ${g.art!.x - g.txt!.r} after the text`).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.art!.h - (wide(w) ? 326 : 253)), `${w}: the drawing is ${g.art!.h} tall`).toBeLessThanOrEqual(1);
+      expect(Number.isFinite(g.deskR), `${w}: the desk was found`).toBe(true);
+      expect(Math.abs(g.art!.r - g.deskR), `${w}: the drawing's right ${g.art!.r} against the desk's ${g.deskR}`).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.art!.r - g.hd!.r), `${w}: the drawing's right ${g.art!.r} against the column's ${g.hd!.r}`).toBeLessThanOrEqual(2);
+      /* the LAYOUT box is the drawn box less its drop: that is what sets the row and what the text centres on */
+      const layoutCy = g.art!.cy - g.artTop;
+      expect(Math.abs(layoutCy - g.txt!.cy), `${w}: centres ${g.txt!.cy} / ${layoutCy} (layout box)`).toBeLessThanOrEqual(4);
+      expect(g.art!.x - g.txt!.r, `${w}: the gap to the text is ${g.art!.x - g.txt!.r}`).toBeGreaterThanOrEqual(wide(w) ? 40 : 24);
       expect(g.artHidden, `${w}: the drawing is aria-hidden`).toBe(true);
-      expect(g.artPos, `${w}: the drawing is in the flow`).toBe("static");
+      expect(["static", "relative"], `${w}: the drawing is in the flow (${g.artPos})`).toContain(g.artPos);
       expect(g.artMask, `${w}: the left-edge fade`).toMatch(/linear-gradient/);
     }
   });
@@ -98,12 +106,13 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H4 · headroom: the drawing clears the top bar by 8px or more, and nothing overflows sideways", async ({ page }) => {
+  test("H4 · headroom: the drawing's top is 30 (24) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
-      expect(Number.isFinite(g.barB), `${w}: the top bar was found`).toBe(true);
-      expect(g.art!.y - g.barB, `${w}: the drawing's top ${g.art!.y} against the bar's bottom ${g.barB}`).toBeGreaterThanOrEqual(8);
+      expect(Number.isFinite(g.sheetTop), `${w}: the sheet's top was found`).toBe(true);
+      expect(Math.abs(g.sheetTop - g.barB), `${w}: the sheet starts at the top bar's bottom (${g.sheetTop} / ${g.barB})`).toBeLessThanOrEqual(1);
+      expect(Math.abs(g.art!.y - g.sheetTop - (wide(w) ? 30 : 24)), `${w}: the drawing's top is ${g.art!.y - g.sheetTop} below the sheet's`).toBeLessThanOrEqual(3);
       expect(g.overflowX, `${w}: the document overflows sideways`).toBeLessThanOrEqual(0);
       expect(g.scOverflowX, `${w}: the page's scroller overflows sideways`).toBeLessThanOrEqual(0);
     }
@@ -163,6 +172,31 @@ test.describe("Query Centre v133 — the open header", () => {
       expect(Math.abs(a.art.x - b.art.x), `${w}: the drawing's x ${a.art.x} → ${b.art.x}`).toBeLessThanOrEqual(8);
       for (const k of ["y", "h"] as const) expect(Math.abs(a.art[k] - b.art[k]), `${w}: art ${k} ${a.art[k]} → ${b.art[k]}`).toBeLessThanOrEqual(1);
       for (const part of ["title", "sub", "b1"] as const) for (const k of ["x", "y", "h"] as const) expect(Math.abs(a[part][k] - b[part][k]), `${w}: ${part} ${k} ${a[part][k]} → ${b[part][k]}`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test("H7 · the drawing crosses the hairline, painted over it, 12–24 below — as the hawk does on /agents", async ({ page }) => {
+    for (const [w, h] of SIZES) {
+      await inkOpen(page, "/agents", w, { height: h, scope: "qc133" });
+      await expect(page.locator('[data-cl15="header"]:not([data-loading])'), `${w}: the Contact list's header`).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(600);
+      const cl = await page.evaluate(() => {
+        const hd = document.querySelector<HTMLElement>('[data-cl15="header"]')!.getBoundingClientRect();
+        const art = document.querySelector<HTMLElement>('[data-cl15="header-art"] img')!.getBoundingClientRect();
+        return { above: hd.bottom - art.top, below: art.bottom - hd.bottom, h: art.height };
+      });
+      await openQc(page, w, h);
+      const g = await readQc(page);
+      const hair = g.hd!.b, below = g.art!.b - hair;
+      console.log(`[H7] ${w}: contact ${JSON.stringify(cl)} · queries below ${below.toFixed(1)}, height ${g.art!.h.toFixed(1)}`);
+      expect(cl.below, `${w}: the hawk crosses its hairline on /agents (precondition)`).toBeGreaterThan(0);
+      expect(g.art!.y, `${w}: the drawing starts above the hairline`).toBeLessThan(hair - 100);
+      expect(below, `${w}: the drawing ends ${below} below the hairline`).toBeGreaterThanOrEqual(12);
+      expect(below, `${w}: the drawing ends ${below} below the hairline`).toBeLessThanOrEqual(24);
+      expect(Math.abs(below - cl.below), `${w}: ${below} below here, ${cl.below} on /agents`).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.art!.h - cl.h), `${w}: the drawing ${g.art!.h} tall, the hawk ${cl.h}`).toBeLessThanOrEqual(1);
+      expect(g.artPos, `${w}: positioned, so it paints over the hairline`).toBe("relative");
+      expect(Number(g.artZ), `${w}: z-index ${g.artZ}`).toBeGreaterThanOrEqual(1);
     }
   });
 });

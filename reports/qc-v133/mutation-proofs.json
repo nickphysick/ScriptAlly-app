@@ -11,12 +11,12 @@
  },
  {
   "lock": "H2",
-  "mutation": "drop the drawing's left margin",
+  "mutation": "start-align the drawing (justify-self: start)",
   "red": true,
   "reading": [
-   "Error: 1512: the drawing starts 56 after the text",
+   "Error: 1512: the drawing's right 1308.484375 against the desk's 1455.609375",
    "Expected: <= 2",
-   "Received:    56"
+   "Received:    147.125"
   ]
  },
  {
@@ -24,19 +24,19 @@
   "mutation": "bottom padding 28",
   "red": true,
   "reading": [
-   "Error: 1512: hairline 379 / 368.96875",
+   "Error: 1512: hairline 419 / 400.8125",
    "Expected: <= 2",
-   "Received:    10.03125"
+   "Received:    18.1875"
   ]
  },
  {
   "lock": "H4",
-  "mutation": "remove the top margin",
+  "mutation": "double the drop",
   "red": true,
   "reading": [
-   "Error: 1512: the drawing's top 60 against the bar's bottom 64",
-   "Expected: >= 8",
-   "Received:    -4"
+   "Error: 1512: the drawing's top is 60 below the sheet's",
+   "Expected: <= 3",
+   "Received:    30"
   ]
  },
  {
@@ -55,8 +55,18 @@
   "red": true,
   "reading": [
    "Error: 1512: title width 233.8 → 535.4",
-   "Expected: <= 1",
+   "Expected: <= 8",
    "Received:    301.59999999999997"
+  ]
+ },
+ {
+  "lock": "H7",
+  "mutation": "remove the drop (top: 0)",
+  "red": true,
+  "reading": [
+   "Error: 1512: the drawing ends -11 below the hairline",
+   "Expected: >= 12",
+   "Received:    -11"
   ]
  }
 ]
