@@ -307,7 +307,7 @@ describe("notes-store convergence — one store owns \"Notes to self\"", () => {
   it("the dashboard passes the USER-TASK store down, never the post-its", () => {
     expect(dash).toContain("userTasks={userTasks}");
     expect(dash).not.toContain("userNotes={notes}");
-    const osd = readFileSync(join(here, "..", "dashboard", "OneScreenDashboard.tsx"), "utf8");
+    const osd = readFileSync(join(here, "..", "dashboard", "v58", "Dash58.tsx"), "utf8");
     expect(osd).toContain("userTasks: UserTask[];");
     expect(osd).not.toContain("notes: Note[];");
     // and OverToYou keeps the same store on the surface that DOES tick and compose

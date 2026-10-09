@@ -165,52 +165,6 @@ describe("search — focus must not resize the field", () => {
   });
 });
 
-/**
- * ⚠️ THE LAZY DRAWER, GUARDED FROM A FILE THAT IMPORTS NOTHING (dashboard redesign, Phase 5).
- *
- * `OneScreenTasks` loads its WRITING half through `React.lazy`, because that half reaches
- * `useTaskCommit` → `lib/db` → `lib/firebase`, which initialises the Firebase SDK at MODULE LOAD.
- * A static import puts `auth/invalid-api-key` into the graph of every suite that renders the
- * dashboard, and those suites then fail to COLLECT.
- *
- * ⚠️ WHICH IS EXACTLY WHY THE GUARD CANNOT LIVE IN ONE OF THEM. `oneScreenTasks.test.tsx` carries
- * the same assertion and it is unreachable in the failing case: the file it would run in does not
- * load, and vitest reports that as `Tests no tests` — which greps as zero reds. This file reads
- * source with `readFileSync` and imports no component at all, so it still runs, and still fails,
- * on the day somebody flattens the import back.
- */
-describe("the dashboard's to-do drawer stays out of the load path", () => {
-  const panel = readFileSync(join(__dirname, "OneScreenTasks.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-
-  /**
-   * ⚠️ RETARGETED, SAME LAW (to-do row round, 20 Sep). The claim is *the panel does not pull the
-   * write layer into its own module graph* — it was written against `DashTaskDrawer`, which this
-   * round retires: the dashboard commits from the row now, so the two modules that reach the db
-   * context are `DashTaskCommit` (the writer) and `DashSnooze` (the dial's flag write). Both are
-   * asserted, because naming only one would leave the other free to be imported statically.
-   */
-  it("⚠️ every module that reaches the write layer is React.lazy, never a static import", () => {
-    expect(panel).toContain("React.lazy(");
-    for (const m of ["DashTaskCommit", "DashSnooze"]) {
-      expect(panel, `${m} must be lazy`).toContain(`import("./${m}")`);
-      /* ⚠️ `import type` IS NOT A STATIC IMPORT — it is erased before the bundle exists, so it
-         pulls no module in. What must not appear is a VALUE import; asserting against the word
-         alone would forbid the type the panel legitimately reads from the writer's own contract. */
-      for (const line of panel.split("\n").filter((l) => l.startsWith("import") && l.includes(m))) {
-        expect(line, `a value import of ${m} drags the Firebase SDK into every dashboard suite`)
-          .toMatch(/^import type /);
-      }
-    }
-    /* and the retired drawer is gone rather than merely unmounted */
-    expect(panel).not.toContain("DashTaskDrawer");
-  });
-
-  /* ⚠️ AND THE PANEL ITSELF MUST NOT REACH THE WRITE LAYER BY ANOTHER DOOR — the point is the
-     GRAPH, not the one import everybody remembers. */
-  it("⚠️ and the panel imports no part of the write layer directly", () => {
-    for (const f of ["../../lib/db", "useTaskCommit", "../../lib/firebase"]) {
-      expect(panel, `the panel imports ${f}`).not.toContain(f);
-    }
-  });
-});
+/* ⚠️ RETIRED (Dashboard v58): "the dashboard's to-do drawer stays out of the load path" guarded
+   `OneScreenTasks`'s lazy imports of `DashTaskCommit` and `DashSnooze`. All three are deleted: the
+   page's actions open the query drawer through `drawerStore`, which imports no write layer. */
