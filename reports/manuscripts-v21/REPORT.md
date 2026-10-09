@@ -42,6 +42,14 @@ dev from the branch (§6).
    (the Queried ring) only while the status is Querying, as v12 and v13 did; the other five show the
    name alone.
 
+## 1a · After the rebase (9 Oct, at merge)
+
+`origin/main` moved once before the merge: Contact list v15.3 (`587a0a7f`), which gives its header
+30px of top padding. Premise 5 came true, so this header follows: `padding: 30px 0 10px`. Every y in
+§2 is therefore 30 lower on both pages than the table says. MS21 was re-run on the rebased build: 23
+of 23, 291 assertions, H1 green against the v15.3 header at both widths. The one rebase conflict was
+`design-refs/.refhashes.json`, resolved by re-adding the v21 entries to main's manifest.
+
 ## 2 · The Contact list numbers (measured on `/agents`, this branch's build, fonts loaded)
 
 Relative to the page's scroller.
