@@ -17,21 +17,27 @@
  * ⚠️ THE SHADOW IS A FILTER ON THE OUTER ELEMENT. The inner one is clipped to the flap, and a clip
  *    removes a box-shadow; a drop-shadow on the parent follows the clipped outline.
  */
-:root { --hsheet-flap: 26px; }
+:root {
+  --hsheet-flap: 26px;
+  /* the page sheet's width and the flap's outline, stated once: the header sheet reads them, and so do the
+     blush banners (Query Centre, Contact list, Manuscripts), whose bottom edge is the same flap without a shadow */
+  --hsheet-w: calc(100vw - var(--ink-sheet-l, 0px) - var(--ink-sheet-r, 0px));
+  --hsheet-clip: polygon(0 0, 100% 0, 100% calc(100% - var(--hsheet-flap)), 50% 100%, 0 calc(100% - var(--hsheet-flap)));
+}
 
 @media (min-width: 768px) {
   .hsheet-host { position: relative; z-index: 1; }
   .hsheet {
     display: block; position: absolute; z-index: -1; pointer-events: none;
     left: 50%; top: -600px; bottom: calc(-1 * var(--hsheet-flap));
-    width: calc(100vw - var(--ink-sheet-l, 0px) - var(--ink-sheet-r, 0px));
+    width: var(--hsheet-w);
     transform: translateX(-50%);
     filter: drop-shadow(0 12px 12px rgba(28, 19, 15, 0.12));
   }
   .hsheet > i {
     display: block; position: absolute; inset: 0;
     background: var(--ws-sheet);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--hsheet-flap)), 50% 100%, 0 calc(100% - var(--hsheet-flap)));
+    clip-path: var(--hsheet-clip);
   }
   /* the hairline every header closed on is retired: the flap is the edge */
   .hsheet-host { border-bottom: 0 !important; }
