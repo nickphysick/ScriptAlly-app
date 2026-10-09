@@ -30,8 +30,9 @@ describe("packages entitlement", () => {
     const body = add.slice(a, b);
     expect(body).toContain("if (!packagesUnlocked(currentUser))");
     expect(body).not.toMatch(/plan === UserPlan\.FREE/);
-    expect(src("../components/manuscripts/v12/ManuscriptPage.tsx")).toMatch(/const pro = packagesUnlocked\(currentUser\)/);
+    /* Manuscripts v21: the page shows no packages list of its own (a door to the packages page instead), so it
+       reads no gate at all — neither the entitlement nor the plan */
+    expect(src("../components/manuscripts/v12/ManuscriptPage.tsx")).not.toMatch(/UserPlan|isProUser|packagesUnlocked/);
     expect(src("../components/MaterialsField.tsx")).toMatch(/const isPro = packagesUnlocked\(currentUser\)/);
-    expect(src("../components/manuscripts/v12/Msv12Empty.tsx")).toMatch(/Submission packages\{PACKAGES_OPEN_TO_ALL \? null :/);
   });
 });

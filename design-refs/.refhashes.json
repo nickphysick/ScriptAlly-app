@@ -187,10 +187,31 @@
     "design-refs/qc-v134/ref-faces-hover-1512@2x.png": "fbd30cabedf175ea189d70ec129e092ad43f232cba1619393de4c9b19b12584a",
     "design-refs/qc-v134/ref-header-desk-1280@2x.png": "11129410cd57fb8072a30a765f6a4edc847adbe7a9a91264a5961f3b82c472ff",
     "design-refs/qc-v134/ref-header-desk-1512@2x.png": "d82cd6aaad841cf348f95485d3fd6f89a1a12582c0bca66fb0d1d320306dcde9",
-    "design-refs/contact-list-v15-3.html": "aad97da81fe4563b1c0c359277d3b19cc59c5d6f18063ace433bf7c6464efa7e"
+    "design-refs/contact-list-v15-3.html": "aad97da81fe4563b1c0c359277d3b19cc59c5d6f18063ace433bf7c6464efa7e",
+    "design-refs/manuscripts/manuscripts-v21.html": "3576000dbe9688f553e460ebd206dd6b8ff97137a192a97c6f203a0329ebdda8",
+    "design-refs/manuscripts/manuscripts-v21-geometry.json": "5e4b64d45901700ec46b80e7f8f99a6c4206ec75f1f17402efd290d2ad47e1a5",
+    "design-refs/manuscripts/v21/01-header-book-activity-1280.png": "0ea6d3c6e4e6d62430044f7bd2040fabc0cda7c6e7dc56e9ec08d95f68d7442d",
+    "design-refs/manuscripts/v21/01-header-book-activity-1512.png": "2e89bf1c574c761338b900f107f59dc889732a6d31913f15b8bea58c2f5fa147",
+    "design-refs/manuscripts/v21/02-versions-1280.png": "e5cdb7d2605e40936f24de3d04629c558d027a5bf2601b49acfb708de17c4328",
+    "design-refs/manuscripts/v21/02-versions-1512.png": "59c8a5e0a892d0455d2dc08c882a763510a6f3d300481e161b1ca8d0b9bce5b5",
+    "design-refs/manuscripts/v21/03-materials-1280.png": "33f96fe06a0a2e3a7e05178745fab3d0c38f4e7fc6626ff32444cbc14a293ec6",
+    "design-refs/manuscripts/v21/03-materials-1512.png": "b4d20c1be33c0c52ba8529e7989f51448f738c1f75dbeccbc252efee7e8b6fdc",
+    "design-refs/manuscripts/v21/04-see-all-1280.png": "60d323357de15132df6ac82c498cb87f64395c06786e0f8157ee02578936da81",
+    "design-refs/manuscripts/v21/04-see-all-1512.png": "ea4afea69d7797727e2f1b3b1b4ff74455b404c4c564b70f0dd08c41977f735f",
+    "design-refs/manuscripts/v21/05-empty-1280.png": "cb0068cc170f13f250aeda122433bbe40d6465ec9f1bf6f39ddb4ec2e0909400",
+    "design-refs/manuscripts/v21/05-empty-1512.png": "3a2ebbb97d47cf4392662a47e84c1ccc7b099e1dd90b14fac5495b4a8072565e",
+    "design-refs/manuscripts/v21/06-deleted-1280.png": "acd3f721136132d17503356d293c9a345b1dbf460016656926988b1d85328213",
+    "design-refs/manuscripts/v21/06-deleted-1512.png": "18654ae849b52ba12b8072971191a93ec7af8698e49916a7fd8afb8d4f35b1b5",
+    "design-refs/manuscripts/v21/07-add-modal-1280.png": "dca24501b9fcad7e3a3cb1964e70f04cd9a2d82b0c0635b220cae7c785110e96",
+    "design-refs/manuscripts/v21/07-add-modal-1512.png": "fa037608c835cfa009fe3678c39a3bbfb6d0c17d78ea552e1c849e449c32b9f6",
+    "design-refs/manuscripts/v21/08-edit-details-1280.png": "23789c9928ec35a1c31cf5701bd5ac3129a7bb844be9bd1133823eb9eb2ea6e1",
+    "design-refs/manuscripts/v21/08-edit-details-1512.png": "1fc239be41f6e34a13fd3c5d0c68f2e26fbd07a1699737870c317d7be5f77a86",
+    "design-refs/manuscripts/v21/09-new-version-1280.png": "55208675b70358c27550e5ecf1901b2fbab02a825408efdaf13b79b5f17403da",
+    "design-refs/manuscripts/v21/09-new-version-1512.png": "949a0361a27c046a289219e274c13c4fd7d87dd9d8d6c1d59d9616ac98dc540e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward."
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history."
   }
 }

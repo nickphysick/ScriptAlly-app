@@ -27,8 +27,11 @@ export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
  * shared open header, a plate nor a band. The Contact list left the band in v15 for an open header the shared component
  * cannot draw (a 72px typewriter title, no eyebrow, the drawing in the flow beside the text); its geometry belongs to
  * `contactV15` CL15-1/CL15-2. The open-header claims skip it by NAME and assert that what they skipped IS this set.
+ *
+ * Manuscripts joined on 9 Oct (Manuscripts v21): the book's title as a 72px typewriter title, one line, two buttons,
+ * the Archivist in the flow at the column's right edge. Its geometry belongs to `manuscriptsV21` H1/H2.
  */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries"];
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The

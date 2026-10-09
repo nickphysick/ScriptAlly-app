@@ -1,0 +1,13 @@
+{"lock": "B1 book", "mutation": "Read the author from somewhere other than User.name", "kind": "source, rebuilt", "red": true, "reason": "Author is User.name"}
+{"lock": "B2 row @ 1512", "mutation": "Drop the activity's scope filter", "kind": "source, rebuilt", "red": true, "reason": "the five rows, by query"}
+{"lock": "B3 your move", "mutation": "Open the record journey instead of the sent journey", "kind": "source, rebuilt", "red": true, "reason": "the drawer's I've-sent-it journey"}
+{"lock": "V3 deck @ 1512", "mutation": "Open the deck on the oldest version", "kind": "source, rebuilt", "red": true, "reason": "the deck opens on the current version"}
+{"lock": "V4 see all @ 1512", "mutation": "Keep the See all label static", "kind": "source, rebuilt", "red": true, "reason": "the label flips"}
+{"lock": "V5 new version", "mutation": "Show a words line on a version with no count", "kind": "source, rebuilt", "red": true, "reason": "a version without a count shows no words line"}
+{"lock": "M1 doors @ 1512", "mutation": "Make only the door's link text clickable", "kind": "source, rebuilt", "red": true, "reason": "the card's corner opens Comparable titles"}
+{"lock": "E1 empty", "mutation": "Put a control inside a preview's sketch", "kind": "source, rebuilt", "red": true, "reason": "a preview holds no control"}
+{"lock": "E2 deleted", "mutation": "Show the no-manuscript copy after a deletion", "kind": "source, rebuilt", "red": true, "reason": "the just-deleted title"}
+{"lock": "H1 open header @ 1512", "mutation": "Give the header a card (a fill and a radius)", "kind": "css, injected", "red": true, "reason": "no ancestor of the title up to the sheet has a background or a radius"}
+{"lock": "H2 drawing @ 1512", "mutation": "justify-self: start on the drawing", "kind": "css, injected", "red": true, "reason": "the drawing's right edge 1033.921875 is the column's 1207.625"}
+{"lock": "V1 banner @ 1512", "mutation": "Let the banner's line wrap", "kind": "css, injected", "red": true, "reason": "one line tall"}
+{"lock": "V2 50/50 @ 1512", "mutation": "1fr 1.4fr on the versions grid", "kind": "css, injected", "red": true, "reason": "the halves differ by ≤ 2 (463.015625 / 648.21875)"}

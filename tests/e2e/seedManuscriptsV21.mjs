@@ -2,12 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ SEED THE MANUSCRIPTS-v13 FIXTURE ══════════════════════════════════════════════════════════
+ * ══ SEED THE MANUSCRIPTS-v21 FIXTURE ══════════════════════════════════════════════════════════
  *
- * Two DEDICATED accounts, both owned by this script (see ms13Fixture.mjs, the one source this and
+ * Three DEDICATED accounts, both owned by this script (see ms21Fixture.mjs, the one source this and
  * the measure file read):
- *   · ms13-filled@scriptally.test — two books; the first is the page's subject
- *   · ms13-empty@scriptally.test  — no manuscripts at all (the v12 empty fixture's shape)
+ *   · ms21-filled@scriptally.test — two books; the first is the page's subject
+ *   · ms21-empty@scriptally.test  — no manuscripts at all
+ *   · ms21-delete@scriptally.test — one manuscript, which `--delete-ms` removes mid-run
  *
  * ⚠️ WIPE, THEN WRITE. Every collection the page reads is emptied and rewritten whole, the feed
  *    included. The measure file's own writes (M5's new version, M7's saved details) each narrate a
@@ -21,9 +22,9 @@
  * ⚠️ DEV ONLY — refuses anything but scriptally-dev.
  *
  * USAGE
- *   node tests/e2e/seedManuscriptsV13.mjs                 both accounts
- *   node tests/e2e/seedManuscriptsV13.mjs --only filled   the filled account (the measure's restore)
- *   node tests/e2e/seedManuscriptsV13.mjs --only empty
+ *   node tests/e2e/seedManuscriptsV21.mjs                 both accounts
+ *   node tests/e2e/seedManuscriptsV21.mjs --only filled   the filled account (the measure's restore)
+ *   node tests/e2e/seedManuscriptsV21.mjs --only empty
  */
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -32,7 +33,8 @@ import { getFirestore, doc, setDoc, updateDoc, deleteDoc, getDocs, collection, T
 import {
   FILLED_EMAIL, FILLED_NAME, EMPTY_EMAIL, EMPTY_NAME, MS_ID, MS_TITLE, MS, OTHER_MS_ID, OTHER_MS_TITLE,
   BV, LETTERS, SYNOPSES, PKGS, ACTIVE_PKG, AGENTS, QUERIES, MS_UPDATED, COMPS,
-} from "./ms13Fixture.mjs";
+  DELETE_EMAIL, DELETE_NAME, DELETE_MS_ID, DELETE_MS_TITLE,
+} from "./ms21Fixture.mjs";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -57,7 +59,10 @@ const CFG = {
 
 const args = process.argv.slice(2);
 const only = (() => { const i = args.indexOf("--only"); return i >= 0 ? args[i + 1] : null; })();
-if (only && only !== "filled" && only !== "empty") throw new Error(`--only takes filled or empty, not "${only}"`);
+if (only && !["filled", "empty", "delete"].includes(only)) throw new Error(`--only takes filled, empty or delete, not "${only}"`);
+/** `--delete-ms`: remove the delete account's one manuscript, as a deletion elsewhere would — the
+ *  measure runs this while the page is open (nothing on the routed page deletes a manuscript). */
+const deleteMs = args.includes("--delete-ms");
 
 /** Sign an owned account in on its own app instance; create the auth user on first contact. */
 const session = async (email, tag) => {
@@ -118,17 +123,37 @@ const TYPE = {
   "Full Sent": "Materials Sent", "Partial Sent": "Materials Sent", "Rejected": "Status Changed",
 };
 
+/* ── the delete account ── */
+if (deleteMs) {
+  const s = await session(DELETE_EMAIL, "ms21-delete");
+  await deleteDoc(doc(s.db, "users", s.uid, "manuscripts", DELETE_MS_ID));
+  console.log(`deleted ${DELETE_MS_ID} from the delete account`);
+  process.exit(0);
+}
+if (!only || only === "delete") {
+  const s = await session(DELETE_EMAIL, "ms21-delete");
+  const n = await wipe(s.db, s.uid);
+  await recreateUserDoc(s.db, s.uid, DELETE_NAME, DELETE_EMAIL, "Free");
+  await setDoc(doc(s.db, "users", s.uid, "manuscripts", DELETE_MS_ID), {
+    id: DELETE_MS_ID, userId: s.uid, title: DELETE_MS_TITLE, genre: "Crime", ageCategory: "Adult",
+    wordCount: 71000, logline: "A bookkeeper finds a second set of accounts in a dead man's hand.",
+    comps: [], status: "Drafting", statusChangedDate: "2026-09-01T12:00:00.000Z",
+    bookVersions: [{ id: "ms21-del-bv", name: "First draft", kind: "initial", createdDate: "2026-09-01" }],
+  });
+  console.log(`delete account ready (${s.uid}) — wiped ${n}, one manuscript`);
+}
+
 /* ── the empty account ──────────────────────────────────────────────────────────────────────── */
-if (only !== "filled") {
-  const s = await session(EMPTY_EMAIL, "ms13-empty");
+if (!only || only === "empty") {
+  const s = await session(EMPTY_EMAIL, "ms21-empty");
   const n = await wipe(s.db, s.uid);
   await recreateUserDoc(s.db, s.uid, EMPTY_NAME, EMPTY_EMAIL, "Free");
   console.log(`empty account ready (${s.uid}) — wiped ${n}, owns nothing, plan Free`);
 }
 
 /* ── the filled account ─────────────────────────────────────────────────────────────────────── */
-if (only !== "empty") {
-  const { db, uid } = await session(FILLED_EMAIL, "ms13-filled");
+if (!only || only === "filled") {
+  const { db, uid } = await session(FILLED_EMAIL, "ms21-filled");
   const n = await wipe(db, uid);
   await recreateUserDoc(db, uid, FILLED_NAME, FILLED_EMAIL, "Pro");
   console.log(`filled account (${uid}) — wiped ${n}`);
@@ -137,7 +162,7 @@ if (only !== "empty") {
 
   await put(["manuscripts", MS_ID], {
     id: MS_ID, userId: uid, title: MS_TITLE, ...MS, comps: COMPS,
-    bookVersions: BV.map((b) => ({ id: b.id, name: b.name, kind: b.kind, createdDate: b.createdDate, note: b.note })),
+    bookVersions: BV.map((b) => ({ id: b.id, name: b.name, kind: b.kind, createdDate: b.createdDate, note: b.note, ...(b.wordCount ? { wordCount: b.wordCount } : {}) })),
     activePackageId: ACTIVE_PKG,
   });
   await put(["manuscripts", OTHER_MS_ID], {
@@ -192,14 +217,15 @@ if (only !== "empty") {
       ...(dated("Full Sent") ? { fullSentDate: dated("Full Sent") } : {}),
       ...(dated("Rejected") ? { rejectedDate: dated("Rejected") } : {}),
       ...(nudge ? { lastNudgeSentDate: noon(nudge.day).toISOString() } : {}),
+      ...(q.expectedSendDate ? { expectedSendDate: q.expectedSendDate } : {}),
       ...(q.materialsRequestedType ? { materialsRequestedType: q.materialsRequestedType, materialsRequestedQuantity: q.materialsRequestedQuantity } : {}),
       ...(last && last.status !== "Queried" ? { lastStatusChange: noon(last.day).toISOString() } : {}),
     });
     for (const s of q.steps) {
       const when = noon(s.day);
       if (s.nudge) {
-        await put(["activities", `ms13-act-${q.id}-nudge`], {
-          id: `ms13-act-${q.id}-nudge`, userId: uid, queryId: q.id, manuscriptId: q.ms,
+        await put(["activities", `ms21-act-${q.id}-nudge`], {
+          id: `ms21-act-${q.id}-nudge`, userId: uid, queryId: q.id, manuscriptId: q.ms,
           activityType: "Nudge Sent", description: `Nudge sent to ${ag.name} at ${ag.agency}`,
           date: when.toISOString(), details: "", eventKey: "nudge_sent",
         });
@@ -214,7 +240,7 @@ if (only !== "empty") {
       });
       logs += 1;
       /* the global feed — what this page's Recent activity reads */
-      const fid = `ms13-act-${q.id}-${slug(s.status)}`;
+      const fid = `ms21-act-${q.id}-${slug(s.status)}`;
       await put(["activities", fid], {
         id: fid, userId: uid, queryId: q.id, manuscriptId: q.ms,
         activityType: TYPE[s.status],

@@ -272,6 +272,8 @@ export interface ActivityInput {
   packages: readonly SubmissionPackage[];
   bookVersions: readonly BookVersion[];
   now: Date;
+  /** how many rows to return; absent is `ACTIVITY_ROWS_MAX` (v21 reads the whole list and picks its own five) */
+  max?: number;
 }
 
 /**
@@ -336,5 +338,5 @@ export const manuscriptActivity = (i: ActivityInput): { rows: ActivityRow[]; tot
       manuscriptId: a.manuscriptId,
     });
   }
-  return { rows: out.slice(0, ACTIVITY_ROWS_MAX), total: out.length };
+  return { rows: out.slice(0, i.max ?? ACTIVITY_ROWS_MAX), total: out.length };
 };

@@ -1,0 +1,374 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Manuscripts v21 (design-refs/manuscripts/manuscripts-v21.html). One block per part; values read off
+ * the rendered oracle at 1512 × 900 and 1280 × 800. "Below 1440" is `max-width: 1439.5px`, as the
+ * Contact list's sheets state it.
+ *
+ * FACES AND COLOURS ARE `:root` TOKENS (`--sp-type`, `--sp-serif`, `--font-mono`) OR LITERALS, so the
+ * dialogs, which portal to the body, read the same values as the page.
+ *
+ * ⚠️ lib/brand.tsx forces a face on bare h1/h2/h3 at runtime, injected last. Every heading here is
+ * stated with two classes and `!important`, which is what beats it.
+ */
+.ms21 { font-size: 16px; line-height: normal; color: #1c130f; }
+.ms21 button { font: inherit; color: inherit; }
+.ms21 :is(h1, h2, h3, p, dl, dd, dt, ol, li) { margin: 0; padding: 0; }
+.ms21 ol { list-style: none; }
+
+/* ── THE OPEN HEADER: the Contact list header's values (contactV15.css §2), copied, not imported.
+   The text block is centred against the drawing, which sits at the column's right edge and hangs
+   over the hairline. The art slot states the Contact list drawing's own height (326 / 253), so the
+   two pages' hairlines sit at one y; the drawing is taller than its slot and its drop is what puts
+   its foot below the line. ── */
+.ms21-hd {
+  box-sizing: border-box;
+  --ms21-slot: 326px; --ms21-drop: 20px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 56px; align-items: center;
+  /* 30 above: the Contact list header's own top padding since its v15.3 (MS21 H1 holds the two equal) */
+  margin-top: 0; padding: 30px 0 10px;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.14);
+}
+.ms21-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.ms21-hd .ms21-txt h1.ms21-title {
+  margin: 0; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  font: 400 72px/0.98 var(--sp-type) !important; letter-spacing: -0.015em; color: #1c130f;
+}
+.ms21-hd .ms21-sub { margin: 16px 0 0; max-width: 600px; font: 400 19px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
+.ms21-hd .ms21-soon {
+  display: inline-block; margin-left: 10px; padding: 3px 8px; border-radius: 6px; vertical-align: 2px;
+  font: 600 8.5px/1.3 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+  color: rgba(28, 19, 15, 0.6); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22);
+}
+.ms21-acts { display: flex; gap: 10px; margin-top: 22px; }
+.ms21 .ms21-b1, .ms21 .ms21-b2, .ms21 .ms21-pill {
+  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
+  font: 400 15.5px var(--sp-type); white-space: nowrap;
+}
+.ms21 .ms21-b1, .ms21 .ms21-pill { background: #2a3a52; color: #f4eee5; }
+.ms21 .ms21-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.ms21 .ms21-b1:hover, .ms21 .ms21-pill:hover { background: #22304a; }
+.ms21 .ms21-b2:hover { background: #f6f3ee; }
+.ms21 :is(.ms21-b1, .ms21-b2, .ms21-pill, .ms21-ring, .ms21-arw, .ms21-vc-go, .ms21-vo, .ms21-seeall, .ms21-more):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* the drawing: at the END of its column, so its right edge is the content column's. `max-width: none`
+   keeps its width when the track is narrower (preflight would squeeze it); positioned, so it paints
+   over the header's own hairline. */
+.ms21-art { justify-self: end; min-width: 0; height: var(--ms21-slot); display: flex; justify-content: flex-end; align-items: flex-start; }
+.ms21-art img { display: block; flex: none; max-width: none; position: relative; top: var(--ms21-drop); z-index: 1; width: 330px; height: auto; }
+@media (max-width: 1439.5px) {
+  .ms21-hd { column-gap: 36px; --ms21-slot: 253px; --ms21-drop: 12px; }
+  .ms21-hd .ms21-txt h1.ms21-title { font-size: 58px !important; }
+  .ms21-hd .ms21-sub { font-size: 17px; }
+  .ms21-art img { width: 260px; }
+}
+
+/* ── THE BOOK AND RECENT ACTIVITY: one row, equal heights. 72 (60) under the hairline. ── */
+.ms21-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: stretch; margin-top: 72px; }
+.ms21-card {
+  box-sizing: border-box; background: #fdfcfa; border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -26px rgba(28, 19, 15, 0.4);
+}
+.ms21-book { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 26px; padding: 22px 24px 22px 22px; }
+.ms21-act { display: flex; flex-direction: column; padding: 20px 20px 18px; min-width: 0; }
+.ms21-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; }
+.ms21 .ms21-h h2 { display: flex; align-items: center; gap: 10px; font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
+.ms21-ic { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #e5e7ea; color: #2a3a52; }
+.ms21-ic svg { display: block; }
+.ms21 .ms21-ring {
+  box-sizing: border-box; height: 34px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 14px var(--sp-type); color: #1c130f;
+}
+.ms21 .ms21-ring:hover { background: #f6f3ee; }
+
+/* the cover: a book block in ink with a darker spine */
+.ms21 .ms21-cover {
+  position: relative; box-sizing: border-box; width: 136px; height: 200px; padding: 22px 14px 16px 20px; border: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between; text-align: left; cursor: default;
+  border-radius: 4px 10px 10px 4px; color: #f5f1eb;
+  background-color: #2a3a52; background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 6px, rgba(0, 0, 0, 0) 6px);
+  box-shadow: 0 14px 26px -16px rgba(10, 14, 20, 0.55);
+}
+.ms21-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ms21-cover-t { font: 400 17px/1.15 var(--sp-type); letter-spacing: 0.02em; text-transform: uppercase; overflow-wrap: anywhere; }
+.ms21-cover-a { font: 600 8px/1.25 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
+.ms21-cover-add {
+  position: absolute; left: 12px; right: 10px; bottom: 10px; padding: 6px 4px; border-radius: 12px; text-align: center; opacity: 0;
+  background: #f5f1eb; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45);
+  font: 400 10px/1.25 var(--sp-type); letter-spacing: 0.08em; text-transform: uppercase; transition: opacity 0.15s;
+}
+.ms21-cover:hover .ms21-cover-add, .ms21-cover:focus-visible .ms21-cover-add { opacity: 1; }
+
+.ms21-bk { display: flex; flex-direction: column; min-width: 0; }
+.ms21 .ms21-log { margin-top: 16px; max-width: 640px; font: 400 19px/1.45 var(--sp-serif); color: #1c130f; }
+.ms21 .ms21-log--none button { border: 0; padding: 0; background: none; cursor: pointer; font: italic 400 19px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.5); text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px; }
+.ms21 .ms21-dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 22px; margin: 20px 0 18px; }
+.ms21 .ms21-dl dt { margin-bottom: 6px; font: 600 8.5px/12px var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.ms21 .ms21-dl dd { display: flex; align-items: center; gap: 7px; font: 400 16px/1.3 var(--sp-serif); color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms21 .ms21-dl dd.ms21-mu { font-style: italic; color: rgba(28, 19, 15, 0.45); }
+.ms21 .ms21-dl dd.ms21-ver { font-family: var(--sp-type); color: #8a4a3c; }
+.ms21-sd { flex: none; display: inline-flex; align-items: center; }
+.ms21-line {
+  margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(28, 19, 15, 0.1);
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: baseline;
+}
+.ms21-line-k { font: 600 8.5px/12px var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.ms21 .ms21-line p { font: italic 400 16px/1.4 var(--sp-serif); color: #1c130f; }
+.ms21 .ms21-line p button { border: 0; padding: 0; background: none; cursor: pointer; text-align: left; font: italic 400 16px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.6); text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px; }
+.ms21-line-src { font: 400 11px var(--sp-type); color: rgba(28, 19, 15, 0.45); white-space: nowrap; }
+
+/* recent activity */
+.ms21 .ms21-feed { flex: 1 1 auto; margin-top: 14px; }
+.ms21 .ms21-feed li + li { border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.ms21 .ms21-frow {
+  width: 100%; box-sizing: border-box; border: 0; background: none; padding: 11px 0; text-align: left;
+  display: grid; grid-template-columns: 52px 14px minmax(0, 1fr); gap: 10px; align-items: start;
+}
+.ms21 button.ms21-frow { cursor: pointer; }
+.ms21 button.ms21-frow:hover .ms21-ft b { text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
+.ms21 button.ms21-frow:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 6px; }
+.ms21-fd { font: 600 8.5px/1.9 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; color: rgba(28, 19, 15, 0.5); }
+.ms21-fi { display: flex; margin-top: 4px; }
+.ms21-sq { width: 11px; height: 11px; border-radius: 3px; background: #8a4a3c; }
+.ms21-ft { font: 400 14.5px/1.4 var(--sp-serif); color: #1c130f; min-width: 0; }
+.ms21 .ms21-ft b { font-weight: 600; }
+.ms21 .ms21-ft small { display: block; margin-top: 2px; font: italic 400 13px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.ms21 .is-you .ms21-ft small { font-style: normal; color: #9a4b32; }
+.ms21 .ms21-none { flex: 1; margin-top: 18px; font: italic 400 15px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.ms21 .ms21-more {
+  align-self: flex-start; margin-top: 8px; border: 0; padding: 0; background: none; cursor: pointer;
+  font: 400 13.5px var(--sp-type); color: #1c130f; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px;
+}
+
+@media (max-width: 1439.5px) {
+  .ms21-grid { grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; margin-top: 60px; }
+  .ms21-book { grid-template-columns: 112px minmax(0, 1fr); gap: 20px; }
+  .ms21 .ms21-cover { width: 112px; height: 166px; padding: 18px 12px 12px 16px; }
+  .ms21-cover-t { font-size: 14px; }
+  .ms21 .ms21-log { font-size: 17px; }
+  .ms21 .ms21-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+  .ms21-line { grid-template-columns: minmax(0, 1fr); }
+  .ms21-line-src { display: none; }
+}
+
+/* ── THE BANNER: the Contact list v15.2 banner (contactV15.css §4), copied. A blush band the sheet's
+   full width, its bottom edge an arrow. The tint is on `::before` (a spread shadow clipped to the
+   band's height) so the clip never reaches the arrow, which is `::after` and hangs below. ── */
+.ms21-ban {
+  position: relative; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  padding: 36px 0 34px; margin: 56px 0 76px;
+}
+.ms21-ban::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: #f3ddd2; box-shadow: 0 0 0 100vmax #f3ddd2; clip-path: inset(0 -100vmax);
+}
+.ms21-ban::after {
+  content: ""; position: absolute; left: 50%; top: calc(100% - 1px); z-index: 0;
+  width: 150px; height: 34px; transform: translateX(-50%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0C40 0 58 22 70 31.5Q75 35 80 31.5C92 22 110 0 150 0Z' fill='%23f3ddd2'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+.ms21 .ms21-ban p {
+  position: relative; z-index: 1; max-width: 100%; text-align: center; white-space: nowrap;
+  font: 400 16.2px/1.3 var(--sp-type); letter-spacing: -0.005em; color: #5b2a1f;
+}
+.ms21 .ms21-ban p b { font-weight: 400; color: #1c130f; text-decoration: underline; text-decoration-thickness: 1.5px; text-decoration-color: rgba(138, 74, 60, 0.75); text-underline-offset: 4px; }
+.ms21 .ms21-ban--big p { font-size: 38px; line-height: 1.3; }
+@media (max-width: 1439.5px) {
+  .ms21-ban { padding: 28px 0 26px; margin: 48px 0 64px; }
+  .ms21-ban::after { width: 120px; height: 28px; }
+  .ms21 .ms21-ban p { font-size: 13px; }
+  .ms21 .ms21-ban--big p { font-size: 29px; }
+}
+
+/* ── VERSIONS: two equal halves; the list, when open, spans both beneath. ── */
+.ms21-vsec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 48px; align-items: center; }
+.ms21-vtxt { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 26px; align-items: center; }
+/* the drawing faces the copy: mirrored. A placeholder — swap the file and nothing here changes. */
+.ms21-vart { display: block; width: 170px; height: auto; max-width: none; transform: scaleX(-1); }
+.ms21 .ms21-vcopy h2 { font: 400 40px/1.05 var(--sp-type) !important; color: #1c130f; }
+.ms21 .ms21-vcopy p { margin-top: 14px; font: 400 17px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.ms21 .ms21-vcopy p b { font-weight: 600; color: #1c130f; }
+.ms21-vacts { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 22px; }
+.ms21 .ms21-seeall { border: 0; padding: 0; background: none; cursor: pointer; font: 400 15px var(--sp-type); color: #1c130f; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
+.ms21 .ms21-seeall:hover { text-decoration-color: currentColor; }
+
+.ms21-car { position: relative; min-width: 0; --ms21-peek: 96px; }
+.ms21-deck { position: relative; height: 330px; }
+.ms21 .ms21-deck-none { position: absolute; inset: 28px var(--ms21-peek) 42px 0; display: grid; place-items: center; border-radius: 16px; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.14); font: italic 400 15px var(--sp-serif); color: rgba(28, 19, 15, 0.5); }
+.ms21-vc {
+  position: absolute; top: 28px; left: 0; box-sizing: border-box; width: calc(100% - var(--ms21-peek)); max-width: 460px;
+  display: flex; flex-direction: column; overflow: hidden; text-align: left; transform-origin: 50% 50%;
+  background: #fff; border-radius: 16px; cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45);
+  transition: transform 0.4s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.4s;
+}
+.ms21-vc.is-on { cursor: default; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.5); }
+.ms21-vc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.ms21-vc-bd { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 36px; padding: 0 14px; background: #5f7b93; color: #f5f1eb; }
+.ms21-vc.is-cur .ms21-vc-bd { background: #2a3a52; }
+.ms21-vc-chip { padding: 4px 7px; border-radius: 6px; background: rgba(245, 241, 235, 0.16); font: 700 7.5px/10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; color: #f5f1eb; }
+.ms21-vc.is-cur .ms21-vc-chip { background: #8a4a3c; }
+.ms21-vc-sv { font: 400 12.5px var(--sp-type); white-space: nowrap; color: #f5f1eb; }
+.ms21-vc-bdy { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 16px 14px; }
+.ms21-vc-hd { display: flex; align-items: center; gap: 12px; }
+.ms21-vc-cov {
+  flex: none; width: 34px; height: 46px; box-sizing: border-box; padding: 0 3px 0 5px; display: grid; place-items: center; overflow: hidden; text-align: center;
+  border-radius: 2px 6px 6px 2px; color: #f5f1eb; font: 400 5.5px/1.25 var(--sp-type); text-transform: uppercase;
+  background-color: #2a3a52; background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 3px, rgba(0, 0, 0, 0) 3px);
+}
+.ms21-vc-nm { min-width: 0; }
+.ms21 .ms21-vc-nm b { display: block; font: 400 18px/1.15 var(--sp-type); color: #1c130f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms21 .ms21-vc-nm small { display: block; margin-top: 4px; font: 500 9px/12px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.ms21-vc-lb { font: 600 8px/10px var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.ms21 .ms21-vc-wl { margin-top: -4px; font: italic 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.78); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ms21-vc-qs { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: -4px; font: 400 13.5px/19px var(--sp-serif); color: #1c130f; }
+.ms21-vc-qs > span { display: flex; align-items: center; gap: 6px; }
+.ms21 .ms21-vc-qs b { font-weight: 600; }
+.ms21-vc-ft { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.ms21 .ms21-vc-ft small { font: 500 8.5px/1.6 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.ms21 .ms21-vc-go { height: 32px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; background: #2a3a52; color: #f5f1eb; font: 400 13.5px var(--sp-type); }
+.ms21 .ms21-vc-go:hover { background: #22304a; }
+.ms21-cnav { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; margin-top: 6px; width: calc(100% - var(--ms21-peek)); max-width: 460px; }
+.ms21-dots { display: flex; gap: 6px; margin-right: auto; }
+.ms21 .ms21-dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: rgba(28, 19, 15, 0.2); transition: width 0.2s; }
+.ms21 .ms21-dots button.is-on { width: 22px; border-radius: 5px; background: #2a3a52; }
+.ms21 .ms21-arw { width: 38px; height: 38px; padding: 0 0 2px; border: 0; border-radius: 50%; cursor: pointer; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 20px/1 var(--sp-type); color: #1c130f; }
+.ms21 .ms21-arw:disabled { opacity: 0.3; cursor: default; }
+
+/* see all */
+.ms21-vall { grid-column: 1 / -1; margin-top: 34px; padding: 8px 22px 10px; --ms21-vt: minmax(0, 1fr) minmax(0, 1.54fr) 110px 250px 100px 70px; }
+.ms21-vall.ms21-vall { background: #fdfcfa; border-radius: 18px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -26px rgba(28, 19, 15, 0.4); }
+.ms21-vlbl { display: grid; grid-template-columns: var(--ms21-vt); gap: 16px; align-items: center; padding: 14px 0 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); font: 600 8.5px/12px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.ms21 .ms21-vall li { display: grid; grid-template-columns: var(--ms21-vt); gap: 16px; align-items: center; padding: 14px 0; }
+.ms21 .ms21-vall li + li { border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.ms21-vn { min-width: 0; }
+/* the name gives way, the Current tag never does: a long name must not push the tag out of sight */
+.ms21 .ms21-vn b { display: flex; align-items: center; font: 400 16px/1.2 var(--sp-type); color: #1c130f; min-width: 0; }
+.ms21-vnn { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms21 .ms21-vn small { display: block; margin-top: 3px; font: 500 9px/12px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.ms21-cur { flex: none; display: inline-block; margin-left: 8px; padding: 3px 6px; border-radius: 5px; vertical-align: 2px; box-shadow: inset 0 0 0 1px rgba(138, 74, 60, 0.45); font: 700 7.5px/10px var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: #8a4a3c; }
+.ms21-vw { font: italic 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms21-vd { font: 400 14px var(--sp-serif); color: #1c130f; white-space: nowrap; }
+.ms21-vq { display: flex; gap: 12px; font: 500 10px/14px var(--font-mono); color: #1c130f; white-space: nowrap; }
+.ms21-vq > span { display: flex; align-items: center; gap: 5px; }
+.ms21-vp { font: 400 14px var(--sp-serif); color: rgba(28, 19, 15, 0.72); white-space: nowrap; }
+.ms21-vlbl .ms21-vp { font: inherit; color: inherit; }
+.ms21 .ms21-vo { justify-self: end; height: 30px; padding: 0 14px; border: 0; border-radius: 999px; cursor: pointer; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 13px var(--sp-type); color: #1c130f; }
+.ms21 .ms21-vo:hover { background: #f6f3ee; }
+
+@media (max-width: 1439.5px) {
+  .ms21-vsec { column-gap: 32px; }
+  .ms21-vtxt { gap: 18px; }
+  .ms21-vart { width: 120px; }
+  .ms21 .ms21-vcopy h2 { font-size: 34px !important; }
+  .ms21-car { --ms21-peek: 72px; }
+  .ms21-vall { --ms21-vt: minmax(0, 1fr) minmax(0, 1.23fr) 96px 200px 60px; }
+  .ms21-vlbl, .ms21 .ms21-vall li { gap: 12px; }
+  .ms21-vall .ms21-vp, .ms21-vqt { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms21-vc, .ms21 .ms21-dots button, .ms21-cover-add, .ms21 .ms21-door { transition: none !important; }
+  .ms21 .ms21-door:hover { transform: none; }
+}
+
+/* ── YOUR MATERIALS: three doors on a full-bleed band (the Contact list next-step band's technique:
+   a spread shadow in the band's colour, clipped to the band's height). ── */
+.ms21-band {
+  margin: 64px 0 0; padding: 56px 0 60px;
+  background: #e9e6e0; box-shadow: 0 0 0 100vmax #e9e6e0; clip-path: inset(0 -100vmax);
+}
+.ms21-bh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin-bottom: 24px; }
+.ms21 .ms21-bh h2 { font: 400 32px/1 var(--sp-type) !important; color: #1c130f; }
+.ms21 .ms21-bh p { font: 400 16px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.66); }
+.ms21-doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.ms21 .ms21-door {
+  box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; padding: 22px 24px 20px; border: 0; text-align: left; cursor: pointer;
+  background: #fdfcfa; border-radius: 18px; color: #1c130f;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.ms21 .ms21-door:hover, .ms21 .ms21-door:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 1.5px #2a3a52, 0 14px 30px -24px rgba(28, 19, 15, 0.45); outline: none; }
+.ms21-dic { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 50%; display: grid; place-items: center; background: #e5e7ea; color: #2a3a52; }
+.ms21-dic svg { display: block; }
+.ms21-dt { font: 400 20px/1.15 var(--sp-type); }
+.ms21-dn { font: 400 15px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+.ms21 .ms21-dn b { font: 400 34px/1 var(--sp-type); color: #1c130f; margin-right: 2px; }
+.ms21-dl2 { flex: 1; margin-top: 4px; font: 400 15px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.ms21-dgo { display: flex; align-items: center; gap: 8px; margin-top: 14px; font: 400 14px var(--sp-type); }
+.ms21 .ms21-dgo i { font-style: normal; transition: transform 0.18s; }
+.ms21 .ms21-door:hover .ms21-dgo i { transform: translateX(3px); }
+@media (max-width: 1439.5px) {
+  .ms21-band { margin-top: 52px; padding: 48px 0 52px; }
+  .ms21 .ms21-bh h2 { font-size: 28px !important; }
+  .ms21-doors { gap: 16px; }
+  .ms21 .ms21-door { padding: 18px 18px 16px; }
+  .ms21-dt { font-size: 18px; }
+}
+
+/* ── THE EMPTY STATE: the banner 72 (60) under the hairline, then three previews. ── */
+.ms21-emptyb { margin-top: 72px; }
+.ms21-emptyb .ms21-ban { margin-top: 0; }
+.ms21-show { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.ms21-sh { box-sizing: border-box; padding: 20px 22px 22px; background: #fdfcfa; border-radius: 18px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45); }
+.ms21 .ms21-sh h3 { margin-top: 18px; font: 400 20px/1.15 var(--sp-type) !important; color: #1c130f; }
+.ms21 .ms21-sh p { margin-top: 8px; font: 400 15px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.7); }
+.ms21-ghost { position: relative; box-sizing: border-box; height: 132px; border-radius: 12px; background: #f3f2f0; overflow: hidden; pointer-events: none; user-select: none; }
+.ms21-ghost i, .ms21-ghost b, .ms21-ghost s, .ms21-ghost em, .ms21-ghost span { display: block; font-style: normal; text-decoration: none; }
+.ms21-ghost--book { display: flex; gap: 16px; padding: 18px; }
+.ms21-ghost .g-c { flex: none; width: 62px; height: 92px; border-radius: 2px 6px 6px 2px; background: #c9d1db; }
+.ms21-ghost .g-l { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.ms21-ghost .g-l > i { height: 9px; border-radius: 4px; background: rgba(28, 19, 15, 0.12); }
+.ms21-ghost .g-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+.ms21-ghost .g-g i { height: 7px; border-radius: 4px; background: rgba(28, 19, 15, 0.08); }
+.ms21-ghost .g-v { position: absolute; top: 26px; left: 22px; right: 104px; bottom: 20px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.ms21-ghost .g-v3 { transform: translate(40px, -12px) scale(0.88); opacity: 0.55; }
+.ms21-ghost .g-v2 { transform: translate(20px, -6px) scale(0.94); opacity: 0.8; }
+.ms21-ghost .g-v1 { display: flex; flex-direction: column; gap: 7px; padding: 12px; }
+.ms21-ghost .g-v1 b { width: 40%; height: 10px; border-radius: 4px; background: #c9d1db; }
+.ms21-ghost .g-v1 i { height: 7px; border-radius: 4px; background: rgba(28, 19, 15, 0.12); }
+.ms21-ghost .g-v1 em { display: flex; gap: 6px; margin-top: 8px; }
+.ms21-ghost .g-v1 s { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
+.ms21-ghost--mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 22px 18px; }
+.ms21-ghost .g-d { display: flex; flex-direction: column; gap: 10px; padding: 12px 10px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.ms21-ghost .g-d s { width: 24px; height: 24px; border-radius: 50%; background: #e5e7ea; }
+.ms21-ghost .g-d i { height: 7px; border-radius: 4px; background: rgba(28, 19, 15, 0.12); }
+@media (max-width: 1439.5px) {
+  .ms21-emptyb { margin-top: 60px; }
+  .ms21-show { gap: 16px; }
+}
+
+/* ── THE DIALOGS (portalled to the body; `:root` tokens and literals only). ── */
+.ms21-layer { color: #1c130f; }
+.ms21-scrim { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: rgba(18, 24, 34, 0.42); }
+.ms21-modal {
+  box-sizing: border-box; width: 600px; max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); overflow: auto;
+  background: #fff; border-radius: 16px; box-shadow: 0 24px 70px rgba(10, 14, 20, 0.35); font-family: var(--sp-serif); color: #1c130f;
+}
+.ms21-modal *, .ms21-modal *::before, .ms21-modal *::after { box-sizing: border-box; }
+.ms21-modal:focus { outline: none; }
+.ms21-mh { padding: 20px 24px; background: #2a3a52; color: #f5f1eb; }
+.ms21-layer .ms21-mh h3 { margin: 0; font: 400 24px/1 var(--sp-type) !important; color: #f5f1eb; }
+.ms21-layer .ms21-mh p { margin: 6px 0 0; font: 400 14px/1.4 var(--sp-serif); color: rgba(245, 241, 235, 0.75); }
+.ms21-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 20px 24px; }
+.ms21-fld { display: flex; flex-direction: column; min-width: 0; }
+.ms21-fld--w { grid-column: 1 / -1; }
+.ms21-layer .ms21-fld label, .ms21-layer .ms21-fl { margin-bottom: 6px; font: 600 9px/12px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.ms21-fld input, .ms21-fld select, .ms21-fld textarea {
+  width: 100%; height: 41px; padding: 10px 12px; border: 0; border-radius: 10px; background: #f3f2f0;
+  font: 400 15px/normal var(--sp-serif); color: #1c130f;
+}
+.ms21-fld textarea { height: 68px; line-height: 1.45; resize: vertical; }
+.ms21-fld input:focus, .ms21-fld select:focus, .ms21-fld textarea:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.ms21-layer .ms21-hint { margin-top: 5px; font: 400 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
+.ms21-layer .ms21-ferr { margin-top: 5px; font: 400 12.5px/1.35 var(--sp-serif); color: #8a4a3c; }
+.ms21-seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 12px; background: #f3f2f0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.ms21-seg button { padding: 7px 12px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; white-space: nowrap; font: 400 13px/18px var(--sp-type); color: rgba(28, 19, 15, 0.6); }
+.ms21-seg button.is-on { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1), inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.ms21-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.ms21-layer .ms21-derr { grid-column: 1 / -1; font: 400 13.5px/1.4 var(--sp-serif); color: #7c2d2d; }
+.ms21-mf { display: flex; justify-content: flex-end; gap: 10px; padding: 0 24px 22px; }
+.ms21-mf button { height: 42px; padding: 0 20px; border: 0; border-radius: 999px; cursor: pointer; font: 400 15px var(--sp-type); }
+.ms21-mf .ms21-mc { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.ms21-mf .ms21-ms { background: #2a3a52; color: #f5f1eb; }
+.ms21-mf .ms21-ms:disabled { opacity: 0.6; cursor: default; }
+.ms21-mf button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
