@@ -17,7 +17,7 @@
 import React from "react";
 import { User } from "../../types";
 import { isProUser } from "../../lib/suggestComps";
-import { Skel } from "./OneScreenDashboard";
+import { Skel } from "./OneScreenPanel";
 
 export const OneScreenPro: React.FC<{
   loading: boolean;

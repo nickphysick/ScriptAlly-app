@@ -19,7 +19,7 @@
  * state that mimics the populated one is a promise about numbers that do not exist.
  */
 import React from "react";
-import { Skel } from "./OneScreenDashboard";
+import { Skel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
 import seedling from "../../assets/shell/new-shoots-icon.png";
 
