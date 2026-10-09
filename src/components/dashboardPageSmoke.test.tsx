@@ -65,11 +65,14 @@ describe("/dashboard renders", () => {
        no landmark any more. The header's counts line replaced them, and it only renders its words
        with a figure in front once the record set has been read — which is the populated branch. */
     expect(html).not.toContain("Agents on file");
-    expect(html).toMatch(/<b>\d+<\/b> quer(y|ies) out/); // the header, on the populated path
+    /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
+       populated landmarks are the title-page eyebrow and the list column's own title. */
+    expect(html).toContain("— NOW QUERYING —");
+    expect(html).toContain("What&#x27;s on the list today?");
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */
-    expect(html).toContain("Activity");         // the right column, top to bottom
+    expect(html).toContain("Activity feed");    // the floating tab: the feed is a drawer now
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy

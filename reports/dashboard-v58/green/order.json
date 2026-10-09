@@ -1,0 +1,284 @@
+[
+ {
+  "lock": "R2",
+  "where": "A as the account stands · population",
+  "ok": true,
+  "detail": "counts {\"req\":11,\"nudge\":7,\"quiet\":5,\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the focus is the first group",
+  "ok": true,
+  "detail": "focus req · expected req from {\"req\":11,\"nudge\":7,\"quiet\":5,\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · label",
+  "ok": true,
+  "detail": "\"AGENTS ARE WAITING\""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · groups in order, none skipped",
+  "ok": true,
+  "detail": "shown req>nudge>quiet>house · expected req>nudge>quiet>house"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the row groups never go backwards",
+  "ok": true,
+  "detail": "req,req,req,req,req,req,req,req,req,req,nudge,nudge,nudge,nudge,nudge,nudge,nudge,quiet,quiet,quiet,quiet,quiet,house,house,house,house"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the count",
+  "ok": true,
+  "detail": "\"1 OF 11\" for 11"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · Then or Also",
+  "ok": true,
+  "detail": "\"THEN 26 ALL 27 →\""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 11\" · task-offer-seed-query-12 → task-full-rj-dupe"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the first goes back into the list, first",
+  "ok": true,
+  "detail": "list opens on task-offer-seed-query-12; 10 of the group listed"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · population",
+  "ok": true,
+  "detail": "counts {\"nudge\":7,\"quiet\":5,\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the focus is the first group",
+  "ok": true,
+  "detail": "focus nudge · expected nudge from {\"nudge\":7,\"quiet\":5,\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · label",
+  "ok": true,
+  "detail": "\"WORTH A NUDGE\""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · groups in order, none skipped",
+  "ok": true,
+  "detail": "shown nudge>quiet>house · expected nudge>quiet>house"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the row groups never go backwards",
+  "ok": true,
+  "detail": "nudge,nudge,nudge,nudge,nudge,nudge,quiet,quiet,quiet,quiet,quiet,house,house,house,house"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the count",
+  "ok": true,
+  "detail": "\"1 OF 7\" for 7"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · Then or Also",
+  "ok": true,
+  "detail": "\"THEN 15 ALL 16 →\""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 7\" · task-nudge-cor-undo → task-nudge-seed-cal-bang-q"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the first goes back into the list, first",
+  "ok": true,
+  "detail": "list opens on task-nudge-cor-undo; 6 of the group listed"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · population",
+  "ok": true,
+  "detail": "counts {\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the focus is the first group",
+  "ok": true,
+  "detail": "focus house · expected house from {\"house\":4}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · label",
+  "ok": true,
+  "detail": "\"HOUSEKEEPING\""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · groups in order, none skipped",
+  "ok": true,
+  "detail": "shown house · expected house"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the row groups never go backwards",
+  "ok": true,
+  "detail": "house,house,house"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the count",
+  "ok": true,
+  "detail": "\"1 OF 4\" for 4"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · Then or Also",
+  "ok": true,
+  "detail": "\"THEN 3 ALL 4 →\""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 4\" · hk:materials → hk:reply"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the first goes back into the list, first",
+  "ok": true,
+  "detail": "list opens on hk:materials; 3 of the group listed"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · population",
+  "ok": true,
+  "detail": "counts {\"ready\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the focus is the first group",
+  "ok": true,
+  "detail": "focus ready · expected ready from {\"ready\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · label",
+  "ok": true,
+  "detail": "\"READY TO QUERY\""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · groups in order, none skipped",
+  "ok": true,
+  "detail": "shown ready · expected ready"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the row groups never go backwards",
+  "ok": true,
+  "detail": "ready,ready,ready,ready"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the count",
+  "ok": true,
+  "detail": "\"1 OF 5\" for 5"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · Then or Also",
+  "ok": true,
+  "detail": "\"ALSO 4 CONTACT LIST →\""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 5\" · ready:thin-ag-chase → ready:thin-ag-close"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the first goes back into the list, first",
+  "ok": true,
+  "detail": "list opens on ready:thin-ag-chase; 4 of the group listed"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · population",
+  "ok": true,
+  "detail": "counts {\"coming\":8}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the focus is the first group",
+  "ok": true,
+  "detail": "focus coming · expected coming from {\"coming\":8}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · label",
+  "ok": true,
+  "detail": "\"COMING UP\""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · groups in order, none skipped",
+  "ok": true,
+  "detail": "shown coming · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the row groups never go backwards",
+  "ok": true,
+  "detail": "coming,coming,coming,coming,coming,coming,coming"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the count",
+  "ok": true,
+  "detail": "\"1 OF 8\" for 8"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · Then or Also",
+  "ok": true,
+  "detail": "\"ALSO 7 CALENDAR →\""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · Add an agent and Discover agents",
+  "ok": true,
+  "detail": "Add an agent | Discover agents SOON"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 8\" · coming:seed-query-8 → coming:seed-query-11"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the first goes back into the list, first",
+  "ok": true,
+  "detail": "list opens on coming:seed-query-8; 7 of the group listed"
+ },
+ {
+  "lock": "R2",
+  "where": "more than one state was entered",
+  "ok": true,
+  "detail": "{\"req\":1,\"nudge\":1,\"house\":1,\"ready\":1,\"coming\":1}"
+ }
+]

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512x900 one h1",
+  "ok": false,
+  "detail": "0 h1 · title is null"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 title",
+  "ok": false,
+  "detail": "\"null\" against the active manuscript \"null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 byline",
+  "ok": false,
+  "detail": "\"null\" against \"by null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 eyebrow",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 no counts",
+  "ok": false,
+  "detail": "digits in the header: none"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 Add an agent",
+  "ok": false,
+  "detail": "add an agent visible: false at 1512"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 centred",
+  "ok": false,
+  "detail": "book null · buttons null"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 no raised ground",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 typewriter, one line",
+  "ok": false,
+  "detail": "null · null line(s)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 one h1",
+  "ok": false,
+  "detail": "0 h1 · title is null"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 title",
+  "ok": false,
+  "detail": "\"null\" against the active manuscript \"null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 byline",
+  "ok": false,
+  "detail": "\"null\" against \"by null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 eyebrow",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 no counts",
+  "ok": false,
+  "detail": "digits in the header: none"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 Add an agent",
+  "ok": false,
+  "detail": "add an agent visible: false at 1280"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 centred",
+  "ok": false,
+  "detail": "book null · buttons null"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 no raised ground",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 typewriter, one line",
+  "ok": false,
+  "detail": "null · null line(s)"
+ }
+]

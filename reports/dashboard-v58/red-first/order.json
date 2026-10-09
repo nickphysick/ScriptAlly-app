@@ -1,0 +1,248 @@
+[
+ {
+  "lock": "R2",
+  "where": "A as the account stands · population",
+  "ok": true,
+  "detail": "counts {}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the focus is the first group",
+  "ok": true,
+  "detail": "focus undefined · expected coming from {}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · label",
+  "ok": true,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · groups in order, none skipped",
+  "ok": false,
+  "detail": "shown  · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the row groups never go backwards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the count",
+  "ok": true,
+  "detail": "\"undefined\" for 0"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · Then or Also",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · Add an agent and Discover agents",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · population",
+  "ok": true,
+  "detail": "counts {}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the focus is the first group",
+  "ok": true,
+  "detail": "focus undefined · expected coming from {}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · label",
+  "ok": true,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · groups in order, none skipped",
+  "ok": false,
+  "detail": "shown  · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the row groups never go backwards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the count",
+  "ok": true,
+  "detail": "\"undefined\" for 0"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · Then or Also",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · Add an agent and Discover agents",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · population",
+  "ok": true,
+  "detail": "counts {}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the focus is the first group",
+  "ok": true,
+  "detail": "focus undefined · expected coming from {}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · label",
+  "ok": true,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · groups in order, none skipped",
+  "ok": false,
+  "detail": "shown  · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the row groups never go backwards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the count",
+  "ok": true,
+  "detail": "\"undefined\" for 0"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · Then or Also",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · Add an agent and Discover agents",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · population",
+  "ok": true,
+  "detail": "counts {}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the focus is the first group",
+  "ok": true,
+  "detail": "focus undefined · expected coming from {}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · label",
+  "ok": true,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · groups in order, none skipped",
+  "ok": false,
+  "detail": "shown  · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the row groups never go backwards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the count",
+  "ok": true,
+  "detail": "\"undefined\" for 0"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · Then or Also",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · Add an agent and Discover agents",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · population",
+  "ok": true,
+  "detail": "counts {}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the focus is the first group",
+  "ok": true,
+  "detail": "focus undefined · expected coming from {}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · label",
+  "ok": true,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · groups in order, none skipped",
+  "ok": false,
+  "detail": "shown  · expected coming"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the row groups never go backwards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the count",
+  "ok": true,
+  "detail": "\"undefined\" for 0"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · Then or Also",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · Add an agent and Discover agents",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "R2",
+  "where": "more than one state was entered",
+  "ok": false,
+  "detail": "{}"
+ }
+]

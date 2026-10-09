@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "R1",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "26 rows"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 nothing painted behind it",
+  "ok": true,
+  "detail": "nothing"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 order",
+  "ok": true,
+  "detail": "list-head>focus>then>list"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 title",
+  "ok": true,
+  "detail": "\"What's on the list today?\" in \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 the rust bar",
+  "ok": true,
+  "detail": "{\"w\":44,\"h\":3,\"bg\":\"rgb(176, 96, 62)\"}"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 the list scrolls inside, clear of the tab",
+  "ok": true,
+  "detail": "{\"pb\":\"86px\",\"oy\":\"auto\"}"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "26 rows"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 nothing painted behind it",
+  "ok": true,
+  "detail": "nothing"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 order",
+  "ok": true,
+  "detail": "list-head>focus>then>list"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 title",
+  "ok": true,
+  "detail": "\"What's on the list today?\" in \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 the rust bar",
+  "ok": true,
+  "detail": "{\"w\":44,\"h\":3,\"bg\":\"rgb(176, 96, 62)\"}"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 the list scrolls inside, clear of the tab",
+  "ok": true,
+  "detail": "{\"pb\":\"86px\",\"oy\":\"auto\"}"
+ }
+]

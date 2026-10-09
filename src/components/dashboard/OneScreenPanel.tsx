@@ -21,7 +21,12 @@
  * IN it. The `head` prop is retired with the last consumer that passed one.
  */
 import React from "react";
-import { Skel } from "./OneScreenDashboard";
+/** The in-card loading bars. They lived on the retired one-screen page; the card is their only reader. */
+export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
+  <div className="os-skel" aria-hidden="true">
+    {bars.map((b, i) => <i key={i} className={b || undefined} style={b === "" ? { width: `${52 + ((i * 17) % 30)}%` } : b === "h" ? { width: `${30 + ((i * 13) % 20)}%` } : undefined} />)}
+  </div>
+);
 
 export interface OneScreenPanelProps {
   /** The container's own class — `os-qa`, `os-lead`, `os-cl`, `os-feed`, `os-todo`. */

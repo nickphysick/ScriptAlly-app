@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512x900 the tab",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"right\":28,\"bottom\":26,\"text\":\"Activity feed LAST 30 DAYS\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 the tab's corner",
+  "ok": true,
+  "detail": "right 28 · bottom 26"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 no feed card on the page",
+  "ok": true,
+  "detail": "the feed lives in the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 opens",
+  "ok": true,
+  "detail": "the drawer is on screen"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 paper white",
+  "ok": true,
+  "detail": "body rgb(251, 249, 245) · drawer rgb(251, 249, 245)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 ink head",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 the oat wash, no dark dim",
+  "ok": true,
+  "detail": "rgba(242, 238, 232, 0.55) · blur(2px)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 width",
+  "ok": true,
+  "detail": "{\"w\":640,\"cap\":640}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 focus is inside",
+  "ok": true,
+  "detail": "focus moved into the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 summary",
+  "ok": true,
+  "detail": "3 replies from agents | 123 things you did | 1 still needs you"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 population, both kinds",
+  "ok": true,
+  "detail": "3 in · 123 out"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 a reply is a card with a state disc",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 yours is a single line",
+  "ok": true,
+  "detail": "123 of 123"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 an open request shows its action",
+  "ok": true,
+  "detail": "1 of 1 open"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 a met request shows the day it went",
+  "ok": true,
+  "detail": "none met in this window"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 the end",
+  "ok": true,
+  "detail": "\"That's the last 30 days. Show September →\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 \"From agents\" filters",
+  "ok": true,
+  "detail": "3 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 \"By you\" filters",
+  "ok": true,
+  "detail": "123 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 Esc closes and focus returns to the tab",
+  "ok": true,
+  "detail": "{\"gone\":true,\"back\":\"tab\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 a press outside closes it",
+  "ok": true,
+  "detail": "{\"gone\":true,\"back\":\"tab\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the tab",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"right\":20,\"bottom\":20,\"text\":\"Activity feed LAST 30 DAYS\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the tab's corner",
+  "ok": true,
+  "detail": "right 20 · bottom 20"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 no feed card on the page",
+  "ok": true,
+  "detail": "the feed lives in the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 opens",
+  "ok": true,
+  "detail": "the drawer is on screen"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 paper white",
+  "ok": true,
+  "detail": "body rgb(251, 249, 245) · drawer rgb(251, 249, 245)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 ink head",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the oat wash, no dark dim",
+  "ok": true,
+  "detail": "rgba(242, 238, 232, 0.55) · blur(2px)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 width",
+  "ok": true,
+  "detail": "{\"w\":536.625,\"cap\":536.64}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 focus is inside",
+  "ok": true,
+  "detail": "focus moved into the drawer"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 summary",
+  "ok": true,
+  "detail": "3 replies from agents | 123 things you did | 1 still needs you"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 population, both kinds",
+  "ok": true,
+  "detail": "3 in · 123 out"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 a reply is a card with a state disc",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 yours is a single line",
+  "ok": true,
+  "detail": "123 of 123"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 an open request shows its action",
+  "ok": true,
+  "detail": "1 of 1 open"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 a met request shows the day it went",
+  "ok": true,
+  "detail": "none met in this window"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 the end",
+  "ok": true,
+  "detail": "\"That's the last 30 days. Show September →\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 \"From agents\" filters",
+  "ok": true,
+  "detail": "3 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 \"By you\" filters",
+  "ok": true,
+  "detail": "123 shown, 0 of the other kind"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 Esc closes and focus returns to the tab",
+  "ok": true,
+  "detail": "{\"gone\":true,\"back\":\"tab\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 a press outside closes it",
+  "ok": true,
+  "detail": "{\"gone\":true,\"back\":\"tab\"}"
+ }
+]

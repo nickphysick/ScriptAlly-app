@@ -50,7 +50,7 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
-import { OneScreenDashboard } from "./dashboard/OneScreenDashboard";
+import { Dash58 } from "./dashboard/v58/Dash58";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
 import { dataNeedTarget, openAgentCard } from "../lib/agentCardStore";
@@ -1514,7 +1514,7 @@ export const Dashboard: React.FC<{
           the diary, the pipeline, the to-do card, the guided empty state and the bottom Pro
           banner all leave this page. Day one is §9's job now; loading is §8's per-card
           skeletons, passed down rather than gated up here. */}
-      <OneScreenDashboard
+      <Dash58
         loading={!collectionsReady}
         queries={queries}
         agents={agents}
@@ -1527,7 +1527,6 @@ export const Dashboard: React.FC<{
         activeManuscript={activeManuscriptForKicker}
         versions={versions}
         onNavigate={onNavigate}
-        updateUserProfile={updateUserProfile}
       />
 
       {/* Slide-In Tasks Panel (Part 3) */}

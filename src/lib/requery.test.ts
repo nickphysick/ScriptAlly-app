@@ -67,10 +67,9 @@ describe("the surfaces", () => {
     const e = feedEntries({ activities: [send("new")], queries: [NEW], agents, manuscripts: [], now: new Date("2026-09-28T12:00:00Z"), seenAt: null });
     expect(e[0].requery).toBeNull();
   });
-  it("the log, the quick card, the To-do pane and Tracking all use the one check", () => {
+  it("the log, the To-do pane and Tracking all use the one check", () => {
     const read = (p: string) => readFileSync(new URL(`../../${p}`, import.meta.url), "utf8");
     expect(read("src/components/queryActions/journeys/LogJourney.tsx")).toMatch(/previousQueryFor\(\{ id: "__new__"[\s\S]{0,160}sent\.getTime\(\)\)/);
-    expect(read("src/components/dashboard/QueryCardLive.tsx")).toContain("requeryLine(query, queries)");
     expect(read("src/components/todo/useTaskPaneSession.tsx")).toContain("requeryLine(q, queries)");
     expect(read("src/components/Queries.tsx")).toContain("requeryLine(activeQuery, queries)");
   });

@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "4 tiles summing to 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 band",
+  "ok": true,
+  "detail": "rgb(228, 225, 219) · ink rgb(28, 19, 15)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 title",
+  "ok": true,
+  "detail": "\"11 closed queries\" for 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 tiles are the derived counts",
+  "ok": true,
+  "detail": "[[\"quiet\",1],[\"letter\",8],[\"partial\",0],[\"full\",2]] against {\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 sum",
+  "ok": true,
+  "detail": "tiles 11 · title 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 labels",
+  "ok": true,
+  "detail": "No reply|Passed on query|Passed on partial|Passed on full"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 a zero is muted, never hidden",
+  "ok": true,
+  "detail": "[[1,false],[8,false],[0,true],[2,false]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 latest",
+  "ok": true,
+  "detail": "\"LATEST Imogen Rackham passed on your query · 6 weeks ago See all →\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "4 tiles summing to 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 band",
+  "ok": true,
+  "detail": "rgb(228, 225, 219) · ink rgb(28, 19, 15)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 title",
+  "ok": true,
+  "detail": "\"11 closed queries\" for 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 tiles are the derived counts",
+  "ok": true,
+  "detail": "[[\"quiet\",1],[\"letter\",8],[\"partial\",0],[\"full\",2]] against {\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 sum",
+  "ok": true,
+  "detail": "tiles 11 · title 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 labels",
+  "ok": true,
+  "detail": "No reply|Passed on query|Passed on partial|Passed on full"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 a zero is muted, never hidden",
+  "ok": true,
+  "detail": "[[1,false],[8,false],[0,true],[2,false]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 latest",
+  "ok": true,
+  "detail": "\"Imogen Rackham passed on your query · 6 weeks ago See all →\""
+ },
+ {
+  "lock": "C1",
+  "where": "matches the Query Centre's rule",
+  "ok": true,
+  "detail": "card 11 · the Query Centre's closed court 11"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: title",
+  "ok": true,
+  "detail": "\"Closed queries\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: words",
+  "ok": true,
+  "detail": "\"None closed yet When an agent passes, or you close a query that has gone quiet, it is counted here with how far it got.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: no tiles, track only",
+  "ok": true,
+  "detail": "0 tiles · arc null"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: title",
+  "ok": true,
+  "detail": "\"Closed queries\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: words",
+  "ok": true,
+  "detail": "\"None closed yet When an agent passes, or you close a query that has gone quiet, it is counted here with how far it got.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: no tiles, track only",
+  "ok": true,
+  "detail": "0 tiles · arc null"
+ }
+]

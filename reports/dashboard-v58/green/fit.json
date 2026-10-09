@@ -1,0 +1,560 @@
+[
+ {
+  "lock": "F0",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "scroll 828 against client 828"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900 sideways",
+  "ok": true,
+  "detail": "document 1512/1512 · scroller 1234/1234"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 activeFrame",
+  "ok": true,
+  "detail": "scrollHeight 392 against 392"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closedFrame",
+  "ok": true,
+  "detail": "scrollHeight 209 against 209"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closedBody",
+  "ok": true,
+  "detail": "scrollHeight 163 against 163"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 tiles",
+  "ok": true,
+  "detail": "scrollHeight 89 against 89"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus",
+  "ok": true,
+  "detail": "scrollHeight 244 against 244"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 active population",
+  "ok": true,
+  "detail": "38 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 active inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed population",
+  "ok": true,
+  "detail": "27 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus population",
+  "ok": true,
+  "detail": "36 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 focus inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 scrolling regions",
+  "ok": true,
+  "detail": "scrolls: list"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 closed inside the window",
+  "ok": true,
+  "detail": "closed card bottom 866 in 900"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 chart floor",
+  "ok": true,
+  "detail": "chart 294.609375"
+ },
+ {
+  "lock": "F2",
+  "where": "1512x900 tab clear of the title",
+  "ok": true,
+  "detail": "tab top 804 · title bottom 242.59375"
+ },
+ {
+  "lock": "F0",
+  "where": "1440x760",
+  "ok": true,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x760",
+  "ok": true,
+  "detail": "scroll 688 against client 688"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x760 sideways",
+  "ok": true,
+  "detail": "document 1440/1440 · scroller 1162/1162"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 activeFrame",
+  "ok": true,
+  "detail": "scrollHeight 273 against 273"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closedFrame",
+  "ok": true,
+  "detail": "scrollHeight 203 against 203"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closedBody",
+  "ok": true,
+  "detail": "scrollHeight 157 against 157"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 tiles",
+  "ok": true,
+  "detail": "scrollHeight 89 against 89"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus",
+  "ok": true,
+  "detail": "scrollHeight 172 against 172"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 active population",
+  "ok": true,
+  "detail": "38 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 active inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed population",
+  "ok": true,
+  "detail": "27 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus population",
+  "ok": true,
+  "detail": "15 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 focus inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 scrolling regions",
+  "ok": true,
+  "detail": "scrolls: list"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 closed inside the window",
+  "ok": true,
+  "detail": "closed card bottom 726 in 760"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x760 chart floor",
+  "ok": true,
+  "detail": "chart 175.421875"
+ },
+ {
+  "lock": "F2",
+  "where": "1440x760 tab clear of the title",
+  "ok": true,
+  "detail": "tab top 664 · title bottom 228.03125"
+ },
+ {
+  "lock": "F0",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "scroll 728 against client 728"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800 sideways",
+  "ok": true,
+  "detail": "document 1280/1280 · scroller 1002/1002"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 activeFrame",
+  "ok": true,
+  "detail": "scrollHeight 301 against 301"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closedFrame",
+  "ok": true,
+  "detail": "scrollHeight 221 against 221"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closedBody",
+  "ok": true,
+  "detail": "scrollHeight 177 against 177"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 tiles",
+  "ok": true,
+  "detail": "scrollHeight 116 against 116"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus",
+  "ok": true,
+  "detail": "scrollHeight 244 against 244"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 active population",
+  "ok": true,
+  "detail": "38 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 active inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed population",
+  "ok": true,
+  "detail": "26 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus population",
+  "ok": true,
+  "detail": "36 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 focus inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 scrolling regions",
+  "ok": true,
+  "detail": "scrolls: list"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 closed inside the window",
+  "ok": true,
+  "detail": "closed card bottom 766 in 800"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 chart floor",
+  "ok": true,
+  "detail": "chart 204.765625"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x800 tab clear of the title",
+  "ok": true,
+  "detail": "tab top 710 · title bottom 225.390625"
+ },
+ {
+  "lock": "F0",
+  "where": "1280x680",
+  "ok": true,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680",
+  "ok": true,
+  "detail": "scroll 608 against client 608"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680 sideways",
+  "ok": true,
+  "detail": "document 1280/1280 · scroller 1002/1002"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 activeFrame",
+  "ok": true,
+  "detail": "scrollHeight 243 against 243"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closedFrame",
+  "ok": true,
+  "detail": "scrollHeight 171 against 171"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closedBody",
+  "ok": true,
+  "detail": "scrollHeight 127 against 127"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 tiles",
+  "ok": true,
+  "detail": "scrollHeight 70 against 70"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus",
+  "ok": true,
+  "detail": "scrollHeight 172 against 172"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 active population",
+  "ok": true,
+  "detail": "38 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 active inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed population",
+  "ok": true,
+  "detail": "26 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus population",
+  "ok": true,
+  "detail": "15 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 focus inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 scrolling regions",
+  "ok": true,
+  "detail": "scrolls: list"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 closed inside the window",
+  "ok": true,
+  "detail": "closed card bottom 646 in 680"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x680 chart floor",
+  "ok": true,
+  "detail": "chart 147.25"
+ },
+ {
+  "lock": "F2",
+  "where": "1280x680 tab clear of the title",
+  "ok": true,
+  "detail": "tab top 590 · title bottom 212.90625"
+ },
+ {
+  "lock": "F0",
+  "where": "1366x650",
+  "ok": true,
+  "detail": "the v58 page is on screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650",
+  "ok": true,
+  "detail": "scroll 578 against client 578"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650 sideways",
+  "ok": true,
+  "detail": "document 1366/1366 · scroller 1088/1088"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 activeFrame",
+  "ok": true,
+  "detail": "scrollHeight 216 against 215"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closedFrame",
+  "ok": true,
+  "detail": "scrollHeight 171 against 171"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closedBody",
+  "ok": true,
+  "detail": "scrollHeight 127 against 127"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 tiles",
+  "ok": true,
+  "detail": "scrollHeight 70 against 70"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus",
+  "ok": true,
+  "detail": "scrollHeight 172 against 172"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 active population",
+  "ok": true,
+  "detail": "38 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 active inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed population",
+  "ok": true,
+  "detail": "26 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus population",
+  "ok": true,
+  "detail": "15 boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 focus inside its card",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 scrolling regions",
+  "ok": true,
+  "detail": "scrolls: list"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 closed inside the window",
+  "ok": true,
+  "detail": "closed card bottom 616 in 650"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 chart floor",
+  "ok": true,
+  "detail": "chart 120"
+ },
+ {
+  "lock": "F2",
+  "where": "1366x650 tab clear of the title",
+  "ok": true,
+  "detail": "tab top 560 · title bottom 211.390625"
+ },
+ {
+  "lock": "F3",
+  "where": "the chart changes",
+  "ok": true,
+  "detail": "chart 294.609375 → 147.25"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 closed is its content's height",
+  "ok": true,
+  "detail": "in the page 223 · given 2400px of room 223"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x680 closed is its content's height",
+  "ok": true,
+  "detail": "in the page 185.25 · given 2400px of room 185.25"
+ }
+]

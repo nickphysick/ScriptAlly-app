@@ -99,11 +99,12 @@ describe("every dashboard container header carries one mark", () => {
      component is NOT retired: `OneScreenCommunity` and three other pages render it, which is why this
      census now asserts the page's own files carry none rather than counting two. */
   const files = {
-    "Tasks": "OneScreenTasks.tsx",
-    "Feed": "OneScreenFeed.tsx",
+    /* the page's files since Dashboard v58: the kept chart card and the four v58 parts */
     "Chart": "OneScreenChart.tsx",
-    "Closed": "OneScreenClosed.tsx",
-    "Quick actions": "OneScreenActions.tsx",
+    "Closed": "v58/Dash58Closed.tsx",
+    "List": "v58/Dash58List.tsx",
+    "Feed": "v58/Dash58Feed.tsx",
+    "Header": "v58/Dash58Header.tsx",
   };
   it("no card on the page carries one, and the component is still live elsewhere", () => {
     let total = 0;

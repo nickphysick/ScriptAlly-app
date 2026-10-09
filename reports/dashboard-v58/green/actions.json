@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "R3",
+  "where": "population",
+  "ok": true,
+  "detail": "focus task-offer-seed-query-12 · 26 rows"
+ },
+ {
+  "lock": "R3",
+  "where": "the focus action opens the flow",
+  "ok": true,
+  "detail": "1 flow surface(s) open"
+ },
+ {
+  "lock": "R3",
+  "where": "nothing changed on press",
+  "ok": true,
+  "detail": "task-offer-seed-query-12 → task-offer-seed-query-12 · rows 26 → 26"
+ },
+ {
+  "lock": "R3",
+  "where": "a row has a tick",
+  "ok": true,
+  "detail": "task-full-rj-dupe"
+ },
+ {
+  "lock": "R3",
+  "where": "the tick opens the flow",
+  "ok": true,
+  "detail": "1 flow surface(s) open"
+ },
+ {
+  "lock": "R3",
+  "where": "the tick wrote nothing",
+  "ok": true,
+  "detail": "row task-full-rj-dupe still listed: true"
+ },
+ {
+  "lock": "R3",
+  "where": "the account is as it was after a reload",
+  "ok": true,
+  "detail": "task-offer-seed-query-12 · 26 → task-offer-seed-query-12 · 26"
+ }
+]

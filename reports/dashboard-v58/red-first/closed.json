@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x900 population",
+  "ok": false,
+  "detail": "0 tiles summing to 0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 band",
+  "ok": false,
+  "detail": "null · ink null"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 title",
+  "ok": false,
+  "detail": "\"null\" for undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 tiles are the derived counts",
+  "ok": false,
+  "detail": "[] against undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 sum",
+  "ok": false,
+  "detail": "tiles 0 · title undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 labels",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 a zero is muted, never hidden",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 latest",
+  "ok": false,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 population",
+  "ok": false,
+  "detail": "0 tiles summing to 0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 band",
+  "ok": false,
+  "detail": "null · ink null"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 title",
+  "ok": false,
+  "detail": "\"null\" for undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 tiles are the derived counts",
+  "ok": false,
+  "detail": "[] against undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 sum",
+  "ok": false,
+  "detail": "tiles 0 · title undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 labels",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 a zero is muted, never hidden",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 latest",
+  "ok": false,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "C1",
+  "where": "matches the Query Centre's rule",
+  "ok": false,
+  "detail": "card undefined · Query Centre's closed court undefined"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: title",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: words",
+  "ok": false,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 none: no tiles, track only",
+  "ok": true,
+  "detail": "0 tiles · arc null"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: title",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: words",
+  "ok": false,
+  "detail": "\"undefined\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 none: no tiles, track only",
+  "ok": true,
+  "detail": "0 tiles · arc null"
+ }
+]
