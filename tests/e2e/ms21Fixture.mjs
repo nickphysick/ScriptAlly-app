@@ -7,7 +7,7 @@
  * `seedManuscriptsV13.mjs` writes it; `manuscriptsV13.measure.ts` asserts against it. Two copies of
  * these ids is how a seeder and a lock come to describe different accounts.
  *
- * ⚠️ TWO DEDICATED ACCOUNTS, `ms13-` PREFIXED (the v13 prompt's parallel-sessions rule). Nothing
+ * ⚠️ TWO DEDICATED ACCOUNTS, `ms21-` PREFIXED (the v13 prompt's parallel-sessions rule). Nothing
  * else ever signs in as them, so the seeder WIPES their collections and rewrites them whole — the
  * only way a run's own writes (M5's new version, M7's saved details — both narrate a feed row)
  * cannot accumulate into the next run's Recent activity.
@@ -24,12 +24,17 @@
  *   · a partial and a full request, unsent ............ M8 (OwedList between hero and shelf)
  */
 
-export const FILLED_EMAIL = "ms13-filled@scriptally.test";
+export const FILLED_EMAIL = "ms21-filled@scriptally.test";
 export const FILLED_NAME = "Isla Morven";
-export const EMPTY_EMAIL = "ms13-empty@scriptally.test";
+export const EMPTY_EMAIL = "ms21-empty@scriptally.test";
 export const EMPTY_NAME = "Rowan Hale";
+/** v21's just-deleted state: one manuscript, which the measure deletes during its run */
+export const DELETE_EMAIL = "ms21-delete@scriptally.test";
+export const DELETE_NAME = "Wren Ashby";
+export const DELETE_MS_ID = "ms21-del-ms";
+export const DELETE_MS_TITLE = "The Salt Ledger";
 
-export const MS_ID = "ms13-ms";
+export const MS_ID = "ms21-ms";
 export const MS_TITLE = "Harbour of Glass";
 export const MS = {
   genre: "Thriller",
@@ -44,47 +49,48 @@ export const MS = {
 };
 
 /** The second book on the account — it exists for M6 and nothing else. */
-export const OTHER_MS_ID = "ms13-ms-b";
+export const OTHER_MS_ID = "ms21-ms-b";
 export const OTHER_MS_TITLE = "The Lantern Year";
 
 /** Book versions, oldest first (append-only order). The newest is the current one. */
 export const BV = [
-  { id: "ms13-bv-1", name: "Prologue first, wilderness world building", kind: "initial", createdDate: "2026-03-03", note: "The original draft as first queried." },
-  { id: "ms13-bv-2", name: "Dual timeline edit", kind: "revision", createdDate: "2026-06-14", note: "1998 chapters interleaved from chapter 3." },
-  { id: "ms13-bv-3", name: "Fast-paced opening", kind: "revision", createdDate: "2026-09-02", note: "Cut the prologue; opens on the ferry." },
+  { id: "ms21-bv-1", name: "Prologue first, wilderness world building", kind: "initial", createdDate: "2026-03-03", note: "The original draft as first queried." },
+  { id: "ms21-bv-2", name: "Dual timeline edit", kind: "revision", createdDate: "2026-06-14", note: "1998 chapters interleaved from chapter 3." },
+  /* ⚠️ ONLY THE NEWEST CARRIES A WORD COUNT (v21): the other two must show no words line at all */
+  { id: "ms21-bv-3", name: "Fast-paced opening", kind: "revision", createdDate: "2026-09-02", note: "Cut the prologue; opens on the ferry.", wordCount: 50000 },
 ];
-export const CURRENT_BV = "ms13-bv-3";
+export const CURRENT_BV = "ms21-bv-3";
 
 /**
  * Materials. Dates chosen so "the letter in use first, then newest first" (v13 §3c) produces the
  * mock's own three chips: Query letter v3 · Query letter v2 · Synopsis, 1 page.
  */
 export const LETTERS = [
-  { id: "ms13-let-1", versionName: "Query letter v1", wordCount: 402, createdDate: "2026-03-01T12:00:00.000Z" },
-  { id: "ms13-let-2", versionName: "Query letter v2", wordCount: 355, createdDate: "2026-08-29T12:00:00.000Z" },
-  { id: "ms13-let-3", versionName: "Query letter v3", wordCount: 310, createdDate: "2026-09-01T12:00:00.000Z" },
+  { id: "ms21-let-1", versionName: "Query letter v1", wordCount: 402, createdDate: "2026-03-01T12:00:00.000Z" },
+  { id: "ms21-let-2", versionName: "Query letter v2", wordCount: 355, createdDate: "2026-08-29T12:00:00.000Z" },
+  { id: "ms21-let-3", versionName: "Query letter v3", wordCount: 310, createdDate: "2026-09-01T12:00:00.000Z" },
 ];
 export const SYNOPSES = [
-  { id: "ms13-syn-1", versionName: "Synopsis, 1 page", wordCount: 480, createdDate: "2026-08-20T12:00:00.000Z" },
-  { id: "ms13-syn-3", versionName: "Synopsis, 3 pages", wordCount: 1420, createdDate: "2026-06-14T12:00:00.000Z" },
+  { id: "ms21-syn-1", versionName: "Synopsis, 1 page", wordCount: 480, createdDate: "2026-08-20T12:00:00.000Z" },
+  { id: "ms21-syn-3", versionName: "Synopsis, 3 pages", wordCount: 1420, createdDate: "2026-06-14T12:00:00.000Z" },
 ];
 
 /** Packages. pkg-1 is `activePackageId`; pkg-3 has never gone out. */
 export const PKGS = [
-  { id: "ms13-pkg-1", packageName: "Autumn round", letter: "ms13-let-3", synopsis: "ms13-syn-1", bookVersionId: "ms13-bv-3", firstSentAt: "2026-08-05T12:00:00.000Z" },
-  { id: "ms13-pkg-2", packageName: "Agents with MSWL", letter: "ms13-let-2", synopsis: "ms13-syn-3", bookVersionId: "ms13-bv-2", firstSentAt: "2026-07-01T12:00:00.000Z" },
-  { id: "ms13-pkg-3", packageName: "Winter draft", letter: "ms13-let-3", synopsis: "ms13-syn-1", bookVersionId: "ms13-bv-3", firstSentAt: null },
+  { id: "ms21-pkg-1", packageName: "Autumn round", letter: "ms21-let-3", synopsis: "ms21-syn-1", bookVersionId: "ms21-bv-3", firstSentAt: "2026-08-05T12:00:00.000Z" },
+  { id: "ms21-pkg-2", packageName: "Agents with MSWL", letter: "ms21-let-2", synopsis: "ms21-syn-3", bookVersionId: "ms21-bv-2", firstSentAt: "2026-07-01T12:00:00.000Z" },
+  { id: "ms21-pkg-3", packageName: "Winter draft", letter: "ms21-let-3", synopsis: "ms21-syn-1", bookVersionId: "ms21-bv-3", firstSentAt: null },
 ];
-export const ACTIVE_PKG = "ms13-pkg-1";
+export const ACTIVE_PKG = "ms21-pkg-1";
 
 export const AGENTS = [
-  { id: "ms13-agent-1", name: "Mira Kovic", agency: "Old Harbour Literary", responseTimeWeeks: 8 },
-  { id: "ms13-agent-2", name: "Douglas Renner", agency: "Renner & Frost" },
-  { id: "ms13-agent-3", name: "Edda Voss", agency: "Voss Literary", responseTimeWeeks: 6 },
-  { id: "ms13-agent-4", name: "Theo Abara", agency: "Abara Grant Agency" },
-  { id: "ms13-agent-5", name: "Sun-hee Park", agency: "Meridian Line" },
-  { id: "ms13-agent-6", name: "Rosa Quintana", agency: "Quintana Books" },
-  { id: "ms13-agent-7", name: "Ilse Brandt", agency: "Brandt Literary" },
+  { id: "ms21-agent-1", name: "Mira Kovic", agency: "Old Harbour Literary", responseTimeWeeks: 8 },
+  { id: "ms21-agent-2", name: "Douglas Renner", agency: "Renner & Frost" },
+  { id: "ms21-agent-3", name: "Edda Voss", agency: "Voss Literary", responseTimeWeeks: 6 },
+  { id: "ms21-agent-4", name: "Theo Abara", agency: "Abara Grant Agency" },
+  { id: "ms21-agent-5", name: "Sun-hee Park", agency: "Meridian Line" },
+  { id: "ms21-agent-6", name: "Rosa Quintana", agency: "Quintana Books" },
+  { id: "ms21-agent-7", name: "Ilse Brandt", agency: "Brandt Literary" },
 ];
 
 /**
@@ -93,31 +99,33 @@ export const AGENTS = [
  * one history. A step with `version` carries that `bookVersionId` on its feed record.
  */
 export const QUERIES = [
-  { id: "ms13-q-1", ms: MS_ID, agent: "ms13-agent-1", pkg: "ms13-pkg-1", status: "Queried",
+  { id: "ms21-q-1", ms: MS_ID, agent: "ms21-agent-1", pkg: "ms21-pkg-1", status: "Queried",
     steps: [{ status: "Queried", day: "2026-08-05" }] },
-  { id: "ms13-q-2", ms: MS_ID, agent: "ms13-agent-2", pkg: "ms13-pkg-1", status: "Queried",
+  { id: "ms21-q-2", ms: MS_ID, agent: "ms21-agent-2", pkg: "ms21-pkg-1", status: "Queried",
     steps: [{ status: "Queried", day: "2026-08-06" }] },
-  { id: "ms13-q-3", ms: MS_ID, agent: "ms13-agent-3", pkg: "ms13-pkg-1", status: "Partial Requested",
+  { id: "ms21-q-3", ms: MS_ID, agent: "ms21-agent-3", pkg: "ms21-pkg-1", status: "Partial Requested",
     materialsRequestedType: "pages", materialsRequestedQuantity: 50,
+    /* the "your move" line's date (v21 §3c): "Send the first 50 pages by 12 Oct" */
+    expectedSendDate: "2026-10-12T12:00:00.000Z",
     steps: [{ status: "Queried", day: "2026-08-07" }, { status: "Partial Requested", day: "2026-09-28" }] },
-  { id: "ms13-q-4", ms: MS_ID, agent: "ms13-agent-4", pkg: "ms13-pkg-1", status: "Full Requested",
+  { id: "ms21-q-4", ms: MS_ID, agent: "ms21-agent-4", pkg: "ms21-pkg-1", status: "Full Requested",
     steps: [{ status: "Queried", day: "2026-08-08" }, { status: "Full Requested", day: "2026-09-19" }] },
-  { id: "ms13-q-5", ms: MS_ID, agent: "ms13-agent-5", pkg: "ms13-pkg-2", status: "Full Sent",
+  { id: "ms21-q-5", ms: MS_ID, agent: "ms21-agent-5", pkg: "ms21-pkg-2", status: "Full Sent",
     steps: [{ status: "Queried", day: "2026-07-01" }, { status: "Full Requested", day: "2026-07-20" },
-      { status: "Full Sent", day: "2026-09-03", version: "ms13-bv-2" }] },
-  { id: "ms13-q-6", ms: MS_ID, agent: "ms13-agent-6", pkg: "ms13-pkg-2", status: "Rejected",
+      { status: "Full Sent", day: "2026-09-03", version: "ms21-bv-2" }] },
+  { id: "ms21-q-6", ms: MS_ID, agent: "ms21-agent-6", pkg: "ms21-pkg-2", status: "Rejected",
     steps: [{ status: "Queried", day: "2026-07-02" }, { nudge: true, day: "2026-09-10" }, { status: "Rejected", day: "2026-09-12" }] },
   /* no package: a query no version row may count (the one edge) */
-  { id: "ms13-q-7", ms: MS_ID, agent: "ms13-agent-7", pkg: "", status: "Queried",
+  { id: "ms21-q-7", ms: MS_ID, agent: "ms21-agent-7", pkg: "", status: "Queried",
     steps: [{ status: "Queried", day: "2026-03-10" }] },
   /* ⚠️ THE OTHER BOOK'S QUERY, and its send is the NEWEST record on the account — so a page that
      forgot to scope Recent activity would lead with it (M6's mutation proves exactly that). */
-  { id: "ms13-q-8", ms: OTHER_MS_ID, agent: "ms13-agent-1", pkg: "", status: "Queried",
+  { id: "ms21-q-8", ms: OTHER_MS_ID, agent: "ms21-agent-1", pkg: "", status: "Queried",
     steps: [{ status: "Queried", day: "2026-10-01" }] },
 ];
 
 /** The version save, narrated the way the app narrates every manuscript write (no version named). */
-export const MS_UPDATED = { id: "ms13-act-msupd", day: "2026-09-02" };
+export const MS_UPDATED = { id: "ms21-act-msupd", day: "2026-09-02" };
 
 export const COMPS = [
   { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021,
@@ -131,14 +139,16 @@ export const COMPS = [
 export const EXPECT = {
   /* versionUsage through the package edge — queried · requested · sent, and the package count */
   usage: {
-    "ms13-bv-3": { queried: 2, requested: 2, sent: 0, packages: 2 },
-    "ms13-bv-2": { queried: 0, requested: 0, sent: 1, packages: 1 },
-    "ms13-bv-1": { queried: 0, requested: 0, sent: 0, packages: 0 },
+    "ms21-bv-3": { queried: 2, requested: 2, sent: 0, packages: 2 },
+    "ms21-bv-2": { queried: 0, requested: 0, sent: 1, packages: 1 },
+    "ms21-bv-1": { queried: 0, requested: 0, sent: 0, packages: 0 },
   },
-  versionOrder: ["ms13-bv-3", "ms13-bv-2", "ms13-bv-1"],
-  compFact: { inLetter: 2, total: 3 },
-  /* the seven newest records on THIS book, newest first, by query (null = the manuscript write) */
-  activityTop7: ["ms13-q-3", "ms13-q-4", "ms13-q-6", "ms13-q-6", "ms13-q-5", null, "ms13-q-4"],
-  activityTotal: 14,
-  owed: ["ms13-q-3", "ms13-q-4"],
+  versionOrder: ["ms21-bv-3", "ms21-bv-2", "ms21-bv-1"],
+  /* the five rows, newest first, by query (null = the manuscript write). Both owed requests are
+     among them; ms21-q-8 (the other book's, and the newest record on the account) never is. */
+  activityTop5: ["ms21-q-3", "ms21-q-4", "ms21-q-6", "ms21-q-6", "ms21-q-5"],
+  owed: ["ms21-q-3", "ms21-q-4"],
+  yourMove: { "ms21-q-3": "Send the first 50 pages by 12 Oct", "ms21-q-4": "Send the full manuscript" },
+  doors: { comps: 3, inQuery: 2, letters: 3, synopses: 2, packages: 3, packageQueries: 6, letterInUse: "Query letter v3" },
+  lede: { versions: 3, current: "Fast-paced opening", queries: 4, requests: 2 },
 };
