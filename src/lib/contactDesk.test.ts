@@ -7,7 +7,8 @@
 import { describe, it, expect } from "vitest";
 import type { Agent, Query } from "../types";
 import { QueryStatus, SubmissionStatus } from "../types";
-import { deskModel, monthOnMonth } from "./contactDesk";
+import { deskModel, monthOnMonth, weekOnWeek } from "./contactDesk";
+import { facesModel } from "./contactFaces";
 import { nextStep } from "./contactNextStep";
 
 const NOW = new Date(2026, 9, 15, 12); // Thu 15 Oct 2026, local
@@ -21,21 +22,41 @@ const q = (agentId: string, status: QueryStatus, dateSent: string | undefined, p
 const HK = { complete: 31, total: 41, gaps: 14, gapAgents: 10 };
 
 describe("the desk (v15.2 §2)", () => {
-  it("On file: the line, and the agents added this calendar month as its month on month", () => {
-    const agents = [ag({ dateAdded: "2026-10-02T09:00:00.000Z" }), ag({ dateAdded: "2026-10-09T09:00:00.000Z" }), ag({ submissionStatus: SubmissionStatus.CLOSED })];
-    const m = deskModel({ agents, queries: [], msId: "ms1", now: NOW, hk: HK });
-    expect([m.file.figure, m.file.rest]).toEqual(["3", "agents on file"]);
-    expect(m.file.mom).toEqual({ dir: "up", n: 2, text: "2 since last month" });
-    expect(deskModel({ agents: [ag()], queries: [], msId: "ms1", now: NOW, hk: HK }).file.rest).toBe("agent on file");
+  /* NOW is Thu 15 Oct 2026: this London week began Mon 12 Oct, last week Mon 5 Oct */
+  const wk = (thisW: number, lastW: number) => [
+    ...Array.from({ length: thisW }, () => ag({ dateAdded: "2026-10-13T09:00:00.000Z" })),
+    ...Array.from({ length: lastW }, () => ag({ dateAdded: "2026-10-07T09:00:00.000Z" })),
+    ag({ dateAdded: "2026-08-26T09:00:00.000Z" }), ag(),
+  ];
+  it("the first card is about THIS WEEK: '{n} added this week', and never the count on file (v15.3 N6)", () => {
+    const m = deskModel({ agents: wk(2, 1), queries: [], msId: "ms1", now: NOW, hk: HK });
+    expect([m.week.figure, m.week.rest]).toEqual(["2", "added this week"]);
+    expect(m.week.label).toBe("2 agents added this week, 4 in the last 8 weeks");
+    for (const c of [m.week, m.queried, m.profiles]) expect(`${c.figure} ${c.rest}`).not.toMatch(/on file/);
+    expect(deskModel({ agents: wk(0, 0), queries: [], msId: "ms1", now: NOW, hk: HK }).week.figure).toBe("0");
+    expect(deskModel({ agents: wk(1, 0), queries: [], msId: "ms1", now: NOW, hk: HK }).week.label).toMatch(/^1 agent added this week/);
   });
-  it("On file's line is six month-end points, the last being now (= N), from dateAdded; and its change is the last step", () => {
-    const agents = [ag({ dateAdded: "2026-04-20T09:00:00.000Z" }), ag({ dateAdded: "2026-06-03T09:00:00.000Z" }), ag({ dateAdded: "2026-10-01T09:00:00.000Z" })];
+  it("the comparison names more, fewer and same, each entered (v15.3 N6)", () => {
+    const of = (t: number, l: number) => deskModel({ agents: wk(t, l), queries: [], msId: "ms1", now: NOW, hk: HK }).week.mom;
+    expect(of(3, 1)).toEqual({ dir: "up", n: 2, text: "2 more than last week" });
+    expect(of(1, 4)).toEqual({ dir: "down", n: 3, text: "3 fewer than last week" });
+    expect(of(2, 2)).toEqual({ dir: "none", n: 0, text: "Same as last week" });
+    expect(of(0, 0).text).toBe("Same as last week");
+    expect(new Set([weekOnWeek(2, 1).dir, weekOnWeek(1, 2).dir, weekOnWeek(1, 1).dir]).size).toBe(3);
+  });
+  it("8 weekly bars, oldest first, this week last; weeks are Monday to Sunday by the London calendar", () => {
+    const agents = [
+      ag({ dateAdded: "2026-10-11T22:30:00.000Z" }), // Sun 11 Oct 23:30 BST: LAST week
+      ag({ dateAdded: "2026-10-11T23:30:00.000Z" }), // Mon 12 Oct 00:30 BST: THIS week, though still Sunday in UTC
+      ag({ dateAdded: "2026-08-26T09:00:00.000Z" }), // the week of 24 Aug: the first of the eight
+      ag({ dateAdded: "2026-08-20T09:00:00.000Z" }), // before the eight weeks: in no bar
+      ag({ dateAdded: "2026-10-20T09:00:00.000Z" }), // after now: in no bar
+      ag({ dateAdded: "" }),                          // no readable date: in no bar
+    ];
     const m = deskModel({ agents, queries: [], msId: "ms1", now: NOW, hk: HK });
-    expect(m.file.trend.values).toEqual([1, 2, 2, 2, 2, 3]); // end of May, Jun, Jul, Aug, Sep — then now
-    expect(m.file.trend.values[5]).toBe(agents.length);
-    expect(m.file.trend.startLabel).toBe("May");
-    /* two derivations against each other: the month on month IS now minus the end of last month */
-    expect(m.file.mom?.n).toBe(m.file.trend.values[5] - m.file.trend.values[4]);
+    expect(m.week.bars).toEqual([1, 0, 0, 0, 0, 0, 1, 1]);
+    expect(m.week.total).toBe(3);
+    expect(m.week.figure).toBe(String(m.week.bars[7]));
   });
   it("Queried: agents with any query for this book, each read by its LATEST query; withdrawn counts as closed (ruling Q1)", () => {
     const a = ag(), b = ag(), c = ag(), d = ag(), e = ag();
@@ -95,9 +116,49 @@ describe("the desk (v15.2 §2)", () => {
   it("no card states one fact twice: the line never carries the month's change, and the change never restates the figure", () => {
     const agents = [ag({ dateAdded: "2026-10-02T09:00:00.000Z" }), ag()];
     const m = deskModel({ agents, queries: [q(agents[0].id, QueryStatus.QUERIED, "2026-10-05")], msId: "ms1", now: NOW, hk: HK });
-    for (const c of [m.file, m.queried, m.profiles]) {
+    for (const c of [m.week, m.queried, m.profiles]) {
       expect(/month/.test(`${c.figure} ${c.rest}`), c.rest).toBe(false);
       if (c.mom) expect(c.mom.text.includes(c.rest), c.mom.text).toBe(false);
     }
+  });
+});
+
+/* ── v15.3 §3: the header's faces ── */
+describe("the header's faces (v15.3 N2, N4)", () => {
+  const cast = (active: number, closed: number, none: number) => {
+    const agents: Agent[] = [], queries: Query[] = [];
+    for (let i = 0; i < active; i++) { const a = ag({ name: `Active ${i}` }); agents.push(a); queries.push(q(a.id, QueryStatus.QUERIED, `2026-09-${String(10 + i).padStart(2, "0")}`)); }
+    for (let i = 0; i < closed; i++) { const a = ag({ name: `Closed ${i}` }); agents.push(a); queries.push(q(a.id, QueryStatus.REJECTED, `2026-08-${String(10 + i).padStart(2, "0")}`)); }
+    for (let i = 0; i < none; i++) agents.push(ag({ name: `Fresh ${i}`, dateAdded: `2026-07-${String(10 + i).padStart(2, "0")}T09:00:00.000Z` }));
+    /* arrive in an order that is none of the orders under test */
+    return { agents: [...agents].reverse().sort((p, r) => p.name.length - r.name.length || (p.id < r.id ? 1 : -1)), queries };
+  };
+  it("6 active, 3 closed, 5 not queried: 4 ink, 2 grey, 2 white, in that order, each most recent first", () => {
+    const { agents, queries } = cast(6, 3, 5);
+    const m = facesModel(agents, queries, "ms1");
+    expect(m.faces.map((f) => f.state)).toEqual(["active", "active", "active", "active", "closed", "closed", "none", "none"]);
+    expect(m.faces.map((f) => f.name)).toEqual(["Active 5", "Active 4", "Active 3", "Active 2", "Closed 2", "Closed 1", "Fresh 4", "Fresh 3"]);
+    expect(m.counts).toEqual({ active: 6, closed: 3, none: 5 });
+  });
+  it("1 active, 0 closed, 9 not queried: 1 ink and 2 white, no grey — a group never fills another's slots", () => {
+    const { agents, queries } = cast(1, 0, 9);
+    const m = facesModel(agents, queries, "ms1");
+    expect(m.faces.map((f) => f.state)).toEqual(["active", "none", "none"]);
+    expect(m.counts).toEqual({ active: 1, closed: 0, none: 9 });
+  });
+  it("the key counts EVERY agent and sums to the total — and equals the Queried desk card (two derivations against each other)", () => {
+    for (const [a, c, n] of [[6, 3, 5], [1, 0, 9], [0, 0, 4], [12, 7, 0]] as const) {
+      const { agents, queries } = cast(a, c, n);
+      const m = facesModel(agents, queries, "ms1");
+      expect(m.counts.active + m.counts.closed + m.counts.none).toBe(agents.length);
+      const d = deskModel({ agents, queries, msId: "ms1", now: NOW, hk: HK }).queried;
+      expect([m.counts.active, m.counts.closed]).toEqual([d.active, d.closed]);
+      expect(m.total - m.faces.length).toBe(agents.length - Math.min(4, a) - Math.min(2, c) - Math.min(2, n));
+    }
+  });
+  it("status is the LATEST query's: reopened after a pass is active; another book's query is not this book's", () => {
+    const a = ag({ name: "Ada Vale" }), b = ag({ name: "Bo" });
+    const m = facesModel([a, b], [q(a.id, QueryStatus.REJECTED, "2026-06-01"), q(a.id, QueryStatus.QUERIED, "2026-09-01"), q(b.id, QueryStatus.QUERIED, "2026-09-01", { manuscriptId: "ms2" })], "ms1");
+    expect(m.faces.map((f) => [f.initials, f.state, f.tip])).toEqual([["AV", "active", "Ada Vale · query active"], ["B", "none", "Bo · not queried yet"]]);
   });
 });

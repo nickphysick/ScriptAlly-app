@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { BarChart, DeskCard, LineChart, RingChart } from "./DeskCard";
+import { BarChart, DeskCard, RingChart, WeekBars } from "./DeskCard";
 import { monthOnMonth } from "../../../lib/contactDesk";
 
 const card = (delta: number | null) => renderToStaticMarkup(
@@ -38,12 +38,25 @@ describe("the desk card's month-on-month line (K3)", () => {
 });
 
 describe("the desk's charts (K4)", () => {
-  it("the line is ONE path through every value, ending at the last", () => {
-    const h = renderToStaticMarkup(<LineChart values={[1, 2, 2, 2, 2, 3]} caption="May → now" />);
-    expect((h.match(/data-dk-line=/g) ?? []).length).toBe(1);
-    const d = /data-dk-line="[^"]*" d="([^"]+)"/.exec(h)?.[1] ?? "";
-    expect((d.match(/[ML]/g) ?? []).length).toBe(6);
+  it("the weekly bars: one per week, only the LAST at full ink, a zero week a 2-unit stub, the tallest the full height (v15.3 N6)", () => {
+    const h = renderToStaticMarkup(<WeekBars values={[0, 1, 3, 0, 2, 1, 1, 2]} caption="added per week" />);
+    const bars = [...h.matchAll(/<rect[^>]*>/g)].map((m) => m[0]);
+    expect(bars.length).toBe(8);
+    const op = bars.map((b) => /fill-opacity="([\d.]+)"/.exec(b)?.[1]);
+    expect(op).toEqual(["0.22", "0.22", "0.22", "0.22", "0.22", "0.22", "0.22", "1"]);
+    const ht = bars.map((b) => Number(/ height="([\d.]+)"/.exec(b)?.[1]));
+    expect(ht[0]).toBe(2); expect(ht[3]).toBe(2); expect(ht[2]).toBe(36);
+    /* each bar is inset 2.5 in a 14-unit slot */
+    expect(bars.map((b) => /x="([\d.]+)"/.exec(b)?.[1]).slice(0, 2)).toEqual(["2.5", "16.5"]);
+    expect(bars.every((b) => /width="9.0"/.test(b))).toBe(true);
+    expect(h).toContain('data-dk-bars="0,1,3,0,2,1,1,2"');
+    expect(h).toContain("added per week");
     expect(h).toContain('aria-hidden="true"');
+  });
+  it("the ring's closed arc is GREY, not pale blue (v15.3 §5, N3)", () => {
+    const h = renderToStaticMarkup(<RingChart active={4} closed={2} total={41} caption="active · closed" />);
+    expect(/data-dk-arc="closed"[^>]*stroke="#b3aca5"/.test(h)).toBe(true);
+    expect(h).not.toContain("#9fb0c4");
   });
   it("the ring's arcs are active and closed as shares of the total, from 12 o'clock; the rest is the track", () => {
     const h = renderToStaticMarkup(<RingChart active={17} closed={5} total={41} caption="active · closed" />);

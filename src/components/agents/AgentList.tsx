@@ -79,6 +79,7 @@ import { notifyPrefs } from "../../lib/accountPrefs";
 import { takesBook } from "../../lib/genreMatch";
 import { SubmissionStatus } from "../../types";
 import { ContactDesk } from "./contact/ContactDesk";
+import { facesModel } from "../../lib/contactFaces";
 import { deskModel } from "../../lib/contactDesk";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -643,6 +644,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     agents, queries, msId: scoped?.id ?? null, now: new Date(nowMs),
     hk: { complete: hk.complete, total: hk.total, gaps: hk.items.length, gapAgents: hk.gapAgents },
   }), [agents, queries, scoped, nowMs, hk]);
+  /* v15.3 §3 — the header's faces and key, over the unfiltered agents and through the desk's own status derivation */
+  const faces = useMemo(() => facesModel(agents, queries, scoped?.id ?? null), [agents, queries, scoped]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* v15 §2: the open header's title is the living count — the LivingHeaders review aid's override wins in dev */
@@ -962,7 +965,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             flying hawk to their right, centred against each other over a hairline. It renders over a LIST only
             (and while settling, painted over): the blank account's pitch is ContactEmpty, with its own header. */}
         {(showList || pageState === "settling") && (
-          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd} onViewAll={viewAllAgents} />
+          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd} onViewAll={viewAllAgents}
+            faces={pageState === "list" ? faces : null} onOpenAgent={(id) => openCard(id)} />
         )}
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}

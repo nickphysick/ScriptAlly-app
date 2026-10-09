@@ -122,15 +122,17 @@ test("CL15.2-K1–K4 · desk", async ({ page }) => {
     L.check(`K1 every card is ${narrow ? 146 : 170}px tall or less, and the three are one height`, w, r.cards.every((c) => c.box!.h <= (narrow ? 146 : 170)) && near(r.cards[0].box!.h, r.cards[2].box!.h, 0.5), r.cards.map((c) => c.box!.h.toFixed(1)).join(" "));
 
     /* K2 — lines */
-    L.check("K2 the lines: “N agents on file”, “q of N queried”, “p% profiles complete”", w,
-      /^\d+ agents? on file$/.test(by.file?.line ?? "") && new RegExp(`^\\d+ of ${N} queried$`).test(by.queried?.line ?? "") && /^\d+% profiles complete$/.test(by.profiles?.line ?? ""), r.cards.map((c) => c.line).join(" | "));
-    L.check("K2 On file's figure is the header's count", w, Number(by.file?.figure) === N, `${by.file?.figure} vs ${N}`);
+    /* v15.3 RETIRED K2's On file row (“N agents on file”, and its figure = the header's count): the first card is the
+       week card now, held by CL15.3 N6. */
+    L.check("K2 the lines: “q of N queried”, “p% profiles complete”", w,
+      new RegExp(`^\\d+ of ${N} queried$`).test(by.queried?.line ?? "") && /^\d+% profiles complete$/.test(by.profiles?.line ?? ""), r.cards.map((c) => c.line).join(" | "));
     L.check(`K2 each line is Special Elite ${narrow ? 17 : 21}, on one line, with nothing cut`, w,
       r.cards.every((c) => c.lineSize === (narrow ? "17px" : "21px") && /Special Elite/.test(c.lineFace ?? "") && (c.lineOver ?? 9) <= 1 && (c.lineH ?? 99) < (narrow ? 40 : 48)), r.cards.map((c) => `${c.lineSize} over ${c.lineOver} h ${c.lineH?.toFixed(1)}`).join(" · "));
 
     /* K3 — month on month, as the page's data has it (the down branch is the unit lock's) */
-    const moms = [by.file?.mom, by.queried?.mom].filter(Boolean) as NonNullable<typeof by.file.mom>[];
-    L.check("K3 population: On file and Queried each carry a month-on-month line; Profiles carries none (no snapshot exists)", w, moms.length === 2 && by.profiles?.mom === null, `file ${!!by.file?.mom} queried ${!!by.queried?.mom} profiles ${JSON.stringify(by.profiles?.mom)}`);
+    /* v15.3 RETIRED K3's On file month-on-month: the week card compares with last WEEK (CL15.3 N6) */
+    const moms = [by.queried?.mom].filter(Boolean) as NonNullable<typeof by.queried.mom>[];
+    L.check("K3 population: Queried carries a month-on-month line; Profiles carries none (no snapshot exists)", w, moms.length === 1 && by.profiles?.mom === null, `queried ${!!by.queried?.mom} profiles ${JSON.stringify(by.profiles?.mom)}`);
     const okMom = (m: (typeof moms)[number]) => m.dir === "up" ? m.colour === "rgb(79, 122, 75)" && /^\d+ since last month$/.test(m.text) && m.arrow === "M6 2.2 10 7.4H2z"
       : m.dir === "down" ? m.colour === "rgb(160, 99, 63)" && /^\d+ since last month$/.test(m.text) && m.arrow === "M6 9.8 2 4.6h8z"
       : m.dir === "none" && m.text === "No change since last month" && m.arrow === null && m.colour === "rgba(28, 19, 15, 0.45)";
@@ -138,8 +140,7 @@ test("CL15.2-K1–K4 · desk", async ({ page }) => {
     L.check("K3 (tally) the directions this account shows", w, true, moms.map((m) => m.dir).join(","));
 
     /* K4 — charts */
-    const pts = (by.file?.lineD ?? "").match(/[ML]/g)?.length ?? 0, vals = (by.file?.lineValues ?? "").split(",").map(Number);
-    L.check("K4 On file is ONE line path of 6 points whose last value is N", w, by.file?.chart === "line" && by.file.linePaths === 1 && pts === 6 && vals.length === 6 && vals[5] === N, `paths ${by.file?.linePaths} pts ${pts} values ${by.file?.lineValues} N ${N}`);
+    /* v15.3 RETIRED K4's On file line chart (8 weekly bars now: CL15.3 N6) and the ring's pale-blue closed arc (grey: N3) */
     const queried = Number(by.queried?.figure), arcSum = (by.queried?.arcs ?? []).reduce((a, x) => a + x.share, 0);
     L.check("K4 Queried is a ring whose arcs (active · closed) sum to queried / N (±0.5%)", w, by.queried?.chart === "ring" && N > 0 && Math.abs(arcSum - (queried / N) * 100) <= 0.5 && (queried === 0 || (by.queried?.arcs.length ?? 0) >= 1), `arcs ${JSON.stringify(by.queried?.arcs)} vs ${queried}/${N}`);
     const m = /^(\d+) of (\d+) agents? queried: (\d+) active, (\d+) closed$/.exec(by.queried?.label ?? "");
@@ -147,13 +148,13 @@ test("CL15.2-K1–K4 · desk", async ({ page }) => {
     L.check("K4 the ring's active arc is the label's active count, and active + closed = queried", w, !!m && Number(m[1]) === queried && Number(m[3]) + Number(m[4]) === queried && Math.abs(act - (Number(m[3]) / N) * 100) <= 0.5, `${by.queried?.label} · active arc ${act}`);
     const pct = Number((by.profiles?.figure ?? "").replace("%", "")), barPct = by.profiles?.pgW ? ((by.profiles.fillW ?? 0) / by.profiles.pgW) * 100 : NaN;
     L.check("K4 Profiles is a bar whose fill is the percentage (±1%)", w, by.profiles?.chart === "bar" && Math.abs(barPct - pct) <= 1, `fill ${barPct.toFixed(1)}% vs ${pct}%`);
-    L.check("K4 every chart is aria-hidden and every card carries its accessible label", w, r.cards.every((c) => c.chartHidden === "true" && (c.label ?? "").length > 8) && /on file$/.test(by.file?.label ?? "") && /profiles complete: \d+ of \d+$/.test(by.profiles?.label ?? ""), r.cards.map((c) => `${c.chartHidden} “${c.label}”`).join(" · "));
-    L.check("K4 the captions: “{month} → now”, “active · closed”, “{filled} of {N}”", w, /^[A-Z][a-z]{2,3} → now$/.test(by.file?.caption ?? "") && by.queried?.caption === "active · closed" && new RegExp(`^\\d+ of ${N}$`).test(by.profiles?.caption ?? ""), r.cards.map((c) => c.caption).join(" | "));
-    L.check("K4 On file is not pressable; Queried and Profiles are", w, !by.file?.pressable && !!by.queried?.pressable && !!by.profiles?.pressable, r.cards.map((c) => `${c.key}:${c.pressable}`).join(" "));
+    L.check("K4 every chart is aria-hidden and every card carries its accessible label", w, r.cards.every((c) => c.chartHidden === "true" && (c.label ?? "").length > 8) && /profiles complete: \d+ of \d+$/.test(by.profiles?.label ?? ""), r.cards.map((c) => `${c.chartHidden} “${c.label}”`).join(" · "));
+    L.check("K4 the captions: “active · closed”, “{filled} of {N}”", w, by.queried?.caption === "active · closed" && new RegExp(`^\\d+ of ${N}$`).test(by.profiles?.caption ?? ""), r.cards.map((c) => c.caption).join(" | "));
+    L.check("K4 the week card is not pressable; Queried and Profiles are", w, !by.week?.pressable && !!by.queried?.pressable && !!by.profiles?.pressable, r.cards.map((c) => `${c.key}:${c.pressable}`).join(" "));
     await checkOverflow(page, L, w);
     await shot(page, "header-desk", vp);
   }
-  L.done(34);
+  L.done(30);
 });
 
 /* ── the next-step section's boxes ── */

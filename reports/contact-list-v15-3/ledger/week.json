@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "N6 the first desk card is the week card, with its 8 bars",
+  "where": "1512",
+  "ok": true,
+  "detail": "probe week chart weeks bars 8 rects 8"
+ },
+ {
+  "lock": "N6 the line reads “{n} added this week”, n being this week's bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"4 added this week\" · bars 0,0,0,0,0,0,0,4"
+ },
+ {
+  "lock": "N6 the comparison matches the two last bars, in words, colour and arrow",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"dir\":\"up\",\"text\":\"4 more than last week\",\"colour\":\"rgb(79, 122, 75)\",\"arrow\":\"M6 2.2 10 7.4H2z\"} · wanted 4 more than last week"
+ },
+ {
+  "lock": "N6 only the last bar is at full opacity; the rest are ink at 22%",
+  "where": "1512",
+  "ok": true,
+  "detail": "0.22,0.22,0.22,0.22,0.22,0.22,0.22,1"
+ },
+ {
+  "lock": "N6 a week with none is a 2-unit stub and the busiest week the tallest",
+  "where": "1512",
+  "ok": true,
+  "detail": "2.0,2.0,2.0,2.0,2.0,2.0,2.0,36.0"
+ },
+ {
+  "lock": "N6 the chart is 112 × 38, aria-hidden, captioned “added per week”",
+  "where": "1512",
+  "ok": true,
+  "detail": "112×38 \"added per week\""
+ },
+ {
+  "lock": "N6 the card's label says the week and the eight weeks, and the card is not pressable",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"4 agents added this week, 4 in the last 8 weeks\" buttons 0"
+ },
+ {
+  "lock": "N6 nothing inside the desk says “agents on file”, and no line chart is left",
+  "where": "1512",
+  "ok": true,
+  "detail": "4 added this week4 more than last weekadded per week6 of 37 queriedNo change since last mo"
+ },
+ {
+  "lock": "N6 the first desk card is the week card, with its 8 bars",
+  "where": "1280",
+  "ok": true,
+  "detail": "probe week chart weeks bars 8 rects 8"
+ },
+ {
+  "lock": "N6 the line reads “{n} added this week”, n being this week's bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"4 added this week\" · bars 0,0,0,0,0,0,0,4"
+ },
+ {
+  "lock": "N6 the comparison matches the two last bars, in words, colour and arrow",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"dir\":\"up\",\"text\":\"4 more than last week\",\"colour\":\"rgb(79, 122, 75)\",\"arrow\":\"M6 2.2 10 7.4H2z\"} · wanted 4 more than last week"
+ },
+ {
+  "lock": "N6 only the last bar is at full opacity; the rest are ink at 22%",
+  "where": "1280",
+  "ok": true,
+  "detail": "0.22,0.22,0.22,0.22,0.22,0.22,0.22,1"
+ },
+ {
+  "lock": "N6 a week with none is a 2-unit stub and the busiest week the tallest",
+  "where": "1280",
+  "ok": true,
+  "detail": "1.5,1.5,1.5,1.5,1.5,1.5,1.5,27.0"
+ },
+ {
+  "lock": "N6 the chart is 84 × 30, aria-hidden, captioned “added per week”",
+  "where": "1280",
+  "ok": true,
+  "detail": "84×30 \"added per week\""
+ },
+ {
+  "lock": "N6 the card's label says the week and the eight weeks, and the card is not pressable",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"4 agents added this week, 4 in the last 8 weeks\" buttons 0"
+ },
+ {
+  "lock": "N6 nothing inside the desk says “agents on file”, and no line chart is left",
+  "where": "1280",
+  "ok": true,
+  "detail": "4 added this week4 more than last weekadded per week6 of 37 queriedNo change since last mo"
+ }
+]

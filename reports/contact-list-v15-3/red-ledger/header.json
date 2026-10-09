@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "N0 the hero number, the faces and the key are on the page",
+  "where": "1512",
+  "ok": false,
+  "detail": "hn false ht false discs 0 key 0"
+ },
+ {
+  "lock": "N0 the hero number, the faces and the key are on the page",
+  "where": "1280",
+  "ok": false,
+  "detail": "hn false ht false discs 0 key 0"
+ },
+ {
+  "lock": "N3 a disc opens that agent's card",
+  "where": "1280",
+  "ok": false,
+  "detail": "tip \"null\" · card "
+ }
+]

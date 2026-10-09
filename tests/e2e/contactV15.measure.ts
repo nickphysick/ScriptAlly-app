@@ -48,7 +48,8 @@ test("CL15-1 · header", async ({ page }) => {
       return {
         found: !!hd && !!title, painted,
         size: tcs ? parseFloat(tcs.fontSize) : null, family: tcs?.fontFamily ?? null,
-        oneLine: !!title && !!tcs && title.getBoundingClientRect().height < parseFloat(tcs.lineHeight) * 1.5,
+        /* v15.3: the h1 holds a 124 (98) figure beside its 42 (34) words, so one line is judged by its tallest part */
+        oneLine: !!title && !!tcs && title.getBoundingClientRect().height < Math.max(parseFloat(tcs.lineHeight), ...[...title.children].map((c) => parseFloat(getComputedStyle(c).fontSize))) * 1.5,
         titleText: title?.textContent ?? null, pageTitle: title?.hasAttribute("data-page-title") ?? false,
         sub: hd?.querySelector('[data-cl15="sub"]')?.textContent ?? null,
         add: hd?.querySelector('[data-cl15="add"]')?.textContent ?? null, disc: hd?.querySelector('[data-cl15="view-all"]')?.textContent ?? null,
@@ -60,7 +61,8 @@ test("CL15-1 · header", async ({ page }) => {
     });
     if (!r.found) { L.check("CL15-1 population: the open header renders", w, false, "no header"); continue; }
     L.check("CL15-1 no card or band behind the title — nothing between it and the group paints", w, r.painted.length === 0, r.painted.join(" | "));
-    L.check(`CL15-1 the title is Special Elite at ${narrow ? 58 : 72} (±1), on one line`, w, r.size !== null && near(r.size, narrow ? 58 : 72, 1) && /Special Elite/.test(r.family ?? "") && r.oneLine, `${r.size} ${r.family} oneLine ${r.oneLine}`);
+    /* v15.3: the title is a hero number. The h1 carries the WORDS' size (42 / 34); the figure's 124 / 98 is CL15.3 N1's. */
+    L.check(`CL15-1 the title is Special Elite, its words at ${narrow ? 34 : 42} (±1), on one line`, w, r.size !== null && near(r.size, narrow ? 34 : 42, 1) && /Special Elite/.test(r.family ?? "") && r.oneLine, `${r.size} ${r.family} oneLine ${r.oneLine}`);
     L.check("CL15-1 the title is the count, \"N agents on file\", and carries data-page-title", w, /^\d+ agents? on file$/.test(r.titleText ?? "") && r.pageTitle, `${r.titleText} ${r.pageTitle}`);
     L.check("CL15-1 the subheader, exactly", w, r.sub === SUB, `${r.sub}`);
     L.check("CL15-1 the two buttons: + Add an agent · View all agents (v15.2)", w, r.add === "+ Add an agent" && r.disc === "View all agents", `${r.add} · ${r.disc}`);
@@ -101,9 +103,9 @@ test("CL15-3 · desk presses", async ({ page }) => {
     });
   });
   const before = await snap();
-  await page.locator('.aglist [data-dk="file"]').filter({ visible: true }).first().click();
+  await page.locator('.aglist [data-dk="week"]').filter({ visible: true }).first().click();
   await page.waitForTimeout(300);
-  L.check("CL15-3 clicking On file changes nothing", "1512", (await snap()) === before, "");
+  L.check("CL15-3 clicking the first card (v15.3: added this week) changes nothing", "1512", (await snap()) === before, "");
   const fig = Number(await page.locator('.aglist [data-dk="queried"] [data-dk-part="figure"]').filter({ visible: true }).first().textContent());
   await page.locator('.aglist [data-dk-press="queried"]').filter({ visible: true }).first().click();
   await page.waitForTimeout(900);

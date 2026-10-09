@@ -2,15 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v15.2 §2 — THE DESK: three white cards in one row, each with an ink disc icon breaking out of its
- * top-left corner, one line, a month-on-month line and a small chart (a line, a ring, a bar). Its figures come from
+ * Contact list v15.2 §2, v15.3 §4 — THE DESK: three white cards in one row, each with an ink disc icon breaking out of
+ * its top-left corner, one line, a comparison line and a small chart (8 weekly bars, a ring, a bar). The first card is
+ * about THIS WEEK: the count on file is the header's hero number and is not restated here. Its figures come from
  * `lib/contactDesk` (pure); the cards are the shared `shell/desk/DeskCard`.
  *
- * ⚠️ PRESSES: Queried sets the list to "Queried" and scrolls to it; Profiles opens Housekeeping; On file is not pressable.
+ * ⚠️ PRESSES: Queried sets the list to "Queried" and scrolls to it; Profiles opens Housekeeping; the week card is not pressable.
  * ⚠️ PROFILES' ICON IS LIVE: its ring's filled arc is the real share complete.
  */
 import React from "react";
-import { BarChart, DeskCard, LineChart, RingChart } from "../../shell/desk/DeskCard";
+import { BarChart, DeskCard, RingChart, WeekBars } from "../../shell/desk/DeskCard";
 import type { DeskModel } from "../../../lib/contactDesk";
 
 const ICON = { viewBox: "0 0 64 64", fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -36,11 +37,11 @@ export const ContactDesk: React.FC<{
   onQueried: () => void;
   onProfiles: () => void;
 }> = ({ model, onQueried, onProfiles }) => {
-  const { file, queried, profiles } = model;
+  const { week, queried, profiles } = model;
   return (
     <div className="cl15-desk dsk-row-grid" data-cl15="desk">
-      <DeskCard probe="file" icon={<HeadIcon />} figure={file.figure} rest={file.rest} label={file.label} mom={file.mom}
-        chart={<LineChart values={file.trend.values} caption={`${file.trend.startLabel} → now`} />} />
+      <DeskCard probe="week" icon={<HeadIcon />} figure={week.figure} rest={week.rest} label={week.label} mom={week.mom}
+        chart={<WeekBars values={week.bars} caption="added per week" />} />
       <DeskCard probe="queried" icon={<BubbleIcon />} figure={queried.figure} rest={queried.rest} label={queried.label} mom={queried.mom}
         onPress={onQueried} pressLabel={`${queried.label}. Show them in the list`}
         chart={<RingChart active={queried.active} closed={queried.closed} total={queried.total} caption="active · closed" />} />

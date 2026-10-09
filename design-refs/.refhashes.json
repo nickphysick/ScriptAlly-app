@@ -186,7 +186,8 @@
     "design-refs/qc-v134/ref-desk-selected-1512@2x.png": "803789a69e9004da2e78aa8f251d0d1e79f99e64fe5290ce1bbdab85a386d9ab",
     "design-refs/qc-v134/ref-faces-hover-1512@2x.png": "fbd30cabedf175ea189d70ec129e092ad43f232cba1619393de4c9b19b12584a",
     "design-refs/qc-v134/ref-header-desk-1280@2x.png": "11129410cd57fb8072a30a765f6a4edc847adbe7a9a91264a5961f3b82c472ff",
-    "design-refs/qc-v134/ref-header-desk-1512@2x.png": "d82cd6aaad841cf348f95485d3fd6f89a1a12582c0bca66fb0d1d320306dcde9"
+    "design-refs/qc-v134/ref-header-desk-1512@2x.png": "d82cd6aaad841cf348f95485d3fd6f89a1a12582c0bca66fb0d1d320306dcde9",
+    "design-refs/contact-list-v15-3.html": "aad97da81fe4563b1c0c359277d3b19cc59c5d6f18063ace433bf7c6464efa7e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

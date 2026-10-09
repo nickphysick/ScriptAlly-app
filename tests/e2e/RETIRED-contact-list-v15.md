@@ -86,3 +86,17 @@ Each entry names what retired, why, and where its claim lives now (if anywhere).
 | `contactV11.measure.ts` | v12 P1 "Discover navigates" | The header's second button stays on the page; re-pointed to assert that | CL15.2 K9 |
 | `pageHeaderV2.measure.ts` | §4.6 "the secondary is Discover" | Re-pointed to "View all agents" | CL15.2 K9 |
 
+
+## v15.3 — the hero number, the agent faces, "added this week" (9 Oct)
+
+| Suite | Case | Why | Now |
+|---|---|---|---|
+| `contactV152.measure.ts` | K2 "the lines: 'N agents on file' …" (the On file row) and "On file's figure is the header's count" | The count on file is the header's hero number; the first desk card is about this week | CL15.3 N6 (the line), N1 (the count) |
+| `contactV152.measure.ts` | K3, On file's month-on-month line | The week card compares with last WEEK | CL15.3 N6; K3 keeps Queried and Profiles |
+| `contactV152.measure.ts` | K4 "On file is ONE line path of 6 points", its "{month} → now" caption and its "on file" label | 8 weekly bars, captioned "added per week" | CL15.3 N6 |
+| `contactV152.measure.ts` | K4, the ring's pale-blue closed arc (`#9fb0c4`; never asserted on the page, held in `deskCard.test.tsx`) | Closed is grey on this page | CL15.3 N3, `deskCard.test.tsx` |
+| `contactV151.measure.ts` | H5 "the drawing's top is 30 / 24 below the sheet's top" | The header has 30px of top padding above the drop; re-pointed in place to 60 / 54 | CL15.1 H5 (re-pointed) |
+| `contactV151.measure.ts` | H4 "the header is no taller than the drawing's layout box plus 14" | The same padding; re-pointed in place to plus 44 | CL15.1 H4 (re-pointed) |
+| `contactV15.measure.ts` | CL15-1 "the title is Special Elite at 72 / 58" | The h1 carries the words' size, 42 / 34; re-pointed in place | CL15-1 (re-pointed), CL15.3 N1 (the figure, 124 / 98) |
+| `deskCard.test.tsx` | "the line is ONE path through every value" | `LineChart` is deleted with its only caller | "the weekly bars …" in the same file |
+| `contactDesk.test.ts` | "On file: the line …" and "On file's line is six month-end points" | The model has no `file` card | the three week-card cases in the same file |
