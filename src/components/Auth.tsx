@@ -337,7 +337,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
                 <input className="sf-in" id="au-reset" type="email" autoComplete="email" placeholder="you@email.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
                 {errs.reset && <p className="sf-err">{errs.reset}</p>}
               </div>
-              <div className="sf-foot">
+              <div className="sf-cfoot">
                 <button type="button" className="sf-link" onClick={backToAuth}>‹ Back to sign in</button>
                 <button type="submit" className="sf-btn" disabled={resetBusy}>
                   {resetBusy && <span className="sf-spin" aria-hidden="true" />}
@@ -349,7 +349,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
             <div>
               <h2 className="sf-h">Check your inbox</h2>
               <p className="sf-lede">If an account exists for <strong>{resetEmail.trim()}</strong>, a reset link is on its way. It expires in an hour.</p>
-              <div className="sf-foot">
+              <div className="sf-cfoot">
                 <button type="button" className="sf-link" onClick={backToAuth}>‹ Back to sign in</button>
               </div>
             </div>

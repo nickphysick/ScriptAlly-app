@@ -7,8 +7,7 @@ import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus } from "../types";
-import { OnboardingCard, SelectRow, BookMotif, FONT_MONO } from "./onboarding/chrome";
-import { onbFaint, onbGround, onbMuted } from "../lib/designTokens";
+import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
@@ -16,7 +15,6 @@ import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, Man
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, stepOfLabel, SpineId } from "../lib/onboardingSpine";
 import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
-import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 /* ⚠️ THE LOCAL PALETTE IS GONE. This file carried its own 19-hex token object — a parchment
@@ -65,11 +63,8 @@ const STAGE_TO_BRANCH: Record<QueryingStage, Branch> = {
 const FLOW_KEY: Record<Branch, number> = { A: 100, B: 200 };
 
 // Centres a screen in the full-height onboarding overlay.
-const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", minHeight: "100%", padding: "32px 16px", boxSizing: "border-box" }}>
-    {children}
-  </div>
-);
+/** A step sits at the sheet's top-left, under the tab — nothing is centred any more. */
+const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -94,44 +89,30 @@ const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }>
  * standing in for the wordmark. One card, one grammar: this screen is now `OnboardingCard` with a
  * book mark on the plate, like the manuscript screens it leads to.
  */
-const WelcomeStageScreen: React.FC<{
+export const WELCOME_TITLE = "Let's set things up around your journey.";
+export const WELCOME_SUB = "No wrong answer here. It just shapes what you see first.";
+export const WELCOME_LABEL = "Where are you in your querying journey?";
+
+export const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
-  stepLabel?: string;
-}> = ({ selected, onSelect, onContinue, stepLabel }) => (
-  <OnboardingCard
-    step={stepLabel}
-    pre="Getting set up"
-    name="Let's set things up around your journey"
-    sub="A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first."
-    motif={<BookMotif />}
-    primaryLabel="Continue"
-    primaryDisabled={!selected}
-    onPrimary={onContinue}
-  >
-    <span
-      style={{
-        fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
-        color: onbFaint, display: "block", marginBottom: 11,
-      }}
-    >
-      Where are you in your querying journey?
-    </span>
-    {STAGE_OPTIONS.map((opt) => (
-      <SelectRow
-        key={opt.id}
-        icon={null}
-        title={opt.title}
-        desc={opt.descriptor}
-        selected={selected === opt.id}
-        onClick={() => onSelect(opt.id)}
-      />
-    ))}
-  </OnboardingCard>
+}> = ({ selected, onSelect, onContinue }) => (
+  <StepColumn screen="welcome">
+    <OpenTitle title={WELCOME_TITLE} sub={WELCOME_SUB} />
+    <StepCard>
+      <QLabel id="sf-welcome-q">{WELCOME_LABEL}</QLabel>
+      <OptionGroup labelledBy="sf-welcome-q">
+        {STAGE_OPTIONS.map((opt) => (
+          <OptionRow key={opt.id} title={opt.title} desc={opt.descriptor} selected={selected === opt.id} onClick={() => onSelect(opt.id)} />
+        ))}
+      </OptionGroup>
+      <StepFoot>
+        <button type="button" className="sf-btn" disabled={!selected} onClick={onContinue}>Continue</button>
+      </StepFoot>
+    </StepCard>
+  </StepColumn>
 );
-
-// ─── Main Onboarding component ────────────────────────────────────────────────
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
@@ -368,7 +349,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "A" && (
           <CenterWrap>
             <BranchA
-              stepLabel={stepLabel}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveReady={(r) => void handleBranchASaveReady(r)}
               onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
@@ -426,22 +406,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
 
         {!flow && step === 0 && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            minHeight: "100%",
-            padding: "32px 16px",
-            boxSizing: "border-box",
-          }}>
-            <WelcomeStageScreen
-              stepLabel={stepLabel}
-              selected={queryingStage}
-              onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
-              onContinue={handleStageContinue}
-            />
-          </div>
+          <WelcomeStageScreen
+            selected={queryingStage}
+            onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
+            onContinue={handleStageContinue}
+          />
         )}
 
       </ScreenTransition>

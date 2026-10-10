@@ -31,6 +31,10 @@ import { CaptureOption, CAPTURE_HEADING, CAPTURE_SUB, capturePrimaryLabel } from
 import { CaptureFork } from "./CaptureFork";
 import { subStepFor, subStepLabel } from "../../lib/onboardingSpine";
 import { HandoverScreen } from "./HandoverScreen";
+import { StepColumn, OpenTitle, StepCard, BackLink, StepFoot, FieldError } from "./setupParts";
+
+export const BOOK_TITLE = "The book you're querying.";
+export const BOOK_SUB = "Just the essentials. Your agents and queries attach to this, and you can flesh it out any time.";
 import { shouldHandOver, HandoverTally } from "../../lib/onboardingHandover";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -303,34 +307,33 @@ export const BranchB: React.FC<BranchBProps> = ({
   // ── B2 · the book ────────────────────────────────────────────────────────
   if (screen === "book") {
     return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your manuscript"
-        name="The book you're querying"
-        sub="We'll attach your pipeline to this"
-        motif={<BookMotif />}
-        onBack={onExit}
-        primaryLabel="Continue →"
-        primaryDisabled={saving}
-        onPrimary={() => {
-          if (!fields.title.trim()) { setFieldError("Give it a title — even a working one."); return; }
-          if (!fields.genre) { setFieldError("Pick the primary genre — agents search by it."); return; }
-          setFieldError(null);
-          setSaving(true);
-          void onSaveBook(fields)
-            .then((ok) => { if (ok) setScreen("pipeline"); })
-            .finally(() => setSaving(false));
-        }}
-      >
-        <ManuscriptFields value={fields} onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }} />
-        {shownError && <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#a0392a", margin: "10px 2px 0" }}>{shownError}</p>}
-      </OnboardingCard>
+      <StepColumn screen="book">
+        <OpenTitle title={BOOK_TITLE} sub={BOOK_SUB} />
+        <StepCard>
+          <ManuscriptFields value={fields} onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }} />
+          {shownError && <FieldError>{shownError}</FieldError>}
+          <StepFoot left={<BackLink onClick={onExit} />}>
+            <button
+              type="button" className="sf-btn" disabled={saving}
+              onClick={() => {
+                if (!fields.title.trim()) { setFieldError("Give it a title — even a working one."); return; }
+                /* Required for the reason BranchA requires it: an agent's fit is matched on genre. */
+                if (!fields.genre) { setFieldError("Pick the primary genre — agents search by it."); return; }
+                setFieldError(null);
+                setSaving(true);
+                void onSaveBook(fields)
+                  .then((ok) => { if (ok) setScreen("pipeline"); })
+                  .finally(() => setSaving(false));
+              }}
+            >
+              Continue
+            </button>
+          </StepFoot>
+        </StepCard>
+      </StepColumn>
     );
   }
 
-  // ── B3 · the capture fork — three ways to bring an existing list across ──
-  //    The fork itself is CaptureFork.tsx: extracted so it can be rendered and asserted on its own,
-  //    rather than only after driving this component through the manuscript screen first.
   if (screen === "pipeline") {
     return (
       <OnboardingCard

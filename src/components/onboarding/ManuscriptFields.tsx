@@ -8,21 +8,19 @@
  * placeholder is the typical range for the chosen primary genre (never pre-filled).
  */
 import React, { useState } from "react";
-import { BrandInput, BrandDropdown } from "../forms";
+import { BrandDropdown } from "../forms";
 import { PREDEFINED_GENRES, AGE_CATEGORIES, genreWordCountRange } from "../../lib/manuscripts";
-import { FONT_MONO } from "./chrome";
+import "./onboarding.css";
 
+/**
+ * A field's label: mono, upper case, with its qualifier quiet beside it. The WORDS are unchanged
+ * from the card this replaced — "Strapline (optional)", "Genre (primary)" — only the dress moved
+ * to the set-up sheet's (onboarding v5).
+ */
 export const OnbLabel: React.FC<{ children: React.ReactNode; optional?: string }> = ({ children, optional }) => (
-  <label
-    style={{
-      fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em",
-      color: "#9c8878", marginBottom: 6, display: "block",
-    }}
-  >
+  <label className="sf-lab">
     {children}
-    {optional && (
-      <span style={{ textTransform: "none", letterSpacing: 0, color: "#c0b0a0" }}> ({optional})</span>
-    )}
+    {optional && <span className="sf-labq"> ({optional})</span>}
   </label>
 );
 
@@ -76,32 +74,36 @@ export const ManuscriptFields: React.FC<ManuscriptFieldsProps> = ({
   const range = genreWordCountRange(value.ageCategory, value.genre);
 
   return (
-    <div>
-      <OnbLabel optional={titleOptional ? "optional" : undefined}>{titleLabel}</OnbLabel>
-      <BrandInput
-        value={value.title}
-        onChange={(e) => set({ title: e.target.value })}
-        placeholder="e.g. The Salt Path Home"
-      />
+    <div className="sf-fields">
+      <div className="sf-field">
+        <OnbLabel optional={titleOptional ? "optional" : undefined}>{titleLabel}</OnbLabel>
+        <input
+          type="text" className="sf-in"
+          value={value.title}
+          onChange={(e) => set({ title: e.target.value })}
+          placeholder="e.g. The Salt Path Home"
+        />
+      </div>
 
       {showStrapline && (
-        <>
+        <div className="sf-field">
           <OnbLabel optional="optional">Strapline</OnbLabel>
-          <BrandInput
-            style={{ fontStyle: value.strapline ? "normal" : "italic" }}
+          <input
+            type="text" className="sf-in"
             value={value.strapline}
             onChange={(e) => set({ strapline: e.target.value })}
             placeholder="One line that sells the story…"
           />
-        </>
+        </div>
       )}
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Age category and genre share a row from 900 wide. Both stay pick-lists. */}
+      <div className="sf-fieldrow">
+        <div className="sf-field">
           <OnbLabel>Age category</OnbLabel>
           <BrandDropdown value={value.ageCategory} options={ageOptions} onChange={(v) => set({ ageCategory: v })} />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="sf-field">
           <OnbLabel optional="primary">Genre</OnbLabel>
           <BrandDropdown
             value={value.genre}
@@ -112,31 +114,20 @@ export const ManuscriptFields: React.FC<ManuscriptFieldsProps> = ({
         </div>
       </div>
 
-      {/* sub-genre pill row + add link */}
-      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 7, margin: "-5px 2px 14px" }}>
+      {/* Sub-genre pills + the "add" link. */}
+      <div className="sf-subs">
         {value.subGenres.map((sg) => (
-          <span
-            key={sg}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6, background: "#f5e2da",
-              border: "0.5px solid #e8c8bc", borderRadius: 7, padding: "4px 8px 4px 10px",
-              fontSize: 12, color: "#7c3a2a",
-            }}
-          >
+          <span key={sg} className="sf-pill">
             {sg}
-            <button
-              aria-label={`Remove ${sg}`}
-              onClick={() => set({ subGenres: value.subGenres.filter((s) => s !== sg) })}
-              style={{ cursor: "pointer", display: "flex", opacity: 0.7, background: "none", border: "none", color: "inherit", padding: 0 }}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <button type="button" aria-label={`Remove ${sg}`} onClick={() => set({ subGenres: value.subGenres.filter((s) => s !== sg) })}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
           </span>
         ))}
         {addingSub ? (
-          <span style={{ minWidth: 180 }}>
+          <span className="sf-subadd">
             <BrandDropdown
               value=""
               options={subGenreOptions}
@@ -148,17 +139,8 @@ export const ManuscriptFields: React.FC<ManuscriptFieldsProps> = ({
             />
           </span>
         ) : (
-          <button
-            onClick={() => setAddingSub(true)}
-            style={{
-              fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.04em", color: "#9c8878",
-              cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4,
-              background: "none", border: "none", padding: "4px 2px", transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7c3a2a")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#9c8878")}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+          <button type="button" className="sf-link sf-link--quiet sf-addsub" onClick={() => setAddingSub(true)}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
             add additional sub-genre
@@ -167,16 +149,16 @@ export const ManuscriptFields: React.FC<ManuscriptFieldsProps> = ({
       </div>
 
       {showWordCount && (
-        <>
+        <div className="sf-field">
           <OnbLabel>Word count</OnbLabel>
-          <BrandInput
+          <input
+            type="text" className="sf-in"
             inputMode="numeric"
             value={value.wordCount}
             onChange={(e) => set({ wordCount: e.target.value.replace(/[^\d,]/g, "") })}
             placeholder={range ?? "e.g. 85,000"}
-            style={{ marginBottom: 0 }}
           />
-        </>
+        </div>
       )}
     </div>
   );

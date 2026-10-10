@@ -11,7 +11,7 @@
  * Every sweep states its population first. The e2e password is never printed.
  */
 import { test, expect, Page } from "@playwright/test";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureSignedIn } from "./measure";
 
@@ -32,10 +32,20 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "signin", q: "s=signin", form: "account" },
   { id: "reset", q: "s=reset", form: "account" },
   { id: "reset-sent", q: "s=reset-sent", form: "account" },
+  { id: "welcome", q: "s=welcome", form: "setup" },
+  { id: "ready", q: "s=ready", form: "setup" },
+  { id: "ready-drafting", q: "s=ready&status=drafting", form: "setup" },
+  { id: "details", q: "s=details&status=ready", form: "setup" },
+  { id: "details-still", q: "s=details&status=drafting", form: "setup" },
+  { id: "book", q: "s=book", form: "setup" },
 ];
+
+/** Open-title screens later phases add. */
+const EXTRA_OPEN: string[] = [];
 
 const MUTATIONS: Record<string, string> = {
   F1: ".sf .sf-panel, .sf .sf-panel .ws-pin{width:260px!important}",
+  S1: ".sf-open{background:#2d3a50!important;padding:24px!important;border-radius:14px!important}",
   A1: "",
   A3: "",
   F4: "@media (max-width:899.98px){.sf{position:fixed!important;inset:0!important;height:100vh!important;min-height:0!important;overflow:hidden!important}" +
@@ -53,6 +63,9 @@ async function mutate(page: Page) {
       bar?.prepend(img);
     });
   }
+  if (MUTATE === "S2") await page.evaluate(() => document.querySelectorAll(".sf-opt").forEach((b) => { b.removeAttribute("role"); b.setAttribute("aria-pressed", b.getAttribute("aria-checked") ?? "false"); b.removeAttribute("aria-checked"); }));
+  if (MUTATE === "S3") await page.evaluate(() => { const dd = document.querySelectorAll(".sf-card .sa-dd")[1]; if (dd) dd.outerHTML = '<input type="text" class="sf-in" placeholder="Genre">'; });
+  if (MUTATE === "S4") await page.evaluate(() => { const c = document.querySelector(".sf-stepcard"); if (c && !c.querySelector('[data-sf="still-writing"]')) { const p = document.createElement("p"); p.className = "sf-note"; p.dataset.sf = "still-writing"; p.textContent = "Still writing?"; c.appendChild(p); } });
   if (MUTATE === "A1") {
     await page.evaluate(() => {
       const d = document.createElement("div"); d.className = "preview-wrap"; d.textContent = "Dashboard preview";
@@ -325,5 +338,114 @@ test.describe("OB1", () => {
     }
     await lab(page, "s=signup&invite=1", VPS[0]); await shot(page, "signup-invite-on-1440");
     await lab(page, "s=signup&invite=0", VPS[0]); await shot(page, "signup-invite-off-1440");
+  });
+
+  /** Screens whose first thing on the sheet is an open title. Phase 4 adds the fork and the confirm. */
+  const OPEN = ["welcome", "ready", "details", "details-still", "book"];
+
+  test("S1 every step opens on a typewriter title on the sheet, with no box round it and no picture", async ({ page }) => {
+    const want: Record<number, number> = { 1440: 44, 1280: 39.68, 390: 30 };
+    let read = 0;
+    for (const id of OPEN.concat(EXTRA_OPEN)) for (const vp of VPS) {
+      await lab(page, SCREENS.find((s) => s.id === id)!.q, vp);
+      const t = await page.evaluate(() => {
+        const col = document.querySelector(".sf-scroll .sf-col")!;
+        const first = col.firstElementChild as HTMLElement;
+        const h = first.querySelector("h1") as HTMLElement | null;
+        const boxed = (el: HTMLElement | null) => {
+          for (let n = el; n && !n.classList.contains("sf-scroll"); n = n.parentElement) {
+            const c = getComputedStyle(n);
+            const bg = c.backgroundColor;
+            if ((bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") || c.boxShadow !== "none" || parseFloat(c.borderTopWidth) > 0) return n.className;
+          }
+          return null;
+        };
+        return {
+          first: first.className, tag: h?.tagName ?? null,
+          family: h ? getComputedStyle(h).fontFamily : "", size: h ? parseFloat(getComputedStyle(h).fontSize) : 0,
+          boxed: boxed(h), imgs: document.querySelectorAll(".sf-scroll img, .sf-scroll svg.sf-art").length,
+          color: h ? getComputedStyle(h).color : "",
+        };
+      });
+      expect(t.first, `${id}: the first element on the sheet is the open title`).toBe("sf-open");
+      expect(t.family, `${id}: typewriter`).toMatch(/Special Elite/);
+      expect(Math.abs(t.size - want[vp.width]), `${id} @${vp.width}: title ${t.size}px`).toBeLessThanOrEqual(1);
+      expect(t.boxed, `${id}: no navy, white or bordered box round the title`).toBeNull();
+      expect(t.imgs, `${id}: no image on the screen`).toBe(0);
+      expect(t.color).toBe("rgb(28, 19, 15)");
+      read++;
+    }
+    expect(read).toBeGreaterThanOrEqual(OPEN.length * VPS.length);
+  });
+
+  test("S2 options are radios: one or none checked, a navy ring on the checked one, Continue waits", async ({ page }) => {
+    for (const [q, n] of [["s=welcome", 4], ["s=ready", 3]] as const) for (const vp of VPS) {
+      await lab(page, q, vp);
+      const read = () => page.evaluate(() => {
+        const rows = Array.from(document.querySelectorAll('.sf-opts[role="radiogroup"] [role="radio"]')) as HTMLElement[];
+        return {
+          rows: rows.length, checked: rows.filter((r) => r.getAttribute("aria-checked") === "true").length,
+          pressed: document.querySelectorAll(".sf-opts [aria-pressed]").length,
+          ring: rows.filter((r) => r.getAttribute("aria-checked") === "true").map((r) => getComputedStyle(r).boxShadow),
+          disabled: (Array.from(document.querySelectorAll(".sf-stepcard .sf-btn")).pop() as HTMLButtonElement).disabled,
+        };
+      });
+      const before = await read();
+      expect(before.rows, `${q}: a radio group of ${n}`).toBe(n);
+      expect(before.checked).toBe(0);
+      expect(before.pressed, "never aria-pressed").toBe(0);
+      expect(before.disabled, "Continue is disabled until one is chosen").toBe(true);
+      await page.locator(".sf-opts [role=radio]").nth(1).click();
+      const after = await read();
+      expect(after.checked).toBe(1);
+      expect(after.ring[0], "a 2px inset navy ring").toMatch(/rgb\(42, 58, 82\) 0px 0px 0px 2px inset/);
+      expect(after.disabled).toBe(false);
+      await page.locator(".sf-opts [role=radio]").nth(0).click();
+      expect((await read()).checked, "still exactly one").toBe(1);
+    }
+  });
+
+  test("S3 the book's fields are the baseline's, and genre and age category are pick-lists", async ({ page }) => {
+    /* The baseline was read from static markup, where an apostrophe is an entity; the page has the
+       character. Decoded once here, so the two are compared as the words a reader sees. */
+    const was = JSON.parse(readFileSync(resolve("reports/onb-v5-setup/baseline/manuscriptFields.json"), "utf8")
+      .replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '\\"'));
+    for (const [q, key] of [["s=book", "full"], ["s=details&status=ready", "full"], ["s=details&status=drafting", "stillWriting"]] as const) {
+      await lab(page, q, VPS[0]);
+      const now = await page.evaluate(() => {
+        const card = document.querySelector(".sf-stepcard")!;
+        const t = (e: Element) => (e.textContent ?? "").replace(/\s+/g, " ").trim();
+        return {
+          labels: Array.from(card.querySelectorAll("label")).map(t),
+          placeholders: Array.from(card.querySelectorAll("input")).map((i) => i.getAttribute("placeholder") ?? ""),
+          options: Array.from(card.querySelectorAll('[role="option"]')).map((o) => t(o).replace("✓", "").trim()),
+          selectPlaceholders: Array.from(card.querySelectorAll(".sa-placeholder")).map(t),
+          lists: card.querySelectorAll('[aria-haspopup="listbox"]').length,
+          textInputs: card.querySelectorAll("input").length,
+        };
+      });
+      expect(now.options.length, `${q}: options read`).toBeGreaterThan(10);
+      expect(now.labels, `${q}: labels`).toEqual(was[key].labels);
+      expect(now.placeholders, `${q}: placeholders`).toEqual(was[key].placeholders);
+      expect(now.options, `${q}: options`).toEqual(was[key].options);
+      expect(now.selectPlaceholders).toEqual(was[key].selectPlaceholders);
+      expect(now.lists, `${q}: genre and age category are pick-lists`).toBe(2);
+      expect(now.textInputs).toBe(was[key].placeholders.length);
+    }
+  });
+
+  test("S4 the still-writing note follows the choice, and is not on the details screen", async ({ page }) => {
+    const note = () => page.locator('.sf-stepcard [data-sf="still-writing"]').count();
+    for (const vp of VPS) {
+      await lab(page, "s=ready", vp);
+      expect(await note(), "absent on arrival").toBe(0);
+      await page.getByRole("radio", { name: /Still being written/ }).click();
+      expect(await note(), "present once it is checked").toBe(1);
+      expect(await page.locator('[data-sf="still-writing"]').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(244, 239, 233)");
+      await page.getByRole("radio", { name: /Ready to query/ }).click();
+      expect(await note(), "absent again on another choice").toBe(0);
+      await lab(page, "s=details&status=drafting", vp);
+      expect(await note(), "absent from the details screen").toBe(0);
+    }
   });
 });

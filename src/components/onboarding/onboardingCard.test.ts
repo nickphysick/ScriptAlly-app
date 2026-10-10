@@ -100,8 +100,12 @@ describe("the card is made of the app's own material", () => {
 });
 
 describe("one card, not three", () => {
-  it("the welcome screen renders the shared card", () => {
-    expect(ONBOARDING).toContain("<OnboardingCard");
+  /* RE-POINTED (onboarding v5): the welcome is an open title over one card now, built from the
+     shared step parts. The law is the one this held — the welcome draws no card of its own. */
+  it("the welcome screen renders the shared step parts, and no card of its own", () => {
+    expect(ONBOARDING).toContain("<OpenTitle");
+    expect(ONBOARDING).toContain("<StepCard");
+    expect(ONBOARDING).not.toContain("<OnboardingCard");
   });
 
   it("its own ModalCard and StageCard are gone", () => {

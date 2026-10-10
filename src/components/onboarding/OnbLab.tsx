@@ -21,6 +21,11 @@ import { SetupFrame, SETUP_GROUP, ACCOUNT_GROUP } from "./SetupFrame";
 import { spineFor, spineIndex, SpineId, OnboardingBranch } from "../../lib/onboardingSpine";
 import { UserPlan } from "../../types";
 import { Auth } from "../Auth";
+import { Onboarding, WelcomeStageScreen } from "../Onboarding";
+import { BranchA } from "./BranchA";
+import { BranchB } from "./BranchB";
+import { emptyManuscriptFields } from "./ManuscriptFields";
+import { ManuscriptStatus } from "../../types";
 
 declare global {
   interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }> } }
@@ -71,6 +76,11 @@ export const LabSetup: React.FC<{
   );
 };
 
+const LabWelcome: React.FC = () => {
+  const [sel, setSel] = React.useState<"starting" | "early" | "deep" | "interest" | null>(null);
+  return <WelcomeStageScreen selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
+};
+
 const Filler: React.FC<{ rows?: number }> = ({ rows = 3 }) => (
   <div data-lab="filler">
     {Array.from({ length: rows }, (_, i) => (
@@ -93,6 +103,42 @@ export const OnbLab: React.FC = () => {
   if (s === "signin") return <Auth initialMode="login" />;
   if (s === "reset") return <Auth initialMode="login" lab={{ view: "reset" }} />;
   if (s === "reset-sent") return <Auth initialMode="login" lab={{ view: "reset", resetSent: true, email: "writer@example.com" }} />;
+
+  /* The REAL set-up, start to finish, for the one claim that needs it: choosing a branch changes
+     the steps. Signed out it has no user to write to. */
+  if (s === "live") return <Onboarding onComplete={labSpy("complete")} />;
+
+  if (s === "welcome") return <LabSetup flow={null} at="you"><LabWelcome /></LabSetup>;
+  if (s === "ready" || s === "details") {
+    const st = q.get("status");
+    const status = st === "drafting" ? ManuscriptStatus.DRAFTING : st === "revising" ? ManuscriptStatus.REVISING
+      : st === "ready" ? ManuscriptStatus.READY_TO_QUERY : s === "details" ? ManuscriptStatus.READY_TO_QUERY : null;
+    return (
+      <LabSetup flow="A" at="book">
+        <BranchA
+          initialScreen={s === "details" ? "details" : "readiness"} initialStatus={status}
+          onExit={labSpy("back")} onSaveReady={labSpy("saveReady")} onSaveStillWriting={labSpy("saveStillWriting")}
+          error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
+        />
+      </LabSetup>
+    );
+  }
+
+  if (s === "book") {
+    return (
+      <LabSetup flow="B" at="book">
+        <BranchB
+          onSkip={labSpy("skip")} onExit={labSpy("back")}
+          onSaveBook={async (f) => { labSpy("saveBook")(f.title); return false; }}
+          initialBook={q.get("filled") === "1" ? { ...emptyManuscriptFields(), title: LAB_TITLE, genre: "Upmarket" } : null}
+          onEnsureManuscript={async () => null}
+          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onImportComplete={labSpy("importComplete")}
+          error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
+        />
+      </LabSetup>
+    );
+  }
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";

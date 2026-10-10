@@ -131,10 +131,11 @@ setup("authenticate", async ({ page, browser }) => {
      * ran while that page was still up: it clicked `.g-btn`, started an OAuth flow, and Playwright
      * retried a click on a detaching node for the full 420-second timeout. The first repair
      * excluded `.g-btn` by name — true today, and a list of things this is NOT, which the next
-     * button with a "Continue…" label is not on. `.sa-onb-card` is the onboarding's own card, so
+     * button with a "Continue…" label is not on. `.sf-sheet` is the set-up frame's own sheet (it was
+     * `.sa-onb-card` until onboarding v5 replaced that card with an open title and a step card), so
      * the only Continue this can find is the one the walk exists to press.
      */
-    const cont = page.locator(".sa-onb-card").getByRole("button", { name: /^Continue/ });
+    const cont = page.locator(".sf-sheet").getByRole("button", { name: /^Continue/ });
     if (await skip.count()) { await skip.first().click(); }
     else if (await cont.count()) {
       /* ⚠️ NEVER CLICK A DISABLED CONTINUE — IT LOOKS EXACTLY LIKE A HUNG PAGE. A gated step keeps
@@ -150,7 +151,7 @@ setup("authenticate", async ({ page, browser }) => {
          matching structure survives copy edits that matching wording cannot. */
       if (await cont.first().isDisabled()) {
         const choice = page
-          .locator(".sa-onb-card")
+          .locator(".sf-sheet")
           .getByRole("button")
           .filter({ hasNotText: /^(Continue|Back|Skip|Sign out|Log out)/ })
           .filter({ visible: true });
