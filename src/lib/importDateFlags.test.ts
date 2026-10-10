@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { readTemplateBuffer } from "./templateImport";
-import { parseModel, queryStatusOf, reviewTallies, seedUnidentifiedSetAside } from "./smartImportReviewModel";
+import { parseModel, queryStatusOf, reviewTallies, seedUnidentifiedSetAside, fmtDate, dayOf, queryReasonText } from "./smartImportReviewModel";
+import { ambiguousReadings } from "./templateImport";
 
 const fx = (name: string) => new Uint8Array(readFileSync(resolve(process.cwd(), "tests/fixtures/import", name)));
 const DATE_CODES = ["unreadable-date", "ambiguous-date", "unreadable-response-date", "ambiguous-response-date"];
@@ -48,5 +49,25 @@ describe("D3 · every date flag reaches the review as an open reason on its row"
     expect(queryStatusOf(byRaw("23/04/2026"))).toBe("captured");
     expect(reviewTallies(r.agents, r.queries).queries.sharpen).toBe(1);
     expect(r.queries.filter((q) => q.sentDate).length, "the other four dates were read").toBe(4);
+  });
+});
+
+describe("D3 · the review shows a template date as a date, and asks in the cell's own words", () => {
+  it("a date read from the template prints as a day, not a raw timestamp", async () => {
+    const r = await review("template-mixed.csv");
+    const owen = r.queries.find((q) => q.sentDate && !q.removed)!;
+    expect(owen.sentDate, "the parser gives a full timestamp").toMatch(/T00:00:00/);
+    expect(fmtDate(owen.sentDate)).toBe("14 Mar 2026");
+    expect(dayOf(owen.sentDate), "a date field can show it").toBe("2026-03-14");
+    expect(fmtDate("2026-03-14")).toBe("14 Mar 2026");
+  });
+  it("the two questions quote the cell, and the ambiguous one offers both readings", async () => {
+    const mixed = await review("template-mixed.csv");
+    const dmy = await review("template-dmy.csv");
+    expect(queryReasonText("unreadable-date", mixed.queries[0])).toBe(`We couldn't read "sometime in May" as a date. When did you send the query?`);
+    const amb = dmy.queries.find((q) => q.sentDateRaw === "03/05/2026")!;
+    expect(queryReasonText("ambiguous-date", amb)).toBe(`"03/05/2026" could be two different dates. Which did you mean?`);
+    expect(ambiguousReadings("03/05/2026").map(fmtDate)).toEqual(["3 May 2026", "5 Mar 2026"]);
+    expect(ambiguousReadings("23/04/2026")).toEqual([]);
   });
 });

@@ -28,7 +28,7 @@ import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
 import {
   ReviewAgent, ReviewQuery, CheckReason,
-  agentStatus, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
+  agentStatus, queryStatusOf, fmtDate, dayOf, QUERY_STATUS_OPTIONS,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, focusReasonMeta,
   dupNoteMerged, dupNoteOpen, dupNoteKept, keepBothLabel, keptClusterLabel,
 } from "../../lib/smartImportReviewModel";
@@ -230,7 +230,7 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
 
   const dateInput = (k: string, label: string, prefill: string | null) => (
     <Field label={label}>
-      <input className="sf-in" type="date" aria-label={label} value={drafts[k] ?? prefill ?? ""} onChange={(e) => setDraft(k, e.target.value)} />
+      <input className="sf-in" type="date" aria-label={label} value={drafts[k] ?? dayOf(prefill)} onChange={(e) => setDraft(k, e.target.value)} />
     </Field>
   );
   const solid = (label: string, onClick: () => void) => <button type="button" className="sf-btn sf-btn--sm" onClick={onClick}>{label}</button>;
@@ -246,12 +246,12 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
           <div className="im-pair">
             <div className="im-pairrow">
               <span className="im-pairlab">Query sent<small>you → agent</small></span>
-              <input className="sf-in" type="date" aria-label="Query sent date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
+              <input className="sf-in" type="date" aria-label="Query sent date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
             </div>
             {ev && (
               <div className="im-pairrow">
                 <span className="im-pairlab">{ev.type}<small>agent → you</small></span>
-                <input className="sf-in" type="date" aria-label="Event date" value={ev.date ?? ""}
+                <input className="sf-in" type="date" aria-label="Event date" value={dayOf(ev.date)}
                   onChange={(e) => onPatch({ timeline: query.timeline.map((t, i) => (i === 0 ? { ...t, date: e.target.value || null } : t)) })} />
               </div>
             )}
@@ -434,7 +434,7 @@ export const QueryRow: React.FC<QueryRowProps> = ({
               </select>
             </Field>
             <Field label="Date sent">
-              <input className="sf-in" type="date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
+              <input className="sf-in" type="date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
             </Field>
           </div>
           <p className="im-editnote">Dates are optional — add what you remember and your timeline stays accurate.</p>

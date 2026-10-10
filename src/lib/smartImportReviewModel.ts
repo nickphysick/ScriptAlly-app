@@ -146,9 +146,13 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
 const MONTHS = MONTHS_SHORT;
 /** Format an ISO date for display; null → "date needed" (never a fabricated date). */
+/** The day part of a stored date. The template parser gives a full timestamp (`…T00:00:00.000Z`)
+ *  where Smart Import gives `YYYY-MM-DD`; a date field and `fmtDate` both need the day alone. */
+export const dayOf = (iso: string | null | undefined): string => (iso ?? "").slice(0, 10);
 export const fmtDate = (iso: string | null): string => {
   if (!iso) return "date needed";
-  const [y, m, d] = iso.split("-").map(Number);
+  // Read the day part only: a full timestamp used to fall through and print raw.
+  const [y, m, d] = dayOf(iso).split("-").map(Number);
   return y && m && d ? `${d} ${MONTHS[m - 1]} ${y}` : iso;
 };
 export const QUERY_STATUS_OPTIONS: QueryStatus[] = [
