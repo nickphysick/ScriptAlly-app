@@ -97,3 +97,94 @@
    17px its page already leaves. Where a control row is fixed directly under the masthead (Calendar, Noteboard) that
    relationship is kept as built. */
 .wpg > .wpg-scroll > .wpg-chrome:has(.hpanel--compact):not(:has(~ .wpg-toolband)) { padding-bottom: calc(var(--hpanel-below) - 17px); }
+
+
+/* ══ HEADER v3 (10 Oct; ref design-refs/shell/header-v3-qc.html `.ohdr`) — ONE PANEL HEADER ON EVERY WORKSPACE PAGE ══
+   `PanelHeader` (shell/PanelHeader.tsx) draws it. A NUMBER page leads with a big stacked number; a TITLE page shows a
+   title in its place. The surface, border, radius and the 28px above are the panel's own, above.
+
+   ⚠️ "COMPACT" IS THE PAGE SHEET'S WIDTH, NOT THE VIEWPORT'S: the base rules are the compact values, and
+      `.ws-app.sheet-wide` (the page sheet is at least 1440 wide) restates the full-size ones — the desks' switch.
+   ⚠️ FOUR CLASSES ON THE BOX RULES. A page's own root class rides on the same element (`.ph.ph--panel.ph--full`
+      is 0-3-0), and the panel's box must not depend on which page mounted it.
+   ⚠️ brand.tsx forces `h1` and bare spans at runtime, injected last: the type rules carry !important and three
+      classes, and every span states its face. */
+.hpanel.hpanel--hero.hp3.hp3 {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
+  padding: 28px 32px 34px 36px; min-height: 0; height: auto; width: auto; overflow: visible;
+  background: var(--hpanel-bg); color: var(--hpanel-fg); border: 1px solid var(--hpanel-line); border-radius: 14px;
+  box-shadow: none; clip-path: none; margin-top: 28px;
+}
+/* a NUMBER panel is as tall as its drawing would make it, with or without one, so a long subline cannot move it */
+/* doubled: `.ph.ph--panel.ph--full:not(.ph--band)` states its own floor at the same weight, in a later sheet */
+.hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 260px; }
+.hp3 .hp3-txt { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+
+/* NUMBER: the title block — the number spans two rows; the words on the first, the subline on the second */
+.hp3 .hp3-tb { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; justify-content: start; column-gap: 16px; max-width: 100%; min-width: 0; }
+.hp3 .hp3-tb h1.hp3-h1 {
+  grid-column: 1 / span 2; grid-row: 1 / span 2; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid;
+  margin: 0; padding: 0; min-width: 0; white-space: nowrap;
+  font: 400 34px/1 var(--sp-type) !important; letter-spacing: 0; color: var(--hpanel-fg);
+}
+.hp3 .hp3-h1 .hp3-n { grid-column: 1; grid-row: 1 / span 2; align-self: center; font: 400 120px/0.78 var(--sp-type) !important; letter-spacing: -0.04em; color: var(--hpanel-fg); }
+.hp3 .hp3-h1 .hp3-w { grid-column: 2; grid-row: 1; align-self: end; padding-bottom: 4px; font: 400 34px/1 var(--sp-type) !important; color: var(--hpanel-fg); }
+.hp3 .hp3-tb .hp3-s {
+  grid-column: 2; grid-row: 2; align-self: start; position: relative; margin: 0; padding-top: 6px; min-width: 0;
+  font: 400 22px/1.3 var(--sp-serif); color: var(--hpanel-muted);
+}
+.hp3 .hp3-s :is(em, i), .hp3 .hp3-sub :is(em, i) { font-family: inherit; font-style: italic; }
+.hp3 .hp3-s :is(b, strong, .ph-ms), .hp3 .hp3-sub :is(b, strong, .ph-ms) { font-family: inherit; font-weight: 600; color: var(--hpanel-fg); }
+/* loading: the number is a blank of its full box */
+.hp3 .hp3-h1 .hp3-n.hp3-blank { color: transparent !important; }
+
+/* TITLE: a title in the number's place, at most two lines; its subline under it */
+.hp3 .hp3-txt h1.hp3-title {
+  margin: 0; max-width: 100%;
+  font: 400 50px/1.02 var(--sp-type) !important; letter-spacing: 0; color: var(--hpanel-fg);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-wrap: balance;
+}
+.hp3 .hp3-txt .hp3-sub { margin: 14px 0 0; max-width: 520px; font: 400 18px/1.4 var(--sp-serif); color: var(--hpanel-muted); }
+
+/* the buttons: 26 under a number's block, 22 under a title's subline; the panel's own two treatments */
+.hp3 .hp3-acts { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 26px; flex-wrap: nowrap; }
+.hp3.hp3--title .hp3-acts { margin-top: 22px; }
+.hp3 .hp3-acts :is(.hp3-btn, .hpanel-b1, .hpanel-b2) {
+  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
+  font: 400 15.5px var(--sp-type); white-space: nowrap;
+}
+
+/* the drawing: the right column, vertically centred, wholly inside the panel */
+.hp3 .hp3-art { justify-self: end; align-self: center; box-sizing: border-box; height: 196px; margin: 0 24px 0 0; display: block; flex: none; }
+.hp3 .hp3-art :is(img, svg) { display: block; height: 100%; width: auto; max-width: none; }
+.hp3 .hp3-art.hpanel-disc { width: 196px; }
+.hp3 .hp3-art.hpanel-disc > :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
+/* the disc is for a drawing: a slot with nothing in it (the To-do list's, until its art arrives) keeps its box and draws no disc */
+.hp3 .hp3-art.hpanel-disc:not(:has(img, svg)) { background: none; box-shadow: none; }
+
+/* full size: the page sheet is 1440 or wider */
+.ws-app.sheet-wide .hpanel.hpanel--hero.hp3.hp3 { padding: 34px 40px 40px 44px; column-gap: 40px; }
+.ws-app.sheet-wide .hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 312px; }
+.ws-app.sheet-wide .hp3 .hp3-tb h1.hp3-h1 { font-size: 40px !important; }
+.ws-app.sheet-wide .hp3 .hp3-h1 .hp3-n { font-size: 150px !important; }
+.ws-app.sheet-wide .hp3 .hp3-h1 .hp3-w { font-size: 40px !important; }
+.ws-app.sheet-wide .hp3 .hp3-txt h1.hp3-title { font-size: 62px !important; }
+.ws-app.sheet-wide .hp3 .hp3-txt .hp3-sub { margin-top: 18px; font-size: 21px; }
+.ws-app.sheet-wide .hp3 .hp3-acts { margin-top: 30px; }
+.ws-app.sheet-wide .hp3.hp3--title .hp3-acts { margin-top: 26px; }
+.ws-app.sheet-wide .hp3 .hp3-art { height: 236px; }
+.ws-app.sheet-wide .hp3 .hp3-art.hpanel-disc { width: 236px; }
+
+/* below 768px: the number steps to 88, the words to 26 and the subline to 17; the drawing is put away; the buttons wrap */
+@media (max-width: 767.98px) {
+  .hpanel.hpanel--hero.hp3.hp3 { grid-template-columns: minmax(0, 1fr); padding: 20px; min-height: 0; }
+  .hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 0; }
+  .hp3 .hp3-art { display: none; }
+  .hp3 .hp3-tb { column-gap: 12px; }
+  .hp3 .hp3-tb h1.hp3-h1 { font-size: 26px !important; white-space: normal; }
+  .hp3 .hp3-h1 .hp3-n { font-size: 88px !important; }
+  .hp3 .hp3-h1 .hp3-w { font-size: 26px !important; }
+  .hp3 .hp3-tb .hp3-s { font-size: 17px; }
+  .hp3 .hp3-txt h1.hp3-title { font-size: 36px !important; }
+  .hp3 .hp3-acts { flex-wrap: wrap; row-gap: 10px; }
+}

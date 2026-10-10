@@ -210,7 +210,7 @@ export const QcCentre: React.FC<{
       {v131 ? (
         /* v133 — THE OPEN HEADER on the desktop: no band, no card, no disc, and the fixed line in
            place of the living facts sentence (the desk carries those facts). */
-        <QcOpenHeader sent={sent} msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} withYou={withYou} />
+        <QcOpenHeader sent={sent} msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} />
       ) : (
       /* below 768px the v126 page is unchanged: the shared header's band and its courier disc */
       <PageHeader

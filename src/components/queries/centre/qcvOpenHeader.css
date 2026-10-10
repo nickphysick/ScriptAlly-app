@@ -2,106 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v136 — the open, ruled-corner header (ref design-refs/query-centre/query-centre-v136.html `.ohdr`).
- * One authoritative block. Desktop only: below 768px the Query Centre renders the v126 page, not this header.
- *
- * ⚠️ "COMPACT" IS THE PAGE SHEET'S WIDTH, NOT THE VIEWPORT'S (the v135 desk's own switch). The base rules are the
- *    compact values, which apply whenever the page sheet is narrower than 1440 — at a 1512 window it is 1256.
- *    `.ws-app.sheet-wide` restates the full-size values.
- * ⚠️ NO SURFACE, NO BORDER BOX, NO RADIUS: the header is on the page. Its only line is the rule along its foot.
- * ⚠️ THE RULED LINES AND THE MARGIN LINE REACH OUTSIDE THE HEADER'S BOX, to the sheet's left edge and its top.
- *    `--qcoh-sl` (the sheet's left edge, measured from this header's) and `--qcoh-sw` (the sheet's width) are
- *    published by QcOpenHeader; the fallbacks draw nothing wrong before the first measurement.
+ * Query Centre — the header's place in the page's group (header v3). The header itself is the shared panel
+ * (shell/headerPanel.css `.hp3`); this sheet only puts it on the group's first row. v136's open, ruled-corner
+ * header and every rule it carried are retired.
  */
 @import "./qcvPage.css";
 
 .qcv-group > .qcoh { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
-.qcoh {
-  position: relative; isolation: isolate; box-sizing: border-box;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 40px; align-items: end;
-  margin: 0; padding: 0; background: none; border: 0; border-radius: 0;
-  border-bottom: 1px solid rgba(28, 19, 15, 0.16);
-}
-
-/* ── the ruled corner: 1px lines every 32px from the sheet's left edge, solid to 14% of the sheet's width and gone
-   by 40%; and a red margin line 26px left of the content column. Both run from the header's top (the sheet's top
-   edge) down to the rule, behind the content. ── */
-.qcoh .qcoh-ruled {
-  position: absolute; z-index: -1; top: 0; bottom: 0; pointer-events: none;
-  left: calc(-1 * var(--qcoh-sl, 0px)); width: var(--qcoh-sw, 100%);
-  background: repeating-linear-gradient(180deg, transparent 0 31px, rgba(28, 19, 15, 0.08) 31px 32px);
-  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 14%, transparent 40%);
-  mask-image: linear-gradient(90deg, #000 0, #000 14%, transparent 40%);
-}
-.qcoh .qcoh-margin {
-  position: absolute; z-index: -1; top: 0; bottom: 0; left: -26px; width: 1px; pointer-events: none;
-  background: rgba(176, 72, 62, 0.42);
-}
-
-/* ── the text block: centred in the row, its left edge the content column's ── */
-.qcoh .qcoh-txt { align-self: center; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 34px 0 36px; }
-/* the title's row: the h1 and, after its words, the stamp — on the words' baseline (the stamp raises itself 6px) */
-.qcoh .qcoh-trow { display: flex; align-items: baseline; gap: 16px; max-width: 100%; }
-/* "You've sent {N} queries": the words at 34 (42), the figure at 88 (112), on one baseline.
-   ⚠️ brand.tsx forces `h1:not(.wsh-title)` at runtime and names bare spans as body sans, both injected last:
-   three classes and !important on the spans win honestly. */
-.qcoh .qcoh-txt h1.qcoh-title {
-  margin: 0; white-space: nowrap; display: flex; align-items: baseline; gap: 16px;
-  font: 400 34px/1 var(--sp-type) !important; color: #1c130f;
-}
-.qcoh .qcoh-title .qcoh-ht { font: 400 34px/1 var(--sp-type) !important; }
-.qcoh .qcoh-title .qcoh-hn { font: 400 88px/0.8 var(--sp-type) !important; letter-spacing: -0.03em; }
-/* the rubber stamp: real text, outside the h1, in rust. Its size and rotation are the header panel's stamp's. */
-.qcoh .qcoh-trow .qcoh-stamp {
-  display: inline-block; flex: none; position: relative; top: -6px; white-space: nowrap;
-  padding: 8px 10px 7px; border: 1.5px solid #a2452a; border-radius: 5px;
-  font-family: "JetBrains Mono", var(--font-mono), monospace; font-weight: 700; font-size: 12px; line-height: 1;
-  letter-spacing: 0.16em; text-transform: uppercase; color: #a2452a;
-  transform: rotate(-2deg);
-}
-/* "for {manuscript title}": serif at ink 72%, the title italic in full ink */
-.qcoh .qcoh-txt .qcoh-sub { margin: 8px 0 0; font: 400 19px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.72); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qcoh .qcoh-sub em { font-family: inherit; font-style: italic; color: #1c130f; }
-
-.qcoh .qcoh-acts { display: flex; gap: 10px; margin-top: 24px; }
-.qcoh .qcoh-acts .qcoh-b1, .qcoh .qcoh-acts .qcoh-b2 {
-  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
-  font: 400 15.5px var(--sp-type); white-space: nowrap;
-}
-.qcoh .qcoh-acts .qcoh-b1 { background: #2d3a50; color: #f4eee5; }
-.qcoh .qcoh-acts .qcoh-b1:hover:not(:disabled) { background: #22304a; }
-.qcoh .qcoh-acts .qcoh-b2 { background: transparent; color: #1c130f; box-shadow: inset 0 0 0 1.5px #1c130f; }
-.qcoh .qcoh-acts .qcoh-b2:hover:not(:disabled) { background: rgba(28, 19, 15, 0.06); }
-.qcoh .qcoh-acts button:disabled { cursor: default; }
-.qcoh .qcoh-acts button:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
-
-/* THE DRAWING: the figure-only courier, 231 (274) tall, at the END of the row and on its bottom line, so it stands
-   on the rule. ⚠️ THE FILE CARRIES 8px OF TRANSPARENT PADDING UNDER THE FIGURE (at 375 tall) and 1px to its right:
-   the negative bottom margin, 5 (6), drops the visible feet onto the rule. The file is not edited. */
-.qcoh .qcoh-art { display: block; justify-self: end; align-self: end; height: 231px; width: auto; max-width: none; margin: 0 0 -5px; }
-
-/* full size: the page sheet is 1440 or wider */
-.ws-app.sheet-wide .qcoh .qcoh-txt { padding: 44px 0; }
-.ws-app.sheet-wide .qcoh .qcoh-txt h1.qcoh-title { font-size: 42px !important; }
-.ws-app.sheet-wide .qcoh .qcoh-title .qcoh-ht { font-size: 42px !important; }
-.ws-app.sheet-wide .qcoh .qcoh-title .qcoh-hn { font-size: 112px !important; }
-.ws-app.sheet-wide .qcoh .qcoh-txt .qcoh-sub { margin-top: 10px; font-size: 22px; }
-.ws-app.sheet-wide .qcoh .qcoh-art { height: 274px; margin-bottom: -6px; }
-
-/* loading: the same boxes; the figure is blank and the buttons are painted over */
-.qcoh[data-loading] .qcoh-hn { color: transparent !important; }
-.qcoh[data-loading] :is(.qcoh-b1, .qcoh-b2) {
-  color: transparent !important; box-shadow: none; border-radius: 22px;
-  background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
-  animation: qcohShim 1.6s ease-in-out infinite;
-}
-@keyframes qcohShim { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-@media (prefers-reduced-motion: reduce) { .qcoh[data-loading] * { animation: none !important; } }
-
-/* below 768px the header would stack with the drawing put away, the ruled corner and margin line kept */
-@media (max-width: 767.98px) {
-  .qcoh { grid-template-columns: minmax(0, 1fr); }
-  .qcoh .qcoh-art { display: none; }
-  .qcoh .qcoh-trow, .qcoh .qcoh-acts { flex-wrap: wrap; row-gap: 12px; }
-  .qcoh .qcoh-txt h1.qcoh-title { flex-wrap: wrap; white-space: normal !important; row-gap: 6px; }
-}

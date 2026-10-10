@@ -219,7 +219,11 @@
     "design-refs/qc-v136/ref-cards-1280@2x.png": "647141faf676ee44cf736376da66ac37483bb17d987f2862d328a7e60422ed57",
     "design-refs/qc-v136/ref-cards-1512@2x.png": "0b3a6106bd9f182a91e91c0f3c0e2f1c2e9a7ee1a188212525b960a92f878a61",
     "design-refs/qc-v136/ref-page-1280@2x.png": "7efc6aaf1ffff8588372f8bc6ecdabae4d4244ab314e35af41f577cd1e798e42",
-    "design-refs/qc-v136/ref-page-1512@2x.png": "eaefc8316eb3337bda9567e76202201d3d72433c58b3d51f63760274658af16d"
+    "design-refs/qc-v136/ref-page-1512@2x.png": "eaefc8316eb3337bda9567e76202201d3d72433c58b3d51f63760274658af16d",
+    "design-refs/shell/header-v3-qc.html": "48b8772bf92de12b36acf755a5bb42cde70451e514f2a8d9be91a8fd5cbab315",
+    "design-refs/shell/header-v3-qc-in-shell.html": "7a5bc36c18dcaa393697c1e3a85bef9e31b289a629edbdff9473d763e484a7fd",
+    "design-refs/header-v3/ref-qc-1280@2x.png": "98a763bf297e5f9f30a12dc8966953d1f272e5d4e19c7cc353eeae72b4152613",
+    "design-refs/header-v3/ref-qc-1512@2x.png": "2a25ffb6c9b7d2caa712b5820551ec8e3314e66e5ebbb69564e45b52c9cf0f3e"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

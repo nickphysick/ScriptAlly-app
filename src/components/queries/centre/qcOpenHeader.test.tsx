@@ -2,57 +2,48 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v136 — the open, ruled-corner header, rendered: the title and its figure, the subheader,
- * the stamp, the two buttons, the figure-only courier, the ruled corner; and the loading shape.
+ * The Query Centre's header (header v3), rendered: the shared panel as a NUMBER page — the count, "queries sent",
+ * "for {manuscript}", two buttons and the courier's disc; no stamp, no faces, no ruled corner; and the loading shape.
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QcOpenHeader, sentTitle, sentWords } from "./QcOpenHeader";
-import { QC_PLATE_FIGURE } from "./qcArt";
+import { QC_COURIER_DISC } from "./qcArt";
 
-const html = (sent: number | null, o: { loading?: boolean; logDisabled?: boolean; msTitle?: string | null; withYou?: number | null } = {}) =>
-  renderToStaticMarkup(<QcOpenHeader sent={sent} msTitle={o.msTitle === undefined ? "Harbour of Glass" : o.msTitle} withYou={o.withYou}
+const html = (sent: number | null, o: { loading?: boolean; logDisabled?: boolean; msTitle?: string | null } = {}) =>
+  renderToStaticMarkup(<QcOpenHeader sent={sent} msTitle={o.msTitle === undefined ? "Harbour of Glass" : o.msTitle}
     loading={!!o.loading} logDisabled={o.logDisabled} onLog={() => {}} onRecord={() => {}} />);
 
-describe("QcOpenHeader (v136)", () => {
-  it("the title: “You’ve sent {N} queries”, one h1 with data-page-title, and its accessible name", () => {
+describe("QcOpenHeader (header v3)", () => {
+  it("the panel, as a number page: one h1 holding the number and the words, named “27 queries sent”", () => {
     const h = html(27);
-    expect(sentTitle(27)).toBe("You’ve sent 27 queries");
-    expect(sentTitle(1)).toBe("You’ve sent 1 query");
-    expect(sentWords(0)).toBe("queries");
-    expect(h).toMatch(/<h1 class="qcoh-title" data-probe="title" data-page-title="" aria-label="You’ve sent 27 queries">/);
-    expect(h).toMatch(/data-qcv="oh-ht">You’ve sent<\/span><span class="qcoh-hn" data-qcv="oh-hn">27<\/span><span class="qcoh-ht" data-qcv="oh-ht2">queries<\/span>/);
-    expect(html(1)).toMatch(/data-qcv="oh-hn">1<\/span><span class="qcoh-ht" data-qcv="oh-ht2">query<\/span>/);
-    expect(h, "an own-header route's marker").toContain('data-own-header=""');
+    expect(sentTitle(27)).toBe("27 queries sent");
+    expect(sentTitle(1)).toBe("1 query sent");
+    expect(sentWords(0)).toBe("queries sent");
+    expect(h).toMatch(/<header class="qcoh hpanel hpanel--hero hp3 hp3--number" data-hpanel="" data-hp3="number" data-qcv="open-header" data-own-header="">/);
+    expect(h).toMatch(/<h1 class="hp3-h1" data-probe="title" data-page-title="" aria-label="27 queries sent"><span class="hp3-n" data-hp3-part="number">27<\/span> <span class="hp3-w" data-hp3-part="words">queries sent<\/span><\/h1>/);
+    expect(html(1)).toMatch(/data-hp3-part="number">1<\/span> <span class="hp3-w" data-hp3-part="words">query sent<\/span>/);
   });
-  it("the subheader: “for {title}”, the title in an <em>; absent when the page is scoped to no single book", () => {
-    expect(html(27)).toContain('<p class="qcoh-sub" data-qcv="oh-sub">for <em>Harbour of Glass</em></p>');
-    expect(html(27, { msTitle: null })).not.toContain("oh-sub");
-  });
-  it("it is not a panel: no panel class, no header sheet, no faces row", () => {
+  it("the subline is a <p> outside the h1: “for {title}”, the title in an <em>; absent when no single book is in scope", () => {
     const h = html(27);
-    expect(h).not.toMatch(/hpanel|data-hpanel|data-header-sheet|hsheet/);
-    expect(h).not.toMatch(/oh-face|oh-faces|qcoh-fc/);
+    expect(h).toContain('</h1><p class="hp3-s" data-probe="intro" data-hp3-part="sub">for <em>Harbour of Glass</em></p>');
+    expect(html(27, { msTitle: null })).not.toContain("hp3-s");
   });
-  it("the stamp: after the title, outside the h1, absent at 0 and while loading", () => {
-    const h = html(27, { withYou: 4 });
-    expect(h).toMatch(/<\/h1><span class="qcoh-stamp" data-qcv="oh-stamp">4 with you<\/span>/);
-    expect(html(27, { withYou: 0 })).not.toContain("oh-stamp");
-    expect(html(27, { withYou: 4, loading: true })).not.toContain("oh-stamp");
-  });
-  it("the drawing is the figure-only courier, aria-hidden; the ruled corner is two aria-hidden layers", () => {
+  it("no stamp, no faces, no ruled corner", () => {
     const h = html(27);
-    expect(h).toContain(`src="${QC_PLATE_FIGURE.src}?v=${QC_PLATE_FIGURE.version}"`);
-    expect(h).toMatch(/<img class="qcoh-art" data-qcv="oh-art" aria-hidden="true"/);
-    expect(h).toContain('<span class="qcoh-ruled" data-qcv="oh-ruled" aria-hidden="true"></span>');
-    expect(h).toContain('<span class="qcoh-margin" data-qcv="oh-margin" aria-hidden="true"></span>');
-    expect(h).not.toMatch(/qc-courier-disc/);
+    expect(h).not.toMatch(/stamp|oh-face|oh-faces|qcoh-fc|oh-ruled|oh-margin/);
   });
-  it("loading: the figure holds a shape and both buttons are disabled", () => {
+  it("the drawing is the courier on his disc, aria-hidden", () => {
+    const h = html(27);
+    expect(h).toContain(`src="${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}"`);
+    expect(h).toMatch(/<div class="hp3-art" data-probe="art" data-hp3-part="art" aria-hidden="true"><img data-qcv="oh-art"/);
+  });
+  it("loading: the number is a blank of its box and both buttons are disabled", () => {
     for (const h of [html(null), html(27, { loading: true })]) {
       expect(h).toContain('data-loading=""');
-      expect(h).toMatch(/data-qcv="oh-hn">00<\/span>/);
+      expect(h).toMatch(/<span class="hp3-n hp3-blank" data-hp3-part="number">00<\/span>/);
+      expect(h).toContain(">queries sent</span>");
       expect((h.match(/disabled=""/g) ?? []).length, "both buttons disabled").toBe(2);
     }
     expect(html(27)).not.toContain("data-loading");
@@ -60,6 +51,6 @@ describe("QcOpenHeader (v136)", () => {
   it("the log rule disables + Log a query alone", () => {
     const h = html(27, { logDisabled: true });
     expect((h.match(/disabled=""/g) ?? []).length).toBe(1);
-    expect(h).toMatch(/data-qcv="oh-log" disabled=""/);
+    expect(h).toMatch(/disabled="" data-qcv="oh-log"/);
   });
 });

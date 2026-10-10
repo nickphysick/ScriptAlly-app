@@ -72,6 +72,7 @@ export interface PageHeaderOverflowItem {
 
 import type { LivingLine, LivingRun } from "../../lib/livingLine";
 import { runsText } from "../../lib/livingLine";
+import { PanelHeader, wordsOf } from "./PanelHeader";
 export type { LivingLine, LivingRun };
 /**
  * A page opts in by passing this. `count` is `null` until the page's count is SETTLED: the fixed
@@ -499,6 +500,30 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       </header>
       );
 }
+
+  /**
+   * HEADER v3 (10 Oct) — A PANEL WITH A LIVING COUNT IS THE SHARED PANEL HEADER, as a NUMBER page: the count large,
+   * the rest of its living headline as the words, its living sentence as the subline. A headline with no number in
+   * it ("All caught up") is shown as a title in the number's place. The page's EMPTY state (count 0 with an `empty`
+   * line) is untouched and falls through to the header below.
+   */
+  if (isPanel && !band && living && !(living.count === 0 && living.empty)) {
+    const line = living.count === null ? null : living.copy(living.count);
+    const words = wordsOf((line ?? living.copy(2)).headline);
+    const asTitle = !!line && wordsOf(line.headline) === null;
+    const btn = (b: typeof primary, ref?: React.Ref<HTMLButtonElement>) => (b ? { label: b.label, onClick: b.onClick, disabled: b.disabled, btnRef: ref } : undefined);
+    return (
+      <PanelHeader
+        kind={asTitle ? "title" : "number"} className={`ph ph--full ph--panel ph--living${art ? "" : " ph--noart"}`}
+        attrs={{ "data-probe": "page-header", "data-size": "full", "data-living": living.count === null ? "pending" : "settled" }}
+        number={line ? living.count : null} words={words ?? ""} title={asTitle ? line!.headline : undefined}
+        loading={living.count === null}
+        sub={line ? <LivingRuns runs={line.subline} /> : undefined} subPending
+        primary={btn(primary, primaryRef)} secondary={btn(secondary)} actsExtra={actionsPopover}
+        art={art} disc={!!art}
+      />
+    );
+  }
 
   return (
     /**
