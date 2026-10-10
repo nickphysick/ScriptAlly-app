@@ -20,6 +20,7 @@ import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { QC_COURIER_DISC } from "./qcArt";
 import { QcOpenHeader } from "./QcOpenHeader";
 import "./qcvBand134.css";
+import "./qcvFullList136.css";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
@@ -57,6 +58,24 @@ export function clearQcViewMemory(): void {
 export function readBirdsEyeOpen(search: string): boolean {
   const v = new URLSearchParams(search).get("view");
   return v === "calendar" || v === "cal";
+}
+
+/**
+ * v136 §C — scroll to the "Your queries" workspace and put focus on its heading. The heading is the
+ * workspace's own `<h2>`; it is made focusable here (`tabindex="-1"`) rather than in the workspace's file.
+ * Smooth unless the reader asked for reduced motion. No hash, no navigation.
+ */
+export function viewFullList(group: HTMLElement | null): void {
+  const head = group?.querySelector<HTMLElement>('[data-qcv="ws-head"]');
+  const title = group?.querySelector<HTMLElement>('[data-qcv="ws-title"]');
+  if (!head || !title) return;
+  const calm = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  /* the bar's top, less the flying hawk's 74px rise and a little air */
+  const scroller = head.closest<HTMLElement>(".wpg-scroll");
+  if (scroller) scroller.scrollTo({ top: scroller.scrollTop + head.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 96, behavior: calm ? "auto" : "smooth" });
+  else head.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+  if (!title.hasAttribute("tabindex")) title.setAttribute("tabindex", "-1");
+  title.focus({ preventScroll: true });
 }
 
 /** v134 §3 — the banner's two lines, exactly; the break falls after "find them,". */
@@ -219,6 +238,15 @@ export const QcCentre: React.FC<{
       * copy are the living-headers pack's and are unchanged.
       */}
     {courts}
+    {/* v136 §C — "View the full list": under the bands, it scrolls to "Your queries" and moves focus to its heading.
+        It does not navigate and puts no hash in the URL. */}
+    {v131 && (
+      <div className="qcfl" data-qcv="full-list-row">
+        <button type="button" className="qcfl-link" data-qcv="full-list" onClick={() => viewFullList(groupRef.current)}>
+          <span className="qcfl-words">View the full list</span><span className="qcfl-arrow" aria-hidden="true">{"\u2193"}</span>
+        </button>
+      </div>
+    )}
     {carousel}
     {/* v134 §3 — THE BANNER above "Your queries" (desktop): a blush band the sheet's full width, its bottom
         edge an arrow pointing down at the list. The copy is exact, on two lines. */}

@@ -13,7 +13,10 @@ import { column } from "./sh2Lib";
 export const DIR = "reports/header-panel-v2";
 export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 /** every workspace route: its header is the panel */
-export const WORKSPACE = ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard"] as const;
+/** Query Centre v136: `/queries` left the panel for its own open, ruled-corner header (QC136 A1). It is a workspace route
+    with no panel; every panel lock skips it by this register, and one check per size holds that it draws none. */
+export const OPEN_HEADER = ["/queries"] as const;
+export const WORKSPACE = ["/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans", "/import"] as const;
 export const PANEL_BG = "rgb(45, 58, 80)";

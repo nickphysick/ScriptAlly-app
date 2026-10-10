@@ -5,6 +5,7 @@
  *
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test qcV133
  */
+import { retiredV136 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 
@@ -88,6 +89,7 @@ test.describe("Query Centre v133 — the open header", () => {
   });
 
   test("H3 · rhythm: the header's top, the hairline and the desk's top equal the Contact list's", async ({ page }) => {
+    test.skip(true, retiredV136("the Query Centre's header rhythm held equal to the Contact list's; v136 gives the Query Centre its own open header (baked decision 1)", "QC136 A3, A5"));
     for (const [w, h] of SIZES) {
       await inkOpen(page, "/agents", w, { height: h, scope: "qc133" });
       await expect(page.locator('[data-cl15="header"]:not([data-loading])'), `${w}: the Contact list's header`).toBeVisible({ timeout: 20_000 });

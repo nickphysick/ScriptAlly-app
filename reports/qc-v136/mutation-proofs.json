@@ -1,0 +1,142 @@
+[
+ {
+  "lock": "A1",
+  "mutation": "restore the panel class",
+  "red": true,
+  "reading": [
+   "Error: 1512: the header carries a panel class",
+   "Expected: false",
+   "Received: true"
+  ]
+ },
+ {
+  "lock": "A2",
+  "mutation": "hard-code 27",
+  "red": true,
+  "reading": [
+   "Error: 1512: the figure is active + inactive (69 + 13)",
+   "Expected: \"82\"",
+   "Received: \"27\""
+  ]
+ },
+ {
+  "lock": "A3",
+  "mutation": "drop the art's negative margin",
+  "red": true,
+  "reading": [
+   "Error: 1512: the drawing's ink ends at 290.072, the rule is at 295",
+   "Expected: <= 3",
+   "Received:    4.927999999999997"
+  ]
+ },
+ {
+  "lock": "A4",
+  "mutation": "remove the mask",
+  "red": true,
+  "reading": [
+   "Error: 1512: ruled lines past the fade",
+   "Expected: 0",
+   "Received: 7"
+  ]
+ },
+ {
+  "lock": "A5",
+  "mutation": "80px gap",
+  "red": true,
+  "reading": [
+   "Error: 1512: rule → bands 80",
+   "Expected: <= 2",
+   "Received:    40"
+  ]
+ },
+ {
+  "lock": "B1",
+  "mutation": "swap the colours",
+  "red": true,
+  "reading": [
+   "Error: 1512: the active band",
+   "Expected: \"rgb(243, 221, 210)\"",
+   "Received: \"rgb(228, 222, 214)\""
+  ]
+ },
+ {
+  "lock": "B2",
+  "mutation": "gap 0",
+  "red": true,
+  "reading": [
+   "Error: 1512: the active cards are 0 apart",
+   "Expected: <= 1",
+   "Received:    8"
+  ]
+ },
+ {
+  "lock": "B3",
+  "mutation": "grid-template-areas: none",
+  "red": true,
+  "reading": [
+   "Error: 1512 you: the divider is left of the headlines",
+   "Expected: < 436.3125",
+   "Received:   654.125"
+  ]
+ },
+ {
+  "lock": "B4",
+  "mutation": "\"responses overdue\"",
+  "red": true,
+  "reading": [
+   "Error: 1512 agent: line 1",
+   "Expected: \"overdue\"",
+   "Received: \"responses overdue\""
+  ]
+ },
+ {
+  "lock": "B5",
+  "mutation": "flex-wrap: wrap, with the fit switched off",
+  "red": true,
+  "reading": [
+   "Error: 1512 you: the row is 60 tall against a 30 disc",
+   "Expected: <= 1",
+   "Received:    30"
+  ]
+ },
+ {
+  "lock": "B6",
+  "mutation": "remove the press handler",
+  "red": true,
+  "reading": [
+   "Error: 1512 you: aria-pressed",
+   "Expected: \"true\"",
+   "Received: \"false\""
+  ]
+ },
+ {
+  "lock": "B7",
+  "mutation": "hide the faces row while loading",
+  "red": true,
+  "reading": [
+   "Error: 1512: band-active h 182.4 → 245.4",
+   "Expected: <= 1",
+   "Received:    63"
+  ]
+ },
+ {
+  "lock": "C1",
+  "mutation": "margin-top 300",
+  "red": true,
+  "reading": [
+   "Error: 1512: the link ends -11.5625 above the viewport's foot",
+   "Expected: >= 24",
+   "Received:    -11.5625"
+  ]
+ },
+ {
+  "lock": "C2",
+  "mutation": "remove the focus call",
+  "red": true,
+  "reading": [
+   "Error: 1512: focus is on the heading (BUTTON)",
+   "Expected: \"ws-title\"",
+   "Received: \"full-list\""
+  ]
+ }
+]

@@ -6,6 +6,7 @@
  *
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test qcV134
  */
+import { retiredV136 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 import { pixel, sameRgb } from "./qc126Lib";
@@ -34,6 +35,7 @@ const deskCounts = (page: Page) => page.evaluate(() => Object.fromEntries(["you"
 
 test.describe("Query Centre v134 — the hero number and the faces", () => {
   test("N1 · hero: the number is the page's count at 124 (98), its words at 42 (34), on one line", async ({ page }) => {
+    test.skip(true, retiredV136("the hero number and its words (\"83 queries out\"); v136's title is \"You've sent {N} queries\", N the bands' total", "QC136 A2"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await page.evaluate((HD) => {
@@ -334,7 +336,10 @@ test.describe("Query Centre v134 — the band and the banner", () => {
       });
       expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(251, 249, 245)");
       expect(g.border === "0px" && g.radius === "0px" && g.shadow === "none", `${w}: no border, radius or shadow on the band (${g.border} ${g.radius} ${g.shadow})`).toBe(true);
-      expect(Math.abs(g.ru.y - g.desk - (wide(w) ? 64 : 52)), `${w}: desk → band ${g.ru.y - g.desk}`).toBeLessThanOrEqual(2);
+      /* RE-POINTED (Query Centre v136): "View the full list" now stands between the bands and this band, so the 64 (52)
+         is measured from the link's row */
+      const linkB = await page.evaluate(() => document.querySelector<HTMLElement>('[data-qcv="full-list-row"]')!.getBoundingClientRect().bottom);
+      expect(Math.abs(g.ru.y - linkB - (wide(w) ? 64 : 52)), `${w}: link → band ${g.ru.y - linkB}`).toBeLessThanOrEqual(2);
       expect(Math.abs(g.padT - (wide(w) ? 72 : 64)) <= 2 && Math.abs(g.padB - (wide(w) ? 72 : 64)) <= 2, `${w}: inner padding ${g.padT} / ${g.padB}`).toBe(true);
       expect(Math.abs(g.innerTop - g.ru.y - g.padT) <= 2 && g.ru.b - g.innerBottom >= g.padB - 2, `${w}: the section starts ${g.innerTop - g.ru.y} inside the band and ends ${g.ru.b - g.innerBottom} above its foot`).toBe(true);
       /* painted: the tint reaches both of the sheet's edges on the band's own rows, and is not above or below it */
@@ -413,6 +418,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
   });
 
   test("L1 · no jump: the header, the desk cards, the band and the banner are the same boxes loading and loaded", async ({ page }) => {
+    test.skip(true, retiredV136("the v134 header, desk cards and faces held loading against loaded; v136 rebuilt all three", "QC136 B7"));
     const read = () => page.evaluate((HD) => {
       const sc = document.querySelector<HTMLElement>(HD)?.closest<HTMLElement>(".wpg-scroll");
       const y0 = sc ? sc.getBoundingClientRect().top - sc.scrollTop : 0;

@@ -78,7 +78,7 @@ test("P7 · no horizontal overflow at 390", async ({ page }) => {
     /* ⚠️ /queries DRAWS NO PANEL ON A PHONE: under 768px the Query Centre is still its v126 page (its band card).
        ⚠️ Comparable titles and Submission packages keep a two-column page grid at 390 (track + 28 + the 340 rail), so
        their header row is 368 wide in a 334 column — as it was before the pack (measured on the base: PHONE_AS_BUILT). */
-    if (route === "/queries") { L.check("P7 the Query Centre's phone page draws its own header, not the panel", route, !r.hd, `panel ${!!r.hd}`); continue; }
+    if ((route as string) === "/queries") { L.check("P7 the Query Centre's phone page draws its own header, not the panel", route, !r.hd, `panel ${!!r.hd}`); continue; }
     const asBuilt = PHONE_AS_BUILT[route];
     L.check("P7 the panel is inside the screen and nothing in it runs past its edge", route, !!r.hd && r.hd.l >= -0.5 && (r.hd.r <= r.vw + 0.5 || (asBuilt !== undefined && near(r.hd.r, asBuilt, 1))) && (r.inner ?? 9) <= 1 && (r.maxR ?? 9e9) <= r.hd.r + 1, `panel ${r.hd ? `${r.hd.l.toFixed(0)}–${r.hd.r.toFixed(0)}` : "absent"}${asBuilt !== undefined ? ` (the header's right edge before the pack: ${asBuilt})` : ""} · inner overflow ${r.inner} · furthest child ${r.maxR?.toFixed(0)}`);
   }
@@ -144,10 +144,12 @@ test("P6 · no jump: the loading and loaded header boxes are equal", async ({ pa
     await page.waitForTimeout(first?.loading ? 7200 : 2400);
     const last = await box(); const w = `${route} @${vp.width}`;
     L.check("P6 the header's box is the same first seen and settled (±1)", w, !!first && !!last && near(first.l, last.l, 1) && near(first.t, last.t, 1) && near(first.w, last.w, 1) && near(first.h, last.h, 1), `${SHOW(first)}${first?.loading ? " (loading)" : ""} → ${SHOW(last)}`);
-    if (route === "/queries" || route === "/agents") L.check("P6 precondition: it was read while loading, then loaded", w, first?.loading === true && last?.loading === false, `first loading ${first?.loading} · last loading ${last?.loading}`);
+    if ((route as string) === "/queries" || route === "/agents") L.check("P6 precondition: it was read while loading, then loaded", w, first?.loading === true && last?.loading === false, `first loading ${first?.loading} · last loading ${last?.loading}`);
   }
-  L.check("P6 population: the held pages were read loading", "all", held >= 4, `${held}`);
-  L.done(SIZES.length * WORKSPACE.length + 5);
+  /* RE-POINTED (Query Centre v136): the Query Centre left this census (its own no-jump is QC136 B7), so the Contact list
+     is the one held page: two readings, one a size, where there were four */
+  L.check("P6 population: the held pages were read loading", "all", held >= 2, `${held}`);
+  L.done(SIZES.length * WORKSPACE.length + 3);
 });
 
 /* ───────────────────────── P8 · the popover ───────────────────────── */
@@ -236,7 +238,8 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
   await prepare(page);
   for (const [vi, vp] of SIZES.entries()) {
     const got: Record<string, NonNullable<Awaited<ReturnType<typeof readHero>>>> = {};
-    for (const route of ["/queries", "/agents"] as const) {
+    /* RE-POINTED (Query Centre v136): the Query Centre's header is no longer a panel; the Contact list's alone is held here */
+    for (const route of ["/agents"] as const) {
       await open(page, route, vp); await page.waitForTimeout(700);
       const r = await readHero(page, HERO[route]); const w = `${route} @${vp.width}`, H = HERO[route];
       L.check("A precondition: the hero header was read", w, !!r?.hd && !!r.win, r ? SHOW(r.hd) : "absent");
@@ -245,8 +248,8 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
       const want = vi === 0 ? 313 : 268;
       L.check(`A1 sheet top to panel bottom is ${want} (±2)`, w, near(r.hd.b - r.win.t, want, 2), (r.hd.b - r.win.t).toFixed(1));
       /* A2 */
-      const expectN = route === "/queries" ? Number(r.badgeCounts[0]) : (r.hero ?? NaN) - Number(r.badgeCounts[1]);
-      L.check("A2 precondition: the count it must state was read independently", w, Number.isFinite(expectN), route === "/queries" ? `With you badge "${r.badgeCounts[0]}"` : `on file ${r.hero} − queried badge "${r.badgeCounts[1]}"`);
+      const expectN = (route as string) === "/queries" ? Number(r.badgeCounts[0]) : (r.hero ?? NaN) - Number(r.badgeCounts[1]);
+      L.check("A2 precondition: the count it must state was read independently", w, Number.isFinite(expectN), (route as string) === "/queries" ? `With you badge "${r.badgeCounts[0]}"` : `on file ${r.hero} − queried badge "${r.badgeCounts[1]}"`);
       if (expectN > 0) {
         L.check("A2 the stamp's text is exact", w, r.stamp?.text === `${expectN} ${H.stampWord}`, `"${r.stamp?.text}" vs "${expectN} ${H.stampWord}"`);
         L.check("A2 its colour and its place outside the h1", w, r.stamp?.color === "rgb(224, 161, 136)" && r.stamp.inH1 === false, `${r.stamp?.color} · in h1 ${r.stamp?.inH1}`);
@@ -271,24 +274,21 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
       const clear = r.badgeTops.length ? Math.min(...r.badgeTops) - 9 - r.hd.b : NaN;
       L.check("A6 every badge's halo clears the panel by 20 or more", w, r.badgeTops.length === 3 && clear >= 20, `${r.badgeTops.length} badges · ${clear.toFixed(1)}`);
     }
-    const q = got["/queries"], a = got["/agents"];
-    L.check("A1 the two pages agree (±1)", `@${vp.width}`, !!q && !!a && near((q.hd!.b - q.win!.t) - (a.hd!.b - a.win!.t), 0, 1), q && a ? `${(q.hd!.b - q.win!.t).toFixed(1)} vs ${(a.hd!.b - a.win!.t).toFixed(1)}` : "—");
-    L.check("A6 the two pages agree (±1)", `@${vp.width}`, !!q && !!a && near((q.cardTop! - q.hd!.b) - (a.cardTop! - a.hd!.b), 0, 1), q && a ? `${(q.cardTop! - q.hd!.b).toFixed(1)} vs ${(a.cardTop! - a.hd!.b).toFixed(1)}` : "—");
   }
   /* A2: no stamp on any other route */
-  for (const route of WORKSPACE.filter((r) => r !== "/queries" && r !== "/agents")) {
+  for (const route of WORKSPACE.filter((r) => r !== "/agents")) {
     await open(page, route, SIZES[0]);
     const r = await readPanel(page);
     L.check("A2 no stamp on any other route", route, !!r.any && r.stamps.length === 0, `${r.stamps.map((s) => s.text).join()}`);
   }
-  L.done(2 * 2 * 13 + 4 + 8);
+  L.done(2 * 13 + 8);
 });
 
 /* ───────────────────────── C1 · the opaque badge ───────────────────────── */
 test("C1 · every badge is a solid white disc, and nothing paints over it", async ({ page }) => {
   const L = new Ledger("C1");
   await prepare(page);
-  for (const vp of SIZES) for (const [route, sel] of [["/queries", '[data-qcv="court-badge"]'], ["/agents", '[data-cdb="badge"]']] as const) {
+  for (const vp of SIZES) /* RE-POINTED (v136): the Query Centre has no badges */ for (const [route, sel] of [["/agents", '[data-cdb="badge"]']] as const) {
     await open(page, route, vp); await page.waitForTimeout(600);
     const bs = await page.evaluate((sel) => {
       const vis = (e: Element) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().height > 0;
@@ -313,7 +313,7 @@ test("C1 · every badge is a solid white disc, and nothing paints over it", asyn
       L.check("C1 the badge is first at the point", w, b.first[k], `${b.first[k]}`);
     }
   }
-  L.done(SIZES.length * 2 * (1 + 3 * 4 * 2));
+  L.done(SIZES.length * 1 * (1 + 3 * 4 * 2));
 });
 
 /* ───────────────────────── D1–D4 · D8 ───────────────────────── */
@@ -354,8 +354,10 @@ test("D1 D2 D3 D4 D8 · the Contact list's badge cards", async ({ page }) => {
   const L = new Ledger(key && /^D[12348]$/.test(key) ? key : "D1-D8");
   await prepare(page);
   for (const [vi, vp] of SIZES.entries()) {
-    await open(page, "/queries", vp); await page.waitForTimeout(500);
-    const qc = await readCards(page, "qc");
+    /* RE-POINTED (Query Centre v136): the Query Centre's badge desk is retired, so the Contact list's cards are held to
+       the badge card's own compact values — what the two desks shared — rather than to a second page */
+    const QC_CARD = { badge: { w: 64, h: 64, left: 16, top: -26 }, stripH: 64, inset: [6, 6, 6, 6], innerBorder: "1px solid" };
+    const qc = [QC_CARD, QC_CARD, QC_CARD] as unknown as Awaited<ReturnType<typeof readCards>>;
     await open(page, "/agents", vp); await page.waitForTimeout(700);
     const cl = await readCards(page, "cl");
     const onFile = await page.evaluate(() => { const e = [...document.querySelectorAll<HTMLElement>('[data-cl15="hero-n"]')].find((x) => x.getBoundingClientRect().height > 0); return e ? Number(e.textContent) : NaN; });
@@ -473,5 +475,7 @@ test("floor · the run wrote the readings it claims", async () => {
   const total = counts.reduce((s, v) => s + v, 0);
   writeFileSync(`${DIR}/ledger/_totals.json`, JSON.stringify(Object.fromEntries(names.map((n, i) => [n, counts[i]]).concat([["total", total]])), null, 1));
   expect(counts.every((c) => c > 0), `a ledger is missing: ${names.filter((_, i) => !counts[i]).join()}`).toBe(true);
-  expect(total).toBeGreaterThanOrEqual(600);
+  /* RE-POINTED (Query Centre v136): the Query Centre left the panel, taking its readings with it — 506 written on the
+     first run without it, where 600 was the floor with it */
+  expect(total).toBeGreaterThanOrEqual(480);
 });

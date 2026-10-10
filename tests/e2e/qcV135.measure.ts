@@ -12,6 +12,7 @@
  * Each was red on the build before the pack (fb201cd5) and by its named mutation (`QC135_MUTATE=<lock>`,
  * qc135Lib MUTATIONS) before its green was believed: reports/qc-v135/.
  */
+import { retiredV136 } from "./inkRetired";
 import { test } from "@playwright/test";
 import { KILL_MOTION } from "./measure";
 import { HEADERS, Ledger, SIZES, near, open, prepare, readHeader } from "./qc135Lib";
@@ -135,6 +136,7 @@ async function openDesk(page: import("@playwright/test").Page, vp: { width: numb
 }
 
 test("B1 B2 B3 B4 B5 B6 · the badge, the tinted strip, the inner border, the placeholder, the body, and no overflow", async ({ page }) => {
+  test.skip(true, retiredV136("the v135 badge card: its badge, tinted strip, inner border, art placeholder and chart; v136's bands draw none of them", "QC136 B1–B5"));
   const B1 = new Ledger("B1"), B2 = new Ledger("B2"), B3 = new Ledger("B3"), B4 = new Ledger("B4"), B5 = new Ledger("B5"), B6 = new Ledger("B6");
   const all = [B1, B2, B3, B4, B5, B6];
   for (const vp of SIZES) {
@@ -177,6 +179,7 @@ test("B1 B2 B3 B4 B5 B6 · the badge, the tinted strip, the inner border, the pl
 });
 
 test("B7 · selected: a 2px ring in the court's colour, aria-pressed, and it chooses for Recently updated only", async ({ page }) => {
+  test.skip(true, retiredV136("the selected badge card's ring in the court's colour; the v136 card's ring is navy", "QC136 B6"));
   const L = new Ledger("B7");
   for (const vp of SIZES) {
     await openDesk(page, vp);
@@ -204,6 +207,7 @@ test("B7 · selected: a 2px ring in the court's colour, aria-pressed, and it cho
 });
 
 test("B8 · desk no jump: the cards, the badges, the strips and the chart boxes are the same boxes loading and loaded", async ({ page }) => {
+  test.skip(true, retiredV136("the badge desk's loading frames", "QC136 B7"));
   const L = new Ledger("B8");
   await page.addInitScript(({ css }) => {
     (window as unknown as { __SA_QC_HOLD_MS: number }).__SA_QC_HOLD_MS = 6000;
@@ -234,6 +238,7 @@ test("B8 · desk no jump: the cards, the badges, the strips and the chart boxes 
 });
 
 test("B9 · art slot: with a slot filled, the image is in the placeholder's box and the dashed border is gone", async ({ page }) => {
+  test.skip(true, retiredV136("the desk's art slots; the v136 bands have none (the QC_DESK_ART_* slots stay registered and unread)", "nothing: no art is drawn on this desk"));
   const L = new Ledger("B9");
   const vp = SIZES[0];
   await openDesk(page, vp);

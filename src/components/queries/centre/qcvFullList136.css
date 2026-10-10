@@ -1,0 +1,26 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v136 §C — "View the full list ↓": a large typewriter link centred 30px under the bands.
+ *
+ * ⚠️ IT IS A ROW OF THE GROUP'S GRID, BETWEEN THE BANDS AND "RECENTLY UPDATED". The banner, the workspace and the
+ *    footer are placed on explicit rows (qcvBand134.css, qcvPage.css); with one more row above them each moves
+ *    down one. Left where they were, grid auto-placement would push "Recently updated" below the footer.
+ */
+.qcv-group > .qcfl { grid-column: 1 / -1; min-width: 0; display: flex; justify-content: center; margin-top: 30px; }
+.qcv-group > .qcfl ~ .qc134-ban { grid-row: 5; }
+.qcv-group > .qcfl ~ .qc134-ban ~ .qcv-page { grid-row: 6; }
+.qcv-group > .qcfl ~ .qc134-ban ~ .af { grid-row: 7; }
+
+.qcfl .qcfl-link {
+  display: inline-flex; align-items: baseline; gap: 12px; margin: 0; padding: 2px 4px; border: 0; border-radius: 4px; background: none; cursor: pointer;
+  font-family: var(--sp-type); font-weight: 400; font-size: 24px; line-height: 1.3; color: #1c130f;
+}
+/* the underline is on the words only */
+.qcfl .qcfl-link .qcfl-words { font-family: inherit; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 7px; text-decoration-color: rgba(28, 19, 15, 0.35); transition: text-decoration-color 0.15s; }
+.qcfl .qcfl-link .qcfl-arrow { font-family: inherit; font-size: 20px; line-height: 1; transition: transform 0.15s; }
+.qcfl .qcfl-link:hover .qcfl-words { text-decoration-color: #1c130f; }
+.qcfl .qcfl-link:hover .qcfl-arrow { transform: translateY(3px); }
+.qcfl .qcfl-link:focus-visible { outline: 2px solid #e0a188; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .qcfl .qcfl-link .qcfl-words, .qcfl .qcfl-link .qcfl-arrow { transition: none; } }
