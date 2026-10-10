@@ -223,7 +223,8 @@
     "design-refs/shell/header-v3-qc.html": "48b8772bf92de12b36acf755a5bb42cde70451e514f2a8d9be91a8fd5cbab315",
     "design-refs/shell/header-v3-qc-in-shell.html": "7a5bc36c18dcaa393697c1e3a85bef9e31b289a629edbdff9473d763e484a7fd",
     "design-refs/header-v3/ref-qc-1280@2x.png": "98a763bf297e5f9f30a12dc8966953d1f272e5d4e19c7cc353eeae72b4152613",
-    "design-refs/header-v3/ref-qc-1512@2x.png": "2a25ffb6c9b7d2caa712b5820551ec8e3314e66e5ebbb69564e45b52c9cf0f3e"
+    "design-refs/header-v3/ref-qc-1512@2x.png": "2a25ffb6c9b7d2caa712b5820551ec8e3314e66e5ebbb69564e45b52c9cf0f3e",
+    "design-refs/marketing/landing-colours-v2.html": "8006ef5103c850ec54628f4bbbc1429aa31b26b37e460fe2128a11c7b0168c94"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

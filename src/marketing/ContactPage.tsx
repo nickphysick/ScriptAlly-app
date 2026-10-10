@@ -27,7 +27,6 @@ import {
   CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS, CONTACT_ART_ALT,
 } from "./contactCopy";
 import { Runs } from "./CopyRuns";
-import { MarketingFooter } from "./MarketingFooter";
 import { ContactTile } from "./marketingMarks";
 import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS, SUPPORT_EMAIL } from "../lib/companyInfo";
 import {
@@ -252,7 +251,6 @@ export const ContactPage: React.FC<{
         </div>
       </main>
 
-      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

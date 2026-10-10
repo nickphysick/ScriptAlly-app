@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { BRAND_MARK, BRAND_WORDMARK, artUrl } from "./brandArt";
+import { MarketingFooter } from "./MarketingFooter";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -245,8 +246,16 @@ export const MarketingShell: React.FC<{
           </div>
         )}
       </div>
-      {/* `tabIndex={-1}` so the skip link can actually move focus here, not merely scroll. */}
-      <div id="mk-main" tabIndex={-1} style={{ flex: 1 }}>{children}</div>
+      {/* `tabIndex={-1}` so the skip link can actually move focus here, not merely scroll.
+          ⚠️ THE SHEET: every light surface of a public page sits inside this one box, and the box
+          owns the four 18px corners (landing colours v2). The page ground behind it is ink, so the
+          nav above and the footer below close a frame around it. */}
+      <div id="mk-main" className="mk-sheet" tabIndex={-1}>{children}</div>
+      {/* ⚠️ THE FOOTER IS THE SHELL'S, RENDERED ONCE. Each page used to mount its own copy as its
+          last child — which put it INSIDE whatever the page's last surface was, so nothing could
+          round that surface's bottom corners against it. Chrome on both sides of the sheet now
+          belongs to the same component. */}
+      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

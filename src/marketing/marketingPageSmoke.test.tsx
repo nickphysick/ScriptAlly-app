@@ -530,7 +530,10 @@ describe("the status band: a question, and nothing that moves", () => {
 
   /** ⚠️ THE MARKS SURVIVE ELSEWHERE, and asserting that is what stops the deletion over-reaching. */
   it("and the glyphs themselves still draw, in the footer", () => {
-    expect(html(), "the footer's signature row").toContain('class="mk-footglyphs"');
+    /* The footer is the shell's (landing colours v2), so it is read where it is rendered. */
+    expect(renderPage(
+      <MarketingShell user={null as never} onNavigate={noNavigate} path="/"><div /></MarketingShell>, "/"),
+      "the footer's signature row").toContain('class="mk-footglyphs"');
   });
 });
 
@@ -851,7 +854,11 @@ describe("the Founding Writers page", () => {
 
   /** It carries the shared footer, so every other public page is one click away. */
   it("takes the shared footer with it", () => {
-    const h = html();
+    /* Rendered through the shell, which is where the footer lives (landing colours v2). */
+    const h = renderPage(
+      <MarketingShell user={null as never} onNavigate={noNavigate} path="/founders">
+        <FoundersPage onNavigate={noNavigate} />
+      </MarketingShell>, "/founders");
     expect(h).toMatch(/["\s`]mk-foot["\s`]/);
     expect(h).toContain("Founding writers");
   });

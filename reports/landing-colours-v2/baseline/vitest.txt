@@ -1,0 +1,625 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-lc2
+
+ ✓ src/components/todo/deadBoard.test.ts (3 tests) 135ms
+ ✓ src/lib/stageSentence.test.ts (7 tests) 126ms
+ ✓ src/components/containers/containers.test.tsx (35 tests) 127ms
+ ✓ src/lib/todoTimeline.test.ts (45 tests) 52ms
+ ✓ src/components/queries/respondDesk.test.tsx (60 tests) 58ms
+ ✓ src/components/todo/todoWorkbench.test.ts (105 tests | 2 skipped) 172ms
+ ✓ src/lib/timelineCopy.test.ts (12 tests) 1046ms
+   ✓ never a pronoun, and never a verdict > every sentence is non-empty and starts with a capital  436ms
+ ✓ src/marketing/marketingPageSmoke.test.tsx (97 tests) 252ms
+ ✓ src/lib/dates.test.ts (6 tests) 1631ms
+   ✓ the one formatter is the only way a short month is made > no toLocaleDateString / toLocaleString / Intl.DateTimeFormat asks for a short month outside lib/dates.ts  412ms
+   ✓ the one formatter is the only way a short month is made > no string in the code says Sept (comments may quote the old bug), and there is one month table  1177ms
+ ✓ src/marketing/marketingTokens.test.ts (48 tests) 129ms
+ ✓ src/components/settingsPageSmoke.test.tsx (30 tests) 153ms
+ ✓ src/components/agents/card/agentCardRetire.test.ts (7 tests) 57ms
+ ✓ src/components/todo/noteboardCard.test.tsx (9 tests) 40ms
+stdout | src/components/shell/workspacePageGrid.test.tsx > no modifier is styled without being emitted > every `.wpg--*` a stylesheet selects on is set by the component
+   modifiers styled and emitted: wpg--fill, wpg--record
+
+ ✓ src/components/shell/workspacePageGrid.test.tsx (34 tests) 55ms
+ ✓ src/lib/queryCentreOverlay.test.ts (20 tests) 41ms
+ ✓ src/components/todo/taskPanePort.test.tsx (33 tests) 101ms
+ ✓ src/lib/actionKind.test.ts (11 tests) 81ms
+ ✓ src/lib/recomputeQuery.test.ts (23 tests) 141ms
+ ✓ src/components/agentsPageSmoke.test.tsx (9 tests) 107ms
+ ✓ src/lib/testAnchors.test.ts (2 tests) 89ms
+ ✓ src/components/analytics/analyticsPageSmoke.test.tsx (6 tests) 138ms
+ ✓ src/components/shell/sidebarCollapse.test.tsx (22 tests) 70ms
+ ✓ src/components/todo/todoTokenResolution.test.ts (1 test) 10ms
+ ✓ src/components/todo/noteboardEmptyState.test.tsx (13 tests) 56ms
+ ✓ src/components/queries/centre/qcList.test.tsx (16 tests) 40ms
+ ✓ src/components/materialsPageSmoke.test.tsx (19 tests) 111ms
+ ✓ src/test/devSurfaceSmoke.test.tsx (13 tests) 83ms
+ ✓ src/lib/materialsSweep.test.ts (16 tests) 14ms
+ ✓ src/lib/dashPins.test.ts (13 tests) 84ms
+ ✓ src/components/manuscripts/journeyPane.test.tsx (13 tests) 46ms
+ ✓ src/components/shell/workspaceShell.test.tsx (31 tests) 98ms
+ ✓ src/components/manuscripts/manuscriptDossier.test.tsx (18 tests) 98ms
+ ✓ src/components/agents/card/agentCard.test.ts (7 tests) 32ms
+ ✓ src/lib/agentContext.test.ts (56 tests) 18ms
+ ✓ src/lib/qcCalView.test.ts (42 tests) 22ms
+ ✓ src/components/todo/todoPageSmoke.test.tsx (8 tests) 97ms
+ ✓ src/components/shell/sidebarCapture.test.tsx (10 tests) 31ms
+ ✓ src/components/shell/pageHeaderDefault.test.tsx (17 tests) 19ms
+ ✓ src/components/todo/noteboardTask.test.ts (8 tests) 62ms
+ ✓ src/components/queriesPageSmoke.test.tsx (6 tests) 73ms
+ ✓ src/lib/analyticsModel.test.ts (45 tests) 28ms
+ ✓ src/lib/qcStages.test.ts (21 tests) 88ms
+ ✓ src/marketing/contactPage.test.tsx (10 tests) 40ms
+ ✓ src/components/shell/shellV2Smoke.test.tsx (8 tests) 25ms
+ ✓ src/components/queries/QueryCentreGrid.test.tsx (9 tests) 34ms
+ ✓ src/components/todo/taskListWide.test.tsx (16 tests) 24ms
+ ✓ src/lib/dashChart.test.ts (36 tests) 43ms
+ ✓ src/lib/correctionPreview.test.ts (11 tests) 24ms
+ ✓ src/components/dashboard/oneScreenChart.test.tsx (23 tests) 29ms
+ ✓ src/components/shell/shellV2Tokens.test.ts (32 tests) 17ms
+ ✓ src/components/queries/queryBandVerbs.test.tsx (10 tests) 38ms
+ ✓ src/components/manuscripts/v12/msv21Smoke.test.tsx (17 tests) 67ms
+ ✓ src/components/dashboardPageSmoke.test.tsx (4 tests) 71ms
+ ✓ src/components/manuscripts/versionsPane.test.tsx (18 tests) 54ms
+ ✓ src/components/agents/contact/contactNextStep.test.tsx (17 tests) 52ms
+ ✓ src/components/queries/queryPanel.test.ts (22 tests) 30ms
+ ✓ src/components/manuscripts/plateEdit.test.tsx (52 tests) 86ms
+ ✓ src/components/authPageSmoke.test.tsx (5 tests) 104ms
+ ✓ src/components/queries/centre/qcCentre.test.tsx (36 tests) 66ms
+ ✓ src/components/queries/QueryCard.test.tsx (19 tests) 33ms
+ ✓ src/components/todo/noteboardChrome.test.tsx (10 tests) 38ms
+ ✓ src/lib/queryAmbient.test.ts (68 tests) 39ms
+ ✓ src/components/todo/noteboardToolbar.test.tsx (7 tests) 37ms
+ ✓ src/components/todo/tasksViewport.test.tsx (76 tests) 73ms
+ ✓ src/components/shell/betaChrome.test.tsx (14 tests) 36ms
+ ✓ src/components/queries/centre/qcBirdsEye.test.tsx (21 tests) 80ms
+ ✓ src/marketing/aboutPage.test.tsx (9 tests) 121ms
+ ✓ src/lib/offerNotify.test.ts (6 tests) 22ms
+ ✓ src/components/manuscripts/notesPane.test.tsx (14 tests) 25ms
+ ✓ src/components/manuscripts/manuscriptPlate.test.tsx (29 tests) 81ms
+ ✓ src/lib/responseJourneys.test.ts (19 tests) 9ms
+ ✓ src/components/manuscripts/overviewPane.test.tsx (20 tests) 31ms
+ ✓ src/lib/dashWindow.test.ts (9 tests) 28ms
+ ✓ src/components/queries/queryLogSheet.test.tsx (11 tests) 56ms
+ ✓ src/lib/todoHandoff.test.ts (55 tests) 28ms
+ ✓ src/lib/bookFigures.test.ts (8 tests) 6ms
+ ✓ src/lib/nudgeState.test.ts (51 tests) 27ms
+ ✓ src/components/manuscripts/compsV2.test.tsx (11 tests) 20ms
+ ✓ src/components/todo/todoShellPolish.test.ts (38 tests) 23ms
+ ✓ src/lib/qcSummary.test.ts (25 tests) 28ms
+ ✓ src/components/queries/sentMaterials.test.tsx (5 tests) 21ms
+ ✓ src/components/shell/mastheadFormat.test.tsx (18 tests) 38ms
+ ✓ src/marketing/marketingLinks.test.tsx (15 tests) 1357ms
+   ✓ the support address is stated once > no source file hardcodes the retired support address  1309ms
+ ✓ src/components/shell/workspaceTasksNav.test.tsx (7 tests) 116ms
+ ✓ src/lib/datePickerHub.test.tsx (17 tests) 28ms
+ ✓ src/lib/todoListView.test.ts (21 tests) 21ms
+ ✓ src/lib/elapsed.test.ts (17 tests) 27ms
+ ✓ src/components/manuscripts/compsScoutVerdict.test.tsx (5 tests) 104ms
+ ✓ src/lib/todoActions.test.ts (22 tests) 18ms
+ ✓ src/lib/todoWalk.test.ts (43 tests) 23ms
+ ✓ src/components/agents/contact/contactDesk.test.tsx (8 tests) 27ms
+ ✓ src/lib/queryCentreChassis.test.ts (52 tests) 45ms
+ ✓ src/lib/queryDerivation.test.ts (43 tests) 13ms
+ ✓ src/components/materials/sampleSpecPicker.test.tsx (12 tests) 47ms
+ ✓ src/components/todo/noteboardDrawer.test.tsx (6 tests) 12ms
+ ✓ src/lib/paneGate.test.ts (16 tests) 18ms
+ ✓ src/lib/queryCentreGrid.test.ts (21 tests) 14ms
+ ✓ src/lib/createQty.test.ts (24 tests) 23ms
+ ✓ src/lib/agentMaterialRows.test.ts (20 tests) 17ms
+ ✓ src/components/shell/topNav.test.tsx (20 tests) 24ms
+ ✓ src/lib/paneCommit.test.ts (49 tests) 10ms
+ ✓ src/components/shell/barSwitcher.test.tsx (3 tests) 41ms
+ ✓ src/components/manuscripts/bookProfile.test.tsx (28 tests) 25ms
+ ✓ src/lib/cardDraft.test.ts (28 tests) 15ms
+ ✓ src/lib/packageEditions.test.ts (26 tests) 19ms
+ ✓ src/lib/accountDeletion.test.ts (15 tests) 20ms
+ ✓ src/lib/manuscriptSummary.test.ts (24 tests) 59ms
+ ✓ src/lib/paneJourney.test.ts (46 tests) 24ms
+ ✓ src/lib/contactList.test.ts (36 tests) 21ms
+ ✓ src/lib/taskDue.test.ts (33 tests) 24ms
+ ✓ src/lib/agentMaterials.test.ts (21 tests) 16ms
+ ✓ src/components/todo/tasksCarryover.test.tsx (11 tests) 16ms
+ ✓ src/marketing/waitlistGuards.test.ts (18 tests) 17ms
+ ✓ src/lib/packageMetrics.test.ts (53 tests) 33ms
+ ✓ src/lib/sessionContext.test.ts (12 tests) 22ms
+ ✓ src/lib/recordResponse.test.ts (11 tests) 19ms
+ ✓ src/marketing/marketingFooter.test.tsx (7 tests) 19ms
+ ✓ src/components/onboarding/captureFork.test.tsx (10 tests) 32ms
+ ✓ src/lib/measureTemplates.test.ts (2 tests) 14ms
+ ✓ src/lib/taskCardFactsSleep.test.ts (4 tests) 31ms
+ ✓ src/components/manuscripts/manuscriptsEmpty.test.tsx (6 tests) 63ms
+ ✓ src/components/dashboard/oneScreenPanel.test.tsx (16 tests) 12ms
+ ✓ src/lib/todoListPage.test.ts (12 tests) 19ms
+ ✓ src/lib/searchPalette.test.ts (33 tests) 19ms
+ ✓ src/lib/queryDraft.test.ts (32 tests) 29ms
+ ✓ src/lib/assistFill.test.ts (16 tests) 16ms
+ ✓ src/lib/todoLedger.test.ts (15 tests) 19ms
+ ✓ src/lib/packagesOverview.test.ts (37 tests) 22ms
+ ✓ src/components/statusDot.test.tsx (5 tests) 8ms
+ ✓ src/components/agents/contact/contactRows.test.tsx (7 tests) 14ms
+ ✓ src/components/todo/boardSidebar.test.tsx (13 tests) 19ms
+ ✓ src/components/queries/queryAgentTab.test.tsx (11 tests) 35ms
+ ✓ src/components/todo/calendarTokens.test.ts (14 tests) 33ms
+ ✓ src/lib/agentCard.test.ts (34 tests) 53ms
+ ✓ src/lib/journeyBars.test.ts (42 tests) 85ms
+ ✓ src/lib/territory.test.ts (26 tests) 11ms
+ ✓ src/components/manuscripts/bookVersionsPanel.test.tsx (15 tests) 16ms
+ ✓ src/lib/builderRail.test.ts (18 tests) 22ms
+ ✓ src/lib/quickAdd.test.ts (12 tests) 6ms
+ ✓ src/components/todo/todoSession.test.ts (57 tests) 41ms
+ ✓ src/lib/attachmentRows.test.ts (7 tests) 28ms
+ ✓ src/components/todo/duplicateSendGuard.test.ts (8 tests) 17ms
+ ✓ src/components/shared/timeline/boardWindow.test.ts (5 tests) 16ms
+ ✓ src/lib/queryCentreCorrections.test.ts (28 tests) 17ms
+ ✓ src/lib/accountPrefs.test.ts (15 tests) 17ms
+ ✓ src/lib/reconstructedStep.test.ts (6 tests) 22ms
+ ✓ src/components/queries/centre/qcArt.test.ts (12 tests) 8ms
+ ✓ src/components/todo/tasksAuditGrammar.test.tsx (3 tests) 30ms
+ ✓ src/lib/materialDraft.test.ts (36 tests) 19ms
+ ✓ src/lib/taskSettings.test.ts (5 tests) 17ms
+ ✓ src/lib/materials.test.ts (19 tests) 18ms
+ ✓ src/lib/accountHeaderFacts.test.ts (11 tests) 21ms
+ ✓ src/lib/sampleJoin.test.ts (14 tests) 15ms
+ ✓ src/lib/todoV2.test.ts (10 tests) 13ms
+ ✓ src/lib/manuscriptPitch.test.ts (17 tests) 11ms
+ ✓ src/components/todo/calendarColourLaw.test.ts (3 tests) 12ms
+ ✓ functions/src/emailConfig.test.ts (19 tests) 10ms
+ ✓ src/components/shell/primitives.test.tsx (49 tests) 17ms
+ ✓ src/components/queryActions/sentHow.test.tsx (5 tests) 42ms
+ ✓ src/lib/queryCentrePolish.test.ts (30 tests) 15ms
+ ✓ src/lib/barPageName.test.ts (6 tests) 37ms
+ ✓ src/lib/shortcuts.test.ts (8 tests) 24ms
+ ✓ functions/src/firestoreHandle.test.ts (11 tests) 6ms
+ ✓ src/lib/listRowDate.test.ts (8 tests) 28ms
+ ✓ src/lib/queryGridEmpty.test.ts (11 tests) 7ms
+ ✓ src/lib/queryCopy.test.ts (10 tests) 13ms
+ ✓ src/components/queries/centre/qcGlance.test.tsx (6 tests) 29ms
+ ✓ src/components/todo/todoTightening.test.ts (14 tests) 16ms
+ ✓ src/lib/dashboardStats.test.ts (58 tests) 13ms
+ ✓ src/lib/queryCentrePane.test.ts (15 tests) 14ms
+ ✓ src/lib/todoBoard.test.ts (33 tests) 11ms
+ ✓ src/components/todo/artSlots.test.tsx (16 tests | 1 skipped) 9ms
+ ✓ src/lib/packageAttach.test.ts (39 tests) 10ms
+ ✓ src/lib/manuscriptV21.test.ts (15 tests) 13ms
+ ✓ src/lib/qcBirdsDrawer.test.ts (5 tests) 10ms
+ ✓ src/components/todo/noteboardCompose.test.ts (9 tests) 22ms
+ ✓ src/components/queries/centre/useQcLoad.test.ts (15 tests) 9ms
+ ✓ src/components/settings/addPassword.test.tsx (12 tests) 9ms
+ ✓ src/lib/agentList.test.ts (63 tests) 43ms
+ ✓ src/components/todo/calendarStageTints.test.ts (5 tests) 3ms
+ ✓ src/lib/queryCentreList.test.ts (15 tests) 8ms
+ ✓ src/components/shared/slideOver.test.tsx (4 tests) 12ms
+ ✓ src/lib/queryCentreGlance.test.ts (12 tests) 9ms
+ ✓ src/lib/recordResponseShell.test.ts (31 tests) 14ms
+ ✓ src/lib/todoCalendar.test.ts (56 tests) 20ms
+ ✓ src/lib/todoBoardSort.test.ts (14 tests) 23ms
+ ✓ src/components/shell/mobileShell.test.tsx (14 tests) 16ms
+ ✓ src/lib/queryCardFacts.test.ts (47 tests) 10ms
+ ✓ src/lib/todoTour.test.ts (6 tests) 40ms
+ ✓ src/lib/todoColumns.test.ts (28 tests) 12ms
+ ✓ src/components/shell/desk/deskCard.test.tsx (7 tests) 13ms
+ ✓ src/components/todo/todoTileTdz.test.ts (3 tests) 31ms
+ ✓ src/components/todo/noteboardOrder.test.ts (7 tests) 11ms
+ ✓ src/lib/dismissTask.test.ts (7 tests) 9ms
+ ✓ src/components/todo/todoNotesTasks.test.ts (26 tests) 9ms
+ ✓ src/lib/agentsPage.test.ts (43 tests) 14ms
+ ✓ src/components/shell/pageHeaderPanel.test.tsx (8 tests) 11ms
+ ✓ src/lib/calendarFacets.test.ts (9 tests) 4ms
+ ✓ src/components/todo/tasksKeys.test.tsx (20 tests) 6ms
+ ✓ src/components/queries/centre/qcOpenHeader.test.tsx (6 tests) 10ms
+ ✓ src/components/todo/v2/v2Rows.test.tsx (4 tests) 7ms
+ ✓ src/components/shared/timeline/calendarFixes.test.ts (8 tests) 7ms
+ ✓ src/lib/queryCentreFade.test.ts (5 tests) 84ms
+ ✓ src/components/dashboard/oneScreenMark.test.tsx (12 tests) 7ms
+ ✓ src/components/todo/calendarStyleReach.test.ts (4 tests) 10ms
+ ✓ src/lib/packageLock.test.ts (26 tests) 8ms
+ ✓ src/components/agents/card/agentCardParts.test.tsx (3 tests) 10ms
+ ✓ src/lib/queryCentreGroups.test.ts (16 tests) 12ms
+ ✓ src/lib/contactHousekeeping.test.ts (25 tests) 45ms
+ ✓ src/components/dashboard/motionPolish.test.ts (12 tests) 10ms
+ ✓ src/components/onboarding/reviewShell.test.tsx (18 tests) 7ms
+ ✓ src/lib/queryTimelineRows.test.ts (7 tests) 13ms
+ ✓ src/components/todo/taskTicket.test.tsx (8 tests) 8ms
+ ✓ src/components/reading-pane/queryTimelineRows.test.tsx (7 tests) 8ms
+ ✓ src/components/dashboard/queryingGoalsCard.test.tsx (31 tests) 9ms
+ ✓ src/lib/oneScreen.test.ts (45 tests) 13ms
+ ✓ src/lib/qcTimeline.test.ts (32 tests) 21ms
+ ✓ src/lib/queryActions/packagesJourney.test.ts (24 tests) 10ms
+ ✓ src/components/manuscripts/manuscriptPager.test.tsx (10 tests) 8ms
+ ✓ src/lib/attachments.test.ts (7 tests) 6ms
+ ✓ src/lib/queryPaneStates.test.ts (9 tests) 9ms
+ ✓ src/lib/discoverAgents.test.ts (24 tests) 11ms
+ ✓ src/lib/expectedDate.test.ts (33 tests) 6ms
+ ✓ src/lib/queryCentreRest.test.ts (19 tests) 7ms
+ ✓ src/components/shell/manuscriptScope.test.ts (8 tests) 3ms
+ ✓ src/lib/smartImportReviewModel.test.ts (55 tests) 10ms
+ ✓ src/lib/queryingGoals.test.ts (58 tests) 6ms
+ ✓ src/lib/queryStateColours.test.ts (8 tests) 7ms
+ ✓ src/lib/workspaceNav.test.ts (28 tests) 9ms
+ ✓ src/lib/queryActions/queryActions.test.ts (27 tests) 17ms
+ ✓ src/components/manuscripts/manuscriptPlateTokens.test.ts (28 tests) 10ms
+ ✓ src/components/manuscripts/compsTokens.test.ts (19 tests) 10ms
+ ✓ src/lib/packageShapes.test.ts (21 tests) 12ms
+ ✓ src/lib/qcDesk.test.ts (10 tests) 7ms
+ ✓ src/lib/analytics.test.ts (34 tests) 10ms
+ ✓ src/lib/queryCentreMoment.test.ts (21 tests) 11ms
+ ✓ src/lib/smartImportCommit.test.ts (29 tests) 7ms
+ ✓ src/lib/contactEdit.test.ts (8 tests) 8ms
+ ✓ src/lib/dashFeed.test.ts (18 tests) 7ms
+ ✓ src/lib/queryCentreSheet.test.ts (17 tests) 8ms
+ ✓ src/components/shell/livingExhibitSource.test.ts (3 tests) 5ms
+ ✓ src/lib/dashV58.test.ts (9 tests) 8ms
+ ✓ src/lib/calendarSections.test.ts (6 tests) 13ms
+ ✓ src/components/todo/noteboardLinks.test.tsx (9 tests) 14ms
+ ✓ src/lib/requery.test.ts (12 tests) 10ms
+ ✓ src/lib/manuscriptShelf.test.ts (16 tests) 18ms
+ ✓ src/lib/queryCentreFrame.test.ts (10 tests) 4ms
+ ✓ src/components/queries/QueryEmptyCard.test.tsx (11 tests) 10ms
+ ✓ src/lib/queryVersions.test.ts (33 tests) 10ms
+ ✓ src/lib/skeletonTiming.test.ts (10 tests) 6ms
+ ✓ src/lib/qcBirdsEye.test.ts (19 tests) 13ms
+ ✓ src/lib/materialsAcceptance.test.ts (21 tests) 8ms
+ ✓ src/lib/todoWorkspace.test.ts (24 tests) 10ms
+ ✓ src/components/todo/tasksLayout.test.tsx (14 tests) 9ms
+ ✓ src/components/containers/framedCard.test.tsx (5 tests) 8ms
+ ✓ src/lib/detachPackage.test.ts (22 tests) 5ms
+ ✓ src/lib/journeyFillin.test.ts (13 tests) 5ms
+ ✓ src/lib/agentBoard.test.ts (17 tests) 16ms
+ ✓ src/lib/computeAgentDeadlineWrites.test.ts (10 tests) 29ms
+ ✓ src/lib/queryMaterialKind.test.ts (16 tests) 11ms
+ ✓ src/components/todo/todoSettlement.test.ts (15 tests) 6ms
+ ✓ src/components/shell/topCrumb.test.ts (13 tests) 6ms
+ ✓ src/lib/confirmDialog.test.ts (15 tests) 6ms
+ ✓ src/lib/queryLoadAnimation.test.ts (9 tests) 5ms
+ ✓ src/lib/journeys.test.ts (26 tests) 6ms
+ ✓ src/lib/deedSynonyms.test.ts (13 tests) 7ms
+ ✓ src/lib/livingHeaders.test.ts (27 tests) 17ms
+ ✓ src/components/dashboard/deskChrome.test.tsx (10 tests) 41ms
+ ✓ src/components/todo/boardSettings.test.tsx (22 tests) 10ms
+ ✓ src/lib/addedRowsAgree.test.ts (2 tests) 7ms
+ ✓ src/lib/dashClosed.test.ts (22 tests) 12ms
+ ✓ src/lib/dashTodo.test.ts (11 tests) 15ms
+ ✓ src/lib/genres.test.ts (25 tests) 6ms
+ ✓ src/lib/contactDesk.test.ts (14 tests) 18ms
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > sends no sampling parameters
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > gives the model web search
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > names the current model and asks for adaptive thinking
+suggestComps: tokens in=1 out=1
+
+ ✓ src/components/manuscripts/manuscriptActions.test.tsx (5 tests) 6ms
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > surfaces a refusal without spending a retry
+suggestComps: tokens in=1 out=1
+
+ ✓ functions/src/suggestCompsCore.test.ts (22 tests) 9ms
+ ✓ src/components/todo/journeyTakeover.test.ts (23 tests) 8ms
+ ✓ src/components/containers/pageRail.test.tsx (3 tests) 9ms
+ ✓ functions/src/assembleImport.test.ts (8 tests) 4ms
+ ✓ src/lib/promoTiles.test.ts (23 tests) 3ms
+ ✓ src/lib/smartImportEntitlement.test.ts (15 tests) 3ms
+ ✓ src/lib/dashBreakdown.test.ts (23 tests) 5ms
+ ✓ src/lib/listCells.test.ts (7 tests) 8ms
+ ✓ src/lib/calendarToolbar.test.ts (6 tests) 4ms
+ ✓ src/components/dashboard/oneScreenPro.test.tsx (5 tests) 6ms
+ ✓ src/lib/displayName.test.ts (15 tests) 4ms
+ ✓ src/lib/journeyRegister.test.ts (33 tests) 7ms
+ ✓ src/lib/activityStores.test.ts (10 tests) 4ms
+ ✓ src/lib/cascade.test.ts (29 tests) 11ms
+ ✓ src/lib/bookVersions.test.ts (36 tests) 5ms
+ ✓ src/components/agents/contactFixture.test.ts (14 tests) 4ms
+ ✓ functions/src/waitlistModel.test.ts (45 tests) 11ms
+ ✓ src/components/queryActions/journeysAnswered.test.ts (8 tests) 7ms
+ ✓ src/components/shell/headerSheet.test.ts (9 tests) 8ms
+ ✓ src/components/shell/inkShell.test.ts (9 tests) 3ms
+ ✓ src/lib/todoGroups.test.ts (26 tests) 5ms
+ ✓ src/lib/queriesMobile.test.ts (8 tests) 4ms
+ ✓ src/lib/compsPage.test.ts (30 tests) 4ms
+ ✓ src/lib/listKeyboard.test.ts (30 tests) 9ms
+ ✓ src/components/shell/signOut.test.tsx (19 tests) 6ms
+ ✓ src/lib/saveSignal.test.ts (16 tests) 5ms
+ ✓ src/lib/sessionStage.test.ts (15 tests) 4ms
+ ✓ src/lib/calendarPill.test.ts (6 tests) 6ms
+ ✓ src/lib/queryActions/parking.test.ts (10 tests) 8ms
+ ✓ src/lib/barLines.test.ts (4 tests) 2ms
+ ✓ src/components/dashboard/illustratedMarks.test.ts (11 tests) 4ms
+ ✓ functions/src/compCatalogue.test.ts (11 tests) 6ms
+ ✓ src/components/dev/backgroundLabModel.test.ts (17 tests) 6ms
+ ✓ src/marketing/landingCopy.test.ts (23 tests) 10ms
+ ✓ src/lib/logNudge.test.ts (16 tests) 5ms
+ ✓ src/lib/comps.test.ts (36 tests) 4ms
+ ✓ src/components/todo/tasksTags.test.tsx (15 tests) 11ms
+ ✓ src/lib/timelineGroups.test.ts (14 tests) 9ms
+ ✓ src/lib/saveAgentEdits.test.ts (22 tests) 5ms
+ ✓ src/lib/recordRepairGone.test.ts (4 tests) 5ms
+ ✓ src/components/todo/tasksNoteboard.test.tsx (15 tests) 9ms
+ ✓ src/lib/correctionUndo.test.ts (8 tests) 1ms
+ ✓ src/lib/taskPrecedence.test.ts (43 tests) 4ms
+ ✓ src/lib/queryMaterialsGap.test.ts (31 tests) 6ms
+ ✓ src/lib/accountRoutes.test.ts (14 tests) 5ms
+ ✓ src/lib/agentCountryRule.test.ts (6 tests) 13ms
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > parses a good first response (strips fences)
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+ ✓ functions/src/assistAgentDataCore.test.ts (12 tests) 133ms
+ ✓ src/components/dashboard/fortnightExpected.test.ts (6 tests) 3ms
+ ✓ src/components/todo/noteboardExamples.test.ts (6 tests) 5ms
+ ✓ src/lib/hubTokens.test.ts (7 tests) 4ms
+ ✓ src/lib/todoBuckets.test.ts (33 tests) 4ms
+ ✓ src/lib/feedSentence.test.ts (18 tests) 11ms
+ ✓ src/components/todo/todoSheet.test.ts (15 tests) 7ms
+ ✓ src/components/todo/barTokens.test.ts (5 tests) 7ms
+ ✓ src/marketing/waitlist.test.ts (13 tests) 11ms
+ ✓ src/lib/manuscripts.test.ts (10 tests) 3ms
+ ✓ src/lib/timelineChapters.test.ts (16 tests) 4ms
+ ✓ src/components/shell/pageHeader.test.tsx (9 tests) 5ms
+ ✓ src/lib/wordCountBands.test.ts (18 tests) 18ms
+ ✓ src/lib/planComparison.test.ts (17 tests) 6ms
+ ✓ src/components/todo/todoListChrome.test.ts (9 tests) 5ms
+ ✓ src/lib/queriesHubColumn.test.ts (8 tests) 6ms
+ ✓ src/components/todo/tasksAuditBoundary.test.tsx (9 tests) 31ms
+ ✓ src/lib/todoFilters.test.ts (14 tests) 3ms
+ ✓ src/lib/packageTracking.test.ts (29 tests) 4ms
+ ✓ src/lib/qcCourtHistory.test.ts (8 tests) 7ms
+ ✓ src/lib/csvCell.test.ts (21 tests) 7ms
+ ✓ src/lib/qcRowLines.test.ts (15 tests) 5ms
+ ✓ src/components/todo/assistantPromo.test.ts (12 tests) 8ms
+ ✓ src/lib/packageAnalytics.test.ts (17 tests) 4ms
+ ✓ src/components/manuscripts/manuscriptLibraryTokens.test.ts (23 tests) 25ms
+ ✓ src/components/dashboard/oneScreenCommunity.test.tsx (14 tests) 3ms
+ ✓ src/lib/todoHousekeeping.test.ts (31 tests) 4ms
+ ✓ src/lib/contactPrefs.test.ts (9 tests) 2ms
+ ✓ functions/src/parseImportDate.test.ts (36 tests) 14ms
+ ✓ src/components/shell/shellV2Nav.test.ts (16 tests) 7ms
+ ✓ src/lib/taskFlags.test.ts (12 tests) 8ms
+ ✓ src/lib/queryCentreWaiting.test.ts (7 tests) 3ms
+ ✓ src/lib/queryPortion.test.ts (11 tests) 16ms
+ ✓ src/components/settings/settingsLaws.test.ts (13 tests) 3ms
+ ✓ src/lib/correctionGuards.test.ts (16 tests) 4ms
+ ✓ src/lib/materialDisplay.test.ts (15 tests) 4ms
+ ✓ src/components/todo/todoFinishing.test.ts (11 tests) 7ms
+ ✓ src/lib/scoutContract.test.ts (8 tests) 3ms
+ ✓ src/lib/materialsJourney.test.ts (9 tests) 6ms
+ ✓ src/lib/paneSweep.test.ts (19 tests) 4ms
+ ✓ src/lib/todoDock.test.ts (27 tests) 3ms
+ ✓ src/lib/manuscriptJourney.test.ts (11 tests) 8ms
+ ✓ src/lib/composerChips.test.ts (14 tests) 10ms
+ ✓ src/components/shell/accountMenu.test.tsx (15 tests) 3ms
+ ✓ src/lib/onboardingStage.test.ts (11 tests) 5ms
+stderr | src/lib/timelineEvent.test.ts > F1 · a type this build does not know > resolves to `unknown` rather than claiming a direction
+[QueryHawk] timeline: activity type "Holding Reply" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+[QueryHawk] timeline: activity type "Something Nobody Has Written Yet" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+
+ ✓ src/lib/timelineEvent.test.ts (6 tests) 4ms
+ ✓ src/components/settings/deletionBanner.test.tsx (11 tests) 3ms
+ ✓ src/marketing/foundersCopy.test.ts (18 tests) 4ms
+ ✓ src/lib/holdingReplyIntegration.test.ts (13 tests) 10ms
+ ✓ src/lib/todoDataFixes.test.ts (14 tests) 25ms
+ ✓ src/lib/timelineDashed.test.ts (3 tests) 6ms
+ ✓ src/components/shell/railNav.test.ts (12 tests) 3ms
+ ✓ src/lib/queryBucket.test.ts (11 tests) 6ms
+ ✓ src/lib/bookVersionsTracking.test.ts (16 tests) 6ms
+ ✓ src/lib/qcCarousel.test.ts (4 tests) 6ms
+ ✓ src/lib/dashList.test.ts (9 tests) 4ms
+ ✓ src/components/searchSuggestions.test.ts (7 tests) 3ms
+ ✓ src/lib/dataExport.test.ts (13 tests) 5ms
+ ✓ src/components/shell/railPeek.test.ts (14 tests) 3ms
+ ✓ src/components/reading-pane/sentStrip.test.ts (22 tests) 3ms
+ ✓ src/lib/stateTokenScope.test.ts (3 tests) 4ms
+ ✓ src/lib/waitAnchor.test.ts (20 tests) 8ms
+ ✓ src/lib/agentNotes.test.ts (15 tests) 4ms
+ ✓ src/lib/onboardingSpine.test.ts (18 tests) 3ms
+ ✓ src/lib/duplicateRemoval.test.ts (9 tests) 5ms
+ ✓ src/lib/flip.test.ts (15 tests) 5ms
+ ✓ src/lib/queryCentreHeads.test.ts (9 tests) 3ms
+ ✓ src/lib/contactNextStep.test.ts (14 tests) 6ms
+ ✓ src/lib/sentPreviously.test.ts (3 tests) 3ms
+ ✓ src/lib/workspaceShell.test.ts (33 tests) 5ms
+ ✓ src/lib/deskWeek.test.ts (7 tests) 6ms
+ ✓ src/lib/templateImport.test.ts (23 tests) 3ms
+ ✓ src/components/todo/todoCardBands.test.ts (6 tests) 33ms
+ ✓ src/lib/materialsBand.test.ts (5 tests) 3ms
+ ✓ src/lib/manuscriptScope.test.ts (10 tests) 4ms
+ ✓ src/lib/manuscriptPage.test.ts (19 tests) 3ms
+ ✓ src/lib/queryPlaceLine.test.ts (25 tests) 5ms
+ ✓ src/lib/suggestComps.test.ts (18 tests) 11ms
+ ✓ src/lib/urgentReconciliation.test.ts (5 tests) 3ms
+ ✓ src/lib/agentMotion.test.ts (19 tests) 4ms
+ ✓ src/lib/holdingReply.test.ts (12 tests) 9ms
+ ✓ src/lib/shellSidebar.test.ts (14 tests) 6ms
+ ✓ src/lib/cardC.test.ts (16 tests) 6ms
+ ✓ src/components/dashboard/dashboardTokenScope.test.ts (2 tests) 3ms
+ ✓ src/lib/queryCentreGround.test.ts (6 tests) 3ms
+ ✓ src/lib/offerDecision.test.ts (7 tests) 6ms
+ ✓ src/lib/journeyMaterials.test.ts (13 tests) 51ms
+ ✓ src/lib/queryActions/sentRecord.test.ts (7 tests) 3ms
+ ✓ src/lib/queryCentreFrameFix.test.ts (8 tests) 4ms
+ ✓ src/lib/qcComingUp.test.ts (9 tests) 3ms
+ ✓ src/lib/createUndo.test.ts (13 tests) 4ms
+ ✓ src/lib/unrecordedVersion.test.ts (8 tests) 4ms
+ ✓ src/components/shell/folderTab.test.ts (5 tests) 3ms
+ ✓ src/lib/correctionMove.test.ts (15 tests) 20ms
+ ✓ src/components/shell/livingExhibit.test.tsx (3 tests) 4ms
+ ✓ src/lib/queryReentry.test.ts (7 tests) 4ms
+ ✓ src/lib/completionSafety.test.ts (11 tests) 7ms
+ ✓ src/lib/smartImport.test.ts (9 tests) 5ms
+ ✓ src/components/todo/tasksChain.test.tsx (6 tests) 5ms
+ ✓ src/lib/accountValidation.test.ts (7 tests) 4ms
+ ✓ src/lib/agentSaveOutcome.test.ts (3 tests) 1ms
+ ✓ src/lib/templateColumns.test.ts (12 tests) 3ms
+ ✓ src/lib/onboardingHandover.test.ts (14 tests) 4ms
+ ✓ src/lib/responseFlagReconciliation.test.ts (10 tests) 5ms
+ ✓ src/components/todo/todoSaveMachine.test.ts (9 tests) 5ms
+ ✓ src/components/dashboard/focusSlot.test.ts (12 tests) 8ms
+ ✓ src/lib/queryStatusWriters.test.ts (5 tests) 3ms
+ ✓ src/lib/bulkTick.test.ts (6 tests) 4ms
+ ✓ src/components/agents/contact/contactAdd.test.ts (5 tests) 10ms
+ ✓ src/lib/timelineViews.test.ts (9 tests) 3ms
+ ✓ src/lib/queryCentreChips.test.ts (5 tests) 3ms
+ ✓ src/components/manuscripts/compsScoutPanel.test.ts (15 tests) 10ms
+ ✓ src/lib/nudgeNextStep.test.ts (12 tests) 2ms
+ ✓ src/components/onboarding/onboardingCard.test.ts (18 tests) 3ms
+ ✓ src/lib/qcFaces.test.ts (5 tests) 5ms
+ ✓ src/lib/overToYouDeadline.test.ts (4 tests) 6ms
+ ✓ src/lib/appArt.test.ts (3 tests) 4ms
+ ✓ src/lib/ledgerSort.test.ts (10 tests) 2ms
+ ✓ src/lib/qcRecent.test.ts (8 tests) 3ms
+ ✓ src/components/manuscripts/compsWiring.test.ts (4 tests) 3ms
+ ✓ src/lib/dashWeekMix.test.ts (10 tests) 4ms
+ ✓ src/lib/queryTimelineEdit.test.ts (12 tests) 2ms
+ ✓ src/lib/packageLinkRule.test.ts (4 tests) 2ms
+ ✓ src/lib/accountTasks.test.ts (5 tests) 4ms
+ ✓ src/lib/closedRecoverable.test.ts (4 tests) 3ms
+ ✓ src/lib/clearedToday.test.ts (8 tests) 2ms
+ ✓ src/lib/queryingGoalsCap.test.ts (7 tests) 4ms
+ ✓ src/lib/inviteCode.test.ts (11 tests) 2ms
+ ✓ src/lib/contactTransport.test.ts (15 tests) 2ms
+ ✓ src/lib/responseDeadline.test.ts (6 tests) 12ms
+ ✓ src/lib/agentCardStore.test.ts (6 tests) 5ms
+ ✓ src/lib/buildRow.test.ts (9 tests) 2ms
+ ✓ src/lib/taskBars.test.ts (8 tests) 3ms
+ ✓ src/lib/manuscriptScopeCases.test.ts (9 tests) 6ms
+ ✓ src/components/todo/noteboardModel.test.tsx (6 tests) 3ms
+ ✓ src/lib/agentLastChecked.test.ts (3 tests) 9ms
+ ✓ src/components/onboarding/onboardingTail.test.ts (14 tests) 5ms
+ ✓ src/components/onboarding/reviewCopyClaims.test.ts (8 tests) 3ms
+ ✓ src/components/shell/contentColumn.test.ts (8 tests) 3ms
+ ✓ src/lib/todoTiers.test.ts (13 tests) 3ms
+ ✓ src/lib/paneHero.test.ts (11 tests) 2ms
+ ✓ src/lib/livingRoutes.test.ts (2 tests) 3ms
+ ✓ src/lib/queryPanelRungs.test.ts (9 tests) 6ms
+ ✓ src/lib/deskTooltip.test.ts (10 tests) 5ms
+ ✓ src/lib/userPaths.test.ts (8 tests) 5ms
+ ✓ src/lib/bookVersionsSamples.test.ts (4 tests) 33ms
+ ✓ src/lib/entitlements.test.ts (2 tests) 5ms
+ ✓ src/lib/paneFill.test.ts (10 tests) 2ms
+ ✓ src/components/todo/todoChrome.test.ts (7 tests) 3ms
+ ✓ src/lib/queriesGround.test.ts (4 tests) 3ms
+ ✓ src/types.test.ts (7 tests) 2ms
+ ✓ src/lib/todoRetiredSurfaces.test.ts (2 tests) 4ms
+ ✓ src/components/dashboard/dashboardMobile.test.ts (6 tests) 2ms
+ ✓ src/components/queries/correctionDesk.test.ts (10 tests) 21ms
+ ✓ src/lib/communityStats.test.ts (9 tests) 2ms
+ ✓ src/lib/shellForRoute.test.ts (9 tests) 2ms
+ ✓ src/components/shell/livingEmpty.test.tsx (5 tests) 2ms
+ ✓ src/lib/landingRoute.test.ts (8 tests) 4ms
+ ✓ src/marketing/contactCopy.test.ts (5 tests) 4ms
+ ✓ src/lib/genreNoun.test.ts (8 tests) 5ms
+ ✓ src/lib/palettePosition.test.ts (14 tests) 5ms
+ ✓ src/lib/heroBook.test.ts (10 tests) 2ms
+ ✓ src/components/manuscripts/attachmentsPanel.test.tsx (5 tests) 3ms
+ ✓ src/lib/cardTier.test.ts (5 tests) 3ms
+ ✓ src/lib/agentDisplay.test.ts (7 tests) 3ms
+ ✓ src/components/todo/completionHold.test.ts (5 tests) 2ms
+ ✓ src/components/shell/railTokens.test.ts (7 tests) 2ms
+ ✓ src/components/onboarding/mobileFloor.test.ts (9 tests) 4ms
+ ✓ src/lib/escapeStack.test.ts (7 tests) 4ms
+ ✓ src/marketing/routeTiers.test.ts (12 tests) 2ms
+ ✓ src/lib/smartImportConfirm.test.ts (9 tests) 2ms
+ ✓ src/lib/calendarFade.test.ts (7 tests) 4ms
+ ✓ src/lib/accountSecurity.test.ts (12 tests) 6ms
+ ✓ src/lib/materialModelRule.test.ts (11 tests) 2ms
+ ✓ src/components/todo/tasksAuditLegend.test.tsx (4 tests) 2ms
+ ✓ src/lib/retireSamples.test.ts (6 tests) 2ms
+ ✓ src/components/dashboard/queryCard.test.tsx (2 tests) 2ms
+ ✓ src/lib/activityEvent.test.ts (17 tests) 2ms
+ ✓ src/lib/manuscriptLanding.test.ts (8 tests) 2ms
+ ✓ src/lib/lifecycle.test.ts (11 tests) 2ms
+ ✓ src/lib/mswlDrift.test.ts (11 tests) 4ms
+ ✓ src/lib/agentImage.test.ts (8 tests) 3ms
+ ✓ src/components/todo/todoPanelFinal.test.ts (4 tests) 15ms
+ ✓ src/lib/todoWorkspaceP0B.test.ts (2 tests) 9ms
+ ✓ src/lib/dashFeedDrawer.test.ts (5 tests) 2ms
+ ✓ src/components/settings/settingsCopy.test.tsx (16 tests) 35ms
+ ✓ src/lib/todoEmpty.test.ts (9 tests) 3ms
+ ✓ src/lib/queryAttentionSort.test.ts (5 tests) 15ms
+ ✓ src/lib/agentDataQuality.test.ts (7 tests) 19ms
+ ✓ src/components/todo/todoScrim.test.ts (7 tests) 4ms
+ ✓ src/lib/agentReplyPolicy.test.ts (6 tests) 4ms
+ ✓ src/lib/timelineGroupSentence.test.ts (5 tests) 2ms
+ ✓ src/lib/contactStrip.test.ts (2 tests) 2ms
+ ✓ src/lib/manuscriptFeed.test.ts (4 tests) 2ms
+ ✓ src/components/todo/tasksAuditControls.test.tsx (6 tests) 3ms
+ ✓ src/lib/queryActions/dockPeek.test.ts (4 tests) 3ms
+ ✓ src/lib/queryTaskBadge.test.ts (6 tests) 2ms
+ ✓ src/lib/querySentRung.test.ts (4 tests) 2ms
+ ✓ src/lib/agentLayout.test.ts (4 tests) 2ms
+ ✓ src/components/dashboard/deskTrend.test.ts (8 tests) 2ms
+ ✓ src/lib/contactListMemory.test.ts (5 tests) 2ms
+ ✓ src/lib/queryPrimaryAction.test.ts (5 tests) 3ms
+ ✓ src/lib/qcDeskWeeks.test.ts (3 tests) 2ms
+ ✓ src/lib/qcListMemory.test.ts (4 tests) 2ms
+ ✓ src/lib/compsCap.test.ts (4 tests) 2ms
+ ✓ src/components/shell/appFooter.test.tsx (4 tests) 4ms
+ ✓ src/lib/feedConversation.test.ts (7 tests) 3ms
+ ✓ src/lib/beAccent.test.ts (4 tests) 2ms
+ ✓ src/components/dashboard/oneScreenChartMeasure.test.ts (3 tests) 3ms
+ ✓ src/lib/scopedManuscript.test.ts (10 tests) 5ms
+ ✓ src/components/todo/todoTagLaw.test.ts (2 tests) 1ms
+ ✓ src/components/dashboard/deskAgents.test.ts (6 tests) 2ms
+ ✓ src/lib/responseToastTitle.test.ts (8 tests) 2ms
+ ✓ src/lib/paneWrite.test.ts (8 tests) 2ms
+ ✓ src/lib/logQuerySeed.test.ts (4 tests) 3ms
+ ✓ src/lib/popoverAlign.test.ts (5 tests) 1ms
+ ✓ src/lib/homeCountryRule.test.ts (4 tests) 1ms
+ ✓ src/lib/agentIdentityRule.test.ts (2 tests) 1ms
+ ✓ src/test/pageStructure.test.ts (26 tests) 30601ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/Dashboard.tsx declares nothing below its return that the JSX above it touches  407ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/Queries.tsx declares nothing below its return that the JSX above it touches  22493ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/agents/AgentList.tsx declares nothing below its return that the JSX above it touches  851ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/AllManuscripts.tsx declares nothing below its return that the JSX above it touches  599ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/ImportCsv.tsx declares nothing below its return that the JSX above it touches  989ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/todo/ToDoPage.tsx declares nothing below its return that the JSX above it touches  3290ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/todo/TodoCalendarPage.tsx declares nothing below its return that the JSX above it touches  775ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  functions/src/email.test.ts [ functions/src/email.test.ts ]
+Error: Cannot find package 'firebase-functions/params' imported from '/Users/nickphysick/ScriptAlly-lc2/functions/src/email.ts'
+ ❯ functions/src/email.ts:24:1
+     22|  */
+     23| 
+     24| import { defineSecret } from "firebase-functions/params";
+       | ^
+     25| import { createHash } from "crypto";
+     26| import { MailConfig, resolveMailConfig, replyToWarning } from "./email…
+
+Caused by: Error: Failed to load url firebase-functions/params (resolved id: firebase-functions/params) in /Users/nickphysick/ScriptAlly-lc2/functions/src/email.ts. Does the file exist?
+ ❯ loadAndTransform ../ScriptAlly-app/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:35835:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 540 passed (541)
+      Tests  8352 passed | 3 skipped (8355)
+   Start at  17:11:48
+   Duration  30.92s (transform 13.82s, setup 0ms, collect 61.04s, tests 44.60s, environment 80ms, prepare 25.18s)
+
+vitest exit 1

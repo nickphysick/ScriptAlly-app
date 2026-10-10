@@ -103,10 +103,40 @@ describe("the hero's ground is a documented copy of the app's, not a reference t
    * hex in this test would go green the day someone changed both the app and the test and left
    * marketing behind. Two derivations against each other, per the house rule.
    */
-  it("--mk-hero-ground equals --ws-ground", () => {
-    const ws = value(app, "--ws-ground");
+  /* RE-POINTED (landing colours v2): the hero sits on the app's SHEET now, not its old ground.
+     Same law, new subject — a documented copy, compared with the app's own declaration. */
+  it("--mk-hero-ground equals --ws-sheet", () => {
+    const ws = value(app, "--ws-sheet");
     expect(ws).toBeTruthy();
     expect(value(marketing, "--mk-hero-ground")).toBe(ws);
+  });
+
+  /**
+   * K1 — EVERY COPY, AGAINST THE APP'S OWN FILE. The right-hand side of each pair is read out of
+   * the app's stylesheet; nothing here is a literal typed on both sides.
+   */
+  const hex = (v: string | null) => (v ?? "").toLowerCase();
+  const triple = (v: string) => {
+    const m = /^#([0-9a-f]{6})$/i.exec(v);
+    expect(m, `${v} is a plain hex`).toBeTruthy();
+    return [0, 2, 4].map((i) => parseInt(m![1].slice(i, i + 2), 16)).join(", ");
+  };
+  it("the tier's ink, cream and text ink equal the app's", () => {
+    for (const [mk, ws] of [
+      ["--mk-ink-shell", "--ink-shell"], ["--mk-cream", "--ink-cream"], ["--mk-nearblack", "--ink-on-light"],
+    ]) {
+      expect(value(app, ws), `${ws} is declared by the app`).toBeTruthy();
+      expect(hex(value(marketing, mk)), `${mk} is a copy of ${ws}`).toBe(hex(value(app, ws)));
+    }
+  });
+  it("--mk-lower equals --ws-page, compared as the colour the app resolves it to", () => {
+    /* The app states the page ground as a channel triple so it can take an alpha. */
+    expect(value(app, "--ws-page")).toBe("rgb(var(--ws-page-rgb))");
+    expect(triple(value(marketing, "--mk-lower")!)).toBe(value(app, "--ws-page-rgb"));
+  });
+  it("the two older ink names are aliases, so the three cannot diverge", () => {
+    expect(value(marketing, "--mk-ink")).toBe("var(--mk-nearblack)");
+    expect(value(marketing, "--mk-head")).toBe("var(--mk-nearblack)");
   });
 
   /**
@@ -114,8 +144,8 @@ describe("the hero's ground is a documented copy of the app's, not a reference t
    * bare `:root` today. If a theme class ever overrides it, "the hero sits on the app's ground"
    * stops being a single value and this copy starts describing one theme out of three.
    */
-  it("--ws-ground is declared exactly once in the app", () => {
-    expect(app.match(/--ws-ground\s*:/g) ?? []).toHaveLength(1);
+  it("--ws-sheet is declared exactly once in the app", () => {
+    expect(app.match(/--ws-sheet\s*:/g) ?? []).toHaveLength(1);
   });
 });
 

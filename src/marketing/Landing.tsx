@@ -22,7 +22,6 @@ import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
-import { MarketingFooter } from "./MarketingFooter";
 import { DOCUMENT_TITLE } from "./landingCopy";
 
 export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
@@ -51,7 +50,6 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           is a worse answer than an unfinished page, because a reader cannot tell the difference
           between "no policy yet" and "the link is broken". The footer is now shared, so a page
           added to the site is reachable from every other page by construction. */}
-        <MarketingFooter onNavigate={onNavigate} />
       </div>
     </div>
   );

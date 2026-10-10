@@ -39,7 +39,6 @@ import {
 import { ABOUT_STORY_ALT } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
 import { MarketingIllustration, CommitmentTick } from "./marketingMarks";
-import { MarketingFooter } from "./MarketingFooter";
 
 /**
  * The mission illustration's own facts. The version is the first eight hex digits of the file's
@@ -149,7 +148,6 @@ export const AboutPage: React.FC<{
         </section>
       </main>
 
-      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

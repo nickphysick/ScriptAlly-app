@@ -87,18 +87,41 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The cream the nav's ink pill prints in — lighter than the parchment so it reads as type on
      ink rather than a second surface. */
   --mk-cta-ink: #f7f0e9;
-  --mk-hero-ground: #f7f4ee;
+  /* ── Landing colours v2: the tier wears the app's colours ──
+     ⚠️ EVERY VALUE BELOW THAT NAMES AN APP TOKEN IS A DOCUMENTED COPY OF IT, NEVER A `var()` TO IT —
+     the discipline this tier already keeps. `marketingTokens.test.ts` reads the app's own
+     declaration for each and compares, so a copy cannot go stale in silence.
+       --mk-ink-shell    --ink-shell     the page ground behind everything, the nav, the footer
+       --mk-cream        --ink-cream     text and marks on ink
+       --mk-hero-ground  --ws-sheet      the opening surface's paper white
+       --mk-lower        --ws-page       the oat everything below it sits on
+       --mk-nearblack    --ink-on-light  text on a light surface (`--mk-ink` and `--mk-head` alias it) */
+  --mk-ink-shell: #1b2433;
+  --mk-cream: #f4eee5;
+  --mk-hero-ground: #fbf9f5;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
-  --mk-lower: #f2ede7;
+  --mk-lower: #f2eee8;
   --mk-card: #fffefb;
   --mk-parch: #fdfaf5;
-  --mk-hair: #e7ddd2;
+  /* The ink at 13% — the one hairline on a light surface. Pre-computed alpha, no `color-mix()`. */
+  --mk-hair: rgba(28, 19, 15, .13);
   --mk-bd: #ded3c2;
-  --mk-head: #5d4037;
-  --mk-ink: #3a1c14;
-  --mk-label: #9c8878;
-  --mk-muted: #8a7a6c;
+  /* ⚠️ ONE INK ON LIGHT. Mocha (#3a1c14) and the mocha heading colour (#5d4037) are retired; the
+     two older names survive as ALIASES so no reader had to move and the three cannot diverge.
+     ⚠️ EVERY MUTED TONE IS THAT INK AT AN ALPHA, RE-DERIVED TO THE CONTRAST IT HAD. Each old hex was
+     measured against the ground it sat on and the alpha solved to give the same ratio on the new
+     one: muted #8a7a6c 3.55 → .52 · label #9c8878 2.91 → .45 · kicker 2.96 → .45 · blush-label
+     #9c6a56 3.82 → .62 · blush-body #6d5348 5.91 → .68 · blush-note #8a6c5f 4.11 → .62 ·
+     placeholder #b08e80 2.99 → .45 · running text #5a4a40 7.25 → .74.
+     ⚠️ TWO OF THEM WERE RAISED RATHER THAN MATCHED: the sign-up's small print and the tally's label
+     sat at 4.1 and 3.8, and lock F2 holds both at 4.5 on a light ground. .62 is the first step that
+     clears it. */
+  --mk-ink: var(--mk-nearblack);
+  --mk-head: var(--mk-nearblack);
+  --mk-label: rgba(28, 19, 15, .45);
+  --mk-muted: rgba(28, 19, 15, .52);
+  --mk-body: rgba(28, 19, 15, .74);
   --mk-burg: #7c3a2a;
   /* ⚠️ `--mk-band-b` IS DELETED AND ITS PARTNER IS NOT. The two were the retired parchment band's
      gradient stops; when that band went, `-a` survived as the About page's commitment strip's flat
@@ -126,11 +149,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      `--mk-blush-body` (#6d5348, darker and redder); neither is this value, and snapping to one to
      save a token would be a colour decision made by convenience. Alpha pre-computed, per the
      no-`color-mix()` rule. */
-  --mk-kicker: rgba(122, 101, 92, .7);
-  --mk-blush-label: #9c6a56;
-  --mk-blush-body: #6d5348;
-  --mk-blush-note: #8a6c5f;
-  --mk-blush-ph: #b08e80;
+  --mk-kicker: rgba(28, 19, 15, .45);
+  --mk-blush-label: rgba(28, 19, 15, .62);
+  --mk-blush-body: rgba(28, 19, 15, .68);
+  --mk-blush-note: rgba(28, 19, 15, .62);
+  --mk-blush-ph: rgba(28, 19, 15, .45);
   --mk-msg-ok-bg: rgba(233, 237, 230, .8);
   --mk-msg-ok-bd: rgba(138, 158, 136, .5);
   /* ── The two primaries (18 Sep) ──
@@ -196,8 +219,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-illo-rim: rgba(124, 58, 42, 0.34);
   --mk-illo-tag: rgba(124, 58, 42, 0.5);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
-  background: var(--mk-hero-ground);
-  color: var(--mk-ink);
+  /* ⚠️ THE PAGE GROUND IS INK. Anything a light surface does not cover is ink — which is what
+     shows in the sheet's four corner arcs and what the nav and the footer are made of. */
+  background: var(--mk-ink-shell);
+  color: var(--mk-cream);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -480,7 +505,29 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-scope { --mk-nav-h: 129px; }
 }
 
-/* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token — see the
+/* ── The sheet: one light surface between the ink nav and the ink footer ──
+   ⚠️ ONE BOX OWNS ALL FOUR CORNERS, AND IT IS THE SHELL'S. A page's first surface gets its top
+   corners and its last surface its bottom ones from this rule, whatever the page is made of — so
+   no page states a radius and none can forget to.
+   ⚠️ `overflow: clip`, NEVER `hidden`. A page's own surfaces paint into the corners and have to be
+   cut to the arc; `hidden` would make this a scroll container, which traps the sticky nav's
+   anchors and every `position: sticky` inside a page. `clip` cuts and does nothing else.
+   ⚠️ AND IT DOES NOT CLIP THE HERO'S SHADOW ANYWHERE A READER COULD SEE. The sheet is the full
+   width of the page, so its right edge IS the edge `html`/`body` already clip at; and its top edge
+   is the nav's bottom edge, which is opaque and sticky — whatever of the shadow rises past the
+   hero's top was already under the bar. `landingColoursV2.measure.ts` H2 holds the picture's box.
+   ⚠️ `flex: 1 0 auto` IS WHAT KEEPS A SHORT PAGE'S FOOTER AT THE FOOT. `.mk-scope` is a column at
+   least the viewport tall; the sheet takes the slack so the ink below a short page is the footer
+   and not a gap. */
+.mk-sheet {
+  flex: 1 0 auto;
+  background-color: var(--mk-hero-ground);
+  color: var(--mk-ink);
+  border-radius: 18px;
+  overflow: clip;
+}
+
+/* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN — the footer left it for the shell (landing colours v2). One wrapper, one token — see the
    note on the tokens. Nothing inside this may repaint the ground.
    ⚠️ THE JOIN IS AN 80px FADE NOW, AND THE HAIRLINE THAT MARKED IT IS DELETED FROM `.mk-statband`.
    Two separators at one boundary is one too many: a rule says "a section ends here" and a fade
@@ -1785,10 +1832,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 500;
   color: var(--mk-head); margin-top: 4px;
 }
-.mk-docsection p { font-size: 14px; font-weight: 300; line-height: 1.75; color: #5a4a40; margin-top: 10px; }
+.mk-docsection p { font-size: 14px; font-weight: 300; line-height: 1.75; color: var(--mk-body); margin-top: 10px; }
 .mk-docsection ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .mk-docsection li {
-  position: relative; padding-left: 20px; font-size: 14px; font-weight: 300; line-height: 1.7; color: #5a4a40;
+  position: relative; padding-left: 20px; font-size: 14px; font-weight: 300; line-height: 1.7; color: var(--mk-body);
 }
 .mk-docsection li::before {
   content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px; border-radius: 50%;
@@ -1936,7 +1983,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   line-height: 1.2; color: var(--mk-head); margin-top: 8px; text-wrap: balance;
 }
 .mk-bandcopy p {
-  font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; margin-top: 16px;
+  font-size: 15px; font-weight: 300; line-height: 1.72; color: var(--mk-body); margin-top: 16px;
 }
 .mk-bandcopy strong { color: var(--mk-ink); font-weight: 500; }
 
@@ -2000,7 +2047,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* Founder sign-off. The rule is its own element — never a border on either label. */
 .mk-founder { max-width: 720px; margin: 0 auto; padding: 52px 56px 20px; text-align: center; }
-.mk-founder p { font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; }
+.mk-founder p { font-size: 15px; font-weight: 300; line-height: 1.72; color: var(--mk-body); }
 .mk-founder a, .mk-founder .mk-doclink { color: var(--mk-burg); }
 .mk-signoff { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
 .mk-signname { font-family: "Playfair Display", Georgia, serif; font-size: 18px; font-weight: 500; color: var(--mk-ink); }

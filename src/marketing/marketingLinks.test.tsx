@@ -66,9 +66,16 @@ describe("the shared footer offers all five, on every public page", () => {
     ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />],
   ];
 
+  /* RE-POINTED (landing colours v2): the footer is rendered ONCE, by `MarketingShell`, so each
+     page is rendered the way the router renders it — inside the shell. The law is unchanged:
+     every public page carries the one footer with every destination. And no page may mount a
+     second copy of its own. */
   for (const [name, node] of PAGES) {
     it(`${name} renders the shared footer with every company and legal link`, () => {
-      const html = renderPage(node(), name);
+      expect(renderPage(node(), name), "the page itself mounts no footer").not.toMatch(/class="mk-foot"/);
+      const html = renderPage(
+        <MarketingShell user={null} onNavigate={noNavigate} path={name}>{node()}</MarketingShell>, name);
+      expect(html.match(/class="mk-foot"/g) ?? [], "exactly one footer").toHaveLength(1);
       /* The whole class attribute, never a prefix: "mk-foot" is a prefix of "mk-footgrid",
          "mk-footcol" and three more, so a substring check here would pass on any of them. */
       expect(html).toMatch(/class="mk-foot"/);
@@ -97,7 +104,12 @@ describe("the nav and the footer agree about what the site contains", () => {
    * rather than assuming it.
    */
   it("…and leaves the legal documents to the footer", () => {
-    const html = nav();
+    /* The shell renders the footer too now, so the claim is sliced to the nav it is about. */
+    const all = nav();
+    const end = all.indexOf("</nav>");
+    expect(end, "the nav is rendered").toBeGreaterThan(-1);
+    const html = all.slice(0, end);
+    expect(all.slice(end), "and the footer does carry them").toContain(">Privacy</button>");
     expect(html).not.toContain(">Privacy</button>");
     expect(html).not.toContain(">Terms</button>");
   });
