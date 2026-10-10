@@ -39,13 +39,19 @@ export type ReviewReasonCode =
   | "missing-day"
   | "serial-outlier"
   | "no-date"
+  | "unreadable-date"            // the template's Date sent cell held text that is not a date
+  | "ambiguous-date"             // …or a date that reads two ways (03/05/2026)
+  | "unreadable-response-date"   // the same two, for the Date of last response cell
+  | "ambiguous-response-date"
   | "status-direction"
   | "status-wording"
   | "check-name"          // agent/agency cell was a note, not a name — real part extracted, confirm
   | "needs-identifying";  // cell named no real agent/agency at all — writer must say who it was
 
 export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
-  "two-dates", "missing-day", "serial-outlier", "no-date", "status-direction", "status-wording",
+  "two-dates", "missing-day", "serial-outlier", "no-date",
+  "unreadable-date", "ambiguous-date", "unreadable-response-date", "ambiguous-response-date",
+  "status-direction", "status-wording",
   "check-name", "needs-identifying",
 ];
 

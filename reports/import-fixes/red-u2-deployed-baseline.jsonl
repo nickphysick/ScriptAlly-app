@@ -1,0 +1,3 @@
+{"lock":"U2","name":"countsBefore","value":{"activities":0,"agents":0,"manuscripts":0,"versions":0,"packages":0,"queries":0,"queries/activity":0,"taskFlags":0,"tasks":0}}
+{"lock":"U2","name":"iso","value":{"summary":{"agents":"5","queries":"5","lead":"It all read cleanly. Your history's ready to come straight in.","file":"template-iso.csv · 5 rows"},"chips":{"ready":"5 ready","open":""},"dash":{"title":"No active queries","waiting":0,"askedToday":1,"asked":[],"notice":"","today":2},"lines":["Smart import · 5 agents added, 5 queries logged"],"sent":[null,null,null,null,null]}}
+{"lock":"U2","name":"countsAfter","value":{"activities":0,"agents":0,"manuscripts":0,"versions":0,"packages":0,"queries":0,"queries/activity":0,"taskFlags":0,"tasks":0}}

@@ -21,28 +21,29 @@ const q = (agentRef: string, status: QueryStatus | null, sentDate: string | null
 
 describe("N1 — buildImportNotice", () => {
   it("returns null when nothing was skipped", () => {
-    expect(buildImportNotice([], { queriesSkipped: 0, errors: [] }, agents)).toBeNull();
+    expect(buildImportNotice([], { errors: [] }, agents)).toBeNull();
     /* an error that is not a skip does not make a notice */
-    expect(buildImportNotice([], { queriesSkipped: 0, errors: ["Couldn't save agent X."] }, agents)).toBeNull();
+    expect(buildImportNotice([], { errors: ["Couldn't save agent X."] }, agents)).toBeNull();
   });
 
   it("one skipped row → one row, with the validation's own reason", () => {
     const v = validateSmartImport({ agents, queries: [q("a1", QueryStatus.QUERIED, "2025-01-01"), q("a2", QueryStatus.REJECTED, "2024-06-01")] });
     expect(v.skipped.length).toBe(1);
-    const n = buildImportNotice(v.skipped, { queriesSkipped: 1, errors: [] }, agents, 7)!;
+    const n = buildImportNotice(v.skipped, { errors: [] }, agents, [], 7)!;
     expect(n.count).toBe(1);
     expect(n.rows).toEqual([{ who: "", status: "Rejected", sentDate: "2024-06-01", reason: v.skipped[0].reason }]);
     expect(n.rows[0].reason).toBe(NO_NAME_REASON);
     expect(n.at).toBe(7);
   });
 
-  it("three skipped rows, one of them at commit time → three rows; length is the commit's count", () => {
+  it("three skipped rows, one of them at commit time → three rows; the count is the list's length", () => {
     const v = validateSmartImport({ agents, queries: [q("a2", QueryStatus.QUERIED), q("zz", QueryStatus.FULL_SENT, "2024-02-02"), q("a1", QueryStatus.QUERIED)] });
     expect(v.skipped.length).toBe(2);
     const commitLine = "Skipped a Partial Sent query — its agent couldn't be saved.";
-    const outcome = { queriesSkipped: 3, errors: ["Couldn't save agent Westbrook Literary: boom", commitLine] };
+    const outcome = { errors: ["Couldn't save agent Westbrook Literary: boom", commitLine] };
     const n = buildImportNotice(v.skipped, outcome, agents)!;
-    expect(n.rows.length).toBe(outcome.queriesSkipped);
+    expect(n.rows.length).toBe(3);
+    expect(n.count).toBe(n.rows.length);
     expect(n.rows.map((r) => r.reason)).toEqual([v.skipped[0].reason, v.skipped[1].reason, commitLine]);
     /* the commit-time row: nobody to name, the status as the commit read it, no date */
     expect(n.rows[2]).toEqual({ who: "", status: "Partial Sent", sentDate: null, reason: commitLine });
@@ -54,15 +55,27 @@ describe("N1 — buildImportNotice", () => {
       { query: q("a3", null), reason: "No readable status" },
       { query: q("a2", null), reason: "No readable status" },
     ];
-    const n = buildImportNotice(skipped, { queriesSkipped: 3, errors: [] }, agents)!;
+    const n = buildImportNotice(skipped, { errors: [] }, agents)!;
     expect(n.rows.map((r) => r.who)).toEqual(["Clara Voss", "Westbrook Literary", ""]);
   });
 
-  it("a list that cannot be made the count is not shown: the count alone", () => {
-    const n = buildImportNotice([], { queriesSkipped: 2, errors: [] }, agents)!;
-    expect(n.count).toBe(2);
-    expect(n.rows).toEqual([]);
-    expect(noticeWhy(n)).toBeNull();
+  it("an automatic set-aside still set aside at import is a row, with the validator's reason", () => {
+    const n = buildImportNotice([], { errors: [] }, agents, [{ status: "Queried", sentDate: "2026-02-10T00:00:00.000Z" }])!;
+    expect(n.count).toBe(1);
+    expect(n.rows).toEqual([{ who: "", status: "Queried", sentDate: "2026-02-10T00:00:00.000Z", reason: NO_NAME_REASON }]);
+    expect(noticeWhy(n)).toBe("It had no agent or agency name.");
+  });
+
+  it("all three kinds together: the count is the list's length, and the reason sentence is dropped", () => {
+    const v = validateSmartImport({ agents, queries: [q("zz", QueryStatus.FULL_SENT)] });
+    const n = buildImportNotice(v.skipped, { errors: ["Skipped a Queried query — its agent couldn't be saved."] }, agents, [{ status: "Queried", sentDate: null }])!;
+    expect(n.rows.length).toBe(3);
+    expect(n.count).toBe(3);
+    expect(noticeWhy(n), "mixed reasons").toBeNull();
+  });
+
+  it("nothing in any of the three → no notice, whatever the commit counted", () => {
+    expect(buildImportNotice([], { errors: [] }, agents, [])).toBeNull();
   });
 });
 

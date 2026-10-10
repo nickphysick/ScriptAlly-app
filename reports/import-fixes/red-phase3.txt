@@ -1,0 +1,12 @@
+   × C1 on the baseline (the same three readings, with the baseline's own API) > summary = review's live rows; the notice lists the nameless row 12ms
+     → expected { summaryAgents: 4, …(2) } to deeply equal { summaryAgents: 3, …(2) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+[32m- Expected[39m
+[31m+ Received[39m
+[32m-   "noticeRows": 1,[39m
+[32m-   "summaryAgents": 3,[39m
+[32m-   "summaryQueries": 3,[39m
+[31m+   "noticeRows": 0,[39m
+[31m+   "summaryAgents": 4,[39m
+[31m+   "summaryQueries": 4,[39m
+      Tests  1 failed (1)

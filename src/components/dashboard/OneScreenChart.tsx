@@ -58,9 +58,13 @@ const INK = "#1c130f";
 
 type Hover = { t: "w"; i: number } | { t: "e"; id: string } | null;
 
-/** "18 active queries" · "1 active query" · "No active queries" */
-export const activeTitle = (n: number | null): string =>
-  n === null ? "Active queries" : n === 0 ? "No active queries" : `${n.toLocaleString("en-GB")} active ${n === 1 ? "query" : "queries"}`;
+/** "18 active queries" · "1 active query" · "No active queries" — and, when queries are live but
+ *  none has a sent date the chart can place, how many and why nothing is drawn. */
+export const activeTitle = (n: number | null, undated = 0): string =>
+  n === null ? "Active queries"
+    : n === 0 && undated > 0
+      ? `${undated.toLocaleString("en-GB")} active ${undated === 1 ? "query has" : "queries have"} no sent date yet.`
+      : n === 0 ? "No active queries" : `${n.toLocaleString("en-GB")} active ${n === 1 ? "query" : "queries"}`;
 
 export const OneScreenChart: React.FC<{
   loading: boolean;
@@ -73,12 +77,14 @@ export const OneScreenChart: React.FC<{
   manuscripts?: Manuscript[];
   /** the live count, the header's own figure; null while loading */
   activeCount: number | null;
+  /** live queries with no sent date — handed in, like `activeCount`; the chart derives no count */
+  undatedCount?: number;
   now: Date;
   /** the page's zero-query branch — the card keeps its box and shows the first-run panel */
   empty?: boolean;
   onSendFirst?: () => void;
   onOpenQuery?: (queryId: string) => void;
-}> = ({ loading, queries, activities, agents = [], manuscripts = [], activeCount, now, empty = false, onSendFirst, onOpenQuery }) => {
+}> = ({ loading, queries, activities, agents = [], manuscripts = [], activeCount, undatedCount = 0, now, empty = false, onSendFirst, onOpenQuery }) => {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const popup = useDashPopup();
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -285,7 +291,7 @@ export const OneScreenChart: React.FC<{
 
   const title = (
     <div className="os-bandrow">
-      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : activeTitle(empty ? 0 : activeCount)}</h3>
+      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : activeTitle(empty ? 0 : activeCount, empty ? 0 : undatedCount)}</h3>
       {!loading && !empty && stage === "short" && <span className="os-since" data-probe-text="chart-since">{sinceLabel(daily)}</span>}
       {/* ⚠️ THE RANGE CONTROL IS IN THE BAND (the v34 mockup, 19 Sep), after the title, and the row WRAPS:
           in a card of 470px or less it takes the full line beneath the title, still on the navy. In

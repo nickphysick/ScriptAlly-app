@@ -146,9 +146,13 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
 const MONTHS = MONTHS_SHORT;
 /** Format an ISO date for display; null → "date needed" (never a fabricated date). */
+/** The day part of a stored date. The template parser gives a full timestamp (`…T00:00:00.000Z`)
+ *  where Smart Import gives `YYYY-MM-DD`; a date field and `fmtDate` both need the day alone. */
+export const dayOf = (iso: string | null | undefined): string => (iso ?? "").slice(0, 10);
 export const fmtDate = (iso: string | null): string => {
   if (!iso) return "date needed";
-  const [y, m, d] = iso.split("-").map(Number);
+  // Read the day part only: a full timestamp used to fall through and print raw.
+  const [y, m, d] = dayOf(iso).split("-").map(Number);
   return y && m && d ? `${d} ${MONTHS[m - 1]} ${y}` : iso;
 };
 export const QUERY_STATUS_OPTIONS: QueryStatus[] = [
@@ -265,6 +269,17 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
       return `We read this as ${fmtDate(q.sentDate)} — but that's well outside your other dates (it came through as a stray spreadsheet number). Is that right, or shall we set it?`;
     case "no-date":
       return `We don't have a date for this one. When did you send the query?`;
+    /* The template parser's own two sentences (templateImport.ts), quoting the cell back. The
+       unreadable one ends on the review's existing date question, because here the fix is a date
+       picker and "Try YYYY-MM-DD" would describe a cell the writer can no longer edit. */
+    case "unreadable-date":
+      return `We couldn't read "${q.sentDateRaw ?? ""}" as a date. When did you send the query?`;
+    case "ambiguous-date":
+      return `"${q.sentDateRaw ?? ""}" could be two different dates. Which did you mean?`;
+    case "unreadable-response-date":
+      return `We couldn't read "${q.timeline[0]?.raw ?? ""}" as a date. When was the last response?`;
+    case "ambiguous-response-date":
+      return `"${q.timeline[0]?.raw ?? ""}" could be two different dates. Which did you mean?`;
     case "status-direction":
       return isPartialStage(q.status)
         ? `Did you send the partial manuscript, or did the agent request it from you?`
@@ -294,6 +309,10 @@ export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
     case "missing-day":        return { pill: "Day to confirm" };
     case "serial-outlier":     return { pill: "Date to confirm" };
     case "no-date":            return { pill: "Date needed" };
+    case "unreadable-date":    return { pill: "Date needed" };
+    case "ambiguous-date":     return { pill: "Date to confirm" };
+    case "unreadable-response-date": return { pill: "Date needed" };
+    case "ambiguous-response-date":  return { pill: "Date to confirm" };
     case "status-direction":   return { pill: "Status to check" };
     case "status-wording":     return { pill: "Status to check" };
     case "check-name":         return { pill: "Name to check" };
@@ -438,6 +457,23 @@ export function seedUnidentifiedSetAside(
       unidentified.has(q.agentRef) && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" as const } : q
     ),
   };
+}
+
+/**
+ * The rows the review set aside BY ITSELF (no agent name, no agency) that are still set aside — what
+ * the import leaves out without the writer having chosen to. One entry per query of such a row, or
+ * one for the row itself when it carried no query. A row the writer named ("Name it instead") is no
+ * longer set aside and is not here; a row the writer removed on purpose never was.
+ */
+export function autoSetAsideRows(agents: ReviewAgent[], queries: ReviewQuery[]): { status: string; sentDate: string | null }[] {
+  const out: { status: string; sentDate: string | null }[] = [];
+  for (const a of agents) {
+    if (!a.deleted || a.setAsideStage !== "unidentified") continue;
+    const mine = queries.filter((q) => q.agentRef === a.id);
+    if (mine.length === 0) out.push({ status: "", sentDate: null });
+    for (const q of mine) out.push({ status: q.status, sentDate: q.sentDate });
+  }
+  return out;
 }
 
 /** A duplicate cluster as the duplicates stage renders it: the open (unresolved) members, plus a

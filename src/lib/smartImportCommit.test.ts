@@ -202,7 +202,7 @@ describe('commitSmartImport — orchestration', () => {
     expect(out.queriesImported).toBe(1);
   });
 
-  it('passes real sentDate as dateSent for dated queries; clears dateSent (deleteField) for provisional ones', async () => {
+  it('passes real sentDate as dateSent for dated queries; passes none, and says it is an import, for undated ones', async () => {
     const { deps } = makeDeps();
     const r = result(
       [agent({ ref: 'a1' })],
@@ -215,10 +215,10 @@ describe('commitSmartImport — orchestration', () => {
     const addQueryCalls = (deps.addQuery as any).mock.calls;
     expect(addQueryCalls[0][0].dateSent).toBe('2026-03-15');
     expect(addQueryCalls[1][0].dateSent).toBeUndefined();
-    const clearCalls = mockUpdateDoc.mock.calls.filter(
-      (c) => (c[1] as any)?.dateSent?._sentinel === 'deleteField'
-    );
-    expect(clearCalls.length).toBe(1);
+    /* It used to let addQuery default the date to now and then delete it with a second write.
+       Now addQuery is told the query is an import and writes no sent date in the first place. */
+    expect(addQueryCalls.map((c: any[]) => c[2])).toEqual([{ imported: true }, { imported: true }]);
+    expect(mockUpdateDoc.mock.calls.filter((c) => 'dateSent' in ((c[1] as any) ?? {}))).toEqual([]);
   });
 
   it('collapses the dashboard feed into ONE "Smart import ·" summary (existing activity type)', async () => {

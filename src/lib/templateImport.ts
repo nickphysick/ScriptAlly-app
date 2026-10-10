@@ -22,7 +22,8 @@
  */
 
 import { QueryStatus } from "../types";
-import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
+import { SmartImportResult, ParsedAgent, ParsedQuery, ReviewReasonCode } from "../types/smartImport";
+import { readSheetBook } from "./sheetCells";
 import {
   TEMPLATE_HEADER_LOOKUP, TEMPLATE_COMMENT_PREFIX, TEMPLATE_STATUS_VALUES,
   isExampleRow, normaliseHeader,
@@ -93,6 +94,18 @@ export function parseTemplateDate(raw: string): { iso: string } | "ambiguous" | 
   }
 
   return null;
+}
+
+/**
+ * The two dates an ambiguous cell could mean, day-first reading first — what the review offers the
+ * writer to choose between. Empty when the cell is not ambiguous.
+ */
+export function ambiguousReadings(raw: string): string[] {
+  const m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(raw.trim());
+  if (!m || parseTemplateDate(raw) !== "ambiguous") return [];
+  const [, a, b, y] = m;
+  const iso = (day: number, month: number) => new Date(Date.UTC(Number(y), month - 1, day)).toISOString();
+  return [iso(Number(a), Number(b)), iso(Number(b), Number(a))];
 }
 
 /**
@@ -190,15 +203,21 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
       }
     }
 
+    /* ⚠️ A FLAG NOBODY READS IS A DATE DROPPED IN SILENCE. `flags` was returned to the caller and
+       never rendered, so a row whose date could not be read arrived at the review as "Ready".
+       Each date flag is ALSO a typed reason on its own query, which is what the review renders. */
+    const reasons: ReviewReasonCode[] = [];
     const sentRaw = cell(row, "Date sent");
     const sent = parseTemplateDate(sentRaw);
     let sentDate: string | null = null;
     if (sent === "ambiguous") {
+      reasons.push("ambiguous-date");
       flags.push({
         row: sheetRow, column: "Date sent", value: sentRaw, reason: "ambiguous-date",
         message: `"${sentRaw}" could be two different dates. Which did you mean?`,
       });
     } else if (sent === null && sentRaw) {
+      reasons.push("unreadable-date");
       flags.push({
         row: sheetRow, column: "Date sent", value: sentRaw, reason: "unreadable-date",
         message: `We couldn't read "${sentRaw}" as a date. Try YYYY-MM-DD.`,
@@ -213,6 +232,12 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
     const responseRaw = cell(row, "Date of last response");
     const response = parseTemplateDate(responseRaw);
     const timeline: ParsedQuery["timeline"] = [];
+    /* A response date that could not be read still gets its (undated) event when there is a status
+       to hang it on, so the review has somewhere to put the writer's answer. */
+    if ((response === "ambiguous" || (response === null && responseRaw)) && status) {
+      timeline.push({ type: status, date: null, raw: responseRaw });
+      reasons.push(response === "ambiguous" ? "ambiguous-response-date" : "unreadable-response-date");
+    }
     if (response === "ambiguous") {
       flags.push({
         row: sheetRow, column: "Date of last response", value: responseRaw, reason: "ambiguous-date",
@@ -237,6 +262,7 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
       sentDate,
       sentDateRaw: sentRaw || null,
       ...(timeline.length ? { timeline } : {}),
+      ...(reasons.length ? { reasons } : {}),
       ...(notes ? { notes } : {}),
     });
   });
@@ -264,14 +290,19 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
  * import depend on where they left the cursor.
  */
 export async function readTemplateFile(file: File): Promise<TemplateParse> {
+  return readTemplateBuffer(await file.arrayBuffer());
+}
+
+/** The same read from bytes — what `readTemplateFile` does once it has the file's contents. */
+export async function readTemplateBuffer(buffer: ArrayBuffer | Uint8Array): Promise<TemplateParse> {
   const XLSX = await import("xlsx");
-  const buffer = await file.arrayBuffer();
-  const book = XLSX.read(buffer, { type: "array", cellDates: false, raw: false });
+  // Text as typed, date cells as ISO from their value — see sheetCells.ts for why both matter.
+  const book = readSheetBook(XLSX, buffer);
   const first = book.SheetNames[0];
   if (!first) return { result: { agents: [], queries: [] }, flags: [], rowsRead: 0, ignoredColumns: [] };
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(book.Sheets[first], {
-    // Strings throughout: a date read as a serial number would bypass the ambiguity check that is
-    // the entire point of parseTemplateDate.
+    // Strings throughout. Date cells are already ISO text (readSheetBook); every other number is
+    // given as the sheet displays it.
     raw: false,
     defval: "",
     blankrows: false,

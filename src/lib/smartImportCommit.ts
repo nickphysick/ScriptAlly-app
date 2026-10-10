@@ -9,13 +9,14 @@
  * derives status, stage dates, and the "Responses Received" flag identically to hand-logged
  * queries. No model involvement here.
  */
-import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp, updateDoc, deleteField } from "firebase/firestore";
+import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
 import { Agent, ActivityType, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
+import { importActivityLine, type ImportSource } from "./importLabels";
 
 // The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
 // pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
@@ -32,7 +33,8 @@ export interface CommitDeps {
   ) => Promise<{ success: boolean; error?: string; id?: string }>;
   addQuery: (
     q: any,
-    bypassLimits?: boolean
+    bypassLimits?: boolean,
+    opts?: { imported?: boolean }
   ) => Promise<{ success: boolean; error?: string; id?: string }>;
 }
 
@@ -55,13 +57,18 @@ export function countExistingMatches(result: SmartImportResult, existingAgents: 
   ).length;
 }
 
+/** Where an all-undated query's ordering keys start. Not a date: see the note at its use. */
+export const UNDATED_ORDER_BASE_MS = 0;
+
 const mapMethod = (m: ParsedAgent["submissionMethod"]): SubmissionMethod =>
   m === "Online Form" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL;
 
 export async function commitSmartImport(
   deps: CommitDeps,
   result: SmartImportResult,
-  manuscriptId: string
+  manuscriptId: string,
+  /** Which path the rows came by — named in the one activity line the import leaves. */
+  source: ImportSource = "smart"
 ): Promise<CommitOutcome> {
   const { userId, existingAgents, manuscriptTitle, addAgent, addQuery } = deps;
   const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [] };
@@ -159,10 +166,16 @@ export async function commitSmartImport(
           personalisationNotes: q.notes ?? "",
           sendMethod: SubmissionMethod.EMAIL,
           status: q.status!,
-          // Only pass a real query date; without one the query imports provisionally.
+          // Only pass a real query date; without one the query is written with no sent date.
           ...(q.sentDate ? { dateSent: q.sentDate } : {}),
         },
-        true
+        true,
+        /* ⚠️ `imported` IS WHAT STOPS addQuery INVENTING A DATE. Without it addQuery defaulted the
+           sent date to now and wrote its own first history steps stamped now. Those steps are
+           real, dated events as far as the derivation can tell, and this commit may only delete
+           steps it wrote itself (the `imp-` rule below), so they survived: every imported stage
+           was dated to the moment of import, and an undated request read "Asked today". */
+        { imported: true }
       );
       if (!res.success || !res.id) {
         outcome.errors.push(`Couldn't import the query to ${agent.name}: ${res.error || "unknown error"}`);
@@ -170,11 +183,6 @@ export async function commitSmartImport(
       }
       queryId = res.id;
       importedQueryIds.add(queryId);
-      // addQuery always defaults dateSent to today; for provisional (undated) imports that
-      // fabricates a date. Clear it so the feeds never show a made-up sent date.
-      if (!q.sentDate) {
-        await updateDoc(doc(db, "users", userId, "queries", queryId), { dateSent: deleteField() });
-      }
     } catch (e) {
       console.error("Smart Import: query write failed:", agent.name, e);
       outcome.errors.push(`Couldn't import the query to ${agent.name}.`);
@@ -211,7 +219,12 @@ export async function commitSmartImport(
       const mine = existing.docs.filter((d) => d.id.startsWith("imp-"));
       await Promise.all(mine.map((d) => deleteDoc(d.ref)));
 
-      for (const rung of assignTimes(impliedRungs(q), importBaseMs)) {
+      /* ⚠️ AN UNDATED QUERY'S STEPS ARE ORDERED FROM ZERO, NEVER FROM THE IMPORT'S OWN TIME. The key
+         only puts the steps in pipeline order and is flagged `dateProvisional`, so nothing shows
+         it. But a key of "now" is still a date in the record: a step the writer later dates in
+         the past is clamped to sit after the latest step, so it was stored as the day of the
+         import instead of the day they chose. */
+      for (const rung of assignTimes(impliedRungs(q), UNDATED_ORDER_BASE_MS)) {
         const id = "imp-" + Math.random().toString(36).substr(2, 9);
         await setDoc(doc(actCol, id), {
           type: rung.status,
@@ -261,7 +274,7 @@ export async function commitSmartImport(
       queryId: "",
       manuscriptId: "",
       activityType: ActivityType.STATUS_CHANGED, // non-housekeeping so it shows in "The story so far"
-      description: `Smart import · ${outcome.agentsCreated} agents added, ${outcome.queriesImported} queries logged`,
+      description: importActivityLine(source, outcome.agentsCreated, outcome.queriesImported),
       date: new Date(importBaseMs).toISOString(),
       details: "",
     });

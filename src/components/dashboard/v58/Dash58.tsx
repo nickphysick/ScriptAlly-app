@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
-import { liveCount } from "../../../lib/dashBreakdown";
+import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
@@ -263,6 +263,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   manuscripts={manuscripts}
                   onOpenQuery={(id) => onNavigate("queries", id)}
                   activeCount={activeCount}
+                  undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
                   now={now}
                   empty={empty}
                   onSendFirst={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}

@@ -7,7 +7,7 @@
  * agents and queries — each led by its number, with the steps and the primary on a bar at the
  * sheet's foot.
  *
- * ⚠️ THE NUMBERS ARE `parseModel`'s AND `reviewTallies`', READ ONCE. This file groups and draws
+ * ⚠️ THE NUMBERS ARE `summaryModel`'s AND `reviewTallies`', READ ONCE. This file groups and draws
  * them (`lib/importSummary`); it classifies nothing. The agents total is the count before any
  * duplicate is merged, as it always was.
  *
@@ -19,11 +19,12 @@
 import React from "react";
 import "./importFlow.css";
 import { SmartImportResult } from "../../types/smartImport";
-import { parseModel, reviewTallies } from "../../lib/smartImportReviewModel";
+import { reviewTallies } from "../../lib/smartImportReviewModel";
 import { overviewLead } from "../../lib/smartImportConfirm";
 import {
   agentKey, agentKeyParts, agentDiscs, queryCourts, importSteps, stepCaption, duplicateSets, agentSharpenFacts,
   TIER_TEXT, TIER_NAME, SUMMARY_TITLE, SUMMARY_PRIMARY,
+  summaryModel,
 } from "../../lib/importSummary";
 import { StatusDot } from "../StatusDot";
 import { Chip, Disc, Stepper } from "./ImportParts";
@@ -67,7 +68,7 @@ const Recon: React.FC<{ what: string; total: number; ok: number; fix: number; sh
 };
 
 export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileName, rowCount, onContinue }) => {
-  const { agents, queries } = React.useMemo(() => parseModel(result), [result]);
+  const { agents, queries } = React.useMemo(() => summaryModel(result), [result]);
   const t = React.useMemo(() => reviewTallies(agents, queries), [agents, queries]);
   const key = React.useMemo(() => agentKey(agents, queries), [agents, queries]);
   const faces = React.useMemo(() => agentDiscs(agents, queries), [agents, queries]);
