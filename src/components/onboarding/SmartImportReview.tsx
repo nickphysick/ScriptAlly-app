@@ -23,532 +23,18 @@ import React, { useState, useRef, useMemo, useCallback } from "react";
 import "./importFlow.css";
 import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
-import { SegmentedToggle, WeekSlider, GenreCombobox, FitStars } from "../forms";
-import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
   ReviewAgent, ReviewQuery, CheckReason,
-  agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
+  agentStatus, resolveReason, queryStatusOf, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside,
-  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters,
-  keepBothLabel, keptClusterLabel, mergedAwayByKeeper,
+  removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
   rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
 } from "../../lib/smartImportReviewModel";
 import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
-
-// ── Palette for the rows (rebuilt in the next phase) ────────────────────────────────────────────
-
-const C = {
-  band: "#EDE6DF",
-  panel: "#fffdfa",
-  frame: "rgba(124,58,42,0.28)",
-  sage: "linear-gradient(135deg,#dce0d9,#d0d6cc)",
-  burgundy: "#7c3a2a",
-  head: "#2e3a2c",
-  cardFill: "#faf8f3",
-  sageEdge: "#8a9e88",
-  invalid: "#b04a3a",
-  meta: "#b0926e",
-  muted: "#9c8878",
-  noteFill: "#FFF0F0",
-  noteInk: "#6b3a34",
-  doneFill: "#e7ece1",
-  doneInk: "#44563a",
-  sticky: "#fbf3c9",
-  stickyInk: "#4a431f",
-};
-const MONO = "'JetBrains Mono',monospace";
-const SERIF = "'Playfair Display',serif";
-
-const initials = (n: string) => {
-  const p = n.trim().split(/\s+/);
-  let s = p[0]?.[0] ?? "";
-  if (p.length > 1) s += p[p.length - 1][0];
-  return s.toUpperCase();
-};
-
-const flab: React.CSSProperties = { fontFamily: MONO, fontSize: 7.5, letterSpacing: "0.09em", textTransform: "uppercase", color: C.muted, display: "block", marginBottom: 5 };
-const finBase: React.CSSProperties = { width: "100%", background: "#fff", border: "1px solid #e2d8cc", borderRadius: 7, padding: "7px 9px", fontFamily: "Source Sans Pro", fontSize: 12, color: "#3a1c14", outline: "none" };
-
-// ── Resolve-bar bits ─────────────────────────────────────────────────────────────────────────────
-// A quiet sage pill on the surviving record once a cluster has absorbed a duplicate.
-const KeptTag: React.FC = () => (
-  <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(90,110,88,0.1)", border: "1px solid rgba(90,110,88,0.26)", borderRadius: 6, padding: "2px 7px", whiteSpace: "nowrap", flexShrink: 0 }}>
-    kept as the main record
-  </span>
-);
-// The slim sage confirmation bar a removed duplicate collapses into (it does NOT vanish): the moved
-// record (struck) merged into the keeper, with a query-count-aware "moved across" note. The collapse
-// animation + reduced-motion fallback live in saDupBarIn (injected in the duplicates return).
-const MergedBar: React.FC<{ removedName: string; keptName: string; n: number }> = ({ removedName, keptName, n }) => (
-  <div className="sa-dup-bar" style={{ display: "flex", alignItems: "center", gap: 8, background: C.doneFill, border: "1px solid rgba(90,110,88,0.28)", borderRadius: 9, padding: "7px 11px", marginTop: 7 }}>
-    <span style={{ color: "#5a6e58", fontSize: 11, flexShrink: 0 }}>✓</span>
-    <span style={{ fontFamily: "Source Sans Pro", fontSize: 11.5, color: C.doneInk, lineHeight: 1.3, minWidth: 0 }}>
-      <span style={{ textDecoration: "line-through", opacity: 0.7 }}>{removedName}</span>
-      {" merged into "}<strong style={{ fontWeight: 600 }}>{keptName}</strong>
-      {" — its quer"}{n === 1 ? "y" : "ies"}{" moved across"}
-    </span>
-  </div>
-);
-
-// ── Shared dedupe control (rendered once per cluster) ────────────────────────────────────────────
-const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) => number; onRemove: (id: string) => void; onKeepBoth: () => void; keptId?: string }> = ({ members, queryCount, onRemove, onKeepBoth, keptId }) => (
-  <div style={{ position: "relative", zIndex: 1, marginTop: 9, padding: "10px 11px", background: "#fff", border: "0.5px solid #f1d9cd", borderRadius: 9 }}>
-    {members.map((s) => {
-      const n = queryCount(s.id);
-      return (
-        <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#6a5a50", padding: "4px 0" }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#c9a89e", flexShrink: 0 }} />
-          <span style={{ flex: 1, minWidth: 0 }}>{(s.name || "—")}{s.agency.trim() ? ` — ${s.agency}` : ""}</span>
-          {keptId === s.id && <KeptTag />}
-          <span style={{ fontFamily: MONO, fontSize: 8, color: C.meta }}>{n} quer{n === 1 ? "y" : "ies"}</span>
-          <button
-            onClick={() => onRemove(s.id)}
-            style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.03em", color: "#a07868", background: "#fff", border: "1px solid #eccebf", borderRadius: 7, padding: "4px 9px", cursor: "pointer", whiteSpace: "nowrap" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = C.burgundy; e.currentTarget.style.borderColor = "#d8a89a"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#a07868"; e.currentTarget.style.borderColor = "#eccebf"; }}
-          >Remove this one</button>
-        </div>
-      );
-    })}
-    <div style={{ fontFamily: "Source Sans Pro", fontSize: 10, color: "#9a7a6a", lineHeight: 1.35, margin: "6px 0 2px" }}>
-      Remove whichever is the duplicate and its queries move onto the agent you keep — nothing is lost.
-    </div>
-    <button
-      onClick={onKeepBoth}
-      style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.03em", color: "#a07868", background: "#fff", border: "1px solid #eccebf", borderRadius: 8, padding: "6px 12px", cursor: "pointer", marginTop: 6 }}
-    >{keepBothLabel(members.length)}</button>
-  </div>
-);
-
-// ── Flat agent row — used by the new agents-screen two-column layout ─────────────────────────
-interface AgentRowProps {
-  agent: ReviewAgent;
-  queryCount: number;
-  dupOpen: boolean;
-  clusterPeers?: ReviewAgent[];
-  open: boolean;
-  onToggleOpen: () => void;
-  onPatch: (p: Partial<ReviewAgent>) => void;
-  onDelete: () => void;
-  onResolveReason: (kind: CheckReason) => void;
-  onReopenReason: (kind: CheckReason) => void;
-  onMerge?: () => void;
-  onKeepBoth?: () => void;
-}
-
-const solidMini: React.CSSProperties = { fontFamily: MONO, fontSize: 12, padding: "9px 15px", borderRadius: 9, cursor: "pointer", border: "none", background: "#f5e2da", color: "#7c3a2a", fontWeight: 500 };
-const ghostMini: React.CSSProperties = { fontFamily: MONO, fontSize: 12, padding: "9px 15px", borderRadius: 9, cursor: "pointer", background: "transparent", color: "#8a8178", border: "1px solid #e3ccc0" };
-
-const AgentRow: React.FC<AgentRowProps> = ({
-  agent, queryCount, dupOpen, clusterPeers, open,
-  onToggleOpen, onPatch, onDelete, onResolveReason, onMerge, onKeepBoth,
-}) => {
-  const [agencyInput, setAgencyInput] = useState("");
-  const agencyRef = useRef<HTMLInputElement>(null);
-  const invalid = !agent.agency.trim();
-  const status = agentStatus(agent, dupOpen);
-  const needsCheck = status !== "captured";
-  const disp = agent.name || agent.agency;
-  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? "Agent name not recorded" : null;
-  const av = agent.name
-    ? initials(agent.name)
-    : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–");
-  const accentColor = needsCheck ? "#a85a44" : "#5a6e58";
-  const avBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
-  const avInk = needsCheck ? "#a85a44" : "#5a6e58";
-  const pillBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
-  const pillInk = needsCheck ? "#a85a44" : "#5a6e58";
-  const openDupReason = dupOpen && (clusterPeers?.length ?? 0) > 0;
-  const openMappingReason = !invalid && !openDupReason ? agent.reasons.find((r) => r.kind === "mapping" && !r.resolved) : null;
-
-  return (
-    <div data-row-id={agent.id} style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
-      {/* Main row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
-        <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
-        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: avInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0, letterSpacing: 0 }}>
-          {av}
-        </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          {disp
-            ? <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2a2521", lineHeight: 1.1 }}>{disp}</div>
-            : <div style={{ fontFamily: SERIF, fontSize: 18, color: "#a89684", fontStyle: "italic", lineHeight: 1.1 }}>Name this agent</div>}
-          {subline && <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#8a8178", marginTop: 1 }}>{subline}</div>}
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: pillBg, color: pillInk, whiteSpace: "nowrap" }}>
-            {needsCheck ? "Needs a look" : "Ready"}
-          </span>
-          {!needsCheck && (
-            <button onClick={onToggleOpen} data-coach="add-details"
-              style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
-            >{open ? "Close" : "Add details"}</button>
-          )}
-          <button title="Don't import" onClick={onDelete}
-            style={{ background: "none", border: "none", color: "#b6a99a", cursor: "pointer", padding: 4, borderRadius: 6, lineHeight: 0, fontSize: 14, fontFamily: "sans-serif" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.08)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a99a"; e.currentTarget.style.background = "none"; }}
-          >✕</button>
-        </span>
-      </div>
-
-      {/* "Add details" editor — ready items only */}
-      {open && !needsCheck && (
-        <div style={{ padding: "12px 22px 18px", borderTop: "0.5px solid #e8ddce", display: "flex", flexDirection: "column", gap: 11 }}>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Agent name</span>
-              <div style={{ position: "relative" }}>
-                <input value={agent.agencyOnly ? "" : agent.name} disabled={agent.agencyOnly} placeholder={agent.agencyOnly ? "Referenced by agency only" : "e.g. Eleanor Vance"}
-                  onChange={(e) => onPatch({ name: e.target.value })}
-                  style={{ ...finBase, ...(agent.agencyOnly ? { background: "#f3efe8", color: "#a89684", fontStyle: "italic" } : {}) }} />
-                <span title="Don't know the name? Use agency only"
-                  onClick={() => onPatch({ agencyOnly: !agent.agencyOnly, ...(!agent.agencyOnly ? { name: "" } : {}) })}
-                  style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, borderRadius: "50%", border: `1px solid ${agent.agencyOnly ? "#8a9e88" : "#d8c8b8"}`, background: agent.agencyOnly ? "#8a9e88" : "#fff", color: agent.agencyOnly ? "#fff" : C.muted, fontFamily: MONO, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>?</span>
-              </div>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Agency</span>
-              <input value={agent.agency} placeholder="Agency" onChange={(e) => onPatch({ agency: e.target.value })} style={finBase} />
-            </div>
-          </div>
-          <div>
-            <span style={flab}>Genres they're looking for</span>
-            <GenreCombobox options={PREDEFINED_GENRES as unknown as string[]} value={agent.genres} onChange={(g) => onPatch({ genres: g })} placeholder="Type or pick…" />
-          </div>
-          <div>
-            <span style={flab}>Website</span>
-            <input value={agent.website} placeholder="agency.com/their-page" onChange={(e) => onPatch({ website: e.target.value })} style={finBase} />
-          </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Submissions</span>
-              <SegmentedToggle<"open" | "closed"> value={agent.submissionsOpen ? "open" : "closed"}
-                options={[{ value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
-                onChange={(v) => onPatch({ submissionsOpen: v === "open" })} ariaLabel="Submissions status" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Typically replies in</span>
-              <WeekSlider value={agent.weeks} onChange={(w) => onPatch({ weeks: w })} min={1} max={26} />
-            </div>
-          </div>
-          <div>
-            <span style={flab}>Agent fit</span>
-            <div style={{ fontSize: 10, color: C.muted, margin: "-2px 0 7px", lineHeight: 1.35 }}>Log how good a match this agent would be for you.</div>
-            <FitStars value={agent.rating} onChange={(r) => onPatch({ rating: r })} size={17} />
-          </div>
-        </div>
-      )}
-
-      {/* Inline reason panel — needs-check items */}
-      {needsCheck && (
-        <div style={{ padding: "0 22px 18px 79px" }}>
-          {/* Missing agency */}
-          {invalid && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".4" fill="#a85a44" stroke="none"/><path d="M12 3l9 16H3z"/></svg>
-                No agency yet — add it to sharpen this record, or carry on without one. Nothing's lost.
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <input ref={agencyRef} type="text" value={agencyInput} onChange={(e) => setAgencyInput(e.target.value)}
-                  placeholder="Agency name" aria-label="Agency name"
-                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none" }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                  onKeyDown={(e) => { if (e.key === "Enter") { const v = agencyInput.trim(); if (v) { onPatch({ agency: v }); setAgencyInput(""); } } }}
-                />
-                <button onClick={() => { const v = agencyInput.trim(); if (v) { onPatch({ agency: v }); setAgencyInput(""); } else { agencyRef.current?.focus(); } }}
-                  style={solidMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
-                >Save agency</button>
-                {agent.name.trim() && (
-                  <button onClick={() => onPatch({ agencyWaived: true })} style={ghostMini}
-                    title="Import now with no agency — add it later from the agent's profile"
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                  >Carry on without an agency</button>
-                )}
-                <button onClick={() => onPatch({ agencyOnly: true, name: "" })} style={ghostMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                >Reference by agency only</button>
-              </div>
-            </>
-          )}
-          {/* Suspected duplicate */}
-          {openDupReason && clusterPeers && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="4" y="4" width="13" height="13" rx="2"/><path d="M9 9h11v11H9z" fill="#fdf3ee"/><rect x="9" y="9" width="11" height="11" rx="2"/></svg>
-                Suspected duplicate of{" "}
-                <b style={{ color: "#7c3a2a", fontWeight: 500 }}>{clusterPeers.map((p) => p.name || p.agency).join(", ")}</b>.
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, color: "#8a8178", marginRight: 4 }}>Same agent, or two different people?</span>
-                <button onClick={onMerge} style={solidMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
-                >Merge them</button>
-                <button onClick={onKeepBoth} style={ghostMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                >Keep both</button>
-              </div>
-            </>
-          )}
-          {/* Mapping note (low-confidence / flag) */}
-          {openMappingReason && (
-            <>
-              <div style={{ fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(openMappingReason.note)}</div>
-              <button onClick={() => onResolveReason("mapping")} style={ghostMini}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-              >Mark as checked</button>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ── Query row (Queries B-redesign) ──────────────────────────────────────────────────────────────
-// Flat list row. A query is "Ready" when it carries no open reason; otherwise it shows one inline
-// panel per typed reason (stacked), each with the catalogue copy + the right input. Copy is derived
-// from the reason code (queryReasonText) so it stays consistent run-to-run.
-const reasonStripStyle: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11, lineHeight: 1.5, maxWidth: 560 };
-const dateBoxStyle: React.CSSProperties = { fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 180, color: "#2a2521", outline: "none" };
-const ReasonIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b5654a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></svg>
-);
-
-// ── Reusable typed-reason panel ───────────────────────────────────────────────────────────────────
-// One reason's copy + the right input, extracted from QueryRow so it's the SINGLE source of truth for
-// reason rendering — used inline in the scan-mode list AND one-at-a-time in the guided focus-overlay.
-// Same handlers, same copy assembly; the only difference between modes is the wrapper around it.
-interface QueryReasonPanelProps {
-  query: ReviewQuery;
-  code: ReviewReasonCode;
-  onPatch: (p: Partial<ReviewQuery>) => void;
-  onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
-  onSwapDates: () => void;
-}
-const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatch, onResolveReason, onSwapDates }) => {
-  // Per-reason local date drafts (so typing doesn't commit until "Save"), and the wording dropdown.
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [serialEditing, setSerialEditing] = useState(false);
-  const [wording, setWording] = useState<QueryStatus>(query.status);
-  const setDraft = (k: string, v: string) => setDrafts((d) => ({ ...d, [k]: v }));
-
-  const dateInput = (k: string, label: string, prefill: string | null) => (
-    <input type="date" aria-label={label} value={drafts[k] ?? prefill ?? ""} onChange={(e) => setDraft(k, e.target.value)}
-      style={dateBoxStyle} onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }} />
-  );
-  const solidBtn = (label: string, onClick: () => void) => (
-    <button onClick={onClick} style={solidMini}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}>{label}</button>
-  );
-  const ghostBtn = (label: string, onClick: () => void) => (
-    <button onClick={onClick} style={ghostMini}
-      onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}>{label}</button>
-  );
-
-  const copy = <div style={reasonStripStyle}><ReasonIcon /><span>{queryReasonText(code, query)}</span></div>;
-  switch (code) {
-    case "two-dates": {
-      const ev = query.timeline[0];
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ borderLeft: "2px solid #ecd9cd", paddingLeft: 16, display: "flex", flexDirection: "column", gap: 10, margin: "4px 0 12px", maxWidth: 520 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 12, width: 130, flexShrink: 0 }}>Query sent<span style={{ display: "block", color: C.muted, fontSize: 10.5 }}>you → agent</span></span>
-              <input type="date" aria-label="Query sent date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} style={dateBoxStyle} />
-            </div>
-            {ev && (
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, width: 130, flexShrink: 0 }}>{ev.type}<span style={{ display: "block", color: C.muted, fontSize: 10.5 }}>agent → you</span></span>
-                <input type="date" aria-label="Event date" value={ev.date ?? ""} onChange={(e) => onPatch({ timeline: query.timeline.map((t, i) => (i === 0 ? { ...t, date: e.target.value || null } : t)) })} style={dateBoxStyle} />
-              </div>
-            )}
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {solidBtn("Yes, that's right", () => onResolveReason("two-dates"))}
-            {ev && ghostBtn("Swap the dates", onSwapDates)}
-            {ghostBtn("It's just one date", () => onResolveReason("two-dates", { timeline: [] }))}
-          </div>
-        </div>
-      );
-    }
-    case "missing-day":
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            {dateInput(code, "Pin to a date", null)}
-            {solidBtn("Save date", () => { const v = drafts[code]; if (v) onResolveReason("missing-day", { sentDate: v }); })}
-            {ghostBtn("Keep as month", () => onResolveReason("missing-day"))}
-          </div>
-        </div>
-      );
-    case "serial-outlier":
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            {serialEditing
-              ? <>{dateInput(code, "Set a different date", query.sentDate)}{solidBtn("Save date", () => { const v = drafts[code] ?? query.sentDate; if (v) onResolveReason("serial-outlier", { sentDate: v }); })}</>
-              : <>{solidBtn("That's right", () => onResolveReason("serial-outlier"))}{ghostBtn("Set a different date", () => setSerialEditing(true))}</>}
-            {ghostBtn("Leave undated", () => onResolveReason("serial-outlier", { sentDate: null }))}
-          </div>
-        </div>
-      );
-    case "no-date":
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            {dateInput(code, "Date sent", null)}
-            {solidBtn("Save date", () => { const v = drafts[code]; if (v) onResolveReason("no-date", { sentDate: v }); })}
-            {ghostBtn("Leave undated", () => onResolveReason("no-date"))}
-          </div>
-        </div>
-      );
-    case "status-direction":
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {statusDirectionChoices(query.status).map((c) => (
-              <button key={c.status} onClick={() => onResolveReason("status-direction", { status: c.status })}
-                style={{ border: "1px solid #e0d3c6", background: "#fff", borderRadius: 9, padding: "10px 14px", fontSize: 13, color: "#2a2521", cursor: "pointer", textAlign: "left" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#7c3a2a"; e.currentTarget.style.background = "#faeee7"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e0d3c6"; e.currentTarget.style.background = "#fff"; }}>
-                <span style={{ fontWeight: 600 }}>{c.label}</span>
-                <span style={{ display: "block", fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 2 }}>→ {c.status}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    case "status-wording":
-      return (
-        <div style={{ marginBottom: 14 }}>
-          {copy}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <select value={wording} onChange={(e) => setWording(e.target.value as QueryStatus)} aria-label="Query status"
-              style={{ ...dateBoxStyle, minWidth: 200, cursor: "pointer" }}>
-              {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            {solidBtn("That's right", () => onResolveReason("status-wording", { status: wording }))}
-          </div>
-        </div>
-      );
-    // check-name / needs-identifying are agent-identity concerns, stripped from query reasons in
-    // parseModel — they never reach here. Kept for completeness; render nothing if they ever do.
-    default:
-      return null;
-  }
-};
-
-interface QueryRowProps {
-  query: ReviewQuery;
-  /** Agent name (Playfair) — agent.name || agent.agency. */
-  agentName: string;
-  /** Leading sub-line segment: the agency or "Agency only". */
-  origin: string;
-  open: boolean;
-  onToggleOpen: () => void;
-  onPatch: (p: Partial<ReviewQuery>) => void;
-  onDelete: () => void;
-  /** Resolve one typed reason, optionally applying the user's fix (status / sentDate / timeline). */
-  onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
-  /** Two-dates "Swap": swap the sent date with the first timeline event. */
-  onSwapDates: () => void;
-}
-
-const QueryRow: React.FC<QueryRowProps> = ({
-  query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onResolveReason, onSwapDates,
-}) => {
-  const openReasons = query.reasons.filter((r) => !r.resolved);
-  const needsCheck = openReasons.length > 0;
-  const dateStr = currentDate(query);
-  const av = initials(agentName) || "–";
-  const accentColor = needsCheck ? "#a85a44" : "#5a6e58";
-  const avBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
-  const pillInk = needsCheck ? "#a85a44" : "#5a6e58";
-
-
-  return (
-    <div data-row-id={query.id} style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
-      {/* Main row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
-        <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
-        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: pillInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0 }}>{av}</span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2a2521", lineHeight: 1.1 }}>{agentName}</div>
-          <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#8a8178", marginTop: 1 }}>
-            {origin} · {query.status} · {dateStr ? fmtDate(dateStr) : "Undated"}
-          </div>
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: needsCheck ? "#f0cdbf" : "#e6ebe3", color: pillInk, whiteSpace: "nowrap" }}>
-            {needsCheck ? "Needs a look" : "Ready"}
-          </span>
-          {!needsCheck && (
-            <button onClick={onToggleOpen} data-coach="add-details"
-              style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
-            >{open ? "Close" : "Add details"}</button>
-          )}
-          <button title="Don't import" onClick={onDelete}
-            style={{ background: "none", border: "none", color: "#b6a99a", cursor: "pointer", padding: 4, borderRadius: 6, lineHeight: 0, fontSize: 14, fontFamily: "sans-serif" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.08)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a99a"; e.currentTarget.style.background = "none"; }}
-          >✕</button>
-        </span>
-      </div>
-
-      {/* "Add details" editor — ready rows: status + sent date */}
-      {open && !needsCheck && (
-        <div style={{ padding: "12px 22px 18px", borderTop: "0.5px solid #e8ddce", display: "flex", flexDirection: "column", gap: 11 }}>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Status</span>
-              <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })} style={{ ...finBase, cursor: "pointer" }}>
-                {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Date sent</span>
-              <input type="date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} style={finBase} />
-            </div>
-          </div>
-          <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Dates are optional — add what you remember and your timeline stays accurate.</div>
-        </div>
-      )}
-
-      {/* Inline reason panels — one per open typed reason, stacked */}
-      {needsCheck && (
-        <div style={{ padding: "0 22px 18px 79px" }}>
-          {openReasons.map((r) => (
-            <QueryReasonPanel key={r.code} query={query} code={r.code} onPatch={onPatch} onResolveReason={onResolveReason} onSwapDates={onSwapDates} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
 
 // ── The words of the three steps ─────────────────────────────────────────────────────────────────
 const NUM_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
@@ -959,68 +445,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     void onImport?.(modelToResult(result, agents, queries));
   };
 
-  // ── Duplicates: render helpers ────────────────────────────────────────────────────────────────
-  //  `bars` are a cluster's already-merged-away records — they collapse into confirmation bars beneath
-  //  the live members (they never just vanish), and once any exist the surviving leader is tagged.
-  const renderCluster = (leader: ReviewAgent, members: ReviewAgent[], bars: ReviewAgent[] = []) => (
-    <div key={`clu-${leader.id}`} data-dup-set={leader.id} data-dup-state="open" style={{ position: "relative", background: "#fdf2ec", border: "1px solid #f0d6c9", borderRadius: 12, padding: "10px 9px 11px" }}>
-      <div style={{ position: "relative", zIndex: 1, fontFamily: MONO, fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "#b07a64", display: "flex", alignItems: "center", gap: 6, margin: "0 2px 8px" }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#d8a08c" }} />Looks like the same agent, imported more than once
-      </div>
-      <DupControl members={members} queryCount={queryCount} onRemove={removeDuplicate} onKeepBoth={() => keepBoth(leader.id)} keptId={bars.length ? leader.id : undefined} />
-      {bars.map((m) => <MergedBar key={`bar-${m.id}`} removedName={m.name || m.agency || "—"} keptName={leader.name || leader.agency || "the kept record"} n={movedCount(m.id)} />)}
-    </div>
-  );
-
-  // A kept-apart cluster on the (revisited) duplicates step: a settled card stating the decision with an
-  // Undo that restores the pre-resolution snapshot.
-  const renderResolvedCluster = (c: { leaderId: string; members: ReviewAgent[] }) => (
-    <div key={`resclu-${c.leaderId}`} data-dup-set={c.leaderId} data-dup-state="kept" style={{ background: C.doneFill, border: "1px solid rgba(90,110,88,0.3)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#5a6e58", display: "flex", alignItems: "center", gap: 6 }}><span>✓</span>{keptClusterLabel(c.members.length)}</div>
-        <div style={{ fontFamily: SERIF, fontSize: 13, color: C.doneInk, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {c.members.map((m, i) => (
-            <span key={m.id}>
-              <span style={{ textDecoration: m.deleted ? "line-through" : "none", opacity: m.deleted ? 0.55 : 1 }}>{m.name || m.agency || "—"}</span>
-              {i < c.members.length - 1 ? <span style={{ color: "#9aa899", margin: "0 6px" }}>·</span> : null}
-            </span>
-          ))}
-        </div>
-      </div>
-      <button onClick={() => undoCluster(c.leaderId)}
-        style={{ flexShrink: 0, fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(90,110,88,0.4)", borderRadius: 7, padding: "4px 10px", cursor: "pointer" }}
-      >Undo</button>
-    </div>
-  );
-
-  // A cluster resolved by merging down to one keeper: the surviving record (tagged + its consolidated
-  // query count) above the confirmation bars for each record it absorbed. Undo restores every snapshot
-  // that covers this group, recovering the whole original cluster.
-  const renderResolvedMerge = (keeper: ReviewAgent, bars: ReviewAgent[]) => {
+  // ── Duplicates ────────────────────────────────────────────────────────────────────────────────
+  /** Undo every snapshot that covers a merged group, recovering the whole original set. */
+  const undoMerged = (keeper: ReviewAgent, bars: ReviewAgent[]) => {
     const ids = [keeper.id, ...bars.map((b) => b.id)];
-    const undoAll = () => Object.keys(snapRef.current)
+    Object.keys(snapRef.current)
       .filter((k) => snapRef.current[k].agents.some((a) => ids.includes(a.id)))
       .forEach((k) => undoCluster(k));
-    const kn = queryCount(keeper.id);
-    return (
-      <div key={`resmerge-${keeper.id}`} data-dup-set={keeper.id} data-dup-state="merged" style={{ position: "relative", background: "#fdf2ec", border: "1px solid #f0d6c9", borderRadius: 12, padding: "10px 9px 11px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, margin: "0 2px 8px" }}>
-          <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "#5a6e58", display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#8a9e88" }} />Duplicate sorted
-          </div>
-          <button onClick={undoAll}
-            style={{ flexShrink: 0, fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(90,110,88,0.4)", borderRadius: 7, padding: "4px 10px", cursor: "pointer" }}
-          >Undo</button>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", border: "0.5px solid #e2d8c8", borderRadius: 9, padding: "8px 11px" }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#8a9e88", flexShrink: 0 }} />
-          <span style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: "#5a4a40" }}>{keeper.name || keeper.agency || "—"}{keeper.name && keeper.agency ? ` — ${keeper.agency}` : ""}</span>
-          <KeptTag />
-          <span style={{ fontFamily: MONO, fontSize: 8, color: C.meta }}>{kn} quer{kn === 1 ? "y" : "ies"}</span>
-        </div>
-        {bars.map((m) => <MergedBar key={`bar-${m.id}`} removedName={m.name || m.agency || "—"} keptName={keeper.name || keeper.agency || "the kept record"} n={movedCount(m.id)} />)}
-      </div>
-    );
   };
 
   // Every detected cluster, resolved or not — the duplicates step renders open ones in the active
@@ -1042,18 +473,18 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     const defaultKeptId = (rowQs.find((q) => q.status === derivedCurrentStatus(rowQs)) ?? rowQs[0])?.id ?? "";
     const removedId = members[1]?.id ?? "";
     return (
-      <div key={`recon-${leaderId}`} data-dup-set={leaderId} data-dup-state={res ? res.kind : "open"} data-dup-kind="reconcile">
-        <ReconcileCard
-          agentName={keeper.name || keeper.agency || "this agent"}
-          manuscriptTitle=""
-          rows={rows}
-          defaultKeptId={defaultKeptId}
-          resolved={res}
-          onLooksRight={(keptId) => reconcileCollapse(leaderId, removedId, rowQs.find((q) => q.id === keptId)!.status, keptId)}
-          onSplit={() => reconcileSplit(leaderId, removedId, defaultKeptId)}
-          onChange={() => revertReconcile(leaderId)}
-        />
-      </div>
+      <ReconcileCard
+        key={`recon-${leaderId}`}
+        setId={leaderId}
+        agentName={keeper.name || keeper.agency || "this agent"}
+        manuscriptTitle=""
+        rows={rows}
+        defaultKeptId={defaultKeptId}
+        resolved={res}
+        onLooksRight={(keptId) => reconcileCollapse(leaderId, removedId, rowQs.find((q) => q.id === keptId)!.status, keptId)}
+        onSplit={() => reconcileSplit(leaderId, removedId, defaultKeptId)}
+        onChange={() => revertReconcile(leaderId)}
+      />
     );
   };
 
@@ -1067,7 +498,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     const units: { sort: number; node: React.ReactNode }[] = [];
     for (const c of allClusters) {
       if (c.type === "keepboth") {
-        units.push({ sort: at(...c.members.map((m) => m.id)), node: renderResolvedCluster({ leaderId: c.leaderId, members: c.members }) });
+        const leaderAgency = agents.find((a) => a.id === c.leaderId)?.agency ?? "";
+        units.push({ sort: at(...c.members.map((m) => m.id)),
+          node: <DupeKept key={`kept-${c.leaderId}`} leaderId={c.leaderId} agency={leaderAgency} members={c.members} onUndo={() => undoCluster(c.leaderId)} /> });
         c.members.forEach((m) => placed.add(m.id));
       } else { // open (merge type never arises — a resolved merge has no live anchor)
         // A two-member pair with one live query each that DIFFER → the reconcile card (collapse
@@ -1080,7 +513,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           c.members.forEach((m) => placed.add(m.id));
         } else {
           const bars = byKeeper.get(c.leaderId) ?? [];
-          units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)), node: renderCluster(c.members[0], c.openMembers, bars) });
+          units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
+            node: <DupeOpen key={`open-${c.leaderId}`} leader={c.members[0]} members={c.openMembers} bars={bars} queryCount={queryCount} movedCount={movedCount}
+                    onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)} /> });
           placed.add(c.leaderId);
           bars.forEach((b) => placed.add(b.id));
         }
@@ -1093,7 +528,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       if (!keeper || keeper.deleted) continue;
       // A pair resolved via the reconcile card shows its OWN sorted state (collapsed/split), in place.
       units.push({ sort: at(keeperId, ...bars.map((b) => b.id)),
-        node: reconciled[keeperId] ? renderReconcileCard(keeperId, [keeper, ...bars]) : renderResolvedMerge(keeper, bars) });
+        node: reconciled[keeperId]
+          ? renderReconcileCard(keeperId, [keeper, ...bars])
+          : <DupeMerged key={`merged-${keeperId}`} keeper={keeper} bars={bars} queries={queryCount(keeperId)} movedCount={movedCount} onUndo={() => undoMerged(keeper, bars)} /> });
     }
     units.sort((a, b) => a.sort - b.sort);
     return units.map((u) => u.node);
@@ -1103,6 +540,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   const agentRows = (): React.ReactNode[] => {
     const rows: React.ReactNode[] = [];
     const consumed = new Set<string>();
+    /* An agent merged from two rows says so in its second line. */
+    const mergedKeepers = new Set(mergedAwayByKeeper(agents).keys());
     for (const a of active) {
       if (consumed.has(a.id)) continue;
       const toggle = () => setOpenId((cur) => (cur === a.id ? null : a.id));
@@ -1111,7 +550,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         const members = [a, ...a.mergeWith.map((id) => active.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
         members.forEach((m) => consumed.add(m.id));
         rows.push(
-          <AgentRow key={a.id} agent={a} queryCount={queryCount(a.id)} dupOpen={true} clusterPeers={members.slice(1)}
+          <AgentRow key={a.id} agent={a} dupOpen={true} clusterPeers={members.slice(1)}
             open={openId === a.id} onToggleOpen={toggle}
             onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
             onMerge={() => members.slice(1).forEach((m) => removeDuplicate(m.id))}
@@ -1123,7 +562,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       } else {
         consumed.add(a.id);
         rows.push(
-          <AgentRow key={a.id} agent={a} queryCount={queryCount(a.id)} dupOpen={openDupIds.has(a.id)}
+          <AgentRow key={a.id} agent={a} dupOpen={openDupIds.has(a.id)} merged={mergedKeepers.has(a.id)}
             open={openId === a.id} onToggleOpen={toggle}
             onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
             onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
@@ -1148,6 +587,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       onDelete={() => removeQuery(q.id)}
       onResolveReason={(code, patch) => resolveQueryReason(q.id, code, patch)}
       onSwapDates={() => swapQueryDates(q.id)}
+      onReopen={() => reopenQueryReasons(q.id)}
     />
   ));
 
@@ -1206,7 +646,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
               <h2 className="im-listtitle">{listTitle}</h2>
               <span className="im-chips">{chips}</span>
             </div>
-            <div data-im="rows" style={screen === "duplicates" ? { display: "grid", gap: 12, padding: 12 } : undefined}>
+            <div data-im="rows">
               {rows.length > 0 ? rows : <div className="im-listempty">{emptyLine}</div>}
             </div>
           </section>

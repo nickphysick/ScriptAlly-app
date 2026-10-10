@@ -13,3 +13,8 @@ V2 mutated: 5 red, 0 green —
 V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press
 V2 mutated: 9 red, 0 green —     Error: entering a step opens no dialog
 V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press
+V5 mutated: 3 red, 0 green —     Error: Reset returns every chip count to its first value
+V3 mutated (scroll to the next open row on answer): 3 red, 0 green —     Error: q1: the reader is not moved
+V4 mutated as named (agencyWaived dropped): 0 red, 2 green — the result does not carry the waiver; see V3
+V3 under V4's named break (agencyWaived dropped): 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+V4 mutated (the saved agency dropped): 1 red, 1 green —     Error: expect(received).toEqual(expected) // deep equality
