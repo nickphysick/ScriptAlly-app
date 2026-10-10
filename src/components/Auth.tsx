@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
-import { OnboardingHeader } from "./onboarding/OnboardingHeader";
+import { SetupFrame, ACCOUNT_GROUP } from "./onboarding/SetupFrame";
 import { BETA_MODE, INVITE_GATE_ENABLED } from "../lib/beta";
 import {
   INVITE_LABEL, INVITE_PLACEHOLDER, INVITE_MISSING, INVITE_REJECTED,
@@ -198,17 +198,16 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
   };
 
   return (
+    <SetupFrame
+      form="account"
+      group={ACCOUNT_GROUP}
+      name={isSignin ? "Sign in" : "Create account"}
+      otherTab={isSignin ? { id: "signup", label: "Create account" } : { id: "signin", label: "Sign in" }}
+      onTab={(id) => { if (view === "reset") backToAuth(); switchMode(id as Mode); }}
+      exitLabel="Back to site"
+      onExit={() => goPublic("/")}
+    >
     <div className="sa-au-root">
-      {/* ⚠️ THE SAME HEADER THE ONBOARDING WEARS — WORDMARK AND EXIT, NO SPINE. Signing in is not
-          a step in the flow, so a position here would claim progress through something the writer
-          has not started. What it buys is continuity: the landing, the auth screens and the
-          onboarding now carry one masthead instead of three, so nothing about arriving reads as
-          having left the product.
-
-          ⚠️ WRAPPER ONLY. The cards, the fields and the invite gate below are untouched, and the
-          exit keeps its own words — "Back to site" is where this one goes, not the onboarding's
-          "Skip for now". */}
-      <OnboardingHeader onExit={() => goPublic("/")} exitLabel="Back to site" />
 
       <div className="scene">
         <div className="split-card paper">
@@ -407,5 +406,6 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
         </div>
       </div>
     </div>
+    </SetupFrame>
   );
 };

@@ -61,7 +61,7 @@ async function savedSessionStillWorks(browser: Browser): Promise<boolean> {
     const p = await ctx.newPage();
     await p.goto("/dashboard");
     return await p
-      .locator(".ws-panel, .sv2-app, #app-stage-scroll")
+      .locator("#ws-sidebar, .sv2-app, #app-stage-scroll")
       .first()
       .waitFor({ state: "visible", timeout: 15_000 })
       .then(() => true, () => false);
@@ -111,7 +111,7 @@ setup("authenticate", async ({ page, browser }) => {
    * dashboard. That write is the point — it is a one-off on a provisioned test account, and every
    * later run finds the gate already gone, so this block simply does not fire.
    */
-  const shell = page.locator(".ws-panel, .sv2-app, #app-stage-scroll").first();
+  const shell = page.locator("#ws-sidebar, .sv2-app, #app-stage-scroll").first();
   for (let step = 0; step < 8; step += 1) {
     if (await shell.count()) break;
     /* ⚠️ THE LABEL IS "Skip this step", NOT "Skip setup" — I took the latter from `chrome.tsx`,
@@ -164,6 +164,6 @@ setup("authenticate", async ({ page, browser }) => {
 
   /* ⚠️ WAIT FOR THE SHELL, NOT FOR A URL. A URL can change before the app has data, and a
      measurement taken then reads a skeleton. The sidebar or the stage means the workspace is up. */
-  await expect(page.locator(".ws-panel, .sv2-app, #app-stage-scroll").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator("#ws-sidebar, .sv2-app, #app-stage-scroll").first()).toBeVisible({ timeout: 30_000 });
   await page.context().storageState({ path: STORAGE_STATE });
 });

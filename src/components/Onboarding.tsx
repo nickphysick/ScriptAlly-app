@@ -15,7 +15,7 @@ import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, stepOfLabel, SpineId } from "../lib/onboardingSpine";
-import { OnboardingHeader } from "./onboarding/OnboardingHeader";
+import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
 import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -80,8 +80,7 @@ const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 // (mode="wait"), stacks invisible exited screens over the live one (default mode), or fails to
 // swap the keyed child at all. A keyed plain div + CSS enter animation is fully robust.
 const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }> = ({ stepKey, children }) => (
-  <div key={stepKey} style={{ width: "100%", animation: "sa-screen-in 0.28s ease-out" }}>
-    <style>{`@keyframes sa-screen-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }`}</style>
+  <div key={stepKey} className="sf-enter" style={{ width: "100%" }}>
     {children}
   </div>
 );
@@ -350,32 +349,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // Overlay wrapper
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      background: onbGround,
-      zIndex: 9999,
-      display: "flex",
-      flexDirection: "column",
-      overflowY: "auto",
-    }}>
-      {/* ⚠️ THE HEADER IS A SIBLING OF THE FLOW, NOT A CHILD OF ANY SCREEN. Rendered inside
-          `ScreenTransition` it would animate in and out on every step change, so the one element
-          whose job is to say "you are still in the same place" would be the one thing that kept
-          moving. */}
-      <OnboardingHeader
-        steps={spineSteps}
-        activeIndex={spineAt}
-        onExit={handleStageSkip}
-      />
-
-      <div style={{
-        flex: 1,
-        minHeight: 0,
-        display: "flex",
-        alignItems: step === 1 ? "stretch" : "center",
-        justifyContent: "center",
-      }}>
+    <SetupFrame
+      form="setup"
+      group={SETUP_GROUP}
+      name={spineSteps[spineAt]?.label ?? ""}
+      steps={spineSteps}
+      activeIndex={spineAt}
+      /* The app's manuscript card, once a title is held: from the "Your list" step on, in the
+         already-querying branch. */
+      manuscriptTitle={flow === "B" && spineStep === "list" ? manuscriptTitle : null}
+      user={currentUser ? { name: currentUser.name, plan: currentUser.plan } : null}
+      exitLabel="Skip for now"
+      onExit={() => { void handleStageSkip(); }}
+    >
+      <div className="sf-stage" style={{ position: "relative" }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
         {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
         {flow === "A" && (
@@ -458,24 +445,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
 
       </ScreenTransition>
-      </div>
 
-      {/* Submitting overlay */}
+      {/* Saving: an oat wash over the sheet only — the frame and the steps stay readable. */}
       {isSubmitting && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(247,244,238,0.72)",
-          zIndex: 10000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: onbMuted, letterSpacing: "0.08em" }}>
-            Saving…
-          </span>
+        <div className="sf-saving" role="status">
+          <span>Saving…</span>
         </div>
       )}
-    </div>
+      </div>
+    </SetupFrame>
   );
 };

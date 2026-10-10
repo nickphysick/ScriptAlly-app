@@ -25,89 +25,179 @@
   .sa-onb-foot { padding: 14px 20px 20px; flex-wrap: wrap; row-gap: 12px; }
 }
 
-/* ══════════════ Onboarding chrome — header + step spine ══════════════
-   Ref: design-refs/scriptally-onboarding-chrome-options.html, option B.
-   Every value below is an existing token from lib/designTokens (quoted, since this sheet is not
-   built through the TS module) or a neutral this file already uses. No hex is taken from the ref. */
+/* ═══ SetupFrame: the one frame before the app (onboarding v5, part 1) ═══════════════════════
+   ⚠️ FROM 768px UP THE FRAME'S GEOMETRY IS `inkShell.css`'s, REUSED. `SetupFrame` renders the
+   shell's own classes, so the sidebar's width, the brand row, the folder tab and the sheet's inset
+   and radius are declared THERE. Nothing below restates one of those numbers; what is here is
+   what the shell has no word for.
+   ⚠️ FACES ARE READ, NEVER NAMED: `--sp-type`, `--sp-serif`, `--sp-mono` (primitives.css, :root).
+   ⚠️ EVERY TOKEN READ HERE IS DECLARED AT `:root`, because these screens render outside the app
+   shell's classes: `--ink-*`, `--ws-page`, `--ws-sheet` (index.css), `--sp-*` (primitives.css),
+   `--hpanel-*` (headerPanel.css), `--fc-card` (framedCard.css). Lock T1 resolves each one on the
+   rendered screens. */
+.sf {
+  position: fixed; inset: 0; z-index: 9999;
+  /* The shell sets these two on `.ws-main` inside its desktop block; the frame needs them at every
+     width, and the tab always grows out of the oat sheet here. */
+  --ink-sheet: var(--ws-page);
+  --ink-tab: var(--ws-page);
+  --sf-ink72: rgba(28, 19, 15, .72);
+  --sf-ink58: rgba(28, 19, 15, .58);
+  --sf-ink34: rgba(28, 19, 15, .34);
+  --sf-ink14: rgba(28, 19, 15, .14);
+  --sf-note: #f4efe9;
+  --sf-rust: #a2452a;
+  --sf-card-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 6px 14px -10px rgba(91, 42, 31, .35);
+  background: var(--ink-shell);
+  color: var(--ink-on-light);
+}
+.sf .sf-main { background: var(--ink-shell); }
+/* The frame is not the app: nothing in it collapses, navigates or opens a menu. */
+.sf .sf-brand { cursor: default; }
+.sf .sf-panel { background: var(--ink-shell); }
 
-.ob-head {
-  flex: none;
-  display: grid;
-  /* Three columns so the wordmark and the exit hold their edges and the spine is centred on the
-     HEADER's midline — not on the leftover space between them, which would shift the spine as the
-     exit label changed length. */
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 26px;
-  border-bottom: 1px solid #e9e2d7; /* onbHairline */
-  background: #fffdf9;              /* onbSurface */
+/* ── The bar: brand row (account, and every phone), the tabs, the exit ── */
+.sf .sf-bar { display: flex; align-items: stretch; }
+.sf .sf-barbrand { display: none; align-items: center; flex: none; padding: 0 22px 0 14px; }
+.sf--account .sf-barbrand { display: flex; }
+/* The tabs' positioning box. `FolderTab` places itself against its parent's left and bottom, so
+   this element — not the bar — is what the tab stands in. */
+.sf .sf-tabs { position: relative; flex: 1 1 auto; min-width: 0; align-self: stretch; }
+.sf .sf-ftfl-l { display: none; position: absolute; left: -12px; bottom: 0; width: 13px; height: 12px; fill: var(--ink-tab); }
+.sf--account .sf-ftfl-l { display: block; }
+.sf .sf-exit {
+  flex: none; align-self: center; margin-left: 16px;
+  background: none; border: 0; padding: 0 0 3px; cursor: pointer;
+  font-family: var(--sp-type); font-size: 14.5px; line-height: 1.3; color: var(--ink-cream-92);
+  box-shadow: inset 0 -1.5px 0 rgba(var(--ink-cream-rgb), .4);
 }
-.ob-headbrand { display: flex; align-items: center; min-width: 0; }
-.ob-headmid { display: flex; align-items: center; justify-content: center; min-width: 0; }
-.ob-headright { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.sf .sf-exit:hover { color: var(--ink-bright); box-shadow: inset 0 -1.5px 0 var(--ink-cream); }
 
-/* ⚠️ QUIET, AND THAT IS THE POINT OF THE PASS. It was the only element above the card and the
-   loudest thing on the page. Mono, small, muted, underlined — a way out that is findable without
-   being an invitation. */
-.ob-headexit {
-  font-family: "JetBrains Mono", "Fira Mono", monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  color: #a5988e;                   /* onbFaint */
-  background: none;
-  border: none;
-  padding: 2px 0;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  white-space: nowrap;
+/* ── The sheet: the only light surface, and the only thing that scrolls ── */
+.sf .sf-sheet { color: var(--ink-on-light); }
+.sf .sf-scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; box-sizing: border-box;
+  padding: 28px clamp(18px, 3.2vw, 44px) 40px;
+  font-family: var(--sp-serif);
 }
-.ob-headexit:hover { color: #6f635b; } /* onbMuted */
+/* Account: no sidebar, so the sheet is inset on the left as well and is a plain rounded sheet —
+   the tab stands off its corner, with a fillet on each side. */
+.sf--account .ws-winwrap { padding-left: 8px; }
+.sf--account .sf-sheet { border-top-left-radius: 12px; }
 
-/* ── the spine ── */
-.ob-spine { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.ob-sp { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.ob-spdot {
-  width: 9px; height: 9px; border-radius: 50%; flex: none;
-  box-sizing: border-box;
-  background: transparent;
-  border: 1.5px solid #e2d9cc;      /* onbOptionEdge — upcoming is an OUTLINE */
+/* ── The sidebar's own contents ── */
+.sf .sf-ms {
+  display: flex; align-items: center; gap: 11px; margin: 14px 0 0; padding: 9px 10px;
+  border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), .16);
+  background: rgba(var(--ink-cream-rgb), .04);
 }
-.ob-splab {
-  font-family: "JetBrains Mono", "Fira Mono", monospace;
-  font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
-  color: #a5988e;                   /* onbFaint */
-  white-space: nowrap;
+.sf .sf-mscover {
+  flex: none; width: 30px; height: 38px; border-radius: 3px; background: var(--ink-cream);
+  box-shadow: inset 0 3px 0 var(--ink-terra);
+  display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 7px; box-sizing: border-box;
 }
-/* Current: filled burgundy with a soft ring. A dot, never a button — the no-burgundy-fill law is
-   about button fills, and the ref names burgundy here explicitly. */
-.ob-sp--now .ob-spdot {
-  background: #7c3a2a;              /* burgundy */
-  border-color: #7c3a2a;
-  box-shadow: 0 0 0 4px rgba(124, 58, 42, 0.14);
+.sf .sf-mscover i { display: block; height: 1.5px; background: var(--ink-shell); border-radius: 1px; }
+.sf .sf-mstx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sf .sf-mst {
+  font-family: var(--sp-type); font-weight: 400; font-size: 14.5px; line-height: 1.3; color: var(--ink-cream);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.ob-sp--now .ob-splab { color: #241711; }  /* onbHeadingInk */
-/* Complete: filled sage. Solid means happened. */
-.ob-sp--done .ob-spdot { background: #5a6e58; border-color: #5a6e58; } /* sageText */
-.ob-sp--done .ob-splab { color: #6f635b; }                            /* onbMuted */
+.sf .sf-mss { font-family: var(--sp-mono); font-size: 8.5px; letter-spacing: .16em; color: var(--ink-cream-42); }
+.sf .sf-grp {
+  display: flex; align-items: center; gap: 12px; margin: 26px 0 8px; padding: 0 8px;
+  font-family: var(--sp-mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-cream-42);
+}
+.sf .sf-grp i { flex: 1; height: 1px; background: rgba(var(--ink-cream-rgb), .12); }
+.sf .sf-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.sf .sf-step {
+  position: relative; display: flex; align-items: center; gap: 12px; height: 36px; padding: 0 10px;
+  border-radius: 8px; font-family: var(--sp-serif); font-size: 16px; line-height: 1.3;
+  color: rgba(var(--ink-cream-rgb), .56);
+}
+.sf .sf-stepdot {
+  flex: none; width: 19px; height: 19px; border-radius: 50%; box-sizing: border-box;
+  display: grid; place-items: center;
+  font-family: var(--sp-mono); font-size: 9px; font-weight: 600; line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), .42);
+}
+.sf .sf-step--done { color: var(--ink-cream-92); }
+.sf .sf-step--done .sf-stepdot { box-shadow: none; background: rgba(var(--ink-cream-rgb), .14); color: var(--ink-cream); }
+.sf .sf-step--now { background: rgba(var(--ink-cream-rgb), .09); color: var(--ink-cream); font-weight: 600; }
+.sf .sf-step--now::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 1px;
+  background: var(--ink-terra);
+}
+.sf .sf-step--now .sf-stepdot { box-shadow: none; background: var(--ink-terra); color: var(--ink-shell); }
+/* The foot: who is signed in and their plan line. No menu, no gear, no Upgrade — set-up sells nothing. */
+.sf .sf-user { display: flex; align-items: center; padding: 6px 8px 2px; min-width: 0; }
+.sf .sf-av {
+  flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(var(--ink-cream-rgb), .12); color: var(--ink-cream);
+  font-family: var(--sp-mono); font-size: 10px; font-weight: 600; letter-spacing: .04em;
+}
+.sf .sf-un {
+  display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 15px; line-height: 1.3;
+  color: var(--ink-cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sf .sf-up { display: block; font-family: var(--sp-serif); font-size: 13px; line-height: 1.3; color: var(--ink-cream-66); }
 
-.ob-spjoin { width: 26px; height: 1px; background: #e9e2d7; flex: none; } /* onbHairline */
+/* The screen-to-screen enter fade, inside the sheet only. */
+@keyframes sa-screen-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+.sf-enter { animation: sa-screen-in .28s ease-out; }
+@media (prefers-reduced-motion: reduce) { .sf-enter { animation: none; } }
 
-/* ⚠️ THE MOBILE FALLBACK REPLACES THE DOTS, IT DOES NOT SHRINK THEM. Below 760px three labelled
-   dots either wrap the header or ellipsise the labels, and a spine whose labels are truncated has
-   stopped doing the one thing it is for. */
-.ob-spmob {
-  display: none;
-  font-family: "JetBrains Mono", "Fira Mono", monospace;
-  font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
-  color: #6f635b;                   /* onbMuted */
-  white-space: nowrap;
+/* ── Below 900px: no sidebar; the brand row, then the tab and the exit on one row; the page
+      scrolls as a document ──
+   ⚠️ THE FRAME STOPS BEING A FIXED WINDOW HERE, AND THAT IS THE POINT. Held at the viewport's
+   height with the sheet scrolling inside it, a phone's last control sits below a clipped box.
+   Released, the document scrolls and the sheet is as tall as its contents. */
+@media (max-width: 899.98px) {
+  .sf { position: absolute; inset: 0 0 auto 0; min-height: 100vh; min-height: 100dvh; display: block; }
+  .sf .sf-panel { display: none; }
+  .sf .sf-main { display: block; overflow: visible; min-height: 100vh; min-height: 100dvh; }
+  .sf .sf-bar { display: flex; flex-wrap: wrap; height: auto; padding: 0 8px; align-items: flex-end; }
+  .sf .sf-barbrand { display: flex; flex: 1 0 100%; padding: 14px 6px 12px; }
+  .sf .sf-tabs { height: 44px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  .sf .sf-tabs::-webkit-scrollbar { display: none; }
+  .sf .sf-exit { align-self: center; margin: 0 6px 0 12px; }
+  .sf .sf-ftfl-l { display: none; }
+  .sf .ws-winwrap { display: block; padding: 0 8px 8px; }
+  .sf .sf-sheet { display: block; overflow: visible; border-radius: 0 12px 12px 12px; background: var(--ink-sheet); }
+  .sf .sf-scroll { overflow: visible; padding: 22px 14px 28px; }
 }
-@media (max-width: 759px) {
-  .ob-spine { display: none; }
-  .ob-spmob { display: inline; }
-  .ob-head { padding: 12px 16px; gap: 10px; }
+/* ⚠️ BELOW 768px THE SHELL'S OWN TAB RULES DO NOT APPLY — `inkShell.css` is a desktop sheet, and
+   the app has no folder tab on a phone. So the phone's tab is dressed here, from the same tokens.
+   It is the one place the tab's look is stated twice, and there is no app tab at this width for it
+   to disagree with. */
+@media (max-width: 767.98px) {
+  .sf .sf-bar { position: relative; z-index: 3; background: transparent; }
+  .sf .ws-beta {
+    display: inline-block; flex: none; margin-left: 2px; padding: 2px 6px; border-radius: 5px;
+    box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), .22);
+    font-family: var(--sp-mono); font-weight: 600; font-size: 8px; line-height: 1.25; letter-spacing: .16em;
+    color: var(--ink-cream-42);
+  }
+  .sf .ws-logo { display: flex; align-items: center; gap: 8px; height: 34px; }
+  .sf .sf-brand { display: flex; align-items: center; gap: 8px; width: auto; padding: 0; }
+  .sf .ws-bmark { width: 34px; height: 34px; }
+  .sf .ws-bwm { margin: 0; font-family: var(--sp-serif); font-weight: 600; font-size: 18.5px; line-height: 1.3; color: var(--ink-cream); }
+  .sf .ws-ftab {
+    position: absolute; left: 0; bottom: -1px; box-sizing: border-box; height: 41px; padding: 0 18px;
+    border-radius: 12px 12px 0 0; background: var(--ink-tab); display: flex; align-items: center;
+    color: var(--ink-on-light); white-space: nowrap;
+  }
+  .sf .ws-ftnm { display: inline-flex; align-items: baseline; gap: 10px; }
+  .sf .ws-ftg { font-family: var(--sp-mono); font-weight: 500; font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(var(--ink-shell-rgb), .56); }
+  .sf .ws-ftn { font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.3; }
+  .sf .ws-ftfl { position: absolute; right: -12px; bottom: 0; width: 13px; height: 12px; display: block; fill: var(--ink-tab); }
+  .sf .ws-ftsibs { position: absolute; bottom: 0; height: 34px; display: flex; gap: 6px; align-items: flex-end; }
+  .sf .ws-ftsib {
+    box-sizing: border-box; height: 34px; display: inline-flex; align-items: center; padding: 0 16px; border: 0;
+    border-radius: 10px 10px 0 0; background: rgba(var(--ink-cream-rgb), .09); color: var(--ink-cream-66);
+    font-family: var(--sp-type); font-size: 16px; white-space: nowrap; cursor: pointer;
+  }
+  .sf .ws-ftmeasure { visibility: hidden; pointer-events: none; left: 0; top: 0; bottom: auto; }
 }
 
 /* ── the handover's tally and destination note (ref option E) ── */
@@ -145,3 +235,11 @@
   text-decoration: underline; text-underline-offset: 3px; padding: 2px 0;
 }
 .ob-handghost:hover { color: #6f635b; }  /* onbMuted */
+
+/* "Saving…": an oat wash at 72% over the sheet only. */
+.sf .sf-stage { min-height: 100%; }
+.sf .sf-saving {
+  position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center;
+  background: rgba(242, 238, 232, .72);
+}
+.sf .sf-saving span { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .08em; color: var(--sf-ink58); }
