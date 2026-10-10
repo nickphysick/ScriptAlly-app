@@ -24,6 +24,7 @@ import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { fmtDate } from "../../lib/smartImportReviewModel";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
+import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { CaptureOption } from "../../lib/captureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
@@ -458,13 +459,11 @@ export const BranchB: React.FC<BranchBProps> = ({
     <Unreadable
       onBack={() => setScreen("pipeline")}
       onAddByHand={onAddByHand}
-      /* The download this screen has always offered, unchanged. */
-      onDownload={() => {
-        const a = document.createElement("a");
-        a.href = "/QueryHawk-pipeline-import-template.xlsx";
-        a.download = "QueryHawk-pipeline-import-template.xlsx";
-        a.click();
-      }}
+      /* ⚠️ THE SAME FILE THE FORK HANDS OUT, by the same call. This card used to fetch
+         `QueryHawk-pipeline-import-template.xlsx` — the three-tab workbook the Query Centre's and
+         the Contact list's empty states link to — so a writer told "use the template" on the fork
+         and here was given two different sheets. */
+      onDownload={() => { void downloadTemplate(TEMPLATE_FILENAME); }}
     />
   );
 };

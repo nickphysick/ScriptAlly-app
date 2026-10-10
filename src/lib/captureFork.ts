@@ -79,7 +79,9 @@ export const CAPTURE_HAND_ACTION = "Add an agent";
 /** The drop zone's words, on the ringed Smart import tile. Dropping a file there works. */
 export const CAPTURE_DROP_LEAD = "Drop your file here, or ";
 export const CAPTURE_DROP_LINK = "choose a file";
-export const CAPTURE_DROP_TYPES = ".csv · .xlsx · up to 5 MB";
+/* ⚠️ THE TYPES ONLY. It read "· up to 5 MB", and nothing enforced 5 MB: the client takes any size and
+   the server's own limit is on the sheet's TEXT (200,000 characters, 600 lines), not on bytes. */
+export const CAPTURE_DROP_TYPES = ".csv · .xlsx";
 
 /**
  * The fact line under a tile: what it costs, and nothing else. Smart import's depends on the
