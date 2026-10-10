@@ -38,7 +38,7 @@ describe("the confirm step names the file it is about to spend an import on", ()
    * slice to nothing and let every assertion below pass against an empty string.
    */
   it("records the filename in pickFile, before the confirm screen mounts", () => {
-    const branchB = src("../components/onboarding/BranchB.tsx");
+    const branchB = src("../components/import/ImportFlow.tsx"); // where the handlers live since part 3
     const anchor = "const pickFile = (file: File) => {";
     expect(branchB).toContain(anchor);
 

@@ -121,20 +121,27 @@ describe("K1 three tiles, no radio, one ring", () => {
     expect(src, "first file only").toMatch(/files\?\.\[0\]/);
   });
 
+  /* Part 3 moved the pickers and their handlers into ImportFlow; the fork reaches them through the
+     flow's ref. The law is unchanged (each press has its own handler) and now spans the seam, so
+     both halves are asserted. */
   it("BranchB wires each press to its own handler", () => {
     const b = readFileSync(resolve(here, "BranchB.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const f = readFileSync(resolve(here, "../import/ImportFlow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const at = b.indexOf("<CaptureFork");
     expect(at).toBeGreaterThan(-1);
     const call = b.slice(at, b.indexOf("/>", at));
-    expect(call).toContain("onChooseFile={() => fileInputRef.current?.click()}");
-    expect(call).toContain("onDropFile={pickFile}");
-    expect(call).toContain("onUploadTemplate={() => templateInputRef.current?.click()}");
+    expect(call).toContain("onChooseFile={() => flowRef.current?.chooseFile()}");
+    expect(f).toContain("chooseFile: () => fileInputRef.current?.click(),");
+    expect(call).toContain("onDropFile={(f) => flowRef.current?.dropFile(f)}");
+    expect(f).toContain("dropFile: pickFile,");
+    expect(call).toContain("onUploadTemplate={() => flowRef.current?.chooseTemplate()}");
+    expect(f).toContain("chooseTemplate: () => templateInputRef.current?.click(),");
     expect(call).toContain("onAddByHand={onAddByHand}");
     expect(call).toContain("onNothingYet={onSkip}");
     expect(call).toContain("ringed={importOption}");
     expect(call).toContain("tier={entitlement.tier}");
-    expect(b).toMatch(/data-picker="smart"[\s\S]*?pickFile\(f\)/);
-    expect(b).toMatch(/data-picker="template"[\s\S]*?pickTemplateFile\(f\)/);
+    expect(f).toMatch(/data-picker="smart"[\s\S]*?pickFile\(f\)/);
+    expect(f).toMatch(/data-picker="template"[\s\S]*?pickTemplateFile\(f\)/);
   });
 });
 
@@ -211,8 +218,8 @@ describe("K3 the confirm names the file, twice, and spends nothing", () => {
     expect(fileTypeLabel("a.CSV")).toBe("CSV");
   });
 
-  it("BranchB reads the file only from the confirm's primary", () => {
-    const b = readFileSync(resolve(here, "BranchB.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("the import flow reads the file only from the confirm's primary", () => {
+    const b = readFileSync(resolve(here, "../import/ImportFlow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const calls = [...b.matchAll(/runMapping\(/g)].length;
     expect(calls, "one call site, plus none on mount").toBe(1);
     expect(b).toContain("onRead={() => { if (pendingFile) void runMapping(pendingFile); }}");

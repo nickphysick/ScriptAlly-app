@@ -96,34 +96,43 @@ describe("E1 each dead end is one card: chip, title, text, foot", () => {
 });
 
 describe("E1 BranchB wires each dead end to the built routes", () => {
-  const b = readFileSync(resolve(here, "BranchB.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  /* Part 3: the dead ends are drawn by ImportFlow now. "Back to the fork" is toStart(): the flow
+     goes idle, and BranchB shows the fork whenever the flow is idle. Both halves are asserted. */
+  const branchOnly = readFileSync(resolve(here, "BranchB.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const b = readFileSync(resolve(here, "../import/ImportFlow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const o = readFileSync(resolve(here, "../Onboarding.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
   it("'Use the template' returns to the fork with the template tile ringed", () => {
-    expect(b).toContain('onUseTemplate={() => { setBlocked(null); setImportOption("template"); setScreen("pipeline"); }}');
+    expect(b).toContain('onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}');
+    expect(branchOnly).toContain('onUseTemplate={() => setImportOption("template")}');
+    expect(b).toContain('const toStart = () => { setScreen("idle"); onBackToStart?.(); };');
+    expect(branchOnly).toContain('{flowScreen === "idle" && (');
   });
   it("the upgrade exit is gone from set-up: no prop, no caller, no hatch", () => {
     expect(b).not.toContain("onUpgrade");
+    expect(branchOnly).not.toContain("onUpgrade");
     expect(o).not.toContain("onUpgrade");
     expect(o).not.toContain('"plans"');
   });
   it("'Start this step again' and the unreadable Back both return to the fork", () => {
-    expect(b).toContain('<Unloaded onAddByHand={onAddByHand} onRestart={() => setScreen("pipeline")} />');
-    expect(b).toMatch(/<Unreadable\s+onBack=\{\(\) => setScreen\("pipeline"\)\}/);
+    expect(b).toContain('<Unloaded onAddByHand={onAddByHand} onRestart={() => toStart()} />');
+    expect(b).toMatch(/<Unreadable\s+onBack=\{\(\) => toStart\(\)\}/);
   });
   it("'Back to the review' returns to the review, and by-hand is the parent's handler everywhere", () => {
     expect(b).toContain('onBackToReview={() => setScreen("review")}');
-    expect((b.match(/onAddByHand=\{onAddByHand\}/g) ?? []).length).toBeGreaterThanOrEqual(5);
+    expect(((b + branchOnly).match(/onAddByHand=\{onAddByHand\}/g) ?? []).length).toBeGreaterThanOrEqual(5);
   });
   it("the old card is no longer drawn by any screen in BranchB", () => {
-    expect(b).not.toContain("OnboardingCard");
-    expect(b).not.toContain("SelectRow");
+    for (const file of [b, branchOnly]) {
+      expect(file).not.toContain("OnboardingCard");
+      expect(file).not.toContain("SelectRow");
+    }
   });
 });
 
 /* Onboarding v5 part 2, phase 0 — one template file. */
 describe("the unreadable-file card hands out the fork's template", () => {
-  const branch = readFileSync(resolve(process.cwd(), "src/components/onboarding/BranchB.tsx"), "utf8")
+  const branch = readFileSync(resolve(process.cwd(), "src/components/import/ImportFlow.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   it("calls downloadTemplate(TEMPLATE_FILENAME), as the fork does", () => {
     expect(branch).toContain("downloadTemplate(TEMPLATE_FILENAME)");
