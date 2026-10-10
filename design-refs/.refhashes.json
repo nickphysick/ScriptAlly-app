@@ -208,7 +208,11 @@
     "design-refs/manuscripts/v21/08-edit-details-1512.png": "1fc239be41f6e34a13fd3c5d0c68f2e26fbd07a1699737870c317d7be5f77a86",
     "design-refs/manuscripts/v21/09-new-version-1280.png": "55208675b70358c27550e5ecf1901b2fbab02a825408efdaf13b79b5f17403da",
     "design-refs/manuscripts/v21/09-new-version-1512.png": "949a0361a27c046a289219e274c13c4fd7d87dd9d8d6c1d59d9616ac98dc540e",
-    "design-refs/dashboard/dashboard-v58.html": "5024673e8b69295f33d5857024ba98e5c9e4e955e1b6bf8ab053bbd0807a6ef4"
+    "design-refs/dashboard/dashboard-v58.html": "5024673e8b69295f33d5857024ba98e5c9e4e955e1b6bf8ab053bbd0807a6ef4",
+    "design-refs/dashboard/feed-drawer-v2.html": "3cd5fcf7f03c7030c6315a437f8bd12891a1833387e9fdc5c9ae4acae643bcd2",
+    "design-refs/feed-drawer-v2/ref-drawer-1512@2x.png": "0afc2b9d867d8b82a8232085c81d3745f924d3f36b5c3d475c1ab92f3f9c5947",
+    "design-refs/feed-drawer-v2/ref-drawer-1280@2x.png": "a7dd9796ebdb57087d2924bca4f1cbe3720b2718d6742255cbcd842d6b08590b",
+    "design-refs/feed-drawer-v2/ref-drawer-lower-1512@2x.png": "c502f48644b8226a119d7b903c573a6106934a711fabc663a7123f7ef741bafd"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
