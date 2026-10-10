@@ -1,0 +1,21 @@
+{"lock":"R2","vp":"1440x900","name":"sheet","value":{"x":248,"y":64,"w":1184,"h":828,"r":1432,"b":892}}
+{"lock":"R2","vp":"1440x900","name":"loader","value":{"x":248,"y":64,"w":1184,"h":828,"r":1432,"b":892}}
+{"lock":"R2","vp":"1440x900","name":"fixedOverFrame","value":[]}
+{"lock":"R2","vp":"1440x900","name":"exit","value":"hidden"}
+{"lock":"R3","vp":"1440x900","name":"finalStatus","value":"Ready"}
+{"lock":"R4","vp":"1440x900","name":"readingMark","value":"rgb(42, 58, 82)"}
+{"lock":"R4","vp":"1440x900","name":"readingSage","value":{"population":107,"hits":[]}}
+{"lock":"R2","vp":"1280x800","name":"sheet","value":{"x":248,"y":64,"w":1024,"h":728,"r":1272,"b":792}}
+{"lock":"R2","vp":"1280x800","name":"loader","value":{"x":248,"y":64,"w":1024,"h":728,"r":1272,"b":792}}
+{"lock":"R2","vp":"1280x800","name":"fixedOverFrame","value":[]}
+{"lock":"R2","vp":"1280x800","name":"exit","value":"hidden"}
+{"lock":"R3","vp":"1280x800","name":"finalStatus","value":"Ready"}
+{"lock":"R4","vp":"1280x800","name":"readingMark","value":"rgb(42, 58, 82)"}
+{"lock":"R4","vp":"1280x800","name":"readingSage","value":{"population":107,"hits":[]}}
+{"lock":"R2","vp":"390x844","name":"sheet","value":{"x":8,"y":116,"w":374,"h":560,"r":382,"b":676}}
+{"lock":"R2","vp":"390x844","name":"loader","value":{"x":8,"y":116,"w":374,"h":560,"r":382,"b":676}}
+{"lock":"R2","vp":"390x844","name":"fixedOverFrame","value":[]}
+{"lock":"R2","vp":"390x844","name":"exit","value":"hidden"}
+{"lock":"R3","vp":"390x844","name":"finalStatus","value":"Ready"}
+{"lock":"R4","vp":"390x844","name":"readingMark","value":"rgb(42, 58, 82)"}
+{"lock":"R4","vp":"390x844","name":"readingSage","value":{"population":107,"hits":[]}}

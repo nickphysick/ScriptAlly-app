@@ -1,0 +1,107 @@
+/* The import, inside the set-up frame (onboarding v5, part 2).
+   Ref: design-refs/onboarding/onboarding-journey-v5.html (#reading #overview #dupes #agents
+   #queries #importing) and import-flow-v1.html. Every rule sits under `.sf`, so it reads the
+   frame's tokens (`--sf-*`, declared on `.sf` in onboarding.css) and the `:root` ones the shell
+   reads. No token is declared here that a page outside the frame could want.
+
+   ⚠️ SAGE IS GONE FROM THE IMPORT. Ticks and fills are navy (`--sp-anthracite`); rust marks a row
+   that asks something and is never a button fill. */
+
+.sf {
+  --im-band: #2d3a50;                 /* the current step's dot, the loader's fills */
+  --im-ink: #1b2433;                  /* a list card's head */
+  --im-cream: #f4eee5;
+  --im-cream-rgb: 244, 238, 229;
+  --im-text-rgb: 28, 19, 15;
+  --im-blush: #f3ddd2;
+  --im-blush-ink: #5b2a1f;
+  --im-stamp: #e0a188;
+  --im-stone: #e4ded6;
+  --im-tray: #d9e0e7;
+  --im-pill: #f4efe9;
+  --im-paper: #fbf9f5;
+  --im-open: #fbf6f2;                 /* a row that asks something */
+}
+
+/* ── A sheet a screen fills edge to edge (the two loaders) ──
+   The sheet's scroller normally pads its contents. A loader is the whole sheet, so while one is
+   mounted the padding goes and the chain down to it becomes a column that fills. */
+.sf .sf-scroll:has(.im-bare) { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.sf .sf-scroll:has(.im-bare) > .sf-stage,
+.sf .sf-scroll:has(.im-bare) .sf-enter { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.sf .im-bare { flex: 1 1 auto; min-height: 0; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+@media (max-width: 899.98px) {
+  /* The frame is a document here, not a window: the loader needs a height of its own. */
+  .sf .sf-scroll:has(.im-bare) { display: block; }
+  .sf .im-bare { min-height: 560px; }
+}
+
+/* ═══ The reading loader ═══════════════════════════════════════════════════════════════════════ */
+.sf .im-ssl-stage {
+  flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 33px, rgba(var(--im-text-rgb), .02) 33px, rgba(var(--im-text-rgb), .02) 34px);
+}
+.sf .im-ssl-empty {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--sp-type); font-size: 22px; color: var(--ink-on-light);
+}
+.sf .im-sc-messy { position: absolute; inset: 0; padding: 13px 17px; display: flex; align-items: center; gap: 10px; transition: opacity .4s ease; }
+.sf .im-sc-messy i {
+  width: 22px; height: 22px; border-radius: 6px; background: var(--im-pill); display: grid; place-items: center;
+  color: rgba(var(--im-text-rgb), .4); flex: none; font-size: 12px; font-style: normal;
+}
+.sf .im-sc-messy span {
+  font-family: var(--sp-mono); font-size: 12.5px; color: var(--sf-ink72);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sf .im-sc-clean { position: absolute; inset: 5px; transition: opacity .45s ease .1s; }
+.sf .im-sc-name {
+  font-family: var(--sp-serif); font-weight: 600; font-size: 15px; line-height: 1.1; color: var(--ink-on-light);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sf .im-sc-sub {
+  font-family: var(--sp-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--im-text-rgb), .56);
+  margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sf .im-sc-blank { width: 25px; height: 25px; border-radius: 50%; display: inline-block; box-shadow: inset 0 0 0 2px rgba(var(--im-text-rgb), .16); }
+/* the scatter sparks: blush, tray, navy, stone */
+.sf .im-sc-spark.q { background: var(--im-blush); color: var(--sf-rust); font-family: var(--sp-type); font-size: 19px; }
+.sf .im-sc-spark.a { background: var(--im-tray); color: var(--im-ink); }
+.sf .im-sc-spark.p { background: var(--im-band); color: var(--im-cream); }
+.sf .im-sc-spark.d { background: var(--im-stone); color: var(--im-ink); }
+/* the work-zone forms: a navy head, typewriter values on dashed rules */
+.sf .im-sc-formbox { background: var(--fc-card); border-radius: 11px; overflow: hidden; opacity: .9; box-shadow: 0 0 0 1px rgba(var(--im-text-rgb), .08), 0 12px 28px -18px rgba(var(--im-text-rgb), .32); }
+.sf .im-sc-formbox h4 {
+  margin: 0; padding: 8px 13px 7px; background: var(--im-band); color: var(--im-cream);
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 13px; display: flex; align-items: center; gap: 8px;
+}
+.sf .im-sc-formbox p { margin: 0; padding: 8px 13px 0; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.sf .im-sc-formbox p:last-child { padding-bottom: 11px; }
+.sf .im-sc-formbox small { font-family: var(--sp-mono); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--im-text-rgb), .5); }
+.sf .im-sc-formbox span {
+  font-family: var(--sp-type); font-size: 12.5px; color: var(--ink-on-light); border-bottom: 1.5px dashed rgba(var(--im-text-rgb), .3);
+  padding-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sf .im-sc-more {
+  position: absolute; left: 50%; transform: translate(-50%, -50%); transition: opacity .4s ease; white-space: nowrap; z-index: 12;
+  font-family: var(--sp-mono); font-size: 11.5px; color: rgba(var(--im-text-rgb), .66); background: var(--im-stone); padding: 5px 13px; border-radius: 20px;
+}
+.sf .im-sc-tick {
+  position: absolute; left: 50%; top: 50%; width: 116px; height: 116px; border-radius: 50%;
+  background: var(--sp-anthracite); color: var(--im-cream); display: grid; place-items: center; z-index: 40;
+  box-shadow: 0 14px 36px -18px rgba(var(--im-text-rgb), .4);
+}
+/* the strip along the sheet's foot */
+.sf .im-ssl-bar {
+  flex: none; height: 52px; box-sizing: border-box; background: var(--im-paper); border-top: 1px solid rgba(var(--im-text-rgb), .1);
+  display: flex; align-items: center; gap: 16px; padding: 0 22px;
+}
+.sf .im-ssl-pip { width: 9px; height: 9px; border-radius: 50%; background: var(--sf-rust); flex: none; }
+.sf .im-ssl-txt { font-family: var(--sp-mono); font-size: 12.5px; color: var(--sf-ink72); white-space: nowrap; min-width: 190px; }
+.sf .im-ssl-track { flex: 1; max-width: 420px; height: 5px; border-radius: 3px; background: rgba(var(--im-text-rgb), .1); overflow: hidden; }
+.sf .im-ssl-track i { display: block; height: 100%; background: var(--sp-anthracite); border-radius: 3px; }
+.sf .im-ssl-cnt { font-family: var(--sp-mono); font-size: 11.5px; color: rgba(var(--im-text-rgb), .6); margin-left: auto; white-space: nowrap; }
+@media (max-width: 599.98px) {
+  .sf .im-ssl-bar { gap: 10px; padding: 0 14px; }
+  .sf .im-ssl-txt { min-width: 0; font-size: 11.5px; }
+}

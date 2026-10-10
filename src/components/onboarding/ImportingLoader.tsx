@@ -25,6 +25,10 @@ const MESSAGES = [
   "Almost ready…",
 ];
 
+/** The loader's beats, named for lock R1 and for nothing else: messages turn every 950ms; on
+ *  completion the card starts to lift at +600ms and the host is called at +1300ms. */
+export const IMPORTING_TIMINGS = { MESSAGE_INTERVAL_MS: 950, LIFT_AT_MS: 600, PROCEED_AT_MS: 1300 } as const;
+
 const ringStyle: React.CSSProperties = {
   position: "absolute", top: "50%", left: "50%", width: 104, height: 104, margin: "-52px 0 0 -52px",
   borderRadius: "50%", border: "1.5px solid rgba(138,158,136,.5)",
@@ -50,7 +54,7 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   // Cycle the decorative status lines while loading; stop the moment we're complete.
   useEffect(() => {
     if (complete) return;
-    const id = setInterval(() => setMsgIndex((i) => (i + 1) % MESSAGES.length), 950);
+    const id = setInterval(() => setMsgIndex((i) => (i + 1) % MESSAGES.length), IMPORTING_TIMINGS.MESSAGE_INTERVAL_MS);
     return () => clearInterval(id);
   }, [complete]);
 
@@ -59,8 +63,8 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   proceedRef.current = onProceed;
   useEffect(() => {
     if (!complete) { setRevealing(false); return; }
-    const fade = setTimeout(() => setRevealing(true), 600);
-    const go = setTimeout(() => proceedRef.current(), 1300);
+    const fade = setTimeout(() => setRevealing(true), IMPORTING_TIMINGS.LIFT_AT_MS);
+    const go = setTimeout(() => proceedRef.current(), IMPORTING_TIMINGS.PROCEED_AT_MS);
     return () => { clearTimeout(fade); clearTimeout(go); };
   }, [complete]);
 

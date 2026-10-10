@@ -9,7 +9,7 @@ import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus } from "../types";
 import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
-import { BranchB } from "./onboarding/BranchB";
+import { BranchB, ExitMode } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
@@ -207,6 +207,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
      so comparing options on the opening question cannot make the spine flicker between two and
      three dots — which would be the lengthening fault wearing a different coat. */
   const [spineStep, setSpineStep] = useState<SpineId>("you");
+  /* What the frame's way out is on the branch's current screen — see BranchB's `onExitMode`. */
+  const [exitMode, setExitMode] = useState<ExitMode>("open");
   const spineSteps = spineFor(flow);
   const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
   /* The card band states the same position in words, in its existing right-hand meta slot — one
@@ -341,6 +343,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       user={currentUser ? { name: currentUser.name, plan: currentUser.plan } : null}
       exitLabel="Skip for now"
       onExit={() => { void handleStageSkip(); }}
+      /* The two import loaders draw no way out. Only branch B reports a mode. */
+      hideExit={flow === "B" && exitMode === "none"}
     >
       <div className="sf-stage" style={{ position: "relative" }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
@@ -362,6 +366,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <BranchB
               onSkip={handleSkip}
               onStage={setSpineStep}
+              onExitMode={setExitMode}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveBook={handleBranchBSaveBook}
               initialBook={b2Draft}

@@ -22,19 +22,21 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("./pageSm
 import { StatusDotDemo } from "../components/StatusDotDemo";
 import { NotesLab } from "../components/notes/NotesLab";
 import { DiaryLab } from "../components/dashboard/DiaryLab";
-import { SmartImportReview } from "../components/onboarding/SmartImportReview";
-import { REVIEW_FIXTURE } from "../components/onboarding/SmartImportReviewFixture";
-import { ReconcileCardDevPreview } from "../components/onboarding/ReconcileCard";
-import { ImportingLoader } from "../components/onboarding/ImportingLoader";
-import { ScatterSettleLoader } from "../components/onboarding/ScatterSettleLoader";
+import { LabReading, LabImporting, LabOverview, LabReview } from "../components/onboarding/OnbLabImport";
 import { SidebarShell } from "../components/shell/SidebarShell";
 
 const surfaces: [hash: string, chrome: string, node: () => React.ReactElement][] = [
   ["#/status-dots", "StatusDot", () => <StatusDotDemo />],
   ["#/notes-lab", "Notes — lab", () => <NotesLab />],
   ["#/diary-lab", "Dates for the diary", () => <DiaryLab />],
-  ["#/import-review", "", () => <SmartImportReview result={REVIEW_FIXTURE} userName="Nick" onSkip={() => {}} />],
-  ["#/reconcile-card", "Duplicates", () => <ReconcileCardDevPreview />],
+  /* The import's steps live in `#/onb-lab` now (onboarding v5 part 2). The five older routes —
+     #/import-review, #/import-review-dupes, #/import-loader, #/scatter-loader, #/reconcile-card —
+     are deleted with their harnesses; each lab screen below is the payload one of them showed. */
+  ["#/onb-lab?s=reading", "Reading your file", () => <LabReading hold="work" />],
+  ["#/onb-lab?s=importing", "Setting up your dashboard", () => <LabImporting done={false} loop={false} />],
+  ["#/onb-lab?s=overview", "", () => <LabOverview fx="review" title="Murphy's Day Out" />],
+  ["#/onb-lab?s=review", "", () => <LabReview fx="review" />],
+  ["#/onb-lab?s=review&fx=dupes", "", () => <LabReview fx="dupes" />],
 ];
 
 describe("the DEV-only review surfaces render", () => {
@@ -51,40 +53,30 @@ describe("the DEV-only review surfaces render", () => {
 });
 
 /**
- * ⚠️ FIVE DEV HARNESSES CANNOT BE SMOKED, AND IT IS ONE FAULT WITH ONE SHAPE: each is a
- * module-private `const` inside `App.tsx` (`ImportingLoaderDevHarness`, `ScatterLoaderDevHarness`,
- * `DrawerLab`, `ReadingPaneLab`, `ShellLab`), so no test can import them. Exporting them is a
- * one-line change each, but it is a change to App.tsx made purely for tests, so it is FLAGGED
- * rather than taken (reports/app-smoke.md).
- *
- * The reason is asserted here rather than dropped — and the harnesses' PAYLOADS are smoked, which
- * is where the code that can actually break lives. A wrapper that only picks props and flips a
- * boolean on an interval is not what breaks; the component it wraps is.
+ * ⚠️ THREE DEV HARNESSES CANNOT BE SMOKED, AND IT IS ONE FAULT WITH ONE SHAPE: each is a
+ * module-private `const` inside `App.tsx` (`DrawerLab`, `ReadingPaneLab`, `ShellLab`), so no test
+ * can import them. Exporting them is a one-line change each, but it is a change to App.tsx made
+ * purely for tests, so it is FLAGGED rather than taken (reports/app-smoke.md). The two import
+ * loaders' harnesses were on this list until onboarding v5 part 2 moved them into the lab, where
+ * they are exported and smoked above.
  */
 describe("the harnesses that cannot be imported — their payloads are smoked instead", () => {
-  it("App.tsx keeps those five harnesses module-private, which is WHY they are not smoked", async () => {
+  it("App.tsx keeps those three harnesses module-private, which is WHY they are not smoked", async () => {
     const { readFileSync } = await import("node:fs");
     const src = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
-    for (const name of [
-      "ImportingLoaderDevHarness", "ScatterLoaderDevHarness",
-      "DrawerLab", "ReadingPaneLab", "ShellLab",
-    ]) {
+    for (const name of ["DrawerLab", "ReadingPaneLab", "ShellLab"]) {
       expect(src, `${name} must be declared in App.tsx`).toContain(`const ${name}`);
-      // If this ever fails because the harness gained an `export`, delete it from this list and
-      // give it a real render smoke above — the reason for the exemption has gone.
       expect(src, `${name} is exported now — give it a real smoke and drop this exemption`)
         .not.toContain(`export const ${name}`);
     }
   });
 
-  it("#/import-loader's payload (ImportingLoader) renders", () => {
-    expect(() => renderPage(<ImportingLoader complete={false} onProceed={() => {}} userName="Nick" />)).not.toThrow();
-  });
-
-  it("#/scatter-loader's payload (ScatterSettleLoader) renders", () => {
-    expect(() => renderPage(
-      <ScatterSettleLoader cards={[]} complete={false} total={0} onProceed={() => {}} onTimeout={() => {}} />,
-    )).not.toThrow();
+  it("the five older import routes and their harnesses are gone from App.tsx", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+    for (const gone of ["#/import-review", "#/import-loader", "#/scatter-loader", "#/reconcile-card", "ImportingLoaderDevHarness", "ScatterLoaderDevHarness"]) {
+      expect(src, gone).not.toContain(gone);
+    }
   });
 
   it("#/shell-lab's payload (SidebarShell) renders", () => {

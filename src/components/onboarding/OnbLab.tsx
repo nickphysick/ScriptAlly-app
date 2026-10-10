@@ -29,10 +29,8 @@ import { ConfirmScreen } from "./ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
+import { LabReading, LabImporting, LabOverview, LabReview } from "./OnbLabImport";
 
-declare global {
-  interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }> } }
-}
 
 /** A handler that only records that it was called. */
 export const labSpy = (name: string) => (arg?: unknown) => {
@@ -58,8 +56,10 @@ export const LabSetup: React.FC<{
   at: SpineId;
   manuscript?: boolean;
   plan?: UserPlan;
+  /** The two loaders draw no way out. */
+  hideExit?: boolean;
   children: React.ReactNode;
-}> = ({ flow, at, manuscript, plan, children }) => {
+}> = ({ flow, at, manuscript, plan, hideExit, children }) => {
   const steps = spineFor(flow);
   const index = Math.max(0, spineIndex(steps, at));
   return (
@@ -73,6 +73,7 @@ export const LabSetup: React.FC<{
       user={{ ...LAB_USER, plan: plan ?? UserPlan.FREE }}
       exitLabel="Skip for now"
       onExit={labSpy("exit")}
+      hideExit={hideExit}
     >
       {children}
     </SetupFrame>
@@ -188,6 +189,16 @@ export const OnbLab: React.FC = () => {
     unloaded: <Unloaded onAddByHand={labSpy("byhand")} onRestart={labSpy("restart")} />,
   };
   if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={s === "used-pro" ? UserPlan.PRO : UserPlan.FREE}>{dead[s]}</LabSetup>;
+
+  /* The import's steps (part 2). Each sits where `Onboarding` puts it: on "Your list", with the
+     manuscript card showing. */
+  const imp = (node: React.ReactNode, hideExit = false) => (
+    <LabSetup flow="B" at="list" manuscript hideExit={hideExit}>{node}</LabSetup>
+  );
+  if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, true);
+  if (s === "importing") return imp(<LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} />, true);
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} />);
+  if (s === "review") return imp(<LabReview fx={q.get("fx")} />);
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";

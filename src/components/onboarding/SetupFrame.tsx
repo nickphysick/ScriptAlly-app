@@ -59,6 +59,9 @@ export interface SetupFrameProps {
   user?: { name?: string | null; plan?: UserPlan } | null;
   exitLabel: string;
   onExit: () => void;
+  /** No way out is drawn. The two import loaders set it: a file being read, or rows being written,
+   *  is not a moment to leave from (onboarding v5 part 2). */
+  hideExit?: boolean;
   children: React.ReactNode;
 }
 
@@ -80,7 +83,7 @@ const TICK = (
 
 export const SetupFrame: React.FC<SetupFrameProps> = ({
   form, group, name, otherTab, onTab, steps, activeIndex = 0, manuscriptTitle, user,
-  exitLabel, onExit, children,
+  exitLabel, onExit, hideExit, children,
 }) => {
   const exitRef = useRef<HTMLButtonElement>(null);
   const noLimit = useRef<HTMLElement>(null);
@@ -156,7 +159,11 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
                          limitRef={form === "account" ? noLimit : exitRef} />
             </div>
           </div>
-          <button type="button" className="sf-exit" ref={exitRef} onClick={onExit} data-sf="exit">
+          {/* Hidden, not removed: `FolderTab` measures its room against this box, and the bar's row
+              keeps its height from it on a phone. */}
+          <button type="button" className="sf-exit" ref={exitRef} onClick={onExit} data-sf="exit"
+                  disabled={hideExit || undefined} style={hideExit ? { visibility: "hidden" } : undefined}
+                  aria-hidden={hideExit || undefined} data-exit-hidden={hideExit ? "1" : undefined}>
             {exitLabel}
           </button>
         </header>

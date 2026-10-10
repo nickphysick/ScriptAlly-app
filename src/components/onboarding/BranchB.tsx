@@ -77,7 +77,21 @@ export interface BranchBProps {
    * progress bar growing because of a choice the writer made.
    */
   onStage?: (stage: "book" | "list") => void;
+  /**
+   * What the frame's way out should be on this screen (onboarding v5 part 2):
+   *   "open"  it leaves at once, as on every set-up step;
+   *   "ask"   a file has been read and nothing saved, so leaving asks first (the summary, the review);
+   *   "none"  no way out is drawn (the two loaders).
+   * The frame is the parent's, so the branch reports and the parent draws.
+   */
+  onExitMode?: (mode: ExitMode) => void;
 }
+
+export type ExitMode = "open" | "ask" | "none";
+export const exitModeFor = (screen: string): ExitMode =>
+  screen === "reading" || screen === "importing" ? "none"
+    : screen === "overview" || screen === "review" ? "ask"
+    : "open";
 
 /* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
    `setScreen("tidying")` was never called from anywhere — the reading screen routes straight to
@@ -98,7 +112,7 @@ type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string 
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -108,6 +122,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   /* Report the named position up rather than an index — an index is not a place, and the header
      owns how many steps this branch has. */
   useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
+  useEffect(() => { onExitMode?.(exitModeFor(screen)); }, [screen, onExitMode]);
 
   /* The band's meta: the step, plus what this screen is doing when that is a real sub-position.
      ⚠️ THE SPINE IS NOT TOLD ANY OF THIS. Sub-steps stay in the band by design — expanding a dot
@@ -377,7 +392,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         total={validated ? resultQueries.length : rawSample.length}
         onProceed={() => setScreen("overview")}
         onTimeout={() => setScreen("fallback")}
-        userName={currentUser?.name}
       />
     );
   }
