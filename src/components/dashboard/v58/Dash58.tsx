@@ -31,6 +31,8 @@ import { openAgentCard } from "../../../lib/agentCardStore";
 import { queriesPathFor } from "../../../lib/queriesFilterParam";
 import { dashAid, useDashHold, type DashAid } from "../../../lib/dashReviewAid";
 import { readShape, writeShape } from "../../../lib/dashShape";
+import { MONTHS_SHORT } from "../../../lib/dates";
+import { readImportNotice, clearImportNotice, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
@@ -57,6 +59,60 @@ export interface Dash58Props {
 }
 
 const NO_AID: DashAid = { drop: [], noClosed: false };
+
+/** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
+const noticeDate = (iso: string | null): string => {
+  const m = iso ? /^(\d{4})-(\d{2})-(\d{2})/.exec(iso) : null;
+  return m ? `${Number(m[3])} ${MONTHS_SHORT[Number(m[2]) - 1] ?? ""} ${m[1]}` : "Undated";
+};
+
+/**
+ * THE SKIPPED-ROWS LINE (onboarding v5 part 2; ref design-refs/import-flow-v1).
+ *
+ * An import that skipped rows says so here, once, with the rows behind it, until it is dismissed.
+ * It appears only after such an import: no notice, no row, and no space kept for one.
+ *
+ * ⚠️ IT TAKES ITS HEIGHT FROM THE CHART, WHICH ALREADY GIVES WAY. It is one more fixed-height row
+ * above the header in the page's column, so with the list closed the page is still one screen.
+ * Opening the list is the one thing that may make the page scroll: the page grows by the list's
+ * own measured height, and nothing else on it changes size.
+ */
+const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; onListHeight: (h: number) => void }> = ({ notice, onDismiss, onListHeight }) => {
+  const [open, setOpen] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
+  useLayoutEffect(() => {
+    /* its own box and the gap above it: everything opening it adds to the row */
+    const el = open ? listRef.current : null;
+    onListHeight(el ? el.offsetHeight + (parseFloat(getComputedStyle(el).marginTop) || 0) : 0);
+    return () => onListHeight(0);
+  }, [open, onListHeight, notice]);
+  const why = noticeWhy(notice);
+  return (
+    <div className="d58-notice" role="status" data-d58="notice">
+      <div className="d58-noticeline">
+        <p className="d58-noticetext"><b>{noticeHeadline(notice.count)}</b>{why ? ` ${why}` : ""}</p>
+        <span className="d58-noticeacts">
+          {notice.rows.length > 0 && (
+            <button type="button" className="d58-noticebtn" aria-expanded={open} onClick={() => setOpen((o) => !o)} data-d58="notice-toggle">
+              {noticeToggle(notice.count, open)}
+            </button>
+          )}
+          <button type="button" className="d58-noticebtn" onClick={onDismiss} data-d58="notice-dismiss">{NOTICE_DISMISS}</button>
+        </span>
+      </div>
+      {open && (
+        <ul className="d58-noticelist" ref={listRef} data-d58="notice-list">
+          {notice.rows.map((r, i) => (
+            <li key={i} data-d58="notice-row">
+              <span>{[r.who, r.status, noticeDate(r.sentDate)].filter(Boolean).join(" · ")}</span>
+              <small>{r.reason}</small>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
@@ -168,13 +224,26 @@ export const Dash58: React.FC<Dash58Props> = ({
     writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: today > 0 });
   }, [loading, focus.item?.key, closed, today, shape.focusH]);
 
+  /* ── the skipped-rows line: read once for this account, shown until dismissed ── */
+  const uid = currentUser?.id ?? "";
+  const [notice, setNotice] = useState<ImportNotice | null>(null);
+  const noticeRead = useRef<string | null>(null);
+  useEffect(() => {
+    if (!uid || noticeRead.current === uid) return;
+    noticeRead.current = uid;
+    setNotice(readImportNotice(uid));
+  }, [uid]);
+  const [noticeListH, setNoticeListH] = useState(0);
+  const dismissNotice = () => { clearImportNotice(uid); setNotice(null); setNoticeListH(0); };
+
   const author = (currentUser?.name ?? "").trim();
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58">
+    <div ref={rootRef} className="os-root d58" style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
+          {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
           <Dash58Header
             loading={loading}
             title={title}

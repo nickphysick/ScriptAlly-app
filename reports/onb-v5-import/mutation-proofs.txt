@@ -25,3 +25,7 @@ R2 mutated on [R2 importing]: 3 red, 0 green —     Error: expect(received).toB
 N1 mutated (commit-time skips dropped):    × N1 — buildImportNotice > three skipped rows, one of them at commit time → three rows; length is the commit's count 3ms
 N1 mutated (commit-time skips dropped): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 N1 mutated (commit-time skips dropped):       Tests  1 failed | 11 passed (12)
+N2 mutated: 1 red, 2 green —     Error: expect(received).toBe(expected) // Object.is equality
+N3 mutated: 3 red, 0 green —     Error: the page does not scroll: 610 against 536
+T1 mutated: 6 red, 0 green —     Error: expect(received).toEqual(expected) // deep equality
+W1 mutated (dupNoteMerged paraphrased):      → expected 'Duplicate merged; its queries have mo…' to be 'Merged the duplicate in — its queries…' // Object.is equality ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯       Tests  1 failed | 9 p

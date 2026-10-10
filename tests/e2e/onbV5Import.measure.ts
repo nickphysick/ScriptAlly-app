@@ -37,6 +37,8 @@ const MUTATIONS: Record<string, string> = {
   R2: ".sf .im-bare{position:fixed!important;inset:0!important;z-index:50!important;background:#f2eee8}",
   R4: ".sf .im-sc-tick{background:#e9ede6!important;color:#5a6e58!important}.sf .im-ldrcard.is-done .im-ldrdisc{background:#e6ebe3!important;color:#5a6e58!important}",
   H2: ".sf .im-ghost .d58-body{grid-template-columns:1fr 1fr 1fr!important}",
+  N3: ".d58-notice{height:120px!important}",
+  T1: ".sf .im-list, .sf .im-pop, .sf .im-ldrcard, .sf .im-ssl-bar{background:var(--im-nope)}",
 };
 
 async function mutate(page: Page) {
@@ -126,6 +128,16 @@ async function mutate(page: Page) {
         const b = (e.target as HTMLElement).closest('[data-im="reset"]');
         if (b && document.querySelector('[data-im="tray"]')) { e.stopImmediatePropagation(); e.preventDefault(); }
       }, true);
+    });
+  }
+  if (MUTATE === "N2") {
+    /* Show the second sentence always. */
+    await page.evaluate(() => {
+      const fix = () => document.querySelectorAll(".d58-noticetext").forEach((p) => {
+        if (!/no agent or agency name/.test(p.textContent ?? "")) p.append(" They had no agent or agency name.");
+      });
+      new MutationObserver(fix).observe(document, { subtree: true, childList: true });
+      fix();
     });
   }
   if (MUTATE === "H1") {
@@ -764,6 +776,175 @@ test.describe("OB2", () => {
           for (const k of keys) near((frame.page as Record<string, never>)[k], (app.page as Record<string, never>)[k], `page box "${k}"`);
         });
       }
+    });
+  }
+
+  /* ── T1 · tokens resolve, and no primary is rust or burgundy ─────────────────────────────── */
+  test.describe("T1", () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+    const SCREENS: Array<{ id: string; q: string; steps?: number }> = [
+      { id: "reading", q: "s=reading&hold=work" }, { id: "importing", q: "s=importing" },
+      { id: "overview", q: "s=overview&fx=review" }, { id: "dupes", q: "s=review&fx=dupes" },
+      { id: "agents", q: "s=review&fx=review" }, { id: "queries", q: "s=review&fx=review", steps: 1 },
+    ];
+    for (const sc of SCREENS) {
+      test(`T1 every token the import's rules read resolves (${sc.id})`, async ({ page }) => {
+        await lab(page, sc.q, { noMutate: true });
+        for (let i = 0; i < (sc.steps ?? 0); i++) await page.locator('[data-im="primary"]').click();
+        await page.waitForTimeout(400);
+        await mutate(page);
+        const r = await page.evaluate(() => {
+          const unresolved: string[] = []; let rules = 0; let reads = 0; let matched = 0;
+          const walk = (list: CSSRuleList) => {
+            for (const rule of Array.from(list)) {
+              if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) { if (!(rule instanceof CSSMediaRule) || matchMedia(rule.conditionText).matches) walk(rule.cssRules); continue; }
+              if (!(rule instanceof CSSStyleRule)) continue;
+              if (!/\.im-|\.sf-strip|\.sf-navzone|\.sf-appnav|\.sf-stepsbox/.test(rule.selectorText)) continue;
+              rules += 1;
+              const names = new Set<string>();
+              for (const m of rule.style.cssText.matchAll(/var\(\s*(--[\w-]+)\s*(,)?/g)) if (!m[2]) names.add(m[1]);
+              if (names.size === 0) continue;
+              let els: Element[] = [];
+              try { els = Array.from(document.querySelectorAll(rule.selectorText.replace(/::?[\w-]+(\([^)]*\))?/g, (p) => (/^::|^:(before|after|hover|focus|focus-visible|first-child|last-child)/.test(p) ? "" : p)))); } catch { els = []; }
+              if (els.length === 0) continue;
+              matched += 1;
+              for (const n of names) { reads += 1; if (!getComputedStyle(els[0]).getPropertyValue(n).trim()) unresolved.push(`${rule.selectorText} reads ${n}`); }
+            }
+          };
+          for (const sheet of Array.from(document.styleSheets)) { try { walk(sheet.cssRules); } catch { /* a cross-origin sheet */ } }
+          const primaries = Array.from(document.querySelectorAll(".sf .sf-btn")).map((b) => getComputedStyle(b).backgroundColor);
+          return { rules, matched, reads, unresolved: [...new Set(unresolved)], primaries };
+        });
+        record(page, "T1", sc.id, r);
+        expect(r.rules, "the import's rules were found").toBeGreaterThan(50);
+        expect(r.reads, "rules on this screen read tokens").toBeGreaterThan(5);
+        expect(r.unresolved).toEqual([]);
+        for (const bg of r.primaries) { expect(bg).not.toBe("rgb(162, 69, 42)"); expect(bg).not.toBe("rgb(124, 58, 42)"); }
+        if (sc.id !== "reading" && sc.id !== "importing") expect(r.primaries.length, "the screen has a primary").toBeGreaterThan(0);
+      });
+    }
+  });
+
+  /* ════ The dashboard's skipped-rows line. SIGNED IN, as the harness account: the notice is kept on
+     the device under the account's own id, so these put one in this browser's storage, read the real
+     /dashboard, and take it out again. Nothing is written to the account. ════ */
+  const NO_NAME = "Row has no agent name or agency to identify it";
+  const row = (reason: string, who = "", status = "Queried", sentDate: string | null = null) => ({ who, status, sentDate, reason });
+  /** The signed-in account's id, from Firebase's own session store. */
+  const uidOf = (page: Page) => page.evaluate(() => new Promise<string>((res) => {
+    const open = indexedDB.open("firebaseLocalStorageDb");
+    open.onerror = () => res("");
+    open.onsuccess = () => {
+      try {
+        const get = open.result.transaction("firebaseLocalStorage", "readonly").objectStore("firebaseLocalStorage").getAll();
+        get.onsuccess = () => res(((get.result as Array<{ value?: { uid?: string } }>).find((r) => r.value?.uid)?.value?.uid) ?? "");
+        get.onerror = () => res("");
+      } catch { res(""); }
+    };
+  }));
+  const dash = async (page: Page, notice: unknown | null) => {
+    await page.goto("/dashboard");
+    await ensureSignedIn(page);
+    const uid = await uidOf(page);
+    expect(uid, "the harness account is signed in").toBeTruthy();
+    await page.evaluate(({ uid, notice }) => {
+      const k = `sa.importSkipped.${uid}`;
+      if (notice) localStorage.setItem(k, JSON.stringify(notice)); else localStorage.removeItem(k);
+    }, { uid, notice });
+    await page.goto("/dashboard", { waitUntil: "load" });
+    await page.waitForSelector('[data-d58="page"][data-loading="0"]', { timeout: 40_000 });
+    await page.evaluate(() => (document as Document).fonts.ready);
+    await page.waitForTimeout(500);
+    await mutate(page);
+    return uid;
+  };
+  const clear = (page: Page, uid: string) => page.evaluate((uid) => localStorage.removeItem(`sa.importSkipped.${uid}`), uid);
+  const visibleNotice = (page: Page) => page.locator('[data-d58="notice"]:visible');
+
+  test.describe("the dashboard's skipped-rows line", () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+
+    test("N2 one no-name row: the line, its row, and Dismiss", async ({ page }) => {
+      const uid = await dash(page, { count: 1, rows: [row(NO_NAME, "", "Rejected", "2026-06-01")], at: 1 });
+      try {
+        const line = visibleNotice(page);
+        await expect(line).toHaveCount(1);
+        const text = ((await line.locator(".d58-noticetext").textContent()) ?? "").replace(/\s+/g, " ").trim();
+        record(page, "N2", "oneRow", text);
+        expect(text).toBe("1 row from your file wasn't imported. It had no agent or agency name.");
+        expect(await line.getAttribute("role")).toBe("status");
+        const first = await page.evaluate(() => { const p = [...document.querySelectorAll('[data-d58="page"]')].find((e) => (e as HTMLElement).offsetParent !== null)!; return p.firstElementChild?.getAttribute("data-d58"); });
+        expect(first, "the line is the first thing on the page, above the header").toBe("notice");
+        const toggle = line.locator('[data-d58="notice-toggle"]');
+        expect(((await toggle.textContent()) ?? "").trim()).toBe("Show the row");
+        await toggle.click();
+        expect(((await toggle.textContent()) ?? "").trim()).toBe("Hide the row");
+        const rows = await line.locator('[data-d58="notice-row"]').allInnerTexts();
+        record(page, "N2", "rows", rows);
+        expect(rows.length, "exactly the stored rows").toBe(1);
+        expect(rows[0]).toContain("Rejected · 1 Jun 2026");
+        expect(rows[0]).toContain(NO_NAME);
+        await line.locator('[data-d58="notice-dismiss"]').click();
+        await expect(visibleNotice(page)).toHaveCount(0);
+        expect(await page.evaluate((uid) => localStorage.getItem(`sa.importSkipped.${uid}`), uid), "Dismiss removes the key").toBeNull();
+        await page.reload({ waitUntil: "load" });
+        await page.waitForSelector('[data-d58="page"][data-loading="0"]', { timeout: 40_000 });
+        await expect(visibleNotice(page), "it does not come back").toHaveCount(0);
+      } finally { await clear(page, uid); }
+    });
+
+    test("N2 two rows with different reasons: the count alone", async ({ page }) => {
+      const uid = await dash(page, { count: 2, rows: [row(NO_NAME), row("Skipped a Queried query — its agent couldn't be saved.", "", "Queried")], at: 1 });
+      try {
+        const line = visibleNotice(page);
+        const text = ((await line.locator(".d58-noticetext").textContent()) ?? "").replace(/\s+/g, " ").trim();
+        record(page, "N2", "mixed", text);
+        expect(text).toBe("2 rows from your file weren't imported.");
+        await line.locator('[data-d58="notice-toggle"]').click();
+        expect(await line.locator('[data-d58="notice-row"]').count()).toBe(2);
+        expect(((await line.locator('[data-d58="notice-toggle"]').textContent()) ?? "").trim()).toBe("Hide the rows");
+        /* an undated row says so */
+        expect((await line.locator('[data-d58="notice-row"]').first().innerText())).toContain("Undated");
+      } finally { await clear(page, uid); }
+    });
+
+    test("N2 no stored notice: the dashboard's first element is its header", async ({ page }) => {
+      const uid = await dash(page, null);
+      try {
+        await expect(visibleNotice(page)).toHaveCount(0);
+        const first = await page.evaluate(() => { const p = [...document.querySelectorAll('[data-d58="page"]')].find((e) => (e as HTMLElement).offsetParent !== null)!; return p.firstElementChild?.getAttribute("data-d58"); });
+        record(page, "N2", "firstWithoutNotice", first);
+        expect(first).toBe("header");
+      } finally { await clear(page, uid); }
+    });
+  });
+
+  /* N3 · one screen with the line showing, at the two smallest windows DB58 F1 holds at. */
+  for (const vp of [{ width: 1366, height: 650 }, { width: 1280, height: 680 }, { width: 1440, height: 900 }]) {
+    test.describe(`N3 ${vp.width}x${vp.height}`, () => {
+      test.use({ viewport: vp });
+      test("N3 one screen with the line showing, and the chart above its floor", async ({ page }) => {
+        const uid = await dash(page, { count: 1, rows: [row(NO_NAME)], at: 1 });
+        try {
+          await expect(visibleNotice(page)).toHaveCount(1);
+          const read = () => page.evaluate(() => {
+            const vis = (sel: string) => [...document.querySelectorAll(sel)].find((e) => (e as HTMLElement).offsetParent !== null) as HTMLElement | undefined;
+            const sc = vis(".ws-wbody")!; const plot = vis('[data-d58="active"] .os-acplot');
+            return { sh: sc.scrollHeight, ch: sc.clientHeight, plot: plot ? Math.round(plot.getBoundingClientRect().height) : -1, notice: Math.round(vis('[data-d58="notice"]')!.getBoundingClientRect().height) };
+          });
+          const closed = await read();
+          record(page, "N3", "closed", closed);
+          expect(closed.plot, "the chart is drawn").toBeGreaterThan(0);
+          expect(closed.sh, `the page does not scroll: ${closed.sh} against ${closed.ch}`).toBeLessThanOrEqual(closed.ch + 1);
+          expect(closed.plot, "the chart is at or above its 120px floor").toBeGreaterThanOrEqual(120);
+          /* open: the page may scroll, and nothing else changes size */
+          await visibleNotice(page).locator('[data-d58="notice-toggle"]').click();
+          await page.waitForTimeout(200);
+          const open = await read();
+          record(page, "N3", "open", open);
+          expect(open.plot, "opening the list does not shrink the chart").toBe(closed.plot);
+        } finally { await clear(page, uid); }
+      });
     });
   }
 });
