@@ -107,6 +107,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-stamp: #e0a188;
   /* The primary button on ink: `--hpanel-primary-bg`. Its text is the shell's ink. */
   --mk-cream-btn: #f3eee6;
+  /* The founding offer's navy panel: `--ink-band`, the ground of the app's own header panel. */
+  --mk-panel: #2d3a50;
+  /* A card on a tinted band: the app's `--fc-card`. True white, which `--mk-card` (#fffefb) is not. */
+  --mk-white: #ffffff;
   --mk-hero-ground: #fbf9f5;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
@@ -162,7 +166,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-blush-label: rgba(28, 19, 15, .62);
   --mk-blush-body: rgba(28, 19, 15, .68);
   --mk-blush-note: rgba(28, 19, 15, .62);
-  --mk-blush-ph: rgba(28, 19, 15, .45);
+  --mk-blush-ph: rgba(28, 19, 15, .48);
   --mk-msg-ok-bg: rgba(233, 237, 230, .8);
   --mk-msg-ok-bd: rgba(138, 158, 136, .5);
   /* ── The two primaries (18 Sep) ──
@@ -179,33 +183,31 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      name the colour rather than borrowing a band's private token. It is still NOT `--mk-burg`
      (#7c3a2a) — fourteen points apart, two reds on one page, and that remains a flag rather than
      a decision made here. */
-  /* ── The vision band's own surface (18 Sep) ──
-     ⚠️ IT IS TRUE WHITE, AND THAT IS NOT `--mk-card` (#fffefb). The card colour is a warm near-white
-     meant to sit ON the page's paper; this band's whole job is to read as a different sheet, and
-     three points of warmth is the difference between a page turn and a smudge.
-     The edge is the band's hairlines; the rule is the "Read our story" underline, a step stronger
-     on purpose. Both pre-computed alphas, per the no-`color-mix()` rule. */
-  --mk-vision-ground: #ffffff;
-  --mk-vision-edge: rgba(28, 19, 15, .08);
-  --mk-vision-rule: rgba(28, 19, 15, .14);
+  /* ── The stone band (landing colours v2) ──
+     ⚠️ IT WAS TRUE WHITE WITH A HAIRLINE ON EACH EDGE; IT IS THE APP'S STONE BAND NOW, AND THE EDGES
+     ARE GONE. On an oat sheet white reads as a card rather than as a band, and the three points
+     are cards — so the band is the darker step and the cards are the white. The colour change
+     marks both edges; `--mk-vision-edge` is deleted with the rules that read it.
+     The rule is the "more about us" underline: the ink at 40%. Pre-computed alphas, no `color-mix()`. */
+  --mk-stone: #e9e6e0;
+  --mk-vision-rule: rgba(28, 19, 15, .4);
   --mk-vision-body: rgba(28, 19, 15, .72);
   --mk-navy: #2a3a52;
   /* Navy's hover, pre-computed per the no-`color-mix()` rule — the same darkening step
      `--mk-ink-hov` is to `--mk-nearblack`. */
   --mk-navy-hov: #1f2c3f;
-  --mk-rust: #8a4a3c;
+  /* The accent on LIGHT: the Query Centre's rust. Terracotta (`--mk-terra`) is the accent on ink. */
+  --mk-rust: #a2452a;
   /* ── The founding-writers banner ──
      ⚠️ THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on the
      ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".
      Two points apart, one job — so this reads the existing token and the brief's value is not
      introduced. */
-  --mk-claim-ground: #f5f1eb;
   --mk-claim-accent: var(--mk-rust);
   --mk-claim-track: #f7e8e2;
-  --mk-claim-sh: rgba(28, 19, 15, .11);
   /* The rust at low alpha — the contact form's focus ring. Pre-computed from `--mk-claim-accent`'s
      own channels, per the no-`color-mix()` rule. */
-  --mk-claim-ring: rgba(138, 74, 60, .2);
+  --mk-claim-ring: rgba(162, 69, 42, .2);
   /* ⚠️ `--mk-foot-ground` IS DELETED (landing colours v2). The footer is the page's own ink now —
      it reads `--mk-ink-shell` — and no hairline states where it starts: the sheet's rounded bottom
      corners mark the join. */
@@ -586,11 +588,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    lower surface TRANSPARENT — through a green build, on a public page, with the rule still
    reading correctly. This stylesheet has had four rounds of a see-through surface from exactly
    that, and the colour here is the gradient's own end stop so the worst case is a flat fill. */
-.mk-lower {
-  background-color: var(--mk-lower);
-  background-image: linear-gradient(180deg, var(--mk-hero-ground), var(--mk-lower) 80px);
-  background-repeat: no-repeat;
-}
+/* ⚠️ FLAT NOW (landing colours v2). The 80px fade at this element's top is gone: the hero carries
+   the whole transition, over the last 38% of its own height, so there is still ONE boundary
+   treatment and it is no longer split across two elements. */
+.mk-lower { background-color: var(--mk-lower); }
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
@@ -659,7 +660,18 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    scrollbar, so on a machine that draws one the shadow's "24px from the edge" would be 24px minus
    the scrollbar — i.e. under it. `.mk-featband` already solved this the same way for the Track
    illustration's bleed. Do not "simplify" this to `vw`. */
-.mk-herowrap { container-type: inline-size; }
+/* ⚠️ AND IT PAINTS THE HERO'S GROUND, BECAUSE IT IS THE FULL-WIDTH BOX. `.mk-hero` is capped at
+   1180, so a ground painted there would be a column, not a surface. Paper white to 62% of the
+   hero's height, then a straight fade to the oat below — arriving exactly at the foot, so the join
+   with `.mk-lower` has no edge at all.
+   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND, for the reason this file gives everywhere:
+   the shorthand resets the colour, so a gradient that fails to parse would leave the hero showing
+   whatever is behind it. The colour here is the gradient's own first stop. */
+.mk-herowrap {
+  container-type: inline-size;
+  background-color: var(--mk-hero-ground);
+  background-image: linear-gradient(180deg, var(--mk-hero-ground) 62%, var(--mk-lower) 100%);
+}
 /* ⚠️ THE STACKING CONTEXT IS LOAD-BEARING AT EVERY WIDTH NOW, not just stacked. The shadow is
    169% of its column and grows LEFTWARD from a fixed right edge, so it reaches back across the
    copy; the art is the later grid item, so without this it would paint a 20% wash over the
@@ -721,7 +733,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-herolink {
   font-family: "Source Serif 4", Georgia, serif; font-size: 17px; color: var(--mk-rust);
   text-decoration: underline; text-underline-offset: 5px;
-  text-decoration-color: rgba(138, 74, 60, .35);
+  text-decoration-color: rgba(162, 69, 42, .45);
 }
 /* ⚠️ THE IMAGE OVERFLOWS ITS COLUMN BY DESIGN, AND `max-width: none` IS LOAD-BEARING. The global
    image reset caps every img at 100% of its box, which would cancel the width below silently. */
@@ -1051,16 +1063,16 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    carry that warning. The shorthand resets every longhand, so the day someone adds an image here it
    would take the ground with it and the band would go transparent through a green build. */
 .mk-vision {
-  background-color: var(--mk-vision-ground);
-  border-top: 1px solid var(--mk-vision-edge);
-  border-bottom: 1px solid var(--mk-vision-edge);
+  background-color: var(--mk-stone);
   margin-top: 104px;
 }
 /* The page's own container, not the ref's. The ref is drawn in a 1440px frame at 120px gutters;
    every other band here is 1180 capped at 56, and one gutter down the page beats two that merely
    look alike. The columns come out 318.7px against the ref's 362.7 — see the h3 boundary below. */
 .mk-visionin {
-  max-width: 1180px; margin: 0 auto; padding: 108px 56px 104px;
+  /* 109/105, where it was 108/104: each takes the pixel the band's deleted edge rule occupied, so
+     nothing below the band moved when the rules went. */
+  max-width: 1180px; margin: 0 auto; padding: 109px 56px 105px;
   text-align: center;
 }
 /* One class plus `!important`, which is enough HERE and is not everywhere: brand.tsx injects a
@@ -1073,6 +1085,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-visionpoints {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; margin-top: 64px;
+}
+/* ── Each point is a white card (landing colours v2) ──
+   ⚠️ THE CARD IS DRAWN OUTWARD, NOT INWARD, AND THAT IS WHAT KEEPS THE LAYOUT FROZEN. A card needs
+   padding, and padding taken out of the column narrows the text and re-wraps it. So the padding is
+   paid back by an equal negative margin: the card's edge sits 34/16/36px OUTSIDE the grid area and
+   the picture, heading and body stay exactly where they were — measured, lock S2. The 56px column
+   gap is what the cards grow into; 24px of it is left between them. */
+.mk-vpoint {
+  background-color: var(--mk-white); border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 6px 14px -10px rgba(91, 42, 31, .35);
+  padding: 34px 16px 36px; margin: -34px -16px -36px;
 }
 /* ⚠️ A FIXED HEIGHT ENDING AT `flex-end`, AND THAT IS WHAT PUTS THE THREE ON ONE BASELINE. Each
    plate is trimmed to its own ink and exported at a common 440px height, so all three fill this box
@@ -1135,7 +1158,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* One column, on the same breakpoint the feature rows stack at — the two bands are read as one
    region and a page that reflowed them at different widths would look like a mistake. */
 @media (max-width: 1080px) {
-  .mk-visionin { padding: 76px 26px 72px; }
+  .mk-visionin { padding: 77px 26px 73px; }
+  /* Stacked, 34 + 36 of outset would be wider than the 56px gap and the cards would overlap. */
+  .mk-vpoint { padding: 20px 16px 22px; margin: -20px -16px -22px; }
   .mk-visionh2 { font-size: 46px; }
   .mk-visionpoints { grid-template-columns: 1fr; gap: 56px; margin-top: 48px; }
   .mk-vfig { height: 180px; }
@@ -1325,10 +1350,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    every other picture on the site, and the smoke test reads the hash against the file.
    ⚠️ COLOUR ONLY, AND STILL NEVER THE SHORTHAND — same reason as `.mk-lower`: the shorthand resets
    every longhand, so the next person to add an image here would take the ground with it. */
-.mk-claimband {
-  background-color: var(--mk-claim-ground);
-  padding: 72px 0;
-}
+/* The band paints nothing now: the hawks stand on the sheet's own oat (landing colours v2). */
+.mk-claimband { padding: 72px 0; }
 /* ⚠️ `1fr 1.3fr` SO THE 430px CAP ACTUALLY BINDS. The old `0.72fr` column was 370px wide at 1440,
    which would have held the picture under its cap at every width; this one is 447px, so the
    drawing stops at 430 and sits centred in it. The 1280 override that followed the old smudge
@@ -1346,12 +1369,19 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-claimcard {
   grid-column: 2;
-  background: #fff; border-radius: 18px; padding: 38px 42px 34px;
-  box-shadow: 0 8px 28px var(--mk-claim-sh);
+  /* ⚠️ THE APP'S NAVY PANEL (landing colours v2). Every element inside it is restated for this
+     ground below, and each of those rules is scoped to `.mk-claimcard` — `FoundingSignup` and
+     `FoundingCounter` also render on light grounds (/founders' hero, /pricing), where they keep
+     their light treatment. The panel is the scope, never the component.
+     37/41/33, where it was 38/42/34: the 1px border is inside the box, so the padding gives it
+     back and the contents did not move. */
+  background-color: var(--mk-panel); color: var(--mk-cream);
+  border: 1px solid rgba(var(--mk-cream-rgb), .14);
+  border-radius: 14px; padding: 37px 41px 33px;
 }
 .mk-claimkicker {
   font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--mk-claim-accent); margin: 0 0 14px;
+  text-transform: uppercase; color: var(--mk-stamp); margin: 0 0 14px;
 }
 /* Two classes and `!important`: brand.tsx forces every bare `h2` to the brand family, so one
    class would lose between two important declarations and this would draw in Playfair.
@@ -1360,15 +1390,15 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    trap this stylesheet has already paid for three times. */
 .mk-claimband .mk-claimh2 {
   font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 36px; line-height: 1.18; color: var(--mk-nearblack); margin: 0; max-width: 16ch;
+  font-size: 36px; line-height: 1.18; color: var(--mk-cream); margin: 0; max-width: 16ch;
   /* Balanced (17 Sep): at 16ch "Join as a founding writer" broke before its last word at every
      width, so the heading ended on "writer" alone. */
   text-wrap: balance;
 }
-.mk-claimlead { margin: 20px 0 12px; font-size: 17.5px; color: var(--mk-ink); }
+.mk-claimlead { margin: 20px 0 12px; font-size: 17.5px; color: var(--mk-cream); }
 .mk-claimlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
 .mk-claimlist li {
-  position: relative; padding-left: 30px; font-size: 17.5px; line-height: 1.45; color: var(--mk-ink);
+  position: relative; padding-left: 30px; font-size: 17.5px; line-height: 1.45; color: var(--mk-cream);
 }
 /* The ring and its centre dot are two pseudo-elements on one item rather than a marker glyph: a
    bullet is not content, and a character would take the text's colour and leading with it.
@@ -1378,17 +1408,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-claimlist li::before {
   content: ""; position: absolute; left: 0; top: .28em;
   width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
-  border: 2px solid var(--mk-claim-accent);
+  border: 2px solid var(--mk-terra);
 }
 .mk-claimlist li::after {
   content: ""; position: absolute; left: 5.25px; top: calc(.28em + 5.25px);
-  width: 3.5px; height: 3.5px; border-radius: 50%; background: var(--mk-claim-accent);
+  width: 3.5px; height: 3.5px; border-radius: 50%; background: var(--mk-terra);
 }
 /* The hairline belongs to this paragraph rather than sitting between the two as an element: a
    rule that exists to separate two blocks is one of them having an edge. */
 .mk-claimask {
-  border-top: 1px solid var(--mk-hair); margin: 24px 0 0; padding-top: 18px;
-  font-size: 16px; line-height: 1.6; color: var(--mk-muted); max-width: 52ch;
+  border-top: 1px solid rgba(var(--mk-cream-rgb), .16); margin: 24px 0 0; padding-top: 18px;
+  font-size: 16px; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .72); max-width: 52ch;
 }
 /* ⚠️ ONE FORM RULE FOR TWO SURFACES — the banner card and the `/founders` hero both pass
    `formClass="mk-claimform"`. The button override is scoped to the FORM, not to the band, which
@@ -1417,8 +1447,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-claimfigures { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .mk-claimtally { margin: 0; }
 .mk-claimnum { font-size: 26px; font-weight: 700; color: var(--mk-nearblack); }
-.mk-claimof { font-size: 16px; font-weight: 400; color: var(--mk-muted); }
-.mk-claimleft { margin: 0; font-size: 16px; color: var(--mk-muted); white-space: nowrap; }
+.mk-claimof { font-size: 16px; font-weight: 400; color: var(--mk-blush-note); }
+.mk-claimleft { margin: 0; font-size: 16px; color: var(--mk-blush-note); white-space: nowrap; }
 .mk-claimtrack {
   height: 10px; border-radius: 999px; background: var(--mk-claim-track);
   overflow: hidden; margin: 12px 0 0;
@@ -1447,6 +1477,36 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-betanote { font-size: 14.5px; color: var(--mk-blush-note); margin: 16px 0 0; }
 .mk-betanote .mk-doclink { color: var(--mk-burg); }
 
+/* ── The sign-up and the counter ON THE NAVY PANEL ──
+   ⚠️ EVERY RULE HERE STARTS `.mk-claimcard`, AND THAT IS THE WHOLE DESIGN. The form and the counter
+   are one component each, mounted on light grounds as well; styling them by their own classes
+   would turn the /founders hero's field cream-on-white. Lock F2 measures those light mounts and
+   F1 measures every outcome state on this one. */
+.mk-claimcard .mk-claimform input {
+  color: var(--mk-cream); background: rgba(var(--mk-cream-rgb), .06);
+  border-color: rgba(var(--mk-cream-rgb), .42);
+}
+.mk-claimcard .mk-claimform input::placeholder { color: rgba(var(--mk-cream-rgb), .5); }
+.mk-claimcard .mk-claimform input:focus { outline: none; border-color: var(--mk-cream); }
+/* The cream button, on the component's own navy one: three classes, so it wins wherever it sits. */
+.mk-claimcard .mk-claimform .mk-btn--navy {
+  background: var(--mk-cream-btn); border-color: var(--mk-cream-btn); color: var(--mk-ink-shell);
+}
+.mk-claimcard .mk-claimform .mk-btn--navy:hover { background: #ffffff; border-color: #ffffff; box-shadow: none; }
+.mk-claimcard .mk-betanote { color: rgba(var(--mk-cream-rgb), .62); }
+.mk-claimcard .mk-betanote .mk-doclink { color: var(--mk-cream); }
+.mk-claimcard .mk-betainvalid { color: var(--mk-stamp); }
+.mk-claimcard .mk-betamsg {
+  background: rgba(var(--mk-cream-rgb), .08); border: 1px solid rgba(var(--mk-cream-rgb), .24);
+  color: var(--mk-cream);
+}
+.mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg .mk-doclink { color: var(--mk-cream); }
+.mk-claimcard .mk-claimcount { border-top-color: rgba(var(--mk-cream-rgb), .16); }
+.mk-claimcard .mk-claimnum { color: var(--mk-cream); }
+.mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft { color: rgba(var(--mk-cream-rgb), .72); }
+.mk-claimcard .mk-claimtrack { background: rgba(var(--mk-cream-rgb), .16); }
+.mk-claimcard .mk-claimfill { background: var(--mk-stamp); }
+
 /* ⚠️ THE TWO BREAKPOINTS ARE IN WIDENING-TO-NARROWING ORDER AND MUST STAY THAT WAY. Both are
    equal specificity and a media query confers none, so source order is the whole cascade. */
 @media (max-width: 1000px) {
@@ -1462,7 +1522,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-claimform input, .mk-claimform .mk-btn--ink { flex: none; width: 100%; }
 }
 @media (max-width: 560px) {
-  .mk-claimcard { padding: 26px 22px 24px; }
+  .mk-claimcard { padding: 25px 21px 23px; }
   .mk-claimband .mk-claimh2 { font-size: 27px; }
   /* The tally and the remainder stack rather than squeezing onto one line. */
   .mk-claimfigures { display: block; }

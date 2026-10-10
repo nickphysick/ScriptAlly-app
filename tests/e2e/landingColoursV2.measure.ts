@@ -193,6 +193,13 @@ const BOXES = [
   ".mk-footglyphs", ".mk-footcol", ".mk-footcol button", ".mk-footbase", ".mk-footmail",
 ];
 
+/**
+ * The one stated exception to ±1. The vision band's two 1px edge rules were deleted and its inner
+ * box took those two pixels as padding, so the band's own box and everything below it are
+ * unmoved while this inner box is 1px higher and 2px taller.
+ */
+const S2_TOLERANCE: Record<string, number> = { ".mk-visionin": 2 };
+
 async function boxes(page: Page) {
   /* Walk the page once so every lazy picture has its box, then read in document coordinates. */
   await page.evaluate(async () => {
@@ -429,7 +436,7 @@ test.describe("LC2", () => {
         now[sel].forEach((b, i) => {
           compared++;
           const d = b.map((v, k) => Math.abs(v - was[sel][i][k]));
-          if (Math.max(...d) > 1) moved.push(`${sel}[${i}] ${b.map((v) => v.toFixed(1))} was ${was[sel][i].map((v) => v.toFixed(1))}`);
+          if (Math.max(...d) > (S2_TOLERANCE[sel] ?? 1)) moved.push(`${sel}[${i}] ${b.map((v) => v.toFixed(1))} was ${was[sel][i].map((v) => v.toFixed(1))}`);
         });
       }
       console.log(`LC2 S2 @${vp.width}: ${compared} boxes compared, ${moved.length} moved`);
