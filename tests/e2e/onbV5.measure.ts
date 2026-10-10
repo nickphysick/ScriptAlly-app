@@ -38,10 +38,15 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "details", q: "s=details&status=ready", form: "setup" },
   { id: "details-still", q: "s=details&status=drafting", form: "setup" },
   { id: "book", q: "s=book", form: "setup" },
+  { id: "fork", q: "s=fork&pick=smart", form: "setup" },
+  { id: "fork-byhand", q: "s=fork&pick=byhand", form: "setup" },
+  { id: "fork-pro", q: "s=fork&pick=template&plan=pro", form: "setup" },
+  { id: "confirm", q: "s=confirm", form: "setup" },
+  { id: "confirm-pro", q: "s=confirm&plan=pro", form: "setup" },
 ];
 
 /** Open-title screens later phases add. */
-const EXTRA_OPEN: string[] = [];
+const EXTRA_OPEN: string[] = ["fork", "confirm"];
 
 const MUTATIONS: Record<string, string> = {
   F1: ".sf .sf-panel, .sf .sf-panel .ws-pin{width:260px!important}",
@@ -66,6 +71,14 @@ async function mutate(page: Page) {
   if (MUTATE === "S2") await page.evaluate(() => document.querySelectorAll(".sf-opt").forEach((b) => { b.removeAttribute("role"); b.setAttribute("aria-pressed", b.getAttribute("aria-checked") ?? "false"); b.removeAttribute("aria-checked"); }));
   if (MUTATE === "S3") await page.evaluate(() => { const dd = document.querySelectorAll(".sf-card .sa-dd")[1]; if (dd) dd.outerHTML = '<input type="text" class="sf-in" placeholder="Genre">'; });
   if (MUTATE === "S4") await page.evaluate(() => { const c = document.querySelector(".sf-stepcard"); if (c && !c.querySelector('[data-sf="still-writing"]')) { const p = document.createElement("p"); p.className = "sf-note"; p.dataset.sf = "still-writing"; p.textContent = "Still writing?"; c.appendChild(p); } });
+  if (MUTATE === "K1") await page.evaluate(() => {
+    /* "Upload my sheet" wired to the Smart import picker: the press records the wrong handler. */
+    const b = document.querySelector('[data-act="upload"]') as HTMLElement | null;
+    const wrong = document.querySelector('[data-act="smart"]') as HTMLElement | null;
+    if (b && wrong) b.addEventListener("click", (e) => { e.stopImmediatePropagation(); wrong.click(); }, true);
+  });
+  if (MUTATE === "K2") await page.evaluate(() => { const f = document.querySelector('[data-fact="smart"]'); if (f) f.textContent = "Uses your one Smart Import"; });
+  if (MUTATE === "K3") await page.evaluate(() => (document.querySelector('[data-act="read"]') as HTMLElement | null)?.click());
   if (MUTATE === "A1") {
     await page.evaluate(() => {
       const d = document.createElement("div"); d.className = "preview-wrap"; d.textContent = "Dashboard preview";
@@ -446,6 +459,95 @@ test.describe("OB1", () => {
       expect(await note(), "absent again on another choice").toBe(0);
       await lab(page, "s=details&status=drafting", vp);
       expect(await note(), "absent from the details screen").toBe(0);
+    }
+  });
+
+  const calls = (page: Page) => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name));
+  const reset = (page: Page) => page.evaluate(() => { window.__onbLab = { calls: [] }; });
+
+  test("K1 three tiles, each button to its own handler, one ring, and a drop that works", async ({ page }) => {
+    for (const vp of VPS) {
+      for (const pick of ["smart", "template", "byhand"]) {
+        await lab(page, "s=fork&pick=" + pick, vp);
+        const t = await page.evaluate(() => ({
+          tiles: document.querySelectorAll(".sf-tile").length,
+          radios: document.querySelectorAll('.sf-col [role="radio"], .sf-col [role="radiogroup"]').length,
+          ringed: Array.from(document.querySelectorAll('.sf-tile[data-ringed="true"]')).map((e) => (e as HTMLElement).dataset.tile),
+          ring: Array.from(document.querySelectorAll(".sf-tile.is-ringed")).map((e) => getComputedStyle(e).boxShadow),
+          cols: new Set(Array.from(document.querySelectorAll(".sf-tile")).map((e) => Math.round(e.getBoundingClientRect().left))).size,
+        }));
+        expect(t.tiles, `@${vp.width}: three tiles`).toBe(3);
+        expect(t.radios, "no radio").toBe(0);
+        expect(t.ringed, "exactly one ringed, and it is the suggested one").toEqual([pick]);
+        expect(t.ring[0], "a 2px navy outline").toMatch(/rgb\(42, 58, 82\) 0px 0px 0px 2px/);
+        expect(t.cols, `@${vp.width}: three across from 1080, stacked below`).toBe(vp.width >= 1080 ? 3 : 1);
+      }
+      await lab(page, "s=fork&pick=smart", vp);
+      const presses: Array<[string, string]> = [
+        ['[data-act="smart"]', "picker"], ['[data-act="download"]', "download"],
+        ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"],
+        ['[data-sf="drop"]', "picker"], ['[data-act="later"]', "skip"], ['[data-act="desk"]', "importDesk"],
+      ];
+      for (const [sel, want] of presses) {
+        await reset(page);
+        await page.locator(sel).click();
+        expect(await calls(page), `@${vp.width}: ${sel} calls ${want} and nothing else`).toEqual([want]);
+      }
+      /* A real drop event carrying a real File. */
+      await reset(page);
+      await page.evaluate(() => {
+        const dt = new DataTransfer();
+        dt.items.add(new File(["Agent,Agency\nA,B\n"], "my agents.csv", { type: "text/csv" }));
+        dt.items.add(new File(["x"], "second.csv", { type: "text/csv" }));
+        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+      });
+      const dropped = await page.evaluate(() => window.__onbLab!.calls);
+      expect(dropped.map((c) => c.name), "one call to pickFile").toEqual(["pickFile"]);
+      expect((dropped[0].arg as { file: string }).file, "with the first file").toBe("my agents.csv");
+      await reset(page);
+      await page.evaluate(() => {
+        const dt = new DataTransfer();
+        dt.items.add(new File(["x"], "notes.pdf", { type: "application/pdf" }));
+        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+      });
+      expect(await calls(page), "a type the picker would not offer is ignored").toEqual([]);
+    }
+  });
+
+  test("K2 the fact lines state cost from the tier, and nothing recommends", async ({ page }) => {
+    for (const [q, smart] of [["s=fork", "Uses your one Smart Import"], ["s=fork&plan=pro", "Uses this month's Smart Import"]] as const) {
+      await lab(page, q, VPS[0]);
+      const f = await page.evaluate(() => ({
+        facts: Array.from(document.querySelectorAll(".sf-fact")).map((e) => e.textContent),
+        text: (document.querySelector(".sf-col") as HTMLElement).innerText,
+      }));
+      expect(f.facts).toEqual([smart, "Always free", "Always free · Ends set-up"]);
+      expect(f.text).not.toMatch(/recommended|best for/i);
+    }
+  });
+
+  test("K3 the confirm names the file twice, Change updates both, and nothing is read before the press", async ({ page }) => {
+    for (const vp of VPS) {
+      await lab(page, "s=confirm", vp);
+      const read = () => page.evaluate(() => ({
+        row: document.querySelector('[data-sf="file-name"]')?.textContent,
+        lead: document.querySelector('[data-sf="confirm-lead"] strong')?.textContent,
+        text: (document.querySelector(".sf-col") as HTMLElement).innerText,
+      }));
+      const a = await read();
+      expect(a.row).toBe("my agents FINAL v3.csv");
+      expect(a.lead, "the sentence names the same file").toBe(a.row);
+      expect(a.text).not.toMatch(/\brows?\b/i);
+      expect(await calls(page), "nothing is read on arrival").not.toContain("runMapping");
+      const chooser = page.waitForEvent("filechooser");
+      await page.locator('[data-act="change"]').click();
+      await (await chooser).setFiles({ name: "second list.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("PK") });
+      await page.waitForFunction(() => document.querySelector('[data-sf="file-name"]')?.textContent === "second list.xlsx");
+      const b = await read();
+      expect(b.lead, "Change updates the sentence too").toBe("second list.xlsx");
+      expect(await calls(page), "choosing a file reads nothing").not.toContain("runMapping");
+      await page.locator('[data-act="read"]').click();
+      expect((await calls(page)).filter((c) => c === "runMapping").length, "one read, on the press").toBe(1);
     }
   });
 });

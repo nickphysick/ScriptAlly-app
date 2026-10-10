@@ -24,10 +24,10 @@ import { ImportOverview } from "./ImportOverview";
 import { ImportingLoader } from "./ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { fmtDate } from "../../lib/smartImportReviewModel";
-import { confirmFileLead } from "../../lib/smartImportConfirm";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
-import { CaptureOption, CAPTURE_HEADING, CAPTURE_SUB, capturePrimaryLabel } from "../../lib/captureFork";
+import { CaptureOption } from "../../lib/captureFork";
+import { ConfirmScreen } from "./ConfirmScreen";
 import { CaptureFork } from "./CaptureFork";
 import { subStepFor, subStepLabel } from "../../lib/onboardingSpine";
 import { HandoverScreen } from "./HandoverScreen";
@@ -334,83 +334,66 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
+  /* The two pickers. One element each, rendered by whichever screen can open one — the fork, and
+     the confirm's "Change" — so a press always has an input to click. */
+  const pickers = (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls"
+        style={{ display: "none" }}
+        data-picker="smart"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
+      />
+      <input
+        ref={templateInputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls"
+        style={{ display: "none" }}
+        data-picker="template"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
+      />
+    </>
+  );
+
   if (screen === "pipeline") {
     return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your list"
-        name={CAPTURE_HEADING}
-        sub={CAPTURE_SUB}
-        motif={<InboxMotif />}
-        onBack={() => setScreen("book")}
-        primaryLabel={capturePrimaryLabel(importOption)}
-        onPrimary={() => {
-          if (importOption === "smart") fileInputRef.current?.click();
-          else if (importOption === "template") templateInputRef.current?.click();
-          else onAddByHand();
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
-        />
-        <input
-          ref={templateInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
-        />
+      <>
+        {pickers}
         <CaptureFork
-          selected={importOption}
-          onSelect={setImportOption}
+          ringed={importOption}
+          tier={entitlement.tier}
           onChooseFile={() => fileInputRef.current?.click()}
+          onDropFile={pickFile}
           onUploadTemplate={() => templateInputRef.current?.click()}
+          onAddByHand={onAddByHand}
+          onBack={() => setScreen("book")}
           onNothingYet={onSkip}
           onOpenImportDesk={onOpenImportDesk}
         />
-      </OnboardingCard>
+      </>
     );
   }
 
-  // ── Confirm — an explicit "this spends your Smart Import" beat so it's never burned by accident.
-  //    Wording is free vs Pro-monthly, driven by the entitlement helper. (Minimal by design — the
-  //    polished credit UI is a later prompt; this just guarantees correct behaviour.) ─
   if (screen === "confirm") {
-    const isPro = entitlement.tier === "pro";
     return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your pipeline"
-        name="This uses your Smart Import"
-        sub={isPro ? "One per month on Pro" : "Your one free Smart Import"}
-        motif={<InboxMotif />}
-        onBack={() => { setPendingFile(null); setScreen("pipeline"); }}
-        primaryLabel="Read my file →"
-        onPrimary={() => { if (pendingFile) void runMapping(pendingFile); }}
-      >
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 10px" }}>
-          {(() => {
-            const lead = confirmFileLead(fileName);
-            return lead.name
-              ? <>{lead.before}<strong>{lead.name}</strong>{lead.after}</>
-              : <>{lead.before}</>;
-          })()}
-        </p>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.55, margin: 0 }}>
-          {isPro
-            ? "This is this month's Smart Import. Your next one is available next month."
-            : "This is your one free Smart Import. Upgrade to Pro later for one every month."}
-        </p>
-      </OnboardingCard>
+      <>
+        {pickers}
+        <ConfirmScreen
+          fileName={fileName}
+          fileSize={pendingFile?.size ?? null}
+          tier={entitlement.tier}
+          /* "Change" opens the picker in place: `pickFile` replaces the pending file and the name
+             shown, and the screen stays where it is. Nothing is read by choosing. */
+          onChange={() => fileInputRef.current?.click()}
+          onBack={() => { setPendingFile(null); setScreen("pipeline"); }}
+          onRead={() => { if (pendingFile) void runMapping(pendingFile); }}
+        />
+      </>
     );
   }
 
-  // ── Blocked — the entitlement is spent. free_used → upgrade path; pro_month_used → next-available
-  //    date. Never a raw error; always a way forward (add by hand). ─
   if (screen === "blocked" && blocked) {
     const isFreeUsed = blocked.reason === "free_used";
     const nextLabel = blocked.nextAvailable

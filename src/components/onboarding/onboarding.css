@@ -486,3 +486,55 @@
   .sf .sf-fieldrow { grid-template-columns: minmax(0, 1fr); }
   .sf .sf-cfoot { margin-top: 24px; }
 }
+
+/* ── "Your list": three tiles, each with its own buttons ── */
+.sf .sf-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.sf .sf-tile {
+  display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-width: 0;
+  background: var(--fc-card); border-radius: 14px; padding: 24px 24px 20px; box-shadow: var(--sf-card-shadow);
+}
+/* The ringed tile: a 2px navy outline in place of the hairline. A suggestion, not a selection. */
+.sf .sf-tile.is-ringed { box-shadow: 0 0 0 2px var(--sp-anthracite), 0 6px 14px -10px rgba(91, 42, 31, .35); }
+.sf .sf-tilemain { display: flex; align-items: flex-start; gap: 16px; }
+.sf .sf-tiledisc {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: #d9e0e7; color: var(--sp-anthracite);
+}
+.sf .sf-tiletx { min-width: 0; flex: 1 1 auto; }
+.sf .sf-tile .sf-tileh {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 22px; line-height: 1.2;
+  color: var(--ink-on-light); margin: 6px 0 0;
+}
+.sf .sf-tilep { font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.5; color: rgba(28, 19, 15, .76); margin: 8px 0 0; }
+.sf .sf-tileacts { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 16px 0 0; }
+.sf .sf-fact {
+  font-family: var(--sp-mono); font-size: 9px; line-height: 1.5; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(28, 19, 15, .5); margin: 14px 0 0;
+}
+.sf .sf-drop {
+  margin-top: auto; border: 1.5px dashed var(--sf-ink34); border-radius: 11px; padding: 18px 14px 16px;
+  text-align: center; cursor: pointer; transition: border-color .14s ease, background .14s ease;
+}
+.sf .sf-drop:hover, .sf .sf-drop.is-over { border-color: var(--sp-anthracite); background: rgba(42, 58, 82, .04); }
+.sf .sf-drop:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .sf-droplead { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: rgba(28, 19, 15, .82); margin: 0; }
+.sf .sf-dropuline { text-decoration: underline; text-underline-offset: 3px; font-family: inherit; }
+.sf .sf-droptypes { font-family: var(--sp-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .5); margin: 8px 0 0; }
+.sf .sf-under-tiles { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 26px 0 0; }
+.sf .sf-escape { font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sf-ink72); margin: 22px 0 0; }
+@media (max-width: 1079.98px) { .sf .sf-tiles { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── The confirm: the file row ── */
+.sf .sf-file {
+  display: flex; align-items: center; gap: 14px; border-radius: 11px; padding: 13px 16px;
+  box-shadow: inset 0 0 0 2px var(--sp-anthracite);
+}
+.sf .sf-filedisc {
+  flex: none; min-width: 38px; height: 38px; padding: 0 6px; box-sizing: border-box; border-radius: 9px;
+  display: grid; place-items: center; background: #d9e0e7; color: var(--sp-anthracite);
+  font-family: var(--sp-mono); font-size: 9.5px; font-weight: 600; letter-spacing: .06em;
+}
+.sf .sf-filetx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sf .sf-filename { font-family: var(--sp-type); font-weight: 600; font-size: 17px; line-height: 1.3; color: var(--ink-on-light); overflow-wrap: anywhere; }
+.sf .sf-filesize { font-family: var(--sp-mono); font-size: 11px; color: var(--sf-ink58); }
+.sf .sf-lede--confirm { margin-top: 20px; max-width: 34em; }

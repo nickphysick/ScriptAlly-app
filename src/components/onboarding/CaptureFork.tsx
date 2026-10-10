@@ -2,196 +2,127 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The capture fork — three ways to bring an existing list across (ref:
- * design-refs/scriptally-onboarding-fork.html).
+ * "Your list" — three tiles, each with its own buttons (onboarding v5, part 1).
  *
- * ⚠️ IT IS ITS OWN COMPONENT SO IT CAN BE ASSERTED ON ITS OWN. Left inside BranchB it was only
- * reachable after driving that component through the manuscript screen first, which means the
- * spec for the fork would have been a spec for the screen before it.
+ * ⚠️ THERE IS NO RADIO GROUP AND NO SHARED PRIMARY. The step used to be choose-then-Continue: three
+ * radios, a reveal under the chosen one, and one primary whose label changed with the choice. A
+ * writer who knows what they want now presses it. Every tile's buttons work at once.
  *
- * ⚠️ ONE REVEAL AT A TIME, BECAUSE THE CHOICE IS ONE. Three panels open together are three sets of
- * instructions for one decision, and the writer has to work out which of them applies to them.
+ * ⚠️ THE RING IS A SUGGESTION, NOT A SELECTION. One tile is ringed — the one matching the default
+ * for the writer's stage — and nothing about the other two is disabled by it.
  *
- * ⚠️ THE QUIET EXIT IS A TEXT LINK AND SITS OUTSIDE THE RADIOGROUP. "I've nothing to capture yet"
- * is not a fourth way of capturing a list; offered as a peer card it reads as one, and a writer
- * with nothing to bring across would be choosing between four things when they have nothing to
- * choose between.
+ * ⚠️ DROPPING A FILE ON THE DROP ZONE WORKS, BECAUSE THE WORDS SAY IT DOES. Before this the zone
+ * read "Drop your file here" and handled a click only. A drop takes the first file, and ignores a
+ * type the picker would not have accepted.
+ *
+ * The component owns no file input and makes no decision: it is given a handler for every press.
  */
 
-import React from "react";
-import { SelectRow, FONT_SANS, FONT_MONO } from "./chrome";
+import React, { useState } from "react";
 import {
-  sageText, onbOptionEdge, onbOptionRest, onbMuted,
-} from "../../lib/designTokens";
-import {
-  CaptureOption, CAPTURE_OPTIONS, CAPTURE_CHOICES, CAPTURE_LATER,
+  CaptureOption, CAPTURE_CHOICES, CAPTURE_HEADING, CAPTURE_SUB, CAPTURE_LATER,
   CAPTURE_ESCAPE_PREFIX, CAPTURE_ESCAPE_LINK, CAPTURE_ESCAPE_SUFFIX,
-  TEMPLATE_TASTER_NOTE, TEMPLATE_STEPS, HAND_NOTE,
+  CAPTURE_SMART_ACTION, CAPTURE_TEMPLATE_DOWNLOAD, CAPTURE_TEMPLATE_UPLOAD, CAPTURE_HAND_ACTION,
+  CAPTURE_DROP_LEAD, CAPTURE_DROP_LINK, CAPTURE_DROP_TYPES, captureFact, acceptsDroppedFile,
 } from "../../lib/captureFork";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
+import { StepColumn, OpenTitle, BackLink } from "./setupParts";
 
-const UploadIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /><path d="M12 3v12M8 7l4-4 4 4" />
-  </svg>
-);
-const TemplateIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" />
-  </svg>
-);
-const HandIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" />
-  </svg>
-);
-
-const ICONS: Record<CaptureOption, React.ReactNode> = {
-  smart: UploadIcon, template: TemplateIcon, byhand: HandIcon,
-};
-
-/** A quiet aside beneath an option — a rule and a sentence, never a boxed warning. */
-const Aside: React.FC<{ tone: "sage" | "muted"; children: React.ReactNode }> = ({ tone, children }) => (
-  <div
-    style={{
-      display: "flex", gap: 9, borderRadius: 9, padding: "10px 12px",
-      background: tone === "sage" ? "#e7ece1" : onbOptionRest,
-      border: `0.5px solid ${tone === "sage" ? "#c4d0bc" : onbOptionEdge}`,
-    }}
-  >
-    <span aria-hidden="true" style={{ flex: "0 0 auto", width: 3, borderRadius: 2, background: tone === "sage" ? sageText : onbMuted, opacity: 0.5 }} />
-    <p style={{ fontFamily: FONT_SANS, fontSize: 12, lineHeight: 1.5, color: tone === "sage" ? "#44563a" : onbMuted, margin: 0 }}>
-      {children}
-    </p>
-  </div>
-);
+const ICON = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+const UploadIcon = <svg {...ICON}><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /><path d="M12 3v12M8 7l4-4 4 4" /></svg>;
+const TemplateIcon = <svg {...ICON}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" /></svg>;
+const HandIcon = <svg {...ICON}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>;
 
 export interface CaptureForkProps {
-  selected: CaptureOption;
-  onSelect: (option: CaptureOption) => void;
-  /** Open the file picker for a Smart Import upload. */
+  /** The suggested tile. A ring, not a selection. */
+  ringed: CaptureOption;
+  /** The writer's Smart Import tier, from the entitlement. */
+  tier: "free" | "pro";
+  /** "Import a spreadsheet", and a press on the drop zone: open the Smart import picker. */
   onChooseFile: () => void;
-  /** Open the file picker for a filled-in template — the local, taster-free path. */
+  /** A file dropped on the drop zone: the same thing the picker's choice runs. */
+  onDropFile: (file: File) => void;
+  /** "Upload my sheet": open the template picker. */
   onUploadTemplate: () => void;
-  /** The quiet exit: nothing to bring across. */
+  /** "Add an agent". */
+  onAddByHand: () => void;
+  onBack: () => void;
+  /** "I've nothing to capture yet". */
   onNothingYet: () => void;
-  /** The Import desk, for a sheet whose columns none of the three routes suit. */
   onOpenImportDesk: () => void;
-  /** Injected so a spec can assert the download without writing a file. */
+  /** Overridable for the lab and the locks; the default downloads the real template. */
   onDownloadTemplate?: () => void;
 }
 
+const Tile: React.FC<{ option: CaptureOption; ringed: boolean; icon: React.ReactNode; fact: string; extra?: React.ReactNode; children: React.ReactNode }> = ({ option, ringed, icon, fact, extra, children }) => (
+  <section className={`sf-tile${ringed ? " is-ringed" : ""}`} data-tile={option} data-ringed={ringed ? "true" : "false"} aria-labelledby={`sf-tile-${option}`}>
+    <div className="sf-tilemain">
+      <span className="sf-tiledisc" aria-hidden="true">{icon}</span>
+      <div className="sf-tiletx">
+        <h2 className="sf-tileh" id={`sf-tile-${option}`}>{CAPTURE_CHOICES[option].title}</h2>
+        <p className="sf-tilep">{CAPTURE_CHOICES[option].desc}</p>
+        <div className="sf-tileacts">{children}</div>
+        <p className="sf-fact" data-fact={option}>{fact}</p>
+      </div>
+    </div>
+    {extra}
+  </section>
+);
+
 export const CaptureFork: React.FC<CaptureForkProps> = ({
-  selected, onSelect, onChooseFile, onUploadTemplate, onNothingYet, onOpenImportDesk, onDownloadTemplate,
+  ringed, tier, onChooseFile, onDropFile, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
 }) => {
   const download = onDownloadTemplate ?? (() => { void downloadTemplate(TEMPLATE_FILENAME); });
+  const [over, setOver] = useState(false);
+
+  const drop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setOver(false);
+    /* First file only; a type the picker would not have offered is ignored, not guessed at. */
+    const file = e.dataTransfer?.files?.[0];
+    if (file && acceptsDroppedFile(file.name)) onDropFile(file);
+  };
 
   return (
-    <>
-      <div role="radiogroup" aria-label="How to build your list">
-        {CAPTURE_OPTIONS.map((key) => (
-          <React.Fragment key={key}>
-            <SelectRow
-              radio
-              icon={ICONS[key]}
-              title={CAPTURE_CHOICES[key].title}
-              desc={CAPTURE_CHOICES[key].desc}
-              tags={CAPTURE_CHOICES[key].tags}
-              selected={selected === key}
-              onClick={() => onSelect(key)}
-            />
-
-            {selected === key && (
-              <div style={{ margin: "-3px 0 12px", padding: "0 2px" }}>
-                {key === "smart" && (
-                  <div
-                    onClick={onChooseFile}
-                    style={{
-                      border: `1.5px dashed ${sageText}`, background: onbOptionRest, borderRadius: 12,
-                      padding: "18px 16px", textAlign: "center", cursor: "pointer",
-                    }}
-                  >
-                    <div style={{ color: sageText, marginBottom: 7 }}>{UploadIcon}</div>
-                    <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#3a1c14", margin: 0 }}>
-                      Drop your file here, or <span style={{ color: sageText, fontWeight: 500 }}>choose a file</span>
-                    </p>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: onbMuted, marginTop: 7 }}>
-                      .csv · .xlsx · up to 5 MB
-                    </div>
-                  </div>
-                )}
-
-                {key === "template" && (
-                  <>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-                      {TEMPLATE_STEPS.map((step) => (
-                        <div key={step.num} style={{ flex: "1 1 150px", minWidth: 0 }}>
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", color: onbMuted }}>{step.num}</div>
-                          <strong style={{ display: "block", fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", marginTop: 2 }}>{step.title}</strong>
-                          <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 12, color: onbMuted, lineHeight: 1.45, marginTop: 2 }}>{step.body}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-                      <button
-                        type="button"
-                        onClick={download}
-                        style={{
-                          fontFamily: FONT_SANS, fontSize: 12.5, color: sageText, background: "none", cursor: "pointer",
-                          border: `1px solid ${sageText}`, borderRadius: 9, padding: "8px 14px",
-                        }}
-                      >
-                        Download the template
-                      </button>
-                      <button
-                        type="button"
-                        onClick={onUploadTemplate}
-                        style={{
-                          fontFamily: FONT_SANS, fontSize: 12.5, color: sageText, background: "none", cursor: "pointer",
-                          border: `1px solid ${onbOptionEdge}`, borderRadius: 9, padding: "8px 14px",
-                        }}
-                      >
-                        Upload my filled-in sheet
-                      </button>
-                    </div>
-                    {/* ⚠️ THE SENTENCE THAT MAKES THE TEMPLATE A REAL ALTERNATIVE. Without it a
-                        writer reads two upload paths and picks the cleverer-sounding one, spending
-                        a one-shot entitlement on a sheet they were willing to fill in by hand. */}
-                    <Aside tone="sage">{TEMPLATE_TASTER_NOTE}</Aside>
-                  </>
-                )}
-
-                {key === "byhand" && <Aside tone="muted">{HAND_NOTE}</Aside>}
-              </div>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div style={{ textAlign: "center", margin: "4px 0 2px" }}>
-        <button
-          type="button"
-          onClick={onNothingYet}
-          style={{
-            fontFamily: FONT_SANS, fontSize: 12, color: onbMuted, background: "none",
-            border: "none", borderBottom: `0.5px solid ${onbOptionEdge}`, cursor: "pointer", padding: 0,
-          }}
+    <StepColumn wide screen="fork">
+      <OpenTitle title={CAPTURE_HEADING} sub={CAPTURE_SUB} />
+      <div className="sf-tiles">
+        <Tile
+          option="smart" ringed={ringed === "smart"} icon={UploadIcon} fact={captureFact("smart", tier)}
+          extra={ringed === "smart" && (
+            <div
+              className={`sf-drop${over ? " is-over" : ""}`} data-sf="drop" role="button" tabIndex={0}
+              onClick={onChooseFile}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChooseFile(); } }}
+              onDragOver={(e) => { e.preventDefault(); if (!over) setOver(true); }}
+              onDragLeave={() => setOver(false)}
+              onDrop={drop}
+            >
+              <p className="sf-droplead">{CAPTURE_DROP_LEAD}<span className="sf-dropuline">{CAPTURE_DROP_LINK}</span></p>
+              <p className="sf-droptypes">{CAPTURE_DROP_TYPES}</p>
+            </div>
+          )}
         >
-          {CAPTURE_LATER}
-        </button>
+          <button type="button" className="sf-btn sf-btn--sm" data-act="smart" onClick={onChooseFile}>{CAPTURE_SMART_ACTION}</button>
+        </Tile>
+        <Tile option="template" ringed={ringed === "template"} icon={TemplateIcon} fact={captureFact("template", tier)}>
+          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="download" onClick={download}>{CAPTURE_TEMPLATE_DOWNLOAD}</button>
+          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="upload" onClick={onUploadTemplate}>{CAPTURE_TEMPLATE_UPLOAD}</button>
+        </Tile>
+        <Tile option="byhand" ringed={ringed === "byhand"} icon={HandIcon} fact={captureFact("byhand", tier)}>
+          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="byhand" onClick={onAddByHand}>{CAPTURE_HAND_ACTION}</button>
+        </Tile>
       </div>
 
-      <div style={{ textAlign: "center", fontSize: 11, color: "#a8968a", marginTop: 10, fontFamily: FONT_SANS }}>
+      <div className="sf-under-tiles">
+        <BackLink onClick={onBack} />
+        <button type="button" className="sf-link" data-act="later" onClick={onNothingYet}>{CAPTURE_LATER}</button>
+      </div>
+      <p className="sf-escape">
         {CAPTURE_ESCAPE_PREFIX}
-        <button
-          type="button"
-          onClick={onOpenImportDesk}
-          style={{ font: "inherit", color: "#9c8878", background: "none", border: "none", borderBottom: "0.5px solid #cdbdae", cursor: "pointer", padding: 0 }}
-        >
-          {CAPTURE_ESCAPE_LINK}
-        </button>
+        <button type="button" className="sf-link sf-link--in" data-act="desk" onClick={onOpenImportDesk}>{CAPTURE_ESCAPE_LINK}</button>
         {CAPTURE_ESCAPE_SUFFIX}
-      </div>
-    </>
+      </p>
+    </StepColumn>
   );
 };

@@ -24,6 +24,8 @@ import { Auth } from "../Auth";
 import { Onboarding, WelcomeStageScreen } from "../Onboarding";
 import { BranchA } from "./BranchA";
 import { BranchB } from "./BranchB";
+import { CaptureFork } from "./CaptureFork";
+import { ConfirmScreen } from "./ConfirmScreen";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
 
@@ -79,6 +81,21 @@ export const LabSetup: React.FC<{
 const LabWelcome: React.FC = () => {
   const [sel, setSel] = React.useState<"starting" | "early" | "deep" | "interest" | null>(null);
   return <WelcomeStageScreen selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
+};
+
+/** The confirm with a real picker behind "Change", wired the way BranchB wires it: choosing a
+ *  second file replaces the pending one and the name shown, and reads nothing. */
+const LabConfirm: React.FC<{ tier: "free" | "pro" }> = ({ tier }) => {
+  const [file, setFile] = React.useState<{ name: string; size: number }>({ name: "my agents FINAL v3.csv", size: 14_300 });
+  const input = React.useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <input ref={input} type="file" accept=".csv,.xlsx,.xls" style={{ display: "none" }} data-picker="smart"
+             onChange={(e) => { const f = e.target.files?.[0]; if (f) { labSpy("pickFile")(f); setFile({ name: f.name, size: f.size }); } e.target.value = ""; }} />
+      <ConfirmScreen fileName={file.name} fileSize={file.size} tier={tier}
+                     onChange={() => input.current?.click()} onBack={labSpy("back")} onRead={labSpy("runMapping")} />
+    </>
+  );
 };
 
 const Filler: React.FC<{ rows?: number }> = ({ rows = 3 }) => (
@@ -139,6 +156,22 @@ export const OnbLab: React.FC = () => {
       </LabSetup>
     );
   }
+
+  const tier = q.get("plan") === "pro" ? "pro" : "free";
+  if (s === "fork") {
+    const pick = q.get("pick");
+    return (
+      <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
+        <CaptureFork
+          ringed={pick === "template" ? "template" : pick === "byhand" ? "byhand" : "smart"} tier={tier}
+          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUploadTemplate={labSpy("templatePicker")}
+          onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
+          onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+        />
+      </LabSetup>
+    );
+  }
+  if (s === "confirm") return <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}><LabConfirm tier={tier} /></LabSetup>;
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";
