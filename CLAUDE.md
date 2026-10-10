@@ -72,6 +72,19 @@
 - **Locks:** `tests/e2e/shellV2.measure.ts` SH2 S1–S6, B1–B3, L1 at 1512 and 1280 (`sh2Lib.ts`; `SH2_MUTATE=<lock>` breaks one in the page; `SH2_CAPTURE=1` against a build of main writes `reports/shell-v2/baseline.json`). Unit: `shell/headerSheet.test.ts`. Older locks retired or re-pointed are listed in the report, §6.
 - **Open, for Nick:** Analytics; the 25px under `PageHeader`; Manuscripts' doors (`#fdfcfa` on a `#fbf9f5` band); the tab staying paper white once the sheet has scrolled away; the empty states' headers were not rendered (the harness account is populated).
 
+## Onboarding v5, part 2 — the import, from "Read my file" to the dashboard (10 Oct; ref = design-refs/onboarding/import-flow-v1.html + design-refs/onboarding-v5/*.png + design-refs/import-flow-v1/*.png; report reports/onb-v5-import/REPORT.md; branch `onb-v5-import` off `onb-v5-setup`, NOT merged)
+- **Every import screen renders inside part 1's `SetupFrame` sheet.** The rules are `.sf .im-*` in `onboarding/importFlow.css`. The two loaders keep their timings (`SCATTER_TIMINGS`, `IMPORTING_TIMINGS`, lock R1) and hide the frame's exit.
+- **The summary (`ImportOverview`) is two cards, each led by its number.** Its sums come from `lib/importSummary.ts` and are held by lock S1.
+- **The review (`SmartImportReview` + `reviewRows.tsx`) is one list card beside a guide card. Every question is answered in its own row; there is no guided walk and no dialog on entering a step.** A settled row's editor carries "Change this" for the three things only the walk could undo.
+- **The review restyles; it never re-derives.** `lib/smartImport.ts`, `lib/smartImportCommit.ts` and `lib/smartImportReviewModel.ts` decide. Lock V4 compares what the review hands the import with a capture of the old build (`tests/e2e/fixtures/onbV5Import/`).
+- **The importing loader opens the dashboard.** `HandoverScreen` and `lib/onboardingHandover.ts` are deleted; `onImportComplete` always goes to "dashboard". Behind the loader is `DashGhost`, the real `Dash58` in its `loading` state.
+- **⚠️ During the hand-off the frame grows by the app's beta strip's measured height** (`--sf-strip-h`), so the frame's shell and the app's shell share one position (lock H2).
+- **Rows that were not imported are one line at the top of the dashboard** (`ImportNoticeRow` in `Dash58.tsx`, words in `lib/importNotice.ts`). The notice is saved in `localStorage["sa.importSkipped.<uid>"]`. An open list adds its measured height to the dashboard, so the chart never shrinks (lock N3).
+- **⚠️ A row with no agent or agency name is set aside by the review before the commit, so it never reaches that line.**
+- **Leaving mid-review asks first** (`SkipSetupConfirm`, `useAskBeforeLeaving`); nothing from the file is saved until the import.
+- **The lab is `#/onb-lab?s=reading|overview|review|importing|flow`** (`OnbLabImport.tsx`). The five older dev routes are deleted.
+- **Locks:** `tests/e2e/onbV5Import.measure.ts` (OB2: R2–R4, S1–S2, V1–V6, H1–H2, N2–N3, T1; `OB2_MUTATE=<lock>` applies each named break), `importWords.test.tsx` (W1), `importLoaders.test.tsx` (R1), `importNotice.test.ts` (N1).
+
 ## Onboarding v5, part 1 — sign-up, sign-in and the set-up steps in the app's frame (10 Oct; ref = design-refs/onboarding/onboarding-journey-v5.html + design-refs/onboarding-v5/*.png; report reports/onb-v5-setup/REPORT.md; branch `onb-v5-setup` off `landing-colours-v2`, NOT merged)
 - **One frame before the app: `SetupFrame` (components/onboarding/), the ink shell in two forms.** `account` (Auth: brand row, two folder tabs and the exit in the bar; no sidebar) and `setup` (Onboarding: a sidebar holding the steps). It replaced `OnboardingHeader`, `OnboardingSpine` and the fixed overlay.
 - **⚠️ FROM 768px UP ITS GEOMETRY IS `inkShell.css`'s BY REUSE.** It renders the shell's own classes (`.ws-app` › `.ws-panel` › `.ws-pin` › `.ws-logo`; `.ws-main` › `.ws-pagebar` + `.ws-winwrap` › `.ws-window`) and mounts the real `FolderTab`. No shell file was edited. Below 768 the shell's desktop rules do not apply, so the phone's tab is dressed in `onboarding.css`.
@@ -1694,6 +1707,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Onboarding v5 part 2 (the import) is DONE on branch `onb-v5-import` (off `onb-v5-setup`), NOT merged to `main`.** Read `reports/onb-v5-import/REPORT.md`, §1 and §9 first.
+
 **Query Centre v136 is DONE on branch `qc-v136` (three commits, cut from `header-panel-v2`), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v136/REPORT.md`; §7 has two open rulings.
 
 **Header panel v2 is DONE on branch `header-panel-v2` (worktree `../ScriptAlly-hp2`, based on `v135-header-desk`), deployed to dev from the branch, NOT merged.** Read `reports/header-panel-v2/REPORT.md`: false premises first, then the "for Nick" list of drawings that need a dark-ground version.

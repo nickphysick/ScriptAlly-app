@@ -934,6 +934,7 @@ test.describe("OB2", () => {
           });
           const closed = await read();
           record(page, "N3", "closed", closed);
+          if (SHOTS) { mkdirSync(resolve(OUT, "shots"), { recursive: true }); await page.screenshot({ path: resolve(OUT, "shots", `dashboard-notice-${vp.width}x${vp.height}.png`) }); }
           expect(closed.plot, "the chart is drawn").toBeGreaterThan(0);
           expect(closed.sh, `the page does not scroll: ${closed.sh} against ${closed.ch}`).toBeLessThanOrEqual(closed.ch + 1);
           expect(closed.plot, "the chart is at or above its 120px floor").toBeGreaterThanOrEqual(120);
@@ -942,6 +943,7 @@ test.describe("OB2", () => {
           await page.waitForTimeout(200);
           const open = await read();
           record(page, "N3", "open", open);
+          if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `dashboard-notice-open-${vp.width}x${vp.height}.png`) });
           expect(open.plot, "opening the list does not shrink the chart").toBe(closed.plot);
         } finally { await clear(page, uid); }
       });
