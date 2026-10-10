@@ -151,6 +151,9 @@ export const BranchB: React.FC<BranchBProps> = ({
   const templateInputRef = useRef<HTMLInputElement>(null);
   /** Cells the template parser could not read. The review screen shows them; nothing is guessed. */
   const [templateFlags, setTemplateFlags] = useState<TemplateFlag[]>([]);
+  /** The file's row count, when it is known without reading the file again: the template parse
+   *  returns it; a Smart import does not (its sample is capped at eight rows). */
+  const [rowsRead, setRowsRead] = useState<number | null>(null);
 
   const shownError = error || fieldError;
 
@@ -191,6 +194,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     try {
       const parsed = await readTemplateFile(file);
       setTemplateFlags(parsed.flags);
+      setRowsRead(parsed.rowsRead);
       setValidated(validateSmartImport(parsed.result));
       setScreen("overview");
     } catch (e) {
@@ -200,7 +204,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   };
 
   const runMapping = async (file: File) => {
-    setRawSample([]); setExtractComplete(false); setValidated(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
     // Display-only: show the writer's actual raw cells the instant they upload, scattered, while the
     // real extraction runs. Never feeds runSmartImport; a parse failure just leaves the loader plain.
@@ -418,7 +422,8 @@ export const BranchB: React.FC<BranchBProps> = ({
       <ImportOverview
         result={validated.result}
         manuscriptTitle={fields.title}
-        userName={currentUser?.name}
+        fileName={fileName}
+        rowCount={rowsRead}
         onContinue={() => setScreen("review")}
       />
     );

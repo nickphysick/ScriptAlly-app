@@ -4,3 +4,7 @@ R4 mutated: 3 red, 0 green —     Error: expect(received).toBe(expected) // Obj
 R1 mutated (FLOOR_MS 1800):    × R1 — both loaders keep every timing > the reading loader's spine 4ms
 R1 mutated (FLOOR_MS 1800): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 R1 mutated (FLOOR_MS 1800):       Tests  1 failed | 6 passed (7)
+S1 mutated: 3 red, 6 green —     Error: with agents + with you + closed = queries
+S2 mutated: 6 red, 3 green —     Error: Duplicates is a step only when sets exist
+S3 mutated (dash restored): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+S3 mutated (dash restored):       Tests  5 failed | 11 passed (16)

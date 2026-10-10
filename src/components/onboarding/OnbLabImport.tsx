@@ -73,7 +73,7 @@ export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done,
 };
 
 export const LabOverview: React.FC<{ fx: string | null; title: string }> = ({ fx, title }) => (
-  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} onContinue={spy("continue")} />
+  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} onContinue={spy("continue")} />
 );
 
 export const LabReview: React.FC<{ fx: string | null }> = ({ fx }) => (

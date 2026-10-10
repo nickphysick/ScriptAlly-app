@@ -40,6 +40,27 @@ const MUTATIONS: Record<string, string> = {
 async function mutate(page: Page) {
   if (!MUTATE) return;
   if (MUTATIONS[MUTATE]) await page.addStyleTag({ content: MUTATIONS[MUTATE] });
+  if (MUTATE === "S1") {
+    /* Count offers in neither group: the offer leaves "with you" and joins nothing. */
+    await page.evaluate(() => {
+      const offer = document.querySelector('[data-im="card-queries"] [data-status="Offer"]');
+      if (!offer) return;
+      const court = offer.closest("[data-court]")!;
+      const n = court.querySelector('[data-im="court-n"]')!;
+      const k = Number(offer.querySelector('[data-im="status-n"]')!.textContent);
+      n.textContent = String(Number(n.textContent) - k);
+      offer.remove();
+    });
+  }
+  if (MUTATE === "S2") {
+    /* Render the stepper's first step always. */
+    await page.evaluate(() => {
+      const ol = document.querySelector('[data-im="steps"]');
+      if (!ol || ol.querySelector('[data-step="duplicates"]')) return;
+      const li = document.createElement("li"); li.className = "im-st"; li.setAttribute("data-step", "duplicates"); li.innerHTML = "<i>1</i>Duplicates";
+      ol.prepend(li);
+    });
+  }
   if (MUTATE === "R3") {
     /* Restore the old last line whenever the loader says it is ready. */
     await page.evaluate(() => {
@@ -177,6 +198,86 @@ test.describe("OB2", () => {
         expect(sage.population, "the sweep covered the loader").toBeGreaterThan(10);
         expect(sage.hits).toEqual([]);
       });
+
+      /* ── S1 · the summary's numbers sum ──────────────────────────────────────────────────── */
+      for (const fx of ["review", "dupes", "clear"]) {
+        test(`S1 summary sums (${fx})`, async ({ page }) => {
+          await lab(page, `s=overview&fx=${fx}`);
+          await page.waitForSelector('[data-im="summary"]');
+          const r = await page.evaluate(() => {
+            const num = (e: Element | null) => Number((e?.textContent ?? "").trim());
+            const card = (sel: string) => {
+              const c = document.querySelector(sel)!;
+              return {
+                total: num(c.querySelector('[data-im="total"]')),
+                tiers: [...c.querySelectorAll('[data-im="tier-n"]')].map(num),
+                key: [...c.querySelectorAll('[data-im="key-n"]')].map(num),
+                courts: [...c.querySelectorAll("[data-court]")].map((g) => ({
+                  key: g.getAttribute("data-court"), n: num(g.querySelector('[data-im="court-n"]')),
+                  statuses: [...g.querySelectorAll('[data-im="status-n"]')].map(num),
+                })),
+              };
+            };
+            return { agents: card('[data-im="card-agents"]'), queries: card('[data-im="card-queries"]') };
+          });
+          record(page, "S1", fx, r);
+          const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
+          /* populations first */
+          expect(r.agents.total, "there are agents").toBeGreaterThan(0);
+          expect(r.queries.total, "there are queries").toBeGreaterThan(0);
+          expect(r.agents.key.length, "the key line has clauses").toBeGreaterThanOrEqual(2);
+          expect(r.queries.courts.length, "the queries card has groups").toBeGreaterThan(0);
+          expect(sum(r.agents.key), "live + closed + not queried = agents").toBe(r.agents.total);
+          expect(sum(r.agents.tiers), "agent tiers = agents").toBe(r.agents.total);
+          expect(sum(r.queries.courts.map((c) => c.n)), "with agents + with you + closed = queries").toBe(r.queries.total);
+          expect(sum(r.queries.tiers), "query tiers = queries").toBe(r.queries.total);
+          for (const c of r.queries.courts) {
+            expect(c.statuses.length, `${c.key} names its statuses`).toBeGreaterThan(0);
+            expect(sum(c.statuses), `${c.key}: per-status counts = the group`).toBe(c.n);
+          }
+        });
+      }
+
+      /* ── S2 · the summary's shape ────────────────────────────────────────────────────────── */
+      for (const fx of ["review", "dupes", "clear"]) {
+        test(`S2 summary shape (${fx})`, async ({ page }) => {
+          await lab(page, `s=overview&fx=${fx}`);
+          await page.waitForSelector('[data-im="summary"]');
+          const r = await page.evaluate(() => {
+            const sheet = document.querySelector('[data-sf="scroll"]') as HTMLElement;
+            /* the first element in the sheet that draws text */
+            const walker = document.createTreeWalker(sheet, NodeFilter.SHOW_TEXT);
+            let first: HTMLElement | null = null;
+            while (walker.nextNode()) { const t = walker.currentNode; if ((t.textContent ?? "").trim()) { first = t.parentElement; break; } }
+            const num = (e: Element | null) => Number((e?.textContent ?? "").trim());
+            const tier = (card: string, t: string) => num(document.querySelector(`[data-im="card-${card}"] [data-tier="${t}"] [data-im="tier-n"]`)) || 0;
+            return {
+              cards: document.querySelectorAll('[data-im="summary"] .im-pop').length,
+              firstTag: first?.tagName, firstFont: first ? getComputedStyle(first).fontFamily : "", firstText: first?.textContent,
+              text: sheet.innerText,
+              controls: [...sheet.querySelectorAll("button, a")].map((b) => (b as HTMLElement).innerText.trim()),
+              primary: (document.querySelector('[data-im="primary"]') as HTMLElement).innerText.trim(),
+              open: tier("agents", "fix") + tier("agents", "sharp") + tier("queries", "sharp"),
+              fix: tier("agents", "fix"),
+              steps: [...document.querySelectorAll('[data-im="steps"] [data-step]')].map((e) => e.getAttribute("data-step")),
+              dots: [...document.querySelectorAll('[data-im="steps"] [data-step] i')].map((e) => e.textContent),
+            };
+          });
+          record(page, "S2", fx, { ...r, text: undefined });
+          expect(r.cards).toBe(2);
+          expect(r.firstTag).toBe("H1");
+          expect(r.firstFont).toContain("Special Elite");
+          expect(r.firstText).toBe("We've read your file.");
+          expect(r.text).not.toMatch(/top tip/i);
+          expect(r.text).not.toMatch(/why sharpen/i);
+          expect(r.controls.length, "the sheet has controls").toBeGreaterThan(0);
+          expect(r.controls.filter((c) => /skip/i.test(c)), "no control named Skip in the sheet").toEqual([]);
+          expect(r.primary).toBe(r.open === 0 ? "Bring it in" : "Let's work through it");
+          expect(r.steps.includes("duplicates"), "Duplicates is a step only when sets exist").toBe(r.fix > 0);
+          expect(r.dots).toEqual(r.steps.map((_, i) => String(i + 1)));
+          if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `overview-${fx}-${vp.width}.png`), fullPage: vp.width < 900 });
+        });
+      }
     });
   }
 });

@@ -43,7 +43,7 @@ describe("R1 — both loaders keep every timing", () => {
 describe("R3 — the reading loader ends on \"Ready\"", () => {
   it("the last status is exactly Ready", () => { expect(READY_TXT).toBe("Ready"); });
   it("no import screen's source says \"what we found\"", () => {
-    for (const f of ["ScatterSettleLoader.tsx", "ImportingLoader.tsx"]) {
+    for (const f of ["ScatterSettleLoader.tsx", "ImportingLoader.tsx", "ImportOverview.tsx", "BranchB.tsx"]) {
       expect(code(src(f)).toLowerCase(), f).not.toContain("what we found");
     }
   });
