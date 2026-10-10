@@ -1,0 +1,17 @@
+F1 ran=1 red=1 ::     Error: frame-setup @1440: sidebar width[0] 260 vs the app's 248
+F2 ran=1 red=1 ::     Error: frame-setup: no old artwork
+F3 ran=1 red=1 ::     Error: flow A
+F4 ran=1 red=1 ::     Error: frame-setup: the last control is inside the scroll height (2604 vs 844)
+A1 ran=1 red=1 ::     Error: the preview and the segmented control are gone
+A3 ran=1 red=1 ::     Error: au-password label is mono
+A4 ran=1 red=0 :: 
+S1 ran=1 red=1 ::     Error: welcome: no navy, white or bordered box round the title
+S2 ran=1 red=1 ::     Error: s=welcome: a radio group of 4
+S3 ran=1 red=1 ::     Error: s=book: options read
+S4 ran=1 red=1 ::     Error: absent on arrival
+K1 ran=1 red=1 ::     Error: @1440: [data-act="upload"] calls templatePicker and nothing else
+K2 ran=1 red=1 ::     Error: expect(received).toEqual(expected) // deep equality
+K3 ran=1 red=1 ::     Error: nothing is read on arrival
+E1 ran=1 red=1 ::     Error: no control named Upgrade
+T1 ran=1 red=1 ::     Error: signup: a primary is navy (or navy disabled), never empty
+A4 ran=1 red=1 ::     TimeoutError: locator.click: Timeout 15000ms exceeded.

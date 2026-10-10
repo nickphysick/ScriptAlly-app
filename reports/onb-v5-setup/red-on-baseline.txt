@@ -1,0 +1,19 @@
+  ✘   1 [measure] › tests/e2e/onbV5.measure.ts:167:3 › OB1 › F1 the frame is the ink shell, and its geometry is the app's (45.1s)
+  ✘   2 [measure] › tests/e2e/onbV5.measure.ts:220:3 › OB1 › F2 no old name anywhere in the journey (45.0s)
+  ✘   3 [measure] › tests/e2e/onbV5.measure.ts:237:3 › OB1 › F3 the sidebar lists the branch's steps, one is current, and the tab names it (45.0s)
+  ✘   4 [measure] › tests/e2e/onbV5.measure.ts:258:3 › OB1 › F4 on a phone the frame is a document: no sidebar, and the last control is reachable (45.0s
+  ✘   5 [measure] › tests/e2e/onbV5.measure.ts:294:3 › OB1 › A1 two tabs, one raised; the other switches mode and keeps the typed email (45.1s)
+  ✘   6 [measure] › tests/e2e/onbV5.measure.ts:324:3 › OB1 › A3 fields: typewriter on a dashed rule, mono labels, and a rust sentence for an error (45.1
+  ✘   7 [measure] › tests/e2e/onbV5.measure.ts:369:3 › OB1 › S1 every step opens on a typewriter title on the sheet, with no box round it and no picture
+  ✘   8 [measure] › tests/e2e/onbV5.measure.ts:404:3 › OB1 › S2 options are radios: one or none checked, a navy ring on the checked one, Continue waits 
+  ✘   9 [measure] › tests/e2e/onbV5.measure.ts:431:3 › OB1 › S3 the book's fields are the baseline's, and genre and age category are pick-lists (45.0s)
+  ✘  10 [measure] › tests/e2e/onbV5.measure.ts:460:3 › OB1 › S4 the still-writing note follows the choice, and is not on the details screen (45.1s)
+  ✘  11 [measure] › tests/e2e/onbV5.measure.ts:478:3 › OB1 › K1 three tiles, each button to its own handler, one ring, and a drop that works (45.1s)
+  ✘  12 [measure] › tests/e2e/onbV5.measure.ts:527:3 › OB1 › K2 the fact lines state cost from the tier, and nothing recommends (45.0s)
+  ✘  13 [measure] › tests/e2e/onbV5.measure.ts:539:3 › OB1 › K3 the confirm names the file twice, Change updates both, and nothing is read before the pr
+  ✘  14 [measure] › tests/e2e/onbV5.measure.ts:564:3 › OB1 › E1 the dead ends: chip, title and actions per state, each press to its own handler (45.0s)
+  ✘  15 [measure] › tests/e2e/onbV5.measure.ts:613:3 › OB1 › T1 every token the set-up sheet reads resolves here, and no primary is rust or burgundy (45
+  ✘  16 [measure] › tests/e2e/onbV5.measure.ts:640:3 › OB1 › A4 the harness: a cold sign-in reaches the app, and set-up opens in the frame and skips bac
+  16 failed
+  15     Error: page.waitForSelector: Test timeout of 45000ms exceeded.
+   1     TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.

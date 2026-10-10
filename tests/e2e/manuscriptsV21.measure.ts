@@ -69,7 +69,7 @@ async function signInAs(page: Page, email: string) {
   await page.locator("#au-email").fill(email);
   await page.locator("#au-pw").fill(readPw());
   await page.getByRole("button", { name: /^Sign in$/ }).last().click();
-  await expect(page.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
 }
 
 async function accountContext(browser: Browser, baseURL: string, email: string): Promise<{ ctx: BrowserContext; page: Page }> {
@@ -104,7 +104,7 @@ async function openAt(page: Page, route: string, vp: { width: number; height: nu
   }, msId);
   await page.goto(route);
   await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}${MUTATE}` });
-  await expect(page.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
   await page.waitForFunction(
     (sel) => [...document.querySelectorAll(sel)].some((e) => e.getBoundingClientRect().height > 0),
     route === "/agents" ? ".cl15-hd" : '[data-ms21="header"]', { timeout: 30_000 },

@@ -38,10 +38,6 @@ import {
   onbPrimaryDisabledBg,
   onbPrimaryDisabledInk,
   onbPlate,
-  onbOptionSelectedFill,
-  onbOptionRest,
-  onbOptionEdge,
-  onbFaint,
   onbMuted,
   onbHeadingInk,
 } from "../../lib/designTokens";
@@ -61,12 +57,6 @@ const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
  * inventing illustrations is not a build task — so the existing monoline glyphs carry the plate
  * until the real marks arrive. The run report names the two that are missing.
  */
-export const BookMotif: React.FC = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={sageText} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 6c-1.6-1-4.2-1.6-6.3-1.6-.9 0-1.7.1-1.7.1v13s.8-.1 1.7-.1c2.1 0 4.7.6 6.3 1.6 1.6-1 4.2-1.6 6.3-1.6.9 0 1.7.1 1.7.1v-13s-.8-.1-1.7-.1c-2.1 0-4.7.6-6.3 1.6z" />
-    <path d="M12 6v13" />
-  </svg>
-);
 
 export const InboxMotif: React.FC = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={sageText} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -212,89 +202,9 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
   );
 };
 
-export interface SelectRowProps {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-  selected: boolean;
-  onClick: () => void;
-  /**
-   * Small facts beneath the description — what the choice costs, and what kind of input it suits.
-   * ⚠️ A TAG STATES A FACT, NEVER A RECOMMENDATION: "Best for a messy list" describes the sheet,
-   * not the writer holding it.
-   */
-  tags?: { label: string; kind: "cost" | "fit" }[];
-  /**
-   * ⚠️ RADIOGROUP SEMANTICS ARE OPT-IN, because the two shapes are genuinely different. A lone row
-   * is a toggle and `aria-pressed` is right for it; a row inside a set of mutually exclusive
-   * choices is a radio, and a screen reader given `aria-pressed` there is told three independent
-   * switches happen to be on and off rather than one choice out of three.
-   */
-  radio?: boolean;
-}
-
-/**
- * A selectable option row.
- *
- * ⚠️ SELECTION IS SAGE, AND THE RING IS THE MARKER. The old row filled soft pink with a burgundy
- * border — the treatment the app reserves for a surface asking something of you, which is the
- * opposite of what a chosen option means.
- */
-export const SelectRow: React.FC<SelectRowProps> = ({ icon, title, desc, selected, onClick, tags, radio }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    role={radio ? "radio" : undefined}
-    aria-checked={radio ? selected : undefined}
-    aria-pressed={radio ? undefined : selected}
-    style={{
-      display: "flex", gap: 13, alignItems: "flex-start", width: "100%", textAlign: "left",
-      background: selected ? onbOptionSelectedFill : onbOptionRest,
-      border: `1px solid ${selected ? sageText : onbOptionEdge}`,
-      borderRadius: 12, padding: "14px 15px", cursor: "pointer", marginBottom: 9,
-      transition: "border-color .16s, background .16s", fontFamily: FONT_SANS,
-    }}
-    onMouseEnter={(e) => { if (!selected) e.currentTarget.style.borderColor = "#d8cbbc"; }}
-    onMouseLeave={(e) => { if (!selected) e.currentTarget.style.borderColor = onbOptionEdge; }}
-  >
-    <span
-      style={{
-        width: 17, height: 17, borderRadius: "50%", flex: "0 0 auto", marginTop: 3,
-        border: `1.5px solid ${selected ? sageText : "#cabcae"}`,
-        background: selected ? sageText : "transparent",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}
-    >
-      {selected && (
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
-      )}
-    </span>
-    <span style={{ minWidth: 0 }}>
-      <span style={{ fontWeight: 600, display: "block", lineHeight: 1.3, fontSize: 14.5, color: onbHeadingInk }}>{title}</span>
-      <span style={{ color: onbMuted, fontSize: 13.5, display: "block", marginTop: 1, lineHeight: 1.4 }}>{desc}</span>
-      {tags && tags.length > 0 && (
-        <span style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-          {tags.map((tag) => (
-            <span
-              key={tag.label}
-              style={{
-                fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase",
-                borderRadius: 999, padding: "4px 9px", border: `1px solid ${tag.kind === "cost" ? sageText : onbOptionEdge}`,
-                color: tag.kind === "cost" ? sageText : onbMuted,
-                background: tag.kind === "cost" ? onbOptionSelectedFill : "transparent",
-              }}
-            >
-              {tag.label}
-            </span>
-          ))}
-        </span>
-      )}
-    </span>
-    <span style={{ flex: 1 }} />
-    <span aria-hidden="true" style={{ flexShrink: 0, marginTop: 1, color: sageText, opacity: 0.85 }}>{icon}</span>
-  </button>
-);
+/* ⚠️ `SelectRow` AND `BookMotif` ARE DELETED (onboarding v5, part 1). Every option row in the
+   journey is `OptionRow` (setupParts.tsx) now, and no set-up step draws a motif. What is left in
+   this file — `OnboardingCard`, `InboxMotif` and the three faces — has exactly one reader, the
+   handover screen, which part 2 restyles; they go with it. */
 
 export { FONT_SERIF, FONT_SANS, FONT_MONO };

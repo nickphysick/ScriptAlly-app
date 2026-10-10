@@ -97,7 +97,10 @@ describe("⚠️ the exit routing — which branches see it at all", () => {
   it("the by-hand route does not render it", () => {
     expect(FORK).toContain("onUploadTemplate");
     expect(FORK).not.toContain("HandoverScreen");
-    expect(BRANCH_B).toMatch(/onAddByHand\(\)/);
+    /* RE-POINTED (onboarding v5): by-hand is a tile's own button now, handed the parent's handler
+       directly rather than called from a shared primary. Same law: it leaves through the agent
+       form and never reaches the handover. */
+    expect(BRANCH_B).toMatch(/onAddByHand=\{onAddByHand\}/);
   });
 
   /** "I've nothing to capture yet" is wired to the skip, which leaves for the dashboard. */

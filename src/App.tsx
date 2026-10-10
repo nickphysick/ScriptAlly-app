@@ -77,6 +77,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 // Dev review surface for the Contact list's three states — #/contact-lab, DEV only. The blank
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
+import { OnbLab } from "./components/onboarding/OnbLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { UndoBar } from "./components/queryActions/UndoBar";
@@ -486,6 +487,13 @@ function AppContent() {
    */
   if (hash === "#/contact-lab" && import.meta.env.MODE !== "production") {
     return <ContactListLab />;
+  }
+  /* #/onb-lab — the screens before the app (sign-up, sign-in, the set-up steps), each held in one
+     state over fixtures inside the real SetupFrame. Gated on MODE exactly as the contact lab is:
+     served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
+     matched by prefix. */
+  if (hash.startsWith("#/onb-lab") && import.meta.env.MODE !== "production") {
+    return <OnbLab />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {

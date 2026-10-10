@@ -79,7 +79,7 @@ export function confirmFileLead(fileName: string | null | undefined): {
   const name = (fileName || "").trim();
   if (!name) {
     return {
-      before: "We'll read your file and show you everything before anything is saved — you confirm what lands.",
+      before: "We'll read your file and show you everything before anything is saved. You confirm what lands.",
       name: null,
       after: "",
     };
@@ -87,6 +87,6 @@ export function confirmFileLead(fileName: string | null | undefined): {
   return {
     before: "We'll read ",
     name,
-    after: " and show you everything before anything is saved — you confirm what lands.",
+    after: " and show you everything before anything is saved. You confirm what lands.",
   };
 }

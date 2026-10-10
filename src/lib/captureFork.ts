@@ -18,98 +18,82 @@
 
 export type CaptureOption = "smart" | "template" | "byhand";
 
-/** The order the fork offers them. Smart Import first: it is the one that saves the most typing. */
+/** Fixed order: the three tiles are peers, not a default with two fallbacks. */
 export const CAPTURE_OPTIONS: CaptureOption[] = ["smart", "template", "byhand"];
 
-export interface CaptureTag {
-  label: string;
-  /** `cost` is the one that names what the choice spends; `fit` describes the input. */
-  kind: "cost" | "fit";
-}
-
+/**
+ * One tile (onboarding v5). ⚠️ THERE IS NO `primaryLabel`, NO `fit` TAG AND NO REVEAL ANY MORE. The
+ * fork was a radio group with one shared primary whose label changed with the choice; it is three
+ * tiles now, each with its own buttons, so there is nothing to choose before acting. The fact line
+ * states COST and nothing else — no "recommended", no "best for".
+ */
 export interface CaptureChoice {
   key: CaptureOption;
   title: string;
   desc: string;
-  tags: CaptureTag[];
-  /** The footer primary's label while this option is selected. */
-  primaryLabel: string;
 }
 
 export const CAPTURE_HEADING = "How shall we capture your existing agents & queries?";
-
 export const CAPTURE_SUB =
   "Whichever you pick, you can add, import and edit agents and queries at any time afterwards. " +
   "Nothing here is permanent.";
 
-/** The quiet exit — a text link, never a fourth card. See the docblock on `CAPTURE_LATER`. */
+/** The quiet exit for a writer with nothing to bring across. */
 export const CAPTURE_LATER = "I've nothing to capture yet";
 
-/** The line beneath the card, pointing at the Import desk's own column matching. */
-export const CAPTURE_ESCAPE_PREFIX = "Already keep a spreadsheet with unusual columns? You can ";
+/** The line under the tiles: a spreadsheet with unusual columns belongs on the Import page. */
+export const CAPTURE_ESCAPE_PREFIX = "Keep a spreadsheet with unusual columns? You can ";
 export const CAPTURE_ESCAPE_LINK = "match them up yourself";
-export const CAPTURE_ESCAPE_SUFFIX = " in the import desk once you're in.";
-
-/**
- * ⚠️ THE TASTER SENTENCE IS THE REASON THE TEMPLATE IS WORTH OFFERING AT ALL. Without it a writer
- * reads two upload paths and picks the clever-sounding one, spending a one-shot entitlement on a
- * sheet they were willing to fill in by hand.
- */
-export const TEMPLATE_TASTER_NOTE =
-  "The template doesn't use your Smart Import taster — keep that for a spreadsheet you'd rather " +
-  "not retype.";
-
-export const HAND_NOTE =
-  "This closes onboarding and opens the real Add agent form, so nothing you type here gets typed " +
-  "twice.";
-
-/** The template reveal's three beats. */
-export const TEMPLATE_STEPS: { num: string; title: string; body: string }[] = [
-  { num: "01", title: "Download", body: "A sheet with the columns already set up." },
-  { num: "02", title: "Fill it in", body: "One agent per row. Leave anything blank you don't know." },
-  { num: "03", title: "Upload", body: "We'll show you what we read before saving." },
-];
+export const CAPTURE_ESCAPE_SUFFIX = " on the Import page once you're in.";
 
 export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
   smart: {
     key: "smart",
-    title: "Smart Import",
+    title: "Smart import.",
     desc:
-      "Upload the spreadsheet you already keep — any layout, any wording. We read it and turn it " +
-      "into agents and queries.",
-    tags: [
-      { label: "Uses your free taster", kind: "cost" },
-      { label: "Best for a messy list", kind: "fit" },
-    ],
-    primaryLabel: "Continue to review",
+      "Upload the spreadsheet you already keep, in any layout and any wording. QueryHawk reads it " +
+      "and shows you everything before anything is saved.",
   },
   template: {
     key: "template",
-    title: "Use the QueryHawk template",
+    title: "Our template.",
     desc:
       "Download a ready-made sheet, fill in your agents, upload it back. Set columns mean we read " +
       "it exactly, every time.",
-    tags: [
-      { label: "Always free, no limit", kind: "cost" },
-      { label: "Best for starting clean", kind: "fit" },
-    ],
-    primaryLabel: "Continue",
   },
   byhand: {
     key: "byhand",
-    title: "Add them by hand",
+    title: "Add by hand.",
     desc:
       "Go straight to the agent form and type them in. Quickest route if you've only a handful to " +
       "record.",
-    tags: [
-      { label: "Always free", kind: "cost" },
-      { label: "Best for under ten", kind: "fit" },
-    ],
-    primaryLabel: "Take me to the agent form",
   },
 };
 
-/** What the footer primary reads while `option` is selected. */
-export function capturePrimaryLabel(option: CaptureOption): string {
-  return CAPTURE_CHOICES[option].primaryLabel;
+/** Each tile's buttons, in order. The first is the tile's main action. */
+export const CAPTURE_SMART_ACTION = "Import a spreadsheet";
+export const CAPTURE_TEMPLATE_DOWNLOAD = "Download the template";
+export const CAPTURE_TEMPLATE_UPLOAD = "Upload my sheet";
+export const CAPTURE_HAND_ACTION = "Add an agent";
+
+/** The drop zone's words, on the ringed Smart import tile. Dropping a file there works. */
+export const CAPTURE_DROP_LEAD = "Drop your file here, or ";
+export const CAPTURE_DROP_LINK = "choose a file";
+export const CAPTURE_DROP_TYPES = ".csv · .xlsx · up to 5 MB";
+
+/**
+ * The fact line under a tile: what it costs, and nothing else. Smart import's depends on the
+ * writer's tier, read from the entitlement — never a guess, and never hard-coded to free.
+ */
+export function captureFact(option: CaptureOption, tier: "free" | "pro"): string {
+  if (option === "smart") return tier === "pro" ? "Uses this month's Smart Import" : "Uses your one Smart Import";
+  if (option === "template") return "Always free";
+  return "Always free · Ends set-up";
+}
+
+/** The file types the picker accepts, and so the only ones a drop is taken for. */
+export const CAPTURE_ACCEPT = [".csv", ".xlsx", ".xls"] as const;
+export function acceptsDroppedFile(name: string): boolean {
+  const lower = name.toLowerCase();
+  return CAPTURE_ACCEPT.some((ext) => lower.endsWith(ext));
 }

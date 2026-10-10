@@ -7,16 +7,14 @@ import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus } from "../types";
-import { OnboardingCard, SelectRow, BookMotif, FONT_MONO } from "./onboarding/chrome";
-import { onbFaint, onbGround, onbMuted } from "../lib/designTokens";
+import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
-import { spineFor, spineIndex, stepOfLabel, SpineId } from "../lib/onboardingSpine";
-import { OnboardingHeader } from "./onboarding/OnboardingHeader";
-import { Check } from "lucide-react";
+import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
+import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 /* ⚠️ THE LOCAL PALETTE IS GONE. This file carried its own 19-hex token object — a parchment
@@ -65,11 +63,8 @@ const STAGE_TO_BRANCH: Record<QueryingStage, Branch> = {
 const FLOW_KEY: Record<Branch, number> = { A: 100, B: 200 };
 
 // Centres a screen in the full-height onboarding overlay.
-const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", minHeight: "100%", padding: "32px 16px", boxSizing: "border-box" }}>
-    {children}
-  </div>
-);
+/** A step sits at the sheet's top-left, under the tab — nothing is centred any more. */
+const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -80,8 +75,7 @@ const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 // (mode="wait"), stacks invisible exited screens over the live one (default mode), or fails to
 // swap the keyed child at all. A keyed plain div + CSS enter animation is fully robust.
 const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }> = ({ stepKey, children }) => (
-  <div key={stepKey} style={{ width: "100%", animation: "sa-screen-in 0.28s ease-out" }}>
-    <style>{`@keyframes sa-screen-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }`}</style>
+  <div key={stepKey} className="sf-enter" style={{ width: "100%" }}>
     {children}
   </div>
 );
@@ -95,44 +89,30 @@ const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }>
  * standing in for the wordmark. One card, one grammar: this screen is now `OnboardingCard` with a
  * book mark on the plate, like the manuscript screens it leads to.
  */
-const WelcomeStageScreen: React.FC<{
+export const WELCOME_TITLE = "Let's set things up around your journey.";
+export const WELCOME_SUB = "No wrong answer here. It just shapes what you see first.";
+export const WELCOME_LABEL = "Where are you in your querying journey?";
+
+export const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
-  stepLabel?: string;
-}> = ({ selected, onSelect, onContinue, stepLabel }) => (
-  <OnboardingCard
-    step={stepLabel}
-    pre="Getting set up"
-    name="Let's set things up around your journey"
-    sub="A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first."
-    motif={<BookMotif />}
-    primaryLabel="Continue"
-    primaryDisabled={!selected}
-    onPrimary={onContinue}
-  >
-    <span
-      style={{
-        fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
-        color: onbFaint, display: "block", marginBottom: 11,
-      }}
-    >
-      Where are you in your querying journey?
-    </span>
-    {STAGE_OPTIONS.map((opt) => (
-      <SelectRow
-        key={opt.id}
-        icon={null}
-        title={opt.title}
-        desc={opt.descriptor}
-        selected={selected === opt.id}
-        onClick={() => onSelect(opt.id)}
-      />
-    ))}
-  </OnboardingCard>
+}> = ({ selected, onSelect, onContinue }) => (
+  <StepColumn screen="welcome">
+    <OpenTitle title={WELCOME_TITLE} sub={WELCOME_SUB} />
+    <StepCard>
+      <QLabel id="sf-welcome-q">{WELCOME_LABEL}</QLabel>
+      <OptionGroup labelledBy="sf-welcome-q">
+        {STAGE_OPTIONS.map((opt) => (
+          <OptionRow key={opt.id} title={opt.title} desc={opt.descriptor} selected={selected === opt.id} onClick={() => onSelect(opt.id)} />
+        ))}
+      </OptionGroup>
+      <StepFoot>
+        <button type="button" className="sf-btn" disabled={!selected} onClick={onContinue}>Continue</button>
+      </StepFoot>
+    </StepCard>
+  </StepColumn>
 );
-
-// ─── Main Onboarding component ────────────────────────────────────────────────
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
@@ -231,7 +211,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
   /* The card band states the same position in words, in its existing right-hand meta slot — one
      source, two renderings, so the dots and the sentence cannot disagree. */
-  const stepLabel = stepOfLabel(spineAt, spineSteps.length);
 
   // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
@@ -350,38 +329,25 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // Overlay wrapper
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      background: onbGround,
-      zIndex: 9999,
-      display: "flex",
-      flexDirection: "column",
-      overflowY: "auto",
-    }}>
-      {/* ⚠️ THE HEADER IS A SIBLING OF THE FLOW, NOT A CHILD OF ANY SCREEN. Rendered inside
-          `ScreenTransition` it would animate in and out on every step change, so the one element
-          whose job is to say "you are still in the same place" would be the one thing that kept
-          moving. */}
-      <OnboardingHeader
-        steps={spineSteps}
-        activeIndex={spineAt}
-        onExit={handleStageSkip}
-      />
-
-      <div style={{
-        flex: 1,
-        minHeight: 0,
-        display: "flex",
-        alignItems: step === 1 ? "stretch" : "center",
-        justifyContent: "center",
-      }}>
+    <SetupFrame
+      form="setup"
+      group={SETUP_GROUP}
+      name={spineSteps[spineAt]?.label ?? ""}
+      steps={spineSteps}
+      activeIndex={spineAt}
+      /* The app's manuscript card, once a title is held: from the "Your list" step on, in the
+         already-querying branch. */
+      manuscriptTitle={flow === "B" && spineStep === "list" ? manuscriptTitle : null}
+      user={currentUser ? { name: currentUser.name, plan: currentUser.plan } : null}
+      exitLabel="Skip for now"
+      onExit={() => { void handleStageSkip(); }}
+    >
+      <div className="sf-stage" style={{ position: "relative" }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
         {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
         {flow === "A" && (
           <CenterWrap>
             <BranchA
-              stepLabel={stepLabel}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveReady={(r) => void handleBranchASaveReady(r)}
               onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
@@ -394,8 +360,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "B" && (
           <CenterWrap>
             <BranchB
-              stepLabel={stepLabel}
-              stepIndex={spineAt}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
@@ -427,55 +391,28 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 if (destination === "queries") sessionStorage.setItem("scriptally_post_onboarding_tab", "queries");
                 void finishOnboarding();
               }}
-              onUpgrade={() => {
-                // Free import spent → leave onboarding into the Plans page via the existing
-                // post-onboarding-tab hatch (App reads + clears it on completion).
-                sessionStorage.setItem("scriptally_post_onboarding_tab", "plans");
-                void finishOnboarding();
-              }}
               error={branchError}
             />
           </CenterWrap>
         )}
 
         {!flow && step === 0 && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            minHeight: "100%",
-            padding: "32px 16px",
-            boxSizing: "border-box",
-          }}>
-            <WelcomeStageScreen
-              stepLabel={stepLabel}
-              selected={queryingStage}
-              onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
-              onContinue={handleStageContinue}
-            />
-          </div>
+          <WelcomeStageScreen
+            selected={queryingStage}
+            onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
+            onContinue={handleStageContinue}
+          />
         )}
 
       </ScreenTransition>
-      </div>
 
-      {/* Submitting overlay */}
+      {/* Saving: an oat wash over the sheet only — the frame and the steps stay readable. */}
       {isSubmitting && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(247,244,238,0.72)",
-          zIndex: 10000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: onbMuted, letterSpacing: "0.08em" }}>
-            Saving…
-          </span>
+        <div className="sf-saving" role="status">
+          <span>Saving…</span>
         </div>
       )}
-    </div>
+      </div>
+    </SetupFrame>
   );
 };

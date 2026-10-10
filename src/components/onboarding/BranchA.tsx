@@ -11,7 +11,7 @@
  */
 import React, { useState } from "react";
 import { ManuscriptStatus } from "../../types";
-import { OnboardingCard, SelectRow, BookMotif, FONT_SANS } from "./chrome";
+import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, BackLink, StepFoot, FieldError } from "./setupParts";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
 export interface BranchAResult {
@@ -22,8 +22,6 @@ export interface BranchAResult {
 export interface BranchAProps {
   /** Back from A2 — returns to the welcome step. */
   onExit: () => void;
-  /** The band's right-hand meta — `Step 2 of 2` on this branch. */
-  stepLabel?: string;
   /** A3a Continue (Ready to Query / Revising) — save, then on to the agents step. */
   onSaveReady: (r: BranchAResult) => void;
   /** A3b "Save & explore agents →" (Still writing) — save as Drafting, route to the agent database. */
@@ -32,131 +30,98 @@ export interface BranchAProps {
   error?: string | null;
 }
 
-const READINESS: { status: ManuscriptStatus; title: string; desc: string; icon: React.ReactNode }[] = [
-  {
-    status: ManuscriptStatus.DRAFTING,
-    title: "Still writing it",
-    desc: "I'm partway through the draft.",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-      </svg>
-    ),
-  },
-  {
-    status: ManuscriptStatus.REVISING,
-    title: "Revising — nearly there",
-    desc: "Drafted, working through edits.",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M11 4H4v16h16v-7" /><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z" />
-      </svg>
-    ),
-  },
-  {
-    status: ManuscriptStatus.READY_TO_QUERY,
-    title: "Ready to query",
-    desc: "Polished and ready to send to agents.",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" />
-      </svg>
-    ),
-  },
+/** The three answers. The descriptions are as built; the titles are onboarding v5's. */
+export const READINESS: { status: ManuscriptStatus; title: string; desc: string }[] = [
+  { status: ManuscriptStatus.DRAFTING, title: "Still being written", desc: "I'm partway through the draft." },
+  { status: ManuscriptStatus.REVISING, title: "In revision, nearly there", desc: "Drafted, working through edits." },
+  { status: ManuscriptStatus.READY_TO_QUERY, title: "Ready to query", desc: "Polished and ready to send to agents." },
 ];
 
-export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveStillWriting, error, stepLabel }) => {
-  const [screen, setScreen] = useState<"readiness" | "details">("readiness");
-  const [status, setStatus] = useState<ManuscriptStatus | null>(null);
+export const READINESS_TITLE = "Where are you with it?";
+export const READINESS_SUB = "No wrong answer. It points us the right way.";
+export const READINESS_LABEL = "Your manuscript is…";
+/** ⚠️ READ BEFORE CHOOSING, NOT AFTER. This note used to appear on the details screen, once
+ *  "still writing" had already been committed to. It sits under the options now, while that
+ *  option is the one selected, so it informs the choice it is about. */
+export const STILL_WRITING_LEAD = "Still writing?";
+export const STILL_WRITING_NOTE =
+  "QueryHawk comes into its own once you're ready to query. While you finish the book, you can " +
+  "get a head start researching agents who'd suit it.";
+
+export const BranchA: React.FC<BranchAProps & { initialScreen?: "readiness" | "details"; initialStatus?: ManuscriptStatus | null }> = ({
+  onExit, onSaveReady, onSaveStillWriting, error, initialScreen, initialStatus,
+}) => {
+  const [screen, setScreen] = useState<"readiness" | "details">(initialScreen ?? "readiness");
+  const [status, setStatus] = useState<ManuscriptStatus | null>(initialStatus ?? null);
   const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   const go = (s: "readiness" | "details") => setScreen(s);
-
   const stillWriting = status === ManuscriptStatus.DRAFTING;
   const shownError = error || fieldError;
 
   if (screen === "readiness") {
     return (
-      <OnboardingCard
-        step={stepLabel}
-        pre="Your manuscript"
-        name="Where are you with it?"
-        sub="No wrong answer — it points us the right way"
-        motif={<BookMotif />}
-        onBack={onExit}
-        primaryLabel="Continue →"
-        primaryDisabled={!status}
-        onPrimary={() => status && go("details")}
-      >
-        {READINESS.map((r) => (
-          <SelectRow
-            key={r.status}
-            icon={r.icon}
-            title={r.title}
-            desc={r.desc}
-            selected={status === r.status}
-            onClick={() => setStatus(r.status)}
-          />
-        ))}
-      </OnboardingCard>
+      <StepColumn screen="ready">
+        <OpenTitle title={READINESS_TITLE} sub={READINESS_SUB} />
+        <StepCard>
+          <QLabel id="sf-ready-q">{READINESS_LABEL}</QLabel>
+          <OptionGroup labelledBy="sf-ready-q">
+            {READINESS.map((r) => (
+              <OptionRow key={r.status} title={r.title} desc={r.desc} selected={status === r.status} onClick={() => setStatus(r.status)} />
+            ))}
+          </OptionGroup>
+          {stillWriting && (
+            <p className="sf-note" data-sf="still-writing"><strong>{STILL_WRITING_LEAD}</strong> {STILL_WRITING_NOTE}</p>
+          )}
+          <StepFoot left={<BackLink onClick={onExit} />}>
+            <button type="button" className="sf-btn" disabled={!status} onClick={() => status && go("details")}>Continue</button>
+          </StepFoot>
+        </StepCard>
+      </StepColumn>
     );
   }
 
-  // A3 — details, in the variant the readiness answer picked.
   return (
-    <OnboardingCard
-        step={stepLabel}
-      pre="Your manuscript"
-      name={stillWriting ? "No rush at all" : "A little about it"}
-      sub={stillWriting ? "We'll keep it safe for when you're ready" : "Just the essentials — flesh it out anytime"}
-      motif={<BookMotif />}
-      onBack={() => go("readiness")}
-      primaryLabel={stillWriting ? "Save & explore agents →" : "Continue →"}
-      onPrimary={() => {
-        if (!stillWriting && !fields.title.trim()) {
-          setFieldError("Give it a title — even a working one.");
-          return;
-        }
-        if (!stillWriting && !fields.genre) {
-          setFieldError("Pick the primary genre — agents search by it.");
-          return;
-        }
-        setFieldError(null);
-        const result = { status: status!, fields };
-        if (stillWriting) onSaveStillWriting(result);
-        else onSaveReady(result);
-      }}
-    >
-      <ManuscriptFields
-        value={fields}
-        onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }}
-        titleLabel={stillWriting ? "Working title" : "Manuscript title"}
-        titleOptional={stillWriting}
-        showStrapline={!stillWriting}
-        showWordCount={!stillWriting}
+    <StepColumn screen="details">
+      <OpenTitle
+        title={stillWriting ? "No rush at all." : "A little about it."}
+        sub={stillWriting ? "We'll keep it safe for when you're ready" : "Just the essentials. You can flesh it out any time."}
       />
-
-      {stillWriting && (
-        <div
-          style={{
-            display: "flex", gap: 10, background: "#e7ece1", border: "0.5px solid #c4d0bc",
-            borderRadius: 9, padding: "12px 13px", marginTop: 2,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-            <circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" />
-          </svg>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 12, lineHeight: 1.55, color: "#44563a", margin: 0 }}>
-            QueryHawk comes into its own once you're ready to query. While you finish the book, get a
-            head start by researching agents who'd suit it — your manuscript stays right here.
-          </p>
-        </div>
-      )}
-
-      {shownError && (
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#a0392a", margin: "10px 2px 0" }}>{shownError}</p>
-      )}
-    </OnboardingCard>
+      <StepCard>
+        <ManuscriptFields
+          value={fields}
+          onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }}
+          titleLabel={stillWriting ? "Working title" : "Manuscript title"}
+          titleOptional={stillWriting}
+          showStrapline={!stillWriting}
+          showWordCount={!stillWriting}
+        />
+        {shownError && <FieldError>{shownError}</FieldError>}
+        <StepFoot left={<BackLink onClick={() => go("readiness")} />}>
+          <button
+            type="button" className="sf-btn"
+            onClick={() => {
+              if (!stillWriting && !fields.title.trim()) {
+                setFieldError("Give it a title — even a working one.");
+                return;
+              }
+              /* Genre is REQUIRED on the querying-bound path: Discover and the Comp Scout both match
+                 on it. A still-writing book is exempt — the flow promises "no rush". */
+              if (!stillWriting && !fields.genre) {
+                setFieldError("Pick the primary genre — agents search by it.");
+                return;
+              }
+              setFieldError(null);
+              const result = { status: status!, fields };
+              if (stillWriting) onSaveStillWriting(result);
+              else onSaveReady(result);
+            }}
+          >
+            {stillWriting ? "Save & explore agents" : "Continue"}
+          </button>
+        </StepFoot>
+      </StepCard>
+    </StepColumn>
   );
 };

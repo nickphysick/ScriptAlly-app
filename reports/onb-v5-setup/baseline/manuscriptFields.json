@@ -1,0 +1,125 @@
+{
+ "full": {
+  "labels": [
+   "Manuscript title",
+   "Strapline (optional)",
+   "Age category",
+   "Genre (primary)",
+   "Word count"
+  ],
+  "placeholders": [
+   "e.g. The Salt Path Home",
+   "One line that sells the story…",
+   "e.g. 85,000"
+  ],
+  "options": [
+   "Picture Book",
+   "Early Reader",
+   "Middle Grade",
+   "Young Adult",
+   "Adult",
+   "Literary Fiction",
+   "Commercial Fiction",
+   "Historical Fiction",
+   "Fantasy",
+   "Science Fiction",
+   "Horror",
+   "Romance",
+   "Thriller",
+   "Mystery",
+   "Crime",
+   "Young Adult",
+   "Middle Grade",
+   "Memoir",
+   "Non-fiction",
+   "Narrative Non-fiction",
+   "Children&#x27;s"
+  ],
+  "selectPlaceholders": [
+   "Select…"
+  ],
+  "links": [
+   "add additional sub-genre"
+  ]
+ },
+ "filled": {
+  "labels": [
+   "Manuscript title",
+   "Strapline (optional)",
+   "Age category",
+   "Genre (primary)",
+   "Word count"
+  ],
+  "placeholders": [
+   "e.g. The Salt Path Home",
+   "One line that sells the story…",
+   "90,000 – 120,000"
+  ],
+  "options": [
+   "Picture Book",
+   "Early Reader",
+   "Middle Grade",
+   "Young Adult",
+   "Adult",
+   "Literary Fiction",
+   "Commercial Fiction",
+   "Historical Fiction",
+   "Fantasy",
+   "Science Fiction",
+   "Horror",
+   "Romance",
+   "Thriller",
+   "Mystery",
+   "Crime",
+   "Young Adult",
+   "Middle Grade",
+   "Memoir",
+   "Non-fiction",
+   "Narrative Non-fiction",
+   "Children&#x27;s"
+  ],
+  "selectPlaceholders": [],
+  "links": [
+   "add additional sub-genre"
+  ]
+ },
+ "stillWriting": {
+  "labels": [
+   "Working title (optional)",
+   "Age category",
+   "Genre (primary)"
+  ],
+  "placeholders": [
+   "e.g. The Salt Path Home"
+  ],
+  "options": [
+   "Picture Book",
+   "Early Reader",
+   "Middle Grade",
+   "Young Adult",
+   "Adult",
+   "Literary Fiction",
+   "Commercial Fiction",
+   "Historical Fiction",
+   "Fantasy",
+   "Science Fiction",
+   "Horror",
+   "Romance",
+   "Thriller",
+   "Mystery",
+   "Crime",
+   "Young Adult",
+   "Middle Grade",
+   "Memoir",
+   "Non-fiction",
+   "Narrative Non-fiction",
+   "Children&#x27;s"
+  ],
+  "selectPlaceholders": [
+   "Select…"
+  ],
+  "links": [
+   "add additional sub-genre"
+  ]
+ }
+}
