@@ -105,7 +105,7 @@ export function deskSections(rows: readonly QcRow[], nowMs: number): DeskSection
       { n: owed.length, text: owedWords(owed), hot: false },
     ]),
     card("agent", agent.length, [
-      { n: overdue, text: plural(overdue, "response overdue", "responses overdue"), hot: overdue > 0 },
+      { n: overdue, text: "overdue", hot: overdue > 0 },
       { n: dueWeek, text: "due this week", hot: false },
     ]),
     card("closed", closed.length, [

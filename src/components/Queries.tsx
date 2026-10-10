@@ -97,7 +97,7 @@ import { useQcListKeys } from "./queries/centre/useQcListKeys";
 import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
-import { QcDesk } from "./queries/centre/QcDesk";
+import { QcGlance } from "./queries/centre/QcGlance";
 import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
@@ -6680,8 +6680,10 @@ export const Queries: React.FC<{
             )}
             courts={qcDesk ? (
               /* v131 §2 (desktop) — the headerless desk; the skeleton is the same component over no rows */
-              <QcDesk
+              <QcGlance
                 sections={deskSections(showGridSkeleton ? [] : qcScoped, Date.now())}
+                /* v136 — the faces are the header's, moved into the cards: the desk's own rows, each court's in qcFaces's order */
+                faces={showGridSkeleton ? [] : facesFor(qcScoped, Date.now(), { you: 16, agent: 16, closed: 16 }).faces}
                 active={qcCzCourt}
                 onCourt={pickCourt}
                 loading={showGridSkeleton}

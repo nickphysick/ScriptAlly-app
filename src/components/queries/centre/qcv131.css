@@ -20,18 +20,12 @@
 
   /* ── §1 · the page order: hero, desk 22 below, Recently updated 44 below (qcvRecent.css); since v132
      "Your queries" is the workspace panel 96 below that (qcvWorkspace.css overrides the 44 here) ── */
-  /* 72 (60 below 1440) under the open header's hairline, as the Contact list v15.1's desk is (QC133 H3) */
-  .qc13 .qc131-desk { margin-top: 72px; }
-  @media (max-width: 1439.5px) { .qc13 .qc131-desk { margin-top: 60px; } }
+  /* the bands' 40 under the header's rule is `.qcg`'s own margin (qcvGlance136.css, v136) */
   .qc13 .qcv-page { padding-top: 0; margin-top: 44px; }
   .qc13 .qc13-work { margin: 0; padding: 0; background: transparent; border-radius: 0; }
 
-  /* ── §2 · the desk's cards are v135's badge cards and live in qcvDesk135.css. v134's icon-card rules (the disc,
-     the line of words, the foot, the underline on the selected card) are retired from here. What stays is the
-     page order above and the loading paint below, which every desk since v131 has shared. ── */
+  /* ── §2 · the desk is v136's bands (QcGlance, qcvGlance136.css). v135's badge cards and every earlier desk's
+     rules are retired. ── */
 
-  .qc131-desk .qc13-sk, .qc131-desk .qc13-sk b { color: transparent; }
-  .qc131-desk .qc13-sk { background: #efe9e0; border-radius: 5px; animation: qcv-pulse 1.4s ease-in-out infinite; }
-  @media (prefers-reduced-motion: reduce) { .qc131-desk .qc13-sk { animation: none; } }
 
 }

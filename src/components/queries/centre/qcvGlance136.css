@@ -1,0 +1,86 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v136 — the active and inactive bands (ref design-refs/query-centre/query-centre-v136.html
+ * `.ag-groups`). One authoritative block.
+ *
+ * ⚠️ "COMPACT" IS THE PAGE SHEET'S WIDTH, NOT THE VIEWPORT'S (the v135 desk's own switch): the base rules are the
+ *    compact values and `.ws-app.sheet-wide` restates the full-size ones.
+ * ⚠️ TWO CLASSES ON EVERY FACE: the page's 0-1-0 font reset (`.qcv-own :where(span, p, div, label)`) lands later
+ *    in the bundle.
+ * ⚠️ THE BANDS ARE 40 UNDER THE HEADER'S RULE (QC136 A5). The margin is here; the header states none.
+ */
+@import "./qcvPage.css";
+
+.qcv-group > .qcg { grid-column: 1 / -1; min-width: 0; }
+.qcg { --qcg-disc: 30px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: stretch; margin-top: 40px; }
+.qcg .qcg-group { box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; border-radius: 16px; padding: 16px 8px 8px; }
+.qcg .qcg-group--active { background: #f3ddd2; }
+.qcg .qcg-group--inactive { background: #e4ded6; }
+/* the band's label: typewriter, lowercase, upright */
+.qcg .qcg-group .qcg-gl { margin: 0; padding: 2px 18px 14px; font-family: var(--sp-type); font-weight: 400; font-style: normal; font-size: 25px; line-height: 1; text-transform: none; white-space: nowrap; }
+.qcg .qcg-group .qcg-gl b { font-family: inherit; font-weight: 400; }
+.qcg .qcg-group--active .qcg-gl { color: #5b2a1f; }
+.qcg .qcg-group--inactive .qcg-gl { color: #4a423c; }
+.qcg .qcg-cards { flex: 1 1 auto; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; align-items: stretch; }
+
+/* the card: white, a hairline ring and a short warm drop */
+.qcg .qcg-card {
+  position: relative; box-sizing: border-box; min-width: 0;
+  display: grid; grid-template-areas: "top top" "num list" "foot foot"; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr auto;
+  column-gap: 16px; align-items: center;
+  padding: 16px 18px 14px; border-radius: 11px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 6px 14px -10px rgba(91, 42, 31, 0.35);
+}
+.qcg .qcg-card.is-on { box-shadow: 0 0 0 2px #2d3a50; }
+/* the whole card is the button; its contents sit above it and let presses through (the faces take the pointer for their popup) */
+.qcg .qcg-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+.qcg .qcg-card:has(.qcg-hit:focus-visible) { outline: 2px solid #e0a188; outline-offset: 2px; }
+.qcg .qcg-hit:focus-visible { outline: none; }
+.qcg .qcg-card > *:not(.qcg-hit) { position: relative; z-index: 1; pointer-events: none; }
+
+.qcg .qcg-card .qcg-top { grid-area: top; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; min-width: 0; }
+.qcg .qcg-card .qcg-lb { font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 11px; line-height: 1.2; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); white-space: nowrap; }
+.qcg .qcg-card .qcg-pill { flex: none; padding: 4px 8px; border-radius: 10px; background: #f4efe9; font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 10.5px; line-height: 1.2; letter-spacing: 0.08em; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+
+/* the number, with a divider on its right running the headlines' height */
+.qcg .qcg-card .qcg-num { grid-area: num; align-self: stretch; display: flex; align-items: center; box-sizing: content-box; min-width: 44px; padding-right: 16px; border-right: 1px solid rgba(28, 19, 15, 0.1); font-family: var(--sp-type); font-weight: 400; font-size: 52px; line-height: 0.85; color: #1c130f; }
+.qcg .qcg-card .qcg-lines { grid-area: list; list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; min-width: 0; }
+.qcg .qcg-card .qcg-line { display: grid; grid-template-columns: 26px minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
+.qcg .qcg-card .qcg-line b { text-align: right; font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.1; color: #1c130f; }
+.qcg .qcg-card .qcg-line span { font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 1.25; color: rgba(28, 19, 15, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a hot line: the figure in rust, the label in full ink */
+.qcg .qcg-card .qcg-line.is-hot b { color: #a2452a; }
+.qcg .qcg-card .qcg-line.is-hot span { color: #1c130f; }
+
+/* the faces: one row, never two. The row's height is the disc's. */
+.qcg .qcg-card .qcg-faces { grid-area: foot; display: flex; flex-wrap: nowrap; align-items: center; box-sizing: content-box; height: var(--qcg-disc); min-width: 0; overflow: hidden; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(28, 19, 15, 0.09); }
+.qcg .qcg-card .qcg-fc {
+  box-sizing: border-box; flex: none; position: relative; width: var(--qcg-disc); height: var(--qcg-disc); border-radius: 50%;
+  display: grid; place-items: center; pointer-events: auto; cursor: pointer;
+  font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 600; font-size: 8.5px; line-height: 1; letter-spacing: 0.02em;
+  box-shadow: 0 0 0 2.5px #fff;
+}
+.qcg .qcg-card .qcg-fc + .qcg-fc { margin-left: -4px; }
+.qcg .qcg-card .qcg-fc--you { background: #b0603e; color: #f4eee5; }
+.qcg .qcg-card .qcg-fc--agent { background: #3d5070; color: #f4eee5; }
+.qcg .qcg-card .qcg-fc--closed { background: #d9d3cc; color: #2b2622; }
+.qcg .qcg-card .qcg-more { flex: none; margin-left: 10px; font-family: var(--sp-serif); font-weight: 400; font-size: 14px; line-height: 1; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+
+/* loading: the same boxes, nothing stated */
+.qcg .qcg-blank { visibility: hidden; }
+
+/* full size: the page sheet is 1440 or wider */
+.ws-app.sheet-wide .qcg { --qcg-disc: 34px; }
+.ws-app.sheet-wide .qcg .qcg-card { padding: 20px 24px 18px; column-gap: 22px; }
+.ws-app.sheet-wide .qcg .qcg-card .qcg-num { font-size: 64px; min-width: 56px; padding-right: 22px; }
+.ws-app.sheet-wide .qcg .qcg-card .qcg-line b { font-size: 21px; }
+.ws-app.sheet-wide .qcg .qcg-card .qcg-line span { font-size: 16.5px; }
+.ws-app.sheet-wide .qcg .qcg-card .qcg-fc { font-size: 9.5px; }
+
+/* below 768px: the bands stack, active first, and the two active cards stack inside their band */
+@media (max-width: 767.98px) {
+  .qcg { grid-template-columns: minmax(0, 1fr); }
+  .qcg .qcg-cards { grid-auto-flow: row; }
+}
