@@ -13,7 +13,7 @@ import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
-import { spineFor, spineIndex, stepOfLabel, SpineId } from "../lib/onboardingSpine";
+import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
 import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -211,7 +211,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
   /* The card band states the same position in words, in its existing right-hand meta slot — one
      source, two renderings, so the dots and the sentence cannot disagree. */
-  const stepLabel = stepOfLabel(spineAt, spineSteps.length);
 
   // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
@@ -361,8 +360,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "B" && (
           <CenterWrap>
             <BranchB
-              stepLabel={stepLabel}
-              stepIndex={spineAt}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
@@ -392,12 +389,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 /* The existing post-onboarding hatch App already reads and clears — the same one
                    the by-hand branch uses for the agent list. Dashboard is the absence of a hatch. */
                 if (destination === "queries") sessionStorage.setItem("scriptally_post_onboarding_tab", "queries");
-                void finishOnboarding();
-              }}
-              onUpgrade={() => {
-                // Free import spent → leave onboarding into the Plans page via the existing
-                // post-onboarding-tab hatch (App reads + clears it on completion).
-                sessionStorage.setItem("scriptally_post_onboarding_tab", "plans");
                 void finishOnboarding();
               }}
               error={branchError}

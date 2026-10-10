@@ -84,8 +84,13 @@ describe("the card is made of the app's own material", () => {
    * built to the mockup's numbers would be a near-miss of the app it introduces, which is worse
    * than an obvious difference.
    */
-  it("the ground matches the app's workspace ground, not the mockup's sample", () => {
-    expect(TOKENS).toContain('export const onbGround = "#f7f4ee"');
+  /* RE-POINTED (onboarding v5): the journey's ground is the app's INK SHELL now, read from the
+     app's own token by `SetupFrame`'s sheet, and the `onbGround` copy is deleted with its last
+     reader. Same law — the ground is the app's, never a mockup's sample. */
+  it("the ground is the app's ink shell, by its token, and no copy of the old ground survives", () => {
+    const sheet = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(sheet).toMatch(/\.sf \{[^}]*background:\s*var\(--ink-shell\)/);
+    expect(TOKENS).not.toContain("onbGround");
     for (const src of JOURNEY) expect(src).not.toContain("#f8f4ee");
   });
 
@@ -134,23 +139,26 @@ describe("the band states position honestly or not at all", () => {
   });
 });
 
-describe("option rows select in sage", () => {
-  it("selection uses the sage ink and the pale sage wash", () => {
-    expect(CHROME).toContain("sageText");
-    expect(CHROME).toContain("onbOptionSelectedFill");
-    expect(TOKENS).toContain('export const onbOptionSelectedFill = "#fbfdfa"');
+/* REWRITTEN (onboarding v5): `SelectRow` is deleted. Every option row is `OptionRow`, selection
+   is a navy ring rather than a sage wash, and there is ONE shape — a radio — because every group
+   in the journey is a set of alternatives. The lone-toggle shape went with the fallback screens
+   that used it. */
+describe("option rows are radios, selected with a navy ring", () => {
+  const PARTS = readFileSync(resolve(here, "setupParts.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const SHEET = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("SelectRow and its sage tokens are gone", () => {
+    expect(CHROME.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("SelectRow");
+    expect(TOKENS).not.toContain("onbOptionSelectedFill");
   });
 
-  /**
-   * ⚠️ TWO SHAPES, BOTH ANNOUNCED. A lone row is a toggle and takes `aria-pressed`; a row inside a
-   * set of mutually exclusive choices opts into `radio`, because a screen reader given
-   * `aria-pressed` there is told three independent switches happen to be on and off rather than one
-   * choice out of three. The `radio` flag is what picks between them, and BOTH must survive — this
-   * used to assert `aria-pressed` alone, and went red the day the capture fork needed the other.
-   */
-  it("and the row reports its state to assistive tech, in whichever shape it is in", () => {
-    expect(CHROME).toContain('aria-pressed={radio ? undefined : selected}');
-    expect(CHROME).toContain('aria-checked={radio ? selected : undefined}');
-    expect(CHROME).toContain('role={radio ? "radio" : undefined}');
+  it("selection is a 2px inset navy ring", () => {
+    expect(SHEET).toMatch(/\.sf \.sf-opt\.is-on \{[^}]*inset 0 0 0 2px var\(--sp-anthracite\)/);
+  });
+
+  it("and the row reports its state as a radio, never as a pressed toggle", () => {
+    expect(PARTS).toContain('role="radio"');
+    expect(PARTS).toContain("aria-checked={selected}");
+    expect(PARTS).not.toContain("aria-pressed");
   });
 });

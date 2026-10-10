@@ -43,6 +43,11 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "fork-pro", q: "s=fork&pick=template&plan=pro", form: "setup" },
   { id: "confirm", q: "s=confirm", form: "setup" },
   { id: "confirm-pro", q: "s=confirm&plan=pro", form: "setup" },
+  { id: "used-free", q: "s=used-free", form: "setup" },
+  { id: "used-pro", q: "s=used-pro", form: "setup" },
+  { id: "unreadable", q: "s=unreadable", form: "setup" },
+  { id: "nothing", q: "s=nothing&errs=1", form: "setup" },
+  { id: "unloaded", q: "s=unloaded", form: "setup" },
 ];
 
 /** Open-title screens later phases add. */
@@ -79,6 +84,11 @@ async function mutate(page: Page) {
   });
   if (MUTATE === "K2") await page.evaluate(() => { const f = document.querySelector('[data-fact="smart"]'); if (f) f.textContent = "Uses your one Smart Import"; });
   if (MUTATE === "K3") await page.evaluate(() => (document.querySelector('[data-act="read"]') as HTMLElement | null)?.click());
+  if (MUTATE === "E1") await page.evaluate(() => {
+    const p = document.querySelector('[data-dead="used-free"] [data-act="template"]');
+    if (p) p.textContent = "Upgrade to Pro";
+  });
+  if (MUTATE === "T1") await page.addStyleTag({ content: ".sf .sf-btn{background:var(--onb-missing)}" });
   if (MUTATE === "A1") {
     await page.evaluate(() => {
       const d = document.createElement("div"); d.className = "preview-wrap"; d.textContent = "Dashboard preview";
@@ -549,5 +559,136 @@ test.describe("OB1", () => {
       await page.locator('[data-act="read"]').click();
       expect((await calls(page)).filter((c) => c === "runMapping").length, "one read, on the press").toBe(1);
     }
+  });
+
+  test("E1 the dead ends: chip, title and actions per state, each press to its own handler", async ({ page }) => {
+    const want: Record<string, { chip: string; fail: boolean; title: string; presses: Array<[string, string]> }> = {
+      "used-free": { chip: "Smart Import already used", fail: false, title: "You've used your Smart Import.",
+        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
+      "used-pro": { chip: "Smart Import already used", fail: false, title: "Next Smart Import next month",
+        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"]] },
+      unreadable: { chip: "File couldn't be read", fail: true, title: "We couldn't read that one.",
+        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
+      nothing: { chip: "Nothing imported", fail: true, title: "That didn't work.", presses: [['[data-act="review"]', "review"]] },
+      unloaded: { chip: "Step didn't load", fail: false, title: "That step didn't load.",
+        presses: [['[data-act="byhand"]', "byhand"], ['[data-act="restart"]', "restart"]] },
+    };
+    let states = 0;
+    for (const [id, w] of Object.entries(want)) for (const vp of VPS) {
+      await lab(page, SCREENS.find((s) => s.id === id)!.q, vp);
+      const d = await page.evaluate(() => {
+        const card = document.querySelector(".sf-dead") as HTMLElement;
+        const chip = card.querySelector('[data-sf="chip"]') as HTMLElement;
+        const h = card.querySelector("h1") as HTMLElement;
+        return {
+          cards: document.querySelectorAll(".sf-dead").length, open: document.querySelectorAll(".sf-scroll .sf-open").length,
+          chip: chip.textContent, chipBg: getComputedStyle(chip).backgroundColor, chipCase: getComputedStyle(chip).textTransform,
+          title: h.textContent, family: getComputedStyle(h).fontFamily, size: parseFloat(getComputedStyle(h).fontSize),
+          width: card.getBoundingClientRect().width, text: card.innerText,
+          controls: Array.from(card.querySelectorAll("button")).map((b) => b.textContent ?? ""),
+        };
+      });
+      expect(d.cards, `${id}: one card`).toBe(1);
+      expect(d.open, `${id}: no open title above it`).toBe(0);
+      expect(d.chip).toBe(w.chip);
+      expect(d.chipBg, `${id}: chip tone`).toBe(w.fail ? "rgb(243, 221, 210)" : "rgb(244, 239, 233)");
+      expect(d.chipCase).toBe("uppercase");
+      expect(d.title).toBe(w.title);
+      expect(d.family).toMatch(/Special Elite/);
+      expect(Math.abs(d.size - 23)).toBeLessThanOrEqual(0.5);
+      expect(d.width, `${id} @${vp.width}: 480 at most`).toBeLessThanOrEqual(480.5);
+      expect(d.controls.length, `${id}: its actions`).toBe(w.presses.length);
+      if (id === "used-free") expect(d.controls.filter((c) => /upgrade/i.test(c)), "no control named Upgrade").toEqual([]);
+      if (id === "unreadable") expect(d.text).not.toMatch(/hasn.t been used/i);
+      for (const [sel, name] of w.presses) {
+        await reset(page);
+        await page.locator(sel).first().click();
+        expect(await calls(page), `${id}: ${sel} calls ${name}`).toEqual([name]);
+      }
+      states++;
+    }
+    expect(states).toBe(5 * VPS.length);
+  });
+
+  test("T1 every token the set-up sheet reads resolves here, and no primary is rust or burgundy", async ({ page }) => {
+    const sheet = readFileSync(resolve("src/components/onboarding/onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const read = [...new Set([...sheet.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1]))].sort();
+    expect(read.length, "tokens read by the sheet").toBeGreaterThan(15);
+    let primaries = 0;
+    for (const sc of SCREENS) {
+      await lab(page, sc.q, VPS[0]);
+      const r = await page.evaluate((names) => {
+        /* A token set on `.sf` is read from an element inside the sheet; an unset one reads empty. */
+        const probe = (document.querySelector(".sf-scroll") ?? document.querySelector(".sf")) as HTMLElement;
+        const cs = getComputedStyle(probe);
+        return {
+          empty: names.filter((n) => cs.getPropertyValue(n).trim() === ""),
+          primaries: Array.from(document.querySelectorAll(".sf .sf-btn:not(.sf-btn--line)")).map((b) => getComputedStyle(b).backgroundColor),
+        };
+      }, read);
+      expect(r.empty, `${sc.id}: tokens that resolve to nothing`).toEqual([]);
+      for (const bg of r.primaries) {
+        primaries++;
+        expect(bg, `${sc.id}: a primary is navy (or navy disabled), never empty`).toMatch(/^rgb\((42, 58, 82|170, 178, 192)\)$/);
+        expect(["rgb(162, 69, 42)", "rgb(124, 58, 42)", "rgba(0, 0, 0, 0)"], `${sc.id}: never rust, burgundy or unpainted`).not.toContain(bg);
+      }
+    }
+    console.log(`OB1 T1 ${read.length} tokens × ${SCREENS.length} screens; ${primaries} primaries`);
+    expect(primaries).toBeGreaterThan(10);
+  });
+
+  test("A4 the harness: a cold sign-in reaches the app, and set-up opens in the frame and skips back to it", async ({ browser, baseURL }) => {
+    /* A context with NO saved session, so the sign-in screen is really walked. */
+    /* ⚠️ AN EXPLICITLY EMPTY STATE. `browser.newContext()` inherits the project's `storageState`, so
+       a context made without one is NOT cold — the first version of this case signed in from the
+       saved session and stayed green with the submit button renamed. */
+    const ctx = await browser.newContext({ baseURL, viewport: VPS[0], storageState: { cookies: [], origins: [] } });
+    const page = await ctx.newPage();
+    if (MUTATE === "A4") {
+      /* The named break: the submit no longer reads "Sign in", so the harness cannot find it. */
+      await ctx.addInitScript(() => {
+        new MutationObserver(() => {
+          document.querySelectorAll(".sf-card button[type=submit]").forEach((b) => { if (b.textContent === "Sign in") b.textContent = "Log in"; });
+        }).observe(document, { childList: true, subtree: true });
+      });
+      page.setDefaultTimeout(15_000);
+    }
+    await page.goto("/dashboard");
+    await page.waitForSelector("#au-email", { timeout: 30_000 });
+    expect(await page.locator("#ws-sidebar").count(), "the context really is signed out: the sign-in screen is up").toBe(0);
+    await ensureSignedIn(page);
+    await expect(page.locator("#ws-sidebar").first(), "the cold sign-in reached the app").toBeVisible({ timeout: 30_000 });
+    /* App opens set-up for a signed-in user when this key is "true": the way into the real thing. */
+    await page.evaluate(() => sessionStorage.setItem("scriptally_new_signup", "true"));
+    await page.reload({ waitUntil: "load" });
+    await page.waitForSelector('[data-setup-frame="setup"]', { timeout: 30_000 });
+    const s = await page.evaluate(() => ({
+      screen: document.querySelector(".sf-col")?.getAttribute("data-screen"),
+      tab: document.querySelector(".sf .ws-ftn")?.textContent,
+      steps: Array.from(document.querySelectorAll(".sf-steplab")).map((e) => e.textContent),
+      old: document.querySelectorAll(".sa-onb-card, .ob-head").length,
+    }));
+    expect(s.screen, "set-up opens on the welcome step").toBe("welcome");
+    expect(s.tab).toBe("You");
+    expect(s.steps).toEqual(["You", "Your book", "Your list"]);
+    expect(s.old, "inside the new frame, not the old card").toBe(0);
+    /* The real thing, so the branch claim is made here too: "Just getting started" shows two steps. */
+    await page.getByRole("radio", { name: /Just getting started/ }).click();
+    await page.locator(".sf-stepcard .sf-btn").click();
+    await page.waitForFunction(() => document.querySelector(".sf-col")?.getAttribute("data-screen") === "ready");
+    expect(await page.locator(".sf-steplab").allTextContents(), "choosing it never adds a step").toEqual(["You", "Your book"]);
+    await page.locator(".sf-exit").click();
+    await expect(page.locator("#ws-sidebar").first(), "Skip for now returns to the app").toBeVisible({ timeout: 30_000 });
+    expect(await page.locator("[data-setup-frame]").count()).toBe(0);
+    await ctx.close();
+  });
+
+  test("shots: every screen and state, at 1440 and 390", async ({ page }) => {
+    test.skip(!SHOTS, "on request");
+    for (const sc of SCREENS.filter((s) => !s.id.startsWith("frame-"))) for (const vp of [VPS[0], VPS[2]]) {
+      await lab(page, sc.q, vp);
+      await shot(page, `${sc.id}-${vp.width}`);
+    }
+    await lab(page, "s=ready&status=drafting", VPS[0]);
   });
 });

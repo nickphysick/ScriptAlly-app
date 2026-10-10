@@ -17,8 +17,6 @@ import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords,
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
-import { OnboardingCard, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
-import { sageText, onbOptionEdge, onbOptionRest, onbOptionSelectedFill, onbPlate, onbHairline, onbMuted } from "../../lib/designTokens";
 import { SmartImportReview } from "./SmartImportReview";
 import { ImportOverview } from "./ImportOverview";
 import { ImportingLoader } from "./ImportingLoader";
@@ -28,8 +26,8 @@ import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { CaptureOption } from "../../lib/captureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
+import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { CaptureFork } from "./CaptureFork";
-import { subStepFor, subStepLabel } from "../../lib/onboardingSpine";
 import { HandoverScreen } from "./HandoverScreen";
 import { StepColumn, OpenTitle, StepCard, BackLink, StepFoot, FieldError } from "./setupParts";
 
@@ -67,8 +65,6 @@ export interface BranchBProps {
    * who had just imported nine queries somewhere those queries are not.
    */
   onImportComplete: (outcome: CommitOutcome, destination: "queries" | "dashboard") => void;
-  /** "Upgrade to Pro" from the blocked (free-used) state — finish onboarding into the Plans page. */
-  onUpgrade?: () => void;
   /** Surfaced save/limit error from the parent (e.g. the Free-tier manuscript cap). */
   error?: string | null;
   /**
@@ -80,16 +76,6 @@ export interface BranchBProps {
    * progress bar growing because of a choice the writer made.
    */
   onStage?: (stage: "book" | "list") => void;
-  /** The band's right-hand meta — `Step 3 of 3`. */
-  stepLabel?: string;
-  /**
-   * The same position as a number, for composing a sub-step.
-   *
-   * ⚠️ PASSED, NEVER PARSED BACK OUT OF `stepLabel`. Reading "3" out of "Step 3 of 3" would be
-   * deriving state from a display string — the fault this repo already forbids by name, and one
-   * that breaks silently the moment the wording changes.
-   */
-  stepIndex?: number;
 }
 
 /* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
@@ -102,56 +88,16 @@ type B3Screen = "book" | "pipeline" | "confirm" | "blocked" | "reading" | "overv
 /** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
 type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
 
-const UploadIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /><path d="M12 3v12M8 7l4-4 4 4" />
-  </svg>
-);
-const HandIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" />
-  </svg>
-);
-const TemplateIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" />
-  </svg>
-);
 
 /** Sage helper note (the v2 sketch's template note), with the template download inside. */
-const TemplateNote: React.FC = () => (
-  <div style={{ display: "flex", gap: 9, background: "#e7ece1", border: "0.5px solid #c4d0bc", borderRadius: 9, padding: "11px 13px", margin: "0 0 14px" }}>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-      <path d="M12 3v12M8 11l4 4 4-4" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-    </svg>
-    <p style={{ fontFamily: FONT_SANS, fontSize: 12, lineHeight: 1.5, color: "#44563a", margin: 0 }}>
-      Don't have a spreadsheet set up?{" "}
-      <a href="/QueryHawk-pipeline-import-template.xlsx" download style={{ color: "#3f5237", fontWeight: 500 }}>
-        Download our template →
-      </a>{" "}
-      It captures each query's status and key dates — so your "responses received" count is right from day one.
-    </p>
-  </div>
-);
 
 /** The v2 sketch's escape-hatch line beneath the options. */
-const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
-  <div style={{ textAlign: "center", fontSize: 11, color: "#a8968a", marginTop: 2, fontFamily: FONT_SANS }}>
-    Already have your own spreadsheet?{" "}
-    <button
-      onClick={onOpen}
-      style={{ font: "inherit", color: "#9c8878", background: "none", border: "none", borderBottom: "0.5px solid #cdbdae", cursor: "pointer", padding: 0 }}
-    >
-      Map your own columns in the Import desk →
-    </button>
-  </div>
-);
 
 // The two-screen SmartImportReview now owns review-row classification, inline fixes and the result
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage, stepLabel, stepIndex,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -166,8 +112,6 @@ export const BranchB: React.FC<BranchBProps> = ({
      ⚠️ THE SPINE IS NOT TOLD ANY OF THIS. Sub-steps stay in the band by design — expanding a dot
      into three would make the Smart Import path look longer than the template path, which is the
      progress bar growing because of a choice the writer made. */
-  const sub = subStepFor(screen);
-  const bandStep = sub !== null && stepIndex !== undefined ? subStepLabel(stepIndex, sub) : stepLabel;
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -395,39 +339,24 @@ export const BranchB: React.FC<BranchBProps> = ({
   }
 
   if (screen === "blocked" && blocked) {
-    const isFreeUsed = blocked.reason === "free_used";
+    const backToFork = () => { setBlocked(null); setScreen("pipeline"); };
+    if (blocked.reason === "free_used") {
+      return (
+        <UsedFree
+          onBack={backToFork}
+          onAddByHand={onAddByHand}
+          /* Back to the fork with the template tile ringed: the suggestion follows what the writer
+             has just been told they can still do. */
+          onUseTemplate={() => { setBlocked(null); setImportOption("template"); setScreen("pipeline"); }}
+        />
+      );
+    }
     const nextLabel = blocked.nextAvailable
       ? new Date(`${blocked.nextAvailable}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
       : "next month";
-    return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your pipeline"
-        name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
-        sub={isFreeUsed ? "Upgrade for one every month" : `Available ${nextLabel}`}
-        motif={<InboxMotif />}
-        onBack={() => { setBlocked(null); setScreen("pipeline"); }}
-        primaryLabel={isFreeUsed ? "Upgrade to Pro →" : "Add them by hand →"}
-        onPrimary={() => (isFreeUsed ? (onUpgrade ? onUpgrade() : onAddByHand()) : onAddByHand())}
-      >
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 12px" }}>
-          {isFreeUsed
-            ? "You've used your free Smart Import. Upgrade to Pro for a Smart Import every month — or add your agents by hand for now."
-            : <>You've used this month's Smart Import. Your next one is available on <strong>{nextLabel}</strong>. You can add agents by hand in the meantime.</>}
-        </p>
-        {isFreeUsed && (
-          <button
-            onClick={onAddByHand}
-            style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: "#9c8878", background: "none", border: "none", borderBottom: "0.5px solid #cdbdae", cursor: "pointer", padding: 0 }}
-          >
-            Add them by hand instead
-          </button>
-        )}
-      </OnboardingCard>
-    );
+    return <UsedProMonth nextLabel={nextLabel} onBack={backToFork} onAddByHand={onAddByHand} />;
   }
 
-  // ── Reading the file — scatter-and-settle loader (raw cells in, clean StatusDots out) ─────────────
   if (screen === "reading") {
     const resultQueries = validated?.result.queries ?? [];
     const resultAgents = validated?.result.agents ?? [];
@@ -498,20 +427,14 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "done" && outcome) {
     const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
     const ok = outcome.queriesImported > 0;
-
-    /* ⚠️ THE HANDOVER REPLACES THE SUCCESS CARD, AND ONLY THE SUCCESS CARD. The failure half below
-       ("That didn't work") is not a handover — it is a report of a thing that did not happen, and
-       it keeps its own screen and its route back to the review.
-
-       ⚠️ AND IT IS GATED ON SOMETHING ACTUALLY HAVING LANDED. A commit that reports success with
-       nothing in it would otherwise reach a tally of zeroes, which is the app remarking on how far
-       along the writer is. */
     const tally: HandoverTally = {
       agents: outcome.agentsCreated,
       queries: outcome.queriesImported,
-      // The manuscript this import was attached to — one, and only once it exists.
       manuscripts: fields.title.trim() ? 1 : 0,
     };
+    /* A successful import always hands over: `shouldHandOver` is true whenever anything was
+       brought across, and `ok` means a query was. The "Brought across" card this used to fall
+       through to could never be reached, and went with `OnboardingCard`'s other callers. */
     if (ok && shouldHandOver(tally)) {
       return (
         <HandoverScreen
@@ -521,122 +444,27 @@ export const BranchB: React.FC<BranchBProps> = ({
         />
       );
     }
-    return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your pipeline"
-        name={ok ? "Brought across" : "That didn't work"}
-        sub={ok ? "Here's what landed in QueryHawk" : "Nothing was imported — here's why"}
-        motif={<InboxMotif />}
-        onBack={() => setScreen("review")}
-        primaryLabel={ok ? "Continue →" : "Back to the review →"}
-        onPrimary={() => (ok ? onImportComplete(outcome, "dashboard") : setScreen("review"))}
-      >
-        <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.7 }}>
-          <p style={{ margin: "0 0 10px" }}>
-            <strong>{outcome.queriesImported}</strong> {outcome.queriesImported === 1 ? "query" : "queries"} imported ·{" "}
-            <strong>{outcome.agentsCreated}</strong> {outcome.agentsCreated === 1 ? "agent" : "agents"} added
-            {outcome.agentsMerged > 0 && <> · <strong>{outcome.agentsMerged}</strong> merged with existing</>}
-          </p>
-          {(outcome.queriesSkipped > 0 || skippedReasons.length > 0) && (
-            <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9c8878" }}>
-              {outcome.queriesSkipped} {outcome.queriesSkipped === 1 ? "row was" : "rows were"} skipped
-              {skippedReasons.length > 0 && <>: {skippedReasons.join("; ").toLowerCase()}</>}.
-            </p>
-          )}
-          {outcome.errors.length > 0 && (
-            <div style={{ background: "#FAEEDA", border: "0.5px solid #ead2a0", borderRadius: 9, padding: "10px 13px", marginTop: 4 }}>
-              {outcome.errors.slice(0, 4).map((err, i) => (
-                <p key={i} style={{ margin: i ? "6px 0 0" : 0, fontSize: 12, color: "#6b4a08", lineHeight: 1.5 }}>{err}</p>
-              ))}
-              {outcome.errors.length > 4 && (
-                <p style={{ margin: "6px 0 0", fontSize: 12, color: "#9a7a30" }}>…and {outcome.errors.length - 4} more.</p>
-              )}
-            </div>
-          )}
-        </div>
-      </OnboardingCard>
-    );
+    return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => setScreen("review")} />;
   }
 
-  /**
-   * ── Fallback — template-first (the v2 layout) when the mapping call fails ─
-   *
-   * ⚠️ THIS BRANCH IS EXPLICITLY CONDITIONED, and the unhandled case below it is separate.
-   * It used to be the function's bare final `return`, which made it the render for ANY screen
-   * value that fell through — so a state that arrived without its data (e.g. `"overview"` with a
-   * null `validated`) silently showed "We couldn't read that one automatically", blaming the
-   * writer's file for what was actually our own missing state. The two are different failures and
-   * now say different things.
-   */
-  const mappingFailed = screen === "fallback";
-  if (!mappingFailed) {
-    /* The genuinely-unhandled case: a screen value with no branch, or a branch whose data never
-       arrived. Never silent — log it for whoever is reading the console, and say honestly that
-       the step could not be shown rather than inventing a cause. Every route out stays live. */
+  // Graceful fallback (also reached when an AI/template mapping fails) — or, if the state machine
+  // lands somewhere no branch above handles, an honest recovery card that names the problem.
+  if (screen !== "fallback") {
     console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
-    return (
-      <OnboardingCard
-        step={bandStep}
-        pre="Your pipeline"
-        name="That step didn't load"
-        sub="Nothing is lost — pick up from here"
-        motif={<InboxMotif />}
-        onBack={() => setScreen("pipeline")}
-        primaryLabel="Back to the start of this step →"
-        onPrimary={() => setScreen("pipeline")}
-      >
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 12px" }}>
-          Something didn't load on our side. Your file hasn't been imported and nothing has been
-          saved — start this step again, or add your agents by hand.
-        </p>
-        <SelectRow
-          icon={HandIcon}
-          title="Add them by hand"
-          desc="Only a few out there? Add your agents one at a time."
-          selected={false}
-          onClick={onAddByHand}
-        />
-        <EscapeHatch onOpen={onOpenImportDesk} />
-      </OnboardingCard>
-    );
+    return <Unloaded onAddByHand={onAddByHand} onRestart={() => setScreen("pipeline")} />;
   }
 
   return (
-    <OnboardingCard
-        step={bandStep}
-      pre="Your pipeline"
-      name="Bring it across"
-      sub="Use our template, or add by hand"
-      motif={<InboxMotif />}
+    <Unreadable
       onBack={() => setScreen("pipeline")}
-      primaryLabel="Download template →"
-      onPrimary={() => {
+      onAddByHand={onAddByHand}
+      /* The download this screen has always offered, unchanged. */
+      onDownload={() => {
         const a = document.createElement("a");
         a.href = "/QueryHawk-pipeline-import-template.xlsx";
         a.download = "QueryHawk-pipeline-import-template.xlsx";
         a.click();
       }}
-    >
-      <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.5, margin: "0 0 12px" }}>
-        We couldn't read that one automatically — use the template or add them by hand.
-      </p>
-      <SelectRow
-        icon={TemplateIcon}
-        title="Import with our template"
-        desc="Download it, drop in your agents and queries, upload. We'll do the rest."
-        selected
-        onClick={() => {}}
-      />
-      <TemplateNote />
-      <SelectRow
-        icon={HandIcon}
-        title="Add them by hand"
-        desc="Only a few out there? Add your agents one at a time."
-        selected={false}
-        onClick={onAddByHand}
-      />
-      <EscapeHatch onOpen={onOpenImportDesk} />
-    </OnboardingCard>
+    />
   );
 };

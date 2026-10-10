@@ -22,8 +22,6 @@ export interface BranchAResult {
 export interface BranchAProps {
   /** Back from A2 — returns to the welcome step. */
   onExit: () => void;
-  /** The band's right-hand meta — `Step 2 of 2` on this branch. */
-  stepLabel?: string;
   /** A3a Continue (Ready to Query / Revising) — save, then on to the agents step. */
   onSaveReady: (r: BranchAResult) => void;
   /** A3b "Save & explore agents →" (Still writing) — save as Drafting, route to the agent database. */

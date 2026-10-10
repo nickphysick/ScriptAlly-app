@@ -538,3 +538,24 @@
 .sf .sf-filename { font-family: var(--sp-type); font-weight: 600; font-size: 17px; line-height: 1.3; color: var(--ink-on-light); overflow-wrap: anywhere; }
 .sf .sf-filesize { font-family: var(--sp-mono); font-size: 11px; color: var(--sf-ink58); }
 .sf .sf-lede--confirm { margin-top: 20px; max-width: 34em; }
+
+/* ── The dead ends: one card, 480 at most, under the tab; no open title ── */
+.sf .sf-col--dead { max-width: 480px; }
+.sf .sf-chip {
+  display: inline-block; margin: 0 0 14px; padding: 5px 10px 4px; border-radius: 10px;
+  font-family: var(--sp-mono); font-size: 9.5px; line-height: 1.4; letter-spacing: .14em; text-transform: uppercase;
+  background: var(--sf-note); color: rgba(28, 19, 15, .66);
+}
+/* Blush for the two that report a failure. Not a verdict on the writer: a fact about the file. */
+.sf .sf-chip--fail { background: #f3ddd2; color: #5b2a1f; }
+.sf .sf-dead .sf-deadh {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 23px; line-height: 1.2;
+  color: var(--ink-on-light); margin: 0;
+}
+.sf .sf-deadtx { margin: 10px 0 0; }
+.sf .sf-deadtx p { font-family: var(--sp-serif); font-size: 16.5px; line-height: 1.5; color: var(--sf-ink72); margin: 0 0 10px; }
+.sf .sf-deadtx p:last-child { margin-bottom: 0; }
+.sf .sf-deadtx strong { font-weight: 600; color: var(--ink-on-light); }
+.sf .sf-deadtx .sf-deadquiet { font-size: 15px; color: var(--sf-ink58); }
+.sf .sf-deaderrs { margin-top: 12px; }
+.sf .sf-deaderrs p { font-size: 14.5px; margin: 0 0 6px; color: rgba(28, 19, 15, .82); }

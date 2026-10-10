@@ -191,8 +191,6 @@ export const shellMuted = "#9c8878"; // muted chrome ink (=== labelColor — rol
    ⚠️ BURGUNDY SURVIVES ONLY AS SMALL STATE INK AND INSIDE ILLUSTRATED MARKS — never as chrome,
    never as a button. The primary is near-black. */
 
-/** The onboarding overlay's ground — the app's workspace ground (index.css --ws-ground). */
-export const onbGround = "#f7f4ee";
 /** The card surface — the dashboard's .os-card fill. */
 export const onbSurface = "#fffdf9";
 /** The card hairline — the app's single content-edge hairline (index.css --ws-edge). */
@@ -208,12 +206,6 @@ export const onbPrimaryDisabledBg = "#e6ded3";
 export const onbPrimaryDisabledInk = "#a5988e";
 /** The band's white plate, which holds the screen's mark. */
 export const onbPlate = "#ffffff";
-/** Option-row selection: sage border + the palest sage wash, never a pink fill. */
-export const onbOptionSelectedFill = "#fbfdfa";
-export const onbOptionRest = "#ffffff";
-export const onbOptionEdge = "#e2d9cc";
-/** Faint ink for the skip link and captions. */
-export const onbFaint = "#a5988e";
 export const onbMuted = "#6f635b";
 /** Heading ink for the body — plain ink, never burgundy. */
 export const onbHeadingInk = "#241711";

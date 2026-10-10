@@ -26,6 +26,7 @@ import { BranchA } from "./BranchA";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
+import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
 
@@ -172,6 +173,21 @@ export const OnbLab: React.FC = () => {
     );
   }
   if (s === "confirm") return <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}><LabConfirm tier={tier} /></LabSetup>;
+
+  /* The dead ends of "Your list" — each its own screen, each handler a spy. */
+  const dead: Record<string, React.ReactNode> = {
+    "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUseTemplate={labSpy("useTemplate")} />,
+    "used-pro": <UsedProMonth nextLabel="1 November 2026" onBack={labSpy("back")} onAddByHand={labSpy("byhand")} />,
+    unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onDownload={labSpy("download")} />,
+    nothing: (
+      <NothingImported
+        outcome={{ queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queriesSkipped: 3, errors: q.get("errs") === "1" ? ["Row 4: no agent or agency name.", "Row 9: the date could not be read."] : [] }}
+        skippedReasons={["No agent or agency name"]} onBackToReview={labSpy("review")}
+      />
+    ),
+    unloaded: <Unloaded onAddByHand={labSpy("byhand")} onRestart={labSpy("restart")} />,
+  };
+  if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={s === "used-pro" ? UserPlan.PRO : UserPlan.FREE}>{dead[s]}</LabSetup>;
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";
