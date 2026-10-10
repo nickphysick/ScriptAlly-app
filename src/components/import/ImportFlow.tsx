@@ -53,6 +53,9 @@ export interface ImportFlowHandle {
   chooseTemplate: () => void;
   /** A file dropped on the host's drop zone: the Smart Import path. */
   dropFile: (file: File) => void;
+  /** Drop the file that was read and everything answered about it, and go back to idle. Nothing has
+   *  been written at any point before the import, so there is nothing to undo. */
+  reset: () => void;
 }
 
 export interface ImportFlowProps {
@@ -75,6 +78,9 @@ export interface ImportFlowProps {
   onScreen?: (screen: ImportFlowScreen) => void;
   /** The importing loader's card has started to lift. */
   onHandoff?: () => void;
+  /** "Cancel", drawn on the summary and the review when the host has a way out of its own (the Import
+   *  page). Set-up passes none: its way out is the frame's. */
+  onCancel?: () => void;
   /**
    * `#/onb-lab` only: start on the summary over a fixture, and commit through a stand-in. The lab
    * has no account to write to; everything between the summary and the hand-over is the real code.
@@ -84,7 +90,7 @@ export interface ImportFlowProps {
 }
 
 export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function ImportFlow({
-  manuscriptTitle, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, lab,
+  manuscriptTitle, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
 }, ref) {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -247,6 +253,11 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     chooseFile: () => fileInputRef.current?.click(),
     chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
+    reset: () => {
+      setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
+      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
+      setScreen("idle");
+    },
   }));
 
   /* The two pickers. One element each, rendered by whichever screen can open one — the fork, and
@@ -357,6 +368,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         fileName={fileName}
         rowCount={rowsRead}
         onContinue={() => setScreen("review")}
+        onCancel={onCancel}
       />
     );
   }
@@ -371,6 +383,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         onBack={() => toStart()}
         error={manuscriptFailed ? manuscriptErrorLine(hostError) : commitError}
         onImport={handleImport}
+        onCancel={onCancel}
       />
     );
   }

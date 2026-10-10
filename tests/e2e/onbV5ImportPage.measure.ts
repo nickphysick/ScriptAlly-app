@@ -390,3 +390,96 @@ test.describe("F1", () => {
     expect((await flowState(page)).screen).toBe("idle");
   });
 });
+
+/* ════ F2 · with no manuscript, the import opens on the book step ═══════════════════════════════ */
+const labCalls = (page: Page) => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c: { name: string; arg?: unknown }) => (c.arg ? `${c.name}:${String(c.arg)}` : c.name)));
+const tilesShown = (page: Page) => page.evaluate(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length);
+
+test.describe("F2", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test("F2 no manuscript: Import a spreadsheet opens the book step, and nothing is written", async ({ page }) => {
+    await lab(page, "s=import-page&live=1", { wait: '.impg [data-impg="tile"]' });
+    await page.locator('[data-act="smart"]').click();
+    if (MUTATE === "F2") await page.evaluate(() => document.querySelector('.impg [data-screen="book"]')?.remove()); // the named break: the book step skipped
+    const r = await page.evaluate(() => ({
+      book: [...document.querySelectorAll('.impg [data-screen="book"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length,
+      title: document.querySelector('.impg [data-screen="book"] h1')?.textContent ?? "",
+      fields: document.querySelectorAll('.impg [data-screen="book"] input, .impg [data-screen="book"] textarea').length,
+      screen: document.querySelector('[data-impg="flow"]')?.getAttribute("data-flow-screen"),
+    }));
+    record("F2", "1440x900", "book", { ...r, tiles: await tilesShown(page), calls: await labCalls(page) });
+    expect(r.book, "the book step is on screen").toBe(1);
+    expect(r.title).toBe("The book you're querying.");
+    expect(r.fields, "with its fields").toBeGreaterThanOrEqual(2);
+    expect(await tilesShown(page)).toBe(0);
+    expect(await labCalls(page), "nothing is written by reaching it").toEqual([]);
+    // Continue without a title is refused, as in set-up; Back returns to the tiles
+    await page.getByRole("button", { name: /^Continue$/ }).click();
+    await expect(page.getByText("Give it a title")).toBeVisible();
+    await page.getByRole("button", { name: /Back/ }).first().click();
+    expect(await tilesShown(page)).toBe(3);
+    expect(await labCalls(page)).toEqual([]);
+  });
+});
+
+/* ════ F3 · leaving part-way asks, with the drawer's words ══════════════════════════════════════ */
+test.describe("F3", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test("F3 Cancel asks on the summary and on each review step; Discard returns to the tiles", async ({ page }) => {
+    await lab(page, "s=import-page&fx=dupes", { wait: '.impg [data-im="summary"]' });
+    if (MUTATE === "F3") {
+      /* the named break: discard without asking */
+      await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest('[data-im="cancel"]')) setTimeout(() => (document.querySelector('[data-im="ask-skip"]') as HTMLElement | null)?.click(), 0); }, true));
+    }
+    const ask = async (where: string) => {
+      await page.locator('.impg [data-im="cancel"]:visible').first().click();
+      await page.waitForTimeout(150);
+      const d = await page.evaluate(() => { const a = document.querySelector('.impg [data-im="ask"]'); return a ? { title: a.querySelector("h2")?.textContent, text: a.querySelector("p")?.textContent, buttons: [...a.querySelectorAll("button")].map((b) => b.textContent) } : null; });
+      expect(d, `${where}: the confirm is shown`).toBeTruthy();
+      expect(d).toEqual({ title: "Discard this?", text: "Nothing has been saved yet.", buttons: ["Keep going", "Discard"] });
+      return d;
+    };
+    const seen: string[] = [];
+    await ask("summary"); seen.push("summary");
+    await page.locator('[data-im="ask-keep"]').click();
+    await expect(page.locator('.impg [data-im="ask"]')).toHaveCount(0);
+    await expect(page.locator('.impg [data-im="summary"]')).toBeVisible();
+    for (const step of ["duplicates", "agents", "queries"]) {
+      await page.locator('.impg [data-im="primary"]').click();
+      await page.locator(`.impg [data-im="review"][data-step="${step}"]`).waitFor({ timeout: 10_000 });
+      await ask(step); seen.push(step);
+      if (step !== "queries") await page.locator('[data-im="ask-keep"]').click();
+    }
+    await page.locator('[data-im="ask-skip"]').click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 10_000 });
+    const calls = await labCalls(page);
+    record("F3", "1440x900", "cancel", { seen, calls, tiles: await tilesShown(page) });
+    expect(seen).toEqual(["summary", "duplicates", "agents", "queries"]);
+    expect(calls.filter((c) => /commit|ensureManuscript|navigate/.test(c)), "no write and no navigation").toEqual([]);
+  });
+});
+
+/* ════ F4 · an in-app import ends on the dashboard, with the skipped-rows notice saved ═══════════ */
+test.describe("F4", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  for (const c of [{ skip: 1, rows: 1 }, { skip: 0, rows: 0 }]) {
+    test(`F4 an import that skips ${c.skip} row${c.skip === 1 ? "" : "s"}`, async ({ page }) => {
+      if (MUTATE === "F4") {
+        /* the named break: the notice is not saved in the app */
+        await page.addInitScript(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k: string, v: string) { if (k.startsWith("sa.importSkipped.")) return; return set.call(this, k, v); }; });
+      }
+      await lab(page, `s=import-page&fx=clear&skip=${c.skip}&floor=100`, { wait: '.impg [data-im="summary"]', reduced: false });
+      await page.evaluate(() => localStorage.removeItem("sa.importSkipped.onb-lab"));
+      for (let i = 0; i < 3; i++) { await page.locator('.impg [data-im="primary"]').click(); await page.waitForTimeout(200); }
+      await page.waitForFunction(() => (window.__onbLab?.calls ?? []).some((x: { name: string }) => x.name === "navigate"), null, { timeout: 30_000 });
+      const calls = await labCalls(page);
+      const notice = await page.evaluate(() => { const raw = localStorage.getItem("sa.importSkipped.onb-lab"); return raw ? JSON.parse(raw) : null; });
+      record("F4", "1440x900", `skip-${c.skip}`, { calls, notice });
+      expect(calls.filter((x) => x.startsWith("navigate")), "it ends on the dashboard").toEqual(["navigate:dashboard"]);
+      expect(calls).toContain("ensureManuscript");
+      expect(calls).toContain("commit");
+      expect(notice ? notice.rows.length : 0, "the notice's rows").toBe(c.rows);
+      if (c.rows > 0) expect(notice.count).toBe(c.rows);
+    });
+  }
+});

@@ -12,12 +12,17 @@
  * fact line says why; there is no dead-end screen and no upgrade prompt here.
  */
 import React, { useRef, useState } from "react";
+import { BookStep } from "../onboarding/BookStep";
+import { ManuscriptFieldsState, emptyManuscriptFields } from "../onboarding/ManuscriptFields";
+import { ImportCancelConfirm } from "./ImportCancelConfirm";
+import { buildManuscriptPayload, ensureManuscriptOnce, manuscriptLimitError, type ManuscriptIdCache } from "../../lib/manuscripts";
+import { ManuscriptStatus } from "../../types";
 import "./importPage.css";
 import "../onboarding/onboarding.css";
 import "../onboarding/importFlow.css";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PanelHeader } from "../shell/PanelHeader";
-import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "./ImportFlow";
+import { ImportFlow, type ImportFlowHandle, type ImportFlowProps, type ImportFlowScreen } from "./ImportFlow";
 import { ImportCsv } from "../ImportCsv";
 import { useScriptAllyDb } from "../../lib/db";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
@@ -33,7 +38,12 @@ export interface ImportPageProps {
   /** `#/onb-lab?s=import-page` only: a held entitlement, and spies in place of the real handlers. */
   lab?: {
     entitlement?: SmartImportEntitlement;
+    /** Every tile press records its name and does nothing else (lock D2). */
     spy?: (name: string) => () => void;
+    /** Start the flow on the summary over a fixture, committing through a stand-in (locks F3, F4). */
+    flow?: ImportFlowProps["lab"];
+    /** Stands in for creating the manuscript. */
+    ensure?: () => Promise<string | null>;
   };
 }
 
@@ -54,12 +64,12 @@ const IconColumns = () => (
 );
 
 export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
-  const { manuscripts } = useScriptAllyDb();
+  const { manuscripts, currentUser, addManuscript } = useScriptAllyDb();
   const liveEntitlement = useSmartImportEntitlement();
   const entitlement = lab?.entitlement ?? liveEntitlement;
 
   const [view, setView] = useState<"tiles" | "matcher">("tiles");
-  const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>("idle");
+  const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>(lab?.flow ? "overview" : "idle");
   const flowRef = useRef<ImportFlowHandle>(null);
   const inFlow = flowScreen !== "idle";
 
@@ -67,11 +77,47 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const activeId = typeof window === "undefined" ? null : window.localStorage.getItem(ACTIVE_MS_KEY);
   const manuscript = manuscripts.find((m) => m.id === activeId) ?? manuscripts[0] ?? null;
 
+  /* ── With no manuscript, the import opens on set-up's book step ──────────────────────────────
+     The details are HELD, as in set-up: nothing is written until the import itself, when the
+     manuscript is created once and every imported query attaches to it. */
+  const [book, setBook] = useState<null | "smart" | "template">(null);
+  const [draft, setDraft] = useState<ManuscriptFieldsState | null>(null);
+  const [hostError, setHostError] = useState<string | null>(null);
+  const created = useRef<ManuscriptIdCache>({ id: null });
+  const needsBook = !manuscript && !draft && !lab?.flow;
+  const openPicker = (kind: "smart" | "template") => (kind === "smart" ? flowRef.current?.chooseFile() : flowRef.current?.chooseTemplate());
+  const start = (kind: "smart" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
+
+  const ensureManuscript = async (): Promise<string | null> => {
+    if (lab?.ensure) return lab.ensure();
+    if (manuscript) return manuscript.id;
+    return ensureManuscriptOnce(created.current, !!draft, async () => {
+      const limit = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+      if (limit) { setHostError(limit); return null; }
+      const res = await addManuscript(buildManuscriptPayload({
+        title: draft!.title.trim() || "Untitled manuscript",
+        genre: draft!.genre,
+        subGenres: draft!.subGenres,
+        ageCategory: draft!.ageCategory,
+        wordCount: parseInt(draft!.wordCount.replace(/\D/g, ""), 10) || 0,
+        logline: draft!.strapline,
+        status: ManuscriptStatus.QUERYING,
+      }));
+      if (!res.success || !res.id) { setHostError(res.error ?? null); return null; }
+      setHostError(null);
+      return res.id;
+    });
+  };
+
+  /* ── Leaving part-way ── "Cancel" asks with the drawer's own words; Discard drops the read file. */
+  const [asking, setAsking] = useState(false);
+
   const act = (name: string, real: () => void) => (lab?.spy ? lab.spy(name) : real);
-  const chooseSmart = act("picker", () => flowRef.current?.chooseFile());
+  const chooseSmart = act("picker", () => start("smart"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
-  const chooseTemplate = act("templatePicker", () => flowRef.current?.chooseTemplate());
+  const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
+  const showTiles = !inFlow && !book;
 
   if (view === "matcher") {
     return <ImportCsv onNavigate={onNavigate} />;
@@ -80,7 +126,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   return (
     <WorkspacePageGrid
       className="impg impg-wpg" scrollLabel="Import"
-      masthead={inFlow ? null : (
+      masthead={!showTiles ? null : (
         <PanelHeader
           kind="title" slim className="ph ph--compact ph--panel"
           attrs={{ "data-probe": "page-header", "data-size": "compact", "data-impg": "header" }}
@@ -88,7 +134,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
         />
       )}
     >
-      {!inFlow && (
+      {showTiles && (
         <div className="impg-tilesview" data-impg="tiles-view">
           <div className="impg-tiles" data-impg="tiles">
             <section className="impg-tile" data-impg="tile" data-tile="smart" aria-labelledby="impg-t-smart">
@@ -132,15 +178,31 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
 
       {/* The shared import flow. Idle, it renders only its two file pickers; once a file is chosen its
           screens take the sheet in place of the header and the tiles. */}
-      <div className="sf impg-flow" data-impg="flow" data-flow-screen={flowScreen}>
+      <div className="sf impg-flow" data-impg="flow" data-flow-screen={book ? "book" : flowScreen}>
+        {book && (
+          <BookStep
+            initial={draft ?? emptyManuscriptFields()}
+            onBack={() => setBook(null)}
+            onContinue={(fields) => {
+              /* Held, not saved. The picker opens from this same press, so the browser lets it. */
+              const kind = book;
+              setDraft(fields); setBook(null);
+              openPicker(kind);
+            }}
+          />
+        )}
         <ImportFlow
           ref={flowRef}
-          manuscriptTitle={manuscript?.title ?? ""}
-          onEnsureManuscript={async () => manuscript?.id ?? null}
+          manuscriptTitle={lab?.flow?.title ?? manuscript?.title ?? draft?.title ?? ""}
+          onEnsureManuscript={ensureManuscript}
+          hostError={hostError}
           onAddByHand={() => onNavigate("agents", "Add an agent")}
           onImportComplete={() => onNavigate("dashboard")}
           onScreen={setFlowScreen}
+          onCancel={() => setAsking(true)}
+          lab={lab?.flow}
         />
+        {asking && <ImportCancelConfirm onKeep={() => setAsking(false)} onDiscard={() => { setAsking(false); flowRef.current?.reset(); }} />}
       </div>
     </WorkspacePageGrid>
   );

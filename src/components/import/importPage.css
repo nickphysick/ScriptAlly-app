@@ -63,3 +63,11 @@
 /* The frame's scroller gives a step 28px above and 40px below; the app's sheet gives neither, so the
    wrapper does while a step is showing. The side gutters are the page grid's. */
 .impg .sf.impg-flow:not([data-flow-screen="idle"]) { padding: 28px 0 40px; }
+
+/* The two loaders are the whole sheet. In the frame its scroller becomes a filling column while one
+   is mounted; in the app the wrapper takes the scrollport's measured height (the page grid publishes
+   it as `--wpg-port-h`) less the grid's own gutters, and the loader fills that. */
+.impg .sf.impg-flow[data-flow-screen="reading"], .impg .sf.impg-flow[data-flow-screen="importing"] {
+  padding: 0; display: flex; flex-direction: column; min-height: max(520px, calc(var(--wpg-port-h, 720px) - 56px));
+  border-radius: 12px; overflow: hidden; margin-top: 16px;
+}

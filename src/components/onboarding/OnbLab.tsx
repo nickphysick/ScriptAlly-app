@@ -248,7 +248,17 @@ export const OnbLab: React.FC = () => {
       tier: reason.startsWith("pro") ? "pro" : "free",
       ...(reason === "pro_month_used" ? { nextAvailable: "2026-11-01" } : {}),
     } as SmartImportEntitlement;
-    return <div data-import-lab="" style={{ minHeight: "100vh", background: "var(--ws-page)" }}><ImportPage onNavigate={labSpy("navigate")} lab={{ entitlement: ent, spy: labSpy }} /></div>;
+    /* `fx=` mounts the shared flow on its summary over a fixture, with a stand-in commit, so the
+       in-app Cancel and the end of an import can be driven without an account. `live=1` leaves the
+       tiles' real handlers on (the lab has no manuscript, so a press opens the book step). */
+    const fx = q.get("fx");
+    const flow = fx ? { result: labFixture(fx), fileName: LAB_FILE, title: LAB_TITLE, commit: labCommit({ skip: Number(q.get("skip") ?? 0), none: q.get("none") === "1" }), uid: LAB_UID, floorMs: Number(q.get("floor") ?? 300) } : undefined;
+    const navigate = (tab: string) => labSpy("navigate")(tab);
+    return (
+      <div data-import-lab="" style={{ minHeight: "100vh", background: "var(--ws-page)" }}>
+        <ImportPage onNavigate={navigate} lab={{ entitlement: ent, spy: fx || q.get("live") === "1" ? undefined : labSpy, flow, ensure: async () => { labSpy("ensureManuscript")(); return "lab-ms"; } }} />
+      </div>
+    );
   }
 
   if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");

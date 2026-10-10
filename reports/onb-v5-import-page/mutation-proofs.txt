@@ -5,3 +5,6 @@ D2 mutated: 2 red, 2 green —     Error: disabled exactly when the entitlement 
 D3 mutated: 1 red, 0 green —     Error: palette lands on the three tiles
 T1 mutated: 1 red, 0 green —     Error: expect(received).toEqual(expected) // deep equality
 F1 mutated (the set-up frame mounted in the app): 1 red —     Error: the set-up frame is not used in the app
+F2 mutated: 1 red, 0 green —     Error: the book step is on screen
+F3 mutated: 1 red, 0 green —     Error: summary: the confirm is shown
+F4 mutated: 1 red, 1 green —     Error: the notice's rows

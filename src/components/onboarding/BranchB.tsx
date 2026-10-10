@@ -16,14 +16,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { SmartImportResult } from "../../types/smartImport";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { CommitOutcome } from "../../lib/smartImportCommit";
-import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
+import { ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 import { CaptureOption } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "../import/ImportFlow";
-import { StepColumn, OpenTitle, StepCard, BackLink, StepFoot, FieldError } from "./setupParts";
+import { BookStep } from "./BookStep";
 
-export const BOOK_TITLE = "The book you're querying.";
-export const BOOK_SUB = "Just the essentials. Your agents and queries attach to this, and you can flesh it out any time.";
+export { BOOK_TITLE, BOOK_SUB } from "./BookStep";
 
 export interface BranchBProps {
   onSkip: () => void;
@@ -112,40 +111,22 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(lab ? { ...emptyManuscriptFields(), title: lab.title } : initialBook ?? emptyManuscriptFields());
-  const [fieldError, setFieldError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const [importOption, setImportOption] = useState<CaptureOption>(defaultImport);
-
-  const shownError = error || fieldError;
 
   // ── B2 · the book ────────────────────────────────────────────────────────
   if (screen === "book") {
     return (
-      <StepColumn screen="book">
-        <OpenTitle title={BOOK_TITLE} sub={BOOK_SUB} />
-        <StepCard>
-          <ManuscriptFields value={fields} onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }} />
-          {shownError && <FieldError>{shownError}</FieldError>}
-          <StepFoot left={<BackLink onClick={onExit} />}>
-            <button
-              type="button" className="sf-btn" disabled={saving}
-              onClick={() => {
-                if (!fields.title.trim()) { setFieldError("Give it a title — even a working one."); return; }
-                /* Required for the reason BranchA requires it: an agent's fit is matched on genre. */
-                if (!fields.genre) { setFieldError("Pick the primary genre — agents search by it."); return; }
-                setFieldError(null);
-                setSaving(true);
-                void onSaveBook(fields)
-                  .then((ok) => { if (ok) setScreen("list"); })
-                  .finally(() => setSaving(false));
-              }}
-            >
-              Continue
-            </button>
-          </StepFoot>
-        </StepCard>
-      </StepColumn>
+      <BookStep
+        initial={fields}
+        error={error}
+        onBack={onExit}
+        onContinue={async (f) => {
+          setFields(f);
+          const ok = await onSaveBook(f);
+          if (ok) setScreen("list");
+        }}
+      />
     );
   }
 

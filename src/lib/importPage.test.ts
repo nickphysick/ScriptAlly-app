@@ -45,3 +45,14 @@ describe("W1 · the Import page's words", () => {
     expect(page).not.toMatch(/recommended|Upgrade/i);
   });
 });
+
+describe("W1 · leaving an import part-way uses the query drawer's own words", () => {
+  it("each of the four strings is in the drawer's discard confirm", async () => {
+    const { CANCEL_ASK } = await import("../components/import/ImportCancelConfirm");
+    expect(CANCEL_ASK).toEqual({ title: "Discard this?", text: "Nothing has been saved yet.", keep: "Keep going", discard: "Discard" });
+    const drawer = code("src/components/queryActions/DrawerShell.tsx");
+    expect(drawer).toContain(`<b>${CANCEL_ASK.title}</b>${CANCEL_ASK.text}`);
+    expect(drawer).toContain(`>${CANCEL_ASK.keep}</button>`);
+    expect(drawer).toContain(`>${CANCEL_ASK.discard}</button>`);
+  });
+});
