@@ -33,6 +33,11 @@ export function retiredV136(why: string, by: string): string {
   return `RETIRED by Query Centre v136 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-query-centre-v136.md).`;
 }
 
+/** Header v3 — the same, for a case whose subject was a page's own header (v136's open header, the stamp, the faces row). Listed in RETIRED-header-v3.md. */
+export function retiredHV3(why: string, by: string): string {
+  return `RETIRED by header v3 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-header-v3.md).`;
+}
+
 export function retired(why: string, by: string): string {
   return `RETIRED by ink shell v1 — ${why}. Superseded by ${by} (tests/e2e/RETIRED-ink-shell-v1.md).`;
 }

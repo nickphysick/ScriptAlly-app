@@ -42,8 +42,10 @@ describe("QcOpenHeader (header v3)", () => {
   it("loading: the number is a blank of its box and both buttons are disabled", () => {
     for (const h of [html(null), html(27, { loading: true })]) {
       expect(h).toContain('data-loading=""');
-      expect(h).toMatch(/<span class="hp3-n hp3-blank" data-hp3-part="number">00<\/span>/);
-      expect(h).toContain(">queries sent</span>");
+      expect(h).toMatch(/<span class="hp3-n hp3-blank" data-hp3-part="number" data-blank="00" aria-hidden="true"><\/span>/);
+      /* and the h1 holds no text at all while it waits */
+      expect(h.slice(h.indexOf("<h1"), h.indexOf("</h1>")).replace(/<[^>]+>/g, "").trim()).toBe("");
+      expect(h).toContain('data-blank="queries sent"');
       expect((h.match(/disabled=""/g) ?? []).length, "both buttons disabled").toBe(2);
     }
     expect(html(27)).not.toContain("data-loading");

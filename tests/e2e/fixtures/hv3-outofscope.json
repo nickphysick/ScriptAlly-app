@@ -1,0 +1,202 @@
+{
+ "/dashboard@1512": {
+  "box": [
+   248,
+   0,
+   1264,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/account@1512": {
+  "box": [
+   248,
+   0,
+   1264,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/help@1512": {
+  "box": [
+   248,
+   0,
+   1264,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/plans@1512": {
+  "box": [
+   248,
+   0,
+   1264,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/import@1512": {
+  "box": [
+   248,
+   0,
+   1264,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/dashboard@1280": {
+  "box": [
+   248,
+   0,
+   1032,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/account@1280": {
+  "box": [
+   248,
+   0,
+   1032,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/help@1280": {
+  "box": [
+   248,
+   0,
+   1032,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/plans@1280": {
+  "box": [
+   248,
+   0,
+   1032,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ },
+ "/import@1280": {
+  "box": [
+   248,
+   0,
+   1032,
+   64
+  ],
+  "panel": false,
+  "hp3": false,
+  "title": "",
+  "style": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "radius": "0px",
+   "padding": "0px 22px 0px 0px",
+   "margin": "0px",
+   "border": "0px",
+   "h1Size": "",
+   "h1Face": ""
+  }
+ }
+}

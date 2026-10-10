@@ -244,30 +244,12 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
       const r = await readHero(page, HERO[route]); const w = `${route} @${vp.width}`, H = HERO[route];
       L.check("A precondition: the hero header was read", w, !!r?.hd && !!r.win, r ? SHOW(r.hd) : "absent");
       if (!r?.hd || !r.win) continue; got[route] = r;
-      /* A1 */
-      const want = vi === 0 ? 313 : 268;
-      L.check(`A1 sheet top to panel bottom is ${want} (±2)`, w, near(r.hd.b - r.win.t, want, 2), (r.hd.b - r.win.t).toFixed(1));
-      /* A2 */
-      const expectN = (route as string) === "/queries" ? Number(r.badgeCounts[0]) : (r.hero ?? NaN) - Number(r.badgeCounts[1]);
-      L.check("A2 precondition: the count it must state was read independently", w, Number.isFinite(expectN), (route as string) === "/queries" ? `With you badge "${r.badgeCounts[0]}"` : `on file ${r.hero} − queried badge "${r.badgeCounts[1]}"`);
-      if (expectN > 0) {
-        L.check("A2 the stamp's text is exact", w, r.stamp?.text === `${expectN} ${H.stampWord}`, `"${r.stamp?.text}" vs "${expectN} ${H.stampWord}"`);
-        L.check("A2 its colour and its place outside the h1", w, r.stamp?.color === "rgb(224, 161, 136)" && r.stamp.inH1 === false, `${r.stamp?.color} · in h1 ${r.stamp?.inH1}`);
-      } else L.check("A2 absent when the count is 0", w, r.stamp === null, `${r.stamp?.text}`);
-      /* A3 */
-      L.check("A3 precondition: faces were drawn", w, r.nDiscs >= 2 && !!r.faces && !!r.disc, `${r.nDiscs} discs`);
-      L.check("A3 one row: the row's height is the disc's (±1), every disc on one line", w, !!r.faces && !!r.disc && near(r.faces.h, r.disc.h, 1) && r.discTops === 1, `row ${r.faces?.h.toFixed(1)} · disc ${r.disc?.h.toFixed(1)} · ${r.discTops} line(s)`);
-      L.check("A3 the halo is the panel's background", w, r.panelBg === PANEL_BG && !!r.halo && r.halo.includes(PANEL_BG), `${r.halo}`);
-      L.check("A3 no key on screen and no subheader element", w, r.keyVisible === 0 && r.subs === 0, `key ${r.keyVisible} · subheader ${r.subs}`);
-      if (route === "/agents") {
-        const nums = (r.said ?? "").match(/\d+/g)?.map(Number) ?? [];
-        L.check("A3 the hidden sentence carries the three counts, and they sum to the count on file", w, !r.saidVisible && nums.length >= 3 && nums.slice(-3).reduce((s, v) => s + v, 0) === r.hero && nums.includes(expectN), `"${r.said}" · on file ${r.hero}`);
-      }
+      /* RETIRED (header v3, 10 Oct): A1 (the panel's height), A2 (the stamp) and A3 (the faces row) — the header is the
+         shared number panel, with no stamp and no faces. Held now by HV3 H7, H5 and H2 (tests/e2e/RETIRED-header-v3.md). */
       /* A4 */
       L.check("A4 primary: cream ground, ink text", w, r.b1?.bg === "rgb(243, 238, 230)" && r.b1.color === "rgb(27, 36, 51)", `${r.b1?.bg} · ${r.b1?.color}`);
       L.check("A4 secondary: transparent, with the cream ring", w, !!r.b2 && /rgba\(0, 0, 0, 0\)|transparent/.test(r.b2.bg) && /244, 238, 229/.test(r.b2.shadow), `${r.b2?.bg} · ${r.b2?.shadow}`);
-      /* A5 */
-      L.check(`A5 the drawing is ${H.artFile} at ${H.artH[vi]} (±1)`, w, !!r.artSrc?.includes(H.artFile) && near(r.art?.h, H.artH[vi], 1), `${r.artSrc?.split("/").pop()} · ${r.art?.h.toFixed(1)}`);
+      /* RETIRED (header v3): A5, the drawing at 206 (170). It is 196 on the compact sheet: HV3 H6. */
       /* A6 */
       const gap = r.cardTop !== null ? r.cardTop - r.hd.b : NaN; const wantGap = vi === 0 ? 72 : 60;
       L.check(`A6 panel bottom to card top is ${wantGap} (±1)`, w, near(gap, wantGap, 1), gap.toFixed(1));
@@ -275,13 +257,8 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
       L.check("A6 every badge's halo clears the panel by 20 or more", w, r.badgeTops.length === 3 && clear >= 20, `${r.badgeTops.length} badges · ${clear.toFixed(1)}`);
     }
   }
-  /* A2: no stamp on any other route */
-  for (const route of WORKSPACE.filter((r) => r !== "/agents")) {
-    await open(page, route, SIZES[0]);
-    const r = await readPanel(page);
-    L.check("A2 no stamp on any other route", route, !!r.any && r.stamps.length === 0, `${r.stamps.map((s) => s.text).join()}`);
-  }
-  L.done(2 * 13 + 8);
+  /* RETIRED (header v3): "no stamp on any other route" is HV3 H5, on every route */
+  L.done(2 * 5);
 });
 
 /* ───────────────────────── C1 · the opaque badge ───────────────────────── */
@@ -360,7 +337,7 @@ test("D1 D2 D3 D4 D8 · the Contact list's badge cards", async ({ page }) => {
     const qc = [QC_CARD, QC_CARD, QC_CARD] as unknown as Awaited<ReturnType<typeof readCards>>;
     await open(page, "/agents", vp); await page.waitForTimeout(700);
     const cl = await readCards(page, "cl");
-    const onFile = await page.evaluate(() => { const e = [...document.querySelectorAll<HTMLElement>('[data-cl15="hero-n"]')].find((x) => x.getBoundingClientRect().height > 0); return e ? Number(e.textContent) : NaN; });
+    const onFile = await page.evaluate(() => { const e = [...document.querySelectorAll<HTMLElement>('[data-cl15="hero-n"], [data-cl15="header"] [data-hp3-part="number"]')].find((x) => x.getBoundingClientRect().height > 0); return e ? Number(e.textContent) : NaN; });
     const W = `@${vp.width}`;
     L.check("D precondition: three cards on each desk", W, qc.length === 3 && cl.length === 3 && cl.map((c) => c.key).join() === "week,queried,profiles", `QC ${qc.length} · Contact ${cl.map((c) => c.key).join()}`);
     if (qc.length !== 3 || cl.length !== 3) continue;
@@ -477,5 +454,7 @@ test("floor · the run wrote the readings it claims", async () => {
   expect(counts.every((c) => c > 0), `a ledger is missing: ${names.filter((_, i) => !counts[i]).join()}`).toBe(true);
   /* RE-POINTED (Query Centre v136): the Query Centre left the panel, taking its readings with it — 506 written on the
      first run without it, where 600 was the floor with it */
-  expect(total).toBeGreaterThanOrEqual(480);
+  /* RE-POINTED (header v3): A1, A2, A3, A5 and the no-stamp sweep are retired, taking 34 readings — 472 written on the
+     first run without them */
+  expect(total).toBeGreaterThanOrEqual(450);
 });

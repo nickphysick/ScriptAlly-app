@@ -1,0 +1,130 @@
+[
+ {
+  "lock": "H1",
+  "mutation": "restore v136's open header on /queries (no surface, a ruled corner)",
+  "red": true,
+  "ownRows": 6,
+  "otherRows": 1,
+  "first": [
+   "✗ H1 surface, radius 14 · /queries @1512 — rgba(0, 0, 0, 0) · 0px",
+   "✗ H1 top is 28 below the sheet's top (±1) · /queries @1512 — 0.0",
+   "✗ H1 /queries has no ruled corner or margin line · /queries @1512 — border-left 3px rgb(42, 58, 82)"
+  ]
+ },
+ {
+  "lock": "H2",
+  "mutation": "the subline moved inside the h1",
+  "red": true,
+  "ownRows": 8,
+  "otherRows": 1,
+  "first": [
+   "✗ H2 the subline is outside the h1 · /agents @1512 — inside true",
+   "✗ H2 the subline is outside the h1 · /manuscripts/comps @1512 — inside true",
+   "✗ H2 the subline is outside the h1 · /manuscripts/packages @1512 — inside true"
+  ]
+ },
+ {
+  "lock": "H3",
+  "mutation": "the number hard-coded to 27",
+  "red": true,
+  "ownRows": 10,
+  "otherRows": 11,
+  "first": [
+   "✗ H3 N is active + inactive · /queries @1512 — 27 vs 69 + 13",
+   "✗ H3 N is the three kinds of agent added up · /agents @1512 — 27 vs 5 + 1 + 31 (\"5 active, 1 closed, 31 not queried.\")",
+   "✗ H3 N is the number of cards the page draws · /manuscripts/comps @1512 — 27 vs 3 cards"
+  ]
+ },
+ {
+  "lock": "H4",
+  "mutation": "a number rendered on Analytics",
+  "red": true,
+  "ownRows": 2,
+  "otherRows": 1,
+  "first": [
+   "✗ H4 there is no number element · /queries/analytics @1512 — 1",
+   "✗ H4 there is no number element · /queries/analytics @1280 — 1"
+  ]
+ },
+ {
+  "lock": "H5",
+  "mutation": "the stamp restored",
+  "red": true,
+  "ownRows": 20,
+  "otherRows": 5,
+  "first": [
+   "✗ H5 no stamp · /queries @1512 — 1",
+   "✗ H5 no stamp · /agents @1512 — 1",
+   "✗ H5 no stamp · /manuscripts/comps @1512 — 1"
+  ]
+ },
+ {
+  "lock": "H6",
+  "mutation": "top: 30px on the art",
+  "red": true,
+  "ownRows": 12,
+  "otherRows": 1,
+  "first": [
+   "✗ H6 its vertical centre is the panel's (±3) · /queries @1512 — 249.0 vs 222.0",
+   "✗ H6 its vertical centre is the panel's (±3) · /agents @1512 — 249.0 vs 222.0",
+   "✗ H6 its vertical centre is the panel's (±3) · /manuscripts/packages @1512 — 249.0 vs 222.0"
+  ]
+ },
+ {
+  "lock": "H7",
+  "mutation": "panel padding-bottom 80",
+  "red": true,
+  "ownRows": 10,
+  "otherRows": 13,
+  "first": [
+   "✗ H7 the panel is 260 tall (±4) · /queries @1512 — 306.0",
+   "✗ H7 every number panel is 260 tall (±4) · /agents @1512 — 306.0",
+   "✗ H7 every number panel is 260 tall (±4) · /manuscripts/comps @1512 — 273.6"
+  ]
+ },
+ {
+  "lock": "H8",
+  "mutation": "the number's blank box dropped while loading",
+  "red": true,
+  "ownRows": 2,
+  "otherRows": 1,
+  "first": [
+   "✗ H8 the header's box is the same first seen and settled (±1) · /manuscripts/comps @1512 — 296,92 1159×64 (loading) → 296,92 1159×260",
+   "✗ H8 the header's box is the same first seen and settled (±1) · /manuscripts/comps @1280 — 289,92 942×64 (loading) → 289,92 942×260"
+  ]
+ },
+ {
+  "lock": "H9",
+  "mutation": "margin-top 80 on the bands",
+  "red": true,
+  "ownRows": 2,
+  "otherRows": 1,
+  "first": [
+   "✗ H9 panel bottom → bands top is 28 (±2) · /queries @1512×900 — 80.0",
+   "✗ H9 panel bottom → bands top is 28 (±2) · /queries @1280×800 — 80.0"
+  ]
+ },
+ {
+  "lock": "H10",
+  "mutation": "panel padding 120",
+  "red": true,
+  "ownRows": 2,
+  "otherRows": 1,
+  "first": [
+   "✗ H10 the link's bottom is at least 24 inside the viewport · /queries @1512×900 — 878.6 of 900 (21.4 clear)",
+   "✗ H10 the link's bottom is at least 24 inside the viewport · /queries @1280×800 — 878.6 of 800 (-78.6 clear)"
+  ]
+ },
+ {
+  "lock": "H11",
+  "mutation": "`panel` defaulted to true (every shared header takes the panel)",
+  "red": true,
+  "ownRows": 6,
+  "otherRows": 1,
+  "first": [
+   "✗ H11 it is not the panel header · /help@1512 — hp3 false · panel true (was false)",
+   "✗ H11 it is not the panel header · /plans@1512 — hp3 false · panel true (was false)",
+   "✗ H11 it is not the panel header · /import@1512 — hp3 false · panel true (was false)"
+  ]
+ }
+]

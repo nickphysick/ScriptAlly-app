@@ -80,10 +80,22 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
         {kind === "number" ? (
           <div className="hp3-tb" data-hp3-part="title-block">
             <h1 className="hp3-h1" data-probe="title" data-page-title="" aria-label={blank ? undefined : `${number} ${words}`}>
-              <span className={`hp3-n${blank ? " hp3-blank" : ""}`} data-hp3-part="number">{blank ? "00" : number}</span>
-              {/* a real space, so the title still reads "27 queries sent" as text (the grid draws none) */}
-              {" "}
-              <span className="hp3-w" data-hp3-part="words">{words}</span>
+              {/* ⚠️ UNSETTLED = NO TEXT, AND THE SAME BOXES. While the count is not known the number and its words are
+                  blanks: their text is drawn by `::before` from `data-blank`, hidden, so each keeps its full box and
+                  the h1 holds no text a reader or a screen reader could take for a count (living headers LH10). */}
+              {blank ? (
+                <>
+                  <span className="hp3-n hp3-blank" data-hp3-part="number" data-blank="00" aria-hidden="true" />
+                  <span className="hp3-w hp3-blank" data-hp3-part="words" data-blank={words} aria-hidden="true" />
+                </>
+              ) : (
+                <>
+                  <span className="hp3-n" data-hp3-part="number">{number}</span>
+                  {/* a real space, so the title still reads "27 queries sent" as text (the grid draws none) */}
+                  {" "}
+                  <span className="hp3-w" data-hp3-part="words">{words}</span>
+                </>
+              )}
             </h1>
             {(sub || subPending) && <p className="hp3-s" data-probe="intro" data-hp3-part="sub">{sub ?? " "}</p>}
           </div>

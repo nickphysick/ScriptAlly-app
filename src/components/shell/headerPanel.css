@@ -136,7 +136,8 @@
 .hp3 .hp3-s :is(em, i), .hp3 .hp3-sub :is(em, i) { font-family: inherit; font-style: italic; }
 .hp3 .hp3-s :is(b, strong, .ph-ms), .hp3 .hp3-sub :is(b, strong, .ph-ms) { font-family: inherit; font-weight: 600; color: var(--hpanel-fg); }
 /* loading: the number is a blank of its full box */
-.hp3 .hp3-h1 .hp3-n.hp3-blank { color: transparent !important; }
+/* a blank: its own text, drawn by a pseudo-element and hidden, so the box is the settled one and the h1 has no text */
+.hp3 .hp3-h1 .hp3-blank::before { content: attr(data-blank); visibility: hidden; }
 
 /* TITLE: a title in the number's place, at most two lines; its subline under it */
 .hp3 .hp3-txt h1.hp3-title {

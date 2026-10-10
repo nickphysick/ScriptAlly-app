@@ -6,6 +6,7 @@
  *
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test qcV136
  */
+import { retiredHV3 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 import { readPng } from "./pngPixels";
@@ -28,7 +29,7 @@ const read = (page: Page) => page.evaluate((HD) => {
   const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
   const R = (e: Element | null | undefined) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, r: r.right, b: r.bottom, cy: r.top + r.height / 2 }; };
   const hd = vis(HD)!, sheet = vis(".ws-window")!, bands = vis('[data-qcv="courts"]');
-  const h1 = hd.querySelector<HTMLElement>("h1")!, hn = hd.querySelector<HTMLElement>('[data-qcv="oh-hn"]')!;
+  const h1 = hd.querySelector<HTMLElement>("h1")!, hn = (hd.querySelector<HTMLElement>('[data-qcv="oh-hn"]') ?? hd.querySelector<HTMLElement>('[data-hp3-part="number"]'))!; /* RE-POINTED (header v3): the number is the shared panel header's */
   const sub = hd.querySelector<HTMLElement>('[data-qcv="oh-sub"]'), art = hd.querySelector<HTMLElement>('[data-qcv="oh-art"]');
   const margin = hd.querySelector<HTMLElement>('[data-qcv="oh-margin"]'), ruled = hd.querySelector<HTMLElement>('[data-qcv="oh-ruled"]');
   const boxed: string[] = [];
@@ -62,12 +63,12 @@ const read = (page: Page) => page.evaluate((HD) => {
   });
   const link = vis('[data-qcv="full-list"]');
   return {
-    sheet: R(sheet)!, hd: R(hd)!, txt: R(hd.querySelector('[data-qcv="oh-text"]'))!, bands: R(bands), boxed,
+    sheet: R(sheet)!, hd: R(hd)!, txt: R(hd.querySelector('[data-qcv="oh-text"], [data-hp3-part="text"]'))!, bands: R(bands), boxed,
     panel: hd.classList.contains("hpanel") || hd.hasAttribute("data-hpanel"), sheets: [...document.querySelectorAll<HTMLElement>("[data-header-sheet]")].filter((e) => e.getBoundingClientRect().height > 0).length,
     tabBg: tab ? getComputedStyle(tab).backgroundColor : "", pageBg: getComputedStyle(document.documentElement).getPropertyValue("--ws-page").trim(), sheetBg: getComputedStyle(sheet).backgroundColor,
     rule: `${cs.borderBottomWidth} ${cs.borderBottomColor}`, hdBg: cs.backgroundColor, hdRadius: cs.borderTopLeftRadius,
     h1Text: h1.textContent ?? "", h1Label: h1.getAttribute("aria-label"), pageTitle: h1.hasAttribute("data-page-title"), hn: hn.textContent ?? "", hnSize: parseFloat(getComputedStyle(hn).fontSize), hnFace: getComputedStyle(hn).fontFamily,
-    wordsSize: parseFloat(getComputedStyle(hd.querySelector('[data-qcv="oh-ht"]')!).fontSize),
+    wordsSize: parseFloat(getComputedStyle(hd.querySelector('[data-qcv="oh-ht"], [data-hp3-part="words"]')!).fontSize),
     sub: sub ? { text: sub.textContent ?? "", em: sub.querySelector("em")?.textContent ?? null, emStyle: sub.querySelector("em") ? getComputedStyle(sub.querySelector("em")!).fontStyle : "", emColour: sub.querySelector("em") ? getComputedStyle(sub.querySelector("em")!).color : "", face: getComputedStyle(sub).fontFamily, size: parseFloat(getComputedStyle(sub).fontSize) } : null,
     art: R(art), artHidden: art?.getAttribute("aria-hidden"), stamp: hd.querySelector<HTMLElement>('[data-qcv="oh-stamp"]') ? getComputedStyle(hd.querySelector('[data-qcv="oh-stamp"]')!).color : null,
     margin: margin ? { box: R(margin)!, bg: getComputedStyle(margin).backgroundColor, hidden: margin.getAttribute("aria-hidden") } : null,
@@ -91,6 +92,7 @@ async function linesInColumn(page: Page, x: number, y0: number, y1: number): Pro
 
 test.describe("Query Centre v136 — A · the open header", () => {
   test("A1 · open: no surface or radius on the header or anything around it, no header sheet, no panel class; the tab is the page's colour", async ({ page }) => {
+    test.skip(true, retiredHV3("the header of the Query Centre is the shared panel again, with a surface and a radius", "HV3 H1"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
@@ -107,6 +109,7 @@ test.describe("Query Centre v136 — A · the open header", () => {
   });
 
   test("A2 · title: “You’ve sent {N} queries”, N = active + inactive, the figure at 88; the subheader is “for {title}” with the title italic", async ({ page }) => {
+    test.skip(true, retiredHV3("the title is the stacked number and its words (82 queries sent), not the v136 sentence", "HV3 H2 and H3"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
@@ -153,6 +156,7 @@ test.describe("Query Centre v136 — A · the open header", () => {
   });
 
   test("A3 · alignment: the text starts on the bands' left, the drawing's ink ends on their right and stands on the rule", async ({ page }) => {
+    test.skip(true, retiredHV3("the drawing is centred inside the panel; there is no rule for it to stand on", "HV3 H6"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
@@ -172,6 +176,7 @@ test.describe("Query Centre v136 — A · the open header", () => {
   });
 
   test("A4 · ruled corner: a red margin line 26 left of the column from the sheet's top to the rule; ruled lines at the sheet's left, none past the fade", async ({ page }) => {
+    test.skip(true, retiredHV3("the ruled corner and its margin line are gone", "HV3 H1"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
@@ -197,6 +202,7 @@ test.describe("Query Centre v136 — A · the open header", () => {
   });
 
   test("A5 · rhythm: the bands start 40 under the rule", async ({ page }) => {
+    test.skip(true, retiredHV3("the bands stand 28 under the panel, not 40 under a rule", "HV3 H9"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
@@ -370,7 +376,7 @@ test.describe("Query Centre v136 — B · the active and inactive bands", () => 
       return {
         loading: !!hd?.hasAttribute("data-loading"), cardsLoading: [...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].filter((c) => c.dataset.loading === "true").length,
         parts: {
-          header: R(hd), text: R(hd?.querySelector('[data-qcv="oh-text"]') ?? null), drawing: R(hd?.querySelector('[data-qcv="oh-art"]') ?? null),
+          header: R(hd), text: R(hd?.querySelector('[data-qcv="oh-text"], [data-hp3-part="text"]') ?? null), drawing: R(hd?.querySelector('[data-qcv="oh-art"]') ?? null),
           ...Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qcv="glance-group"]')].map((g) => [`band-${g.dataset.group}`, R(g)])),
           ...Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qcv="court"]')].map((c) => [`card-${c.dataset.court}`, R(c)])),
           link: R(document.querySelector('[data-qcv="full-list"]')),
@@ -400,14 +406,15 @@ test.describe("Query Centre v136 — B · the active and inactive bands", () => 
 });
 
 test.describe("Query Centre v136 — C · View the full list", () => {
-  test("C1 · above the fold: the link's bottom edge is 24px or more inside the viewport, 30 under the bands, centred", async ({ page }) => {
+  test("C1 · above the fold: the link's bottom edge is 24px or more inside the viewport, 40 under the bands, centred", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await read(page);
       expect(g.link, `${w}: the link was found`).not.toBeNull();
       expect(g.vh, `${w}: the viewport`).toBe(h);
       expect(g.vh - g.link!.box.b, `${w}: the link ends ${g.vh - g.link!.box.b} above the viewport's foot`).toBeGreaterThanOrEqual(24);
-      expect(Math.abs(g.link!.box.y - g.bands!.b - 30), `${w}: bands → link ${g.link!.box.y - g.bands!.b}`).toBeLessThanOrEqual(2);
+      /* RE-POINTED (header v3 part C): 40 under the bands, where v136 drew 30 */
+      expect(Math.abs(g.link!.box.y - g.bands!.b - 40), `${w}: bands → link ${g.link!.box.y - g.bands!.b}`).toBeLessThanOrEqual(2);
       expect(Math.abs((g.link!.box.x + g.link!.box.w / 2) - (g.bands!.x + g.bands!.w / 2)), `${w}: centred under the bands`).toBeLessThanOrEqual(2);
       console.log(`[C1] ${w}: the link ends at ${g.link!.box.b.toFixed(1)} of ${g.vh}`);
     }

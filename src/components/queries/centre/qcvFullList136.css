@@ -8,7 +8,9 @@
  *    footer are placed on explicit rows (qcvBand134.css, qcvPage.css); with one more row above them each moves
  *    down one. Left where they were, grid auto-placement would push "Recently updated" below the footer.
  */
-.qcv-group > .qcfl { grid-column: 1 / -1; min-width: 0; display: flex; justify-content: center; margin-top: 30px; }
+.qcv-group > .qcfl { grid-column: 1 / -1; min-width: 0; display: flex; justify-content: center; margin-top: 40px; }
+/* Header v3 part C: 40 under the bands, 46 on the wide sheet (v136: 30) */
+.ws-app.sheet-wide .qcv-group > .qcfl { margin-top: 46px; }
 .qcv-group > .qcfl ~ .qc134-ban { grid-row: 5; }
 .qcv-group > .qcfl ~ .qc134-ban ~ .qcv-page { grid-row: 6; }
 .qcv-group > .qcfl ~ .qc134-ban ~ .af { grid-row: 7; }

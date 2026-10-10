@@ -14,7 +14,8 @@
 @import "./qcvPage.css";
 
 .qcv-group > .qcg { grid-column: 1 / -1; min-width: 0; }
-.qcg { --qcg-disc: 30px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: stretch; margin-top: 40px; }
+.qcg { --qcg-disc: 30px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: stretch; margin-top: 28px; }
+/* Header v3 part C: the bands stand 28 under the panel (v136 stood them 40 under its open header) */
 .qcg .qcg-group { box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; border-radius: 16px; padding: 16px 8px 8px; }
 .qcg .qcg-group--active { background: #f3ddd2; }
 .qcg .qcg-group--inactive { background: #e4ded6; }

@@ -449,6 +449,10 @@ export const SubmissionPackages: React.FC = () => {
     count: collectionsReady ? pkgCount : null,
     copy: (n) => packagesHeaderCopy(n, { lead, firstLiveName: (active && active.status !== "Retired" ? active : live[0])?.packageName ?? null }),
     empty: { heading: PACKAGES_EMPTY_HEADING, subline: [PACKAGES_EMPTY_SUBLINE] },
+  } : !collectionsReady ? {
+    /* Header v3 (H8): the same wait as Comparable titles' — a blank number until the manuscripts land */
+    count: null,
+    copy: (n) => packagesHeaderCopy(n, { lead: null, firstLiveName: null }),
   } : undefined;
   const editing = shown?.editId ?? null;
   const dupe = shown && shown.letter

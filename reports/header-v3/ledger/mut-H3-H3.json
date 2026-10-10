@@ -1,0 +1,1682 @@
+[
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "kind number · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H1 /queries has no ruled corner or margin line",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "border-left 1px rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "\"queries sent\""
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "\"82 queries sent\" vs \"27 queries sent\""
+ },
+ {
+  "lock": "H3 N is active + inactive",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "27 vs 69 + 13"
+ },
+ {
+  "lock": "H7 the panel is 260 tall (±4)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "art 1180,121 219×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "kind number · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "\"agents on file\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "475.3 vs 475.3"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "\"37 agents on file\" vs \"27 agents on file\""
+ },
+ {
+  "lock": "H3 N is the three kinds of agent added up",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "27 vs 5 + 1 + 31 (\"5 active, 1 closed, 31 not queried.\")"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 the hidden sentence carries the three counts",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "\"5 active, 1 closed, 31 not queried.\" hidden true"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "art 1104,121 295×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "kind number · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "\"comp titles\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "475.3 vs 475.3"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "\"3 comp titles\" vs \"27 comp titles\""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "27 vs 3 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "kind number · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "\"packages\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "475.3 vs 475.3"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "\"3 packages\" vs \"27 packages\""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "27 vs 3 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "art 1203,121 196×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "kind number · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "\"things to do\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "475.3 vs 475.3"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "\"39 things to do\" vs \"27 things to do\""
+ },
+ {
+  "lock": "H3 N is the page's tiles added up",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "27 vs tiles 15 + 21 + 3"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "art 1203,121 196×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "kind title · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "1 line(s) \"Less guesswork, better results\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "art 1203,121 196×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "kind title · 296,92 1159×179"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "1 line(s) \"DiscoverPro\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "kind title · 296,92 1159×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "1 line(s) \"Nothing In It Yet\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "art 1203,121 196×196 · panel 296,92 1159×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "kind title · 296,92 1159×181"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "1 line(s) \"Calendar\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "kind title · 296,92 1159×179"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "1 line(s) \"Noteboard\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "kind number · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H1 /queries has no ruled corner or margin line",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "border-left 1px rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "\"queries sent\""
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "\"82 queries sent\" vs \"27 queries sent\""
+ },
+ {
+  "lock": "H3 N is active + inactive",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "27 vs 69 + 13"
+ },
+ {
+  "lock": "H7 the panel is 260 tall (±4)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "art 955,121 219×196 · panel 289,92 942×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "kind number · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "\"agents on file\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "467.8 vs 467.8"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "\"37 agents on file\" vs \"27 agents on file\""
+ },
+ {
+  "lock": "H3 N is the three kinds of agent added up",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "27 vs 5 + 1 + 31 (\"5 active, 1 closed, 31 not queried.\")"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 the hidden sentence carries the three counts",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "\"5 active, 1 closed, 31 not queried.\" hidden true"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "art 879,121 295×196 · panel 289,92 942×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "kind number · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "\"comp titles\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "467.8 vs 467.8"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "\"3 comp titles\" vs \"27 comp titles\""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "27 vs 3 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "kind number · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "\"packages\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "467.8 vs 467.8"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "\"3 packages\" vs \"27 packages\""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "27 vs 3 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "art 978,121 196×196 · panel 289,92 942×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "kind number · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "120"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "\"things to do\""
+ },
+ {
+  "lock": "H2 the subline starts at the words' left (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "467.8 vs 467.8"
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "\"39 things to do\" vs \"27 things to do\""
+ },
+ {
+  "lock": "H3 N is the page's tiles added up",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "27 vs tiles 15 + 21 + 3"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "260.0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "art 978,121 196×196 · panel 289,92 942×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "kind title · 289,92 942×271"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "2 line(s) \"Less guesswork, better results\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "art 978,127 196×196 · panel 289,92 942×271"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "224.6 vs 227.6"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "kind title · 289,92 942×179"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "1 line(s) \"DiscoverPro\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "kind title · 289,92 942×260"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "1 line(s) \"Nothing In It Yet\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 the drawing is 196 tall (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "196.0"
+ },
+ {
+  "lock": "H6 it lies inside the panel",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "art 978,121 196×196 · panel 289,92 942×260"
+ },
+ {
+  "lock": "H6 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "219.0 vs 222.0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "kind title · 289,92 942×181"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "1 line(s) \"Calendar\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "kind title · 289,92 942×179"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "1 line(s) \"Noteboard\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 population: several routes carry a drawing",
+  "where": "all",
+  "ok": true,
+  "detail": "12 readings"
+ },
+ {
+  "lock": "H2 population: several number pages carry a subline",
+  "where": "all",
+  "ok": true,
+  "detail": "8 sublines"
+ }
+]

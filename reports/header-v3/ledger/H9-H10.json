@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "H9 precondition: the panel, the bands and the link are on screen",
+  "where": "/queries @1512×900",
+  "ok": true,
+  "detail": "296,92 1159×260 · 296,380 1159×245 · 296,665 1159×35"
+ },
+ {
+  "lock": "H9 panel bottom → bands top is 28 (±2)",
+  "where": "/queries @1512×900",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H9 bands bottom → the link's top is 40 (±2)",
+  "where": "/queries @1512×900",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "H10 the link's bottom is at least 24 inside the viewport",
+  "where": "/queries @1512×900",
+  "ok": true,
+  "detail": "700.6 of 900 (199.4 clear)"
+ },
+ {
+  "lock": "H9 precondition: the panel, the bands and the link are on screen",
+  "where": "/queries @1280×800",
+  "ok": true,
+  "detail": "289,92 942×260 · 289,380 942×245 · 289,665 942×35"
+ },
+ {
+  "lock": "H9 panel bottom → bands top is 28 (±2)",
+  "where": "/queries @1280×800",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "H9 bands bottom → the link's top is 40 (±2)",
+  "where": "/queries @1280×800",
+  "ok": true,
+  "detail": "40.0"
+ },
+ {
+  "lock": "H10 the link's bottom is at least 24 inside the viewport",
+  "where": "/queries @1280×800",
+  "ok": true,
+  "detail": "700.6 of 800 (99.4 clear)"
+ }
+]
