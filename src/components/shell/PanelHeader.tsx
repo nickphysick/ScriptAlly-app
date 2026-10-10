@@ -61,6 +61,12 @@ export interface PanelHeaderProps {
   className?: string;
   attrs?: Record<string, string | undefined>;
   headerRef?: React.Ref<HTMLElement>;
+  /**
+   * SLIM (onboarding v5 part 3, the Import page) — a title panel with no buttons and no drawing, at
+   * its reference's own measures (padding 26/34/26/38, title 46/1.06, sub 19/1.5, at most 500 wide).
+   * ⚠️ EVERY RULE OF IT NAMES `.hp3--slim` (headerPanel.css), so no other page's header can move.
+   */
+  slim?: boolean;
 }
 
 const Btn: React.FC<{ b: PanelButton; kind: "b1" | "b2"; off: boolean }> = ({ b, kind, off }) => (
@@ -69,12 +75,12 @@ const Btn: React.FC<{ b: PanelButton; kind: "b1" | "b2"; off: boolean }> = ({ b,
 
 export const PanelHeader: React.FC<PanelHeaderProps> = ({
   kind, number = null, words = "", title, titleAdornment, sub, subPending = false, primary, secondary, acts, actsExtra,
-  art, disc = false, said, loading = false, className, attrs, headerRef,
+  art, disc = false, said, loading = false, className, attrs, headerRef, slim = false,
 }) => {
   const blank = kind === "number" && (loading || number === null);
   const hasActs = !!(primary || secondary || acts);
   return (
-    <header ref={headerRef} className={`${className ? `${className} ` : ""}hpanel hpanel--hero hp3 hp3--${kind}${art ? "" : " hp3--noart"}`}
+    <header ref={headerRef} className={`${className ? `${className} ` : ""}hpanel hpanel--hero hp3 hp3--${kind}${art ? "" : " hp3--noart"}${slim ? " hp3--slim" : ""}`}
       data-hpanel="" data-hp3={kind} data-loading={loading || blank ? "" : undefined} aria-busy={loading || blank || undefined} {...attrs}>
       <div className="hp3-txt" data-hp3-part="text">
         {kind === "number" ? (

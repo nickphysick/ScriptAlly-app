@@ -10,7 +10,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
-import { FIX, MUTATE, lab, capture, record, vpName } from "./ip1Lib";
+import { FIX, MUTATE, SHOTS, OUT, VIEWPORTS, lab, capture, record, vpName } from "./ip1Lib";
+import { openRoute } from "./measure";
 
 test.setTimeout(120_000);
 
@@ -98,3 +99,294 @@ for (const vp of P1_VIEWPORTS) {
     });
   });
 }
+
+/* ════ D1 · the page: one navy panel, three tiles, the footnote ═════════════════════════════════
+   On the real route, signed in, inside the real shell. */
+
+async function readPage(page: Page) {
+  return page.evaluate(() => {
+    const vis = (e: Element | null | undefined) => !!e && (e as HTMLElement).offsetParent !== null;
+    const root = [...document.querySelectorAll(".impg")].find(vis) as HTMLElement | undefined;
+    if (!root) return null;
+    const box = (e: Element | null | undefined) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left * 2) / 2, y: Math.round(r.top * 2) / 2, w: Math.round(r.width * 2) / 2, h: Math.round(r.height * 2) / 2, r: Math.round(r.right * 2) / 2 }; };
+    const panels = [...root.querySelectorAll("[data-hpanel]")].filter(vis);
+    const panel = panels[0];
+    const tiles = [...root.querySelectorAll('[data-impg="tile"]')].filter(vis);
+    const row = root.querySelector('[data-impg="tiles"]');
+    const foot = root.querySelector('[data-impg="footnote"]');
+    const sheet = document.querySelector(".ws-window");
+    const scroller = root.closest(".ws-wbody") ?? document.scrollingElement!;
+    return {
+      panels: panels.length,
+      panelBg: panel ? getComputedStyle(panel).backgroundColor : "",
+      panelRadius: panel ? getComputedStyle(panel).borderTopLeftRadius : "",
+      h1: panel?.querySelector("h1")?.textContent ?? "",
+      h1Font: panel?.querySelector("h1") ? getComputedStyle(panel.querySelector("h1")!).fontSize : "",
+      sub: panel?.querySelector('[data-hp3-part="sub"]')?.textContent ?? "",
+      panelButtons: panel ? panel.querySelectorAll("button, a").length : -1,
+      panelArt: panel ? panel.querySelectorAll('[data-hp3-part="art"], img, svg').length : -1,
+      headerSheets: [...root.querySelectorAll(".hsheet, [data-hsheet]")].filter(vis).length + [...document.querySelectorAll(".hsheet-host")].filter(vis).length,
+      panel: box(panel), row: box(row), sheet: box(sheet),
+      tiles: tiles.map((t) => ({ id: t.getAttribute("data-tile"), box: box(t), title: t.querySelector("h2")?.textContent, buttons: [...t.querySelectorAll("button")].map((b) => b.textContent), fact: t.querySelector('[data-impg="fact"]')?.textContent, bg: getComputedStyle(t).backgroundColor })),
+      footnote: foot?.textContent ?? "", foot: box(foot),
+      order: [...root.querySelectorAll('[data-hpanel], [data-impg="tiles"], [data-impg="footnote"]')].filter(vis).map((e) => e.getAttribute("data-impg") ?? "panel"),
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      scrollerOverflowX: (scroller as HTMLElement).scrollWidth - (scroller as HTMLElement).clientWidth,
+      bad: (root.textContent ?? "").match(/upgrade|recommended/gi) ?? [],
+    };
+  });
+}
+
+/** Open /import signed in. The shared opener cannot open a phone width (its first panel match is
+ *  the hidden sidebar), so it opens at 1440 and the page is then resized and reloaded. */
+async function openImport(page: Page, vp: { width: number; height: number }) {
+  await openRoute(page, "/import", { width: 1440, height: 900 });
+  if (vp.width !== 1440 || vp.height !== 900) { await page.setViewportSize(vp); await page.reload({ waitUntil: "load" }); }
+  await page.locator(".impg").first().waitFor({ state: "attached", timeout: 20_000 });
+  await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].some((e) => (e as HTMLElement).offsetParent !== null), null, { timeout: 20_000 });
+  await page.evaluate(() => (document as Document).fonts.ready);
+  /* A page entering reports its animated box: read only once two reads agree. */
+  let last = "";
+  for (let i = 0; i < 20; i++) {
+    const now = await page.evaluate(() => { const e = [...document.querySelectorAll(".impg [data-hpanel], .impg [data-impg=\"flow\"]")].find((x) => (x as HTMLElement).offsetParent !== null); const r = e?.getBoundingClientRect(); return r ? `${r.top},${r.height},${getComputedStyle(e!).opacity}` : ""; });
+    if (now && now === last) break;
+    last = now; await page.waitForTimeout(150);
+  }
+}
+
+for (const vp of VIEWPORTS) {
+  test.describe(`D1 ${vpName(vp)}`, () => {
+    test("D1 the Import page opens on a panel, three tiles and the footnote", async ({ page }) => {
+      await openImport(page, vp);
+      if (MUTATE === "D1") {
+        /* the named break: the old page header in the panel's place */
+        await page.evaluate(() => { const p = document.querySelector(".impg [data-hpanel]"); if (p) { p.removeAttribute("data-hpanel"); (p as HTMLElement).style.background = "transparent"; } });
+      }
+      const r = await readPage(page);
+      expect(r, "the page is on screen").toBeTruthy();
+      record("D1", vpName(vp), "page", r);
+      if (SHOTS) { mkdirSync(resolve(OUT, "shots"), { recursive: true }); await page.screenshot({ path: resolve(OUT, "shots", `import-page-${vp.width}.png`), fullPage: vp.width < 900 }); }
+      expect(r!.panels, "one panel").toBe(1);
+      expect(r!.panelBg).toBe("rgb(45, 58, 80)");
+      expect(r!.h1).toBe("Bring your list across.");
+      expect(r!.panelButtons, "no button in the panel").toBe(0);
+      expect(r!.headerSheets, "no header sheet under the panel").toBe(0);
+      expect(r!.tiles.length, "exactly three tiles").toBe(3);
+      expect(r!.tiles.map((t) => t.id)).toEqual(["smart", "template", "match"]);
+      expect(r!.tiles.map((t) => t.title)).toEqual(["Smart import.", "Our template.", "Match your own columns."]);
+      expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet"], ["Download the template", "Upload my sheet"], ["Match columns"]]);
+      expect(r!.sub).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
+      expect(r!.footnote).toBe("An import adds to what you already have.");
+      expect(r!.order).toEqual(["header", "tiles", "footnote"]);
+      expect(r!.footnote.length).toBeGreaterThan(10);
+      expect(Math.abs(r!.panel!.x - r!.row!.x), "the panel's left edge is the tiles' row's").toBeLessThanOrEqual(0.5);
+      expect(Math.abs(r!.panel!.r - r!.row!.r), "the panel's right edge is the tiles' row's").toBeLessThanOrEqual(0.5);
+      expect(r!.overflowX, "no horizontal overflow").toBeLessThanOrEqual(0);
+      expect(r!.scrollerOverflowX).toBeLessThanOrEqual(0);
+      expect(r!.bad).toEqual([]);
+      if (vp.width >= 1280) {
+        const ys = r!.tiles.map((t) => t.box!.y);
+        expect(new Set(ys).size, "three across").toBe(1);
+        expect(Math.round(r!.tiles[1].box!.x - r!.tiles[0].box!.r), "16 apart").toBe(16);
+        expect(Math.abs(r!.row!.y - (r!.panel!.y + r!.panel!.h) - 28), "28 under the panel").toBeLessThanOrEqual(1);
+        expect(Math.abs(r!.panel!.y - r!.sheet!.y - 28), "the panel is 28 under the sheet's top").toBeLessThanOrEqual(1);
+        if (vp.width === 1440) expect(Math.abs(r!.panel!.h - 174), "the panel is the reference's 174 tall").toBeLessThanOrEqual(1);
+        expect(Math.abs(r!.foot!.y - (r!.row!.y + r!.row!.h) - 28), "the footnote is 28 under the tiles").toBeLessThanOrEqual(1);
+      } else {
+        expect(new Set(r!.tiles.map((t) => t.box!.x)).size, "stacked").toBe(1);
+      }
+    });
+  });
+}
+
+/* ════ D2 · each tile's button calls its own handler; the entitlement decides the first ═════════ */
+const ENTITLEMENTS = [
+  { reason: "free_available", fact: "1 Smart Import available", disabled: false },
+  { reason: "free_used", fact: "Smart Import already used", disabled: true },
+  { reason: "pro_available", fact: "1 Smart Import available", disabled: false },
+  { reason: "pro_month_used", fact: "Available 1 Nov", disabled: true },
+] as const;
+
+test.describe("D2", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  for (const e of ENTITLEMENTS) {
+    test(`D2 tiles with the entitlement ${e.reason}`, async ({ page }) => {
+      await lab(page, `s=import-page&ent=${e.reason}`, { wait: '.impg [data-impg="tile"]' });
+      if (MUTATE === "D2") {
+        /* the named break: the button is enabled when the Smart Import is used */
+        await page.evaluate(() => { for (const b of document.querySelectorAll('[data-act="smart"]')) (b as HTMLButtonElement).disabled = false; });
+      }
+      const read = await page.evaluate(() => ({
+        fact: document.querySelector('[data-tile="smart"] [data-impg="fact"]')?.textContent ?? "",
+        disabled: (document.querySelector('[data-act="smart"]') as HTMLButtonElement | null)?.disabled,
+        others: [...document.querySelectorAll('[data-act="download"], [data-act="upload"], [data-act="match"]')].map((b) => (b as HTMLButtonElement).disabled),
+        facts: [...document.querySelectorAll('[data-impg="fact"]')].map((f) => f.textContent),
+        bad: (document.querySelector(".impg")?.textContent ?? "").match(/upgrade|recommended/gi) ?? [],
+        ringed: document.querySelectorAll(".impg .is-ringed, .impg [data-ringed], .impg .impg-badge").length,
+      }));
+      record("D2", "1440x900", e.reason, read);
+      expect(read.fact).toBe(e.fact);
+      expect(read.disabled, "disabled exactly when the entitlement says no").toBe(e.disabled);
+      expect(read.others, "the other three buttons are always live").toEqual([false, false, false]);
+      expect(read.facts.slice(1)).toEqual(["Always free · No limit", "CSV · Always free"]);
+      expect(read.bad).toEqual([]);
+      expect(read.ringed, "no tile is ringed or badged").toBe(0);
+      // each press reaches its own handler
+      const calls = async () => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c: { name: string }) => c.name));
+      const want: string[] = [];
+      if (!e.disabled) { await page.locator('[data-act="smart"]').click(); want.push("picker"); }
+      else { await page.locator('[data-act="smart"]').click({ force: true, trial: false }).catch(() => {}); }
+      await page.locator('[data-act="download"]').click(); want.push("download");
+      await page.locator('[data-act="upload"]').click(); want.push("templatePicker");
+      await page.locator('[data-act="match"]').click(); want.push("matcher");
+      expect(await calls()).toEqual(want);
+    });
+  }
+});
+
+/* ════ D3 · every way into /import lands on the tiles ═══════════════════════════════════════════ */
+test.describe("D3", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  const onTiles = async (page: Page) => {
+    await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 20_000 });
+    return page.evaluate(() => ({ path: location.pathname, matcher: !!document.querySelector(".impm, [data-impm]"), tiles: [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length }));
+  };
+  test("D3 the address, the search palette and the account menu each land on the tiles", async ({ page }) => {
+    const seen: Record<string, unknown> = {};
+    // 1 · the address itself (what the Contact list's, the Query Centre's and account settings' links navigate to)
+    await openImport(page, { width: 1440, height: 900 });
+    seen.address = await onTiles(page);
+    // 2 · the search palette's "Import" page entry
+    await openRoute(page, "/dashboard", { width: 1440, height: 900 });
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+    await page.keyboard.type("Import");
+    const entry = page.getByText("Bring in queries from a spreadsheet").first();
+    await entry.waitFor({ timeout: 10_000 });
+    if (MUTATE === "D3") {
+      /* the named break: the palette's entry opens the matcher instead of the tiles */
+      await entry.click();
+      await page.waitForFunction(() => location.pathname === "/import", null, { timeout: 10_000 });
+      await page.locator('[data-act="match"]:visible').first().click();
+      seen.palette = await page.evaluate(() => ({ path: location.pathname, tiles: [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length }));
+    } else {
+      await entry.click();
+      seen.palette = await onTiles(page);
+    }
+    record("D3", "1440x900", "ways", seen);
+    for (const [way, r] of Object.entries(seen)) {
+      expect((r as { path: string }).path, way).toBe("/import");
+      expect((r as { tiles: number }).tiles, `${way} lands on the three tiles`).toBe(3);
+    }
+  });
+});
+
+/* ════ T1 · every token the page's rules read resolves ══════════════════════════════════════════ */
+test.describe("T1", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test("T1 the Import page's rules read only tokens that resolve", async ({ page }) => {
+    await openImport(page, { width: 1440, height: 900 });
+    if (MUTATE === "T1") await page.addStyleTag({ content: ".impg .impg-tile{background:var(--impg-nope)}" });
+    const r = await page.evaluate(() => {
+      const unresolved: string[] = []; let rules = 0; let reads = 0;
+      const walk = (list: CSSRuleList) => {
+        for (const rule of Array.from(list)) {
+          if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule || (typeof CSSContainerRule !== "undefined" && rule instanceof CSSContainerRule)) { walk((rule as CSSGroupingRule).cssRules); continue; }
+          if (!(rule instanceof CSSStyleRule) || !/\.impg|\.hp3--slim/.test(rule.selectorText)) continue;
+          rules += 1;
+          const names = new Set<string>();
+          for (const m of rule.style.cssText.matchAll(/var\(\s*(--[\w-]+)\s*(,)?/g)) if (!m[2]) names.add(m[1]);
+          if (!names.size) continue;
+          let el: Element | null = null;
+          try { el = document.querySelector(rule.selectorText.replace(/::?[\w-]+(\([^)]*\))?/g, (p) => (/^::|^:(hover|focus|focus-visible|disabled)/.test(p) ? "" : p))); } catch { el = null; }
+          if (!el) continue;
+          for (const n of names) { reads += 1; if (!getComputedStyle(el).getPropertyValue(n).trim()) unresolved.push(`${rule.selectorText} reads ${n}`); }
+        }
+      };
+      for (const sheet of Array.from(document.styleSheets)) { try { walk(sheet.cssRules); } catch { /* cross-origin */ } }
+      const buttons = [...document.querySelectorAll(".impg button")].map((b) => getComputedStyle(b).backgroundColor);
+      return { rules, reads, unresolved: [...new Set(unresolved)], buttons };
+    });
+    record("T1", "1440x900", "page", r);
+    expect(r.rules, "the page's rules were found").toBeGreaterThan(15);
+    expect(r.reads, "they read tokens").toBeGreaterThan(8);
+    expect(r.unresolved).toEqual([]);
+    for (const bg of r.buttons) { expect(bg).not.toBe("rgb(162, 69, 42)"); expect(bg).not.toBe("rgb(124, 58, 42)"); }
+  });
+});
+
+/* ════ F1 · the import, inside the app ══════════════════════════════════════════════════════════
+   On the real route, signed in: the flow's screens take the sheet, the real sidebar stays, and the
+   set-up frame is not used. Nothing is imported: the walk stops at the summary and goes back. */
+const FIXTURE = (name: string) => resolve(process.cwd(), "tests/fixtures/import", name);
+async function flowState(page: Page) {
+  return page.evaluate(() => {
+    const vis = (e: Element | null | undefined) => !!e && (e as HTMLElement).offsetParent !== null;
+    const root = [...document.querySelectorAll(".impg")].find(vis);
+    const flow = root?.querySelector('[data-impg="flow"]');
+    const sheet = document.querySelector(".ws-window")?.getBoundingClientRect();
+    const screenEl = flow ? [...flow.querySelectorAll("[data-screen], [data-im='summary'], [data-im='review']")].find(vis) : null;
+    const r = screenEl?.getBoundingClientRect();
+    return {
+      screen: flow?.getAttribute("data-flow-screen") ?? "",
+      setupFrame: document.querySelectorAll("[data-setup-frame]").length,
+      sidebar: [...document.querySelectorAll(".ws-panel")].filter(vis).length,
+      navLinks: [...document.querySelectorAll(".ws-panel a, .ws-panel button")].filter(vis).length,
+      tiles: root ? [...root.querySelectorAll('[data-impg="tile"]')].filter(vis).length : -1,
+      panel: root ? [...root.querySelectorAll("[data-hpanel]")].filter(vis).length : -1,
+      inSheet: !!(r && sheet && r.left >= sheet.left - 0.5 && r.right <= sheet.right + 0.5 && r.top >= sheet.top - 0.5),
+      queriesCard: root?.querySelector('[data-im="card-queries"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+      sidebarBook: document.querySelector(".ws-panel [data-ms-title], .ws-panel .ws-mscard b, .ws-panel .bsw-title")?.textContent?.trim() ?? "",
+      title: [...(root?.querySelectorAll("h1") ?? [])].filter(vis).map((h) => h.textContent)[0] ?? "",
+    };
+  });
+}
+
+test.describe("F1", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test("F1 the template tile starts the flow in the app's sheet", async ({ page }) => {
+    await openImport(page, { width: 1440, height: 900 });
+    const book = await page.evaluate(() => { const id = localStorage.getItem("scriptally_active_manuscript_id"); return id; });
+    await page.locator('.impg input[data-picker="template"]').setInputFiles(FIXTURE("template-iso.csv"));
+    await page.locator('.impg [data-im="summary"]').waitFor({ timeout: 20_000 });
+    if (MUTATE === "F1") {
+      /* the named break: the set-up frame mounted in the app */
+      await page.evaluate(() => { const d = document.createElement("div"); d.setAttribute("data-setup-frame", ""); document.querySelector(".impg")?.appendChild(d); });
+    }
+    const s = await flowState(page);
+    record("F1", "1440x900", "template", { ...s, book });
+    if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", "flow-summary-in-app-1440.png") });
+    expect(s.screen).toBe("overview");
+    expect(s.setupFrame, "the set-up frame is not used in the app").toBe(0);
+    expect(s.sidebar, "the real sidebar is present").toBeGreaterThanOrEqual(1);
+    expect(s.navLinks, "…with its navigation").toBeGreaterThan(8);
+    expect(s.tiles, "the tiles gave way to the flow").toBe(0);
+    expect(s.panel, "…and so did the header panel").toBe(0);
+    expect(s.inSheet, "the flow renders inside the sheet's box").toBe(true);
+    expect(s.queriesCard, "the queries card names a manuscript").toMatch(/5\s*queries\s*for\s+\S+/);
+    // into the review, then Back: the first screen's Back returns to the tiles
+    await page.locator('.impg [data-im="primary"]').click();
+    await page.locator('.impg [data-im="review"]').waitFor({ timeout: 10_000 });
+    await page.locator('.impg [data-im="back"]').click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 10_000 });
+    const back = await flowState(page);
+    expect(back.screen).toBe("idle");
+    expect(back.tiles).toBe(3);
+  });
+
+  test("F1 the Smart import tile opens its confirm step; Back returns to the tiles", async ({ page }) => {
+    await openImport(page, { width: 1440, height: 900 });
+    const allowed = await page.evaluate(() => !(document.querySelector('.impg [data-act="smart"]') as HTMLButtonElement).disabled);
+    test.skip(!allowed, "the harness account's Smart Import is spent; the confirm step is covered by the set-up lab");
+    await page.locator('.impg input[data-picker="smart"]').setInputFiles(FIXTURE("smart-messy.xlsx"));
+    await page.locator('.impg [data-screen="confirm"]').waitFor({ timeout: 10_000 });
+    const s = await flowState(page);
+    record("F1", "1440x900", "smart-confirm", s);
+    if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", "flow-confirm-in-app-1440.png") });
+    expect(s.screen).toBe("confirm");
+    expect(s.setupFrame).toBe(0);
+    expect(s.inSheet).toBe(true);
+    await page.getByRole("button", { name: /Back/ }).first().click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 10_000 });
+    expect((await flowState(page)).screen).toBe("idle");
+  });
+});

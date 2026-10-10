@@ -97,8 +97,10 @@ describe("route variants — declared once at the mount", () => {
       expect(slot, `${route} still declares a contentVariant — it caps the header, toolbar and scroller together, from an ancestor no page stylesheet can see`)
         .not.toContain("contentVariant");
     }
-    expect(app, "Import lost its cap — it is out of scope for the header spec and the cap is what gives it a column")
-      .toContain('<StagePage active contentVariant="read"><ImportCsv');
+    /* Import was the one capped slot while it was a plain page. Since onboarding v5 part 3 it is a
+       grid page like the rest, so it declares no width kind either: the grid gives it its column. */
+    expect(app).toContain('<StagePage active><ImportPage');
+    expect(app).not.toContain('contentVariant="read"><Import');
   });
 
   it("the dashboard stays exempt (no contentVariant on its slot)", () => {

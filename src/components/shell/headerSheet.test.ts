@@ -19,12 +19,14 @@ describe("which routes have a header sheet, and which a panel", () => {
       expect(hasHeaderPanel(r), r).toBe(true);
       expect(hasHeaderSheet(r), r).toBe(false);
     }
-    for (const r of ["/import", "/plans", "/help"]) { expect(hasHeaderSheet(r), r).toBe(true); expect(hasHeaderPanel(r), r).toBe(false); }
+    for (const r of ["/plans", "/help"]) { expect(hasHeaderSheet(r), r).toBe(true); expect(hasHeaderPanel(r), r).toBe(false); }
+    /* the Import page joined the panel routes with onboarding v5 part 3 (its header is the slim title panel) */
+    expect(hasHeaderPanel("/import")).toBe(true); expect(hasHeaderSheet("/import")).toBe(false);
     for (const r of ["/dashboard", "/account", "/account/profile", "/account/security"]) { expect(hasHeaderSheet(r), r).toBe(false); expect(hasHeaderPanel(r), r).toBe(false); }
   });
   it("the two lists are what they say", () => {
     expect(NO_HEADER_SHEET_ROUTES).toEqual(["/dashboard", "/account"]);
-    expect(HEADER_PANEL_ROUTES.length).toBe(10);
+    expect(HEADER_PANEL_ROUTES.length).toBe(11); // ten, and the Import page since onboarding v5 part 3
     expect(hasHeaderSheet("/accounting")).toBe(true);
   });
 });

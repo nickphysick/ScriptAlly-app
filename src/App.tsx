@@ -24,7 +24,7 @@ import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
-import { ImportCsv } from "./components/ImportCsv";
+import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
@@ -760,7 +760,7 @@ function AppContent() {
           </StagePage>
         )}
         {routeKey === "import" && (
-          <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>
+          <StagePage active><ImportPage onNavigate={handleNavigate} /></StagePage>
         )}
 
         {/* The legacy site footer ("QueryHawk · The Literary Querying Companion" + Help Centre)

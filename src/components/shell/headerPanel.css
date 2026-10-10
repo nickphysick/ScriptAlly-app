@@ -196,3 +196,18 @@
   .hp3 .hp3-txt h1.hp3-title { font-size: 36px !important; }
   .hp3 .hp3-acts { flex-wrap: wrap; row-gap: 10px; }
 }
+
+/* ── SLIM (onboarding v5 part 3; ref design-refs/onboarding/onboarding-journey-v5.html #desk) ─────────
+   The Import page's panel: a title and one sentence, at the reference's own measures. ⚠️ EVERY RULE
+   NAMES `.hp3--slim`, so no other page's header can move. The class is repeated to out-rank the
+   four-class box rule and the wide-sheet title rule above, which the page's root also matches. */
+.hpanel.hpanel--hero.hp3.hp3.hp3--slim.hp3--slim { padding: 26px 34px 26px 38px; }
+.hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title, .ws-app.sheet-wide .hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title { font: 400 46px/1.06 var(--sp-type) !important; }
+.hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub, .ws-app.sheet-wide .hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub {
+  margin-top: 14px; max-width: 500px; font: 400 19px/1.5 var(--sp-serif); color: rgba(var(--ink-cream-rgb), .86);
+}
+@media (max-width: 767px) {
+  .hpanel.hpanel--hero.hp3.hp3.hp3--slim.hp3--slim { padding: 20px; }
+  .hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title { font-size: 34px !important; }
+  .hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub { font-size: 17px; }
+}
