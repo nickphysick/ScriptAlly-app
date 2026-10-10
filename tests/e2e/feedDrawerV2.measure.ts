@@ -16,7 +16,7 @@
  *    also held at unit (src/components/dashboard/v58/feedFamily.test.ts), where the fixture is complete.
  */
 import { test, expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 import { openDrawer, openQc, pixel } from "./qc126Lib";
 
@@ -186,4 +186,165 @@ test("FD2 A1 A2 A3 · every half-screen drawer floats", async ({ page }) => {
     await page.keyboard.press("Escape");
   }
   L.done(SIZES.length * 18);
+});
+
+/* ───────────────────────── B · the feed rows ───────────────────────── */
+const BASELINE = "tests/e2e/fixtures/fd2-untouched.json";
+
+/** Every row of the open feed drawer, read once. A real function, never a template. */
+async function readRows(page: Page) {
+  return page.evaluate(() => {
+    const dr = document.querySelector<HTMLElement>('[data-d58="drawer"]'); const body = document.querySelector<HTMLElement>('[data-d58="drawer-body"]');
+    if (!dr || !body) return null;
+    const bb = body.getBoundingClientRect();
+    const rows = [...body.querySelectorAll<HTMLElement>('[data-d58="ev"]')].map((e) => {
+      const r = e.getBoundingClientRect(); const cs = getComputedStyle(e);
+      const tag = e.querySelector<HTMLElement>(".d58-evtag"), say = e.querySelector<HTMLElement>(".d58-evsay"), meta = e.querySelector<HTMLElement>(".d58-evmeta");
+      const disc = e.querySelector<HTMLElement>('[data-d58="ev-disc"]'), time = e.querySelector<HTMLElement>("time"), who = say?.querySelector<HTMLElement>("b") ?? null;
+      const dotSvg = disc?.querySelector<SVGElement>("span svg") ?? null, glyph = disc?.querySelector<SVGElement>(":scope > svg") ?? null;
+      const ds = disc ? getComputedStyle(disc) : null;
+      return {
+        family: e.getAttribute("data-family") ?? "", app: e.getAttribute("data-app") === "1", atype: e.getAttribute("data-atype") ?? "", status: e.getAttribute("data-status") ?? "",
+        need: e.getAttribute("data-need") === "1", met: e.getAttribute("data-met") === "1",
+        h: r.height, l: r.left, r: r.right, bg: cs.backgroundColor, c: cs.getPropertyValue("--c").trim(), t: cs.getPropertyValue("--t").trim(),
+        before: getComputedStyle(e, "::before").content, beforeW: parseFloat(getComputedStyle(e, "::before").width) || 0,
+        tag: tag ? { color: getComputedStyle(tag).color, text: (tag.textContent ?? "").trim(), size: parseFloat(getComputedStyle(tag).fontSize) } : null,
+        saySize: say ? parseFloat(getComputedStyle(say).fontSize) : null, sayOver: say ? say.scrollWidth - say.clientWidth : 0, sayText: (say?.textContent ?? "").trim(),
+        whoWeight: who ? getComputedStyle(who).fontWeight : null, meta: !!meta,
+        disc: disc && ds ? { w: disc.getBoundingClientRect().width, bg: ds.backgroundColor, ring: ds.boxShadow } : null,
+        dot: dotSvg ? { w: dotSvg.getBoundingClientRect().width, color: getComputedStyle(dotSvg).color } : null,
+        glyph: glyph ? { kind: glyph.getAttribute("data-d58") ?? "", w: glyph.getBoundingClientRect().width, color: getComputedStyle(glyph).color } : null,
+        timeH: time ? time.getBoundingClientRect().height : null, timeLh: time ? parseFloat(getComputedStyle(time).lineHeight) : null, timeR: time ? time.getBoundingClientRect().right : null,
+        act: e.querySelector<HTMLElement>('[data-d58="ev-act"]')?.textContent?.trim() ?? null, done: e.querySelector<HTMLElement>('[data-d58="ev-done"]')?.textContent?.trim() ?? null,
+      };
+    });
+    return {
+      rows, bodyL: bb.left, bodyR: bb.right, bodyOver: body.scrollWidth - body.clientWidth,
+      spines: [...body.querySelectorAll(".d58-evcard, .d58-evline, .d58-evdot")].length,
+      untouched: {
+        filter: [...dr.querySelectorAll<HTMLElement>("[data-d58-seg]")].map((b) => `${b.textContent?.trim()}${b.getAttribute("aria-pressed") === "true" ? "*" : ""}`),
+        sum: [...dr.querySelectorAll<HTMLElement>('[data-d58="sum"]')].map((d) => (d.textContent ?? "").replace(/\s+/g, " ").trim()),
+        days: [...dr.querySelectorAll<HTMLElement>('[data-d58="day"]')].map((d) => (d.textContent ?? "").replace(/\s+/g, " ").trim()),
+        end: (dr.querySelector<HTMLElement>('[data-d58="drawer-end"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      },
+    };
+  });
+}
+
+const INK = "rgb(28, 19, 15)";
+const hexRgb = (h: string) => { const m = h.replace("#", "").match(/../g) ?? []; return `rgb(${m.map((x) => parseInt(x, 16)).join(", ")})`; };
+
+if (process.env.FD2_CAPTURE) {
+  test("FD2 capture · the untouched parts, on the build before the pack", async ({ page }) => {
+    await prepare(page);
+    const got: Record<string, unknown> = {};
+    for (const vp of SIZES) {
+      await openFeed(page, vp, false);
+      got[`${vp.width}`] = await page.evaluate(() => {
+        const dr = document.querySelector<HTMLElement>('[data-d58="drawer"]')!;
+        return {
+          filter: [...dr.querySelectorAll<HTMLElement>("[data-d58-seg]")].map((b) => `${b.textContent?.trim()}${b.getAttribute("aria-pressed") === "true" ? "*" : ""}`),
+          sum: [...dr.querySelectorAll<HTMLElement>('[data-d58="sum"]')].map((d) => (d.textContent ?? "").replace(/\s+/g, " ").trim()),
+          days: [...dr.querySelectorAll<HTMLElement>('[data-d58="day"]')].map((d) => (d.textContent ?? "").replace(/\s+/g, " ").trim()),
+          end: (dr.querySelector<HTMLElement>('[data-d58="drawer-end"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+        };
+      });
+      await page.keyboard.press("Escape");
+    }
+    mkdirSync("tests/e2e/fixtures", { recursive: true });
+    writeFileSync(BASELINE, JSON.stringify(got, null, 1));
+    console.log(`captured ${Object.keys(got).length} sizes`);
+  });
+}
+
+test("FD2 B1 B2 B3 B4 B7 · the rows: families, tints, marks, housekeeping, fit", async ({ page }) => {
+  test.skip(!!process.env.FD2_CAPTURE, "capture run");
+  test.setTimeout(300_000);
+  const L = new Ledger(MUT && /^B[12347]$/.test(MUT) ? MUT : "B1-B7");
+  await prepare(page);
+  for (const vp of SIZES) {
+    await openFeed(page, vp, true);
+    const d = await readRows(page); const at = `@${vp.width}`;
+    L.check("B precondition: the drawer holds rows", at, !!d && d.rows.length >= 8, `${d?.rows.length ?? 0} rows`);
+    if (!d) continue;
+    const tally: Record<string, number> = {};
+    for (const r of d.rows) tally[r.family] = (tally[r.family] ?? 0) + 1;
+    console.log(`  FD2 ${at}: ${d.rows.length} rows — ${Object.entries(tally).map(([k, v]) => `${k} ${v}`).join(" · ")}`);
+    L.check("B1 population: at least five families are on the account", at, Object.keys(tally).length >= 5, JSON.stringify(tally));
+    L.check("B1 population: a request, a closed and a housekeeping row are there", at, (tally.request ?? 0) > 0 && (tally.closed ?? 0) > 0 && (tally.housekeeping ?? 0) > 0, JSON.stringify(tally));
+    const badFam = d.rows.filter((r) => r.family !== familyOf(r));
+    L.check("B1 every row's family is the table's", at, badFam.length === 0, badFam.slice(0, 3).map((r) => `${r.status || r.atype} → ${r.family}, want ${familyOf(r)}`).join(" · ") || `${d.rows.length} rows agree`);
+    const badCol = d.rows.filter((r) => !FAMILY[r.family] || hexRgb(r.c) !== FAMILY[r.family].c || (r.tag && r.tag.color !== FAMILY[r.family].c));
+    L.check("B1 the tag's colour is the family's", at, badCol.length === 0, badCol.slice(0, 3).map((r) => `${r.family}: tag ${r.tag?.color} · --c ${r.c}`).join(" · ") || "all agree");
+    L.check("B1 nothing has a spine, a card or a one-line row", at, d.spines === 0 && d.rows.every((r) => r.before === "none" || r.beforeW === 0), `${d.spines} old parts`);
+    /* B2 */
+    const tinted = d.rows.filter((r) => r.family === "offer" || r.family === "request"), plain = d.rows.filter((r) => r.family !== "offer" && r.family !== "request" && r.family !== "housekeeping");
+    L.check("B2 population: tinted and plain rows both", at, tinted.length > 0 && plain.length > 0, `${tinted.length} tinted · ${plain.length} plain`);
+    const badT = tinted.filter((r) => r.bg !== FAMILY[r.family].t || r.disc?.bg !== "rgb(255, 255, 255)" || !near(r.saySize, 17, 0.5));
+    L.check("B2 offers and requests: the family's tint, a white disc, a 17px sentence", at, badT.length === 0, badT.slice(0, 2).map((r) => `${r.family}: ${r.bg} · disc ${r.disc?.bg} · ${r.saySize}`).join(" · ") || `${tinted.length} rows`);
+    const badP = d.rows.filter((r) => r.family !== "offer" && r.family !== "request").filter((r) => r.bg !== "rgba(0, 0, 0, 0)" || (r.family !== "housekeeping" && !near(r.saySize, 15.5, 0.5)));
+    L.check("B2 every other row is untinted, its sentence 15.5px", at, badP.length === 0, badP.slice(0, 2).map((r) => `${r.family}: ${r.bg} · ${r.saySize}`).join(" · ") || `${plain.length} rows`);
+    /* B3 */
+    const withStatus = d.rows.filter((r) => r.status && r.family !== "housekeeping" && r.family !== "nudge");
+    const badDot = withStatus.filter((r) => !r.dot || !near(r.dot.w, 24, 1) || r.dot.color !== INK || !near(r.disc?.w, 34, 0.5));
+    L.check("B3 population: rows with a status", at, withStatus.length >= 5, `${withStatus.length}`);
+    L.check("B3 a row with a status holds a 24px StatusDot in ink, on a 34px disc", at, badDot.length === 0, badDot.slice(0, 2).map((r) => `${r.status}: ${JSON.stringify(r.dot)} disc ${r.disc?.w}`).join(" · ") || `${withStatus.length} dots`);
+    const nudges = d.rows.filter((r) => r.family === "nudge"), house = d.rows.filter((r) => r.family === "housekeeping");
+    L.check("B3 a nudge holds the bell, housekeeping the gear, both in ink", at, nudges.every((r) => r.glyph?.kind === "ev-bell" && near(r.glyph.w, 16, 0.5) && r.glyph.color === INK) && house.length > 0 && house.every((r) => r.glyph?.kind === "ev-gear" && near(r.glyph.w, 11, 0.5) && r.glyph.color === INK), `${nudges.length} nudges · ${house.length} housekeeping`);
+    /* B4 */
+    const badH = house.filter((r) => r.h > 36 || r.tag || r.meta || (r.whoWeight !== null && Number(r.whoWeight) >= 600) || !near(r.saySize, 13, 0.5));
+    L.check("B4 housekeeping is one line: 36 tall at most, no tag, no meta, the person not bold", at, house.length > 0 && badH.length === 0, badH.slice(0, 2).map((r) => `${r.h.toFixed(1)} tall · tag ${!!r.tag} · meta ${r.meta} · weight ${r.whoWeight}`).join(" · ") || `${house.length} rows, tallest ${Math.max(...house.map((r) => r.h)).toFixed(1)}`);
+    /* B7 */
+    if (vp.width === 1280) {
+      const over = d.rows.filter((r) => r.r > d.bodyR + 0.5 || r.l < d.bodyL - 0.5 || /* a housekeeping line is cut with an ellipsis on purpose */ (r.family !== "housekeeping" && r.sayOver > 1) || (r.timeR ?? 0) > d.bodyR + 0.5);
+      L.check("B7 no row overflows the drawer at 1280", at, over.length === 0 && d.bodyOver <= 1, over.slice(0, 2).map((r) => `"${r.sayText.slice(0, 30)}" over ${r.sayOver}`).join(" · ") || `body overflow ${d.bodyOver}`);
+      const wrapT = d.rows.filter((r) => r.timeH !== null && r.timeLh !== null && r.timeH > r.timeLh * 1.5);
+      L.check("B7 no time wraps", at, wrapT.length === 0, `${wrapT.length} wrapped`);
+    }
+    await page.keyboard.press("Escape");
+  }
+  L.done(SIZES.length * 11);
+});
+
+test("FD2 B5 B6 · the actions still act, and the parts around the rows are untouched", async ({ page }) => {
+  test.skip(!!process.env.FD2_CAPTURE, "capture run");
+  test.setTimeout(300_000);
+  const L = new Ledger(MUT && /^B[56]$/.test(MUT) ? MUT : "B5-B6");
+  await prepare(page);
+  const base = existsSync(BASELINE) ? (JSON.parse(readFileSync(BASELINE, "utf8")) as Record<string, { filter: string[]; sum: string[]; days: string[]; end: string }>) : null;
+  expect(base, "B6 baseline missing: capture it against a build of the base (FD2_CAPTURE=1)").not.toBeNull();
+  for (const vp of SIZES) {
+    const at = `@${vp.width}`;
+    /* B6, at the default window, as the baseline was read */
+    await openFeed(page, vp, false);
+    const d0 = await readRows(page); const b = base![`${vp.width}`];
+    L.check("B6 the filter reads as on the baseline", at, JSON.stringify(d0?.untouched.filter) === JSON.stringify(b.filter), `${d0?.untouched.filter.join(" | ")}`);
+    L.check("B6 the summary figures are the baseline's", at, JSON.stringify(d0?.untouched.sum) === JSON.stringify(b.sum), `${d0?.untouched.sum.join(" | ")} vs ${b.sum.join(" | ")}`);
+    L.check("B6 the day headings and counts are the baseline's", at, JSON.stringify(d0?.untouched.days) === JSON.stringify(b.days), `${d0?.untouched.days.length} days vs ${b.days.length}`);
+    L.check("B6 the end line is the baseline's", at, d0?.untouched.end === b.end, `"${d0?.untouched.end}" vs "${b.end}"`);
+    /* B5, at Everything */
+    await page.locator('[data-d58="drawer-range"]').selectOption("all", { timeout: 4000 });
+    await page.waitForTimeout(400);
+    const d = await readRows(page);
+    const needs = d?.rows.filter((r) => r.need) ?? [], mets = d?.rows.filter((r) => r.met) ?? [];
+    console.log(`  FD2 B5 ${at}: ${needs.length} open (${needs.filter((r) => r.family === "offer").length} offers) · ${mets.length} met`);
+    L.check("B5 population: an open request or offer, and a met one", at, needs.length > 0 && mets.length > 0, `${needs.length} open · ${mets.length} met`);
+    L.check("B5 every open one shows its action, in a tinted row", at, needs.every((r) => !!r.act && /→$/.test(r.act) && !r.done && (r.family === "offer" || r.family === "request")), needs.slice(0, 3).map((r) => `${r.family}: ${r.act}`).join(" · "));
+    L.check("B5 every met one shows the day it went", at, mets.every((r) => !r.act && /^✓ Sent on \d/.test(r.done ?? "")), mets.slice(0, 3).map((r) => r.done).join(" · "));
+    /* press a request's action: the query drawer opens in the built mode, and nothing is written (it is closed untouched) */
+    for (const fam of ["request", "offer"] as const) {
+      const btn = page.locator(`[data-d58="ev"][data-family="${fam}"] [data-d58="ev-act"]`).first();
+      if (!(await btn.count())) { if (fam === "request") L.check("B5 a request's action opens the send journey", at, false, "no open request on the account"); else console.log(`  FD2 B5 ${at}: no open offer on the account — the offer mode is held at unit`); continue; }
+      await btn.scrollIntoViewIfNeeded();
+      await btn.click({ timeout: 4000 });
+      const qad = page.locator("[data-qad-drawer]:visible").first();
+      await qad.waitFor({ timeout: 5000 }).catch(() => {});
+      const mode = (await qad.count()) ? await qad.getAttribute("data-qad-drawer") : null;
+      L.check(fam === "request" ? "B5 a request's action opens the send journey" : "B5 an offer's action opens the offer journey", at, mode === (fam === "request" ? "sent" : "offer"), `mode ${mode}`);
+      if (mode) { await page.locator('[data-qad-drawer]:visible button[aria-label="Close"], [data-qad-drawer]:visible [data-qad="close"]').first().click({ timeout: 3000 }).catch(() => page.keyboard.press("Escape")); await page.waitForTimeout(400); }
+      if (!(await page.locator('[data-d58="drawer"]').count())) { await page.locator('[data-d58="tab"]').click({ timeout: 4000 }).catch(() => {}); await page.locator('[data-d58="drawer-range"]').selectOption("all", { timeout: 4000 }).catch(() => {}); await page.waitForTimeout(400); }
+    }
+    await page.keyboard.press("Escape");
+  }
+  L.done(SIZES.length * 8);
 });
