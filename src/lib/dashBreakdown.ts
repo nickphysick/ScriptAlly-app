@@ -43,6 +43,14 @@ export const isLive = (q: Query): boolean => LIVE_STATUSES.includes(q.status) &&
 
 export const liveQueries = (queries: readonly Query[]): Query[] => queries.filter(isLive);
 
+/**
+ * Live by status, with no sent date — so the chart, which places a query by the day it was sent,
+ * has nowhere to draw it. Counted so the card can say so instead of reading "No active queries"
+ * over queries that are live (import fixes, 10 Oct).
+ */
+export const undatedLiveCount = (queries: readonly Query[]): number =>
+  queries.filter((q) => LIVE_STATUSES.includes(q.status) && sentAt(q) === null).length;
+
 /** The header's and the chart's figure — the size of the live set. */
 export const liveCount = (queries: readonly Query[]): number => liveQueries(queries).length;
 
