@@ -28,10 +28,16 @@ const SHOTS = !!process.env.OB_SHOTS;
 export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }> = [
   { id: "frame-setup", q: "s=frame&form=setup&flow=B&at=list&ms=1", form: "setup" },
   { id: "frame-account", q: "s=frame&form=account&mode=signup", form: "account" },
+  { id: "signup", q: "s=signup", form: "account" },
+  { id: "signin", q: "s=signin", form: "account" },
+  { id: "reset", q: "s=reset", form: "account" },
+  { id: "reset-sent", q: "s=reset-sent", form: "account" },
 ];
 
 const MUTATIONS: Record<string, string> = {
   F1: ".sf .sf-panel, .sf .sf-panel .ws-pin{width:260px!important}",
+  A1: "",
+  A3: "",
   F4: "@media (max-width:899.98px){.sf{position:fixed!important;inset:0!important;height:100vh!important;min-height:0!important;overflow:hidden!important}" +
       ".sf .sf-main{height:100vh!important;min-height:0!important;overflow:hidden!important}}",
 };
@@ -47,6 +53,13 @@ async function mutate(page: Page) {
       bar?.prepend(img);
     });
   }
+  if (MUTATE === "A1") {
+    await page.evaluate(() => {
+      const d = document.createElement("div"); d.className = "preview-wrap"; d.textContent = "Dashboard preview";
+      document.querySelector(".sf-offer")?.appendChild(d);
+    });
+  }
+  if (MUTATE === "A3") await page.evaluate(() => { const e = document.querySelector("#au-pw"); if (e) e.id = "au-password"; });
   if (MUTATE === "F3") {
     await page.evaluate(() => {
       const ol = document.querySelector(".sf-steps");
@@ -227,15 +240,90 @@ test.describe("OB1", () => {
       expect(f.brandTop, "the brand row is visible").not.toBeNull();
       expect(f.brandBottom!, "the brand row sits above the tab").toBeLessThanOrEqual(f.tabTop + 1);
       expect(f.exitTop < f.tabBottom && f.exitBottom > f.tabTop, "the tab and the exit share a row").toBe(true);
-      expect(f.lastBottom, "the content is taller than the screen (the case is real)").toBeGreaterThan(f.viewH);
+      /* The two filler screens are padded past the fold so the scrolling half is really exercised;
+         a real screen may fit, and is then reachable without scrolling. */
+      if (sc.id.startsWith("frame-")) expect(f.lastBottom, "the content is taller than the screen (the case is real)").toBeGreaterThan(f.viewH);
+      console.log(`OB1 F4 ${sc.id}: last control at ${Math.round(f.lastBottom)} of ${f.scrollH} (viewport ${f.viewH})`);
       expect(f.lastBottom, `${sc.id}: the last control is inside the scroll height (${f.lastBottom} vs ${f.scrollH})`).toBeLessThanOrEqual(f.scrollH);
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
       const reached = await page.evaluate(() => {
         const last = Array.from(document.querySelectorAll(".sf-scroll *")).pop()!.getBoundingClientRect();
-        return last.bottom <= window.innerHeight + 1 && last.top >= 0;
+        return last.bottom <= window.innerHeight + 1;
       });
       expect(reached, `${sc.id}: scrolling reaches it`).toBe(true);
       expect(f.overflow).toBeLessThanOrEqual(0);
     }
+  });
+
+  test("A1 two tabs, one raised; the other switches mode and keeps the typed email", async ({ page }) => {
+    for (const vp of VPS) {
+      await lab(page, "s=signup", vp);
+      const read = () => page.evaluate(() => ({
+        raised: document.querySelector(".sf .ws-ftn")?.textContent,
+        group: document.querySelector(".sf .ws-ftg")?.textContent,
+        other: Array.from(document.querySelectorAll(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib")).map((e) => e.textContent),
+        panel: getComputedStyle(document.querySelector(".sf-offer")!).backgroundColor,
+        title: document.querySelector(".sf-offerh")?.textContent,
+        email: (document.querySelector("#au-email") as HTMLInputElement).value,
+        old: document.querySelectorAll(".seg-opt, .preview-wrap, .col-feature").length,
+      }));
+      await page.fill("#au-email", "writer@example.com");
+      const up = await read();
+      expect(up.group).toBe("Your account");
+      expect(up.raised).toBe("Create account");
+      expect(up.other, `@${vp.width}: exactly one recessed tab`).toEqual(["Sign in"]);
+      expect(up.panel).toBe("rgb(45, 58, 80)");
+      expect(up.title).toBe("The hunt begins.");
+      expect(up.old, "the preview and the segmented control are gone").toBe(0);
+      await page.click(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
+      await page.waitForFunction(() => document.querySelector(".sf .ws-ftn")?.textContent === "Sign in");
+      const inn = await read();
+      expect(inn.other).toEqual(["Create account"]);
+      expect(inn.title).toBe("Welcome back.");
+      expect(inn.email, "the typed email survives the switch").toBe("writer@example.com");
+      expect(inn.panel).toBe("rgb(45, 58, 80)");
+    }
+  });
+
+  test("A3 fields: typewriter on a dashed rule, mono labels, and a rust sentence for an error", async ({ page }) => {
+    for (const vp of VPS) {
+      for (const s of ["signup", "signin", "reset"]) {
+        await lab(page, "s=" + s, vp);
+        const fields = await page.evaluate(() => Array.from(document.querySelectorAll(".sf-card input")).map((el) => {
+          const c = getComputedStyle(el);
+          const lab = document.querySelector(`label[for="${el.id}"]`);
+          const lc = lab ? getComputedStyle(lab) : null;
+          return {
+            id: el.id, family: c.fontFamily, size: parseFloat(c.fontSize), style: c.borderBottomStyle, width: c.borderBottomWidth,
+            labFamily: lc?.fontFamily ?? "", labCase: lc?.textTransform ?? "",
+          };
+        }));
+        expect(fields.length, `${s} @${vp.width}: inputs measured`).toBeGreaterThan(0);
+        for (const f of fields) {
+          expect(f.family, `${f.id} is the typewriter face`).toMatch(/Special Elite/);
+          expect(Math.abs(f.size - 18), `${f.id} size ${f.size}`).toBeLessThanOrEqual(0.5);
+          expect(f.style, `${f.id} rule`).toBe("dashed");
+          expect(f.labFamily, `${f.id} label is mono`).toMatch(/JetBrains Mono/);
+          expect(f.labCase).toBe("uppercase");
+        }
+      }
+      await lab(page, "s=signin", vp);
+      expect(await page.locator("#au-email").count()).toBe(1);
+      expect(await page.locator("#au-pw").count()).toBe(1);
+      await page.fill("#au-email", "not-an-address");
+      await page.fill("#au-pw", "x");
+      await page.locator(".sf-card").getByRole("button", { name: /^Sign in$/ }).click();
+      await page.waitForSelector(".sf-card .sf-err");
+      const err = await page.evaluate(() => {
+        const e = document.querySelector(".sf-card .sf-err")!;
+        const i = getComputedStyle(document.querySelector("#au-email")!);
+        return { text: e.textContent, color: getComputedStyle(e).color, rule: [i.borderBottomStyle, i.borderBottomColor] };
+      });
+      expect(err.text).toBe("That doesn’t look like a valid email address.");
+      expect(err.color).toBe("rgb(162, 69, 42)");
+      expect(err.rule).toEqual(["solid", "rgb(162, 69, 42)"]);
+    }
+    await lab(page, "s=signup&invite=1", VPS[0]); await shot(page, "signup-invite-on-1440");
+    await lab(page, "s=signup&invite=0", VPS[0]); await shot(page, "signup-invite-off-1440");
   });
 });

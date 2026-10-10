@@ -83,6 +83,7 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
   exitLabel, onExit, children,
 }) => {
   const exitRef = useRef<HTMLButtonElement>(null);
+  const noLimit = useRef<HTMLElement>(null);
   const siblings: TabSibling[] = otherTab
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
     : [];
@@ -146,7 +147,14 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
             <svg className="sf-ftfl-l" viewBox="0 0 12 12" preserveAspectRatio="none" width="13" height="12" aria-hidden="true" focusable="false">
               <path d="M12 0V12H0A12 12 0 0 0 12 0Z" />
             </svg>
-            <FolderTab group={group} name={name} siblings={siblings} onGo={(id) => onTab?.(id)} limitRef={exitRef} />
+            {/* `FolderTab` fits its siblings between its own left edge and `limitRef`, collapsing the
+                ones that do not fit. On the account screens the second tab must STAY — it is the only
+                way to the other mode — so there the limit is this box's own width, and on a phone
+                the box is wider than the row and scrolls sideways. */}
+            <div className="sf-tabsin">
+              <FolderTab group={group} name={name} siblings={siblings} onGo={(id) => onTab?.(id)}
+                         limitRef={form === "account" ? noLimit : exitRef} />
+            </div>
           </div>
           <button type="button" className="sf-exit" ref={exitRef} onClick={onExit} data-sf="exit">
             {exitLabel}

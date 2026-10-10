@@ -20,6 +20,7 @@ import React from "react";
 import { SetupFrame, SETUP_GROUP, ACCOUNT_GROUP } from "./SetupFrame";
 import { spineFor, spineIndex, SpineId, OnboardingBranch } from "../../lib/onboardingSpine";
 import { UserPlan } from "../../types";
+import { Auth } from "../Auth";
 
 declare global {
   interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }> } }
@@ -85,6 +86,13 @@ export const OnbLab: React.FC = () => {
   const s = q.get("s") ?? "frame";
   const flow = (q.get("flow") === "A" ? "A" : q.get("flow") === "B" ? "B" : null) as OnboardingBranch;
   const at = (q.get("at") ?? "you") as SpineId;
+
+  /* The account screens: the REAL `Auth`, held in a state by its lab prop. Nothing is submitted
+     by mounting it; a lock that types into it and presses submit stops at the built validation. */
+  if (s === "signup") return <Auth initialMode="signup" lab={{ showInvite: q.get("invite") === "1" ? true : q.get("invite") === "0" ? false : undefined }} />;
+  if (s === "signin") return <Auth initialMode="login" />;
+  if (s === "reset") return <Auth initialMode="login" lab={{ view: "reset" }} />;
+  if (s === "reset-sent") return <Auth initialMode="login" lab={{ view: "reset", resetSent: true, email: "writer@example.com" }} />;
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";

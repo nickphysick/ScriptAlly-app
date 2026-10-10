@@ -63,6 +63,7 @@
 /* The tabs' positioning box. `FolderTab` places itself against its parent's left and bottom, so
    this element — not the bar — is what the tab stands in. */
 .sf .sf-tabs { position: relative; flex: 1 1 auto; min-width: 0; align-self: stretch; }
+.sf .sf-tabsin { position: absolute; inset: 0; }
 .sf .sf-ftfl-l { display: none; position: absolute; left: -12px; bottom: 0; width: 13px; height: 12px; fill: var(--ink-tab); }
 .sf--account .sf-ftfl-l { display: block; }
 .sf .sf-exit {
@@ -159,9 +160,13 @@
   .sf .sf-bar { display: flex; flex-wrap: wrap; height: auto; padding: 0 8px; align-items: flex-end; }
   .sf .sf-barbrand { display: flex; flex: 1 0 100%; padding: 14px 6px 12px; }
   .sf .sf-tabs { height: 44px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  /* Wider than the row on purpose: both account tabs keep their full names and the second runs
+     off the edge, reached by scrolling the row sideways. */
+  .sf--account .sf-tabsin { right: auto; width: 620px; }
   .sf .sf-tabs::-webkit-scrollbar { display: none; }
   .sf .sf-exit { align-self: center; margin: 0 6px 0 12px; }
-  .sf .sf-ftfl-l { display: none; }
+  .sf .sf-tabsin { position: absolute; inset: 0; }
+.sf .sf-ftfl-l { display: none; }
   .sf .ws-winwrap { display: block; padding: 0 8px 8px; }
   .sf .sf-sheet { display: block; overflow: visible; border-radius: 0 12px 12px 12px; background: var(--ink-sheet); }
   .sf .sf-scroll { overflow: visible; padding: 22px 14px 28px; }
@@ -243,3 +248,171 @@
   background: rgba(242, 238, 232, .72);
 }
 .sf .sf-saving span { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .08em; color: var(--sf-ink58); }
+
+/* ═══ The parts every screen before the app is made of (onboarding v5, part 1) ═══════════════
+   One white card, dashed-rule fields, navy pill buttons, typewriter links. Declared once and worn
+   by the account screens and every set-up step.
+   ⚠️ HEADINGS TAKE TWO CLASSES AND `!important`. `brand.tsx` injects a runtime rule forcing the
+   brand face on every bare h1/h2/h3 with `!important`; its h1 selector is one class and one
+   element, so only a two-class selector outranks it. Body text needs neither: the injection's
+   `p, span, div, button` rule is a bare element selector and any class beats it. */
+.sf .sf-card {
+  background: var(--fc-card); border-radius: 14px; padding: 32px 36px 28px; box-sizing: border-box;
+  box-shadow: var(--sf-card-shadow); color: var(--ink-on-light); font-family: var(--sp-serif);
+}
+.sf .sf-card .sf-h {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 27px; line-height: 1.1;
+  letter-spacing: 0; color: var(--ink-on-light); margin: 0;
+}
+.sf .sf-lede { font-family: var(--sp-serif); font-size: 17px; line-height: 1.5; color: var(--sf-ink72); margin: 10px 0 0; }
+.sf .sf-lede strong { font-weight: 600; color: var(--ink-on-light); }
+
+/* Fields: a mono label over a typewriter value on a dashed rule. */
+.sf .sf-field { display: block; margin: 22px 0 0; min-width: 0; }
+.sf .sf-labrow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sf .sf-lab {
+  display: block; font-family: var(--sp-mono); font-size: 10px; line-height: 1.4; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--sf-ink58);
+}
+.sf .sf-labq { text-transform: none; letter-spacing: .04em; }
+.sf .sf-inwrap { position: relative; display: flex; align-items: center; }
+.sf .sf-in {
+  flex: 1 1 auto; min-width: 0; width: 100%; box-sizing: border-box; display: block;
+  font-family: var(--sp-type); font-size: 18px; line-height: 1.3; color: var(--ink-on-light);
+  background: transparent; border: 0; border-bottom: 1.5px dashed var(--sf-ink34); border-radius: 0;
+  padding: 9px 3px 8px; margin: 0; outline: none; box-shadow: none;
+}
+/* ⚠️ `!important`, THE GUARD'S OWN `:not()` CHAIN, AND ONLY HERE. mobileShell.css holds every text
+   control at 16px on a phone with `!important` (the iOS focus-zoom guard), on a selector worth four
+   attribute tests. 18px clears that guard's floor, so restating it costs nothing — but a plain
+   two-class rule loses to it, flag or no flag, and the typewriter value silently drops to 16
+   below 768px. Measured before this was written: 16. */
+@media (max-width: 767.98px) {
+  .sf .sf-in:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) { font-size: 18px !important; }
+}
+.sf .sf-in::placeholder { color: rgba(28, 19, 15, .34); }
+.sf .sf-in:focus { border-bottom: 1.5px solid var(--sp-anthracite); }
+.sf .sf-field.is-bad .sf-in { border-bottom: 1.5px solid var(--sf-rust); }
+.sf .sf-err { font-family: var(--sp-serif); font-size: 14px; line-height: 1.4; color: var(--sf-rust); margin: 7px 0 0; }
+.sf .sf-eye {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: grid; place-items: center;
+  width: 32px; height: 32px; padding: 0; background: none; border: 0; cursor: pointer; color: var(--sf-ink58);
+}
+.sf .sf-eye svg { width: 18px; height: 18px; }
+.sf .sf-eye:hover { color: var(--ink-on-light); }
+.sf .sf-inwrap--eye .sf-in { padding-right: 38px; }
+
+/* Buttons: navy pills. Rust is never a fill. */
+.sf .sf-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px; box-sizing: border-box;
+  height: 44px; padding: 2px 24px 0; border: 0; border-radius: 22px; cursor: pointer; white-space: nowrap;
+  font-family: var(--sp-type); font-size: 15.5px; line-height: 1; letter-spacing: 0; text-transform: none;
+  background: var(--sp-anthracite); color: var(--ink-cream); text-decoration: none;
+  transition: background .16s ease;
+}
+.sf .sf-btn:hover { background: #344662; }
+.sf .sf-btn:disabled { background: #aab2c0; cursor: not-allowed; }
+.sf .sf-btn--sm { height: 38px; border-radius: 19px; padding: 2px 20px 0; }
+.sf .sf-btn--full { width: 100%; }
+.sf .sf-btn--line {
+  background: transparent; color: var(--ink-on-light); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .82);
+}
+.sf .sf-btn--line:hover { background: rgba(28, 19, 15, .05); }
+.sf .sf-google {
+  display: flex; align-items: center; justify-content: center; gap: 11px; width: 100%; box-sizing: border-box;
+  height: 46px; padding: 2px 20px 0; border: 0; border-radius: 23px; cursor: pointer;
+  background: #ffffff; color: var(--ink-on-light); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .82);
+  font-family: var(--sp-type); font-size: 15.5px; line-height: 1;
+}
+.sf .sf-google svg { width: 18px; height: 18px; flex: none; margin-top: -2px; }
+.sf .sf-google:hover { background: rgba(28, 19, 15, .04); }
+.sf .sf-google:disabled { opacity: .6; cursor: default; }
+.sf .sf-btn:focus-visible, .sf .sf-google:focus-visible, .sf .sf-link:focus-visible, .sf .sf-eye:focus-visible {
+  outline: 2px solid var(--sp-anthracite); outline-offset: 3px;
+}
+.sf .sf-spin {
+  width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(var(--ink-cream-rgb), .35);
+  border-top-color: var(--ink-cream); animation: sf-spin .7s linear infinite; margin-top: -2px;
+}
+@keyframes sf-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sf .sf-spin { animation: none; } }
+
+/* Text links: Back, "Forgot?", and the line-level links. */
+.sf .sf-link {
+  display: inline; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink-on-light);
+  font-family: var(--sp-type); font-size: 15.5px; line-height: 1.3;
+  text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 6px;
+  text-decoration-color: rgba(28, 19, 15, .35);
+}
+.sf .sf-link:hover { text-decoration-color: var(--ink-on-light); }
+.sf .sf-link--quiet { font-size: 14.5px; }
+/* A link inside a sentence takes the sentence's own face and size. */
+.sf .sf-link--in { font-family: inherit; font-size: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+.sf .sf-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 28px 0 0; flex-wrap: wrap; }
+.sf .sf-foot--end { justify-content: flex-end; }
+.sf .sf-note {
+  background: var(--sf-note); border-radius: 11px; padding: 13px 16px; margin: 20px 0 0;
+  font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.5; color: rgba(28, 19, 15, .82);
+}
+.sf .sf-note strong { font-weight: 600; color: var(--ink-on-light); }
+/* One sentence above the primary: rust for an error, ink for a success. No icon box. */
+.sf .sf-msg { font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; margin: 20px 0 0; color: var(--ink-on-light); }
+.sf .sf-msg--error { color: var(--sf-rust); }
+
+/* ── The account screens: a navy panel beside one white card ── */
+.sf .sf-pair {
+  display: grid; grid-template-columns: 480fr 636fr; gap: 24px; align-items: stretch;
+  max-width: 1140px; margin: 10px auto 0;
+}
+/* The app's own navy header panel, by its tokens. */
+.sf .sf-offer {
+  display: flex; flex-direction: column; box-sizing: border-box; min-height: 596px; min-width: 0;
+  background: var(--hpanel-bg); color: var(--hpanel-fg); border-radius: 14px; padding: 36px 36px 0;
+  box-shadow: inset 0 0 0 1px var(--hpanel-line);
+}
+.sf .sf-eyebrow {
+  font-family: var(--sp-mono); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--hpanel-stamp); margin: 0 0 14px;
+}
+.sf .sf-offer .sf-offerh {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 46px; line-height: 1.06;
+  letter-spacing: -.005em; color: var(--hpanel-fg); margin: 0;
+}
+.sf .sf-offerp { font-family: var(--sp-serif); font-size: 19px; line-height: 1.5; color: var(--hpanel-muted); margin: 24px 0 0; max-width: 24em; }
+.sf .sf-offerlist { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.sf .sf-offerlist li {
+  position: relative; padding-left: 20px; font-family: var(--sp-serif); font-size: 17.5px; line-height: 1.4;
+  color: var(--hpanel-muted);
+}
+.sf .sf-offerlist li::before {
+  content: ""; position: absolute; left: 0; top: .52em; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--hpanel-stamp);
+}
+/* The one drawing in the journey: the flock, at the panel's foot. Never cropped, never upscaled. */
+.sf .sf-flock {
+  display: block; margin: auto auto 0; padding-top: 24px; box-sizing: content-box;
+  width: auto; height: auto; max-height: 280px; max-width: min(100%, 280px); object-fit: contain;
+}
+.sf .sf-authcard { min-width: 0; display: flex; flex-direction: column; }
+.sf .sf-invite { background: var(--sf-note); border-radius: 11px; padding: 14px 16px 12px; margin: 22px 0 0; }
+.sf .sf-invite .sf-field { margin: 0; }
+.sf .sf-invite .sf-in { font-family: var(--sp-mono); letter-spacing: .06em; font-size: 16px; }
+.sf .sf-authcard .sf-google { margin: 22px 0 0; }
+.sf .sf-or {
+  display: flex; align-items: center; gap: 14px; margin: 24px 0 0;
+  font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--sf-ink58);
+}
+.sf .sf-or::before, .sf .sf-or::after { content: ""; flex: 1; height: 1px; background: var(--sf-ink14); }
+.sf .sf-authcard .sf-btn--full { margin: 26px 0 0; }
+.sf .sf-under { text-align: center; margin: 18px 0 0; font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sf-ink72); }
+
+@media (max-width: 899.98px) {
+  .sf .sf-pair { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 0; }
+  /* Stacked, the panel is a heading: its list and its drawing go, and it is as tall as its words. */
+  .sf .sf-offer { min-height: 0; padding: 26px 22px 24px; }
+  .sf .sf-offer .sf-offerh { font-size: 34px; }
+  .sf .sf-offerlist, .sf .sf-offerlead, .sf .sf-flock { display: none; }
+  .sf .sf-offerp { font-size: 17px; margin-top: 14px; }
+  .sf .sf-card { padding: 24px 20px 22px; }
+}
