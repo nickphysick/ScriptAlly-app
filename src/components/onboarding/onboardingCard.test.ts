@@ -20,7 +20,10 @@ import { stripComments } from "../../test/pageSmoke";
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
 
-const CHROME = read("chrome.tsx");
+/* `chrome.tsx` (OnboardingCard, InboxMotif) is DELETED with its last reader, the closing page
+   (onboarding v5 part 2). The absences these locks assert are read off the step parts that replaced
+   it; the three claims that were about the card itself went with the card. */
+const CHROME = read("setupParts.tsx");
 const ONBOARDING = read("../Onboarding.tsx");
 const BRANCH_A = read("BranchA.tsx");
 const BRANCH_B = read("BranchB.tsx");
@@ -63,9 +66,12 @@ describe("the primary is ink — never pink, never burgundy", () => {
     }
   });
 
-  it("the card's primary reads from the ink token", () => {
-    expect(CHROME).toContain("onbPrimaryBg");
-    expect(TOKENS).toContain('export const onbPrimaryBg = "#1c130f"');
+  /* RE-POINTED (onboarding v5 part 2): the card and its `onbPrimaryBg` token are gone. The primary
+     is the frame's navy pill, stated once in onboarding.css from the shell's token. */
+  it("the primary is the frame's navy pill, from the shell's token", () => {
+    const sheet = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(sheet).toMatch(/\.sf \.sf-btn \{[^}]*background:\s*var\(--sp-anthracite\)/);
+    expect(TOKENS).not.toContain("onbPrimaryBg");
   });
 
   it("nothing in the journey sets a burgundy background", () => {
@@ -94,13 +100,11 @@ describe("the card is made of the app's own material", () => {
     for (const src of JOURNEY) expect(src).not.toContain("#f8f4ee");
   });
 
-  it("the surface and hairline match the dashboard card", () => {
-    expect(TOKENS).toContain('export const onbSurface = "#fffdf9"'); // .os-card fill
-    expect(TOKENS).toContain('export const onbHairline = "#e9e2d7"'); // --ws-edge
-  });
-
-  it("the card reads tokens rather than inlining its own colours", () => {
-    expect(CHROME).toContain('from "../../lib/designTokens"');
+  /* RETIRED (onboarding v5 part 2): "the surface and hairline match the dashboard card" and "the
+     card reads tokens" were claims about OnboardingCard, deleted with the closing page. What
+     remains is that no onboarding-only token survives it. */
+  it("no onboarding-only token outlives the card", () => {
+    expect(TOKENS).not.toMatch(/export const onb[A-Z]/);
   });
 });
 
@@ -129,10 +133,6 @@ describe("one card, not three", () => {
 });
 
 describe("the band states position honestly or not at all", () => {
-  it("the step marker is optional", () => {
-    expect(CHROME).toContain("step?: string");
-  });
-
   it("and nothing renders a fixed dot row", () => {
     expect(CHROME).not.toContain("DOT_TOTAL");
     for (const src of JOURNEY) expect(src).not.toContain("dotIndex");

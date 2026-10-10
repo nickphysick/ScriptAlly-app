@@ -29,10 +29,11 @@ import { ConfirmScreen } from "./ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
+import { LabReading, LabImporting, LabOverview, LabReview, labCommit, labFixture, LAB_FILE, LAB_UID } from "./OnbLabImport";
+import { HandoffNav, HANDOFF_TAB } from "./HandoffNav";
+import { ExitMode } from "./BranchB";
+import { useAskBeforeLeaving } from "./SkipSetupConfirm";
 
-declare global {
-  interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }> } }
-}
 
 /** A handler that only records that it was called. */
 export const labSpy = (name: string) => (arg?: unknown) => {
@@ -58,24 +59,64 @@ export const LabSetup: React.FC<{
   at: SpineId;
   manuscript?: boolean;
   plan?: UserPlan;
+  /** What the frame's way out is, as the branch reports it: the loaders draw none; the summary and
+   *  the review ask first. */
+  exit?: "open" | "ask" | "none";
+  /** The importing loader is up: the frame takes the dashboard's page tokens. */
+  appMode?: boolean;
+  /** The hand-off has begun: the tab names the dashboard and the app's nav fades in. */
+  handingOff?: boolean;
   children: React.ReactNode;
-}> = ({ flow, at, manuscript, plan, children }) => {
+}> = ({ flow, at, manuscript, plan, exit = "open", appMode, handingOff, children }) => {
   const steps = spineFor(flow);
   const index = Math.max(0, spineIndex(steps, at));
+  const leaving = useAskBeforeLeaving(exit, labSpy("skip"));
+  const hideExit = exit === "none";
   return (
     <SetupFrame
       form="setup"
-      group={SETUP_GROUP}
-      name={steps[index]?.label ?? ""}
+      group={handingOff ? HANDOFF_TAB.group : SETUP_GROUP}
+      name={handingOff ? HANDOFF_TAB.name : steps[index]?.label ?? ""}
+      appMode={appMode}
+      handoff={appMode ? { on: !!handingOff, nav: <HandoffNav /> } : null}
       steps={steps}
       activeIndex={index}
       manuscriptTitle={manuscript ? LAB_TITLE : null}
       user={{ ...LAB_USER, plan: plan ?? UserPlan.FREE }}
       exitLabel="Skip for now"
-      onExit={labSpy("exit")}
+      onExit={exit === "open" ? labSpy("exit") : leaving.onExit}
+      hideExit={hideExit}
     >
       {children}
+      {leaving.confirm}
     </SetupFrame>
+  );
+};
+
+/**
+ * The real branch from the summary to the hand-over, wired the way `Onboarding` wires it: the
+ * branch reports its exit mode, that it is importing, and the hand-off; this owns the frame. The
+ * commit is a stand-in that writes nothing. When the import completes the frame is left in its
+ * handed-over state (the app cannot mount signed out) and the call is recorded.
+ */
+const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorMs: number }> = ({ fx, skip, none, floorMs }) => {
+  const [exit, setExit] = React.useState<ExitMode>("ask");
+  const [importing, setImporting] = React.useState(false);
+  const [handingOff, setHandingOff] = React.useState(false);
+  const [arrived, setArrived] = React.useState(false);
+  const lab = React.useMemo(() => ({ result: labFixture(fx), fileName: LAB_FILE, title: LAB_TITLE, commit: labCommit({ skip, none }), uid: LAB_UID, floorMs }), [fx, skip, none, floorMs]);
+  return (
+    <LabSetup flow="B" at="list" manuscript exit={arrived ? "none" : exit} appMode={importing || arrived} handingOff={handingOff}>
+      <div data-lab-flow={arrived ? "arrived" : "running"} style={{ display: "contents" }}>
+        <BranchB
+          lab={lab}
+          onSkip={labSpy("skip")} onExit={labSpy("back")} onSaveBook={async () => false} onEnsureManuscript={async () => "lab-ms"}
+          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onExitMode={setExit} onImporting={setImporting} onHandoff={() => setHandingOff(true)}
+          onImportComplete={(_o, destination) => { labSpy("importComplete")(destination); setArrived(true); }}
+        />
+      </div>
+    </LabSetup>
   );
 };
 
@@ -188,6 +229,17 @@ export const OnbLab: React.FC = () => {
     unloaded: <Unloaded onAddByHand={labSpy("byhand")} onRestart={labSpy("restart")} />,
   };
   if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={s === "used-pro" ? UserPlan.PRO : UserPlan.FREE}>{dead[s]}</LabSetup>;
+
+  /* The import's steps (part 2). Each sits where `Onboarding` puts it: on "Your list", with the
+     manuscript card showing. */
+  const imp = (node: React.ReactNode, exit: "ask" | "none") => (
+    <LabSetup flow="B" at="list" manuscript exit={exit}>{node}</LabSetup>
+  );
+  if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");
+  if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
+  if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} />, "ask");
+  if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";

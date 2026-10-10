@@ -1,0 +1,131 @@
+{
+ "agents": [
+  {
+   "ref": "d1",
+   "name": "Jamal Carter",
+   "agency": "Carter & Vale",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "d4",
+   "name": "Sarah Beth",
+   "agency": "Beth Books",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "d6",
+   "name": "Tomas Vidal",
+   "agency": "The Quill Agency",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "d7",
+   "name": "PRIYA RAMAN",
+   "agency": "",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "d9",
+   "name": "Nora Finch",
+   "agency": "Finch & Rowe",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "d10",
+   "name": "N. Finch",
+   "agency": "Finch & Rowe",
+   "genres": [],
+   "responseTimeWeeks": 6
+  }
+ ],
+ "queries": [
+  {
+   "agentRef": "d1",
+   "status": "No Response",
+   "sentDate": "2024-02-01",
+   "sentDateRaw": "01/02/2024",
+   "timeline": [
+    {
+     "type": "Queried",
+     "date": "2024-02-01",
+     "raw": "01/02/2024"
+    },
+    {
+     "type": "Full Requested",
+     "date": "2024-03-10",
+     "raw": "10/03/2024"
+    },
+    {
+     "type": "No Response",
+     "date": "2024-01-15",
+     "raw": "15/01/2024"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "agentRef": "d4",
+   "status": "Partial Requested",
+   "sentDate": "2024-04-02",
+   "sentDateRaw": "02/04/2024",
+   "timeline": [
+    {
+     "type": "Queried",
+     "date": "2024-04-02",
+     "raw": "02/04/2024"
+    },
+    {
+     "type": "Partial Requested",
+     "date": "2024-04-20",
+     "raw": "20/04/2024"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "agentRef": "d6",
+   "status": "Queried",
+   "sentDate": "2024-05-06",
+   "sentDateRaw": "06/05/2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "d7",
+   "status": "Partial Requested",
+   "sentDate": null,
+   "sentDateRaw": null,
+   "timeline": [],
+   "notes": "asked for 50pp"
+  },
+  {
+   "agentRef": "d7",
+   "status": "Partial Sent",
+   "sentDate": "2024-05-01",
+   "sentDateRaw": "01/05/2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "d9",
+   "status": "Queried",
+   "sentDate": "2024-06-10",
+   "sentDateRaw": "10/06/2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "d10",
+   "status": "Queried",
+   "sentDate": "2024-06-10",
+   "sentDateRaw": "10/06/2024",
+   "timeline": [],
+   "notes": ""
+  }
+ ]
+}

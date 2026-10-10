@@ -1,0 +1,165 @@
+{
+ "agents": [
+  {
+   "ref": "a2",
+   "name": "Jamal Carter",
+   "agency": "Carter & Vale",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a3",
+   "name": "Marianne Webb",
+   "agency": "The Greenhouse",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a4",
+   "name": "Tomas Vidal",
+   "agency": "The Quill Agency",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a5",
+   "name": "Gregory Salt",
+   "agency": "Penhallow Literary",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a6",
+   "name": "",
+   "agency": "Westbrook Literary",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a7",
+   "name": "Wren & Co",
+   "agency": "Wren & Co",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a8",
+   "name": "Owen Hale",
+   "agency": "Hale House",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a9",
+   "name": "Ines Marlow",
+   "agency": "",
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a10",
+   "name": "Rhea Solis",
+   "agency": "Solis & Finch",
+   "issues": [
+    "agency read from a merged cell"
+   ],
+   "genres": [],
+   "responseTimeWeeks": 6
+  },
+  {
+   "ref": "a12",
+   "name": "Dana Whitlock",
+   "agency": "Whitlock Agency",
+   "genres": [],
+   "responseTimeWeeks": 6
+  }
+ ],
+ "queries": [
+  {
+   "agentRef": "a2",
+   "status": "Full Requested",
+   "sentDate": "2024-03-14",
+   "sentDateRaw": "14/03/2024",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-03-20",
+     "raw": "20/3"
+    }
+   ],
+   "notes": "requested full ms 20/3"
+  },
+  {
+   "agentRef": "a3",
+   "status": "Full Sent",
+   "sentDate": "2024-05-15",
+   "sentDateRaw": "15/5/24",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a4",
+   "status": "No Response",
+   "sentDate": null,
+   "sentDateRaw": "March 2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a5",
+   "status": "No Response",
+   "sentDate": null,
+   "sentDateRaw": "44621",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a6",
+   "status": "Rejected",
+   "sentDate": "2024-06-01",
+   "sentDateRaw": null,
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a7",
+   "status": "Partial Sent",
+   "sentDate": "2024-04-18",
+   "sentDateRaw": "18/04/2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a8",
+   "status": "Partial Sent",
+   "sentDate": "2025-02-03",
+   "sentDateRaw": "03/02/2025",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a9",
+   "status": "Offer",
+   "sentDate": "2025-01-12",
+   "sentDateRaw": "12/01/2025",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a10",
+   "status": "Withdrawn",
+   "sentDate": "2024-09-09",
+   "sentDateRaw": "09/09/2024",
+   "timeline": [],
+   "notes": ""
+  },
+  {
+   "agentRef": "a12",
+   "status": "Partial Requested",
+   "sentDate": null,
+   "sentDateRaw": null,
+   "timeline": [],
+   "notes": ""
+  }
+ ]
+}

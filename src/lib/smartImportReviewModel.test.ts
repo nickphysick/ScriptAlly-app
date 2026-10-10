@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
 import { impliedRungs, assignTimes } from './impliedRungs';
 import { deriveStatus } from './queryDerivation';
 import { QueryStatus } from '../types';
@@ -125,22 +125,6 @@ describe('statusDirectionChoices — the two real choices', () => {
   it('offers the partial pair for a partial status', () => {
     expect(statusDirectionChoices(QueryStatus.PARTIAL_SENT).map((c) => c.status))
       .toEqual([QueryStatus.PARTIAL_SENT, QueryStatus.PARTIAL_REQUESTED]);
-  });
-});
-
-describe('decideStageEntry — intro before walk on first entry, suppressed after', () => {
-  it('first flagged visit → intro (the welcome plays before the walk)', () => {
-    expect(decideStageEntry({ flagged: true, introSeen: false, escaped: false })).toBe('intro');
-  });
-  it('revisit after the intro has been seen → walk (no replay)', () => {
-    expect(decideStageEntry({ flagged: true, introSeen: true, escaped: false })).toBe('walk');
-  });
-  it('escaped via "View all" → none (stay on the list, no intro, no walk)', () => {
-    expect(decideStageEntry({ flagged: true, introSeen: true, escaped: true })).toBe('none');
-    expect(decideStageEntry({ flagged: true, introSeen: false, escaped: true })).toBe('none');
-  });
-  it('zero flagged items → none (clean list, no empty overlay)', () => {
-    expect(decideStageEntry({ flagged: false, introSeen: false, escaped: false })).toBe('none');
   });
 });
 
@@ -333,43 +317,6 @@ describe('modelToResult — exclusions & merge repointing', () => {
   });
 });
 
-describe('doneStageMessage — the all-sorted message tells the truth', () => {
-  const chip = 'Queries all sorted — ready to import';
-
-  it('claims "all sorted" + shows the chip ONLY when nothing was skipped', () => {
-    const m = doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip });
-    expect(m.heading).toBe('All sorted ✦');
-    expect(m.chip).toBe(chip);
-  });
-
-  it('does NOT claim all-sorted (no chip) when items were skipped/left open', () => {
-    const m = doneStageMessage({ fixesLeft: false, skipped: 2, sortedChip: chip });
-    expect(m.chip).toBeNull();                 // never the false "ready to import" claim
-    expect(m.heading).not.toBe('All sorted ✦');
-    expect(m.body).toMatch(/still open/);
-    // the two states must read differently
-    expect(m).not.toEqual(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip }));
-  });
-
-  it('singular vs plural wording for the open count', () => {
-    expect(doneStageMessage({ fixesLeft: false, skipped: 1, sortedChip: chip }).body).toMatch(/^One is still open/);
-    expect(doneStageMessage({ fixesLeft: false, skipped: 3, sortedChip: chip }).body).toMatch(/^3 are still open/);
-  });
-
-  it('a blocking fix shows "Almost there", never the chip', () => {
-    const m = doneStageMessage({ fixesLeft: true, skipped: 0, sortedChip: chip });
-    expect(m.heading).toBe('Almost there');
-    expect(m.chip).toBeNull();
-  });
-
-  it('uses a stage-specific celebratory body when given (agents → full list)', () => {
-    const agents = "Your data is looking sharp — let's take a look at the full list";
-    expect(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: 'Agents reviewed', celebratoryBody: agents }).body).toBe(agents);
-    // default body when none supplied
-    expect(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip }).body).toMatch(/ready to import/);
-  });
-});
-
 describe('keep-both copy is count-aware (2 → both, 3+ → all)', () => {
   it('a 2-record cluster says "keep both"', () => {
     expect(keepBothLabel(2)).toBe("They're different — keep both");
@@ -383,27 +330,25 @@ describe('keep-both copy is count-aware (2 → both, 3+ → all)', () => {
   });
 });
 
-describe('focusReasonMeta — in-focus card pill + headline (both walks)', () => {
-  const keys: FocusReasonKey[] = ['agent-needs-agency', 'agent-mapping', ...REVIEW_REASON_CODES];
-
-  it('gives every reason — both agent keys and every query code — a non-empty pill and headline', () => {
-    for (const k of keys) {
-      const { pill, headline } = focusReasonMeta(k);
-      expect(pill.trim().length, `pill for ${k}`).toBeGreaterThan(0);
-      expect(headline.trim().length, `headline for ${k}`).toBeGreaterThan(0);
-    }
+/* The guided walk is retired (onboarding v5 part 2): `decideStageEntry` and `doneStageMessage` are
+   deleted with it, and `focusReasonMeta` keeps only the pill a row wears while it asks something. */
+describe('focusReasonMeta — the label a row wears while it asks', () => {
+  const keys = ['agent-needs-agency', 'agent-mapping', 'two-dates', 'missing-day', 'serial-outlier', 'no-date', 'status-direction', 'status-wording', 'check-name', 'needs-identifying'] as const;
+  it('gives every reason — both agent keys and every query code — a non-empty pill', () => {
+    for (const k of keys) expect(focusReasonMeta(k).pill.length, k).toBeGreaterThan(3);
   });
-
-  it('drops the generic "Quick fix"/"Sharpen" wording — pills are context-specific', () => {
-    for (const k of keys) {
-      expect(focusReasonMeta(k).pill).not.toMatch(/quick fix|sharpen/i);
-    }
+  it('never falls back to a generic tier word', () => {
+    for (const k of keys) expect(focusReasonMeta(k).pill).not.toMatch(/quick fix|sharpen/i);
   });
-
-  it('maps the brief examples', () => {
-    expect(focusReasonMeta('agent-needs-agency')).toEqual({ pill: 'No agency name', headline: 'No agency on record yet' });
+  it('maps the brief examples, and carries no headline', () => {
+    expect(focusReasonMeta('agent-needs-agency')).toEqual({ pill: 'No agency name' });
     expect(focusReasonMeta('status-direction').pill).toBe('Status to check');
-    expect(focusReasonMeta('two-dates').headline).toMatch(/two dates/i);
+    expect(focusReasonMeta('missing-day').pill).toBe('Day to confirm');
+  });
+  it('the walk\'s two functions are gone from the model', async () => {
+    const model = await import('./smartImportReviewModel');
+    expect('decideStageEntry' in model).toBe(false);
+    expect('doneStageMessage' in model).toBe(false);
   });
 });
 

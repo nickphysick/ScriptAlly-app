@@ -33,7 +33,7 @@ export function overviewLead(counts: {
 }): string {
   const { agentsFix, agentsSharpen, queriesSharpen } = counts;
   if (agentsFix === 0 && agentsSharpen === 0 && queriesSharpen === 0) {
-    return "It all read cleanly — your history's ready to come straight in.";
+    return "It all read cleanly. Your history's ready to come straight in.";
   }
 
   const clauses: string[] = [];
@@ -64,7 +64,9 @@ export function overviewLead(counts: {
     clauses.length === 1
       ? clauses[0]
       : `${clauses.slice(0, -1).join(", ")} and ${clauses[clauses.length - 1]}`;
-  return `Most of it's ready to go — ${list}.`;
+  /* Two sentences, no dash (onboarding v5 part 2). The clauses and their joins are untouched; the
+     list's first letter is capitalised because it opens a sentence now. */
+  return `Most of it's ready to go. ${list.charAt(0).toUpperCase()}${list.slice(1)}.`;
 }
 
 /** The lead sentence: names the file when we have one, and says so plainly when we do not. */

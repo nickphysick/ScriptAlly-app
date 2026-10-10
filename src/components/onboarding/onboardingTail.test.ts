@@ -47,7 +47,8 @@ const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "ut
 
 const ONBOARDING = read("../Onboarding.tsx");
 const BRANCH_B = read("BranchB.tsx");
-const CHROME = read("chrome.tsx");
+/* chrome.tsx is deleted (onboarding v5 part 2); the absence is read off the parts that replaced it. */
+const CHROME = read("setupParts.tsx");
 
 describe("the legacy agents and completion screens are gone", () => {
   for (const gone of ["Screen5Agents", "Screen6Complete", "handleScreen5Continue"]) {

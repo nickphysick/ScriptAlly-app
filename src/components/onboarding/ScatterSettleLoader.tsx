@@ -17,14 +17,12 @@
  * imports only a representative handful scatter; the rest are noted as "+N more". Reduced-motion: no
  * drift, no sparks, no fly-in — just the easing bar + rotating status text, then the clean stack.
  */
-import React, { useEffect, useRef, useState } from "react";
-import { OnbNav } from "./SmartImportReview";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import "./importFlow.css";
 import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 
-const SERIF = "'Playfair Display',serif";
-const MONO = "'JetBrains Mono',monospace";
 
 export interface LoaderCard {
   /** The row's raw cells as the writer typed them — shown while scattered. */
@@ -47,7 +45,6 @@ export interface ScatterSettleLoaderProps {
   onProceed: () => void;
   /** Hard-timeout / unrecoverable wait — the host exits to its fallback (never dead-ends onboarding). */
   onTimeout?: () => void;
-  userName?: string;
 }
 
 // Scatter slots — offsets (px) from the centre of the stage + a slight rotation + per-card drift
@@ -114,10 +111,10 @@ const FORM_POOL = 6;       // max forms alive at once
 const FORM_SPAWN = 720;    // ms between spawns
 const FORM_LIFE = 3000;    // ms a form lives (fade in → drift up → fade out)
 type FormKind = "agent" | "query";
-const FORM_META: Record<FormKind, { title: string; glyph: React.ReactNode; accent: string; fields: [string, string] }> = {
-  agent: { title: "Add an agent", accent: "#5a6e58", fields: ["Name", "Agency"],
+const FORM_META: Record<FormKind, { title: string; glyph: React.ReactNode; fields: [string, string] }> = {
+  agent: { title: "Add an agent", fields: ["Name", "Agency"],
     glyph: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /></svg> },
-  query: { title: "Log a query", accent: "#7c3a2a", fields: ["Status", "Date sent"],
+  query: { title: "Log a query", fields: ["Status", "Date sent"],
     glyph: <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2 12 22 3 13 22l-2.5-7.5L2 12Z" /></svg> },
 };
 // Two evocative field values pulled from the raw scrap (split on its own separators; trimmed). Honest:
@@ -128,9 +125,36 @@ const formFields = (messy: string, kind: FormKind): [string, string] => {
   return [parts[parts.length - 2] || parts[0] || "…", parts[parts.length - 1] || "…"];     // status-ish · date-ish (tail)
 };
 
-export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, userName }) => {
+/** The last status line. ⚠️ "Ready" and nothing after it: the summary that follows says what was
+ *  read, and nothing in the import says "here's what we found" (onboarding v5 part 2). */
+export const READY_TXT = "Ready";
+
+/** The timing spine, exported for lock R1 and for nothing else: no caller may set these. */
+export const SCATTER_TIMINGS = { INTRO_MS, FLOOR_MS, SLOW_AT_MS, TIMEOUT_MS, STATUS_INTERVAL_MS: 1300 } as const;
+
+/** How far the outermost scattered card reaches from the stage's centre at full spread: the widest
+ *  slot offset plus half a messy card. The stage scales the spread to its own box below this. */
+const FULL_SPREAD = 332 + CARD_W / 2;
+
+export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout }) => {
   const reduced = prefersStatic();
-  const userInitial = userName ? userName[0].toUpperCase() : "?";
+  /* ⚠️ POSITIONS ARE MEASURED FROM THE STAGE, NOT THE WINDOW. The loader fills the frame's sheet
+     now, which is narrower than the window by the sidebar, so the scatter is scaled to the stage's
+     own width: at full spread a 1280 window's outer cards ran 40px past the sheet's edge. */
+  const stageRef = useRef<HTMLElement>(null);
+  const [spread, setSpread] = useState(1);
+  useLayoutEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const fit = () => {
+      const w = el.clientWidth;
+      if (w > 0) setSpread(Math.max(0.2, Math.min(1, (w / 2 - 14 - CARD_W / 2) / (FULL_SPREAD - CARD_W / 2))));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const n = cards.length;
   const [introDone, setIntroDone] = useState(reduced); // intro beat over → the Work zone (drift) begins
   const [minElapsed, setMinElapsed] = useState(false); // Reveal floor reached
@@ -187,7 +211,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   // motion preferences; this is the reduced-motion path's main sign of life).
   useEffect(() => {
     if (settling) return;
-    const id = setInterval(() => setTxtIdx((i) => (i + 1) % WAIT_TXT.length), 1300);
+    const id = setInterval(() => setTxtIdx((i) => (i + 1) % WAIT_TXT.length), SCATTER_TIMINGS.STATUS_INTERVAL_MS);
     return () => clearInterval(id);
   }, [settling]);
 
@@ -255,10 +279,10 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   // Bar: eases to ~78% across the wait (never parked), then completes to 100% as cards resolve.
   const barW = settling ? Math.round(78 + (resolved / Math.max(1, n)) * 22) : (waitStarted ? 78 : 4);
   const barTransition = settling ? "width .45s ease" : "width 6s cubic-bezier(.25,.6,.4,1)";
-  const txt = allShownResolved ? "ready — here's what we found" : settling ? "Tidying records…" : slow ? SLOW_TXT : WAIT_TXT[txtIdx];
+  const txt = allShownResolved ? READY_TXT : settling ? "Tidying records…" : slow ? SLOW_TXT : WAIT_TXT[txtIdx];
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#fbf7f1", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Source Sans Pro, sans-serif", color: "#3a1c14", backgroundImage: "repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(124,58,42,.022) 33px,rgba(124,58,42,.022) 34px)" }}>
+    <div className="im-bare im-ssl" data-im="reading" data-im-state={tick ? "done" : settling ? "settling" : "work"}>
       <style>{`
         @keyframes saScAppear{from{opacity:0}to{opacity:1}}
         @keyframes saScPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
@@ -269,28 +293,23 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         @keyframes saScSpark{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.1);opacity:1}55%{transform:scale(1);opacity:1}100%{transform:scale(.96) translateY(-10px);opacity:0}}
         .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .7s cubic-bezier(.5,0,.3,1), width .55s cubic-bezier(.4,0,.2,1), opacity .5s ease .12s, background .4s ease, border-color .4s ease, box-shadow .5s ease;}
         @keyframes saScBigtick{0%{transform:translate(-50%,-50%) scale(0);opacity:0}60%{transform:translate(-50%,-50%) scale(1.12);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
-        @keyframes saScHalo{0%{box-shadow:0 0 0 0 rgba(138,158,136,.42)}100%{box-shadow:0 0 0 26px rgba(138,158,136,0)}}
+        @keyframes saScHalo{0%{box-shadow:0 0 0 0 rgba(45,58,80,.42)}100%{box-shadow:0 0 0 26px rgba(45,58,80,0)}}
         .sa-sc-bigtick{animation:saScBigtick .75s cubic-bezier(.34,1.56,.64,1) forwards, saScHalo 1.6s ease .5s;}
         @media(prefers-reduced-motion:reduce){.sa-sc-bigtick{animation:none;transform:translate(-50%,-50%) scale(1);opacity:1;}}
         .sa-sc-appear{animation:saScAppear .4s ease both;}
         .sa-sc-squeeze{animation:saScSqueeze .52s cubic-bezier(.34,1.56,.64,1) both;}
         .sa-sc-float{animation:saScBob var(--d,3.6s) ease-in-out infinite;animation-delay:var(--dl,0s);}
-        .sa-sc-layer{position:absolute;left:17px;right:17px;top:0;bottom:0;display:flex;align-items:center;transition:opacity .4s ease;}
         .sa-sc-dotpop svg{animation:saScPop .5s cubic-bezier(.34,1.56,.64,1);}
         .sa-sc-spark{position:absolute;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:saScSpark 1.5s ease forwards;z-index:6;}
-        .sa-sc-spark.q{background:#f7eed8;color:#a8842c;font-family:${SERIF};font-weight:700;font-size:18px;}
-        .sa-sc-spark.a{background:#e9ede6;color:#5a6e58;}
-        .sa-sc-spark.p{background:#f5e2da;color:#7c3a2a;}
-        .sa-sc-spark.d{background:#eef1ec;color:#5a6e58;}
         /* Work-zone forms — drift up through the background, behind the scraps. */
         @keyframes saScForm{0%{opacity:0;transform:translate(-50%,-50%) translateY(18px) scale(.93) rotate(var(--fr,0deg))}16%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) translateY(-32px) scale(.98) rotate(var(--fr,0deg))}}
         .sa-sc-form{position:absolute;animation:saScForm 3s cubic-bezier(.4,0,.3,1) forwards;z-index:4;pointer-events:none;}
-        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-squeeze,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark{animation:none;}.sa-sc-form{display:none;}}
+        @keyframes saScBlink{0%,100%{opacity:.4}50%{opacity:1}}
+        .sa-sc-pip{animation:saScBlink 1.1s ease-in-out infinite;}
+        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-squeeze,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark,.sa-sc-pip{animation:none;}.sa-sc-form{display:none;}}
       `}</style>
 
-      <OnbNav userInitial={userInitial} />
-
-      <main style={{ flex: "1 1 auto", minHeight: 0, position: "relative", overflow: "hidden" }}>
+      <main className="im-ssl-stage" ref={stageRef} data-im="stage">
         {/* Work-zone forms — Add-an-agent / Log-a-query, fields filling from the raw scraps, drifting BEHIND them */}
         {!reduced && !settling && forms.map((fm) => {
           const meta = FORM_META[fm.kind];
@@ -298,20 +317,17 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           const rows: [string, string][] = [[meta.fields[0], v1], [meta.fields[1], v2]];
           return (
             <div key={fm.id} className="sa-sc-form" style={{ left: `${fm.x}%`, top: `${fm.y}%`, width: 248, ["--fr" as string]: `${fm.rot}deg` }} aria-hidden>
-              <div style={{ background: "#fffdfa", border: "1px solid #ece1d4", borderRadius: 11, boxShadow: "0 12px 28px -18px rgba(58,28,20,.32)", padding: "11px 13px", opacity: 0.84 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9, color: meta.accent, fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>{meta.glyph}{meta.title}</div>
+              <div className="im-sc-formbox">
+                <h4>{meta.glyph}{meta.title}</h4>
                 {rows.map(([label, val], k) => (
-                  <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: k === 0 ? 6 : 0 }}>
-                    <span style={{ fontFamily: MONO, fontSize: 8, color: "#a89a8c", width: 50, flexShrink: 0, textTransform: "uppercase", letterSpacing: ".04em" }}>{label}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontFamily: "Source Sans Pro", fontSize: 11, color: "#5a4a3e", background: "#f6f1ea", border: "1px solid #ece1d4", borderRadius: 6, padding: "4px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{val}</span>
-                  </div>
+                  <p key={k}><small>{label}</small><span>{val}</span></p>
                 ))}
               </div>
             </div>
           );
         })}
         {n === 0 ? (
-          <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontFamily: SERIF, fontSize: 22, color: "#7c3a2a" }}>Reading your file…</div>
+          <div className="im-ssl-empty">Reading your file…</div>
         ) : cards.map((card, i) => {
           const slot = SCATTER[i % SCATTER.length];
           const isDone = i < resolved;                 // crystallised (clean on-brand layer)
@@ -327,32 +343,32 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           } else if (arranged || reduced) {            // tidy grid
             left = `calc(50% + ${gx}px)`; top = `calc(50% + ${gy}px)`; transform = "translate(-50%,-50%) rotate(0deg)";
           } else {                                     // scattered — straightens to 0° as it crystallises in place
-            left = `calc(50% + ${slot.dx}px)`; top = `calc(50% + ${slot.dy}px)`; transform = `translate(-50%,-50%) rotate(${isDone ? 0 : slot.r}deg)`;
+            left = `calc(50% + ${Math.round(slot.dx * spread)}px)`; top = `calc(50% + ${slot.dy}px)`; transform = `translate(-50%,-50%) rotate(${isDone ? 0 : slot.r}deg)`;
           }
           return (
-            <div key={i} className={`sa-sc-card${reduced || introDone ? "" : " sa-sc-squeeze"}${drifting ? " sa-sc-float" : ""}`} aria-hidden
+            <div key={i} className={`sa-sc-card${reduced || introDone ? "" : " sa-sc-squeeze"}${drifting ? " sa-sc-float" : ""}`} aria-hidden data-im="card"
               style={{
-                position: "absolute", left, top, transform, opacity: cardOpacity, width: isDone ? RESOLVED_W : CARD_W, minHeight: 66, zIndex: arranged ? 20 + i : (isDone ? 15 : 10),
+                position: "absolute", left, top, transform, opacity: cardOpacity, width: isDone ? RESOLVED_W : CARD_W, maxWidth: "calc(100% - 20px)", minHeight: 66, zIndex: arranged ? 20 + i : (isDone ? 15 : 10),
                 animationDelay: reduced ? undefined : `${50 + i * 80}ms`,
                 ["--r" as string]: `${slot.r}deg`, ["--bx" as string]: `${slot.bx}px`, ["--by" as string]: `${slot.by}px`, ["--br" as string]: `${slot.br}deg`, ["--d" as string]: `${slot.d}s`, ["--dl" as string]: `${slot.dl}s`,
-                background: "#fff", border: isDone ? "1px solid transparent" : "1px solid #e7ddd2", borderRadius: 13,
-                boxShadow: isDone ? "0 13px 32px -15px rgba(58,28,20,.3)" : "0 14px 30px -16px rgba(58,28,20,.4)",
+                background: "#fff", border: isDone ? "1px solid transparent" : "1px solid rgba(28,19,15,.12)", borderRadius: 13,
+                boxShadow: isDone ? "0 13px 32px -15px rgba(28,19,15,.3)" : "0 14px 30px -16px rgba(28,19,15,.4)",
               }}>
               {/* messy (raw) layer — fades out on crystallise */}
-              <div style={{ position: "absolute", inset: 0, padding: "13px 17px", display: "flex", alignItems: "center", gap: 10, opacity: isDone ? 0 : 1, transition: "opacity .4s ease" }}>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: "#f2ece3", display: "flex", alignItems: "center", justifyContent: "center", color: "#bcae9f", flexShrink: 0, fontSize: 12 }}>▦</span>
-                <span style={{ fontFamily: MONO, fontSize: 12.5, color: "#a89a8c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.messy}</span>
+              <div className="im-sc-messy" style={{ opacity: isDone ? 0 : 1 }}>
+                <i>▦</i>
+                <span>{card.messy}</span>
               </div>
-              {/* clean (on-brand) layer — the white rim (inset 5) holds the SheenWave inset frame: dot + name + agency */}
-              <div style={{ position: "absolute", inset: 5, opacity: isDone ? 1 : 0, transition: "opacity .45s ease .1s" }}>
+              {/* clean layer — the white rim (inset 5) holds the navy sheen frame: dot + name + agency */}
+              <div className="im-sc-clean" style={{ opacity: isDone ? 1 : 0 }}>
                 <SheenWave radius={9} borderWidth={1.5} style={{ height: "100%", background: "#fff", padding: "11px 14px", display: "flex", alignItems: "center" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 11, width: "100%", minWidth: 0 }}>
                     <span className={isDone ? "sa-sc-dotpop" : undefined} style={{ width: 25, height: 25, flexShrink: 0, display: "inline-flex" }}>
-                      {card.status ? <StatusDot status={card.status} overrideSize={25} /> : <span style={{ width: 25, height: 25, borderRadius: "50%", border: "2px solid #e3d4c7", display: "inline-block" }} />}
+                      {card.status ? <StatusDot status={card.status} overrideSize={25} /> : <span className="im-sc-blank" />}
                     </span>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, lineHeight: 1.1, color: "#3a1c14", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.name || "—"}</div>
-                      <div style={{ fontFamily: "Source Sans Pro", fontSize: 11, color: "#9a8c80", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.agency || ""}</div>
+                      <div className="im-sc-name">{card.name || "—"}</div>
+                      <div className="im-sc-sub">{card.agency || ""}</div>
                     </div>
                   </div>
                 </SheenWave>
@@ -361,35 +377,32 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           );
         })}
 
-        {/* process-sparks — on-brand glyphs popping around the cards while we work */}
+        {/* process-sparks — popping around the cards while we work */}
         {sparks.map((s) => (
-          <div key={s.id} className={`sa-sc-spark ${s.kind}`} aria-hidden style={{ left: `${s.x}%`, top: `${s.y}%` }}>{SPARK_GLYPH[s.kind]}</div>
+          <div key={s.id} className={`sa-sc-spark im-sc-spark ${s.kind}`} aria-hidden style={{ left: `${s.x}%`, top: `${s.y}%` }}>{SPARK_GLYPH[s.kind]}</div>
         ))}
 
         {/* the remainder of a big import — a quiet pill below the grid; fades as the grid squeezes away */}
         {settling && remainder > 0 && (
-          <div style={{ position: "absolute", left: "50%", top: `calc(50% + ${(Math.ceil(n / 2) - 1) / 2 * GRID_ROW + 72}px)`, transform: "translate(-50%, -50%)", opacity: squeeze ? 0 : 1, transition: "opacity .4s ease", fontFamily: MONO, fontSize: 11.5, color: "#8a8178", background: "#efe7db", padding: "5px 13px", borderRadius: 20, whiteSpace: "nowrap" }}>
+          <div className="im-sc-more" style={{ top: `calc(50% + ${(Math.ceil(n / 2) - 1) / 2 * GRID_ROW + 72}px)`, opacity: squeeze ? 0 : 1 }}>
             + {remainder} more, tidied
           </div>
         )}
 
-        {/* the done beat — records squeeze to centre and resolve into the big sage tick (hands to the Overview) */}
+        {/* the done beat — records squeeze to centre and resolve into the navy mark (hands to the summary) */}
         {tick && (
-          <div className="sa-sc-bigtick" style={{ position: "absolute", left: "50%", top: "50%", width: 116, height: 116, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 40, boxShadow: "0 14px 36px -18px rgba(58,28,20,.3)" }} aria-hidden>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          <div className="sa-sc-bigtick im-sc-tick" data-im="tick" aria-hidden>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
           </div>
         )}
       </main>
 
-      {/* slim bottom status bar — gold blinking pip · rotating status · smoothly-easing progress · count */}
-      <div style={{ flexShrink: 0, height: 52, background: "rgba(253,250,245,.92)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)", borderTop: "1px solid #e7ddd2", display: "flex", alignItems: "center", gap: 16, padding: "0 22px" }}>
-        <style>{`@keyframes saScBlink{0%,100%{opacity:.4}50%{opacity:1}} .sa-sc-pip{animation:saScBlink 1.1s ease-in-out infinite;} @media(prefers-reduced-motion:reduce){.sa-sc-pip{animation:none;}}`}</style>
-        <span className="sa-sc-pip" style={{ width: 9, height: 9, borderRadius: "50%", background: "#a8842c", flexShrink: 0 }} />
-        <span key={txt} style={{ fontFamily: MONO, fontSize: 12.5, color: "#6a5c50", whiteSpace: "nowrap", minWidth: 168, animation: "saScAppear .25s ease" }}>{txt}</span>
-        <span style={{ flex: 1, height: 5, borderRadius: 3, background: "#ece3d6", overflow: "hidden", maxWidth: 420 }}>
-          <span style={{ display: "block", height: "100%", width: `${barW}%`, background: "linear-gradient(90deg,#8a9e88,#5a6e58)", borderRadius: 3, transition: barTransition }} />
-        </span>
-        <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#9a8c80", marginLeft: "auto", whiteSpace: "nowrap" }}>{total > 0 ? `${countShown} / ${total}` : ""}</span>
+      {/* the strip at the sheet's foot — rust pip · rotating status · easing progress · count */}
+      <div className="im-ssl-bar" data-im="strip" role="status">
+        <span className="sa-sc-pip im-ssl-pip" />
+        <span key={txt} className="im-ssl-txt" data-im="status" style={{ animation: "saScAppear .25s ease" }}>{txt}</span>
+        <span className="im-ssl-track"><i style={{ width: `${barW}%`, transition: barTransition }} /></span>
+        <span className="im-ssl-cnt" data-im="count">{total > 0 ? `${countShown} / ${total}` : ""}</span>
       </div>
     </div>
   );

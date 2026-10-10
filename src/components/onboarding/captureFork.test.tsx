@@ -102,7 +102,9 @@ describe("K1 three tiles, no radio, one ring", () => {
   it("the drop zone rides the ringed Smart import tile, and says what it accepts", () => {
     expect(fork("smart")).toContain('data-sf="drop"');
     expect(text(fork("smart"))).toContain("Drop your file here, or choose a file");
-    expect(text(fork("smart"))).toContain(".csv · .xlsx · up to 5 MB");
+    expect(text(fork("smart"))).toContain(".csv · .xlsx");
+    /* A size nothing enforces is not stated (onboarding v5 part 2, phase 0). */
+    expect(text(fork("smart"))).not.toMatch(/\bMB\b/);
     expect(fork("byhand")).not.toContain('data-sf="drop"');
     expect(fork("template")).not.toContain('data-sf="drop"');
   });

@@ -120,3 +120,15 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
     expect(b).not.toContain("SelectRow");
   });
 });
+
+/* Onboarding v5 part 2, phase 0 — one template file. */
+describe("the unreadable-file card hands out the fork's template", () => {
+  const branch = readFileSync(resolve(process.cwd(), "src/components/onboarding/BranchB.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  it("calls downloadTemplate(TEMPLATE_FILENAME), as the fork does", () => {
+    expect(branch).toContain("downloadTemplate(TEMPLATE_FILENAME)");
+  });
+  it("and no longer names the three-tab workbook", () => {
+    expect(branch).not.toContain("pipeline-import-template");
+  });
+});

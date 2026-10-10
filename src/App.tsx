@@ -57,15 +57,6 @@ import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
-// TEMP: agents-screen B-redesign dev preview — remove after visual sign-off.
-import { SmartImportReview } from "./components/onboarding/SmartImportReview";
-import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES } from "./components/onboarding/SmartImportReviewFixture";
-// TEMP: post-import loader dev preview — remove after visual sign-off.
-import { ImportingLoader } from "./components/onboarding/ImportingLoader";
-// TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
-import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
-// TEMP: duplicate-query reconcile card dev preview (#/reconcile-card) — remove after sign-off.
-import { ReconcileCardDevPreview } from "./components/onboarding/ReconcileCard";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
@@ -83,40 +74,6 @@ import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-
-/** TEMP dev harness for the post-import loader (#/import-loader): loops loading → complete so both
- *  states can be reviewed. The real flow drives `complete` from BranchB's commit + 5s floor. */
-const ImportingLoaderDevHarness: React.FC = () => {
-  const [complete, setComplete] = useState(false);
-  useEffect(() => {
-    const id = setInterval(() => setComplete((c) => !c), 4000);
-    return () => clearInterval(id);
-  }, []);
-  // onProceed is a no-op here so the completion state stays on screen for review (no real route).
-  return <ImportingLoader complete={complete} onProceed={() => {}} userName="Nick" />;
-};
-
-/** TEMP dev harness for the scatter-settle extraction loader (#/scatter-loader): mock raw cells, a
- *  simulated ~2.2s extraction, then it snaps + crystallises. Loops so both states can be reviewed. */
-const ScatterLoaderDevHarness: React.FC = () => {
-  const SAMPLE: { messy: string; name: string; agency: string; date: string; status: QueryStatus }[] = [
-    { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", agency: "Carter & Vale", date: "1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
-    { messy: "Okonkwo Lit · fulls req · 12.4.24", name: "Maria Okonkwo", agency: "Okonkwo Literary", date: "12 Apr 2024", status: QueryStatus.FULL_REQUESTED },
-    { messy: "Vidal · Quill · sent · 6 May", name: "Tomas Vidal", agency: "The Quill Agency", date: "6 May 2024", status: QueryStatus.QUERIED },
-    { messy: "G. Salt · offer!! · 02/13/2024", name: "Gregory Salt", agency: "Penhallow Literary", date: "13 Feb 2024", status: QueryStatus.OFFER },
-    { messy: "Mercer · R&R · 18 Apr", name: "Daniel Mercer", agency: "Saltmarsh Literary", date: "18 Apr 2024", status: QueryStatus.REVISE_RESUBMIT },
-    { messy: "Webb · rejected · 5.2.24", name: "Marianne Webb", agency: "The Greenhouse", date: "5 Feb 2024", status: QueryStatus.REJECTED },
-  ];
-  const [complete, setComplete] = useState(false);
-  useEffect(() => {
-    const cycle = () => { setComplete(false); setTimeout(() => setComplete(true), 2200); };
-    cycle();
-    const id = setInterval(cycle, 8000);
-    return () => clearInterval(id);
-  }, []);
-  const cards: LoaderCard[] = SAMPLE.map((s) => complete ? { messy: s.messy, name: s.name, agency: s.agency, date: s.date, status: s.status } : { messy: s.messy });
-  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={() => {}} userName="Nick" />;
-};
 
 /** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditQueryDrawer over a mock
  *  query so the shell can be reviewed without signing in. Sits inside DbProvider, so the drawer's
@@ -452,25 +409,6 @@ function AppContent() {
   // without signing in. In prod the hash simply falls through to the normal app/landing.
   if (hash === "#/plans" && import.meta.env.DEV) {
     return <PlansPage />;
-  }
-  // Dev-only agents-screen B-redesign preview.
-  if (hash === "#/import-review-dupes" && import.meta.env.DEV) {
-    return <SmartImportReview result={REVIEW_FIXTURE_DUPES} userName="Nick" onSkip={() => {}} />;
-  }
-  if (hash === "#/import-review" && import.meta.env.DEV) {
-    return <SmartImportReview result={REVIEW_FIXTURE} userName="Nick" onSkip={() => {}} />;
-  }
-  // Dev-only post-import loader preview (auto-loops loading → complete).
-  if (hash === "#/import-loader" && import.meta.env.DEV) {
-    return <ImportingLoaderDevHarness />;
-  }
-  // Dev-only scatter-settle extraction loader preview (auto-loops scatter → snap/crystallise).
-  if (hash === "#/scatter-loader" && import.meta.env.DEV) {
-    return <ScatterLoaderDevHarness />;
-  }
-  // Dev-only duplicate-query reconcile card preview (working ⇄ sorted, local state).
-  if (hash === "#/reconcile-card" && import.meta.env.DEV) {
-    return <ReconcileCardDevPreview />;
   }
   /**
    * Contact list review surface — the real page over a stub db, so its blank state can be seen at

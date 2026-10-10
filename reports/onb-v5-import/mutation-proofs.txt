@@ -1,0 +1,31 @@
+R2 mutated: 3 red, 0 green —     Error: expect(received).toBeGreaterThanOrEqual(expected)
+R3 mutated: 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+R4 mutated: 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+R1 mutated (FLOOR_MS 1800):    × R1 — both loaders keep every timing > the reading loader's spine 4ms
+R1 mutated (FLOOR_MS 1800): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+R1 mutated (FLOOR_MS 1800):       Tests  1 failed | 6 passed (7)
+S1 mutated: 3 red, 6 green —     Error: with agents + with you + closed = queries
+S2 mutated: 6 red, 3 green —     Error: Duplicates is a step only when sets exist
+S3 mutated (dash restored): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+S3 mutated (dash restored):       Tests  5 failed | 11 passed (16)
+V1 mutated: 9 red, 0 green —     Error: no old wordmark
+V2 mutated: 5 red, 0 green — 
+V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press
+V2 mutated: 9 red, 0 green —     Error: entering a step opens no dialog
+V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press
+V5 mutated: 3 red, 0 green —     Error: Reset returns every chip count to its first value
+V3 mutated (scroll to the next open row on answer): 3 red, 0 green —     Error: q1: the reader is not moved
+V4 mutated as named (agencyWaived dropped): 0 red, 2 green — the result does not carry the waiver; see V3
+V3 under V4's named break (agencyWaived dropped): 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+V4 mutated (the saved agency dropped): 1 red, 1 green —     Error: expect(received).toEqual(expected) // deep equality
+H1 mutated on [H1 the import]: 3 red, 0 green —     Error: expect(received).not.toMatch(expected)
+H2 mutated on [H2]: 2 red, 0 green —     Error: page box "left".w: frame 344 vs app 602
+R4 mutated on [R4 importing]: 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+R2 mutated on [R2 importing]: 3 red, 0 green —     Error: expect(received).toBeGreaterThanOrEqual(expected)
+N1 mutated (commit-time skips dropped):    × N1 — buildImportNotice > three skipped rows, one of them at commit time → three rows; length is the commit's count 3ms
+N1 mutated (commit-time skips dropped): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+N1 mutated (commit-time skips dropped):       Tests  1 failed | 11 passed (12)
+N2 mutated: 1 red, 2 green —     Error: expect(received).toBe(expected) // Object.is equality
+N3 mutated: 3 red, 0 green —     Error: the page does not scroll: 610 against 536
+T1 mutated: 6 red, 0 green —     Error: expect(received).toEqual(expected) // deep equality
+W1 mutated (dupNoteMerged paraphrased):      → expected 'Duplicate merged; its queries have mo…' to be 'Merged the duplicate in — its queries…' // Object.is equality ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯       Tests  1 failed | 9 p

@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -97,6 +97,7 @@
     "design-refs/materials/packages-hero-boxes.png": "aee79d51a1895a6323470e849f5def37ba1549efd98aeb294bb99c7cc5f0e611",
     "design-refs/materials/packages-v2-1.html": "f005cf457efd4b633421a27883c562130842523f9adf628a1e044ccff6cdf58f",
     "design-refs/materials/packages-v2.html": "caf4bb51dbbe34e214d65e5103205128e16db2f17110ea639d9dd7e56a5472dc",
+    "design-refs/onboarding/import-flow-v1.html": "917f0169999224844fba9151dd4ecd8b93785f02abffee1dc82bf6d29011fc05",
     "design-refs/onboarding/onboarding-journey-v5.html": "e00a1da6dc59b2a2b37fd574573f94abc275cea4a54823b8aa89c91432e4796e",
     "design-refs/packages-journey/log-query-packages-v2.html": "3d6e7e26bf26485a51fd4cec1585fee94f3f3315f1a9c6a13a9fb65c895736d0",
     "design-refs/packages-journey/package-tracking-v1.html": "00eee592e3b782c8f1abbf0afb5f0badaa832cec613057ba2e3789d2f28bba7d",
@@ -232,8 +233,8 @@
     "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b"
   },
   "superseded": {
-    "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
-    "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history."
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
+    "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }
 }
