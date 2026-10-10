@@ -17,6 +17,7 @@
  * THE TWO DRAWINGS ARE SWAPPABLE BY FILE: the sheet sets each width, and nothing here depends on a
  * drawing's own size.
  */
+import { PanelHeader } from "../../shell/PanelHeader";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import "../../shell/headerPanel.css";
@@ -49,7 +50,18 @@ export const MsOpenHeader: React.FC<{
   /** the "More manuscripts: coming soon" chip, after the subheader */
   soon?: boolean;
   children: React.ReactNode;
-}> = ({ title, sub, soon, children }) => (
+  /** Header v3: the populated page's header is the shared panel header, as a TITLE page (the book's title has no
+      count in it). The empty and deleted states do not pass this and keep the header they had. */
+  v3?: boolean;
+}> = ({ title, sub, soon, children, v3 }) => v3 ? (
+  <PanelHeader
+    kind="title" className="ms21-hd3" attrs={{ "data-ms21": "header", "data-own-header": "" }}
+    title={title}
+    sub={<span data-ms21="sub">{sub}{soon ? <span className="ms21-soon" data-ms21="soon">More manuscripts: coming soon</span> : null}</span>}
+    acts={children}
+    art={<img data-ms21="header-art" src={heroArt} alt="" />} disc
+  />
+) : (
   <header className="ms21-hd hpanel hpanel--hero" data-ms21="header" data-own-header="" data-hpanel="">
     <div className="ms21-txt" data-ms21="header-text">
       <h1 className="ms21-title" data-probe="title" data-page-title="">{title}</h1>

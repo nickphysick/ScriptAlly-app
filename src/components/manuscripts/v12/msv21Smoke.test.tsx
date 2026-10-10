@@ -39,6 +39,9 @@ describe("/manuscripts (v21) renders", () => {
     expect(html.match(/data-ms21="preview"/g)?.length ?? 0).toBe(3);
     for (const p of EMPTY_PREVIEWS) expect(html).toContain(p.title);
     for (const probe of ["book", "activity", "versions", "materials"]) expect(html, probe).not.toContain(`data-ms21="${probe}"`);
+    /* header v3 does not reach the empty state: it keeps the header it had */
+    expect(html).not.toContain("data-hp3");
+    expect(html).toContain('class="ms21-title"');
     /* the previews are inert furniture: each ghost is aria-hidden and holds no control */
     const ghosts = [...html.matchAll(/<div class="ms21-ghost[^"]*" aria-hidden="true" data-ms21="ghost">([\s\S]*?)<\/div><h3/g)];
     expect(ghosts.length).toBe(3);
@@ -47,7 +50,8 @@ describe("/manuscripts (v21) renders", () => {
 
   it("filled: the book's title is the page title, over the book, activity, the banner, versions and three doors", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toMatch(/<h1 class="ms21-title" data-probe="title" data-page-title="">The Smoke Test<\/h1>/);
+    expect(html).toMatch(/<h1 class="hp3-title" data-probe="title" data-page-title="">The Smoke Test<\/h1>/);
+    expect(html).toContain('data-hp3="title"');
     expect(html).toContain(MS_HEADER_SUB);
     for (const probe of ["header", "book", "activity", "banner", "versions", "materials"]) expect(html, probe).toContain(`data-ms21="${probe}"`);
     expect(html.match(/data-ms21="door"/g)?.length ?? 0).toBe(3);

@@ -467,6 +467,19 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         "several controls becomes a second toolbar, which is what this format replaced.",
       );
     }
+    /* HEADER v3 part B — the masthead as a panel is the shared panel header, as a TITLE page. Its behaviour (in the
+       flow, scrolling away with the page, exactly one primary or none) is unchanged. */
+    if (panel) {
+      const b = (x: typeof primary, ref?: React.Ref<HTMLButtonElement>) => (x ? { label: x.label, onClick: x.onClick, disabled: x.disabled, btnRef: ref } : undefined);
+      return (
+        <PanelHeader
+          kind="title" className="ph ph--compact ph--panel"
+          attrs={{ "data-probe": "page-header", "data-size": "compact" }}
+          title={title} titleAdornment={titleAdornment} sub={description}
+          primary={b(primary, primaryRef)} secondary={b(secondary)}
+        />
+      );
+    }
     return (
       /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
          ground and scrolls away with the page. */
@@ -521,6 +534,23 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         sub={line ? <LivingRuns runs={line.subline} /> : undefined} subPending
         primary={btn(primary, primaryRef)} secondary={btn(secondary)} actsExtra={actionsPopover}
         art={art} disc={!!art}
+      />
+    );
+  }
+
+  /* HEADER v3 part B — Analytics' band as a panel is the shared panel header, as a TITLE page. `data-band` stays,
+     because the band register reads it. ⚠️ ONLY THE BAND: a full panel with neither a band nor a living count is a
+     page with no manuscript to count for (Comparable titles, Submission packages), which is an empty state and keeps
+     the header it had. */
+  if (isPanel && band && !living && !plate) {
+    const b = (x: typeof primary, ref?: React.Ref<HTMLButtonElement>) => (x ? { label: x.label, onClick: x.onClick, disabled: x.disabled, btnRef: ref } : undefined);
+    return (
+      <PanelHeader
+        kind="title" className={`ph ph--full ph--panel hp3--band${art ? "" : " ph--noart"}`}
+        attrs={{ "data-probe": "page-header", "data-size": "full", "data-band": "" }}
+        title={title} titleAdornment={titleAdornment} sub={description}
+        primary={b(primary, primaryRef)} secondary={b(secondary)} actsExtra={actionsPopover}
+        art={art}
       />
     );
   }

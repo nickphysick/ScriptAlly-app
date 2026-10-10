@@ -45,8 +45,9 @@ describe("/queries/analytics renders", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     expect(html).toContain('data-probe="page-header"');
-    /* the band keeps its classes (its type and its disc are the band's) and gains the panel's: no full bleed, no fixed height */
-    expect(html).toMatch(/class="ph ph--full ph--panel hpanel ph--band ph--bandfix"/);
+    /* header v3: the band as a panel is the shared panel header, as a title page */
+    expect(html).toMatch(/class="ph ph--full ph--panel hp3--band hpanel hpanel--hero hp3 hp3--title"/);
+    expect(html).toContain('data-band=""');
     expect(html).toContain('data-hpanel=""');
     expect(html).not.toContain("data-header-sheet");
     expect(html).not.toContain("data-living=");

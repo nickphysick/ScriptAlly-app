@@ -199,9 +199,9 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   return grid(
     <>
       <PageGuide page={MS_GUIDE_PAGE} steps={MS_GUIDE} />
-      <MsOpenHeader title={ms.title} sub={MS_HEADER_SUB} soon={manuscripts.length <= 1}>
-        <button type="button" className="ms21-b1" data-ms21="header-edit" onClick={() => setEditOpen(true)}>Edit details</button>
-        <button type="button" className="ms21-b2" data-ms21="header-new-version" onClick={() => setVersionDlg("new")}>+ New version</button>
+      <MsOpenHeader v3 title={ms.title} sub={MS_HEADER_SUB} soon={manuscripts.length <= 1}>
+        <button type="button" className="hp3-btn hpanel-b1" data-ms21="header-edit" onClick={() => setEditOpen(true)}>Edit details</button>
+        <button type="button" className="hp3-btn hpanel-b2" data-ms21="header-new-version" onClick={() => setVersionDlg("new")}>+ New version</button>
       </MsOpenHeader>
 
       <div className="ms21-grid" data-ms21="row">

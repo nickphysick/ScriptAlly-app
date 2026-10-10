@@ -40,12 +40,44 @@ describe("PageHeader panel", () => {
       expect(h, `count ${n}`).not.toContain("data-header-sheet");
     }
   });
-  it("the band as a panel keeps the band's classes and takes no sheet", () => {
-    const h = r(<PageHeader panel band bandFixed title="T" art={<span />} />);
-    expect(h).toMatch(/class="ph ph--full ph--panel hpanel ph--band ph--bandfix"/);
-    expect(h).toContain('data-probe="band-disc"');
+  it("the band as a panel is the shared panel header, as a title page (header v3), and takes no sheet", () => {
+    const h = r(<PageHeader panel band bandFixed title="T" description="d" art={<span />} />);
+    expect(h).toMatch(/<header class="ph ph--full ph--panel hp3--band hpanel hpanel--hero hp3 hp3--title"[^>]*data-hp3="title"/);
+    expect(h).toContain('data-band=""');
+    expect(h).toMatch(/<h1 class="hp3-title" data-probe="title" data-page-title="">T<\/h1>/);
+    expect(h).toContain('data-hp3-part="art"');
+    expect(h).not.toContain('data-hp3-part="number"');
     expect(h).not.toContain("data-header-sheet");
     /* and the band WITHOUT the prop (the Query Centre's empty state) is exactly the band */
     expect(r(<PageHeader band card title="T" />)).not.toContain("hpanel");
+  });
+  it("header v3: a living panel leads with its count, the words beside it and the sentence outside the h1", () => {
+    const h = r(<PageHeader panel title="T" living={living(3)} primary={{ label: "Go", onClick: () => {} }} />);
+    expect(h).toContain('data-hp3="number"');
+    expect(h).toMatch(/<h1 class="hp3-h1"[^>]*aria-label="3 things">/);
+    expect(h).toMatch(/data-hp3-part="number">3<\/span>/);
+    expect(h).toMatch(/data-hp3-part="words">things<\/span>/);
+    const h1 = h.slice(h.indexOf("<h1"), h.indexOf("</h1>"));
+    expect(h1).not.toContain('data-hp3-part="sub"');
+    expect(h).toContain('data-hp3-part="sub"');
+    expect(h).toContain('class="hp3-btn hpanel-b1"');
+  });
+  it("header v3: while the count is unsettled the number is a blank of its own box, with no name", () => {
+    const h = r(<PageHeader panel title="T" living={living(null)} />);
+    expect(h).toContain('class="hp3-n hp3-blank"');
+    expect(h).not.toContain("aria-label=");
+    expect(h).toContain('data-loading=""');
+  });
+  it("header v3: the workspace masthead as a panel is a title page; without the prop it is the masthead it was", () => {
+    const h = r(<PageHeader variant="workspace" panel title="Calendar" description="d" />);
+    expect(h).toMatch(/<header class="ph ph--compact ph--panel hpanel hpanel--hero hp3 hp3--title hp3--noart"/);
+    expect(h).toContain('data-size="compact"');
+    expect(r(<PageHeader variant="workspace" title="Calendar" />)).not.toContain("hp3");
+  });
+  it("⚠️ header v3 reaches no header without the prop, no empty state, and no full panel that has nothing to count", () => {
+    expect(r(<PageHeader title="T" />)).not.toContain("hp3");
+    expect(r(<PageHeader panel title="T" living={living(0)} />)).not.toContain("hp3");
+    expect(r(<PageHeader band card title="T" />)).not.toContain("hp3");
+    expect(r(<PageHeader panel title="T" description="d" />)).not.toContain("hp3");
   });
 });

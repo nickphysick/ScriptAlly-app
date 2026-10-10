@@ -146,6 +146,13 @@
 }
 .hp3 .hp3-txt .hp3-sub { margin: 14px 0 0; max-width: 520px; font: 400 18px/1.4 var(--sp-serif); color: var(--hpanel-muted); }
 
+/* a title's adornment (Discover's "Pro" pill) sits beside the title, on its line, and keeps its own colours */
+.hp3 .hp3-txt h1.hp3-title > :is(span, i, b)[class] { vertical-align: middle; margin-left: 12px; }
+/* Analytics' drawing slot is its own empty white disc; it takes the drawing's box */
+.hp3.hp3--band .hp3-art { width: 196px; }
+.ws-app.sheet-wide .hp3.hp3--band .hp3-art { width: 236px; }
+/* Analytics' first section already stands 32 under its header (measured), so the panel adds the difference */
+.hpanel.hpanel--hero.hp3.hp3.hp3--band.hp3--band { margin-bottom: calc(var(--hpanel-below) - 32px); }
 /* the buttons: 26 under a number's block, 22 under a title's subline; the panel's own two treatments */
 .hp3 .hp3-acts { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 26px; flex-wrap: nowrap; }
 .hp3.hp3--title .hp3-acts { margin-top: 22px; }
@@ -157,7 +164,7 @@
 /* the drawing: the right column, vertically centred, wholly inside the panel */
 .hp3 .hp3-art { justify-self: end; align-self: center; box-sizing: border-box; height: 196px; margin: 0 24px 0 0; display: block; flex: none; }
 .hp3 .hp3-art :is(img, svg) { display: block; height: 100%; width: auto; max-width: none; }
-.hp3 .hp3-art.hpanel-disc { width: 196px; }
+.hp3 .hp3-art.hpanel-disc { width: 196px; padding: 14px; }
 .hp3 .hp3-art.hpanel-disc > :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
 /* the disc is for a drawing: a slot with nothing in it (the To-do list's, until its art arrives) keeps its box and draws no disc */
 .hp3 .hp3-art.hpanel-disc:not(:has(img, svg)) { background: none; box-shadow: none; }
@@ -173,7 +180,7 @@
 .ws-app.sheet-wide .hp3 .hp3-acts { margin-top: 30px; }
 .ws-app.sheet-wide .hp3.hp3--title .hp3-acts { margin-top: 26px; }
 .ws-app.sheet-wide .hp3 .hp3-art { height: 236px; }
-.ws-app.sheet-wide .hp3 .hp3-art.hpanel-disc { width: 236px; }
+.ws-app.sheet-wide .hp3 .hp3-art.hpanel-disc { width: 236px; padding: 16px; }
 
 /* below 768px: the number steps to 88, the words to 26 and the subline to 17; the drawing is put away; the buttons wrap */
 @media (max-width: 767.98px) {
