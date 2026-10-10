@@ -14,6 +14,16 @@ export const REVIEW_FIXTURE: SmartImportResult = {
     { ref: "a5", name: "Gregory Salt", agency: "Penhallow Literary" },
     { ref: "a6", name: "", agency: "Westbrook Literary" },
     { ref: "a7", name: "Wren & Co", agency: "Wren & Co" },
+    // Onboarding v5 part 2 — rows for the states no fixture reached (§0.3):
+    // two named agents with no agency (one to save an agency on, one to carry on without),
+    { ref: "a8", name: "Owen Hale", agency: "" },
+    { ref: "a9", name: "Ines Marlow", agency: "" },
+    // a named agent the mapper flagged (the "mapping" reason),
+    { ref: "a10", name: "Rhea Solis", agency: "Solis & Finch", issues: ["agency read from a merged cell"] },
+    // a row naming nobody (set aside on entry, with the writer's own note as context),
+    { ref: "a11", name: "", agency: "" },
+    // and the agent behind the two-reason query.
+    { ref: "a12", name: "Dana Whitlock", agency: "Whitlock Agency" },
   ],
   queries: [
     // Clean — ready.
@@ -32,6 +42,12 @@ export const REVIEW_FIXTURE: SmartImportResult = {
     { agentRef: "a6", status: QueryStatus.REJECTED, sentDate: null, sentDateRaw: null, reasons: ["no-date"] },
     // Status wording — mapped but worth confirming.
     { agentRef: "a7", status: QueryStatus.QUERIED, sentDate: "2024-04-18", sentDateRaw: "18/04/2024", reasons: ["status-wording"] },
+    { agentRef: "a8", status: QueryStatus.PARTIAL_SENT, sentDate: "2025-02-03", sentDateRaw: "03/02/2025" },
+    { agentRef: "a9", status: QueryStatus.OFFER, sentDate: "2025-01-12", sentDateRaw: "12/01/2025" },
+    { agentRef: "a10", status: QueryStatus.WITHDRAWN, sentDate: "2024-09-09", sentDateRaw: "09/09/2024" },
+    { agentRef: "a11", status: QueryStatus.QUERIED, sentDate: "2024-08-01", sentDateRaw: "01/08/2024", notes: "the one from the conference" },
+    // Two reasons on one row.
+    { agentRef: "a12", status: QueryStatus.PARTIAL_REQUESTED, sentDate: null, sentDateRaw: null, reasons: ["no-date", "status-wording"] },
   ],
 };
 
@@ -49,6 +65,11 @@ export const REVIEW_FIXTURE_DUPES: SmartImportResult = {
     { ref: "d6", name: "Tomas Vidal", agency: "The Quill Agency" },
     { ref: "d7", name: "PRIYA RAMAN", agency: "" },
     { ref: "d8", name: "Priya Raman ", agency: "" },
+    // Onboarding v5 part 2 — a pair whose two rows are IDENTICAL, so it keeps the plain dedupe
+    // control (remove one / keep both) rather than the reconcile card. Without it no fixture reached
+    // "kept both" once the three-way set above had been merged down to a pair.
+    { ref: "d9", name: "Nora Finch", agency: "Finch & Rowe" },
+    { ref: "d10", name: "N. Finch", agency: "Finch & Rowe" },
   ],
   queries: [
     { agentRef: "d1", status: QueryStatus.QUERIED, sentDate: "2024-02-01", sentDateRaw: "01/02/2024" },
@@ -61,5 +82,22 @@ export const REVIEW_FIXTURE_DUPES: SmartImportResult = {
     // reconcile card collapses them into one query, deriving Partial Sent + harvesting "asked for 50pp".
     { agentRef: "d7", status: QueryStatus.PARTIAL_REQUESTED, sentDate: null, sentDateRaw: null, notes: "asked for 50pp" },
     { agentRef: "d8", status: QueryStatus.PARTIAL_SENT, sentDate: "2024-05-01", sentDateRaw: "01/05/2024" },
+    { agentRef: "d9", status: QueryStatus.QUERIED, sentDate: "2024-06-10", sentDateRaw: "10/06/2024" },
+    { agentRef: "d10", status: QueryStatus.QUERIED, sentDate: "2024-06-10", sentDateRaw: "10/06/2024" },
+  ],
+};
+
+/** Onboarding v5 part 2 — a file with nothing to ask: no duplicate, every agent with an agency, no
+ *  reason on any query. The summary's "Bring it in" state, and the third fixture lock S1 sums over. */
+export const REVIEW_FIXTURE_CLEAR: SmartImportResult = {
+  agents: [
+    { ref: "c1", name: "Clara Voss", agency: "Pemberton Literary" },
+    { ref: "c2", name: "Tomas Vidal", agency: "The Quill Agency" },
+    { ref: "c3", name: "Marianne Webb", agency: "The Greenhouse" },
+  ],
+  queries: [
+    { agentRef: "c1", status: QueryStatus.QUERIED, sentDate: "2025-11-01", sentDateRaw: "01/11/2025" },
+    { agentRef: "c2", status: QueryStatus.FULL_SENT, sentDate: "2025-10-02", sentDateRaw: "02/10/2025" },
+    { agentRef: "c2", status: QueryStatus.REJECTED, sentDate: "2025-06-02", sentDateRaw: "02/06/2025" },
   ],
 };

@@ -225,7 +225,8 @@
     "design-refs/header-v3/ref-qc-1280@2x.png": "98a763bf297e5f9f30a12dc8966953d1f272e5d4e19c7cc353eeae72b4152613",
     "design-refs/header-v3/ref-qc-1512@2x.png": "2a25ffb6c9b7d2caa712b5820551ec8e3314e66e5ebbb69564e45b52c9cf0f3e",
     "design-refs/marketing/landing-colours-v2.html": "8006ef5103c850ec54628f4bbbc1429aa31b26b37e460fe2128a11c7b0168c94",
-    "design-refs/onboarding/onboarding-journey-v5.html": "e00a1da6dc59b2a2b37fd574573f94abc275cea4a54823b8aa89c91432e4796e"
+    "design-refs/onboarding/onboarding-journey-v5.html": "e00a1da6dc59b2a2b37fd574573f94abc275cea4a54823b8aa89c91432e4796e",
+    "design-refs/onboarding/import-flow-v1.html": "917f0169999224844fba9151dd4ecd8b93785f02abffee1dc82bf6d29011fc05"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",
