@@ -265,6 +265,17 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
       return `We read this as ${fmtDate(q.sentDate)} — but that's well outside your other dates (it came through as a stray spreadsheet number). Is that right, or shall we set it?`;
     case "no-date":
       return `We don't have a date for this one. When did you send the query?`;
+    /* The template parser's own two sentences (templateImport.ts), quoting the cell back. The
+       unreadable one ends on the review's existing date question, because here the fix is a date
+       picker and "Try YYYY-MM-DD" would describe a cell the writer can no longer edit. */
+    case "unreadable-date":
+      return `We couldn't read "${q.sentDateRaw ?? ""}" as a date. When did you send the query?`;
+    case "ambiguous-date":
+      return `"${q.sentDateRaw ?? ""}" could be two different dates. Which did you mean?`;
+    case "unreadable-response-date":
+      return `We couldn't read "${q.timeline[0]?.raw ?? ""}" as a date. When was the last response?`;
+    case "ambiguous-response-date":
+      return `"${q.timeline[0]?.raw ?? ""}" could be two different dates. Which did you mean?`;
     case "status-direction":
       return isPartialStage(q.status)
         ? `Did you send the partial manuscript, or did the agent request it from you?`
@@ -294,6 +305,10 @@ export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
     case "missing-day":        return { pill: "Day to confirm" };
     case "serial-outlier":     return { pill: "Date to confirm" };
     case "no-date":            return { pill: "Date needed" };
+    case "unreadable-date":    return { pill: "Date needed" };
+    case "ambiguous-date":     return { pill: "Date to confirm" };
+    case "unreadable-response-date": return { pill: "Date needed" };
+    case "ambiguous-response-date":  return { pill: "Date to confirm" };
     case "status-direction":   return { pill: "Status to check" };
     case "status-wording":     return { pill: "Status to check" };
     case "check-name":         return { pill: "Name to check" };

@@ -33,6 +33,7 @@ import {
   dupNoteMerged, dupNoteOpen, dupNoteKept, keepBothLabel, keptClusterLabel,
 } from "../../lib/smartImportReviewModel";
 import { Chip, Disc, initialsOf } from "./ImportParts";
+import { ambiguousReadings } from "../../lib/templateImport";
 
 const READY = "Ready";
 
@@ -297,6 +298,45 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
           </div>
         </div>
       );
+    case "unreadable-date":
+      return (
+        <div className="im-reason" data-reason={code}>
+          {question}
+          <div className="im-fixrow">
+            {dateInput(code, "Date sent", null)}
+            {solid("Save date", () => { const v = drafts[code]; if (v) onResolveReason(code, { sentDate: v }); })}
+            {quiet("Leave undated", () => onResolveReason(code))}
+          </div>
+        </div>
+      );
+    case "ambiguous-date":
+      return (
+        <div className="im-reason" data-reason={code}>
+          {question}
+          <div className="im-fixrow">
+            {ambiguousReadings(query.sentDateRaw ?? "").map((iso) => (
+              <React.Fragment key={iso}>{solid(fmtDate(iso), () => onResolveReason(code, { sentDate: iso }))}</React.Fragment>
+            ))}
+            {quiet("Leave undated", () => onResolveReason(code))}
+          </div>
+        </div>
+      );
+    case "unreadable-response-date":
+    case "ambiguous-response-date": {
+      const ev = query.timeline[0];
+      const setEvent = (iso: string) => onResolveReason(code, { timeline: query.timeline.map((t, i) => (i === 0 ? { ...t, date: iso } : t)) });
+      return (
+        <div className="im-reason" data-reason={code}>
+          {question}
+          <div className="im-fixrow">
+            {code === "ambiguous-response-date"
+              ? ambiguousReadings(ev?.raw ?? "").map((iso) => <React.Fragment key={iso}>{solid(fmtDate(iso), () => setEvent(iso))}</React.Fragment>)
+              : <>{dateInput(code, "Date of last response", null)}{solid("Save date", () => { const v = drafts[code]; if (v) setEvent(v); })}</>}
+            {quiet("Leave undated", () => onResolveReason(code))}
+          </div>
+        </div>
+      );
+    }
     case "status-direction":
       return (
         <div className="im-reason" data-reason={code}>

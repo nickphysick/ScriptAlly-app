@@ -8,6 +8,7 @@
  * the proposed mapping before anything is shown for confirmation. Nothing here writes.
  */
 import * as XLSX from "xlsx";
+import { readSheetBook } from "./sheetCells";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { QueryStatus } from "../types";
 import { SmartImportResult, ParsedQuery } from "../types/smartImport";
@@ -17,8 +18,12 @@ export const MAX_SHEET_CHARS = 200_000;
 export const MAX_SHEET_ROWS = 600;
 
 export async function fileToCsv(file: File): Promise<string> {
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array" });
+  return bufferToCsv(await file.arrayBuffer());
+}
+
+/** The sheet as the text Smart Import is sent. */
+export function bufferToCsv(buf: ArrayBuffer | Uint8Array): string {
+  const wb = readSheetBook(XLSX, buf);
   const ws = wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_csv(ws); // also handles .csv
 }
@@ -30,8 +35,11 @@ export async function fileToCsv(file: File): Promise<string> {
  *  status scribbles) so the "messy → clean" crystallise lands on something true to the file. */
 export interface RawRecordSample { messy: string }
 export async function sampleRawRecords(file: File, max = 8): Promise<RawRecordSample[]> {
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array" });
+  return sampleRawFromBuffer(await file.arrayBuffer(), max);
+}
+
+export function sampleRawFromBuffer(buf: ArrayBuffer | Uint8Array, max = 8): RawRecordSample[] {
+  const wb = readSheetBook(XLSX, buf);
   const ws = wb.Sheets[wb.SheetNames[0]];
   if (!ws) return [];
   const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false, defval: "" });
