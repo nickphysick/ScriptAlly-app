@@ -9,13 +9,17 @@
  * it. This module builds that notice when the commit returns and keeps it per account, on the
  * device.
  *
- * ⚠️ ITS LENGTH IS THE COMMIT'S OWN COUNT. Two things skip a row, and both are counted by
- * `commitSmartImport` into `queriesSkipped`: validation (`validateSmartImport(...).skipped`, each
- * with its query and its reason), and the commit itself, when a query's agent could not be saved
- * (an `errors` line, "Skipped a {status} query — its agent couldn't be saved."). The notice is one
- * row for each, so `rows.length === outcome.queriesSkipped`. If the two ever stop reconciling, the
- * notice carries the count alone and no list — a list that disagrees with its own headline is worse
- * than none.
+ * ⚠️ THREE THINGS KEEP A ROW OUT, AND THE NOTICE IS ONE ROW FOR EACH (import fixes, 10 Oct):
+ *   1. validation (`validateSmartImport(...).skipped`, each with its query and its reason);
+ *   2. the commit itself, when a query's agent could not be saved (an `errors` line, "Skipped a
+ *      {status} query — its agent couldn't be saved.");
+ *   3. the review's AUTOMATIC set-aside: a row with no agent name and no agency is set aside
+ *      before the review opens, so it never reaches validation or the commit. If it is still set
+ *      aside when the writer imports, it was not imported, and it is listed with the validator's
+ *      own reason for such a row. A row the writer removed on purpose is not listed: they know.
+ * The count is the list's length, so the headline and the list cannot disagree. Before this rule
+ * the count came from the commit, which never saw (3) — so the one row most likely to be left out
+ * of a writer's file was the one row the line never mentioned.
  *
  * ⚠️ EVERY REASON IS THE SOURCE'S OWN STRING, VERBATIM. Nothing here rewords why a row was skipped.
  */
@@ -32,9 +36,9 @@ export interface ImportNoticeRow {
   reason: string;
 }
 export interface ImportNotice {
-  /** How many rows were not imported — `outcome.queriesSkipped`. */
+  /** How many rows were not imported — the list's own length. */
   count: number;
-  /** One per skipped row; empty when the count could not be reconciled to a list. */
+  /** One per row that was not imported. */
   rows: ImportNoticeRow[];
   /** When the import returned (ms). */
   at: number;
@@ -45,13 +49,16 @@ export const NO_NAME_REASON = "Row has no agent name or agency to identify it";
 /** The line the commit writes when a query's agent could not be saved (smartImportCommit.ts). */
 const COMMIT_SKIP = /^Skipped a (.*) query — its agent couldn't be saved\.$/;
 
+/** A row the review set aside by itself and that was still set aside at import. */
+export interface SetAsideRow { status: string; sentDate: string | null }
+
 export function buildImportNotice(
   skipped: readonly { query: ParsedQuery; reason: string }[],
-  outcome: { queriesSkipped: number; errors: readonly string[] },
+  outcome: { errors: readonly string[] },
   agents: readonly ParsedAgent[],
+  setAside: readonly SetAsideRow[] = [],
   now: number = Date.now(),
 ): ImportNotice | null {
-  if (outcome.queriesSkipped <= 0) return null;
   const byRef = new Map(agents.map((a) => [a.ref, a]));
   const rows: ImportNoticeRow[] = skipped.map(({ query, reason }) => {
     const a = byRef.get(query.agentRef);
@@ -66,8 +73,9 @@ export function buildImportNotice(
     const m = COMMIT_SKIP.exec(line);
     if (m) rows.push({ who: "", status: m[1], sentDate: null, reason: line });
   }
-  /* The list must be the count. If it is not, state the count alone. */
-  return { count: outcome.queriesSkipped, rows: rows.length === outcome.queriesSkipped ? rows : [], at: now };
+  for (const r of setAside) rows.push({ who: "", status: r.status, sentDate: r.sentDate, reason: NO_NAME_REASON });
+  if (rows.length === 0) return null;
+  return { count: rows.length, rows, at: now };
 }
 
 const keyFor = (uid: string) => `sa.importSkipped.${uid}`;

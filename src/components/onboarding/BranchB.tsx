@@ -241,7 +241,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   /** Commit the final result the review hands back. The two-screen SmartImportReview owns every
    *  inline fix (statuses, dates, dedupe, exclusions, recovered names) and builds the result via
    *  modelToResult, so we just commit it — same deps and post-import flow as before. */
-  const handleImport = async (result: SmartImportResult) => {
+  const handleImport = async (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => {
     if (!currentUser && !lab) return;
     setCommitError(null);
     setImportComplete(false);
@@ -271,7 +271,7 @@ export const BranchB: React.FC<BranchBProps> = ({
       /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
          loader completes. The validation is of the result the REVIEW handed back — the one that was
          committed — not of the first read. A commit that skipped nothing clears any older notice. */
-      saveImportNotice(lab ? lab.uid : currentUser!.id, buildImportNotice(validateSmartImport(result).skipped, committed, result.agents));
+      saveImportNotice(lab ? lab.uid : currentUser!.id, buildImportNotice(validateSmartImport(result).skipped, committed, result.agents, left?.setAside ?? []));
       // Never route on a false success: if nothing actually landed, surface the outcome screen
       // instead of the loader's completion + dashboard route.
       if (committed.queriesImported === 0) { setScreen("done"); return; }

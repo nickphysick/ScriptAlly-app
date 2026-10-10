@@ -27,7 +27,7 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
   ReviewAgent, ReviewQuery, CheckReason,
   agentStatus, resolveReason, queryStatusOf, fmtDate,
-  dupNoteOpen, dupNoteKept, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside,
+  dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
   rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
 } from "../../lib/smartImportReviewModel";
@@ -153,7 +153,9 @@ export interface SmartImportReviewProps {
   /** Import the final working model. The component converts it (modelToResult) to a SmartImportResult
    *  ready for commitSmartImport(deps, result, manuscriptId). The host owns the commit deps; this
    *  component owns the conversion. */
-  onImport?: (result: SmartImportResult) => void | Promise<void>;
+  /** `left` carries what the result cannot: the rows the review set aside by itself that are
+   *  still set aside, for the host's skipped-rows notice. */
+  onImport?: (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => void | Promise<void>;
 }
 
 type Step = "duplicates" | "agents" | "queries";
@@ -442,7 +444,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   const onImportClick = () => {
     if (!canImport) return; // nothing to import (no active queries)
-    void onImport?.(modelToResult(result, agents, queries));
+    void onImport?.(modelToResult(result, agents, queries), { setAside: autoSetAsideRows(agents, queries) });
   };
 
   // ── Duplicates ────────────────────────────────────────────────────────────────────────────────

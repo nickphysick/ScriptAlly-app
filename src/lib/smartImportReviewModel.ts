@@ -455,6 +455,23 @@ export function seedUnidentifiedSetAside(
   };
 }
 
+/**
+ * The rows the review set aside BY ITSELF (no agent name, no agency) that are still set aside — what
+ * the import leaves out without the writer having chosen to. One entry per query of such a row, or
+ * one for the row itself when it carried no query. A row the writer named ("Name it instead") is no
+ * longer set aside and is not here; a row the writer removed on purpose never was.
+ */
+export function autoSetAsideRows(agents: ReviewAgent[], queries: ReviewQuery[]): { status: string; sentDate: string | null }[] {
+  const out: { status: string; sentDate: string | null }[] = [];
+  for (const a of agents) {
+    if (!a.deleted || a.setAsideStage !== "unidentified") continue;
+    const mine = queries.filter((q) => q.agentRef === a.id);
+    if (mine.length === 0) out.push({ status: "", sentDate: null });
+    for (const q of mine) out.push({ status: q.status, sentDate: q.sentDate });
+  }
+  return out;
+}
+
 /** A duplicate cluster as the duplicates stage renders it: the open (unresolved) members, plus a
  *  resolution verdict once it's settled. `type` is "open" while 2+ members are still live; "merge"
  *  only once it's down to a single keeper; "keepboth" when the writer chose to keep them apart. */
