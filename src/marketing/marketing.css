@@ -135,12 +135,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-label: rgba(28, 19, 15, .45);
   --mk-muted: rgba(28, 19, 15, .52);
   --mk-body: rgba(28, 19, 15, .74);
-  --mk-burg: #7c3a2a;
-  /* ⚠️ `--mk-band-b` IS DELETED AND ITS PARTNER IS NOT. The two were the retired parchment band's
-     gradient stops; when that band went, `-a` survived as the About page's commitment strip's flat
-     fill and `-b` had no reader left. Found by the inverse half of the token lock below — a
-     declared-but-unread token is a knob the next reader goes looking for the effect of. */
-  --mk-band-a: #ece5d8;
+  /* ⚠️ `--mk-burg` IS DELETED (landing colours v2). Burgundy is retired from the public pages: every
+     reader moved to `--mk-rust`, and every burgundy alpha in this sheet is rust's channels now.
+     One red on light, one terracotta on ink. */
+  /* ⚠️ `--mk-band-a` IS DELETED TOO (landing colours v2). It was About's commitment strip's tan
+     fill; that strip is a band holding three cards, which is what the stone band is, so it reads
+     `--mk-stone` and the last of the retired parchment band's two stops is gone. */
   --mk-centre: #f6e4da;
   --mk-sage: #e9ede6;
   --mk-sage-t: #5a6e58;
@@ -224,8 +224,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-nearblack: #1c130f;
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
-  --mk-illo-rim: rgba(124, 58, 42, 0.34);
-  --mk-illo-tag: rgba(124, 58, 42, 0.5);
+  --mk-illo-rim: rgba(162, 69, 42, 0.34);
+  --mk-illo-tag: rgba(162, 69, 42, 0.5);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
   /* ⚠️ THE PAGE GROUND IS INK. Anything a light surface does not cover is ink — which is what
      shows in the sheet's four corner arcs and what the nav and the footer are made of. */
@@ -312,19 +312,19 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-btn--cta {
   background: var(--mk-cta); border-color: var(--mk-cta-bd); color: var(--mk-nearblack);
   padding: 14px 28px; font-size: .98rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px rgba(124, 58, 42, .08);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px rgba(162, 69, 42, .08);
   transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 .mk-btn--cta:hover {
   background: var(--mk-cta-hov); transform: translateY(-1px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 6px 14px rgba(124, 58, 42, .13);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 6px 14px rgba(162, 69, 42, .13);
 }
 @media (prefers-reduced-motion: reduce) { .mk-btn--cta { transition: none; } .mk-btn--cta:hover { transform: none; } }
 
 /* ⚠️ THE TIER HAD NO FOCUS STYLE AT ALL — every control fell back to the UA ring, which on a warm
    ground is close to invisible. One rule, both element types, both pages. */
 .mk-scope a:focus-visible,
-.mk-scope button:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 3px; }
+.mk-scope button:focus-visible { outline: 2px solid var(--mk-rust); outline-offset: 3px; }
 /* ⚠️ ON INK THE RING IS THE STAMP, 2px AT 2px. The light-ground ring is a dark red and vanishes on
    the bar. Three classes of specificity, so it wins over the rule above wherever it sits. */
 .mk-scope .mk-navwrap a:focus-visible, .mk-scope .mk-navwrap button:focus-visible,
@@ -334,16 +334,16 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-tlink {
   font-size: 13px;
   font-weight: 500;
-  color: var(--mk-burg);
+  color: var(--mk-rust);
   text-decoration: none;
   cursor: pointer;
   background: none;
   border: none;
   font-family: inherit;
-  border-bottom: 1px solid rgba(124, 58, 42, 0.35);
+  border-bottom: 1px solid rgba(162, 69, 42, 0.35);
   padding: 0 0 1px;
 }
-.mk-tlink:hover { border-bottom-color: var(--mk-burg); }
+.mk-tlink:hover { border-bottom-color: var(--mk-rust); }
 
 /* ── The marketing nav: brand furniture, condensing on scroll ── */
 /* ⚠️ THE CONDENSE'S TRIGGERS, AND THEY SIT BEFORE THE NAV ON PURPOSE. Condensing shortens the nav,
@@ -570,10 +570,32 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    and not a gap. */
 .mk-sheet {
   flex: 1 0 auto;
-  background-color: var(--mk-hero-ground);
+  background-color: var(--mk-lower);
   color: var(--mk-ink);
   border-radius: 18px;
   overflow: clip;
+  /* A stacking context, so an opening section's ground (below) can sit at z-index -1 and still be
+     in front of this box's own fill. Without it the negative layer sinks behind the sheet. */
+  isolation: isolate;
+}
+
+/* ── Every page opens on paper white and continues on oat ──
+   ⚠️ THE SHEET IS OAT; A PAGE'S OPENING SECTION PAINTS THE PAPER WHITE OVER IT, with the landing
+   hero's own treatment: paper to 62% of the section's height, then a straight fade arriving at the
+   oat at its foot. One rule for the five pages that are not the landing, so none of them was
+   restructured to get it.
+   ⚠️ A PSEUDO-ELEMENT, BECAUSE EVERY ONE OF THESE SECTIONS IS A CAPPED, CENTRED COLUMN. Painted on
+   the section itself the ground would be a column with oat down both sides. The layer is centred
+   on the section and a full viewport wide; the sheet clips whatever a scrollbar makes it overhang.
+   ⚠️ THE PAIR IS ONE MECHANISM: `z-index: -1` here and `isolation: isolate` on the sheet. Either
+   alone is wrong — see the note there.
+   Contact and the two legal pages are one section each, so the whole page is the opening. */
+.mk-mission, .mk-pricehead, .mk-fwhero, .mk-contact, .mk-docplane { position: relative; }
+.mk-mission::before, .mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
+  left: calc(50% - 50vw); width: 100vw; pointer-events: none;
+  background-color: var(--mk-hero-ground);
+  background-image: linear-gradient(180deg, var(--mk-hero-ground) 62%, var(--mk-lower) 100%);
 }
 
 /* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN — the footer left it for the shell (landing colours v2). One wrapper, one token — see the
@@ -782,9 +804,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* The counter: a 5px bar and a mono tally, centred. Live or absent. */
 .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
-.mk-fmbar { height: 5px; border-radius: 999px; background: rgba(124, 58, 42, .16); overflow: hidden; }
+.mk-fmbar { height: 5px; border-radius: 999px; background: rgba(162, 69, 42, .16); overflow: hidden; }
 .mk-fmfill {
-  height: 100%; background: var(--mk-burg); opacity: .8; border-radius: 999px;
+  height: 100%; background: var(--mk-rust); opacity: .8; border-radius: 999px;
   transition: width .5s ease;
 }
 /* ⚠️ AFTER `.mk-fmfill`, NOT WITH THE OTHER REDUCED-MOTION RULES. Both are 0-1-0 and a media query
@@ -797,7 +819,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-blush-label); margin: 8px 0 0;
 }
-.mk-fmtally { color: var(--mk-burg); font-weight: 500; }
+.mk-fmtally { color: var(--mk-rust); font-weight: 500; }
 .mk-fmof { opacity: .6; }
 
 
@@ -1282,7 +1304,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    signature looked right at a glance. A glance is what it survived; a measurement caught it. */
 .mk-fwhonest .mk-fwmark {
   font-family: "Playfair Display", Georgia, serif; font-size: 3.4rem; line-height: 1;
-  color: rgba(124, 58, 42, .28); margin: 0 0 4px;
+  color: rgba(162, 69, 42, .28); margin: 0 0 4px;
 }
 /* ⚠️ THIS CLAMP LOOKS LIKE IT FAILS THE CONTAINER-CAP CHECK AND DOES NOT — READ THIS BEFORE
    REACHING FOR THE CEILING. `2.1vw` reaches 1.75rem at 1333px while `.mk-fwpad` caps at 1180, and
@@ -1303,7 +1325,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-fwhonest em { font-style: italic; }
 /* The same hand as the landing's postscript — it is one person asking, and the signature says so. */
 .mk-fwhonest .mk-fwsign {
-  font-family: "Caveat", cursive; font-size: 1.45rem; color: var(--mk-burg);
+  font-family: "Caveat", cursive; font-size: 1.45rem; color: var(--mk-rust);
   margin: 24px auto 0; text-align: center;
 }
 
@@ -1463,7 +1485,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* ── `FoundingSignup`'s own chrome: three surfaces, one set of rules ── */
 /* The reader is told what went wrong beneath the form, never instead of the page. */
-.mk-betainvalid { margin: 12px 0 0; max-width: 44ch; font-size: .92rem; color: var(--mk-burg); }
+.mk-betainvalid { margin: 12px 0 0; max-width: 44ch; font-size: .92rem; color: var(--mk-rust); }
 /* ⚠️ THE LIVE REGION IS ALWAYS MOUNTED AND USUALLY EMPTY. An empty box must therefore contribute
    nothing, or every reader pays for the announcement in vertical space. */
 .mk-betamsgwrap:empty { display: none; }
@@ -1473,9 +1495,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-betamsg--ok { background: var(--mk-msg-ok-bg); border: 1px solid var(--mk-msg-ok-bd); color: var(--mk-ink); }
 .mk-betamsg--warn { background: #fff; border: 1px solid var(--mk-cta-bd); color: var(--mk-ink); }
-.mk-betamsg a { color: var(--mk-burg); }
+.mk-betamsg a { color: var(--mk-rust); }
 .mk-betanote { font-size: 14.5px; color: var(--mk-blush-note); margin: 16px 0 0; }
-.mk-betanote .mk-doclink { color: var(--mk-burg); }
+.mk-betanote .mk-doclink { color: var(--mk-rust); }
 
 /* ── The sign-up and the counter ON THE NAVY PANEL ──
    ⚠️ EVERY RULE HERE STARTS `.mk-claimcard`, AND THAT IS THE WHOLE DESIGN. The form and the counter
@@ -1632,7 +1654,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    left this card's list 14px below the other two. */
 .mk-tier--founding {
   background: var(--mk-blush); border-color: var(--mk-cta-bd); cursor: default;
-  box-shadow: 0 18px 44px rgba(124, 58, 42, .14);
+  box-shadow: 0 18px 44px rgba(162, 69, 42, .14);
   padding-top: 38px; margin-top: -12px;
 }
 /* ⚠️ THE TAB BREAKS THE TOP EDGE, which is why it is absolutely positioned and the card is
@@ -1680,12 +1702,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   list-style: none; margin: 22px 0 0; padding: 20px 0 0;
   border-top: 1px solid var(--mk-hair); display: grid; gap: 12px;
 }
-.mk-tier--founding .mk-tierfeats { border-top-color: rgba(124, 58, 42, .18); }
+.mk-tier--founding .mk-tierfeats { border-top-color: rgba(162, 69, 42, .18); }
 .mk-tierfeats li { position: relative; padding-left: 22px; font-size: 16px; line-height: 1.45; color: var(--mk-blush-body); }
 /* Drawn, not typed — a glyph would be announced once per item and the list already says how many. */
 .mk-tierfeats li::before {
   content: ""; position: absolute; left: 1px; top: .36em; width: 9px; height: 6px;
-  border-left: 2px solid var(--mk-burg); border-bottom: 2px solid var(--mk-burg);
+  border-left: 2px solid var(--mk-rust); border-bottom: 2px solid var(--mk-rust);
   transform: rotate(-45deg); opacity: .8;
 }
 .mk-tierfeats li.mk-tieroff { color: var(--mk-kicker); }
@@ -1892,8 +1914,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-drtag {
   flex: none; font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-burg); font-weight: 500;
-  border: 1px solid rgba(124, 58, 42, 0.28); border-radius: 999px; padding: 5px 10px;
+  text-transform: uppercase; color: var(--mk-rust); font-weight: 500;
+  border: 1px solid rgba(162, 69, 42, 0.28); border-radius: 999px; padding: 5px 10px;
 }
 .mk-draftribbon p { font-size: 12.5px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
 
@@ -1911,7 +1933,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   display: grid; place-items: center;
   background: var(--mk-centre); border: 1px solid var(--mk-bd);
 }
-.mk-docplate svg { width: 22px; height: 22px; fill: none; stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mk-docplate svg { width: 22px; height: 22px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .mk-doceyebrow {
   font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-label);
@@ -1953,17 +1975,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-docsection strong { color: var(--mk-ink); font-weight: 500; }
 .mk-doclink {
   background: none; border: none; padding: 0; cursor: pointer; font: inherit;
-  color: var(--mk-burg); text-decoration: underline; text-underline-offset: 2px;
+  color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px;
 }
 .mk-doclink:hover { color: var(--mk-head); }
-.mk-docsection a { color: var(--mk-burg); text-decoration: underline; text-underline-offset: 2px; }
+.mk-docsection a { color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px; }
 
 /* A pulled-out clause — the sentence a reader should not be able to skim past. */
 .mk-callout {
   display: flex; gap: 14px; margin-top: 16px; padding: 15px 18px;
   background: var(--mk-parch); border: 1px solid var(--mk-bd); border-radius: 12px;
 }
-.mk-corule { flex: none; width: 3px; border-radius: 2px; background: var(--mk-burg); opacity: .55; }
+.mk-corule { flex: none; width: 3px; border-radius: 2px; background: var(--mk-rust); opacity: .55; }
 .mk-callout p { margin-top: 0; font-size: 13.5px; }
 
 @media (max-width: 760px) {
@@ -2126,7 +2148,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-illo--done { border-color: transparent; background: none; }
 .mk-illo svg {
   width: 190px; max-width: 100%; height: auto; fill: none;
-  stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
+  stroke: var(--mk-rust); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
 }
 .mk-illotag {
   position: absolute; left: 14px; bottom: 12px;
@@ -2135,8 +2157,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 /* Commitments — three cards on a tinted band. */
-.mk-commitstrip { background: var(--mk-band-a); border-top: 1px solid var(--mk-hair); border-bottom: 1px solid var(--mk-hair); }
-.mk-commitinner { max-width: 1180px; margin: 0 auto; padding: 46px 56px; }
+/* The stone band, as on the landing: the colour change marks its edges, so the two hairlines went
+   and the inner padding took their pixels (47 where it was 46). Its cards were white and stay so. */
+.mk-commitstrip { background-color: var(--mk-stone); }
+.mk-commitinner { max-width: 1180px; margin: 0 auto; padding: 47px 56px; }
 .mk-commitgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
 .mk-commit {
   background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px; padding: 22px;
@@ -2157,7 +2181,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* Founder sign-off. The rule is its own element — never a border on either label. */
 .mk-founder { max-width: 720px; margin: 0 auto; padding: 52px 56px 20px; text-align: center; }
 .mk-founder p { font-size: 15px; font-weight: 300; line-height: 1.72; color: var(--mk-body); }
-.mk-founder a, .mk-founder .mk-doclink { color: var(--mk-burg); }
+.mk-founder a, .mk-founder .mk-doclink { color: var(--mk-rust); }
 .mk-signoff { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
 .mk-signname { font-family: "Playfair Display", Georgia, serif; font-size: 18px; font-weight: 500; color: var(--mk-ink); }
 .mk-signrule { flex: 0 0 auto; width: 1px; height: 15px; background: var(--mk-bd); }
@@ -2180,7 +2204,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      SHORTER than the three vision plates beneath it — measured, and the wrong way round. The
      stacked floor still tightens from 340, it just cannot go under the plates it outranks. */
   .mk-bandcopy h1 { font-size: 32px; }
-  .mk-commitinner { padding: 34px 26px; }
+  .mk-commitinner { padding: 35px 26px; }
   .mk-commitgrid { grid-template-columns: 1fr; }
   .mk-founder { padding: 38px 26px 16px; }
 }
@@ -2228,6 +2252,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-cmailcard {
   display: flex; align-items: center; gap: 16px; margin: 32px 0 0;
   background: #fff; border-radius: 14px; padding: 18px 22px;
+  /* White on paper white has no edge of its own; the vision cards' hairline gives it one. */
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06);
 }
 .mk-cmaillabel {
   margin: 0 0 3px; font-size: 12.5px; font-weight: 600; letter-spacing: .08em;
@@ -2290,7 +2316,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   outline: none; border-color: var(--mk-claim-accent); box-shadow: 0 0 0 3px var(--mk-claim-ring);
 }
 .mk-field input::placeholder, .mk-field textarea::placeholder { color: var(--mk-label); }
-.mk-fielderr { font-size: 14px; color: var(--mk-burg); }
+.mk-fielderr { font-size: 14px; color: var(--mk-rust); }
 
 /* Off-screen rather than display:none — see the honeypot note in ContactPage.tsx. */
 .mk-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
@@ -2307,7 +2333,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-cbtn:disabled { opacity: .55; cursor: default; }
 .mk-cbtn:disabled:hover { background: var(--mk-nearblack); }
 .mk-cstate { margin: 14px 0 0; font-size: 15px; line-height: 1.55; color: var(--mk-muted); }
-.mk-cstate--bad { color: var(--mk-burg); }
+.mk-cstate--bad { color: var(--mk-rust); }
 .mk-cfine { margin: 16px 0 0; font-size: 14px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cfine .mk-doclink { font-size: inherit; }
 /* ⚠️ 17px ON PHONES TOO. mobileShell.css holds every text control at 16px below md with

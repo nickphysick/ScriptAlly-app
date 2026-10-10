@@ -14,6 +14,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ensureSignedIn } from "./measure";
 
 const ROUTES = ["/", "/pricing", "/about", "/contact", "/founders", "/terms", "/privacy"];
 const VPS = [
@@ -30,7 +31,6 @@ const MUTATE = process.env.LC2_MUTATE ?? "";
 const SHOTS = !!process.env.LC2_SHOTS;
 
 const INK = [27, 36, 51];
-const CREAM = [244, 238, 229];
 
 /** Each lock's named break, as a stylesheet. The two that need the DOM are applied in `mutate`. */
 const MUTATIONS: Record<string, string> = {
@@ -590,4 +590,27 @@ test.describe("LC2", () => {
   });
 });
 
-export { CREAM };
+test("LC2 signed in: the nav offers the dashboard on the cream button, beside a cream avatar", async ({ page }) => {
+  test.skip(CAPTURE || !process.env.LC2_SIGNED_IN, "signs in as the harness account; on request");
+  await page.setViewportSize(VPS[0]);
+  await page.goto("/dashboard");
+  await ensureSignedIn(page);
+  await page.goto("/", { waitUntil: "load" });
+  await page.waitForSelector(".mk-avatar");
+  const s = await page.evaluate(() => {
+    const b = getComputedStyle(document.querySelector(".mk-navright .mk-btn")!);
+    const a = getComputedStyle(document.querySelector(".mk-avatar")!);
+    return {
+      label: document.querySelector(".mk-navright .mk-btn")!.textContent,
+      btn: [b.backgroundColor, b.color], avatar: [a.backgroundColor, a.color],
+      h: document.querySelector(".mk-navwrap")!.getBoundingClientRect().height,
+    };
+  });
+  console.log("LC2 signed-in", JSON.stringify(s));
+  expect(s.label).toBe("Open dashboard");
+  expect(s.btn).toEqual(["rgb(243, 238, 230)", "rgb(27, 36, 51)"]);
+  expect(s.avatar).toEqual(["rgba(244, 238, 229, 0.12)", "rgb(244, 238, 229)"]);
+  expect(s.h).toBe(88);
+  mkdirSync(resolve(OUT, "shots"), { recursive: true });
+  await page.screenshot({ path: resolve(OUT, "shots", "nav-signed-in-1440.png"), clip: { x: 0, y: 0, width: 1440, height: 140 } });
+});

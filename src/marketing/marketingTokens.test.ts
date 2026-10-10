@@ -189,10 +189,11 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
     /* RE-POINTED (landing colours v2): rust is the Query Centre's now. The alias is the law;
        the value is recorded so a change to it is a decision. */
     expect(value(marketing, "--mk-rust")).toBe("#a2452a");
-    /* ⚠️ STILL NOT `--mk-burg` (#7c3a2a). Fourteen points apart, two reds on one page — a flag that
-       has been raised and not resolved, and asserting the DIFFERENCE is what stops it being closed
-       by accident rather than by decision. */
-    expect(value(marketing, "--mk-rust")).not.toBe(value(marketing, "--mk-burg"));
+    /* RE-POINTED (landing colours v2): the flag this carried — two reds on one page, fourteen
+       points apart — is resolved. Burgundy is retired; rust is the one red on light. */
+    expect(marketing, "burgundy is gone from the sheet").not.toMatch(/--mk-burg\b/);
+    expect(marketing, "and so is every alpha of it").not.toMatch(/124,\s*58,\s*42/);
+    expect(marketing).not.toMatch(/#7c3a2a/i);
   });
 
   /**
@@ -235,7 +236,13 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
 });
 
 /** Who may read `--mk-lower`. Phase 4 adds the sheet and the other pages' opening fades. */
-const LOWER_READERS = [".mk-herowrap", ".mk-lower"];
+const LOWER_READERS = [
+  /* the five other pages' opening sections: paper white fading to the oat, as the hero does */
+  ".mk-mission::before, .mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  ".mk-herowrap", ".mk-lower",
+  /* the sheet itself: every page continues on the oat */
+  ".mk-sheet",
+].sort();
 
 describe("two surfaces, and the step between them is real", () => {
   /**
