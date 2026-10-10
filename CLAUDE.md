@@ -357,6 +357,7 @@
   - **⚠️ AND THE HOLDING PAGE'S SIGN-UP FORM HAS NEVER WORKED (found 26 Aug — recorded so it is not "discovered" as a new bug in six months).** `firebase.holding.json` rewrites `/api/waitlist` to `{ functionId: "waitlist", region: "europe-west2" }` correctly — but **`waitlist` is not deployed to prod.** `firebase functions:list --project prod` returns exactly `extractFromEmail` and `smartImportMap` and nothing else. Hosting 404s the missing function, **the SPA catch-all turns the 404 into `200 text/html`**, and the page is handed its own HTML where it asked for JSON. It is the same failure-that-looks-like-success the app's own client checks `content-type` to survive. **The rewrite is right and the function is absent — fix it by deploying `waitlist`, never by touching that config.**
 
 ## Deployment
+- **Dev can carry several unmerged branches at once. Before any dev deploy, name the branch the served bundle was built from. If it isn't the branch you're on, merge yours into it as a new branch and deploy that. A bundle-hash mismatch is a stop.**
 - **⚠️ DEV FIRESTORE RULES ARE CLAUDE'S TO DEPLOY (18 Aug). PROD REMAINS NICK'S — hosting, functions and rules alike.** The whole of the dev rules deploy is ONE command, and it names its config and its project because a bare deploy resolves `.firebaserc`'s default, which is PROD:
   ```
   firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev
