@@ -16,6 +16,7 @@ import { Agent, ActivityType, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
+import { importActivityLine, type ImportSource } from "./importLabels";
 
 // The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
 // pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
@@ -65,7 +66,9 @@ const mapMethod = (m: ParsedAgent["submissionMethod"]): SubmissionMethod =>
 export async function commitSmartImport(
   deps: CommitDeps,
   result: SmartImportResult,
-  manuscriptId: string
+  manuscriptId: string,
+  /** Which path the rows came by — named in the one activity line the import leaves. */
+  source: ImportSource = "smart"
 ): Promise<CommitOutcome> {
   const { userId, existingAgents, manuscriptTitle, addAgent, addQuery } = deps;
   const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [] };
@@ -271,7 +274,7 @@ export async function commitSmartImport(
       queryId: "",
       manuscriptId: "",
       activityType: ActivityType.STATUS_CHANGED, // non-housekeeping so it shows in "The story so far"
-      description: `Smart import · ${outcome.agentsCreated} agents added, ${outcome.queriesImported} queries logged`,
+      description: importActivityLine(source, outcome.agentsCreated, outcome.queriesImported),
       date: new Date(importBaseMs).toISOString(),
       details: "",
     });

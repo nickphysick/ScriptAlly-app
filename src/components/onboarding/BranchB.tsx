@@ -26,6 +26,7 @@ import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
+import { manuscriptErrorLine, type ImportSource } from "../../lib/importLabels";
 import { CaptureOption } from "../../lib/captureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
@@ -152,6 +153,9 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [extractComplete, setExtractComplete] = useState(false);
   const [outcome, setOutcome] = useState<CommitOutcome | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
+  const [manuscriptFailed, setManuscriptFailed] = useState(false);
+  /** Which path read the file — named in the activity line the commit leaves. */
+  const [importSource, setImportSource] = useState<ImportSource>("smart");
   // Drives the loader's completion beat: flipped true only after a genuine success (commit resolved
   // with rows imported AND the 5s floor elapsed). The loader then plays its finish and routes on.
   const [importComplete, setImportComplete] = useState(false);
@@ -200,6 +204,7 @@ export const BranchB: React.FC<BranchBProps> = ({
    */
   const pickTemplateFile = async (file: File) => {
     setRawSample([]); setExtractComplete(false); setValidated(null); setTemplateFlags([]);
+    setImportSource("template");
     setFileName(file.name);
     try {
       const parsed = await readTemplateFile(file);
@@ -215,6 +220,7 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   const runMapping = async (file: File) => {
     setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setImportSource("smart");
     setScreen("reading"); // the scatter-settle loader takes over from here
     // Display-only: show the writer's actual raw cells the instant they upload, scattered, while the
     // real extraction runs. Never feeds runSmartImport; a parse failure just leaves the loader plain.
@@ -244,6 +250,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   const handleImport = async (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => {
     if (!currentUser && !lab) return;
     setCommitError(null);
+    setManuscriptFailed(false);
     setImportComplete(false);
     setScreen("importing"); // the loader shows the instant Import is pressed
     try {
@@ -251,7 +258,9 @@ export const BranchB: React.FC<BranchBProps> = ({
       // attach this import's queries to it. Idempotent: a retry after a failed commit reuses the id.
       const mId = await onEnsureManuscript();
       if (!mId) {
-        setCommitError("Couldn't set up your manuscript — nothing's lost. Try again, or use the Import desk.");
+        /* The host says why through `error` (the plan's limit has its own message); the review
+           shows that when it is the limit, and the plain sentence for anything else. */
+        setManuscriptFailed(true);
         setScreen("review");
         return;
       }
@@ -263,7 +272,8 @@ export const BranchB: React.FC<BranchBProps> = ({
           : commitSmartImport(
               { userId: currentUser!.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
               result,
-              mId
+              mId,
+              importSource
             ),
         delay(lab?.floorMs ?? 5000),
       ]);
@@ -453,7 +463,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         result={validated.result}
         manuscriptTitle={fields.title}
         onBack={() => setScreen("pipeline")}
-        error={commitError}
+        error={manuscriptFailed ? manuscriptErrorLine(error) : commitError}
         onImport={handleImport}
       />
     );

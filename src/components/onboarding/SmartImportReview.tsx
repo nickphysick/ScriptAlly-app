@@ -20,6 +20,7 @@
  * "Review all agents" with duplicate sets still open, which carry through to the agents step.
  */
 import React, { useState, useRef, useMemo, useCallback } from "react";
+import { queryOriginLine } from "../../lib/importLabels";
 import "./importFlow.css";
 import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
@@ -575,12 +576,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     }
     return rows;
   };
-  const originOf = (q: ReviewQuery): string => {
-    const a = agents.find((x) => x.id === q.agentRef && !x.deleted);
-    if (!a) return "From your file";
-    if (a.agencyOnly || !a.name) return "Agency only";
-    return a.agency || "Agency only";
-  };
+  const originOf = (q: ReviewQuery): string => queryOriginLine(agents.find((x) => x.id === q.agentRef && !x.deleted));
   const queryRows = (): React.ReactNode[] => qActive.map((q) => (
     <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)}
       open={openId === q.id}
