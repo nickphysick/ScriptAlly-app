@@ -1,0 +1,266 @@
+[
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "640 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "640.0 vs 640.0"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "corner rgb(144, 146, 149) · header rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A2 the wash runs from the main column's left to the viewport's right, top to bottom",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "{\"l\":248,\"t\":0,\"r\":1512,\"b\":900,\"mainL\":248,\"vw\":1512,\"vh\":900,\"bg\":\"rgba(242, 238, 232, 0.55)\"}"
+ },
+ {
+  "lock": "A2 the wash is the light wash it was",
+  "where": "feed @1512",
+  "ok": true,
+  "detail": "rgba(242, 238, 232, 0.55)"
+ },
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "1119 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "1118.9 vs 1118.9"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "corner rgb(27, 31, 41) · header rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A2 the Birds-eye dim still covers the viewport",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "{\"l\":0,\"t\":0,\"w\":1512,\"h\":900,\"vw\":1512,\"vh\":900}"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "filter @1512",
+  "ok": true,
+  "detail": "997–1317 × 81–400 in drawer 385–1504"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "group @1512",
+  "ok": true,
+  "detail": "1098–1378 × 81–291 in drawer 385–1504"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "sort @1512",
+  "ok": true,
+  "detail": "1168–1438 × 81–355 in drawer 385–1504"
+ },
+ {
+  "lock": "A3 population: the three popovers opened",
+  "where": "birds-eye @1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "housekeeping @1512",
+  "ok": true,
+  "detail": "780 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "housekeeping @1512",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "housekeeping @1512",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "housekeeping @1512",
+  "ok": true,
+  "detail": "780.0 vs 780.0"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "housekeeping @1512",
+  "ok": true,
+  "detail": "corner rgb(27, 31, 41) · header rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "537 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "536.6 vs 536.6"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "corner rgb(144, 146, 149) · header rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A2 the wash runs from the main column's left to the viewport's right, top to bottom",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "{\"l\":248,\"t\":0,\"r\":1280,\"b\":800,\"mainL\":248,\"vw\":1280,\"vh\":800,\"bg\":\"rgba(242, 238, 232, 0.55)\"}"
+ },
+ {
+  "lock": "A2 the wash is the light wash it was",
+  "where": "feed @1280",
+  "ok": true,
+  "detail": "rgba(242, 238, 232, 0.55)"
+ },
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "947 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "947.2 vs 947.2"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "corner rgb(27, 31, 41) · header rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A2 the Birds-eye dim still covers the viewport",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "{\"l\":0,\"t\":0,\"w\":1280,\"h\":800,\"vw\":1280,\"vh\":800}"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "filter @1280",
+  "ok": true,
+  "detail": "785–1105 × 81–400 in drawer 325–1272"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "group @1280",
+  "ok": true,
+  "detail": "880–1160 × 81–291 in drawer 325–1272"
+ },
+ {
+  "lock": "A3 the popover lies wholly inside the viewport and the drawer",
+  "where": "sort @1280",
+  "ok": true,
+  "detail": "940–1210 × 81–355 in drawer 325–1272"
+ },
+ {
+  "lock": "A3 population: the three popovers opened",
+  "where": "birds-eye @1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A1 precondition: the drawer is open",
+  "where": "housekeeping @1280",
+  "ok": true,
+  "detail": "717 wide"
+ },
+ {
+  "lock": "A1 8 from the top, right and bottom (±1)",
+  "where": "housekeeping @1280",
+  "ok": true,
+  "detail": "8.0 / 8.0 / 8.0"
+ },
+ {
+  "lock": "A1 radius 12, clipped",
+  "where": "housekeeping @1280",
+  "ok": true,
+  "detail": "12px · overflow hidden"
+ },
+ {
+  "lock": "A1 the width is the one it had (±1)",
+  "where": "housekeeping @1280",
+  "ok": true,
+  "detail": "716.8 vs 716.8"
+ },
+ {
+  "lock": "A1 the header's top corner is cut to the radius",
+  "where": "housekeeping @1280",
+  "ok": true,
+  "detail": "corner rgb(27, 31, 41) · header rgb(42, 58, 82)"
+ }
+]

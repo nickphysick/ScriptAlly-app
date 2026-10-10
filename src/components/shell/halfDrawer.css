@@ -13,6 +13,12 @@
   box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.35);
   transform: translateX(102%); transition: transform 0.32s cubic-bezier(.22, .8, .3, 1);
 }
+/* Feed drawer v2 part A (10 Oct): every half-screen drawer FLOATS — 8px in from the top, right and bottom, 12px
+   corners, the page sheet's own inset and radius. It clips, so the ink header follows the corners. The closed
+   transform clears the 8px and the shadow. Under 768px the drawer keeps the full-height rule it had. */
+@media (min-width: 768px) {
+  .hdr { top: 8px; right: 8px; bottom: 8px; border-radius: 12px; overflow: hidden; box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.08); transform: translateX(calc(100% + 24px)); }
+}
 .hdr.is-in { transform: none; }
 .hdr-head { position: relative; flex: none; }
 .hdr-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
