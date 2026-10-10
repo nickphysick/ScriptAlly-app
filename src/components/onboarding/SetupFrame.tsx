@@ -24,7 +24,7 @@
  * (`FolderTab`'s own 90ms swap). Only the sheet's contents fade.
  */
 
-import React, { useRef } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import "../shell/primitives.css";
 import "../shell/workspaceShell.css";
 import "../shell/inkShell.css";
@@ -36,6 +36,7 @@ import { planLine } from "../../lib/shellSidebar";
 import { getInitials, formatSidebarName } from "../../lib/displayName";
 import { SpineStep } from "../../lib/onboardingSpine";
 import { UserPlan } from "../../types";
+import { BetaStrip } from "../shell/BetaStrip";
 
 /** The group label over the steps, and the tab's group on every set-up step. */
 export const SETUP_GROUP = "Getting set up";
@@ -62,6 +63,14 @@ export interface SetupFrameProps {
   /** No way out is drawn. The two import loaders set it: a file being read, or rows being written,
    *  is not a moment to leave from (onboarding v5 part 2). */
   hideExit?: boolean;
+  /**
+   * The hand-off to the app, at the end of the import (part 2). `appMode` gives the frame the
+   * dashboard route's page tokens, so the dashboard's loading page behind the importing loader is
+   * measured as it will be in the app. `handoff.nav` is the app's nav, for show; when `handoff.on`
+   * turns true the steps fade out and it fades in where the app's nav will be.
+   */
+  appMode?: boolean;
+  handoff?: { on: boolean; nav: React.ReactNode } | null;
   children: React.ReactNode;
 }
 
@@ -83,9 +92,24 @@ const TICK = (
 
 export const SetupFrame: React.FC<SetupFrameProps> = ({
   form, group, name, otherTab, onTab, steps, activeIndex = 0, manuscriptTitle, user,
-  exitLabel, onExit, hideExit, children,
+  exitLabel, onExit, hideExit, appMode, handoff, children,
 }) => {
   const exitRef = useRef<HTMLButtonElement>(null);
+  /* ⚠️ THE APP HAS A STRIP ABOVE ITS SHELL THAT THE FRAME DOES NOT (the beta notice, until it is
+     dismissed), so the app's sidebar, tab and sheet start that much lower than the frame's. On the
+     hand-off the frame makes room for it — the same strip, drawn for show, its height measured
+     rather than assumed — so that when the app mounts nothing moves. */
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [stripH, setStripH] = useState(0);
+  useLayoutEffect(() => {
+    const el = stripRef.current;
+    if (!el) { setStripH(0); return; }
+    const fit = () => setStripH(el.offsetHeight);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [!!handoff]);
   const noLimit = useRef<HTMLElement>(null);
   const siblings: TabSibling[] = otherTab
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
@@ -95,7 +119,8 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
   const userName = (user?.name ?? "").trim();
 
   return (
-    <div className={`ws-app sf sf--${form}`} data-setup-frame={form}>
+    <div className={`ws-app sf sf--${form}${appMode ? " dash-mode" : ""}${handoff?.on ? " is-handoff" : ""}`} data-setup-frame={form}
+         style={handoff ? ({ ["--sf-strip-h" as string]: `${stripH}px` } as React.CSSProperties) : undefined}>
       {form === "setup" && (
         <div className="ws-panel sf-panel" data-sf="panel">
           <div className="ws-pin">
@@ -109,19 +134,24 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
                 </span>
               </div>
             )}
-            <div className="sf-grp"><span>{SETUP_GROUP}</span><i aria-hidden="true" /></div>
-            <ol className="sf-steps" aria-label="Set-up steps">
-              {(steps ?? []).map((s, i) => {
-                const state = i < activeIndex ? "done" : i === activeIndex ? "now" : "todo";
-                return (
-                  <li key={s.id} className={`sf-step sf-step--${state}`} data-step={s.id} data-state={state}
-                      aria-current={state === "now" ? "step" : undefined}>
-                    <span className="sf-stepdot" aria-hidden="true">{state === "done" ? TICK : i + 1}</span>
-                    <span className="sf-steplab">{s.label}</span>
-                  </li>
-                );
-              })}
-            </ol>
+            <div className="sf-navzone">
+              <div className="sf-stepsbox" aria-hidden={handoff?.on || undefined}>
+              <div className="sf-grp"><span>{SETUP_GROUP}</span><i aria-hidden="true" /></div>
+              <ol className="sf-steps" aria-label="Set-up steps">
+                {(steps ?? []).map((s, i) => {
+                  const state = i < activeIndex ? "done" : i === activeIndex ? "now" : "todo";
+                  return (
+                    <li key={s.id} className={`sf-step sf-step--${state}`} data-step={s.id} data-state={state}
+                        aria-current={state === "now" ? "step" : undefined}>
+                      <span className="sf-stepdot" aria-hidden="true">{state === "done" ? TICK : i + 1}</span>
+                      <span className="sf-steplab">{s.label}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+              </div>
+              {handoff?.nav}
+            </div>
             {user && (
               <div className="ws-pfoot sf-foot" data-sf="foot">
                 <div className="ws-pfrow">
@@ -173,6 +203,13 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
           </div>
         </div>
       </div>
+      {/* Last, so that adding it re-keys nothing above it. For show: the app's own strip arrives
+          with the app. */}
+      {handoff && (
+        <div className="sf-strip" ref={stripRef} aria-hidden="true" data-sf="strip" {...{ inert: true }}>
+          <BetaStrip onReport={() => {}} />
+        </div>
+      )}
     </div>
   );
 };

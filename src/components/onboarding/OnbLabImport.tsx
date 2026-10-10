@@ -9,6 +9,7 @@
  *   ?s=overview&fx=review|dupes|clear
  *   ?s=review&fx=review|dupes|clear   the three review steps, start to finish
  *   ?s=importing[&done=1]
+ *   ?s=flow&fx=…[&skip=N][&none=1][&floor=ms]   the real branch from the summary to the hand-over
  *
  * These replace the five older dev routes (`#/import-review`, `#/import-review-dupes`,
  * `#/import-loader`, `#/scatter-loader`, `#/reconcile-card`), which were gated on `DEV` and so
@@ -18,6 +19,8 @@
 import React, { useEffect, useState } from "react";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
+import { validateSmartImport } from "../../lib/smartImport";
+import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { ImportingLoader } from "./ImportingLoader";
 import { ImportOverview } from "./ImportOverview";
@@ -61,6 +64,22 @@ export const LabReading: React.FC<{ hold: string | null }> = ({ hold }) => {
   const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
   return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={spy("proceed")} onTimeout={spy("timeout")} />;
 };
+
+/** A stand-in commit for the lab's whole run: it writes nothing and reports an outcome shaped by the
+ *  query (`skip` rows skipped at commit time, `none=1` for nothing imported). */
+export const labCommit = (opts: { skip: number; none: boolean }) => async (result: SmartImportResult): Promise<CommitOutcome> => {
+  const { importable, skipped } = validateSmartImport(result);
+  spy("commit")();
+  (window.__onbLab ??= { calls: [] }).result = JSON.parse(JSON.stringify(result));
+  const commitSkips = Math.min(opts.skip, importable.length);
+  return {
+    agentsCreated: opts.none ? 0 : result.agents.length, agentsMerged: 0,
+    queriesImported: opts.none ? 0 : importable.length - commitSkips,
+    queriesSkipped: skipped.length + commitSkips,
+    errors: importable.slice(0, commitSkips).map((q) => `Skipped a ${q.status} query — its agent couldn't be saved.`),
+  };
+};
+export const LAB_UID = "onb-lab";
 
 export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done, loop }) => {
   const [complete, setComplete] = useState(done);

@@ -13,6 +13,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ensureSignedIn } from "./measure";
 
 export const VPS = [
   { width: 1440, height: 900 },
@@ -33,8 +34,9 @@ function record(page: Page, lock: string, name: string, value: unknown) {
 
 /** CSS-only breaks, injected after the page settles. DOM breaks are in `mutate`. */
 const MUTATIONS: Record<string, string> = {
-  R2: ".sf .im-bare{position:fixed!important;inset:0!important;z-index:50!important}",
-  R4: ".sf .im-sc-tick{background:#e9ede6!important;color:#5a6e58!important}",
+  R2: ".sf .im-bare{position:fixed!important;inset:0!important;z-index:50!important;background:#f2eee8}",
+  R4: ".sf .im-sc-tick{background:#e9ede6!important;color:#5a6e58!important}.sf .im-ldrcard.is-done .im-ldrdisc{background:#e6ebe3!important;color:#5a6e58!important}",
+  H2: ".sf .im-ghost .d58-body{grid-template-columns:1fr 1fr 1fr!important}",
 };
 
 async function mutate(page: Page) {
@@ -124,6 +126,17 @@ async function mutate(page: Page) {
         const b = (e.target as HTMLElement).closest('[data-im="reset"]');
         if (b && document.querySelector('[data-im="tray"]')) { e.stopImmediatePropagation(); e.preventDefault(); }
       }, true);
+    });
+  }
+  if (MUTATE === "H1") {
+    /* Route onProceed to the old closing page: it is drawn over the sheet when the import completes. */
+    await page.evaluate(() => {
+      new MutationObserver(() => {
+        if (!document.querySelector('[data-lab-flow="arrived"]') || document.querySelector("[data-old-done]")) return;
+        const d = document.createElement("div"); d.setAttribute("data-old-done", "1");
+        d.innerHTML = "<h1>That's everything captured</h1>";
+        document.querySelector('[data-sf="scroll"]')?.prepend(d);
+      }).observe(document, { subtree: true, childList: true, attributes: true });
     });
   }
   if (MUTATE === "R3") {
@@ -629,6 +642,126 @@ test.describe("OB2", () => {
           expect(got, "onImport was handed a result").toBeTruthy();
           record(page, "V4", "dupes", { agents: (got as { agents: unknown[] }).agents.length, queries: (got as { queries: unknown[] }).queries.length });
           expect(got).toEqual(snap("v4-dupes.json"));
+        });
+      }
+
+      /* ── R2 + R4 · the importing loader ──────────────────────────────────────────────────── */
+      test("R2 importing loader sits in the frame's sheet", async ({ page }) => {
+        await lab(page, "s=importing");
+        await page.waitForSelector('[data-im="loader-card"]');
+        const sheet = await box(page, '[data-sf="sheet"]');
+        const loader = await box(page, '[data-im="importing"]');
+        const card = await box(page, '[data-im="loader-card"]');
+        record(page, "R2", "importing", { sheet, loader, card });
+        expect(sheet && loader && card).toBeTruthy();
+        for (const b of [loader!, card!]) {
+          expect(b.x).toBeGreaterThanOrEqual(sheet!.x - 0.5); expect(b.y).toBeGreaterThanOrEqual(sheet!.y - 0.5);
+          expect(b.r).toBeLessThanOrEqual(sheet!.r + 0.5); expect(b.b).toBeLessThanOrEqual(sheet!.b + 0.5);
+        }
+        expect(await fixedOverFrame(page), "nothing fixed is drawn over the frame").toEqual([]);
+        const exit = await page.evaluate(() => { const e = document.querySelector('[data-sf="exit"]') as HTMLElement | null; return e ? getComputedStyle(e).visibility : "absent"; });
+        expect(["hidden", "absent"]).toContain(exit);
+        if (vp.width >= 900) expect((await box(page, '[data-sf="panel"]'))!.w).toBeGreaterThan(200);
+        if (vp.width === 1440) expect(Math.round(card!.w), "the card is 421 wide").toBe(421);
+        if (SHOTS) { mkdirSync(resolve(OUT, "shots"), { recursive: true }); await page.screenshot({ path: resolve(OUT, "shots", `importing-${vp.width}.png`) }); }
+      });
+      test("R4 importing loader's finished disc is navy, and nothing is sage", async ({ page }) => {
+        await lab(page, "s=importing&done=1");
+        await page.waitForSelector('[data-im="loader-card"].is-done');
+        await page.waitForTimeout(520); /* past the disc's colour transition, before the card lifts away */
+        const disc = await page.evaluate(() => { const d = document.querySelector('[data-im="loader-disc"]') as HTMLElement; const cs = getComputedStyle(d); return { bg: cs.backgroundColor, ink: cs.color }; });
+        record(page, "R4", "importingDisc", disc);
+        expect(disc.bg).toBe("rgb(42, 58, 82)");
+        const sage = await sageIn(page, '[data-im="loader-card"]');
+        record(page, "R4", "importingSage", sage);
+        expect(sage.population).toBeGreaterThan(5);
+        expect(sage.hits).toEqual([]);
+        const text = await page.locator('[data-im="loader-card"]').innerText();
+        expect(text).toContain("You're all set");
+        expect(text).toContain("Opening your dashboard…");
+      });
+
+      /* ── H1 · no closing page: the import ends on the dashboard ──────────────────────────── */
+      test("H1 the import hands over to the dashboard", async ({ page }) => {
+        await lab(page, "s=flow&fx=clear&floor=300");
+        await page.waitForSelector('[data-im="summary"]');
+        await page.locator('[data-im="primary"]').click();                 // Bring it in → the review
+        await page.locator('[data-im="primary"]').click();                 // agents → queries
+        await page.waitForSelector('[data-im="review"][data-step="queries"]');
+        await page.locator('[data-im="primary"]').click();                 // Import and get started
+        await page.waitForSelector('[data-im="importing"]');
+        await page.waitForSelector('[data-lab-flow="arrived"]', { timeout: 20_000 });
+        await page.waitForTimeout(400);
+        const r = await page.evaluate(() => ({
+          text: (document.querySelector("[data-setup-frame]") as HTMLElement).innerText,
+          calls: (window.__onbLab?.calls ?? []).filter((c) => c.name === "importComplete"),
+          tab: (document.querySelector(".ws-ftab") as HTMLElement).innerText.replace(/\s+/g, " ").trim(),
+          ghost: !!document.querySelector('[data-im="ghost"] [data-d58="page"]'),
+        }));
+        record(page, "H1", "arrival", { calls: r.calls, tab: r.tab, ghost: r.ghost });
+        expect(r.text).not.toMatch(/that's everything captured/i);
+        expect(r.text).not.toMatch(/brought across/i);
+        expect(r.calls.length, "onImportComplete is called once").toBe(1);
+        expect(r.calls[0].arg).toBe("dashboard");
+        expect(r.ghost, "what is on screen is the dashboard's page").toBe(true);
+        if (vp.width >= 768) expect(r.tab.toLowerCase()).toContain("dashboard");
+      });
+      test("H1 nothing imported still shows its own card", async ({ page }) => {
+        await lab(page, "s=flow&fx=clear&floor=300&none=1");
+        await page.locator('[data-im="primary"]').click();
+        await page.locator('[data-im="primary"]').click();
+        await page.waitForSelector('[data-im="review"][data-step="queries"]');
+        await page.locator('[data-im="primary"]').click();
+        await page.waitForSelector('[data-screen="nothing"], [data-dead="nothing"], .sf-card', { timeout: 20_000 });
+        await page.waitForFunction(() => !document.querySelector('[data-im="importing"]'), null, { timeout: 20_000 });
+        const calls = await page.evaluate(() => (window.__onbLab?.calls ?? []).filter((c) => c.name === "importComplete").length);
+        expect(calls, "a commit that imported nothing does not hand over").toBe(0);
+      });
+
+      /* ── H2 · seamless: the frame's last frame is the app's first ────────────────────────── */
+      if (vp.width >= 1280) {
+        test("H2 the loader's last frame matches the dashboard's first", async ({ page }) => {
+          /* SIGNED IN, as the harness account: the app side of this is the real /dashboard, held in
+             its own loading state by the dashboard's dev aid. Both sides run in one browser context,
+             so they read the same remembered loading shape, as they do on a writer's device. */
+          await page.addInitScript(() => { (window as unknown as { __SA_DASH_HOLD_MS: number }).__SA_DASH_HOLD_MS = 120_000; });
+          await page.goto("/dashboard");
+          await ensureSignedIn(page);
+          await page.goto("/dashboard", { waitUntil: "load" });
+          await page.waitForSelector('[data-d58="page"][data-loading="1"]', { timeout: 30_000 });
+          await page.evaluate(() => (document as Document).fonts.ready);
+          await page.waitForTimeout(600);
+          const read = (root: string) => page.evaluate((root) => {
+            const b = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left * 10) / 10, y: Math.round(r.top * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10 }; };
+            const host = document.querySelector(root)!;
+            const ghost: Record<string, unknown> = {};
+            host.querySelectorAll("[data-d58]").forEach((e) => { const k = e.getAttribute("data-d58")!; if (!(k in ghost)) ghost[k] = b(e); });
+            return {
+              sidebar: b(document.querySelector(".ws-panel")), mark: b(document.querySelector(".ws-bmark")),
+              tab: b(document.querySelector(".ws-ftab")), sheet: b(document.querySelector(".ws-window")), page: ghost,
+            };
+          }, root);
+          const app = await read("body");
+          await lab(page, "s=importing&done=1&handoff=1", { noMutate: true });
+          await page.waitForSelector('[data-im="importing"][data-im-state="lifting"]', { timeout: 10_000 });
+          await page.waitForTimeout(900); /* the 700ms hand-off has finished */
+          await mutate(page);
+          await page.waitForTimeout(150);
+          const frame = await read('[data-im="ghost"]');
+          record(page, "H2", "app", app); record(page, "H2", "frame", frame);
+          const near = (a: { x: number; y: number; w: number; h: number } | null, b: typeof a, what: string) => {
+            expect(a && b, `${what} is drawn on both`).toBeTruthy();
+            for (const k of ["x", "y", "w", "h"] as const) expect(Math.abs(a![k] - b![k]), `${what}.${k}: frame ${a![k]} vs app ${b![k]}`).toBeLessThanOrEqual(1);
+          };
+          near(frame.sidebar, app.sidebar, "sidebar");
+          near(frame.mark, app.mark, "brand mark");
+          near(frame.tab, app.tab, "tab");
+          near(frame.sheet, app.sheet, "sheet");
+          /* "tab" is the dashboard's floating feed tab. The ghost does not draw it (it floats over the
+             page, and the app's own arrives with the app), so it is not one of the page's boxes here. */
+          const keys = Object.keys(app.page).filter((k) => k !== "tab");
+          expect(keys.length, "the dashboard's loading page has named boxes").toBeGreaterThan(3);
+          for (const k of keys) near((frame.page as Record<string, never>)[k], (app.page as Record<string, never>)[k], `page box "${k}"`);
         });
       }
     });

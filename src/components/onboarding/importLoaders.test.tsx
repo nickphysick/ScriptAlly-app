@@ -36,7 +36,8 @@ describe("R1 — both loaders keep every timing", () => {
     ]) expect(s, beat).toContain(beat);
   });
   it("the branch's commit floor is untouched", () => {
-    expect(code(src("BranchB.tsx"))).toContain("delay(5000)");
+    /* 5000 is the floor; the lab's stand-in commit may shorten it and nothing else may. */
+    expect(code(src("BranchB.tsx"))).toContain("delay(lab?.floorMs ?? 5000)");
   });
 });
 
@@ -49,7 +50,34 @@ describe("R3 — the reading loader ends on \"Ready\"", () => {
   });
 });
 
+describe("H1 — the import ends on the dashboard, with no closing page", () => {
+  const branch = code(src("BranchB.tsx"));
+  it("the handover page and its lib are deleted", () => {
+    const fs = require("fs") as typeof import("fs");
+    expect(fs.existsSync(resolve(process.cwd(), "src/components/onboarding/HandoverScreen.tsx"))).toBe(false);
+    expect(fs.existsSync(resolve(process.cwd(), "src/lib/onboardingHandover.ts"))).toBe(false);
+    expect(fs.existsSync(resolve(process.cwd(), "src/components/onboarding/chrome.tsx"))).toBe(false);
+    expect(branch).not.toContain("HandoverScreen");
+    expect(branch).not.toContain("That's everything captured");
+  });
+  it("the loader's onProceed names the dashboard, and only the dashboard", () => {
+    expect(branch).toContain('onImportComplete(outcome, "dashboard")');
+    expect(branch).not.toContain('"queries"');
+  });
+  it("nothing imported still shows its own card", () => {
+    expect(branch).toContain('if (committed.queriesImported === 0) { setScreen("done"); return; }');
+    expect(branch).toContain("<NothingImported");
+  });
+});
+
 describe("the loaders sit in the frame's sheet", () => {
+  it("the importing loader is not a fixed layer, mounts no old nav and no drawn skeleton", () => {
+    const s = code(src("ImportingLoader.tsx"));
+    expect(s).not.toMatch(/position:\s*"fixed"/);
+    expect(s).not.toContain("OnbNav");
+    expect(s).not.toContain("DashboardSkeleton");
+    expect(s).toContain("<DashGhost />");
+  });
   it("the reading loader is not a fixed layer and mounts no old nav", () => {
     const s = code(src("ScatterSettleLoader.tsx"));
     expect(s).not.toMatch(/position:\s*"fixed"/);

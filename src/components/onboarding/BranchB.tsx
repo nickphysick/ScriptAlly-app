@@ -25,16 +25,15 @@ import { fmtDate } from "../../lib/smartImportReviewModel";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
+import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
 import { CaptureOption } from "../../lib/captureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { CaptureFork } from "./CaptureFork";
-import { HandoverScreen } from "./HandoverScreen";
 import { StepColumn, OpenTitle, StepCard, BackLink, StepFoot, FieldError } from "./setupParts";
 
 export const BOOK_TITLE = "The book you're querying.";
 export const BOOK_SUB = "Just the essentials. Your agents and queries attach to this, and you can flesh it out any time.";
-import { shouldHandOver, HandoverTally } from "../../lib/onboardingHandover";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
  *  errors — Promise.all rejects as soon as the commit does). */
@@ -62,10 +61,10 @@ export interface BranchBProps {
   /**
    * Import committed — the parent finishes onboarding.
    *
-   * ⚠️ THE DESTINATION IS THE HANDOVER'S TO CHOOSE. Landing everyone on the dashboard put a writer
-   * who had just imported nine queries somewhere those queries are not.
+   * ⚠️ THE IMPORT ENDS ON THE DASHBOARD (onboarding v5 part 2). The destination is still named, so
+   * the one call site reads as what it does; "queries" went with the closing page that offered it.
    */
-  onImportComplete: (outcome: CommitOutcome, destination: "queries" | "dashboard") => void;
+  onImportComplete: (outcome: CommitOutcome, destination: "dashboard") => void;
   /** Surfaced save/limit error from the parent (e.g. the Free-tier manuscript cap). */
   error?: string | null;
   /**
@@ -85,6 +84,16 @@ export interface BranchBProps {
    * The frame is the parent's, so the branch reports and the parent draws.
    */
   onExitMode?: (mode: ExitMode) => void;
+  /** The branch is on the importing loader (the frame takes the dashboard's page tokens for it). */
+  onImporting?: (on: boolean) => void;
+  /** The importing loader's card has started to lift: the frame becomes the app's. */
+  onHandoff?: () => void;
+  /**
+   * `#/onb-lab` only: start on the summary over a fixture, and commit through a stand-in. The lab
+   * has no account to write to; everything between the summary and the hand-over is the real code.
+   * `floorMs` shortens the 5-second floor for the locks (the floor itself is lock R1's).
+   */
+  lab?: { result: SmartImportResult; fileName: string; title: string; commit: (result: SmartImportResult) => Promise<CommitOutcome>; uid: string; floorMs?: number };
 }
 
 export type ExitMode = "open" | "ask" | "none";
@@ -112,30 +121,31 @@ type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string 
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
 
-  const [screen, setScreen] = useState<B3Screen>("book");
+  const [screen, setScreen] = useState<B3Screen>(lab ? "overview" : "book");
 
   /* Report the named position up rather than an index — an index is not a place, and the header
      owns how many steps this branch has. */
   useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
   useEffect(() => { onExitMode?.(exitModeFor(screen)); }, [screen, onExitMode]);
+  useEffect(() => { onImporting?.(screen === "importing"); }, [screen, onImporting]);
 
   /* The band's meta: the step, plus what this screen is doing when that is a real sub-position.
      ⚠️ THE SPINE IS NOT TOLD ANY OF THIS. Sub-steps stay in the band by design — expanding a dot
      into three would make the Smart Import path look longer than the template path, which is the
      progress bar growing because of a choice the writer made. */
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
-  const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
+  const [fields, setFields] = useState<ManuscriptFieldsState>(lab ? { ...emptyManuscriptFields(), title: lab.title } : initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [importOption, setImportOption] = useState<CaptureOption>(defaultImport);
-  const [fileName, setFileName] = useState("");
-  const [validated, setValidated] = useState<ValidatedImport | null>(null);
+  const [fileName, setFileName] = useState(lab?.fileName ?? "");
+  const [validated, setValidated] = useState<ValidatedImport | null>(() => (lab ? validateSmartImport(lab.result) : null));
   // Scatter-settle loader (extraction wait): the writer's raw cells sampled client-side (display only),
   // plus the "extraction done" signal that triggers the snap-and-crystallise settle.
   const [rawSample, setRawSample] = useState<RawRecordSample[]>([]);
@@ -232,7 +242,7 @@ export const BranchB: React.FC<BranchBProps> = ({
    *  inline fix (statuses, dates, dedupe, exclusions, recovered names) and builds the result via
    *  modelToResult, so we just commit it — same deps and post-import flow as before. */
   const handleImport = async (result: SmartImportResult) => {
-    if (!currentUser) return;
+    if (!currentUser && !lab) return;
     setCommitError(null);
     setImportComplete(false);
     setScreen("importing"); // the loader shows the instant Import is pressed
@@ -248,16 +258,22 @@ export const BranchB: React.FC<BranchBProps> = ({
       // Run the commit and a 5s UX floor together. The floor never hides an error: if the commit
       // rejects, Promise.all rejects immediately (we don't wait out the 5s to surface the failure).
       const [committed] = await Promise.all([
-        commitSmartImport(
-          { userId: currentUser.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
-          result,
-          mId
-        ),
-        delay(5000),
+        lab
+          ? lab.commit(result)
+          : commitSmartImport(
+              { userId: currentUser!.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
+              result,
+              mId
+            ),
+        delay(lab?.floorMs ?? 5000),
       ]);
       setOutcome(committed);
+      /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
+         loader completes. The validation is of the result the REVIEW handed back — the one that was
+         committed — not of the first read. A commit that skipped nothing clears any older notice. */
+      saveImportNotice(lab ? lab.uid : currentUser!.id, buildImportNotice(validateSmartImport(result).skipped, committed, result.agents));
       // Never route on a false success: if nothing actually landed, surface the outcome screen
-      // ("That didn't work — here's why") instead of the loader's completion + dashboard route.
+      // instead of the loader's completion + dashboard route.
       if (committed.queriesImported === 0) { setScreen("done"); return; }
       // Genuine success → let the loader play its completion beat, then it calls onProceed to route.
       setImportComplete(true);
@@ -400,16 +416,17 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── Bringing it in — the held post-import loader (5s floor + commit), then routes to the dashboard.
+  // ── Bringing it in — the held loader (5s floor + commit), which opens the dashboard.
   if (screen === "importing") {
     return (
       <ImportingLoader
         complete={importComplete}
-        /* ⚠️ THE LOADER HANDS OVER TO THE HANDOVER, NOT TO THE DASHBOARD. It used to call
-           onImportComplete directly, so a successful import went straight out of onboarding and
-           the writer never saw what had landed — the `done` screen existed only for the
-           nothing-imported case. That silent exit is the seam this phase adds. */
-        onProceed={() => setScreen("done")}
+        onLift={onHandoff}
+        /* ⚠️ THE LOADER HANDS OVER TO THE DASHBOARD. There is no closing page: the dashboard is what
+           the import was for, and the page that stood here ("That's everything captured") restated
+           what the dashboard shows a moment later. `importComplete` is only ever set after the
+           build's own success test (at least one query imported), so `outcome` is a success here. */
+        onProceed={() => { if (outcome) onImportComplete(outcome, "dashboard"); }}
       />
     );
   }
@@ -442,27 +459,9 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── Outcome — what the commit actually did. Never silent, never auto-skipped past. ─
+  // ── Nothing imported — what the commit actually did. Never silent, never auto-skipped past.
   if (screen === "done" && outcome) {
     const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
-    const ok = outcome.queriesImported > 0;
-    const tally: HandoverTally = {
-      agents: outcome.agentsCreated,
-      queries: outcome.queriesImported,
-      manuscripts: fields.title.trim() ? 1 : 0,
-    };
-    /* A successful import always hands over: `shouldHandOver` is true whenever anything was
-       brought across, and `ok` means a query was. The "Brought across" card this used to fall
-       through to could never be reached, and went with `OnboardingCard`'s other callers. */
-    if (ok && shouldHandOver(tally)) {
-      return (
-        <HandoverScreen
-          tally={tally}
-          onOpenQueryCentre={() => onImportComplete(outcome, "queries")}
-          onDashboard={() => onImportComplete(outcome, "dashboard")}
-        />
-      );
-    }
     return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => setScreen("review")} />;
   }
 

@@ -409,3 +409,72 @@ button.im-pick { cursor: pointer; }
    takes its parent's face. */
 .sf .im-rw span:not([class]), .sf .im-dupe span:not([class]), .sf .im-said span, .sf .im-result span, .sf .im-pick > span,
 .sf .im-mergedbar span, .sf .im-key, .sf .im-court p, .sf .im-toast span, .sf .im-trayhead span { font-family: inherit; }
+
+/* ═══ The importing loader ════════════════════════════════════════════════════════════════════ */
+.sf .im-ldr { background: var(--ink-sheet); }
+/* the dashboard's own loading page, filling the sheet exactly as the shell's scroller would */
+.sf .im-ghost { position: absolute; inset: 0; pointer-events: none; }
+.sf .im-ghost .d58-dock { display: none; }
+.sf .im-ldrcard {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; box-sizing: border-box;
+  width: 421px; max-width: calc(100% - 28px); padding: 30px 40px 34px; text-align: center;
+  background: var(--fc-card); border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(var(--im-text-rgb), .08), 0 30px 70px -26px rgba(var(--im-text-rgb), .5);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.sf .im-ldrcard.is-lifting { opacity: 0; transform: translate(-50%, -50%) translateY(-6px) scale(.985); pointer-events: none; }
+.sf .im-ldremblem { position: relative; width: 160px; height: 160px; display: grid; place-items: center; margin: 0 auto 22px; }
+.sf .im-ldrring {
+  position: absolute; top: 50%; left: 50%; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%;
+  border: 1.5px solid rgba(45, 58, 80, .45); animation: imLdrPing 2.4s ease-out infinite;
+}
+.sf .im-ldrring.r2 { animation-delay: 1.2s; }
+.sf .im-ldrdisc {
+  width: 104px; height: 104px; border-radius: 50%; background: var(--im-paper); color: var(--sp-anthracite);
+  display: grid; place-items: center; position: relative; z-index: 2;
+  box-shadow: 0 18px 38px -18px rgba(var(--im-text-rgb), .45), inset 0 0 0 1px rgba(var(--im-text-rgb), .06);
+  transition: background .5s, color .5s; animation: imLdrBreathe 2.6s ease-in-out infinite;
+}
+.sf .im-ldrcard.is-done .im-ldrdisc { background: var(--sp-anthracite); color: var(--im-cream); animation: imLdrSettle .6s ease forwards; }
+.sf .im-ldrcard .im-ldrh { font-family: var(--sp-type) !important; font-weight: 400; font-size: 25px; line-height: 1.15; margin: 0 0 10px; color: var(--ink-on-light); }
+.sf .im-ldrmsg { font-family: var(--sp-mono); font-size: 12.5px; letter-spacing: .02em; color: rgba(var(--im-text-rgb), .6); margin: 0 auto 22px; min-height: 18px; animation: imLdrFade .3s ease; }
+.sf .im-ldrtrack { width: 240px; max-width: 100%; height: 5px; border-radius: 5px; background: rgba(45, 58, 80, .14); overflow: hidden; position: relative; margin: 0 auto; transition: opacity .4s ease; }
+.sf .im-ldrtrack span { position: absolute; top: 0; left: -40%; height: 100%; width: 38%; border-radius: 5px; background: linear-gradient(90deg, transparent, #2a3a52, transparent); animation: imLdrSlide 1.35s ease-in-out infinite; }
+.sf .im-ldrcard.is-done .im-ldrtrack { opacity: 0; }
+@keyframes imLdrBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes imLdrPing { 0% { transform: scale(.85); opacity: .55; } 80% { opacity: 0; } 100% { transform: scale(1.95); opacity: 0; } }
+@keyframes imLdrSlide { 0% { left: -40%; } 100% { left: 100%; } }
+@keyframes imLdrSettle { from { transform: scale(1.06); } to { transform: scale(1); } }
+@keyframes imLdrFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sf .im-ldrdisc, .sf .im-ldrring, .sf .im-ldrtrack span, .sf .im-ldrmsg { animation: none; }
+  .sf .im-ldrcard.is-done .im-ldrdisc { animation: none; }
+  .sf .im-ldrring { opacity: .25; }
+  .sf .im-ldrtrack span { display: none; }
+  .sf .im-ldrcard { transition: none; }
+}
+@media (max-width: 899.98px) {
+  .sf .im-ldr { min-height: 640px; }
+}
+
+/* ═══ The frame becomes the app's (the hand-off) ══════════════════════════════════════════════
+   As the importing loader's card lifts, the sidebar's steps fade out and the app's nav rows fade in
+   where the app's nav will be. 700ms, the card's own lift. Under reduced motion nothing fades: the
+   frame holds, then the app is there. */
+.sf .sf-navzone { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.sf .sf-stepsbox { transition: opacity .7s ease; }
+.sf .sf-appnav { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .7s ease; }
+.sf.is-handoff .sf-stepsbox { opacity: 0; }
+.sf.is-handoff .sf-appnav { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .sf .sf-stepsbox, .sf .sf-appnav { transition: none; }
+  .sf.is-handoff .sf-stepsbox { opacity: 1; }
+  .sf.is-handoff .sf-appnav { opacity: 0; }
+}
+
+/* the app's strip above the shell: the frame makes room for it during the hand-off */
+.sf { transition: padding-top .7s ease; }
+.sf .sf-strip { position: absolute; left: 0; right: 0; top: 0; transform: translateY(-100%); transition: transform .7s ease; z-index: 2; }
+.sf.is-handoff { padding-top: var(--sf-strip-h, 0px); box-sizing: border-box; }
+.sf.is-handoff .sf-strip { transform: none; }
+@media (prefers-reduced-motion: reduce) { .sf, .sf .sf-strip { transition: none; } }

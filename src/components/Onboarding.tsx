@@ -11,6 +11,7 @@ import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFo
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB, ExitMode } from "./onboarding/BranchB";
 import { useAskBeforeLeaving } from "./onboarding/SkipSetupConfirm";
+import { HandoffNav, HANDOFF_TAB } from "./onboarding/HandoffNav";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
@@ -210,6 +211,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [spineStep, setSpineStep] = useState<SpineId>("you");
   /* What the frame's way out is on the branch's current screen — see BranchB's `onExitMode`. */
   const [exitMode, setExitMode] = useState<ExitMode>("open");
+  /* The end of the import: the importing loader is up (the frame takes the dashboard's page
+     tokens), and then its card lifts and the frame becomes the app's. */
+  const [importing, setImporting] = useState(false);
+  const [handingOff, setHandingOff] = useState(false);
+  const startHandoff = React.useCallback(() => setHandingOff(true), []);
   const spineSteps = spineFor(flow);
   const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
   /* The card band states the same position in words, in its existing right-hand meta slot — one
@@ -337,8 +343,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   return (
     <SetupFrame
       form="setup"
-      group={SETUP_GROUP}
-      name={spineSteps[spineAt]?.label ?? ""}
+      /* On the hand-off the tab names the page the app is about to open. */
+      group={handingOff ? HANDOFF_TAB.group : SETUP_GROUP}
+      name={handingOff ? HANDOFF_TAB.name : spineSteps[spineAt]?.label ?? ""}
+      appMode={flow === "B" && importing}
+      handoff={flow === "B" && importing ? { on: handingOff, nav: <HandoffNav /> } : null}
       steps={spineSteps}
       activeIndex={spineAt}
       /* The app's manuscript card, once a title is held: from the "Your list" step on, in the
@@ -372,6 +381,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExitMode={setExitMode}
+              onImporting={setImporting}
+              onHandoff={startHandoff}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveBook={handleBranchBSaveBook}
               initialBook={b2Draft}
@@ -395,12 +406,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
                 await finishOnboarding();
               }}
-              onImportComplete={(_outcome, destination) => {
-                /* The existing post-onboarding hatch App already reads and clears — the same one
-                   the by-hand branch uses for the agent list. Dashboard is the absence of a hatch. */
-                if (destination === "queries") sessionStorage.setItem("scriptally_post_onboarding_tab", "queries");
-                void finishOnboarding();
-              }}
+              /* The import ends on the dashboard, which is the absence of a post-onboarding hatch. */
+              onImportComplete={() => { void finishOnboarding(); }}
               error={branchError}
             />
           </CenterWrap>

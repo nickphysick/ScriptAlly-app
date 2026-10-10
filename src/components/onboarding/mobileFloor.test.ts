@@ -15,30 +15,12 @@ import { stripComments } from "../../test/pageSmoke";
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
 
-describe("the onboarding card has a small-screen step at all", () => {
-  /** The journey carried ZERO @media rules before this — at any width it kept 30px body padding. */
-  const css = readFileSync(resolve(here, "onboarding.css"), "utf8");
-
-  it("declares a ≤640px breakpoint", () => {
-    expect(css).toContain("@media (max-width: 640px)");
-  });
-
-  it("tightens the body, the band and the plate", () => {
-    for (const selector of [".sa-onb-body", ".sa-onb-band", ".sa-onb-plate", ".sa-onb-foot"]) {
-      expect(css).toContain(selector);
-    }
-  });
-
-  /**
-   * ⚠️ THE FOOT WRAPS RATHER THAN SHRINKING THE PRIMARY. At 10.5px mono a label like
-   * "Save & explore agents" is already at its floor; squeezing it to hold one line would make the
-   * one control that moves the flow on the hardest thing on the screen to read.
-   */
-  it("wraps the footer instead of compressing it", () => {
-    const anchor = ".sa-onb-foot {";
-    expect(css).toContain(anchor);
-    const rule = css.slice(css.indexOf(anchor), css.indexOf("}", css.indexOf(anchor)));
-    expect(rule).toContain("flex-wrap: wrap");
+/* RETIRED (onboarding v5 part 2): "the onboarding card has a small-screen step" — its three cases
+   read `.sa-onb-*` rules, which were the old card's and went with it and its last reader. The
+   frame's own phone arrangement is locked on the rendered page (OB1 F4). */
+describe("the old card's phone rules are gone with the card", () => {
+  it("no .sa-onb-* rule survives", () => {
+    expect(readFileSync(resolve(here, "onboarding.css"), "utf8")).not.toContain(".sa-onb-");
   });
 });
 

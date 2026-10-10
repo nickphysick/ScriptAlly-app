@@ -18,3 +18,10 @@ V3 mutated (scroll to the next open row on answer): 3 red, 0 green —     Error
 V4 mutated as named (agencyWaived dropped): 0 red, 2 green — the result does not carry the waiver; see V3
 V3 under V4's named break (agencyWaived dropped): 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
 V4 mutated (the saved agency dropped): 1 red, 1 green —     Error: expect(received).toEqual(expected) // deep equality
+H1 mutated on [H1 the import]: 3 red, 0 green —     Error: expect(received).not.toMatch(expected)
+H2 mutated on [H2]: 2 red, 0 green —     Error: page box "left".w: frame 344 vs app 602
+R4 mutated on [R4 importing]: 3 red, 0 green —     Error: expect(received).toBe(expected) // Object.is equality
+R2 mutated on [R2 importing]: 3 red, 0 green —     Error: expect(received).toBeGreaterThanOrEqual(expected)
+N1 mutated (commit-time skips dropped):    × N1 — buildImportNotice > three skipped rows, one of them at commit time → three rows; length is the commit's count 3ms
+N1 mutated (commit-time skips dropped): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+N1 mutated (commit-time skips dropped):       Tests  1 failed | 11 passed (12)
