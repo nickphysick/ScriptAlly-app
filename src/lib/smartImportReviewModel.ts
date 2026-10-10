@@ -199,35 +199,6 @@ export const queryTier = (q: ReviewQuery): ReviewTier =>
 export interface PopulationTally { total: number; ready: number; fix: number; sharpen: number; }
 export interface ReviewTallies { agents: PopulationTally; queries: PopulationTally; }
 
-/** What should happen on entering a review stage: play the pre-walk intro (first flagged visit),
- *  open the guided walk (intro already seen, not escaped), or nothing (zero-flag, or escaped to the
- *  list). Pure so the entry rule is unit-testable: intro-before-walk on first entry, suppressed after. */
-export type StageEntryAction = "intro" | "walk" | "none";
-export function decideStageEntry(opts: { flagged: boolean; introSeen: boolean; escaped: boolean }): StageEntryAction {
-  if (!opts.flagged) return "none";                         // zero-flag → clean list
-  if (!opts.introSeen && !opts.escaped) return "intro";     // first flagged visit → welcome
-  if (opts.escaped) return "none";                          // chose "View all" → stay on the list
-  return "walk";                                            // seen the intro → straight into the walk
-}
-
-/** The walk's end-of-stage message. Pure so it can be tested. Three honest states:
- *   • a blocking fix is still open → "Almost there" (you can't import yet).
- *   • everything was actually resolved → the celebratory "All sorted ✦" + the stage's handoff chip.
- *   • some were skipped / left open → NO "all sorted" claim and NO chip; an honest "saved for now" note.
- *  `sortedChip` is the stage-aware confirmation ("Queries all sorted — ready to import"); it is only
- *  returned when nothing was skipped, so we never tell the writer everything's sorted when it isn't. */
-export interface DoneStageMessage { heading: string; chip: string | null; body: string }
-export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; sortedChip: string; celebratoryBody?: string }): DoneStageMessage {
-  if (opts.fixesLeft) {
-    return { heading: "Almost there", chip: null, body: "A fix still needs doing before you can import — pop back to it whenever you're ready." };
-  }
-  if (opts.skipped > 0) {
-    const n = opts.skipped === 1 ? "One is" : `${opts.skipped} are`;
-    return { heading: "Saved for now", chip: null, body: `${n} still open — saved as-is, and easy to revisit whenever you like.` };
-  }
-  return { heading: "All sorted ✦", chip: opts.sortedChip, body: opts.celebratoryBody ?? "Your records are looking sharp — everything's ready to import." };
-}
-
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
  *  to its own total. Both populations are advisory now: ready + sharpen, never blocking. (Agents can
@@ -309,25 +280,24 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
   }
 }
 
-/** The guided focus-card's WORKING-state copy per flagged reason, across BOTH walks. `pill` is the
- *  context-specific corner label (replaces the generic "Quick fix"/"Sharpen"); `headline` states the
- *  issue itself in the card's prominent Playfair voice (no longer a muted subtitle). The two agent keys
- *  cover the agents walk; the ReviewReasonCode arm covers the queries walk. Pure + tested so the wording
- *  stays consistent run-to-run. The detailed question + inputs still come from queryReasonText /
- *  QueryReasonPanel / AgentFixPanel — this is only the orientation (pill + headline). */
+/** The label a row wears while it asks something: the reason's own name. The two agent keys cover
+ *  the agents step; the ReviewReasonCode arm covers the queries step. Pure + tested so the wording
+ *  stays consistent run-to-run. (It also carried a `headline` for the guided walk's card; the walk
+ *  is retired and nothing read it.) The detailed question + inputs come from queryReasonText and the
+ *  row's own panel. */
 export type FocusReasonKey = "agent-needs-agency" | "agent-mapping" | ReviewReasonCode;
-export function focusReasonMeta(key: FocusReasonKey): { pill: string; headline: string } {
+export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
   switch (key) {
-    case "agent-needs-agency": return { pill: "No agency name", headline: "No agency on record yet" };
-    case "agent-mapping":      return { pill: "Detail to check", headline: "Worth a quick look at the details" };
-    case "two-dates":          return { pill: "Two dates found", headline: "We spotted two dates here" };
-    case "missing-day":        return { pill: "Day to confirm",  headline: "A month, but no exact day" };
-    case "serial-outlier":     return { pill: "Date to confirm", headline: "This date looks out of place" };
-    case "no-date":            return { pill: "Date needed",     headline: "No date on this one yet" };
-    case "status-direction":   return { pill: "Status to check", headline: "Who made the first move?" };
-    case "status-wording":     return { pill: "Status to check", headline: "Worth checking this status" };
-    case "check-name":         return { pill: "Name to check",   headline: "Worth checking this name" };
-    case "needs-identifying":  return { pill: "Who's this for?", headline: "We couldn't tell who this was for" };
+    case "agent-needs-agency": return { pill: "No agency name" };
+    case "agent-mapping":      return { pill: "Detail to check" };
+    case "two-dates":          return { pill: "Two dates found" };
+    case "missing-day":        return { pill: "Day to confirm" };
+    case "serial-outlier":     return { pill: "Date to confirm" };
+    case "no-date":            return { pill: "Date needed" };
+    case "status-direction":   return { pill: "Status to check" };
+    case "status-wording":     return { pill: "Status to check" };
+    case "check-name":         return { pill: "Name to check" };
+    case "needs-identifying":  return { pill: "Who's this for?" };
   }
 }
 

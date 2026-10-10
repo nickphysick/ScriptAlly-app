@@ -61,6 +61,31 @@ async function mutate(page: Page) {
       ol.prepend(li);
     });
   }
+  if (MUTATE === "V1") {
+    /* Mount the old nav. */
+    await page.evaluate(() => {
+      const nav = document.createElement("nav");
+      nav.innerHTML = '<img src="/scriptally-title-v2.png" alt="ScriptAlly" style="height:34px">';
+      document.querySelector('[data-sf="scroll"]')?.prepend(nav);
+    });
+  }
+  if (MUTATE === "V2") {
+    /* Mount the guided walk's overlay on entry. */
+    await page.evaluate(() => {
+      const d = document.createElement("div");
+      d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
+      d.style.cssText = "position:fixed;inset:0;z-index:70;background:rgba(42,37,33,.5);display:grid;place-items:center";
+      d.innerHTML = '<div style="background:#fff;padding:30px;border-radius:14px">One at a time</div>';
+      document.querySelector("[data-setup-frame]")?.appendChild(d);
+    });
+  }
+  if (MUTATE === "V6") {
+    /* Leave on the first press: the confirm's own "Skip for now" is pressed for the writer. */
+    await page.evaluate(() => {
+      new MutationObserver(() => (document.querySelector('[data-im="ask-skip"]') as HTMLElement | null)?.click())
+        .observe(document, { subtree: true, childList: true });
+    });
+  }
   if (MUTATE === "R3") {
     /* Restore the old last line whenever the loader says it is ready. */
     await page.evaluate(() => {
@@ -73,7 +98,7 @@ async function mutate(page: Page) {
   }
 }
 
-export async function lab(page: Page, q: string, opts: { reduced?: boolean } = {}) {
+export async function lab(page: Page, q: string, opts: { reduced?: boolean; noMutate?: boolean } = {}) {
   if (opts.reduced) await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`/#/onb-lab?${q}`, { waitUntil: "load" });
   /* The lab reads its query once, at mount: a second visit that changes only the query needs a
@@ -81,7 +106,7 @@ export async function lab(page: Page, q: string, opts: { reduced?: boolean } = {
   await page.reload({ waitUntil: "load" });
   await page.waitForSelector("[data-setup-frame]", { timeout: 20_000 });
   await page.evaluate(() => (document as Document).fonts.ready);
-  await mutate(page);
+  if (!opts.noMutate) await mutate(page);
 }
 
 const box = (page: Page, sel: string) => page.evaluate((s) => {
@@ -126,6 +151,8 @@ const sageIn = (page: Page, root: string) => page.evaluate(({ root, sage }) => {
 }, { root, sage: OLD_SAGE });
 
 test.describe("OB2", () => {
+  /* A lock that cannot find its subject fails in a minute, not seven. */
+  test.setTimeout(90_000);
   for (const vp of VPS) {
     test.describe(`${vp.width}x${vp.height}`, () => {
       test.use({ viewport: vp });
@@ -276,6 +303,126 @@ test.describe("OB2", () => {
           expect(r.steps.includes("duplicates"), "Duplicates is a step only when sets exist").toBe(r.fix > 0);
           expect(r.dots).toEqual(r.steps.map((_, i) => String(i + 1)));
           if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `overview-${fx}-${vp.width}.png`), fullPage: vp.width < 900 });
+        });
+      }
+
+      /* ── the review: which lab query lands on which step ── */
+      const STEPS: Array<{ step: "duplicates" | "agents" | "queries"; fx: string; path: string[]; firstQ: string; nQ: number; guide: string }> = [
+        { step: "duplicates", fx: "dupes", path: [], firstQ: "What's a duplicate?", nQ: 4, guide: "Same agent, twice?" },
+        { step: "agents", fx: "review", path: [], firstQ: "What does “needs a look” mean?", nQ: 5, guide: "Anything marked needs a quick look." },
+        { step: "queries", fx: "review", path: ["agents"], firstQ: "What does “needs a look” mean?", nQ: 5, guide: "Dates drive your reminders." },
+      ];
+      const toStep = async (page: Page, t: (typeof STEPS)[number]) => {
+        /* The break is applied once the step is reached: a break that covers the page would stop
+           the walk to the step, and the test would wait out its timeout instead of going red. */
+        await lab(page, `s=review&fx=${t.fx}`, { noMutate: true });
+        await page.waitForSelector('[data-im="review"]');
+        for (const _ of t.path) { await page.locator('[data-im="primary"]').click(); }
+        await page.waitForSelector(`[data-im="review"][data-step="${t.step}"]`);
+        await mutate(page);
+      };
+
+      /* ── V1 · the review's frame ─────────────────────────────────────────────────────────── */
+      for (const t of STEPS) {
+        test(`V1 review frame (${t.step})`, async ({ page }) => {
+          await toStep(page, t);
+          const r = await page.evaluate(() => {
+            const frame = document.querySelector("[data-setup-frame]") as HTMLElement;
+            const fonts = new Set<string>();
+            frame.querySelectorAll<HTMLElement>("*").forEach((e) => { if (e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) fonts.add(getComputedStyle(e).fontFamily.split(",")[0].replace(/["']/g, "").trim()); });
+            const rail = document.querySelector('[data-im="rail"]') as HTMLElement;
+            return {
+              text: frame.innerText,
+              oldArt: [...frame.querySelectorAll("img")].filter((i) => /scriptally/i.test(i.getAttribute("src") ?? "") || /scriptally/i.test(i.alt)).length,
+              navs: frame.querySelectorAll("nav").length,
+              fonts: [...fonts],
+              head: getComputedStyle(document.querySelector('[data-im="list-head"]') as HTMLElement).backgroundColor,
+              railKids: [...rail.children].map((c) => c.getAttribute("data-im")),
+              guideHead: (rail.querySelector(".im-guideh") as HTMLElement).innerText,
+              eyebrow: (rail.querySelector(".im-eyebrow") as HTMLElement).innerText,
+              questions: [...rail.querySelectorAll('[data-im="faq-q"]')].map((b) => (b as HTMLElement).innerText.replace(/\s*\+$/, "").trim()),
+              qHead: (rail.querySelector(".im-faqh") as HTMLElement).innerText,
+              stepperIsControl: document.querySelectorAll('[data-im="steps"] button, [data-im="steps"] a').length,
+            };
+          });
+          record(page, "V1", t.step, { ...r, text: undefined });
+          expect(r.fonts.length, "the sweep read text").toBeGreaterThan(2);
+          expect(r.text).not.toMatch(/ScriptAlly/);
+          expect(r.oldArt, "no old wordmark").toBe(0);
+          expect(r.navs, "no nav inside the frame").toBe(0);
+          expect(r.fonts.filter((f) => /caveat/i.test(f)), "no Caveat face").toEqual([]);
+          expect(r.head).toBe("rgb(27, 36, 51)");
+          expect(r.railKids).toEqual(["guide", "questions"]);
+          expect(r.eyebrow.toLowerCase()).toBe("how this step works");
+          expect(r.guideHead).toBe(t.guide);
+          expect(r.qHead).toBe("Questions");
+          expect(r.questions.length).toBe(t.nQ);
+          expect(r.questions[0]).toBe(t.firstQ);
+          expect(r.stepperIsControl, "the stepper is not a control").toBe(0);
+          if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `review-${t.step}-${vp.width}.png`), fullPage: vp.width < 900 });
+        });
+      }
+
+      /* ── V2 · no walk ─────────────────────────────────────────────────────────────────────── */
+      for (const t of STEPS) {
+        test(`V2 no walk on entry (${t.step})`, async ({ page }) => {
+          await toStep(page, t);
+          await page.waitForTimeout(900); /* the old intro arrived after a beat */
+          const r = await page.evaluate(() => {
+            const dialogs = document.querySelectorAll('[role="dialog"]').length;
+            const rows = document.querySelector('[data-im="rows"]') as HTMLElement;
+            const target = rows.querySelector("button") as HTMLElement | null;
+            let reachable = false;
+            if (target) {
+              target.scrollIntoView({ block: "center" });
+              const b = target.getBoundingClientRect();
+              const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+              reachable = !!hit && (hit === target || target.contains(hit));
+            }
+            return { dialogs, hasControl: !!target, reachable, text: (document.querySelector("[data-setup-frame]") as HTMLElement).innerText };
+          });
+          record(page, "V2", t.step, { dialogs: r.dialogs, hasControl: r.hasControl, reachable: r.reachable });
+          expect(r.hasControl, "the list has a control to reach").toBe(true);
+          expect(r.dialogs, "entering a step opens no dialog").toBe(0);
+          expect(await fixedOverFrame(page), "nothing is laid over the frame").toEqual([]);
+          expect(r.reachable, "the list is interactive at once").toBe(true);
+          expect(r.text).not.toMatch(/all sorted\b(?!\.)/i);
+          expect(r.text).not.toMatch(/let's (do it|go)/i);
+        });
+      }
+
+      /* ── V6 · leaving asks ───────────────────────────────────────────────────────────────── */
+      for (const q of ["s=overview&fx=review", "s=review&fx=dupes", "s=review&fx=review"]) {
+        test(`V6 leaving asks first (${q})`, async ({ page }) => {
+          await lab(page, q);
+          const calls = () => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name));
+          const exit = page.locator('[data-sf="exit"]');
+          await expect(exit).toBeVisible();
+          await exit.click();
+          await page.waitForTimeout(150);
+          const afterFirst = await calls();
+          record(page, "V6", `${q} afterFirstPress`, afterFirst);
+          expect(afterFirst.filter((c) => c === "skip" || c === "exit"), "nothing leaves on the first press").toEqual([]);
+          const ask = page.locator('[data-im="ask"]');
+          await expect(ask).toBeVisible();
+          const words = await ask.innerText();
+          expect(words).toContain("Skip set-up for now?");
+          expect(words).toContain("Nothing from this file has been saved yet");
+          await page.keyboard.press("Escape");
+          await expect(ask).toHaveCount(0);
+          expect((await calls()).filter((c) => c === "skip")).toEqual([]);
+          /* a press outside closes it too */
+          await exit.click();
+          await page.locator('[data-im="ask-dim"]').click({ position: { x: 6, y: 6 } });
+          await expect(ask).toHaveCount(0);
+          expect((await calls()).filter((c) => c === "skip")).toEqual([]);
+          /* "Keep setting up" closes; "Skip for now" leaves, once */
+          await exit.click();
+          await page.locator('[data-im="ask-keep"]').click();
+          await expect(ask).toHaveCount(0);
+          await exit.click();
+          await page.locator('[data-im="ask-skip"]').click();
+          expect((await calls()).filter((c) => c === "skip").length, "the confirm's Skip for now leaves, once").toBe(1);
         });
       }
     });

@@ -10,6 +10,7 @@ import { ManuscriptStatus } from "../types";
 import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB, ExitMode } from "./onboarding/BranchB";
+import { useAskBeforeLeaving } from "./onboarding/SkipSetupConfirm";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
@@ -329,6 +330,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
      email and a genre list and then dropped both on the floor. Agents are added on the agent list
      now, through the form that stores what it asks for. */
 
+  /* Leaving once a file has been read: the confirm's "Skip for now" is branch B's own skip. */
+  const leaving = useAskBeforeLeaving(flow === "B" ? exitMode : "open", () => { void handleSkip(); });
+
   // Overlay wrapper
   return (
     <SetupFrame
@@ -342,8 +346,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       manuscriptTitle={flow === "B" && spineStep === "list" ? manuscriptTitle : null}
       user={currentUser ? { name: currentUser.name, plan: currentUser.plan } : null}
       exitLabel="Skip for now"
-      onExit={() => { void handleStageSkip(); }}
-      /* The two import loaders draw no way out. Only branch B reports a mode. */
+      /* Branch B reports what its screen's way out is: the two import loaders draw none, and once a
+         file has been read (the summary, the review) leaving asks first. Elsewhere it leaves at once. */
+      onExit={flow === "B" && exitMode !== "open" ? leaving.onExit : () => { void handleStageSkip(); }}
       hideExit={flow === "B" && exitMode === "none"}
     >
       <div className="sf-stage" style={{ position: "relative" }}>
@@ -412,6 +417,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </ScreenTransition>
 
       {/* Saving: an oat wash over the sheet only — the frame and the steps stay readable. */}
+      {flow === "B" && leaving.confirm}
       {isSubmitting && (
         <div className="sf-saving" role="status">
           <span>Saving…</span>

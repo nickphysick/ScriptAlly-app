@@ -8,3 +8,8 @@ S1 mutated: 3 red, 6 green —     Error: with agents + with you + closed = quer
 S2 mutated: 6 red, 3 green —     Error: Duplicates is a step only when sets exist
 S3 mutated (dash restored): ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
 S3 mutated (dash restored):       Tests  5 failed | 11 passed (16)
+V1 mutated: 9 red, 0 green —     Error: no old wordmark
+V2 mutated: 5 red, 0 green — 
+V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press
+V2 mutated: 9 red, 0 green —     Error: entering a step opens no dialog
+V6 mutated: 9 red, 0 green —     Error: nothing leaves on the first press

@@ -410,7 +410,6 @@ export const BranchB: React.FC<BranchBProps> = ({
            the writer never saw what had landed — the `done` screen existed only for the
            nothing-imported case. That silent exit is the seam this phase adds. */
         onProceed={() => setScreen("done")}
-        userName={currentUser?.name}
       />
     );
   }
@@ -435,10 +434,10 @@ export const BranchB: React.FC<BranchBProps> = ({
     return (
       <SmartImportReview
         result={validated.result}
+        manuscriptTitle={fields.title}
         onBack={() => setScreen("pipeline")}
         error={commitError}
         onImport={handleImport}
-        userName={currentUser?.name}
       />
     );
   }

@@ -36,7 +36,9 @@ const C = {
 const FONT_SERIF = "'Playfair Display', Georgia, serif";
 const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', monospace";
-const FONT_HAND = "'Caveat', cursive";
+/* The writer's own note, quoted: serif italic. It was the Caveat hand, which no import screen wears
+   any more (onboarding v5 part 2). */
+const FONT_HAND = "var(--sp-serif)";
 
 export interface ReconcileCardRow {
   id: string; // query id (stable key)
@@ -213,7 +215,7 @@ export const ReconcileCard: React.FC<ReconcileCardProps> = ({
             <span>
               <b style={{ color: C.ink, fontWeight: 600 }}>{other.status}</b>
             </span>
-            {other.note && <span style={{ fontFamily: FONT_HAND, fontSize: 16, color: "#8a7868" }}>"{other.note}"</span>}
+            {other.note && <span style={{ fontFamily: FONT_HAND, fontStyle: "italic", fontSize: 15, color: "#8a7868" }}>"{other.note}"</span>}
             <span style={{ color: C.muted, fontSize: 12.5 }}>· {other.dateLabel}</span>
           </div>
           <div style={{ marginTop: 9, fontFamily: FONT_SANS, fontSize: 12, color: C.muted, fontStyle: "italic" }}>
@@ -375,7 +377,7 @@ export const ReconcileCard: React.FC<ReconcileCardProps> = ({
             <span>{row.status}</span>
             <span style={{ color: "#9a8c80" }}>· {row.dateLabel}</span>
           </div>
-          {row.note && <p style={{ fontFamily: FONT_HAND, fontSize: 16, color: "#8a7868", margin: "5px 0 0" }}>"{row.note}"</p>}
+          {row.note && <p style={{ fontFamily: FONT_HAND, fontStyle: "italic", fontSize: 15, color: "#8a7868", margin: "5px 0 0" }}>"{row.note}"</p>}
         </div>
         {/* Right chips */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>

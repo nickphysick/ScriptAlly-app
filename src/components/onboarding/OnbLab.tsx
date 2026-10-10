@@ -30,6 +30,7 @@ import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from ".
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
 import { LabReading, LabImporting, LabOverview, LabReview } from "./OnbLabImport";
+import { useAskBeforeLeaving } from "./SkipSetupConfirm";
 
 
 /** A handler that only records that it was called. */
@@ -56,12 +57,15 @@ export const LabSetup: React.FC<{
   at: SpineId;
   manuscript?: boolean;
   plan?: UserPlan;
-  /** The two loaders draw no way out. */
-  hideExit?: boolean;
+  /** What the frame's way out is, as the branch reports it: the loaders draw none; the summary and
+   *  the review ask first. */
+  exit?: "open" | "ask" | "none";
   children: React.ReactNode;
-}> = ({ flow, at, manuscript, plan, hideExit, children }) => {
+}> = ({ flow, at, manuscript, plan, exit = "open", children }) => {
   const steps = spineFor(flow);
   const index = Math.max(0, spineIndex(steps, at));
+  const leaving = useAskBeforeLeaving(exit, labSpy("skip"));
+  const hideExit = exit === "none";
   return (
     <SetupFrame
       form="setup"
@@ -72,10 +76,11 @@ export const LabSetup: React.FC<{
       manuscriptTitle={manuscript ? LAB_TITLE : null}
       user={{ ...LAB_USER, plan: plan ?? UserPlan.FREE }}
       exitLabel="Skip for now"
-      onExit={labSpy("exit")}
+      onExit={exit === "open" ? labSpy("exit") : leaving.onExit}
       hideExit={hideExit}
     >
       {children}
+      {leaving.confirm}
     </SetupFrame>
   );
 };
@@ -192,13 +197,13 @@ export const OnbLab: React.FC = () => {
 
   /* The import's steps (part 2). Each sits where `Onboarding` puts it: on "Your list", with the
      manuscript card showing. */
-  const imp = (node: React.ReactNode, hideExit = false) => (
-    <LabSetup flow="B" at="list" manuscript hideExit={hideExit}>{node}</LabSetup>
+  const imp = (node: React.ReactNode, exit: "ask" | "none") => (
+    <LabSetup flow="B" at="list" manuscript exit={exit}>{node}</LabSetup>
   );
-  if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, true);
-  if (s === "importing") return imp(<LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} />, true);
-  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} />);
-  if (s === "review") return imp(<LabReview fx={q.get("fx")} />);
+  if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");
+  if (s === "importing") return imp(<LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} />, "none");
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} />, "ask");
+  if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");
 
   if (s === "frame" && q.get("form") === "account") {
     const signin = q.get("mode") === "signin";

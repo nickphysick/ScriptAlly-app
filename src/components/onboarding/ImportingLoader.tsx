@@ -9,7 +9,7 @@
  * Visual source of truth: scriptally-importing-loader.html.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { OnbNav } from "./SmartImportReview";
+import "./importFlow.css";
 import { DashboardSkeleton } from "../dashboard/DashboardSkeleton";
 
 const SERIF = "'Playfair Display',serif";
@@ -39,12 +39,9 @@ export interface ImportingLoaderProps {
   complete: boolean;
   /** Called once, ~900ms after `complete` turns true — the host routes to the dashboard. */
   onProceed: () => void;
-  /** User's display name — the slim nav shows the first initial as avatar (same as the review nav). */
-  userName?: string;
 }
 
-export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onProceed, userName }) => {
-  const userInitial = userName ? userName[0].toUpperCase() : "?";
+export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onProceed }) => {
   const [msgIndex, setMsgIndex] = useState(0);
   // Once complete, a brief "all set" beat, then the loader card fades out to reveal the dashboard
   // skeleton that's been assembling behind it — a seamless handoff into the real dashboard (which
@@ -69,9 +66,8 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   }, [complete]);
 
   return (
-    // Full-viewport (fixed) so it escapes the narrow onboarding column wrapper and renders at the
-    // same full-width scale as the review screens: cream ground, full-width nav, centred stage.
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#f2ede7", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
+    // It fills the set-up frame's sheet (onboarding v5 part 2): no fixed layer, no nav of its own.
+    <div className="im-bare" data-im="importing" style={{ background: "var(--ink-sheet)", fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
       <style>{`
         @keyframes saLdrBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
         @keyframes saLdrPing{0%{transform:scale(.85);opacity:.55}80%{opacity:0}100%{transform:scale(1.95);opacity:0}}
@@ -92,8 +88,6 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
           .sa-ldr-slider{display:none;}
         }
       `}</style>
-
-      <OnbNav userInitial={userInitial} />
 
       <main style={{ flex: "1 1 auto", minHeight: 0, position: "relative", overflow: "hidden" }}>
         {/* The dashboard building itself behind the loader — the real skeleton, slotting in staggered,

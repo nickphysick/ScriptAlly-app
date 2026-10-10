@@ -63,37 +63,32 @@ describe("the scatter loader does not scatter cards off-screen", () => {
   });
 });
 
-describe("the review shell collapses without overflowing", () => {
+/* The review left its own full-screen shell for the set-up frame (onboarding v5 part 2), so the
+   old shell's four claims (`.sa-rv-grid` stacking, the state band wrapping, `.sa-rv-scroll`, and
+   `.sa-rv-root` clipping) have no subject. What replaces them: */
+describe("the review collapses inside the frame", () => {
+  const css = stripComments(readFileSync(resolve(here, "importFlow.css"), "utf8"));
   const review = read("SmartImportReview.tsx");
 
-  it("the two-up main+sidebar stacks", () => {
-    expect(review).toContain("@media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }");
+  it("the rail follows the list below 1100px", () => {
+    const anchor = "@media (max-width: 1099.98px)";
+    expect(css).toContain(anchor);
+    const block = css.slice(css.indexOf(anchor), css.indexOf(anchor) + 260);
+    expect(block).toContain(".sf .im-rev { grid-template-columns: minmax(0, 1fr); }");
   });
 
-  /** The band's tally must wrap rather than push the window wide. */
-  it("the state band wraps its contents", () => {
-    const anchor = "@media(max-width:760px){";
-    expect(review).toContain(anchor);
-    const block = review.slice(review.indexOf(anchor), review.indexOf("}", review.indexOf(anchor) + 200));
-    expect(block).toContain("flex-wrap:wrap");
+  /** The list card grows with its rows and the SHEET scrolls: the card has no scroller of its own. */
+  it("the list card is not a scroller", () => {
+    const anchor = ".sf .im-list {";
+    expect(css).toContain(anchor);
+    const rule = css.slice(css.indexOf(anchor), css.indexOf("}", css.indexOf(anchor)));
+    expect(rule).not.toMatch(/overflow(-y)?:\s*(auto|scroll)/);
+    expect(rule).not.toMatch(/max-height/);
   });
 
-  /**
-   * ⚠️ THE VIEWPORT LOCK, ASSERTED THE WAY THIS CODEBASE REQUIRES: the records column must be a
-   * SCROLLER, not merely a region that happens not to overflow. "Page scroll is zero" is satisfied
-   * equally by clipping, which is the failure this phrasing exists to exclude.
-   */
-  it("the records column remains a real scroller", () => {
-    const anchor = ".sa-rv-scroll{";
-    expect(review).toContain(anchor);
-    const rule = review.slice(review.indexOf(anchor), review.indexOf("}", review.indexOf(anchor)));
-    expect(rule).toMatch(/overflow(-y)?:\s*auto/);
-  });
-
-  it("and the window itself never becomes the scroller", () => {
-    const anchor = ".sa-rv-root{";
-    expect(review).toContain(anchor);
-    const rule = review.slice(review.indexOf(anchor), review.indexOf("}", review.indexOf(anchor)));
-    expect(rule).toContain("overflow:hidden");
+  it("the old shell is gone", () => {
+    for (const gone of ["sa-rv-root", "sa-rv-window", "sa-rv-scroll", "ReviewShell", "OnbNav", "REVIEW_SHELL_CSS"]) {
+      expect(review, gone).not.toContain(gone);
+    }
   });
 });

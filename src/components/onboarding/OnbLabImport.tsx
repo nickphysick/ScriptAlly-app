@@ -79,8 +79,8 @@ export const LabOverview: React.FC<{ fx: string | null; title: string }> = ({ fx
 export const LabReview: React.FC<{ fx: string | null }> = ({ fx }) => (
   <SmartImportReview
     result={labFixture(fx)}
+    manuscriptTitle="Murphy's Day Out"
     onBack={spy("back")}
-    onSkip={spy("skip")}
     onImport={(r) => {
       spy("import")();
       (window.__onbLab ??= { calls: [] }).result = JSON.parse(JSON.stringify(r));
