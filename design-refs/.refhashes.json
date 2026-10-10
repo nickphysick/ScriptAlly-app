@@ -213,7 +213,13 @@
     "design-refs/dashboard/dashboard-v58.html": "5024673e8b69295f33d5857024ba98e5c9e4e955e1b6bf8ab053bbd0807a6ef4",
     "design-refs/query-centre/query-centre-v135.html": "7cdc59e0b9881502e21eef8a40149948c0dfc47ef34535193903b3b5bcab1729",
     "design-refs/query-centre/query-centre-v135-in-shell.html": "92fa002288c11d7b09057b83df99b8d93782dd30d21af8c559648bec4a0b3964",
-    "design-refs/shell/header-panel-v2.html": "f575aaa5bebdbafaae8eba01373872b67b766164d9de0dd8d8f26f15d7262f7c"
+    "design-refs/shell/header-panel-v2.html": "f575aaa5bebdbafaae8eba01373872b67b766164d9de0dd8d8f26f15d7262f7c",
+    "design-refs/query-centre/query-centre-v136.html": "c269d628f19ec7f64ca1631dc3a46f88abd0bf765facec559fd01764787e8638",
+    "design-refs/query-centre/query-centre-v136-in-shell.html": "00612f6487a66bef199cf505505a2bc7e6c28a9b4d08fd7c9948f8694f4c42f7",
+    "design-refs/qc-v136/ref-cards-1280@2x.png": "647141faf676ee44cf736376da66ac37483bb17d987f2862d328a7e60422ed57",
+    "design-refs/qc-v136/ref-cards-1512@2x.png": "0b3a6106bd9f182a91e91c0f3c0e2f1c2e9a7ee1a188212525b960a92f878a61",
+    "design-refs/qc-v136/ref-page-1280@2x.png": "7efc6aaf1ffff8588372f8bc6ecdabae4d4244ab314e35af41f577cd1e798e42",
+    "design-refs/qc-v136/ref-page-1512@2x.png": "eaefc8316eb3337bda9567e76202201d3d72433c58b3d51f63760274658af16d"
   },
   "superseded": {
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history.",

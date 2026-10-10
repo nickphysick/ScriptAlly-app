@@ -6597,9 +6597,10 @@ export const Queries: React.FC<{
             entering={qcLoad.entering}
             headLine={qcHeadLine}
             living={qcLiving}
-            /* v134 §1 — the faces read the hero number's own rows; a disc opens its query as a row does */
-            faces={qcLiving.count === null ? null : facesFor(qcLivingRows, Date.now())}
-            /* header panel v2 — the stamp states the With you badge's own figure: the same call the desk makes */
+            /* v136 — the header's figure is the bands' own total (with you + with agents + closed), so the title and the
+               two band labels cannot disagree; the subheader names the manuscript the page is scoped to */
+            sent={showGridSkeleton || qcLiving.count === null ? null : deskSections(qcScoped, Date.now()).reduce((n, s) => n + s.total, 0)}
+            msTitle={qcLineTitle}
             withYou={showGridSkeleton || qcLiving.count === null ? null : (deskSections(qcScoped, Date.now()).find((s) => s.key === "you")?.total ?? 0)}
             onFace={(id) => { cardSetRef.current = qcLivingRows.map((r) => r.id); onOpenQuery?.(id); }}
             onLog={() => onNavigate?.("queries", "Log a query")}

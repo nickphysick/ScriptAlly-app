@@ -20,7 +20,6 @@ import { PageHeader, type LivingHeader } from "../../shell/PageHeader";
 import { QC_COURIER_DISC } from "./qcArt";
 import { QcOpenHeader } from "./QcOpenHeader";
 import "./qcvBand134.css";
-import type { Faces } from "../../../lib/qcFaces";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
@@ -79,8 +78,9 @@ export const QcCentre: React.FC<{
   /** True while a query is already being written. */
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-  /** v134 §1 — the header's faces (desktop), and what a disc opens */
-  faces?: Faces | null;
+  /** v136 — the open header's figure (the bands' own total) and the current manuscript's title */
+  sent?: number | null;
+  msTitle?: string | null;
   /** the With you court's count, for the header's stamp (header panel v2) */
   withYou?: number | null;
   onFace?: (id: string) => void;
@@ -123,7 +123,7 @@ export const QcCentre: React.FC<{
    * drawn — the group headers pin instead. Below 768px the v126 page is unchanged.
    */
   v131?: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, faces = null, onFace, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
@@ -191,7 +191,7 @@ export const QcCentre: React.FC<{
       {v131 ? (
         /* v133 — THE OPEN HEADER on the desktop: no band, no card, no disc, and the fixed line in
            place of the living facts sentence (the desk carries those facts). */
-        <QcOpenHeader living={living} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} faces={faces} onFace={onFace} withYou={withYou} />
+        <QcOpenHeader sent={sent} msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} withYou={withYou} />
       ) : (
       /* below 768px the v126 page is unchanged: the shared header's band and its courier disc */
       <PageHeader
