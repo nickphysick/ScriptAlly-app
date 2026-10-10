@@ -72,6 +72,19 @@
 - **Locks:** `tests/e2e/shellV2.measure.ts` SH2 S1–S6, B1–B3, L1 at 1512 and 1280 (`sh2Lib.ts`; `SH2_MUTATE=<lock>` breaks one in the page; `SH2_CAPTURE=1` against a build of main writes `reports/shell-v2/baseline.json`). Unit: `shell/headerSheet.test.ts`. Older locks retired or re-pointed are listed in the report, §6.
 - **Open, for Nick:** Analytics; the 25px under `PageHeader`; Manuscripts' doors (`#fdfcfa` on a `#fbf9f5` band); the tab staying paper white once the sheet has scrolled away; the empty states' headers were not rendered (the harness account is populated).
 
+## Import fixes — dates, counts and labels (11 Oct; report reports/import-fixes/REPORT.md; branch `import-fixes` off `onb-v5-import`, NOT merged)
+- **One reader for both import paths: `lib/sheetCells.ts` (`readSheetBook`).** Text formats are read with `raw: true`, so a text date arrives as typed. A real Excel date cell is converted to `YYYY-MM-DD` from its serial number, never its display text. **SheetJS's default read turns `2026-08-02` in a CSV into `8/2/26` and reads `03/05/2026` as 5 March.**
+- **A template date flag is a typed reason on its query** (`unreadable-date`, `ambiguous-date`, and the two `-response-date` codes), so the review asks. `TemplateParse.flags` alone is rendered by nothing.
+- **⚠️ `addQuery({ imported: true })` is how an import avoids invented dates** (`lib/addQueryShape.ts`). Without it `addQuery` defaults the sent date to now and seeds history steps stamped now; the import may only delete `imp-` steps, so those survive and date every imported stage to the import moment. `ImportCsv.tsx` and the email import do not pass it yet.
+- **An all-undated query's ordering keys start from zero** (`UNDATED_ORDER_BASE_MS`), never the import's time.
+- **The active card is handed `undatedCount`** and reads "{n} active queries have no sent date yet." when the live count is 0. `isLive` still requires a sent date.
+- **The summary counts `summaryModel(result)`**: the parse with the review's automatic set-aside applied.
+- **`buildImportNotice` = validation's skipped rows + commit-time skips + automatic set-asides still set aside** (`autoSetAsideRows`, handed over by the review's `onImport(result, left)`). Its count is the list's length.
+- **Labels are `lib/importLabels.ts`:** `queryOriginLine` ("No agency" for a named agent), `importActivityLine(source, …)`, `manuscriptErrorLine`. `commitSmartImport` takes the source as its fourth argument.
+- **The template parser gives a full timestamp; Smart Import gives `YYYY-MM-DD`.** `fmtDate` and the review's date fields read `dayOf(iso)`.
+- **Fixtures:** `tests/fixtures/import/` (built by `build.mjs`). **Locks IF1:** `importDates.test.ts` (D1, D2, D4), `importDateFlags.test.ts` (D3), `importNoInventedDate.test.ts` (U1), `importUndatedCard.test.ts` and `tests/e2e/importFixes.measure.ts` (U2), `importOneCount.test.tsx` (C1), `importLabels.test.ts` (L1).
+- **⚠️ The U2 walk signs in as the empty fixture account (`ms21-empty`), imports through set-up, and removes what it wrote** (`tests/e2e/importFixesAccount.mjs`). Run it at one worker.
+
 ## Onboarding v5, part 2 — the import, from "Read my file" to the dashboard (10 Oct; ref = design-refs/onboarding/import-flow-v1.html + design-refs/onboarding-v5/*.png + design-refs/import-flow-v1/*.png; report reports/onb-v5-import/REPORT.md; branch `onb-v5-import` off `onb-v5-setup`, NOT merged)
 - **Every import screen renders inside part 1's `SetupFrame` sheet.** The rules are `.sf .im-*` in `onboarding/importFlow.css`. The two loaders keep their timings (`SCATTER_TIMINGS`, `IMPORTING_TIMINGS`, lock R1) and hide the frame's exit.
 - **The summary (`ImportOverview`) is two cards, each led by its number.** Its sums come from `lib/importSummary.ts` and are held by lock S1.
@@ -1707,6 +1720,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Import fixes are DONE on branch `import-fixes` (off `onb-v5-import`), NOT merged to `main`.** Read `reports/import-fixes/REPORT.md`, §1 and §7.2 first.
+
 **Onboarding v5 part 2 (the import) is DONE on branch `onb-v5-import` (off `onb-v5-setup`), NOT merged to `main`.** Read `reports/onb-v5-import/REPORT.md`, §1 and §9 first.
 
 **Query Centre v136 is DONE on branch `qc-v136` (three commits, cut from `header-panel-v2`), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v136/REPORT.md`; §7 has two open rulings.
