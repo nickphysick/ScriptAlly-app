@@ -67,7 +67,9 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
     }
   });
 
-  test("N2 · faces: up to 3 with you, 3 with agents, 2 closed, in that order and in the court colours; + more; no key; one line", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. On the blue an agent's disc is #6a81a8 and the halo is the panel's. HP2 A3 holds the row; the faces' order and caps are held at unit (qcOpenHeader.test.tsx, qcFaces). */
+
+  test.skip("N2 · faces: up to 3 with you, 3 with agents, 2 closed, in that order and in the court colours; + more; no key; one line", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const desk = await deskCounts(page);
@@ -109,7 +111,9 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
     }
   });
 
-  test("N3 · faces spacing: 16 under the subheader, 22 above the buttons; a disc's popup is the agent's name; a click opens that query", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. There is no subheader to measure from. HP2 A3. */
+
+  test.skip("N3 · faces spacing: 16 under the subheader, 22 above the buttons; a disc's popup is the agent's name; a click opens that query", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await page.evaluate((HD) => {

@@ -190,7 +190,8 @@ test.afterAll(async () => {
 
 /* ══ H1 · the open header — no card, the title large, and the Contact list's own three lines ═════ */
 for (const vp of VPS) {
-  test(`H1 open header @ ${vp.width}`, async () => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The header is a panel. HP2 P1. */
+  test.skip(`H1 open header @ ${vp.width}`, async () => {
     /* the Contact list first: its header top, hairline and first content, by the same ruler */
     await openAt(page, "/agents", vp);
     const aHd = await one(page, ".cl15-hd");
@@ -225,7 +226,8 @@ for (const vp of VPS) {
 
 /* ══ H2 · the drawing — at the column's right edge, hanging over the hairline, painted above it ══ */
 for (const vp of VPS) {
-  test(`H2 drawing @ ${vp.width}`, async () => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The drawing stands in a white disc inside the panel. HP2 P5. */
+  test.skip(`H2 drawing @ ${vp.width}`, async () => {
     await openMs(page, vp);
     const hd = await one(page, '[data-ms21="header"]');
     const img = await one(page, '[data-ms21="header-art"] img');

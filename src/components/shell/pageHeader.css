@@ -937,7 +937,13 @@
 
 /* the full header: the hero's padding; the frame is the two-column grid, the drawing in the right column, centred, inside */
 .ph.ph--panel.ph--full { padding: 24px 26px 24px 30px; min-height: 0; }
-@media (min-width: 1440px) { .ph.ph--panel.ph--full { padding: 34px 36px 26px 40px; } }
+/* ⚠️ A FULL PANEL HOLDS ITS SETTLED HEIGHT WHILE ITS PAGE LOADS (HP2 P6; before the data lands it is not yet `ph--living`). Until the manuscript is known the header has
+   no button row, and it grew by that row when the data landed (measured before the pack too: 258 → 288 on Comparable
+   titles and Submission packages). The floor is the settled height of title, two-line intro and buttons. */
+.ph.ph--panel.ph--full:not(.ph--band) { min-height: 236px; }
+@media (min-width: 1440px) { .ph.ph--panel.ph--full:not(.ph--band) { min-height: 257px; } }
+@media (max-width: 767.98px) { .ph.ph--panel.ph--full:not(.ph--band) { min-height: 0; } }
+@media (min-width: 1440px) { .ph.ph--panel.ph--full { padding: 30px 36px 30px 40px; } }
 .ph.ph--panel .ph-hin { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center; min-height: 0; padding: 0; }
 @media (min-width: 1440px) { .ph.ph--panel .ph-hin { column-gap: 40px; } }
 .ph.ph--panel.ph--full .ph-text { max-width: none; min-width: 0; }
@@ -958,6 +964,12 @@
 .ph.ph--panel.ph--band .ph-hin { width: auto; grid-template-columns: minmax(0, 1fr) auto; justify-content: normal; row-gap: 0; }
 .ph.ph--panel.ph--band .ph-bdisc { width: 170px; margin: 0; justify-self: end; position: static; }
 @media (min-width: 1440px) { .ph.ph--panel.ph--band .ph-bdisc { width: 206px; } }
+/* ⚠️ ON A PHONE THE BAND'S OWN ARRANGEMENT STANDS (AN17-17): a block, with the 100px disc at the text's top right.
+   The two rules above out-rank the band's phone rules, so the phone's are restated here, after them. */
+@media (max-width: 760px) {
+  .ph.ph--panel.ph--band .ph-hin { display: block; position: relative; }
+  .ph.ph--panel.ph--band .ph-bdisc { position: absolute; right: 0; top: 0; width: 100px; margin: 0; }
+}
 .ph.ph--panel.ph--band .ph-title { color: var(--hpanel-fg); }
 .ph.ph--panel.ph--band .ph-intro { color: var(--hpanel-muted); }
 

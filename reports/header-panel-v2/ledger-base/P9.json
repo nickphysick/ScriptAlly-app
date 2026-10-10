@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "P9 the header's left edge is the content column's (±1)",
+  "where": "@1512",
+  "ok": false,
+  "detail": "panel undefined · column 296.4"
+ },
+ {
+  "lock": "P9 its height is not the band's 337",
+  "where": "@1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "P9 the section tab opens its list and a section is reached",
+  "where": "@1512",
+  "ok": true,
+  "detail": "9 items · scroll 0 → 2669"
+ },
+ {
+  "lock": "P9 the header's left edge is the content column's (±1)",
+  "where": "@1280",
+  "ok": false,
+  "detail": "panel undefined · column 289.0"
+ },
+ {
+  "lock": "P9 its height is not the band's 337",
+  "where": "@1280",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "P9 the section tab opens its list and a section is reached",
+  "where": "@1280",
+  "ok": true,
+  "detail": "9 items · scroll 0 → 2535"
+ }
+]

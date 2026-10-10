@@ -78,7 +78,8 @@ test("AN17-1 · shell", async ({ page }) => {
 });
 
 /* ── AN17-2 · the band ── */
-test("AN17-2 · band", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. Analytics' header is the panel: no full bleed, no 337px, a 206 (170) disc. HP2 P1, P9. */
+test.skip("AN17-2 · band", async ({ page }) => {
   const L = new Ledger("an17-2");
   for (const vp of DESKTOP) {
     await openAn(page, vp);

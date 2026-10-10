@@ -24,7 +24,8 @@ const SUB = "Your agent data underpins everything. Collate and manage it here.";
    ⚠️ RETIRED BY v15.1 (8 Oct): "the drawing starts 56 (36) after the text block" (the drawing sits at the column's right
    edge now and the gap is a minimum — CL15.1 H2) and "the drawing is 400 / 310 wide" (490 / 380 — H1). The hairline is
    ink at 14% (H3). ── */
-test("CL15-1 · header", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. A panel, no subheader, a border by design. HP2 P1, A1–A5. */
+test.skip("CL15-1 · header", async ({ page }) => {
   const L = new Ledger("cl15-1");
   for (const vp of WIDTHS15) {
     await openContacts(page, vp);

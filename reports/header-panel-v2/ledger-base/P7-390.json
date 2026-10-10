@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/queries",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the Query Centre's phone page draws its own header, not the panel",
+  "where": "/queries",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/queries/analytics",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/queries/analytics",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/agents",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/agents",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/agents/discover",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/agents/discover",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/manuscripts",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/manuscripts",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/manuscripts/comps",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/manuscripts/comps",
+  "ok": false,
+  "detail": "panel absent (the header's right edge before the pack: 396) · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/manuscripts/packages",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/manuscripts/packages",
+  "ok": false,
+  "detail": "panel absent (the header's right edge before the pack: 396) · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/todo",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/todo",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/todo/calendar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/todo/calendar",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ },
+ {
+  "lock": "P7 the document does not scroll sideways at 390",
+  "where": "/todo/noteboard",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel is inside the screen and nothing in it runs past its edge",
+  "where": "/todo/noteboard",
+  "ok": false,
+  "detail": "panel absent · inner overflow null · furthest child undefined"
+ }
+]

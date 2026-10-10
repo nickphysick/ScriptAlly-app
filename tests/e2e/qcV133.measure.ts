@@ -50,7 +50,8 @@ const readQc = (page: Page) => page.evaluate((HD) => {
 }, HD);
 
 test.describe("Query Centre v133 — the open header", () => {
-  test("H1 · open: no card or band around the title, Special Elite, the exact line", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The header is a panel: the title has a ground by design. HP2 P1. */
+  test.skip("H1 · open: no card or band around the title, Special Elite, the exact line", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
@@ -65,7 +66,9 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H2 · the drawing: 326 (253) tall, its right edge on the desk's, the text centred on its layout box", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The drawing is the disc version at 206 (170), inside the panel. HP2 A5, P5. */
+
+  test.skip("H2 · the drawing: 326 (253) tall, its right edge on the desk's, the text centred on its layout box", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
@@ -105,7 +108,9 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H4 · headroom: the drawing's top is 60 (54) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The panel is 28 under the sheet's top and the drawing is inside it. HP2 P1, P5, P7. */
+
+  test.skip("H4 · headroom: the drawing's top is 60 (54) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
@@ -147,7 +152,9 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H6 · no jump: the loading header's box and its parts equal the loaded ones", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P6 holds no-jump on every workspace route. */
+
+  test.skip("H6 · no jump: the loading header's box and its parts equal the loaded ones", async ({ page }) => {
     const read = () => page.evaluate((HD) => {
       const hd = [...document.querySelectorAll<HTMLElement>(HD)].find((e) => e.getBoundingClientRect().height > 0)!;
       const R = (e: Element | null) => { const r = e!.getBoundingClientRect(); return { y: +r.top.toFixed(1), h: +r.height.toFixed(1), x: +r.left.toFixed(1) }; };

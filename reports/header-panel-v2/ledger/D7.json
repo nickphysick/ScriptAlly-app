@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "D7 precondition: read loading, then loaded",
+  "where": "@1512",
+  "ok": true,
+  "detail": "first true,true,true then false,false,false"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "296,449 370×197 → 296,449 370×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "strip 296,449 370×64 → 296,449 370×64 · chart 549,535 96×95 → 549,535 96×95 · line 16.9 → 16.9"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "691,449 370×197 → 691,449 370×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "strip 691,449 370×64 → 691,449 370×64 · chart 961,535 78×95 → 961,535 78×95 · line 16.9 → 16.9"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "1085,449 370×197 → 1085,449 370×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "strip 1085,449 370×64 → 1085,449 370×64 · chart 1338,535 96×95 → 1338,535 96×95 · line 16.9 → 16.9"
+ },
+ {
+  "lock": "D7 precondition: read loading, then loaded",
+  "where": "@1280",
+  "ok": true,
+  "detail": "first true,true,true then false,false,false"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "289,392 298×197 → 289,392 298×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "strip 289,392 298×64 → 289,392 298×64 · chart 469,478 96×95 → 469,478 96×95 · line 16.9 → 16.9"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "611,392 298×197 → 611,392 298×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "strip 611,392 298×64 → 611,392 298×64 · chart 809,478 78×95 → 809,478 78×95 · line 16.9 → 16.9"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "933,392 298×197 → 933,392 298×197"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "64 at 16,-26 → 64 at 16,-26"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "strip 933,392 298×64 → 933,392 298×64 · chart 1113,478 96×95 → 1113,478 96×95 · line 16.9 → 16.9"
+ }
+]

@@ -45,7 +45,7 @@
   display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
   padding: 24px 26px 24px 30px;
 }
-@media (min-width: 1440px) { .hpanel--hero { column-gap: 40px; padding: 34px 36px 26px 40px; } }
+@media (min-width: 1440px) { .hpanel--hero { column-gap: 40px; padding: 30px 36px 30px 40px; } }
 /* the workspace masthead's panel */
 .hpanel--compact { padding: 22px 28px; }
 
@@ -75,7 +75,20 @@
 /* below 768px a panel keeps its surface and its radius, at 20px of padding; each header stacks or hides its parts as it did */
 @media (max-width: 767.98px) {
   .hpanel--hero, .hpanel--compact { padding: 20px; }
+  /* the hero panel on a phone: one column, the drawing put away, and the title row, the title and the buttons wrap.
+     ⚠️ MEASURED (HP2 P7, 390px): with the desktop grid the drawing lay across the words and the row ran 218px past
+     the panel's edge. The three own headers had no phone rule of their own. */
+  .hpanel.hpanel--hero { grid-template-columns: minmax(0, 1fr); }
+  .hpanel.hpanel--hero > :is(img, [aria-hidden="true"]):last-child { display: none; }
+  .hpanel.hpanel--hero :is(.qcoh-trow, .cl15-trow) { flex-wrap: wrap; row-gap: 14px; }
+  .hpanel.hpanel--hero h1 { flex-wrap: wrap; white-space: normal !important; row-gap: 6px; }
+  .hpanel.hpanel--hero :is(.qcoh-acts, .cl15-acts, .ms21-acts) { flex-wrap: wrap; }
+  .hpanel .hpanel-stamp { top: 0; }
+  .hpanel.hpanel--hero :is(.qcoh-trow, .cl15-trow) { padding-top: 10px; }
 }
+/* a panel is never wider than the track it sits in (a grid item's automatic minimum is its content's) */
+.hpanel { min-width: 0; max-width: 100%; }
+:is(.cpv-head, .ppv-head):has(> .hpanel) { min-width: 0; }
 
 /* the workspace grid's chrome slab closes on a hairline of its own, 1px under the masthead: under a panel it would rule
    across the page just beneath the panel's edge. The border stays (1px of layout) and stops painting. */

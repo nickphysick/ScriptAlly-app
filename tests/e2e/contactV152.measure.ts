@@ -103,7 +103,8 @@ async function readDesk(page: Page) {
   });
 }
 
-test("CL15.2-K1–K4 · desk", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The desk is three badge cards, not the shared icon card. HP2 D1–D8. */
+test.skip("CL15.2-K1–K4 · desk", async ({ page }) => {
   const L = new Ledger("cl152-desk");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);

@@ -44,7 +44,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 /* ── H1–H5 and D1–D2 · the header and the desk, at rest ── */
-test("CL15.1-HD · hawk and desk", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The hawk's size, its drop over the hairline and the icon desk are all replaced. HP2 A1, A5, A6, D1. */
+test.skip("CL15.1-HD · hawk and desk", async ({ page }) => {
   const L = new Ledger("cl151-hd");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);

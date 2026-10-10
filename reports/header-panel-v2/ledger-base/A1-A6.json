@@ -1,0 +1,410 @@
+[
+ {
+  "lock": "A precondition: the hero header was read",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "296,64 1159×390"
+ },
+ {
+  "lock": "A1 sheet top to panel bottom is 313 (±2)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "390.0"
+ },
+ {
+  "lock": "A2 precondition: the count it must state was read independently",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "With you badge \"13\""
+ },
+ {
+  "lock": "A2 the stamp's text is exact",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "\"undefined\" vs \"13 with you\""
+ },
+ {
+  "lock": "A2 its colour and its place outside the h1",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "undefined · in h1 undefined"
+ },
+ {
+  "lock": "A3 precondition: faces were drawn",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "8 discs"
+ },
+ {
+  "lock": "A3 one row: the row's height is the disc's (±1), every disc on one line",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "row 38.0 · disc 38.0 · 1 line(s)"
+ },
+ {
+  "lock": "A3 the halo is the panel's background",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "rgb(251, 249, 245) 0px 0px 0px 3px"
+ },
+ {
+  "lock": "A3 no key on screen and no subheader element",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "key 0 · subheader 1"
+ },
+ {
+  "lock": "A4 primary: cream ground, ink text",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4 secondary: transparent, with the cream ring",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "A5 the drawing is qc-courier-disc at 206 (±1)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "qc-plate-courier-figure.png?v=a84c6aac · 326.0"
+ },
+ {
+  "lock": "A6 panel bottom to card top is 72 (±1)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "88.0"
+ },
+ {
+  "lock": "A6 every badge's halo clears the panel by 20 or more",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "3 badges · 53.0"
+ },
+ {
+  "lock": "A precondition: the hero header was read",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "296,64 1159×390"
+ },
+ {
+  "lock": "A1 sheet top to panel bottom is 313 (±2)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "389.8"
+ },
+ {
+  "lock": "A2 precondition: the count it must state was read independently",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "on file 37 − queried badge \"undefined\""
+ },
+ {
+  "lock": "A2 absent when the count is 0",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "undefined"
+ },
+ {
+  "lock": "A3 precondition: faces were drawn",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "7 discs"
+ },
+ {
+  "lock": "A3 one row: the row's height is the disc's (±1), every disc on one line",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "row 38.0 · disc 38.0 · 1 line(s)"
+ },
+ {
+  "lock": "A3 the halo is the panel's background",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "rgb(251, 249, 245) 0px 0px 0px 3px"
+ },
+ {
+  "lock": "A3 no key on screen and no subheader element",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "key 1 · subheader 1"
+ },
+ {
+  "lock": "A3 the hidden sentence carries the three counts, and they sum to the count on file",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "\"null\" · on file 37"
+ },
+ {
+  "lock": "A4 primary: cream ground, ink text",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4 secondary: transparent, with the cream ring",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "A5 the drawing is contact-header-hawk at 214 (±1)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "contact-header-hawk.png · 325.8"
+ },
+ {
+  "lock": "A6 panel bottom to card top is 72 (±1)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "NaN"
+ },
+ {
+  "lock": "A6 every badge's halo clears the panel by 20 or more",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "0 badges · NaN"
+ },
+ {
+  "lock": "A1 the two pages agree (±1)",
+  "where": "@1512",
+  "ok": true,
+  "detail": "390.0 vs 389.8"
+ },
+ {
+  "lock": "A6 the two pages agree (±1)",
+  "where": "@1512",
+  "ok": false,
+  "detail": "88.0 vs -453.8"
+ },
+ {
+  "lock": "A precondition: the hero header was read",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "289,64 942×317"
+ },
+ {
+  "lock": "A1 sheet top to panel bottom is 268 (±2)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "317.0"
+ },
+ {
+  "lock": "A2 precondition: the count it must state was read independently",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "With you badge \"13\""
+ },
+ {
+  "lock": "A2 the stamp's text is exact",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "\"undefined\" vs \"13 with you\""
+ },
+ {
+  "lock": "A2 its colour and its place outside the h1",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "undefined · in h1 undefined"
+ },
+ {
+  "lock": "A3 precondition: faces were drawn",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "8 discs"
+ },
+ {
+  "lock": "A3 one row: the row's height is the disc's (±1), every disc on one line",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "row 32.0 · disc 32.0 · 1 line(s)"
+ },
+ {
+  "lock": "A3 the halo is the panel's background",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "rgb(251, 249, 245) 0px 0px 0px 3px"
+ },
+ {
+  "lock": "A3 no key on screen and no subheader element",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "key 0 · subheader 1"
+ },
+ {
+  "lock": "A4 primary: cream ground, ink text",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4 secondary: transparent, with the cream ring",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "A5 the drawing is qc-courier-disc at 170 (±1)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "qc-plate-courier-figure.png?v=a84c6aac · 253.0"
+ },
+ {
+  "lock": "A6 panel bottom to card top is 60 (±1)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "88.0"
+ },
+ {
+  "lock": "A6 every badge's halo clears the panel by 20 or more",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "3 badges · 53.0"
+ },
+ {
+  "lock": "A precondition: the hero header was read",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "289,64 942×317"
+ },
+ {
+  "lock": "A1 sheet top to panel bottom is 268 (±2)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "316.7"
+ },
+ {
+  "lock": "A2 precondition: the count it must state was read independently",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "on file 37 − queried badge \"undefined\""
+ },
+ {
+  "lock": "A2 absent when the count is 0",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "undefined"
+ },
+ {
+  "lock": "A3 precondition: faces were drawn",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "5 discs"
+ },
+ {
+  "lock": "A3 one row: the row's height is the disc's (±1), every disc on one line",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "row 32.0 · disc 32.0 · 1 line(s)"
+ },
+ {
+  "lock": "A3 the halo is the panel's background",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "rgb(251, 249, 245) 0px 0px 0px 3px"
+ },
+ {
+  "lock": "A3 no key on screen and no subheader element",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "key 1 · subheader 1"
+ },
+ {
+  "lock": "A3 the hidden sentence carries the three counts, and they sum to the count on file",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "\"null\" · on file 37"
+ },
+ {
+  "lock": "A4 primary: cream ground, ink text",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4 secondary: transparent, with the cream ring",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "A5 the drawing is contact-header-hawk at 172 (±1)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "contact-header-hawk.png · 252.7"
+ },
+ {
+  "lock": "A6 panel bottom to card top is 60 (±1)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "NaN"
+ },
+ {
+  "lock": "A6 every badge's halo clears the panel by 20 or more",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "0 badges · NaN"
+ },
+ {
+  "lock": "A1 the two pages agree (±1)",
+  "where": "@1280",
+  "ok": true,
+  "detail": "317.0 vs 316.7"
+ },
+ {
+  "lock": "A6 the two pages agree (±1)",
+  "where": "@1280",
+  "ok": false,
+  "detail": "88.0 vs -380.7"
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/queries/analytics",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/agents/discover",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/manuscripts",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/manuscripts/comps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/manuscripts/packages",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/todo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/todo/calendar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2 no stamp on any other route",
+  "where": "/todo/noteboard",
+  "ok": true,
+  "detail": ""
+ }
+]

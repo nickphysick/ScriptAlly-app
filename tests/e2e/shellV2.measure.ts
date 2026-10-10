@@ -133,7 +133,8 @@ for (const vp of SIZES) {
 }
 
 /* ── S5 · art ── */
-test("S5 · art: each drawing is painted above the sheet and keeps main's size (v135: the open headers' drawings sit clear of the flap)", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. Every drawing in S5's census is in a panel now, with no sheet beneath it. HP2 P5 and A5 hold the drawings. */
+test.skip("S5 · art: each drawing is painted above the sheet and keeps main's size (v135: the open headers' drawings sit clear of the flap)", async ({ page }) => {
   const L = new Ledger("S5");
   for (const vp of SIZES) for (const [route, a] of Object.entries(ART)) {
     await open(page, route, vp);
@@ -161,7 +162,7 @@ test("S6 · tab: the page tab and its fillet are the sheet's colour on a header 
     L.check(`S6 the tab is ${rgb(want)}`, w, r.tabBg === rgb(want) && r.filFill === rgb(want), `tab ${r.tabBg} fillet ${r.filFill}`);
     L.check("S6 the tab's colour and a sheet on the page go together", w, r.hasHost === SHEET_ROUTES.includes(route), `sheet on the page ${r.hasHost}`);
   }
-  L.check("S6 population: both kinds of route are in the census", "census", SHEET_ROUTES.length > 5 && NO_SHEET_ROUTES.length >= 2, `${SHEET_ROUTES.length} with, ${NO_SHEET_ROUTES.length} without`);
+  L.check("S6 population: both kinds of route are in the census", "census", SHEET_ROUTES.length >= 3 && NO_SHEET_ROUTES.length >= 2 /* RE-POINTED (header panel v2): the workspace routes left the sheet; Import, Plans and the Help centre keep it */, `${SHEET_ROUTES.length} with, ${NO_SHEET_ROUTES.length} without`);
   L.done(ROUTES.length * SIZES.length * 2);
 });
 
@@ -255,7 +256,10 @@ test("L1 · no jump: each header sheet, band and banner is the same box loading 
   }, sels);
   await open(page, "/dashboard", SIZES[0]);
   let held = 0;
-  for (const vp of SIZES) for (const route of SHEET_ROUTES) {
+  /* RE-POINTED (header panel v2): the bands and banners are on workspace routes, which left the sheet; they stay in this census */
+  const L1_ROUTES = [...new Set<string>([...SHEET_ROUTES, ...BANDS.map((b) => b.route), ...BANNERS.map((b) => b.route)])];
+  for (const vp of SIZES) for (const route of L1_ROUTES) {
+    const hasSheet = (SHEET_ROUTES as readonly string[]).includes(route);
     const sels = { band: BANDS.find((b) => b.route === route)?.sel, banner: BANNERS.find((b) => b.route === route)?.sel };
     await page.setViewportSize(vp);
     await page.goto(route);
@@ -272,8 +276,8 @@ test("L1 · no jump: each header sheet, band and banner is the same box loading 
     if (CAPTURE) { captured[key("hjump", route, vp.width)] = { l: 0, t: 0, r: 0, b: 0, w: 0, h: a.head && b.head ? b.head.h - a.head.h : 0 }; continue; }
     /* the header's own growth while its living line settles is main's, measured there (`hjump`): the sheet may follow it and no more */
     const hj = base[key("hjump", route, vp.width)]?.h ?? 0;
-    L.check("L1 the header sheet is there on the first frame the header is", w, !!a.sheet, f(a.sheet));
-    L.check("L1 the sheet does not move, beyond the header's own settling on main", w, !!a.sheet && !!b.sheet && near(a.sheet.l, b.sheet.l, 1) && near(a.sheet.w, b.sheet.w, 1) && near(a.sheet.t, b.sheet.t, 1) && Math.abs(b.sheet.h - a.sheet.h - hj) <= 1, `first ${f(a.sheet)} settled ${f(b.sheet)} · main's header settles by ${hj.toFixed(1)}`);
+    if (hasSheet) L.check("L1 the header sheet is there on the first frame the header is", w, !!a.sheet, f(a.sheet));
+    if (hasSheet) L.check("L1 the sheet does not move, beyond the header's own settling on main", w, !!a.sheet && !!b.sheet && near(a.sheet.l, b.sheet.l, 1) && near(a.sheet.w, b.sheet.w, 1) && near(a.sheet.t, b.sheet.t, 1) && Math.abs(b.sheet.h - a.sheet.h - hj) <= 1, `first ${f(a.sheet)} settled ${f(b.sheet)} · main's header settles by ${hj.toFixed(1)}`);
     if (sels.band) L.check("L1 the band's box, loading and loaded", w, same(a.band, b.band), `first ${f(a.band)} settled ${f(b.band)}`);
     if (sels.banner) L.check("L1 the banner's box, loading and loaded", w, same(a.banner, b.banner), `first ${f(a.banner)} settled ${f(b.banner)}`);
   }

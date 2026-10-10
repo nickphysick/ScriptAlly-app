@@ -20,7 +20,8 @@ import { column, sameRgb } from "./sh2Lib";
 test.beforeEach(async ({ page }) => { await prepare(page); });
 
 /* ── A1–A4 · the centred pair, on all three open headers ── */
-test("A1 A2 A3 A4 · the centred pair: one group on the sheet's centre, the drawing centred on the text and clear of the flap, one set of values", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The three open headers are panels now: the centred pair on the header sheet is gone. HP2 P1, P5 and A1 hold the panel. */
+test.skip("A1 A2 A3 A4 · the centred pair: one group on the sheet's centre, the drawing centred on the text and clear of the flap, one set of values", async ({ page }) => {
   const A1 = new Ledger("A1"), A2 = new Ledger("A2"), A3 = new Ledger("A3"), A4 = new Ledger("A4");
   for (const vp of SIZES) {
     const got: { route: string; gap: number; padB: number; cols: number; justify: string; align: string; artSelf: string | null }[] = [];
@@ -52,7 +53,8 @@ test("A1 A2 A3 A4 · the centred pair: one group on the sheet's centre, the draw
 });
 
 /* ── A5 · the header, loading and loaded ── */
-test("A5 · header no jump: each open header is the same box, on the same grid, loading and loaded", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P6 holds no-jump on every workspace route. */
+test.skip("A5 · header no jump: each open header is the same box, on the same grid, loading and loaded", async ({ page }) => {
   const L = new Ledger("A5");
   /* motion is killed from the first frame (the pages rise 4px on entry), and both reads are of ONE load */
   await page.addInitScript(({ css }) => {

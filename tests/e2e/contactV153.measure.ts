@@ -86,7 +86,8 @@ const INK = "rgb(42, 58, 82)", GREY = "rgb(179, 172, 165)", WHITE = "rgb(255, 25
 const ORDER = ["active", "closed", "none"];
 const SLOTS: Record<string, number> = { active: 4, closed: 2, none: 2 };
 
-test("CL15.3-N1–N5 · header", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The faces key and the subheader are gone; the header is a panel with a stamp. HP2 A1–A6. */
+test.skip("CL15.3-N1–N5 · header", async ({ page }) => {
   const L = new Ledger("header");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -170,7 +171,8 @@ test("CL15.3-N1–N5 · header", async ({ page }) => {
   L.done(46);
 });
 
-test("CL15.3-N6 · week card", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. It read the icon card (.dsk-card). The week's figures are held by HP2 D3 and contactDesk.test.ts. */
+test.skip("CL15.3-N6 · week card", async ({ page }) => {
   const L = new Ledger("week");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);

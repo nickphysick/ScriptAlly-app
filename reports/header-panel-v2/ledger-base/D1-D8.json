@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "D precondition: three cards on each desk",
+  "where": "@1512",
+  "ok": false,
+  "detail": "QC 3 · Contact "
+ },
+ {
+  "lock": "D precondition: three cards on each desk",
+  "where": "@1280",
+  "ok": false,
+  "detail": "QC 3 · Contact "
+ }
+]
