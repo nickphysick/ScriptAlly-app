@@ -341,18 +341,20 @@ describe("the marketing chrome renders in both of its states", () => {
    * claim underneath it survives and is asserted here: what a reader SEES and what a screen reader
    * HEARS are still the same word, because the alt text carries it.
    */
-  it("wears the drawn wordmark, named for a screen reader, at its own content hash", () => {
+  /* RE-POINTED (landing colours v2): on an ink bar the wordmark is LIVE TYPE, as the app's sidebar
+     draws it — the drawn file is dark artwork and is not filtered to suit. The law underneath is
+     the one this lock has carried through three wordmarks: what a reader SEES and what a screen
+     reader HEARS are the same word, said once. */
+  it("wears the wordmark as type, and the button still names the site once", () => {
     const html = renderPage(shell(null), "/");
-    const img = /<img[^>]*class="mk-wordmarkart"[^>]*>/.exec(html);
-    expect(img, "the nav renders the wordmark as artwork").toBeTruthy();
-    expect(img![0], "the picture IS the word, so the alt is the word").toContain('alt="QueryHawk"');
-    const src = /src="([^"]+)"/.exec(img![0]);
-    const [path, version] = src![1].split("?v=");
-    const bytes = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../..", "public" + path));
-    expect(version, "the version IS the file, not a number kept in step by hand")
-      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
-    expect(html, "the accessible name is untouched").toContain('aria-label="QueryHawk home"');
-    expect(html, "the type it replaced is gone from the nav").not.toContain(">QUERYHAWK<");
+    const nav = html.slice(0, html.indexOf("</nav>"));
+    expect(nav, "the word is type").toContain('<span class="mk-navword">QueryHawk</span>');
+    expect(nav, "the drawn wordmark is not rendered on ink").not.toContain("queryhawk_title");
+    expect(nav).not.toMatch(/["\s`]mk-wordmarkart["\s`]/);
+    expect(nav, "the button names the destination").toContain('aria-label="QueryHawk home"');
+    const marks = nav.match(/<img class="mk-logo"[^>]*>/g) ?? [];
+    expect(marks, "the mark is still drawn, once").toHaveLength(1);
+    expect(marks[0], "and says nothing the name does not").toContain('alt=""');
   });
 });
 

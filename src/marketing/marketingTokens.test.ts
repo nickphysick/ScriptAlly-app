@@ -134,6 +134,16 @@ describe("the hero's ground is a documented copy of the app's, not a reference t
     expect(value(app, "--ws-page")).toBe("rgb(var(--ws-page-rgb))");
     expect(triple(value(marketing, "--mk-lower")!)).toBe(value(app, "--ws-page-rgb"));
   });
+  it("the accent on ink, the stamp and the cream button equal the app's", () => {
+    const panel = decls(css("../components/shell/headerPanel.css"));
+    expect(hex(value(marketing, "--mk-terra"))).toBe(hex(value(app, "--ink-terra")));
+    expect(value(marketing, "--mk-cream-rgb")).toBe(value(app, "--ink-cream-rgb"));
+    expect(value(panel, "--hpanel-stamp"), "the app still declares the stamp").toBeTruthy();
+    expect(hex(value(marketing, "--mk-stamp"))).toBe(hex(value(panel, "--hpanel-stamp")));
+    expect(hex(value(marketing, "--mk-cream-btn"))).toBe(hex(value(panel, "--hpanel-primary-bg")));
+    expect(hex(value(marketing, "--mk-ink-shell")), "the cream button's text is the shell's ink")
+      .toBe(hex(value(panel, "--hpanel-primary-fg")));
+  });
   it("the two older ink names are aliases, so the three cannot diverge", () => {
     expect(value(marketing, "--mk-ink")).toBe("var(--mk-nearblack)");
     expect(value(marketing, "--mk-head")).toBe("var(--mk-nearblack)");
@@ -210,7 +220,7 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
   it("each modifier is declared after the base it overrides", () => {
     const base = marketing.indexOf(".mk-btn {");
     expect(base, "the base button is declared").toBeGreaterThan(-1);
-    for (const mod of [".mk-btn--navy {", ".mk-btn--cta {"]) {
+    for (const mod of [".mk-btn--navy {", ".mk-btn--cta {", ".mk-btn--cream {"]) {
       expect(marketing.indexOf(mod), `${mod} after the base`).toBeGreaterThan(base);
     }
     /* The two modifiers never land on one element — proved from the components, not assumed. */
@@ -449,12 +459,18 @@ describe("the lower surface's repaints are the banner, the vision band and the f
    * Its ground is a token three points below `--mk-lower`, so the hairline carries the edge and the
    * fill only confirms it.
    */
-  it("the footer is the second, and a hairline states where it starts", () => {
+  /* RE-POINTED (landing colours v2): the footer left the lower surface for the shell and is the
+     page's own ink. It is the frame's lower edge, not a band inside the sheet, and the sheet's
+     rounded corners mark the join — so it states NO top rule. */
+  it("the footer is the page's ink ground, and no hairline states where it starts", () => {
     const foot = ruleFor(".mk-foot");
-    expect(foot).toMatch(/background-color:\s*var\(--mk-foot-ground\)/);
-    expect(foot, "its top edge is declared").toMatch(/border-top:\s*1px solid var\(--mk-hair\)/);
+    expect(foot).toMatch(/background-color:\s*var\(--mk-ink-shell\)/);
+    expect(ruleFor(".mk-scope"), "the same token the page ground reads").toMatch(/background:\s*var\(--mk-ink-shell\)/);
+    expect(foot, "the sheet's corners mark the join").not.toMatch(/border-top/);
     expect(foot).not.toMatch(/background:\s/);
-    expect(value(marketing, "--mk-foot-ground")).toBe("#efeae3");
+    expect(marketing, "its old ground is deleted").not.toMatch(/--mk-foot-ground/);
+    const landing = SOURCES.find(([f]) => f === "Landing.tsx")![1];
+    expect(landing, "and it is not rendered inside the lower surface").not.toMatch(/<MarketingFooter/);
   });
 
   /**
@@ -482,9 +498,9 @@ describe("the lower surface's repaints are the banner, the vision band and the f
 
   it("and nothing else under the wrapper repaints the ground", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
-    const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband", ".mk-foot"];
+    const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband"];
     const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
-    expect(painted).toEqual([".mk-vision", ".mk-claimband", ".mk-foot"]);
+    expect(painted).toEqual([".mk-vision", ".mk-claimband"]);
   });
 
   /**
@@ -1301,9 +1317,14 @@ describe("the nav wordmark is artwork, and the display face it replaced is gone"
    * way to do this, would have put the artwork in both places. The nav has its own element instead.
    */
   it("the nav wears the picture and the footer keeps its type", () => {
-    const art = ruleFor(".mk-wordmarkart");
-    expect(art, "a fixed height with `width: auto` — the file is 500x100").toMatch(/height:\s*34px/);
-    expect(art).toMatch(/width:\s*auto/);
+    /* RE-POINTED (landing colours v2): the nav is ink, so its wordmark is cream type in the
+       footer's own face. Still two classes — restyling the shared one would move both. */
+    expect(marketing, "the artwork's rule went with the artwork").not.toMatch(/\.mk-wordmarkart/);
+    const word = ruleFor(".mk-navword");
+    expect(word).toMatch(/font-family:\s*"Playfair Display"/);
+    expect(word).toMatch(/font-weight:\s*600/);
+    expect(word).toMatch(/color:\s*var\(--mk-cream\)/);
+    expect(word, "mixed-case Playfair keeps the 1.3 floor").toMatch(/line-height:\s*1\.3/);
     expect(ruleFor(".mk-wordmark"), "the footer's, untouched").toMatch(/font-family:\s*"Playfair Display"/);
     expect(marketing, "the nav no longer restyles the shared class").not.toMatch(/\.mk-nav \.mk-wordmark\s*\{/);
   });

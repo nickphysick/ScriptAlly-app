@@ -98,6 +98,15 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
        --mk-nearblack    --ink-on-light  text on a light surface (`--mk-ink` and `--mk-head` alias it) */
   --mk-ink-shell: #1b2433;
   --mk-cream: #f4eee5;
+  /* The same cream as a channel triple, so a rule can take it at an alpha — the app's own
+     arrangement (`--ink-cream-rgb`). Every tier of cream on ink is this at a stated strength. */
+  --mk-cream-rgb: 244, 238, 229;
+  /* Accent on ink: `--ink-terra`. Rust is the accent on light; the two never swap grounds. */
+  --mk-terra: #d9967a;
+  /* The focus ring on ink, and the navy panel's kicker: the app's `--hpanel-stamp`. */
+  --mk-stamp: #e0a188;
+  /* The primary button on ink: `--hpanel-primary-bg`. Its text is the shell's ink. */
+  --mk-cream-btn: #f3eee6;
   --mk-hero-ground: #fbf9f5;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
@@ -197,12 +206,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The rust at low alpha — the contact form's focus ring. Pre-computed from `--mk-claim-accent`'s
      own channels, per the no-`color-mix()` rule. */
   --mk-claim-ring: rgba(138, 74, 60, .2);
-  /* ── The footer and the contact page (17 Sep) ──
-     ⚠️ `--mk-foot-ground` IS THE SECOND BAND BELOW THE HERO THAT PAINTS ITS OWN GROUND, and the
-     lock that used to say there was only one now names both. It qualifies for the same reason the
-     banner does: it is bounded, and a hairline states its top edge. Three points darker than
-     `--mk-lower`, so the hairline carries the edge and the fill only confirms it. */
-  --mk-foot-ground: #efeae3;
+  /* ⚠️ `--mk-foot-ground` IS DELETED (landing colours v2). The footer is the page's own ink now —
+     it reads `--mk-ink-shell` — and no hairline states where it starts: the sheet's rounded bottom
+     corners mark the join. */
   /* The ink pill's hover, shared by the nav's CTA and the contact form's button — one value for
      one job, rather than the same literal typed twice. */
   --mk-ink-hov: #2c1f19;
@@ -275,11 +281,26 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-btn--navy:hover {
   background: var(--mk-navy-hov); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(42, 58, 82, .22);
 }
+/* ⚠️ THE PRIMARY ON INK, AND IT SHARES NAVY'S GEOMETRY EXACTLY (landing colours v2). A navy pill
+   on an ink bar is a button nobody can find; the app's answer on its own navy header is this cream
+   one. Radius, padding, size and wrap are navy's, restated rather than shared, so swapping the
+   modifier on the nav's button moved nothing — lock N3 holds the bar's height either side.
+   ⚠️ DECLARED AFTER `.mk-btn`, FOR THE REASON NAVY IS. `.mk-btn--navy` stays: it is the primary on
+   every LIGHT ground. */
+.mk-btn--cream {
+  background: var(--mk-cream-btn); border-color: var(--mk-cream-btn); color: var(--mk-ink-shell);
+  border-radius: 999px; padding: 11px 24px; font-size: 1rem; box-shadow: none;
+  transition: transform .18s ease, background .18s ease;
+  white-space: nowrap;
+}
+.mk-btn--cream:hover { background: #ffffff; border-color: #ffffff; transform: translateY(-1px); }
 @media (prefers-reduced-motion: reduce) {
+  .mk-btn--cream { transition: none; }
+  .mk-btn--cream:hover { transform: none; }
   .mk-btn--navy { transition: none; }
   .mk-btn--navy:hover { transform: none; }
   /* The condense is a state change, not an animation — it should land instantly. */
-  .mk-navwrap, .mk-nav, .mk-logo { transition: none !important; }
+  .mk-navwrap, .mk-nav, .mk-logo, .mk-navword { transition: none !important; }
 }
 
 /* ⚠️ A MODIFIER, NOT A CHANGE TO `.mk-btn`. The base button is the Cappuccino-conformant white
@@ -302,6 +323,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    ground is close to invisible. One rule, both element types, both pages. */
 .mk-scope a:focus-visible,
 .mk-scope button:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 3px; }
+/* ⚠️ ON INK THE RING IS THE STAMP, 2px AT 2px. The light-ground ring is a dark red and vanishes on
+   the bar. Three classes of specificity, so it wins over the rule above wherever it sits. */
+.mk-scope .mk-navwrap a:focus-visible, .mk-scope .mk-navwrap button:focus-visible,
+.mk-scope .mk-foot a:focus-visible, .mk-scope .mk-foot button:focus-visible {
+  outline: 2px solid var(--mk-stamp); outline-offset: 2px;
+}
 .mk-tlink {
   font-size: 13px;
   font-weight: 500;
@@ -335,17 +362,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-navsentinel--condense { height: 40px; margin-bottom: -40px; }
 .mk-navsentinel--release { height: 8px; margin-bottom: -8px; }
 .mk-navwrap {
-  position: sticky; top: 0; z-index: 60; background: var(--mk-hero-ground);
-  transition: box-shadow .2s ease, background .2s ease;
+  position: sticky; top: 0; z-index: 60; background: var(--mk-ink-shell);
+  transition: box-shadow .2s ease;
 }
 /* ⚠️ THE CONDENSED STATE IS SHORTER THAN THE FULL ONE, and `--mk-nav-h` is set from the FULL
    height — see the token, where the measurement is. The intuition that an anchor scroll "happens
    with the nav already condensed" is the trap: the target is computed before the condense, and the
    condense then moves the target. */
-.mk-navwrap.mk-scrolled {
-  box-shadow: 0 1px 0 var(--mk-hair), 0 6px 18px rgba(58, 28, 20, .05);
-  background: rgba(247, 244, 238, .92); backdrop-filter: blur(8px);
-}
+/* ⚠️ THE BAR IS THE SAME OPAQUE INK IN BOTH STATES (landing colours v2). Condensed it used to turn
+   translucent and blur what passed under it; ink at 92% over a white sheet is a grey bar. The only
+   thing the condensed state adds is a cream hairline, where the light bar cast a shadow. */
+.mk-navwrap.mk-scrolled { box-shadow: 0 1px 0 rgba(var(--mk-cream-rgb), .12); }
 .mk-nav {
   display: flex; align-items: center; gap: 40px; padding: 20px 56px;
   max-width: 1300px; margin: 0 auto; transition: padding .2s ease;
@@ -369,43 +396,63 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    treatment in both places.
    ⚠️ `width: auto` WITH A FIXED HEIGHT IS WHAT KEEPS THE LOCKUP HONEST. The file is 500×100, so at
    34px tall it draws 170px wide whatever the lettering inside it does. */
-.mk-wordmarkart { height: 34px; width: auto; display: block; flex: none; transition: height .2s ease; }
-.mk-navwrap.mk-scrolled .mk-wordmarkart { height: 29px; }
+/* ⚠️ ON INK THE WORDMARK IS LIVE TYPE, AS THE APP'S SIDEBAR DRAWS IT (landing colours v2).
+   `queryhawk_title.png` is dark artwork and is neither filtered nor recoloured — it is simply not
+   drawn on this ground. `.mk-wordmarkart` and its three size steps are deleted with it.
+   ⚠️ THE SIZES ARE THE ARTWORK'S, MEASURED. The picture was 34px tall with capitals 19px high
+   (56% of the file); Playfair's capitals are 72.2% of the em, so 26px of type gives 18.8. The
+   condensed and phone steps keep the artwork's own ratios (29, 26 and 22 of 34 → 22, 20 and 17).
+   ⚠️ 1.3, THE FLOOR FOR MIXED-CASE PLAYFAIR, AND IT STILL FITS. 26 × 1.3 is 33.8, inside the mark's
+   40px, so the mark goes on setting the lockup's height and the bar's — lock N3.
+   The 5px margin is the inset the artwork's letters had inside their file.
+   ⚠️ AND THE BOX KEEPS THE ARTWORK'S WIDTH, SO NOTHING BESIDE IT MOVED. The picture drew 170px wide
+   at 34 tall (a 5:1 file); the type is narrower, and left to its own width it pulled the four links
+   26px to the left. Each step states the width the picture had there, less the 5px margin — which
+   also means the two collapse breakpoints, measured for the artwork, still hold. */
+.mk-navword {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 26px;
+  line-height: 1.3; letter-spacing: -.01em; color: var(--mk-cream); white-space: nowrap;
+  margin-left: 5px; width: 165px; text-align: left;
+  display: block; flex: none; transition: font-size .2s ease;
+}
+.mk-navwrap.mk-scrolled .mk-navword { font-size: 22px; width: 140px; }
 
 /* ⚠️ THE LINKS ARE THE BODY FACE, NOT PLAYFAIR. The display face was tried here and rejected —
    the wordmark is the only Playfair in the bar, which is what makes it read as the brand rather
    than as the first item in a list. */
 .mk-links { display: flex; align-items: center; gap: 30px; }
 .mk-links button, .mk-login {
-  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: var(--mk-ink);
+  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: rgba(var(--mk-cream-rgb), .78);
   background: none; border: none; cursor: pointer; padding: 4px 0; line-height: 1.2;
   position: relative;
 }
-.mk-links button:hover, .mk-login:hover { color: var(--mk-burg); }
+.mk-links button:hover, .mk-login:hover { color: var(--mk-cream); }
 /* The active page. `aria-current` is the source of truth and the styling hangs off it, so the
    two cannot disagree — a class would let one be set without the other. */
-.mk-links button[aria-current] { color: var(--mk-burg); }
+.mk-links button[aria-current] { color: var(--mk-cream); }
 .mk-links button[aria-current]::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
-  height: 1.5px; background: var(--mk-burg); opacity: .65;
+  height: 1.5px; background: var(--mk-terra);
 }
 .mk-navright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.mk-login { margin-right: 28px; }
+/* Two classes, so it outranks the grouped rule above whichever comes first. */
+.mk-navright .mk-login { margin-right: 28px; color: rgba(var(--mk-cream-rgb), .82); }
+.mk-navright .mk-login:hover { color: var(--mk-cream); }
 
 /* The burger and its panel — below the breakpoint only. */
 .mk-burger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; }
-.mk-burger span { display: block; width: 22px; height: 1.6px; background: var(--mk-ink); margin: 5px 0; }
+.mk-burger span { display: block; width: 22px; height: 1.6px; background: var(--mk-cream); margin: 5px 0; }
 .mk-navpanel {
   display: flex; flex-direction: column; gap: 2px;
-  padding: 6px 22px 18px; background: var(--mk-hero-ground);
+  padding: 6px 22px 18px; background: var(--mk-ink-shell);
 }
 .mk-navpanel button {
-  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: var(--mk-ink);
+  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: rgba(var(--mk-cream-rgb), .86);
   background: none; border: none; cursor: pointer; text-align: left; padding: 12px 0;
-  border-bottom: 1px solid var(--mk-hair);
+  border-bottom: 1px solid rgba(var(--mk-cream-rgb), .14);
 }
 .mk-navpanel button:last-child { border-bottom: none; }
-.mk-navpanel button[aria-current] { color: var(--mk-burg); }
+.mk-navpanel button[aria-current] { color: var(--mk-terra); }
 
 /* ⚠️ THE SKIP LINK IS OFF-SCREEN, NOT `display: none` — hidden that way it is unreachable by the
    keyboard, which is the only thing it exists for. */
@@ -424,14 +471,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--mk-parch);
-  border: 1px solid rgba(124, 58, 42, 0.3);
+  background: rgba(var(--mk-cream-rgb), .12);
+  border: 1px solid transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: "Playfair Display", Georgia, serif;
   font-size: 13px;
-  color: var(--mk-burg);
+  color: var(--mk-cream);
   flex: none;
 }
 
@@ -492,12 +539,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      The step-down is kept anyway because it costs nothing and this exact regression has arrived
      twice — but it now sizes the image, and the measurement confirms the width rather than
      assuming it. */
-  .mk-wordmarkart { height: 26px; }
+  .mk-navword { font-size: 20px; width: 125px; }
   /* ⚠️ AND ITS CONDENSED STATE, WHICH WAS TALLER THAN ITS RESTING ONE. The desktop condense rule
      (`.mk-navwrap.mk-scrolled .mk-wordmarkart`, 29px) outranks the bare 26px above on specificity,
      so on a phone the wordmark GREW as the bar shrank — measured 17 Sep. 22 is 26 at the nav's
      own 0.85 condense ratio. */
-  .mk-navwrap.mk-scrolled .mk-wordmarkart { height: 22px; }
+  .mk-navwrap.mk-scrolled .mk-navword { font-size: 17px; width: 105px; }
   .mk-burger { margin-left: auto; order: 2; }
   .mk-navright { order: 3; width: 100%; margin-left: 0; }
   .mk-navright .mk-btn { width: 100%; justify-content: center; }
@@ -1701,7 +1748,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    put "SCRIPTALLY.INK" on every public page — the address that replaces it is the one support
    address, read from `companyInfo`, so the footer cannot publish a second. */
 .mk-foot {
-  background-color: var(--mk-foot-ground); border-top: 1px solid var(--mk-hair);
+  background-color: var(--mk-ink-shell);
   padding: 64px 0 28px;
 }
 .mk-footinner { max-width: 1180px; margin: 0 auto; padding: 0 56px; }
@@ -1716,20 +1763,20 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    1.3 is the house floor for mixed-case Playfair. */
 .mk-wordmark {
   font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 25px;
-  line-height: 1.3; letter-spacing: -.012em; color: var(--mk-nearblack);
+  line-height: 1.3; letter-spacing: -.012em; color: var(--mk-cream);
 }
 .mk-foottag {
-  font-size: 16.5px; line-height: 1.6; color: var(--mk-muted);
+  font-size: 16.5px; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .62);
   margin: 18px 0 0; max-width: 34ch;
 }
 /* The six states as the status band draws them — a signature rather than a control, so the row is
    hidden from the accessibility tree and dimmed as a group. */
-.mk-footglyphs { display: flex; gap: 14px; margin: 22px 0 0; color: var(--mk-nearblack); opacity: .5; }
+.mk-footglyphs { display: flex; gap: 14px; margin: 22px 0 0; color: var(--mk-cream); opacity: .5; }
 .mk-footglyphs svg { width: 19px; height: 19px; display: block; flex: none; }
 /* No `!important` needed: brand.tsx forces h1, h2 and h3, and these are h4. */
 .mk-footcol h4 {
   font-family: "Special Elite", cursive; font-weight: 400; font-size: 15px;
-  color: var(--mk-claim-accent); margin: 0 0 18px;
+  color: var(--mk-terra); margin: 0 0 18px;
 }
 .mk-footcol ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; justify-items: start; }
 /* ⚠️ THE RULE UNDER EACH LINK IS ALWAYS THERE AND ONLY ITS COLOUR CHANGES. A border that appeared
@@ -1737,27 +1784,29 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-footcol button {
   background: none; border: 0; border-bottom: 1px solid transparent; padding: 0 0 2px;
   cursor: pointer; font-family: inherit; font-size: 16.5px; line-height: 1.4;
-  color: var(--mk-ink); text-align: left;
+  color: rgba(var(--mk-cream-rgb), .86); text-align: left;
 }
-.mk-footcol button:hover { border-bottom-color: var(--mk-claim-accent); }
+.mk-footcol button:hover { color: var(--mk-cream); border-bottom-color: var(--mk-terra); }
 /* The hairline is the bar's own edge, not an element above it. `1fr auto 1fr` keeps the middle
    cell on the page's midline whatever the two ends hold. */
 .mk-footbase {
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
-  margin: 56px 0 0; padding: 22px 0 0; border-top: 1px solid var(--mk-hair);
-  font-size: 14.5px; color: var(--mk-muted);
+  margin: 56px 0 0; padding: 22px 0 0; border-top: 1px solid rgba(var(--mk-cream-rgb), .14);
+  font-size: 14.5px; color: rgba(var(--mk-cream-rgb), .6);
 }
 .mk-footbase p { margin: 0; }
+/* The name in the base line is full cream; the line around it is cream at 60%. */
+.mk-footname { color: var(--mk-cream); }
 .mk-footmade { display: inline-flex; align-items: center; gap: 8px; }
 .mk-footmade svg {
-  width: 16px; height: 16px; flex: none; fill: none; stroke: var(--mk-claim-accent);
+  width: 16px; height: 16px; flex: none; fill: none; stroke: var(--mk-terra);
   stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
 }
 .mk-footmail {
-  justify-self: end; color: var(--mk-ink); text-decoration: none;
+  justify-self: end; color: rgba(var(--mk-cream-rgb), .86); text-decoration: none;
   border-bottom: 1px solid transparent;
 }
-.mk-footmail:hover { border-bottom-color: var(--mk-claim-accent); }
+.mk-footmail:hover { color: var(--mk-cream); border-bottom-color: var(--mk-terra); }
 /* ⚠️ NARROWING ORDER, AND THE 560 BLOCK MUST STAY BELOW THE 900 ONE — equal specificity, so the
    later query wins. */
 @media (max-width: 900px) {

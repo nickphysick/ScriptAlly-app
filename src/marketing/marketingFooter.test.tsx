@@ -100,7 +100,10 @@ describe("the footer's base line", () => {
     const h = foot();
     const base = /<div class="mk-footbase">([\s\S]*)<\/div>\s*<\/div>\s*<\/footer>/.exec(h);
     expect(base, "the base line renders").toBeTruthy();
-    expect(base![1]).toContain(`<p>© ${new Date().getFullYear()} QueryHawk</p>`);
+    /* The name carries a span so it can be full cream in a line set at 60% (landing colours v2).
+       The words are unchanged, which is what the second line holds. */
+    expect(base![1]).toContain(`<p>© ${new Date().getFullYear()} <span class="mk-footname">QueryHawk</span></p>`);
+    expect(base![1].replace(/<[^>]+>/g, "")).toContain(`© ${new Date().getFullYear()} QueryHawk`);
     expect(base![1]).toMatch(/<p class="mk-footmade"><svg[\s\S]*?<\/svg>Made in the UK, for writers<\/p>/);
     expect(base![1]).toContain(`<a class="mk-footmail" href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>`);
   });

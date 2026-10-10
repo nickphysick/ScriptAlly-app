@@ -93,7 +93,7 @@ export const MarketingFooter: React.FC<{
         <div className="mk-footbase">
           {/* The year is read rather than written: a hardcoded one is wrong every January, and it
               is the single value here that has a correct answer the app already knows. */}
-          <p>© {new Date().getFullYear()} QueryHawk</p>
+          <p>© {new Date().getFullYear()} <span className="mk-footname">QueryHawk</span></p>
           <p className="mk-footmade"><PaperPlane />Made in the UK, for writers</p>
           {/* ⚠️ `SUPPORT_EMAIL`, NOT hello@queryhawk.ink. On 17 Sep that domain did not resolve at all
               (NXDOMAIN, no MX record), so mail sent to it would bounce — and the privacy policy
