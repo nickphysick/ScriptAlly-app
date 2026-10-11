@@ -434,7 +434,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       ...((outcome.already ?? []).length > 0 || already.length > 0 ? [ALREADY_REASON] : []),
     ])];
     /* Every row was already here: there is no review to go back to, so the way out is the start. */
-    if (nothingNew) return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => toStart()} backLabel="Back" />;
+    if (nothingNew) return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => toStart()} backLabel="Back" nothingNew />;
     return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => setScreen("review")} />;
   }
 

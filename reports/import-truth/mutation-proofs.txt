@@ -17,3 +17,4 @@ H1 · pagetop · headerPanelV2 P2: 1 failed | ✗ P2 the header's box equals the
 H1 · pagetop · headerV3 H11: 1 failed | ✗ H11 the header's box equals the baseline (±1) · /dashboard@1512 — [248,0,1264,64] → [248,41.8,1264,64]
 H1 · shift4 · headerPanelV2 P2: 1 failed | ✗ P2 the header's box equals the baseline (±1) · /dashboard@1512 — [298,64,1156,146.5] → [298,68.3,1156,146.5]
 H1 · shift4 · headerV3 H11: 1 failed | ✗ H11 the header's box equals the baseline (±1) · /dashboard@1512 — [248,0,1264,64] → [248,4,1264,64]
+R1 (rendered, dev walk) · drop the duplicate check, rebuilt: 1 failed | [2026-10-11T11:44:16.479Z] @firebase/firestore: Firestore (12.14.0): BloomFilter error: BloomFilterError: Invalid hash count: 0  TimeoutError: locator.waitFor: Timeout 30000ms exceeded.  - waiting for locator('[data-dead="nothing"]') to be visible 

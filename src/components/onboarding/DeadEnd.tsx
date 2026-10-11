@@ -30,6 +30,8 @@ export const USED_PRO_TITLE = "Next Smart Import next month";
 export const UNREADABLE_TITLE = "We couldn't read that one.";
 export const UNREADABLE_TEXT = "Use the template, or add your agents by hand. Nothing has been saved.";
 export const NOTHING_TITLE = "That didn't work.";
+/** When every row of the file was already in the account: the import worked, and found nothing new. */
+export const NOTHING_NEW_TITLE = "Nothing new to import.";
 export const UNLOADED_TITLE = "That step didn't load.";
 export const UNLOADED_TEXT = "Something didn't load on our side. Your file hasn't been imported and nothing has been saved.";
 
@@ -124,8 +126,10 @@ export const NothingImported: React.FC<{
   outcome: ImportCounts; skippedReasons: string[]; onBackToReview: () => void;
   /** when there is no review to go back to (every row was already in the account) */
   backLabel?: string;
-}> = ({ outcome, skippedReasons, onBackToReview, backLabel }) => (
-  <DeadEndCard kind="nothing" chip={CHIP_NOTHING} fail title={NOTHING_TITLE}
+  /** every row was already here: say that, not "That didn't work." */
+  nothingNew?: boolean;
+}> = ({ outcome, skippedReasons, onBackToReview, backLabel, nothingNew }) => (
+  <DeadEndCard kind="nothing" chip={CHIP_NOTHING} fail={!nothingNew} title={nothingNew ? NOTHING_NEW_TITLE : NOTHING_TITLE}
     actions={<Primary act="review" onClick={onBackToReview}>{backLabel ?? "Back to the review"}</Primary>}>
     <ImportCountsBody outcome={outcome} skippedReasons={skippedReasons} />
   </DeadEndCard>

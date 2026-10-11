@@ -217,3 +217,24 @@ describe("N1 · the notice gains the rows already here", () => {
     expect(buildImportNotice([], { errors: [] }, [], [], 0, [])).toBeNull();
   });
 });
+
+describe("R1 · a file whose every row is already here", () => {
+  it("shows the existing nothing-imported card, saying nothing was new — not that it failed", async () => {
+    const React = (await import("react")).default;
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const { NothingImported, NOTHING_NEW_TITLE, NOTHING_TITLE } = await import("../components/onboarding/DeadEnd");
+    const outcome = { queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queriesSkipped: 5, errors: [] };
+    const html = renderToStaticMarkup(React.createElement(NothingImported, { outcome, skippedReasons: [ALREADY_REASON], onBackToReview: () => {}, backLabel: "Back", nothingNew: true }));
+    const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    expect(NOTHING_NEW_TITLE).toBe("Nothing new to import.");
+    expect(text).toContain("Nothing new to import.");
+    expect(text).not.toContain(NOTHING_TITLE);
+    expect(text).toContain("0 queries imported · 0 agents added");
+    expect(text).toContain("5 rows were skipped: already in your queries.");
+    expect(text).toMatch(/Back\s*$/);
+    expect(text).not.toContain("Back to the review");
+    const flow = code("src/components/import/ImportFlow.tsx");
+    expect(flow).toMatch(/if \(nothingNew\) return <NothingImported[^;]*backLabel="Back" nothingNew \/>;/);
+    expect(flow, "it is reached from the read, before anything is written").toMatch(/setNothingNew\(true\);\s*setScreen\("done"\);\s*return "nothing";/);
+  });
+});
