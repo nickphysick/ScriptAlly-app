@@ -272,7 +272,7 @@ import { queryPortion } from "../lib/queryPortion";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { VersionLines } from "./reading-pane/VersionLines";
 import { bookVersionsOf } from "../lib/bookVersions";
-import { openingRead, manuscriptHeld, versionsActive, listVersion, UNRECORDED_VERSION, sendVersionDefault } from "../lib/queryVersions";
+import { openingRead, versionsActive, listVersion, UNRECORDED_VERSION, sendVersionDefault } from "../lib/queryVersions";
 import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
 import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -2307,14 +2307,12 @@ export const Queries: React.FC<{
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
   /* v126 §6 — whether the action drawer is open, so the Birds-eye drawer's keys stand down beneath it */
   const [qaOpen, setQaOpen] = useState<boolean>(() => currentDrawerRequest() != null);
-  /* …and whether it was opened from the card, which then docks to the drawer's chip */
-  const [qaDocked, setQaDocked] = useState<boolean>(() => !!currentDrawerRequest()?.dock);
   /* Query panel v1 — a page other than this one asks for a query through the store (the Dashboard); here the
      open query is `?q`. ⚠️ Declared ABOVE the list's keys hook, which reads it at render. */
   const extPanel = useSyncExternalStore(subscribeQueryPanel, currentQueryPanel, currentQueryPanel);
   /* …and whether an action's form is stepped INTO the panel (Part C) */
   const [qaPanel, setQaPanel] = useState<boolean>(() => !!currentDrawerRequest()?.panel);
-  useEffect(() => subscribeDrawer((r) => { setQaOpen(r != null); setQaDocked(!!r?.dock); setQaPanel(!!r?.panel); }), []);
+  useEffect(() => subscribeDrawer((r) => { setQaOpen(r != null); setQaPanel(!!r?.panel); }), []);
   /**
    * v126 §7 — THE SET THE CARD WAS OPENED FROM, so ← → in the centred card step through the list's
    * rows, the carousel's cards or the Birds-eye drawer's rows — whichever the reader came from. A

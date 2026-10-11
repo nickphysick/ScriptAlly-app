@@ -991,9 +991,7 @@
   :root .qad-dock.qad-dock--peek { right: calc(min(500px, 100vw) + 32px); }
   /* the card the chip peeks follows it: 24 beside the inset drawer, and up by the 4px the chip rose
      (20 above the sheet's foot, which is 8 above the viewport's) */
-  :root .ac-ov[data-peek] .ac,
-  :root .qcv-qm--peek .qcv-qm-card { right: calc(min(500px, 100%) + 32px); bottom: 88px; }
-  :root .qcv-qm--peek .qcv-qm-card { right: calc(min(500px, 100%) + 32px); bottom: calc(var(--ink-sheet-b, 0px) + 80px); }
+  :root .ac-ov[data-peek] .ac { right: calc(min(500px, 100%) + 32px); bottom: 88px; }
 
 }
 
