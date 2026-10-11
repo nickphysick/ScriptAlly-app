@@ -13,3 +13,8 @@ Phase 4 (lab, 1440)
 F1  red on the Phase 3 build: reports/onb-v9/red/F-before.txt (no 16:9 slot; heading "This uses your Smart Import.")
 F1  mutation: restore the one-shot note            -> red: "the one-shot note is gone"
 Unmutated: 3 passed.
+
+Phase 5 (lab, 1440)
+S1  red on the Phase 4 build: reports/onb-v9/red/S-before.txt (no mark; Continue lit with sets undecided; no band)
+S1  mutation: colour the file chip --go            -> red: "nothing but the mark is sage"
+Unmutated: 3 passed.

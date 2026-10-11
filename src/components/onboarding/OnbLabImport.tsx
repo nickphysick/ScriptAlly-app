@@ -91,8 +91,8 @@ export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done,
   return <ImportingLoader complete={complete} onProceed={spy("proceed")} />;
 };
 
-export const LabOverview: React.FC<{ fx: string | null; title: string }> = ({ fx, title }) => (
-  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} onContinue={spy("continue")} />
+export const LabOverview: React.FC<{ fx: string | null; title: string; rows?: number | null }> = ({ fx, title, rows }) => (
+  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} rowCount={rows ?? null} onContinue={spy("continue")} />
 );
 
 export const LabReview: React.FC<{ fx: string | null }> = ({ fx }) => (

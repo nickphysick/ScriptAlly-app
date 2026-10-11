@@ -349,7 +349,8 @@ test.describe("OB2", () => {
               text: sheet.innerText,
               controls: [...sheet.querySelectorAll("button, a")].map((b) => (b as HTMLElement).innerText.trim()),
               primary: (document.querySelector('[data-im="primary"]') as HTMLElement).innerText.trim(),
-              open: tier("agents", "fix") + tier("agents", "sharp") + tier("queries", "sharp"),
+              /* v9: the "sharp" tier is "ask" (Need an answer) */
+              open: tier("agents", "fix") + tier("agents", "ask") + tier("queries", "ask"),
               fix: tier("agents", "fix"),
               steps: [...document.querySelectorAll('[data-im="steps"] [data-step]')].map((e) => e.getAttribute("data-step")),
               dots: [...document.querySelectorAll('[data-im="steps"] [data-step] i')].map((e) => e.textContent),

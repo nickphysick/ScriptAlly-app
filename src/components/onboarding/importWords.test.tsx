@@ -36,7 +36,10 @@ describe("W1 · the words that changed, as literals, on their screens", () => {
     expect(t).toMatch(/for\s+The Salt Road/);
     expect(t).toContain("with agents");
     expect(t).toContain("Step 1");
-    expect(overview(REVIEW_FIXTURE)).toContain("Optional");
+    /* v9: nothing flagged is optional; the tier is "Need an answer" */
+    expect(overview(REVIEW_FIXTURE)).not.toMatch(/Optional|Chances to sharpen/);
+    expect(overview(REVIEW_FIXTURE)).toContain("Need an answer");
+    expect(overview(REVIEW_FIXTURE)).toContain("24 rows, read and sorted. Nothing is saved yet.");
     expect(t).toContain("Let's work through it");
     for (const gone of ["Top tip", "Why sharpen", "Skip setup", "→", "Here's what we found"]) expect(t).not.toContain(gone);
     for (const l of ["Duplicates", "Agents", "Queries", "Import"]) expect(t).toContain(l);
@@ -51,19 +54,15 @@ describe("W1 · the words that changed, as literals, on their screens", () => {
     expect(TIER_TEXT.agentsReady).toBe("Read cleanly. Good to import as they are.");
     expect(TIER_TEXT.agentsFix(1)).toBe("1 possible duplicate set to merge. Sorted on the duplicates step.");
     expect(TIER_TEXT.agentsFix(3)).toBe("3 possible duplicate sets to merge. Sorted on the duplicates step.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 2, openMapping: true })).toBe("2 could use an agency, plus the odd detail to confirm. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 2, openMapping: false })).toBe("2 could use an agency. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 0, openMapping: true })).toBe("A detail or two to confirm. Each one sharpens your tracking.");
     expect(TIER_TEXT.queriesReady).toBe("Dates read, statuses clear. Good to import as they are.");
-    expect(TIER_TEXT.queriesSharpen).toBe("A few dates to confirm and statuses to clarify. Each one makes your tracking sharper.");
     const n = { sets: 1, agentsOpen: 3, queriesOpen: 0 };
     expect(stepCaption("duplicates", n)).toBe("1 set");
     expect(stepCaption("duplicates", { ...n, sets: 4 })).toBe("4 sets");
-    expect(stepCaption("agents", n)).toBe("3 optional");
+    expect(stepCaption("agents", n)).toBe("3 to answer");
     expect(stepCaption("queries", n)).toBe("Ready to go");
     expect(stepCaption("import", n)).toBe("You confirm");
     const t = overview(REVIEW_FIXTURE);
-    expect(t).toContain(TIER_TEXT.queriesSharpen);
+    expect(t).toMatch(/dates? (to confirm|missing)[^.]*\. One pick each\./);
   });
 
   it("the duplicates step", () => {
@@ -159,6 +158,6 @@ describe("W1 · the words that did not change, verbatim from their modules", () 
     expect(IMPORTING_HEAD).toEqual({ working: "Setting up your dashboard", done: "You're all set" });
     expect(IMPORTING_DONE_LINE).toBe("Opening your dashboard…");
     expect(IMPORTING_MESSAGES).toHaveLength(6);
-    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", sharpen: "Chances to sharpen" });
+    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" });
   });
 });

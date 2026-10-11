@@ -36,6 +36,11 @@ import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
 import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
+import { Disc, initialsOf } from "./ImportParts";
+import { GoMark } from "./v9/GoMark";
+import {
+  openAgentQuestions, answerKind, answeredLine, allAnsweredHead, writeHint, duplicatesDoneLine, duplicatesNextHint,
+} from "../../lib/reviewGate";
 
 // ── The words of the three steps ─────────────────────────────────────────────────────────────────
 const NUM_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
@@ -46,6 +51,8 @@ export const duplicatesTitle = (openSets: number): string =>
     : `${openSets <= 12 ? NUM_WORDS[openSets] : openSets} agents look like they came in twice.`;
 export const DUPLICATES_SUB = "Keep one row and its queries combine. Nothing is lost.";
 export const REVIEW_PRIMARY = { duplicates: "Review all agents", agents: "Continue to queries" } as const;
+/** Duplicates, all sorted (v9). */
+export const DUPES_DONE = { head: "Duplicates sorted.", list: "What you decided", change: "Change a decision", merged: "Merged", kept: "Kept both", open: "Decide each set above first." } as const;
 /** The final primary: the build's own two sentences, without the arrow. */
 export const importPrimary = (agents: number, openQueries: number): string =>
   openQueries > 0 ? `Import ${agents} agent${agents === 1 ? "" : "s"} · ${openQueries} to sharpen` : "Import and get started";
@@ -463,6 +470,31 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // resolve UI and resolved ones in their settled state, so a decision stays revisitable via Back.
   const allClusters = buildClusters(agents);
   const openSets = allClusters.filter((c) => c.type !== "keepboth").length;
+  /* v9: once every set is decided the list gives way to the mark and "What you decided". "Change a
+     decision" brings the sets back, each with its Undo; deciding them all again returns here. */
+  const [dupEditing, setDupEditing] = useState(false);
+  const wasOpen = useRef(openSets > 0);
+  React.useEffect(() => { if (wasOpen.current && openSets === 0) setDupEditing(false); wasOpen.current = openSets > 0; }, [openSets]);
+  const dupesDone = screen === "duplicates" && openSets === 0 && !dupEditing;
+  const decided = (): { id: string; name: string; initials: string; sub: string; chip: string; merged: boolean }[] => {
+    const out: { id: string; name: string; initials: string; sub: string; chip: string; merged: boolean; at: number }[] = [];
+    const idx = new Map<string, number>(agents.map((a, i): [string, number] => [a.id, i]));
+    for (const [keeperId, bars] of mergedAwayByKeeper(agents)) {
+      const k = agents.find((a) => a.id === keeperId);
+      if (!k || k.deleted) continue;
+      const name = k.name || k.agency || "This agent";
+      const gone = bars.map((b) => `"${b.name || b.agency || "a row"}"`).join(", ");
+      out.push({ id: keeperId, name, initials: k.name ? initialsOf(k.name) : "–", merged: true, chip: DUPES_DONE.merged, at: idx.get(keeperId) ?? 0,
+        sub: [k.name && k.agency ? k.agency : null, "kept", `${gone} merged in`].filter(Boolean).join(" · ") });
+    }
+    for (const c of allClusters) {
+      if (c.type !== "keepboth") continue;
+      const l = c.members[0];
+      out.push({ id: c.leaderId, name: c.members.map((m) => m.name || m.agency).join(", "), initials: l.name ? initialsOf(l.name) : "–", merged: false, chip: c.members.length > 2 ? "Kept all" : DUPES_DONE.kept, at: idx.get(c.leaderId) ?? 0,
+        sub: [l.agency || null, "kept as separate agents"].filter(Boolean).join(" · ") });
+    }
+    return out.sort((a, b) => a.at - b.at);
+  };
 
   // A flagged pair as the reconcile card: working while the cluster is open, sorted once
   // collapsed/split. Rows are the live member queries while open, or the pre-collapse snapshot once
@@ -594,8 +626,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // ── The frame of a step ───────────────────────────────────────────────────────────────────────
   const steps = importSteps(hadDuplicates);
   const title = (manuscriptTitle ?? "").trim();
+  /* v9: when the last answer lands on the queries step, the sage band says so and accounts for
+     every answer given. Only a step that asked something can be "all answered". */
+  const asked = qActive.filter((q) => q.reasons.length > 0);
+  const queriesDone = screen === "queries" && asked.length > 0 && qNeed === 0;
+  const doneKinds = asked.flatMap((q) => q.reasons.map((r) => answerKind(r.code, q)));
+  const agentQuestionsLeft = openAgentQuestions(active).length;
   const head =
-    screen === "duplicates" ? (
+    dupesDone ? null : screen === "duplicates" ? (
       <header className="im-ohead im-ohead--sm">
         <h1 className="im-h1" data-im="title">{duplicatesTitle(openSets)}</h1>
         <p>{DUPLICATES_SUB}</p>
@@ -613,7 +651,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         <h1 className="im-stack" data-im="title">
           <span className="im-num" data-im="title-n">{qActive.length}</span>
           <span className="im-words">queries for your Query Centre</span>
-          {title && <span className="im-sub">for <i>{title}</i></span>}
+          {queriesDone ? <span className="im-sub" data-im="title-sub">Every question answered. Nothing is saved yet.</span>
+            : title && <span className="im-sub">for <i>{title}</i></span>}
         </h1>
       </header>
     );
@@ -638,9 +677,42 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     <div className="im-page" data-im="review" data-screen={`review-${screen}`} data-step={screen} key={screen}>
       {head}
       <Stepper steps={steps} current={screen} label="Review progress" />
+      {dupesDone && (
+        <div className="o9-markrow" data-im="dupes-done">
+          <GoMark />
+          <div className="o9-mtxt">
+            <h1 className="im-h1 o9-mhead" data-im="title">{DUPES_DONE.head}</h1>
+            <span data-im="dupes-line">{duplicatesDoneLine({ merged: decided().filter((d) => d.merged).length, kept: decided().filter((d) => !d.merged).length, forward: active.length })}</span>
+          </div>
+        </div>
+      )}
+      {queriesDone && (
+        <div className="o9-alldone o9-pop" data-im="all-answered">
+          <GoMark size="sm" />
+          <div>
+            <b data-im="all-head">{allAnsweredHead(asked.length)}</b>
+            <span data-im="all-line">{answeredLine(doneKinds)}</span>
+          </div>
+        </div>
+      )}
       <div className="im-rev">
         <div className="im-revmain">
           {error && <p className="im-commiterr" role="alert" data-im="commit-error">{error}</p>}
+          {dupesDone ? (
+            <section className="im-list o9-decided o9-rise" data-im="decided" aria-label={DUPES_DONE.list}>
+              <div className="im-listhead im-listhead--quiet">
+                <h2 className="im-listtitle">{DUPES_DONE.list}</h2>
+                <button type="button" className="sf-link sf-link--quiet" onClick={() => setDupEditing(true)} data-im="change-decision">{DUPES_DONE.change}</button>
+              </div>
+              {decided().map((d) => (
+                <div className="im-rw" key={d.id} data-decided={d.id}>
+                  <Disc initials={d.initials} />
+                  <div><b className="im-rwname">{d.name}</b><small className="im-rwsub">{d.sub}</small></div>
+                  <div className="im-rwend"><Chip className={d.merged ? "o9-chip--go" : undefined} data-im="decided-chip">{d.chip}</Chip></div>
+                </div>
+              ))}
+            </section>
+          ) : (
           <section className="im-list" data-im="list" aria-label={listTitle}>
             <div className="im-listhead" data-im="list-head">
               <h2 className="im-listtitle">{listTitle}</h2>
@@ -650,15 +722,22 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
               {rows.length > 0 ? rows : <div className="im-listempty">{emptyLine}</div>}
             </div>
           </section>
+          )}
           <SetAsideTray items={trayItems} onRestore={onRestoreSetAside} />
+          {(screen === "duplicates" || queriesDone) && (
+            <p className="o9-barhint" data-im="hint">
+              {screen === "duplicates" ? (openSets > 0 ? DUPES_DONE.open : duplicatesNextHint(agentQuestionsLeft)) : writeHint(active.length, qActive.length)}
+            </p>
+          )}
           <div className="im-actbar" data-im="foot">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
             {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
             <button type="button" className="sf-link sf-link--quiet" onClick={reset} data-im="reset">Reset all changes made here</button>
             <span className="im-sp" />
             {screen === "duplicates" && (
-              /* always available — unresolved sets carry through to the agents step */
-              <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>
+              /* v9: lit only once every set is decided. It was always available, and an undecided
+                 set carried through to the agents step. */
+              <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} disabled={openSets > 0} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>
             )}
             {screen === "agents" && (
               <button type="button" className="sf-btn" onClick={onContinueClick} disabled={active.length === 0} data-im="primary">{REVIEW_PRIMARY.agents}</button>

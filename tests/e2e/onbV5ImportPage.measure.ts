@@ -12,6 +12,7 @@ import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { FIX, MUTATE, SHOTS, OUT, VIEWPORTS, lab, capture, record, vpName } from "./ip1Lib";
 import { openRoute } from "./measure";
+import { settleStep } from "./reviewDrive";
 import { devDb } from "./devWrite";
 import { openMatcher, readRun, snapshot as matcherSnapshot, cleanup as matcherCleanup, type Kind } from "./matcherDrive";
 
@@ -33,12 +34,8 @@ const P1_SCREENS: Screen[] = [
   { id: "reading-work", q: "s=reading&hold=work", mode: "skeleton" },
   { id: "reading-done", q: "s=reading&hold=done", mode: "skeleton" },
   { id: "importing", q: "s=importing", mode: "skeleton" },
-  { id: "flow-overview-review", q: "s=flow&fx=review", mode: "full" },
-  { id: "flow-overview-dupes", q: "s=flow&fx=dupes", mode: "full" },
-  { id: "flow-overview-clear", q: "s=flow&fx=clear", mode: "full" },
-  { id: "flow-duplicates", q: "s=flow&fx=dupes", mode: "full", steps: ["primary"] },
-  { id: "flow-agents", q: "s=flow&fx=review", mode: "full", steps: ["primary"] },
-  { id: "flow-queries", q: "s=flow&fx=review", mode: "full", steps: ["primary", "primary"] },
+  /* v9: the summary and the three review steps are redrawn (OB9 S1, G1 to G4), so they left the
+     pre-move comparison. The loaders and the nothing-imported screen are still held to it. */
   { id: "flow-importing", q: "s=flow&fx=clear&floor=60000", mode: "skeleton", steps: ["primary", "primary", "import"] },
   { id: "flow-nothing", q: "s=flow&fx=clear&none=1&floor=50", mode: "full", steps: ["primary", "primary", "import"], wait: '[data-screen="nothing"], [data-sf="chip"]' },
 ];
@@ -445,6 +442,8 @@ test.describe("F3", () => {
     await expect(page.locator('.impg [data-im="ask"]')).toHaveCount(0);
     await expect(page.locator('.impg [data-im="summary"]')).toBeVisible();
     for (const step of ["duplicates", "agents", "queries"]) {
+      /* v9: a step's primary is disabled until everything on it has an answer */
+      await settleStep(page, { scope: ".impg" });
       await page.locator('.impg [data-im="primary"]').click();
       await page.locator(`.impg [data-im="review"][data-step="${step}"]`).waitFor({ timeout: 10_000 });
       await ask(step); seen.push(step);

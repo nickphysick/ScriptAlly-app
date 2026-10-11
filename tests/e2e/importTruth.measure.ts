@@ -13,6 +13,7 @@
  * Its mutation is made in the source and rebuilt (drop the duplicate check in lib/importDuplicates),
  * never by a hook in the product: the walk then leaves ten queries where one import leaves five.
  */
+import { walkSetupToFork } from "./reviewDrive";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -133,13 +134,8 @@ test("R1 · the same sheet twice leaves one import's worth; then a mixed sheet",
       await page.locator("#au-email").fill(ACCOUNT_EMAIL);
       await page.locator("#au-pw").fill(readPw());
       await page.getByRole("button", { name: /^Sign in$/ }).last().click();
-      await page.getByText("A few queries out").first().click({ timeout: 30_000 });
-      await page.getByRole("button", { name: /^Continue$/ }).click();
-      await page.getByPlaceholder("e.g. The Salt Path Home").fill("The Salt Road", { timeout: 20_000 });
-      await page.getByText("Select…").first().click();
-      await page.getByText("Thriller", { exact: true }).last().click();
-      await page.getByRole("button", { name: /^Continue$/ }).click();
-      await page.locator('[data-act="upload"]').waitFor({ timeout: 20_000 });
+      /* v9: set-up's book step is the acknowledgement, the title and "Your book" (one walker). */
+      await walkSetupToFork(page);
 
       // ── 1 · template-iso.csv ──
       await page.locator('input[type="file"]').nth(1).setInputFiles(FX("template-iso.csv"));

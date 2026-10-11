@@ -8,6 +8,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { lab, record, shot, noOverflow, settled, MUTATE, WIDE, PHONE } from "./ob9Lib";
+import { decideDuplicates, answerAgents, answerQueries } from "./reviewDrive";
 
 /* ════ W1 · the welcome ════ */
 test.describe("W1", () => {
@@ -503,5 +504,150 @@ test.describe("F1", () => {
     await noOverflow(page, "fork 400");
     await lab(page, "s=confirm", PHONE, { motion: "reduce" });
     await noOverflow(page, "confirm 400");
+  });
+});
+
+/* ════ S1 · success marks, and nothing called optional ═══════════════════════════════ */
+test.describe("S1", () => {
+  const GO = "rgb(78, 125, 96)";
+  type P = import("@playwright/test").Page;
+  /** Every element on the screen painted with the sage, and whether it is a mark. */
+  const sage = (page: P) => page.evaluate((go) => {
+    const hits: { where: string; prop: string; mark: boolean }[] = [];
+    for (const el of document.querySelectorAll<HTMLElement>(".sf *")) {
+      if (el.getBoundingClientRect().width === 0) continue;
+      const c = getComputedStyle(el);
+      for (const prop of ["backgroundColor", "color", "borderTopColor", "outlineColor", "fill", "stroke"] as const) {
+        if (c[prop] === go) hits.push({ where: el.className?.toString?.() || el.tagName, prop, mark: !!el.closest('[data-o9="gomark"]') });
+      }
+      const b = getComputedStyle(el, "::before"), a = getComputedStyle(el, "::after");
+      for (const [ps, name] of [[b, "::before"], [a, "::after"]] as const) {
+        if (ps.content !== "none" && (ps.backgroundColor === go || ps.borderTopColor === go)) hits.push({ where: (el.className?.toString?.() || el.tagName) + name, prop: "pseudo", mark: !!el.closest('[data-o9="gomark"]') });
+      }
+    }
+    return hits;
+  }, GO);
+  const mark = (page: P, scope: string) => page.evaluate((sel) => {
+    const m = document.querySelector<HTMLElement>(`${sel} [data-o9="gomark"]`);
+    if (!m) return null;
+    const r = m.getBoundingClientRect(); const path = m.querySelector("path")!;
+    return { size: [Math.round(r.width), Math.round(r.height)], bg: getComputedStyle(m).backgroundColor, radius: getComputedStyle(m).borderRadius, tick: getComputedStyle(path).stroke, drawn: getComputedStyle(path).strokeDashoffset };
+  }, scope);
+  const reviewText = (page: P) => page.evaluate(() => (document.querySelector<HTMLElement>(".sf-scroll, [data-sf=\"scroll\"]") ?? document.querySelector<HTMLElement>(".sf")!).innerText);
+
+  test("S1 the summary opens on the mark, and its tiers need an answer", async ({ page }) => {
+    await lab(page, "s=overview&fx=review&rows=34", WIDE, { motion: "reduce" });
+    if (MUTATE === "S1") await page.addStyleTag({ content: ".sf .im-chip--file{background:#4e7d60!important}" });
+    const m = await mark(page, '[data-im="summary"]');
+    const s = await page.evaluate(() => {
+      const t = (sel: string) => document.querySelector(sel)?.textContent ?? "";
+      const markRow = document.querySelector('[data-im="markrow"]')!.getBoundingClientRect(); const pops = document.querySelector(".im-pops")!.getBoundingClientRect();
+      return {
+        title: t('[data-im="title"]'), line: t('[data-im="read-line"]'), lead: t('[data-im="lead"]'),
+        bold: [...document.querySelectorAll('[data-im="lead"] b')].map((b) => b.textContent ?? ""),
+        tiers: [...document.querySelectorAll(".im-tiers li")].map((li) => ({ tone: (li as HTMLElement).dataset.tier, name: li.querySelector(".im-tname")?.childNodes[0]?.textContent ?? "", chip: li.querySelector(".im-chip")?.textContent ?? "", n: Number(li.querySelector('[data-im="tier-n"]')?.textContent), text: li.querySelector("p")?.textContent ?? "" })),
+        captions: [...document.querySelectorAll(".im-st")].map((st) => [(st as HTMLElement).dataset.step, st.querySelector("small")?.textContent ?? ""]),
+        markFirst: markRow.bottom <= pops.top, file: t('[data-im="file"]'),
+      };
+    });
+    record("S1", "summary", { m, s });
+    await shot(page, "overview-1440", true);
+    expect(m, "the summary has a mark").not.toBeNull();
+    expect(m!.size).toEqual([84, 84]);
+    expect(m!.bg, "the mark is --go").toBe(GO);
+    expect(m!.drawn, "under reduced motion the tick is drawn").toBe("0px");
+    expect(s.title).toBe("We've read your file.");
+    expect(s.line).toBe("34 rows, read and sorted. Nothing is saved yet.");
+    expect(s.markFirst, "the mark comes before the cards").toBe(true);
+    expect(s.file, "the chip is the file's name alone").not.toMatch(/rows?/);
+    const ask = s.tiers.filter((t) => t.tone === "ask");
+    expect(ask.length, "both cards have a tier that needs an answer").toBe(2);
+    for (const t of ask) expect(t.name.trim()).toBe("Need an answer");
+    expect(ask.map((t) => t.chip)).toEqual(["Step 1", "Step 2"]);
+    expect(s.captions.filter(([id]) => id === "agents" || id === "queries").map(([, c]) => c)).toEqual(ask.map((t) => `${t.n} to answer`));
+    expect(s.lead).toMatch(/^Most of it's ready to go\. .* Each one is a quick pick, and then everything lands at once\.$/);
+    expect(s.bold).toEqual([`${ask[0].n} agents need an answer`, `${ask[1].n} queries need an answer`]);
+    const text = await reviewText(page);
+    expect(text).not.toMatch(/optional/i);
+    expect(text).not.toMatch(/chances to sharpen|to sharpen/i);
+    const hits = await sage(page);
+    expect(hits.filter((h) => h.mark).length, "the sweep sees the mark").toBeGreaterThan(0);
+    expect(hits.filter((h) => !h.mark), "nothing but the mark is sage").toEqual([]);
+    /* without a row count the line states none */
+    await lab(page, "s=overview&fx=review", WIDE, { motion: "reduce" });
+    expect(await page.locator('[data-im="read-line"]').textContent()).toBe("Read and sorted. Nothing is saved yet.");
+  });
+
+  test("S1 duplicates: Continue lights only when every set is decided, then the mark", async ({ page }) => {
+    await lab(page, "s=review&fx=dupes", WIDE, { motion: "reduce" });
+    const primary = page.locator('[data-im="primary"]');
+    const openSets = () => page.locator('[data-dup-state="open"]').count();
+    const before = { open: await openSets(), off: await primary.isDisabled(), hint: await page.locator('[data-im="hint"]').allTextContents() };
+    expect(before.open, "the fixture opens with sets to decide").toBeGreaterThan(1);
+    expect(before.off, "Continue is off while a set is undecided").toBe(true);
+    await decideDuplicates(page, { keepOne: /Finch/ });
+    expect(await openSets(), "every set is decided").toBe(0);
+    await page.locator('[data-im="dupes-done"]').waitFor({ timeout: 5000 });
+    const m = await mark(page, '[data-im="dupes-done"]');
+    const d = await page.evaluate(() => ({
+      head: document.querySelector('[data-im="dupes-done"] [data-im="title"]')?.textContent ?? "", line: document.querySelector('[data-im="dupes-line"]')?.textContent ?? "",
+      list: document.querySelector('[data-im="decided"] .im-listtitle')?.textContent ?? "", change: document.querySelector('[data-im="change-decision"]')?.textContent ?? "",
+      rows: [...document.querySelectorAll("[data-decided]")].map((r) => ({ name: r.querySelector(".im-rwname")?.textContent ?? "", sub: r.querySelector(".im-rwsub")?.textContent ?? "", chip: r.querySelector('[data-im="decided-chip"]')?.textContent ?? "", chipBg: getComputedStyle(r.querySelector('[data-im="decided-chip"]')!).backgroundColor })),
+      hint: document.querySelector('[data-im="hint"]')?.textContent ?? "", openList: document.querySelectorAll('[data-im="list"]').length,
+    }));
+    record("S1", "dupes-done", { before, m, d, off: await primary.isDisabled() });
+    await shot(page, "dupes-done-1440", true);
+    expect(m!.size).toEqual([84, 84]);
+    expect(m!.bg).toBe(GO);
+    expect(d.head).toBe("Duplicates sorted.");
+    expect(d.line).toMatch(/^\d+ sets? merged\. Their queries moved across, nothing lost\. 1 set kept as separate agents\. \d+ agents go forward\.$/);
+    expect(d.list).toBe("What you decided");
+    expect(d.change).toBe("Change a decision");
+    expect(d.rows.length).toBeGreaterThan(1);
+    expect(d.rows.filter((r) => r.chip === "Merged").every((r) => r.chipBg === "rgb(225, 234, 226)"), "Merged is sage-soft").toBe(true);
+    expect(d.rows.some((r) => r.chip === "Kept both")).toBe(true);
+    expect(d.openList, "the list of sets has given way").toBe(0);
+    expect(d.hint).toMatch(/^Next, (\d+ agents? needs? an answer|your agents)\.$/);
+    expect(await primary.isDisabled(), "Continue lights now").toBe(false);
+    expect((await sage(page)).filter((h) => !h.mark)).toEqual([]);
+    expect(await reviewText(page)).not.toMatch(/optional/i);
+    /* Change a decision brings the sets back, each with its Undo; undoing one puts Continue out again */
+    await page.locator('[data-im="change-decision"]').click();
+    await page.locator('[data-im="dupe-undo"]').first().click();
+    expect(await openSets()).toBeGreaterThan(0);
+    expect(await primary.isDisabled()).toBe(true);
+  });
+
+  test("S1 queries: the last answer brings the sage band, which accounts for every answer", async ({ page }) => {
+    await lab(page, "s=review&fx=review", WIDE, { motion: "reduce" });
+    /* the agents step first: answer whatever it asks, by the quickest honest answer */
+    await answerAgents(page);
+    await page.locator('[data-im="primary"]').click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    expect(await page.locator('[data-im="all-answered"]').count(), "no band while questions are open").toBe(0);
+    const answered = await answerQueries(page);
+    expect(answered, "the fixture's queries step asks something").toBeGreaterThan(3);
+    await page.locator('[data-im="all-answered"]').waitFor({ timeout: 5000 });
+    const m = await mark(page, '[data-im="all-answered"]');
+    const a = await page.evaluate(() => ({
+      head: document.querySelector('[data-im="all-head"]')?.textContent ?? "", line: document.querySelector('[data-im="all-line"]')?.textContent ?? "",
+      band: getComputedStyle(document.querySelector('[data-im="all-answered"]')!).backgroundColor, hint: document.querySelector('[data-im="hint"]')?.textContent ?? "",
+      primary: document.querySelector('[data-im="primary"]')?.textContent ?? "", sub: document.querySelector('[data-im="title-sub"]')?.textContent ?? "",
+    }));
+    record("S1", "queries-done", { m, a, answered });
+    await shot(page, "queries-done-1440", true);
+    expect(m!.size).toEqual([52, 52]);
+    expect(m!.bg).toBe(GO);
+    expect(a.band, "the band is sage-soft").toBe("rgb(225, 234, 226)");
+    expect(a.head).toMatch(/^All \d+ answered\.$/);
+    const parts = a.line.replace(/\.$/, "").split(", ");
+    expect(parts.length).toBeGreaterThan(1);
+    for (const p of parts) expect(p).toMatch(/^\d+ (dates? confirmed|dates? added|left blank on purpose|status(es)? set|details? checked)$/);
+    expect(a.line, "an undated answer is accounted for").toMatch(/\d+ left blank on purpose/);
+    expect(a.hint).toMatch(/^\d+ agents and \d+ queries will be written\. The dashboard opens when it's done\.$/);
+    expect(a.primary).toBe("Import and get started");
+    expect(a.sub).toBe("Every question answered. Nothing is saved yet.");
+    expect((await sage(page)).filter((h) => !h.mark)).toEqual([]);
+    expect(await reviewText(page)).not.toMatch(/optional/i);
   });
 });

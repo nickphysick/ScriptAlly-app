@@ -9,6 +9,7 @@
  *   IF_SHOTS=1    write the report's screenshots
  *   IF_MUTATE=U2  apply U2's named break in the page (fall back to today when the date is missing)
  */
+import { walkSetupToFork } from "./reviewDrive";
 import { test, expect, type Page, type Browser } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -55,13 +56,8 @@ async function walk(browser: Browser, baseURL: string, w: Walk) {
     await page.getByRole("button", { name: /^Sign in$/ }).last().click();
 
     // set-up: the journey question, the book, the fork
-    await page.getByText("A few queries out").first().click({ timeout: 30_000 });
-    await page.getByRole("button", { name: /^Continue$/ }).click();
-    await page.getByPlaceholder("e.g. The Salt Path Home").fill("The Salt Road", { timeout: 20_000 });
-    await page.getByText("Select…").first().click();
-    await page.getByText("Thriller", { exact: true }).last().click();
-    await page.getByRole("button", { name: /^Continue$/ }).click();
-    await page.locator('[data-act="upload"]').waitFor({ timeout: 20_000 });
+    /* v9: set-up's book step is the acknowledgement, the title and "Your book" (one walker). */
+    await walkSetupToFork(page);
     await page.locator('input[type="file"]').nth(1).setInputFiles(FX(w.file));
 
     // the summary
