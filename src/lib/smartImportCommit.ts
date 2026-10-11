@@ -61,6 +61,71 @@ export function countExistingMatches(result: SmartImportResult, existingAgents: 
 /** Where an all-undated query's ordering keys start. Not a date: see the note at its use. */
 export const UNDATED_ORDER_BASE_MS = 0;
 
+/**
+ * Write an imported query's history: every step its status implies, dated where the file gave a
+ * date and flagged `dateProvisional` where it did not, then derive the query from them.
+ * Shared by every import that creates a query (the template, Smart Import and the column
+ * matcher), so none of them can date a step from the clock.
+ */
+export async function writeImportedHistory(
+  userId: string,
+  queryId: string,
+  q: ParsedQuery,
+  agentName: string,
+  manuscriptTitle: string,
+): Promise<void> {
+  const actCol = collection(db, "users", userId, "queries", queryId, "activity");
+  const existing = await getDocs(actCol);
+  /**
+   * ⚠️ AN IMPORT MAY ONLY DELETE ACTIVITIES THE IMPORT WROTE. This cleared the query's ENTIRE
+   * activity subcollection — every response logged through `recordResponse`, every nudge from
+   * `logNudge`, every status change — and that subcollection is the authoritative one the Query
+   * Centre reads and `recomputeQuery` derives all ten fields from. Re-importing a spreadsheet to
+   * correct one typo destroyed a year of recorded responses, silently, and then re-derived the
+   * query's dates and status from the import's version of events. Nothing warned, and nothing in
+   * the app could put it back.
+   *
+   * Provisional rungs are the import's own and it may replace them freely; anything the writer
+   * recorded is theirs.
+   *
+   * ⚠️ THE DISCRIMINATOR IS AN ID PREFIX, AND THAT IS A WEAKER CONTRACT THAN A STORED FIELD.
+   * `imp-` is on every rung the import writes (see the `setDoc` below) and it is durable because
+   * it IS the document id — but it is not validated by `firestore.rules`, nothing stops a future
+   * writer from minting an `imp-` id, and it carries no reason with it. The honest shape is a
+   * stored `source: "import"` on every import-written rung, with this as the interim
+   * discriminator so the law can land before the schema does.
+   *
+   * ⚠️ AND `dateProvisional` IS NOT A SUFFICIENT DISCRIMINATOR — it is the obvious candidate and
+   * it is wrong. It is set only on the UNDATED subset, so scoping the delete to it would leave
+   * every import-written rung that happens to carry a real date undeletable, and those rungs
+   * would then duplicate on every re-import.
+   */
+  const mine = existing.docs.filter((d) => d.id.startsWith("imp-"));
+  await Promise.all(mine.map((d) => deleteDoc(d.ref)));
+
+  /* ⚠️ AN UNDATED QUERY'S STEPS ARE ORDERED FROM ZERO, NEVER FROM THE IMPORT'S OWN TIME. The key
+     only puts the steps in pipeline order and is flagged `dateProvisional`, so nothing shows
+     it. But a key of "now" is still a date in the record: a step the writer later dates in
+     the past is clamped to sit after the latest step, so it was stored as the day of the
+     import instead of the day they chose. */
+  for (const rung of assignTimes(impliedRungs(q), UNDATED_ORDER_BASE_MS)) {
+    const id = "imp-" + Math.random().toString(36).substr(2, 9);
+    await setDoc(doc(actCol, id), {
+      type: rung.status,
+      resultingStatus: rung.status,
+      createdAt: Timestamp.fromMillis(rung.ms),
+      // A carried note (the duplicate-collapse harvest, e.g. "asked for 50pp") rides its own rung;
+      // ordinary imports have none → the generated label, byte-identical to before.
+      note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
+      ...(rung.provisional ? { dateProvisional: true } : {}),
+      queryId,
+      agentName,
+      manuscriptTitle,
+    });
+  }
+  await recomputeQuery(userId, queryId);
+}
+
 export async function commitSmartImport(
   deps: CommitDeps,
   result: SmartImportResult,
@@ -182,56 +247,7 @@ export async function commitSmartImport(
     }
 
     try {
-      const actCol = collection(db, "users", userId, "queries", queryId, "activity");
-      const existing = await getDocs(actCol);
-      /**
-       * ⚠️ AN IMPORT MAY ONLY DELETE ACTIVITIES THE IMPORT WROTE. This cleared the query's ENTIRE
-       * activity subcollection — every response logged through `recordResponse`, every nudge from
-       * `logNudge`, every status change — and that subcollection is the authoritative one the Query
-       * Centre reads and `recomputeQuery` derives all ten fields from. Re-importing a spreadsheet to
-       * correct one typo destroyed a year of recorded responses, silently, and then re-derived the
-       * query's dates and status from the import's version of events. Nothing warned, and nothing in
-       * the app could put it back.
-       *
-       * Provisional rungs are the import's own and it may replace them freely; anything the writer
-       * recorded is theirs.
-       *
-       * ⚠️ THE DISCRIMINATOR IS AN ID PREFIX, AND THAT IS A WEAKER CONTRACT THAN A STORED FIELD.
-       * `imp-` is on every rung the import writes (see the `setDoc` below) and it is durable because
-       * it IS the document id — but it is not validated by `firestore.rules`, nothing stops a future
-       * writer from minting an `imp-` id, and it carries no reason with it. The honest shape is a
-       * stored `source: "import"` on every import-written rung, with this as the interim
-       * discriminator so the law can land before the schema does.
-       *
-       * ⚠️ AND `dateProvisional` IS NOT A SUFFICIENT DISCRIMINATOR — it is the obvious candidate and
-       * it is wrong. It is set only on the UNDATED subset, so scoping the delete to it would leave
-       * every import-written rung that happens to carry a real date undeletable, and those rungs
-       * would then duplicate on every re-import.
-       */
-      const mine = existing.docs.filter((d) => d.id.startsWith("imp-"));
-      await Promise.all(mine.map((d) => deleteDoc(d.ref)));
-
-      /* ⚠️ AN UNDATED QUERY'S STEPS ARE ORDERED FROM ZERO, NEVER FROM THE IMPORT'S OWN TIME. The key
-         only puts the steps in pipeline order and is flagged `dateProvisional`, so nothing shows
-         it. But a key of "now" is still a date in the record: a step the writer later dates in
-         the past is clamped to sit after the latest step, so it was stored as the day of the
-         import instead of the day they chose. */
-      for (const rung of assignTimes(impliedRungs(q), UNDATED_ORDER_BASE_MS)) {
-        const id = "imp-" + Math.random().toString(36).substr(2, 9);
-        await setDoc(doc(actCol, id), {
-          type: rung.status,
-          resultingStatus: rung.status,
-          createdAt: Timestamp.fromMillis(rung.ms),
-          // A carried note (the duplicate-collapse harvest, e.g. "asked for 50pp") rides its own rung;
-          // ordinary imports have none → the generated label, byte-identical to before.
-          note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
-          ...(rung.provisional ? { dateProvisional: true } : {}),
-          queryId,
-          agentName: agent.name,
-          manuscriptTitle,
-        });
-      }
-      await recomputeQuery(userId, queryId);
+      await writeImportedHistory(userId, queryId, q, agent.name, manuscriptTitle);
       outcome.queriesImported++;
     } catch (e) {
       console.error("Smart Import: seeding/recompute failed:", agent.name, e);

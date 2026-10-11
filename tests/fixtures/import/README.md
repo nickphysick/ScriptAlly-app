@@ -12,3 +12,4 @@ Built by `node tests/fixtures/import/build.mjs`. Names are invented.
 
 - `template-window.csv` — the template with two agents: one whose row gives a response window (6 weeks), one whose row gives none.
 - `matcher-agents.csv` — an agents sheet for the column matcher: one row with a rating of 5, one with none, one with a rating that is not a number from 1 to 5.
+- `matcher-queries.csv` — a queries sheet for the column matcher: one ISO date, one blank, one unreadable ("sometime in May"), one that could mean two days (03/04/2026), one day-first (14/03/2026).

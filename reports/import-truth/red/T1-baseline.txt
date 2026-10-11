@@ -1,0 +1,1154 @@
+
+ RUN  v3.2.6 /private/tmp/sa-truth-base
+
+ ❯ src/lib/importNoClock.test.ts (7 tests | 5 failed) 8ms
+   × T1 · the column matcher > matcher-queries.csv: each date cell is the day the file wrote, or no date 3ms
+     → Invalid time value
+   × T1 · the column matcher > the history written for every row carries the file's day or none, and never the clock 2ms
+     → {"type":"Queried","resultingStatus":"Queried","createdAt":{"_ts":1940907967890},"queryId":"q1","agentName":"Clara Voss","manuscriptTitle":"The Salt Road"}: expected true to be false // Object.is equality
+   ✓ T1 · the column matcher > what addQuery does with an undated matcher row: no sent date, no history of its own 0ms
+   × T1 · the column matcher > the matcher passes the import flag, writes the history from the sheet, and falls back to the clock nowhere 1ms
+     → expected '\n\nimport React, { useState, useEffe…' to match /addQuery\(\{ \.\.\.queryData, id: que…/
+   × T1 · the email import > an undated email: no sent date, the import flag, and the clock nowhere in the history 1ms
+     → addQuery is told this is an import: expected undefined to be true // Object.is equality
+   ✓ T1 · the email import > a dated email keeps its date 0ms
+   × T1 · the email import > the commit reads the clock nowhere 0ms
+     → expected '\nimport { collection, doc, getDocs, …' not to match /Date\.now\(\)|new Date\(\)/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/importNoClock.test.ts > T1 · the column matcher > matcher-queries.csv: each date cell is the day the file wrote, or no date
+RangeError: Invalid time value
+ ❯ Module.matcherDate src/lib/importMatcher.ts:83:124
+     81| 
+     82| // seam for the red reading: the baseline's behaviour, under the names…
+     83| export function matcherDate(raw: string | null | undefined): any { con…
+       |                                                                                                                            ^
+     84| export function undatedQueryLine(_r: number, _raw: string, _w: string)…
+     85| 
+ ❯ src/lib/importNoClock.test.ts:57:34
+ ❯ src/lib/importNoClock.test.ts:57:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/lib/importNoClock.test.ts > T1 · the column matcher > the history written for every row carries the file's day or none, and never the clock
+AssertionError: {"type":"Queried","resultingStatus":"Queried","createdAt":{"_ts":1940907967890},"queryId":"q1","agentName":"Clara Voss","manuscriptTitle":"The Salt Road"}: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/lib/importNoClock.test.ts:77:72
+     75|       const steps = vi.mocked(setDoc).mock.calls.map((c) => c[1] as an…
+     76|       expect(steps.length, `${agent}: steps were written`).toBeGreater…
+     77|       for (const s of steps) expect(mentionsNow(s), JSON.stringify(s))…
+       |                                                                        ^
+     78|       const queried = steps.find((s) => s.resultingStatus === QuerySta…
+     79|       if (sent.iso) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/lib/importNoClock.test.ts > T1 · the column matcher > the matcher passes the import flag, writes the history from the sheet, and falls back to the clock nowhere
+AssertionError: expected '\n\nimport React, { useState, useEffe…' to match /addQuery\(\{ \.\.\.queryData, id: que…/
+
+[32m- Expected:[39m 
+/addQuery\(\{ \.\.\.queryData, id: queryId \}, true, \{ imported: true \}\)/
+
+[31m+ Received:[39m 
+"
+
+import React, { useState, useEffect } from \"react\";
+import \"./onboarding/onboarding.css\";
+import \"./onboarding/importFlow.css\";
+import \"./import/importMatcher.css\";
+import { OpenTitle, OptionGroup, OptionRow } from \"./onboarding/setupParts\";
+import {
+  MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
+  MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR,
+} from \"../lib/importMatcher\";
+import { useScriptAllyDb } from \"../lib/db\";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from \"../lib/agentDisplay\";
+import { parseLegacyComps } from \"../lib/comps\";
+import {
+  UserPlan,
+  QueryStatus,
+  ManuscriptStatus,
+  SubmissionMethod,
+  SubmissionStatus,
+  Agent,
+  Manuscript,
+  Query,
+  Activity,
+  ActivityType,
+  User
+} from \"../types\";
+import {
+  UploadCloud,
+  CheckCircle,
+  Database,
+  Columns,
+  AlertTriangle,
+  FileText,
+  Sparkles,
+  ChevronRight,
+  RefreshCw,
+  Users,
+  BookOpen,
+  FileSpreadsheet,
+  HelpCircle,
+  User as UserIcon,
+  Activity as ActivityIcon,
+  Trash2
+} from \"lucide-react\";
+
+
+function parseCSV(text: string): string[][] {
+  const lines: string[][] = [];
+  let row: string[] = [\"\"];
+  let insideQuote = false;
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+    
+    if (char === '\"') {
+      if (insideQuote && nextChar === '\"') {
+        row[row.length - 1] += '\"';
+        i++; 
+      } else {
+        insideQuote = !insideQuote;
+      }
+    } else if (char === ',' && !insideQuote) {
+      row.push(\"\");
+    } else if ((char === '\\r' || char === '\\n') && !insideQuote) {
+      if (char === '\\r' && nextChar === '\\n') {
+        i++; 
+      }
+      lines.push(row);
+      row = [\"\"];
+    } else {
+      row[row.length - 1] += char;
+    }
+  }
+  if (row.length > 1 || row[0] !== \"\") {
+    lines.push(row);
+  }
+  
+  
+  return lines.filter(r => r.some(cell => cell.trim() !== \"\"));
+}
+
+
+function findFuzzyMatch(headers: string[], targetFields: string[]): Record<string, string> {
+  const mapping: Record<string, string> = {};
+  
+  const rules: Record<string, string[]> = {
+    name: [\"name\", \"agent\", \"contact\", \"full name\", \"agent name\", \"person\", \"representative\", \"username\", \"pen name\"],
+    agency: [\"agency\", \"literary agency\", \"company\", \"firm\", \"organization\"],
+    email: [\"email\", \"e-mail\", \"email address\", \"contact email\", \"address\", \"registered email\"],
+    website: [\"website\", \"site\", \"url\", \"web page\", \"web\", \"link\"],
+    genres: [\"genres\", \"categories\", \"subjects\", \"genre list\", \"tags\"],
+    mswlNotes: [\"mswl\", \"mswl notes\", \"manuscript wish list\", \"wishlist\", \"interests\"],
+    starRating: [\"rating\", \"stars\", \"star rating\", \"rank\", \"importance\", \"priority\"],
+    notes: [\"notes\", \"comments\", \"remarks\", \"memo\", \"description\"],
+    
+    title: [\"title\", \"book title\", \"work\", \"manuscript title\", \"novel\", \"manuscript\", \"story\"],
+    genre: [\"genre\", \"category\", \"manuscript genre\", \"book genre\"],
+    wordCount: [\"word count\", \"words\", \"wordcount\", \"length\", \"size\"],
+    logline: [\"logline\", \"hook\", \"pitch\", \"one line\", \"elevator pitch\", \"summary\"],
+    comps: [\"comps\", \"comparable titles\", \"comparables\", \"similar books\"],
+    ageCategory: [\"age category\", \"audience\", \"target audience\", \"age\", \"category classification\"],
+    
+    manuscriptId: [\"manuscript\", \"manuscript title\", \"book\", \"story\", \"work to query\", \"related title\"],
+    agentId: [\"agent\", \"agent name\", \"recipient\", \"contact queried\"],
+    status: [\"status\", \"query status\", \"outcome\", \"state\", \"result\", \"action\", \"status state\", \"subscription state\"],
+    dateSent: [\"date sent\", \"sent date\", \"date\", \"lodged\", \"dispatched\", \"sent\"],
+    personalisationNotes: [\"personalization\", \"personalisation\", \"pitch intro\", \"personalized notes\"],
+
+    queryId: [\"query\", \"query id\", \"queryid\", \"related query\", \"submission\"],
+    activityType: [\"type\", \"activity type\", \"action\", \"event\", \"event type\"],
+    description: [\"description\", \"summary\", \"activity desc\", \"short explanation\", \"message\", \"subject\"],
+    date: [\"date\", \"timestamp\", \"recorded date\", \"created date\", \"recorded\", \"time\", \"sign up date\"],
+    details: [\"details\", \"body\", \"further info\", \"payload\", \"extra\", \"notes\"],
+
+    plan: [\"plan\", \"user plan\", \"account level\", \"level\", \"tier\", \"plan tier\"],
+    trialStartDate: [\"trial start\", \"trial startDate\", \"start date\", \"subscribed date\"]
+  };
+
+  for (const field of targetFields) {
+    const matchedHeader = headers.find(h => {
+      const cleanHeader = h.toLowerCase().trim().replace(/[_\\-\\s]+/g, \"\");
+      const fieldList = rules[field] || [field];
+      return fieldList.some(keyword => {
+        const cleanKeyword = keyword.replace(/[_\\-\\s]+/g, \"\");
+        return cleanHeader === cleanKeyword || cleanHeader.includes(cleanKeyword) || cleanKeyword.includes(cleanHeader);
+      });
+    });
+    if (matchedHeader) {
+      mapping[field] = matchedHeader;
+    } else {
+      mapping[field] = \"\";
+    }
+  }
+  
+  return mapping;
+}
+
+
+function normalizeQueryStatus(val: string): QueryStatus {
+  const clean = val.toLowerCase().trim();
+  if (clean.includes(\"reject\") || clean === \"pass\" || clean === \"no\" || clean === \"no thanks\" || clean === \"no reply\") {
+    return QueryStatus.REJECTED;
+  }
+  if (clean.includes(\"partial req\") || clean.includes(\"request partial\")) {
+    return QueryStatus.PARTIAL_REQUESTED;
+  }
+  if (clean.includes(\"partial sent\") || clean.includes(\"sent partial\")) {
+    return QueryStatus.PARTIAL_SENT;
+  }
+  if (clean.includes(\"full req\") || clean.includes(\"request full\")) {
+    return QueryStatus.FULL_REQUESTED;
+  }
+  if (clean.includes(\"full sent\") || clean.includes(\"sent full\")) {
+    return QueryStatus.FULL_SENT;
+  }
+  if (clean.includes(\"r&r\") || clean.includes(\"revise\") || clean.includes(\"resubmit\")) {
+    return QueryStatus.REVISE_RESUBMIT;
+  }
+  if (clean.includes(\"offer\") || clean.includes(\"representation\")) {
+    return QueryStatus.OFFER;
+  }
+  if (clean.includes(\"withdraw\")) {
+    return QueryStatus.WITHDRAWN;
+  }
+  if (clean.includes(\"cnr\") || clean.includes(\"no response\") || clean.includes(\"closed\")) {
+    return QueryStatus.NO_RESPONSE;
+  }
+  return QueryStatus.QUERIED; 
+}
+
+
+
+
+
+type ImportType = \"agents\" | \"manuscripts\" | \"queries\" | \"activities\";
+
+export const ImportCsv: React.FC<{
+  onNavigate: (tab: string, subPageName?: string) => void;
+  
+  onBack?: () => void;
+}> = ({ onNavigate, onBack }) => {
+  const {
+    currentUser,
+    agents,
+    manuscripts,
+    queries,
+    addAgent,
+    addManuscript,
+    addQuery,
+    addActivity,
+    updateQuery,
+  } = useScriptAllyDb();
+
+  const [importType, setImportType] = useState<ImportType>(\"agents\");
+  const [step, setStep] = useState<number>(1); 
+  const [fileName, setFileName] = useState<string>(\"\");
+  const [readError, setReadError] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const [rawText, setRawText] = useState<string>(\"\");
+  const [csvRows, setCsvRows] = useState<string[][]>([]);
+  const [headers, setHeaders] = useState<string[]>([]);
+  
+  
+  const [fieldMappings, setFieldMappings] = useState<Record<string, string>>({});
+  
+  
+  const [isImporting, setIsImporting] = useState<boolean>(false);
+  const [importProgress, setImportProgress] = useState<number>(0);
+  const [importResults, setImportResults] = useState<{
+    successful: number;
+    failed: number;
+    errors: string[];
+    logs: string[];
+    
+    
+    unmatched: {
+      row: number; missing: string; detail: string;
+      queryId: string; msTitle: string; agentName: string;
+      needsMs: boolean; needsAgent: boolean;
+    }[];
+  }>({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
+
+  const targetFields = {
+    agents: [\"name\", \"agency\", \"email\", \"website\", \"genres\", \"mswlNotes\", \"starRating\", \"notes\"],
+    manuscripts: [\"title\", \"genre\", \"wordCount\", \"logline\", \"comps\", \"ageCategory\"],
+    queries: [\"manuscriptId\", \"agentId\", \"status\", \"dateSent\", \"personalisationNotes\"],
+    activities: [\"queryId\", \"manuscriptId\", \"activityType\", \"description\", \"date\", \"details\"],
+    user: [\"name\", \"email\", \"plan\", \"trialStartDate\", \"subscriptionStatus\"]
+  };
+
+  
+  const columnExamples = {
+    agents: \"Name, Agency, Email, Website, Genres, MSWL Notes, Star Rating, Notes\",
+    manuscripts: \"Title, Genre, Word Count, Logline, Comps, Audience Age\",
+    queries: \"Manuscript Title, Agent Name, State, Date Sent, Custom Intro Text\",
+    activities: \"Related Query, Related Title, Event Type, Description, Date, Extras\",
+    user: \"Pen Name, Email, Plan Tier, Sign up Date, Subscription State\"
+  };
+
+  
+  const handleParse = () => {
+    if (!rawText.trim()) {
+      setReadError(\"Choose a file or paste the rows first.\");
+      return;
+    }
+    
+    const rows = parseCSV(rawText);
+    if (rows.length < 2) {
+      setReadError(\"The file needs a row of headings and at least one row beneath it.\");
+      return;
+    }
+    
+    setReadError(null);
+    const parsedHeaders = rows[0].map(h => h.trim());
+    setHeaders(parsedHeaders);
+    setCsvRows(rows.slice(1));
+    
+    
+    const fields = targetFields[importType];
+    const initialMapping = findFuzzyMatch(parsedHeaders, fields);
+    setFieldMappings(initialMapping);
+    
+    setStep(2);
+  };
+
+  
+  const readFile = (file: File | undefined | null) => {
+    if (!file) return;
+    setFileName(file.name);
+    setReadError(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setRawText(text);
+    };
+    reader.readAsText(file);
+  };
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => readFile(e.target.files?.[0]);
+
+  
+  
+  const [creating, setCreating] = useState<number | null>(null);
+  const createFromRow = async (u: {
+    row: number; queryId: string; msTitle: string; agentName: string;
+    needsMs: boolean; needsAgent: boolean;
+  }) => {
+    if (!currentUser) return;
+    setCreating(u.row);
+    try {
+      const patch: { manuscriptId?: string; agentId?: string } = {};
+      if (u.needsMs && u.msTitle) {
+        const id = \"ms-fromrow-\" + Math.random().toString(36).slice(2, 11);
+        const res = await addManuscript({
+          id,
+          title: u.msTitle,
+          
+          genre: \"\", subGenres: [], wordCount: 0, logline: \"\", ageCategory: \"\", comps: [],
+          status: ManuscriptStatus.QUERYING,
+        } as never, true);
+        if (res.success) patch.manuscriptId = id;
+      }
+      if (u.needsAgent && u.agentName) {
+        const id = \"agent-fromrow-\" + Math.random().toString(36).slice(2, 11);
+        const res = await addAgent({
+          id,
+          name: u.agentName,
+          agency: \"\", email: \"\", website: \"\", genres: [], mswlNotes: \"\", notes: \"\",
+          submissionStatus: SubmissionStatus.OPEN,
+          submissionMethod: SubmissionMethod.EMAIL,
+          
+          materialsWanted: [],
+          
+        } as never, true);
+        if (res.success) patch.agentId = id;
+      }
+      if (Object.keys(patch).length) {
+        await updateQuery(u.queryId, patch as never);
+        setImportResults((r) => ({ ...r, unmatched: r.unmatched.filter((x) => x.row !== u.row) }));
+      }
+    } finally {
+      setCreating(null);
+    }
+  };
+
+  const handleExecuteImport = async () => {
+    setIsImporting(true);
+    setImportProgress(0);
+    setStep(3);
+    
+    let successfulCount = 0;
+    let failedCount = 0;
+    const errorsList: string[] = [];
+    const unmatchedList: {
+    row: number; missing: string; detail: string;
+    queryId: string; msTitle: string; agentName: string;
+    needsMs: boolean; needsAgent: boolean;
+  }[] = [];
+    const runLogs: string[] = [];
+    
+    const total = csvRows.length;
+
+    
+    const localManuscripts = [...manuscripts];
+    const localAgents = [...agents];
+    const localQueries = [...queries];
+    
+    for (let index = 0; index < total; index++) {
+      const row = csvRows[index];
+      
+      
+      const getMappedValue = (field: string): string => {
+        const colHeader = fieldMappings[field];
+        if (!colHeader) return \"\";
+        const colIdx = headers.indexOf(colHeader);
+        return colIdx !== -1 && row[colIdx] !== undefined ? row[colIdx].trim() : \"\";
+      };
+
+      try {
+        if (importType === \"agents\") {
+          const name = getMappedValue(\"name\");
+          if (!name) {
+            failedCount++;
+            errorsList.push(ERR.noName(index + 2));
+            continue;
+          }
+
+          
+          const foundAgent = localAgents.find(a => a.name.toLowerCase() === name.toLowerCase());
+          if (foundAgent) {
+            runLogs.push(LOG.agentExists(name));
+            successfulCount++;
+            continue;
+          }
+          
+          
+          const agency = getMappedValue(\"agency\");
+          const email = getMappedValue(\"email\");
+          const website = getMappedValue(\"website\") || \"\";
+          
+          
+          const genresRaw = getMappedValue(\"genres\");
+          const genres = genresRaw 
+            ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean)
+            : [\"General Fiction\"];
+            
+          const mswlNotes = getMappedValue(\"mswlNotes\");
+          
+          
+          const starRaw = parseInt(getMappedValue(\"starRating\"), 10);
+          const starRating: 1 | 2 | 3 | 4 | 5 = (!isNaN(starRaw) && starRaw >= 1 && starRaw <= 5)
+            ? (starRaw as any)
+            : 3;
+            
+          
+          const notes = getMappedValue(\"notes\");
+
+          const agentData = {
+            name,
+            agency,
+            email,
+            website,
+            genres,
+            mswlNotes,
+            starRating,
+            submissionStatus: SubmissionStatus.OPEN,
+            responseTimeWeeks: 8,
+            noResponseMeansNo: true,
+            submissionMethod: SubmissionMethod.EMAIL,
+            materialsWanted: [\"Query Letter\", \"Synopsis\", \"Sample Pages\"],
+            notes
+          };
+
+          const newAgId = \"agent-imported-\" + Math.random().toString(36).substr(2, 9);
+          const res = await addAgent({ ...agentData, id: newAgId }, true);
+          if (res.success) {
+            const addedAgRef = {
+              ...agentData,
+              id: newAgId,
+              userId: currentUser?.id || \"\",
+              dateAdded: new Date().toISOString(),
+              lastCheckedDate: new Date().toISOString()
+            };
+            localAgents.push(addedAgRef);
+            successfulCount++;
+            runLogs.push(LOG.agentAdded(name, agency));
+          } else {
+            failedCount++;
+            errorsList.push(ERR.agentFailed(name, res.error));
+          }
+          
+        } else if (importType === \"manuscripts\") {
+          const title = getMappedValue(\"title\");
+          if (!title) {
+            failedCount++;
+            errorsList.push(ERR.noTitle(index + 2));
+            continue;
+          }
+
+          
+          const foundMs = localManuscripts.find(m => m.title.toLowerCase() === title.toLowerCase());
+          if (foundMs) {
+            runLogs.push(LOG.manuscriptExists(title));
+            successfulCount++;
+            continue;
+          }
+
+          const genre = getMappedValue(\"genre\");
+          
+          const wordCount = parseInt(getMappedValue(\"wordCount\"), 10) || 0;
+          const logline = getMappedValue(\"logline\");
+          
+          const comps = parseLegacyComps(getMappedValue(\"comps\"));
+          const ageCategory = getMappedValue(\"ageCategory\");
+
+          const msData = {
+            title,
+            genre,
+            subGenres: [],
+            wordCount,
+            logline,
+            comps,
+            ageCategory,
+            status: ManuscriptStatus.READY_TO_QUERY
+          };
+
+          const newMsId = \"ms-imported-\" + Math.random().toString(36).substr(2, 9);
+          const res = await addManuscript({ ...msData, id: newMsId }, true);
+          if (res.success) {
+            const addedMsRef = {
+              ...msData,
+              id: newMsId,
+              userId: currentUser?.id || \"\",
+              statusChangedDate: new Date().toISOString()
+            } as any;
+            localManuscripts.push(addedMsRef);
+            successfulCount++;
+            runLogs.push(LOG.manuscriptAdded(title));
+          } else {
+            failedCount++;
+            errorsList.push(ERR.manuscriptFailed(title, res.error));
+          }
+          
+        } else if (importType === \"queries\") {
+          
+          const msTitleInput = getMappedValue(\"manuscriptId\");
+          const agentNameInput = getMappedValue(\"agentId\");
+          const statusInput = getMappedValue(\"status\");
+          const dateSentInput = getMappedValue(\"dateSent\");
+          const personalisationNotes = getMappedValue(\"personalisationNotes\");
+
+          if (!msTitleInput || !agentNameInput) {
+            failedCount++;
+            errorsList.push(ERR.needsBoth(index + 2));
+            continue;
+          }
+
+          
+          let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
+          let foundAgent = localAgents.find(a => a.name.toLowerCase() === agentNameInput.toLowerCase());
+
+          
+
+          
+          const queryId = \"q-imported-\" + Math.random().toString(36).substr(2, 9);
+          const queryData = {
+            
+            manuscriptId: foundMs?.id ?? \"\",
+            agentId: foundAgent?.id ?? \"\",
+            packageId: \"\",
+            personalisationNotes,
+            sendMethod: SubmissionMethod.EMAIL,
+            status: normalizeQueryStatus(statusInput),
+            dateSent: dateSentInput ? new Date(dateSentInput).toISOString() : new Date().toISOString()
+          };
+
+          
+          if (!foundMs || !foundAgent) {
+            const missing = !foundMs && !foundAgent ? \"Needs a manuscript and an agent\"
+              : !foundMs ? \"Needs a manuscript\" : \"Needs an agent\";
+            unmatchedList.push({
+              row: index + 2,
+              queryId,
+              msTitle: msTitleInput,
+              agentName: agentNameInput,
+              needsMs: !foundMs,
+              needsAgent: !foundAgent,
+              missing,
+              detail: [!foundMs ? `manuscript “${msTitleInput}”` : null,
+                       !foundAgent ? `agent “${agentNameInput}”` : null]
+                .filter(Boolean).join(\" · \"),
+            });
+          }
+          const res = await addQuery({ ...queryData, id: queryId }, true);
+          if (res.success) {
+            const addedQRef = {
+              ...queryData,
+              id: queryId,
+              userId: currentUser?.id || \"\",
+              responseDeadline: undefined
+            };
+            localQueries.push(addedQRef);
+            successfulCount++;
+            runLogs.push(LOG.queryAdded(msTitleInput, agentNameInput, normalizeQueryStatus(statusInput)));
+          } else {
+            failedCount++;
+            errorsList.push(ERR.queryFailed(index + 2, res.error));
+          }
+        } else if (importType === \"activities\") {
+          const msTitleInput = getMappedValue(\"manuscriptId\");
+          const activityTypeInput = getMappedValue(\"activityType\");
+          
+          const description = getMappedValue(\"description\");
+          const date = getMappedValue(\"date\") ? new Date(getMappedValue(\"date\")).toISOString() : new Date().toISOString();
+          const details = getMappedValue(\"details\") || \"\";
+
+          let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
+          let foundQ = localQueries.find(q => {
+            const ms = localManuscripts.find(m => m.id === q.manuscriptId);
+            return ms && ms.title.toLowerCase() === msTitleInput.toLowerCase();
+          });
+
+          const actVal = activityTypeInput.toLowerCase();
+          let activityType = ActivityType.STATUS_CHANGED;
+          if (actVal.includes(\"nudge\")) activityType = ActivityType.NUDGE_SENT;
+          else if (actVal.includes(\"query\")) activityType = ActivityType.QUERY_SENT;
+          else if (actVal.includes(\"material\")) activityType = ActivityType.MATERIALS_SENT;
+
+          
+          if (!foundQ) {
+            failedCount++;
+            errorsList.push(`Activity row ${index + 2}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`);
+            continue;
+          }
+          const actData = {
+            queryId: foundQ.id,
+            manuscriptId: foundMs?.id ?? \"\",
+            activityType,
+            description,
+            date,
+            details
+          };
+
+          const res = await addActivity(actData);
+          if (res.success) {
+            successfulCount++;
+            runLogs.push(LOG.eventAdded(description));
+          } else {
+            failedCount++;
+            errorsList.push(ERR.eventFailed(res.error));
+          }
+        }
+      } catch (err: any) {
+        failedCount++;
+        errorsList.push(ERR.rowUnreadable(index + 2, String(err?.message || err)));
+      }
+
+      setImportProgress(Math.round(((index + 1) / total) * 100));
+      setImportResults({
+        successful: successfulCount,
+        unmatched: unmatchedList,
+        failed: failedCount,
+        errors: errorsList,
+        logs: runLogs
+      });
+      
+      
+      await new Promise(r => setTimeout(r, 60));
+    }
+
+    setIsImporting(false);
+  };
+
+  const handleReset = () => {
+    setStep(1);
+    setRawText(\"\");
+    setFileName(\"\");
+    setReadError(null);
+    setCsvRows([]);
+    setHeaders([]);
+    setFieldMappings({});
+    setImportProgress(0);
+    setImportResults({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
+  };
+
+  const fieldLabel = (field: string) =>
+    field === \"manuscriptId\" ? \"Reference Manuscript Title\" : field === \"agentId\" ? \"Target Agent Name\" : field.replace(/([A-Z])/g, \" $1\");
+  const isRequired = (field: string) => field === \"name\" || field === \"title\" || field === \"manuscriptId\" || field === \"agentId\";
+  const hasLines = importResults.logs.length > 0 || importResults.errors.length > 0;
+  
+  const shownProgress = isImporting ? importProgress : 100;
+
+  return (
+    <div className=\"sf impg-flow impm\" data-impm=\"\" data-impm-step={step} data-impm-kind={importType}>
+      {onBack && <button type=\"button\" className=\"sf-link impm-back\" onClick={onBack} data-impm=\"back\">{MATCHER_BACK}</button>}
+      <OpenTitle title={MATCHER_TITLE} sub={step === 2 ? MATCHER_SUB : undefined} />
+
+      <ol className=\"im-steps impm-steps\" aria-label=\"The three steps\" data-impm=\"steps\">
+        {MATCHER_STEPS.map((label, i) => {
+          const state = i + 1 < step ? \"done\" : i + 1 === step ? \"on\" : \"todo\";
+          return (
+            <React.Fragment key={label}>
+              {i > 0 && <li className=\"im-stln\" aria-hidden=\"true\" />}
+              <li className={`im-st${state === \"on\" ? \" is-on\" : state === \"done\" ? \" is-done\" : \"\"}`} data-state={state} aria-current={state === \"on\" ? \"step\" : undefined}>
+                <i>{state === \"done\" ? \"✓\" : i + 1}</i>{label}
+              </li>
+            </React.Fragment>
+          );
+        })}
+      </ol>
+
+      {}
+      {step === 1 && (
+        <section className=\"sf-card impm-card\" data-impm=\"card\">
+          <p className=\"sf-qlab\" id=\"impm-kind\">{KIND_QUESTION}</p>
+          <OptionGroup labelledBy=\"impm-kind\">
+            {KINDS.map((k) => (
+              <OptionRow key={k.id} title={k.title} desc={k.desc} selected={importType === k.id} onClick={() => setImportType(k.id)} />
+            ))}
+          </OptionGroup>
+
+          <p className=\"sf-qlab impm-gap\" id=\"impm-file\">{FILE_QUESTION}</p>
+          <div
+            className={`sf-drop impm-drop${over ? \" is-over\" : \"\"}`} role=\"button\" tabIndex={0} data-impm=\"drop\" aria-labelledby=\"impm-file\"
+            onClick={() => fileRef.current?.click()}
+            onKeyDown={(e) => { if (e.key === \"Enter\" || e.key === \" \") { e.preventDefault(); fileRef.current?.click(); } }}
+            onDragOver={(e) => { e.preventDefault(); if (!over) setOver(true); }}
+            onDragLeave={() => setOver(false)}
+            onDrop={(e) => { e.preventDefault(); setOver(false); readFile(e.dataTransfer.files?.[0]); }}
+          >
+            <p className=\"sf-droplead\">{FILE_DROP}</p>
+            <p className=\"sf-droptypes\">{fileName ? fileName : `Expected header example: ${columnExamples[importType]}`}</p>
+          </div>
+          <input ref={fileRef} type=\"file\" accept=\".csv\" onChange={handleFileUpload} style={{ display: \"none\" }} data-impm=\"file\" />
+
+          <label className=\"sf-lab impm-gap\" htmlFor=\"impm-paste\">{FILE_PASTE}</label>
+          <textarea
+            id=\"impm-paste\" className=\"impm-paste\" rows={6} value={rawText} data-impm=\"paste\"
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder={columnExamples[importType]}
+          />
+          {readError && <p className=\"sf-err sf-err--card\" role=\"alert\">{readError}</p>}
+
+          <div className=\"sf-cfoot sf-cfoot--end\">
+            <span className=\"sf-footr\">
+              <button type=\"button\" className=\"sf-btn\" onClick={handleParse} data-impm=\"read\">{FILE_READ}</button>
+            </span>
+          </div>
+        </section>
+      )}
+
+      {}
+      {step === 2 && (
+        <section className=\"sf-card impm-card\" data-impm=\"card\">
+          <table className=\"impm-map\" data-impm=\"map\">
+            <thead>
+              <tr><th scope=\"col\">{MAP_FIELD}</th><th scope=\"col\">Column in your file</th></tr>
+            </thead>
+            <tbody>
+              {targetFields[importType].map((field) => (
+                <tr key={field}>
+                  <th scope=\"row\">
+                    <span className=\"impm-field\">{fieldLabel(field)}</span>
+                    {isRequired(field) && <span className=\"impm-req\">{MAP_REQUIRED}</span>}
+                  </th>
+                  <td>
+                    <select
+                      className=\"sf-in impm-select\" value={fieldMappings[field] || \"\"} aria-label={fieldLabel(field)}
+                      onChange={(e) => setFieldMappings({ ...fieldMappings, [field]: e.target.value })}
+                    >
+                      <option value=\"\">{MAP_SKIP}</option>
+                      {headers.map((h) => (
+                        <option key={h} value={h}>Matched to: \"{h}\"</option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className=\"impm-preview\" data-impm=\"preview\">
+            <p className=\"sf-lab\">Quick Row Mapping Sample of parsed table ({csvRows.length} total rows)</p>
+            <div className=\"impm-previewscroll\">
+              <table className=\"impm-prev\">
+                <thead>
+                  <tr>
+                    {targetFields[importType].slice(0, 4).map((f) => (
+                      <th key={f}>{f === \"manuscriptId\" ? \"Manuscript\" : f === \"agentId\" ? \"Agent\" : f.replace(/([A-Z])/g, \" $1\")}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvRows.slice(0, 2).map((row, idx) => (
+                    <tr key={idx}>
+                      {targetFields[importType].slice(0, 4).map((field) => {
+                        const colName = fieldMappings[field];
+                        const colIdx = headers.indexOf(colName);
+                        const value = colIdx !== -1 && row[colIdx] !== undefined ? row[colIdx] : \"--\";
+                        return <td key={field} title={value}>{field === \"status\" && importType === \"queries\" ? String(normalizeQueryStatus(value)) : String(value)}</td>;
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {importType === \"queries\" && <p className=\"impm-note\" data-impm=\"link-note\">{MAP_LINK_NOTE}</p>}
+
+          <div className=\"sf-cfoot\">
+            <button type=\"button\" className=\"sf-link sf-link--quiet\" onClick={handleReset} data-impm=\"start-again\">{MAP_START_AGAIN}</button>
+            <span className=\"sf-footr\">
+              <button type=\"button\" className=\"sf-btn\" onClick={handleExecuteImport} data-impm=\"import\">{importRowsLabel(csvRows.length)}</button>
+            </span>
+          </div>
+        </section>
+      )}
+
+      {}
+      {step === 3 && (
+        <section className=\"sf-card impm-card\" data-impm=\"card\" aria-busy={isImporting}>
+          <h2 className=\"sf-h impm-runh\" data-impm=\"run-title\">{isImporting ? RUN_WORKING : RUN_FINISHED}</h2>
+          {isImporting && <p className=\"impm-runsub\">{RUN_KEEP_OPEN}</p>}
+
+          <div className=\"impm-progress\" data-impm=\"progress\">
+            <span className=\"sf-lab\">{RUN_PROGRESS}</span>
+            <span className=\"impm-track\"><span style={{ width: `${shownProgress}%` }} /></span>
+            <span className=\"impm-pc\">{shownProgress}%</span>
+          </div>
+
+          <dl className=\"impm-counts\" data-impm=\"counts\">
+            <div><dd>{importResults.successful}</dd><dt>{COUNT_IMPORTED}</dt></div>
+            <div><dd>{importResults.failed}</dd><dt>{COUNT_NOT}</dt></div>
+            <div><dd>{importResults.unmatched.length}</dd><dt>{COUNT_DECIDE}</dt></div>
+          </dl>
+
+          {}
+          {importResults.unmatched.length > 0 && (
+            <div className=\"impm-decide\" data-impm=\"decide\">
+              <p className=\"sf-lab\">Rows that need a decision</p>
+              <ul>
+                {importResults.unmatched.map((u) => (
+                  <li key={u.row} className=\"impm-drow\">
+                    <span className=\"impm-drown\">Row {u.row}</span>
+                    <span className=\"impm-drowt\"><b>{u.missing}</b>{u.detail ? <span> — no match for {u.detail}</span> : null}</span>
+                    {}
+                    <button type=\"button\" className=\"sf-link sf-link--quiet\" disabled={creating === u.row} onClick={() => void createFromRow(u)}>
+                      {creating === u.row ? \"Creating…\" : \"Create from this row\"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {}
+              <p className=\"impm-decidenote\">{DECIDE_NOTE}</p>
+            </div>
+          )}
+
+          {hasLines && (
+            <div className=\"impm-logwrap\">
+              <p className=\"sf-lab\">{LOG_TITLE}</p>
+              <ul className=\"impm-log\" data-impm=\"log\">
+                {importResults.logs.map((log, idx) => <li key={`l${idx}`}>{log}</li>)}
+                {importResults.errors.map((err, idx) => <li key={`e${idx}`} className=\"is-err\">{err}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {!isImporting && (
+            <div className=\"sf-cfoot\">
+              <button type=\"button\" className=\"sf-link sf-link--quiet\" onClick={handleReset} data-impm=\"another\">{AFTER_ANOTHER}</button>
+              <span className=\"sf-footr\">
+                <button
+                  type=\"button\" className=\"sf-btn\" data-impm=\"open\"
+                  onClick={() => {
+                    if (importType === \"queries\") onNavigate(\"queries\");
+                    else if (importType === \"manuscripts\") onNavigate(\"manuscripts\");
+                    else onNavigate(\"agents\");
+                  }}
+                >
+                  {afterOpenLabel(importType)}
+                </button>
+              </span>
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
+
+};
+"
+
+ ❯ src/lib/importNoClock.test.ts:99:17
+     97|   it("the matcher passes the import flag, writes the history from the …
+     98|     const src = code("src/components/ImportCsv.tsx");
+     99|     expect(src).toMatch(/addQuery\(\{ \.\.\.queryData, id: queryId \},…
+       |                 ^
+    100|     expect(src).toMatch(/writeImportedHistory\(/);
+    101|     expect(src, "no `: new Date().toISOString()` fallback").not.toMatc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/lib/importNoClock.test.ts > T1 · the email import > an undated email: no sent date, the import flag, and the clock nowhere in the history
+AssertionError: addQuery is told this is an import: expected undefined to be true // Object.is equality
+
+[32m- Expected:[39m 
+true
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/lib/importNoClock.test.ts:127:66
+    125|     const [doc, , opts] = addQuery.mock.calls[0] as [Record<string, un…
+    126|     expect("dateSent" in doc).toBe(false);
+    127|     expect(opts?.imported, "addQuery is told this is an import").toBe(…
+       |                                                                  ^
+    128|     expect(mentionsNow(doc)).toBe(false);
+    129|     const steps = batchSets.map((c) => c[1] as any).filter((d) => d.re…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/lib/importNoClock.test.ts > T1 · the email import > the commit reads the clock nowhere
+AssertionError: expected '\nimport { collection, doc, getDocs, …' not to match /Date\.now\(\)|new Date\(\)/
+
+[32m- Expected:[39m 
+/Date\.now\(\)|new Date\(\)/
+
+[31m+ Received:[39m 
+"
+import { collection, doc, getDocs, deleteDoc, writeBatch, query, where, Timestamp } from \"firebase/firestore\";
+import { db } from \"./firebase\";
+import { recomputeQuery } from \"./recomputeQuery\";
+import { assignTimes } from \"./smartImportCommit\";
+import { QueryStatus, SubmissionMethod, SubmissionStatus, ActivityType, Agent } from \"../types\";
+import type { ProposalRecord, ProposalSubject } from \"./emailImport\";
+
+export interface EmailCommitDeps {
+  userId: string;
+  manuscriptTitle: string;
+  addAgent: (
+    a: Omit<Agent, \"id\" | \"userId\" | \"dateAdded\" | \"lastCheckedDate\"> & { id?: string },
+    bypassLimits?: boolean
+  ) => Promise<{ success: boolean; error?: string; id?: string }>;
+  addQuery: (q: any, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
+}
+
+export interface EmailCommitResult {
+  agentName: string;
+  queryId: string;
+  recordCount: number;
+  created: boolean; 
+}
+
+const tsMillis = (v: any): number => (v && typeof v.toMillis === \"function\" ? v.toMillis() : 0);
+
+
+export function timeRungs(
+  rungs: { status: QueryStatus; date: string | null }[],
+  importBaseMs: number
+): { status: QueryStatus; ms: number; provisional: boolean }[] {
+  return assignTimes(rungs, importBaseMs).map((t, i) =>
+    rungs[i].date != null
+      ? { status: t.status, ms: new Date(rungs[i].date as string).getTime(), provisional: false }
+      : { status: t.status, ms: t.ms, provisional: true }
+  );
+}
+
+
+function feedEntryFor(status: QueryStatus, agentName: string, agency: string): { type: ActivityType; desc: string } {
+  const at = `${agentName} at ${agency}`;
+  switch (status) {
+    case QueryStatus.QUERIED: return { type: ActivityType.QUERY_SENT, desc: `Query sent to ${at}` };
+    case QueryStatus.PARTIAL_REQUESTED: return { type: ActivityType.STATUS_CHANGED, desc: `${at} requested a partial manuscript` };
+    case QueryStatus.PARTIAL_SENT: return { type: ActivityType.MATERIALS_SENT, desc: `Partial manuscript sent to ${at}` };
+    case QueryStatus.FULL_REQUESTED: return { type: ActivityType.STATUS_CHANGED, desc: `${at} requested the full manuscript` };
+    case QueryStatus.FULL_SENT: return { type: ActivityType.MATERIALS_SENT, desc: `Full manuscript sent to ${at}` };
+    case QueryStatus.REVISE_RESUBMIT: return { type: ActivityType.STATUS_CHANGED, desc: `Revise & Resubmit request received from ${at}` };
+    case QueryStatus.OFFER: return { type: ActivityType.STATUS_CHANGED, desc: `Offer of representation from ${at}` };
+    case QueryStatus.REJECTED: return { type: ActivityType.STATUS_CHANGED, desc: `Rejection received from ${at}` };
+    case QueryStatus.WITHDRAWN: return { type: ActivityType.STATUS_CHANGED, desc: `Withdrew query from ${at}` };
+    case QueryStatus.NO_RESPONSE: return { type: ActivityType.STATUS_CHANGED, desc: `No response received from ${at}` };
+    default: return { type: ActivityType.STATUS_CHANGED, desc: `${status} — ${at}` };
+  }
+}
+
+
+export async function commitEmailImport(
+  deps: EmailCommitDeps,
+  subject: ProposalSubject,
+  manuscriptId: string,
+  accepted: ProposalRecord[]
+): Promise<EmailCommitResult> {
+  if (accepted.length === 0) throw new Error(\"Nothing to add — accept at least one record.\");
+
+  let queryId: string;
+  let agentName: string;
+  let created = false;
+  let clearSeededRung = false;
+
+  if (subject.kind === \"new_agent\") {
+    
+    const agentRes = await deps.addAgent(
+      {
+        name: subject.agentName?.trim() ?? \"\",
+        agency: subject.agency,
+        email: \"\",
+        website: \"\",
+        genres: [],
+        mswlNotes: \"\",
+        starRating: 3,
+        submissionStatus: SubmissionStatus.OPEN,
+        responseTimeWeeks: 0,
+        noResponseMeansNo: false,
+        submissionMethod: SubmissionMethod.EMAIL,
+        materialsWanted: [],
+        notes: \"\",
+        importedNeedsReview: true,
+      },
+      true
+    );
+    if (!agentRes.success || !agentRes.id) {
+      throw new Error(agentRes.error || \"Couldn't create the agent.\");
+    }
+    const agentId = agentRes.id;
+    agentName = subject.agentName?.trim() || subject.agency;
+
+    
+    
+    const initialStatus = (accepted[accepted.length - 1].resultingStatus as QueryStatus) || QueryStatus.QUERIED;
+    const queriedDated = accepted.find(
+      (r) => r.resultingStatus === QueryStatus.QUERIED && !r.dateProvisional && r.date
+    );
+    const qRes = await deps.addQuery(
+      {
+        manuscriptId,
+        agentId,
+        packageId: \"\",
+        personalisationNotes: \"\",
+        sendMethod: SubmissionMethod.EMAIL,
+        status: initialStatus,
+        ...(queriedDated?.date ? { dateSent: queriedDated.date } : {}),
+      },
+      true
+    );
+    if (!qRes.success || !qRes.id) {
+      
+      throw new Error(qRes.error || \"Created the agent, but couldn't create the query. Please try again.\");
+    }
+    queryId = qRes.id;
+    created = true;
+    clearSeededRung = true;
+  } else {
+    if (!subject.queryId) throw new Error(\"Matched proposal is missing its queryId.\");
+    queryId = subject.queryId;
+    agentName = subject.agentName?.trim() || subject.agency;
+  }
+
+  
+  const actCol = collection(db, \"users\", deps.userId, \"queries\", queryId, \"activity\");
+
+  
+  
+  let baseMs = Date.now();
+  const existing = await getDocs(actCol);
+  if (clearSeededRung) {
+    await Promise.all(existing.docs.map((d) => deleteDoc(d.ref)));
+  } else {
+    const latest = Math.max(0, ...existing.docs.map((d) => tsMillis(d.data().createdAt)));
+    baseMs = Math.max(Date.now(), latest + 1);
+  }
+
+  
+  
+  
+  const seedRungs = accepted.map((r) => ({
+    status: r.resultingStatus as QueryStatus,
+    date: r.date ?? null,
+  }));
+  const timed = timeRungs(seedRungs, baseMs);
+
+  const batch = writeBatch(db);
+  for (let i = 0; i < timed.length; i++) {
+    const rung = timed[i];
+    const ref = doc(actCol, `eml-${baseMs}-${i}-${Math.random().toString(36).slice(2, 8)}`);
+    batch.set(ref, {
+      type: rung.status,
+      resultingStatus: rung.status,
+      createdAt: Timestamp.fromMillis(rung.ms),
+      note: rung.provisional ? `${rung.status} (from email — date needed)` : `${rung.status} (from email)`,
+      ...(rung.provisional ? { dateProvisional: true } : {}),
+      queryId,
+      agentName,
+      manuscriptTitle: deps.manuscriptTitle,
+    });
+  }
+  await batch.commit();
+
+  
+  
+  
+  
+  const feedCol = collection(db, \"users\", deps.userId, \"activities\");
+  if (created) {
+    
+    
+    const seeded = await getDocs(query(feedCol, where(\"queryId\", \"==\", queryId)));
+    await Promise.all(seeded.docs.map((d) => deleteDoc(d.ref)));
+  }
+  const feedBatch = writeBatch(db);
+  for (const rung of timed) {
+    if (rung.provisional) continue;
+    const ref = doc(feedCol);
+    const { type, desc } = feedEntryFor(rung.status, agentName, subject.agency);
+    feedBatch.set(ref, {
+      id: ref.id,
+      userId: deps.userId,
+      queryId,
+      manuscriptId,
+      activityType: type,
+      description: desc,
+      date: new Date(rung.ms).toISOString(), 
+      details: \"\",
+      resultingStatus: rung.status,
+    });
+  }
+  await feedBatch.commit();
+
+  
+  
+  await recomputeQuery(deps.userId, queryId);
+
+  return { agentName, queryId, recordCount: accepted.length, created };
+}
+"
+
+ ❯ src/lib/importNoClock.test.ts:145:54
+    143| 
+    144|   it("the commit reads the clock nowhere", () => {
+    145|     expect(code("src/lib/emailImportCommit.ts")).not.toMatch(/Date\.no…
+       |                                                      ^
+    146|   });
+    147| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed (7)
+   Start at  12:15:36
+   Duration  318ms (transform 54ms, setup 0ms, collect 131ms, tests 8ms, environment 0ms, prepare 36ms)
+

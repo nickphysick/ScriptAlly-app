@@ -8,11 +8,12 @@ import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
 import { importedAgentDoc } from "../lib/importedAgent";
+import { writeImportedHistory } from "../lib/smartImportCommit";
 import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
   MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
   MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
-  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine,
 } from "../lib/importMatcher";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
@@ -434,9 +435,7 @@ export const ImportCsv: React.FC<{
               ...agentData,
               id: newAgId,
               userId: currentUser?.id || "",
-              dateAdded: new Date().toISOString(),
-              lastCheckedDate: new Date().toISOString()
-            };
+            } as (typeof localAgents)[number]; // a look-up entry for later rows; it is never written
             localAgents.push(addedAgRef);
             successfulCount++;
             runLogs.push(LOG.agentAdded(name, agency));
@@ -490,7 +489,6 @@ export const ImportCsv: React.FC<{
               ...msData,
               id: newMsId,
               userId: currentUser?.id || "",
-              statusChangedDate: new Date().toISOString()
             } as any;
             localManuscripts.push(addedMsRef);
             successfulCount++;
@@ -567,6 +565,7 @@ export const ImportCsv: React.FC<{
            * `materialsLinkWrites` returns it when clearing a link.
            */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
+          const sent = matcherDate(dateSentInput);
           const queryData = {
             /**
              * ⚠️ NO INVENTED IDS (D1). These were `|| "ms-seed-fantasy"` and `|| "agent-seed-alex"`,
@@ -587,7 +586,8 @@ export const ImportCsv: React.FC<{
             personalisationNotes,
             sendMethod: SubmissionMethod.EMAIL,
             status: normalizeQueryStatus(statusInput),
-            dateSent: dateSentInput ? new Date(dateSentInput).toISOString() : new Date().toISOString()
+            /* The day the sheet wrote, or no sent date. Never the moment of the import. */
+            ...(sent.iso ? { dateSent: sent.iso } : {}),
           };
 
           /* ⚠️ RECORDED BEFORE THE WRITE, so the row is reported whether or not the write succeeds —
@@ -608,8 +608,19 @@ export const ImportCsv: React.FC<{
                 .filter(Boolean).join(" · "),
             });
           }
-          const res = await addQuery({ ...queryData, id: queryId }, true);
+          /* `imported` stops addQuery setting a sent date of now and writing history stamped now;
+             the history is then written here, from the sheet (the same writer the template uses). */
+          const res = await addQuery({ ...queryData, id: queryId }, true, { imported: true });
           if (res.success) {
+            await writeImportedHistory(
+              currentUser?.id || "", queryId,
+              { agentRef: "", status: queryData.status, sentDate: sent.iso },
+              foundAgent?.name ?? agentNameInput, foundMs?.title ?? msTitleInput,
+            );
+            if (!sent.iso) {
+              const line = undatedQueryLine(index + 2, dateSentInput, (sent as { why: "blank" | "ambiguous" | "unreadable" }).why);
+              if (line) runLogs.push(line);
+            }
             const addedQRef = {
               ...queryData,
               id: queryId,
@@ -630,7 +641,15 @@ export const ImportCsv: React.FC<{
              "Activity logged via CSV Import" is true about the import and says nothing about the
              event. Empty is honest. */
           const description = getMappedValue("description");
-          const date = getMappedValue("date") ? new Date(getMappedValue("date")).toISOString() : new Date().toISOString();
+          /* An event is placed by its date. With none that can be read there is nowhere true to put
+             it, so the row is not imported and the log says why. Never the moment of the import. */
+          const eventDate = matcherDate(getMappedValue("date"));
+          if (!eventDate.iso) {
+            failedCount++;
+            errorsList.push(ERR.eventNoDate(index + 2));
+            continue;
+          }
+          const date = eventDate.iso;
           const details = getMappedValue("details") || "";
 
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
