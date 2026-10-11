@@ -6,6 +6,7 @@
  *
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test qcV134
  */
+import { retiredV136 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 import { pixel, sameRgb } from "./qc126Lib";
@@ -34,6 +35,7 @@ const deskCounts = (page: Page) => page.evaluate(() => Object.fromEntries(["you"
 
 test.describe("Query Centre v134 — the hero number and the faces", () => {
   test("N1 · hero: the number is the page's count at 124 (98), its words at 42 (34), on one line", async ({ page }) => {
+    test.skip(true, retiredV136("the hero number and its words (\"83 queries out\"); v136's title is \"You've sent {N} queries\", N the bands' total", "QC136 A2"));
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await page.evaluate((HD) => {
@@ -67,7 +69,9 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
     }
   });
 
-  test("N2 · faces: up to 3 with you, 3 with agents, 2 closed, in that order and in the court colours; + more; no key; one line", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. On the blue an agent's disc is #6a81a8 and the halo is the panel's. HP2 A3 holds the row; the faces' order and caps are held at unit (qcOpenHeader.test.tsx, qcFaces). */
+
+  test.skip("N2 · faces: up to 3 with you, 3 with agents, 2 closed, in that order and in the court colours; + more; no key; one line", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const desk = await deskCounts(page);
@@ -109,7 +113,9 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
     }
   });
 
-  test("N3 · faces spacing: 16 under the subheader, 22 above the buttons; a disc's popup is the agent's name; a click opens that query", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. There is no subheader to measure from. HP2 A3. */
+
+  test.skip("N3 · faces spacing: 16 under the subheader, 22 above the buttons; a disc's popup is the agent's name; a click opens that query", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await page.evaluate((HD) => {
@@ -188,6 +194,7 @@ const readDesk = (page: Page) => page.evaluate(() => {
 
 test.describe("Query Centre v134 — the icon desk cards", () => {
   test("K1 · desk shape: three white cards, a court-coloured disc 28 (24) above each, no stamp; selected is the court's ring and foot bar", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the icon cards are replaced by the badge cards (QC135 B1–B4, B7)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -232,6 +239,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 
   test("K2 · desk content: the line and its figure, v131.1's two tiles, and a neutral month-on-month", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the line of words is gone; tiles and the month-on-month line are held by QC135 B5");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -269,6 +277,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 
   test("K3 · desk chart: one 112 × 38 (84 × 30) svg a card, ten points, the last is the figure, the court's stroke, aria-hidden", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the chart is 96 × 46 in the badge card's body (QC135 B5)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const d = await readDesk(page);
@@ -289,7 +298,7 @@ test.describe("Query Centre v134 — the icon desk cards", () => {
   });
 });
 
-const BAND = [233, 230, 224], BLUSH = [243, 221, 210];
+const BAND = [251, 249, 245], BLUSH = [243, 221, 210]; /* the band is paper white, --ws-band, since app shell v2 (it was 233, 230, 224) */
 const LINES = ["One list to log them all, one list to find them,", "one list to hold your queries and in the darkness mind them."];
 /** scroll the page's own scroller so `sel`'s middle sits mid-viewport, and wait for it to settle */
 async function centre(page: Page, sel: string) {
@@ -306,7 +315,8 @@ async function spansSheet(page: Page, y: number, rgb: number[]) {
 }
 
 test.describe("Query Centre v134 — the band and the banner", () => {
-  test("B1 · band: Recently updated sits on #e9e6e0, edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
+  test("B1 · band: Recently updated sits on paper white (#fbf9f5; app shell v2), edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="ru"]');
@@ -325,9 +335,12 @@ test.describe("Query Centre v134 — the band and the banner", () => {
           ring: feat?.querySelector<HTMLElement>(".qcard") ? getComputedStyle(feat.querySelector<HTMLElement>(".qcard")!).boxShadow : "",
         };
       });
-      expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(233, 230, 224)");
+      expect(g.beforeBg, `${w}: the band's colour`).toBe("rgb(251, 249, 245)");
       expect(g.border === "0px" && g.radius === "0px" && g.shadow === "none", `${w}: no border, radius or shadow on the band (${g.border} ${g.radius} ${g.shadow})`).toBe(true);
-      expect(Math.abs(g.ru.y - g.desk - (wide(w) ? 64 : 52)), `${w}: desk → band ${g.ru.y - g.desk}`).toBeLessThanOrEqual(2);
+      /* RE-POINTED (Query Centre v136): "View the full list" now stands between the bands and this band, so the 64 (52)
+         is measured from the link's row */
+      const linkB = await page.evaluate(() => document.querySelector<HTMLElement>('[data-qcv="full-list-row"]')!.getBoundingClientRect().bottom);
+      expect(Math.abs(g.ru.y - linkB - (wide(w) ? 64 : 52)), `${w}: link → band ${g.ru.y - linkB}`).toBeLessThanOrEqual(2);
       expect(Math.abs(g.padT - (wide(w) ? 72 : 64)) <= 2 && Math.abs(g.padB - (wide(w) ? 72 : 64)) <= 2, `${w}: inner padding ${g.padT} / ${g.padB}`).toBe(true);
       expect(Math.abs(g.innerTop - g.ru.y - g.padT) <= 2 && g.ru.b - g.innerBottom >= g.padB - 2, `${w}: the section starts ${g.innerTop - g.ru.y} inside the band and ends ${g.ru.b - g.innerBottom} above its foot`).toBe(true);
       /* painted: the tint reaches both of the sheet's edges on the band's own rows, and is not above or below it */
@@ -364,7 +377,8 @@ test.describe("Query Centre v134 — the band and the banner", () => {
     };
   });
 
-  test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, the arrow centred, the bar 104 (92) below", async ({ page }) => {
+  test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, no arrow (app shell v2: the flap, SH2 B2), the bar 130 (118) below", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="banner"]');
@@ -379,25 +393,23 @@ test.describe("Query Centre v134 — the band and the banner", () => {
       expect(g.colour === "rgb(91, 42, 31)" && g.align === "center", `${w}: ${g.colour} ${g.align}`).toBe(true);
       expect(Math.abs(g.minH - (wide(w) ? 136 : 112)) <= 0.5 && g.pad === (wide(w) ? "36px 34px" : "28px 26px"), `${w}: min-height ${g.minH}, padding ${g.pad}`).toBe(true);
       expect(Math.abs(g.box.y - g.ruB - (wide(w) ? 56 : 48)), `${w}: ${g.box.y - g.ruB} of page above the banner`).toBeLessThanOrEqual(2);
-      expect(Math.abs(g.barT - g.box.b - (wide(w) ? 104 : 92)), `${w}: banner → bar ${g.barT - g.box.b}`).toBeLessThanOrEqual(2);
+      /* app shell v2: 104 (92) + the flap's 26 */
+      expect(Math.abs(g.barT - g.box.b - (wide(w) ? 130 : 118)), `${w}: banner → bar ${g.barT - g.box.b}`).toBeLessThanOrEqual(2);
       /* painted edge to edge, with plain page above it */
       const mid = await spansSheet(page, g.box.y + g.box.h / 2, BLUSH);
       expect(mid.ok, `${w}: the banner's painted edges are the sheet's ${JSON.stringify(mid)}`).toBe(true);
       const gapPx = await pixel(page, mid.sheet.l + 2, g.box.y - 20);
       expect(!sameRgb(gapPx, BLUSH, 3) && !sameRgb(gapPx, BAND, 3), `${w}: plain page colour above the banner (${gapPx})`).toBe(true);
-      /* the arrow: 150 × 34 (120 × 28), centred on the banner's bottom edge, 1px inside it, and painted */
-      expect(Math.abs(g.arrow.h - (wide(w) ? 34 : 28)) <= 1 && Math.abs(g.arrow.w - (wide(w) ? 150 : 120)) <= 1, `${w}: the arrow is ${g.arrow.w} × ${g.arrow.h}`).toBe(true);
-      const cx = g.box.x + g.box.w / 2;
-      expect(Math.abs(parseFloat(g.arrow.left) - g.box.w / 2), `${w}: the arrow is centred (${g.arrow.left} of ${g.box.w})`).toBeLessThanOrEqual(1);
-      expect(Math.abs(parseFloat(g.arrow.top) - (g.box.h - 1)), `${w}: the arrow starts 1px inside the banner`).toBeLessThanOrEqual(1);
-      const tip = await pixel(page, cx, g.box.b + (wide(w) ? 20 : 16)), beside = await pixel(page, cx + 110, g.box.b + (wide(w) ? 20 : 16));
-      expect(sameRgb(tip, BLUSH, 3) && !sameRgb(beside, BLUSH, 3), `${w}: the arrow is painted below the banner's centre (${tip} / ${beside})`).toBe(true);
+      /* RETIRED (app shell v2, 9 Oct): the arrow. The banner's bottom edge is the header sheet's flap, in blush (SH2 B2 measures its
+         shape, depth and the absence of a shadow). What is held here is that no arrow is drawn. */
+      expect(!(g.arrow.w > 0) && !/svg/.test(g.arrow.bg), `${w}: no arrow (${g.arrow.w} × ${g.arrow.h} ${g.arrow.bg})`).toBe(true);
       const o = await noOverflow(page);
       expect(o.doc <= 0 && o.sc <= 0, `${w}: no sideways overflow ${JSON.stringify(o)}`).toBe(true);
     }
   });
 
   test("B3 · the flying hawk's top clears the banner's bottom edge by 8px or more", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="banner"]');
@@ -409,6 +421,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
   });
 
   test("L1 · no jump: the header, the desk cards, the band and the banner are the same boxes loading and loaded", async ({ page }) => {
+    test.skip(true, retiredV136("the v134 header, desk cards and faces held loading against loaded; v136 rebuilt all three", "QC136 B7"));
     const read = () => page.evaluate((HD) => {
       const sc = document.querySelector<HTMLElement>(HD)?.closest<HTMLElement>(".wpg-scroll");
       const y0 = sc ? sc.getBoundingClientRect().top - sc.scrollTop : 0;
@@ -441,7 +454,10 @@ test.describe("Query Centre v134 — the band and the banner", () => {
       expect(keys.length, `${w}: parts measured`).toBeGreaterThanOrEqual(9);
       for (const k of keys) {
         expect(a.parts[k] && b.parts[k], `${w}: ${k} measured in both states`).toBeTruthy();
-        for (const d of ["x", "y", "w", "h"] as const) expect(Math.abs(a.parts[k]![d] - b.parts[k]![d]), `${w}: ${k} ${d} ${a.parts[k]![d]} → ${b.parts[k]![d]}`).toBeLessThanOrEqual(1);
+        /* RE-POINTED (Query Centre v135): the header's text is not held in x — the centred pair re-centres by half the change in
+           the text's width when the count arrives (4px; QC135 A5 reports it). Everything else is held in all four. */
+        const dims = (["number", "faces", "buttons"].includes(k) ? ["y", "w", "h"] : ["x", "y", "w", "h"]) as ("x" | "y" | "w" | "h")[];
+        for (const d of dims) expect(Math.abs(a.parts[k]![d] - b.parts[k]![d]), `${w}: ${k} ${d} ${a.parts[k]![d]} → ${b.parts[k]![d]}`).toBeLessThanOrEqual(1);
       }
       console.log(`[L1] ${w}: ${keys.map((k) => `${k} ${b.parts[k]!.h}`).join(" · ")}`);
     }

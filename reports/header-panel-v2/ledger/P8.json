@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "P8 precondition: the header carries the Set aside door",
+  "where": "@1512",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "P8 the popover opened and its centre is on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "338,327 358×210"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1512 point 1",
+  "ok": true,
+  "detail": "li.sap-row"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1512 point 2",
+  "ok": true,
+  "detail": "div.sap-tabs"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1512 point 3",
+  "ok": true,
+  "detail": "li.sap-row"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1512 point 4",
+  "ok": true,
+  "detail": "div.sap-body"
+ },
+ {
+  "lock": "P8 precondition: the header carries the Set aside door",
+  "where": "@1280",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "P8 the popover opened and its centre is on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "321,312 358×210"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1280 point 1",
+  "ok": true,
+  "detail": "li.sap-row"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1280 point 2",
+  "ok": true,
+  "detail": "div.sap-tabs"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1280 point 3",
+  "ok": true,
+  "detail": "li.sap-row"
+ },
+ {
+  "lock": "P8 the popover is first at the point",
+  "where": "@1280 point 4",
+  "ok": true,
+  "detail": "div.sap-body"
+ }
+]

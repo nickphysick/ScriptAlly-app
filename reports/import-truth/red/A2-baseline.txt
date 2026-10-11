@@ -1,0 +1,2892 @@
+
+ RUN  v3.2.6 /private/tmp/sa-truth-base
+
+ ❯ src/lib/unknownDoor.test.tsx (18 tests | 11 failed) 13ms
+   ✓ A2 · the precondition: the agent is what an import writes > status Unknown, no rating 0ms
+   × A2 · what it reads > the Contact list row reads Not known, and neither Open nor Closed 3ms
+     → expected '<div class="clv-list" data-clv="list"…' to match /data-clv="door-unknown"[^>]*>Not know…/
+   ✓ A2 · what it reads > the row is not drawn as a closed agent 1ms
+   × A2 · what it reads > the card's foot reads Not known, and the card never reads Open 1ms
+     → expected ' Not yet queried ★★★★★ CV Clara Voss …' to contain 'Not known'
+   ✓ A2 · what it reads > no rating reads as no rating: the card says Not rated and shows no filled star 1ms
+   × A2 · what it reads > the Query Centre's agent tab reads Not known 1ms
+     → expected ' Closed for submissions — window Emai…' to contain 'Not known'
+   × A2 · it is counted with neither Open nor Closed > the door is not known, and not open 0ms
+     → (0 , doorOf) is not a function
+   × A2 · it is counted with neither Open nor Closed > the Contact list's open filter and its counts 1ms
+     → expected { open: 2, closed: 1 } to deeply equal { open: 1, closed: 1, unknown: 1 }
+   × A2 · it is counted with neither Open nor Closed > the census's never-queried card: 1 open now, 1 closed 0ms
+     → expected '2 open now · 1 closed' to be '1 open now · 1 closed' // Object.is equality
+   × A2 · it is counted with neither Open nor Closed > it is not ready to query, and the next step counts it on its own 0ms
+     → expected true to be false // Object.is equality
+   × A2 · it is counted with neither Open nor Closed > grouped by action it is neither ready nor closed 0ms
+     → expected 'ready' to be 'nothing' // Object.is equality
+   ✓ A2 · it is counted with neither Open nor Closed > Housekeeping asks for no reopening date 0ms
+   × A2 · it is counted with neither Open nor Closed > the dream-agent suggestion needs a stated Open 2ms
+     → expected '\n\nimport { MONTHS_SHORT } from "./d…' to match /a\.starRating === 5 && a\.submissionS…/
+   ✓ A2 · sorts place it after the rated and the stated > ready order: an unrated agent follows a rated one 0ms
+   ✓ A2 · sorts place it after the rated and the stated > response time: no window sorts last in both directions 0ms
+   × A2 · the editor still writes only Open or Closed > an Unknown agent opens with neither chosen, and saving something else leaves the status alone 0ms
+     → expected 'open' to be null
+   × A2 · the editor still writes only Open or Closed > choosing Open writes Open; choosing Closed writes Closed 0ms
+     → expected undefined to be 'Open' // Object.is equality
+   ✓ A2 · the editor still writes only Open or Closed > the editor's door control offers Open and Closed, and no third choice 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · what it reads > the Contact list row reads Not known, and neither Open nor Closed
+AssertionError: expected '<div class="clv-list" data-clv="list"…' to match /data-clv="door-unknown"[^>]*>Not know…/
+
+[32m- Expected:[39m 
+/data-clv="door-unknown"[^>]*>Not known</
+
+[31m+ Received:[39m 
+"<div class=\"clv-list\" data-clv=\"list\" data-density=\"comfortable\"><div class=\"lt-panel\" style=\"--lt-cols:minmax(200px, 1.3fr) minmax(0, 2fr) 120px minmax(170px, 1fr);--lt-stick:0px\" data-clv=\"panel\"><div class=\"lt-labels\" data-lt=\"labels\"><span class=\"lt-lab\" data-lt-col=\"Agent\">Agent</span><span class=\"lt-lab\" data-lt-col=\"What they want\">What they want</span><span class=\"lt-lab\" data-lt-col=\"Replies\">Replies</span><span class=\"lt-lab end\" data-lt-col=\"Query status\">Query status</span></div><div class=\"lt-div\" data-clv=\"band\" data-letter=\"V\"><span class=\"lt-dtab\"><b>V</b></span><em data-cl13=\"gcount\">1 agent</em></div><div role=\"button\" tabindex=\"0\" class=\"clv-row\" data-clv=\"row\" data-agent-card=\"a-unknown\" data-stand=\"none\" data-door=\"open\" data-status=\"Not queried yet\" data-rating=\"none\" data-loc=\"\" data-genres=\"Thriller\"><span class=\"clv-rwho\"><span class=\"clv-ini\" aria-hidden=\"true\">CV</span><span class=\"clv-rwn\"><b>Clara Voss</b><i class=\"clv-ragy\">Pemberton Literary</i></span></span><span class=\"clv-rfit\" data-clv=\"dos\"><span class=\"clv-miss\" role=\"button\" tabindex=\"0\" data-clv=\"torn-wish\">+ Add their wishlist</span><span class=\"clv-gch\" data-clv=\"gch\"><span>Thriller</span></span></span><span class=\"clv-rrep\" data-clv=\"rep\"><b class=\"unk\">Not stated</b><small>Open to queries</small></span><span class=\"clv-rq\"><span class=\"clv-ql clv-ql--none\">Not queried yet</span></span><span class=\"clv-rtray\" data-cl13=\"tray\"><button type=\"button\" class=\"clv-trb p\" data-cl13=\"tray-act\">Log a query</button><button type=\"button\" class=\"clv-trb\" data-cl13=\"tray-open\">Open card</button></span></div></div></div>"
+
+ ❯ src/lib/unknownDoor.test.tsx:59:17
+     57| 
+     58|   it("the Contact list row reads Not known, and neither Open nor Close…
+     59|     expect(row).toMatch(/data-clv="door-unknown"[^>]*>Not known</);
+       |                 ^
+     60|     expect(text(row)).not.toMatch(/Open to queries|Closed to queries|C…
+     61|     expect(row).toContain('data-door="unknown"');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · what it reads > the card's foot reads Not known, and the card never reads Open
+AssertionError: expected ' Not yet queried ★★★★★ CV Clara Voss …' to contain 'Not known'
+
+Expected: [32m"Not [7mknown[27m"[39m
+Received: [31m"[7m [27mNot [7myet queried ★★★★★ CV Clara Voss Pemberton Literary Genres sought Thriller Manuscript wishlist No wishlist yet Add Wants you to send Not recorded Add Open to queries Log a query [27m"[39m
+
+ ❯ src/lib/unknownDoor.test.tsx:72:24
+     70|   });
+     71|   it("the card's foot reads Not known, and the card never reads Open",…
+     72|     expect(text(card)).toContain("Not known");
+       |                        ^
+     73|     expect(text(card)).not.toMatch(/\bOpen\b/);
+     74|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · what it reads > the Query Centre's agent tab reads Not known
+AssertionError: expected ' Closed for submissions — window Emai…' to contain 'Not known'
+
+Expected: [32m"Not known"[39m
+Received: [31m" Closed for submissions — window Email method — silence 0 your queries "[39m
+
+ ❯ src/lib/unknownDoor.test.tsx:86:17
+     84|   it("the Query Centre's agent tab reads Not known", () => {
+     85|     const tab = text(renderToStaticMarkup(<QueryAgentTab agent={unknow…
+     86|     expect(tab).toContain("Not known");
+       |                 ^
+     87|     expect(tab).not.toMatch(/Open to submissions|Closed for submission…
+     88|     expect(src("src/components/queries/QueryLogSheet.tsx")).toMatch(/"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > the door is not known, and not open
+TypeError: (0 , doorOf) is not a function
+ ❯ src/lib/unknownDoor.test.tsx:95:12
+     93|   const f0 = emptyContactFilters();
+     94|   it("the door is not known, and not open", () => {
+     95|     expect(doorOf(unknown)).toBe("unknown");
+       |            ^
+     96|     expect(isDoorOpen(unknown)).toBe(false);
+     97|     expect(fUnknown.door).toBe("unknown");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > the Contact list's open filter and its counts
+AssertionError: expected { open: 2, closed: 1 } to deeply equal { open: 1, closed: 1, unknown: 1 }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "closed": 1,[22m
+[32m-   "open": 1,[39m
+[32m-   "unknown": 1,[39m
+[31m+   "open": 2,[39m
+[2m  }[22m
+
+ ❯ src/lib/unknownDoor.test.tsx:101:15
+     99|   it("the Contact list's open filter and its counts", () => {
+    100|     const c = facetCounts(facts, f0, () => true).open;
+    101|     expect(c).toEqual({ open: 1, closed: 1, unknown: 1 });
+       |               ^
+    102|     expect(matchesContactFilters(fUnknown, { ...f0, open: "open" })).t…
+    103|     expect(matchesContactFilters(fUnknown, { ...f0, open: "closed" }))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > the census's never-queried card: 1 open now, 1 closed
+AssertionError: expected '2 open now · 1 closed' to be '1 open now · 1 closed' // Object.is equality
+
+Expected: [32m"[7m1[27m open now · 1 closed"[39m
+Received: [31m"[7m2[27m open now · 1 closed"[39m
+
+ ❯ src/lib/unknownDoor.test.tsx:108:24
+    106|   it("the census's never-queried card: 1 open now, 1 closed", () => {
+    107|     const never = contactCensus(all, [], null).cards.find((c) => c.key…
+    108|     expect(never.fact).toBe("1 open now · 1 closed");
+       |                        ^
+    109|   });
+    110|   it("it is not ready to query, and the next step counts it on its own…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > it is not ready to query, and the next step counts it on its own
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/lib/unknownDoor.test.tsx:111:57
+    109|   });
+    110|   it("it is not ready to query, and the next step counts it on its own…
+    111|     expect(isReady(unknown, () => false, ["Thriller"])).toBe(false);
+       |                                                         ^
+    112|     expect(isReady(open, () => false, ["Thriller"])).toBe(true);
+    113|     const step = nextStep({ agents: all, queries: [], msId: null, book…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > grouped by action it is neither ready nor closed
+AssertionError: expected 'ready' to be 'nothing' // Object.is equality
+
+Expected: [32m"nothing"[39m
+Received: [31m"ready"[39m
+
+ ❯ src/lib/unknownDoor.test.tsx:122:44
+    120|   });
+    121|   it("grouped by action it is neither ready nor closed", () => {
+    122|     expect(actionOf(fUnknown, () => true)).toBe("nothing");
+       |                                            ^
+    123|     expect(actionOf(facts[1], () => true)).toBe("ready");
+    124|     expect(actionOf(facts[2], () => true)).toBe("shut");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · it is counted with neither Open nor Closed > the dream-agent suggestion needs a stated Open
+AssertionError: expected '\n\nimport { MONTHS_SHORT } from "./d…' to match /a\.starRating === 5 && a\.submissionS…/
+
+[32m- Expected:[39m 
+/a\.starRating === 5 && a\.submissionStatus === SubmissionStatus\.OPEN/
+
+[31m+ Received:[39m 
+"
+
+import { MONTHS_SHORT } from \"./dates\";
+import React, { createContext, useContext, useState, useEffect, useRef } from \"react\";
+import {
+  User,
+  UserPlan,
+  SmartImportUsage,
+  Manuscript,
+  ManuscriptStatus,
+  ManuscriptVersion,
+  ComponentType,
+  SubmissionPackage,
+  Agent,
+  SubmissionStatus,
+  SubmissionMethod,
+  Query,
+  QueryStatus,
+  type EventKey,
+  Activity,
+  ActivityType,
+  JournalEntry,
+  Note,
+  NoteColour,
+  UserTask,
+  SurfaceOffset,
+  DismissedTask,
+  TaskFlag,
+  Task,
+  CommunityAgent
+} from \"../types\";
+
+import {
+  seedManuscripts,
+  seedVersions,
+  seedPackages,
+  seedAgents,
+  seedQueries,
+  seedActivities,
+  seedJournalEntries
+} from \"./seeds\";
+
+import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from \"./seedCommunityAgents\";
+import { narratesManuscriptWrite } from \"./manuscriptFeed\";
+import { packagesUnlocked } from \"./entitlements\";
+
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  onAuthStateChanged
+} from \"firebase/auth\";
+
+import {
+  doc,
+  setDoc as _setDoc,
+  getDoc,
+  getDocFromServer,
+  updateDoc as _updateDoc,
+  deleteDoc as _deleteDoc,
+  collection,
+  onSnapshot,
+  getDocs,
+  query as fsQuery,
+  where,
+  deleteField,
+  writeBatch as _writeBatch,
+  Timestamp,
+  serverTimestamp,
+  type DocumentReference
+} from \"firebase/firestore\";
+
+import { tracked, trackWrite } from \"./saveSignal\";
+
+
+const setDoc: typeof _setDoc = tracked(_setDoc) as typeof _setDoc;
+const updateDoc: typeof _updateDoc = tracked(_updateDoc) as typeof _updateDoc;
+const deleteDoc: typeof _deleteDoc = tracked(_deleteDoc as (...a: unknown[]) => Promise<void>) as typeof _deleteDoc;
+const writeBatch: typeof _writeBatch = ((...args: Parameters<typeof _writeBatch>) => {
+  const batch = _writeBatch(...args);
+  const commit = batch.commit.bind(batch);
+  batch.commit = () => trackWrite(commit());
+  return batch;
+}) as typeof _writeBatch;
+
+import { db, auth, app, handleFirestoreError, OperationType } from \"./firebase\";
+
+import { getStorage, ref as storageRef, uploadBytesResumable, deleteObject, getDownloadURL } from \"firebase/storage\";
+import { Attachment } from \"../types\";
+import { attachmentStoragePath, newAttachmentId } from \"./attachments\";
+import { TodoWriteError, classifyWriteError } from \"./todoWrite\";
+import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from \"./queryDerivation\";
+import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from \"./cascade\";
+import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from \"./recomputeQuery\";
+import { importedSentDate, seedsOwnHistory } from \"./addQueryShape\";
+import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from \"./logNudge\";
+import { resolveGenre, matchKey } from \"./genres\";
+import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from \"./saveAgentEdits\";
+import { computeAgentDeadlineWrites } from \"./computeAgentDeadlineWrites\";
+import { computeResponseDeadline } from \"./responseDeadline\";
+
+import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from \"./packageMetrics\";
+import { nextEdition, contentsChanged, summaryFrom } from \"./packageEditions\";
+import { isVersionSent } from \"./versionLock\";
+import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from \"./expectedDate\";
+import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from \"./holdingReply\";
+
+import { planExpectedDateMigration, type MigrationQuery } from \"./expectedDate\";
+import { planSampleRetirement, retirementReport } from \"./retireSamples\";
+import { replyTask } from \"./taskPrecedence\";
+
+import { scheduledReminder } from \"./nudgeState\";
+import { elapsedPhrase, daysBetween } from \"./elapsed\";
+import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed, MUTED_UNTIL } from \"./taskFlags\";
+import { homeCountrySeed } from \"./territory\";
+import { agentDataQualityNeeds } from \"./agentDataQuality\";
+import { queriesMissingMaterials, isBulkMaterialsGap, MATERIALS_BULK_RECORD_ID } from \"./queryMaterialsGap\";
+import { agentPrimary } from \"./agentDisplay\";
+import { taskSurvivesMute } from \"./todoHousekeeping\";
+import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from \"./offerDecision\";
+import { applyUserPaths, type UserPaths } from \"./userPaths\";
+
+
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, \"test\", \"connection\"));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes(\"the client is offline\")) {
+      console.error(\"Please check your Firebase configuration; offline mode triggered.\");
+    }
+  }
+}
+testConnection();
+
+
+function materialsSentDescription(
+  targetStatus: QueryStatus,
+  agent: { name?: string; agency?: string } | undefined,
+  opts?: { resubmit?: boolean; round?: number }
+): string {
+  const name = agent?.name || \"the agent\";
+  const agency = agent?.agency || \"agency\";
+  if (opts?.resubmit) {
+    return `Revised manuscript (v${opts.round ?? 2}) resubmitted to ${name} at ${agency}`;
+  }
+  if (targetStatus === QueryStatus.PARTIAL_SENT) {
+    return `Partial manuscript sent to ${name} at ${agency}`;
+  }
+  return `Full manuscript sent to ${name} at ${agency}`;
+}
+
+
+function statusReconstructionNote(status: QueryStatus): string {
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED: return \"Partial manuscript requested\";
+    case QueryStatus.PARTIAL_SENT:      return \"Partial manuscript sent\";
+    case QueryStatus.FULL_REQUESTED:    return \"Full manuscript requested\";
+    case QueryStatus.FULL_SENT:         return \"Full manuscript sent\";
+    case QueryStatus.REVISE_RESUBMIT:   return \"Revise & resubmit requested\";
+    case QueryStatus.OFFER:             return \"Offer of representation received\";
+    case QueryStatus.REJECTED:          return \"Rejection received\";
+    case QueryStatus.WITHDRAWN:         return \"Query withdrawn\";
+    case QueryStatus.NO_RESPONSE:       return \"Query closed — no response\";
+    default:                            return \"Query sent\";
+  }
+}
+
+function formatHumanDate(dateInput: string | Date | undefined): string {
+  if (!dateInput) return \"unknown date\";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return \"unknown date\";
+  
+  const day = d.getDate();
+  const months = MONTHS_SHORT;
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
+
+export type DismissType = \"permanent\" | \"fixed snooze\" | \"custom date\" | \"lift\";
+
+
+export interface AddQueryOpts {
+  eventKey?: EventKey;
+  details?: string;
+  
+  stampPackage?: boolean;
+  
+  imported?: boolean;
+}
+
+interface DbContextType {
+  currentUser: User | null;
+  smartImportUsage: SmartImportUsage | null;
+  authReady: boolean;
+  collectionsReady: boolean;
+  
+  activitiesReady: boolean;
+  manuscripts: Manuscript[];
+  versions: ManuscriptVersion[];
+  packages: SubmissionPackage[];
+  agents: Agent[];
+  communityAgents: CommunityAgent[];
+  queries: Query[];
+  activities: Activity[];
+  journalEntries: JournalEntry[];
+  notes: Note[];
+  dismissedTasks: DismissedTask[];
+  
+  taskFlags: TaskFlag[];
+  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean; unbumpSnooze?: boolean }) => Promise<void>;
+  snoozeTaskFlag: (key: TaskFlagKey, days: number) => Promise<void>;
+  resolveTaskFlag: (key: TaskFlagKey) => Promise<void>;
+  migrateDismissedTasks: () => Promise<number>;
+  tasks: Task[];
+  login: (email: string, password?: string) => Promise<boolean>;
+  signup: (name: string, email: string, password?: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
+  
+  
+  
+  
+
+  
+  addManuscript: (m: Omit<Manuscript, \"id\" | \"userId\" | \"statusChangedDate\"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
+  updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
+  
+  updateManuscriptQuiet: (id: string, fields: Partial<Manuscript>) => Promise<void>;
+  deleteManuscript: (id: string) => Promise<void>;
+
+  
+  
+  attachments: Attachment[];
+  
+  addAttachment: (manuscriptId: string, file: File, onProgress?: (pct: number) => void) => Promise<Attachment>;
+  deleteAttachment: (id: string) => Promise<void>;
+  attachmentUrl: (a: Attachment) => Promise<string>;
+  
+  setManuscriptShelved: (id: string, shelved: boolean) => Promise<void>;
+  
+  
+  addVersion: (v: Omit<ManuscriptVersion, \"id\" | \"userId\" | \"createdDate\">) => Promise<string>;
+  
+  updateVersion: (id: string, fields: Partial<Record<\"versionName\" | \"contentDraft\" | \"fileAttached\" | \"fileName\" | \"notes\" | \"contentType\" | \"contentLink\" | \"wordCount\", unknown>>) => Promise<string | null>;
+  
+  deleteVersion: (id: string) => Promise<boolean>;
+  
+  archiveVersion: (id: string) => Promise<void>;
+  
+  restoreVersion: (id: string) => Promise<void>;
+
+  
+  addPackage: (p: Omit<SubmissionPackage, \"id\" | \"userId\" | \"status\" | \"createdDate\">) => Promise<{ success: boolean; error?: string; id?: string }>;
+  
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, \"packageName\" | \"queryLetterVersionId\" | \"synopsisVersionId\" | \"samplePagesVersionId\" | \"otherMaterials\" | \"bookVersionId\" | \"note\" | \"noteEditedAt\">>) => Promise<string | null>;
+  
+  
+  setQueryPackage: (queryId: string, packageId: string) => Promise<string | null>;
+  retirePackage: (id: string) => Promise<void>;
+  
+  revertPackageEdition: (prev: SubmissionPackage) => Promise<string | null>;
+  
+  reconcileStamps: (pkgIds: string[]) => Promise<{ lifted: string[]; stamped: string[] }>;
+  
+  restorePackage: (id: string) => Promise<void>;
+  
+  deletePackage: (id: string) => Promise<boolean>;
+  
+  
+  setActivePackage: (manuscriptId: string, packageId: string) => Promise<void>;
+  
+  
+  addAgent: (a: Omit<Agent, \"id\" | \"userId\" | \"dateAdded\" | \"lastCheckedDate\"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
+  updateAgent: (id: string, fields: Partial<Agent>) => Promise<void>;
+  saveAgentEdits: (agentId: string, patch: AgentEditPatch, extraWrites?: AgentExtraWrite[]) => Promise<SaveAgentResult>;
+  deleteAgent: (id: string) => Promise<void>;
+  
+  setAgentSetAside: (id: string, setAside: boolean) => Promise<void>;
+  
+  
+  addQuery: (q: Omit<Query, \"id\" | \"userId\" | \"status\" | \"dateSent\" | \"responseDeadline\" | \"nudgeDate\"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean, opts?: AddQueryOpts) => Promise<{ success: boolean; error?: string; id?: string }>;
+  updateQueryStatus: (id: string, newStatus: QueryStatus, systemNotes?: string) => Promise<void>;
+  
+  recordMaterialsSent: (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
+    sentDate: string; 
+    isResubmit?: boolean;
+    writerExpectedDate?: string; 
+    nudgeDate?: string; 
+    
+    bookVersionId?: string;
+  }) => Promise<void>;
+  
+  markSentWithReceipt: (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
+    sentDate: string; 
+    isResubmit?: boolean;
+    writerExpectedDate?: string; 
+    nudgeDate?: string; 
+    
+    note?: string;
+    bookVersionId?: string;
+  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string } } | void>;
+  
+  recordHoldingReply: (
+    queryId: string,
+    input: { repliedOn: string; weeks?: number | null; note?: string },
+  ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
+  undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
+  updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
+  deleteQuery: (id: string) => Promise<void>;
+  
+  
+  addJournalEntry: (queryId: string, entryText: string) => Promise<void>;
+  deleteJournalEntry: (id: string) => Promise<void>;
+  updateJournalEntry: (id: string, entryText: string) => Promise<void>;
+  
+  pinJournalEntry: (id: string, pinned: boolean) => Promise<void>;
+
+  
+  addNote: (fields: { text: string; colour?: Note[\"colour\"]; dueDate?: string | null }) => Promise<void>;
+  
+  
+  addPersonalGenre: (rawLabel: string) => Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }>;
+  updateNote: (id: string, fields: Partial<Pick<Note, \"text\" | \"colour\" | \"dueDate\" | \"done\" | \"doneAt\">>) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  
+  
+  
+  userTasks: UserTask[];
+  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, \"text\" | \"done\">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
+  deleteUserTask: (id: string) => Promise<void>;
+  
+  restoreUserTask: (task: UserTask) => Promise<void>;
+  
+  setUserTaskColour: (id: string, colour: NoteColour) => Promise<boolean>;
+
+  
+  addActivity: (act: Omit<Activity, \"id\" | \"userId\"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
+  deleteActivity: (id: string) => Promise<void>;
+  
+  readQueryActivity: (queryId: string) => Promise<{ id: string; data: Record<string, unknown> }[]>;
+  
+  moveActivity: (
+    activityId: string, fromQueryId: string, toQueryId: string, patch?: { note?: string },
+  ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
+  
+  deleteActivities: (ids: string[]) => Promise<() => Promise<void>>;
+  
+  editActivity: (
+    queryId: string,
+    activityId: string,
+    
+    patch: Partial<Pick<Activity, \"description\" | \"details\" | \"date\" | \"resultingStatus\">>
+      & { bookVersionId?: string | null }
+  ) => Promise<void>;
+
+  
+  updateUserProfile: (fields: Partial<User>) => Promise<void>;
+  
+  updateUserPaths: (paths: UserPaths) => Promise<void>;
+  
+  
+  dismissTask: (taskType: string, relatedRecordId: string, dismissType: DismissType, snoozeDays?: number) => Promise<void>;
+  
+  
+  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }>;
+  recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
+
+  
+  
+  
+  
+  
+  
+}
+
+
+export const DbContext = createContext<DbContextType | undefined>(undefined);
+
+export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  
+  
+  
+  const [smartImportUsage, setSmartImportUsage] = useState<SmartImportUsage | null>(null);
+  const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
+  const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [packages, setPackages] = useState<SubmissionPackage[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [communityAgents, setCommunityAgents] = useState<CommunityAgent[]>([]);
+  const [queries, setQueries] = useState<Query[]>([]);
+  
+  
+  
+  
+  
+  const [authReady, setAuthReady] = useState<boolean>(false);
+  const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  
+  const [activitiesReady, setActivitiesReady] = useState<boolean>(false);
+  
+  const readinessNetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [userTasks, setUserTasks] = useState<UserTask[]>([]);
+  const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
+  const [taskFlags, setTaskFlags] = useState<TaskFlag[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  
+  const signupTempNameRef = useRef<string | null>(null);
+
+  
+  useEffect(() => {
+    let unsubUser: () => void = () => {};
+    let unsubEntitlement: () => void = () => {};
+    let unsubManuscripts: () => void = () => {};
+    let unsubVersions: () => void = () => {};
+    let unsubAttachments: () => void = () => {};
+    let unsubPackages: () => void = () => {};
+    let unsubAgents: () => void = () => {};
+    let unsubQueries: () => void = () => {};
+    let unsubActivities: () => void = () => {};
+    let unsubJournal: () => void = () => {};
+    let unsubNotes: () => void = () => {};
+    let unsubUserTasks: () => void = () => {};
+    let unsubDismissed: () => void = () => {};
+    let unsubTaskFlags: () => void = () => {};
+
+    const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        
+        setCurrentUser(null);
+        setSmartImportUsage(null);
+        setAuthReady(true);          
+        setCollectionsReady(false);  
+        setActivitiesReady(false);
+        if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
+        try { localStorage.removeItem(\"scriptally_was_authed\"); } catch {}
+
+        
+        unsubUser();
+        unsubEntitlement();
+        unsubManuscripts();
+        unsubVersions();
+      unsubAttachments();
+        unsubAttachments();
+        unsubPackages();
+        unsubAgents();
+        unsubQueries();
+        unsubActivities();
+        unsubJournal();
+        unsubNotes();
+        unsubDismissed();
+        unsubTaskFlags();
+        return;
+      }
+
+      const uid = firebaseUser.uid;
+
+      
+      
+      setCollectionsReady(false);
+      setActivitiesReady(false);
+      let mLoaded = false, aLoaded = false, qLoaded = false;
+      const markCollectionsLoaded = () => {
+        if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
+      };
+
+      
+      const snapshotIsLoaded = (snap: { metadata?: { fromCache?: boolean }; size?: number }): boolean =>
+        !snap.metadata?.fromCache || (snap.size ?? 0) > 0;
+
+      
+      const readinessNet = setTimeout(() => {
+        mLoaded = aLoaded = qLoaded = true;
+        markCollectionsLoaded();
+        setActivitiesReady(true);
+      }, 6000);
+      readinessNetRef.current = readinessNet;
+
+      
+      
+      
+      seedCommunityAgentsIfEmpty(uid).catch(err => {
+        console.error(\"Error running community agents seeding check:\", err);
+      });
+
+      try {
+        const userDocRef = doc(db, \"users\", uid);
+        let userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          const emailPrefix = (firebaseUser.email || \"\").split(\"@\")[0] || \"Writer\";
+          const freshUser: User = {
+            id: uid,
+            name: signupTempNameRef.current || firebaseUser.displayName || emailPrefix,
+            email: firebaseUser.email || \"\",
+            plan: UserPlan.FREE,
+            trialStartDate: new Date().toISOString(),
+            subscriptionStatus: \"trialing\",
+            onboardingComplete: false,
+            
+            
+            ...homeCountrySeed(),
+          };
+          await setDoc(userDocRef, freshUser);
+          signupTempNameRef.current = null;
+        } else if (signupTempNameRef.current && userDoc.data()?.onboardingComplete === undefined) {
+          await updateDoc(userDocRef, { onboardingComplete: false });
+          signupTempNameRef.current = null;
+        } else {
+          signupTempNameRef.current = null;
+        }
+
+        
+        unsubUser = onSnapshot(userDocRef, (snap) => {
+          if (snap.exists()) {
+            const data = snap.data() as User;
+            setCurrentUser(data);
+            setAuthReady(true); 
+            try { localStorage.setItem(\"scriptally_was_authed\", \"1\"); } catch {}
+          }
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}`);
+        });
+
+        
+        
+        
+        unsubEntitlement = onSnapshot(doc(db, \"users\", uid, \"private\", \"entitlement\"), (snap) => {
+          setSmartImportUsage(snap.exists() ? (snap.data() as SmartImportUsage) : null);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/private/entitlement`);
+        });
+
+        
+        unsubManuscripts = onSnapshot(collection(db, \"users\", uid, \"manuscripts\"), (snap) => {
+          const arr: Manuscript[] = [];
+          snap.forEach(d => arr.push(d.data() as Manuscript));
+          setManuscripts(arr);
+          if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); }
+        }, (error) => {
+          mLoaded = true; markCollectionsLoaded(); 
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
+        });
+
+        
+        unsubVersions = onSnapshot(collection(db, \"users\", uid, \"versions\"), (snap) => {
+          const arr: ManuscriptVersion[] = [];
+          snap.forEach(d => arr.push(d.data() as ManuscriptVersion));
+          setVersions(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/versions`);
+        });
+
+        
+        
+        
+        
+        
+        
+        unsubAttachments = onSnapshot(collection(db, \"users\", uid, \"attachments\"), (snap) => {
+          const arr: Attachment[] = [];
+          snap.forEach(d => arr.push(d.data() as Attachment));
+          setAttachments(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/attachments`);
+        });
+
+        
+        unsubPackages = onSnapshot(collection(db, \"users\", uid, \"packages\"), (snap) => {
+          const arr: SubmissionPackage[] = [];
+          snap.forEach(d => arr.push(d.data() as SubmissionPackage));
+          setPackages(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/packages`);
+        });
+
+        
+        unsubAgents = onSnapshot(collection(db, \"users\", uid, \"agents\"), (snap) => {
+          const arr: Agent[] = [];
+          snap.forEach(d => arr.push(d.data() as Agent));
+          setAgents(arr);
+          if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); }
+        }, (error) => {
+          aLoaded = true; markCollectionsLoaded();
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
+        });
+
+        
+        unsubQueries = onSnapshot(collection(db, \"users\", uid, \"queries\"), (snap) => {
+          const arr: Query[] = [];
+          snap.forEach(d => arr.push(d.data() as Query));
+          setQueries(arr);
+          if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); }
+        }, (error) => {
+          qLoaded = true; markCollectionsLoaded();
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
+        });
+
+        
+        unsubActivities = onSnapshot(collection(db, \"users\", uid, \"activities\"), (snap) => {
+          const arr: Activity[] = [];
+          snap.forEach(d => arr.push(d.data() as Activity));
+          const migratedArr = arr.map(actDoc => {
+            const seedMatch = seedActivities.find(sAct => sAct.id === actDoc.id);
+            let cleanedDesc = actDoc.description || \"\";
+            if (cleanedDesc && (cleanedDesc.toLowerCase().includes(\"initial query packet dispatched\") || cleanedDesc.toLowerCase().includes(\"dispatched to\"))) {
+              cleanedDesc = cleanedDesc
+                .replace(/Initial Query packet dispatched to /gi, \"Query sent to \")
+                .replace(/Initial Query packet sent to /gi, \"Query sent to \")
+                .replace(/dispatched to /gi, \"sent to \");
+            }
+            if (seedMatch) {
+              return {
+                ...actDoc,
+                description: seedMatch.description,
+                details: seedMatch.details
+              };
+            }
+            if (cleanedDesc !== actDoc.description) {
+              return {
+                ...actDoc,
+                description: cleanedDesc
+              };
+            }
+            return actDoc;
+          });
+          setActivities(migratedArr);
+          if (snapshotIsLoaded(snap)) setActivitiesReady(true);
+        }, (error) => {
+          setActivitiesReady(true); 
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/activities`);
+        });
+
+        
+        unsubJournal = onSnapshot(collection(db, \"users\", uid, \"journalEntries\"), (snap) => {
+          const arr: JournalEntry[] = [];
+          snap.forEach(d => arr.push(d.data() as JournalEntry));
+          setJournalEntries(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/journalEntries`);
+        });
+
+        
+        unsubNotes = onSnapshot(collection(db, \"users\", uid, \"notes\"), (snap) => {
+          const arr: Note[] = [];
+          snap.forEach(d => arr.push(d.data() as Note));
+          setNotes(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/notes`);
+        });
+
+        
+        
+        
+        unsubUserTasks = onSnapshot(collection(db, \"users\", uid, \"tasks\"), (snap) => {
+          const arr: UserTask[] = [];
+          snap.forEach(d => arr.push(d.data() as UserTask));
+          setUserTasks(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/tasks`);
+        });
+
+        
+        unsubDismissed = onSnapshot(collection(db, \"users\", uid, \"dismissedTasks\"), (snap) => {
+          const arr: DismissedTask[] = [];
+          snap.forEach(d => arr.push(d.data() as DismissedTask));
+          setDismissedTasks(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/dismissedTasks`);
+        });
+
+        
+        unsubTaskFlags = onSnapshot(collection(db, \"users\", uid, \"taskFlags\"), (snap) => {
+          const arr: TaskFlag[] = [];
+          snap.forEach(d => arr.push(d.data() as TaskFlag));
+          setTaskFlags(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/taskFlags`);
+        });
+
+      } catch (err) {
+        console.error(\"Bootstrapping/authentication loading failures:\", err);
+        setAuthReady(true);          
+        setCollectionsReady(true);   
+        setActivitiesReady(true);
+      }
+    });
+
+    return () => {
+      unsubAuth();
+      unsubUser();
+      unsubEntitlement();
+      unsubManuscripts();
+      unsubVersions();
+      unsubAttachments();
+      unsubPackages();
+      unsubAgents();
+      unsubQueries();
+      unsubActivities();
+      unsubJournal();
+      unsubNotes();
+      unsubUserTasks();
+      unsubDismissed();
+      unsubTaskFlags();
+    };
+  }, []);
+
+  
+  useEffect(() => {
+    if (!currentUser) {
+      setCommunityAgents(localSeedCommunityAgents);
+      return;
+    }
+
+    const fetchCommunityAgents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, \"communityAgents\"));
+        const list: CommunityAgent[] = [];
+        querySnapshot.forEach((docSnap) => {
+          list.push(docSnap.data() as CommunityAgent);
+        });
+        setCommunityAgents(list);
+      } catch (error) {
+        console.error(\"[QueryHawk] Failed to fetch community agents from Firestore: \", error);
+        
+        setCommunityAgents(localSeedCommunityAgents);
+      }
+    };
+
+    fetchCommunityAgents();
+  }, [currentUser]);
+
+  
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const calculatedTasks: Task[] = [];
+
+    
+
+    const holdingReplyByQuery = new Map<string, number>();
+
+    for (const a of activities) {
+
+      if ((a as { activityType?: string }).activityType !== HOLDING_REPLY_TYPE || !a.queryId) continue;
+
+      const t = new Date(a.date as string).getTime();
+
+      if (Number.isNaN(t)) continue;
+
+      const prev = holdingReplyByQuery.get(a.queryId);
+
+      if (prev === undefined || t > prev) holdingReplyByQuery.set(a.queryId, t);
+
+    }
+
+    const lastHoldingReplyFor = (id: string): number | null => holdingReplyByQuery.get(id) ?? null;
+    const now = new Date();
+    const todayISO = now.toISOString().slice(0, 10);
+
+    queries.forEach(q => {
+      const manuscript = manuscripts.find(m => m.id === q.manuscriptId);
+      const agent = agents.find(a => a.id === q.agentId);
+      if (!manuscript || !agent) return;
+
+      const mTitle = manuscript.title;
+      
+      
+      
+      
+      
+      const aName = agentPrimary(agent);
+
+      if (q.status === QueryStatus.OFFER && !hasOfferDecision(q.id, activities)) {
+        calculatedTasks.push({
+          id: `task-offer-${q.id}`,
+          priority: \"urgent\",
+          title: `Offer received from ${aName}!`,
+          description: `You have an active offer on '${mTitle}'. It's time to notify other agents.`,
+          manuscriptTitle: mTitle,
+          context: `With agent ${aName}`,
+          relatedRecordId: q.id,
+          taskType: \"offer_received\",
+          actionLabel: \"View Query\",
+          actionPath: \"queries\"
+        });
+      }
+
+      
+      const offerRef = q.offerRefQueryId ? queries.find((x) => x.id === q.offerRefQueryId) : undefined;
+      const liveOther = ![QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED].includes(q.status);
+      if (offerRef && offerRef.status === QueryStatus.OFFER && q.offerTold === false && liveOther) {
+        calculatedTasks.push({
+          id: `task-offer-tell-${q.id}`, priority: \"urgent\",
+          title: `Tell ${aName} about your offer`,
+          description: `You have an offer on '${mTitle}'. Let ${aName} know, with your deadline.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: \"offer_tell\", actionLabel: \"Open the offer\", actionPath: \"queries\",
+        });
+      }
+      if (offerRef && q.offerReply === \"full\" && liveOther
+        && [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED].includes(q.status)) {
+        calculatedTasks.push({
+          id: `task-offer-full-${q.id}`, priority: \"urgent\",
+          title: `Send the full to ${aName}`,
+          description: `${aName} wants the full of '${mTitle}' before your offer deadline.`,
+          manuscriptTitle: mTitle, context: `Request from ${aName}`, relatedRecordId: q.id,
+          taskType: \"offer_send_full\", actionLabel: \"Log it\", actionPath: \"queries\",
+        });
+      }
+      if (q.status === QueryStatus.WITHDRAWN && q.withdrawTold === false && (q.closingReason === \"withdrew\" || q.closingReason === \"accepted_offer\")) {
+        const signed = q.closingReason === \"accepted_offer\";
+        calculatedTasks.push({
+          id: `task-${signed ? \"signed\" : \"withdraw\"}-tell-${q.id}`, priority: \"suggested\",
+          title: signed ? `Tell ${aName} you've signed` : `Tell ${aName} you've withdrawn`,
+          description: signed ? `You accepted an offer for '${mTitle}'. Let ${aName} know.` : `You withdrew '${mTitle}'. Let ${aName} know.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: signed ? \"signed_tell\" : \"withdraw_tell\", actionLabel: \"Mark as told\", actionPath: \"queries\",
+        });
+      }
+      if (q.agentRecheckOn && new Date(q.agentRecheckOn).getTime() <= Date.now()) {
+        calculatedTasks.push({
+          id: `task-recheck-${q.id}`, priority: \"suggested\",
+          title: `Check on ${aName}`,
+          description: `${aName} had stopped taking queries. See whether they've reopened, or where they've moved to.`,
+          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+          taskType: \"agent_recheck\", actionLabel: \"Open the agent\", actionPath: \"agents\",
+        });
+      }
+
+      if (q.status === QueryStatus.PARTIAL_REQUESTED) {
+        calculatedTasks.push({
+          id: `task-partial-${q.id}`,
+          priority: \"urgent\",
+          title: `${aName} requested a partial manuscript`,
+          description: `Outstanding partial draft request for '${mTitle}'. Send your sample chapters!`,
+          manuscriptTitle: mTitle,
+          context: `Request from ${aName}`,
+          relatedRecordId: q.id,
+          taskType: \"partial_requested\",
+          actionLabel: \"Submit Chapters\",
+          actionPath: \"queries\"
+        });
+      }
+
+      if (q.status === QueryStatus.FULL_REQUESTED) {
+        calculatedTasks.push({
+          id: `task-full-${q.id}`,
+          priority: \"urgent\",
+          title: `Full script requested by ${aName}! 🎉`,
+          description: `An spectacular milestone! Transmit the master copy of '${mTitle}' immediately.`,
+          manuscriptTitle: mTitle,
+          context: `Request from ${aName}`,
+          relatedRecordId: q.id,
+          taskType: \"full_requested\",
+          actionLabel: \"Submit Details\",
+          actionPath: \"queries\"
+        });
+      }
+
+      if (q.status === QueryStatus.REVISE_RESUBMIT) {
+        calculatedTasks.push({
+          id: `task-rr-${q.id}`,
+          priority: \"urgent\",
+          title: `R&R Invitation from ${aName}`,
+          description: `${aName} has invited a Revise & Resubmit. Check notes for guidelines.`,
+          manuscriptTitle: mTitle,
+          context: `Revise and Resubmit with ${aName}`,
+          relatedRecordId: q.id,
+          taskType: \"revise_resubmit\",
+          actionLabel: \"Review Comments\",
+          actionPath: \"queries\"
+        });
+      }
+
+      
+      
+      const reply = replyTask({
+        status: q.status,
+        dateSent: q.dateSent,
+        responseDeadline: q.responseDeadline,
+        responseTimeWeeks: agent.responseTimeWeeks,
+        
+        noResponseMeansNo: typeof q.nrmnOverride === \"boolean\" ? q.nrmnOverride : agent.noResponseMeansNo,
+        lastNudgeSentDate: q.lastNudgeSentDate,
+        closePlan: q.closePlan,
+        
+        writerNudgeDate: q.nudgeDate,
+        
+        reminderScheduled: !!scheduledReminder(userTasks, q.id, todayISO),
+        
+        repliedSinceMs: lastHoldingReplyFor(q.id),
+        now: now.getTime(),
+      });
+      if (reply === \"close\") {
+        
+        const silentDays = q.dateSent ? daysBetween(new Date(q.dateSent).getTime(), now.getTime()) : null;
+        calculatedTasks.push({
+          id: `task-no-res-close-${q.id}`,
+          priority: \"suggested\",
+          title: silentDays != null
+            ? `No response from ${aName} for ${elapsedPhrase(silentDays)}. Consider closing?`
+            : `No response from ${aName}. Consider closing?`,
+          description: `Their stated window has passed with no reply.`,
+          manuscriptTitle: mTitle,
+          context: `Archiving recommendation`,
+          relatedRecordId: q.id,
+          taskType: \"no_response_close\",
+          
+          reason: \"no-reply\" as const,
+          actionLabel: \"Close Query\",
+          actionPath: \"queries\"
+        });
+      } else if (reply === \"nudge\") {
+        calculatedTasks.push({
+          id: `task-nudge-${q.id}`,
+          priority: \"overdue\",
+          title: `Nudge due: ${aName}`,
+          description: `It's been ${agent.responseTimeWeeks} weeks since submission. Time to send a polite nudge letter!`,
+          manuscriptTitle: mTitle,
+          context: `Follow-up needed`,
+          relatedRecordId: q.id,
+          taskType: \"nudge_overdue\",
+          
+          reason: q.lastNudgeSentDate ? (\"nudge-again\" as const) : (\"nudge-first\" as const),
+          actionLabel: \"Log Nudge\",
+          actionPath: \"queries\"
+        });
+      }
+    });
+
+    
+    const materialsGaps = queriesMissingMaterials({
+      queries, activities, agents, manuscripts, displayName: agentPrimary,
+    });
+    if (isBulkMaterialsGap(materialsGaps.length)) {
+      calculatedTasks.push({
+        id: \"task-materials-bulk\",
+        priority: \"suggested\",
+        title: `${materialsGaps.length} queries have no record of what you sent`,
+        description: `Fill them in together — the oldest first, where the details are hardest to recover.`,
+        manuscriptTitle: \"\",
+        context: `Record gap`,
+        relatedRecordId: MATERIALS_BULK_RECORD_ID,
+        taskType: \"materials_unrecorded_bulk\",
+        actionLabel: \"Record materials\",
+        actionPath: \"todo\"
+      });
+    } else {
+      materialsGaps.forEach(g => {
+        calculatedTasks.push({
+          id: `task-materials-${g.queryId}`,
+          priority: \"suggested\",
+          title: `No record of what you sent ${g.agentName}`,
+          description: `The query on '${g.manuscriptTitle}' went out without its materials recorded.`,
+          manuscriptTitle: g.manuscriptTitle,
+          context: `Record gap`,
+          relatedRecordId: g.queryId,
+          taskType: \"materials_unrecorded\",
+          actionLabel: \"Record materials\",
+          actionPath: \"todo\"
+        });
+      });
+    }
+
+    manuscripts.forEach(m => {
+      const qCount = queries.filter(q => q.manuscriptId === m.id).length;
+      if (m.status === ManuscriptStatus.READY_TO_QUERY && qCount === 0) {
+        calculatedTasks.push({
+          id: `task-query-start-${m.id}`,
+          priority: \"overdue\",
+          title: `Start querying for '${m.title}'`,
+          description: `Your manuscript status is 'Ready to Query' but you haven't sent any submissions yet.`,
+          manuscriptTitle: m.title,
+          context: `Manuscript prepared`,
+          relatedRecordId: m.id,
+          taskType: \"querying_unstarted\",
+          actionLabel: \"Find Agents\",
+          actionPath: \"agents\"
+        });
+      }
+    });
+
+    agents.forEach(a => {
+      
+      if (a.starRating === 5 && a.submissionStatus !== SubmissionStatus.CLOSED && !a.setAside) {
+        const hasQuery = queries.some(q => q.agentId === a.id);
+        if (!hasQuery) {
+          calculatedTasks.push({
+            id: `task-dream-agent-${a.id}`,
+            priority: \"suggested\",
+            title: `Query Dream Agent: ${agentPrimary(a)}`,
+            description: `${agentPrimary(a)} is a 5★ fit for your catalog and is open to subs. Build a pitch!`,
+            manuscriptTitle: manuscripts[0]?.title || \"Your manuscript\",
+            context: `High-value match`,
+            relatedRecordId: a.id,
+            taskType: \"dream_agent_unqueried\",
+            actionLabel: \"Send Query\",
+            actionPath: \"queries\"
+          });
+        }
+      }
+
+      
+      if (agentDataQualityNeeds(a).length > 0) {
+        calculatedTasks.push({
+          id: `task-dq-${a.id}`,
+          priority: \"suggested\",
+          title: `Complete MSWL details for ${agentPrimary(a)}`,
+          description: `Keep submission rules clean. Add guidelines or MSWL cues to secure your pitch.`,
+          manuscriptTitle: \"\",
+          context: `Research clean-up`,
+          relatedRecordId: a.id,
+          taskType: \"data_quality_poor\",
+          actionLabel: \"Edit Agent\",
+          actionPath: \"agents\"
+        });
+      }
+    });
+
+    
+    
+    const nowMs = now.getTime();
+    const mutedRules = currentUser?.mutedTaskRules ?? [];
+    const activeTasks = calculatedTasks.filter(t => {
+      const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
+      
+      
+      if (flag && isFlagSuppressing(flag, nowMs) && t.taskType !== \"offer_received\") return false;
+      
+      
+      const ag = t.taskType === \"data_quality_poor\" ? agents.find(a => a.id === t.relatedRecordId) : undefined;
+      return taskSurvivesMute(t.taskType, ag, mutedRules);
+    });
+
+    setTasks(activeTasks);
+    
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks]);
+
+  
+  const migratedExpected = useRef(false);
+  useEffect(() => {
+    if (!currentUser || migratedExpected.current) return;
+    if (queries.length === 0 || agents.length === 0) return;
+    migratedExpected.current = true;
+
+    const plan = planExpectedDateMigration(
+      queries as unknown as MigrationQuery[],
+      (agentId) => agents.find((a) => a.id === agentId)?.responseTimeWeeks,
+    );
+    console.log(
+      `[QueryHawk] expected-date migration — ${plan.drop.length} agency-derived date${plan.drop.length === 1 ? \"\" : \"s\"} dropped, `
+      + `${plan.adopt.length} adopted as the writer's, of which ${plan.unresolvable.length} `
+      + `unresolvable (agent states no window now, so the stored date is either the writer's or debris from a cleared one)`,
+    );
+
+    void (async () => {
+      for (const id of plan.drop) {
+        try {
+          await updateDoc(doc(db, \"users\", currentUser.id, \"queries\", id), { responseDeadline: deleteField() });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${id}`); }
+      }
+      for (const { id, iso } of plan.adopt) {
+        try {
+          await updateDoc(doc(db, \"users\", currentUser.id, \"queries\", id), { writerExpectedDate: iso, responseDeadline: deleteField() });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${id}`); }
+      }
+      console.log(\"[QueryHawk] expected-date migration — writes attempted\");
+    })();
+  }, [currentUser, queries, agents]);
+
+  
+  const retiredSamples = useRef(false);
+  useEffect(() => {
+    if (!currentUser || retiredSamples.current) return;
+    if (versions.length === 0) return;
+    retiredSamples.current = true;
+
+    const plan = planSampleRetirement(versions, packages);
+    console.log(retirementReport(plan));
+    if (plan.archive.length === 0) return;
+
+    void (async () => {
+      for (const id of plan.archive) {
+        try {
+          await updateDoc(doc(db, \"users\", currentUser.id, \"versions\", id), { status: \"Retired\" });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`); }
+      }
+      console.log(`[QueryHawk] sample-pages retirement — ${plan.archive.length} archive write${plan.archive.length === 1 ? \"\" : \"s\"} attempted`);
+    })();
+  }, [currentUser, versions, packages]);
+
+  
+
+  
+  
+  
+  
+  
+
+  
+  const friendlyAuthError = (code?: string): string => {
+    switch (code) {
+      case \"auth/invalid-email\":
+        return \"That email address doesn't look valid. Please check and try again.\";
+      case \"auth/invalid-credential\":
+      case \"auth/wrong-password\":
+        return \"Incorrect email or password. Try again, or reset your password using “Forgot secret?”.\";
+      case \"auth/user-not-found\":
+        return \"No account found with that email. Switch to “Sign up” to create one.\";
+      case \"auth/email-already-in-use\":
+        return \"An account with this email already exists. Try logging in instead.\";
+      case \"auth/missing-password\":
+        return \"Please enter your password.\";
+      case \"auth/weak-password\":
+        return \"Please choose a password of at least 6 characters.\";
+      case \"auth/too-many-requests\":
+        return \"Too many attempts. Please wait a moment and try again.\";
+      case \"auth/network-request-failed\":
+        return \"Network error. Check your connection and try again.\";
+      default:
+        return \"Something went wrong while signing you in. Please try again.\";
+    }
+  };
+
+  const login = async (email: string, password?: string): Promise<boolean> => {
+    const pass = password || \"\";
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      return true;
+    } catch (error: any) {
+      
+      
+      console.error(\"Authentication login failures:\", error);
+      throw new Error(friendlyAuthError(error?.code));
+    }
+  };
+
+  const resetPassword = async (email: string): Promise<void> => {
+    if (!email) {
+      throw new Error(\"Enter your email address first, then tap “Forgot secret?”.\");
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+      throw new Error(friendlyAuthError(error?.code));
+    }
+  };
+
+  const signup = async (name: string, email: string, password?: string): Promise<boolean> => {
+    try {
+      signupTempNameRef.current = name;
+      sessionStorage.setItem(\"scriptally_new_signup\", \"true\");
+      const pass = password || \"\";
+      await createUserWithEmailAndPassword(auth, email, pass);
+      return true;
+    } catch (error: any) {
+      console.error(\"Sign up failure:\", error);
+      throw new Error(friendlyAuthError(error?.code));
+    }
+  };
+
+  
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(\"Sign out process error:\", e);
+    } finally {
+      
+      
+      window.location.assign(\"/\");
+    }
+  };
+
+
+  
+  const addManuscript = async (
+    m: Omit<Manuscript, \"id\" | \"userId\" | \"statusChangedDate\"> & { id?: string },
+    bypassLimits: boolean = false
+  ): Promise<{ success: boolean; error?: string; id?: string }> => {
+    if (!currentUser) return { success: false, error: \"Authentication status required.\" };
+
+    if (!bypassLimits && currentUser.plan === UserPlan.FREE && manuscripts.length >= 1) {
+      return {
+        success: false,
+        error: \"Free tier is limited to 1 manuscript. Please upgrade to Pro to track multiple scripts!\"
+      };
+    }
+
+    const id = m.id || \"ms-\" + Math.random().toString(36).substr(2, 9);
+    const newMs: Manuscript = {
+      ...m,
+      id,
+      userId: currentUser.id,
+      statusChangedDate: new Date().toISOString()
+    } as any;
+
+    let writeSuccess = false;
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"manuscripts\", id), newMs);
+      writeSuccess = true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${id}`);
+      return { success: false, error: \"Database exception occurred.\" };
+    }
+
+    if (writeSuccess) {
+      await addActivity({
+        activityType: ActivityType.MANUSCRIPT_ADDED,
+        description: `You added a new title ${newMs.title} to your manuscripts`,
+        manuscriptId: id,
+        queryId: \"\",
+        date: new Date().toISOString(),
+        details: \"\"
+      });
+      return { success: true, id };
+    }
+    return { success: false, error: \"Initialization failed.\" };
+  };
+
+  const updateManuscript = async (id: string, fields: Partial<Manuscript>) => {
+    if (!currentUser) return;
+    const existingMs = manuscripts.find(m => m.id === id);
+    if (!existingMs) return;
+    const msTitle = existingMs.title;
+
+    let writeSuccess = false;
+    try {
+      const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
+      const updates = {
+        ...fields,
+        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
+      };
+      await updateDoc(doc(db, \"users\", currentUser.id, \"manuscripts\", id), updates);
+      writeSuccess = true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
+    }
+
+    
+    if (writeSuccess && narratesManuscriptWrite(fields)) {
+      const dateStr = new Date().toISOString();
+      await addActivity({
+        activityType: ActivityType.MANUSCRIPT_UPDATED,
+        description: \"You updated a manuscript's details\",
+        manuscriptId: id,
+        queryId: \"\",
+        date: dateStr,
+        details: \"\"
+      });
+    }
+  };
+
+  
+  const updateManuscriptQuiet = async (id: string, fields: Partial<Manuscript>) => {
+    if (!currentUser) return;
+    const existingMs = manuscripts.find(m => m.id === id);
+    if (!existingMs) return;
+    try {
+      const hasStatusChanged = fields.status && fields.status !== existingMs.status;
+      await updateDoc(doc(db, \"users\", currentUser.id, \"manuscripts\", id), {
+        ...fields,
+        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {}),
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
+    }
+  };
+
+  
+  
+  const setActivePackage = async (manuscriptId: string, packageId: string) => {
+    if (!currentUser) return;
+    try {
+      
+      await updateDoc(doc(db, \"users\", currentUser.id, \"manuscripts\", manuscriptId), { activePackageId: packageId || deleteField() });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${manuscriptId}`);
+    }
+  };
+
+  
+  
+  
+  const commitDeletesInBatches = async (refs: DocumentReference[]) => {
+    for (const chunk of chunkArray(refs, 450)) {
+      const batch = writeBatch(db);
+      for (const ref of chunk) batch.delete(ref);
+      await batch.commit();
+    }
+  };
+
+  const deleteManuscript = async (id: string) => {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    
+    const msTitle = manuscripts.find(m => m.id === id)?.title || \"a manuscript\";
+    
+    
+    
+    
+    const plan = cascadePlan(\"manuscript\", id, { queries, activities, taskFlags, versions, packages, attachments });
+    const qIds = plan.queryIds;
+    
+    const orphanedBlobs: string[] = [];
+    for (const a of attachments.filter((x) => x.manuscriptId === id)) {
+      try {
+        await deleteObject(storageRef(getStorage(app), a.storagePath));
+      } catch (e) {
+        orphanedBlobs.push(a.storagePath);
+        console.error(`[attachments] blob delete failed during cascade: ${a.storagePath}`, e);
+      }
+    }
+
+    try {
+      const refs: DocumentReference[] = [];
+      
+      
+      
+      for (const d of plan.docs) {
+        if (d.col === \"queries\") {
+          const actSnap = await getDocs(collection(db, \"users\", uid, \"queries\", d.id, \"activity\"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, \"users\", uid, d.col, d.id));
+      }
+      await commitDeletesInBatches(refs);
+
+      
+      
+      
+      const qn = qIds.length;
+      const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? \"ies\" : \"y\"} removed)` : \"\";
+      
+      const orphanNote = orphanedBlobs.length
+        ? `${orphanedBlobs.length} file${orphanedBlobs.length > 1 ? \"s\" : \"\"} could not be removed from storage: ${orphanedBlobs.join(\", \")}`
+        : \"\";
+      await addActivity({
+        activityType: ActivityType.MANUSCRIPT_DELETED,
+        description: `You deleted “${msTitle}”${detail}`,
+        manuscriptId: \"\",
+        queryId: \"\",
+        date: new Date().toISOString(),
+        details: orphanNote,
+        
+      }).catch((e) => {
+        console.error(
+          `[attachments] the delete record could not be written; ` +
+          (orphanedBlobs.length
+            ? `THE ONLY REMAINING TRACE OF ${orphanedBlobs.length} ORPHANED BLOB(S) IS THIS LINE: ${orphanedBlobs.join(\", \")}`
+            : \"no orphans to report\"),
+          e,
+        );
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
+    }
+  };
+
+  
+
+  
+  const addAttachment = async (manuscriptId: string, file: File, onProgress?: (pct: number) => void): Promise<Attachment> => {
+    if (!currentUser) throw new Error(\"Not signed in.\");
+    const uid = currentUser.id;
+    const id = newAttachmentId();
+    const path = attachmentStoragePath(uid, manuscriptId, id);
+    const objectRef = storageRef(getStorage(app), path);
+
+    
+    const task = uploadBytesResumable(objectRef, file, { contentType: file.type });
+    if (onProgress) {
+      task.on(\"state_changed\", (snap) => {
+        onProgress(snap.totalBytes ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100) : 0);
+      });
+    }
+    await task;
+
+    const record: Attachment = {
+      id, userId: uid, manuscriptId,
+      fileName: file.name,
+      size: file.size,
+      contentType: file.type,
+      storagePath: path,
+      uploadedAt: new Date().toISOString(),
+    };
+    try {
+      await setDoc(doc(db, \"users\", uid, \"attachments\", id), record);
+    } catch (e) {
+      await deleteObject(objectRef).catch((cleanupError) => {
+        console.error(
+          `[attachments] ORPHANED BLOB — the record write failed and the object could not be removed. ` +
+          `Path: ${path}`, cleanupError,
+        );
+      });
+      throw e;
+    }
+    return record;
+  };
+
+  
+  const deleteAttachment = async (id: string): Promise<void> => {
+    if (!currentUser) throw new Error(\"Not signed in.\");
+    const uid = currentUser.id;
+    const record = attachments.find((a) => a.id === id);
+    if (record) {
+      await deleteObject(storageRef(getStorage(app), record.storagePath)).catch((e) => {
+        console.error(
+          `[attachments] blob delete failed; removing the record anyway and leaving an orphan. ` +
+          `Path: ${record.storagePath}`, e,
+        );
+      });
+    }
+    await deleteDoc(doc(db, \"users\", uid, \"attachments\", id));
+  };
+
+  
+  const attachmentUrl = async (a: Attachment): Promise<string> =>
+    getDownloadURL(storageRef(getStorage(app), a.storagePath));
+
+  
+  
+  const setManuscriptShelved = async (id: string, shelved: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"manuscripts\", id), { shelved });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
+    }
+  };
+
+  
+  const addVersion = async (v: Omit<ManuscriptVersion, \"id\" | \"userId\" | \"createdDate\">): Promise<string> => {
+    if (!currentUser) return \"\";
+    const id = \"ver-\" + Math.random().toString(36).substr(2, 9);
+    const newVer: ManuscriptVersion = {
+      ...v,
+      id,
+      userId: currentUser.id,
+      createdDate: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"versions\", id), newVer);
+      return id; 
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/versions/${id}`);
+      return \"\";
+    }
+  };
+
+  
+  const updateVersion = async (
+    id: string,
+    fields: Partial<Record<
+      \"versionName\" | \"contentDraft\" | \"fileAttached\" | \"fileName\" | \"notes\" | \"contentType\" | \"contentLink\" | \"wordCount\",
+      unknown
+    >>,
+  ): Promise<string | null> => {
+    if (!currentUser) return \"Authentication required.\";
+    
+    const content = ([\"contentDraft\", \"fileAttached\", \"fileName\", \"contentType\", \"contentLink\", \"wordCount\"] as const).some((k) => k in fields);
+    if (content && isVersionSent(id, queries, packages)) {
+      return \"This version has been sent, so its content stays as it went. Edit it to make the next version.\";
+    }
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"versions\", id), fields);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+      return \"Couldn't save that change.\";
+    }
+  };
+
+  const deleteVersion = async (id: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    
+    const held = packagesUsingVersion(id, packages).length > 0;
+    if (held) return false;
+    try {
+      await deleteDoc(doc(db, \"users\", currentUser.id, \"versions\", id));
+      return true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/versions/${id}`);
+      return false;
+    }
+  };
+
+  const archiveVersion = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      
+      await updateDoc(doc(db, \"users\", currentUser.id, \"versions\", id), { status: \"Retired\" });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+    }
+  };
+
+  
+  const restoreVersion = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"versions\", id), { status: \"Active\" });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+    }
+  };
+
+  
+  const addPackage = async (p: Omit<SubmissionPackage, \"id\" | \"userId\" | \"status\" | \"createdDate\">): Promise<{ success: boolean; error?: string; id?: string }> => {
+    if (!currentUser) return { success: false, error: \"Authentication required.\" };
+
+    
+    if (!packagesUnlocked(currentUser)) {
+      return {
+        success: false,
+        error: \"Custom Submission Packages & A/B Tracking are premium features. Upgrade to QueryHawk Pro!\"
+      };
+    }
+
+    const id = \"pkg-\" + Math.random().toString(36).substr(2, 9);
+    
+    const other = p.otherMaterials?.trim();
+    const newPkg: SubmissionPackage = {
+      ...p,
+      ...(other ? { otherMaterials: other } : {}),
+      id,
+      userId: currentUser.id,
+      status: \"Active\",
+      createdDate: new Date().toISOString(),
+      
+      edition: 1,
+    };
+    if (!other) delete (newPkg as { otherMaterials?: string }).otherMaterials;
+
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"packages\", id), newPkg);
+      return { success: true, id };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/packages/${id}`);
+      return { success: false, error: \"Database transaction error.\" };
+    }
+  };
+
+  
+  const updatePackage = async (
+    id: string,
+    fields: Partial<Pick<SubmissionPackage, \"packageName\" | \"queryLetterVersionId\" | \"synopsisVersionId\" | \"samplePagesVersionId\" | \"otherMaterials\" | \"bookVersionId\" | \"note\" | \"noteEditedAt\">>,
+  ): Promise<string | null> => {
+    if (!currentUser) return \"Authentication required.\";
+    const live = packages.find((p) => p.id === id);
+    
+    let bump: ReturnType<typeof nextEdition> = null;
+    if (live && isPackageLocked(live)) {
+      if (\"samplePagesVersionId\" in fields && (fields.samplePagesVersionId ?? \"\") !== (live.samplePagesVersionId ?? \"\")) {
+        return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+      }
+      const ms = manuscripts.find((m) => m.id === live.manuscriptId);
+      bump = nextEdition(live, { ...live, ...fields }, new Date().toISOString(),
+        summaryFrom(versions, ms?.bookVersions ?? []));
+    }
+    
+    const payload: Record<string, unknown> = { ...fields };
+    for (const k of [\"otherMaterials\", \"note\"] as const) {
+      if (!(k in fields)) continue;
+      const t = (fields[k] as string | undefined)?.trim();
+      payload[k] = t ? t : deleteField();
+      if (k === \"note\" && !t) payload.noteEditedAt = deleteField();
+    }
+    if (bump) {
+      payload.edition = bump.edition;
+      payload.editions = bump.editions;
+    } else if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
+      
+      payload.editions = deleteField();
+    }
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", id), payload);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      return \"Couldn't save that change.\";
+    }
+  };
+
+
+  
+  const setQueryPackage = async (queryId: string, packageId: string): Promise<string | null> => {
+    if (!currentUser) return \"Authentication required.\";
+    const patch = materialsLinkWrites({ packageId, materials: [] });
+    const target = packageId ? packages.find((p) => p.id === packageId) ?? null : null;
+    try {
+      const batch = writeBatch(db);
+      batch.update(doc(db, \"users\", currentUser.id, \"queries\", queryId), patch);
+      if (target && !isPackageLocked(target)) {
+        batch.update(doc(db, \"users\", currentUser.id, \"packages\", target.id),
+          { firstSentAt: new Date().toISOString() });
+      }
+      await batch.commit();
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+      return \"Couldn't change the package.\";
+    }
+  };
+
+  const deletePackage = async (id: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    
+    if (queries.some((q) => q.packageId === id)) return false;
+    try {
+      await deleteDoc(doc(db, \"users\", currentUser.id, \"packages\", id));
+      return true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/packages/${id}`);
+      return false;
+    }
+  };
+
+  
+  const restorePackage = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", id), { status: \"Active\", retiredAt: deleteField() });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+    }
+  };
+
+  
+  const revertPackageEdition = async (prev: SubmissionPackage): Promise<string | null> => {
+    if (!currentUser) return \"Authentication required.\";
+    const live = packages.find((p) => p.id === prev.id);
+    const liveEd = typeof live?.edition === \"number\" ? live.edition : 1;
+    if (queries.some((q) => (q.sentPackageId || q.packageId) === prev.id && (q.sentPackageEdition ?? 1) === liveEd && liveEd > (prev.edition ?? 1))) {
+      return `A query has already gone out with this edition, so it stays.`;
+    }
+    const payload: Record<string, unknown> = {
+      packageName: prev.packageName,
+      queryLetterVersionId: prev.queryLetterVersionId,
+      synopsisVersionId: prev.synopsisVersionId,
+      bookVersionId: prev.bookVersionId || deleteField(),
+      otherMaterials: prev.otherMaterials?.trim() || deleteField(),
+      note: prev.note?.trim() || deleteField(),
+      noteEditedAt: prev.noteEditedAt || deleteField(),
+      edition: prev.edition ?? deleteField(),
+      editions: prev.editions?.length ? prev.editions : deleteField(),
+    };
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", prev.id), payload);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${prev.id}`);
+      return \"Couldn't undo that change.\";
+    }
+  };
+
+  
+  const retirePackage = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", id), { status: \"Retired\", retiredAt: new Date().toISOString() });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+    }
+  };
+
+  
+  const reconcileStamps = async (pkgIds: string[]): Promise<{ lifted: string[]; stamped: string[] }> => {
+    if (!currentUser) return { lifted: [], stamped: [] };
+    const lifted: string[] = [];
+    const stamped: string[] = [];
+    for (const id of [...new Set(pkgIds.filter(Boolean))]) {
+      try {
+        const snap = await getDoc(doc(db, \"users\", currentUser.id, \"packages\", id));
+        if (!snap.exists()) continue;
+        const stampedNow = !!(snap.data() as SubmissionPackage).firstSentAt;
+        const col = collection(db, \"users\", currentUser.id, \"queries\");
+        const [a, b] = await Promise.all([
+          getDocs(fsQuery(col, where(\"packageId\", \"==\", id))),
+          getDocs(fsQuery(col, where(\"sentPackageId\", \"==\", id))),
+        ]);
+        const held = !a.empty || !b.empty;
+        if (stampedNow && !held) {
+          await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", id), { firstSentAt: deleteField() });
+          lifted.push(id);
+        } else if (!stampedNow && held) {
+          await updateDoc(doc(db, \"users\", currentUser.id, \"packages\", id), { firstSentAt: new Date().toISOString() });
+          stamped.push(id);
+        }
+      } catch (e) {
+        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      }
+    }
+    return { lifted, stamped };
+  };
+
+  
+  const addAgent = async (
+    a: Omit<Agent, \"id\" | \"userId\" | \"dateAdded\" | \"lastCheckedDate\"> & { id?: string },
+    bypassLimits: boolean = false
+  ): Promise<{ success: boolean; error?: string; id?: string }> => {
+    if (!currentUser) return { success: false, error: \"Not logged in.\" };
+
+    if (!bypassLimits && currentUser.plan === UserPlan.FREE && agents.length >= 5) {
+      return {
+        success: false,
+        error: \"Free tier is capped at 5 agents. Upgrade to QueryHawk Pro for unlimited research!\"
+      };
+    }
+
+    const id = a.id || \"agent-\" + Math.random().toString(36).substr(2, 9);
+    const rawAg: Agent = {
+      ...a,
+      id,
+      userId: currentUser.id,
+      dateAdded: new Date().toISOString(),
+      lastCheckedDate: new Date().toISOString()
+    } as any;
+
+    
+    const newAg: any = {};
+    Object.keys(rawAg).forEach(k => {
+      if ((rawAg as any)[k] !== undefined) {
+        newAg[k] = (rawAg as any)[k];
+      }
+    });
+
+    let writeSuccess = false;
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"agents\", id), newAg);
+      writeSuccess = true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${id}`);
+      return { success: false, error: \"Database storage failed.\" };
+    }
+
+    if (writeSuccess) {
+      
+      await addActivity({
+        id: `act-added-agent-${id}`,
+        activityType: ActivityType.AGENT_ADDED,
+        description: newAg.name?.trim()
+          ? `Added ${newAg.name} at ${newAg.agency}`
+          : `Added ${newAg.agency}`,
+        manuscriptId: \"\",
+        queryId: \"\",
+        date: new Date().toISOString(),
+        details: \"\"
+      });
+      return { success: true, id };
+    }
+    return { success: false, error: \"Operation failed.\" };
+  };
+
+  
+  
+  
+  
+  
+  const updateAgent = async (id: string, fields: Partial<Agent>) => {
+    if (!currentUser) return;
+    const existingAgent = agents.find(a => a.id === id);
+    if (!existingAgent) return;
+    const previousStarRating = existingAgent.starRating;
+    const agentName = existingAgent.name;
+    const agencyName = existingAgent.agency;
+
+    let writeSuccess = false;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"agents\", id), { ...fields });
+      writeSuccess = true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
+    }
+
+    if (writeSuccess) {
+      const activitiesToCreate = [];
+      const dateStr = new Date().toISOString();
+
+      if (fields.submissionStatus !== undefined) {
+        if (fields.submissionStatus === SubmissionStatus.OPEN) {
+          activitiesToCreate.push({
+            activityType: ActivityType.AGENT_UPDATED,
+            description: `You updated details for ${agentName} at ${agencyName}`,
+            manuscriptId: \"\",
+            queryId: \"\",
+            date: dateStr,
+            details: \"Submission status updated to Open\"
+          });
+        } else if (fields.submissionStatus === SubmissionStatus.CLOSED) {
+          activitiesToCreate.push({
+            activityType: ActivityType.AGENT_UPDATED,
+            description: `You updated details for ${agentName} at ${agencyName}`,
+            manuscriptId: \"\",
+            queryId: \"\",
+            date: dateStr,
+            details: \"Submission status updated to Closed\"
+          });
+        }
+      }
+
+      if (fields.starRating !== undefined) {
+        activitiesToCreate.push({
+          activityType: ActivityType.AGENT_UPDATED,
+          description: `You updated details for ${agentName} at ${agencyName}`,
+          manuscriptId: \"\",
+          queryId: \"\",
+          date: dateStr,
+          details: `Updated star rating field from ${previousStarRating} to ${fields.starRating}`
+        });
+      }
+
+      if (fields.mswlNotes !== undefined && fields.mswlNotes !== \"\") {
+        activitiesToCreate.push({
+          activityType: ActivityType.AGENT_UPDATED,
+          description: `You updated details for ${agentName} at ${agencyName}`,
+          manuscriptId: \"\",
+          queryId: \"\",
+          date: dateStr,
+          details: \"Updated wishlist notes field\"
+        });
+      }
+
+      const hasSpecificKeys = fields.submissionStatus !== undefined || 
+                               fields.starRating !== undefined || 
+                               (fields.mswlNotes !== undefined && fields.mswlNotes !== \"\");
+
+      if (!hasSpecificKeys) {
+        const otherKeys = Object.keys(fields).filter(
+          k => k !== \"submissionStatus\" && k !== \"starRating\" && k !== \"mswlNotes\" && fields[k as keyof Partial<Agent>] !== undefined
+        );
+        if (otherKeys.length > 0) {
+          activitiesToCreate.push({
+            activityType: ActivityType.AGENT_UPDATED,
+            description: `You updated details for ${agentName} at ${agencyName}`,
+            manuscriptId: \"\",
+            queryId: \"\",
+            date: dateStr,
+            details: \"\"
+          });
+        }
+      }
+
+      for (const act of activitiesToCreate) {
+        await addActivity(act);
+      }
+    }
+  };
+
+  
+  
+  
+  
+  const saveAgentEdits = (
+    agentId: string,
+    patch: AgentEditPatch,
+    extraWrites: AgentExtraWrite[] = []
+  ): Promise<SaveAgentResult> => {
+    if (!currentUser) return Promise.resolve({ ok: false, error: \"Not signed in.\" });
+
+    
+    
+    
+    
+    
+    
+    let allExtra = extraWrites;
+    const prevWeeks = agents.find(a => a.id === agentId)?.responseTimeWeeks;
+    if (typeof patch.responseTimeWeeks === \"number\" && patch.responseTimeWeeks !== prevWeeks) {
+      const fanOut = computeAgentDeadlineWrites(
+        queries.filter(q => q.agentId === agentId),
+        patch.responseTimeWeeks,
+        (queryId) => doc(db, \"users\", currentUser.id, \"queries\", queryId),
+      );
+      allExtra = extraWrites.concat(fanOut);
+    }
+
+    return commitAgentEdits(db, currentUser.id, agentId, patch, allExtra);
+  };
+
+  const deleteAgent = async (id: string) => {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    
+    const agentName = agents.find(a => a.id === id)?.name || \"an agent\";
+    
+    
+    
+    
+    
+    const plan = cascadePlan(\"agent\", id, { queries, activities, taskFlags, userTasks });
+    const qIds = plan.queryIds;
+    try {
+      const refs: DocumentReference[] = [];
+      
+      try {
+        const notesSnap = await getDocs(collection(db, \"users\", uid, \"agents\", id, \"notes\"));
+        notesSnap.forEach(n => refs.push(n.ref));
+      } catch {
+        
+      }
+      for (const d of plan.docs) {
+        if (d.col === \"queries\") {
+          const actSnap = await getDocs(collection(db, \"users\", uid, \"queries\", d.id, \"activity\"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, \"users\", uid, d.col, d.id));
+      }
+      await commitDeletesInBatches(refs);
+
+      
+      
+      
+      const qn = qIds.length;
+      const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? \"ies\" : \"y\"} removed)` : \"\";
+      await addActivity({
+        activityType: ActivityType.AGENT_DELETED,
+        description: `You deleted ${agentName}${detail}`,
+        manuscriptId: \"\",
+        queryId: \"\",
+        date: new Date().toISOString(),
+        details: \"\",
+      }).catch(() => {  });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
+    }
+  };
+
+  
+  
+  
+  
+  const deleteQuery = async (queryId: string) => {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    if (!queries.find(q => q.id === queryId)) return;
+    try {
+      const refs: DocumentReference[] = [];
+      const actSnap = await getDocs(collection(db, \"users\", uid, \"queries\", queryId, \"activity\"));
+      actSnap.forEach(a => refs.push(a.ref));
+      for (const aid of activityIdsForQueries(activities, [queryId])) refs.push(doc(db, \"users\", uid, \"activities\", aid));
+      
+      for (const fid of flagIdsForCascade(taskFlags, { queryIds: [queryId] })) refs.push(doc(db, \"users\", uid, \"taskFlags\", fid));
+      
+      refs.push(doc(db, \"users\", uid, \"queries\", queryId));
+      await commitDeletesInBatches(refs);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/queries/${queryId}`);
+    }
+  };
+
+  
+  
+  const setAgentSetAside = async (id: string, setAside: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"agents\", id), { setAside });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
+    }
+  };
+
+  
+  const addQuery = async (
+    q: Omit<Query, \"id\" | \"userId\" | \"status\" | \"dateSent\" | \"responseDeadline\" | \"nudgeDate\"> & { status?: QueryStatus; dateSent?: string; id?: string },
+    bypassLimits: boolean = false,
+    opts?: AddQueryOpts,
+  ): Promise<{ success: boolean; error?: string; id?: string }> => {
+    if (!currentUser) return { success: false, error: \"Session required.\" };
+
+    
+    const agent = agents.find(a => a.id === q.agentId);
+    const dead: string | undefined = undefined;
+
+    const id = q.id || \"q-\" + Math.random().toString(36).substr(2, 9);
+    const newQ: any = {
+      ...q,
+      id,
+      userId: currentUser.id,
+      status: q.status || QueryStatus.QUERIED,
+      dateSent: importedSentDate(q.dateSent, opts, () => new Date().toISOString()),
+      responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
+    };
+    
+    
+    
+    for (const k of Object.keys(newQ)) {
+      if (newQ[k] === undefined) delete newQ[k];
+    }
+
+    
+    
+    
+    const nowMs = Date.now();
+    const seedActivities = (): Activity[] => {
+      if (!seedsOwnHistory(opts)) return [];
+      const out: Activity[] = [
+        {
+          id: \"act-\" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.QUERY_SENT,
+          description: `Query sent to ${agent?.name || \"agent\"} at ${agent?.agency || \"agency\"}`,
+          date: new Date(nowMs).toISOString(),
+          details: opts?.details ?? `Sent via ${q.sendMethod || agent?.submissionMethod || \"Email\"}`,
+          resultingStatus: QueryStatus.QUERIED,
+          ...(opts?.eventKey ? { eventKey: opts.eventKey } : {}),
+        },
+      ];
+      if (newQ.status && newQ.status !== QueryStatus.QUERIED) {
+        out.push({
+          id: \"act-\" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.STATUS_CHANGED,
+          description: statusReconstructionNote(newQ.status),
+          
+          date: new Date(nowMs + 1).toISOString(),
+          details: \"\",
+          resultingStatus: newQ.status,
+        });
+      }
+      return out;
+    };
+
+    try {
+      const seeded = seedActivities();
+      const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || \"\";
+      
+      const logDoc = (act: Activity) => ({
+        type: act.resultingStatus,
+        resultingStatus: act.resultingStatus,
+        createdAt: Timestamp.fromDate(new Date(act.date)),
+        note: act.description,
+        queryId: id,
+        agentName: agent?.name || \"The agent\",
+        manuscriptTitle,
+        ...(act.eventKey ? { eventKey: act.eventKey } : {}),
+      });
+      
+      const batch = writeBatch(db);
+      batch.set(doc(db, \"users\", currentUser.id, \"queries\", id), newQ);
+      for (const act of seeded) {
+        batch.set(doc(db, \"users\", currentUser.id, \"activities\", act.id), act);
+        batch.set(doc(db, \"users\", currentUser.id, \"queries\", id, \"activity\", act.id), logDoc(act));
+      }
+      const stampTarget = opts?.stampPackage && q.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
+      if (stampTarget && !isPackageLocked(stampTarget)) {
+        batch.update(doc(db, \"users\", currentUser.id, \"packages\", stampTarget.id), { firstSentAt: new Date().toISOString() });
+      }
+      
+      if (import.meta.env.MODE !== \"production\" && (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE) {
+        (window as unknown as { __SA_FAIL_NEXT_SAVE?: boolean }).__SA_FAIL_NEXT_SAVE = false;
+        batch.set(doc(db, \"users\", currentUser.id, \"no-such-collection\", \"refused\"), { refused: true });
+      }
+      await batch.commit();
+
+      
+      if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
+        await recomputeQueryOnline(currentUser.id, id);
+      }
+      return { success: true, id };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${id}`);
+      return { success: false, error: \"Failed to dispatch Query.\" };
+    }
+  };
+
+  
+  
+
+  
+  const recompute = async (queryId: string) => {
+    if (!currentUser) return;
+    await recomputeQueryOnline(currentUser.id, queryId);
+  };
+
+  
+  const updateQueryStatus = async (queryId: string, newStatus: QueryStatus, systemNotes?: string) => {
+    if (!currentUser) return;
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return;
+
+    const oldStatus = targetQ.status;
+    if (oldStatus === newStatus) return;
+
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    const agentFirstName = agent?.name ? agent.name.split(\" \")[0] : \"the agent\";
+    const calcDeadline = () => {
+      if (agent) {
+        const d = new Date();
+        d.setDate(d.getDate() + (agent.responseTimeWeeks * 7));
+        return d.toISOString();
+      }
+      return new Date(Date.now() + 6 * 7 * 24 * 60 * 60 * 1000).toISOString();
+    };
+    const formattedDeadStr = formatHumanDate(calcDeadline());
+
+    const missedActivities: Omit<Activity, \"id\">[] = [];
+    const dateStr = new Date().toISOString();
+
+    const sequence: QueryStatus[] = [
+      QueryStatus.QUERIED,
+      QueryStatus.PARTIAL_REQUESTED,
+      QueryStatus.PARTIAL_SENT,
+      QueryStatus.FULL_REQUESTED,
+      QueryStatus.FULL_SENT
+    ];
+
+    const startIndex = sequence.indexOf(oldStatus);
+    const endIndex = sequence.indexOf(newStatus);
+
+    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+      for (let i = startIndex + 1; i <= endIndex; i++) {
+        const skippedState = sequence[i];
+
+        if (skippedState === QueryStatus.PARTIAL_REQUESTED) {
+          missedActivities.push({
+            userId: currentUser.id,
+            queryId,
+            manuscriptId: targetQ.manuscriptId,
+            activityType: ActivityType.STATUS_CHANGED,
+            description: `${agent?.name || \"The agent\"} at ${agent?.agency || \"agency\"} requested a partial manuscript`,
+            date: dateStr,
+            details: `Respond by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.PARTIAL_REQUESTED
+          });
+        } else if (skippedState === QueryStatus.PARTIAL_SENT) {
+          missedActivities.push({
+            userId: currentUser.id,
+            queryId,
+            manuscriptId: targetQ.manuscriptId,
+            activityType: ActivityType.MATERIALS_SENT,
+            description: materialsSentDescription(QueryStatus.PARTIAL_SENT, agent),
+            date: dateStr,
+            details: `Expected a response by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.PARTIAL_SENT
+          });
+        } else if (skippedState === QueryStatus.FULL_REQUESTED) {
+          missedActivities.push({
+            userId: currentUser.id,
+            queryId,
+            manuscriptId: targetQ.manuscriptId,
+            activityType: ActivityType.STATUS_CHANGED,
+            description: `${agent?.name || \"The agent\"} at ${agent?.agency || \"agency\"} requested a full manuscript`,
+            date: dateStr,
+            details: `Respond by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.FULL_REQUESTED
+          });
+        } else if (skippedState === QueryStatus.FULL_SENT) {
+          missedActivities.push({
+            userId: currentUser.id,
+            queryId,
+            manuscriptId: targetQ.manuscriptId,
+            activityType: ActivityType.MATERIALS_SENT,
+            description: materialsSentDescription(QueryStatus.FULL_SENT, agent),
+            date: dateStr,
+            details: `Expected a response by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.FULL_SENT
+          });
+        }
+      }
+    } else {
+      let activityType = ActivityType.STATUS_CHANGED;
+      let desc = `Status updated to ${newStatus}`;
+      let detailsLine = systemNotes || \"\";
+
+      if (newStatus === QueryStatus.QUERIED) {
+        desc = `Query sent to ${agent?.name || \"agent\"} at ${agent?.agency || \"agency\"}`;
+        detailsLine = `Sent via ${targetQ.sendMethod || agent?.submissionMethod || \"Email\"}`;
+      } else if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
+        desc = `${agent?.name || \"The agent\"} at ${agent?.agency || \"agency\"} requested a partial manuscript`;
+        detailsLine = `Respond by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.PARTIAL_SENT) {
+        activityType = ActivityType.MATERIALS_SENT;
+        desc = materialsSentDescription(QueryStatus.PARTIAL_SENT, agent);
+        detailsLine = `Expected a response by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.FULL_REQUESTED) {
+        desc = `${agent?.name || \"The agent\"} at ${agent?.agency || \"agency\"} requested a full manuscript`;
+        detailsLine = `Respond by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.FULL_SENT) {
+        activityType = ActivityType.MATERIALS_SENT;
+        desc = materialsSentDescription(QueryStatus.FULL_SENT, agent);
+        detailsLine = `Expected a response by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.REVISE_RESUBMIT) {
+        desc = `Revise & Resubmit request received from ${agent?.name || \"the agent\"} at ${agent?.agency || \"agency\"}`;
+        detailsLine = `Respond by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.OFFER) {
+        desc = `Congratulations! You've received an offer of representation from ${agent?.name || \"the agent\"} at ${agent?.agency || \"agency\"}!`;
+        detailsLine = `Respond by ${formattedDeadStr}`;
+      } else if (newStatus === QueryStatus.REJECTED) {
+        desc = `Rejection received from ${agent?.name || \"the agent\"} at ${agent?.agency || \"agency\"}`;
+        detailsLine = \"Query closed. Don't worry - it's all part of the journey.\";
+      } else if (newStatus === QueryStatus.WITHDRAWN) {
+        desc = `Withdrew query from ${agent?.name || \"the agent\"} at ${agent?.agency || \"agency\"}.`;
+        detailsLine = \"Query closed\";
+      } else if (newStatus === QueryStatus.NO_RESPONSE) {
+        desc = `No response received from ${agent?.name || \"the agent\"} at ${agent?.agency || \"agency\"}`;
+        detailsLine = \"This query reached its active tracking deadline and has been closed\";
+      }
+
+      missedActivities.push({
+        userId: currentUser.id,
+        queryId,
+        manuscriptId: targetQ.manuscriptId,
+        activityType,
+        description: desc,
+        date: dateStr,
+        details: detailsLine,
+        resultingStatus: newStatus
+      });
+    }
+
+    
+    
+    const baseTime = new Date(dateStr).getTime();
+    missedActivities.forEach((act, i) => {
+      act.date = new Date(baseTime + i).toISOString();
+    });
+
+    
+    try {
+      const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || \"\";
+      for (const act of missedActivities) {
+         const actId = \"act-\" + Math.random().toString(36).substr(2, 9);
+         await setDoc(doc(db, \"users\", currentUser.id, \"activities\", actId), {
+           ...act,
+           id: actId
+         });
+         
+         
+         await setDoc(doc(db, \"users\", currentUser.id, \"queries\", queryId, \"activity\", actId), {
+           type: act.resultingStatus,
+           resultingStatus: act.resultingStatus,
+           createdAt: Timestamp.fromDate(new Date(act.date)),
+           note: act.description,
+           queryId,
+           agentName: agent?.name || \"The agent\",
+           manuscriptTitle
+         });
+      }
+      await recompute(queryId);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  
+  
+  
+  const recordMaterialsSent = async (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT | QueryStatus.RESUBMITTED;
+    sentDate: string;
+    isResubmit?: boolean;
+    
+    writerExpectedDate?: string;
+    nudgeDate?: string;
+    
+    note?: string;
+      
+    bookVersionId?: string;
+    
+    eventKey?: EventKey;
+  }) => {
+    if (!currentUser) return;
+    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note, bookVersionId, eventKey } = args;
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return;
+
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    
+    
+    const desiredMillis = new Date(sentDate).getTime();
+    const eventMillis = await monotonicEventTime(currentUser.id, queryId, desiredMillis);
+    const sentISO = new Date(eventMillis).toISOString();
+
+    
+    
+    const descriptionRound = isResubmit ? (targetQ.revisionRound ?? 1) + 1 : undefined;
+
+    
+    const qUpdates: Record<string, any> = {};
+    
+    if (writerExpectedDate) Object.assign(qUpdates, writerExpectedWrite(new Date(writerExpectedDate).toISOString()));
+    if (nudgeDate) qUpdates.nudgeDate = new Date(nudgeDate).toISOString();
+
+    const description = materialsSentDescription(targetStatus, agent, {
+      resubmit: isResubmit,
+      round: descriptionRound,
+    });
+    
+    const details = [
+      (note ?? \"\").trim() || null,
+      writerExpectedDate ? `Expected a response by ${formatHumanDate(writerExpectedDate)}` : null,
+    ].filter(Boolean).join(\" · \");
+
+    const activity: Omit<Activity, \"id\"> = {
+      userId: currentUser.id,
+      queryId,
+      manuscriptId: targetQ.manuscriptId,
+      activityType: ActivityType.MATERIALS_SENT,
+      description,
+      date: sentISO,
+      details,
+      resultingStatus: targetStatus,
+      
+      ...(bookVersionId ? { bookVersionId } : {}),
+      ...(eventKey ? { eventKey } : {}),
+    };
+
+    try {
+      if (Object.keys(qUpdates).length > 0) {
+        await updateDoc(doc(db, \"users\", currentUser.id, \"queries\", queryId), qUpdates);
+      }
+      
+      
+      
+      
+      const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || \"\";
+      
+      
+      const prior = {
+        ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedDate === \"string\" ? { writerExpectedDate: (targetQ as unknown as Record<string, string>).writerExpectedDate } : {}),
+        ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedSetAt === \"string\" ? { writerExpectedSetAt: (targetQ as unknown as Record<string, string>).writerExpectedSetAt } : {}),
+        ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeDate === \"string\" ? { nudgeDate: (targetQ as unknown as Record<string, string>).nudgeDate } : {}),
+      };
+      const actId = \"act-\" + Math.random().toString(36).substr(2, 9);
+      const subRef = doc(db, \"users\", currentUser.id, \"queries\", queryId, \"activity\", actId);
+      await setDoc(subRef, {
+        type: targetStatus,
+        resultingStatus: targetStatus,
+        createdAt: Timestamp.fromDate(new Date(sentISO)),
+        note: description,
+        queryId,
+        agentName: agent?.name || \"The agent\",
+        manuscriptTitle,
+        ...(eventKey ? { eventKey } : {}),
+      });
+      await setDoc(doc(db, \"users\", currentUser.id, \"activities\", actId), { ...activity, id: actId });
+      await recompute(queryId);
+      return { activityId: actId, prior };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  
+  
+  
+  
+  
+  
+  
+  
+  useEffect(() => {
+    if (!currentUser || queries.length === 0) return;
+    const timer = setTimeout(() => {
+      const now = Date.now();
+      const toClose = queries.filter(q =>
+        q.status === QueryStatus.QUERIED &&
+        q.ifNoResponse === \"Mark as no response automatically\" &&
+        q.responseDeadline &&
+        new Date(q.responseDeadline).getTime() < now
+      );
+      toClose.forEach(async (q) => {
+        try {
+          await updateQueryStatus(
+            q.id,
+            QueryStatus.NO_RESPONSE,
+            \"Automatically closed — no response by the deadline you set.\"
+          );
+        } catch (err) {
+          console.error(\"[QueryHawk] Auto-close failed:\", err);
+        }
+      });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [currentUser, queries]);
+
+  
+  
+  const removeActivityEverywhere = async (
+    queryId: string,
+    
+    id: string,
+  ): Promise<{ sub: string | null; feed: string | null }> => {
+    if (!currentUser) return { sub: null, feed: null };
+    const uid = currentUser.id;
+
+    
+    const subRef = doc(db, \"users\", uid, \"queries\", queryId, \"activity\", id);
+    const feedRefById = doc(db, \"users\", uid, \"activities\", id);
+    const [subSnap, feedSnap] = await Promise.all([getDoc(subRef), getDoc(feedRefById)]);
+
+    let subId: string | null = subSnap.exists() ? id : null;
+    let feedId: string | null = feedSnap.exists() ? id : null;
+
+    
+    const near = <T,>(xs: { id: string; t: number }[], at: number): string | null =>
+      xs.length ? xs.map((x) => ({ id: x.id, d: Math.abs(x.t - at) })).sort((a, b) => a.d - b.d)[0].id : null;
+
+    if (subId && !feedId) {
+      const d = subSnap.data() as Record<string, unknown>;
+      const want = d.resultingStatus ?? d.type ?? null;
+      const raw = (d.createdAt as { toDate?: () => Date })?.toDate?.().toISOString() ?? (d.createdAt as unknown as string);
+      if (want !== null) {
+        feedId = near(activities.filter((a) => a.queryId === queryId && a.resultingStatus === want)
+          .map((a) => ({ id: a.id, t: getActivityTime(a.date) })), getActivityTime(raw));
+      }
+    } else if (feedId && !subId) {
+      const f = activities.find((a) => a.id === id);
+      const want = f?.resultingStatus ?? null;
+      if (want !== null) {
+        const all = await getDocs(collection(db, \"users\", uid, \"queries\", queryId, \"activity\"));
+        const cands = all.docs
+          .filter((x) => { const v = x.data() as Record<string, unknown>; return (v.resultingStatus ?? v.type) === want; })
+          .map((x) => {
+            const v = x.data() as Record<string, unknown>;
+            const raw = (v.createdAt as { toDate?: () => Date })?.toDate?.().toISOString() ?? (v.createdAt as unknown as string);
+            return { id: x.id, t: getActivityTime(raw) };
+          });
+        subId = near(cands, getActivityTime(f?.date));
+      }
+    }
+
+    if (!subId && !feedId) return { sub: null, feed: null };
+    
+    const batch = writeBatch(db);
+    if (subId) batch.delete(doc(db, \"users\", uid, \"queries\", queryId, \"activity\", subId));
+    if (feedId) batch.delete(doc(db, \"users\", uid, \"activities\", feedId));
+    await batch.commit();
+    return { sub: subId, feed: feedId };
+  };
+
+  const undoQueryStatus = async (queryId: string, _previousStatus: QueryStatus, newStatus: QueryStatus) => {
+    if (!currentUser) return;
+
+    try {
+      
+      const snap = await getDocs(collection(db, \"users\", currentUser.id, \"queries\", queryId, \"activity\"));
+      const docs = snap.docs
+        .map(d => ({ ref: d.ref, derivable: subcollectionDocToDerivable(d.id, d.data()) }))
+        .filter(d => d.derivable.resultingStatus !== null && d.derivable.resultingStatus !== undefined)
+        .sort((a, b) => getActivityTime(a.derivable.date) - getActivityTime(b.derivable.date));
+      const target =
+        [...docs].reverse().find(d => d.derivable.resultingStatus === newStatus) ??
+        docs[docs.length - 1];
+
+      if (target) {
+        
+        await removeActivityEverywhere(queryId, target.ref.id);
+      }
+
+      await recompute(queryId);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  
+  const addJournalEntry = async (queryId: string, entryText: string) => {
+    if (!currentUser) return;
+    const id = \"j-\" + Math.random().toString(36).substr(2, 9);
+    const newEntry: JournalEntry = {
+      id,
+      userId: currentUser.id,
+      queryId,
+      entryText,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"journalEntries\", id), newEntry);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/journalEntries/${id}`);
+    }
+  };
+
+  const deleteJournalEntry = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await deleteDoc(doc(db, \"users\", currentUser.id, \"journalEntries\", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/journalEntries/${id}`);
+    }
+  };
+
+  
+  const pinJournalEntry = async (id: string, pinned: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"journalEntries\", id), { pinned });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/journalEntries/${id}`);
+    }
+  };
+
+  const updateJournalEntry = async (id: string, entryText: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, \"users\", currentUser.id, \"journalEntries\", id), { entryText });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/journalEntries/${id}`);
+    }
+  };
+
+  
+  
+  const addNote = async (fields: { text: string; colour?: Note[\"colour\"]; dueDate?: string | null }) => {
+    if (!currentUser) return;
+    const id = \"note-\" + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    
+    const newNote: Note = {
+      id,
+      userId: currentUser.id,
+      text: fields.text,
+      colour: fields.colour ?? \"pink\",
+      dueDate: fields.dueDate ?? null,
+      done: false,
+      doneAt: null,
+      createdAt: now,
+      updatedAt: now
+    };
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"notes\", id), newNote);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
+  
+  const addPersonalGenre = async (
+    rawLabel: string
+  ): Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }> => {
+    if (!currentUser) return { ok: false, reason: \"You need to be signed in.\" };
+    const personal = currentUser.personalGenres ?? [];
+    const r = resolveGenre(rawLabel, currentUser.id, personal);
+    if (r.status === \"rejected\" || r.status === \"at-limit\") return { ok: false, reason: r.reason };
+    if (r.status === \"canonical\" || r.status === \"personal\") return { ok: true, id: r.id, label: r.label };
+
+    
+    const next = [...personal, { id: r.id, label: r.label }];
+    await updateUserProfile({ personalGenres: next });
+    try {
+      const key = matchKey(rawLabel);
+      const suggId = `${currentUser.id}__${key.replace(/\\s+/g, \"-\")}`;
+      await setDoc(doc(db, \"genreSuggestions\", suggId), {
+        id: suggId,
+        normalisedLabel: key,
+        label: r.label,
+        userId: currentUser.id,
+        createdAt: new Date().toISOString(),
+      });
+    } catch {
+      
+    }
+    return { ok: true, id: r.id, label: r.label };
+  };
+
+  const updateNote = async (
+    id: string,
+    fields: Partial<Pick<Note, \"text\" | \"colour\" | \"dueDate\" | \"done\" | \"doneAt\">>
+  ) => {
+    if (!currentUser) return;
+    try {
+      
+      await updateDoc(doc(db, \"users\", currentUser.id, \"notes\", id), {
+        ...fields,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await deleteDoc(doc(db, \"users\", currentUser.id, \"notes\", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
+
+  
+  
+  
+  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }): Promise<string | undefined> => {
+    if (!currentUser) return undefined;
+    const text = (fields.text ?? \"\").trim();
+    if (!text) return undefined; 
+    
+    
+    const id = fields.id ?? \"task-\" + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    const newTask: UserTask = {
+      id, userId: currentUser.id, text, done: false, createdAt: fields.createdAt ?? now, updatedAt: now,
+      ...(fields.detail && fields.detail.trim() ? { detail: fields.detail.trim() } : {}),
+      ...(fields.queryId ? { queryId: fields.queryId } : {}),
+      ...(fields.agentId ? { agentId: fields.agentId } : {}),
+      ...(fields.manuscriptId ? { manuscriptId: fields.manuscriptId } : {}),
+      ...(fields.dueDate ? { dueDate: fields.dueDate } : {}),
+      
+      ...(fields.dueDate && fields.surfaceOffset && fields.surfaceOffset !== \"on-day\" ? { surfaceOffset: fields.surfaceOffset } : {}),
+      ...(fields.tags && fields.tags.length ? { tags: fields.tags } : {}),
+    };
+    try {
+      await setDoc(doc(db, \"users\", currentUser.id, \"tasks\", id), newTask);
+      return id;
+    } catch (e) {
+      
+      
+      
+      
+      console.error(`Firestore error [WRITE] users/${currentUser.id}/tasks/${id}: ${e instanceof Error ? e.message : String(e)}`);
+      throw new TodoWriteError(classifyWriteError(e), \"user task write failed\");
+    }
+  };
+
+  const updateUserTask = async (
+    id: string,
+    fields: Partial<Pick<UserTask, \"text\" | \"done\">> & {
+      completedAt?: string | null;
+      detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
+      committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
+    },
+  ) => {
+    if (!currentUser) return;
+    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
+    const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
+    
+    if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
+    
+    if (detail !== undefined) patch.detail = detail === null ? deleteField() : detail;
+    if (dueDate !== undefined) patch.dueDate = dueDate === null ? deleteField() : dueDate;
+    if (surfaceOffset !== undefined) patch.surfaceOffset = surfaceOffset === null ? deleteField() : surfaceOffset;
+    
+    if (tags !== undefined) patch.tags = tags === null || tags.length === 0 ? deleteField() : tags;
+    
+    if (estimateMin !== undefined) patch.estim...
+
+ ❯ src/lib/unknownDoor.test.tsx:131:35
+    129|   });
+    130|   it("the dream-agent suggestion needs a stated Open", () => {
+    131|     expect(src("src/lib/db.tsx")).toMatch(/a\.starRating === 5 && a\.s…
+       |                                   ^
+    132|   });
+    133| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · the editor still writes only Open or Closed > an Unknown agent opens with neither chosen, and saving something else leaves the status alone
+AssertionError: expected 'open' to be null
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+"open"
+
+ ❯ src/lib/unknownDoor.test.tsx:151:23
+    149|   it("an Unknown agent opens with neither chosen, and saving something…
+    150|     const base = draftOf(unknown);
+    151|     expect(base.door).toBeNull();
+       |                       ^
+    152|     const patch = cardPatch(unknown, base, { ...base, city: "Leeds" },…
+    153|     expect("submissionStatus" in patch).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
+
+ FAIL  src/lib/unknownDoor.test.tsx > A2 · the editor still writes only Open or Closed > choosing Open writes Open; choosing Closed writes Closed
+AssertionError: expected undefined to be 'Open' // Object.is equality
+
+[32m- Expected:[39m 
+"Open"
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/lib/unknownDoor.test.tsx:157:110
+    155|   it("choosing Open writes Open; choosing Closed writes Closed", () =>…
+    156|     const base = draftOf(unknown);
+    157|     expect(cardPatch(unknown, base, { ...base, door: "open" }, "2026-1…
+       |                                                                                                              ^
+    158|     expect(cardPatch(unknown, base, { ...base, door: "closed" }, "2026…
+    159|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  11 failed | 7 passed (18)
+   Start at  12:10:42
+   Duration  428ms (transform 147ms, setup 0ms, collect 226ms, tests 13ms, environment 0ms, prepare 46ms)
+

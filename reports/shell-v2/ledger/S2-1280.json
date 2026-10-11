@@ -1,0 +1,434 @@
+[
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "sheet top -536.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "sheet top -536.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "now 39 main 39"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "sheet top -536.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "sheet top -518.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "sheet top -490.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ },
+ {
+  "lock": "S2 precondition: a header sheet is on screen",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "host true sheet true"
+ },
+ {
+  "lock": "S2 the sheet's colour",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "rgb(251, 249, 245)"
+ },
+ {
+  "lock": "S2 the sheet's edges are the page sheet's (±1)",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "sheet 248.0–1272.0 page 248–1272"
+ },
+ {
+  "lock": "S2 it starts at the page sheet's top",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "sheet top -454.0 page top 64"
+ },
+ {
+  "lock": "S2 no horizontal overflow (none the sheet adds: no more than main's own)",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "now 0 main 0"
+ },
+ {
+  "lock": "S2 painted: paper at the page sheet's left and right edges and at its top",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "left 251,249,245 right 251,249,245 top 251,249,245"
+ }
+]

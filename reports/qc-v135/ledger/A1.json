@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "art 421×326"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "group 435.0–1317.0, midpoint 876.0, sheet centre 876.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "art 490×326"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "group 300.0–1452.0, midpoint 876.0, sheet centre 876.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "art 330×336"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "group 379.4–1372.5, midpoint 876.0, sheet centre 876.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "art 327×253"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "group 397.4–1122.6, midpoint 760.0, sheet centre 760.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "art 380×253"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "group 289.0–1231.0, midpoint 760.0, sheet centre 760.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "56.0"
+ },
+ {
+  "lock": "A1 precondition: the header, its text block and its drawing are on screen",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "art 260×264"
+ },
+ {
+  "lock": "A1 the midpoint of (text left, art right) is the page sheet's centre (±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "group 357.5–1162.5, midpoint 760.0, sheet centre 760.0"
+ },
+ {
+  "lock": "A1 the gap between the text and the drawing is 56 (±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "56.0"
+ }
+]

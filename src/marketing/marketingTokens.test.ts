@@ -32,6 +32,9 @@ const app = decls(css("../index.css"));
    against its source rather than against a literal typed on both sides. */
 const dash = decls(css("../components/dashboard/oneScreen.css"));
 
+/** A token's value, lower-cased, so two hexes compare as colours rather than as spellings. */
+const hex = (v: string | null) => (v ?? "").toLowerCase();
+
 const value = (src: string, token: string) => {
   const m = new RegExp("\\" + token + "\\s*:\\s*([^;]+);").exec(src);
   return m ? m[1].trim() : null;
@@ -103,10 +106,49 @@ describe("the hero's ground is a documented copy of the app's, not a reference t
    * hex in this test would go green the day someone changed both the app and the test and left
    * marketing behind. Two derivations against each other, per the house rule.
    */
-  it("--mk-hero-ground equals --ws-ground", () => {
-    const ws = value(app, "--ws-ground");
+  /* RE-POINTED (landing colours v2): the hero sits on the app's SHEET now, not its old ground.
+     Same law, new subject — a documented copy, compared with the app's own declaration. */
+  it("--mk-hero-ground equals --ws-sheet", () => {
+    const ws = value(app, "--ws-sheet");
     expect(ws).toBeTruthy();
     expect(value(marketing, "--mk-hero-ground")).toBe(ws);
+  });
+
+  /**
+   * K1 — EVERY COPY, AGAINST THE APP'S OWN FILE. The right-hand side of each pair is read out of
+   * the app's stylesheet; nothing here is a literal typed on both sides.
+   */
+  const triple = (v: string) => {
+    const m = /^#([0-9a-f]{6})$/i.exec(v);
+    expect(m, `${v} is a plain hex`).toBeTruthy();
+    return [0, 2, 4].map((i) => parseInt(m![1].slice(i, i + 2), 16)).join(", ");
+  };
+  it("the tier's ink, cream and text ink equal the app's", () => {
+    for (const [mk, ws] of [
+      ["--mk-ink-shell", "--ink-shell"], ["--mk-cream", "--ink-cream"], ["--mk-nearblack", "--ink-on-light"],
+    ]) {
+      expect(value(app, ws), `${ws} is declared by the app`).toBeTruthy();
+      expect(hex(value(marketing, mk)), `${mk} is a copy of ${ws}`).toBe(hex(value(app, ws)));
+    }
+  });
+  it("--mk-lower equals --ws-page, compared as the colour the app resolves it to", () => {
+    /* The app states the page ground as a channel triple so it can take an alpha. */
+    expect(value(app, "--ws-page")).toBe("rgb(var(--ws-page-rgb))");
+    expect(triple(value(marketing, "--mk-lower")!)).toBe(value(app, "--ws-page-rgb"));
+  });
+  it("the accent on ink, the stamp and the cream button equal the app's", () => {
+    const panel = decls(css("../components/shell/headerPanel.css"));
+    expect(hex(value(marketing, "--mk-terra"))).toBe(hex(value(app, "--ink-terra")));
+    expect(value(marketing, "--mk-cream-rgb")).toBe(value(app, "--ink-cream-rgb"));
+    expect(value(panel, "--hpanel-stamp"), "the app still declares the stamp").toBeTruthy();
+    expect(hex(value(marketing, "--mk-stamp"))).toBe(hex(value(panel, "--hpanel-stamp")));
+    expect(hex(value(marketing, "--mk-cream-btn"))).toBe(hex(value(panel, "--hpanel-primary-bg")));
+    expect(hex(value(marketing, "--mk-ink-shell")), "the cream button's text is the shell's ink")
+      .toBe(hex(value(panel, "--hpanel-primary-fg")));
+  });
+  it("the two older ink names are aliases, so the three cannot diverge", () => {
+    expect(value(marketing, "--mk-ink")).toBe("var(--mk-nearblack)");
+    expect(value(marketing, "--mk-head")).toBe("var(--mk-nearblack)");
   });
 
   /**
@@ -114,8 +156,8 @@ describe("the hero's ground is a documented copy of the app's, not a reference t
    * bare `:root` today. If a theme class ever overrides it, "the hero sits on the app's ground"
    * stops being a single value and this copy starts describing one theme out of three.
    */
-  it("--ws-ground is declared exactly once in the app", () => {
-    expect(app.match(/--ws-ground\s*:/g) ?? []).toHaveLength(1);
+  it("--ws-sheet is declared exactly once in the app", () => {
+    expect(app.match(/--ws-sheet\s*:/g) ?? []).toHaveLength(1);
   });
 });
 
@@ -144,11 +186,14 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
    */
   it("--mk-claim-accent is an alias for --mk-rust, so the two cannot diverge", () => {
     expect(value(marketing, "--mk-claim-accent")).toBe("var(--mk-rust)");
-    expect(value(marketing, "--mk-rust")).toBe("#8a4a3c");
-    /* ⚠️ STILL NOT `--mk-burg` (#7c3a2a). Fourteen points apart, two reds on one page — a flag that
-       has been raised and not resolved, and asserting the DIFFERENCE is what stops it being closed
-       by accident rather than by decision. */
-    expect(value(marketing, "--mk-rust")).not.toBe(value(marketing, "--mk-burg"));
+    /* RE-POINTED (landing colours v2): rust is the Query Centre's now. The alias is the law;
+       the value is recorded so a change to it is a decision. */
+    expect(value(marketing, "--mk-rust")).toBe("#a2452a");
+    /* RE-POINTED (landing colours v2): the flag this carried — two reds on one page, fourteen
+       points apart — is resolved. Burgundy is retired; rust is the one red on light. */
+    expect(marketing, "burgundy is gone from the sheet").not.toMatch(/--mk-burg\b/);
+    expect(marketing, "and so is every alpha of it").not.toMatch(/124,\s*58,\s*42/);
+    expect(marketing).not.toMatch(/#7c3a2a/i);
   });
 
   /**
@@ -180,7 +225,7 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
   it("each modifier is declared after the base it overrides", () => {
     const base = marketing.indexOf(".mk-btn {");
     expect(base, "the base button is declared").toBeGreaterThan(-1);
-    for (const mod of [".mk-btn--navy {", ".mk-btn--cta {"]) {
+    for (const mod of [".mk-btn--navy {", ".mk-btn--cta {", ".mk-btn--cream {"]) {
       expect(marketing.indexOf(mod), `${mod} after the base`).toBeGreaterThan(base);
     }
     /* The two modifiers never land on one element — proved from the components, not assumed. */
@@ -189,6 +234,15 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
     }
   });
 });
+
+/** Who may read `--mk-lower`. Phase 4 adds the sheet and the other pages' opening fades. */
+const LOWER_READERS = [
+  /* the five other pages' opening sections: paper white fading to the oat, as the hero does */
+  ".mk-mission::before, .mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  ".mk-herowrap", ".mk-lower",
+  /* the sheet itself: every page continues on the oat */
+  ".mk-sheet",
+].sort();
 
 describe("two surfaces, and the step between them is real", () => {
   /**
@@ -218,18 +272,24 @@ describe("two surfaces, and the step between them is real", () => {
    * The claim is that changing the lower surface is still one line, so nothing OUTSIDE this rule
    * may read the token — that is what would give the colour two homes again.
    */
-  it("--mk-lower has one definition, and only its own rule reads it", () => {
+  /* RE-POINTED (landing colours v2): the 80px fade at the top of `.mk-lower` is gone. The hero
+     carries the whole transition — paper white to 62%, then a straight fade arriving at the oat
+     exactly at its foot — so there is still ONE boundary treatment, and it lives on one element.
+     The readers are named: a new one is a decision, not a diff. */
+  it("--mk-lower has one definition, and its readers are the lower surface, the hero's fade and the sheet", () => {
     expect(marketing.match(/--mk-lower\s*:/g) ?? []).toHaveLength(1);
     const own = ruleFor(".mk-lower");
-    expect((own.match(/var\(--mk-lower\)/g) ?? []).length, "the fill and the fade's end stop").toBe(2);
-    expect((marketing.match(/var\(--mk-lower\)/g) ?? []).length, "and nothing else reads it").toBe(2);
-    expect(own, "the fade replaced the hairline that used to mark the join")
-      .toMatch(/linear-gradient\(180deg,\s*var\(--mk-hero-ground\),\s*var\(--mk-lower\)\s*80px\)/);
-    /* ⚠️ SEPARATE LONGHANDS, NEVER THE SHORTHAND. `background:` resets every longhand including
-       the colour, so a gradient that failed to parse would leave the whole lower surface
-       transparent — through a green build, on a public page. */
     expect(own).toMatch(/background-color:\s*var\(--mk-lower\)/);
+    expect(own, "flat: the fade moved to the hero").not.toMatch(/gradient|background-image/);
     expect(own).not.toMatch(/background:\s/);
+    const hero = ruleFor(".mk-herowrap");
+    expect(hero).toMatch(/background-color:\s*var\(--mk-hero-ground\)/);
+    expect(hero, "paper white holds to 62%, then fades to the oat at the foot")
+      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-hero-ground\) 62%,\s*var\(--mk-lower\) 100%\)/);
+    expect(hero, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
+    const readers = [...baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => /var\(--mk-lower\)/.test(m[2])).map((m) => m[1].trim()).sort();
+    expect(readers).toEqual(LOWER_READERS);
   });
 
   /**
@@ -374,9 +434,9 @@ describe("the vision band's own type and geometry", () => {
     expect(more).toMatch(/text-decoration-color:\s*var\(--mk-vision-rule\)/);
     expect(more).toMatch(/margin-top:\s*60px/);
     /* The rule is stronger than the edge — asserted as an ORDER, so both survive a retune. */
-    const alpha = (t: string) => Number(/,\s*\.?(\d*\.?\d+)\s*\)/.exec(value(marketing, t)!)![1]);
-    expect(alpha("--mk-vision-rule"), "the link reads stronger than the band's edges")
-      .toBeGreaterThan(alpha("--mk-vision-edge"));
+    /* RE-POINTED (landing colours v2): the band has no edge rules left to be stronger than. The
+       underline is the ink at 40%, which is the claim the value can carry on its own. */
+    expect(value(marketing, "--mk-vision-rule"), "the ink at 40%").toBe("rgba(28, 19, 15, .4)");
   });
 
   /**
@@ -401,17 +461,42 @@ describe("the vision band's own type and geometry", () => {
   });
 });
 
-describe("the lower surface's repaints are the banner, the vision band and the footer, and no others", () => {
+describe("the lower surface's one repaint is the vision band (was: the banner, the vision band and the footer)", () => {
   /**
    * ⚠️ COLOUR ONLY, AND NEVER THE SHORTHAND. The banner's picture is an `<img>` in its grid now, so
    * the band paints nothing but its ground — and the shorthand, which resets every longhand, would
    * take the ground with it the day someone added an image here.
    */
-  it("the banner declares its own ground and nothing else", () => {
-    const decls = ruleFor(".mk-claimband");
-    expect(decls).toMatch(/background-color:\s*var\(--mk-claim-ground\)/);
-    expect(decls, "the drawing is an element in the grid, not a background").not.toMatch(/background-image/);
-    expect(decls, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
+  /* RE-POINTED (landing colours v2): the founding band no longer repaints — the hawks stand on
+     the sheet's oat — and the offer inside it is the app's navy PANEL, which is a card on the
+     surface rather than a second surface. */
+  it("the founding band paints nothing; its panel is the navy card", () => {
+    const band = ruleFor(".mk-claimband");
+    expect(band).not.toMatch(/background/);
+    expect(marketing, "its old ground is deleted").not.toMatch(/--mk-claim-ground/);
+    const panel = ruleFor(".mk-claimcard");
+    expect(panel).toMatch(/background-color:\s*var\(--mk-panel\)/);
+    expect(panel).toMatch(/border:\s*1px solid rgba\(var\(--mk-cream-rgb\), \.14\)/);
+    expect(panel).toMatch(/border-radius:\s*14px/);
+    expect(panel).toMatch(/color:\s*var\(--mk-cream\)/);
+    expect(hex(value(marketing, "--mk-panel")), "a copy of the app's --ink-band").toBe(hex(value(app, "--ink-band")));
+  });
+
+  /**
+   * ⚠️ THE PANEL IS THE SCOPE, NEVER THE COMPONENT. `FoundingSignup` and `FoundingCounter` also
+   * mount on light grounds; a rule that turned the field cream by its own class would do it there
+   * too. Every rule that puts cream on one of their parts must start at the panel.
+   */
+  it("every cream treatment of the sign-up and the counter is scoped to the panel", () => {
+    const PARTS = /\.mk-(claimform|betanote|betainvalid|betamsg|claimcount|claimnum|claimof|claimleft|claimtrack|claimfill)\b/;
+    const cream = [...baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => PARTS.test(m[1]) && /--mk-cream|--mk-stamp/.test(m[2]));
+    expect(cream.length, "the panel restates them (the sweep is not vacuous)").toBeGreaterThan(8);
+    for (const m of cream) {
+      for (const sel of m[1].split(",")) {
+        expect(sel.trim(), "starts at the panel").toMatch(/^\.mk-claimcard\s/);
+      }
+    }
   });
 
   /**
@@ -419,12 +504,18 @@ describe("the lower surface's repaints are the banner, the vision band and the f
    * Its ground is a token three points below `--mk-lower`, so the hairline carries the edge and the
    * fill only confirms it.
    */
-  it("the footer is the second, and a hairline states where it starts", () => {
+  /* RE-POINTED (landing colours v2): the footer left the lower surface for the shell and is the
+     page's own ink. It is the frame's lower edge, not a band inside the sheet, and the sheet's
+     rounded corners mark the join — so it states NO top rule. */
+  it("the footer is the page's ink ground, and no hairline states where it starts", () => {
     const foot = ruleFor(".mk-foot");
-    expect(foot).toMatch(/background-color:\s*var\(--mk-foot-ground\)/);
-    expect(foot, "its top edge is declared").toMatch(/border-top:\s*1px solid var\(--mk-hair\)/);
+    expect(foot).toMatch(/background-color:\s*var\(--mk-ink-shell\)/);
+    expect(ruleFor(".mk-scope"), "the same token the page ground reads").toMatch(/background:\s*var\(--mk-ink-shell\)/);
+    expect(foot, "the sheet's corners mark the join").not.toMatch(/border-top/);
     expect(foot).not.toMatch(/background:\s/);
-    expect(value(marketing, "--mk-foot-ground")).toBe("#efeae3");
+    expect(marketing, "its old ground is deleted").not.toMatch(/--mk-foot-ground/);
+    const landing = SOURCES.find(([f]) => f === "Landing.tsx")![1];
+    expect(landing, "and it is not rendered inside the lower surface").not.toMatch(/<MarketingFooter/);
   });
 
   /**
@@ -433,28 +524,34 @@ describe("the lower surface's repaints are the banner, the vision band and the f
    * warm ground, which is a step big enough that an undeclared edge would read as the page having
    * come apart. Stating both is what makes it a sheet rather than a hole.
    */
-  it("the vision band is the third, and it states both of its edges", () => {
+  /* RE-POINTED (landing colours v2): the band is the app's stone and is the ONLY repaint left
+     under the lower surface. Its two edge rules are gone — the colour change marks both edges —
+     and each of its three points is a white card drawn outward from its column. */
+  it("the vision band is stone, with no edge rules, and its points are white cards", () => {
     const band = ruleFor(".mk-vision");
-    expect(band).toMatch(/background-color:\s*var\(--mk-vision-ground\)/);
-    expect(band, "its top edge is declared").toMatch(/border-top:\s*1px solid var\(--mk-vision-edge\)/);
-    expect(band, "and so is its bottom — it is a sheet, not a seam")
-      .toMatch(/border-bottom:\s*1px solid var\(--mk-vision-edge\)/);
+    expect(band).toMatch(/background-color:\s*var\(--mk-stone\)/);
+    expect(band, "the colour change marks the edges").not.toMatch(/border/);
     expect(band, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     expect(band, "the drawing sits in the grid, not behind it").not.toMatch(/background-image/);
-    /* ⚠️ TRUE WHITE, AND DELIBERATELY NOT `--mk-card` (#fffefb). The card colour is a warm near-white
-       meant to sit ON this paper; three points of warmth is the difference between a page turn and
-       a smudge, and snapping to the neighbour to save a token would be a colour decision made by
-       convenience. Asserted as a DIFFERENCE, so it survives either value being retuned. */
-    expect(value(marketing, "--mk-vision-ground")).toBe("#ffffff");
-    expect(value(marketing, "--mk-vision-ground"), "the band's sheet is not the card's warm white")
-      .not.toBe(value(marketing, "--mk-card"));
+    expect(value(marketing, "--mk-stone")).toBe("#e9e6e0");
+    expect(marketing, "the edge token went with the rules").not.toMatch(/--mk-vision-edge/);
+    const card = ruleFor(".mk-vpoint");
+    expect(card).toMatch(/background-color:\s*var\(--mk-white\)/);
+    expect(card).toMatch(/border-radius:\s*14px/);
+    expect(card).toMatch(/box-shadow:\s*0 0 0 1px rgba\(28, 19, 15, \.06\), 0 6px 14px -10px rgba\(91, 42, 31, \.35\)/);
+    const card_ = decls(css("../components/containers/framedCard.css"));
+    expect(hex(value(marketing, "--mk-white")), "a copy of the app's --fc-card").toBe(hex(value(card_, "--fc-card")));
+    /* The padding is paid back by an equal negative margin, so the column's contents do not move. */
+    const pad = /padding:\s*([^;]+);/.exec(card)![1].trim().split(/\s+/);
+    const mar = /margin:\s*([^;]+);/.exec(card)![1].trim().split(/\s+/);
+    expect(mar).toEqual(pad.map((v) => "-" + v));
   });
 
   it("and nothing else under the wrapper repaints the ground", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
-    const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband", ".mk-foot"];
+    const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband"];
     const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
-    expect(painted).toEqual([".mk-vision", ".mk-claimband", ".mk-foot"]);
+    expect(painted).toEqual([".mk-vision"]);
   });
 
   /**
@@ -663,7 +760,7 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     expect(link).toMatch(/color:\s*var\(--mk-rust\)/);
     expect(link).toMatch(/text-underline-offset:\s*5px/);
     expect(link, "the underline is the hairline weight, so it never competes")
-      .toMatch(/text-decoration-color:\s*rgba\(138, 74, 60, \.35\)/);
+      .toMatch(/text-decoration-color:\s*rgba\(162, 69, 42, \.45\)/);
     expect(ruleFor(".mk-heroctas")).toMatch(/gap:\s*22px/);
   });
 
@@ -775,7 +872,7 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the seven that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the eight that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
@@ -797,6 +894,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
          as a negative top margin, so the card grows upward and its feature list starts on exactly
          the line its neighbours' do. The transform it replaced moved the content with the card. */
       ".mk-tier--founding",
+      /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
+         margin, so the picture, heading and body keep their column (landing colours v2) */
+      ".mk-vpoint",
     ]);
   });
 
@@ -1271,9 +1371,14 @@ describe("the nav wordmark is artwork, and the display face it replaced is gone"
    * way to do this, would have put the artwork in both places. The nav has its own element instead.
    */
   it("the nav wears the picture and the footer keeps its type", () => {
-    const art = ruleFor(".mk-wordmarkart");
-    expect(art, "a fixed height with `width: auto` — the file is 500x100").toMatch(/height:\s*34px/);
-    expect(art).toMatch(/width:\s*auto/);
+    /* RE-POINTED (landing colours v2): the nav is ink, so its wordmark is cream type in the
+       footer's own face. Still two classes — restyling the shared one would move both. */
+    expect(marketing, "the artwork's rule went with the artwork").not.toMatch(/\.mk-wordmarkart/);
+    const word = ruleFor(".mk-navword");
+    expect(word).toMatch(/font-family:\s*"Playfair Display"/);
+    expect(word).toMatch(/font-weight:\s*600/);
+    expect(word).toMatch(/color:\s*var\(--mk-cream\)/);
+    expect(word, "mixed-case Playfair keeps the 1.3 floor").toMatch(/line-height:\s*1\.3/);
     expect(ruleFor(".mk-wordmark"), "the footer's, untouched").toMatch(/font-family:\s*"Playfair Display"/);
     expect(marketing, "the nav no longer restyles the shared class").not.toMatch(/\.mk-nav \.mk-wordmark\s*\{/);
   });

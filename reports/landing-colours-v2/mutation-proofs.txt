@@ -1,0 +1,11 @@
+N1 ran=1 red=1 ::     Error: / @1440 condensed: nav ground
+N2 ran=1 red=1 ::     Error: @1440: the wordmark is not a picture
+N3 ran=1 red=1 ::     Error: / @1440 rest 92 vs 88
+H1 ran=1 red=1 ::     Error: top 27,36,51
+H2 ran=1 red=1 ::     Error: expect(received).toBe(expected) // Object.is equality
+S1 ran=1 red=1 ::     Error: / @1440
+S2 ran=1 red=1 ::     Error: .mk-statband[0] 130.0,608.0,1180.0,253.8 was 130.0,608.0,1180.0,233.8
+V1 ran=1 red=1 ::     Error: expect(received).toBe(expected) // Object.is equality
+F1 ran=1 red=1 ::     Error: sent: .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button "You're on the list. We'll email your inv"
+F2 ran=1 red=1 ::     Error: founders hero: .mk-fwcol input[type=email]
+T1 ran=1 red=1 ::     Error: no hairline where it starts

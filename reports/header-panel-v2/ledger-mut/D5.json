@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D5 precondition: the list shows everyone, and fewer are queried",
+  "where": "queried",
+  "ok": true,
+  "detail": "showing 37 · queried 6"
+ },
+ {
+  "lock": "D5 the week card is not pressable",
+  "where": "week",
+  "ok": true,
+  "detail": "button false"
+ },
+ {
+  "lock": "D5 the labels are the icon cards'",
+  "where": "labels",
+  "ok": true,
+  "detail": "6 of 37 agents queried: 5 active, 1 closed. Show them in the list | 3% of profiles complete: 1 of 37. Open Housekeeping"
+ },
+ {
+  "lock": "D5 Queried sets the list to Queried",
+  "where": "queried",
+  "ok": false,
+  "detail": "showing 37 → 37 (queried 6)"
+ },
+ {
+  "lock": "D5 Profiles opens Housekeeping",
+  "where": "profiles",
+  "ok": false,
+  "detail": "Housekeeping surfaces on screen 0 → 0"
+ }
+]

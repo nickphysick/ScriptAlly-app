@@ -326,7 +326,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                 <div className="qls-g"><div className="qls-gv">{mine.length ? `${mine.length} sent before` : "never queried"}</div><div className="qls-gk">your history</div></div>
               </div>
               <div className="qls-agfoot">
-                <span className="qls-pill">{agent.submissionStatus === "Open" ? "Open to submissions" : "Closed for submissions"}</span>
+                <span className="qls-pill">{agent.submissionStatus === "Open" ? "Open to submissions" : agent.submissionStatus === "Closed" ? "Closed for submissions" : "Not known"}</span>
               </div>
             </div>
           );

@@ -37,7 +37,6 @@ import {
 } from "./landingCopy";
 import { Runs } from "./CopyRuns";
 import { FoundingCounter } from "./FoundingSignup";
-import { MarketingFooter } from "./MarketingFooter";
 
 /**
  * Each tier's bird. The words live in `PRICING_TIERS` (`illoAlt`); the file, its pixel size and its
@@ -188,7 +187,6 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
         </section>
       </div>
 
-      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

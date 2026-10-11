@@ -2,158 +2,171 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Smart Import — the overview screen ("Here's what we found"). A positive arrival between processing
- * and the review stages. The tally is grouped BY POPULATION (Agents | Queries), never pooled — each
- * column reconciles to its own total. Counts are derived live via reviewTallies. Built to fit one
- * viewport — totals fold into the column headers, the manuscript is a chip, the why-line is a single
- * strip, the top tip is a scrawl in the corner.
+ * The import summary (onboarding v5, part 2; ref design-refs/onboarding/onboarding-journey-v5.html
+ * #overview). It sits in the set-up frame's sheet: an open title, the file's name, then two cards —
+ * agents and queries — each led by its number, with the steps and the primary on a bar at the
+ * sheet's foot.
  *
- * ⚠️ NOTHING HERE BLOCKS, and this docblock used to say otherwise. It described agents as having a
- * "blocking 'A quick fix' tier (missing agency or a duplicate group)", which stopped being true when
- * a missing agency became an optional sharpen — `agentTierOf` returns "sharpen" unconditionally, and
- * every proceed control on every review stage stays live. The one real decision, an unresolved
- * duplicate, gets its own stage BEFORE the review rather than a gate inside it.
+ * ⚠️ THE NUMBERS ARE `summaryModel`'s AND `reviewTallies`', READ ONCE. This file groups and draws
+ * them (`lib/importSummary`); it classifies nothing. The agents total is the count before any
+ * duplicate is merged, as it always was.
  *
- * ⚠️ THE LEAD SENTENCE IS COMPOSED FROM THE COUNTS (`overviewLead`), never chosen from a fixed pair.
- * A single hardcoded "some agents need a fix, some queries need sharpening" line was rendered
- * whenever ANY of the three counts was non-zero, so it routinely named a category showing zero in
- * the column directly beneath it.
+ * ⚠️ NOTHING HERE BLOCKS. The one real decision, an unresolved duplicate, has its own step.
+ *
+ * ⚠️ NO WAY OUT IS DRAWN HERE. The frame's "Skip for now" is the one way out of set-up; the
+ * summary's own "Skip setup" (which was rendered disabled) is gone with its prop.
  */
 import React from "react";
+import "./importFlow.css";
 import { SmartImportResult } from "../../types/smartImport";
-import { parseModel, reviewTallies, reviewNeedCount } from "../../lib/smartImportReviewModel";
+import { reviewTallies } from "../../lib/smartImportReviewModel";
 import { overviewLead } from "../../lib/smartImportConfirm";
-import { ReviewShell } from "./SmartImportReview";
-
-const MONO = "'JetBrains Mono',monospace";
-const SERIF = "'Playfair Display',serif";
-const CAVEAT = "'Caveat',cursive";
-
-const C = {
-  ink: "#3a1c14", burgundy: "#7c3a2a", muted: "#9a8c80", body: "#6a5c50", hairline: "#e7ddd2",
-  parchment: "#fdfaf5", sageLight: "#e9ede6", sageDark: "#5a6e58",
-  goldSoft: "#f4ead0", goldInk: "#6f5618",
-  pinkBtn: "#f5e2da", pinkEdge: "#e8c8bc", pinkWash: "#faeee7",
-};
+import {
+  agentKey, agentKeyParts, agentDiscs, queryCourts, importSteps, stepCaption, duplicateSets, agentSharpenFacts,
+  TIER_TEXT, TIER_NAME, SUMMARY_TITLE, SUMMARY_PRIMARY,
+  summaryModel,
+} from "../../lib/importSummary";
+import { StatusDot } from "../StatusDot";
+import { Chip, Disc, Stepper } from "./ImportParts";
 
 interface Props {
   result: SmartImportResult;
   manuscriptTitle: string;
-  userName?: string;
+  /** The file's name, for the chip beside the title. */
+  fileName?: string;
+  /** The file's row count, when it is already known without reading the file again (the template
+   *  path knows it; a Smart import does not). Absent, the chip shows the name alone. */
+  rowCount?: number | null;
   onContinue: () => void;
-  onSkip?: () => void;
+  /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
+  onCancel?: () => void;
 }
 
-const Tier: React.FC<{ tone: "ok" | "fix" | "sharp"; glyph: string; title: string; count: number; desc: string; first?: boolean }> = ({ tone, glyph, title, count, desc, first }) => {
-  const dot = tone === "ok" ? { background: C.sageLight, color: C.sageDark }
-    : tone === "fix" ? { background: C.goldSoft, color: C.goldInk }
-    : { background: C.pinkBtn, color: C.burgundy };
+const TICK = (
+  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 13l4 4 10-11" /></svg>
+);
+
+const Tier: React.FC<{ tone: "ok" | "fix" | "sharp"; mark: React.ReactNode; count: number; name: string; chip?: React.ReactNode; text: string }> = ({ tone, mark, count, name, chip, text }) => (
+  <li className={tone} data-tier={tone}>
+    <span className="im-tm" aria-hidden="true">{mark}</span>
+    <b className="im-n" data-im="tier-n">{count}</b>
+    <div>
+      <h3 className="im-tname">{name}{chip}</h3>
+      <p>{text}</p>
+    </div>
+  </li>
+);
+
+/** The reconciling bar: one segment per tier above zero, in proportion. */
+const Recon: React.FC<{ what: string; total: number; ok: number; fix: number; sharp: number }> = ({ what, total, ok, fix, sharp }) => {
+  const said = [`${ok} ready to go`, ...(fix > 0 ? [`${fix} need a quick fix`] : []), ...(sharp > 0 ? [`${sharp} to sharpen`] : [])].join(", ");
   return (
-    <div style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 18px", borderTop: first ? "none" : "1px solid #f1e8de" }}>
-      <div style={{ width: 24, height: 24, borderRadius: 7, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, marginTop: 1, ...dot }}>{glyph}</div>
-      <div>
-        <div style={{ fontWeight: 600, fontSize: 15, color: C.ink }}>
-          {title}
-          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 500, padding: "2px 8px", borderRadius: 6, marginLeft: 7, verticalAlign: 1, ...dot }}>{count}</span>
-        </div>
-        <div style={{ fontSize: 13, color: C.body, marginTop: 3, lineHeight: 1.45 }}>{desc}</div>
-      </div>
+    <div className="im-recon" role="img" aria-label={`Of ${total} ${what}: ${said}`} data-im="recon">
+      {ok > 0 && <i className="ok" style={{ flex: ok }} />}
+      {fix > 0 && <i className="fix" style={{ flex: fix }} />}
+      {sharp > 0 && <i className="sharp" style={{ flex: sharp }} />}
     </div>
   );
 };
 
-const Column: React.FC<{ label: string; total: number; children: React.ReactNode }> = ({ label, total, children }) => (
-  // The card frame (overflow:hidden + borderRadius) clips the header fill to the rounded top corners —
-  // canonical header-fill structure: no ::before overlay, no radius-matching on the header itself.
-  <div style={{ border: `1px solid ${C.hairline}`, borderRadius: 13, background: C.parchment, overflow: "hidden" }}>
-    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", padding: "13px 18px", borderBottom: "1px solid #efe2d6", background: "#DCE0D9" }}>
-      <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".1em", textTransform: "uppercase", color: C.ink, fontWeight: 500 }}>{label}</span>
-      <span style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: C.burgundy }}>{total}<small style={{ fontFamily: MONO, fontSize: 9.5, color: C.muted, fontWeight: 400, letterSpacing: ".04em", marginLeft: 4 }}>in total</small></span>
-    </div>
-    {children}
-  </div>
-);
-
-export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userName, onContinue, onSkip }) => {
-  const { agents, queries } = React.useMemo(() => parseModel(result), [result]);
+export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileName, rowCount, onContinue, onCancel }) => {
+  const { agents, queries } = React.useMemo(() => summaryModel(result), [result]);
   const t = React.useMemo(() => reviewTallies(agents, queries), [agents, queries]);
-
-  // Fix breakdown for the agent-column description (counts only).
-  const liveAgents = agents.filter((a) => !a.deleted);
-  const noAgency = liveAgents.filter((a) => !a.agency.trim()).length;
-  const dupGroups = liveAgents.filter((a) => a.mergeWith.length > 0 && !a.mergeResolved).length; // leaders = group count
-  // Duplicates are the one real decision (their own stage). A missing agency is now an optional sharpen.
-  const agentFixDesc = dupGroups
-    ? `${dupGroups} possible duplicate set${dupGroups === 1 ? "" : "s"} to merge — sorted on the duplicates step.`
-    : "A duplicate set to merge.";
-  const agentSharpenDesc = noAgency
-    ? `${noAgency} could use an agency, plus the odd detail to confirm. Optional — and nothing's lost without one.`
-    : "A detail or two to confirm. Optional — each one sharpens your tracking.";
+  const key = React.useMemo(() => agentKey(agents, queries), [agents, queries]);
+  const faces = React.useMemo(() => agentDiscs(agents, queries), [agents, queries]);
+  const courts = React.useMemo(() => queryCourts(queries), [queries]);
+  const sets = duplicateSets(agents);
+  const sharpen = agentSharpenFacts(agents);
 
   const allClear = t.agents.fix === 0 && t.agents.sharpen === 0 && t.queries.sharpen === 0;
-  const userInitial = userName ? userName[0].toUpperCase() : "?";
+  const steps = importSteps(sets > 0);
+  const captions = Object.fromEntries(steps.map((id) => [id, stepCaption(id, { sets, agentsOpen: t.agents.sharpen, queriesOpen: t.queries.sharpen })]));
+  const title = manuscriptTitle.trim() || "your book";
+  const file = (fileName ?? "").trim();
 
   return (
-    <ReviewShell userInitial={userInitial} needCount={reviewNeedCount(agents, queries)} fit>
-      <div style={{ position: "relative", padding: "32px 40px 0", flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
-        {/* Scrawled corner note — muted grey handwriting, no card, slight tilt */}
-        <div style={{ position: "absolute", top: 22, right: 30, width: 210, textAlign: "right", zIndex: 5, pointerEvents: "none" }}>
-          <p style={{ fontFamily: CAVEAT, fontSize: 17, lineHeight: 1.3, color: "#a89b8e", margin: 0, transform: "rotate(-1.6deg)" }}>
-            <b style={{ color: "#94867a", fontWeight: 600 }}>Top tip:</b> spend a bit of time getting these right, it pays dividends later
-          </p>
-        </div>
-
-        <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: C.muted, fontWeight: 500 }}>We've read your file</div>
-        <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 31, margin: "7px 0 0", color: C.ink, lineHeight: 1.1 }}>Here's what we found</h1>
-        <p style={{ fontFamily: CAVEAT, fontSize: 21, color: C.burgundy, margin: "9px 0 4px", maxWidth: 600, lineHeight: 1.35 }}>
-          {overviewLead({ agentsFix: t.agents.fix, agentsSharpen: t.agents.sharpen, queriesSharpen: t.queries.sharpen })}
-        </p>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 11, color: C.muted, background: C.parchment, border: `1px solid ${C.hairline}`, borderRadius: 7, padding: "5px 11px", marginTop: 6 }}>
-          📄 1 manuscript · {manuscriptTitle || "Your book"}
-        </span>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 20 }}>
-          <Column label="Agents" total={t.agents.total}>
-            <Tier first tone="ok" glyph="✓" title="Ready to go" count={t.agents.ready}
-              desc="Read cleanly — good to import as they are." />
-            {t.agents.sharpen > 0 && (
-              <Tier tone="sharp" glyph="✦" title="Chances to sharpen" count={t.agents.sharpen} desc={agentSharpenDesc} />
-            )}
-            {t.agents.fix > 0 && (
-              <Tier tone="fix" glyph="!" title="A quick fix" count={t.agents.fix} desc={agentFixDesc} />
-            )}
-          </Column>
-
-          <Column label="Queries" total={t.queries.total}>
-            <Tier first tone="ok" glyph="✓" title="Ready to go" count={t.queries.ready}
-              desc="Dates read, statuses clear — good to import as they are." />
-            {t.queries.sharpen > 0 && (
-              <Tier tone="sharp" glyph="✦" title="Chances to sharpen" count={t.queries.sharpen}
-                desc="A few dates to confirm and statuses to clarify. Optional — each one makes your tracking sharper." />
-            )}
-          </Column>
-        </div>
-
-        {(t.agents.sharpen > 0 || t.queries.sharpen > 0) && (
-          <div style={{ display: "flex", gap: 11, alignItems: "flex-start", background: C.pinkWash, border: `1px solid ${C.pinkEdge}`, borderRadius: 12, padding: "13px 17px", marginTop: 18 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={C.burgundy} style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2z" /></svg>
-            <p style={{ margin: 0, fontSize: 13, color: "#7a4636", lineHeight: 1.45 }}>
-              <b style={{ color: C.ink }}>Why sharpen?</b> The fuller your records, the smarter QueryHawk gets — accurate response counts, nudges at the right moment, and a clear picture of where you stand. Nothing here is required; it just makes everything that follows work better for you.
-            </p>
+    <div className="im-sum" data-im="summary" data-screen="overview">
+      <header className="im-ohead">
+        <h1 className="im-h1" data-im="title">{SUMMARY_TITLE}</h1>
+        {file && (
+          <div className="im-sumchips">
+            <Chip file data-im="file">{file}{typeof rowCount === "number" ? ` · ${rowCount} row${rowCount === 1 ? "" : "s"}` : ""}</Chip>
           </div>
         )}
+        <p data-im="lead">{overviewLead({ agentsFix: t.agents.fix, agentsSharpen: t.agents.sharpen, queriesSharpen: t.queries.sharpen })}</p>
+      </header>
+
+      <div className="im-pops">
+        <section className="im-pop" aria-labelledby="im-pop-a" data-im="card-agents">
+          <div className="im-stack" id="im-pop-a">
+            <span className="im-num" data-im="total">{t.agents.total}</span>
+            <span className="im-words">agents</span>
+            <span className="im-sub">for your contact list</span>
+          </div>
+          <div className="im-prev">
+            <div className="im-faces" aria-hidden="true">
+              {faces.discs.map((d) => <Disc key={d.id} initials={d.initials} tone={d.standing} />)}
+              {faces.rest > 0 && <span className="im-faces-more">+{faces.rest}</span>}
+            </div>
+            <p className="im-key" data-im="key">
+              {agentKeyParts(key).map((p, i) => (
+                <React.Fragment key={p.text}>{i > 0 && " · "}<b data-im="key-n">{p.n}</b> {p.text}</React.Fragment>
+              ))}
+            </p>
+          </div>
+          <Recon what="agents" total={t.agents.total} ok={t.agents.ready} fix={t.agents.fix} sharp={t.agents.sharpen} />
+          <ul className="im-tiers">
+            <Tier tone="ok" mark={TICK} count={t.agents.ready} name={TIER_NAME.ready} text={TIER_TEXT.agentsReady} />
+            {t.agents.fix > 0 && (
+              <Tier tone="fix" mark="!" count={t.agents.fix} name={TIER_NAME.fix} chip={<Chip hot>Step 1</Chip>} text={TIER_TEXT.agentsFix(sets)} />
+            )}
+            {t.agents.sharpen > 0 && (
+              <Tier tone="sharp" mark="+" count={t.agents.sharpen} name={TIER_NAME.sharpen} chip={<Chip>Optional</Chip>} text={TIER_TEXT.agentsSharpen(sharpen)} />
+            )}
+          </ul>
+        </section>
+
+        <section className="im-pop" aria-labelledby="im-pop-q" data-im="card-queries">
+          <div className="im-stack" id="im-pop-q">
+            <span className="im-num" data-im="total">{t.queries.total}</span>
+            <span className="im-words">queries</span>
+            <span className="im-sub">for <i>{title}</i></span>
+          </div>
+          <div className="im-prev">
+            <div className="im-courts">
+              {courts.filter((c) => c.total > 0).map((c) => (
+                <div className="im-court" key={c.key} data-court={c.key}>
+                  <p><b data-im="court-n">{c.total}</b> {c.phrase}</p>
+                  <div className="im-gl">
+                    {c.statuses.map((s) => (
+                      <span key={s.status} title={s.name} data-status={s.status}>
+                        <StatusDot status={s.status} overrideSize={15} /> <span data-im="status-n">{s.count}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Recon what="queries" total={t.queries.total} ok={t.queries.ready} fix={0} sharp={t.queries.sharpen} />
+          <ul className="im-tiers">
+            <Tier tone="ok" mark={TICK} count={t.queries.ready} name={TIER_NAME.ready} text={TIER_TEXT.queriesReady} />
+            {t.queries.sharpen > 0 && (
+              <Tier tone="sharp" mark="+" count={t.queries.sharpen} name={TIER_NAME.sharpen} chip={<Chip>Optional</Chip>} text={TIER_TEXT.queriesSharpen} />
+            )}
+          </ul>
+        </section>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 40px 22px", flexShrink: 0 }}>
-        <button onClick={onSkip} disabled={!onSkip}
-          style={{ fontFamily: MONO, fontSize: 12.5, color: C.muted, background: "none", border: "none", cursor: onSkip ? "pointer" : "default" }}>Skip setup</button>
-        <button onClick={onContinue}
-          style={{ fontFamily: MONO, fontSize: 13.5, background: C.pinkBtn, color: C.burgundy, padding: "13px 24px", borderRadius: 11, fontWeight: 500, border: `1px solid ${C.pinkEdge}`, cursor: "pointer", transition: "background .25s,color .25s,border-color .25s" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "#c4d0c0"; e.currentTarget.style.color = C.sageDark; e.currentTarget.style.borderColor = "#aebfa9"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = C.pinkBtn; e.currentTarget.style.color = C.burgundy; e.currentTarget.style.borderColor = C.pinkEdge; }}>
-          {allClear ? "Bring it in →" : "Let's work through it →"}
-        </button>
+      <div className="im-nextbar" data-im="nextbar">
+        <Stepper steps={steps} current={null} captions={captions} label="What happens next" />
+        <div className="im-nextgo">
+          {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
+          <button type="button" className="sf-btn" onClick={onContinue} data-im="primary">
+            {allClear ? SUMMARY_PRIMARY.clear : SUMMARY_PRIMARY.work}
+          </button>
+        </div>
       </div>
-    </ReviewShell>
+    </div>
   );
 };

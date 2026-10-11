@@ -20,7 +20,10 @@ import { stripComments } from "../../test/pageSmoke";
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
 
-const CHROME = read("chrome.tsx");
+/* `chrome.tsx` (OnboardingCard, InboxMotif) is DELETED with its last reader, the closing page
+   (onboarding v5 part 2). The absences these locks assert are read off the step parts that replaced
+   it; the three claims that were about the card itself went with the card. */
+const CHROME = read("setupParts.tsx");
 const ONBOARDING = read("../Onboarding.tsx");
 const BRANCH_A = read("BranchA.tsx");
 const BRANCH_B = read("BranchB.tsx");
@@ -63,9 +66,12 @@ describe("the primary is ink — never pink, never burgundy", () => {
     }
   });
 
-  it("the card's primary reads from the ink token", () => {
-    expect(CHROME).toContain("onbPrimaryBg");
-    expect(TOKENS).toContain('export const onbPrimaryBg = "#1c130f"');
+  /* RE-POINTED (onboarding v5 part 2): the card and its `onbPrimaryBg` token are gone. The primary
+     is the frame's navy pill, stated once in onboarding.css from the shell's token. */
+  it("the primary is the frame's navy pill, from the shell's token", () => {
+    const sheet = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(sheet).toMatch(/\.sf \.sf-btn \{[^}]*background:\s*var\(--sp-anthracite\)/);
+    expect(TOKENS).not.toContain("onbPrimaryBg");
   });
 
   it("nothing in the journey sets a burgundy background", () => {
@@ -84,24 +90,31 @@ describe("the card is made of the app's own material", () => {
    * built to the mockup's numbers would be a near-miss of the app it introduces, which is worse
    * than an obvious difference.
    */
-  it("the ground matches the app's workspace ground, not the mockup's sample", () => {
-    expect(TOKENS).toContain('export const onbGround = "#f7f4ee"');
+  /* RE-POINTED (onboarding v5): the journey's ground is the app's INK SHELL now, read from the
+     app's own token by `SetupFrame`'s sheet, and the `onbGround` copy is deleted with its last
+     reader. Same law — the ground is the app's, never a mockup's sample. */
+  it("the ground is the app's ink shell, by its token, and no copy of the old ground survives", () => {
+    const sheet = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(sheet).toMatch(/\.sf \{[^}]*background:\s*var\(--ink-shell\)/);
+    expect(TOKENS).not.toContain("onbGround");
     for (const src of JOURNEY) expect(src).not.toContain("#f8f4ee");
   });
 
-  it("the surface and hairline match the dashboard card", () => {
-    expect(TOKENS).toContain('export const onbSurface = "#fffdf9"'); // .os-card fill
-    expect(TOKENS).toContain('export const onbHairline = "#e9e2d7"'); // --ws-edge
-  });
-
-  it("the card reads tokens rather than inlining its own colours", () => {
-    expect(CHROME).toContain('from "../../lib/designTokens"');
+  /* RETIRED (onboarding v5 part 2): "the surface and hairline match the dashboard card" and "the
+     card reads tokens" were claims about OnboardingCard, deleted with the closing page. What
+     remains is that no onboarding-only token survives it. */
+  it("no onboarding-only token outlives the card", () => {
+    expect(TOKENS).not.toMatch(/export const onb[A-Z]/);
   });
 });
 
 describe("one card, not three", () => {
-  it("the welcome screen renders the shared card", () => {
-    expect(ONBOARDING).toContain("<OnboardingCard");
+  /* RE-POINTED (onboarding v5): the welcome is an open title over one card now, built from the
+     shared step parts. The law is the one this held — the welcome draws no card of its own. */
+  it("the welcome screen renders the shared step parts, and no card of its own", () => {
+    expect(ONBOARDING).toContain("<OpenTitle");
+    expect(ONBOARDING).toContain("<StepCard");
+    expect(ONBOARDING).not.toContain("<OnboardingCard");
   });
 
   it("its own ModalCard and StageCard are gone", () => {
@@ -120,33 +133,32 @@ describe("one card, not three", () => {
 });
 
 describe("the band states position honestly or not at all", () => {
-  it("the step marker is optional", () => {
-    expect(CHROME).toContain("step?: string");
-  });
-
   it("and nothing renders a fixed dot row", () => {
     expect(CHROME).not.toContain("DOT_TOTAL");
     for (const src of JOURNEY) expect(src).not.toContain("dotIndex");
   });
 });
 
-describe("option rows select in sage", () => {
-  it("selection uses the sage ink and the pale sage wash", () => {
-    expect(CHROME).toContain("sageText");
-    expect(CHROME).toContain("onbOptionSelectedFill");
-    expect(TOKENS).toContain('export const onbOptionSelectedFill = "#fbfdfa"');
+/* REWRITTEN (onboarding v5): `SelectRow` is deleted. Every option row is `OptionRow`, selection
+   is a navy ring rather than a sage wash, and there is ONE shape — a radio — because every group
+   in the journey is a set of alternatives. The lone-toggle shape went with the fallback screens
+   that used it. */
+describe("option rows are radios, selected with a navy ring", () => {
+  const PARTS = readFileSync(resolve(here, "setupParts.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const SHEET = readFileSync(resolve(here, "onboarding.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("SelectRow and its sage tokens are gone", () => {
+    expect(CHROME.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("SelectRow");
+    expect(TOKENS).not.toContain("onbOptionSelectedFill");
   });
 
-  /**
-   * ⚠️ TWO SHAPES, BOTH ANNOUNCED. A lone row is a toggle and takes `aria-pressed`; a row inside a
-   * set of mutually exclusive choices opts into `radio`, because a screen reader given
-   * `aria-pressed` there is told three independent switches happen to be on and off rather than one
-   * choice out of three. The `radio` flag is what picks between them, and BOTH must survive — this
-   * used to assert `aria-pressed` alone, and went red the day the capture fork needed the other.
-   */
-  it("and the row reports its state to assistive tech, in whichever shape it is in", () => {
-    expect(CHROME).toContain('aria-pressed={radio ? undefined : selected}');
-    expect(CHROME).toContain('aria-checked={radio ? selected : undefined}');
-    expect(CHROME).toContain('role={radio ? "radio" : undefined}');
+  it("selection is a 2px inset navy ring", () => {
+    expect(SHEET).toMatch(/\.sf \.sf-opt\.is-on \{[^}]*inset 0 0 0 2px var\(--sp-anthracite\)/);
+  });
+
+  it("and the row reports its state as a radio, never as a pressed toggle", () => {
+    expect(PARTS).toContain('role="radio"');
+    expect(PARTS).toContain("aria-checked={selected}");
+    expect(PARTS).not.toContain("aria-pressed");
   });
 });

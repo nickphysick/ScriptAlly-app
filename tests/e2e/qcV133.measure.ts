@@ -5,6 +5,7 @@
  *
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test qcV133
  */
+import { retiredV136 } from "./inkRetired";
 import { test, expect, Page } from "@playwright/test";
 import { inkOpen } from "./inkLib";
 
@@ -50,7 +51,8 @@ const readQc = (page: Page) => page.evaluate((HD) => {
 }, HD);
 
 test.describe("Query Centre v133 — the open header", () => {
-  test("H1 · open: no card or band around the title, Special Elite, the exact line", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The header is a panel: the title has a ground by design. HP2 P1. */
+  test.skip("H1 · open: no card or band around the title, Special Elite, the exact line", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
@@ -65,15 +67,17 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H2 · the drawing: 326 (253) tall, its right edge on the desk's, the text centred on its layout box", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The drawing is the disc version at 206 (170), inside the panel. HP2 A5, P5. */
+
+  test.skip("H2 · the drawing: 326 (253) tall, its right edge on the desk's, the text centred on its layout box", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
       expect(g.art && g.txt, `${w}: the text block and the drawing were found`).toBeTruthy();
       expect(Math.abs(g.art!.h - (wide(w) ? 326 : 253)), `${w}: the drawing is ${g.art!.h} tall`).toBeLessThanOrEqual(1);
       expect(Number.isFinite(g.deskR), `${w}: the desk was found`).toBe(true);
-      expect(Math.abs(g.art!.r - g.deskR), `${w}: the drawing's right ${g.art!.r} against the desk's ${g.deskR}`).toBeLessThanOrEqual(2);
-      expect(Math.abs(g.art!.r - g.hd!.r), `${w}: the drawing's right ${g.art!.r} against the column's ${g.hd!.r}`).toBeLessThanOrEqual(2);
+      /* RETIRED (Query Centre v135): the drawing is not at the column's right edge — the pair is centred on the sheet (QC135 A1). */
+
       /* the LAYOUT box is the drawn box less its drop: that is what sets the row and what the text centres on */
       const layoutCy = g.art!.cy - g.artTop;
       expect(Math.abs(layoutCy - g.txt!.cy), `${w}: centres ${g.txt!.cy} / ${layoutCy} (layout box)`).toBeLessThanOrEqual(4);
@@ -85,6 +89,7 @@ test.describe("Query Centre v133 — the open header", () => {
   });
 
   test("H3 · rhythm: the header's top, the hairline and the desk's top equal the Contact list's", async ({ page }) => {
+    test.skip(true, retiredV136("the Query Centre's header rhythm held equal to the Contact list's; v136 gives the Query Centre its own open header (baked decision 1)", "QC136 A3, A5"));
     for (const [w, h] of SIZES) {
       await inkOpen(page, "/agents", w, { height: h, scope: "qc133" });
       await expect(page.locator('[data-cl15="header"]:not([data-loading])'), `${w}: the Contact list's header`).toBeVisible({ timeout: 20_000 });
@@ -101,11 +106,13 @@ test.describe("Query Centre v133 — the open header", () => {
       expect(cl.top, `${w}: the Contact list's header was measured`).toBeGreaterThan(60);
       expect(Math.abs(qc.top - cl.top), `${w}: header top ${qc.top} / ${cl.top}`).toBeLessThanOrEqual(2);
       expect(Math.abs(qc.hair - cl.hair), `${w}: hairline ${qc.hair} / ${cl.hair}`).toBeLessThanOrEqual(2);
-      expect(Math.abs(qc.desk - cl.desk), `${w}: desk top ${qc.desk} / ${cl.desk}`).toBeLessThanOrEqual(2);
+      /* RETIRED (Query Centre v135): the Query Centre's desk is 88 under its header (its badges need the headroom); the Contact list's is not. */
     }
   });
 
-  test("H4 · headroom: the drawing's top is 60 (54) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The panel is 28 under the sheet's top and the drawing is inside it. HP2 P1, P5, P7. */
+
+  test.skip("H4 · headroom: the drawing's top is 60 (54) below the sheet's top, and nothing overflows sideways", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       const g = await readQc(page);
@@ -113,7 +120,8 @@ test.describe("Query Centre v133 — the open header", () => {
       expect(Math.abs(g.sheetTop - g.barB), `${w}: the sheet starts at the top bar's bottom (${g.sheetTop} / ${g.barB})`).toBeLessThanOrEqual(1);
       /* RE-POINTED (Contact list v15.3): the header gained 30px of top padding, so the drawing's top is the padding plus
          its drop — 60 (54) below the sheet's top, where it was 30 (24). H3 and H7 hold it equal to /agents. */
-      expect(Math.abs(g.art!.y - g.sheetTop - (wide(w) ? 60 : 54)), `${w}: the drawing's top is ${g.art!.y - g.sheetTop} below the sheet's`).toBeLessThanOrEqual(3);
+      /* RE-POINTED (Query Centre v135): no drop — the drawing's top is the header's 30 of padding */
+      expect(Math.abs(g.art!.y - g.sheetTop - 30), `${w}: the drawing's top is ${g.art!.y - g.sheetTop} below the sheet's`).toBeLessThanOrEqual(3);
       expect(g.overflowX, `${w}: the document overflows sideways`).toBeLessThanOrEqual(0);
       expect(g.scOverflowX, `${w}: the page's scroller overflows sideways`).toBeLessThanOrEqual(0);
     }
@@ -146,7 +154,9 @@ test.describe("Query Centre v133 — the open header", () => {
     }
   });
 
-  test("H6 · no jump: the loading header's box and its parts equal the loaded ones", async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P6 holds no-jump on every workspace route. */
+
+  test.skip("H6 · no jump: the loading header's box and its parts equal the loaded ones", async ({ page }) => {
     const read = () => page.evaluate((HD) => {
       const hd = [...document.querySelectorAll<HTMLElement>(HD)].find((e) => e.getBoundingClientRect().height > 0)!;
       const R = (e: Element | null) => { const r = e!.getBoundingClientRect(); return { y: +r.top.toFixed(1), h: +r.height.toFixed(1), x: +r.left.toFixed(1) }; };
@@ -173,11 +183,13 @@ test.describe("Query Centre v133 — the open header", () => {
       expect(Math.abs(a.titleW - b.titleW), `${w}: title width ${a.titleW} → ${b.titleW}`).toBeLessThanOrEqual(16);
       expect(Math.abs(a.art.x - b.art.x), `${w}: the drawing's x ${a.art.x} → ${b.art.x}`).toBeLessThanOrEqual(8);
       for (const k of ["y", "h"] as const) expect(Math.abs(a.art[k] - b.art[k]), `${w}: art ${k} ${a.art[k]} → ${b.art[k]}`).toBeLessThanOrEqual(1);
-      for (const part of ["title", "sub", "b1"] as const) for (const k of ["x", "y", "h"] as const) expect(Math.abs(a[part][k] - b[part][k]), `${w}: ${part} ${k} ${a[part][k]} → ${b[part][k]}`).toBeLessThanOrEqual(1);
+      /* RE-POINTED (Query Centre v135): x is no longer held — the centred pair re-centres by half the change in the text's width when the count arrives (4px here; QC135 A5 reports it) */
+      for (const part of ["title", "sub", "b1"] as const) for (const k of ["y", "h"] as const) expect(Math.abs(a[part][k] - b[part][k]), `${w}: ${part} ${k} ${a[part][k]} → ${b[part][k]}`).toBeLessThanOrEqual(1);
     }
   });
 
   test("H7 · the drawing crosses the hairline, painted over it, 12–24 below — as the hawk does on /agents", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the drawing no longer crosses the header's edge; it sits 34 above the flap (QC135 A3)");
     for (const [w, h] of SIZES) {
       await inkOpen(page, "/agents", w, { height: h, scope: "qc133" });
       await expect(page.locator('[data-cl15="header"]:not([data-loading])'), `${w}: the Contact list's header`).toBeVisible({ timeout: 20_000 });

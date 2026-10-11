@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 carried up by the list's end",
+  "ok": true,
+  "detail": "header -72.3–35.7, list ends at 35.7"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 gone with the list",
+  "ok": true,
+  "detail": "header's bottom -39.9 · data-pinned null"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 Summary returns to the top",
+  "ok": true,
+  "detail": "scrollTop 0 · focus on the heading true"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 carried up by the list's end",
+  "ok": true,
+  "detail": "header -72.5–35.5, list ends at 35.5"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 gone with the list",
+  "ok": true,
+  "detail": "header's bottom -40.1 · data-pinned null"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 Summary returns to the top",
+  "ok": true,
+  "detail": "scrollTop 0 · focus on the heading true"
+ }
+]

@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "B precondition: the drawer holds rows",
+  "where": "@1512",
+  "ok": true,
+  "detail": "355 rows"
+ },
+ {
+  "lock": "B1 population: at least five families are on the account",
+  "where": "@1512",
+  "ok": true,
+  "detail": "{\"closed\":19,\"housekeeping\":167,\"nudge\":117,\"sent\":25,\"queried\":20,\"request\":7}"
+ },
+ {
+  "lock": "B1 population: a request, a closed and a housekeeping row are there",
+  "where": "@1512",
+  "ok": true,
+  "detail": "{\"closed\":19,\"housekeeping\":167,\"nudge\":117,\"sent\":25,\"queried\":20,\"request\":7}"
+ },
+ {
+  "lock": "B1 every row's family is the table's",
+  "where": "@1512",
+  "ok": true,
+  "detail": "355 rows agree"
+ },
+ {
+  "lock": "B1 the tag's colour is the family's",
+  "where": "@1512",
+  "ok": true,
+  "detail": "all agree"
+ },
+ {
+  "lock": "B1 nothing has a spine, a card or a one-line row",
+  "where": "@1512",
+  "ok": true,
+  "detail": "0 old parts"
+ },
+ {
+  "lock": "B2 population: tinted and plain rows both",
+  "where": "@1512",
+  "ok": true,
+  "detail": "7 tinted · 181 plain"
+ },
+ {
+  "lock": "B2 offers and requests: the family's tint, a white disc, a 17px sentence",
+  "where": "@1512",
+  "ok": true,
+  "detail": "7 rows"
+ },
+ {
+  "lock": "B2 every other row is untinted, its sentence 15.5px",
+  "where": "@1512",
+  "ok": true,
+  "detail": "181 rows"
+ },
+ {
+  "lock": "B3 population: rows with a status",
+  "where": "@1512",
+  "ok": true,
+  "detail": "71"
+ },
+ {
+  "lock": "B3 a row with a status holds a 24px StatusDot in ink, on a 34px disc",
+  "where": "@1512",
+  "ok": false,
+  "detail": "Rejected: {\"w\":24,\"color\":\"rgb(124, 113, 104)\"} disc 34 · Full Sent: {\"w\":24,\"color\":\"rgb(61, 80, 112)\"} disc 34"
+ },
+ {
+  "lock": "B3 a nudge holds the bell, housekeeping the gear, both in ink",
+  "where": "@1512",
+  "ok": false,
+  "detail": "117 nudges · 167 housekeeping"
+ },
+ {
+  "lock": "B4 housekeeping is one line: 36 tall at most, no tag, no meta, the person not bold",
+  "where": "@1512",
+  "ok": true,
+  "detail": "167 rows, tallest 35.0"
+ },
+ {
+  "lock": "B precondition: the drawer holds rows",
+  "where": "@1280",
+  "ok": true,
+  "detail": "355 rows"
+ },
+ {
+  "lock": "B1 population: at least five families are on the account",
+  "where": "@1280",
+  "ok": true,
+  "detail": "{\"closed\":19,\"housekeeping\":167,\"nudge\":117,\"sent\":25,\"queried\":20,\"request\":7}"
+ },
+ {
+  "lock": "B1 population: a request, a closed and a housekeeping row are there",
+  "where": "@1280",
+  "ok": true,
+  "detail": "{\"closed\":19,\"housekeeping\":167,\"nudge\":117,\"sent\":25,\"queried\":20,\"request\":7}"
+ },
+ {
+  "lock": "B1 every row's family is the table's",
+  "where": "@1280",
+  "ok": true,
+  "detail": "355 rows agree"
+ },
+ {
+  "lock": "B1 the tag's colour is the family's",
+  "where": "@1280",
+  "ok": true,
+  "detail": "all agree"
+ },
+ {
+  "lock": "B1 nothing has a spine, a card or a one-line row",
+  "where": "@1280",
+  "ok": true,
+  "detail": "0 old parts"
+ },
+ {
+  "lock": "B2 population: tinted and plain rows both",
+  "where": "@1280",
+  "ok": true,
+  "detail": "7 tinted · 181 plain"
+ },
+ {
+  "lock": "B2 offers and requests: the family's tint, a white disc, a 17px sentence",
+  "where": "@1280",
+  "ok": true,
+  "detail": "7 rows"
+ },
+ {
+  "lock": "B2 every other row is untinted, its sentence 15.5px",
+  "where": "@1280",
+  "ok": true,
+  "detail": "181 rows"
+ },
+ {
+  "lock": "B3 population: rows with a status",
+  "where": "@1280",
+  "ok": true,
+  "detail": "71"
+ },
+ {
+  "lock": "B3 a row with a status holds a 24px StatusDot in ink, on a 34px disc",
+  "where": "@1280",
+  "ok": false,
+  "detail": "Rejected: {\"w\":24,\"color\":\"rgb(124, 113, 104)\"} disc 34 · Full Sent: {\"w\":24,\"color\":\"rgb(61, 80, 112)\"} disc 34"
+ },
+ {
+  "lock": "B3 a nudge holds the bell, housekeeping the gear, both in ink",
+  "where": "@1280",
+  "ok": false,
+  "detail": "117 nudges · 167 housekeeping"
+ },
+ {
+  "lock": "B4 housekeeping is one line: 36 tall at most, no tag, no meta, the person not bold",
+  "where": "@1280",
+  "ok": true,
+  "detail": "167 rows, tallest 35.0"
+ },
+ {
+  "lock": "B7 no row overflows the drawer at 1280",
+  "where": "@1280",
+  "ok": false,
+  "detail": "\"You added Added William Tan at\" over 44"
+ },
+ {
+  "lock": "B7 no time wraps",
+  "where": "@1280",
+  "ok": true,
+  "detail": "0 wrapped"
+ }
+]

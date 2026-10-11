@@ -48,7 +48,9 @@ export interface QueryAgentTabProps {
 
 
 export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, onOpenContactList, onEditAgent }) => {
-  const open = agent.submissionStatus === "Open";
+  /* three-way: an imported agent nobody has checked is not known, never "Closed" */
+  const door = agent.submissionStatus === "Open" ? "Open to submissions"
+    : agent.submissionStatus === "Closed" ? "Closed for submissions" : "Not known";
   const flag = flagFor(agent.country);
   const place = agent.city || countryName(agent.country);
   /* the ONE stored-materials reader — the same rows the Contact list's editor round-trips.
@@ -81,7 +83,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
             {place && <span>{place}</span>}
           </span>
         )}
-        <span className="qat-open">{open ? "Open to submissions" : "Closed for submissions"}</span>
+        <span className="qat-open">{door}</span>
       </div>
 
       {(agent.email || agent.website || socials.length > 0) && (
@@ -102,7 +104,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
 
       <div className="qat-tiles">
         <div className="qat-tile">
-          <div className="qat-tv">{agent.responseTimeWeeks != null ? <>{agent.responseTimeWeeks}<span>wks</span></> : "—"}</div>
+          <div className="qat-tv">{typeof agent.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0 ? <>{agent.responseTimeWeeks}<span>wks</span></> : "—"}</div>
           <div className="qat-tk">window</div>
         </div>
         <div className="qat-tile">

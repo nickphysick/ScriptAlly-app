@@ -1,0 +1,73 @@
+/* The Import page (onboarding v5, part 3; ref design-refs/onboarding/onboarding-journey-v5.html #desk).
+   The header is the shared panel (`PanelHeader slim`); this sheet is the tiles and the footnote, and
+   the dress the shared import flow needs when the app, not the set-up frame, is its host.
+   Colours are the app's tokens: `--fc-card`, `--sp-*`, `--ink-*` (index.css, primitives.css). */
+.impg {
+  --impg-ink: var(--ink-on-light);
+  --impg-ink76: rgba(28, 19, 15, .76);
+  --impg-ink72: rgba(28, 19, 15, .72);
+  --impg-ink50: rgba(28, 19, 15, .5);
+  --impg-disc: #d9e0e7;
+  --impg-card-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 6px 14px -10px rgba(91, 42, 31, .35);
+  color: var(--impg-ink);
+}
+.impg .impg-tiles {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; box-sizing: border-box;
+}
+.impg .impg-tile {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; align-items: start; box-sizing: border-box;
+  padding: 24px 24px 20px; border-radius: 14px; background: var(--fc-card); box-shadow: var(--impg-card-shadow);
+}
+.impg .impg-disc {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--impg-disc); color: var(--sp-anthracite);
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.impg .impg-body { display: flex; flex-direction: column; min-width: 0; }
+.impg .impg-tile .impg-h { margin: 0; font: 400 22px/1.3 var(--sp-type) !important; letter-spacing: 0; color: var(--impg-ink); }
+.impg .impg-tile .impg-p { margin: 8px 0 0; font: 400 15.5px/1.5 var(--sp-serif); color: var(--impg-ink76); }
+.impg .impg-acts { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 16px; }
+.impg .impg-btn {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; height: 38px; padding: 2px 20px 0;
+  border: 0; border-radius: 19px; cursor: pointer; white-space: nowrap; text-decoration: none;
+  font-family: var(--sp-type); font-size: 15.5px; line-height: 1; letter-spacing: 0;
+  background: var(--sp-anthracite); color: var(--ink-cream); transition: background .16s ease;
+}
+.impg .impg-btn:hover { background: #344662; }
+.impg .impg-btn:disabled { background: #aab2c0; cursor: not-allowed; }
+.impg .impg-btn--line { background: transparent; color: var(--impg-ink); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .82); }
+.impg .impg-btn--line:hover { background: rgba(28, 19, 15, .05); }
+.impg .impg-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.impg .impg-tile .impg-fact {
+  margin: 14px 0 0; font-family: var(--sp-mono); font-size: 9px; line-height: 1.5; letter-spacing: .14em; text-transform: uppercase; color: var(--impg-ink50);
+}
+.impg .impg-foot { margin: 28px 0 0; max-width: 560px; font: 400 15.5px/1.5 var(--sp-serif); color: var(--impg-ink72); }
+
+/* 28 under the panel. ⚠️ THE GAP UNDER A HEADER IS THE GRID'S ALONE (its spacer's height): the page
+   sets the grid's own token and adds no margin of its own, which would simply add to it. Two classes,
+   because `.wpg` declares the token on this same element. */
+.impg.impg-wpg { --wpg-chrome-gap: 28px; }
+
+/* Below 1080 of window the tiles stack. A container query on the tiles' own column: the sidebar
+   collapses, so the window's width says nothing about the column's. 755px is the column at a
+   1080px window with the sidebar open (1080 − 248 − 8 − two gutters of 3.2vw).
+   ⚠️ The container is the tiles' wrapper, never the page root: a size container contains its fixed
+   descendants, and the import flow's confirm and toast are fixed. */
+.impg .impg-tilesview { container-type: inline-size; container-name: impgtiles; }
+@container impgtiles (max-width: 755px) { .impg .impg-tiles { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── The shared import flow, hosted by the app ─────────────────────────────────────────────────
+   The flow's screens are dressed by rules scoped to `.sf` (the set-up frame's class). In the app the
+   frame is not used; this wrapper carries the class so those rules apply, and undoes the four
+   properties that make `.sf` a full-window frame. */
+.impg .sf.impg-flow { position: static; inset: auto; z-index: auto; background: transparent; }
+/* The frame's scroller gives a step 28px above and 40px below; the app's sheet gives neither, so the
+   wrapper does while a step is showing. The side gutters are the page grid's. */
+.impg .sf.impg-flow:not([data-flow-screen="idle"]) { padding: 28px 0 40px; }
+
+/* The two loaders are the whole sheet. In the frame its scroller becomes a filling column while one
+   is mounted; in the app the wrapper takes the scrollport's measured height (the page grid publishes
+   it as `--wpg-port-h`) less the grid's own gutters, and the loader fills that. */
+.impg .sf.impg-flow[data-flow-screen="reading"], .impg .sf.impg-flow[data-flow-screen="importing"] {
+  padding: 0; display: flex; flex-direction: column; min-height: max(520px, calc(var(--wpg-port-h, 720px) - 56px));
+  border-radius: 12px; overflow: hidden; margin-top: 16px;
+}

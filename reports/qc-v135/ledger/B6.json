@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "B6 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "20/20 →471 20/20 →471 · body ends 645 · chart from 549"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "20/20 →881 20/20 →846 · body ends 1039 · chart from 943"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "20/20 →1216 20/20 →1230 · body ends 1434 · chart from 1338"
+ },
+ {
+  "lock": "B6 no sideways overflow on the page",
+  "where": "@1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B6 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "20/20 →463 20/20 →463 · body ends 565 · chart from 469"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "20/20 →801 20/20 →767 · body ends 887 · chart from 791"
+ },
+ {
+  "lock": "B6 nothing in the card runs past its right edge",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "scroll 0, spill 0.0"
+ },
+ {
+  "lock": "B6 no tile label wraps, and every label ends inside the card's body",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "20/20 →1064 20/20 →1078 · body ends 1209 · chart from 1113"
+ },
+ {
+  "lock": "B6 no sideways overflow on the page",
+  "where": "@1280",
+  "ok": true,
+  "detail": "0"
+ }
+]

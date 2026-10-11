@@ -1,0 +1,50 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:268:3 › Query Centre v137 › C2 · width: 24 from the sheet's edges; 1600 and centred on a wide window
+[measure] › tests/e2e/qcV137.measure.ts:268:3 › Query Centre v137 › C2 · width: 24 from the sheet's edges; 1600 and centred on a wide window
+  ✗ C2 · 1512 24 from the sheet's edges — 28.4 · 28.4
+
+  ✗ C2 · 1512 the sheet less 48 — 1199.3 of a 1256.0 sheet
+
+  ✗ C2 · 1280 24 from the sheet's edges — 21.0 · 21.0
+
+  ✗ C2 · 1280 the sheet less 48 — 982.1 of a 1024.0 sheet
+
+  ✗ C2 · 1920 capped at 1600 — 1296.0
+
+[C2] 7/12 green
+
+  1) [measure] › tests/e2e/qcV137.measure.ts:268:3 › Query Centre v137 › C2 · width: 24 from the sheet's edges; 1600 and centred on a wide window 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "C2 · 1512 24 from the sheet's edges — 28.4 · 28.4",
+    +   "C2 · 1512 the sheet less 48 — 1199.3 of a 1256.0 sheet",
+    +   "C2 · 1280 24 from the sheet's edges — 21.0 · 21.0",
+    +   "C2 · 1280 the sheet less 48 — 982.1 of a 1024.0 sheet",
+    +   "C2 · 1920 capped at 1600 — 1296.0",
+    + ]
+
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:290:7
+
+    Error Context: test-results/qcV137.measure.ts-Query-Ce-e908d-nd-centred-on-a-wide-window-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV137.measure.ts:268:3 › Query Centre v137 › C2 · width: 24 from the sheet's edges; 1600 and centred on a wide window 
+  1 passed (34.5s)

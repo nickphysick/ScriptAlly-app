@@ -1,0 +1,23 @@
+{"lock":"P1","exit":1,"readings":120,"red":8,"otherLocksRed":3,"first":"P1 the header is the panel · /todo @1512 — no [data-hpanel] on screen (header 296,82 1159×263)"}
+{"lock":"P4","exit":1,"readings":87,"red":20,"otherLocksRed":0,"first":"P4 intro contrast ≥ 4.5 · /queries/analytics @1512 \"Patterns, stats and insights to help you\" — 1.59 (rgb(28, 19, 15) on rgb(45, 58, 80))"}
+{"lock":"P5","exit":1,"readings":21,"red":11,"otherLocksRed":0,"first":"P5 its vertical centre is the panel's (±3) · /queries @1512 — 264.6 vs 234.6"}
+{"lock":"P7","exit":1,"readings":20,"red":5,"otherLocksRed":10,"first":"P7 no horizontal overflow at 1280 · /queries @1280 — 101"}
+{"lock":"P2","exit":1,"readings":50,"red":24,"otherLocksRed":0,"first":"P2 it is not a panel · /help@1512 — panel true"}
+{"lock":"P6","exit":1,"readings":25,"red":4,"otherLocksRed":0,"first":"P6 the header's box is the same first seen and settled (±1) · /queries @1512 — 296,92 1159×491 (loading) → 296,92 1159×285"}
+{"lock":"P8","exit":0,"readings":12,"red":0,"otherLocksRed":0,"first":null}
+{"lock":"P9","exit":1,"readings":6,"red":4,"otherLocksRed":0,"first":"P9 the header's left edge is the content column's (±1) · @1512 — panel 236.4 · column 296.4"}
+{"lock":"A1","exit":1,"readings":6,"red":4,"otherLocksRed":4,"first":"A1 sheet top to panel bottom is 313 (±2) · /queries @1512 — 347.2"}
+{"lock":"A2","exit":1,"readings":20,"red":4,"otherLocksRed":0,"first":"A2 the stamp's text is exact · /queries @1512 — \"4 with you\" vs \"13 with you\""}
+{"lock":"A3","exit":1,"readings":18,"red":2,"otherLocksRed":0,"first":"A3 no key on screen and no subheader element · /agents @1512 — key 1 · subheader 0"}
+{"lock":"A4","exit":1,"readings":8,"red":4,"otherLocksRed":0,"first":"A4 primary: cream ground, ink text · /queries @1512 — rgb(42, 58, 82) · rgb(255, 255, 255)"}
+{"lock":"A5","exit":1,"readings":4,"red":2,"otherLocksRed":0,"first":"A5 the drawing is qc-courier-disc at 206 (±1) · /queries @1512 — qc-plate-courier-figure.png · 206.0"}
+{"lock":"A6","exit":1,"readings":10,"red":4,"otherLocksRed":0,"first":"A6 panel bottom to card top is 72 (±1) · /queries @1512 — 88.0"}
+{"lock":"C1","exit":1,"readings":100,"red":36,"otherLocksRed":0,"first":"C1 the point samples white · /queries @1512 badge 1 point 1 — rgb(246, 226, 216)"}
+{"lock":"D1","exit":1,"readings":18,"red":6,"otherLocksRed":0,"first":"D1 the badge's size and offset equal the Query Centre's (±1) · week @1512 — 64×64 at 16,0 vs 64×64 at 16,-26"}
+{"lock":"D2","exit":1,"readings":6,"red":4,"otherLocksRed":0,"first":"D2 slate: the strip, the badge's ring and the title · week @1512 — rgb(246, 221, 210) · rgb(162, 69, 42) · ring rgb(162, 69, 42) 0px 0px 0px 4px, rgb(24"}
+{"lock":"D3","exit":1,"readings":14,"red":2,"otherLocksRed":0,"first":"D3 queried: the badge is active + closed, and each tile is its own arc · @1512 — badge 6 · active 1 (arc 13.51) · closed 5 (arc 2.7)"}
+{"lock":"D4","exit":1,"readings":6,"red":6,"otherLocksRed":3,"first":"D4 one chart, inside a 96 × 46 box · week @1512 — 1 chart(s) · drawing 260.0×46.0 · box 260.0"}
+{"lock":"D8","exit":1,"readings":6,"red":2,"otherLocksRed":0,"first":"D8 the title is whole, inside the strip and clear of the placeholder · week @1280 — ink 385–532 (1 line(s)) · placeholder from 515 · strip 392–456, ink 415–433"}
+{"lock":"D5","exit":1,"readings":5,"red":2,"otherLocksRed":0,"first":"D5 Queried sets the list to Queried · queried — showing 37 → 37 (queried 6)"}
+{"lock":"D6","exit":1,"readings":6,"red":2,"otherLocksRed":0,"first":"D6 the image is loaded and fills the same box (±1) · week — slot 595,456 60×50 → 595,456 60×50 · image 0×0 loaded true"}
+{"lock":"D7","exit":1,"readings":20,"red":6,"otherLocksRed":0,"first":"D7 the badge is there while loading, in the same place and size (±1) · week @1512 — absent → 64 at 16,-26"}

@@ -23,7 +23,7 @@
  * ⚠️ THE IA IS A PROP. This component owns the grammar and no section list.
  */
 import { isLivingRoute } from "../../lib/livingRoutes";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MastheadSectionContext } from "./mastheadSection";
 import {
@@ -59,6 +59,7 @@ import "./primitives.css";
 import "./workspaceShell.css";
 /* ⚠️ AFTER workspaceShell.css — the ink shell overrides it by order at equal specificity. */
 import "./inkShell.css";
+import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 
@@ -533,6 +534,23 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     };
   }, []);
 
+  /**
+   * v135 — IS THE PAGE SHEET WIDER THAN 1440? Three open headers and the Query Centre's desk have a "compact" set of
+   * values that belongs to the SHEET's width, not the viewport's (at a 1512 window the sheet is 1256). The class is
+   * measured rather than a container query, because `container-type` on the sheet is layout containment, and that
+   * would re-anchor every `position: fixed` child of a page to the sheet. A layout effect, so the first paint is right.
+   */
+  const [sheetWide, setSheetWide] = useState(false);
+  useLayoutEffect(() => {
+    const win = winWrapRef.current?.querySelector<HTMLElement>(".ws-window");
+    if (!win) return undefined;
+    const read = () => { const w = win.getBoundingClientRect().width; if (w > 0) setSheetWide(w > 1440); };
+    read();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(read) : null;
+    ro?.observe(win);
+    return () => ro?.disconnect();
+  }, []);
+
   /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
   const searchFieldRef = useRef<HTMLButtonElement | null>(null);
   const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
@@ -589,7 +607,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetWide ? " sheet-wide" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition
@@ -1076,6 +1094,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ref={scrollRef}
               onScroll={onScroll}
             >
+              {/* v137 §E — the sticky lip, for pages that scroll here rather than in a workspace grid */}
+              <SheetLip />
               <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>
                 {/* ⚠️ THE MASTHEAD'S KICKER, SUPPLIED ONCE. Every page's masthead names its section;
                     the shell is the one component that already knows the route AND wraps all ten, so

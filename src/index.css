@@ -189,8 +189,14 @@
   /* ⚠️ GREIGE (Query Centre v126 Phase 1, 5 Oct): the page ground app-wide. `--ws-ground` below stays
      #f7f4ee because the marketing tier's `--mk-hero-ground` is locked to it and that tier is out of
      bounds; its one app reader (`.ws-app`) reads `--ws-page` now, so nothing in the app shows it. */
-  --ws-page-rgb: 243, 242, 240;
+  /* ⚠️ OAT (app shell v2, 9 Oct; ref design-refs/shell/shell-v2-page.html): the page ground app-wide is
+     #f2eee8; it was greige #f3f2f0. `--ws-sheet` is the header sheet (the lighter field every page
+     header sits on, closed by the envelope flap — shell/headerSheet.css) and `--ws-band` is a section
+     band's paper white. Two tokens at one value on purpose: they are two surfaces and may part. */
+  --ws-page-rgb: 242, 238, 232;
   --ws-page: rgb(var(--ws-page-rgb));
+  --ws-sheet: #fbf9f5;
+  --ws-band: #fbf9f5;
   /* ══ THE INK SHELL (ink shell v1, 6 Oct; ref design-refs/shell/ink-shell-v1.html) ══════════════════
      The frame, the sidebar and the bar are one ink ground; the sheet is the only light surface. These
      tokens are NEW and are the only values the ink chrome reads — every older shell token keeps its

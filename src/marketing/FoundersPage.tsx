@@ -33,7 +33,6 @@ import React, { useEffect } from "react";
 import { Runs } from "./CopyRuns";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { FoundingBand } from "./FoundingBand";
-import { MarketingFooter } from "./MarketingFooter";
 import {
   FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
   FOUNDERS_DEAL, FOUNDERS_HONEST_LEAD, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
@@ -125,7 +124,6 @@ export const FoundersPage: React.FC<{
       {/* ⚠️ THE SAME BAND, NOT A COPY. One list, one counter, one outcome — sign up in the hero
           above and this arrives already answered rather than asking again. */}
       <FoundingBand onNavigate={onNavigate} />
-      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

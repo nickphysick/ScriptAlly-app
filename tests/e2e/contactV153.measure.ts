@@ -86,7 +86,8 @@ const INK = "rgb(42, 58, 82)", GREY = "rgb(179, 172, 165)", WHITE = "rgb(255, 25
 const ORDER = ["active", "closed", "none"];
 const SLOTS: Record<string, number> = { active: 4, closed: 2, none: 2 };
 
-test("CL15.3-N1–N5 · header", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The faces key and the subheader are gone; the header is a panel with a stamp. HP2 A1–A6. */
+test.skip("CL15.3-N1–N5 · header", async ({ page }) => {
   const L = new Ledger("header");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -114,7 +115,8 @@ test("CL15.3-N1–N5 · header", async ({ page }) => {
     const ideal = ORDER.flatMap((s) => Array.from({ length: Math.min(SLOTS[s], keyN[s] ?? 0) }, () => s));
     const shown = r.discs.map((d) => d.state);
     /* one more disc costs its width less the overlap; the room is the drawing's left less the column gap */
-    const step = narrow ? 27 : 31, gap = narrow ? 36 : 56;
+    /* v135: the gap is 56 wherever the page sheet is 1440 or narrower, which is every width measured here */
+    const step = narrow ? 27 : 31, gap = 56;
     L.check("N2 the discs are ink, then grey, then white: a prefix of ≤4 active, ≤2 closed, ≤2 not queried", w, shown.length >= 1 && shown.every((s, i) => s === ideal[i]) && shown.length <= ideal.length, `shown ${shown.join(",")} · ideal ${ideal.join(",")}`);
     L.check("N2 discs are only ever dropped from the END, and only when the row would run into the drawing", w, shown.length === ideal.length || r.faces.r + step > r.img.l - gap, `shown ${shown.length} of ${ideal.length} · row right ${r.faces.r.toFixed(0)} + one more ${step} vs drawing left ${r.img.l.toFixed(0)} less the ${gap} gap`);
     L.check("N2 earlier discs are on top: z-index falls along the row, and each overlaps the last", w, r.discs.every((d, i) => i === 0 || (Number(d.z) < Number(r.discs[i - 1].z) && near(r.discs[i - 1].box.r - d.box.l, narrow ? 5 : 7, 0.6))), r.discs.map((d) => d.z).join(","));
@@ -169,7 +171,8 @@ test("CL15.3-N1–N5 · header", async ({ page }) => {
   L.done(46);
 });
 
-test("CL15.3-N6 · week card", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. It read the icon card (.dsk-card). The week's figures are held by HP2 D3 and contactDesk.test.ts. */
+test.skip("CL15.3-N6 · week card", async ({ page }) => {
   const L = new Ledger("week");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);

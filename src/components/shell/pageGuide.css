@@ -68,7 +68,7 @@
 .pgd--dress .pgd-f em.on { background: #2a3a52; }
 .pgd--dress .pgd-b, .pgd--dress .pgd-next {
   margin: 0; border: 0; height: 32px; padding: 0 14px; border-radius: 16px; cursor: pointer;
-  font: 400 13.5px var(--sp-type); background: #f3f2f0; color: #1c130f;
+  font: 400 13.5px var(--sp-type); background: var(--ws-page); color: #1c130f;
 }
 .pgd--dress .pgd-next { background: #2a3a52; color: #f5f1eb; }
 .pgd--dress .pgd-next:hover { text-decoration: none; }

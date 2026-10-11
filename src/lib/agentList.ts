@@ -9,9 +9,10 @@
  * Two vocabularies the whole page shares:
  *   · RELATIONSHIP (your history with them) — active / prev / never, worded exactly once in
  *     `relationshipLabel` so the card pill, the filter chips and the empty-history line agree.
- *   · DOOR (their submission status) — open or closed. `SubmissionStatus.UNKNOWN` is retired at
- *     the UI layer: it READS as open (no stamp, no fade, no closed-chip membership) and is only
- *     ever written as "Open"/"Closed", so an agent migrates off Unknown on its first saved edit.
+ *   · DOOR (their submission status) — open, closed, or not known. `SubmissionStatus.UNKNOWN`
+ *     is what an import writes when no one has said (import-truth). It reads as NOT KNOWN: never
+ *     as open, never as closed. The editor still writes only "Open"/"Closed", so an agent leaves
+ *     Unknown when the writer sets one.
  */
 import { MONTHS_SHORT } from "./dates";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
@@ -68,11 +69,18 @@ export const awaitingYourPages = (agentId: string, queries: Query[]): boolean =>
   queries.some((q) => q.agentId === agentId && AWAITING_PAGES_STATUSES.includes(q.status));
 
 /**
- * Their door. UNKNOWN reads as OPEN (decision 3) — the ONLY closed state is an explicit
- * `SubmissionStatus.CLOSED`, so door state, card fade, stamp and chip counts can never disagree.
+ * Their door, three ways. Open and closed are stated facts; anything else (`Unknown`, or a
+ * missing value) is NOT KNOWN and is counted with neither. This reverses the earlier "Unknown
+ * reads as open" (decision 3): an imported agent nobody has checked was being offered as open.
  */
-export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
-  agent.submissionStatus !== SubmissionStatus.CLOSED;
+export type DoorState = "open" | "closed" | "unknown";
+export const doorOf = (agent: Pick<Agent, "submissionStatus">): DoorState =>
+  agent.submissionStatus === SubmissionStatus.OPEN ? "open"
+    : agent.submissionStatus === SubmissionStatus.CLOSED ? "closed" : "unknown";
+/** The word every surface shows for a door nobody has stated. */
+export const DOOR_NOT_KNOWN = "Not known";
+export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean => doorOf(agent) === "open";
+export const isDoorClosed = (agent: Pick<Agent, "submissionStatus">): boolean => doorOf(agent) === "closed";
 
 /* ⚠️ `agentStateClass` AND `agentCardDims` ARE RETIRED (v11 P4, 25 Sep) — they styled the flip
    card, and the flip card is deleted. The LAW they carried — a live query outranks the shut
@@ -143,8 +151,9 @@ export function agentTurn(agent: Agent, queries: Query[]): AgentTurn {
   return live.some((q) => getPrimaryAction(q.status as QueryStatus).ballHolder === "writer") ? "you" : "them";
 }
 
-/** Axis C for one agent — just `isDoorOpen` in axis clothing; nothing new is derived. */
-export const agentDoor = (agent: Agent): AgentDoor => (isDoorOpen(agent) ? "open" : "closed");
+/** Axis C for one agent. ⚠️ Two-way, and nothing on screen reads it (the v2 toolbar that did is
+ *  gone): an Unknown agent still falls under "open" here. Live surfaces read `doorOf`. */
+export const agentDoor = (agent: Agent): AgentDoor => (isDoorClosed(agent) ? "closed" : "open");
 
 /** The wording for each axis value — one place, so filters, groups and tags all agree. */
 export const STANDING_LABEL: Record<AgentStanding, string> = {

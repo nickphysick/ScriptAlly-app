@@ -1,0 +1,1490 @@
+[
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "296,92 1159×285"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (desk)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "title,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/queries @1512 \"83\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/queries @1512 \"+ Log a query\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/queries @1512 \"Record a response\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "art 1188,132 230×206 · panel 296,92 1159×285"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "234.6 vs 234.6"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "296,92 1159×323"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/queries/analytics @1512 \"Less guesswork, better results\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/queries/analytics @1512 \"Patterns, stats and insights to help you\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/queries/analytics @1512 \"Take a look ↓\"",
+  "ok": true,
+  "detail": "16.24 (rgb(28, 19, 15) on rgb(245, 241, 235))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/queries/analytics @1512 \"Record a response\"",
+  "ok": true,
+  "detail": "10.18 (rgb(245, 241, 235) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "art 1213,150 206×206 · panel 296,92 1159×323"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "253.3 vs 253.3"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "296,92 1159×285"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (desk)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "title,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/agents @1512 \"37\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/agents @1512 \"+ Add an agent\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/agents @1512 \"View all agents\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "art 1097,128 322×214 · panel 296,92 1159×285"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "234.6 vs 234.6"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "296,92 1159×166"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "title,eyebrow,intro"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/agents/discover @1512 \"DiscoverPro\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/agents/discover @1512 \"Agents / Discover\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/agents/discover @1512 \"Verified agents matched to your manuscri\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "296,92 1159×268"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts @1512 \"Nothing In It Yet\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts @1512 \"Your book, every version of it, and what\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts @1512 \"Edit details\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/manuscripts @1512 \"+ New version\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "art 1213,123 206×206 · panel 296,92 1159×268"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "226.0 vs 226.0"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "296,92 1159×257"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "title,intro,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1512 \"3 comp titles\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1512 \"The Tidewater Line and Salt Road are in \"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1512 \"+ Add a comp\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "296,92 1159×268"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1512 \"3 packages\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1512 \"Autumn round is out on 4 queries — 2 req\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1512 \"+ New package\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1512 \"Side by side\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "art 1213,123 206×206 · panel 296,92 1159×268"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "226.0 vs 226.0"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "296,92 1159×257"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "title,intro,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo @1512 \"39 things to do\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/todo @1512 \"The oldest of them is Consider closing, \"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/todo @1512 \"Set aside · 2\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "296,92 1159×112"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "title,eyebrow,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo/calendar @1512 \"Calendar\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/todo/calendar @1512 \"Tasks / Calendar\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/todo/calendar @1512 \"New task\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "296,92 1159×166"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "title,eyebrow,intro"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo/noteboard @1512 \"Noteboard\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/todo/noteboard @1512 \"Tasks / Noteboard\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/todo/noteboard @1512 \"Thoughts, snippets, and things worth kee\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "289,92 942×240"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (desk)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "title,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/queries @1280 \"83\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/queries @1280 \"+ Log a query\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/queries @1280 \"Record a response\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "art 1014,127 190×170 · panel 289,92 942×240"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "212.2 vs 212.2"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "289,92 942×294"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/queries/analytics @1280 \"Less guesswork, better results\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/queries/analytics @1280 \"Patterns, stats and insights to help you\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/queries/analytics @1280 \"Take a look ↓\"",
+  "ok": true,
+  "detail": "16.24 (rgb(28, 19, 15) on rgb(245, 241, 235))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/queries/analytics @1280 \"Record a response\"",
+  "ok": true,
+  "detail": "10.18 (rgb(245, 241, 235) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "art 1034,154 170×170 · panel 289,92 942×294"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "238.9 vs 238.9"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "289,92 942×240"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (desk)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "title,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/agents @1280 \"37\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/agents @1280 \"+ Add an agent\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/agents @1280 \"View all agents\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "art 945,126 259×172 · panel 289,92 942×240"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "212.2 vs 212.2"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "289,92 942×166"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "title,eyebrow,intro"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/agents/discover @1280 \"DiscoverPro\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/agents/discover @1280 \"Agents / Discover\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/agents/discover @1280 \"Verified agents matched to your manuscri\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "39 (as built before the pack: 39)"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "289,92 942×220"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts @1280 \"Nothing In It Yet\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts @1280 \"Your book, every version of it, and what\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts @1280 \"Edit details\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/manuscripts @1280 \"+ New version\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "art 1034,117 170×170 · panel 289,92 942×220"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "202.0 vs 202.0"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "289,92 942×236"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "title,intro,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1280 \"3 comp titles\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1280 \"The Tidewater Line and Salt Road are in \"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts/comps @1280 \"+ Add a comp\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "289,92 942×236"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "title,intro,button 1,button 2"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1280 \"3 packages\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1280 \"Autumn round is out on 4 queries — 2 req\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1280 \"+ New package\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P4 button 2 contrast ≥ 4.5",
+  "where": "/manuscripts/packages @1280 \"Side by side\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P5 the drawing lies inside the panel on all four sides",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "art 1034,125 170×170 · panel 289,92 942×236"
+ },
+ {
+  "lock": "P5 its vertical centre is the panel's (±3)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "209.9 vs 210.0"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "289,92 942×236"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "title,intro,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo @1280 \"39 things to do\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/todo @1280 \"The oldest of them is Consider closing, \"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/todo @1280 \"Set aside · 2\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "289,92 942×112"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "title,eyebrow,button 1"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo/calendar @1280 \"Calendar\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/todo/calendar @1280 \"Tasks / Calendar\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 button 1 contrast ≥ 4.5",
+  "where": "/todo/calendar @1280 \"New task\"",
+  "ok": true,
+  "detail": "13.50 (rgb(27, 36, 51) on rgb(243, 238, 230))"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "289,92 942×166"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px · 1px solid"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0 (parent)"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "title,eyebrow,intro"
+ },
+ {
+  "lock": "P4 title contrast ≥ 4.5",
+  "where": "/todo/noteboard @1280 \"Noteboard\"",
+  "ok": true,
+  "detail": "9.94 (rgb(244, 238, 229) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 eyebrow contrast ≥ 4.5",
+  "where": "/todo/noteboard @1280 \"Tasks / Noteboard\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P4 intro contrast ≥ 4.5",
+  "where": "/todo/noteboard @1280 \"Thoughts, snippets, and things worth kee\"",
+  "ok": true,
+  "detail": "7.82 (rgba(244, 238, 229, 0.86) on rgb(45, 58, 80))"
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "panel 289–1231 · sheet 248–1272"
+ },
+ {
+  "lock": "P5 population: several routes carry a drawing",
+  "where": "all",
+  "ok": true,
+  "detail": "10 readings with a drawing"
+ },
+ {
+  "lock": "P4 population: several routes carry an intro",
+  "where": "all",
+  "ok": true,
+  "detail": "14 intros"
+ }
+]

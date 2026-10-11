@@ -100,7 +100,11 @@ export interface HeaderReading {
 const round = (n: number) => Math.round(n * 10) / 10;
 
 /** The shell's own roots. `.ws-panel` is the sidebar, `.ws-work` the content wrapper. */
-const SHELL = ".ws-panel, .ws-work, .ws-window, #app-stage-scroll";
+/* ⚠️ RE-POINTED (onboarding v5): THE SIGN-IN AND SET-UP SCREENS NOW WEAR THE SHELL'S OWN CLASSES.
+   `SetupFrame` reuses `.ws-panel` and `.ws-window` so its geometry is the app's by construction —
+   which made "a `.ws-window` is attached" true on the sign-in page, and this helper returned at
+   once believing it was signed in. `#ws-sidebar` and `.ws-work` exist only inside the real shell. */
+const SHELL = "#ws-sidebar, .ws-work, #app-stage-scroll";
 
 /**
  * ⚠️ `storageState` DOES NOT CARRY A FIREBASE SESSION, and the failure looks like a broken

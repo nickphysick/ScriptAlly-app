@@ -44,6 +44,21 @@ describe("the desk (v15.2 §2)", () => {
     expect(of(0, 0).text).toBe("Same as last week");
     expect(new Set([weekOnWeek(2, 1).dir, weekOnWeek(1, 2).dir, weekOnWeek(1, 1).dir]).size).toBe(3);
   });
+  it("ADDED THIS MONTH counts agents whose dateAdded falls in the current calendar month, and no others (header panel v2 D)", () => {
+    const agents = [
+      ag({ dateAdded: "2026-10-01T09:00:00.000Z" }), // the first of this month: in
+      ag({ dateAdded: "2026-10-13T09:00:00.000Z" }), // this week: in
+      ag({ dateAdded: "2026-09-30T09:00:00.000Z" }), // last month: out
+      ag({ dateAdded: "2026-10-20T09:00:00.000Z" }), // after now: out
+      ag({ dateAdded: "2025-10-10T09:00:00.000Z" }), // October of last year: out
+      ag({ dateAdded: "" }),                          // no readable date: out
+    ];
+    const m = deskModel({ agents, queries: [], msId: "ms1", now: NOW, hk: HK });
+    expect(m.week.month).toBe(2);
+    expect(deskModel({ agents: [ag()], queries: [], msId: "ms1", now: NOW, hk: HK }).week.month).toBe(0);
+    /* it is its own count: not the week's figure and not the eight weeks' total */
+    expect([m.week.figure, m.week.total, m.week.month]).toEqual(["1", 3, 2]);
+  });
   it("8 weekly bars, oldest first, this week last; weeks are Monday to Sunday by the London calendar", () => {
     const agents = [
       ag({ dateAdded: "2026-10-11T22:30:00.000Z" }), // Sun 11 Oct 23:30 BST: LAST week

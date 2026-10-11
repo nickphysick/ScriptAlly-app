@@ -1,0 +1,111 @@
+{
+ "dry": true,
+ "removed": 0,
+ "plan": [
+  {
+   "id": "q-imported-1nzp7z3h7",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-3b8hlr7rl",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-4u80p5qkj",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-7bqjoai77",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-9t5ko5nxs",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-c7o0wqrf1",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-iacnspgnz",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-isbu9huiz",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-wt6ykzcn0",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  },
+  {
+   "id": "q-imported-zaxipj83o",
+   "historySteps": 1,
+   "feedRows": 1,
+   "day": "2026-09-20"
+  }
+ ],
+ "before": {
+  "activities": 406,
+  "agents": 37,
+  "manuscripts": 5,
+  "versions": 14,
+  "packages": 7,
+  "queries": 83,
+  "taskFlags": 17,
+  "tasks": 6,
+  "queries/activity": 123
+ },
+ "after": {
+  "activities": 406,
+  "agents": 37,
+  "manuscripts": 5,
+  "versions": 14,
+  "packages": 7,
+  "queries": 83,
+  "taskFlags": 17,
+  "tasks": 6,
+  "queries/activity": 123
+ },
+ "expected": {
+  "activities": 396,
+  "agents": 37,
+  "manuscripts": 5,
+  "versions": 14,
+  "packages": 7,
+  "queries": 73,
+  "taskFlags": 17,
+  "tasks": 6,
+  "queries/activity": 113
+ },
+ "countsMatch": true,
+ "invented": {
+  "agentsOnAccount": 37,
+  "madeByAnImport": 0,
+  "rating3": 0,
+  "statusOpen": 0,
+  "window0or8": 0,
+  "replyRuleSet": 0,
+  "threeMaterials": 0,
+  "generalFiction": 0,
+  "anyOfThese": 0
+ }
+}

@@ -114,7 +114,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
 /* ══ phase 3 — row facts, the date line, filters, groups and sorts ══════════════════════════ */
 import {
   ACTION_GROUPS, type ContactFilters, NOT_RECORDED, dropOptions, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
-  agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies,
+  agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies, OPEN_CHOICES,
   matchesContactFilters, rowDateLine, sortFacts, standingQuery,
 } from "./contactList";
 import { genreKey } from "./genreMatch";
@@ -171,12 +171,20 @@ describe("v14 §4 — the filters: each control on its own fact, AND across, cou
     expect(matchesContactFilters(factOf("fx-long"), { ...f0, action: true })).toBe(false);
     expect(count({ ...f0, action: true })).toBe(facts.filter((x) => x.stand === "you").length);
   });
-  it("Open for submissions: Unknown counts as open; open + closed is the whole list", () => {
-    expect(count({ ...f0, open: "open" }) + count({ ...f0, open: "closed" })).toBe(facts.length);
-    /* the cast states every door, so the Unknown case is made from a real fact */
+  /* Re-pointed by import-truth: this pinned "Unknown counts as open". An Unknown agent is now
+     counted on its own, under "Not known", and with neither Open nor Closed. */
+  it("Open for submissions: three ways, and they sum to the list; Unknown is with neither", () => {
+    const withUnknown = [...facts.slice(1), { ...facts[0], door: "unknown" as const, openKey: "unstated" as const }];
+    const n = (open: "open" | "closed" | "unknown") => withUnknown.filter((x) => matchesContactFilters(x, { ...f0, open })).length;
+    expect(n("unknown"), "population").toBe(1);
+    expect(n("open") + n("closed") + n("unknown")).toBe(withUnknown.length);
     const unstated = { ...factOf("fx-long"), openKey: "unstated" as const };
-    expect(matchesContactFilters(unstated, { ...f0, open: "open" })).toBe(true);
+    expect(matchesContactFilters(unstated, { ...f0, open: "open" })).toBe(false);
     expect(matchesContactFilters(unstated, { ...f0, open: "closed" })).toBe(false);
+    expect(matchesContactFilters(unstated, { ...f0, open: "unknown" })).toBe(true);
+    const c = facetCounts(withUnknown, f0, () => true).open;
+    expect(c).toEqual({ open: n("open"), closed: n("closed"), unknown: 1 });
+    expect(OPEN_CHOICES.map((o) => o.label)).toEqual(["Either", "Open now", "Closed for now", "Not known"]);
   });
   it("Queried or not partitions the list", () => {
     expect(count({ ...f0, queried: "yes" }) + count({ ...f0, queried: "no" })).toBe(facts.length);

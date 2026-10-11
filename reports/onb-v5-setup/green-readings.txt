@@ -1,0 +1,74 @@
+OB1 F1 frame-setup @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 frame-setup @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 welcome @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 welcome @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 ready @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 ready @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 ready-drafting @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 ready-drafting @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 details @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 details @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 details-still @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 details-still @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 book @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 book @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork-byhand @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork-byhand @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork-pro @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 fork-pro @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 confirm @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 confirm @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 confirm-pro @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 confirm-pro @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 used-free @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 used-free @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 used-pro @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 used-pro @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 unreadable @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 unreadable @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 nothing @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 nothing @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 unloaded @1440 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+OB1 F1 unloaded @1280 sidebar 248 mark 20,16,34,34 inset 8/8 radii 0px,12px,12px,12px
+  ✓   1 [measure] › tests/e2e/onbV5.measure.ts:167:3 › OB1 › F1 the frame is the ink shell, and its geometry is the app's (21.8s)
+  ✓   2 [measure] › tests/e2e/onbV5.measure.ts:220:3 › OB1 › F2 no old name anywhere in the journey (10.8s)
+  ✓   3 [measure] › tests/e2e/onbV5.measure.ts:237:3 › OB1 › F3 the sidebar lists the branch's steps, one is current, and the tab names it (1.1s)
+OB1 F4 frame-setup: last control at 2604 of 2654 (viewport 844)
+OB1 F4 frame-account: last control at 2604 of 2654 (viewport 844)
+OB1 F4 signup: last control at 852 of 912 (viewport 844)
+OB1 F4 signin: last control at 761 of 844 (viewport 844)
+OB1 F4 reset: last control at 655 of 844 (viewport 844)
+OB1 F4 reset-sent: last control at 517 of 844 (viewport 844)
+OB1 F4 welcome: last control at 740 of 844 (viewport 844)
+OB1 F4 ready: last control at 607 of 844 (viewport 844)
+OB1 F4 ready-drafting: last control at 769 of 844 (viewport 844)
+OB1 F4 details: last control at 745 of 844 (viewport 844)
+OB1 F4 details-still: last control at 565 of 844 (viewport 844)
+OB1 F4 book: last control at 803 of 861 (viewport 844)
+OB1 F4 fork: last control at 1437 of 1497 (viewport 844)
+OB1 F4 fork-byhand: last control at 1337 of 1397 (viewport 844)
+OB1 F4 fork-pro: last control at 1337 of 1397 (viewport 844)
+OB1 F4 confirm: last control at 707 of 844 (viewport 844)
+OB1 F4 confirm-pro: last control at 707 of 844 (viewport 844)
+OB1 F4 used-free: last control at 445 of 844 (viewport 844)
+OB1 F4 used-pro: last control at 433 of 844 (viewport 844)
+OB1 F4 unreadable: last control at 425 of 844 (viewport 844)
+OB1 F4 nothing: last control at 474 of 844 (viewport 844)
+OB1 F4 unloaded: last control at 417 of 844 (viewport 844)
+  ✓   4 [measure] › tests/e2e/onbV5.measure.ts:258:3 › OB1 › F4 on a phone the frame is a document: no sidebar, and the last control is reachable (5.3s)
+  ✓   5 [measure] › tests/e2e/onbV5.measure.ts:294:3 › OB1 › A1 two tabs, one raised; the other switches mode and keeps the typed email (1.6s)
+  ✓   6 [measure] › tests/e2e/onbV5.measure.ts:324:3 › OB1 › A3 fields: typewriter on a dashed rule, mono labels, and a rust sentence for an error (3.8s)
+  ✓   7 [measure] › tests/e2e/onbV5.measure.ts:369:3 › OB1 › S1 every step opens on a typewriter title on the sheet, with no box round it and no picture (5.3s)
+  ✓   8 [measure] › tests/e2e/onbV5.measure.ts:404:3 › OB1 › S2 options are radios: one or none checked, a navy ring on the checked one, Continue waits (2.1s)
+  ✓   9 [measure] › tests/e2e/onbV5.measure.ts:431:3 › OB1 › S3 the book's fields are the baseline's, and genre and age category are pick-lists (1.1s)
+  ✓  10 [measure] › tests/e2e/onbV5.measure.ts:460:3 › OB1 › S4 the still-writing note follows the choice, and is not on the details screen (2.0s)
+  ✓  11 [measure] › tests/e2e/onbV5.measure.ts:478:3 › OB1 › K1 three tiles, each button to its own handler, one ring, and a drop that works (3.8s)
+  ✓  12 [measure] › tests/e2e/onbV5.measure.ts:527:3 › OB1 › K2 the fact lines state cost from the tier, and nothing recommends (931ms)
+  ✓  13 [measure] › tests/e2e/onbV5.measure.ts:539:3 › OB1 › K3 the confirm names the file twice, Change updates both, and nothing is read before the press (1.3s)
+  ✓  14 [measure] › tests/e2e/onbV5.measure.ts:564:3 › OB1 › E1 the dead ends: chip, title and actions per state, each press to its own handler (4.7s)
+OB1 T1 30 tokens × 22 screens; 19 primaries
+  ✓  15 [measure] › tests/e2e/onbV5.measure.ts:613:3 › OB1 › T1 every token the set-up sheet reads resolves here, and no primary is rust or burgundy (5.4s)
+  ✓  16 [measure] › tests/e2e/onbV5.measure.ts:640:3 › OB1 › A4 the harness: a cold sign-in reaches the app, and set-up opens in the frame and skips back to it (2.7s)
+  ✓  17 [measure] › tests/e2e/onbV5.measure.ts:686:3 › OB1 › shots: every screen and state, at 1440 and 390 (10.8s)

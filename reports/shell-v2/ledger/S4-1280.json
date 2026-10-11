@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "width 0 alpha 1"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "width 0 alpha 1"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "width 0 alpha 1"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/import @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/plans @1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S4 no header border paints (width 0 or transparent)",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "width 26 alpha 0"
+ },
+ {
+  "lock": "S4 the chrome slab's own hairline does not paint",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "alpha 0"
+ },
+ {
+  "lock": "S4 no rule element within 4px of the edge",
+  "where": "/help @1280",
+  "ok": true,
+  "detail": "none"
+ }
+]

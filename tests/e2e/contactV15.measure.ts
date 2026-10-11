@@ -24,7 +24,8 @@ const SUB = "Your agent data underpins everything. Collate and manage it here.";
    ⚠️ RETIRED BY v15.1 (8 Oct): "the drawing starts 56 (36) after the text block" (the drawing sits at the column's right
    edge now and the gap is a minimum — CL15.1 H2) and "the drawing is 400 / 310 wide" (490 / 380 — H1). The hairline is
    ink at 14% (H3). ── */
-test("CL15-1 · header", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. A panel, no subheader, a border by design. HP2 P1, A1–A5. */
+test.skip("CL15-1 · header", async ({ page }) => {
   const L = new Ledger("cl15-1");
   for (const vp of WIDTHS15) {
     await openContacts(page, vp);
@@ -68,7 +69,8 @@ test("CL15-1 · header", async ({ page }) => {
     L.check("CL15-1 the two buttons: + Add an agent · View all agents (v15.2)", w, r.add === "+ Add an agent" && r.disc === "View all agents", `${r.add} · ${r.disc}`);
     const ct = r.txt ? (r.txt.t + r.txt.b) / 2 : NaN, ca = r.art ? (r.art.t + r.art.b) / 2 : NaN;
     L.check("CL15-1 the text block's centre and the drawing's are within 4px", w, Math.abs(ct - ca) <= 4, `text ${ct.toFixed(1)} drawing ${ca.toFixed(1)}`);
-    L.check("CL15-1 the hairline: 1px ink at 14%", w, r.line === "1px solid rgba(28, 19, 15, 0.14)", `${r.line}`);
+    /* RETIRED (app shell v2, 9 Oct): the header's hairline is gone — the header sheet's flap is its edge (SH2 S3, S4). What is held here is its absence. */
+    L.check("CL15-1 no hairline under the header (retired by app shell v2; SH2 S4)", w, /^0px/.test(r.line ?? ""), `${r.line}`);
     await checkOverflow(page, L, w);
   }
   L.done(16);

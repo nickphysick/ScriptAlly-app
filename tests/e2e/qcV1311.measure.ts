@@ -72,6 +72,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D2 · the copy, its singulars, and no 'With the agent' anywhere on the route", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the line of words is gone; the count is the badge and the title is in the strip (QC135 B1, B2, B5)");
     const PAT: Record<string, [RegExp, RegExp]> = {
       you: [/^\d+ offers? to consider$/, /^\d+ (partials?|fulls?|requests?) to send$/],
       agent: [/^\d+ responses? overdue$/, /^\d+ due this week$/],
@@ -108,6 +109,7 @@ test.describe("Query Centre v131.1 — the desk as three ledger cards", () => {
   });
 
   test("D3 · tiles: 26px tall; a needs-you-now count is rust on blush; a zero is the muted tile", async ({ page }) => {
+    test.skip(true, "RETIRED by Query Centre v135: the tiles are 28px tall in the badge card's body; the hot rule is unchanged (QC135 B5)");
     let hot = 0, zero = 0;
     for (const w of WIDTHS) {
       await openQc(page, w);

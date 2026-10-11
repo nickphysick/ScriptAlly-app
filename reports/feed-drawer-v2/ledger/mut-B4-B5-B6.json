@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "B6 the filter reads as on the baseline",
+  "where": "@1512",
+  "ok": true,
+  "detail": "All* | From agents | By you"
+ },
+ {
+  "lock": "B6 the summary figures are the baseline's",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3replies from agents | 123things you did | 1still needs you vs 3replies from agents | 123things you did | 1still needs you"
+ },
+ {
+  "lock": "B6 the day headings and counts are the baseline's",
+  "where": "@1512",
+  "ok": true,
+  "detail": "7 days vs 7"
+ },
+ {
+  "lock": "B6 the end line is the baseline's",
+  "where": "@1512",
+  "ok": true,
+  "detail": "\"That's the last 30 days. Show September →\" vs \"That's the last 30 days. Show September →\""
+ },
+ {
+  "lock": "B5 population: an open request or offer, and a met one",
+  "where": "@1512",
+  "ok": true,
+  "detail": "5 open · 1 met"
+ },
+ {
+  "lock": "B5 every open one shows its action, in a tinted row",
+  "where": "@1512",
+  "ok": true,
+  "detail": "request: Send the full → · request: Send the partial → · request: Send the partial →"
+ },
+ {
+  "lock": "B5 every met one shows the day it went",
+  "where": "@1512",
+  "ok": true,
+  "detail": "✓ Sent on 2 Sep"
+ },
+ {
+  "lock": "B5 a request's action opens the send journey",
+  "where": "@1512",
+  "ok": true,
+  "detail": "mode sent"
+ },
+ {
+  "lock": "B6 the filter reads as on the baseline",
+  "where": "@1280",
+  "ok": true,
+  "detail": "All* | From agents | By you"
+ },
+ {
+  "lock": "B6 the summary figures are the baseline's",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3replies from agents | 123things you did | 1still needs you vs 3replies from agents | 123things you did | 1still needs you"
+ },
+ {
+  "lock": "B6 the day headings and counts are the baseline's",
+  "where": "@1280",
+  "ok": true,
+  "detail": "7 days vs 7"
+ },
+ {
+  "lock": "B6 the end line is the baseline's",
+  "where": "@1280",
+  "ok": true,
+  "detail": "\"That's the last 30 days. Show September →\" vs \"That's the last 30 days. Show September →\""
+ },
+ {
+  "lock": "B5 population: an open request or offer, and a met one",
+  "where": "@1280",
+  "ok": true,
+  "detail": "5 open · 1 met"
+ },
+ {
+  "lock": "B5 every open one shows its action, in a tinted row",
+  "where": "@1280",
+  "ok": true,
+  "detail": "request: Send the full → · request: Send the partial → · request: Send the partial →"
+ },
+ {
+  "lock": "B5 every met one shows the day it went",
+  "where": "@1280",
+  "ok": true,
+  "detail": "✓ Sent on 2 Sep"
+ },
+ {
+  "lock": "B5 a request's action opens the send journey",
+  "where": "@1280",
+  "ok": true,
+  "detail": "mode sent"
+ }
+]

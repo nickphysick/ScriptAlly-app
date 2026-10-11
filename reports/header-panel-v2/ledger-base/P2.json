@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "Harbour of Glass [298,64,1156,146.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "[298,64,1156,146.5] → [298,64,1156,146.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "[298,107.5,423.5,57.5] → [298,107.5,423.5,57.5]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "Profile [304,108,1060,59]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "[304,108,1060,59] → [304,108,1060,59]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "[304,108,138.5,36] → [304,108,138.5,36]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "QueryHawk Help Centre [494,146,764,213]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "[494,146,764,213] → [494,146,764,213]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "[494,166,537.5,44] → [494,166,537.5,44]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "Choose your plan [494,110,764,166.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "[494,110,764,166.5] → [494,110,764,166.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "[494,130,740,44] → [494,130,740,44]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "Import [444,82,864,166.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "[444,82,864,166.5] → [444,82,864,166.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "[444,102,840,44] → [444,102,840,44]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "Harbour of Glass [282,64,956,134]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "[282,64,956,134] → [282,64,956,134]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "[282,105,376.5,51] → [282,105,376.5,51]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "Profile [304,108,912,59]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "[304,108,912,59] → [304,108,912,59]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "[304,108,138.5,36] → [304,108,138.5,36]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "QueryHawk Help Centre [378,146,764,213]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "[378,146,764,213] → [378,146,764,213]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "[378,166,537.5,44] → [378,166,537.5,44]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "Choose your plan [378,110,764,166.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "[378,110,764,166.5] → [378,110,764,166.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "[378,130,740,44] → [378,130,740,44]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "Import [328,82,864,166.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "[328,82,864,166.5] → [328,82,864,166.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "[328,102,840,44] → [328,102,840,44]"
+ }
+]

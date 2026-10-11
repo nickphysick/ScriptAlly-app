@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "Harbour of Glass [298,64,1156,146.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "[298,64,1156,146.5] → [298,64,1156,146.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "[298,107.5,423.5,57.5] → [298,107.5,423.5,57.5]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "Profile [304,108,1060,59]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "[304,108,1060,59] → [304,108,1060,59]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "[304,108,138.5,36] → [304,108,138.5,36]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "QueryHawk Help Centre [494,156,764,216]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/help@1512",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/help@1512",
+  "ok": false,
+  "detail": "[494,146,764,213] → [494,156,764,216]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/help@1512",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/help@1512",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "Choose your plan [494,120,764,169.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/plans@1512",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/plans@1512",
+  "ok": false,
+  "detail": "[494,110,764,166.5] → [494,120,764,169.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/plans@1512",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/plans@1512",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/import@1512",
+  "ok": true,
+  "detail": "Import [444,92,864,169.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/import@1512",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/import@1512",
+  "ok": false,
+  "detail": "[444,82,864,166.5] → [444,92,864,169.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/import@1512",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/import@1512",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "Harbour of Glass [282,64,956,134]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "[282,64,956,134] → [282,64,956,134]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "[282,105,376.5,51] → [282,105,376.5,51]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "Profile [304,108,912,59]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "panel false"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "[304,108,912,59] → [304,108,912,59]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "equal"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "[304,108,138.5,36] → [304,108,138.5,36]"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "QueryHawk Help Centre [378,156,764,216]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/help@1280",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/help@1280",
+  "ok": false,
+  "detail": "[378,146,764,213] → [378,156,764,216]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/help@1280",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/help@1280",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "Choose your plan [378,120,764,169.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/plans@1280",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/plans@1280",
+  "ok": false,
+  "detail": "[378,110,764,166.5] → [378,120,764,169.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/plans@1280",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/plans@1280",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ },
+ {
+  "lock": "P2 precondition: a header was read",
+  "where": "/import@1280",
+  "ok": true,
+  "detail": "Import [328,92,864,169.5]"
+ },
+ {
+  "lock": "P2 it is not a panel",
+  "where": "/import@1280",
+  "ok": false,
+  "detail": "panel true"
+ },
+ {
+  "lock": "P2 the header's box equals the baseline (±1)",
+  "where": "/import@1280",
+  "ok": false,
+  "detail": "[328,82,864,166.5] → [328,92,864,169.5]"
+ },
+ {
+  "lock": "P2 the header's computed styles equal the baseline",
+  "where": "/import@1280",
+  "ok": false,
+  "detail": "backgroundColor: rgba(0, 0, 0, 0) → rgb(45, 58, 80); color: rgb(58, 28, 20) → rgb(244, 238, 229); paddingTop: 20px → 22px; paddingRight: 0px → 28px; paddingLeft: 0px → 28px; marginTop: 18px → 28px; borderTopWidth: 0px → 1px; borderTopLeftRadius: 0px → 14px"
+ },
+ {
+  "lock": "P2 the title's box and styles equal the baseline",
+  "where": "/import@1280",
+  "ok": false,
+  "detail": "color: rgb(28, 19, 15) → rgb(244, 238, 229); borderBottomColor: rgb(28, 19, 15) → rgb(244, 238, 229)"
+ }
+]

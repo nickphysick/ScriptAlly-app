@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B9 precondition: the slot was empty and a placeholder was drawn",
+  "where": "you",
+  "ok": true,
+  "detail": "dashed 1 img false"
+ },
+ {
+  "lock": "B9 the image is loaded and fills the same box (±1)",
+  "where": "you",
+  "ok": true,
+  "detail": "box 60×50 img 60×50 loaded true"
+ },
+ {
+  "lock": "B9 it is contained, with no dashed border and no label",
+  "where": "you",
+  "ok": true,
+  "detail": "contain · border none 0 · text \"\""
+ },
+ {
+  "lock": "B9 an empty slot beside it is still a placeholder",
+  "where": "agent",
+  "ok": true,
+  "detail": "dashed 1"
+ }
+]

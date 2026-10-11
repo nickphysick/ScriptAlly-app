@@ -1,0 +1,28 @@
+   × D3 · every date flag reaches the review as an open reason on its row > template-mixed.csv: the unreadable date is asked about; the blank date is not 62ms
+     → the parser flagged one date: expected [ 'sometime in May', '2/10/26', …(1) ] to deeply equal [ 'sometime in May' ]
+   × D3 · every date flag reaches the review as an open reason on its row > template-dmy.csv: 03/05/2026 is asked about; 23/04/2026 reads without a question 2ms
+     → expected [ '3/5/26' ] to deeply equal [ '03/05/2026' ]
+   × D1 · the template's ISO dates come out as written > template-iso.csv 6ms
+     → expected [ null, null, null, null, null ] to deeply equal [ '2026-08-02', '2026-03-14', …(3) ]
+   × D1 · the template's ISO dates come out as written > template-iso.xlsx 6ms
+     → expected [ null, null, null, null, null ] to deeply equal [ '2026-08-02', '2026-03-14', …(3) ]
+   × D2 · a real Excel date cell for 2 August 2026 reads as 2026-08-02 > on the template path 2ms
+     → expected null to be '2026-08-02' // Object.is equality
+   × D2 · a real Excel date cell for 2 August 2026 reads as 2026-08-02 > on the Smart Import path 2ms
+     → expected 'Clara Voss,Pemberton Literary,8/2/26,…' to contain '2026-08-02'
+   × D4 · Smart Import is sent real date cells as ISO and text dates as typed > fileToCsv's text 1ms
+     → expected '8/2/26' to be '2026-08-02' // Object.is equality
+   × D4 · Smart Import is sent real date cells as ISO and text dates as typed > a .csv's text dates reach Smart Import unchanged 0ms
+     → expected '8/2/26' to be '2026-08-02' // Object.is equality
+   × D4 · Smart Import is sent real date cells as ISO and text dates as typed > the loader's sample shows the same cells 1ms
+     → expected 'Clara Voss  ·  Pemberton Literary  · …' to contain '2026-08-02'
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: the parser flagged one date: expected [ 'sometime in May', '2/10/26', …(1) ] to deeply equal [ 'sometime in May' ]
+AssertionError: expected [ '3/5/26' ] to deeply equal [ '03/05/2026' ]
+AssertionError: expected [ null, null, null, null, null ] to deeply equal [ '2026-08-02', '2026-03-14', …(3) ]
+AssertionError: expected null to be '2026-08-02' // Object.is equality
+AssertionError: expected 'Clara Voss,Pemberton Literary,8/2/26,…' to contain '2026-08-02'
+AssertionError: expected '8/2/26' to be '2026-08-02' // Object.is equality
+AssertionError: expected '8/2/26' to be '2026-08-02' // Object.is equality
+AssertionError: expected 'Clara Voss  ·  Pemberton Literary  · …' to contain '2026-08-02'
+      Tests  9 failed (9)

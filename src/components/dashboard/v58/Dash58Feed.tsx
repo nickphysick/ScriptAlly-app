@@ -21,8 +21,9 @@ import { StatusDot } from "../../StatusDot";
 import { feedEntries, type FeedSeg } from "../../../lib/dashFeed";
 import {
   FEED_FILTERS, SUMMARY_NOUN, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
-  windowEndLine, type FeedFilter,
+  windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
+import { actModeFor, feedFamily } from "./feedFamily";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
@@ -45,16 +46,47 @@ const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
   <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>
 );
 
-const TONE: Record<string, string> = {
-  queried: "var(--state-queried)", agent: "var(--state-agent)", you: "var(--state-you)",
-  offer: "var(--state-offer)", closed: "var(--state-closed)",
-};
-
-const PlusDot = () => (
-  <svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true">
-    <circle cx="7" cy="7" r="5.3" fill="none" stroke="#1c130f" strokeWidth="1.3" /><path d="M7 4.3v5.4M4.3 7h5.4" stroke="#1c130f" strokeWidth="1.3" />
+/* The two marks that are not a status. Drawn here: nothing in the app exports a bell or a gear to share. */
+const BellGlyph = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-bell">
+    <path d="M6 16V11a6 6 0 1112 0v5l2 2H4z" /><path d="M10 20a2 2 0 004 0" />
   </svg>
 );
+const GearGlyph = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-gear">
+    <circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+  </svg>
+);
+
+/**
+ * ONE ROW FOR EVERY EVENT (feed drawer v2). A 34px disc carrying the mark in ink, the tag in the
+ * family's colour, the time, the sentence and the meta line. Offers and requests are tinted and
+ * carry their action; housekeeping is one muted line. The family dresses the row and decides nothing.
+ */
+export const FeedRow: React.FC<{ ev: DrawerEvent; onAct: (queryId: string, mode: DrawerMode) => void }> = ({ ev, onAct }) => {
+  const { entry: e, say, tag, meta } = ev;
+  const family = feedFamily(e);
+  const house = family === "housekeeping";
+  return (
+    <div
+      className="d58-ev" data-d58="ev" data-family={family} data-dir={e.dir} data-need={e.need ? "1" : "0"} data-met={e.met ? "1" : "0"}
+      data-status={e.status ?? ""} data-atype={e.activityType} data-app={e.app ? "1" : "0"}
+    >
+      <span className="d58-evico" data-d58="ev-disc">
+        {house ? <GearGlyph /> : family === "nudge" || !e.status ? <BellGlyph /> : <StatusDot status={e.status} overrideSize={24} decorative />}
+      </span>
+      <div className="d58-evmain">
+        {!house && <div className="d58-evtop"><span className="d58-evtag" data-d58="ev-tag">{tag}</span><time>{e.time}</time></div>}
+        <p className="d58-evsay" data-d58="ev-say"><Segs say={say} /></p>
+        {house && <time>{e.time}</time>}
+        {!house && meta && <span className="d58-evmeta" data-d58="ev-meta">{meta}</span>}
+        {!house && (e.need && e.queryId ? (
+          <button type="button" className="d58-evact" data-d58="ev-act" onClick={() => onAct(e.queryId as string, actModeFor(e.status))}>{e.need.label} →</button>
+        ) : e.met ? <span className="d58-evdone" data-d58="ev-done">✓ Sent on {e.met}</span> : null)}
+      </div>
+    </div>
+  );
+};
 
 export const Dash58Feed: React.FC<{
   title: string;
@@ -142,34 +174,7 @@ export const Dash58Feed: React.FC<{
           {days.map((d) => (
             <React.Fragment key={d.key}>
               <div className="d58-day" data-d58="day"><span>{d.heading}</span><b>{d.count}</b></div>
-              {d.events.map(({ entry: e, say, tag, meta }) => (
-                <div className="d58-ev" key={e.id} data-d58="ev" data-dir={e.dir} data-need={e.need ? "1" : "0"} data-met={e.met ? "1" : "0"}>
-                  {e.dir === "in" ? (
-                    <>
-                      <span className="d58-evdot" style={{ ["--d58-tone" as string]: TONE[e.state ?? "closed"] ?? TONE.closed } as React.CSSProperties}>
-                        {e.status ? <StatusDot status={e.status} overrideSize={15} decorative /> : null}
-                      </span>
-                      <div className="d58-evcard">
-                        <div className="d58-evtop"><span className="d58-evtag">{tag}</span><time>{e.time}</time></div>
-                        <p><Segs say={say} /></p>
-                        {meta && <span className="d58-evmeta">{meta}</span>}
-                        {e.need && e.queryId ? (
-                          <button type="button" className="d58-evact" data-d58="ev-act" onClick={() => onAct(e.queryId as string, e.status === QueryStatus.OFFER ? "offer" : "sent")}>{e.need.label} →</button>
-                        ) : e.met ? <span className="d58-evdone" data-d58="ev-done">✓ Sent on {e.met}</span> : null}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="d58-evdot is-sm">{e.status ? <StatusDot status={e.status} overrideSize={13} decorative /> : <PlusDot />}</span>
-                      <div className="d58-evline">
-                        <p><Segs say={say} /></p>
-                        <time>{e.time}</time>
-                        {meta && <span className="d58-evmeta">{meta}</span>}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+              {d.events.map((ev) => <FeedRow key={ev.entry.id} ev={ev} onAct={onAct} />)}
             </React.Fragment>
           ))}
           <div className="d58-dend" data-d58="drawer-end">

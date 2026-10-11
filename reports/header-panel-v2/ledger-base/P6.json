@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "296,64 1159×390 (loading) → 296,64 1159×390"
+ },
+ {
+  "lock": "P6 precondition: it was read while loading, then loaded",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "first loading true · last loading false"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "296,64 1159×337 → 296,64 1159×337"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "296,64 1159×390 (loading) → 296,64 1159×390"
+ },
+ {
+  "lock": "P6 precondition: it was read while loading, then loaded",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first loading true · last loading false"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "296,82 1159×188 → 296,82 1159×188"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "296,64 1159×400 → 296,64 1159×400"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "296,82 1159×258 → 296,82 1159×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "296,82 1159×258 → 296,82 1159×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "296,82 1159×288 → 296,82 1159×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": true,
+  "detail": "296,82 1159×134 → 296,82 1159×134"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": true,
+  "detail": "296,82 1159×188 → 296,82 1159×188"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "289,64 942×317 (loading) → 289,64 942×317"
+ },
+ {
+  "lock": "P6 precondition: it was read while loading, then loaded",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "first loading true · last loading false"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "289,64 942×337 → 289,64 942×337"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "289,64 942×317 (loading) → 289,64 942×317"
+ },
+ {
+  "lock": "P6 precondition: it was read while loading, then loaded",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first loading true · last loading false"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "289,82 942×188 → 289,82 942×188"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "289,64 942×328 → 289,64 942×328"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "289,82 942×258 → 289,82 942×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "289,82 942×258 → 289,82 942×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "289,82 942×288 → 289,82 942×288"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "289,82 942×134 → 289,82 942×134"
+ },
+ {
+  "lock": "P6 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "289,82 942×188 → 289,82 942×188"
+ },
+ {
+  "lock": "P6 population: the held pages were read loading",
+  "where": "all",
+  "ok": true,
+  "detail": "4"
+ }
+]

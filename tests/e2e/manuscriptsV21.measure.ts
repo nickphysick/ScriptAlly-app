@@ -37,7 +37,7 @@ test.setTimeout(180_000);
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 260;
+const FLOOR = 250; /* 260 less the readings Query Centre v135 retired (the shared hairline y, the drawing's right edge) */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 const wide = (w: number) => w >= 1440;
@@ -69,7 +69,7 @@ async function signInAs(page: Page, email: string) {
   await page.locator("#au-email").fill(email);
   await page.locator("#au-pw").fill(readPw());
   await page.getByRole("button", { name: /^Sign in$/ }).last().click();
-  await expect(page.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
 }
 
 async function accountContext(browser: Browser, baseURL: string, email: string): Promise<{ ctx: BrowserContext; page: Page }> {
@@ -104,7 +104,7 @@ async function openAt(page: Page, route: string, vp: { width: number; height: nu
   }, msId);
   await page.goto(route);
   await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}${MUTATE}` });
-  await expect(page.locator(".ws-window").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
   await page.waitForFunction(
     (sel) => [...document.querySelectorAll(sel)].some((e) => e.getBoundingClientRect().height > 0),
     route === "/agents" ? ".cl15-hd" : '[data-ms21="header"]', { timeout: 30_000 },
@@ -190,7 +190,8 @@ test.afterAll(async () => {
 
 /* ══ H1 · the open header — no card, the title large, and the Contact list's own three lines ═════ */
 for (const vp of VPS) {
-  test(`H1 open header @ ${vp.width}`, async () => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The header is a panel. HP2 P1. */
+  test.skip(`H1 open header @ ${vp.width}`, async () => {
     /* the Contact list first: its header top, hairline and first content, by the same ruler */
     await openAt(page, "/agents", vp);
     const aHd = await one(page, ".cl15-hd");
@@ -214,8 +215,9 @@ for (const vp of VPS) {
     expect(t.size, "72 (58 below 1440)").toBe(wide(vp.width) ? 72 : 58);
     expect(t.hasHook, "the title keeps data-page-title").toBe(true);
     expect(Math.abs(hd.y - aHd.y), `header top ${hd.y} against the Contact list's ${aHd.y}`).toBeLessThanOrEqual(2);
-    expect(Math.abs(hd.b - aHd.b), `hairline y ${hd.b} against the Contact list's ${aHd.b}`).toBeLessThanOrEqual(2);
-    expect(Math.abs(first.y - aFirst.y), `first content top ${first.y} against the Contact list's ${aFirst.y}`).toBeLessThanOrEqual(2);
+    /* RETIRED (Query Centre v135): the two headers no longer end at one y. Each is its drawing plus 30 and 34 of padding, and this
+       drawing is 10 taller than the Contact list's; what they share is the centred pair's values (QC135 A4). */
+    /* RETIRED (Query Centre v135): the first content no longer starts at the Contact list's y — this header is 10 taller (its drawing is). */
     ck(8);
     await noOverflow(page, `H1 @ ${vp.width}`);
     await shot(page, `01-header-book-activity-${vp.width}`);
@@ -224,29 +226,19 @@ for (const vp of VPS) {
 
 /* ══ H2 · the drawing — at the column's right edge, hanging over the hairline, painted above it ══ */
 for (const vp of VPS) {
-  test(`H2 drawing @ ${vp.width}`, async () => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The drawing stands in a white disc inside the panel. HP2 P5. */
+  test.skip(`H2 drawing @ ${vp.width}`, async () => {
     await openMs(page, vp);
     const hd = await one(page, '[data-ms21="header"]');
     const img = await one(page, '[data-ms21="header-art"] img');
     expect(img.w, "the drawing is 330 wide (260 below 1440)").toBeCloseTo(wide(vp.width) ? 330 : 260, 0);
-    expect(Math.abs(img.r - hd.r), `the drawing's right edge ${img.r} is the column's ${hd.r}`).toBeLessThanOrEqual(2);
+    /* RETIRED (Query Centre v135): the drawing is not at the column's right edge — the pair is centred on the sheet (QC135 A1). */
     const hang = img.b - hd.b;
-    expect(hang, `the drawing's foot is 12–24 below the hairline (${hang})`).toBeGreaterThanOrEqual(12);
-    expect(hang).toBeLessThanOrEqual(24);
-    /* painted above: at a point on the hairline, inside the drawing, the drawing is what is on top */
-    const top = await page.evaluate(() => {
-      const sc = [...document.querySelectorAll(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!;
-      sc.scrollTop = 0;
-      const hd = [...document.querySelectorAll('[data-ms21="header"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-      const im = hd.querySelector('[data-ms21="header-art"] img')!.getBoundingClientRect();
-      const y = hd.getBoundingClientRect().bottom - 0.5, x = im.x + im.width / 2;
-      const onScreen = y < innerHeight && x < innerWidth;
-      const el = document.elementFromPoint(x, y);
-      return { onScreen, tag: el?.tagName ?? "", inArt: !!el?.closest('[data-ms21="header-art"]') };
-    });
-    expect(top.onScreen, "the probe point is on screen").toBe(true);
-    expect(top.inArt, `the drawing paints above the hairline (found ${top.tag})`).toBe(true);
-    ck(6);
+    /* RE-POINTED (Query Centre v135): the drawing sits clear of the flap, 30 or more above the header's flat edge (QC135 A3) */
+    expect(hang, `the drawing's foot is 30 or more above the header's edge (${hang})`).toBeLessThanOrEqual(-30);
+    /* RETIRED (Query Centre v135): "the drawing paints above the hairline" — there is no hairline and the drawing does not
+       reach the header's edge. That it paints above the header sheet is shell v2's S5. */
+    ck(4);
   });
 }
 
@@ -371,10 +363,8 @@ for (const vp of VPS) {
     expect(r.bWeight, "'versions' is underlined, not bold").toBe("400");
     expect(r.bLine).toContain("underline");
     expect(r.label, "labelled A note").toBe("A note");
-    /* the arrow: centred on the band */
-    const tx = Number(/matrix\([^)]*,\s*(-?[\d.]+),\s*-?[\d.]+\)/.exec(r.arrowTf)?.[1] ?? NaN);
-    expect(Math.abs(r.arrowLeft + tx + r.arrowW / 2 - r.banW / 2), "the arrow is centred").toBeLessThanOrEqual(2);
-    expect(r.arrowW, "150 (120 below 1440)").toBe(wide(vp.width) ? 150 : 120);
+    /* RETIRED (app shell v2, 9 Oct): the arrow. The banner's bottom edge is the header sheet's flap, in blush (SH2 B2). Held here: no arrow. */
+    expect(!(r.arrowW > 0), `no arrow hangs under the banner (${r.arrowW})`).toBe(true);
     /* painted edges: the blush reaches both edges of the sheet */
     const blush = [243, 221, 210];
     expect(r.mid, "the band's middle is on screen").toBeLessThan(vp.height);
@@ -382,10 +372,10 @@ for (const vp of VPS) {
     expect(near(left, blush), `the sheet's left edge is blush (${left})`).toBe(true);
     expect(near(right, blush), `the sheet's right edge is blush (${right})`).toBe(true);
     ck(15);
-    /* spacing: 56 (48) above from the book row, 76 (64) below to Versions */
+    /* spacing: 56 (48) above from the book row, 102 (90) below to Versions — 76 (64) plus the flap's 26 (app shell v2) */
     const row = await one(page, '[data-ms21="row"]'), ban = await one(page, '[data-ms21="banner"]'), vs = await one(page, '[data-ms21="versions"]');
     expect(Math.abs(ban.y - row.b - (wide(vp.width) ? 56 : 48)), "the band's top from the book row").toBeLessThanOrEqual(1);
-    expect(Math.abs(vs.y - ban.b - (wide(vp.width) ? 76 : 64)), "Versions from the band").toBeLessThanOrEqual(1);
+    expect(Math.abs(vs.y - ban.b - (wide(vp.width) ? 102 : 90)), "Versions from the band").toBeLessThanOrEqual(1);
     ck(2);
     await noOverflow(page, `V1 @ ${vp.width}`);
   });
@@ -538,9 +528,9 @@ for (const vp of VPS) {
       const b = band.getBoundingClientRect(), s = sc.getBoundingClientRect();
       return { x: s.x + 1, r: s.x + sc.clientWidth - 14, y: b.y + 20, bg: getComputedStyle(band).backgroundColor };
     });
-    expect(edge.bg).toBe("rgb(233, 230, 224)");
-    expect(near(await pixel(page, edge.x, edge.y), [233, 230, 224]), "the band reaches the sheet's left edge").toBe(true);
-    expect(near(await pixel(page, edge.r, edge.y), [233, 230, 224]), "…and its right").toBe(true);
+    expect(edge.bg).toBe("rgb(251, 249, 245)") /* paper white, --ws-band (app shell v2) */;
+    expect(near(await pixel(page, edge.x, edge.y), [251, 249, 245]), "the band reaches the sheet's left edge").toBe(true);
+    expect(near(await pixel(page, edge.r, edge.y), [251, 249, 245]), "…and its right").toBe(true);
     ck(8);
     await shot(page, `03-materials-${vp.width}`);
     await noOverflow(page, `M1 @ ${vp.width}`);

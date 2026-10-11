@@ -1,0 +1,47 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:449:3 › Query Centre v137 › L1 · no jump: the panel and the strip are the same boxes loading and loaded
+[measure] › tests/e2e/qcV137.measure.ts:449:3 › Query Centre v137 › L1 · no jump: the panel and the strip are the same boxes loading and loaded
+  ✗ L1 · 1512 strip — 1159×153.8 at 296,476.4 → 1159×223.8 at 296,476.4
+
+  ✗ L1 · 1512 cells — 290×153.8 at 296,476.4 | 290×153.8 at 586,476.4 | 290×153.8 at 876,476.4 | 290×153.8 at 1166,476.4
+
+  ✗ L1 · 1280 strip — 942×153.8 at 289,476.4 → 942×223.8 at 289,476.4
+
+  ✗ L1 · 1280 cells — 236×153.8 at 289,476.4 | 236×153.8 at 524,476.4 | 236×153.8 at 760,476.4 | 236×153.8 at 996,476.4
+
+[L1] 6/10 green
+
+  1) [measure] › tests/e2e/qcV137.measure.ts:449:3 › Query Centre v137 › L1 · no jump: the panel and the strip are the same boxes loading and loaded 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "L1 · 1512 strip — 1159×153.8 at 296,476.4 → 1159×223.8 at 296,476.4",
+    +   "L1 · 1512 cells — 290×153.8 at 296,476.4 | 290×153.8 at 586,476.4 | 290×153.8 at 876,476.4 | 290×153.8 at 1166,476.4",
+    +   "L1 · 1280 strip — 942×153.8 at 289,476.4 → 942×223.8 at 289,476.4",
+    +   "L1 · 1280 cells — 236×153.8 at 289,476.4 | 236×153.8 at 524,476.4 | 236×153.8 at 760,476.4 | 236×153.8 at 996,476.4",
+    + ]
+
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:477:7
+
+    Error Context: test-results/qcV137.measure.ts-Query-Ce-d4516-me-boxes-loading-and-loaded-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV137.measure.ts:449:3 › Query Centre v137 › L1 · no jump: the panel and the strip are the same boxes loading and loaded 
+  1 passed (35.3s)

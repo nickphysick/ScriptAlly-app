@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openRoute, liftMotionSuppression } from "./measure";
+import { openMatcher, runMatcher, readRun, snapshot, cleanup } from "./matcherDrive";
 import { devDb } from "./devWrite";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { resolve } from "node:path";
@@ -11,28 +11,19 @@ test("AFTER — a real CSV import lands unattached", async ({ page }) => {
   const { db, uid } = await devDb();
   const before = (await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id);
 
-  await openRoute(page, "/import", { width: 1440, height: 1000 });
-  await liftMotionSuppression(page);
-  await page.waitForTimeout(1800);
-  await page.getByRole("button", { name: /Query Log Entries/i }).click();
-  await page.waitForTimeout(600);
-
-  /* ⚠️ SCOPED: every workspace page stays mounted, so a bare `textarea` matches a hidden copy. */
-  const ta = page.locator('textarea[placeholder^="Header 1"]').first();
-  await ta.waitFor({ state: "visible" });
-  await ta.fill(`Manuscript Title,Agent Name,State,Date Sent
+  /* Re-pointed (onboarding v5 part 3): the matcher is behind the Import page's "Match columns" tile and
+     its labels changed. The rule is unchanged: a query imported from a CSV lands with no package. */
+  const snap = await snapshot(db, uid);
+  /* ⚠️ THE CLEAN-UP IS IN `finally`. A failed assertion used to skip it and leave the run's rows on
+     the shared account (ten such rows from 20 Sep are still there). */
+  try {
+  await openMatcher(page, "Queries");
+  await runMatcher(page, `Manuscript Title,Agent Name,State,Date Sent
 The Smoke Test,Dangling Probe Agent,Queried,2026-08-01`);
-  await page.waitForTimeout(500);
-
-  await page.getByRole("button", { name: /Parse CSV Table/i }).click();
-  await page.waitForTimeout(1200);
-  await page.screenshot({ path: SHOT("flow-2-match") });
-
-  await page.getByRole("button", { name: /Begin Processing Records/i }).click();
-  await page.waitForTimeout(4000);
   await page.screenshot({ path: SHOT("flow-3-done") });
-  const log = await page.evaluate(() => document.body.innerText.match(/Linked query logged[^\n]*/)?.[0] ?? null);
-  console.log(`import log line: ${log}`);
+  const run = await readRun(page);
+  console.log(`import log: ${JSON.stringify(run.log)}`);
+  expect(run.log.some((l) => l.startsWith('Added query: "The Smoke Test" to Dangling Probe Agent')), "the run says the query was added").toBe(true);
 
   /* ── what did it actually store? ─────────────────────────────────────────────────────── */
   const after = await getDocs(collection(db, "users", uid, "queries"));
@@ -45,37 +36,13 @@ The Smoke Test,Dangling Probe Agent,Queried,2026-08-01`);
     expect(q.packageId, "the import still writes a package id").toBe("");
   }
 
-  /* ── and what does the pane render for it? ───────────────────────────────────────────── */
-  await openRoute(page, "/queries", { width: 1440, height: 1000 });
-  await liftMotionSuppression(page);
-  await page.waitForTimeout(2600);
-  const qc = page.locator(".qc-wpg");
-  const all = qc.getByRole("button", { name: /^all$/i }).first();
-  if (await all.count()) { await all.click(); await page.waitForTimeout(800); }
-  const rows = qc.locator(".f12-row");
-  const n = Math.min(await rows.count(), 60);
-  const blanks: unknown[] = [];
-  let seen = 0;
-  for (let i = 0; i < n; i++) {
-    await rows.nth(i).click(); await page.waitForTimeout(300);
-    const s = await qc.evaluate((r) => ({
-      strip: r.querySelectorAll(".qc-strip--packed").length,
-      loose: r.querySelectorAll(".qc-loose").length,
-      fork: r.querySelectorAll(".qc-fork").length,
-      agent: (r.querySelector(".qp-agent, .f12-idname") as HTMLElement)?.innerText?.slice(0, 24) ?? null,
-    }));
-    seen++;
-    if (s.strip + s.loose + s.fork !== 1) blanks.push({ row: i, ...s });
-    if (/Dangling Probe/i.test(s.agent ?? "")) {
-      console.log(`IMPORTED QUERY RENDERS: ${JSON.stringify(s)}`);
-      await page.screenshot({ path: SHOT("after-imported-pane") });
-    }
+  /* RETIRED HALF: this test went on to click through `.qc-wpg .f12-row` and count attachment blocks.
+     That is the three-column pane, unreachable since the Query Centre became a list (see
+     tests/e2e/RED-BACKLOG.md); the selector matches nothing, so the half was red before this pack and
+     is not a claim about the matcher. The store assertions above are the rule this file holds. */
+  } finally {
+    const removed = await cleanup(db, uid, snap);
+    expect((await snapshot(db, uid)).queries.length, "the account's queries are as they were").toBe(snap.queries.length);
+    console.log(`cleaned up ${removed} documents`);
   }
-  console.log(`rows sampled: ${seen} | rendering nothing: ${blanks.length}`);
-  for (const b of blanks) console.log(`  ${JSON.stringify(b)}`);
-  expect(seen).toBeGreaterThan(10);
-  expect(blanks, "a query renders no attachment block at all").toEqual([]);
-
-  for (const d of fresh) await deleteDoc(doc(db, "users", uid, "queries", d.id));
-  console.log(`cleaned up ${fresh.length} imported ${fresh.length === 1 ? "query" : "queries"}`);
 });

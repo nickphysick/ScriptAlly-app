@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B3 precondition: the flying hawk is on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "top 411.0"
+ },
+ {
+  "lock": "B3 the hawk clears the banner's flat edge by 8 or more",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "48.9"
+ },
+ {
+  "lock": "B3 …and never overlaps the flap's triangle",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "hawk top 411.0 · the flap over it reaches 372.6"
+ },
+ {
+  "lock": "B3 precondition: the flying hawk is on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "top 367.3"
+ },
+ {
+  "lock": "B3 the hawk clears the banner's flat edge by 8 or more",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "36.9"
+ },
+ {
+  "lock": "B3 …and never overlaps the flap's triangle",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "hawk top 367.3 · the flap over it reaches 342.8"
+ }
+]

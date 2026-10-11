@@ -1,0 +1,14 @@
+{"lock":"A1","exit":1,"readings":18,"red":5,"first":"A1 the midpoint of (text left, art right) is the page sheet's centre (±2) · /queries @1512 — group 296.4–1178.5, midpoint 737.4, sheet centre 876.0"}
+{"lock":"A2","exit":1,"readings":12,"red":12,"first":"A2 the drawing's vertical centre is the text block's (±2) · /queries @1512 — art 287.0 text 257.0"}
+{"lock":"A3","exit":1,"readings":12,"red":12,"first":"A3 the drawing's bottom is 30 or more above the flap's flat edge · /queries @1512 — 18.0 (flat edge 438.0, art bottom 420.0)"}
+{"lock":"A4","exit":1,"readings":8,"red":2,"first":"A4 one column gap on all three · @1512 — /queries 56 · /agents 56 · /manuscripts 40"}
+{"lock":"A5","exit":1,"readings":19,"red":12,"first":"A5 the loading frame is on the same grid (two tracks, centred) · /queries @1512 — 296,64 1159×648 · 3 tracks center"}
+{"lock":"B1","exit":1,"readings":38,"red":6,"first":"B1 its top is 26 (±1) above the card's top, its left 16 (±1) in · you @1512 — above 0.0 left 16.0"}
+{"lock":"B2","exit":1,"readings":20,"red":6,"first":"B2 the strip's background is the court's tint · you @1512 — rgb(255, 255, 255)"}
+{"lock":"B3","exit":1,"readings":14,"red":6,"first":"B3 the inner border is drawn 6 (±0.5) inside every edge · you @1512 — none inset 6/6/6/6"}
+{"lock":"B4","exit":1,"readings":20,"red":6,"first":"B4 its vertical centre is the strip's (±1) · you @1512 — 567.0 vs 574.0"}
+{"lock":"B5","exit":1,"readings":20,"red":1,"first":"B5 the month-on-month line is on one line · closed @1280 — \"No change since last month\" 33.8 tall, line-height 16.9"}
+{"lock":"B6","exit":1,"readings":16,"red":3,"first":"B6 nothing in the card runs past its right edge · you @1280 — scroll 2, spill 2.0"}
+{"lock":"B7","exit":1,"readings":20,"red":6,"first":"B7 its outer ring is 2px in the court's colour · you @1512 — rgba(28, 19, 15, 0.09) 0px 0px 0px 1px"}
+{"lock":"B8","exit":1,"readings":20,"red":6,"first":"B8 the badge is there while loading, blank, in the same box (±1) · you @1512 — 0,0 0×0 → 312,516 64×64 · loading count \"\""}
+{"lock":"B9","exit":1,"readings":4,"red":2,"first":"B9 the image is loaded and fills the same box (±1) · you — box 60×50 img 0×0 loaded true"}

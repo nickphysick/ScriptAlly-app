@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "P8 precondition: the header carries the Set aside door",
+  "where": "@1512",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "P8 the popover opened and its centre is on screen",
+  "where": "@1512",
+  "ok": false,
+  "detail": "no popover"
+ },
+ {
+  "lock": "P8 precondition: the header carries the Set aside door",
+  "where": "@1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "P8 the popover opened and its centre is on screen",
+  "where": "@1280",
+  "ok": false,
+  "detail": "no popover"
+ }
+]

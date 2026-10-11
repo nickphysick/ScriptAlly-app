@@ -1,0 +1,41 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:243:3 › Query Centre v137 › C1 · removed: no Recently updated, banner, full-list link or hawk; the list is 40 under the strip
+[measure] › tests/e2e/qcV137.measure.ts:243:3 › Query Centre v137 › C1 · removed: no Recently updated, banner, full-list link or hawk; the list is 40 under the strip
+  ✗ C1 · 1512 list 40 under the strip — 130.0
+
+  ✗ C1 · 1280 list 40 under the strip — 130.0
+
+[C1] 10/12 green
+
+  1) [measure] › tests/e2e/qcV137.measure.ts:243:3 › Query Centre v137 › C1 · removed: no Recently updated, banner, full-list link or hawk; the list is 40 under the strip 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "C1 · 1512 list 40 under the strip — 130.0",
+    +   "C1 · 1280 list 40 under the strip — 130.0",
+    + ]
+
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:265:7
+
+    Error Context: test-results/qcV137.measure.ts-Query-Ce-439ad--list-is-40-under-the-strip-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV137.measure.ts:243:3 › Query Centre v137 › C1 · removed: no Recently updated, banner, full-list link or hawk; the list is 40 under the strip 
+  1 passed (29.4s)

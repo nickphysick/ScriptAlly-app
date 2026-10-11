@@ -9,13 +9,16 @@
  * derives status, stage dates, and the "Responses Received" flag identically to hand-logged
  * queries. No model involvement here.
  */
-import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp, updateDoc, deleteField } from "firebase/firestore";
+import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
-import { Agent, ActivityType, SubmissionMethod } from "../types";
+import { Agent, ActivityType, Query, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
+import { importActivityLine, type ImportSource } from "./importLabels";
+import { importedAgentDoc } from "./importedAgent";
+import { findExistingAgent, isSameQuery } from "./importDuplicates";
 
 // The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
 // pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
@@ -25,6 +28,8 @@ export { impliedRungs, assignTimes };
 export interface CommitDeps {
   userId: string;
   existingAgents: Agent[];
+  /** the account's queries, so a query already here is not written a second time */
+  existingQueries?: readonly Pick<Query, "agentId" | "manuscriptId" | "dateSent">[];
   manuscriptTitle: string;
   addAgent: (
     a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string },
@@ -32,7 +37,8 @@ export interface CommitDeps {
   ) => Promise<{ success: boolean; error?: string; id?: string }>;
   addQuery: (
     q: any,
-    bypassLimits?: boolean
+    bypassLimits?: boolean,
+    opts?: { imported?: boolean }
   ) => Promise<{ success: boolean; error?: string; id?: string }>;
 }
 
@@ -42,29 +48,95 @@ export interface CommitOutcome {
   queriesImported: number;
   queriesSkipped: number;
   errors: string[];
+  /** rows not written because the account already holds that query (same agent, manuscript and sent day) */
+  already?: { who: string; status: string; sentDate: string | null }[];
 }
-
-const norm = (s = "") => s.trim().toLowerCase();
 
 /** How many agents in the proposal already exist (for the review screen's merge note). */
 export function countExistingMatches(result: SmartImportResult, existingAgents: Agent[]): number {
   return (result.agents || []).filter((a) =>
-    existingAgents.some(
-      (ex) => norm(ex.name) === norm(a.name) && (!a.agency || !ex.agency || norm(ex.agency) === norm(a.agency))
-    )
+    !!findExistingAgent(existingAgents, a)
   ).length;
 }
 
-const mapMethod = (m: ParsedAgent["submissionMethod"]): SubmissionMethod =>
-  m === "Online Form" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL;
+/** Where an all-undated query's ordering keys start. Not a date: see the note at its use. */
+export const UNDATED_ORDER_BASE_MS = 0;
+
+/**
+ * Write an imported query's history: every step its status implies, dated where the file gave a
+ * date and flagged `dateProvisional` where it did not, then derive the query from them.
+ * Shared by every import that creates a query (the template, Smart Import and the column
+ * matcher), so none of them can date a step from the clock.
+ */
+export async function writeImportedHistory(
+  userId: string,
+  queryId: string,
+  q: ParsedQuery,
+  agentName: string,
+  manuscriptTitle: string,
+): Promise<void> {
+  const actCol = collection(db, "users", userId, "queries", queryId, "activity");
+  const existing = await getDocs(actCol);
+  /**
+   * ⚠️ AN IMPORT MAY ONLY DELETE ACTIVITIES THE IMPORT WROTE. This cleared the query's ENTIRE
+   * activity subcollection — every response logged through `recordResponse`, every nudge from
+   * `logNudge`, every status change — and that subcollection is the authoritative one the Query
+   * Centre reads and `recomputeQuery` derives all ten fields from. Re-importing a spreadsheet to
+   * correct one typo destroyed a year of recorded responses, silently, and then re-derived the
+   * query's dates and status from the import's version of events. Nothing warned, and nothing in
+   * the app could put it back.
+   *
+   * Provisional rungs are the import's own and it may replace them freely; anything the writer
+   * recorded is theirs.
+   *
+   * ⚠️ THE DISCRIMINATOR IS AN ID PREFIX, AND THAT IS A WEAKER CONTRACT THAN A STORED FIELD.
+   * `imp-` is on every rung the import writes (see the `setDoc` below) and it is durable because
+   * it IS the document id — but it is not validated by `firestore.rules`, nothing stops a future
+   * writer from minting an `imp-` id, and it carries no reason with it. The honest shape is a
+   * stored `source: "import"` on every import-written rung, with this as the interim
+   * discriminator so the law can land before the schema does.
+   *
+   * ⚠️ AND `dateProvisional` IS NOT A SUFFICIENT DISCRIMINATOR — it is the obvious candidate and
+   * it is wrong. It is set only on the UNDATED subset, so scoping the delete to it would leave
+   * every import-written rung that happens to carry a real date undeletable, and those rungs
+   * would then duplicate on every re-import.
+   */
+  const mine = existing.docs.filter((d) => d.id.startsWith("imp-"));
+  await Promise.all(mine.map((d) => deleteDoc(d.ref)));
+
+  /* ⚠️ AN UNDATED QUERY'S STEPS ARE ORDERED FROM ZERO, NEVER FROM THE IMPORT'S OWN TIME. The key
+     only puts the steps in pipeline order and is flagged `dateProvisional`, so nothing shows
+     it. But a key of "now" is still a date in the record: a step the writer later dates in
+     the past is clamped to sit after the latest step, so it was stored as the day of the
+     import instead of the day they chose. */
+  for (const rung of assignTimes(impliedRungs(q), UNDATED_ORDER_BASE_MS)) {
+    const id = "imp-" + Math.random().toString(36).substr(2, 9);
+    await setDoc(doc(actCol, id), {
+      type: rung.status,
+      resultingStatus: rung.status,
+      createdAt: Timestamp.fromMillis(rung.ms),
+      // A carried note (the duplicate-collapse harvest, e.g. "asked for 50pp") rides its own rung;
+      // ordinary imports have none → the generated label, byte-identical to before.
+      note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
+      ...(rung.provisional ? { dateProvisional: true } : {}),
+      queryId,
+      agentName,
+      manuscriptTitle,
+    });
+  }
+  await recomputeQuery(userId, queryId);
+}
 
 export async function commitSmartImport(
   deps: CommitDeps,
   result: SmartImportResult,
-  manuscriptId: string
+  manuscriptId: string,
+  /** Which path the rows came by — named in the one activity line the import leaves. */
+  source: ImportSource = "smart"
 ): Promise<CommitOutcome> {
   const { userId, existingAgents, manuscriptTitle, addAgent, addQuery } = deps;
-  const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [] };
+  const existingQueries = deps.existingQueries ?? [];
+  const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [], already: [] };
 
   const { importable, skipped } = validateSmartImport(result);
   outcome.queriesSkipped = skipped.length;
@@ -88,38 +160,33 @@ export async function commitSmartImport(
   //    isolated: one bad agent must never abort the batch (handleFirestoreError THROWS, so
   //    addAgent/addQuery can raise as well as return failure).
   const refToAgent: Record<string, { id: string; name: string }> = {};
+  const agentLabel: Record<string, string> = {};
   for (const a of result.agents || []) {
     if (!a.name?.trim() && !a.agency?.trim()) {
       // No name AND no agency — nothing to identify it by; its queries are skipped by validation.
       continue;
     }
     const agentName = a.name?.trim() ?? "";
+    agentLabel[a.ref] = agentName || (a.agency ?? "").trim();
     try {
-      const match = existingAgents.find(
-        (ex) => norm(ex.name) === norm(agentName) && norm(ex.agency) === norm(a.agency ?? "")
-      );
+      // the one agent match every import path uses (importDuplicates.ts)
+      const match = findExistingAgent(existingAgents, { name: agentName, agency: a.agency });
       if (match) {
         refToAgent[a.ref] = { id: match.id, name: match.name };
         outcome.agentsMerged++;
         continue;
       }
+      // Only what the file gave: no rating, window or reply rule of the import's own (importedAgent.ts).
       const res = await addAgent(
-        {
-          name: agentName,
-          agency: a.agency ?? "",
-          email: a.email ?? "",
-          website: a.website ?? "",
-          genres: a.genres ?? [],
-          mswlNotes: a.mswlNotes ?? "",
-          starRating: 3,
-          submissionStatus: "Open" as any,
-          responseTimeWeeks: a.responseTimeWeeks ?? 0,
-          noResponseMeansNo: a.noResponseMeansNo ?? false,
-          submissionMethod: mapMethod(a.submissionMethod),
-          materialsWanted: [],
-          notes: "",
-          importedNeedsReview: true,
-        },
+        importedAgentDoc(
+          {
+            name: agentName, agency: a.agency, email: a.email, website: a.website, genres: a.genres,
+            mswlNotes: a.mswlNotes, responseTimeWeeks: a.responseTimeWeeks,
+            noResponseMeansNo: a.noResponseMeansNo, submissionMethod: a.submissionMethod,
+            starRating: a.starRating, submissionStatus: a.submissionStatus,
+          },
+          { importedNeedsReview: true },
+        ),
         true
       );
       const label = agentName || a.agency || "(unnamed)";
@@ -149,6 +216,13 @@ export async function commitSmartImport(
       continue;
     }
 
+    /* ALREADY HERE: the same agent, the same manuscript and the same sent day (or both undated).
+       Nothing is written for it — no query, no history — and it is listed with the skipped rows. */
+    if (existingQueries.some((ex) => isSameQuery(ex, { agentId: agent.id, manuscriptId, sentDate: q.sentDate }))) {
+      outcome.already!.push({ who: agent.name || agentLabel[q.agentRef] || "", status: q.status ?? "", sentDate: q.sentDate ?? null });
+      continue;
+    }
+
     let queryId: string;
     try {
       const res = await addQuery(
@@ -159,10 +233,16 @@ export async function commitSmartImport(
           personalisationNotes: q.notes ?? "",
           sendMethod: SubmissionMethod.EMAIL,
           status: q.status!,
-          // Only pass a real query date; without one the query imports provisionally.
+          // Only pass a real query date; without one the query is written with no sent date.
           ...(q.sentDate ? { dateSent: q.sentDate } : {}),
         },
-        true
+        true,
+        /* ⚠️ `imported` IS WHAT STOPS addQuery INVENTING A DATE. Without it addQuery defaulted the
+           sent date to now and wrote its own first history steps stamped now. Those steps are
+           real, dated events as far as the derivation can tell, and this commit may only delete
+           steps it wrote itself (the `imp-` rule below), so they survived: every imported stage
+           was dated to the moment of import, and an undated request read "Asked today". */
+        { imported: true }
       );
       if (!res.success || !res.id) {
         outcome.errors.push(`Couldn't import the query to ${agent.name}: ${res.error || "unknown error"}`);
@@ -170,11 +250,6 @@ export async function commitSmartImport(
       }
       queryId = res.id;
       importedQueryIds.add(queryId);
-      // addQuery always defaults dateSent to today; for provisional (undated) imports that
-      // fabricates a date. Clear it so the feeds never show a made-up sent date.
-      if (!q.sentDate) {
-        await updateDoc(doc(db, "users", userId, "queries", queryId), { dateSent: deleteField() });
-      }
     } catch (e) {
       console.error("Smart Import: query write failed:", agent.name, e);
       outcome.errors.push(`Couldn't import the query to ${agent.name}.`);
@@ -182,51 +257,7 @@ export async function commitSmartImport(
     }
 
     try {
-      const actCol = collection(db, "users", userId, "queries", queryId, "activity");
-      const existing = await getDocs(actCol);
-      /**
-       * ⚠️ AN IMPORT MAY ONLY DELETE ACTIVITIES THE IMPORT WROTE. This cleared the query's ENTIRE
-       * activity subcollection — every response logged through `recordResponse`, every nudge from
-       * `logNudge`, every status change — and that subcollection is the authoritative one the Query
-       * Centre reads and `recomputeQuery` derives all ten fields from. Re-importing a spreadsheet to
-       * correct one typo destroyed a year of recorded responses, silently, and then re-derived the
-       * query's dates and status from the import's version of events. Nothing warned, and nothing in
-       * the app could put it back.
-       *
-       * Provisional rungs are the import's own and it may replace them freely; anything the writer
-       * recorded is theirs.
-       *
-       * ⚠️ THE DISCRIMINATOR IS AN ID PREFIX, AND THAT IS A WEAKER CONTRACT THAN A STORED FIELD.
-       * `imp-` is on every rung the import writes (see the `setDoc` below) and it is durable because
-       * it IS the document id — but it is not validated by `firestore.rules`, nothing stops a future
-       * writer from minting an `imp-` id, and it carries no reason with it. The honest shape is a
-       * stored `source: "import"` on every import-written rung, with this as the interim
-       * discriminator so the law can land before the schema does.
-       *
-       * ⚠️ AND `dateProvisional` IS NOT A SUFFICIENT DISCRIMINATOR — it is the obvious candidate and
-       * it is wrong. It is set only on the UNDATED subset, so scoping the delete to it would leave
-       * every import-written rung that happens to carry a real date undeletable, and those rungs
-       * would then duplicate on every re-import.
-       */
-      const mine = existing.docs.filter((d) => d.id.startsWith("imp-"));
-      await Promise.all(mine.map((d) => deleteDoc(d.ref)));
-
-      for (const rung of assignTimes(impliedRungs(q), importBaseMs)) {
-        const id = "imp-" + Math.random().toString(36).substr(2, 9);
-        await setDoc(doc(actCol, id), {
-          type: rung.status,
-          resultingStatus: rung.status,
-          createdAt: Timestamp.fromMillis(rung.ms),
-          // A carried note (the duplicate-collapse harvest, e.g. "asked for 50pp") rides its own rung;
-          // ordinary imports have none → the generated label, byte-identical to before.
-          note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
-          ...(rung.provisional ? { dateProvisional: true } : {}),
-          queryId,
-          agentName: agent.name,
-          manuscriptTitle,
-        });
-      }
-      await recomputeQuery(userId, queryId);
+      await writeImportedHistory(userId, queryId, q, agent.name, manuscriptTitle);
       outcome.queriesImported++;
     } catch (e) {
       console.error("Smart Import: seeding/recompute failed:", agent.name, e);
@@ -254,6 +285,8 @@ export async function commitSmartImport(
         .map((d) => deleteDoc(d.ref))
     );
 
+    /* The line counts what was written. An import that wrote nothing leaves no line. */
+    if (outcome.agentsCreated === 0 && outcome.queriesImported === 0) return outcome;
     const summaryId = "imp-sum-" + Math.random().toString(36).substr(2, 9);
     await setDoc(doc(feedCol, summaryId), {
       id: summaryId,
@@ -261,7 +294,7 @@ export async function commitSmartImport(
       queryId: "",
       manuscriptId: "",
       activityType: ActivityType.STATUS_CHANGED, // non-housekeeping so it shows in "The story so far"
-      description: `Smart import · ${outcome.agentsCreated} agents added, ${outcome.queriesImported} queries logged`,
+      description: importActivityLine(source, outcome.agentsCreated, outcome.queriesImported),
       date: new Date(importBaseMs).toISOString(),
       details: "",
     });

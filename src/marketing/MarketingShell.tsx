@@ -13,7 +13,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
-import { BRAND_MARK, BRAND_WORDMARK, artUrl } from "./brandArt";
+import { BRAND_MARK, artUrl } from "./brandArt";
+import { MarketingFooter } from "./MarketingFooter";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -177,11 +178,11 @@ export const MarketingShell: React.FC<{
                 announcement is noise to a screen reader, and the button's own aria-label names
                 the destination. */}
             <img className="mk-logo" src={artUrl(BRAND_MARK)} alt="" />
-            <img
-              className="mk-wordmarkart"
-              src={artUrl(BRAND_WORDMARK)}
-              alt="QueryHawk"
-            />
+            {/* ⚠️ LIVE TYPE ON INK, AS THE APP'S SIDEBAR DRAWS IT (landing colours v2). The drawn
+                wordmark is dark artwork; it is not filtered to suit an ink bar, it is not drawn on
+                one. The button's aria-label still names the destination, and an aria-label
+                replaces a button's content as its name — so a reader still hears the site once. */}
+            <span className="mk-navword">QueryHawk</span>
           </button>
           {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
               Contact are real public routes; leaving them footer-only would put the two company
@@ -202,12 +203,12 @@ export const MarketingShell: React.FC<{
               </button>
             )}
             {nav.mode === "anon" ? (
-              <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("founders")}>
+              <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
             ) : (
               <>
-                <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("dashboard")}>
+                <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("dashboard")}>
                   {nav.primaryLabel}
                 </button>
                 <span className="mk-avatar" aria-hidden="true">{nav.avatarInitial}</span>
@@ -245,8 +246,16 @@ export const MarketingShell: React.FC<{
           </div>
         )}
       </div>
-      {/* `tabIndex={-1}` so the skip link can actually move focus here, not merely scroll. */}
-      <div id="mk-main" tabIndex={-1} style={{ flex: 1 }}>{children}</div>
+      {/* `tabIndex={-1}` so the skip link can actually move focus here, not merely scroll.
+          ⚠️ THE SHEET: every light surface of a public page sits inside this one box, and the box
+          owns the four 18px corners (landing colours v2). The page ground behind it is ink, so the
+          nav above and the footer below close a frame around it. */}
+      <div id="mk-main" className="mk-sheet" tabIndex={-1}>{children}</div>
+      {/* ⚠️ THE FOOTER IS THE SHELL'S, RENDERED ONCE. Each page used to mount its own copy as its
+          last child — which put it INSIDE whatever the page's last surface was, so nothing could
+          round that surface's bottom corners against it. Chrome on both sides of the sheet now
+          belongs to the same component. */}
+      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

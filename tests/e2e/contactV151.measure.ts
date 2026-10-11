@@ -44,7 +44,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 /* ── H1–H5 and D1–D2 · the header and the desk, at rest ── */
-test("CL15.1-HD · hawk and desk", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The hawk's size, its drop over the hairline and the icon desk are all replaced. HP2 A1, A5, A6, D1. */
+test.skip("CL15.1-HD · hawk and desk", async ({ page }) => {
   const L = new Ledger("cl151-hd");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -83,22 +84,27 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     /* H1 */
     L.check(`H1 the drawing is ${narrow ? 380 : 490} wide (±1)`, w, near(r.img.w, narrow ? 380 : 490, 1), `${r.img.w.toFixed(1)}`);
     /* H2 */
-    L.check("H2 the drawing's right edge is the desk's right edge (±2)", w, near(r.img.r, r.desk.r, 2), `img ${r.img.r.toFixed(1)} desk ${r.desk.r.toFixed(1)}`);
+    /* RETIRED (Query Centre v135): the drawing is no longer at the column's right edge — the text and the drawing are one group
+       centred on the sheet (QC135 A1). */
     /* H3 — precondition first: the rule and the point under it are on screen, or elementFromPoint answers nothing */
     const under = r.img.b - (r.ruleTop + r.bw);
     L.check("H3 precondition: the rule is on screen", w, r.ruleTop > 0 && r.ruleTop + r.bw + 4 < r.vh, `rule ${r.ruleTop} vh ${r.vh}`);
-    L.check("H3 the drawing's bottom is 12–24 below the header's hairline", w, under >= 12 && under <= 24, `${under.toFixed(1)}`);
-    L.check("H3 4px below the rule, inside the drawing's box, the drawing is what is painted; and on the rule too", w, r.below === "IMG*" && r.onRule === "IMG*", `below ${r.below} on rule ${r.onRule}`);
-    L.check("H3 the hairline is 1px ink at 12–14%", w, /^1px solid rgba\(28, 19, 15, 0\.1[234]\)$/.test(r.line ?? ""), `${r.line}`);
+    /* RE-POINTED (Query Centre v135): the drawing no longer crosses the header's edge; it sits clear of the flap (QC135 A3). */
+    L.check("H3 the drawing's bottom is 30 or more above the header's flat edge (v135)", w, under <= -30, `${under.toFixed(1)}`);
+    /* RETIRED (Query Centre v135): "painted over the rule" — there is no rule and the drawing does not reach the edge. */
+    /* RETIRED (app shell v2, 9 Oct): the hairline is gone; "the header's hairline" in H3 and D1 now reads "the header's flat bottom edge" (SH2 S3–S5). */
+    L.check("H3 no hairline under the header (retired by app shell v2; SH2 S4)", w, /^0px/.test(r.line ?? ""), `${r.line}`);
     /* H4 — the LAYOUT box is the painted rect less the drop */
     const layoutC = r.img.t - r.drop + r.img.h / 2, textC = (r.txt.t + r.txt.b) / 2;
     L.check("H4 the text block's centre is within 4px of the drawing's LAYOUT box centre (its rect less the drop)", w, Math.abs(textC - layoutC) <= 4, `text ${textC.toFixed(1)} layout ${layoutC.toFixed(1)} drop ${r.drop} (${r.pos})`);
     /* v15.3 gave the header 30px of top padding, so the allowance is 44 (30 above, 10 below, 4 spare), not 14 */
-    L.check("H4 the drop is visual only: the header is no taller than the drawing's layout box plus 44", w, r.hd.h <= r.img.h + 44, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
+    /* RE-POINTED (Query Centre v135): no drop; the header is the drawing plus its 30 and 34 of padding. */
+    L.check("H4 the header is no taller than the drawing's box plus 64", w, r.hd.h <= r.img.h + 64.5, `header ${r.hd.h.toFixed(1)} drawing ${r.img.h.toFixed(1)}`);
     /* H5 */
     const head = r.img.t - r.sheetTop;
     /* v15.3 re-pointed: the header's own 30px of top padding sits above the drop, so 30 + 30 (30 + 24) */
-    L.check(`H5 the drawing's top is ${narrow ? 54 : 60} (±3) below the page sheet's top`, w, near(head, narrow ? 54 : 60, 3), `${head.toFixed(1)}`);
+    /* RE-POINTED (Query Centre v135): no drop, so the drawing's top is the header's 30 of padding. */
+    L.check("H5 the drawing's top is 30 (±3) below the page sheet's top", w, near(head, 30, 3), `${head.toFixed(1)}`);
 
     /* D1 */
     const gap = r.desk.t - r.hd.b;
@@ -108,7 +114,7 @@ test("CL15.1-HD · hawk and desk", async ({ page }) => {
     await checkOverflow(page, L, w);
     await shot(page, "header-desk", vp);
   }
-  L.done(33);
+  L.done(30); /* 33 less three readings Query Centre v135 retired */
 });
 
 /* the band's boxes, with the band scrolled into the middle of the scroller so its pixels can be sampled */
@@ -140,8 +146,8 @@ const shot = async (page: Page, name: string, vp: { width: number }) => {
   mkdirSync(`${DIR}/shots`, { recursive: true });
   await page.screenshot({ path: `${DIR}/shots/${name}-${vp.width}.png`, animations: "disabled" });
 };
-const BAND = [233, 230, 224];
-const PAGE = [243, 242, 240];
+const BAND = [251, 249, 245]; /* paper white, --ws-band (app shell v2; it was 233, 230, 224) */
+const PAGE = [242, 238, 232];
 
 async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, state: string) {
   const r = await readBand(page);
@@ -149,7 +155,7 @@ async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, sta
   if (!r.band || !r.fs || !r.panel || !r.desk || !r.bar || !r.sheet || r.state !== state) { L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, false, JSON.stringify({ state: r.state, band: !!r.band, bar: !!r.bar })); return; }
   L.check("CL15.1 population: the band, the stage, the desk and the banner render in this state", where, true, "");
   /* B1 — the tint itself, and where it is PAINTED (a box-shadow has no box to read: the pixels are the evidence) */
-  L.check("B1 the band's background is rgb(233, 230, 224), with no border and no radius", where, r.bg === "rgb(233, 230, 224)" && r.border === "0px 0px 0px" && r.radius === "0px", `${r.bg} · ${r.border} · ${r.radius}`);
+  L.check("B1 the band's background is rgb(251, 249, 245), with no border and no radius", where, r.bg === "rgb(251, 249, 245)" && r.border === "0px 0px 0px" && r.radius === "0px", `${r.bg} · ${r.border} · ${r.radius}`);
   const y = Math.min(r.band.t + 20, r.sheet.b - 4);
   L.check("B1 precondition: the sampled line is inside the band and on screen", where, y > r.band.t && y < r.band.b && y > r.sheet.t && y < r.sheet.b, `y ${y} band ${r.band.t}–${r.band.b} sheet ${r.sheet.t}–${r.sheet.b}`);
   /* ⚠️ THE SHEET SHADES ITS OWN LAST 10px (measured: the page ground reads 240,239,237 at the edge against 243,242,240

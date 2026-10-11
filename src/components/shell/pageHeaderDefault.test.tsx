@@ -47,10 +47,14 @@ const renderInLeavingGrid = (el: React.ReactElement) =>
    variant's contents now sit in `.ph-hin`, the centred 920px hero frame. Nothing else moved. */
 /* ⚠️ UPDATED DELIBERATELY BY THE QUIET BAR, IN THE SAME COMMIT AS THE CHANGE: the title carries
    `data-page-title`, which the shell reads to know when the title has gone up behind the bar. */
+/* app shell v2 (9 Oct): every non-band PageHeader opens with the header sheet's layer and carries its host class. */
+const SHEET = '<span class="hsheet" data-header-sheet="" aria-hidden="true"><i></i></span>';
+
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
     expect(render(<PageHeader title="Help centre" />)).toBe(
-      '<header class="ph ph--full" data-probe="page-header" data-size="full">'
+      '<header class="ph ph--full hsheet-host" data-probe="page-header" data-size="full">'
+      + SHEET
       + '<div class="ph-hin" data-probe="hero-frame">'
       + '<div class="ph-text"><h1 class="ph-title" data-probe="title" data-page-title="">Help centre</h1></div></div></header>'
     );
@@ -66,7 +70,8 @@ describe("⚠️ the default variant is frozen", () => {
       />
     );
     expect(out).toBe(
-      '<header class="ph ph--full" data-probe="page-header" data-size="full">'
+      '<header class="ph ph--full hsheet-host" data-probe="page-header" data-size="full">'
+      + SHEET
       + '<div class="ph-hin" data-probe="hero-frame">'
       + '<div class="ph-text"><h1 class="ph-title" data-probe="title" data-page-title="">Your agent list</h1>'
       + '<p class="ph-intro" data-probe="intro">Everyone you&#x27;re querying.</p>'
@@ -96,14 +101,14 @@ describe("⚠️ the default variant is frozen", () => {
   });
 
   it("the default still renders its closing rule", () => {
-    expect(render(<PageHeader title="T" />)).toContain('<header class="ph ph--full"');
+    expect(render(<PageHeader title="T" />)).toContain('<header class="ph ph--full hsheet-host"');
   });
 });
 
 describe("the workspace variant", () => {
   it("renders title and no mark — and nothing actionable unless a CTA is passed", () => {
     const out = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
-    expect(out).toContain('class="ph ph--compact"');
+    expect(out).toContain('class="ph ph--compact hsheet-host"');
     expect(out).toContain("Query Centre");
     /* ⚠️ THE MARK IS DECLARED AND NOT DRAWN. It belongs to the collapsed bar now; the prop survives
        so that bar knows which one, rather than a second table keyed by route. */
@@ -111,11 +116,11 @@ describe("the workspace variant", () => {
        page's mark at 20px — that is the whole reason the prop survives — so a document-wide search
        for `data-mark` finds the BAR's and reports the masthead as drawing one. The claim is about
        where the mark is, so the slice has to be as well. */
-    expect(sliceBetween(out, '<header class="ph ph--compact"', "</header>"), "the masthead drew a declared mark")
+    expect(sliceBetween(out, '<header class="ph ph--compact hsheet-host"', "</header>"), "the masthead drew a declared mark")
       .not.toContain('data-mark="queries"');
     /* ⚠️ ASSERTED STRUCTURALLY, NOT AGAINST A LIST OF LABELS. A name list passes the day someone
        adds a button this test has never heard of, which is precisely the day it should fail. */
-    const masthead = sliceBetween(out, '<header class="ph ph--compact"', "</header>");
+    const masthead = sliceBetween(out, '<header class="ph ph--compact hsheet-host"', "</header>");
     expect(masthead).not.toContain("<button");
     expect(masthead).not.toContain("<a ");
   });
@@ -206,8 +211,8 @@ describe("the workspace variant", () => {
     const withSub = renderInGrid(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
     expect(withSub).toContain("ph-intro");
     /* ⚠️ ONE CLASS IN BOTH STATES — the only difference is whether the paragraph exists. */
-    expect(withSub).toContain('class="ph ph--compact"');
-    expect(solo).toContain('class="ph ph--compact"');
+    expect(withSub).toContain('class="ph ph--compact hsheet-host"');
+    expect(solo).toContain('class="ph ph--compact hsheet-host"');
   });
 
   /**
@@ -239,7 +244,7 @@ describe("the workspace variant", () => {
     expect(KEYS.length, "the mark census shrank").toBeGreaterThan(8);
     for (const m of KEYS) {
       const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
-      expect(out, `${m} threw or failed to render`).toContain('class="ph ph--compact"');
+      expect(out, `${m} threw or failed to render`).toContain('class="ph ph--compact hsheet-host"');
       expect(out, `${m} is drawn somewhere — the bar carries the page's own icon now`)
         .not.toContain(`data-mark="${m}"`);
     }
@@ -282,7 +287,7 @@ describe("⚠️ the shell never mounts PageHeader", () => {
  */
 describe("no prop can choose the masthead's shape", () => {
   /** the masthead's own markup, sliced out of whatever it is mounted in */
-  const shape = (el: React.ReactElement) => sliceBetween(renderInGrid(el), '<header class="ph ph--compact"', "</header>");
+  const shape = (el: React.ReactElement) => sliceBetween(renderInGrid(el), '<header class="ph ph--compact hsheet-host"', "</header>");
 
   it("only `description` changes it — and it changes ONE element", () => {
     const solo = shape(<PageHeader variant="workspace" title="T" mark="todo" />);

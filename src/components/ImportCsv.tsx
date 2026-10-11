@@ -4,7 +4,19 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "./shell/PageHeader";
+import "./onboarding/onboarding.css";
+import "./onboarding/importFlow.css";
+import "./import/importMatcher.css";
+import { importedAgentDoc } from "../lib/importedAgent";
+import { saveImportNotice, type ImportNoticeRow } from "../lib/importNotice";
+import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
+import { writeImportedHistory } from "../lib/smartImportCommit";
+import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
+import {
+  MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
+  MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine, eventDateReason, matchHistoryRow, historySkipReason,
+} from "../lib/importMatcher";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { parseLegacyComps } from "../lib/comps";
@@ -174,7 +186,9 @@ type ImportType = "agents" | "manuscripts" | "queries" | "activities";
 
 export const ImportCsv: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ onNavigate }) => {
+  /** Back to the Import page's tiles. */
+  onBack?: () => void;
+}> = ({ onNavigate, onBack }) => {
   const {
     currentUser,
     agents,
@@ -188,10 +202,11 @@ export const ImportCsv: React.FC<{
   } = useScriptAllyDb();
 
   const [importType, setImportType] = useState<ImportType>("agents");
-  const [subTab, setSubTab] = useState<"wizard" | "grids">("wizard");
-  const [gridSearch, setGridSearch] = useState<string>("");
-  const [activeGridTab, setActiveGridTab] = useState<"agents" | "manuscripts" | "queries" | "activities">("agents");
   const [step, setStep] = useState<number>(1); // Step 1: Input, Step 2: Mapping, Step 3: Run
+  const [fileName, setFileName] = useState<string>("");
+  const [readError, setReadError] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const fileRef = React.useRef<HTMLInputElement>(null);
   const [rawText, setRawText] = useState<string>("");
   const [csvRows, setCsvRows] = useState<string[][]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -229,7 +244,7 @@ export const ImportCsv: React.FC<{
     agents: ["name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "notes"],
     manuscripts: ["title", "genre", "wordCount", "logline", "comps", "ageCategory"],
     queries: ["manuscriptId", "agentId", "status", "dateSent", "personalisationNotes"],
-    activities: ["queryId", "manuscriptId", "activityType", "description", "date", "details"],
+    activities: ["queryId", "manuscriptId", "agentId", "activityType", "description", "date", "details"],
     user: ["name", "email", "plan", "trialStartDate", "subscriptionStatus"]
   };
 
@@ -238,46 +253,24 @@ export const ImportCsv: React.FC<{
     agents: "Name, Agency, Email, Website, Genres, MSWL Notes, Star Rating, Notes",
     manuscripts: "Title, Genre, Word Count, Logline, Comps, Audience Age",
     queries: "Manuscript Title, Agent Name, State, Date Sent, Custom Intro Text",
-    activities: "Related Query, Related Title, Event Type, Description, Date, Extras",
+    activities: "Related Query, Related Title, Agent Name, Event Type, Description, Date, Extras",
     user: "Pen Name, Email, Plan Tier, Sign up Date, Subscription State"
-  };
-
-  // Load a pre-populated demo CSV mock based on selections
-  const loadDemoCsv = () => {
-    let demoString = "";
-    if (importType === "agents") {
-      demoString = `"Agent Name","Literary Agency","E-Mail Address","Official Site","Genres Represented","MSWL Focus","Priority Star Rating","Personal Dossier Notes"
-"Alexandra Stone","Foundry Literary + Media","astone@foundrymedia.com","https://foundrymedia.com/stone","Science Fiction, Fantasy, YA","Looking for climate fiction, high concept fantasy, character-driven YA",5,"MSWL details collected during London Book Fair."
-"Jonathan Vance","Vanguard Creative Agency","jvance@vanguardcreative.co.uk","https://vanguardcreative.co.uk/jon","Thriller, Horror, Gothic","Dark academe settings, supernatural horrors with literary sensibilities, psychological lock-box thrillers",4,"Met at York Writers Conference."`;
-    } else if (importType === "manuscripts") {
-      demoString = `"Book Title","Primary Genre","Wordcount Total","One-Sentence Elevator Hook","Comparative Works / Comps","Intended Reader Age"
-"The Clockwork Citadel","Steampunk Fantasy",98200,"In a city floating in oil, a guild clockmaker rebuilds her dying sibling into an engine.","SABRIEL meets THE GOLDEN COMPASS","Young Adult (YA)"
-"Shadows on the Moors","Gothic Mystery",81000,"A botanist traveling to York discovers her host family claims to raise long-extinct ravens.","Rebecca by Daphne du Maurier, MEXICAN GOTHIC","Adult (18+)"`;
-    } else if (importType === "queries") {
-      demoString = `"Script Name","Target Agent","Query Status Code","Date Lodged","Personal Intro Segment"
-"The Clockwork Citadel","Alexandra Stone","Full Requested","2026-04-12","I noticed on your MSWL that you enjoy high-concept clock engineering!"
-"Shadows on the Moors","Jonathan Vance","Rejected","2026-05-01","I appreciated your panel speech about moors settings at York and wanted to send this."`;
-    } else if (importType === "activities") {
-      demoString = `"Related Query","Related Title","Event Type","Description","Date","Extras"
-"My Pitch Query","The Clockwork Citadel","Query Sent","Sent initial query email directly to Agent Alexandra Stone","2026-04-12","Submitted via online form successfully."
-"Feedback follow up","Shadows on the Moors","Status Changed","Agent Jonathan Vance requested partial sample chapters!","2026-05-15","Requested 3 chapters."`;
-    }
-    setRawText(demoString);
   };
 
   // Handle Initial parsing
   const handleParse = () => {
     if (!rawText.trim()) {
-      alert("Please upload a CSV file or paste spreadsheet tabular data first.");
+      setReadError("Choose a file or paste the rows first.");
       return;
     }
     
     const rows = parseCSV(rawText);
     if (rows.length < 2) {
-      alert("Tabular data must contain at least a header row and one data row.");
+      setReadError("The file needs a row of headings and at least one row beneath it.");
       return;
     }
     
+    setReadError(null);
     const parsedHeaders = rows[0].map(h => h.trim());
     setHeaders(parsedHeaders);
     setCsvRows(rows.slice(1));
@@ -291,10 +284,10 @@ export const ImportCsv: React.FC<{
   };
 
   // File Uploader handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const readFile = (file: File | undefined | null) => {
     if (!file) return;
-    
+    setFileName(file.name);
+    setReadError(null);
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
@@ -302,6 +295,7 @@ export const ImportCsv: React.FC<{
     };
     reader.readAsText(file);
   };
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => readFile(e.target.files?.[0]);
 
   // Handle execution of the import
   /**
@@ -340,21 +334,9 @@ export const ImportCsv: React.FC<{
       }
       if (u.needsAgent && u.agentName) {
         const id = "agent-fromrow-" + Math.random().toString(36).slice(2, 11);
-        const res = await addAgent({
-          id,
-          name: u.agentName,
-          agency: "", email: "", website: "", genres: [], mswlNotes: "", notes: "",
-          submissionStatus: SubmissionStatus.OPEN,
-          submissionMethod: SubmissionMethod.EMAIL,
-          /* ⚠️ REQUIRED BY `isValidAgent` AS A LIST, and an empty one is honest — the row stated no
-             materials. Omitting it was DENIED and the agent silently failed to create while the
-             manuscript succeeded, which is the half-done write this whole run is about. */
-          materialsWanted: [],
-          /* ⚠️ `starRating`, `responseTimeWeeks` and `noResponseMeansNo` are OMITTED, deliberately.
-             The rules make each optional and this app treats absence as a first-class state for all
-             three — an unrated agent shows no stars rather than five hollow ones. Writing a default
-             here would be the `starRating: 3` the auto-create block was retired for. */
-        } as never, true);
+        /* The row gave a name and nothing else, so the agent holds a name and nothing else. The
+           builder writes the fields the rules require in their empty form (see importedAgent.ts). */
+        const res = await addAgent({ ...importedAgentDoc({ name: u.agentName }), id }, true);
         if (res.success) patch.agentId = id;
       }
       if (Object.keys(patch).length) {
@@ -387,6 +369,7 @@ export const ImportCsv: React.FC<{
     const localManuscripts = [...manuscripts];
     const localAgents = [...agents];
     const localQueries = [...queries];
+    const noticeRows: ImportNoticeRow[] = [];
     
     for (let index = 0; index < total; index++) {
       const row = csvRows[index];
@@ -404,15 +387,17 @@ export const ImportCsv: React.FC<{
           const name = getMappedValue("name");
           if (!name) {
             failedCount++;
-            errorsList.push(`Row ${index + 2} skipped: 'name' field is missing.`);
+            errorsList.push(ERR.noName(index + 2));
             continue;
           }
 
           // Strict de-duplicate matching
-          const foundAgent = localAgents.find(a => a.name.toLowerCase() === name.toLowerCase());
+          /* The one agent match every import uses (importDuplicates.ts): same name, and the same
+             agency or one side giving none. The row is not imported, and is counted as not imported. */
+          const foundAgent = findExistingAgent(localAgents, { name, agency: getMappedValue("agency") });
           if (foundAgent) {
-            runLogs.push(`Agent info "${name}" already present in repository. Skipping duplicate row.`);
-            successfulCount++;
+            errorsList.push(LOG.agentExists(name));
+            failedCount++;
             continue;
           }
           
@@ -426,12 +411,10 @@ export const ImportCsv: React.FC<{
            * ⚠️ THE EMAIL IS THE ONE TO REMEMBER. A fabricated address sits on a real person's record
            * and can be SENT TO — and nothing downstream distinguishes it from one the writer typed.
            *
-           * ⚠️ THREE FALLBACKS SURVIVE DELIBERATELY AND ARE FLAGGED, NOT FIXED: `notes` and
-           * `description` write true provenance ("Imported from Zite archives"), which is a
-           * different thing from a fabrication even though it is still words in a field the writer
-           * owns; and `responseTimeWeeks: 8` is a real default with a meaning rather than an
-           * invention. Each needs a call, and Phase 4's instruction is to fix the unambiguous and
-           * flag the rest.
+           * The last of them went with the import-truth pack: a rating of 3 for an empty cell,
+           * "Open", an 8-week reply window, "no response means no", three materials and the genre
+           * "General Fiction". The agent is now built by `importedAgentDoc`, which holds what the
+           * sheet gave and nothing else.
            */
           const agency = getMappedValue("agency");
           const email = getMappedValue("email");
@@ -439,47 +422,16 @@ export const ImportCsv: React.FC<{
           
           // Custom parsing for genres (split by comma, semicolon, etc.)
           const genresRaw = getMappedValue("genres");
-          const genres = genresRaw 
-            ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean)
-            : ["General Fiction"];
-            
+          const genres = genresRaw ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean) : [];
           const mswlNotes = getMappedValue("mswlNotes");
-          
-          // Star rating parsing
-          const starRaw = parseInt(getMappedValue("starRating"), 10);
-          const starRating: 1 | 2 | 3 | 4 | 5 = (!isNaN(starRaw) && starRaw >= 1 && starRaw <= 5)
-            ? (starRaw as any)
-            : 3;
-            
-          /**
-           * ⚠️ NO PROVENANCE IN A FIELD THE WRITER AUTHORS (Ruling 1). This wrote "Imported from Zite
-           * archives." into the agent's own notes — TRUE, and still the same fault as the logline,
-           * only smaller: the app putting its sentence where the writer's belongs. Provenance is
-           * worth keeping; a field the writer thinks is theirs is not the place to keep it.
-           *
-           * ⚠️ AND THE PLACE FOR IT EXISTS BUT IS NOT USED HERE — see F-AJ. `Agent.fieldSources`
-           * records where a value was found and when, and its own docstring states the principle
-           * this ruling restates: "a found fact is never indistinguishable from one the writer
-           * verified/typed". It is per-FIELD, keyed by the field it describes, so it does not model
-           * "this whole record came from a CSV"; and nothing writes it today. Reported, not added.
-           */
           const notes = getMappedValue("notes");
 
-          const agentData = {
-            name,
-            agency,
-            email,
-            website,
-            genres,
-            mswlNotes,
-            starRating,
-            submissionStatus: SubmissionStatus.OPEN,
-            responseTimeWeeks: 8,
-            noResponseMeansNo: true,
-            submissionMethod: SubmissionMethod.EMAIL,
-            materialsWanted: ["Query Letter", "Synopsis", "Sample Pages"],
-            notes
-          };
+          /* Only what the sheet gave. A rating is kept when the cell holds 1 to 5; nothing else is
+             filled in: no status, no reply window, no reply rule, no materials, no genre. */
+          const agentData = importedAgentDoc({
+            name, agency, email, website, genres, mswlNotes, notes,
+            starRating: getMappedValue("starRating"),
+          });
 
           const newAgId = "agent-imported-" + Math.random().toString(36).substr(2, 9);
           const res = await addAgent({ ...agentData, id: newAgId }, true);
@@ -488,30 +440,28 @@ export const ImportCsv: React.FC<{
               ...agentData,
               id: newAgId,
               userId: currentUser?.id || "",
-              dateAdded: new Date().toISOString(),
-              lastCheckedDate: new Date().toISOString()
-            };
+            } as (typeof localAgents)[number]; // a look-up entry for later rows; it is never written
             localAgents.push(addedAgRef);
             successfulCount++;
-            runLogs.push(`Successfully added Agent: "${name}" (${agency})`);
+            runLogs.push(LOG.agentAdded(name, agency));
           } else {
             failedCount++;
-            errorsList.push(`Agent line ${name} fail: ${res.error || "limit cap hit"}`);
+            errorsList.push(ERR.agentFailed(name, res.error));
           }
           
         } else if (importType === "manuscripts") {
           const title = getMappedValue("title");
           if (!title) {
             failedCount++;
-            errorsList.push(`Row ${index + 2} skipped: 'title' header is missing.`);
+            errorsList.push(ERR.noTitle(index + 2));
             continue;
           }
 
           // De-duplicate matching
           const foundMs = localManuscripts.find(m => m.title.toLowerCase() === title.toLowerCase());
           if (foundMs) {
-            runLogs.push(`Manuscript "${title}" already present in catalog. Skipping duplicate row.`);
-            successfulCount++;
+            errorsList.push(LOG.manuscriptExists(title));
+            failedCount++;
             continue;
           }
 
@@ -544,14 +494,13 @@ export const ImportCsv: React.FC<{
               ...msData,
               id: newMsId,
               userId: currentUser?.id || "",
-              statusChangedDate: new Date().toISOString()
             } as any;
             localManuscripts.push(addedMsRef);
             successfulCount++;
-            runLogs.push(`Successfully added Manuscript: "${title}" (${genre})`);
+            runLogs.push(LOG.manuscriptAdded(title));
           } else {
             failedCount++;
-            errorsList.push(`Manuscript "${title}" fail: ${res.error || "limit cap hit"}`);
+            errorsList.push(ERR.manuscriptFailed(title, res.error));
           }
           
         } else if (importType === "queries") {
@@ -564,13 +513,13 @@ export const ImportCsv: React.FC<{
 
           if (!msTitleInput || !agentNameInput) {
             failedCount++;
-            errorsList.push(`Row ${index + 2} skipped: Both Manuscript title and Agent name are required.`);
+            errorsList.push(ERR.needsBoth(index + 2));
             continue;
           }
 
           // Case-insensitive lookups on dynamic local caches
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
-          let foundAgent = localAgents.find(a => a.name.toLowerCase() === agentNameInput.toLowerCase());
+          let foundAgent = findExistingAgent(localAgents, { name: agentNameInput });
 
           /**
            * ⚠️ AN UNMATCHED ROW IS FLAGGED, NOT FABRICATED (overnight ruling, D1).
@@ -621,6 +570,14 @@ export const ImportCsv: React.FC<{
            * `materialsLinkWrites` returns it when clearing a link.
            */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
+          const sent = matcherDate(dateSentInput);
+          /* ALREADY HERE: the same agent, the same manuscript and the same sent day (or both with
+             none). Nothing is written for the row, and it is counted as not imported. */
+          if (foundMs && foundAgent && localQueries.some((ex) => isSameQuery(ex, { agentId: foundAgent!.id, manuscriptId: foundMs!.id, sentDate: sent.iso }))) {
+            errorsList.push(LOG.queryExists(msTitleInput, agentNameInput));
+            failedCount++;
+            continue;
+          }
           const queryData = {
             /**
              * ⚠️ NO INVENTED IDS (D1). These were `|| "ms-seed-fantasy"` and `|| "agent-seed-alex"`,
@@ -641,7 +598,8 @@ export const ImportCsv: React.FC<{
             personalisationNotes,
             sendMethod: SubmissionMethod.EMAIL,
             status: normalizeQueryStatus(statusInput),
-            dateSent: dateSentInput ? new Date(dateSentInput).toISOString() : new Date().toISOString()
+            /* The day the sheet wrote, or no sent date. Never the moment of the import. */
+            ...(sent.iso ? { dateSent: sent.iso } : {}),
           };
 
           /* ⚠️ RECORDED BEFORE THE WRITE, so the row is reported whether or not the write succeeds —
@@ -662,8 +620,19 @@ export const ImportCsv: React.FC<{
                 .filter(Boolean).join(" · "),
             });
           }
-          const res = await addQuery({ ...queryData, id: queryId }, true);
+          /* `imported` stops addQuery setting a sent date of now and writing history stamped now;
+             the history is then written here, from the sheet (the same writer the template uses). */
+          const res = await addQuery({ ...queryData, id: queryId }, true, { imported: true });
           if (res.success) {
+            await writeImportedHistory(
+              currentUser?.id || "", queryId,
+              { agentRef: "", status: queryData.status, sentDate: sent.iso },
+              foundAgent?.name ?? agentNameInput, foundMs?.title ?? msTitleInput,
+            );
+            if (!sent.iso) {
+              const line = undatedQueryLine(index + 2, dateSentInput, (sent as { why: "blank" | "ambiguous" | "unreadable" }).why);
+              if (line) runLogs.push(line);
+            }
             const addedQRef = {
               ...queryData,
               id: queryId,
@@ -672,10 +641,10 @@ export const ImportCsv: React.FC<{
             };
             localQueries.push(addedQRef);
             successfulCount++;
-            runLogs.push(`Linked query logged: Manuscript "${msTitleInput}" sent to Agent "${agentNameInput}" (Status: ${normalizeQueryStatus(statusInput)})`);
+            runLogs.push(LOG.queryAdded(msTitleInput, agentNameInput, normalizeQueryStatus(statusInput)));
           } else {
             failedCount++;
-            errorsList.push(`Query match row ${index + 2} failed to record: ${res.error || "Tier limits exceeded."}`);
+            errorsList.push(ERR.queryFailed(index + 2, res.error));
           }
         } else if (importType === "activities") {
           const msTitleInput = getMappedValue("manuscriptId");
@@ -684,14 +653,15 @@ export const ImportCsv: React.FC<{
              "Activity logged via CSV Import" is true about the import and says nothing about the
              event. Empty is honest. */
           const description = getMappedValue("description");
-          const date = getMappedValue("date") ? new Date(getMappedValue("date")).toISOString() : new Date().toISOString();
+          const eventDate = matcherDate(getMappedValue("date"));
           const details = getMappedValue("details") || "";
 
-          let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
-          let foundQ = localQueries.find(q => {
-            const ms = localManuscripts.find(m => m.id === q.manuscriptId);
-            return ms && ms.title.toLowerCase() === msTitleInput.toLowerCase();
-          });
+          /* Manuscript AND agent (importMatcher.matchHistoryRow). The agent was never read here: the
+             row went to the first query on a manuscript with that title. */
+          const agentNameInput = getMappedValue("agentId");
+          const match = matchHistoryRow({ title: msTitleInput, agent: agentNameInput }, localManuscripts, localAgents, localQueries);
+          const foundQ = match.kind === "attach" ? localQueries.find((q) => q.id === match.queryId) : undefined;
+          const foundMs = foundQ ? localManuscripts.find((m) => m.id === foundQ.manuscriptId) : undefined;
 
           const actVal = activityTypeInput.toLowerCase();
           let activityType = ActivityType.STATUS_CHANGED;
@@ -706,11 +676,34 @@ export const ImportCsv: React.FC<{
            * ruling turns on. `q-seed-fantasy` made it worse than either: the activity was written,
            * attached to a query that does not exist, and visible from nowhere.
            */
-          if (!foundQ) {
+          if (match.kind === "skip" || !foundQ) {
+            const whySkipped = match.kind === "skip" ? match.why : "no-query";
             failedCount++;
-            errorsList.push(`Activity row ${index + 2}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`);
+            errorsList.push(
+              whySkipped === "no-agent-several" ? ERR.eventNoAgentSeveral(index + 2, msTitleInput)
+                : whySkipped === "agent-several" ? ERR.eventAgentSeveral(index + 2, msTitleInput, agentNameInput)
+                : ERR.eventNoQuery(index + 2));
+            /* …and to the dashboard's notice, so the row is in a list the writer will see again */
+            const reason = historySkipReason(whySkipped);
+            if (reason !== null) noticeRows.push({ who: agentNameInput, status: description || activityTypeInput, sentDate: eventDate.iso, reason });
             continue;
           }
+          /* An event is placed by its date. With none that can be read there is nowhere true to put
+             it (never the moment of the import), so the row is skipped — and never silently: the
+             run's log says so, and the row goes to the dashboard's skipped-rows notice with the
+             review's own date reason. */
+          if (!eventDate.iso) {
+            failedCount++;
+            errorsList.push(ERR.eventNoDate(index + 2));
+            noticeRows.push({
+              who: localAgents.find((a) => a.id === foundQ!.agentId)?.name ?? "",
+              status: description || activityTypeInput,
+              sentDate: null,
+              reason: eventDateReason((eventDate as { why: "blank" | "ambiguous" | "unreadable" }).why),
+            });
+            continue;
+          }
+          const date = eventDate.iso;
           const actData = {
             queryId: foundQ.id,
             manuscriptId: foundMs?.id ?? "",
@@ -723,15 +716,15 @@ export const ImportCsv: React.FC<{
           const res = await addActivity(actData);
           if (res.success) {
             successfulCount++;
-            runLogs.push(`Successfully added Activity event: "${description}"`);
+            runLogs.push(LOG.eventAdded(description));
           } else {
             failedCount++;
-            errorsList.push(`Activity row fail: ${res.error || "System error"}`);
+            errorsList.push(ERR.eventFailed(res.error));
           }
         }
       } catch (err: any) {
         failedCount++;
-        errorsList.push(`General error parsing row ${index + 2}: ${err?.message || err}`);
+        errorsList.push(ERR.rowUnreadable(index + 2, String(err?.message || err)));
       }
 
       setImportProgress(Math.round(((index + 1) / total) * 100));
@@ -747,12 +740,25 @@ export const ImportCsv: React.FC<{
       await new Promise(r => setTimeout(r, 60));
     }
 
+    /* THE FINAL COUNTS, set once more after the last row. A row that is skipped leaves the loop
+       by `continue`, which passes over the update above; a run whose LAST rows were skipped
+       therefore finished showing the counts as they stood before them, and those rows were in
+       no count and no list. */
+    setImportResults({ successful: successfulCount, unmatched: unmatchedList, failed: failedCount, errors: errorsList, logs: runLogs });
+
+    /* Rows skipped for want of a date are kept for the dashboard. A run that skipped none leaves
+       any earlier notice as it is: this run has nothing to say about it. */
+    if (noticeRows.length > 0 && currentUser) {
+      saveImportNotice(currentUser.id, { count: noticeRows.length, rows: noticeRows, at: Date.now() });
+    }
     setIsImporting(false);
   };
 
   const handleReset = () => {
     setStep(1);
     setRawText("");
+    setFileName("");
+    setReadError(null);
     setCsvRows([]);
     setHeaders([]);
     setFieldMappings({});
@@ -760,732 +766,212 @@ export const ImportCsv: React.FC<{
     setImportResults({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
   };
 
+  const fieldLabel = (field: string) =>
+    field === "manuscriptId" ? "Reference Manuscript Title" : field === "agentId" ? "Target Agent Name" : field.replace(/([A-Z])/g, " $1");
+  const isRequired = (field: string) => field === "name" || field === "title" || field === "manuscriptId" || field === "agentId";
+  const hasLines = importResults.logs.length > 0 || importResults.errors.length > 0;
+  /* A finished run is at 100%. The run's own counter is only advanced by rows that reach the end of
+     the loop, so a file whose last row was not imported used to finish reading "67%". */
+  const shownProgress = isImporting ? importProgress : 100;
+
   return (
-    <div className="min-h-screen pb-16 font-sans text-[#3a1c14]">
-      {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the "CSV MIGRATION
-          DESK" meta line is dropped with it (no meta slot under the header law). */}
-      <div className="max-w-4xl mx-auto px-4">
-        <PageHeader
-          /* §3.3 (page header v1) — compact: `full` is the OPEN header now, and this page is not one
-           of the two that opens with one. */
-        variant="workspace"
-          title="Import"
-          description="Bring your existing spreadsheet across — agents, queries and dates, matched for you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-        />
-      </div>
-      <div className="max-w-4xl mx-auto px-4 pt-8">
+    <div className="sf impg-flow impm" data-impm="" data-impm-step={step} data-impm-kind={importType}>
+      {onBack && <button type="button" className="sf-link impm-back" onClick={onBack} data-impm="back">{MATCHER_BACK}</button>}
+      <OpenTitle title={MATCHER_TITLE} sub={step === 2 ? MATCHER_SUB : undefined} />
 
-        <p className="text-xs text-stone-500 text-center max-w-lg mx-auto leading-relaxed mb-8">
-          Transition your legacy rows, agent tracker templates, or Zite export data CSV sheets straight into your synchronized database without losing historical pitch timelines.
-        </p>
+      <ol className="im-steps impm-steps" aria-label="The three steps" data-impm="steps">
+        {MATCHER_STEPS.map((label, i) => {
+          const state = i + 1 < step ? "done" : i + 1 === step ? "on" : "todo";
+          return (
+            <React.Fragment key={label}>
+              {i > 0 && <li className="im-stln" aria-hidden="true" />}
+              <li className={`im-st${state === "on" ? " is-on" : state === "done" ? " is-done" : ""}`} data-state={state} aria-current={state === "on" ? "step" : undefined}>
+                <i>{state === "done" ? "✓" : i + 1}</i>{label}
+              </li>
+            </React.Fragment>
+          );
+        })}
+      </ol>
 
-        {/* SUBTAB SWITCHER */}
-        <div className="flex justify-center gap-3 mb-8 border-b border-[#7c3a2a]/10 pb-4">
-          <button
-            onClick={() => setSubTab("wizard")}
-            className={`px-5 py-2.5 text-xs font-bold font-mono tracking-wider uppercase rounded-xl transition-all flex items-center gap-2 ${
-              subTab === "wizard"
-                ? "bg-[#7c3a2a] text-white shadow-md scale-[1.01]"
-                : "border border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-white hover:bg-stone-50"
-            }`}
+      {/* ── 1 · Your file ── */}
+      {step === 1 && (
+        <section className="sf-card impm-card" data-impm="card">
+          <p className="sf-qlab" id="impm-kind">{KIND_QUESTION}</p>
+          <OptionGroup labelledBy="impm-kind">
+            {KINDS.map((k) => (
+              <OptionRow key={k.id} title={k.title} desc={k.desc} selected={importType === k.id} onClick={() => setImportType(k.id)} />
+            ))}
+          </OptionGroup>
+
+          <p className="sf-qlab impm-gap" id="impm-file">{FILE_QUESTION}</p>
+          <div
+            className={`sf-drop impm-drop${over ? " is-over" : ""}`} role="button" tabIndex={0} data-impm="drop" aria-labelledby="impm-file"
+            onClick={() => fileRef.current?.click()}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
+            onDragOver={(e) => { e.preventDefault(); if (!over) setOver(true); }}
+            onDragLeave={() => setOver(false)}
+            onDrop={(e) => { e.preventDefault(); setOver(false); readFile(e.dataTransfer.files?.[0]); }}
           >
-            <UploadCloud className="w-4 h-4" />
-            <span>A. CSV Import Wizard</span>
-          </button>
-          
-          <button
-            onClick={() => setSubTab("grids")}
-            className={`px-5 py-2.5 text-xs font-bold font-mono tracking-wider uppercase rounded-xl transition-all flex items-center gap-2 ${
-              subTab === "grids"
-                ? "bg-[#7c3a2a] text-white shadow-md scale-[1.01]"
-                : "border border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-white hover:bg-stone-50"
-            }`}
-          >
-            <Database className="w-4 h-4" />
-            <span>B. Live Database Grid Viewer</span>
-          </button>
-        </div>
-
-        {subTab === "wizard" && (
-          <>
-            {/* WIZARD PROGRESS STEPS BAR */}
-            <div className="mb-10 max-w-md mx-auto grid grid-cols-3 text-center text-xs font-mono tracking-wider font-semibold uppercase text-stone-400">
-          <div className={step >= 1 ? "text-[#7c3a2a] border-t-2 border-[#7c3a2a] pt-3" : "border-t-2 pt-3"}>
-            1. Source CSV
+            <p className="sf-droplead">{FILE_DROP}</p>
+            <p className="sf-droptypes">{fileName ? fileName : `Expected header example: ${columnExamples[importType]}`}</p>
           </div>
-          <div className={step >= 2 ? "text-[#7c3a2a] border-t-2 border-[#7c3a2a] pt-3" : "border-t-2 pt-3"}>
-            2. Match Headers
+          <input ref={fileRef} type="file" accept=".csv" onChange={handleFileUpload} style={{ display: "none" }} data-impm="file" />
+
+          <label className="sf-lab impm-gap" htmlFor="impm-paste">{FILE_PASTE}</label>
+          <textarea
+            id="impm-paste" className="impm-paste" rows={6} value={rawText} data-impm="paste"
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder={columnExamples[importType]}
+          />
+          {readError && <p className="sf-err sf-err--card" role="alert">{readError}</p>}
+
+          <div className="sf-cfoot sf-cfoot--end">
+            <span className="sf-footr">
+              <button type="button" className="sf-btn" onClick={handleParse} data-impm="read">{FILE_READ}</button>
+            </span>
           </div>
-          <div className={step >= 3 ? "text-[#7c3a2a] border-t-2 border-[#7c3a2a] pt-3" : "border-t-2 pt-3"}>
-            3. Process Import
-          </div>
-        </div>
+        </section>
+      )}
 
-        {/* STEP 1: INPUT AND TYPE CHOOSE */}
-        {step === 1 && (
-          <div className="bg-white rounded-2xl border border-[#EBDCD3] p-6 shadow-sm space-y-6">
-            
-            {/* TYPE CHOOSE BUTTONS */}
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-widest text-stone-500 mb-3 font-bold">
-                A. Choose the data category to migrate
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <button
-                  onClick={() => setImportType("agents")}
-                  className={`p-4 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
-                    importType === "agents"
-                      ? "border-[#7c3a2a] bg-[#FAF1EF] text-[#7c3a2a]"
-                      : "border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-[#FCFAF7]"
-                  }`}
-                >
-                  <Users className="w-5 h-5 shrink-0" />
-                  <span className="text-xs font-serif font-bold">Agents Database</span>
-                  <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Fuzzy check bio, MSWL tags</span>
-                </button>
-
-                <button
-                  onClick={() => setImportType("manuscripts")}
-                  className={`p-4 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
-                    importType === "manuscripts"
-                      ? "border-[#7c3a2a] bg-[#FAF1EF] text-[#7c3a2a]"
-                      : "border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-[#FCFAF7]"
-                  }`}
-                >
-                  <BookOpen className="w-5 h-5 shrink-0" />
-                  <span className="text-xs font-serif font-bold">Manuscript Titles</span>
-                  <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Wordcount registers, loglines</span>
-                </button>
-
-                <button
-                  onClick={() => setImportType("queries")}
-                  className={`p-4 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
-                    importType === "queries"
-                      ? "border-[#7c3a2a] bg-[#FAF1EF] text-[#7c3a2a]"
-                      : "border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-[#FCFAF7]"
-                  }`}
-                >
-                  <Database className="w-5 h-5 shrink-0" />
-                  <span className="text-xs font-serif font-bold">Query Log Entries</span>
-                  <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Historic status & dispatch dates</span>
-                </button>
-
-                <button
-                  onClick={() => setImportType("activities")}
-                  className={`p-4 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
-                    importType === "activities"
-                      ? "border-[#7c3a2a] bg-[#FAF1EF] text-[#7c3a2a]"
-                      : "border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-[#FCFAF7]"
-                  }`}
-                >
-                  <ActivityIcon className="w-5 h-5 shrink-0" />
-                  <span className="text-xs font-serif font-bold">Activity logs</span>
-                  <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Historic notifications/records</span>
-                </button>
-
-              </div>
-            </div>
-
-            {/* DEMO DATA QUICK FILL TRIGGER */}
-            <div className="flex justify-between items-center bg-[#FCFAF7] border border-dashed border-[#EBDCD3] rounded-xl p-3 text-xs">
-              <span className="text-stone-500 font-light">Don't have Zite output handy? Load formatting samples!</span>
-              <button
-                onClick={loadDemoCsv}
-                className="text-[#7c3a2a] hover:underline font-bold flex items-center gap-1 shrink-0 bg-white px-2.5 py-1 border border-[#EBDCD3]/75 rounded shadow-sm"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Fill Mock Demo CSV</span>
-              </button>
-            </div>
-
-            {/* CSV LOAD INPUT / DRAG CONTAINER */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-mono uppercase tracking-widest text-stone-500 font-bold">
-                  B. Paste CSV Text or Choose Export File
-                </label>
-                <div className="text-[11px] text-stone-400 font-mono">
-                  Expected header example: {columnExamples[importType]}
-                </div>
-              </div>
-
-              <div className="border-2 border-dashed border-stone-200 rounded-xl p-4 text-center hover:bg-[#FCFAF7] transition-all relative">
-                <UploadCloud className="w-8 h-8 text-[#7c3a2a]/60 mx-auto mb-2" />
-                <p className="text-xs text-stone-650 mb-3">
-                  Drag and drop your spreadsheet export, or find a <code>.csv</code> file on your computer.
-                </p>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="mx-auto block text-xs border border-[#EBDCD3] bg-white rounded p-1 shadow-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#FAF1EF] file:text-[#7c3a2a] cursor-pointer"
-                />
-              </div>
-
-              <div className="mt-4">
-                <div className="text-[11px] uppercase font-mono text-stone-400 mb-1 font-bold">Or paste raw columns (comma separated values)</div>
-                <textarea
-                  value={rawText}
-                  onChange={(e) => setRawText(e.target.value)}
-                  placeholder={`Header 1,Header 2,Header 3...\n"Row 1 Column A","Row 1 Column B","Row 1 Column C"...`}
-                  className="w-full h-44 text-xs font-mono p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#7c3a2a] text-[#3a1c14]/90"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={handleParse}
-                className="bg-[#7c3a2a] text-white hover:bg-[#5e2b1e] text-xs font-bold py-2.5 px-6 rounded-lg shadow-md transition-all flex items-center gap-1.5"
-              >
-                <span>Parse CSV Table &rarr;</span>
-              </button>
-            </div>
-
-          </div>
-        )}
-
-        {/* STEP 2: MAPPING HEADERS */}
-        {step === 2 && (
-          <div className="bg-white rounded-2xl border border-[#EBDCD3] p-6 shadow-sm space-y-6 animate-fadeIn">
-            <div className="border-b border-stone-100 pb-4">
-              <h3 className="font-serif text-lg font-bold text-[#3a1c14] flex items-center gap-2">
-                <Columns className="w-4.5 h-4.5 text-[#7c3a2a]" />
-                <span>Map spreadsheet headers to QueryHawk fields</span>
-              </h3>
-              <p className="text-xs text-[#3a1c14]/70 mt-1">
-                We scanned your table's columns. Specify which source column should populate each QueryHawk target field.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-              {targetFields[importType].map(field => {
-                // Determine matches
-                const currentMapped = fieldMappings[field] || "";
-                
-                // Fields required flags
-                const isRequired = field === "name" || field === "title" || field === "manuscriptId" || field === "agentId";
-
-                return (
-                  <div key={field} className="flex flex-col gap-1 text-xs border-b border-stone-100/50 pb-2.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-serif font-bold text-[#3a1c14] capitalize flex items-center gap-1 text-[13px]">
-                        {field === "manuscriptId" ? "Reference Manuscript Title" : field === "agentId" ? "Target Agent Name" : field.replace(/([A-Z])/g, " $1")}
-                        {isRequired && <span className="text-[#A32D2D] font-bold">* Required</span>}
-                      </span>
-                      <span className="text-[10px] font-mono text-stone-400">Database field</span>
-                    </div>
-
+      {/* ── 2 · Match columns ── */}
+      {step === 2 && (
+        <section className="sf-card impm-card" data-impm="card">
+          <table className="impm-map" data-impm="map">
+            <thead>
+              <tr><th scope="col">{MAP_FIELD}</th><th scope="col">Column in your file</th></tr>
+            </thead>
+            <tbody>
+              {targetFields[importType].map((field) => (
+                <tr key={field}>
+                  <th scope="row">
+                    <span className="impm-field">{fieldLabel(field)}</span>
+                    {isRequired(field) && <span className="impm-req">{MAP_REQUIRED}</span>}
+                  </th>
+                  <td>
                     <select
-                      value={currentMapped}
+                      className="sf-in impm-select" value={fieldMappings[field] || ""} aria-label={fieldLabel(field)}
                       onChange={(e) => setFieldMappings({ ...fieldMappings, [field]: e.target.value })}
-                      className="mt-1 block w-full text-xs border border-stone-200 rounded p-1.5 bg-stone-50 cursor-pointer focus:outline-none focus:border-[#7c3a2a]"
                     >
-                      <option value="">-- Skip &amp; Don't Import This --</option>
-                      {headers.map(h => (
+                      <option value="">{MAP_SKIP}</option>
+                      {headers.map((h) => (
                         <option key={h} value={h}>Matched to: "{h}"</option>
                       ))}
                     </select>
-                  </div>
-                );
-              })}
-            </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-            {/* PREVIEW CONTAINER */}
-            <div className="bg-[#FCFAF7] border border-[#EBDCD3] rounded-xl p-4">
-              <h4 className="text-[11px] font-mono uppercase tracking-wider text-stone-500 font-bold mb-2 flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-stone-400" />
-                <span>Quick Row Mapping Sample of parsed table ({csvRows.length} total rows)</span>
-              </h4>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-sans text-[11px] leading-relaxed border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#EBDCD3]/70">
-                      {targetFields[importType].slice(0, 4).map(f => (
-                        <th key={f} className="py-2 px-1 text-stone-500 capitalize font-serif font-bold">
-                          {f === "manuscriptId" ? "Manuscript" : f === "agentId" ? "Agent" : f.replace(/([A-Z])/g, " $1")} 
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {csvRows.slice(0, 2).map((row, idx) => (
-                      <tr key={idx} className="border-b border-stone-100 last:border-0 text-[#3a1c14]/90">
-                        {targetFields[importType].slice(0, 4).map(field => {
-                          const colName = fieldMappings[field];
-                          const colIdx = headers.indexOf(colName);
-                          const value = colIdx !== -1 && row[colIdx] !== undefined ? row[colIdx] : "--";
-                          return (
-                            <td key={field} className="py-2 px-1 truncate max-w-[150px]" title={value}>
-                              {field === "status" && importType === "queries" ? String(normalizeQueryStatus(value)) : String(value)}
-                            </td>
-                          );
-                        })}
-                      </tr>
+          <div className="impm-preview" data-impm="preview">
+            <p className="sf-lab">Quick Row Mapping Sample of parsed table ({csvRows.length} total rows)</p>
+            <div className="impm-previewscroll">
+              <table className="impm-prev">
+                <thead>
+                  <tr>
+                    {targetFields[importType].slice(0, 4).map((f) => (
+                      <th key={f}>{f === "manuscriptId" ? "Manuscript" : f === "agentId" ? "Agent" : f.replace(/([A-Z])/g, " $1")}</th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* EXPLANATION ABOUT REFERENCE LINKING FOR QUERIES LOG */}
-            {importType === "queries" && (
-              <div className="p-4 bg-blue-50/70 border border-blue-150-100/50 rounded-xl flex items-start gap-3">
-                <HelpCircle className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-900 leading-relaxed">
-                  <strong>Smart Match linking is active:</strong> historical queries refer to agents and manuscripts by text name. The QueryHawk migration desk will scan your database for matching Agent names and Book titles. If a matching agent or manuscript isn't registered yet, we will <em>auto-populate directory entries</em> for you so that pitch relationships link correctly!
-                </p>
-              </div>
-            )}
-
-            <div className="pt-2 flex justify-between gap-4">
-              <button
-                onClick={handleReset}
-                className="border border-[#7c3a2a] text-[#7c3a2a] hover:bg-[#FAF1EF] text-xs font-bold py-2.5 px-6 rounded-lg transition-all"
-              >
-                &larr; Start Over
-              </button>
-              
-              <button
-                onClick={handleExecuteImport}
-                className="bg-[#7c3a2a] text-white hover:bg-[#5e2b1e] text-xs font-bold py-2.5 px-6 rounded-lg shadow-md transition-all flex items-center gap-1.5"
-              >
-                <span>Begin Processing Records ({csvRows.length} lines) &rarr;</span>
-              </button>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvRows.slice(0, 2).map((row, idx) => (
+                    <tr key={idx}>
+                      {targetFields[importType].slice(0, 4).map((field) => {
+                        const colName = fieldMappings[field];
+                        const colIdx = headers.indexOf(colName);
+                        const value = colIdx !== -1 && row[colIdx] !== undefined ? row[colIdx] : "--";
+                        return <td key={field} title={value}>{field === "status" && importType === "queries" ? String(normalizeQueryStatus(value)) : String(value)}</td>;
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
 
-        {/* STEP 3: RUN PROCESS PROGRESS AND LOGS */}
-        {step === 3 && (
-          <div className="bg-white rounded-2xl border border-[#EBDCD3] p-6 shadow-sm space-y-6">
-            <div className="border-b border-stone-100 pb-4">
-              <h3 className="font-serif text-lg font-bold text-[#3a1c14] flex items-center gap-2">
-                <RefreshCw className={isImporting ? "w-5 h-5 text-[#7c3a2a] animate-spin" : "w-5 h-5 text-[#3b6d11]"} />
-                <span>
-                  {isImporting ? "Injecting records into database..." : "Database migration complete!"}
-                </span>
-              </h3>
-              <p className="text-xs text-[#3a1c14]/70 mt-1">
-                Importing parsed data rows. This may take a moment depending on line configurations. Keep tab active.
-              </p>
-            </div>
+          {importType === "queries" && <p className="impm-note" data-impm="link-note">{MAP_LINK_NOTE}</p>}
 
-            {/* ANIMATED PROGRESS BAR */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-stone-500 font-bold uppercase tracking-wider">Overall progression</span>
-                <span className="text-[#7c3a2a] font-bold">{importProgress}%</span>
-              </div>
-              <div className="w-full bg-stone-100 h-2.5 rounded-full overflow-hidden">
-                <div
-                  style={{ width: `${importProgress}%` }}
-                  className="bg-[#7c3a2a] h-full transition-all duration-150"
-                />
-              </div>
-            </div>
+          <div className="sf-cfoot">
+            <button type="button" className="sf-link sf-link--quiet" onClick={handleReset} data-impm="start-again">{MAP_START_AGAIN}</button>
+            <span className="sf-footr">
+              <button type="button" className="sf-btn" onClick={handleExecuteImport} data-impm="import">{importRowsLabel(csvRows.length)}</button>
+            </span>
+          </div>
+        </section>
+      )}
 
-            {/* LIVE SCOREBOARD METRICS */}
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="bg-[#FAF1EF] border border-[#F2DDD5] rounded-xl p-4">
-                <span className="block text-3xl font-serif font-bold text-[#7c3a2a]">
-                  {importResults.successful}
-                </span>
-                <span className="text-xs text-stone-600 font-medium">Successfully Imported</span>
-              </div>
-              
-              <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                <span className="block text-3xl font-serif font-bold text-stone-600">
-                  {importResults.failed}
-                </span>
-                <span className="text-xs text-stone-600 font-medium">Lines Failed / Skipped</span>
-              </div>
-              {/* ⚠️ THE THIRD COUNT READS AS WORK, NOT DAMAGE (D5/D8). "Need a decision" says
-                  something is waiting for the writer; "failed" would say the data is gone. */}
-              <div className="bg-[#FBF7EF] border border-[#EADFC9] rounded-xl p-4">
-                <div className="text-2xl font-serif font-bold text-[#8a6d3b]">
-                  {importResults.unmatched.length}
-                </div>
-                <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 mt-1">
-                  Need a decision
-                </div>
-              </div>
-            </div>
+      {/* ── 3 · Import ── */}
+      {step === 3 && (
+        <section className="sf-card impm-card" data-impm="card" aria-busy={isImporting}>
+          <h2 className="sf-h impm-runh" data-impm="run-title">{isImporting ? RUN_WORKING : RUN_FINISHED}</h2>
+          {isImporting && <p className="impm-runsub">{RUN_KEEP_OPEN}</p>}
 
-            {/* DETAILED PROCESSING LOGGER BOX */}
-            <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-widest text-[#3a1c14]/60 font-bold">
-                Console Processing Streams &amp; Exceptions
-              </label>
-              
-              <div className="w-full bg-stone-900 rounded-lg p-4 text-[10px] font-mono text-[#DCD1C4] h-52 overflow-y-auto space-y-1">
-                {/**
-                  * ⚠️ QUIET WHEN NOTHING IS WRONG (D5). This block renders ONLY when a row needs a
-                  * call — a clean import shows its counts and nothing else. A list that is always
-                  * present, empty, teaches the eye to skip the place the problems appear.
-                  */}
-                {importResults.unmatched.length > 0 && (
-                  <div className="mb-4 rounded-xl border border-[#EADFC9] bg-[#FBF7EF] p-4">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-2">
-                      Rows that need a decision
-                    </div>
-                    <ul className="space-y-1.5">
-                      {importResults.unmatched.map((u) => (
-                        <li key={u.row} className="text-xs text-[#3a1c14] flex gap-2">
-                          <span className="font-mono text-stone-400 shrink-0">Row {u.row}</span>
-                          <span className="flex-1"><b className="font-semibold">{u.missing}</b>
-                            {u.detail ? <span className="text-[#3a1c14]/70"> — no match for {u.detail}</span> : null}
-                          </span>
-                          {/* ⚠️ THE OFFER, NOT THE DEFAULT (D2). It creates from what the row gave —
-                              the title and the name — and leaves everything else empty. */}
-                          <button
-                            type="button"
-                            disabled={creating === u.row}
-                            onClick={() => void createFromRow(u)}
-                            className="shrink-0 text-[10px] font-mono uppercase tracking-wider text-[#7c3a2a] border-b border-[#e8c8bc] hover:text-[#3a1c14] disabled:opacity-50"
-                          >
-                            {creating === u.row ? "Creating…" : "Create from this row"}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                    {/* ⚠️ THE SUMMARY IS A MOMENT; THE FLAGS ARE THE RECORD (D6). Closing this loses
-                        nothing — every row above is on the query list under Unassigned, and the
-                        banner there stays until the last one is resolved. */}
-                    <p className="text-[11px] text-[#3a1c14]/70 mt-3 leading-relaxed">
-                      Every row above was imported. You can close this — they are on your query list,
-                      and it will keep showing them until each one has what it needs.
-                    </p>
-                  </div>
-                )}
-                {importResults.logs.map((log, idx) => (
-                  <p key={idx} className="text-[#3B6D11]/90 font-sans"><span className="text-stone-400">&bull;&nbsp;</span>{log}</p>
+          <div className="impm-progress" data-impm="progress">
+            <span className="sf-lab">{RUN_PROGRESS}</span>
+            <span className="impm-track"><span style={{ width: `${shownProgress}%` }} /></span>
+            <span className="impm-pc">{shownProgress}%</span>
+          </div>
+
+          <dl className="impm-counts" data-impm="counts">
+            <div><dd>{importResults.successful}</dd><dt>{COUNT_IMPORTED}</dt></div>
+            <div><dd>{importResults.failed}</dd><dt>{COUNT_NOT}</dt></div>
+            <div><dd>{importResults.unmatched.length}</dd><dt>{COUNT_DECIDE}</dt></div>
+          </dl>
+
+          {/* ⚠️ QUIET WHEN NOTHING IS WRONG (D5). This block renders ONLY when a row needs a call — a
+              clean import shows its counts and nothing else. */}
+          {importResults.unmatched.length > 0 && (
+            <div className="impm-decide" data-impm="decide">
+              <p className="sf-lab">Rows that need a decision</p>
+              <ul>
+                {importResults.unmatched.map((u) => (
+                  <li key={u.row} className="impm-drow">
+                    <span className="impm-drown">Row {u.row}</span>
+                    <span className="impm-drowt"><b>{u.missing}</b>{u.detail ? <span> — no match for {u.detail}</span> : null}</span>
+                    {/* ⚠️ THE OFFER, NOT THE DEFAULT (D2). It creates from what the row gave — the title
+                        and the name — and leaves everything else empty. */}
+                    <button type="button" className="sf-link sf-link--quiet" disabled={creating === u.row} onClick={() => void createFromRow(u)}>
+                      {creating === u.row ? "Creating…" : "Create from this row"}
+                    </button>
+                  </li>
                 ))}
-                {importResults.errors.map((err, idx) => (
-                  <p key={idx} className="text-red-400 font-sans leading-relaxed"><span className="text-red-500 font-mono font-bold">[!]</span> {err}</p>
-                ))}
-                {importResults.logs.length === 0 && importResults.errors.length === 0 && (
-                  <p className="text-stone-500 italic">Pre-allocation memory allocated. Streams commencing...</p>
-                )}
-              </div>
+              </ul>
+              {/* ⚠️ THE SUMMARY IS A MOMENT; THE FLAGS ARE THE RECORD (D6). Closing this loses nothing. */}
+              <p className="impm-decidenote">{DECIDE_NOTE}</p>
             </div>
+          )}
 
-            {/* FINAL COMPLETION SUMMARY ACTION BUTTONS */}
-            {!isImporting && (
-              <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="space-y-1">
-                  <p className="text-xs text-[#3a1c14]/80">
-                    Your records are now locked into live cloud synchronization.
-                  </p>
-                </div>
-                
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleReset}
-                    className="border border-stone-300 text-stone-650 hover:bg-stone-50 text-xs font-bold py-2 PX-5 rounded-lg transition-all"
-                  >
-                    Import Another Sheet
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      if (importType === "queries") onNavigate("queries");
-                      else if (importType === "manuscripts") onNavigate("manuscripts");
-                      else onNavigate("agents");
-                    }}
-                    className="bg-[#7c3a2a] text-white hover:bg-[#5e2b1e] text-xs font-bold py-2 px-6 rounded-lg shadow transition-all"
-                  >
-                    Go Inspect Imported Data &rarr;
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-          </>
-        )}
-
-        {subTab === "grids" && (
-          <div className="bg-white rounded-2xl border border-[#EBDCD3] p-6 shadow-sm space-y-6">
-            
-            {/* GRID TABLE TABS */}
-            <div className="border-b border-stone-100 pb-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#3a1c14] flex items-center gap-1.5">
-                  <Database className="w-5 h-5 text-[#7c3a2a]" />
-                  <span>Real-Time Database Inspector Mode</span>
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Browse and query your synced records in grid format. Any imported CSV entries are synchronized instantly.
-                </p>
-              </div>
-
-              {/* SEARCH FILTER */}
-              <div className="w-full md:w-64">
-                <input
-                  type="text"
-                  placeholder="Quick search tables..."
-                  value={gridSearch}
-                  onChange={(e) => setGridSearch(e.target.value)}
-                  className="w-full text-xs p-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                />
-              </div>
+          {hasLines && (
+            <div className="impm-logwrap">
+              <p className="sf-lab">{LOG_TITLE}</p>
+              <ul className="impm-log" data-impm="log">
+                {importResults.logs.map((log, idx) => <li key={`l${idx}`}>{log}</li>)}
+                {importResults.errors.map((err, idx) => <li key={`e${idx}`} className="is-err">{err}</li>)}
+              </ul>
             </div>
+          )}
 
-            {/* TAB SELECTOR */}
-            <div className="flex flex-wrap gap-2 text-xs">
-              {[
-                { id: "agents", label: `Agents Directory (${agents.length})`, icon: Users },
-                { id: "manuscripts", label: `Manuscripts (${manuscripts.length})`, icon: BookOpen },
-                { id: "queries", label: `Query Logs (${queries.length})`, icon: FileSpreadsheet },
-                { id: "activities", label: `Activities (${useScriptAllyDb().activities.length})`, icon: ActivityIcon }
-              ].map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeGridTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveGridTab(tab.id as any);
-                      setGridSearch("");
-                    }}
-                    className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg border font-medium transition-all ${
-                      isActive
-                        ? "bg-[#FAF1EF] border-[#7c3a2a] text-[#7c3a2a] font-bold shadow-sm"
-                        : "border-stone-100 hover:bg-stone-50 text-stone-600 bg-white"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+          {!isImporting && (
+            <div className="sf-cfoot">
+              <button type="button" className="sf-link sf-link--quiet" onClick={handleReset} data-impm="another">{AFTER_ANOTHER}</button>
+              <span className="sf-footr">
+                <button
+                  type="button" className="sf-btn" data-impm="open"
+                  onClick={() => {
+                    if (importType === "queries") onNavigate("queries");
+                    else if (importType === "manuscripts") onNavigate("manuscripts");
+                    else onNavigate("agents");
+                  }}
+                >
+                  {afterOpenLabel(importType)}
+                </button>
+              </span>
             </div>
-
-            {/* GRID DISPLAY CONTAINER */}
-            <div className="overflow-x-auto border border-stone-200 rounded-xl bg-[#FCFAF7]">
-              
-              {/* AGENTS GRID */}
-              {activeGridTab === "agents" && (
-                <table className="w-full text-left text-xs leading-normal border-collapse">
-                  <thead>
-                    <tr className="bg-stone-100 border-b border-stone-200 text-stone-600 font-mono text-[10px] uppercase tracking-wider font-bold">
-                      <th className="p-3">Agent Name</th>
-                      <th className="p-3">Agency</th>
-                      <th className="p-3">Email Address</th>
-                      <th className="p-3">Website</th>
-                      <th className="p-3">Genre Focus</th>
-                      <th className="p-3">Priority Rating</th>
-                      <th className="p-3">Submission Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-150 bg-white">
-                    {agents
-                      .filter(a => {
-                        const s = gridSearch.toLowerCase();
-                        return (
-                          a.name.toLowerCase().includes(s) ||
-                          a.agency.toLowerCase().includes(s) ||
-                          a.email.toLowerCase().includes(s) ||
-                          a.genres.join(", ").toLowerCase().includes(s)
-                        );
-                      })
-                      .map(a => (
-                        <tr key={a.id} className="hover:bg-[#FAF1EF]/10 transition-colors text-stone-800">
-                          <td className="p-3 font-serif font-bold text-[#3a1c14]">{a.name}</td>
-                          <td className="p-3 text-stone-600">{a.agency}</td>
-                          <td className="p-3 text-stone-600 font-mono text-[11px]">{a.email}</td>
-                          <td className="p-3 text-[11px]">
-                            {a.website ? (
-                              <a href={a.website} target="_blank" rel="noreferrer" className="text-[#7c3a2a] underline hover:text-[#5e2b1e] break-all">
-                                {a.website}
-                              </a>
-                            ) : (
-                              "--"
-                            )}
-                          </td>
-                          <td className="p-3">
-                            <span className="flex flex-wrap gap-1">
-                              {a.genres.map(g => (
-                                <span key={g} className="bg-stone-100 border border-stone-200 rounded px-1.5 py-0.5 text-[9px] uppercase font-mono font-medium">
-                                  {g}
-                                </span>
-                              ))}
-                            </span>
-                          </td>
-                          <td className="p-3 tracking-widest text-[#BA7517] font-bold font-mono">{"★".repeat(a.starRating)}</td>
-                          <td className="p-3 font-medium text-stone-750">{a.submissionStatus}</td>
-                        </tr>
-                      ))}
-                    {agents.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-stone-400 italic">
-                          No registree agents detected. Upload a CSV of agents above to seed yours instantly!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-
-              {/* MANUSCRIPTS GRID */}
-              {activeGridTab === "manuscripts" && (
-                <table className="w-full text-left text-xs leading-normal border-collapse">
-                  <thead>
-                    <tr className="bg-stone-100 border-b border-[#EBDCD3] text-stone-600 font-mono text-[10px] uppercase tracking-wider font-bold">
-                      <th className="p-3">Book Title</th>
-                      <th className="p-3">Primary Genre</th>
-                      <th className="p-3">Audience Age</th>
-                      <th className="p-3">Word Count</th>
-                      <th className="p-3">Elevator Hook</th>
-                      <th className="p-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EBDCD3] bg-white">
-                    {manuscripts
-                      .filter(m => {
-                        const s = gridSearch.toLowerCase();
-                        return (
-                          m.title.toLowerCase().includes(s) ||
-                          m.genre.toLowerCase().includes(s) ||
-                          m.logline.toLowerCase().includes(s)
-                        );
-                      })
-                      .map(m => (
-                        <tr key={m.id} className="hover:bg-[#FAF1EF]/10 transition-colors text-stone-800">
-                          <td className="p-3 font-serif font-bold text-[#3a1c14]">{m.title}</td>
-                          <td className="p-3 text-stone-600">{m.genre}</td>
-                          <td className="p-3 text-stone-600">{m.ageCategory}</td>
-                          <td className="p-3 font-mono">{m.wordCount?.toLocaleString() || "0"} words</td>
-                          <td className="p-3 text-stone-500 max-w-xs truncate" title={m.logline}>{m.logline}</td>
-                          <td className="p-3">
-                            <span className="bg-[#FAF1EF] text-[#7c3a2a] border border-[#7c3a2a]/20 rounded px-2 py-0.5 text-[10px] font-bold">
-                              {m.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    {manuscripts.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="p-8 text-center text-stone-400 italic">
-                          No manuscript files loaded. Upload a CSV of book logs above to get started!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-
-              {/* QUERIES GRID */}
-              {activeGridTab === "queries" && (
-                <table className="w-full text-left text-xs leading-normal border-collapse">
-                  <thead>
-                    <tr className="bg-stone-100 border-b border-[#EBDCD3] text-stone-600 font-mono text-[10px] uppercase tracking-wider font-bold">
-                      <th className="p-3">Reference Manuscript</th>
-                      <th className="p-3">Target Agent Recipient</th>
-                      <th className="p-3">Query Status</th>
-                      <th className="p-3">Date Sent</th>
-                      <th className="p-3">Custom Personalisation Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EBDCD3] bg-white">
-                    {queries
-                      .filter(q => {
-                        const s = gridSearch.toLowerCase();
-                        const manuscriptText = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
-                        const agentText = agents.find(a => a.id === q.agentId)?.name || "";
-                        return (
-                          manuscriptText.toLowerCase().includes(s) ||
-                          agentText.toLowerCase().includes(s) ||
-                          q.status.toLowerCase().includes(s) ||
-                          q.personalisationNotes.toLowerCase().includes(s)
-                        );
-                      })
-                      .map(q => {
-                        const ms = manuscripts.find(m => m.id === q.manuscriptId);
-                        const ag = agents.find(a => a.id === q.agentId);
-                        return (
-                          <tr key={q.id} className="hover:bg-[#FAF1EF]/10 transition-colors text-stone-800">
-                            <td className="p-3 font-serif font-bold text-[#3a1c14]">{ms ? ms.title : "Unknown Manuscript"}</td>
-                            <td className="p-3 text-stone-700 font-medium">{ag ? agentPrimary(ag) : AGENT_NOT_SPECIFIED}</td>
-                            <td className="p-3">
-                              <span className="bg-amber-100/50 text-[#BA7517] border border-amber-200/50 rounded px-1.5 py-0.5 text-[10px] font-mono uppercase font-bold">
-                                {q.status}
-                              </span>
-                            </td>
-                            <td className="p-3 text-stone-500 font-mono text-[11px]">{q.dateSent ? new Date(q.dateSent).toLocaleDateString() : "--"}</td>
-                            <td className="p-3 text-stone-600 italic text-[11px] max-w-sm truncate" title={q.personalisationNotes}>
-                              "{q.personalisationNotes}"
-                            </td>
-                          </tr>
-                        );
-                      })
-                    }
-                    {queries.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-stone-400 italic">
-                          No active query logs. Dispatch queries to active agents, or import spreadsheet rows above!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-
-              {/* ACTIVITIES GRID */}
-              {activeGridTab === "activities" && (
-                <table className="w-full text-left text-xs leading-normal border-collapse">
-                  <thead>
-                    <tr className="bg-stone-100 border-b border-[#EBDCD3] text-stone-600 font-mono text-[10px] uppercase tracking-wider font-bold">
-                      <th className="p-3">Timestamp Date</th>
-                      <th className="p-3">Event Type</th>
-                      <th className="p-3">Description</th>
-                      <th className="p-3">Timeline Details</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EBDCD3] bg-white">
-                    {useScriptAllyDb().activities
-                      .filter(act => {
-                        const s = gridSearch.toLowerCase();
-                        return (
-                          act.activityType.toLowerCase().includes(s) ||
-                          act.description.toLowerCase().includes(s) ||
-                          act.details.toLowerCase().includes(s)
-                        );
-                      })
-                      .map(act => (
-                        <tr key={act.id} className="hover:bg-[#FAF1EF]/10 transition-colors text-stone-800">
-                          <td className="p-3 font-mono text-stone-500 text-[11px]">{new Date(act.date).toLocaleString()}</td>
-                          <td className="p-3">
-                            <span className="bg-stone-100 border border-stone-200 text-stone-700 rounded px-1.5 py-0.5 text-[9px] uppercase font-mono font-bold">
-                              {act.activityType}
-                            </span>
-                          </td>
-                          <td className="p-3 text-[#3a1c14] font-medium">{act.description}</td>
-                          <td className="p-3 text-stone-500 max-w-sm truncate" title={act.details}>
-                            {act.details || "--"}
-                          </td>
-                        </tr>
-                      ))}
-                    {useScriptAllyDb().activities.length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="p-8 text-center text-stone-400 italic">
-                          No activity log events found. Activity streams are triggered as you log queries, and the csv uploader matches histories cleanly.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-
-              {/* USER GRID */}
-              </div>
-            
-          </div>
-        )}
-
-      </div>
+          )}
+        </section>
+      )}
     </div>
   );
+
 };

@@ -10,7 +10,7 @@
  *    tint out to the sheet's edges and `clip-path: inset(0 -100vmax)` cuts it off above and below. A shadow
  *    is not scrollable overflow, so nothing scrolls sideways; the sheet (`.ws-window`) clips it at its edge.
  * ⚠️ THE TINT IS ON A PSEUDO-ELEMENT, NEVER THE SECTION: a clip-path on the section would cut the featured
- *    card's shadow, and on the banner it would cut the arrow, which hangs below it.
+ *    card's shadow. (The banner's `::before` is the flap itself since app shell v2: the sheet's width, clipped to the flap.)
  */
 @media (min-width: 768px) {
   /* ── "Recently updated" on a band: 64 (52) under the desk, 72 (64) of tint above and below the section.
@@ -18,7 +18,8 @@
   .qcv-group.qc13 > .qcr { position: relative; isolation: isolate; margin-top: 64px; padding-top: 72px; padding-bottom: 72px; }
   .qcv-group.qc13 > .qcr::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
-    background: #e9e6e0; box-shadow: 0 0 0 100vmax #e9e6e0; clip-path: inset(0 -100vmax);
+    /* app shell v2: paper white, the shell's token (it was #e9e6e0) */
+    background: var(--ws-band); box-shadow: 0 0 0 100vmax var(--ws-band); clip-path: inset(0 -100vmax);
   }
   /* the featured card holds its edge on the tint: its outer ring is ink at 10% (it was 14% on the page) */
   .qcv-group.qc13 > .qcr .qcr-feat .qcard {
@@ -34,18 +35,15 @@
   }
   .qcv-group > .qc134-ban ~ .qcv-page { grid-row: 5; }
   .qcv-group > .qc134-ban ~ .af { grid-row: 6; }
-  /* ⚠️ 104, NOT THE CONTACT LIST'S 76: the flying hawk rises 74 above the bar and must clear the banner (B3).
+  /* ⚠️ APP SHELL v2 (9 Oct): the arrow is retired; the banner's bottom edge is the envelope flap (the header sheet's
+     shape and depth, in blush, no shadow), and the gap grew by the flap's 26: 130 (118), was 104 (92).
+     ⚠️ 104 + 26, NOT THE CONTACT LIST'S 76 + 26: the flying hawk rises 74 above the bar and must clear the banner (B3).
      0-4-0, to beat `.qc13 .qcv-page.qcw`'s 96 (qcvWorkspace.css). */
-  .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 104px; }
+  .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 130px; }
   .qc134-ban::before {
-    content: ""; position: absolute; inset: 0; z-index: 0;
-    background: #f3ddd2; box-shadow: 0 0 0 100vmax #f3ddd2; clip-path: inset(0 -100vmax);
-  }
-  /* the arrow: a soft point, 150 × 34, starting 1px inside the banner so no seam shows */
-  .qc134-ban::after {
-    content: ""; position: absolute; left: 50%; top: calc(100% - 1px); z-index: 0;
-    width: 150px; height: 34px; transform: translateX(-50%);
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0C40 0 58 22 70 31.5Q75 35 80 31.5C92 22 110 0 150 0Z' fill='%23f3ddd2'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    content: ""; position: absolute; z-index: 0; top: 0; bottom: calc(-1 * var(--hsheet-flap));
+    left: 50%; width: var(--hsheet-w); transform: translateX(-50%);
+    background: #f3ddd2; clip-path: var(--hsheet-clip);
   }
   /* two lines, each a block; a line that cannot fit wraps naturally.
      ⚠️ TWO CLASSES ON THE FACE: the page's font reset names `p` and `span` and lands later in the bundle. */
@@ -60,8 +58,7 @@
   @media (max-width: 1439.5px) {
     .qcv-group.qc13 > .qcr { margin-top: 52px; padding-top: 64px; padding-bottom: 64px; }
     .qcv-group > .qc134-ban { min-height: 112px; padding: 28px 0 26px; margin-top: 48px; }
-    .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 92px; }
-    .qc134-ban::after { width: 120px; height: 28px; }
+    .qcv-group.qc13 > .qc134-ban ~ .qcv-page.qcw { margin-top: 118px; }
     .qc134-ban .qc134-ban-p { font-size: 24px; }
   }
 }

@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "D7 precondition: read loading, then loaded",
+  "where": "@1512",
+  "ok": false,
+  "detail": "first  then "
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "0 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "0 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "0 @1512",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "1 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "1 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "1 @1512",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "2 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "2 @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "2 @1512",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ },
+ {
+  "lock": "D7 precondition: read loading, then loaded",
+  "where": "@1280",
+  "ok": false,
+  "detail": "first  then "
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "0 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "0 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "0 @1280",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "1 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "1 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "1 @1280",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ },
+ {
+  "lock": "D7 the card's box (±1)",
+  "where": "2 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the badge is there while loading, in the same place and size (±1)",
+  "where": "2 @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "D7 the strip, the chart box and the line (±1)",
+  "where": "2 @1280",
+  "ok": false,
+  "detail": "strip absent → absent · chart absent → absent · line undefined → undefined"
+ }
+]

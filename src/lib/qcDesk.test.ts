@@ -50,10 +50,10 @@ describe("v131.1 · the desk's lines", () => {
     expect(owedOf([QueryStatus.REVISE_RESUBMIT])).toBe("request to send");
     expect(owedOf([])).toBe("requests to send");
   });
-  it("with agents: responses overdue (rust when any), and due inside this London week, Monday to Sunday", () => {
+  it("with agents: overdue (rust when any; v136 — it was \"responses overdue\"), and due inside this London week, Monday to Sunday", () => {
     expect(agent.label).toBe("With agents");
     expect(agent.total).toBe(4);
-    expect(agent.lines).toEqual([{ n: 1, text: "response overdue", hot: true }, { n: 2, text: "due this week", hot: false }]);
+    expect(agent.lines).toEqual([{ n: 1, text: "overdue", hot: true }, { n: 2, text: "due this week", hot: false }]);
   });
   it("closed: rejections and no response — a withdrawal on neither line; the big number is v131's", () => {
     expect(closed.lines).toEqual([{ n: 1, text: "rejection", hot: false }, { n: 1, text: "no response", hot: false }]);
@@ -62,7 +62,7 @@ describe("v131.1 · the desk's lines", () => {
   it("no count is rust at zero", () => {
     const [y, a] = deskSections([], NOW);
     expect(y.lines[0]).toEqual({ n: 0, text: "offers to consider", hot: false });
-    expect(a.lines[0]).toEqual({ n: 0, text: "responses overdue", hot: false });
+    expect(a.lines[0]).toEqual({ n: 0, text: "overdue", hot: false });
   });
   it("the chart has ten points and its last is the card's figure", () => {
     for (const s of [you, agent, closed]) {

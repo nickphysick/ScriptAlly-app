@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B8 precondition: read loading, then loaded",
+  "where": "@1512",
+  "ok": true,
+  "detail": "first true,true,true then false,false,false"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "296,542 370×197 → 296,542 370×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "312,516 64×64 → 312,516 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "strip 296,542 370×64 → 296,542 370×64 · chart 549,661 96×46 → 549,661 96×46"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "691,542 370×197 → 691,542 370×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "707,516 64×64 → 707,516 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "strip 691,542 370×64 → 691,542 370×64 · chart 943,661 96×46 → 943,661 96×46"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "1085,542 370×197 → 1085,542 370×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "1101,516 64×64 → 1101,516 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "strip 1085,542 370×64 → 1085,542 370×64 · chart 1338,661 96×46 → 1338,661 96×46"
+ },
+ {
+  "lock": "B8 precondition: read loading, then loaded",
+  "where": "@1280",
+  "ok": true,
+  "detail": "first true,true,true then false,false,false"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "289,469 298×197 → 289,469 298×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "305,443 64×64 → 305,443 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "strip 289,469 298×64 → 289,469 298×64 · chart 469,588 96×46 → 469,588 96×46"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "611,469 298×197 → 611,469 298×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "627,443 64×64 → 627,443 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "strip 611,469 298×64 → 611,469 298×64 · chart 791,588 96×46 → 791,588 96×46"
+ },
+ {
+  "lock": "B8 the card's box (±1)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "933,469 298×197 → 933,469 298×197"
+ },
+ {
+  "lock": "B8 the badge is there while loading, blank, in the same box (±1)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "949,443 64×64 → 949,443 64×64 · loading count \"\""
+ },
+ {
+  "lock": "B8 the strip and the chart box (±1)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "strip 933,469 298×64 → 933,469 298×64 · chart 1113,588 96×46 → 1113,588 96×46"
+ }
+]

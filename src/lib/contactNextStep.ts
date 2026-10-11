@@ -10,11 +10,12 @@
  *   done       neither — every agent on the list is queried, doesn't take the genre, or is closed to submissions
  *
  * ⚠️ READY TO QUERY IS ONE RULE, AND THE SECTION, THE "ready to query" PILL AND "See all" ALL READ IT (§4): the
- *    agent is open (`submissionStatus !== Closed`; Unknown reads open), has no query for this manuscript, and
+ *    agent is open (`submissionStatus === Open`; Unknown is not known, so not ready), has no query for this manuscript, and
  *    EITHER takes one of the book's genres OR has no genres recorded. An agent whose genres ARE recorded and take
  *    none of the book's is a KNOWN MISMATCH: never ready, never reopening, counted only in the done line's note.
  * ⚠️ v14's fourth state ("A few more might fit", the no-genres agents) IS RETIRED: those agents are ready now.
- * ⚠️ THE DONE STATE ACCOUNTS FOR EVERY AGENT (§4, ruling Q3): queried + known mismatches + closed to submissions = N.
+ * ⚠️ THE DONE STATE ACCOUNTS FOR EVERY AGENT (§4, ruling Q3): queried + known mismatches + closed to submissions
+ *    + door not known = N (the last part added by import-truth, when Unknown stopped reading as open).
  *    "Closed to submissions" is every other unqueried agent — Closed with no reopening date, OR with one already past
  *    (a past date is not a reopening; the note's wording, "are closed to submissions", is true of both).
  * ⚠️ THE SPLIT LINE SUMS TO QUERIED (ruling Q1): each queried agent's LATEST query (by sent date) is still reading,
@@ -62,6 +63,8 @@ export interface NextStep {
   mismatches: number;
   /** not queried · not a mismatch · Closed with no reopening date ahead */
   closed: number;
+  /** not queried · not a mismatch · the door not known (an imported agent nobody has set) */
+  doorUnknown: number;
   /** the done state's split line, each queried agent's latest query: sums to `queried` */
   outcomes: { reading: number; asked: number; passed: number; withdrawn: number };
 }
@@ -109,7 +112,7 @@ export function readyOrder(book: readonly string[]): (a: Agent, b: Agent) => num
 
 /** THE ONE READY RULE (§4): open, no query for this manuscript, and the genres take the book or are unknown. */
 export function isReady(a: Agent, queried: (a: Agent) => boolean, book: readonly string[]): boolean {
-  return a.submissionStatus !== SubmissionStatus.CLOSED && !queried(a) && !knownMismatch(a, book);
+  return a.submissionStatus === SubmissionStatus.OPEN && !queried(a) && !knownMismatch(a, book);
 }
 
 export function nextStep(input: NextStepInput): NextStep {
@@ -129,7 +132,7 @@ export function nextStep(input: NextStepInput): NextStep {
     .filter((a) => !queried(a) && !knownMismatch(a, book) && a.submissionStatus === SubmissionStatus.CLOSED && dayOf(a.reopensOn) > todayIso)
     .sort((a, b) => dayOf(a.reopensOn).localeCompare(dayOf(b.reopensOn)) || surnameOf(a).localeCompare(surnameOf(b)));
 
-  let nQueried = 0, mismatches = 0, closed = 0;
+  let nQueried = 0, mismatches = 0, closed = 0, doorUnknown = 0;
   const outcomes = { reading: 0, asked: 0, passed: 0, withdrawn: 0 };
   for (const a of agents) {
     const qs = byAgent.get(a.id);
@@ -142,12 +145,13 @@ export function nextStep(input: NextStepInput): NextStep {
       else outcomes.reading += 1;
     } else if (knownMismatch(a, book)) mismatches += 1;
     else if (a.submissionStatus === SubmissionStatus.CLOSED && !(dayOf(a.reopensOn) > todayIso)) closed += 1;
+    else if (a.submissionStatus !== SubmissionStatus.OPEN && a.submissionStatus !== SubmissionStatus.CLOSED) doorUnknown += 1;
   }
 
   const state: NextState = ready.length ? "ready" : reopening.length ? "reopening" : "done";
   return {
     state, ready, unknown: ready.filter(genresUnknown).length, reopening,
-    total: agents.length, queried: nQueried, mismatches, closed, outcomes,
+    total: agents.length, queried: nQueried, mismatches, closed, doorUnknown, outcomes,
   };
 }
 

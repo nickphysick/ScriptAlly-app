@@ -74,7 +74,12 @@ describe("⚠️ the views are gone, and `?view=` keeps exactly one meaning (v65
 describe("one derived list, one control that narrows it", () => {
   it("every view's rows come from `sortedList`, and `sortedList` follows the sentence", () => {
     expect(page).toContain("const sortedList = qcVisible.map((r) => r.query);");
-    expect(page).toContain("const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind)), qcSort);");
+    /* v137 §B re-point: the law is "one derived list, narrowed by the sentence's filter and Find, then sorted". The strip's
+       court is a third narrowing of the SAME list on the desktop, so the claim is asserted in parts, not as one spelling. */
+    const vis = page.slice(page.indexOf("const qcVisible = sortRows("), page.indexOf("const sortedList = qcVisible.map"));
+    expect(vis.length).toBeGreaterThan(40);
+    for (const part of ["qcScoped.filter(", "matchesFilter(r, qcFilter)", "matchesFind(r, qcFind)", "tileCourt(r.status) === qcCourtOn", "qcSort)"]) expect(vis, part).toContain(part);
+    expect(page).toContain("const qcCourtOn = qcDesk ? qcCzCourt : null;");
     expect(page).toMatch(/const gridRows: GridCard\[\] = sortedList\.map\(/);
   });
   it("⚠️ the page holds ONE filter, ONE scope and ONE sort — and the retired controls are not mounted", () => {

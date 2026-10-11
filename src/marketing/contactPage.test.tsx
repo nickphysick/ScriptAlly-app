@@ -17,6 +17,7 @@ vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).fireb
 vi.mock("../components/toast/ToastProvider", async () => (await import("../test/pageSmoke")).toastMock());
 
 import { ContactPage } from "./ContactPage";
+import { MarketingShell } from "./MarketingShell";
 import { CONTACT_TOPICS, CONTACT_ART_ALT } from "./contactCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 
@@ -130,8 +131,14 @@ describe("the page as a whole", () => {
     }
   });
 
+  /* RE-POINTED (landing colours v2): the footer is the shell's now, so "above the footer" is a
+     claim about the page AS THE SHELL RENDERS IT. The law is unchanged — the service line is the
+     last thing on the page and the footer follows it. */
   it("puts the service line under both columns, above the footer", () => {
-    const h = html();
+    const h = renderPage(
+      <MarketingShell user={null} onNavigate={noNavigate} path="/contact">
+        <ContactPage onNavigate={noNavigate} />
+      </MarketingShell>, "/contact");
     const split = h.indexOf('class="mk-contactsplit"');
     const line = h.indexOf('class="mk-svcline"');
     const foot = h.indexOf('class="mk-foot"');

@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "B1 population: three v135 cards, loaded and on screen",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "rgb(176, 96, 62) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.4"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "halo in rgb(176, 96, 62) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px -8p · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 242,238,232 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "you @1512",
+  "ok": true,
+  "detail": "\"13\""
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "rgb(61, 80, 112) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.4"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "halo in rgb(61, 80, 112) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px -8p · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 239,235,229 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "agent @1512",
+  "ok": true,
+  "detail": "\"56\""
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "rgb(124, 113, 104) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "halo in rgb(124, 113, 104) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px - · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 241,237,231 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "closed @1512",
+  "ok": true,
+  "detail": "\"13\""
+ },
+ {
+  "lock": "B1 population: three v135 cards, loaded and on screen",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3 cards · 3 badges"
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "rgb(176, 96, 62) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.4"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "halo in rgb(176, 96, 62) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px -8p · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 242,238,232 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "you @1280",
+  "ok": true,
+  "detail": "\"13\""
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "rgb(61, 80, 112) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.4"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "halo in rgb(61, 80, 112) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px -8p · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 239,235,229 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "agent @1280",
+  "ok": true,
+  "detail": "\"56\""
+ },
+ {
+  "lock": "B1 the badge is 64 (±1) and round",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "64.0×64.0"
+ },
+ {
+  "lock": "B1 its top is 26 (±1) above the card's top, its left 16 (±1) in",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "above 26.0 left 16.0"
+ },
+ {
+  "lock": "B1 the ring is the court's colour, 4px",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "rgb(124, 113, 104) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0"
+ },
+ {
+  "lock": "B1 the halo is the colour of what the desk sits on (the page), 9px",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "halo in rgb(124, 113, 104) 0px 0px 0px 4px, rgb(242, 238, 232) 0px 0px 0px 9px, rgba(28, 19, 15, 0.45) 0px 10px 18px - · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "B1 painted: the halo is the page's colour, and the page just above it is within 3 levels (it clears the flap's shadow)",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "halo 242,238,232 · 5px above it 241,237,231 · page 242,238,232"
+ },
+ {
+  "lock": "B1 the badge states the count",
+  "where": "closed @1280",
+  "ok": true,
+  "detail": "\"13\""
+ }
+]

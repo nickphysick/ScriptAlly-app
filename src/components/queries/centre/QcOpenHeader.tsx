@@ -2,88 +2,55 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v133 — THE OPEN HEADER (design-refs/query-centre/query-centre-v133.html). No card, no
- * band, no disc: the living "{N} queries out" as a 72px typewriter title, one fixed line, two buttons,
- * and the courier at the column's right, hanging over the hairline that closes the header (the
- * Contact list v15.1 header's design, by Nick's ruling of 9 Oct, which supersedes the mock's placement).
+ * Query Centre — THE HEADER (header v3, 10 Oct; ref design-refs/shell/header-v3-qc.html). The shared panel
+ * header (`shell/PanelHeader`), as a NUMBER page: "{N} queries sent", "for {manuscript}", two buttons, and the
+ * courier on his white disc. v136's open, ruled-corner header is retired: no ruled lines, no margin line, no
+ * rule, no stamp.
  *
- * ⚠️ IT IS THE CONTACT LIST v15 HEADER'S SHAPE, BUILT BESIDE IT. `src/components/agents/**` is another
- * session's, so the values are restated here (qcvOpenHeader.css) rather than imported. The two are a
- * lift candidate into one `shell/` component, with v132's duplicates.
- *
- * ⚠️ PAGE-LOCAL, NOT `PageHeader`: `/queries` sits in the e2e censuses' OWN_HEADER_ROUTES
- * (tests/e2e/plateRoutes.ts). The phone (under 768px) keeps the v126 page and its `PageHeader` band.
- *
- * ⚠️ THE TITLE KEEPS `data-page-title`, the hook the shared header gives every page title.
+ * ⚠️ {N} IS THE BANDS' OWN TOTAL (with you + with agents + closed), so the header and the two band labels
+ *    cannot disagree (HV3 H3). A withdrawn or signed query sits in no court and is in neither.
+ * ⚠️ THE SUBLINE NAMES A BOOK ONLY WHEN THE PAGE IS SCOPED TO ONE (`msTitle`): the Query Centre is not scoped by
+ *    the sidebar's manuscript, and naming that book over every book's queries would be false.
+ * ⚠️ PAGE-LOCAL MOUNT, SHARED PANEL: `/queries` is in the e2e censuses' OWN_HEADER_ROUTES. Desktop only — below
+ *    768px the page renders the v126 page and its own header.
  */
-import React, { useRef } from "react";
-import type { LivingHeader } from "../../shell/PageHeader";
-import type { Faces } from "../../../lib/qcFaces";
-import { QC_PLATE_FIGURE } from "./qcArt";
-import { useTip } from "./QcList132";
+import React from "react";
+import { PanelHeader } from "../../shell/PanelHeader";
+import { QC_COURIER_DISC } from "./qcArt";
 import "./qcvOpenHeader.css";
 
-export const QC_HEADER_SUB = "Send, track, and chase them from this page.";
-/** what the hero number holds while the count settles: its own shape, painted over */
-const PENDING_NUMBER = "00";
-/** "queries out", or "query out" for one */
-export const heroWords = (n: number): string => (n === 1 ? "query out" : "queries out");
+/** "queries sent", or "query sent" for one */
+export const sentWords = (n: number): string => (n === 1 ? "query sent" : "queries sent");
+/** the h1's accessible name: "27 queries sent" */
+export const sentTitle = (n: number): string => `${n} ${sentWords(n)}`;
+
+/** v137 — the header's fixed title, broken after the comma, and its accessible name */
+export const QC_HEADER_TITLE = "Every query, in one place";
+/** the subline: it names the manuscript when the page is scoped to one book */
+export const qcHeaderSub = (msTitle: string | null): string =>
+  msTitle ? `Send, track and chase your queries for ${msTitle}.` : "Send, track and chase your queries.";
 
 /**
- * v134 §1 — THE FACES: up to eight agent discs, coloured by court, then "+N more". No key: the desk
- * states the split. The discs are `aria-hidden` and the row carries one sentence for a screen reader;
- * each disc shows the list's own popup (the agent's name; the stage and the court) and opens its query.
+ * Query Centre v137 §A — THE ANALYTICS PANEL WITH A TITLE (the shared panel header's title kind). The big number
+ * is gone from here: the first cell of "At a glance" carries it. No stamp, no faces row, no ruled corner.
  */
-const FacesRow: React.FC<{ faces: Faces | null; onFace?: (id: string) => void }> = ({ faces, onFace }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const tip = useTip(ref);
-  /* loading: the row holds its height with three painted-over discs */
-  if (!faces) return <div className="qcoh-faces" data-qcv="oh-faces" aria-hidden="true">{[0, 1, 2].map((i) => <span key={i} className="qcoh-fc qcoh-fc--sk" style={{ zIndex: 8 - i }} />)}</div>;
-  if (!faces.faces.length) return <div className="qcoh-faces" data-qcv="oh-faces" data-n="0" role="img" aria-label={faces.sentence} />;
-  return (
-    <div ref={ref} className="qcoh-faces" data-qcv="oh-faces" data-n={faces.faces.length} role="group" aria-label={faces.sentence} {...tip.handlers}>
-      {faces.faces.map((f, i) => (
-        <button key={f.id} type="button" tabIndex={-1} aria-hidden="true" className={`qcoh-fc qcoh-fc--${f.court}`}
-          data-qcv="oh-face" data-court={f.court} data-qid={f.id} data-tip={f.name} data-tl={f.line} style={{ zIndex: faces.faces.length - i }}
-          onClick={() => onFace?.(f.id)}>{f.initials}</button>
-      ))}
-      {faces.more > 0 && <span className="qcoh-more" data-qcv="oh-more" aria-hidden="true">+{faces.more} more</span>}
-      {tip.node}
-    </div>
-  );
-};
-
 export const QcOpenHeader: React.FC<{
-  /** the living title's source: its count is the hero number (lib/livingHeaders, the manuscript scope's) */
-  living?: LivingHeader;
+  /** the manuscript the page is scoped to; null when it is scoped to more than one book */
+  msTitle?: string | null;
   loading: boolean;
   onLog: () => void;
   onRecord: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-  /** the faces under the subheader; null while the page settles */
-  faces?: Faces | null;
-  onFace?: (id: string) => void;
-}> = ({ living, loading, onLog, onRecord, logDisabled = false, logRef, faces = null, onFace }) => {
-  const pending = loading || !living || living.count === null;
-  const n = pending ? 0 : (living!.count as number);
-  return (
-    <header className="qcoh" data-qcv="open-header" data-own-header="" data-loading={pending ? "" : undefined} aria-busy={pending || undefined}>
-      <div className="qcoh-txt" data-qcv="oh-text">
-        {/* THE HERO NUMBER (v134): the count set large, its words beside it on one baseline. One h1, two spans. */}
-        <h1 className="qcoh-title" data-probe="title" data-page-title="" aria-label={pending ? undefined : `${n} ${heroWords(n)}`}>
-          <span className="qcoh-hn" data-qcv="oh-hn">{pending ? PENDING_NUMBER : n}</span>
-          <span className="qcoh-ht" data-qcv="oh-ht">{heroWords(pending ? 2 : n)}</span>
-        </h1>
-        <p className="qcoh-sub" data-qcv="oh-sub">{QC_HEADER_SUB}</p>
-        <FacesRow faces={pending ? null : faces} onFace={onFace} />
-        <div className="qcoh-acts">
-          <button ref={logRef} type="button" className="qcoh-b1" data-qcv="oh-log" onClick={onLog} disabled={logDisabled || pending}>+ Log a query</button>
-          <button type="button" className="qcoh-b2" data-qcv="oh-record" onClick={onRecord} disabled={pending}>Record a response</button>
-        </div>
-      </div>
-      <img className="qcoh-art" data-qcv="oh-art" aria-hidden="true" alt=""
-        src={`${QC_PLATE_FIGURE.src}?v=${QC_PLATE_FIGURE.version}`} width={QC_PLATE_FIGURE.width} height={QC_PLATE_FIGURE.height} />
-    </header>
-  );
-};
+}> = ({ msTitle = null, loading, onLog, onRecord, logDisabled = false, logRef }) => (
+  <PanelHeader
+    kind="title" className="qcoh qcoh--137" attrs={{ "data-qcv": "open-header", "data-own-header": "" }}
+    title={<span aria-label={QC_HEADER_TITLE}><span aria-hidden="true">Every query,<br />in one place</span></span>}
+    sub={<span data-qcv="oh-sub">Send, track and chase your queries{msTitle ? <> for <i className="qcoh-ms" data-qcv="oh-ms">{msTitle}</i></> : null}.</span>}
+    loading={loading}
+    primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled, btnRef: logRef, attrs: { "data-qcv": "oh-log" } }}
+    secondary={{ label: "Record a response", onClick: onRecord, attrs: { "data-qcv": "oh-record" } }}
+    /* the courier on his white disc (the file is the disc). Swappable by file (qcArt.ts). */
+    art={<img data-qcv="oh-art" alt="" src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} />}
+  />
+);

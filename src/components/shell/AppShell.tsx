@@ -112,6 +112,8 @@ export const StagePage: React.FC<{
   return (
     <div
       className={active && entering ? "stage-page-on" : undefined}
+      /* a page that is mounted and not on screen says so, for CSS that must ask what is VISIBLE (the folder tab's colour) */
+      data-stage-off={active ? undefined : ""}
       onAnimationEnd={(e) => { if (e.animationName === "pageIn") setEntering(false); }}
       style={{
         display: active ? (isFillCol ? "flex" : "block") : "none",
@@ -154,7 +156,7 @@ const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" }
 /* ⚠️ KEYED BY THE ITEM'S OWN ICON, not by section. The flat nav has no parent row to inherit
    from, so every destination carries one — a row without an icon among rows with them reads as
    broken. The GROUP keys (workspace/queries/…) stay: the rail's ribs still read them. */
-const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
+export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   // rail ribs — one per group. (The `todo` GROUP key became `tasks` with the sidebar-IA fix,
   // 6 Aug — the To-do row left Workspace for its own TASKS section; the old key is deleted, not
   // aliased, so a stale section id loses its glyph loudly in the parity lock rather than half

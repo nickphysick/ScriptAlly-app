@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C3",
+  "where": "1024 no sideways scroll",
+  "ok": true,
+  "detail": "scroller 0 · document 0"
+ },
+ {
+  "lock": "C3",
+  "where": "1024 rows inside the list",
+  "ok": true,
+  "detail": "0 cells outside, over 12 rows of a 720px list"
+ },
+ {
+  "lock": "C3",
+  "where": "1024 What you sent hidden",
+  "ok": true,
+  "detail": "heading false · 0 cells shown"
+ },
+ {
+  "lock": "C3",
+  "where": "1024 names have room",
+  "ok": true,
+  "detail": "narrowest name 82"
+ },
+ {
+  "lock": "C3",
+  "where": "1024 Find is usable",
+  "ok": true,
+  "detail": "664"
+ },
+ {
+  "lock": "C3",
+  "where": "1024 strip",
+  "ok": true,
+  "detail": "rows at 476,680"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 no sideways scroll",
+  "ok": true,
+  "detail": "scroller 0 · document 0"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 rows inside the list",
+  "ok": true,
+  "detail": "0 cells outside, over 12 rows of a 876px list"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 What you sent hidden",
+  "ok": true,
+  "detail": "heading false · 0 cells shown"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 names have room",
+  "ok": true,
+  "detail": "narrowest name 82"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 Find is usable",
+  "ok": true,
+  "detail": "820"
+ },
+ {
+  "lock": "C3",
+  "where": "1180 strip",
+  "ok": true,
+  "detail": "rows at 476"
+ }
+]

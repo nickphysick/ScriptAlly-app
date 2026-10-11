@@ -1,0 +1,314 @@
+[
+ {
+  "lock": "D precondition: three cards on each desk",
+  "where": "@1512",
+  "ok": true,
+  "detail": "QC 3 · Contact week,queried,profiles"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "week @1512",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 96.0×46.0 · box 96.0"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "queried @1512",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 46.0×46.0 · box 78.3"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "profiles @1512",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 96.0×46.0 · box 96.0"
+ },
+ {
+  "lock": "D3 titles are exact",
+  "where": "@1512",
+  "ok": true,
+  "detail": "Added this week|Queried|Profiles complete"
+ },
+ {
+  "lock": "D3 tile labels are exact",
+  "where": "@1512",
+  "ok": true,
+  "detail": "in the last 8 weeks/this month|active/closed|complete/with gaps to fill"
+ },
+ {
+  "lock": "D3 captions are exact",
+  "where": "@1512",
+  "ok": true,
+  "detail": "added per week | active · closed | 1 of 37"
+ },
+ {
+  "lock": "D3 week: the badge is this week's bar, the first tile is the eight bars' sum, the month is no less than the week",
+  "where": "@1512",
+  "ok": true,
+  "detail": "badge 4 · bars 0,0,0,0,0,0,0,4 · tiles 4,4"
+ },
+ {
+  "lock": "D3 queried: the badge is active + closed, and each tile is its own arc",
+  "where": "@1512",
+  "ok": false,
+  "detail": "badge 6 · active 1 (arc 13.51) · closed 5 (arc 2.7)"
+ },
+ {
+  "lock": "D3 profiles: complete + gaps is the count on file, and the badge is their percentage",
+  "where": "@1512",
+  "ok": true,
+  "detail": "badge 3% · 1 + 36 vs 37 on file · fill 3"
+ },
+ {
+  "lock": "D3 the gaps tile is rust only while there are gaps; no other tile is",
+  "where": "@1512",
+  "ok": true,
+  "detail": "gaps 36 · hot true · rgb(246, 221, 210)"
+ },
+ {
+  "lock": "D precondition: three cards on each desk",
+  "where": "@1280",
+  "ok": true,
+  "detail": "QC 3 · Contact week,queried,profiles"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 96.0×46.0 · box 96.0"
+ },
+ {
+  "lock": "D8 no horizontal overflow in the card",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D8 the title is whole, inside the strip and clear of the placeholder",
+  "where": "week @1280",
+  "ok": true,
+  "detail": "ink 385–483 (2 line(s)) · placeholder from 515 · strip 392–456, ink 405–442"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 46.0×46.0 · box 78.3"
+ },
+ {
+  "lock": "D8 no horizontal overflow in the card",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D8 the title is whole, inside the strip and clear of the placeholder",
+  "where": "queried @1280",
+  "ok": true,
+  "detail": "ink 707–781 (1 line(s)) · placeholder from 837 · strip 392–456, ink 415–433"
+ },
+ {
+  "lock": "D1 the badge's size and offset equal the Query Centre's (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "64×64 at 16,-26 vs 64×64 at 16,-26"
+ },
+ {
+  "lock": "D1 the strip's height equals the Query Centre's (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "D1 the inner border's inset and line equal the Query Centre's (±1)",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "6,6,6,6 1px solid vs 6,6,6,6 1px solid"
+ },
+ {
+  "lock": "D2 slate: the strip, the badge's ring and the title",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · rgb(61, 80, 112) · ring rgb(61, 80, 112) 0px 0px 0px 4px, rgb(24"
+ },
+ {
+  "lock": "D4 one chart, inside a 96 × 46 box",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "1 chart(s) · drawing 96.0×46.0 · box 96.0"
+ },
+ {
+  "lock": "D8 no horizontal overflow in the card",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D8 the title is whole, inside the strip and clear of the placeholder",
+  "where": "profiles @1280",
+  "ok": true,
+  "detail": "ink 1029–1111 (2 line(s)) · placeholder from 1159 · strip 392–456, ink 405–442"
+ },
+ {
+  "lock": "D3 titles are exact",
+  "where": "@1280",
+  "ok": true,
+  "detail": "Added this week|Queried|Profiles complete"
+ },
+ {
+  "lock": "D3 tile labels are exact",
+  "where": "@1280",
+  "ok": true,
+  "detail": "in the last 8 weeks/this month|active/closed|complete/with gaps to fill"
+ },
+ {
+  "lock": "D3 captions are exact",
+  "where": "@1280",
+  "ok": true,
+  "detail": "added per week | active · closed | 1 of 37"
+ },
+ {
+  "lock": "D3 week: the badge is this week's bar, the first tile is the eight bars' sum, the month is no less than the week",
+  "where": "@1280",
+  "ok": true,
+  "detail": "badge 4 · bars 0,0,0,0,0,0,0,4 · tiles 4,4"
+ },
+ {
+  "lock": "D3 queried: the badge is active + closed, and each tile is its own arc",
+  "where": "@1280",
+  "ok": false,
+  "detail": "badge 6 · active 1 (arc 13.51) · closed 5 (arc 2.7)"
+ },
+ {
+  "lock": "D3 profiles: complete + gaps is the count on file, and the badge is their percentage",
+  "where": "@1280",
+  "ok": true,
+  "detail": "badge 3% · 1 + 36 vs 37 on file · fill 3"
+ },
+ {
+  "lock": "D3 the gaps tile is rust only while there are gaps; no other tile is",
+  "where": "@1280",
+  "ok": true,
+  "detail": "gaps 36 · hot true · rgb(246, 221, 210)"
+ }
+]

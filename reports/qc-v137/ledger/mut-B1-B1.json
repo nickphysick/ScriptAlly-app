@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 four cells",
+  "ok": true,
+  "detail": "all,you,agent,closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cell 1 is the list's unfiltered count",
+  "ok": false,
+  "detail": "cell 1 72 · showing 73 of 73"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cell 1 is the rows drawn",
+  "ok": false,
+  "detail": "73 rows (0 groups folded) · cell 1 72 · the courts 13 + 46 + 13"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 equal cells, one row",
+  "ok": true,
+  "detail": "289.8 289.8 289.8 289.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 twenty bars",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 last bar rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42) · others rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 one white box",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · 14px"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 under the panel",
+  "ok": true,
+  "detail": "34.0 · heading to strip 14.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 faces on one row",
+  "ok": true,
+  "detail": "1,1,1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 four cells",
+  "ok": true,
+  "detail": "all,you,agent,closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 cell 1 is the list's unfiltered count",
+  "ok": false,
+  "detail": "cell 1 72 · showing 73 of 73"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 cell 1 is the rows drawn",
+  "ok": false,
+  "detail": "73 rows (0 groups folded) · cell 1 72 · the courts 13 + 46 + 13"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 equal cells, one row",
+  "ok": true,
+  "detail": "235.5 235.5 235.5 235.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 twenty bars",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 last bar rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42) · others rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 one white box",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · 14px"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 under the panel",
+  "ok": true,
+  "detail": "34.0 · heading to strip 14.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 faces on one row",
+  "ok": true,
+  "detail": "1,1,1"
+ }
+]

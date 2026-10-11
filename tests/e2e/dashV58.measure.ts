@@ -484,8 +484,8 @@ test("DB58 A1–A2 — the activity feed: the tab, the drawer and its rows", asy
     const ins = d.evs.filter((e) => e.dir === "in"), outs = d.evs.filter((e) => e.dir === "out");
     console.log(`  A2 ${w}: ${ins.length} from agents · ${outs.length} by you · ${d.evs.filter((e) => e.need).length} open · ${d.evs.filter((e) => e.met).length} met`);
     L.check("A2", `${w} population, both kinds`, ins.length > 0 && outs.length > 0, `${ins.length} in · ${outs.length} out`);
-    L.check("A2", `${w} a reply is a card with a state disc`, ins.length > 0 && ins.every((e) => e.card && e.disc && !e.line), `${ins.filter((e) => e.card && e.disc).length} of ${ins.length}`);
-    L.check("A2", `${w} yours is a single line`, outs.length > 0 && outs.every((e) => e.line && !e.card), `${outs.filter((e) => e.line && !e.card).length} of ${outs.length}`);
+    /* RETIRED (feed drawer v2, 10 Oct): "every reply is a card with a state disc" and "yours is a single line". Every
+       event is one row now, dressed by its family: FD2 B1–B4 (tests/e2e/feedDrawerV2.measure.ts). */
     L.check("A2", `${w} an open request shows its action`, d.evs.filter((e) => e.need).every((e) => e.act && !e.done), `${d.evs.filter((e) => e.need && e.act).length} of ${d.evs.filter((e) => e.need).length} open`);
     L.check("A2", `${w} a met request shows the day it went`, d.evs.filter((e) => e.met).every((e) => !e.act && /^✓ Sent on \d/.test(e.done ?? "")), `${d.evs.filter((e) => e.met).map((e) => e.done).slice(0, 3).join(" | ") || "none met in this window"}`);
     L.check("A2", `${w} the end`, !!d.end && /That's (the last 30 days|everything since)/.test(d.end), `"${d.end}"`);
@@ -508,7 +508,8 @@ test("DB58 A1–A2 — the activity feed: the tab, the drawer and its rows", asy
     const out = await page.evaluate(() => ({ gone: !document.querySelector('[data-d58="drawer"]'), back: document.activeElement?.getAttribute("data-d58") }));
     L.check("A1", `${w} a press outside closes it`, out.gone && out.back === "tab", JSON.stringify(out));
   }
-  L.done(40);
+  /* RE-POINTED (feed drawer v2): two A2 claims are retired, two readings a size */
+  L.done(36);
 });
 
 /* ── L1 ────────────────────────────────────────────────────────────────────────────────────── */

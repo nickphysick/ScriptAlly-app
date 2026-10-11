@@ -93,7 +93,7 @@
    39 (31) inside the band's edges — the oracle's own rendered figures. The stage's own margins are zeroed here. */
 .clv-group > .cl14-next {
   grid-column: 1 / -1; grid-row: 3;
-  --cl15-band: #e9e6e0;
+  --cl15-band: var(--ws-band); /* app shell v2: paper white, the shell's token (it was #e9e6e0) */
   margin: 64px 0 56px; padding: 73px 0;
   background: var(--cl15-band);
   box-shadow: 0 0 0 100vmax var(--cl15-band);

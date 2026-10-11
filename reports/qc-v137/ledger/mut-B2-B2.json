@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 you pressed",
+  "ok": true,
+  "detail": "pressed \"you\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 you showing",
+  "ok": true,
+  "detail": "showing 13 of 73, the cell says 13"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 you no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 agent pressed",
+  "ok": true,
+  "detail": "pressed \"agent\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 agent showing",
+  "ok": true,
+  "detail": "showing 46 of 73, the cell says 46"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 agent no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 closed pressed",
+  "ok": true,
+  "detail": "pressed \"closed\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 closed showing",
+  "ok": true,
+  "detail": "showing 13 of 73, the cell says 13"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 closed no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 court and chip combine",
+  "ok": true,
+  "detail": "court 46, with Overdue 31"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Clear all shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Clear all clears both",
+  "ok": true,
+  "detail": "pressed \"\" · showing 73 of 73"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 pressing again clears",
+  "ok": true,
+  "detail": "pressed \"\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 no scroll from further down",
+  "ok": true,
+  "detail": "scrollTop 367 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 1 clears",
+  "ok": true,
+  "detail": "pressed \"\" · showing 73"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 you pressed",
+  "ok": true,
+  "detail": "pressed \"you\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 you showing",
+  "ok": true,
+  "detail": "showing 13 of 73, the cell says 13"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 you no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 agent pressed",
+  "ok": true,
+  "detail": "pressed \"agent\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 agent showing",
+  "ok": true,
+  "detail": "showing 46 of 73, the cell says 46"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 agent no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 closed pressed",
+  "ok": true,
+  "detail": "pressed \"closed\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 closed showing",
+  "ok": true,
+  "detail": "showing 13 of 73, the cell says 13"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 closed no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 court and chip combine",
+  "ok": true,
+  "detail": "court 46, with Overdue 31"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Clear all shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Clear all clears both",
+  "ok": true,
+  "detail": "pressed \"\" · showing 73 of 73"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 pressing again clears",
+  "ok": true,
+  "detail": "pressed \"\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 no scroll from further down",
+  "ok": true,
+  "detail": "scrollTop 367 → 367"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 1 clears",
+  "ok": true,
+  "detail": "pressed \"\" · showing 73"
+ }
+]

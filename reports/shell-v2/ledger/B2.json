@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "214–362"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "left 363 right 362 flat 362.2"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "25.8"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "now 130 main 104"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "now 1159.3×148.0 main 1159.3×148.0"
+ },
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "214–350"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "left 350 right 350 flat 350.0"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "26.0"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "now 102 main 76"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "now 1159.3×136.0 main 1159.3×136.0"
+ },
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "214–308"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "left 308 right 308 flat 307.8"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "25.2"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "now 102 main 76"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "now 1159.3×94.1 main 1159.3×94.1"
+ },
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "214–330"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "left 331 right 331 flat 330.4"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "25.6"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "now 118 main 92"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "now 942.1×116.4 main 942.1×116.4"
+ },
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "214–326"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "left 326 right 326 flat 325.9"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "26.1"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "now 90 main 64"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "now 942.1×112.0 main 942.1×112.0"
+ },
+ {
+  "lock": "B2 precondition: the banner and the room under it are on screen",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "214–287"
+ },
+ {
+  "lock": "B2 no arrow",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "::after content none width 0"
+ },
+ {
+  "lock": "B2 the bottom edge is flat at the sides (±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "left 287 right 287 flat 286.8"
+ },
+ {
+  "lock": "B2 …and 26 (±1) lower at the centre",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "25.2"
+ },
+ {
+  "lock": "B2 no shadow: 6px under the edge is the page",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "filter none/none shadow none pixel 242,238,232"
+ },
+ {
+  "lock": "B2 the content below starts at main's gap + 26 (±2)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "now 90 main 64"
+ },
+ {
+  "lock": "B2 the banner's own box is main's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "now 942.1×72.9 main 942.1×72.9"
+ }
+]

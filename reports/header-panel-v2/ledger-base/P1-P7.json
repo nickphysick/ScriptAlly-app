@@ -1,0 +1,974 @@
+[
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,64 1159×390)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries/analytics @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,64 1159×337)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries/analytics @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries/analytics @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,64 1159×390)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×188)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents/discover @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,64 1159×400)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/packages @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×134)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/calendar @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 296,82 1159×188)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/noteboard @1512",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,64 942×317)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,64 942×337)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "sheet false"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "tab rgb(242, 238, 232) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/queries/analytics @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,64 942×317)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×188)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "39 (as built before the pack: 39)"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/agents/discover @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,64 942×328)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/manuscripts/packages @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×288)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×134)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo/calendar @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo/calendar @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 the header is the panel",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "no [data-hpanel] on screen (header 289,82 942×188)"
+ },
+ {
+  "lock": "P1 background, radius 14, 1px border",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "null · null · null"
+ },
+ {
+  "lock": "P1 left and right edges are the content column's (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 top is 28 below the sheet's top edge (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P1 no header sheet",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "sheet true"
+ },
+ {
+  "lock": "P1 the folder tab is the page colour",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "tab rgb(251, 249, 245) · page rgb(242, 238, 232)"
+ },
+ {
+  "lock": "P4 precondition: a title was read",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "P7 no horizontal overflow at 1280",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P7 the panel ends inside the page sheet",
+  "where": "/todo/noteboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "P5 population: several routes carry a drawing",
+  "where": "all",
+  "ok": false,
+  "detail": "0 readings with a drawing"
+ },
+ {
+  "lock": "P4 population: several routes carry an intro",
+  "where": "all",
+  "ok": false,
+  "detail": "0 intros"
+ }
+]

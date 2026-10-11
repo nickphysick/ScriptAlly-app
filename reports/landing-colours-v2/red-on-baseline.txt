@@ -1,0 +1,19 @@
+  ✘   2 [measure] › tests/e2e/landingColoursV2.measure.ts:271:3 › LC2 › N1 the nav's ground is ink, opaque, at rest and condensed, on every public route (719ms)
+  ✘   3 [measure] › tests/e2e/landingColoursV2.measure.ts:294:3 › LC2 › N2 the wordmark is type on ink, the primary is the cream button, and every link reads (672ms)
+  ✓   4 [measure] › tests/e2e/landingColoursV2.measure.ts:330:3 › LC2 › N3 the nav's heights and the anchor landing are the pre-pack ones (11.3s)
+  ✘   5 [measure] › tests/e2e/landingColoursV2.measure.ts:351:3 › LC2 › H1 the hero is paper white fading to oat, with ink type (1.2s)
+  ✓   6 [measure] › tests/e2e/landingColoursV2.measure.ts:373:3 › LC2 › H2 the shadow is the same picture in the same place (1.3s)
+  ✘   7 [measure] › tests/e2e/landingColoursV2.measure.ts:386:3 › LC2 › S1 one light sheet with four 18px corners between the ink nav and the ink footer (632ms)
+  ✓   8 [measure] › tests/e2e/landingColoursV2.measure.ts:425:3 › LC2 › S2 nothing on the landing page moved (2.1s)
+  ✘   9 [measure] › tests/e2e/landingColoursV2.measure.ts:448:3 › LC2 › V1 the vision band is stone, holding three white cards (738ms)
+  ✘  10 [measure] › tests/e2e/landingColoursV2.measure.ts:470:3 › LC2 › F1 everything on the navy founding panel reads, in every outcome state (693ms)
+  ✘  11 [measure] › tests/e2e/landingColoursV2.measure.ts:524:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment (695ms)
+  ✘  12 [measure] › tests/e2e/landingColoursV2.measure.ts:554:3 › LC2 › T1 the footer is the page's ink ground, with no rule above it (641ms)
+    Error: / @1440 rest: nav ground
+    Error: @1440: the wordmark is not a picture
+    Error: top 247,244,238
+    Error: /: the sheet exists
+    Error: expect(received).toBe(expected) // Object.is equality
+    Error: the panel is the navy panel
+    Error: founders hero: .mk-fwcol input[type=email]::placeholder
+    Error: expect(received).toBe(expected) // Object.is equality

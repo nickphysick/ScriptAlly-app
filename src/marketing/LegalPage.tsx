@@ -21,7 +21,6 @@
 import React from "react";
 import { LEGAL_DOCUMENTS, LEGAL_COPY_REVIEWED, DRAFT_TAG, LegalDocumentKey, LegalBlock } from "./legalCopy";
 import { DocumentShell } from "./DocumentShell";
-import { MarketingFooter } from "./MarketingFooter";
 import { LegalPlate } from "./marketingMarks";
 import { Runs } from "./CopyRuns";
 
@@ -79,7 +78,6 @@ export const LegalPage: React.FC<{ doc: LegalDocumentKey; onNavigate: Nav }> = (
         ))}
       </DocumentShell>
 
-      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

@@ -1,0 +1,138 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The Contact list's badge desk (header panel v2, Part D; ref design-refs/shell/header-panel-v2.html `#cl`).
+ *
+ * ⚠️ THE QUERY CENTRE v135 CARD, PORTED VALUE FOR VALUE from queries/centre/qcvDesk135.css: the card, the inner border,
+ *    the strip, the number badge (a child of the card, so the border cannot paint across it), the placeholder, the body
+ *    grid, the tiles, the chart box and the full-width line. HP2 D1 measures the two desks against each other.
+ *    Page-local, not lifted: the two badge desks are a lift candidate.
+ * ⚠️ ONE COURT: every card is slate (`--cdb-c` #3d5070 on `--cdb-cl` #e2e7ef). The rust "hot" tile is the Query Centre's.
+ * ⚠️ "COMPACT" IS THE PAGE SHEET'S WIDTH (`.ws-app.sheet-wide` restates the full-size values), as on the Query Centre.
+ * ⚠️ THE HALO IS THE PAGE'S TOKEN (`--ws-page`): the desk sits on the page.
+ * ⚠️ NO SELECTED STATE on these cards.
+ * ⚠️ THE CHARTS ARE shell/desk's OWN COMPONENTS, which state their colours as attributes; this sheet recolours and
+ *    resizes them for this card. shell/desk/desk.css is not edited.
+ */
+.cdb-desk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cdb-card { --cdb-c: #3d5070; --cdb-cl: #e2e7ef; --cdb-c40: rgba(61, 80, 112, 0.4); --cdb-c55: rgba(61, 80, 112, 0.55); }
+
+.cdb-card {
+  position: relative; box-sizing: border-box; min-width: 0;
+  display: flex; flex-direction: column; overflow: visible;
+  border-radius: 16px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09), 0 14px 30px -26px rgba(28, 19, 15, 0.4);
+  transition: box-shadow 0.15s;
+}
+.cdb-card:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 34px -24px rgba(28, 19, 15, 0.45); }
+/* the inner border */
+.cdb-card::before {
+  content: ""; position: absolute; inset: 6px; z-index: 2; box-sizing: border-box;
+  border-radius: 11px; border: 1.25px solid var(--cdb-c40); pointer-events: none;
+}
+.cdb-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+.cdb-hit:focus-visible { outline: 2px solid #2d3a50; outline-offset: 6px; }
+.cdb-card > *:not(.cdb-hit) { position: relative; z-index: 1; pointer-events: none; }
+
+/* ── the header strip ── */
+.cdb-card .cdb-strip {
+  box-sizing: border-box; flex: none; height: 64px; padding: 0 86px 0 96px;
+  display: flex; align-items: center; border-radius: 16px 16px 0 0; background: var(--cdb-cl);
+}
+.cdb-card .cdb-title { font-family: var(--sp-type); font-weight: 400; font-size: 18px; line-height: 1.2; letter-spacing: 0.005em; color: var(--cdb-c); white-space: nowrap; }
+
+/* ── the number badge: breaks out of the card's top edge. A SOLID white disc: it is the card's own child, above the
+   inner border (z-index 2) and the strip (1), so nothing shows through or over it.
+   ⚠️ 0-3-0: `.cdb-card > *:not(.cdb-hit)` is 0-2-0 and would otherwise set it relative at z-index 1. ── */
+.cdb-card > .cdb-badge.cdb-badge {
+  position: absolute; left: 16px; top: -26px; z-index: 3; box-sizing: border-box;
+  width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+  background: #fff; color: var(--cdb-c);
+  box-shadow: 0 0 0 4px var(--cdb-c), 0 0 0 9px var(--ws-page), 0 10px 18px -8px rgba(28, 19, 15, 0.45);
+}
+.cdb-card .cdb-badge b { font-family: var(--sp-type); font-weight: 400; font-size: 30px; line-height: 1; letter-spacing: -0.02em; color: inherit; }
+
+/* ── the illustration: a dashed placeholder until its slot is filled (ContactOpenHeader.tsx) ── */
+.cdb-card .cdb-art {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 3; box-sizing: border-box;
+  width: 60px; height: 50px; padding: 6px; border-radius: 12px;
+  display: grid; place-items: center; text-align: center;
+  border: 1.5px dashed var(--cdb-c55); background: rgba(255, 255, 255, 0.55); color: var(--cdb-c);
+}
+.cdb-card .cdb-artlb { display: block; font-family: var(--sp-mono); font-weight: 600; font-size: 6.5px; line-height: 1.25; letter-spacing: 0.06em; text-transform: uppercase; color: inherit; }
+.cdb-card .cdb-artlb svg { display: block; width: 14px; height: 14px; margin: 0 auto 2px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.cdb-card .cdb-art--img { padding: 0; border: 0; background: transparent; }
+/* ⚠️ THE IMAGE IS PLACED BY INSET, NOT `height: 100%`: the slot is a grid, whose row is content-sized, so a percentage
+   height is dropped and the image took its own ratio (measured: 60 × 57 in a 60 × 50 box). */
+.cdb-card .cdb-art--img img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; object-fit: contain; }
+
+/* ── the body: the tiles left, the chart right across both rows and on the bottom, the month line beneath ── */
+.cdb-card .cdb-bd { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; padding: 22px 22px 16px; align-items: start; }
+.cdb-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.cdb-row { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.cdb-card .cdb-tile {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex: none;
+  min-width: 30px; height: 28px; padding: 0 6px; border-radius: 7px;
+  background: var(--cdb-cl); color: var(--cdb-c);
+  font-family: var(--sp-type); font-weight: 400; font-size: 17px; line-height: 1;
+}
+.cdb-card .cdb-tile.is-hot { background: #f6ddd2; color: #a2452a; }
+.cdb-card .cdb-tile.is-zero { background: #f1eee9; color: rgba(28, 19, 15, 0.4); }
+.cdb-card .cdb-lb { font-family: var(--sp-serif); font-weight: 400; font-size: 14.5px; line-height: 1.35; color: rgba(28, 19, 15, 0.72); white-space: nowrap; }
+.cdb-card .cdb-ch { grid-row: 1 / span 2; grid-column: 2; align-self: stretch; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
+.cdb-card .cdb-ch svg { display: block; width: 96px; height: 46px; overflow: visible; }
+.cdb-card .cdb-ch small { display: block; margin-top: 3px; font-family: var(--sp-type); font-weight: 400; font-size: 10.5px; line-height: 1.2; color: rgba(28, 19, 15, 0.42); white-space: nowrap; text-align: right; }
+.cdb-card .cdb-mom { grid-column: 1; display: flex; align-items: center; gap: 6px; margin-top: 6px; font-family: var(--sp-serif); font-weight: 400; font-size: 13px; line-height: 1.3; color: rgba(28, 19, 15, 0.58); white-space: nowrap; }
+.cdb-card .cdb-mom svg { display: block; flex: none; width: 10px; height: 10px; fill: currentColor; }
+
+/* ── the page sheet wider than 1440: the full-size values ── */
+.ws-app.sheet-wide .cdb-card .cdb-strip { height: 72px; padding: 0 110px 0 112px; }
+.ws-app.sheet-wide .cdb-card .cdb-title { font-size: 21px; }
+.ws-app.sheet-wide .cdb-card > .cdb-badge.cdb-badge { left: 20px; top: -30px; width: 76px; height: 76px; }
+.ws-app.sheet-wide .cdb-card .cdb-badge b { font-size: 36px; }
+.ws-app.sheet-wide .cdb-card .cdb-art { right: 16px; width: 76px; height: 56px; }
+.ws-app.sheet-wide .cdb-card .cdb-lb { font-size: 15.5px; }
+.ws-app.sheet-wide .cdb-card .cdb-ch svg { width: 150px; height: 62px; }
+.ws-app.sheet-wide .cdb-card .cdb-mom { font-size: 14px; }
+
+
+/* ── what is the Contact list's own ── */
+/* the title may wrap to two lines (it never clips, and the strip's right padding keeps it clear of the placeholder) */
+.cdb-card .cdb-title { white-space: normal; line-height: 1.08; }
+/* the percentage is set smaller so it fits the disc: 22 (27) against the numeral's 30 (36) */
+.cdb-card .cdb-badge--pct b { font-size: 22px; letter-spacing: -0.03em; }
+.ws-app.sheet-wide .cdb-card .cdb-badge--pct b { font-size: 27px; }
+/* a card with no press has no cursor change; the press cards keep the hover lift */
+.cdb-card:not(.is-press):hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09), 0 14px 30px -26px rgba(28, 19, 15, 0.4); }
+/* the line keeps its height when there is nothing to say */
+.cdb-card .cdb-mom.is-empty { visibility: hidden; }
+
+/* ── the shared charts, in this card's box and colours ── */
+.cdb-card .cdb-ch .dsk-chart { display: flex; flex-direction: column; align-items: flex-end; gap: 0; margin: 0; padding: 0; }
+.cdb-card .cdb-ch .dsk-svg { display: block; width: 96px; height: 46px; overflow: visible; }
+.cdb-card .cdb-ch .dsk-svg--ring { width: 46px; }
+.cdb-card .cdb-ch [data-dk-bar] { fill: var(--cdb-c); }
+.cdb-card .cdb-ch .dsk-svg--ring circle:first-child { stroke: var(--cdb-cl); }
+.cdb-card .cdb-ch [data-dk-arc="active"] { stroke: var(--cdb-c); }
+.cdb-card .cdb-ch [data-dk-arc="closed"] { stroke: #c9c3bb; }
+/* the bar: its track is the tint, its fill the court's colour, in the chart box's width and on its bottom edge */
+.cdb-card .cdb-ch [data-dk-chart="bar"] { width: 96px; height: 46px; justify-content: flex-end; }
+.cdb-card .cdb-ch .dsk-pg { display: block; width: 100%; height: 8px; margin: 0; border-radius: 4px; background: var(--cdb-cl); overflow: hidden; }
+.cdb-card .cdb-ch .dsk-pg i { display: block; height: 100%; border-radius: 4px; background: var(--cdb-c); }
+.cdb-card .cdb-ch [data-dk-chart="bar"] small { width: 96px; }
+.ws-app.sheet-wide .cdb-card .cdb-ch .dsk-svg { width: 150px; height: 62px; }
+.ws-app.sheet-wide .cdb-card .cdb-ch .dsk-svg--ring { width: 62px; }
+.ws-app.sheet-wide .cdb-card .cdb-ch [data-dk-chart="bar"] { width: 150px; height: 62px; }
+.ws-app.sheet-wide .cdb-card .cdb-ch [data-dk-chart="bar"] small { width: 150px; }
+
+/* ── loading: blank discs, every box at its size, the text and the charts painted over ── */
+.clv-group[data-loading] .cdb-card :is(.cdb-badge b, .cdb-tile, .cdb-lb, .cdb-mom, .cdb-ch small) { color: transparent !important; }
+.clv-group[data-loading] .cdb-card :is(.cdb-tile, .cdb-lb, .cdb-mom, .cdb-ch small) {
+  border-radius: 5px; background: linear-gradient(90deg, #e7e5e1, #f1efec, #e7e5e1); background-size: 200% 100%;
+  animation: cl13Shim 1.6s ease-in-out infinite;
+}
+.clv-group[data-loading] .cdb-card .cdb-mom.is-empty { visibility: visible; }
+.clv-group[data-loading] .cdb-card :is(.cdb-mom svg, .dsk-svg, .dsk-pg) { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .cdb-card { transition: none; } .clv-group[data-loading] .cdb-card * { animation: none !important; } }
+@media (max-width: 767.98px) { .cdb-desk { grid-template-columns: minmax(0, 1fr); gap: 44px; } }

@@ -1946,6 +1946,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         >
           <PageHeader
             variant="full"
+            panel
             title="To-do list"
             description="Everything that's yours to do, and everything worth a look."
             living={tdLiving}

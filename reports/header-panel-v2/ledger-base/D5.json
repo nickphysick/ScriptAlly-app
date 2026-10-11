@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D5 precondition: the list shows everyone, and fewer are queried",
+  "where": "queried",
+  "ok": false,
+  "detail": "showing 37 · queried NaN"
+ },
+ {
+  "lock": "D5 the week card is not pressable",
+  "where": "week",
+  "ok": false,
+  "detail": "button undefined"
+ },
+ {
+  "lock": "D5 the labels are the icon cards'",
+  "where": "labels",
+  "ok": false,
+  "detail": "undefined | undefined"
+ },
+ {
+  "lock": "D5 Queried sets the list to Queried",
+  "where": "queried",
+  "ok": false,
+  "detail": "showing 37 → 37 (queried NaN)"
+ },
+ {
+  "lock": "D5 Profiles opens Housekeeping",
+  "where": "profiles",
+  "ok": false,
+  "detail": "Housekeeping surfaces on screen 0 → 0"
+ }
+]

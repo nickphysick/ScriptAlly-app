@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512 measured loading, then loaded",
+  "ok": true,
+  "detail": "true → false"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "1159×267.2 at 296,133.8 → 1159×267.2 at 296,133.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 strip heading",
+  "ok": true,
+  "detail": "1159×27.5 at 296,434.9 → 1159×27.5 at 296,434.9"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 strip",
+  "ok": false,
+  "detail": "1159×153.8 at 296,476.4 → 1159×223.8 at 296,476.4"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cells",
+  "ok": false,
+  "detail": "290×153.8 at 296,476.4 | 290×153.8 at 586,476.4 | 290×153.8 at 876,476.4 | 290×153.8 at 1166,476.4"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 measured loading, then loaded",
+  "ok": true,
+  "detail": "true → false"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "942×267.2 at 289,133.8 → 942×267.2 at 289,133.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 strip heading",
+  "ok": true,
+  "detail": "942×27.5 at 289,434.9 → 942×27.5 at 289,434.9"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 strip",
+  "ok": false,
+  "detail": "942×153.8 at 289,476.4 → 942×223.8 at 289,476.4"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cells",
+  "ok": false,
+  "detail": "236×153.8 at 289,476.4 | 236×153.8 at 524,476.4 | 236×153.8 at 760,476.4 | 236×153.8 at 996,476.4"
+ }
+]

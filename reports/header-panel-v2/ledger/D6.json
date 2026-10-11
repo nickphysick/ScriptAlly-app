@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D6 a dashed box, labelled Art to come, hidden from assistive tech",
+  "where": "week",
+  "ok": true,
+  "detail": "dashed 1 · \"Art to come\" · aria-hidden true"
+ },
+ {
+  "lock": "D6 a dashed box, labelled Art to come, hidden from assistive tech",
+  "where": "queried",
+  "ok": true,
+  "detail": "dashed 1 · \"Art to come\" · aria-hidden true"
+ },
+ {
+  "lock": "D6 a dashed box, labelled Art to come, hidden from assistive tech",
+  "where": "profiles",
+  "ok": true,
+  "detail": "dashed 1 · \"Art to come\" · aria-hidden true"
+ },
+ {
+  "lock": "D6 the image is loaded and fills the same box (±1)",
+  "where": "week",
+  "ok": true,
+  "detail": "slot 595,456 60×50 → 595,456 60×50 · image 60×50 loaded true"
+ },
+ {
+  "lock": "D6 the dashes and the label are gone",
+  "where": "week",
+  "ok": true,
+  "detail": "border none 0 · text \"\""
+ },
+ {
+  "lock": "D6 an empty slot beside it is still a placeholder",
+  "where": "queried",
+  "ok": true,
+  "detail": "dashed 1"
+ }
+]

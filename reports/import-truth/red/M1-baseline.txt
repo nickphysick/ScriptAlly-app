@@ -1,0 +1,72 @@
+
+ RUN  v3.2.6 /private/tmp/sa-truth-base
+
+ ❯ src/lib/importMixedCard.test.tsx (6 tests | 3 failed) 13ms
+   × M1 · some dated, some not > two dated and one undated: the chart counts two, and the line reads "1 more has no sent date yet." 10ms
+     → expected null to be '1 more has no sent date yet.' // Object.is equality
+   × M1 · some dated, some not > two dated and three undated: "3 more have no sent date yet." 1ms
+     → expected null to be '3 more have no sent date yet.' // Object.is equality
+   ✓ M1 · some dated, some not > a closed undated query is not counted 0ms
+   ✓ M1 · none dated, and all dated > none dated: only the import-fixes sentence 0ms
+   ✓ M1 · none dated, and all dated > all dated: the card is as it was, with no line 0ms
+   × M1 · none dated, and all dated > the two builders: exactly one of them speaks for any pair of counts 0ms
+     → (0 , undatedMoreLine) is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/importMixedCard.test.tsx > M1 · some dated, some not > two dated and one undated: the chart counts two, and the line reads "1 more has no sent date yet."
+AssertionError: expected null to be '1 more has no sent date yet.' // Object.is equality
+
+[32m- Expected:[39m 
+"1 more has no sent date yet."
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/lib/importMixedCard.test.tsx:40:20
+     38|     const c = card(mixed);
+     39|     expect(c.title).toBe("2 active queries");
+     40|     expect(c.more).toBe("1 more has no sent date yet.");
+       |                    ^
+     41|     expect(c.html, "the two sentences never appear together").not.toMa…
+     42|     expect(c.html.indexOf('data-probe-text="chart-undated"'), "the lin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/importMixedCard.test.tsx > M1 · some dated, some not > two dated and three undated: "3 more have no sent date yet."
+AssertionError: expected null to be '3 more have no sent date yet.' // Object.is equality
+
+[32m- Expected:[39m 
+"3 more have no sent date yet."
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/lib/importMixedCard.test.tsx:46:30
+     44|   it("two dated and three undated: \"3 more have no sent date yet.\"",…
+     45|     const mixed = [q(QueryStatus.QUERIED, ago(20)), q(QueryStatus.QUER…
+     46|     expect(card(mixed).more).toBe("3 more have no sent date yet.");
+       |                              ^
+     47|   });
+     48|   it("a closed undated query is not counted", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/lib/importMixedCard.test.tsx > M1 · none dated, and all dated > the two builders: exactly one of them speaks for any pair of counts
+TypeError: (0 , undatedMoreLine) is not a function
+ ❯ src/lib/importMixedCard.test.tsx:73:26
+     71|     for (let n = 0; n <= 4; n++) for (let u = 0; u <= 4; u++) {
+     72|       const titleSpeaks = NONE_DATED.test(activeTitle(n, u));
+     73|       const lineSpeaks = undatedMoreLine(n, u) !== null;
+       |                          ^
+     74|       if (titleSpeaks && lineSpeaks) both++;
+     75|       if (lineSpeaks) mixedSeen++;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  12:17:51
+   Duration  416ms (transform 134ms, setup 0ms, collect 209ms, tests 13ms, environment 0ms, prepare 44ms)
+

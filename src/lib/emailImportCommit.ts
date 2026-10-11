@@ -22,8 +22,9 @@
 import { collection, doc, getDocs, deleteDoc, writeBatch, query, where, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
-import { assignTimes } from "./smartImportCommit";
-import { QueryStatus, SubmissionMethod, SubmissionStatus, ActivityType, Agent } from "../types";
+import { assignTimes, UNDATED_ORDER_BASE_MS } from "./smartImportCommit";
+import { QueryStatus, SubmissionMethod, ActivityType, Agent } from "../types";
+import { importedAgentDoc } from "./importedAgent";
 import type { ProposalRecord, ProposalSubject } from "./emailImport";
 
 export interface EmailCommitDeps {
@@ -33,7 +34,7 @@ export interface EmailCommitDeps {
     a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string },
     bypassLimits?: boolean
   ) => Promise<{ success: boolean; error?: string; id?: string }>;
-  addQuery: (q: any, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
+  addQuery: (q: any, bypassLimits?: boolean, opts?: { imported?: boolean }) => Promise<{ success: boolean; error?: string; id?: string }>;
 }
 
 export interface EmailCommitResult {
@@ -106,23 +107,9 @@ export async function commitEmailImport(
 
   if (subject.kind === "new_agent") {
     // 1a. Create the agent — agency is the confirmed identity; name only if present.
+    //     Only what the email gave: no rating, window or reply rule of the import's own.
     const agentRes = await deps.addAgent(
-      {
-        name: subject.agentName?.trim() ?? "",
-        agency: subject.agency,
-        email: "",
-        website: "",
-        genres: [],
-        mswlNotes: "",
-        starRating: 3,
-        submissionStatus: SubmissionStatus.OPEN,
-        responseTimeWeeks: 0,
-        noResponseMeansNo: false,
-        submissionMethod: SubmissionMethod.EMAIL,
-        materialsWanted: [],
-        notes: "",
-        importedNeedsReview: true,
-      },
+      importedAgentDoc({ name: subject.agentName?.trim() ?? "", agency: subject.agency }, { importedNeedsReview: true }),
       true
     );
     if (!agentRes.success || !agentRes.id) {
@@ -147,7 +134,9 @@ export async function commitEmailImport(
         status: initialStatus,
         ...(queriedDated?.date ? { dateSent: queriedDated.date } : {}),
       },
-      true
+      true,
+      // an import: addQuery sets no sent date of its own and writes no history stamped now
+      { imported: true }
     );
     if (!qRes.success || !qRes.id) {
       // The agent now exists (importedNeedsReview) — recoverable; surface, never silent-partial.
@@ -165,15 +154,16 @@ export async function commitEmailImport(
   // 2. Write the rungs into the per-query activity subcollection.
   const actCol = collection(db, "users", deps.userId, "queries", queryId, "activity");
 
-  // new_agent → drop addQuery's auto-seeded rung so our set is authoritative; base ordering at now.
-  // matched   → keep the real history; base provisional ordering AFTER the latest existing rung.
-  let baseMs = Date.now();
+  // new_agent → undated steps are ordered from zero, never from the import's own time.
+  // matched   → keep the real history; order undated steps just AFTER the latest existing one.
+  // Neither reads the clock: an ordering key of "now" is still a date in the record.
+  let baseMs = UNDATED_ORDER_BASE_MS;
   const existing = await getDocs(actCol);
   if (clearSeededRung) {
     await Promise.all(existing.docs.map((d) => deleteDoc(d.ref)));
   } else {
     const latest = Math.max(0, ...existing.docs.map((d) => tsMillis(d.data().createdAt)));
-    baseMs = Math.max(Date.now(), latest + 1);
+    baseMs = latest + 1;
   }
 
   // Dated-ness is the presence of a real date (user-set or stated), NOT the flag — so a date the

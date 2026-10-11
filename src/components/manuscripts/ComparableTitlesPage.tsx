@@ -320,6 +320,11 @@ export const ComparableTitlesPage: React.FC<{
       firstTitle: comps[0]?.title ?? null,
     }),
     empty: { heading: COMPS_EMPTY_HEADING, subline: ["Add the books ", { ms: activeMs.title }, " sits beside, and QueryHawk keeps them ready for your letter."] },
+  } : !collectionsReady ? {
+    /* Header v3 (H8): before the manuscripts land there is no book to count for yet. The header waits as the same
+       number panel with a blank number, so it does not open as the no-manuscript header and then change height. */
+    count: null,
+    copy: (n) => compsHeaderCopy(n, { missing: 0, inLetter: [], firstTitle: null }),
   } : undefined;
 
   const formEl = (f: FormState) => (
@@ -346,6 +351,7 @@ export const ComparableTitlesPage: React.FC<{
           <div className="cpv-head">
             <PageHeader
               variant="full"
+              panel
               title="Comparable titles"
               description={activeMs ? undefined : "Add a manuscript to build its comp list."}
               living={living}

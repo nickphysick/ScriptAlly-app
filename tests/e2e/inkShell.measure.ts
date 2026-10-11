@@ -9,6 +9,7 @@
  * state asked for — because a probe that finds nothing passes vacuously.
  */
 import { test, expect, Page } from "@playwright/test";
+import { hasHeaderSheet } from "../../src/components/shell/headerSheetRoutes";
 import { readFileSync } from "node:fs";
 import { INK, TERRA, WIDTHS, MUTATE, inkOpen, rect, css, pngDiff, rowColours, applyMutation } from "./inkLib";
 import { liftMotionSuppression } from "./measure";
@@ -66,8 +67,12 @@ test.describe("ink shell", () => {
         const win = await css(page, ".ws-window", ["background-color"]);
         expect(tab, `${route}: a tab is drawn`).not.toBeNull();
         expect(fl, `${route}: the fillet is drawn`).not.toBeNull();
-        expect(tab!["background-color"], `${route} ${w}: tab vs sheet`).toBe(win!["background-color"]);
-        expect(fl!.fill, `${route} ${w}: fillet vs sheet`).toBe(win!["background-color"]);
+        /* RE-POINTED (app shell v2, 9 Oct): the tab and its fillet are still one colour, but on a route whose header
+           sits on the header sheet that colour is the SHEET's (#fbf9f5), not the page sheet's — the tab joins the
+           header. Elsewhere it is still the page sheet's. SH2 S6 holds the same thing over the whole census. */
+        const want = hasHeaderSheet(route) ? "rgb(251, 249, 245)" : win!["background-color"];
+        expect(tab!["background-color"], `${route} ${w}: the tab`).toBe(want);
+        expect(fl!.fill, `${route} ${w}: fillet vs tab`).toBe(tab!["background-color"]);
       }
     }
   });
@@ -493,7 +498,9 @@ test.describe("ink shell at 3×", () => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/todo", w, { scope: "ink3" });
       const tab = (await rect(page, ".ws-ftab"))!;
-      const sheet = (await css(page, ".ws-window", ["background-color"]))!["background-color"];
+      /* RE-POINTED (app shell v2, 9 Oct): /todo has a header sheet, so the tab and the strip under its foot are
+         both the SHEET's colour — the seam this lock guards is now between the tab and the header sheet. */
+      const sheet = hasHeaderSheet("/todo") ? "rgb(251, 249, 245)" : (await css(page, ".ws-window", ["background-color"]))!["background-color"];
       const foot = tab.b - 1; /* the sheet's top edge, which the tab overlaps by 1px */
       const shot = await page.screenshot({ clip: { x: tab.x + 13, y: foot - 2, width: tab.w - 26, height: 4 } });
       const colours = await rowColours(page, shot, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 0, Math.floor((tab.w - 26) * 3));
@@ -555,7 +562,7 @@ for (const v of FRACTIONAL) {
         const tab = (await rect(page, ".ws-ftab"))!;
         const win = (await rect(page, ".ws-window"))!;
         expect(tab, "the tab is drawn").not.toBeNull();
-        const sheet = (await css(page, ".ws-window", ["background-color"]))!["background-color"];
+        const sheet = hasHeaderSheet("/todo") ? "rgb(251, 249, 245)" : (await css(page, ".ws-window", ["background-color"]))!["background-color"];
         /* the precondition this case exists for: the sheet's top edge lands MID-pixel at this scale */
         const devTop = win.y * v.dsf;
         const fractional = Math.abs(devTop - Math.round(devTop)) > 0.01;
@@ -563,7 +570,12 @@ for (const v of FRACTIONAL) {
         const foot = tab.b - 1;
         const shot = await page.screenshot({ clip: { x: tab.x + 13, y: foot - 2, width: tab.w - 26, height: 4 } });
         const colours = await rowColours(page, shot, Array.from({ length: 12 }, (_, i) => i), 0, 100000);
-        expect(colours, `${v.name} at ${w}: colours across the tab's foot`).toEqual([sheet]);
+        /* ⚠️ ONE LEVEL OF TOLERANCE SINCE APP SHELL v2: under the tab's foot is the header sheet, which is drawn through a
+           filter (its drop shadow), and at a fractional scale the compositor rounds that layer one level off the tab's
+           flat fill — measured at 1.25: rgb(251, 250, 246) against rgb(251, 249, 245). A seam is a different COLOUR. */
+        const lv = (c: string) => (c.match(/\d+/g) ?? []).map(Number);
+        const want = lv(sheet);
+        expect(colours.length > 0 && colours.every((c) => lv(c).every((n, i) => Math.abs(n - want[i]) <= 1)), `${v.name} at ${w}: colours across the tab's foot ${JSON.stringify(colours)} against ${sheet}`).toBe(true);
       }
     });
   });

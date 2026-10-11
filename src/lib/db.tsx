@@ -108,6 +108,7 @@ import { TodoWriteError, classifyWriteError } from "./todoWrite";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
+import { importedSentDate, seedsOwnHistory } from "./addQueryShape";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
@@ -225,6 +226,12 @@ export interface AddQueryOpts {
    * lets an undo lift a stamp no query still points at.
    */
   stampPackage?: boolean;
+  /**
+   * The query arrives by import (import fixes, 10 Oct). No sent date is defaulted to now and no
+   * history is seeded here: the import writes the history itself, with the file's own dates. See
+   * `addQueryShape.ts` for what the "now" steps did to an imported query.
+   */
+  imported?: boolean;
 }
 
 interface DbContextType {
@@ -1204,8 +1211,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     agents.forEach(a => {
-      // Dream-agent nudge: 5★, not closed (Unknown counts as suggestable), and not set aside.
-      if (a.starRating === 5 && a.submissionStatus !== SubmissionStatus.CLOSED && !a.setAside) {
+      // Dream-agent nudge: 5★, stated open (the line says "is open to subs"), and not set aside.
+      if (a.starRating === 5 && a.submissionStatus === SubmissionStatus.OPEN && !a.setAside) {
         const hasQuery = queries.some(q => q.agentId === a.id);
         if (!hasQuery) {
           calculatedTasks.push({
@@ -2399,7 +2406,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       id,
       userId: currentUser.id,
       status: q.status || QueryStatus.QUERIED,
-      dateSent: q.dateSent || new Date().toISOString(),
+      dateSent: importedSentDate(q.dateSent, opts, () => new Date().toISOString()),
       responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
     };
     // Firestore (no ignoreUndefinedProperties) rejects undefined fields. An advanced-status
@@ -2414,6 +2421,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // reproduces the seeded status immediately — without depending on the backfill timer.
     const nowMs = Date.now();
     const seedActivities = (): Activity[] => {
+      if (!seedsOwnHistory(opts)) return [];
       const out: Activity[] = [
         {
           id: "act-" + Math.random().toString(36).substr(2, 9),

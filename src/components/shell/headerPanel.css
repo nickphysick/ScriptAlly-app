@@ -1,0 +1,213 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE HEADER PANEL (header panel v2, 9 Oct; ref design-refs/shell/header-panel-v2.html).
+ *
+ * On every workspace page the header is a rounded panel in the Analytics band's blue, sitting on the page
+ * ground: 28px under the page sheet's top edge, the content column's width, radius 14, a hairline border,
+ * no shadow. It replaces the header sheet and its envelope flap on those pages.
+ *
+ * ⚠️ THE HEADER ELEMENT ITSELF IS THE PANEL (`.hpanel`). No wrapper and no layer behind it: a panel header
+ *    renders no `<HeaderSheet />` and is not an `hsheet-host`.
+ * ⚠️ THE TOKENS ARE STATED ONCE, HERE, AT `:root`. Each header's own sheet reads them for its type, its
+ *    buttons and its halo; none restates a value. `--hpanel-bg` is `--ink-band`, never `--ink-shell`.
+ * ⚠️ THE FOLDER TAB'S COLOUR FOLLOWS WHAT IS UNDER IT, AND THAT IS DECIDED IN inkShell.css BY WHAT IS ON
+ *    SCREEN — a visible header sheet — never by a list of routes. A panel has no sheet, so its tab is the
+ *    page's colour; an empty state on the same route still has its sheet and its matching tab.
+ * ⚠️ HERO vs COMPACT: `.hpanel--hero` is the two-column panel of the open headers and the full shared header
+ *    (text left, drawing right, vertically centred); `.hpanel--compact` is the workspace masthead's.
+ *    "Compact" VALUES in the hero follow the header's own query (the viewport, 1440), as each header does.
+ */
+:root {
+  --hpanel-bg: var(--ink-band);
+  --hpanel-fg: #f4eee5;
+  --hpanel-muted: rgba(244, 238, 229, 0.86);
+  --hpanel-line: rgba(244, 238, 229, 0.14);
+  --hpanel-stamp: #e0a188;
+  --hpanel-primary-bg: #f3eee6;
+  --hpanel-primary-fg: #1b2433;
+  --hpanel-ring: rgba(244, 238, 229, 0.7);
+  /* the space under a panel that has no desk row beneath it: 48, and 40 below a 1440 viewport */
+  --hpanel-below: 40px;
+}
+@media (min-width: 1440px) { :root { --hpanel-below: 48px; } }
+
+.hpanel {
+  box-sizing: border-box; position: relative;
+  margin-top: 28px;
+  background: var(--hpanel-bg); color: var(--hpanel-fg);
+  border: 1px solid var(--hpanel-line); border-radius: 14px;
+  box-shadow: none;
+}
+/* the two-column panel: text left, drawing right, centred on each other */
+.hpanel--hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
+  padding: 24px 26px 24px 30px;
+}
+@media (min-width: 1440px) { .hpanel--hero { column-gap: 40px; padding: 30px 36px 30px 40px; } }
+/* the workspace masthead's panel */
+.hpanel--compact { padding: 22px 28px; }
+
+/* the two buttons on a panel, whatever the header calls them */
+.hpanel .hpanel-b1 { background: var(--hpanel-primary-bg); color: var(--hpanel-primary-fg); box-shadow: none; }
+.hpanel .hpanel-b1:hover:not(:disabled) { background: #fff; }
+.hpanel .hpanel-b2 { background: transparent; color: var(--hpanel-fg); box-shadow: inset 0 0 0 1.5px var(--hpanel-ring); }
+.hpanel .hpanel-b2:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); }
+/* disabled stays legible on the blue: the same fills, never a 45% wash over a dark ground */
+.hpanel .hpanel-b1:disabled, .hpanel .hpanel-b2:disabled { opacity: 1; cursor: default; }
+.hpanel :is(button, a, [tabindex]):focus-visible { outline: 2px solid var(--hpanel-stamp); outline-offset: 2px; }
+
+/* a drawing made for a light ground stands on a white disc (the Analytics band's `BandDisc` construction) */
+.hpanel-disc { display: block; aspect-ratio: 1; border-radius: 50%; background: #fff; overflow: hidden; }
+.hpanel-disc > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* the rubber stamp (the Query Centre and the Contact list only): real text, outside the h1.
+   ⚠️ TWO CLASSES: the Query Centre's 0-1-0 font reset names bare spans and lands later in the bundle. */
+.hpanel .hpanel-stamp {
+  display: inline-block; flex: none; position: relative; top: -6px; white-space: nowrap;
+  padding: 8px 10px 7px; border: 1.5px solid var(--hpanel-stamp); border-radius: 5px;
+  font-family: "JetBrains Mono", var(--font-mono), monospace; font-weight: 700; font-size: 12px; line-height: 1;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--hpanel-stamp);
+  transform: rotate(-2deg);
+}
+
+/* below 768px a panel keeps its surface and its radius, at 20px of padding; each header stacks or hides its parts as it did */
+@media (max-width: 767.98px) {
+  .hpanel--hero, .hpanel--compact { padding: 20px; }
+  /* the hero panel on a phone: one column, the drawing put away, and the title row, the title and the buttons wrap.
+     ⚠️ MEASURED (HP2 P7, 390px): with the desktop grid the drawing lay across the words and the row ran 218px past
+     the panel's edge. The three own headers had no phone rule of their own. */
+  .hpanel.hpanel--hero { grid-template-columns: minmax(0, 1fr); }
+  .hpanel.hpanel--hero > :is(img, [aria-hidden="true"]):last-child { display: none; }
+  .hpanel.hpanel--hero :is(.qcoh-trow, .cl15-trow) { flex-wrap: wrap; row-gap: 14px; }
+  .hpanel.hpanel--hero h1 { flex-wrap: wrap; white-space: normal !important; row-gap: 6px; }
+  .hpanel.hpanel--hero :is(.qcoh-acts, .cl15-acts, .ms21-acts) { flex-wrap: wrap; }
+  .hpanel .hpanel-stamp { top: 0; }
+  .hpanel.hpanel--hero :is(.qcoh-trow, .cl15-trow) { padding-top: 10px; }
+}
+/* a panel is never wider than the track it sits in (a grid item's automatic minimum is its content's) */
+.hpanel { min-width: 0; max-width: 100%; }
+:is(.cpv-head, .ppv-head):has(> .hpanel) { min-width: 0; }
+
+/* the workspace grid's chrome slab closes on a hairline of its own, 1px under the masthead: under a panel it would rule
+   across the page just beneath the panel's edge. The border stays (1px of layout) and stops painting. */
+.wpg > .wpg-scroll > .wpg-chrome:has(.hpanel) { border-bottom-color: transparent; }
+/* ⚠️ A MASTHEAD WITH NO CONTROL ROW UNDER IT (Discover) takes the full space beneath its panel: `--hpanel-below`, less the
+   17px its page already leaves. Where a control row is fixed directly under the masthead (Calendar, Noteboard) that
+   relationship is kept as built. */
+.wpg > .wpg-scroll > .wpg-chrome:has(.hpanel--compact):not(:has(~ .wpg-toolband)) { padding-bottom: calc(var(--hpanel-below) - 17px); }
+
+
+/* ══ HEADER v3 (10 Oct; ref design-refs/shell/header-v3-qc.html `.ohdr`) — ONE PANEL HEADER ON EVERY WORKSPACE PAGE ══
+   `PanelHeader` (shell/PanelHeader.tsx) draws it. A NUMBER page leads with a big stacked number; a TITLE page shows a
+   title in its place. The surface, border, radius and the 28px above are the panel's own, above.
+
+   ⚠️ "COMPACT" IS THE PAGE SHEET'S WIDTH, NOT THE VIEWPORT'S: the base rules are the compact values, and
+      `.ws-app.sheet-wide` (the page sheet is at least 1440 wide) restates the full-size ones — the desks' switch.
+   ⚠️ FOUR CLASSES ON THE BOX RULES. A page's own root class rides on the same element (`.ph.ph--panel.ph--full`
+      is 0-3-0), and the panel's box must not depend on which page mounted it.
+   ⚠️ brand.tsx forces `h1` and bare spans at runtime, injected last: the type rules carry !important and three
+      classes, and every span states its face. */
+.hpanel.hpanel--hero.hp3.hp3 {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
+  padding: 28px 32px 34px 36px; min-height: 0; height: auto; width: auto; overflow: visible;
+  background: var(--hpanel-bg); color: var(--hpanel-fg); border: 1px solid var(--hpanel-line); border-radius: 14px;
+  box-shadow: none; clip-path: none; margin-top: 28px;
+}
+/* a NUMBER panel is as tall as its drawing would make it, with or without one, so a long subline cannot move it */
+/* doubled: `.ph.ph--panel.ph--full:not(.ph--band)` states its own floor at the same weight, in a later sheet */
+.hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 260px; }
+.hp3 .hp3-txt { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+
+/* NUMBER: the title block — the number spans two rows; the words on the first, the subline on the second */
+.hp3 .hp3-tb { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; justify-content: start; column-gap: 16px; max-width: 100%; min-width: 0; }
+.hp3 .hp3-tb h1.hp3-h1 {
+  grid-column: 1 / span 2; grid-row: 1 / span 2; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid;
+  margin: 0; padding: 0; min-width: 0; white-space: nowrap;
+  font: 400 34px/1 var(--sp-type) !important; letter-spacing: 0; color: var(--hpanel-fg);
+}
+.hp3 .hp3-h1 .hp3-n { grid-column: 1; grid-row: 1 / span 2; align-self: center; font: 400 120px/0.78 var(--sp-type) !important; letter-spacing: -0.04em; color: var(--hpanel-fg); }
+.hp3 .hp3-h1 .hp3-w { grid-column: 2; grid-row: 1; align-self: end; padding-bottom: 4px; font: 400 34px/1 var(--sp-type) !important; color: var(--hpanel-fg); }
+.hp3 .hp3-tb .hp3-s {
+  grid-column: 2; grid-row: 2; align-self: start; position: relative; margin: 0; padding-top: 6px; min-width: 0;
+  font: 400 22px/1.3 var(--sp-serif); color: var(--hpanel-muted);
+}
+.hp3 .hp3-s :is(em, i), .hp3 .hp3-sub :is(em, i) { font-family: inherit; font-style: italic; }
+.hp3 .hp3-s :is(b, strong, .ph-ms), .hp3 .hp3-sub :is(b, strong, .ph-ms) { font-family: inherit; font-weight: 600; color: var(--hpanel-fg); }
+/* loading: the number is a blank of its full box */
+/* a blank: its own text, drawn by a pseudo-element and hidden, so the box is the settled one and the h1 has no text */
+.hp3 .hp3-h1 .hp3-blank::before { content: attr(data-blank); visibility: hidden; }
+
+/* TITLE: a title in the number's place, at most two lines; its subline under it */
+.hp3 .hp3-txt h1.hp3-title {
+  margin: 0; max-width: 100%;
+  font: 400 50px/1.02 var(--sp-type) !important; letter-spacing: 0; color: var(--hpanel-fg);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-wrap: balance;
+}
+.hp3 .hp3-txt .hp3-sub { margin: 14px 0 0; max-width: 520px; font: 400 18px/1.4 var(--sp-serif); color: var(--hpanel-muted); }
+
+/* a title's adornment (Discover's "Pro" pill) sits beside the title, on its line, and keeps its own colours */
+.hp3 .hp3-txt h1.hp3-title > :is(span, i, b)[class] { vertical-align: middle; margin-left: 12px; }
+/* Analytics' drawing slot is its own empty white disc; it takes the drawing's box */
+.hp3.hp3--band .hp3-art { width: 196px; }
+.ws-app.sheet-wide .hp3.hp3--band .hp3-art { width: 236px; }
+/* Analytics' first section already stands 32 under its header (measured), so the panel adds the difference */
+.hpanel.hpanel--hero.hp3.hp3.hp3--band.hp3--band { margin-bottom: calc(var(--hpanel-below) - 32px); }
+/* the buttons: 26 under a number's block, 22 under a title's subline; the panel's own two treatments */
+.hp3 .hp3-acts { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 26px; flex-wrap: nowrap; }
+.hp3.hp3--title .hp3-acts { margin-top: 22px; }
+.hp3 .hp3-acts :is(.hp3-btn, .hpanel-b1, .hpanel-b2) {
+  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
+  font: 400 15.5px var(--sp-type); white-space: nowrap;
+}
+
+/* the drawing: the right column, vertically centred, wholly inside the panel */
+.hp3 .hp3-art { justify-self: end; align-self: center; box-sizing: border-box; height: 196px; margin: 0 24px 0 0; display: block; flex: none; }
+.hp3 .hp3-art :is(img, svg) { display: block; height: 100%; width: auto; max-width: none; }
+.hp3 .hp3-art.hpanel-disc { width: 196px; padding: 14px; }
+.hp3 .hp3-art.hpanel-disc > :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
+/* the disc is for a drawing: a slot with nothing in it (the To-do list's, until its art arrives) keeps its box and draws no disc */
+.hp3 .hp3-art.hpanel-disc:not(:has(img, svg)) { background: none; box-shadow: none; }
+
+/* full size: the page sheet is 1440 or wider */
+.ws-app.sheet-wide .hpanel.hpanel--hero.hp3.hp3 { padding: 34px 40px 40px 44px; column-gap: 40px; }
+.ws-app.sheet-wide .hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 312px; }
+.ws-app.sheet-wide .hp3 .hp3-tb h1.hp3-h1 { font-size: 40px !important; }
+.ws-app.sheet-wide .hp3 .hp3-h1 .hp3-n { font-size: 150px !important; }
+.ws-app.sheet-wide .hp3 .hp3-h1 .hp3-w { font-size: 40px !important; }
+.ws-app.sheet-wide .hp3 .hp3-txt h1.hp3-title { font-size: 62px !important; }
+.ws-app.sheet-wide .hp3 .hp3-txt .hp3-sub { margin-top: 18px; font-size: 21px; }
+.ws-app.sheet-wide .hp3 .hp3-acts { margin-top: 30px; }
+.ws-app.sheet-wide .hp3.hp3--title .hp3-acts { margin-top: 26px; }
+.ws-app.sheet-wide .hp3 .hp3-art { height: 236px; }
+.ws-app.sheet-wide .hp3 .hp3-art.hpanel-disc { width: 236px; padding: 16px; }
+
+/* below 768px: the number steps to 88, the words to 26 and the subline to 17; the drawing is put away; the buttons wrap */
+@media (max-width: 767.98px) {
+  .hpanel.hpanel--hero.hp3.hp3 { grid-template-columns: minmax(0, 1fr); padding: 20px; min-height: 0; }
+  .hpanel.hpanel--hero.hp3.hp3.hp3--number.hp3--number { min-height: 0; }
+  .hp3 .hp3-art { display: none; }
+  .hp3 .hp3-tb { column-gap: 12px; }
+  .hp3 .hp3-tb h1.hp3-h1 { font-size: 26px !important; white-space: normal; }
+  .hp3 .hp3-h1 .hp3-n { font-size: 88px !important; }
+  .hp3 .hp3-h1 .hp3-w { font-size: 26px !important; }
+  .hp3 .hp3-tb .hp3-s { font-size: 17px; }
+  .hp3 .hp3-txt h1.hp3-title { font-size: 36px !important; }
+  .hp3 .hp3-acts { flex-wrap: wrap; row-gap: 10px; }
+}
+
+/* ── SLIM (onboarding v5 part 3; ref design-refs/onboarding/onboarding-journey-v5.html #desk) ─────────
+   The Import page's panel: a title and one sentence, at the reference's own measures. ⚠️ EVERY RULE
+   NAMES `.hp3--slim`, so no other page's header can move. The class is repeated to out-rank the
+   four-class box rule and the wide-sheet title rule above, which the page's root also matches. */
+.hpanel.hpanel--hero.hp3.hp3.hp3--slim.hp3--slim { padding: 26px 34px 26px 38px; }
+.hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title, .ws-app.sheet-wide .hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title { font: 400 46px/1.06 var(--sp-type) !important; }
+.hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub, .ws-app.sheet-wide .hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub {
+  margin-top: 14px; max-width: 500px; font: 400 19px/1.5 var(--sp-serif); color: rgba(var(--ink-cream-rgb), .86);
+}
+@media (max-width: 767px) {
+  .hpanel.hpanel--hero.hp3.hp3.hp3--slim.hp3--slim { padding: 20px; }
+  .hp3.hp3--slim.hp3--slim .hp3-txt h1.hp3-title { font-size: 34px !important; }
+  .hp3.hp3--slim.hp3--slim .hp3-txt .hp3-sub { font-size: 17px; }
+}

@@ -1,0 +1,602 @@
+[
+ {
+  "lock": "C1 precondition: three badges on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "3 badges"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 1 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 1 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 1 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 1 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 1 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 1 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 1 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 1 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 2 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 2 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 2 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 2 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 2 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 2 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 2 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 2 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 3 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 3 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 3 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 3 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 3 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 3 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1512 badge 3 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1512 badge 3 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 precondition: three badges on screen",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "3 badges"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 1 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 1 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 1 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 1 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 1 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 1 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 1 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 1 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 2 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 2 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 2 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 2 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 2 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 2 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 2 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 2 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 3 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 3 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 3 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 3 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 3 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 3 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1512 badge 3 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1512 badge 3 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 precondition: three badges on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "3 badges"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 1 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 1 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 1 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 1 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 1 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 1 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 1 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 1 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 2 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 2 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 2 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 2 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 2 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 2 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 2 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 2 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 3 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 3 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 3 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 3 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 3 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 3 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/queries @1280 badge 3 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/queries @1280 badge 3 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 precondition: three badges on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "3 badges"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 1 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 1 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 1 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 1 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 1 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 1 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 1 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 1 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 2 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 2 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 2 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 2 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 2 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 2 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 2 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 2 point 4",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 3 point 1",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 3 point 1",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 3 point 2",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 3 point 2",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 3 point 3",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 3 point 3",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1 the point samples white",
+  "where": "/agents @1280 badge 3 point 4",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1 the badge is first at the point",
+  "where": "/agents @1280 badge 3 point 4",
+  "ok": true,
+  "detail": "true"
+ }
+]

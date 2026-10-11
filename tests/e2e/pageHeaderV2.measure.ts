@@ -188,7 +188,8 @@ for (const vp of SIZES) {
 
 /* ── §2 · Comparable titles' full header (comps v2, 27 Sep) — WITHOUT_ART until Nick supplies it ── */
 for (const vp of SIZES) {
-  test(`§2 · Comparable titles' full header at ${vp.width}`, async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P1, P4, P6. */
+  test.skip(`§2 · Comparable titles' full header at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`v2-full-comps-${vp.width}`);
     await openApp(page, "/manuscripts/comps", vp);
     const r = await readFull(page, '[data-cpv="rail"]');
@@ -205,7 +206,8 @@ for (const vp of SIZES) {
 
 /* ── §2 · Submission packages' full header (packages v2, 27 Sep) — WITH its padded archivist (D8) ── */
 for (const vp of SIZES) {
-  test(`§2 · Submission packages' full header at ${vp.width}`, async ({ page }) => {
+  /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P1, P5, P6. */
+  test.skip(`§2 · Submission packages' full header at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`v2-full-packages-${vp.width}`);
     await openApp(page, "/manuscripts/packages", vp);
     const r = await readFull(page, '[data-ppv="rail"]');
@@ -219,7 +221,9 @@ for (const vp of SIZES) {
   });
 }
 
-test("§4.4 · the full headers are one header", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. The full headers are panels. HP2 P1 holds one box on every route. */
+
+test.skip("§4.4 · the full headers are one header", async ({ page }) => {
   const L = new Ledger("v2-consistency");
   for (const vp of SIZES) {
     await openApp(page, "/queries", vp); const q = await readTops(page);

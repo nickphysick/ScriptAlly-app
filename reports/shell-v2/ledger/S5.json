@@ -1,0 +1,188 @@
+[
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "at y 434: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "20.0"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "now 1034.9,124.0 420.8×326.0 main 1034.9,124.0 420.8×326.0"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "at y 433.8125: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "20.0"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "now 965.6,124.0 490.0×325.8 main 965.6,124.0 490.0×325.8"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "at y 434: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "19.5"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "now 1125.6,114.0 330.0×335.5 main 1125.6,114.0 330.0×335.5"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "at y 338: art"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "now 922.4,72.0 533.3×272.0 main 922.4,72.0 533.3×272.0"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "at y 361: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "now 904.5,118.0 326.5×253.0 main 904.5,118.0 326.5×253.0"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "at y 360.671875: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "now 851.0,118.0 380.0×252.7 main 851.0,118.0 380.0×252.7"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "at y 361: art"
+ },
+ {
+  "lock": "S5 the drawing's bottom is 12–24 below the flat edge",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "13.4"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "now 971.0,106.0 260.0×264.4 main 971.0,106.0 260.0×264.4"
+ },
+ {
+  "lock": "S5 precondition: the drawing and the sheet are on screen",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "art true sheet true"
+ },
+ {
+  "lock": "S5 the drawing is painted above the sheet",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "at y 338: art"
+ },
+ {
+  "lock": "S5 position and size unchanged from main (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "now 797.7,72.0 433.4×272.0 main 797.7,72.0 433.4×272.0"
+ },
+ {
+  "lock": "S5 population: the three open headers are in the census",
+  "where": "census",
+  "ok": true,
+  "detail": "/agents /queries /manuscripts"
+ }
+]

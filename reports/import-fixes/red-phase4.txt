@@ -1,0 +1,5 @@
+L1 on the baseline:
+579:    if (a.agencyOnly || !a.name) return "Agency only";
+580:    return a.agency || "Agency only";
+264:      description: `Smart import · ${outcome.agentsCreated} agents added, ${outcome.queriesImported} queries logged`,
+254:        setCommitError("Couldn't set up your manuscript — nothing's lost. Try again, or use the Import desk.");

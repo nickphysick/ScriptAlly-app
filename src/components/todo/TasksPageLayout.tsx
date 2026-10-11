@@ -164,7 +164,7 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
        */
       scroller=".tpl-zone, .l-body, .cal-fpbody"
       scrollLabel={title}
-      masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} primary={primary} illo={illo} />}
+      masthead={<PageHeader variant="workspace" panel mark={mark} title={title} description={subtitle} primary={primary} illo={illo} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is
          that the plate carries identity while the tool row carries tallies and context. Absent
          both, the grid renders no row and no hairline rather than a bare rule. */

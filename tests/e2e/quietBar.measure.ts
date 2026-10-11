@@ -155,7 +155,9 @@ test("Q9 · reduced motion makes both changes instant", async ({ browser }) => {
   expect(L.failures().map((f) => `${f.lock} · ${f.state} — ${f.detail}`)).toEqual([]);
 });
 
-test("Q8 · every full header starts on the column's left, level with the first card; the drawing ends on its right", async ({ page }) => {
+/* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. A panel's text starts inside its padding, not on the column's left. HP2 P1 holds the panel's edges to the column. */
+
+test.skip("Q8 · every full header starts on the column's left, level with the first card; the drawing ends on its right", async ({ page }) => {
   const L = new Ledger("qb-left");
   let full = 0, compact = 0, drawn = 0;
   const platesSeen = new Set<string>();

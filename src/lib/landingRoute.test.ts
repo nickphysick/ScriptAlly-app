@@ -114,7 +114,13 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
     expect(agents.length, "the Contact-list hatch is written by three exits").toBe(3);
     /* and the other two go elsewhere, so "the hatch always means agents" is not the claim */
     expect(onboarding).toContain(`sessionStorage.setItem("${KEY}", "import")`);
-    expect(onboarding).toContain(`sessionStorage.setItem("${KEY}", "plans")`);
+    /* RE-POINTED (onboarding v5, baked decision 4): the "Smart Import already used" card no longer
+       offers Upgrade — it leads with the template — so set-up has no exit to the plans page and
+       this hatch value is gone with the prop that wrote it. */
+    expect(onboarding).not.toContain(`sessionStorage.setItem("${KEY}", "plans")`);
+    /* RE-POINTED (onboarding v5 part 2): the import ends on the dashboard, which is the ABSENCE of
+       a hatch. The "queries" value went with the closing page that offered the Query Centre. */
+    expect(onboarding).not.toContain(`sessionStorage.setItem("${KEY}", "queries")`);
   });
 
   it("⚠️ every hatch value is a tab the bridge can resolve — never a path", () => {

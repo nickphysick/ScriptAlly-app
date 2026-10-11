@@ -36,9 +36,9 @@ test("QC126-1 · shell", async ({ page }) => {
         sideRule: cs(side)?.boxShadow ?? null, label: cs(vis(".ws-glabel"))?.color ?? null,
       };
     });
-    L.check("QC126-1 page ground", w, c.main === "rgb(243, 242, 240)", `${c.main}`);
+    L.check("QC126-1 page ground", w, c.main === "rgb(242, 238, 232)", `${c.main}`);
     L.check("QC126-1 sidebar ground", w, c.side === "rgb(230, 228, 224)", `${c.side}`);
-    L.check("QC126-1 top bar = the page colour", w, c.bar === "rgb(243, 242, 240)", `${c.bar}`);
+    L.check("QC126-1 top bar = the page colour", w, c.bar === "rgb(242, 238, 232)", `${c.bar}`);
     L.check("QC126-1 top-bar rule", w, c.barRule === "rgba(28, 19, 15, 0.1)" && c.barRuleOp === "1", `${c.barRule} op ${c.barRuleOp}`);
     L.check("QC126-1 sidebar rule", w, !!c.sideRule && c.sideRule.includes("rgba(28, 19, 15, 0.1)"), `${c.sideRule}`);
     L.check("QC126-1 sidebar labels", w, c.label === "rgba(28, 19, 15, 0.45)", `${c.label}`);

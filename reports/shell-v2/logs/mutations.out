@@ -1,0 +1,10 @@
+{"lock":"S1","exit":1,"readings":40,"red":30,"first":"S1 the page sheet's background · /dashboard @1512 — rgb(243, 242, 240)"}
+{"lock":"S2","exit":1,"readings":144,"red":48,"first":"S2 the sheet's edges are the page sheet's (±1) · /queries @1280 — sheet 289.0–1231.0 page 248–1272"}
+{"lock":"S3","exit":1,"readings":96,"red":96,"first":"S3 the edge is flat at the sides and 26 lower at the centre (outline at 4 x's, ±2) · /queries @1280 — x 262: 357 want 357.7 · x 350: 357 want 362.2 · x 760: 357 want 383.0 · x 1258: 357 want 357.7"}
+{"lock":"S4","exit":1,"readings":72,"red":6,"first":"S4 no header border paints (width 0 or transparent) · /queries @1280 — width 1 alpha 0.14"}
+{"lock":"S5","exit":1,"readings":31,"red":8,"first":"S5 the drawing is painted above the sheet · /queries @1512 — at y 434: sheet"}
+{"lock":"S6","exit":1,"readings":61,"red":24,"first":"S6 the tab is rgb(251, 249, 245) · /queries @1512 — tab rgb(242, 238, 232) fillet rgb(242, 238, 232)"}
+{"lock":"B1","exit":1,"readings":36,"red":12,"first":"B1 the band's colour · /queries @1512 — rgb(233, 230, 224)"}
+{"lock":"B2","exit":1,"readings":42,"red":18,"first":"B2 no arrow · /queries @1512 — ::after content \"\" width 150"}
+{"lock":"B3","exit":1,"readings":6,"red":0,"first":null}
+{"lock":"L1","exit":1,"readings":61,"red":8,"first":"L1 the header sheet is there on the first frame the header is · /queries @1512 — absent"}

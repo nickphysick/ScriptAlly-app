@@ -23,6 +23,9 @@ export interface ParsedAgent {
   submissionMethod?: "Email" | "Online Form" | null;
   responseTimeWeeks?: number | null;
   noResponseMeansNo?: boolean | null;
+  /** Set in review by the writer; no file gives either. Absent or null = not stated. */
+  starRating?: number | null;
+  submissionStatus?: "Open" | "Closed" | null;
   mswlNotes?: string;
   /** Legacy/fixtures only — the function no longer emits agent confidence. Optional so older callers
    *  and test fixtures still type-check. Agent review flags come from `issues`. */
@@ -39,13 +42,19 @@ export type ReviewReasonCode =
   | "missing-day"
   | "serial-outlier"
   | "no-date"
+  | "unreadable-date"            // the template's Date sent cell held text that is not a date
+  | "ambiguous-date"             // …or a date that reads two ways (03/05/2026)
+  | "unreadable-response-date"   // the same two, for the Date of last response cell
+  | "ambiguous-response-date"
   | "status-direction"
   | "status-wording"
   | "check-name"          // agent/agency cell was a note, not a name — real part extracted, confirm
   | "needs-identifying";  // cell named no real agent/agency at all — writer must say who it was
 
 export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
-  "two-dates", "missing-day", "serial-outlier", "no-date", "status-direction", "status-wording",
+  "two-dates", "missing-day", "serial-outlier", "no-date",
+  "unreadable-date", "ambiguous-date", "unreadable-response-date", "ambiguous-response-date",
+  "status-direction", "status-wording",
   "check-name", "needs-identifying",
 ];
 

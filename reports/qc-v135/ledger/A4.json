@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A4 population: three headers were read",
+  "where": "@1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A4 one column gap on all three",
+  "where": "@1512",
+  "ok": true,
+  "detail": "/queries 56 · /agents 56 · /manuscripts 56"
+ },
+ {
+  "lock": "A4 one padding-bottom on all three",
+  "where": "@1512",
+  "ok": true,
+  "detail": "/queries 34 · /agents 34 · /manuscripts 34"
+ },
+ {
+  "lock": "A4 one alignment on all three (two tracks, centred, items centred, the drawing centre / start)",
+  "where": "@1512",
+  "ok": true,
+  "detail": "/queries center · /agents center · /manuscripts center | /queries center · /agents center · /manuscripts center | /queries center / start · /agents center / start · /manuscripts center / start"
+ },
+ {
+  "lock": "A4 population: three headers were read",
+  "where": "@1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A4 one column gap on all three",
+  "where": "@1280",
+  "ok": true,
+  "detail": "/queries 56 · /agents 56 · /manuscripts 56"
+ },
+ {
+  "lock": "A4 one padding-bottom on all three",
+  "where": "@1280",
+  "ok": true,
+  "detail": "/queries 34 · /agents 34 · /manuscripts 34"
+ },
+ {
+  "lock": "A4 one alignment on all three (two tracks, centred, items centred, the drawing centre / start)",
+  "where": "@1280",
+  "ok": true,
+  "detail": "/queries center · /agents center · /manuscripts center | /queries center · /agents center · /manuscripts center | /queries center / start · /agents center / start · /manuscripts center / start"
+ }
+]

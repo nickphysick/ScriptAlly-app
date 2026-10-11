@@ -27,8 +27,10 @@ export interface ReviewAgent {
   agencyOnly: boolean;   // the "?" toggle — name unknown, referenced by agency
   genres: string[];
   website: string;
-  submissionsOpen: boolean;
-  weeks: number;         // 1–26
+  /** null until the writer sets it in review: no file states whether an agent is open */
+  submissionsOpen: boolean | null;
+  /** 1–26; null when the file gave none and the writer has not set one */
+  weeks: number | null;
   rating: number;        // 0–5 (0 = unrated)
   /** Per-reason items, each with its own friendly note + a resolved flag. Resolving a reason marks
    *  it done (struck-through sage note kept for confirmation) rather than dropping it; the card's
@@ -146,9 +148,13 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
 const MONTHS = MONTHS_SHORT;
 /** Format an ISO date for display; null → "date needed" (never a fabricated date). */
+/** The day part of a stored date. The template parser gives a full timestamp (`…T00:00:00.000Z`)
+ *  where Smart Import gives `YYYY-MM-DD`; a date field and `fmtDate` both need the day alone. */
+export const dayOf = (iso: string | null | undefined): string => (iso ?? "").slice(0, 10);
 export const fmtDate = (iso: string | null): string => {
   if (!iso) return "date needed";
-  const [y, m, d] = iso.split("-").map(Number);
+  // Read the day part only: a full timestamp used to fall through and print raw.
+  const [y, m, d] = dayOf(iso).split("-").map(Number);
   return y && m && d ? `${d} ${MONTHS[m - 1]} ${y}` : iso;
 };
 export const QUERY_STATUS_OPTIONS: QueryStatus[] = [
@@ -198,35 +204,6 @@ export const queryTier = (q: ReviewQuery): ReviewTier =>
  *  ready+sharpen (sharpen = optional). A record with multiple reasons counts ONCE (by tier, not reason). */
 export interface PopulationTally { total: number; ready: number; fix: number; sharpen: number; }
 export interface ReviewTallies { agents: PopulationTally; queries: PopulationTally; }
-
-/** What should happen on entering a review stage: play the pre-walk intro (first flagged visit),
- *  open the guided walk (intro already seen, not escaped), or nothing (zero-flag, or escaped to the
- *  list). Pure so the entry rule is unit-testable: intro-before-walk on first entry, suppressed after. */
-export type StageEntryAction = "intro" | "walk" | "none";
-export function decideStageEntry(opts: { flagged: boolean; introSeen: boolean; escaped: boolean }): StageEntryAction {
-  if (!opts.flagged) return "none";                         // zero-flag → clean list
-  if (!opts.introSeen && !opts.escaped) return "intro";     // first flagged visit → welcome
-  if (opts.escaped) return "none";                          // chose "View all" → stay on the list
-  return "walk";                                            // seen the intro → straight into the walk
-}
-
-/** The walk's end-of-stage message. Pure so it can be tested. Three honest states:
- *   • a blocking fix is still open → "Almost there" (you can't import yet).
- *   • everything was actually resolved → the celebratory "All sorted ✦" + the stage's handoff chip.
- *   • some were skipped / left open → NO "all sorted" claim and NO chip; an honest "saved for now" note.
- *  `sortedChip` is the stage-aware confirmation ("Queries all sorted — ready to import"); it is only
- *  returned when nothing was skipped, so we never tell the writer everything's sorted when it isn't. */
-export interface DoneStageMessage { heading: string; chip: string | null; body: string }
-export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; sortedChip: string; celebratoryBody?: string }): DoneStageMessage {
-  if (opts.fixesLeft) {
-    return { heading: "Almost there", chip: null, body: "A fix still needs doing before you can import — pop back to it whenever you're ready." };
-  }
-  if (opts.skipped > 0) {
-    const n = opts.skipped === 1 ? "One is" : `${opts.skipped} are`;
-    return { heading: "Saved for now", chip: null, body: `${n} still open — saved as-is, and easy to revisit whenever you like.` };
-  }
-  return { heading: "All sorted ✦", chip: opts.sortedChip, body: opts.celebratoryBody ?? "Your records are looking sharp — everything's ready to import." };
-}
 
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
@@ -294,6 +271,17 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
       return `We read this as ${fmtDate(q.sentDate)} — but that's well outside your other dates (it came through as a stray spreadsheet number). Is that right, or shall we set it?`;
     case "no-date":
       return `We don't have a date for this one. When did you send the query?`;
+    /* The template parser's own two sentences (templateImport.ts), quoting the cell back. The
+       unreadable one ends on the review's existing date question, because here the fix is a date
+       picker and "Try YYYY-MM-DD" would describe a cell the writer can no longer edit. */
+    case "unreadable-date":
+      return `We couldn't read "${q.sentDateRaw ?? ""}" as a date. When did you send the query?`;
+    case "ambiguous-date":
+      return `"${q.sentDateRaw ?? ""}" could be two different dates. Which did you mean?`;
+    case "unreadable-response-date":
+      return `We couldn't read "${q.timeline[0]?.raw ?? ""}" as a date. When was the last response?`;
+    case "ambiguous-response-date":
+      return `"${q.timeline[0]?.raw ?? ""}" could be two different dates. Which did you mean?`;
     case "status-direction":
       return isPartialStage(q.status)
         ? `Did you send the partial manuscript, or did the agent request it from you?`
@@ -309,25 +297,28 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
   }
 }
 
-/** The guided focus-card's WORKING-state copy per flagged reason, across BOTH walks. `pill` is the
- *  context-specific corner label (replaces the generic "Quick fix"/"Sharpen"); `headline` states the
- *  issue itself in the card's prominent Playfair voice (no longer a muted subtitle). The two agent keys
- *  cover the agents walk; the ReviewReasonCode arm covers the queries walk. Pure + tested so the wording
- *  stays consistent run-to-run. The detailed question + inputs still come from queryReasonText /
- *  QueryReasonPanel / AgentFixPanel — this is only the orientation (pill + headline). */
+/** The label a row wears while it asks something: the reason's own name. The two agent keys cover
+ *  the agents step; the ReviewReasonCode arm covers the queries step. Pure + tested so the wording
+ *  stays consistent run-to-run. (It also carried a `headline` for the guided walk's card; the walk
+ *  is retired and nothing read it.) The detailed question + inputs come from queryReasonText and the
+ *  row's own panel. */
 export type FocusReasonKey = "agent-needs-agency" | "agent-mapping" | ReviewReasonCode;
-export function focusReasonMeta(key: FocusReasonKey): { pill: string; headline: string } {
+export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
   switch (key) {
-    case "agent-needs-agency": return { pill: "No agency name", headline: "No agency on record yet" };
-    case "agent-mapping":      return { pill: "Detail to check", headline: "Worth a quick look at the details" };
-    case "two-dates":          return { pill: "Two dates found", headline: "We spotted two dates here" };
-    case "missing-day":        return { pill: "Day to confirm",  headline: "A month, but no exact day" };
-    case "serial-outlier":     return { pill: "Date to confirm", headline: "This date looks out of place" };
-    case "no-date":            return { pill: "Date needed",     headline: "No date on this one yet" };
-    case "status-direction":   return { pill: "Status to check", headline: "Who made the first move?" };
-    case "status-wording":     return { pill: "Status to check", headline: "Worth checking this status" };
-    case "check-name":         return { pill: "Name to check",   headline: "Worth checking this name" };
-    case "needs-identifying":  return { pill: "Who's this for?", headline: "We couldn't tell who this was for" };
+    case "agent-needs-agency": return { pill: "No agency name" };
+    case "agent-mapping":      return { pill: "Detail to check" };
+    case "two-dates":          return { pill: "Two dates found" };
+    case "missing-day":        return { pill: "Day to confirm" };
+    case "serial-outlier":     return { pill: "Date to confirm" };
+    case "no-date":            return { pill: "Date needed" };
+    case "unreadable-date":    return { pill: "Date needed" };
+    case "ambiguous-date":     return { pill: "Date to confirm" };
+    case "unreadable-response-date": return { pill: "Date needed" };
+    case "ambiguous-response-date":  return { pill: "Date to confirm" };
+    case "status-direction":   return { pill: "Status to check" };
+    case "status-wording":     return { pill: "Status to check" };
+    case "check-name":         return { pill: "Name to check" };
+    case "needs-identifying":  return { pill: "Who's this for?" };
   }
 }
 
@@ -342,8 +333,8 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     genres: normaliseGenres(a.genres), // validate raw import genres against the allow-list; drop unknowns
 
     website: a.website ?? "",
-    submissionsOpen: a.submissionMethod !== null ? true : true,
-    weeks: a.responseTimeWeeks && a.responseTimeWeeks > 0 ? Math.min(26, a.responseTimeWeeks) : 6,
+    submissionsOpen: null,
+    weeks: a.responseTimeWeeks && a.responseTimeWeeks > 0 ? Math.min(26, a.responseTimeWeeks) : null,
     rating: 0,
     // A named agent flags only for a GENUINE detail issue from the mapper — never for an abbreviated
     // or missing name. An agency-only agent (no name) is valid and carries no reason → Captured.
@@ -468,6 +459,23 @@ export function seedUnidentifiedSetAside(
       unidentified.has(q.agentRef) && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" as const } : q
     ),
   };
+}
+
+/**
+ * The rows the review set aside BY ITSELF (no agent name, no agency) that are still set aside — what
+ * the import leaves out without the writer having chosen to. One entry per query of such a row, or
+ * one for the row itself when it carried no query. A row the writer named ("Name it instead") is no
+ * longer set aside and is not here; a row the writer removed on purpose never was.
+ */
+export function autoSetAsideRows(agents: ReviewAgent[], queries: ReviewQuery[]): { status: string; sentDate: string | null }[] {
+  const out: { status: string; sentDate: string | null }[] = [];
+  for (const a of agents) {
+    if (!a.deleted || a.setAsideStage !== "unidentified") continue;
+    const mine = queries.filter((q) => q.agentRef === a.id);
+    if (mine.length === 0) out.push({ status: "", sentDate: null });
+    for (const q of mine) out.push({ status: q.status, sentDate: q.sentDate });
+  }
+  return out;
 }
 
 /** A duplicate cluster as the duplicates stage renders it: the open (unresolved) members, plus a
@@ -671,7 +679,12 @@ export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], 
   const origAgents = new Map((result.agents || []).map((a) => [a.ref, a]));
   const agentsOut: ParsedAgent[] = agents.filter((a) => !a.deleted).map((a) => {
     const o = origAgents.get(a.id);
-    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website, responseTimeWeeks: a.weeks };
+    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website,
+      // what the file gave or the writer set in review; null where neither did
+      responseTimeWeeks: a.weeks,
+      starRating: a.rating >= 1 && a.rating <= 5 ? a.rating : null,
+      submissionStatus: a.submissionsOpen == null ? null : a.submissionsOpen ? "Open" : "Closed",
+    };
   });
   // Cross-reference guard: exclude queries whose agent was deleted even if the cascade missed them.
   const survivingAgentIds = new Set(agentsOut.map((a) => a.ref));

@@ -222,7 +222,7 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
     /* ALL QUERIED — every agent on the list is accounted for: queried + don't take the genre + closed to
        submissions = N (lib/contactNextStep), and the split line's parts sum to queried. */
     const { reading, asked, passed, withdrawn } = step.outcomes;
-    const N = step.total, m = step.mismatches, c = step.closed;
+    const N = step.total, m = step.mismatches, c = step.closed, u = step.doorUnknown;
     title = "You’ve queried all your agents";
     compact = true;
     sentence = step.queried === N
@@ -231,6 +231,7 @@ export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
     const notes = [
       m > 0 && genres ? `The other ${m} ${m === 1 ? "doesn’t" : "don’t"} take ${genres}.` : "",
       c > 0 ? `${c} ${c === 1 ? "is" : "are"} closed to submissions.` : "",
+      u > 0 ? `${u} ${u === 1 ? "has" : "have"} no open or closed status recorded.` : "",
     ].filter(Boolean);
     extra = (
       <>
