@@ -86,7 +86,10 @@ export const QcWorkspaceHead: React.FC<{
   scope: ScopeMenu | null;
   /** while the data loads: the bar and the strip are real, their figures are placeholders (W10) */
   loading?: boolean;
-}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false }) => {
+  /** v137 §B — the strip's court filter is on: "Clear all" shows, and clears it with the rest */
+  courtOn?: boolean;
+  onClearCourt?: () => void;
+}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false, courtOn = false, onClearCourt }) => {
   /* the keyboard card: a click outside or Escape closes it */
   const [keysOpen, setKeysOpen] = useState(false);
   const keysRef = useRef<HTMLSpanElement>(null);
@@ -107,7 +110,7 @@ export const QcWorkspaceHead: React.FC<{
   const count = countOf;
   const stageOpts = options.filter((o) => o.key.startsWith("stage:"));
   const onStage = filter.startsWith("stage:");
-  const anyOn = filter !== "all" || find.trim().length > 0 || (scope?.current ?? null) != null;
+  const anyOn = filter !== "all" || find.trim().length > 0 || (scope?.current ?? null) != null || courtOn;
 
   const groups: Record<Exclude<Pop, null>, QcMenuGroup[]> = {
     group: [{ current: group, items: GROUP_BY_OPTIONS.map((g) => ({ key: g.key, label: g.label })), onPick: (k) => { onGroup(k as GroupBy); close(); } }],
@@ -232,7 +235,7 @@ export const QcWorkspaceHead: React.FC<{
         {visibleChips}
         {stageBtn}
         {moreBtn}
-        {anyOn && <button type="button" className="qcw-clear" data-qcv="ws-clear" onClick={() => { onFilter("all"); onFind(""); scope?.onScope(null); }}>Clear all</button>}
+        {anyOn && <button type="button" className="qcw-clear" data-qcv="ws-clear" onClick={() => { onFilter("all"); onFind(""); scope?.onScope(null); onClearCourt?.(); }}>Clear all</button>}
         {/* the unfolded row, measured off-screen: what the strip would need to hold every chip */}
         <div className="qcw-strip-measure" ref={measureRef} aria-hidden="true">
           {chips.map((c) => React.cloneElement(c, { tabIndex: -1, key: `m-${c.key}` }))}
