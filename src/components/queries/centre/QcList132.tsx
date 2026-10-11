@@ -27,7 +27,7 @@ import type { ListGroup, GroupBy } from "../../../lib/qcCalView";
 import type { QcRow, QcSort } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
-import { STAGE_NAME } from "../../../lib/qcSummary";
+import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import { QC_INKWELL } from "./qcArt";
 import "./qcvList132.css";
 
@@ -190,7 +190,7 @@ export const QcList132: React.FC<{
     const pkg = pkgId ? packageOf?.(pkgId) ?? null : null;
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qcw-row${closed ? " qcw-row--closed" : ""}${ringId === r.id ? " kf" : ""}`} data-ring={ringId === r.id || undefined}
-        data-qcv="row" data-id={r.id} data-qid={r.id} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
         onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>

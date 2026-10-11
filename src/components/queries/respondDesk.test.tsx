@@ -349,7 +349,8 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
   it("both live close controls open the QUICK POPOVER with their own anchor — and neither the desk", () => {
     /* Query actions v1 (27 Sep): 3 — the card footer's Close door falls back to the same popover while
        the drawer's Close journey is not live, and carries its own anchor like the other two. */
-    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(3);
+    /* RE-POINTED (Query panel v1): 2 — the under-900 drawer and its close control are gone with the panel */
+    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(2);
     expect(page, "a close control went back through the desk")
       .not.toMatch(/openDeskVerb\("closed"/);
     /* ⚠️ AND NUDGE STAYS ON THE DESK, which is the distinction §4.5 refuses to collapse: nudging

@@ -12,6 +12,7 @@
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
  */
+import { claimRightPanel, openQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../../types";
@@ -177,6 +178,13 @@ export const Dash58: React.FC<Dash58Props> = ({
   );
   const today = todayCount(feed30, now);
   const [feedOpen, setFeedOpen] = useState(false);
+  /* Query panel v1 — one right-hand panel at a time: the feed says when it opens, and closes when a query does */
+  useEffect(() => {
+    if (!feedOpen) return undefined;
+    claimRightPanel("feed");
+    const off = subscribeRightPanel((o) => { if (o && o !== "feed") setFeedOpen(false); });
+    return () => { off(); releaseRightPanel("feed"); };
+  }, [feedOpen]);
 
   const run = (a: ListAction) => {
     if (a.kind === "drawer") openQueryDrawer({ ...a.request });
@@ -262,7 +270,8 @@ export const Dash58: React.FC<Dash58Props> = ({
                   activities={scopedActivities}
                   agents={agents}
                   manuscripts={manuscripts}
-                  onOpenQuery={(id) => onNavigate("queries", id)}
+                  /* Query panel v1: the query opens in the side panel, over this page */
+                  onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
                   activeCount={activeCount}
                   undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
                   now={now}

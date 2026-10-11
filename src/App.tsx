@@ -33,6 +33,7 @@ import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
 import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
+import { closeQueryPanel } from "./lib/queryPanelStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
@@ -324,6 +325,8 @@ function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname.replace(/\/+$/, "") || "/";
+  /* Query panel v1 — a query opened over another page (the Dashboard) belongs to that page: leaving it closes it */
+  useEffect(() => { closeQueryPanel(); }, [path]);
   const routeKey = path.split("/")[1] || "";
   const params = new URLSearchParams(location.search);
 

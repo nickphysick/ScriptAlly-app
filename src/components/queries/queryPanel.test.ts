@@ -128,7 +128,9 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
       expect(at, "the tracking body is missing").toBeGreaterThan(-1);
       const end = whole.indexOf("const qpAgentTab = ", at);
       expect(end, "the agent tab no longer bounds the tracking slice").toBeGreaterThan(at);
-      expect(whole.split("tracking={qpTracking}").length - 1, "the card and the drawer must BOTH take the one tracking body").toBe(2);
+      /* RE-POINTED (Query panel v1): the open query has ONE house now, the side panel; the under-900 drawer that was
+         its second is gone, so the one tracking body has one taker */
+      expect(whole.split("tracking={qpTracking}").length - 1, "the one tracking body has one taker, the panel's card").toBe(1);
       return whole.slice(at, end);
     })();
     expect(mount).toContain("<QueryTimeline");

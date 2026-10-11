@@ -29,13 +29,29 @@ export function useQcListKeys(opts: {
   onFind: (s: string) => void;
   findRef: React.RefObject<HTMLInputElement | null>;
   onOpen: (id: string) => void;
+  /** Query panel v1 — the query open in the side panel from this page: ↑ ↓ (and J K) then walk the visible rows */
+  panelId?: string | null;
 }): { ringId: string | null; clearRing: () => void } {
-  const { active, find, onFind, findRef, onOpen } = opts;
+  const { active, find, onFind, findRef, onOpen, panelId = null } = opts;
   const [ringId, setRingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!active) { setRingId(null); return undefined; }
     const onKey = (e: KeyboardEvent) => {
+      /* Query panel v1 — WHILE A QUERY IS OPEN IN THE SIDE PANEL the keys walk the list: the previous or next
+         VISIBLE row (a folded group's rows are not drawn, so they are skipped), brought into view with
+         `nearest`. Escape is the panel's own layer. Nothing here runs while a field has the caret. */
+      if (panelId) {
+        if (isEditableTarget(e.target) || modalOpen() || e.altKey || e.metaKey || e.ctrlKey) return;
+        const dn = matchesShortcut(SHORTCUTS.qcDown, e), upk = matchesShortcut(SHORTCUTS.qcUp, e);
+        if (!dn && !upk) return;
+        const all = visibleRows();
+        const i = all.findIndex((r) => r.dataset.qid === panelId);
+        const to = all[i < 0 ? 0 : Math.max(0, Math.min(all.length - 1, i + (dn ? 1 : -1)))];
+        e.preventDefault();
+        if (to && to.dataset.qid && to.dataset.qid !== panelId) { onOpen(to.dataset.qid); to.scrollIntoView({ block: "nearest" }); }
+        return;
+      }
       const rows = visibleRows();
       if (!rows.length && !find) return;
       const typing = isEditableTarget(e.target);
@@ -73,7 +89,9 @@ export function useQcListKeys(opts: {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [active, find, onFind, findRef, onOpen, ringId]);
+  }, [active, find, onFind, findRef, onOpen, ringId, panelId]);
+  /* the ring and the open row are never both marked */
+  useEffect(() => { if (panelId) setRingId(null); }, [panelId]);
 
   return { ringId, clearRing: () => setRingId(null) };
 }

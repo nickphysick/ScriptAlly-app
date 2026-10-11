@@ -1,0 +1,24 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The query's side panel (Query panel v1): how the open card sits in the shared `SidePanel`, the list's
+ * selected row, and what stands down while the panel is open.
+ */
+/* the card fills the panel: its own frame, shadow, width cap and sticky placement belong to its old homes */
+.qsp .spanel-own > .qcv-open {
+  position: static; flex: 1 1 auto; min-height: 0; width: auto; max-width: none; height: auto; max-height: none; margin: 0;
+  display: flex; flex-direction: column; border: 0; border-radius: 0; box-shadow: none; background: #fff; padding: 0;
+}
+.qsp .spanel-own > .qcv-open > .qcv-open-fr { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; border: 0; border-radius: 0; box-shadow: none; }
+
+/* the open row: a warm ground and a 3px edge in its court's colour */
+@media (min-width: 768px) {
+  .qcw-list .qcw-row[aria-selected="true"] { background: #f7f3ed; box-shadow: inset 3px 0 0 var(--qp-court, #3d5070); }
+  .qcw-list .qcw-row[aria-selected="true"][data-court="you"] { --qp-court: #b0603e; }
+  .qcw-list .qcw-row[aria-selected="true"][data-court="agent"] { --qp-court: #3d5070; }
+  .qcw-list .qcw-row[aria-selected="true"][data-court="closed"] { --qp-court: #7c7168; }
+}
+
+/* while any side panel is open, the floating tabs (Birds-eye, Activity feed, Housekeeping) stand down */
+body.spanel-open .ftab { opacity: 0; pointer-events: none; }

@@ -1,0 +1,32 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The right-hand panel's container (Query panel v1). See SidePanel.tsx.
+ *
+ * z 66: over the page and its floating tabs (55), under the parked chip (69) and the action drawer (70).
+ * ⚠️ NO `var()` IN THE KEYFRAME (it fails silently in this setup): the frames carry opacity and transform only.
+ * ⚠️ `animation-fill-mode: backwards`, not `both`: a finished `both` holds `transform: none` over the element
+ *    for good, which would make it the containing block for anything fixed inside it.
+ */
+.spanel {
+  position: fixed; top: 8px; right: 8px; bottom: 8px; z-index: 66; box-sizing: border-box;
+  width: min(560px, calc(100vw - 48px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: #fff; border-radius: 12px;
+  box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.08);
+  animation: spanelIn 180ms ease-out backwards;
+}
+@media (max-width: 1440px) { .spanel { width: min(520px, calc(100vw - 48px)); } }
+@keyframes spanelIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .spanel { animation: none; } }
+
+.spanel > .spanel-own, .spanel > .spanel-slot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.spanel > .spanel-own[hidden] { display: none; }
+.spanel > .spanel-slot:empty { display: none; }
+.spanel:not([data-step]) > .spanel-slot { display: none; }
+
+/* under 900px of window the panel is the whole screen */
+@media (max-width: 899.98px) {
+  .spanel { top: 0; right: 0; bottom: 0; left: 0; width: auto; border-radius: 0; box-shadow: none; }
+}

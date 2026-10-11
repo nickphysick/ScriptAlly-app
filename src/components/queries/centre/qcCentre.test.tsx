@@ -108,18 +108,19 @@ describe("one derived list, one control that narrows it", () => {
   });
 });
 
-describe("⚠️ two houses, one set of doors — the docked card opens what the drawer opens", () => {
-  it("both take the SAME three tab bodies, built once", () => {
-    for (const p of ["tracking={qpTracking}", "notesTab={qpNotesTab}"]) expect(page.split(p).length - 1, p).toBe(2);
-    expect(page.split("agentTab={qpAgentTab").length - 1).toBe(2);
+/* RE-POINTED (Query panel v1): "two houses" — the docked card and the under-900 drawer — is ONE house now, the
+   side panel. The law that mattered survives in a stronger form: the tab bodies are built once and taken once. */
+describe("⚠️ one house — the open query is the side panel, and its tab bodies are built once", () => {
+  it("the three tab bodies are built once and taken once", () => {
+    for (const p of ["tracking={qpTracking}", "notesTab={qpNotesTab}"]) expect(page.split(p).length - 1, p).toBe(1);
+    expect(page.split("agentTab={qpAgentTab").length - 1).toBe(1);
     for (const c of ["const qpTracking = ", "const qpAgentTab = ", "const qpNotesTab = "]) expect(page.split(c).length - 1, c).toBe(1);
   });
-  it("both primaries go through the desk for Mark sent / Record response, and the offer keeps its own journey", () => {
-    expect(page.split('openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor)').length - 1).toBe(2);
-    expect(page.split('if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }').length - 1).toBe(2);
-  });
-  it("the drawer is for the narrow column and a CHOSEN query only — never beside the docked card, never for the implicit row", () => {
-    expect(page).toContain("{panelRow && activeQuery && urlSelectedId && qcDocked === false && (");
+  it("the panel is mounted once, for a chosen query only, and the modal and the narrow drawer are gone", () => {
+    expect(page.split("<QueryPanelHost").length - 1).toBe(1);
+    expect(page).toContain("{qcOpenCardNode && cardQueryId && (");
+    expect(page).not.toContain("<QcQueryModal");
+    expect(page).not.toContain("qcDocked === false && (");
   });
   it("the tab memory is one key for both houses", () => {
     expect(read("src/components/queries/centre/QcOpenCard.tsx")).toContain('import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";');

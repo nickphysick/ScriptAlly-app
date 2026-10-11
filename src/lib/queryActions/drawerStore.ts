@@ -56,6 +56,11 @@ export interface OpenRequest {
    */
   dock?: { initials: string; name: string; status: string };
   /**
+   * Query panel v1 — opened from the query's side panel: the journey's form steps INTO that panel (its slot),
+   * with "← Back to query", instead of opening as a drawer of its own. Carries what the step's frame names.
+   */
+  panel?: { name: string; agency: string; first: string };
+  /**
    * The docked card is told when to step aside and when to come back: true while the drawer is on
    * screen, false the moment it is not — saved, cancelled, parked, or hidden by a failed save — so
    * no path can leave a card stepped aside behind a drawer that has gone (§6.1).
