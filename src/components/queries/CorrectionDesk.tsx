@@ -22,6 +22,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { SIDE_SLOT } from "../shell/SidePanel";
 import { IlloSlot } from "./IlloSlot";
 import "./correctionDesk.css";
 
@@ -70,6 +71,8 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, r
 
   /* placed before paint, and re-placed when the card's own height changes (the steps differ),
      the window resizes, or anything scrolls — the rung moves with the drawer's scroller */
+  const [slot, setSlot] = useState<Element | null>(null);
+  useLayoutEffect(() => { setSlot(document.querySelector(SIDE_SLOT)); }, []);
   useLayoutEffect(place, [place, children]);
   useEffect(() => {
     const card = cardRef.current;
@@ -106,6 +109,22 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, r
    * body there is no ancestor to clip it, structurally. The stage class rides the portal root, so
    * `--stage-accent` still resolves.
    */
+  /* Query panel v1 §C — WHILE THE QUERY'S SIDE PANEL IS OPEN THE DESK STEPS INTO IT (its slot), with "← Back
+     to query", instead of standing beside it as a second card. Its fields and its logic are unchanged. */
+  if (slot && slot.isConnected) {
+    return createPortal(
+      <div className={`t-f12 qc-neutral qcd qcd--panel qcc--st-${state}`} role="presentation" data-qp-step="correct">
+        <div className="qcd-ptop">
+          <button type="button" className="qcd-pback" data-qp="step-back" onClick={onClose}>{"\u2190"} Back to query</button>
+        </div>
+        <div ref={cardRef} className="qcd-card" role="group" aria-label="Correct this entry" data-notch="off">
+          <div className="qcd-scroll">{children}</div>
+        </div>
+      </div>,
+      slot,
+    );
+  }
+
   return createPortal(
     /**
      * ⚠️ THE SCOPE CLASSES RIDE THE PORTAL ROOT, AND WITHOUT THEM THE STRIP PAINTS DEAD (drawer-3

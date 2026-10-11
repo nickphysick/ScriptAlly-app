@@ -44,6 +44,52 @@ export function cardDoors(status: QueryStatus | string): Door[] {
   ];
 }
 
+/**
+ * Query panel v1 §C — THE NEXT MOVE DECIDES THE PRIMARY. The panel's footer, by where the query stands:
+ * the journeys are `cardDoors`'s own (nothing here opens anything new); what the panel adds is the wording
+ * and one rule — a query with the agent for over a year with no reply leads with Close.
+ *
+ * ⚠️ A CLOSED QUERY'S DOOR IS STILL "Record a late reply". There is no reopen-without-a-reply journey: what
+ *    reopens a query is the reply that arrived, and the response journey records it.
+ */
+export const LONG_SILENCE_DAYS = 365;
+export function panelDoors(status: QueryStatus | string, daysWaiting: number | null): Door[] {
+  if (ENDED.has(status)) return [{ mode: "resp", label: "Record a late reply", primary: true }];
+  if (status === QueryStatus.SIGNED) return [];
+  if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "Record your answer", primary: true }, { mode: "close", label: "Close query" }];
+  if (OWED.has(status)) return [
+    { mode: "sent", label: status === QueryStatus.PARTIAL_REQUESTED ? "Mark partial sent" : status === QueryStatus.FULL_REQUESTED ? "Mark full sent" : "Mark revision sent", primary: true },
+    { mode: "resp", label: "Record a response" },
+    { mode: "close", label: "Close query" },
+  ];
+  if (daysWaiting != null && daysWaiting > LONG_SILENCE_DAYS) return [
+    { mode: "close", label: "Close query", primary: true },
+    { mode: "resp", label: "Record a response" },
+    { mode: "nudge", label: "Nudge" },
+  ];
+  return [
+    { mode: "resp", label: "Record a response", primary: true },
+    { mode: "nudge", label: "Nudge" },
+    { mode: "close", label: "Close query" },
+  ];
+}
+/** The step's frame: what the band says is happening, and the step's title. */
+export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { doing: string; title: string } {
+  const who = first || "the agent";
+  if (mode === "resp") return ENDED.has(String(status))
+    ? { doing: "Recording a late reply", title: `What did ${who} say?` }
+    : { doing: "Recording a response", title: `What did ${who} say?` };
+  if (mode === "sent") return {
+    doing: status === QueryStatus.PARTIAL_REQUESTED ? "Marking the partial sent" : status === QueryStatus.FULL_REQUESTED ? "Marking the full sent" : "Marking the revision sent",
+    title: `What went to ${who}?`,
+  };
+  if (mode === "offer") return { doing: "Recording your answer", title: `Your answer to ${who}` };
+  if (mode === "nudge") return { doing: "Recording a nudge", title: `A nudge to ${who}` };
+  if (mode === "close") return { doing: "Closing the query", title: `Close ${who}'s query?` };
+  if (mode === "edit") return { doing: "Correcting the record", title: `Correct ${who}'s record` };
+  return { doing: "Logging a query", title: "Log a query" };
+}
+
 /** A Query Centre row's hover actions, by status (MOCK-SPEC §3.3). */
 export function rowDoors(status: QueryStatus | string): Door[] {
   if (OWED.has(status)) return [{ mode: "sent", label: "✓ SENT IT" }];

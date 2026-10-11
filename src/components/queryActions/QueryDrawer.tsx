@@ -15,11 +15,11 @@
  * again from its own snapshot. The parked journey and the open one are told apart by the store's
  * `instance`: a park keeps it, a resume reuses it, a new door gets a new one.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import {
-  closeQueryDrawer, currentClash, currentDrawerRequest, currentParked, discardParked, parkQueryDrawer, restoreParked,
+  closeQueryDrawer, onDrawerLeaveAsk, currentClash, currentDrawerRequest, currentParked, discardParked, parkQueryDrawer, restoreParked,
   showUndoBar, subscribeDrawer, subscribeParked,
   type DrawerMode, type DrawerPreset, type OpenRequest, type ParkedJourney,
 } from "../../lib/queryActions/drawerStore";
@@ -30,6 +30,9 @@ import { DrawerContext, initialsOf } from "./controls";
 import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/dockPeek";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
+import { panelStepWords } from "../../lib/queryActions/entry";
+import { tileCourt } from "../../lib/qcSummary";
+import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";
 import { LogJourney } from "./journeys/LogJourney";
@@ -93,6 +96,14 @@ export function QueryDrawer() {
   const viewRef = useRef<JourneyView | null>(null);
   const shellRef = useRef<ShellState | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  /**
+   * Query panel v1 §C — OPENED FROM THE QUERY'S SIDE PANEL, THE JOURNEY STEPS INTO IT: its form is portalled
+   * into the panel's slot, with "← Back to query", and there is no second drawer, no scrim and no dock chip.
+   * The slot is looked up when the request arrives; if the panel is not there (a parked journey resumed from
+   * its chip on another page), the journey opens as the drawer it always was.
+   */
+  const [slot, setSlot] = useState<Element | null>(null);
+  useLayoutEffect(() => { setSlot(req?.panel ? document.querySelector(SIDE_SLOT) : null); }, [req]);
 
   useEffect(() => subscribeDrawer((r) => {
     setReq(r);
@@ -182,6 +193,8 @@ export function QueryDrawer() {
     if (viewRef.current?.dirty) void park();
     else close();
   }, [park, close]);
+
+  useEffect(() => onDrawerLeaveAsk(() => backToCard()), [backToCard]);
 
   const runSave = useCallback(async (view: JourneyView) => {
     if (!req || savingRef.current) return;
@@ -274,11 +287,19 @@ export function QueryDrawer() {
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
 
+  const inPanel = !!req?.panel && !!slot && slot.isConnected;
+  const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
+  const panelFrame = inPanel && req?.panel ? {
+    ...req.panel,
+    court: (pq ? tileCourt(pq.status as never) : null) ?? "closed",
+    ...panelStepWords(req.mode, pq?.status, req.panel.first),
+  } : null;
+
   return (
     <>
       {createPortal(
         <DrawerContext.Provider value={{ today, openCal, setOpenCal }}>
-          <div ref={rootRef} className={`qad-root${open ? " is-open" : ""}`} data-qad-root
+          <div ref={rootRef} className={`qad-root${open ? " is-open" : ""}${inPanel ? " qad-root--panel" : ""}`} data-qad-root
             style={hidden || parkedAway ? { display: "none" } : undefined}>
             <J key={`${active.instance ?? 0}-${active.mode}-${gen}`} req={active} today={today} switchTo={switchTo} pickQuery={pickQuery}>
               {(view, initialStep) => {
@@ -286,7 +307,7 @@ export function QueryDrawer() {
                 return (
                   <DrawerShell view={view} mode={active.mode} open={open && !hidden && !parkedAway}
                     initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}
-                    from={req?.dock?.name ?? null} stateRef={shellRef}
+                    from={req?.dock?.name ?? null} stateRef={shellRef} panel={panelFrame}
                     onCancel={close} onPark={() => void park()} onSave={() => runSave(view)} />
                 );
               }}
@@ -312,7 +333,7 @@ export function QueryDrawer() {
             )
           ) : null}
         </DrawerContext.Provider>,
-        document.body,
+        inPanel ? slot! : document.body,
       )}
       {chip}
     </>

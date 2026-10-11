@@ -455,3 +455,32 @@ body.qad-docked .qcv-qm, body.qad-docked .qcv-open {
 .qad-sentsum { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
 .qad-sentsum .sh-chip { margin-top: 0; }
 .qad-ptags em.w { background: #f3eee7; color: var(--qad-ink70); }
+
+/* ═════ Query panel v1 §C — THE JOURNEY STEPPED INTO THE QUERY'S SIDE PANEL ═════
+   The same shell, the same steps and fields; what changes is the container (the panel's slot, not a drawer of
+   its own) and the frame above the steps. No scrim, no ink header, no dock chip.
+   ⚠️ `:root` ON THE DRAWER RULE: inkShell.css floats `.qad-drawer` 8px in and slides it with `:root .qad-drawer`. */
+.qad-root.qad-root--panel { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+:root .qad-root--panel .qad-drawer, :root .qad-root--panel.is-open .qad-drawer {
+  position: static; top: auto; right: auto; bottom: auto; width: auto; max-width: none; flex: 1 1 auto; min-height: 0;
+  transform: none; transition: none; border-radius: 0; box-shadow: none; z-index: auto; opacity: 1;
+}
+.qad-root--panel .qps-frame { flex: none; }
+.qad-root--panel .qps-band { box-sizing: border-box; height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 28px; background: #e2e7ef; color: #3d5070; }
+.qad-root--panel .qad-drawer[data-court="you"] .qps-band { background: #f3ddd2; color: #b0603e; }
+.qad-root--panel .qad-drawer[data-court="closed"] .qps-band { background: #ece8e3; color: #7c7168; }
+.qad-root--panel .qps-band b { font-family: var(--qad-mono); font-weight: 500; font-size: 9.5px; line-height: 13px; letter-spacing: 0.2em; text-transform: uppercase; }
+.qad-root--panel .qps-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 28px 0; }
+.qad-root--panel .qps-back { border: 0; background: none; padding: 4px 0; cursor: pointer; font-family: var(--qad-serif); font-size: 15px; line-height: 1.3; color: #1c130f; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 4px; }
+.qad-root--panel .qps-back:hover { text-decoration-color: #1c130f; }
+.qad-root--panel .qps-back:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; border-radius: 3px; }
+.qad-root--panel .qps-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--qad-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.qad-root--panel .qps-title { padding: 12px 28px 4px; font-family: var(--qad-machine); font-weight: 400; font-size: 32px; line-height: 1.2; color: #1c130f; }
+@media (max-width: 1440px) { .qad-root--panel .qps-title { font-size: 28px; } }
+.qad-root--panel .qad-body { padding: 0 28px 24px; }
+.qad-root--panel .qad-stepper { margin: 0 -28px; padding: 12px 22px 10px; }
+/* the "when you save" list is the consequence line here, above the foot on every step */
+.qad-root--panel .qad-saves { display: none; }
+.qad-root--panel .qps-cons { flex: none; margin: 0 28px 14px; padding: 12px 16px; border-radius: 10px; background: #f5f1ec; font-family: var(--qad-serif); font-style: italic; font-size: 14.5px; line-height: 1.45; color: #1c130f; max-height: 96px; overflow-y: auto; }
+.qad-root--panel .qps-cons span { font-family: inherit; }
+.qad-root--panel .qad-foot { padding: 14px 28px 18px; }

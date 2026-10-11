@@ -5393,7 +5393,9 @@ export const Queries: React.FC<{
       onDoor={(mode, anchor) => {
         const ag = agents.find((a) => a.id === activeQuery.agentId);
         if (DRAWER_LIVE[mode]) {
-          openQueryDrawer({ mode, queryId: activeQuery.id, ...(ag ? { dock: { initials: qcById.get(activeQuery.id)?.initials ?? "", name: ag.name || ag.agency || "The agent", status: String(activeQuery.status) } } : {}) });
+          /* Query panel v1 §C — the journey's form steps INTO the panel (no second drawer, no dock chip) */
+          const nm = (ag?.name || ag?.agency || "The agent").trim();
+          openQueryDrawer({ mode, queryId: activeQuery.id, panel: { name: nm, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } });
           return;
         }
         if (mode === "offer") openRecord(activeQuery);
@@ -6996,7 +6998,7 @@ export const Queries: React.FC<{
               beside it. One mount for every door (a row, `?q`, a Birds-eye bar, another page through the
               store). The centred modal and the under-900 drawer it replaces are gone. */}
           {qcOpenCardNode && cardQueryId && (
-            <QueryPanelHost id={cardQueryId} from={extPanel ? extPanel.from : "queries"} step={qaOpen && qaPanel} onClose={closeQueryCard}>
+            <QueryPanelHost id={cardQueryId} from={extPanel ? extPanel.from : "queries"} step={(qaOpen && qaPanel) || !!correcting || !!deskVerb} onClose={closeQueryCard}>
               {qcOpenCardNode}
             </QueryPanelHost>
           )}

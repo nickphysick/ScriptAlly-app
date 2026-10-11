@@ -111,6 +111,18 @@ export function openQueryDrawer(req: OpenRequest): void {
   current = { ...req, instance: ++instanceSeq };
   notify();
 }
+/**
+ * Query panel v1 — the panel asks the open journey to LEAVE (the reader chose another row, or closed the panel):
+ * decision 8 answers it, so a journey with answers is parked and one without is cancelled. The drawer's host
+ * registers what "leave" means.
+ */
+let leaveAsk: (() => void) | null = null;
+export function onDrawerLeaveAsk(f: () => void): () => void {
+  leaveAsk = f;
+  return () => { if (leaveAsk === f) leaveAsk = null; };
+}
+export function askDrawerToLeave(): void { leaveAsk?.(); }
+
 export function closeQueryDrawer(): void {
   current = null;
   notify();

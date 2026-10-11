@@ -26,7 +26,7 @@ import { turnFor } from "../../../lib/queryCardFacts";
 import { COURT_LABEL, STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
 import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
-import { cardDoors } from "../../../lib/queryActions/entry";
+import { panelDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import type { SubmissionPackage } from "../../../types";
 import "./qcvPage.css";
@@ -76,7 +76,8 @@ export const QcOpenCard: React.FC<{
   /* ⚠️ ONE PREDICATE decides what a query offers — `queryVerbs`, the same one the drawer reads */
   const verbs = queryVerbs(turnFor(row.status));
   const action = primaryActionLabel(row.status);
-  const doors = onDoor ? cardDoors(row.status) : [];
+  /* Query panel v1 §C — the next move is the primary (`panelDoors`); a year of silence leads with Close */
+  const doors = onDoor ? panelDoors(row.status, row.court === "agent" ? row.dayN : null) : [];
   const more: { key: OpenAction; label: string }[] = onDoor
     ? (verbs.nudge ? [{ key: "snooze" as const, label: "Snooze the nudge" }] : [])
     : [

@@ -45,9 +45,16 @@ export interface ShellProps {
   onSave: () => Promise<void>;
   /** where the shell stands, kept current for the host's park */
   stateRef?: React.MutableRefObject<ShellState | null>;
+  /**
+   * Query panel v1 §C — the journey is stepped INTO the query's side panel. The shell then draws the step's
+   * frame (the court band naming the step, "← Back to query", the title, the consequence line) in place of
+   * the ink header, and neither a scrim nor a dialog of its own: the panel is the one dialog.
+   */
+  panel?: { name: string; agency: string; first: string; court: string; doing: string; title: string } | null;
 }
+const COURT_WORDS: Record<string, string> = { you: "With you", agent: "With the agent", closed: "Closed" };
 
-export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, onCancel, onPark, onSave, stateRef }: ShellProps) {
+export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, onCancel, onPark, onSave, stateRef, panel = null }: ShellProps) {
   const { openCal, setOpenCal } = useDrawer();
   const n = view.steps.length;
   const last = n;
@@ -143,8 +150,20 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
 
   return (
     <>
-      <div className="qad-scrim" onClick={leave} data-qad-scrim />
-      <aside className="qad-drawer" role="dialog" aria-modal="true" aria-label={view.title} data-qad-drawer={mode}>
+      {panel ? null : <div className="qad-scrim" onClick={leave} data-qad-scrim />}
+      <aside className={`qad-drawer${panel ? " qad-drawer--panel" : ""}`} role={panel ? "group" : "dialog"} aria-modal={panel ? undefined : "true"} aria-label={panel ? panel.title : view.title}
+        data-qad-drawer={mode} data-qp-step={panel ? mode : undefined} data-court={panel?.court}>
+        {panel ? (
+          <div className="qps-frame" data-qp="step-frame">
+            <div className="qps-band" data-qp="step-band"><b>{COURT_WORDS[panel.court] ?? "Closed"}</b><b data-qp="step-doing">{panel.doing}</b></div>
+            <div className="qps-top">
+              <button type="button" className="qps-back" data-qp="step-back" onClick={leave}>{"\u2190"} Back to query</button>
+              <span className="qps-who" data-qp="step-who">{[panel.name, panel.agency].filter(Boolean).join(" \u00b7 ")}</span>
+            </div>
+            {/* not an <h2>: brand.tsx forces every h1–h3 into the brand serif */}
+            <div className="qps-title" role="heading" aria-level={2} data-qp="step-title">{panel.title}</div>
+          </div>
+        ) : (
         <div className="qad-head" data-qad-head>
           <div className="qad-top">
             <div className="qad-tt">
@@ -159,6 +178,7 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
           <button type="button" className="qad-dx" aria-label="Close" onClick={requestClose}>×</button>
           {view.who}
         </div>
+        )}
 
         <div className="qad-body" ref={bodyRef} data-qad-body>
           {view.steps.length ? (
@@ -232,6 +252,10 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
           ) : null}
         </div>
 
+        {/* Query panel v1 §C — the consequence line: what saving will change, in the journey's own "when you save" words */}
+        {panel && view.ok && view.saves.length ? (
+          <div className="qps-cons" data-qp="step-consequence">{view.saves.map((l, i) => <span key={i}>{l.text}{" "}</span>)}</div>
+        ) : null}
         <div className="qad-foot" data-qad-foot>
           {cur > 0 ? <button type="button" className="qad-back" onClick={() => go(cur - 1)}>‹ Back</button> : null}
           {view.pickOnly ? null : <button type="button" className={`qad-save${busy ? " busy" : ""}`} disabled={primaryDisabled} onClick={primary} data-qad-primary>{primaryLabel}</button>}

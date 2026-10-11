@@ -14,6 +14,7 @@ import React, { useEffect, useRef } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
 import { SidePanel } from "../shell/SidePanel";
+import { askDrawerToLeave, currentDrawerRequest } from "../../lib/queryActions/drawerStore";
 import "./queryPanelHost.css";
 
 export const QueryPanelHost: React.FC<{
@@ -37,6 +38,16 @@ export const QueryPanelHost: React.FC<{
     const off = subscribeRightPanel((o) => { if (o && o !== "query") closeRef.current(); });
     return () => { off(); releaseRightPanel("query"); };
   }, []);
+
+  /* a step belongs to the query it was opened on: choosing another row, or closing the panel, asks it to leave
+     (parked with answers, cancelled without — decision 8) */
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return undefined; }
+    if (currentDrawerRequest()?.panel) askDrawerToLeave();
+    return undefined;
+  }, [id]);
+  useEffect(() => () => { if (currentDrawerRequest()?.panel) askDrawerToLeave(); }, []);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
