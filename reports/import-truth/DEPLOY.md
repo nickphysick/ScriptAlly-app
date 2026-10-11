@@ -28,3 +28,16 @@ The harness account after every run: 73 queries, 37 agents, 5 manuscripts, 396 f
 A note pasted during the run said dev was serving `index-qtlrUiAS.js` from `dev/header-v3-landing-v2-feed-drawer-v2` at `383c88d4`. That was an earlier state. Dev was read again before this deploy (`index-BgPpCckO.js`), and `383c88d4` is an ancestor of the branch deployed, so header v3, landing colours v2 and feed drawer v2 are all still on dev.
 
 Harness account after every run: 73 queries, 37 agents, 5 manuscripts, 396 feed rows, 113 history steps.
+
+## Third deploy: the matcher's history match (11 October)
+
+| | |
+|---|---|
+| Served before | `index-BtSeNfOI.js`, from `dev/header-v3-landing-v2-feed-drawer-v2-onb-v5-import-fixes-import-page-truth` at `b984a010` (read just before the merge; that worktree's `dist/` held the same bundle) |
+| Merged | `origin/import-truth` (`56868497`) into that branch, now at `aa0ba516`. No conflicts. Pushed. |
+| Gates on the merged branch | `tsc` 0 · Vitest 562 files, 8,559 passed, 3 skipped · production build 0 · `build:dev` 0 |
+| Rendered locks on the merged build | the history match, the undated rows, the walk and the three older matcher suites: 6 passed · P2 and H11: 2 passed · the Import page, set-up parts 1 and 2 and the import-fixes walk: 126 passed, 2 skipped |
+| Deployed | `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`, from a clean tree |
+| Served after | `index-v7i_Tl5S.js` |
+
+Harness account after every run: 73 queries, 37 agents, 5 manuscripts, 396 feed rows, 113 history steps.
