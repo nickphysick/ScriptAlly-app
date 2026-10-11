@@ -8,3 +8,8 @@ B2  mutation: allow free text in the search       -> red: "typing something outs
 B3  mutation: the Adult note for every pick       -> red: "Picture Book"
 B4  mutation: remove the bounds                   -> red: over.err expected ["That's over 500,000 words. Check the number."]
 Unmutated: 12 passed.
+
+Phase 4 (lab, 1440)
+F1  red on the Phase 3 build: reports/onb-v9/red/F-before.txt (no 16:9 slot; heading "This uses your Smart Import.")
+F1  mutation: restore the one-shot note            -> red: "the one-shot note is gone"
+Unmutated: 3 passed.

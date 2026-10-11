@@ -116,7 +116,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
         <BranchB
           lab={lab}
           onSkip={labSpy("skip")} onExit={labSpy("back")} onSaveBook={async () => false} onEnsureManuscript={async () => "lab-ms"}
-          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
           onExitMode={setExit} onImporting={setImporting} onHandoff={() => setHandingOff(true)}
           onImportComplete={(_o, destination) => { labSpy("importComplete")(destination); setArrived(true); }}
         />
@@ -139,7 +139,7 @@ const LabConfirm: React.FC<{ tier: "free" | "pro" }> = ({ tier }) => {
     <>
       <input ref={input} type="file" accept=".csv,.xlsx,.xls" style={{ display: "none" }} data-picker="smart"
              onChange={(e) => { const f = e.target.files?.[0]; if (f) { labSpy("pickFile")(f); setFile({ name: f.name, size: f.size }); } e.target.value = ""; }} />
-      <ConfirmScreen fileName={file.name} fileSize={file.size} tier={tier}
+      <ConfirmScreen fileName={file.name} fileSize={file.size}
                      onChange={() => input.current?.click()} onBack={labSpy("back")} onRead={labSpy("runMapping")} />
     </>
   );
@@ -202,11 +202,10 @@ export const OnbLab: React.FC = () => {
 
   const tier = q.get("plan") === "pro" ? "pro" : "free";
   if (s === "fork") {
-    const pick = q.get("pick");
     return (
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
-          ringed={pick === "template" ? "template" : pick === "byhand" ? "byhand" : "smart"} tier={tier}
+          tier={tier}
           onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUploadTemplate={labSpy("templatePicker")}
           onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
           onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}

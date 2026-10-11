@@ -329,7 +329,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         <ConfirmScreen
           fileName={fileName}
           fileSize={pendingFile?.size ?? null}
-          tier={entitlement.tier}
           /* "Change" opens the picker in place: `pickFile` replaces the pending file and the name
              shown, and the screen stays where it is. Nothing is read by choosing. */
           onChange={() => fileInputRef.current?.click()}
@@ -347,7 +346,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         <UsedFree
           onBack={backToFork}
           onAddByHand={onAddByHand}
-          /* Back to the fork with the template tile ringed: the suggestion follows what the writer
+          /* Back to the start, where the template tile is: what the writer
              has just been told they can still do. */
           onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}
         />

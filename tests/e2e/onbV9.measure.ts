@@ -9,7 +9,7 @@
 import { test, expect } from "@playwright/test";
 import { lab, record, shot, noOverflow, settled, MUTATE, WIDE, PHONE } from "./ob9Lib";
 
-/* ════ W1 · the welcome ═══════════════════════════════════════════════════════════════════════ */
+/* ════ W1 · the welcome ════ */
 test.describe("W1", () => {
   const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
     const vis = (e: Element | null): e is HTMLElement => !!e && (e as HTMLElement).getBoundingClientRect().width > 0;
@@ -390,5 +390,118 @@ test.describe("B", () => {
     await lab(page, Q, PHONE, { motion: "reduce" });
     await shot(page, "book-400", true);
     await noOverflow(page, "book 400");
+  });
+});
+
+/* ════ F1 · the fork's tiles and the Smart Import hand-off ═══════════════════════════ */
+test.describe("F1", () => {
+  const TILE_LINES: Record<string, string[]> = {
+    smart: ["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"],
+    template: ["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"],
+    byhand: ["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"],
+  };
+  const STEPS: Array<[string, string]> = [
+    ["Your sheet, as it is", "Any layout, any wording. Nothing to tidy first."],
+    ["QueryHawk reads every row", "Agents, queries, dates and statuses, sorted into place."],
+    ["You check what lands", "Anything unclear is asked about. Nothing is saved until you say so."],
+  ];
+
+  test("F1 three tiles: a 16:9 slot, three lines, no ring on arrival", async ({ page }) => {
+    for (const pick of ["smart", "template", "byhand"]) {
+      await lab(page, "s=fork&pick=" + pick, WIDE, { motion: "reduce" });
+      const t = await page.evaluate(() => {
+        const tiles = [...document.querySelectorAll<HTMLElement>(".sf-tile")];
+        return {
+          heading: document.querySelector(".sf-open h1")?.textContent ?? "",
+          tiles: tiles.map((el) => {
+            const slot = el.querySelector<HTMLElement>('[data-o9="slot"]');
+            const r = slot?.getBoundingClientRect(); const tr = el.getBoundingClientRect();
+            const dots = [...el.querySelectorAll<HTMLElement>("li")].map((li) => getComputedStyle(li, "::before").backgroundColor);
+            return {
+              id: el.dataset.tile, ringShadow: getComputedStyle(el).boxShadow, ringAttr: el.getAttribute("data-ringed"), ringClass: el.classList.contains("is-ringed"),
+              slotRatio: r && r.height ? +(r.width / r.height).toFixed(2) : 0, slotFull: r ? Math.abs(r.width - tr.width) <= 1 && Math.abs(r.top - tr.top) <= 1 : false,
+              lines: [...el.querySelectorAll("li")].map((li) => li.textContent ?? ""), dots,
+              paragraph: el.querySelectorAll(".sf-tilep").length,
+              buttons: [...el.querySelectorAll("button")].map((b) => b.textContent ?? ""), fact: el.querySelector(".sf-fact")?.textContent ?? "",
+            };
+          }),
+          drop: document.querySelectorAll('[data-sf="drop"]').length,
+          later: document.querySelector('[data-act="later"]')?.textContent ?? "", desk: document.querySelector('[data-act="desk"]')?.textContent ?? "",
+          back: document.querySelectorAll(".sf-under-tiles .sf-back, .sf-under-tiles [data-act=\"back\"]").length,
+        };
+      });
+      record("F1", `fork pick=${pick}`, t);
+      expect(t.tiles.map((x) => x.id)).toEqual(["smart", "template", "byhand"]);
+      for (const x of t.tiles) {
+        expect(Math.abs(x.slotRatio - 16 / 9), `${x.id}: a 16:9 slot (${x.slotRatio})`).toBeLessThanOrEqual(0.03);
+        expect(x.slotFull, `${x.id}: the slot is the tile's full width, at its top`).toBe(true);
+        expect(x.lines, `${x.id}: three short lines`).toEqual(TILE_LINES[x.id!]);
+        expect(x.dots, `${x.id}: navy dots`).toEqual(["rgb(42, 58, 82)", "rgb(42, 58, 82)", "rgb(42, 58, 82)"]);
+        expect(x.paragraph, `${x.id}: the paragraph is gone`).toBe(0);
+        expect(x.ringClass || x.ringAttr === "true" || /0px 0px 0px 2px/.test(x.ringShadow), `${x.id}: no ring on arrival (pick=${pick})`).toBe(false);
+      }
+      expect(t.tiles[0].buttons).toEqual(["Import a spreadsheet"]);
+      expect(t.tiles[1].buttons).toEqual(["Download the template", "Upload my sheet"]);
+      expect(t.tiles[2].buttons).toEqual(["Add an agent"]);
+      expect(t.tiles.map((x) => x.fact)).toEqual(["Uses your one Smart Import", "Always free", "Always free · Ends set-up"]);
+      expect(t.heading).toBe("How shall we capture your existing agents & queries?");
+      expect(t.later).toBe("I've nothing to capture yet");
+      expect(t.desk).toBe("match them up yourself");
+    }
+    await shot(page, "fork-1440", true);
+    /* each button still reaches its own handler */
+    for (const [sel, want] of [['[data-act="smart"]', "picker"], ['[data-act="download"]', "download"], ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"]] as const) {
+      await page.evaluate(() => { window.__onbLab = { calls: [] }; });
+      await page.locator(sel).click();
+      expect(await page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name)), sel).toEqual([want]);
+    }
+  });
+
+  test("F1 the hand-off: its heading, no one-shot note, three steps with 96px slots", async ({ page }) => {
+    for (const plan of ["free", "pro"]) {
+      await lab(page, "s=confirm&plan=" + plan, WIDE, { motion: "reduce" });
+      if (MUTATE === "F1") await page.evaluate(() => { const p = document.createElement("p"); p.className = "sf-note"; p.textContent = "This is your one Smart Import. The template never uses it, so keep it for a spreadsheet you'd rather not retype."; document.querySelector(".sf-stepcard")!.appendChild(p); });
+      const c = await page.evaluate(() => {
+        const col = document.querySelector<HTMLElement>('[data-screen="confirm"]')!;
+        const card = col.querySelector<HTMLElement>(".sf-stepcard")!; const how = col.querySelector<HTMLElement>('[data-o9="how"]');
+        const cr = card.getBoundingClientRect(); const hr = how?.getBoundingClientRect();
+        return {
+          heading: col.querySelector("h1")?.textContent ?? "", sub: col.querySelector(".sf-sub")?.textContent ?? "",
+          text: (col.textContent ?? "").replace(/\s+/g, " "), notes: card.querySelectorAll(".sf-note").length,
+          eyebrow: how?.querySelector('[data-o9="how-eyebrow"]')?.textContent ?? "",
+          steps: how ? [...how.querySelectorAll("li")].map((li) => {
+            const s = li.querySelector<HTMLElement>('[data-o9="slot"]')!.getBoundingClientRect();
+            const b = li.querySelector("b")!;
+            return { title: b.textContent ?? "", number: getComputedStyle(b, "::before").content, line: li.querySelector('[data-o9="how-line"]')?.textContent ?? "", slot: [Math.round(s.width), Math.round(s.height)] };
+          }) : [],
+          beside: !!hr && hr.left >= cr.right - 1,
+          card: { label: card.querySelector(".sf-qlab")?.textContent ?? "", file: card.querySelector('[data-sf="file-name"]')?.textContent ?? "", primary: card.querySelector('[data-act="read"]')?.textContent ?? "", change: card.querySelector('[data-act="change"]')?.textContent ?? "" },
+        };
+      });
+      record("F1", `hand-off plan=${plan}`, c);
+      expect(c.heading).toBe("Let QueryHawk Smart Import take it from here.");
+      expect(c.sub).toBe("Nothing is saved until you've checked what we read.");
+      expect(c.notes, "the one-shot note is gone").toBe(0);
+      expect(c.text, "this screen no longer names the one Smart Import").not.toMatch(/your one Smart Import|this month's Smart Import|uses your/i);
+      expect(c.eyebrow).toBe("What happens next");
+      expect(c.steps.map((s) => [s.title, s.line])).toEqual(STEPS);
+      expect(c.steps.map((s) => s.slot), "a 96px square slot each").toEqual([[96, 96], [96, 96], [96, 96]]);
+      /* a CSS counter: the computed value names the counter, and the list increments it once per step */
+      for (const st of c.steps) expect(st.number, "numbered by the list's own counter").toMatch(/counter\(o9how\) " · "/);
+      expect(c.beside, "the steps sit beside the card at 1440").toBe(true);
+      expect(c.card).toEqual({ label: "The file you chose", file: "my agents FINAL v3.csv", primary: "Read my file", change: "Change" });
+    }
+    await shot(page, "confirm-1440", true);
+    await lab(page, "s=confirm", { width: 1000, height: 800 }, { motion: "reduce" });
+    const stacked = await page.evaluate(() => { const c = document.querySelector(".sf-stepcard")!.getBoundingClientRect(); const h = document.querySelector('[data-o9="how"]')!.getBoundingClientRect(); return h.top >= c.bottom - 1; });
+    expect(stacked, "below 1100 the steps stack under the card").toBe(true);
+  });
+
+  test("F1 the fork and the hand-off at 400: no overflow", async ({ page }) => {
+    await lab(page, "s=fork", PHONE, { motion: "reduce" });
+    await shot(page, "fork-400", true);
+    await noOverflow(page, "fork 400");
+    await lab(page, "s=confirm", PHONE, { motion: "reduce" });
+    await noOverflow(page, "confirm 400");
   });
 });

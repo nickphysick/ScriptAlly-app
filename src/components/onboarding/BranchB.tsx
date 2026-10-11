@@ -17,7 +17,6 @@ import { SmartImportResult } from "../../types/smartImport";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
-import { CaptureOption } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "../import/ImportFlow";
 import { BookMore } from "./v9/BookMore";
@@ -38,7 +37,6 @@ export interface BranchBProps {
    *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
   onEnsureManuscript: () => Promise<string | null>;
   /** Pre-selected capture option: deep/interest → "smart", early → "byhand". */
-  defaultImport: CaptureOption;
   /** "Add them by hand" — drops into the existing add-agents flow. */
   onAddByHand: () => void;
   /** Escape hatch — finish onboarding into the Import desk (ImportCsv). */
@@ -100,7 +98,7 @@ export const exitModeFor = (screen: string): ExitMode =>
 type B3Screen = "ack" | "book" | "list";
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
 }) => {
   const entitlement = useSmartImportEntitlement();
 
@@ -120,7 +118,6 @@ export const BranchB: React.FC<BranchBProps> = ({
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(lab ? { ...emptyManuscriptFields(), title: lab.title } : initialBook ?? emptyManuscriptFields());
 
-  const [importOption, setImportOption] = useState<CaptureOption>(defaultImport);
 
   // ── Step 2 opens with the acknowledgement and the title (onboarding v9) ──
   if (screen === "ack") {
@@ -158,7 +155,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         onEnsureManuscript={onEnsureManuscript}
         hostError={error}
         onAddByHand={onAddByHand}
-        onUseTemplate={() => setImportOption("template")}
         onImportComplete={onImportComplete}
         onScreen={setFlowScreen}
         onHandoff={onHandoff}
@@ -166,7 +162,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       />
       {flowScreen === "idle" && (
         <CaptureFork
-          ringed={importOption}
           tier={entitlement.tier}
           onChooseFile={() => flowRef.current?.chooseFile()}
           onDropFile={(f) => flowRef.current?.dropFile(f)}

@@ -30,7 +30,8 @@ export const CAPTURE_OPTIONS: CaptureOption[] = ["smart", "template", "byhand"];
 export interface CaptureChoice {
   key: CaptureOption;
   title: string;
-  desc: string;
+  /** Three short lines (onboarding v9): what it takes, what it does, what it asks of you. */
+  lines: [string, string, string];
 }
 
 export const CAPTURE_HEADING = "How shall we capture your existing agents & queries?";
@@ -50,23 +51,17 @@ export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
   smart: {
     key: "smart",
     title: "Smart import.",
-    desc:
-      "Upload the spreadsheet you already keep, in any layout and any wording. QueryHawk reads it " +
-      "and shows you everything before anything is saved.",
+    lines: ["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"],
   },
   template: {
     key: "template",
     title: "Our template.",
-    desc:
-      "Download a ready-made sheet, fill in your agents, upload it back. Set columns mean we read " +
-      "it exactly, every time.",
+    lines: ["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"],
   },
   byhand: {
     key: "byhand",
     title: "Add by hand.",
-    desc:
-      "Go straight to the agent form and type them in. Quickest route if you've only a handful to " +
-      "record.",
+    lines: ["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"],
   },
 };
 
@@ -76,12 +71,6 @@ export const CAPTURE_TEMPLATE_DOWNLOAD = "Download the template";
 export const CAPTURE_TEMPLATE_UPLOAD = "Upload my sheet";
 export const CAPTURE_HAND_ACTION = "Add an agent";
 
-/** The drop zone's words, on the ringed Smart import tile. Dropping a file there works. */
-export const CAPTURE_DROP_LEAD = "Drop your file here, or ";
-export const CAPTURE_DROP_LINK = "choose a file";
-/* ⚠️ THE TYPES ONLY. It read "· up to 5 MB", and nothing enforced 5 MB: the client takes any size and
-   the server's own limit is on the sheet's TEXT (200,000 characters, 600 lines), not on bytes. */
-export const CAPTURE_DROP_TYPES = ".csv · .xlsx";
 
 /**
  * The fact line under a tile: what it costs, and nothing else. Smart import's depends on the

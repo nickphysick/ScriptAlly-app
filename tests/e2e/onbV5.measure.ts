@@ -434,7 +434,7 @@ test.describe("OB1", () => {
   const calls = (page: Page) => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name));
   const reset = (page: Page) => page.evaluate(() => { window.__onbLab = { calls: [] }; });
 
-  test("K1 three tiles, each button to its own handler, one ring, and a drop that works", async ({ page }) => {
+  test("K1 three tiles, each button to its own handler, no ring, and a drop that works", async ({ page }) => {
     for (const vp of VPS) {
       for (const pick of ["smart", "template", "byhand"]) {
         await lab(page, "s=fork&pick=" + pick, vp);
@@ -447,15 +447,16 @@ test.describe("OB1", () => {
         }));
         expect(t.tiles, `@${vp.width}: three tiles`).toBe(3);
         expect(t.radios, "no radio").toBe(0);
-        expect(t.ringed, "exactly one ringed, and it is the suggested one").toEqual([pick]);
-        expect(t.ring[0], "a 2px navy outline").toMatch(/rgb\(42, 58, 82\) 0px 0px 0px 2px/);
+        /* RE-POINTED (onboarding v9): no tile is pre-selected (OB9 F1 holds the tiles' new shape). */
+        expect(t.ringed, "no tile is ringed").toEqual([]);
+        expect(t.ring, "no ring class").toEqual([]);
         expect(t.cols, `@${vp.width}: three across from 1080, stacked below`).toBe(vp.width >= 1080 ? 3 : 1);
       }
       await lab(page, "s=fork&pick=smart", vp);
       const presses: Array<[string, string]> = [
         ['[data-act="smart"]', "picker"], ['[data-act="download"]', "download"],
         ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"],
-        ['[data-sf="drop"]', "picker"], ['[data-act="later"]', "skip"], ['[data-act="desk"]', "importDesk"],
+        ['[data-act="later"]', "skip"], ['[data-act="desk"]', "importDesk"],
       ];
       for (const [sel, want] of presses) {
         await reset(page);
@@ -468,7 +469,7 @@ test.describe("OB1", () => {
         const dt = new DataTransfer();
         dt.items.add(new File(["Agent,Agency\nA,B\n"], "my agents.csv", { type: "text/csv" }));
         dt.items.add(new File(["x"], "second.csv", { type: "text/csv" }));
-        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+        document.querySelector('[data-tile="smart"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
       });
       const dropped = await page.evaluate(() => window.__onbLab!.calls);
       expect(dropped.map((c) => c.name), "one call to pickFile").toEqual(["pickFile"]);
@@ -477,7 +478,7 @@ test.describe("OB1", () => {
       await page.evaluate(() => {
         const dt = new DataTransfer();
         dt.items.add(new File(["x"], "notes.pdf", { type: "application/pdf" }));
-        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+        document.querySelector('[data-tile="smart"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
       });
       expect(await calls(page), "a type the picker would not offer is ignored").toEqual([]);
     }
@@ -506,7 +507,8 @@ test.describe("OB1", () => {
       const a = await read();
       expect(a.row).toBe("my agents FINAL v3.csv");
       expect(a.lead, "the sentence names the same file").toBe(a.row);
-      expect(a.text).not.toMatch(/\brows?\b/i);
+      /* v9: the screen says "QueryHawk reads every row"; what it must not state is a COUNT of rows. */
+      expect(a.text).not.toMatch(/\d[\d,]*\s+rows?\b/i);
       expect(await calls(page), "nothing is read on arrival").not.toContain("runMapping");
       const chooser = page.waitForEvent("filechooser");
       await page.locator('[data-act="change"]').click();

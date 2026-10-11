@@ -14,19 +14,6 @@
 
 export type QueryingStage = "starting" | "early" | "deep" | "interest";
 
-/** Which import route Branch B pre-selects. */
-export type ImportDefault = "smart" | "byhand";
-
-/**
- * "A few queries out" means a handful to type in; the deeper two mean a spreadsheet worth reading.
- *
- * ⚠️ IT IS A PRE-SELECTION, NEVER A RESTRICTION — both routes stay live on the screen whatever this
- * returns, and an unknown or absent stage falls to Smart Import, which is the screen's own hero.
- */
-export function importDefaultForStage(stage: QueryingStage | null | undefined): ImportDefault {
-  return stage === "early" ? "byhand" : "smart";
-}
-
 /**
  * The stage to act on: the STORED answer, falling back to the one held in this session.
  *

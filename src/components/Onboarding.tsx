@@ -15,7 +15,7 @@ import { ManuscriptFieldsState, emptyManuscriptFields } from "./onboarding/Manus
 import { AckTitle } from "./onboarding/v9/AckTitle";
 import { BookMore } from "./onboarding/v9/BookMore";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
-import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
+import { effectiveQueryingStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
 import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
 import { WELCOME_EYEBROW, WELCOME_LINE, welcomeHeading } from "../lib/onboardingV9";
@@ -397,8 +397,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "B" && (
           <CenterWrap>
             <BranchB
-              stage={queryingStage ?? "early"}
-              stageTitle={STAGE_OPTIONS.find((o) => o.id === queryingStage)?.title ?? ""}
+              /* The answer just given leads; the stored one covers a writer who arrives here without it
+                 (lib/onboardingStage). It chooses which passage the title step types. */
+              stage={effectiveQueryingStage(queryingStage, currentUser?.queryingStage) ?? "early"}
+              stageTitle={STAGE_OPTIONS.find((o) => o.id === effectiveQueryingStage(queryingStage, currentUser?.queryingStage))?.title ?? ""}
               name={currentUser?.name}
               onSkip={handleSkip}
               onStage={setSpineStep}
@@ -409,10 +411,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onSaveBook={handleBranchBSaveBook}
               initialBook={b2Draft}
               onEnsureManuscript={ensureBranchBManuscript}
-              /* ⚠️ READS THE STORED ANSWER, not this component's local state — see
-                 lib/onboardingStage. The field used to be written to the profile and never read
-                 back from it. */
-              defaultImport={importDefaultForStage(effectiveQueryingStage(currentUser?.queryingStage, queryingStage))}
               onAddByHand={async () => {
                 // Manual-add finish: create the held manuscript once, then finish onto the agent
                 // list, where the app's real Add-an-agent form lives.
