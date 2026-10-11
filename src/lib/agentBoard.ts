@@ -25,7 +25,7 @@
 import { MONTHS_SHORT } from "./dates";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../types";
 import { STATUS_ORDER } from "./statusOrder";
-import { isTerminalStatus, queriesForAgent, isDoorOpen, methodShort } from "./agentList";
+import { isTerminalStatus, queriesForAgent, isDoorClosed, methodShort } from "./agentList";
 import { stateFor, STATE_ACCENT_TOKEN } from "./queryCardFacts";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import { parseWhen } from "./dashboardStats";
@@ -146,7 +146,7 @@ export const GROUPINGS: readonly Grouping[] = [
     column: (a, q) => historyBucket(agentQueryStanding(a.id, q)) },
   { key: "added", label: "Month added", sub: "Newest month first", order: null, column: (a) => monthAdded(a.dateAdded) },
   { key: "door", label: "Open or closed", sub: "Whether they're taking queries", order: ["Open to queries", "Closed to queries"],
-    column: (a) => (isDoorOpen(a) ? "Open to queries" : "Closed to queries") },
+    column: (a) => (isDoorClosed(a) ? "Closed to queries" : "Open to queries") },
   { key: "loc", label: "Location", sub: "By country", order: null,
     column: (a) => countryName(a.country) || "Not recorded" },
   { key: "method", label: "Submission method", sub: "How to approach them",

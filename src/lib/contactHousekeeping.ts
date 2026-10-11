@@ -23,7 +23,7 @@
  */
 import { QueryStatus, type Agent, type Query } from "../types";
 import { agentDataQualityNeeds } from "./agentDataQuality";
-import { isDoorOpen } from "./agentList";
+import { isDoorClosed } from "./agentList";
 import { agentPrimary } from "./agentDisplay";
 import { joinGenres } from "./genreNoun";
 import { formatDate } from "./dates";
@@ -97,7 +97,7 @@ export function agentGaps(a: Agent, ctx: Pick<HkAgentCtx, "hasReopenTask">, sett
   if (agentDataQualityNeeds(a).includes("materials")) gaps.push("materials");
   if ((a.genres ?? []).length === 0) gaps.push("genres");
   if (!(a.mswlNotes ?? "").trim()) gaps.push("wishlist");
-  if (!isDoorOpen(a) && !ctx.hasReopenTask) gaps.push("reopen");
+  if (isDoorClosed(a) && !ctx.hasReopenTask) gaps.push("reopen");
   return gaps;
 }
 
@@ -360,7 +360,7 @@ export function wishlistCheckin(agents: readonly Agent[], ctxOf: (a: Agent) => H
     const ms = Date.parse(stamp);
     if (Number.isNaN(ms)) return false;
     if (dayKey(addMonths(new Date(ms), prefs.wishlistEvery)) > now) return false;
-    if (!isDoorOpen(a)) return false;
+    if (isDoorClosed(a)) return false;
     return !ctxOf(a).passedOn;
   }).sort((x, y) => {
     const cx = ctxOf(x), cy = ctxOf(y);

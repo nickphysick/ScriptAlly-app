@@ -23,7 +23,8 @@ import { collection, doc, getDocs, deleteDoc, writeBatch, query, where, Timestam
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
 import { assignTimes } from "./smartImportCommit";
-import { QueryStatus, SubmissionMethod, SubmissionStatus, ActivityType, Agent } from "../types";
+import { QueryStatus, SubmissionMethod, ActivityType, Agent } from "../types";
+import { importedAgentDoc } from "./importedAgent";
 import type { ProposalRecord, ProposalSubject } from "./emailImport";
 
 export interface EmailCommitDeps {
@@ -106,23 +107,9 @@ export async function commitEmailImport(
 
   if (subject.kind === "new_agent") {
     // 1a. Create the agent — agency is the confirmed identity; name only if present.
+    //     Only what the email gave: no rating, window or reply rule of the import's own.
     const agentRes = await deps.addAgent(
-      {
-        name: subject.agentName?.trim() ?? "",
-        agency: subject.agency,
-        email: "",
-        website: "",
-        genres: [],
-        mswlNotes: "",
-        starRating: 3,
-        submissionStatus: SubmissionStatus.OPEN,
-        responseTimeWeeks: 0,
-        noResponseMeansNo: false,
-        submissionMethod: SubmissionMethod.EMAIL,
-        materialsWanted: [],
-        notes: "",
-        importedNeedsReview: true,
-      },
+      importedAgentDoc({ name: subject.agentName?.trim() ?? "", agency: subject.agency }, { importedNeedsReview: true }),
       true
     );
     if (!agentRes.success || !agentRes.id) {

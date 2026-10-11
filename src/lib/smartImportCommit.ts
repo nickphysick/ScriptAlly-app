@@ -17,6 +17,7 @@ import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImpor
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
 import { importActivityLine, type ImportSource } from "./importLabels";
+import { importedAgentDoc } from "./importedAgent";
 
 // The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
 // pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
@@ -59,9 +60,6 @@ export function countExistingMatches(result: SmartImportResult, existingAgents: 
 
 /** Where an all-undated query's ordering keys start. Not a date: see the note at its use. */
 export const UNDATED_ORDER_BASE_MS = 0;
-
-const mapMethod = (m: ParsedAgent["submissionMethod"]): SubmissionMethod =>
-  m === "Online Form" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL;
 
 export async function commitSmartImport(
   deps: CommitDeps,
@@ -110,23 +108,17 @@ export async function commitSmartImport(
         outcome.agentsMerged++;
         continue;
       }
+      // Only what the file gave: no rating, window or reply rule of the import's own (importedAgent.ts).
       const res = await addAgent(
-        {
-          name: agentName,
-          agency: a.agency ?? "",
-          email: a.email ?? "",
-          website: a.website ?? "",
-          genres: a.genres ?? [],
-          mswlNotes: a.mswlNotes ?? "",
-          starRating: 3,
-          submissionStatus: "Open" as any,
-          responseTimeWeeks: a.responseTimeWeeks ?? 0,
-          noResponseMeansNo: a.noResponseMeansNo ?? false,
-          submissionMethod: mapMethod(a.submissionMethod),
-          materialsWanted: [],
-          notes: "",
-          importedNeedsReview: true,
-        },
+        importedAgentDoc(
+          {
+            name: agentName, agency: a.agency, email: a.email, website: a.website, genres: a.genres,
+            mswlNotes: a.mswlNotes, responseTimeWeeks: a.responseTimeWeeks,
+            noResponseMeansNo: a.noResponseMeansNo, submissionMethod: a.submissionMethod,
+            starRating: a.starRating, submissionStatus: a.submissionStatus,
+          },
+          { importedNeedsReview: true },
+        ),
         true
       );
       const label = agentName || a.agency || "(unnamed)";

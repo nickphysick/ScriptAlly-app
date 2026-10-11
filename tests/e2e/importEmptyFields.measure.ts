@@ -30,10 +30,14 @@ Empty Fields Probe`);
   expect(a.agency, "an agency was invented").toBe("");
   expect(a.email, "an email address was invented").toBe("");
   expect(a.mswlNotes, "wish-list notes were invented").toBe("");
-  /* ⚠️ KEPT ON PURPOSE (Ruling 1). A stated assumption about response times, not a claim about this
-     agency — visibly editable, no false authorship. Asserted so a later sweep does not remove it by
-     pattern-matching the others. */
-  expect(a.responseTimeWeeks, "the stated default was removed").toBe(8);
+  /* Ruling 1 kept an 8-week reply window here. The import-truth pack reversed it: the sheet gave
+     no window, rating, status, reply rule, materials or genre, so the agent holds none. */
+  expect("responseTimeWeeks" in a, "a reply window was invented").toBe(false);
+  expect("starRating" in a, "a rating was invented").toBe(false);
+  expect("noResponseMeansNo" in a, "a reply rule was invented").toBe(false);
+  expect(a.submissionStatus, "a status was invented").toBe("Unknown");
+  expect(a.materialsWanted, "materials were invented").toEqual([]);
+  expect(a.genres, "a genre was invented").toEqual([]);
 
   } finally {
     const removed = await cleanup(db, uid, snap);

@@ -18,6 +18,7 @@
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
+import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import type { QcRow } from "../../../lib/qcSummary";
 import { type CardAct, materialChips, primaryFor, queryTone } from "../../../lib/agentCard";
 import { genreLabel, type PersonalGenre } from "../../../lib/genres";
@@ -100,7 +101,7 @@ export const AgentCarouselCard: React.FC<AgentCarouselCardProps> = ({ agent, fac
       <MaterialsBlock mats={mats} label="Wants you to send" onAdd={() => onAdd(agent.id, "materials")} probe="cl13" />
       <div className="cl13-acf" data-cl13="cfoot">
         <small>
-          {shut ? (reopens ? `Reopens ${day(reopens)}` : "Closed to queries") : "Open to queries"}
+          {shut ? (reopens ? `Reopens ${day(reopens)}` : "Closed to queries") : facts.door === "open" ? "Open to queries" : DOOR_NOT_KNOWN}
           {fits && fitWord ? <><br />Fits {fitWord}</> : null}
         </small>
         {action ? (

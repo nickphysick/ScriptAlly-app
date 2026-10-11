@@ -16,6 +16,7 @@ import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { AgentFacts, ContactGroup, RowDateLine, type SortKey, rowDateLine } from "../../../lib/contactList";
+import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
@@ -131,9 +132,9 @@ const Row: React.FC<{
   const wish = (a.mswlNotes ?? "").trim();
   /* §6 — a CLOSED agent: their door is shut and nothing is queried, or everything with them has closed.
      Grey disc, softer name; no coloured edge for anyone. */
-  const shut = (x.standing.kind === "none" && x.door !== "open") || x.stand === "closed";
+  const shut = (x.standing.kind === "none" && x.door === "closed") || x.stand === "closed";
   const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
-  const reopens = x.door !== "open" ? reopenDay(a.reopensOn) : null;
+  const reopens = x.door === "closed" ? reopenDay(a.reopensOn) : null;
   const wishRef = useRef<HTMLParagraphElement>(null);
   const mq = useRef<Animation | null>(null);
   const stopMq = () => { mq.current?.cancel(); mq.current = null; };
@@ -208,7 +209,9 @@ const Row: React.FC<{
       {/* Replies: "~N wks" over the door */}
       <span className="clv-rrep" data-clv="rep">
         {weeks ? <b>~{weeks} wks</b> : <b className="unk">Not stated</b>}
-        <small>{x.door === "open" ? "Open to queries" : reopens ? `Closed till ${reopens}` : "Closed to queries"}</small>
+        {x.door === "unknown"
+          ? <small data-clv="door-unknown" title="Whether they are open to queries is not known">{DOOR_NOT_KNOWN}</small>
+          : <small>{x.door === "open" ? "Open to queries" : reopens ? `Closed till ${reopens}` : "Closed to queries"}</small>}
       </span>
       <span className="clv-rq">
         {x.standing.kind === "none" ? (

@@ -16,7 +16,7 @@
  */
 import type { Agent, Manuscript, Query, QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
-import { isDoorOpen } from "./agentList";
+import { isDoorOpen, isDoorClosed, doorOf, DOOR_NOT_KNOWN, type DoorState } from "./agentList";
 import { bookGenres, genreKey, takesBook } from "./genreMatch";
 import { joinGenres } from "./genreNoun";
 
@@ -114,6 +114,7 @@ export function contactCensus(agents: readonly Agent[], rows: readonly QcRow[], 
 
   const yourMove = active.filter((a) => (standing.get(a.id) as { yourMove: boolean }).yourMove).length;
   const openNow = never.filter((a) => isDoorOpen(a)).length;
+  const shutNow = never.filter((a) => isDoorClosed(a)).length;
   /* ⚠️ THE SPLIT NAMES PASSED AND NO-REPLY ONLY (the mock's own line). A withdrawn close is in
      the COUNT — the card is "agents whose query closed" — and deliberately not in the split. */
   const passed = closed.filter((a) => (standing.get(a.id) as { status: QueryStatus }).status === "Rejected").length;
@@ -123,7 +124,7 @@ export function contactCensus(agents: readonly Agent[], rows: readonly QcRow[], 
     standing,
     cards: [
       { key: "active", name: "Active queries", count: active.length, fact: `${yourMove} your move`, urgent: yourMove > 0 },
-      { key: "never", name: "Never queried", count: never.length, fact: `${openNow} open now · ${never.length - openNow} closed`, urgent: false },
+      { key: "never", name: "Never queried", count: never.length, fact: `${openNow} open now · ${shutNow} closed`, urgent: false },
       { key: "closed", name: "Query closed", count: closed.length, fact: `${passed} passed · ${noReply} no reply`, urgent: false },
     ],
   };
@@ -225,9 +226,9 @@ export interface AgentFacts {
   pastExpected: boolean;
   /** the location as displayed: city, else the country's name, else null */
   loc: string | null;
-  door: "open" | "closed";
-  /** v13: the door as the agent's record states it — Open, Closed, or Not stated (an absent or
-   *  Unknown status, which `door` reads as open) */
+  /** their door: open, closed, or not known (an Unknown or absent status; counted with neither) */
+  door: DoorState;
+  /** v13: the same fact under the filter's keys — Open, Closed, or not stated */
   openKey: OpenKey;
   /** the status the filter's Query status section reads (v11 §5.1's seven) */
   statusKey: string;
@@ -258,7 +259,7 @@ export function agentFacts(a: Agent, rows: readonly QcRow[], msId: string | null
     q,
     pastExpected: open.some((r) => r.court === "agent" && r.pastExpected),
     loc: (a.city ?? "").trim() || countryName(a.country) || null,
-    door: isDoorOpen(a) ? "open" : "closed",
+    door: doorOf(a),
     openKey: openKeyOf(a),
     statusKey,
     status14: status14Of(standing.kind === "none" ? null : q),
@@ -313,7 +314,7 @@ export function status14Of(q: Pick<QcRow, "status"> | null): StatusKey {
   }
 }
 
-export type OpenChoice = "either" | "open" | "closed";
+export type OpenChoice = "either" | "open" | "closed" | "unknown";
 export type QueriedChoice = "either" | "yes" | "no";
 export type GenreMode = "any" | "all";
 export interface ContactFilters {
@@ -331,6 +332,7 @@ export const emptyContactFilters = (): ContactFilters =>
   ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" });
 export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
+  { key: "unknown", label: DOOR_NOT_KNOWN },
 ];
 export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "yes", label: "Queried" }, { key: "no", label: "Not queried yet" },
@@ -345,14 +347,17 @@ export const contactFilterCount = (f: ContactFilters): number =>
 /* the one-line facts each filter reads */
 export const isActionRequired = (x: Pick<AgentFacts, "stand">) => x.stand === "you";
 export const isQueried = (x: Pick<AgentFacts, "standing">) => x.standing.kind !== "none";
-export const isOpenNow = (x: Pick<AgentFacts, "openKey">) => x.openKey !== "closed";
+/** Stated open. An agent whose door is not known is neither open nor closed. */
+export const isOpenNow = (x: Pick<AgentFacts, "openKey">) => x.openKey === "open";
+export const isClosedNow = (x: Pick<AgentFacts, "openKey">) => x.openKey === "closed";
+export const isDoorUnknown = (x: Pick<AgentFacts, "openKey">) => x.openKey === "unstated";
 export const isMissingMaterials = (x: Pick<AgentFacts, "agent">) => (x.agent.materialsWanted ?? []).length === 0;
 export const isAlwaysResponds = (x: Pick<AgentFacts, "agent">) => x.agent.noResponseMeansNo === false;
 
 const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => boolean> = {
   status: (x, f) => f.status.length === 0 || f.status.includes(x.status14),
   action: (x, f) => !f.action || isActionRequired(x),
-  open: (x, f) => f.open === "either" || (f.open === "open" ? isOpenNow(x) : !isOpenNow(x)),
+  open: (x, f) => f.open === "either" || (f.open === "open" ? isOpenNow(x) : f.open === "closed" ? isClosedNow(x) : isDoorUnknown(x)),
   queried: (x, f) => f.queried === "either" || (f.queried === "yes" ? isQueried(x) : !isQueried(x)),
   mats: (x, f) => !f.mats || isMissingMaterials(x),
   always: (x, f) => !f.always || isAlwaysResponds(x),
@@ -374,7 +379,10 @@ export function facetCounts(facts: readonly AgentFacts[], f: ContactFilters, poo
     action: under("action").filter(isActionRequired).length,
     mats: under("mats").filter(isMissingMaterials).length,
     always: under("always").filter(isAlwaysResponds).length,
-    open: { open: under("open").filter(isOpenNow).length, closed: under("open").filter((x) => !isOpenNow(x)).length },
+    open: {
+      open: under("open").filter(isOpenNow).length, closed: under("open").filter(isClosedNow).length,
+      unknown: under("open").filter(isDoorUnknown).length,
+    },
     queried: { yes: under("queried").filter(isQueried).length, no: under("queried").filter((x) => !isQueried(x)).length },
   };
 }
@@ -445,7 +453,8 @@ export function actionOf(x: AgentFacts, takes: (x: AgentFacts) => boolean): Acti
   if (st === "fr") return "full";
   if (st === "rr") return "revision";
   if (x.pastExpected) return "nudge";
-  if (st === "none") return !isOpenNow(x) ? "shut" : takes(x) ? "ready" : "nothing";
+  /* ready needs a door stated open; a door nobody has stated is neither shut nor ready */
+  if (st === "none") return isClosedNow(x) ? "shut" : isOpenNow(x) && takes(x) ? "ready" : "nothing";
   if (st === "queried" || st === "ps" || st === "fs" || st === "resub") return "waiting";
   return "nothing";
 }

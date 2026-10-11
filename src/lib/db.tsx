@@ -1211,8 +1211,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     agents.forEach(a => {
-      // Dream-agent nudge: 5★, not closed (Unknown counts as suggestable), and not set aside.
-      if (a.starRating === 5 && a.submissionStatus !== SubmissionStatus.CLOSED && !a.setAside) {
+      // Dream-agent nudge: 5★, stated open (the line says "is open to subs"), and not set aside.
+      if (a.starRating === 5 && a.submissionStatus === SubmissionStatus.OPEN && !a.setAside) {
         const hasQuery = queries.some(q => q.agentId === a.id);
         if (!hasQuery) {
           calculatedTasks.push({
