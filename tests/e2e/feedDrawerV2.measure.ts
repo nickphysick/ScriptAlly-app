@@ -190,6 +190,14 @@ test("FD2 A1 A2 A3 · every half-screen drawer floats", async ({ page }) => {
 
 /* ───────────────────────── B · the feed rows ───────────────────────── */
 const BASELINE = "tests/e2e/fixtures/fd2-untouched.json";
+/**
+ * ⚠️ B6 READS THE DRAWER AT A FIXED CLOCK (re-baselined 11 Oct). The feed draws the activities dated inside
+ *    [now − 30 days, now], so a baseline captured at the real time aged out within a day ("119 things you did" became
+ *    123). With `Date` held at this instant in both the capture and the check, the window is closed at both ends
+ *    and later activity cannot enter it. What can still move it: someone writing or deleting activities DATED inside
+ *    that window on the shared account (a back-dated seed). Then re-capture; the drawer is not at fault.
+ */
+const B6_NOW = new Date("2026-10-11T09:00:00.000Z");
 
 /** Every row of the open feed drawer, read once. A real function, never a template. */
 async function readRows(page: Page) {
@@ -237,6 +245,7 @@ const hexRgb = (h: string) => { const m = h.replace("#", "").match(/../g) ?? [];
 if (process.env.FD2_CAPTURE) {
   test("FD2 capture · the untouched parts, on the build before the pack", async ({ page }) => {
     await prepare(page);
+    await page.clock.setFixedTime(B6_NOW);
     const got: Record<string, unknown> = {};
     for (const vp of SIZES) {
       await openFeed(page, vp, false);
@@ -313,6 +322,7 @@ test("FD2 B5 B6 · the actions still act, and the parts around the rows are unto
   await prepare(page);
   const base = existsSync(BASELINE) ? (JSON.parse(readFileSync(BASELINE, "utf8")) as Record<string, { filter: string[]; sum: string[]; days: string[]; end: string }>) : null;
   expect(base, "B6 baseline missing: capture it against a build of the base (FD2_CAPTURE=1)").not.toBeNull();
+  await page.clock.setFixedTime(B6_NOW);
   for (const vp of SIZES) {
     const at = `@${vp.width}`;
     /* B6, at the default window, as the baseline was read */
