@@ -145,3 +145,28 @@ describe("T1 · the email import", () => {
     expect(code("src/lib/emailImportCommit.ts")).not.toMatch(/Date\.now\(\)|new Date\(\)/);
   });
 });
+
+describe("U3 · the matcher never drops a row silently for want of a date", () => {
+  it("a skipped history row carries the review's own date reason", async () => {
+    const { eventDateReason } = await import("./importMatcher");
+    const { focusReasonMeta } = await import("./smartImportReviewModel");
+    expect(eventDateReason("blank")).toBe("Date needed");
+    expect(eventDateReason("unreadable")).toBe("Date needed");
+    expect(eventDateReason("ambiguous")).toBe("Date to confirm");
+    expect(eventDateReason("unreadable"), "it is the review's word, not a second one").toBe(focusReasonMeta("unreadable-date").pill);
+  });
+  it("the matcher writes an undated query row, and sends an undated history row to the notice", () => {
+    const src = code("src/components/ImportCsv.tsx");
+    const queries = src.slice(src.indexOf('importType === "queries"'), src.indexOf('importType === "activities"'));
+    expect(queries.length).toBeGreaterThan(500);
+    expect(queries, "no query row is skipped for its date").not.toMatch(/if \(!sent\.iso\)\s*(continue|\{\s*failedCount)/);
+    expect(queries).toMatch(/\.\.\.\(sent\.iso \? \{ dateSent: sent\.iso \} : \{\}\)/);
+    const history = src.slice(src.indexOf('importType === "activities"'));
+    expect(history).toMatch(/if \(!eventDate\.iso\) \{\s*failedCount\+\+;\s*errorsList\.push\(ERR\.eventNoDate\(index \+ 2\)\);\s*noticeRows\.push\(/);
+    expect(history).toMatch(/reason: eventDateReason\(/);
+    /* the counts are set once more after the last row, so a run that ends on skipped rows counts them */
+    const afterLoop = src.slice(src.lastIndexOf("await new Promise(r => setTimeout(r, 60));"));
+    expect(afterLoop).toMatch(/setImportResults\(\{ successful: successfulCount, unmatched: unmatchedList, failed: failedCount, errors: errorsList, logs: runLogs \}\);/);
+    expect(src).toMatch(/if \(noticeRows\.length > 0 && currentUser\) \{\s*saveImportNotice\(currentUser\.id, \{ count: noticeRows\.length, rows: noticeRows, at: Date\.now\(\) \}\);/);
+  });
+});

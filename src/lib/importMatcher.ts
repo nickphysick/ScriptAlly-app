@@ -6,6 +6,7 @@
  * replace its developer copy. Stated once so the screen, its run log and the lock read one set.
  */
 import { parseTemplateDate } from "./templateImport";
+import { focusReasonMeta } from "./smartImportReviewModel";
 
 export type MatcherKind = "agents" | "manuscripts" | "queries" | "activities";
 
@@ -86,6 +87,14 @@ export function undatedQueryLine(row: number, raw: string, why: "blank" | "ambig
   return why === "ambiguous"
     ? `Row ${row}: the date "${raw.trim()}" could mean two days. Imported with no sent date.`
     : `Row ${row}: the date "${raw.trim()}" couldn't be read. Imported with no sent date.`;
+}
+/**
+ * Why a history row with no usable date was skipped, in the import review's own words for a date
+ * it cannot use ("Date needed" for a blank or unreadable cell, "Date to confirm" for one that
+ * could mean two days). The row carries this reason in the dashboard's skipped-rows notice.
+ */
+export function eventDateReason(why: "blank" | "ambiguous" | "unreadable"): string {
+  return focusReasonMeta(why === "ambiguous" ? "ambiguous-date" : why === "unreadable" ? "unreadable-date" : "no-date").pill;
 }
 const why = (reason?: string) => (reason ? ` ${reason}` : "");
 export const ERR = {

@@ -238,3 +238,32 @@ describe("R1 · a file whose every row is already here", () => {
     expect(flow, "it is reached from the read, before anything is written").toMatch(/setNothingNew\(true\);\s*setScreen\("done"\);\s*return "nothing";/);
   });
 });
+
+describe("N3 · the dashboard learns of a new notice without a reload", () => {
+  it("saving or clearing the notice announces it, and the dashboard subscribes", async () => {
+    const { saveImportNotice, clearImportNotice, onImportNoticeChange, readImportNotice } = await import("./importNotice");
+    const store = new Map<string, string>();
+    const listeners = new Map<string, Set<() => void>>();
+    vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
+    vi.stubGlobal("window", {
+      addEventListener: (t: string, f: () => void) => { (listeners.get(t) ?? listeners.set(t, new Set()).get(t)!).add(f); },
+      removeEventListener: (t: string, f: () => void) => { listeners.get(t)?.delete(f); },
+      dispatchEvent: (e: { type: string }) => { for (const f of listeners.get(e.type) ?? []) f(); return true; },
+    });
+    vi.stubGlobal("Event", class { constructor(public type: string) {} });
+    try {
+      const seen: (number | null)[] = [];
+      const off = onImportNoticeChange(() => seen.push(readImportNotice("u1")?.count ?? null));
+      saveImportNotice("u1", buildImportNotice([], { errors: [] }, [], [], 1, [{ who: "Clara Voss", status: "Queried", sentDate: null }]));
+      saveImportNotice("u1", buildImportNotice([], { errors: [] }, [], [{ status: "Queried", sentDate: null }, { status: "Queried", sentDate: null }], 2));
+      clearImportNotice("u1");
+      expect(seen, "each change was heard, with the notice as it then stood").toEqual([1, 2, null]);
+      off();
+      saveImportNotice("u1", null);
+      expect(seen.length, "nothing is heard after unsubscribing").toBe(3);
+    } finally { vi.unstubAllGlobals(); }
+    const dash = code("src/components/dashboard/v58/Dash58.tsx");
+    expect(dash).toMatch(/return onImportNoticeChange\(\(\) => setNotice\(readImportNotice\(uid\)\)\);/);
+    expect(dash, "no read-once guard").not.toMatch(/noticeRead/);
+  });
+});

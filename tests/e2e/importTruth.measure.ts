@@ -1,5 +1,6 @@
 /**
- * IT1 · R1 (rendered), with A2 and M1 seen on the way — the walk on dev.
+ * IT1 · R1 and N3 (rendered), with A2 and M1 seen on the way — the walk on dev.
+ * N3: an import made from the Import page shows its skipped-rows notice on the dashboard with no reload.
  *
  * Signs in as the dedicated empty fixture account and imports `template-iso.csv` (through set-up,
  * which creates the manuscript), then the SAME file again from the Import page, then
@@ -190,10 +191,14 @@ test("R1 · the same sheet twice leaves one import's worth; then a mixed sheet",
       expect(nothing).toContain("5 rows were skipped: already in your queries.");
       await page.locator('[data-dead="nothing"] [data-act="review"]').click();
       await page.locator('[data-impg="tiles"]').waitFor({ timeout: 10_000 });
-      await page.goto("/dashboard");
+      /* N3 · BACK TO THE DASHBOARD WITHOUT A RELOAD. The page was loaded once, at /import; the mark set
+         here is lost by any reload, and it is still there when the notice is read. */
+      await page.evaluate(() => { (window as unknown as Record<string, unknown>).__noReload = "second"; });
+      await page.getByRole("button", { name: /^Dashboard$/ }).first().click();
       await page.locator(".os-root.d58:not(.is-ghost)").first().waitFor({ timeout: 60_000 });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
       const dashTwo = await readDashboard(page);
+      expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__noReload), "the page was not reloaded").toBe("second");
       record("secondDashboard", dashTwo);
       await shot(page, "2-iso-again-dashboard-notice-1440");
       expect(dashTwo.noticeRows.length, "every row of the file is listed").toBe(5);
@@ -203,7 +208,9 @@ test("R1 · the same sheet twice leaves one import's worth; then a mixed sheet",
 
       // ── 3 · template-mixed.csv, from the Import page ──
       await uploadFromImportPage(page, "template-mixed.csv");
+      await page.evaluate(() => { (window as unknown as Record<string, unknown>).__noReload = "third"; });
       const third = await throughReview(page, "3-mixed");
+      expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__noReload), "the page was not reloaded on the way to the dashboard").toBe("third");
       const afterThree = (await snapshot()).counts;
       const dashThree = await readDashboard(page);
       record("third", { ...third, dash: dashThree, counts: afterThree });
@@ -214,18 +221,12 @@ test("R1 · the same sheet twice leaves one import's worth; then a mixed sheet",
       // M1, on the page: the chart draws the dated ones and says how many more it cannot place
       expect(dashThree.title).toBe("5 active queries");
       expect(dashThree.more).toBe("2 more have no sent date yet.");
-      /* ⚠️ THE DASHBOARD READS THE NOTICE ONCE PER VISIT TO THE APP (Dash58, outside this pack's
-         fence). Arriving from the Import page without a reload it still shows the notice it read
-         earlier. Recorded as found; the notice the import SAVED is read after a reload. */
-      record("thirdNoticeBeforeReload", dashThree.notice);
-      await page.goto("/dashboard");
-      await page.locator(".os-root.d58:not(.is-ghost)").first().waitFor({ timeout: 60_000 });
-      const dashReloaded = await readDashboard(page);
-      record("thirdAfterReload", dashReloaded);
-      await shot(page, "3-mixed-dashboard-after-reload-1440");
-      expect(dashReloaded.noticeText).toContain("1 row from your file wasn't imported. It had no agent or agency name.");
-      expect(dashReloaded.noticeRows.some((r) => r.includes("Already in your queries")), "nothing in the mixed file was already here").toBe(false);
-      expect(dashReloaded.more).toBe("2 more have no sent date yet.");
+      /* N3 · the import ended on the dashboard by the app's own navigation, with no reload, and the
+         notice is the one THIS import saved: one nameless row, and none of the five from before. */
+      record("thirdNotice", { headline: dashThree.notice, rows: dashThree.noticeRows });
+      expect(dashThree.noticeText).toContain("1 row from your file wasn't imported. It had no agent or agency name.");
+      expect(dashThree.noticeRows.length, "the count is this import's").toBe(1);
+      expect(dashThree.noticeRows.some((r) => r.includes("Already in your queries")), "the earlier notice is gone").toBe(false);
       expect(errors).toEqual([]);
     } catch (e) {
       const at = await page.evaluate(() => ({

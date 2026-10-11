@@ -8,13 +8,14 @@ import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
 import { importedAgentDoc } from "../lib/importedAgent";
+import { saveImportNotice, type ImportNoticeRow } from "../lib/importNotice";
 import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
 import { writeImportedHistory } from "../lib/smartImportCommit";
 import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
   MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
   MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
-  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine, eventDateReason,
 } from "../lib/importMatcher";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
@@ -368,6 +369,7 @@ export const ImportCsv: React.FC<{
     const localManuscripts = [...manuscripts];
     const localAgents = [...agents];
     const localQueries = [...queries];
+    const noticeRows: ImportNoticeRow[] = [];
     
     for (let index = 0; index < total; index++) {
       const row = csvRows[index];
@@ -651,15 +653,7 @@ export const ImportCsv: React.FC<{
              "Activity logged via CSV Import" is true about the import and says nothing about the
              event. Empty is honest. */
           const description = getMappedValue("description");
-          /* An event is placed by its date. With none that can be read there is nowhere true to put
-             it, so the row is not imported and the log says why. Never the moment of the import. */
           const eventDate = matcherDate(getMappedValue("date"));
-          if (!eventDate.iso) {
-            failedCount++;
-            errorsList.push(ERR.eventNoDate(index + 2));
-            continue;
-          }
-          const date = eventDate.iso;
           const details = getMappedValue("details") || "";
 
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
@@ -686,6 +680,22 @@ export const ImportCsv: React.FC<{
             errorsList.push(`Activity row ${index + 2}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`);
             continue;
           }
+          /* An event is placed by its date. With none that can be read there is nowhere true to put
+             it (never the moment of the import), so the row is skipped — and never silently: the
+             run's log says so, and the row goes to the dashboard's skipped-rows notice with the
+             review's own date reason. */
+          if (!eventDate.iso) {
+            failedCount++;
+            errorsList.push(ERR.eventNoDate(index + 2));
+            noticeRows.push({
+              who: localAgents.find((a) => a.id === foundQ!.agentId)?.name ?? "",
+              status: description || activityTypeInput,
+              sentDate: null,
+              reason: eventDateReason((eventDate as { why: "blank" | "ambiguous" | "unreadable" }).why),
+            });
+            continue;
+          }
+          const date = eventDate.iso;
           const actData = {
             queryId: foundQ.id,
             manuscriptId: foundMs?.id ?? "",
@@ -722,6 +732,17 @@ export const ImportCsv: React.FC<{
       await new Promise(r => setTimeout(r, 60));
     }
 
+    /* THE FINAL COUNTS, set once more after the last row. A row that is skipped leaves the loop
+       by `continue`, which passes over the update above; a run whose LAST rows were skipped
+       therefore finished showing the counts as they stood before them, and those rows were in
+       no count and no list. */
+    setImportResults({ successful: successfulCount, unmatched: unmatchedList, failed: failedCount, errors: errorsList, logs: runLogs });
+
+    /* Rows skipped for want of a date are kept for the dashboard. A run that skipped none leaves
+       any earlier notice as it is: this run has nothing to say about it. */
+    if (noticeRows.length > 0 && currentUser) {
+      saveImportNotice(currentUser.id, { count: noticeRows.length, rows: noticeRows, at: Date.now() });
+    }
     setIsImporting(false);
   };
 
