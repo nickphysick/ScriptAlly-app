@@ -120,7 +120,16 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const showTiles = !inFlow && !book;
 
   if (view === "matcher") {
-    return <ImportCsv onNavigate={onNavigate} />;
+    /* The matcher opens with its own open title under a "‹ Back to import" link: no panel header. */
+    return (
+      <WorkspacePageGrid className="impg impg-wpg" scrollLabel="Import" masthead={null}>
+        {/* The grid gives its measure to the scroll row's direct child; the matcher sits inside it,
+            left-aligned, at most 960 wide. */}
+        <div data-impg="matcher-view">
+          <ImportCsv onNavigate={onNavigate} onBack={() => setView("tiles")} />
+        </div>
+      </WorkspacePageGrid>
+    );
   }
 
   return (

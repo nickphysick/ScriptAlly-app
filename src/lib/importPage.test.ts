@@ -56,3 +56,47 @@ describe("W1 · leaving an import part-way uses the query drawer's own words", (
     expect(drawer).toContain(`>${CANCEL_ASK.discard}</button>`);
   });
 });
+
+describe("W1 · the column matcher's words", () => {
+  it("each string of the table, as a literal", async () => {
+    const m = await import("./importMatcher");
+    expect([m.MATCHER_TITLE, m.MATCHER_SUB, m.MATCHER_BACK]).toEqual(["Match your own columns.", "Choose the column in your file for each QueryHawk field.", "‹ Back to import"]);
+    expect([...m.MATCHER_STEPS]).toEqual(["Your file", "Match columns", "Import"]);
+    expect(m.KIND_QUESTION).toBe("What's in the file?");
+    expect(m.KINDS.map((k) => `${k.title} / ${k.desc}`)).toEqual([
+      "Agents / Names, agencies, contact details", "Manuscripts / Titles, genres, word counts",
+      "Queries / Who you queried, when, and the status", "Query history / Dated events for queries already here",
+    ]);
+    expect([m.FILE_QUESTION, m.FILE_DROP, m.FILE_PASTE, m.FILE_READ]).toEqual(["Choose a file, or paste it", "Drop a .csv file here, or choose one.", "Or paste the rows, comma separated", "Read the file"]);
+    expect([m.MAP_FIELD, m.MAP_SKIP, m.MAP_REQUIRED, m.MAP_START_AGAIN]).toEqual(["QueryHawk field", "Don't import this", "Required", "‹ Start again"]);
+    expect(m.MAP_LINK_NOTE).toBe("Each row is linked to the agent and manuscript already here with the same name. A row with no match is still imported, and listed for you to decide.");
+    expect([m.importRowsLabel(1), m.importRowsLabel(7)]).toEqual(["Import 1 row", "Import 7 rows"]);
+    expect([m.RUN_WORKING, m.RUN_KEEP_OPEN, m.RUN_PROGRESS, m.RUN_FINISHED]).toEqual(["Importing…", "Keep this tab open until it finishes.", "Progress", "Import finished."]);
+    expect([m.COUNT_IMPORTED, m.COUNT_NOT, m.COUNT_DECIDE, m.LOG_TITLE]).toEqual(["Imported", "Not imported", "Need a decision", "Row by row"]);
+    expect(m.AFTER_ANOTHER).toBe("Import another file");
+    expect([m.afterOpenLabel("agents"), m.afterOpenLabel("manuscripts"), m.afterOpenLabel("queries"), m.afterOpenLabel("activities")]).toEqual(["Open the Contact list", "Open Manuscripts", "Open the Query Centre", "Open the Contact list"]);
+  });
+  it("the run's lines", async () => {
+    const { LOG, ERR, DEVELOPER_WORDS } = await import("./importMatcher");
+    const lines = [
+      LOG.agentExists("Clara Voss"), LOG.manuscriptExists("The Salt Road"), LOG.agentAdded("Clara Voss", "Pemberton Literary"), LOG.agentAdded("Owen Hale", ""),
+      LOG.manuscriptAdded("The Salt Road"), LOG.queryAdded("The Salt Road", "Clara Voss", "Queried"), LOG.eventAdded("Asked for the partial"),
+      ERR.noName(3), ERR.noTitle(4), ERR.needsBoth(5), ERR.agentFailed("Clara Voss", "boom"), ERR.agentFailed("Clara Voss"), ERR.manuscriptFailed("T"), ERR.queryFailed(6, "boom"), ERR.eventFailed(), ERR.rowUnreadable(7, "x"),
+    ];
+    expect(lines.slice(0, 7)).toEqual([
+      "Clara Voss is already on your contact list. Row not imported.", '"The Salt Road" is already in your manuscripts. Row not imported.',
+      "Added agent: Clara Voss, Pemberton Literary", "Added agent: Owen Hale", 'Added manuscript: "The Salt Road"',
+      'Added query: "The Salt Road" to Clara Voss, Queried', "Added to a query's history: Asked for the partial",
+    ]);
+    for (const l of lines) expect(l, l).not.toMatch(DEVELOPER_WORDS);
+  });
+  it("the matcher renders them, and its three removals are gone", () => {
+    const src = code("src/components/ImportCsv.tsx");
+    for (const c of ["{MATCHER_BACK}", "MATCHER_TITLE", "MATCHER_SUB", "{KIND_QUESTION}", "{FILE_QUESTION}", "{FILE_DROP}", "{FILE_PASTE}", "{FILE_READ}", "{MAP_FIELD}", "{MAP_SKIP}", "{MAP_REQUIRED}", "{MAP_LINK_NOTE}", "{MAP_START_AGAIN}", "importRowsLabel(csvRows.length)", "RUN_WORKING : RUN_FINISHED", "{RUN_KEEP_OPEN}", "{RUN_PROGRESS}", "{COUNT_IMPORTED}", "{COUNT_NOT}", "{COUNT_DECIDE}", "{LOG_TITLE}", "{DECIDE_NOTE}", "{AFTER_ANOTHER}", "afterOpenLabel(importType)"]) {
+      expect(src, c).toContain(c);
+    }
+    for (const gone of ["loadDemoCsv", "subTab", "activeGridTab", "gridSearch", "<PageHeader", "Zite", "Grid Viewer", "stone-", "blue-", "bg-[#7c3a2a]"]) expect(src, gone).not.toContain(gone);
+    expect(src).toContain('role="button"'); // the drop zone
+    expect(src).toContain("onDrop="); // "Drop" is said because a drop is handled
+  });
+});

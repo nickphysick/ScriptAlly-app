@@ -17,6 +17,7 @@ import { AllManuscripts } from "./AllManuscripts";
 import { ComparableTitlesPage } from "./manuscripts/ComparableTitlesPage";
 import { SubmissionPackages } from "./SubmissionPackages";
 import { ImportCsv } from "./ImportCsv";
+import { ImportPage } from "./import/ImportPage";
 
 // The active-manuscript key is shared app state; leaving it set would silently scope a later file.
 afterEach(() => setActiveManuscript(null));
@@ -211,14 +212,28 @@ describe("/manuscripts/packages renders", () => {
   });
 });
 
+/* Since onboarding v5 part 3 the route renders the Import page (three tiles); the column matcher is
+   the screen behind its third tile. Both are smoked. */
 describe("/import renders", () => {
-  const page = () => <ImportCsv onNavigate={noNavigate} />;
+  const page = () => <ImportPage onNavigate={noNavigate} />;
 
   it("renders without throwing", () => {
     expect(() => renderPage(page(), "/import")).not.toThrow();
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(page(), "/import")).toContain("CSV Import Wizard");
+    const html = renderPage(page(), "/import");
+    expect(html).toContain("Bring your list across.");
+    expect(html).toContain("Match your own columns.");
+  });
+});
+
+describe("the column matcher renders", () => {
+  const page = () => <ImportCsv onNavigate={noNavigate} onBack={noNavigate} />;
+  it("renders without throwing, with its own chrome", () => {
+    const html = renderPage(page(), "/import");
+    expect(html).toContain("Match your own columns.");
+    expect(html).toContain("‹ Back to import");
+    expect(html).not.toContain("CSV Import Wizard");
   });
 });

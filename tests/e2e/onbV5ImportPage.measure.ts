@@ -12,6 +12,8 @@ import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { FIX, MUTATE, SHOTS, OUT, VIEWPORTS, lab, capture, record, vpName } from "./ip1Lib";
 import { openRoute } from "./measure";
+import { devDb } from "./devWrite";
+import { openMatcher, readRun, snapshot as matcherSnapshot, cleanup as matcherCleanup, type Kind } from "./matcherDrive";
 
 test.setTimeout(120_000);
 
@@ -482,4 +484,117 @@ test.describe("F4", () => {
       if (c.rows > 0) expect(notice.count).toBe(c.rows);
     });
   }
+});
+
+/* ════ M2 · M3 · the column matcher: no developer words, and its shape ══════════════════════════
+   On the real route, signed in, for each of the four kinds, with a file that produces each kind of
+   run line. Every row the run adds is removed in the same run. */
+const DEVELOPER_WORDS = /database|repositor|catalog|stream|inject|synchron|migration|console|registr|Zite|Mock|Demo/i;
+const stamp = Date.now().toString(36).slice(-5);
+const MATCHER_FILES: Array<{ kind: Kind; slug: string; csv: string }> = [
+  { kind: "Agents", slug: "agents", csv: `Name,Agency,Email\nM2 Probe ${stamp},Probe House,probe@example.com\nM2 Solo ${stamp},,\nM2 Probe ${stamp},Probe House,\n,No Name Agency,` },
+  { kind: "Manuscripts", slug: "manuscripts", csv: `Title,Genre,Word Count\nM2 Book ${stamp},Thriller,90000\nM2 Book ${stamp},Thriller,90000\n,Thriller,1000` },
+  { kind: "Queries", slug: "queries", csv: `Manuscript Title,Agent Name,State,Date Sent\nM2 Book ${stamp},M2 Probe ${stamp},Queried,2026-08-01\nM2 Missing ${stamp},M2 Nobody ${stamp},Queried,2026-08-02\n,M2 Probe ${stamp},Queried,2026-08-03` },
+  { kind: "Query history", slug: "history", csv: `Related Query,Related Title,Event Type,Description,Date,Extras\nM2 Probe ${stamp},M2 Book ${stamp},Status Changed,M2 asked for the partial,2026-08-10,\nM2 Nobody ${stamp},M2 Missing ${stamp},Status Changed,M2 orphan event,2026-08-11,` },
+];
+
+test.describe("M2 M3", () => {
+  test.describe.configure({ mode: "serial" });
+  test.use({ viewport: { width: 1440, height: 1000 } });
+  test.setTimeout(420_000);
+  test("M2 no developer words on any step, for any kind; M3 the matcher's shape", async ({ page }) => {
+    const { db, uid } = await devDb();
+    const before = await matcherSnapshot(db, uid);
+    const texts: Record<string, string> = {};
+    const lines = new Set<string>();
+    const shape: Record<string, unknown> = {};
+    const grab = async (key: string) => { texts[key] = await page.evaluate(() => (document.querySelector(".impm") as HTMLElement).innerText + " " + [...document.querySelectorAll(".impm option, .impm [placeholder]")].map((e) => (e.textContent ?? "") + " " + (e.getAttribute("placeholder") ?? "")).join(" ")); };
+    const shoot = async (name: string) => { if (SHOTS) { mkdirSync(resolve(OUT, "shots"), { recursive: true }); await page.screenshot({ path: resolve(OUT, "shots", `${name}.png`), fullPage: true }); } };
+    try {
+      for (const f of MATCHER_FILES) {
+        await openMatcher(page, f.kind);
+        await grab(`${f.slug}-1`); await shoot(`matcher-${f.slug}-1-1440`);
+        if (f.slug === "agents") {
+          shape.step1 = await page.evaluate(() => {
+            const root = document.querySelector(".impm")!;
+            const group = root.querySelector('[role="radiogroup"]');
+            return {
+              radios: group ? group.querySelectorAll('[role="radio"]').length : 0,
+              checked: group ? group.querySelectorAll('[role="radio"][aria-checked="true"]').length : 0,
+              tabs: [...root.querySelectorAll("button")].filter((b) => /grid viewer|live .* viewer|wizard/i.test(b.textContent ?? "")).length,
+              demo: [...root.querySelectorAll("button")].filter((b) => /demo|sample/i.test(b.textContent ?? "")).length,
+              back: root.querySelector('[data-impm="back"]')?.textContent ?? "",
+              title: root.querySelector("h1")?.textContent ?? "",
+              pageHeaders: document.querySelectorAll('.impg [data-probe="page-header"]:not([hidden])').length ? [...document.querySelectorAll('.impg [data-probe="page-header"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length : 0,
+            };
+          });
+        }
+        await page.locator('.impm [data-impm="paste"]').fill(f.csv);
+        await page.locator('.impm [data-impm="read"]').click();
+        await page.locator('.impm [data-impm="import"]').waitFor({ state: "visible", timeout: 15_000 });
+        await grab(`${f.slug}-2`); await shoot(`matcher-${f.slug}-2-1440`);
+        await page.locator('.impm [data-impm="import"]').click();
+        await page.waitForFunction(() => document.querySelector('.impm [data-impm="run-title"]')?.textContent === "Import finished.", null, { timeout: 90_000 });
+        if (MUTATE === "M2") await page.evaluate(() => { const li = document.createElement("li"); li.textContent = 'Successfully added Agent: "X" (Y) to the repository'; document.querySelector('.impm [data-impm="log"]')?.appendChild(li); }); // the named break: one old log line restored
+        await grab(`${f.slug}-3`); await shoot(`matcher-${f.slug}-3-1440`);
+        const run = await readRun(page);
+        for (const l of run.log) lines.add(l.replace(new RegExp(stamp, "g"), "·").replace(/\d+/g, "N"));
+        if (f.slug === "agents") {
+          if (MUTATE === "M3") await page.evaluate(() => { const b = document.createElement("button"); b.textContent = "B. Live Database Grid Viewer"; document.querySelector(".impm")?.prepend(b); }); // the named break: the grids tab restored
+          shape.step3 = await page.evaluate(() => {
+            const root = document.querySelector(".impm")!;
+            const log = root.querySelector('[data-impm="log"]') as HTMLElement | null;
+            const bad = [...root.querySelectorAll("button")].map((b) => getComputedStyle(b).backgroundColor).filter((bg) => ["rgb(162, 69, 42)", "rgb(124, 58, 42)", "rgb(41, 37, 36)", "rgb(59, 130, 246)", "rgb(37, 99, 235)"].includes(bg));
+            return {
+              logMax: log ? getComputedStyle(log).maxHeight : "", logOverflow: log ? getComputedStyle(log).overflowY : "", logHeight: log ? Math.round(log.getBoundingClientRect().height) : -1,
+              badButtons: bad, tabs: [...root.querySelectorAll("button")].filter((b) => /grid viewer/i.test(b.textContent ?? "")).length,
+              counts: [...root.querySelectorAll('[data-impm="counts"] dt')].map((d) => d.textContent),
+            };
+          });
+        }
+        if (SHOTS) { await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(400); await shoot(`matcher-${f.slug}-3-390`); await page.setViewportSize({ width: 1440, height: 1000 }); }
+      }
+    } finally {
+      const removed = await matcherCleanup(db, uid, before);
+      const after = await matcherSnapshot(db, uid);
+      record("M2", "1440x1000", "cleanup", { removed, before: Object.fromEntries(Object.entries(before).map(([k, v]) => [k, v.length])), after: Object.fromEntries(Object.entries(after).map(([k, v]) => [k, v.length])) });
+      expect(Object.fromEntries(Object.entries(after).map(([k, v]) => [k, v.length])), "every imported row was removed").toEqual(Object.fromEntries(Object.entries(before).map(([k, v]) => [k, v.length])));
+    }
+    const offenders = Object.entries(texts).flatMap(([k, t]) => { const m = t.match(new RegExp(DEVELOPER_WORDS.source, "gi")); return m ? [`${k}: ${[...new Set(m)].join(", ")}`] : []; });
+    record("M2", "1440x1000", "words", { screens: Object.keys(texts).length, distinctLines: [...lines], offenders });
+    record("M3", "1440x1000", "shape", shape);
+    expect(Object.keys(texts).length, "three steps for each of four kinds").toBe(12);
+    console.log(`M2 distinct run lines: ${lines.size}`);
+    expect(lines.size, "the files produced a spread of run lines").toBeGreaterThan(5);
+    expect(offenders, "no developer words anywhere").toEqual([]);
+    // M3
+    const s1 = shape.step1 as { radios: number; checked: number; tabs: number; demo: number; back: string; title: string; pageHeaders: number };
+    const s3 = shape.step3 as { logMax: string; logOverflow: string; logHeight: number; badButtons: string[]; tabs: number; counts: string[] };
+    expect(s1.radios, "the kinds are a radio group of four").toBe(4);
+    expect(s1.checked).toBe(1);
+    expect(s1.tabs + s3.tabs, "no grids tab").toBe(0);
+    expect(s1.demo, "no demo button").toBe(0);
+    expect(s1.back).toBe("‹ Back to import");
+    expect(s1.title).toBe("Match your own columns.");
+    expect(s1.pageHeaders, "the page's own header is gone from the matcher").toBe(0);
+    expect(s3.badButtons, "no rust, burgundy or utility-colour button").toEqual([]);
+    expect(s3.logMax).toBe("280px");
+    expect(s3.logOverflow).toBe("auto");
+    expect(s3.logHeight).toBeLessThanOrEqual(280);
+    expect(s3.counts).toEqual(["Imported", "Not imported", "Need a decision"]);
+  });
+
+  test("M3 the matcher at 390: its first two steps, for each kind", async ({ page }) => {
+    test.skip(!SHOTS, "shots only");
+    for (const f of MATCHER_FILES) {
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await openMatcher(page, f.kind);
+      await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(500);
+      await page.screenshot({ path: resolve(OUT, "shots", `matcher-${f.slug}-1-390.png`), fullPage: true });
+      await page.locator('.impm [data-impm="paste"]').fill(f.csv);
+      await page.locator('.impm [data-impm="read"]').click();
+      await page.locator('.impm [data-impm="import"]').waitFor({ state: "visible" });
+      await page.screenshot({ path: resolve(OUT, "shots", `matcher-${f.slug}-2-390.png`), fullPage: true });
+    }
+  });
 });
