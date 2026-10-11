@@ -27,7 +27,7 @@ const PANEL_BG = "rgb(45, 58, 80)";
 export const NUMBER = ["/queries", "/agents", "/manuscripts/comps", "/manuscripts/packages", "/todo"] as const;
 export const TITLE = ["/queries/analytics", "/agents/discover", "/manuscripts", "/todo/calendar", "/todo/noteboard"] as const;
 const ALL = [...NUMBER, ...TITLE];
-const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans", "/import"] as const;
+const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
 const WORDS: Record<string, RegExp> = {
   "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/, "/manuscripts/comps": /^comp titles?$/,

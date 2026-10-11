@@ -37,21 +37,21 @@ describe("R1 — both loaders keep every timing", () => {
   });
   it("the branch's commit floor is untouched", () => {
     /* 5000 is the floor; the lab's stand-in commit may shorten it and nothing else may. */
-    expect(code(src("BranchB.tsx"))).toContain("delay(lab?.floorMs ?? 5000)");
+    expect(code(src("../import/ImportFlow.tsx"))).toContain("delay(lab?.floorMs ?? 5000)"); // moved with the commit in part 3
   });
 });
 
 describe("R3 — the reading loader ends on \"Ready\"", () => {
   it("the last status is exactly Ready", () => { expect(READY_TXT).toBe("Ready"); });
   it("no import screen's source says \"what we found\"", () => {
-    for (const f of ["ScatterSettleLoader.tsx", "ImportingLoader.tsx", "ImportOverview.tsx", "BranchB.tsx"]) {
+    for (const f of ["ScatterSettleLoader.tsx", "ImportingLoader.tsx", "ImportOverview.tsx", "BranchB.tsx", "../import/ImportFlow.tsx"]) {
       expect(code(src(f)).toLowerCase(), f).not.toContain("what we found");
     }
   });
 });
 
 describe("H1 — the import ends on the dashboard, with no closing page", () => {
-  const branch = code(src("BranchB.tsx"));
+  const branch = code(src("../import/ImportFlow.tsx")); // the import, since part 3
   it("the handover page and its lib are deleted", () => {
     const fs = require("fs") as typeof import("fs");
     expect(fs.existsSync(resolve(process.cwd(), "src/components/onboarding/HandoverScreen.tsx"))).toBe(false);

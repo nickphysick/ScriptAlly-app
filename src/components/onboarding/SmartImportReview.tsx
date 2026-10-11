@@ -157,11 +157,13 @@ export interface SmartImportReviewProps {
   /** `left` carries what the result cannot: the rows the review set aside by itself that are
    *  still set aside, for the host's skipped-rows notice. */
   onImport?: (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => void | Promise<void>;
+  /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
+  onCancel?: () => void;
 }
 
 type Step = "duplicates" | "agents" | "queries";
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport }) => {
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel }) => {
   const initial = useMemo(() => parseModel(result), [result]);
   // Auto-set-aside the truly-unidentifiable (no name AND no agency) before review begins — they
   // wait in the tray with a "Name it instead" escape.
@@ -651,6 +653,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           <SetAsideTray items={trayItems} onRestore={onRestoreSetAside} />
           <div className="im-actbar" data-im="foot">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
+            {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
             <button type="button" className="sf-link sf-link--quiet" onClick={reset} data-im="reset">Reset all changes made here</button>
             <span className="im-sp" />
             {screen === "duplicates" && (

@@ -38,6 +38,8 @@ interface Props {
    *  path knows it; a Smart import does not). Absent, the chip shows the name alone. */
   rowCount?: number | null;
   onContinue: () => void;
+  /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
+  onCancel?: () => void;
 }
 
 const TICK = (
@@ -67,7 +69,7 @@ const Recon: React.FC<{ what: string; total: number; ok: number; fix: number; sh
   );
 };
 
-export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileName, rowCount, onContinue }) => {
+export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileName, rowCount, onContinue, onCancel }) => {
   const { agents, queries } = React.useMemo(() => summaryModel(result), [result]);
   const t = React.useMemo(() => reviewTallies(agents, queries), [agents, queries]);
   const key = React.useMemo(() => agentKey(agents, queries), [agents, queries]);
@@ -159,6 +161,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
       <div className="im-nextbar" data-im="nextbar">
         <Stepper steps={steps} current={null} captions={captions} label="What happens next" />
         <div className="im-nextgo">
+          {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
           <button type="button" className="sf-btn" onClick={onContinue} data-im="primary">
             {allClear ? SUMMARY_PRIMARY.clear : SUMMARY_PRIMARY.work}
           </button>

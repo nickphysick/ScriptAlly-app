@@ -18,7 +18,7 @@ export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }
 export const OPEN_HEADER = ["/queries"] as const;
 export const WORKSPACE = ["/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/noteboard"] as const;
 /** routes that must not change */
-export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans", "/import"] as const;
+export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 export const PANEL_BG = "rgb(45, 58, 80)";
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };

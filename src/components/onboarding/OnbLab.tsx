@@ -9,6 +9,7 @@
  *
  *   #/onb-lab?s=frame&form=setup&flow=B&at=list&ms=1
  *   #/onb-lab?s=frame&form=account&mode=signin
+ *   #/onb-lab?s=import-page&ent=free_available|free_used|pro_available|pro_month_used
  *
  * Served by every non-production build and gated at the call site on `MODE` (App.tsx), so
  * production carries none of it. No sign-in, and it writes nothing: every handler a screen is
@@ -33,6 +34,8 @@ import { LabReading, LabImporting, LabOverview, LabReview, labCommit, labFixture
 import { HandoffNav, HANDOFF_TAB } from "./HandoffNav";
 import { ExitMode } from "./BranchB";
 import { useAskBeforeLeaving } from "./SkipSetupConfirm";
+import { ImportPage } from "../import/ImportPage";
+import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 
 
 /** A handler that only records that it was called. */
@@ -235,6 +238,29 @@ export const OnbLab: React.FC = () => {
   const imp = (node: React.ReactNode, exit: "ask" | "none") => (
     <LabSetup flow="B" at="list" manuscript exit={exit}>{node}</LabSetup>
   );
+  /* The Import page (part 3): its tiles in each entitlement state, every press a spy. The flow's
+     own screens are the ones above; on the real route they render in the app's sheet. */
+  if (s === "import-page") {
+    const reason = (q.get("ent") ?? "free_available") as SmartImportEntitlement["reason"];
+    const ent: SmartImportEntitlement = {
+      allowed: reason === "free_available" || reason === "pro_available",
+      reason,
+      tier: reason.startsWith("pro") ? "pro" : "free",
+      ...(reason === "pro_month_used" ? { nextAvailable: "2026-11-01" } : {}),
+    } as SmartImportEntitlement;
+    /* `fx=` mounts the shared flow on its summary over a fixture, with a stand-in commit, so the
+       in-app Cancel and the end of an import can be driven without an account. `live=1` leaves the
+       tiles' real handlers on (the lab has no manuscript, so a press opens the book step). */
+    const fx = q.get("fx");
+    const flow = fx ? { result: labFixture(fx), fileName: LAB_FILE, title: LAB_TITLE, commit: labCommit({ skip: Number(q.get("skip") ?? 0), none: q.get("none") === "1" }), uid: LAB_UID, floorMs: Number(q.get("floor") ?? 300) } : undefined;
+    const navigate = (tab: string) => labSpy("navigate")(tab);
+    return (
+      <div data-import-lab="" style={{ minHeight: "100vh", background: "var(--ws-page)" }}>
+        <ImportPage onNavigate={navigate} lab={{ entitlement: ent, spy: fx || q.get("live") === "1" ? undefined : labSpy, flow, ensure: async () => { labSpy("ensureManuscript")(); return "lab-ms"; } }} />
+      </div>
+    );
+  }
+
   if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");
   if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;

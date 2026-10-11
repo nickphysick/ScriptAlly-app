@@ -66,7 +66,7 @@ describe("L1 · the activity line names its path", () => {
   it("the Smart Import path", async () => { expect(await run("smart")).toBe("Smart import · 5 agents added, 5 queries logged"); });
   it("unnamed, it is a Smart Import, as before", async () => { expect(await run()).toMatch(/^Smart import · /); });
   it("the host passes the path it took", () => {
-    const src = code("src/components/onboarding/BranchB.tsx");
+    const src = code("src/components/import/ImportFlow.tsx"); // where the handlers live since part 3
     expect(src).toMatch(/pickTemplateFile[\s\S]*?setImportSource\("template"\)/);
     expect(src).toMatch(/runMapping[\s\S]*?setImportSource\("smart"\)/);
     expect(src).toMatch(/commitSmartImport\([\s\S]*?importSource\s*\)/);
@@ -86,8 +86,8 @@ describe("L1 · the manuscript error", () => {
     expect(manuscriptErrorLine(null)).toBe(MANUSCRIPT_ERROR);
   });
   it("the host shows it on the review, with nothing lost", () => {
-    const src = code("src/components/onboarding/BranchB.tsx");
-    expect(src).toContain("manuscriptFailed ? manuscriptErrorLine(error) : commitError");
+    const src = code("src/components/import/ImportFlow.tsx");
+    expect(src).toContain("manuscriptFailed ? manuscriptErrorLine(hostError) : commitError");
     expect(src).not.toContain("Couldn't set up your manuscript —");
     expect(src).toMatch(/setManuscriptFailed\(true\);\s*setScreen\("review"\)/);
   });
