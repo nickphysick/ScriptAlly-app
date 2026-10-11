@@ -32,8 +32,8 @@ const near = (a: unknown, b: number, t: number) => typeof a === "number" && Numb
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the stacked number back in the panel */
   A1: { js: `(() => { const b = document.querySelector('.qcoh--137 [data-hp3-part="text"]'); if (b && !b.querySelector('[data-hp3-part="number"]')) { const n = document.createElement("span"); n.setAttribute("data-hp3-part", "number"); n.textContent = "82"; b.prepend(n); } })()` },
-  /* cell 1 counting something other than the three courts */
-  B1: { js: `(() => { const f = document.querySelector('[data-qcv="strip-cell"][data-k="all"] [data-qcv="strip-fig"]'); if (f && !f.hasAttribute("data-mut")) { f.setAttribute("data-mut", ""); f.textContent = String(Number(f.textContent) + 1); } })()` },
+  /* F1: cell 1 back to the three courts added up (which hold no withdrawn or signed query) */
+  B1: { js: `(() => { const c = [...document.querySelectorAll('.qcv-group.qc13 [data-qcv="strip-cell"]')]; const f = (e) => e.querySelector('[data-qcv="strip-fig"]'); if (c.length === 4 && !f(c[0]).hasAttribute("data-mut")) { f(c[0]).setAttribute("data-mut", ""); f(c[0]).textContent = String(c.slice(1).reduce((n, e) => n + Number(f(e).textContent), 0)); } })()` },
   /* pressing a cell scrolls to the list, as the v136 link did */
   B2: { js: `(() => { if (window.__m137) return; window.__m137 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-qcv="strip-cell"]')) { const l = document.querySelector('.qcv-group.qc13 > .qcv-page'); l && l.scrollIntoView(); } }, true); })()` },
   /* the v134 gap back above the list */
@@ -137,7 +137,7 @@ test.describe("Query Centre v137", () => {
     L.done(16);
   });
 
-  test("B1 · strip: four cells, cell 1 is cells 2 + 3 + 4, twenty bars and the last is rust", async ({ page }) => {
+  test("B1 · strip: four cells, cell 1 is every query for the manuscript, twenty bars and the last is rust", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("B1");
     for (const vp of SIZES) {
@@ -153,6 +153,8 @@ test.describe("Query Centre v137", () => {
         return {
           figs: cells.map((c) => Number(c.querySelector('[data-qcv="strip-fig"]')?.textContent)), keys: cells.map((c) => c.dataset.k),
           widths: cells.map((c) => c.getBoundingClientRect().width), tops: cells.map((c) => c.getBoundingClientRect().top),
+          showing: [Number(g.querySelector<HTMLElement>('[data-qcv="showing"]')?.dataset.x), Number(g.querySelector<HTMLElement>('[data-qcv="showing"]')?.dataset.y)],
+          rows: g.querySelectorAll('.qcw-list [data-qcv="row"]').length, folded: g.querySelectorAll(".qcw-list .qcw-grp.shut").length,
           bars: bars.length, lastFill: last ? getComputedStyle(last).fill : "", otherFill: bars[0] ? getComputedStyle(bars[0]).fill : "", lastFlag: last?.getAttribute("data-last"),
           bg: getComputedStyle(box).backgroundColor, radius: getComputedStyle(box).borderTopLeftRadius,
           gap: head.top - panel.bottom, headToBox: box.getBoundingClientRect().top - head.bottom,
@@ -162,7 +164,10 @@ test.describe("Query Centre v137", () => {
       });
       const w = `${vp.width}`;
       L.check("B1", `${w} four cells`, r.keys.join() === "all,you,agent,closed", r.keys.join());
-      L.check("B1", `${w} cell 1 is the sum`, r.figs[0] === r.figs[1] + r.figs[2] + r.figs[3] && r.figs[0] > 0, `${r.figs[0]} vs ${r.figs[1]} + ${r.figs[2]} + ${r.figs[3]}`);
+      /* F1 (11 Oct): cell 1 is every query for the manuscript, withdrawn and signed included: the list's own
+         unfiltered count, and the rows it draws. It need not be the three courts added up. */
+      L.check("B1", `${w} cell 1 is the list's unfiltered count`, r.figs[0] > 0 && r.figs[0] === r.showing[1] && r.showing[0] === r.showing[1], `cell 1 ${r.figs[0]} · showing ${r.showing[0]} of ${r.showing[1]}`);
+      L.check("B1", `${w} cell 1 is the rows drawn`, r.folded === 0 && r.rows === r.figs[0], `${r.rows} rows (${r.folded} groups folded) · cell 1 ${r.figs[0]} · the courts ${r.figs[1]} + ${r.figs[2]} + ${r.figs[3]}`);
       L.check("B1", `${w} equal cells, one row`, Math.max(...r.widths) - Math.min(...r.widths) <= 1.5 && new Set(r.tops.map(Math.round)).size === 1, r.widths.map((x) => x.toFixed(1)).join(" "));
       L.check("B1", `${w} twenty bars`, r.bars === 20, `${r.bars}`);
       L.check("B1", `${w} last bar rust`, r.lastFill === "rgb(162, 69, 42)" && r.lastFlag === "true" && r.otherFill === "rgb(45, 58, 80)", `${r.lastFill} · others ${r.otherFill}`);
@@ -170,7 +175,7 @@ test.describe("Query Centre v137", () => {
       L.check("B1", `${w} under the panel`, near(r.gap, r.wide ? 40 : 34, 1.5) && near(r.headToBox, 14, 1.5), `${r.gap.toFixed(1)} · heading to strip ${r.headToBox.toFixed(1)}`);
       L.check("B1", `${w} faces on one row`, r.faces.every((n) => n === 1), r.faces.join());
     }
-    L.done(16);
+    L.done(18);
   });
 
   test("B2 · filter: a cell narrows the list, shows pressed, and does not scroll", async ({ page }) => {

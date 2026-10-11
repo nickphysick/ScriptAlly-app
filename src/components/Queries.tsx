@@ -6691,6 +6691,8 @@ export const Queries: React.FC<{
               <QcStrip
                 sections={deskSections(showGridSkeleton ? [] : qcScoped, Date.now())}
                 sent={stripSent(showGridSkeleton ? [] : qcScoped, Date.now())}
+                /* F1: every query in scope, the list's own unfiltered count */
+                total={qcScoped.length}
                 faces={showGridSkeleton ? [] : facesFor(qcScoped, Date.now(), { you: 16, agent: 16, closed: 16 }).faces}
                 active={qcCzCourt}
                 /* a cell filters the list (and never scrolls); cell 1, or the pressed cell again, clears it */

@@ -19,7 +19,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import type { TileCourt } from "../../../lib/qcSummary";
 import type { DeskSection } from "../../../lib/qcDesk";
 import type { Face } from "../../../lib/qcFaces";
-import { sentLine, stripLine, stripTotal, type StripPart, type StripSent } from "../../../lib/qcStrip";
+import { sentLine, stripLine, type StripPart, type StripSent } from "../../../lib/qcStrip";
 import { discsThatFit } from "./QcGlance";
 import { useTip } from "./QcList132";
 import "./qcvPage.css";
@@ -99,10 +99,11 @@ export const QcStrip: React.FC<{
   /** cell 1: clear the court */
   onAll: () => void;
   loading?: boolean;
-}> = ({ sections, sent, faces = [], active = null, onCourt, onAll, loading = false }) => {
+  /** cell 1: every query for the manuscript in view, withdrawn and signed included. It is the list's unfiltered count, and it need not be the three courts added up (they hold no withdrawn or signed query). */
+  total: number;
+}> = ({ sections, sent, faces = [], active = null, onCourt, onAll, loading = false, total }) => {
   const ref = useRef<HTMLDivElement>(null);
   const tip = useTip(ref);
-  const total = stripTotal(sections);
   const said = (label: string, n: number, parts: readonly StripPart[]) => (loading ? `${label}: loading` : `${label}: ${n}. ${parts.map((p) => `${p.n} ${p.text}`).join(", ")}`);
   const allParts = sentLine(sent);
   return (
