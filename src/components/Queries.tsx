@@ -5,7 +5,7 @@
 
 import { SendExtras } from "./queryActions/SendExtras";
 import { requeryLine } from "../lib/requery";
-import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
+import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -139,7 +139,8 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QcQueryModal } from "./queries/centre/QcQueryModal";
+import { QueryPanelHost } from "./queries/QueryPanelHost";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeRightPanel } from "../lib/queryPanelStore";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -2296,12 +2297,24 @@ export const Queries: React.FC<{
    * page they had not asked for. The calendar's card is the calendar's; the page's is the page's.
    */
   const [beCard, setBeCard] = useState<string | null>(null);
+  /* Query panel v1 — the Birds-eye drawer takes its turn at the right edge too */
+  useEffect(() => {
+    if (!beOpen) return undefined;
+    claimRightPanel("birds");
+    const off = subscribeRightPanel((o) => { if (o === "feed") setBeOpen(false); });
+    return () => { off(); releaseRightPanel("birds"); };
+  }, [beOpen]);
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
   /* v126 §6 — whether the action drawer is open, so the Birds-eye drawer's keys stand down beneath it */
   const [qaOpen, setQaOpen] = useState<boolean>(() => currentDrawerRequest() != null);
   /* …and whether it was opened from the card, which then docks to the drawer's chip */
   const [qaDocked, setQaDocked] = useState<boolean>(() => !!currentDrawerRequest()?.dock);
-  useEffect(() => subscribeDrawer((r) => { setQaOpen(r != null); setQaDocked(!!r?.dock); }), []);
+  /* Query panel v1 — a page other than this one asks for a query through the store (the Dashboard); here the
+     open query is `?q`. ⚠️ Declared ABOVE the list's keys hook, which reads it at render. */
+  const extPanel = useSyncExternalStore(subscribeQueryPanel, currentQueryPanel, currentQueryPanel);
+  /* …and whether an action's form is stepped INTO the panel (Part C) */
+  const [qaPanel, setQaPanel] = useState<boolean>(() => !!currentDrawerRequest()?.panel);
+  useEffect(() => subscribeDrawer((r) => { setQaOpen(r != null); setQaDocked(!!r?.dock); setQaPanel(!!r?.panel); }), []);
   /**
    * v126 §7 — THE SET THE CARD WAS OPENED FROM, so ← → in the centred card step through the list's
    * rows, the carousel's cards or the Birds-eye drawer's rows — whichever the reader came from. A
@@ -2377,6 +2390,8 @@ export const Queries: React.FC<{
     onFind: setQcFind,
     findRef: qcFindRef,
     onOpen: (id) => onOpenQuery?.(id),
+    /* Query panel v1 — while a query is open from this page, ↑ ↓ (and J K) walk the visible rows */
+    panelId: routeActive && !extPanel && !(qaOpen && qaPanel) ? urlSelectedId : null,
   });
   const [qcCzSort, setQcCzSort] = useState<CzSort>("recent");
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
@@ -2750,7 +2765,8 @@ export const Queries: React.FC<{
    * a single docked card was introduced to end. So the calendar re-points WHICH query is described
    * and the page decides WHERE the card is drawn — never a second card that has to be kept in step.
    */
-  const cardQueryId = beCard ?? selectedQueryId;
+  /* the store's wins while it is set: it is what the reader last pressed */
+  const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
   /**
    * §1 (v65.6) — CLOSING THE CARD IS ONE ACT, whichever door opened it. The ✕, Escape and a press
    * on the scrim all come here: a second path is a second behaviour, and this card is reachable
@@ -2761,6 +2777,7 @@ export const Queries: React.FC<{
    * drop the page's own selection because a reader closed a card they opened in an overlay.
    */
   const closeQueryCard = useCallback(() => {
+    if (currentQueryPanel()) { closeQueryPanel(); return; }
     if (beCard != null) { setBeCard(null); return; }
     onSelectView?.("cards");
   }, [beCard, onSelectView]);
@@ -5355,6 +5372,7 @@ export const Queries: React.FC<{
          page's. Clearing both would drop the page's selection for a click made in an overlay. */
       onClose={closeQueryCard}
       manuscriptTitle={activeMs?.title ?? null}
+      manuscript={extPanel ? "caption" : "none"}
       manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
       /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
          Record response and Mark sent; an open offer keeps its own journey */
@@ -6974,122 +6992,13 @@ export const Queries: React.FC<{
             * registered at a time, so the cascade — popover, card, calendar — is a property of what
             * is on screen rather than of which component mounted last.
             */}
-          {qcOpenCardNode && (beCard != null || qcDocked === true) && (
-            <QcQueryModal onClose={closeQueryCard} ownsEscape={!beOpen} docked={qaOpen && qaDocked}
-              onStep={(delta) => {
-                const set = cardSetRef.current ?? qcVisible.map((r) => r.id);
-                if (!set.length || !cardQueryId) return;
-                const at = set.indexOf(cardQueryId);
-                const next = set[((at < 0 ? 0 : at + delta) + set.length) % set.length];
-                if (beCard != null) setBeCard(next); else onOpenQuery?.(next);
-              }}>{qcOpenCardNode}</QcQueryModal>
-          )}
-
-          {/* UNDER 900px OF COLUMN the open query is today's DRAWER — for a query the reader chose (`?q`),
-              never for the implicit first row, and never while the centred card is on screen */}
-          {panelRow && activeQuery && urlSelectedId && qcDocked === false && (
-            <QueryPanel
-              open
-              sentChip={<SentChip q={activeQuery} packages={packages} />}
-              facts={panelRow.facts}
-              status={panelRow.status}
-              name={panelRow.name}
-              agency={panelRow.agency}
-              initials={panelRow.initials}
-              sentLabel={activeQuery.dateSent ? fmtShortISO(activeQuery.dateSent) : "—"}
-              viaLabel={sendMethodLabel(activeQuery.sendMethod)}
-              manuscriptTitle={activeMs?.title ?? null}
-              /**
-               * The header's manuscript line — mono meta beside the title, and the sent version
-               * right-aligned WHEN THE QUERY RECORDS ONE. `manuscriptHeld` is the same "what do
-               * they hold" derivation the version surfaces read (latest partial/full send), and
-               * `openingRead` the same package-sample fallback — composed, never re-derived, so
-               * this line and the Versions pane cannot disagree about which draft went.
-               */
-              manuscriptMeta={activeMs ? [activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter(Boolean).join(" · ") || null : null}
-              versionLabel={(() => {
-                const v = manuscriptHeld(activeQuery.id, activities as never, activeBookVersions)?.version
-                  ?? openingRead(activeQuery, packages, versions, activeBookVersions);
-                if (!v) return null;
-                const m = /^(\d{4})-(\d{2})/.exec(v.createdDate);
-                const when = m ? formatDate(new Date(Number(m[1]), Number(m[2]) - 1, 1), { month: "short", year: "numeric" }) : null;
-                return when ? `${v.name} · ${when}` : v.name;
-              })()}
-              position={{ index: panelIndex, total: gridRows.length }}
-              /* the CTA engine's own answer — never a second table of verbs */
-              primaryLabel={
-                panelRow.facts.turn === "you" ? "Mark sent"
-                  : panelRow.facts.turn === "offer" ? "Record decision"
-                    : "Record response"
-              }
-              onPrimary={(anchor) => {
-                /**
-                 * §1 (respond-nudge) — THE DESK IS THE HOME for Record response and Mark sent;
-                 * `Record decision` (an open offer) keeps the existing journey, per decision 5 —
-                 * the desk hosts the three verbs and the offer flow is not one of them.
-                 */
-                if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
-                openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
-              }}
-              onNudge={(anchor) => openDeskVerb("nudge", anchor)}
-              liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
-              /* ⚠️ THE QUICK PAIR BYPASSES THE DESK HERE TOO — the drawer is already open, so the
-                 popover simply anchors to its own button. Sending these through `openDeskVerb`
-                 would put a composing surface over a one-answer question. */
-              onSnooze={(anchor) => { if (activeQuery) openQuick("snooze", activeQuery.id, anchor); }}
-              /* the row's OWN reminder clause, not a second spelling of it — see the prop's note */
-              reminderLabel={panelRow && panelRow.facts.nudgePartIndex != null
-                ? panelRow.facts.captionParts[panelRow.facts.nudgePartIndex] ?? null
-                : null}
-              onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
-              onClose={() => onSelectView?.("cards")}
-              onStep={(delta) => {
-                if (!gridRows.length) return;
-                const next = gridRows[(panelIndex + delta + gridRows.length) % gridRows.length];
-                onOpenQuery?.(next.id);
-                /* ⚠️ THE CARD BEHIND IS SCROLLED INTO VIEW, so stepping never leaves the reader
-                   looking at a panel whose card is off screen. `nearest` rather than `center`:
-                   a card already visible must not jump. */
-                requestAnimationFrame(() => {
-                  document.querySelector(`[data-qcc-id="${next.id}"]`)
-                    ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-                });
-              }}
-              elapsed={(() => {
-                /* ⚠️ THE FIGURE, NOT THE PROSE (v14). This regexed `caption` for its leading
-                   number — and v14's caption opens with days-to-EXPECTED, so the tray would have
-                   gone on labelling it "waiting so far" while showing something else entirely.
-                   `facts.elapsed` is the number the tray actually means; the copy above is now
-                   free to change without moving it. */
-                return {
-                  value: String(panelRow.facts.elapsed.value),
-                  unit: panelRow.facts.elapsed.unit,
-                  caption: panelRow.facts.turn === "you" ? "since request"
-                    : panelRow.facts.turn === "closed" ? "since close" : "waiting so far",
-                };
-              })()}
-              expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
-              /**
-               * ⚠️ THE TRACKING TAB IS THE SHARED TIMELINE — the same `QueryTimeline` the record
-               * view rendered, never a drawer-local imitation. The ⋯ is ON here
-               * (onEditEntry/onDeleteEntry).
-               * §2 wires the send-rung extras; this mount is the chassis.
-               */
-              tracking={qpTracking}
-              /**
-               * §4 — THE AGENT TAB, a view of the agent document (decision 4). History rows are
-               * derived HERE because they need queries+manuscripts: every query with this agent,
-               * newest activity first, the open one marked `this query`. `queriesForAgent` is the
-               * same reader the Contact list counts with — one derivation, two surfaces.
-               */
-              agentTab={qpAgentTab ?? undefined}
-              /**
-               * §1 — THE NOTES TAB IS THE EXISTING THREAD, UNBOXED. `NotesThread` owns ordering,
-               * pinning, the composer and the settle; the tab is just where it lives now.
-               */
-              notesTab={qpNotesTab}
-              noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
-            />
+          {/* Query panel v1 — THE OPEN QUERY IS A SIDE PANEL: 8px in on the right, no scrim, the list live
+              beside it. One mount for every door (a row, `?q`, a Birds-eye bar, another page through the
+              store). The centred modal and the under-900 drawer it replaces are gone. */}
+          {qcOpenCardNode && cardQueryId && (
+            <QueryPanelHost id={cardQueryId} from={extPanel ? extPanel.from : "queries"} step={qaOpen && qaPanel} onClose={closeQueryCard}>
+              {qcOpenCardNode}
+            </QueryPanelHost>
           )}
           </>
         ) : (

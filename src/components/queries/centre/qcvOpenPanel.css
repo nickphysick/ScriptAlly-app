@@ -1,0 +1,58 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The open query inside the side panel (Query panel v1; ref design-refs/query-panel-v1/query-panel-v1.html,
+ * `#qdroot`, `.qk-*`). The card is `QcOpenCard` as built; this sheet is how it reads in the panel.
+ *
+ * ⚠️ THE PANEL PORTALS TO `document.body`. The card's own palette (`--qcv-*`) is declared at `:root`, so its
+ *    reads resolve; everything this sheet adds is a literal.
+ * ⚠️ TWO CLASSES ON EVERY FACE, and `!important` on the heading: the page's font reset and brand.tsx both
+ *    land later.
+ */
+/* 1 · the court band: 38px, the court's tint and colour */
+.qsp .qcv-open-bd { min-height: 38px; height: 38px; padding: 0 28px; gap: 12px; background: #e2e7ef !important; color: #3d5070; }
+.qsp .qcv-open[data-court="you"] .qcv-open-bd { background: #f3ddd2 !important; color: #b0603e; }
+.qsp .qcv-open[data-court="closed"] .qcv-open-bd { background: #ece8e3 !important; color: #7c7168; }
+.qsp .qcv-open-bd .qcv-open-crt, .qsp .qcv-open-bd .qcv-open-day {
+  font-family: var(--sp-mono); font-weight: 500; font-size: 9.5px; line-height: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: inherit;
+}
+.qsp .qcv-open-bd .qcv-open-crt--you::before { display: none; }
+
+/* 2–4 · the head and the tabs hold still; the tab's body is the only part that scrolls */
+.qsp .qcv-open-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: visible; padding: 0; }
+.qsp .qcv-open-who { flex: none; grid-template-columns: 46px minmax(0, 1fr) auto auto; gap: 14px; padding: 22px 22px 0 28px; }
+.qsp .qcv-open-ini { width: 46px; height: 46px; border: 0; background: #e2e7ef; color: #3d5070; font-size: 12px; }
+.qsp .qcv-open[data-court="you"] .qcv-open-ini { background: #f3ddd2; color: #b0603e; }
+.qsp .qcv-open[data-court="closed"] .qcv-open-ini { background: #ece8e3; color: #7c7168; }
+.qsp .qcv-open .qcv-open-nm { font-family: var(--sp-serif) !important; font-weight: 600; font-size: 22px; line-height: 1.3; color: #1c130f; outline: none; }
+.qsp .qcv-open-ag { font-family: var(--sp-mono); font-size: 9px; letter-spacing: 0.16em; }
+.qsp .qcv-open-pill { background: #f4f1ec; font-family: var(--sp-serif); font-size: 14px; padding: 6px 13px 6px 9px; }
+.qsp .qcv-open-x {
+  margin: 0; width: 34px; height: 34px; border-radius: 50%; background: none; color: #1c130f; cursor: pointer;
+  font-family: var(--sp-serif); font-weight: 400; font-size: 22px; line-height: 1; display: grid; place-items: center;
+}
+.qsp .qcv-open-x:hover { background: #f4f1ec; }
+.qsp .qcv-open-x:focus-visible { outline: 2px solid #2f5f86; outline-offset: 1px; }
+.qsp .qcv-open .qcv-open-for { flex: none; margin: 8px 28px 0 88px; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 13.5px; line-height: 1.4; color: rgba(28, 19, 15, 0.45); }
+.qsp .qcv-open .qcv-open-for i { font-family: var(--sp-type); font-style: normal; }
+.qsp .qcv-open-tabs { flex: none; gap: 26px; margin: 18px 0 0; padding: 0 28px; }
+.qsp .qcv-open-tabs button { font-family: var(--sp-serif); font-size: 16px; line-height: 22px; padding-bottom: 9px; }
+.qsp .qcv-open-tab { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 28px 22px; }
+
+/* 5 · the foot is pinned: the status line and ⋯, then the buttons, then Delete */
+.qsp .qcv-open-ft { min-height: 0; padding: 16px 28px 0; border-top: 1px solid rgba(28, 19, 15, 0.1); align-items: flex-start; }
+.qsp .qcv-open-ft .qcv-open-stand { font-family: var(--sp-mono); font-size: 9.5px; line-height: 15px; letter-spacing: 0.16em; color: rgba(28, 19, 15, 0.7); }
+.qsp .qcv-open[data-over="true"] .qcv-open-ft .qcv-open-stand { color: #a2452a; }
+.qsp .qcv-open-doors { padding: 14px 28px 18px; gap: 10px; }
+.qsp .qcv-open-doors .qcv-open-act, .qsp .qcv-open-doors .qcv-open-cb { height: 44px; padding: 2px 22px 0; border-radius: 22px; font-family: var(--sp-type); font-size: 16px; }
+.qsp .qcv-open-doors .qcv-open-act { background: #2a3a52; }
+.qsp .qcv-open-doors .qcv-open-cdel { flex-basis: 100%; text-align: right; margin: 4px 0 0; font-family: var(--sp-mono); font-weight: 500; font-size: 8.5px; letter-spacing: 0.18em; }
+
+/* under 900px the panel is the whole screen and the × reads "← Back" */
+@media (max-width: 899.98px) {
+  .qsp .qcv-open-who { grid-template-columns: 46px minmax(0, 1fr) auto; padding-top: 52px; position: relative; }
+  .qsp .qcv-open-x { position: absolute; top: 10px; left: 18px; width: auto; height: 34px; padding: 0 10px; border-radius: 17px; font-family: var(--sp-serif); font-size: 15px; }
+  .qsp .qcv-open-x span { display: none; }
+  .qsp .qcv-open-x::before { content: "\2190  Back"; }
+}

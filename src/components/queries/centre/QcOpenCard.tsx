@@ -23,15 +23,15 @@ import { StatusDot } from "../../StatusDot";
 import { FramedCard } from "../../containers/FramedCard";
 import { queryVerbs } from "../../../lib/queryRowFacts";
 import { turnFor } from "../../../lib/queryCardFacts";
-import { COURT_LABEL, STAGE_NAME, factLine, primaryActionLabel, standLine, type QcRow } from "../../../lib/qcSummary";
+import { COURT_LABEL, STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
 import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
 import { cardDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
-import { SentChip } from "../../queryActions/SentHow";
 import type { SubmissionPackage } from "../../../types";
 import "./qcvPage.css";
 import "./qcvOpen.css";
+import "./qcvOpenPanel.css";
 
 export type OpenAction = "nudge" | "snooze" | "closed";
 
@@ -60,7 +60,12 @@ export const QcOpenCard: React.FC<{
   onDoor?: (mode: DrawerMode, anchor: HTMLElement) => void;
   /** Query actions v1 (D7) — the quiet "Delete query" at the footer's right, behind an inline confirm. */
   onDeleteQuery?: () => void;
-}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery }) => {
+  /**
+   * Query panel v1 §B — how the manuscript is named. The Query Centre already names it, so the card says
+   * nothing ("none"); opened over any other page it is one muted caption under the head ("caption").
+   */
+  manuscript?: "none" | "caption";
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none" }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
@@ -82,18 +87,13 @@ export const QcOpenCard: React.FC<{
   return (
     <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr" bandClassName="qcv-open-bd"
       label={`${row.agentName}, ${row.agency}`} bandFill={`var(--state-${row.state})`}
-      rest={{ "data-status": row.status, "data-id": row.id }}
+      rest={{ "data-status": row.status, "data-id": row.id, "data-court": tileCourt(row.status) ?? "closed" }}
       band={<>
         <b className={`qcv-open-crt${row.withYou ? " qcv-open-crt--you" : ""}`} data-qcv="open-court" data-you={row.withYou ? "true" : "false"}>{COURT_LABEL[row.court]}</b>
-        {/* omitted, never "Day 0", where either end of it is undated */}
-        {row.dayN != null && <b className="qcv-open-day">Day {row.dayN}</b>}
-        {/* ⚠️ THE ✕ IS BACK IN THE BAND (v21 §7). v11 hid it because the card was ALWAYS open —
-            there was an implicit selection, so closing it had nowhere to go and a control that
-            cannot be obeyed is worse than none. Nothing selects on load now, so "close" is a real
-            state again: it returns the view to full width. */}
-        {onClose && (
-          <button type="button" className="qcv-open-x" data-qcv="open-close" aria-label="Close this query" onClick={onClose}>✕</button>
-        )}
+        {/* omitted, never "Day 0", where either end of it is undated; a closed query states the day it closed */}
+        {row.court === "closed"
+          ? (row.stageStartMs != null && <b className="qcv-open-day" data-qcv="open-day">{factLine(row, nowMs)}</b>)
+          : row.dayN != null && <b className="qcv-open-day" data-qcv="open-day">Day {row.dayN}</b>}
       </>}>
       <div className="qcv-open-body">
         <div className="qcv-open-who">
@@ -101,18 +101,19 @@ export const QcOpenCard: React.FC<{
           <div className="qcv-open-whotx">
             <h2 className="qcv-open-nm">{row.agentName}</h2>
             <span className="qcv-open-ag">{row.agency}</span>
-            {/* §A3 — how the materials went, visible before anything is opened */}
-            <SentChip q={row.query} packages={packages} />
+            {/* Query panel v1 §B — no stamp here: the materials box in the timeline already says how they went */}
           </div>
           <span className="qcv-open-pill"><StatusDot status={row.status} overrideSize={14} decorative />{STAGE_NAME[row.status]}</span>
+          {/* Query panel v1 §B — the close is the head's: a 34px round hit area, top right */}
+          {onClose && (
+            <button type="button" className="qcv-open-x" data-qcv="open-close" aria-label="Close this query" onClick={onClose}><span aria-hidden="true">{"\u00d7"}</span></button>
+          )}
         </div>
 
-        {manuscriptTitle && (
-          <div className="qcv-open-ms">
-            <em>Querying</em>
-            <b>{manuscriptTitle}</b>
-            {manuscriptTags.length > 0 && <p>{manuscriptTags.map((t) => <span key={t}>{t}</span>)}</p>}
-          </div>
+        {/* Query panel v1 §B — the "Querying {title}" block is gone. Over a page that does not already name the
+            manuscript, one muted caption says which book this is. */}
+        {manuscript === "caption" && manuscriptTitle && (
+          <p className="qcv-open-for" data-qcv="open-for">for <i>{manuscriptTitle}</i></p>
         )}
 
         <div className="qcv-open-tabs" role="tablist" aria-label="Query detail">

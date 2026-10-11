@@ -302,7 +302,7 @@ describe("the open query, docked", () => {
     expect(rule(openCss, ".qcv-open-ft")).toMatch(/flex:\s*none/);
   });
   it("the band: whose court, the rust dot only when it is the writer's move, and Day N — omitted when undated", () => {
-    expect(card({})).toMatch(/data-qcv="open-court" data-you="false">With the agent<\/b><b class="qcv-open-day">Day 20<\/b>/);
+    expect(card({})).toMatch(/data-qcv="open-court" data-you="false">With the agent<\/b><b class="qcv-open-day" data-qcv="open-day">Day 20<\/b>/);
     expect(card({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })).toMatch(/class="qcv-open-crt qcv-open-crt--you"[^>]*data-you="true">With you</);
     expect(card({ status: QueryStatus.OFFER, offerDate: ago(2) })).toMatch(/class="qcv-open-crt"[^>]*data-you="false">Offer</);
     expect(card({ status: QueryStatus.NO_RESPONSE })).not.toContain("qcv-open-day");
