@@ -35,12 +35,78 @@ Three commits on the same branch: ruling 6 (`68c39da7`), ruling 4 (`fa9e86a3`) a
 ### Things to know
 
 - **The matcher's notice holds only rows skipped for want of a date.** Its other not-imported rows (no name, already here, no matching query) stay in its own run log, as before. A matcher run that skips no dated row leaves any earlier notice alone.
-- **The notice row names the agent of the query the history row matched.** The matcher matches a history row to a query by manuscript title alone (the first query on that manuscript), so on a manuscript with several queries the name can be another agent's. That match is the build's own and was not changed.
+- **The notice row names the agent of the query the history row matched.** When this was written the matcher matched by manuscript title alone, so the name could be another agent's. Fixed in §0b.
 - **New string:** none. "Date needed" and "Date to confirm" are the review's existing labels.
 
 ### Gates after the rulings
 
 `tsc` 0 · Vitest 560 files, 8,537 passed, 3 skipped · both builds 0. Harness account after every run: 73 queries, 37 agents, 5 manuscripts, 396 feed rows, 113 history steps.
+
+## 0b. The matcher's history match (11 October, third round)
+
+One commit on the same branch.
+
+### False premises first
+
+1. **A history sheet had no column that could name the agent.** Its fields were Related Query, Related Title, Event Type, Description, Date and Extras. So "the sheet gives no agent" was true of every history sheet. The fix adds the matcher's existing agent field to the history sheet ("Target Agent Name", headings such as `Agent` or `Agent Name` are matched automatically, as on a queries sheet). That is one more row on the "Match columns" step for a history file, and the heading example now includes `Agent Name`.
+2. **"Related Query" is mapped and never read.** It was not read before this change either. I left it unread: nothing says what a writer puts in it.
+3. **There is no agency column on a history sheet, and I did not add one.** The agent is matched by name; `sameAgent` treats a missing agency as a match.
+4. **The existing log line already claimed an agent match.** It read "no query matches this manuscript and agent" while the agent was never consulted. It is true now, and is kept word for word.
+5. **No existing agent wording fits two of the cases.** See "The wording used" below; for those the notice's reason is left empty instead of invented.
+6. **A case the ruling does not name: two queries to the same agent for the same manuscript** (a re-query). The row names the agent and both match. I write nothing for it, as for "several queries, no agent"; attaching to one would be a guess.
+7. **The ruling-4 lock (U3) had been relying on the old match.** Its history row named no agent and "The Smoke Test" has many queries, so the row was attached to another agent's query (its notice row read "Tom Ellery"). U3 now puts its agent on the list and names them; the notice row reads "Undated Probe Agent".
+
+### §0: how it worked
+
+- **The line:** `ImportCsv.tsx:660–663`, `localQueries.find(q => …ms.title.toLowerCase() === msTitleInput.toLowerCase())`. The first query, in the order the store lists them, on a manuscript with that title.
+- **With several queries on the manuscript:** every history row for that title was written to that one query, whoever it was for. Measured on the unchanged build: a row for agent B and a row for agent A both landed on A's query; a row naming nobody landed on it too.
+- **Columns that could name the agent or agency:** none (see 1 and 3).
+
+### The fix
+
+`lib/importMatcher.ts` `matchHistoryRow`. The agent match is `findExistingAgent` / `sameAgent`, the one all three tiles use.
+
+| The row | The manuscript's queries | Result |
+|---|---|---|
+| names an agent | exactly one to that agent | attached to it |
+| names an agent | none to that agent, or the agent is not on the list | nothing written |
+| names an agent | more than one to that agent | nothing written |
+| names no agent | exactly one | attached to it, as before |
+| names no agent | several | nothing written |
+| names no agent | none | nothing written (as before) |
+
+A row that is not written goes to the run's log and the "Not imported" count, and (except the last row of the table, which is unchanged) to the dashboard's skipped-rows notice.
+
+### The wording used
+
+| Case | Notice reason | Where the words come from |
+|---|---|---|
+| No agent, several queries | `Who's this for?` | the review's label for a row that names nobody |
+| Agent not on the contact list | `Row didn't match an agent` | the import's own reason for that (now one constant, read by both) |
+| Agent on the list, no query for that manuscript | *(empty)* | nothing existing fits |
+| Agent on the list, more than one query for that manuscript | *(empty)* | nothing existing fits |
+
+**For you:** the two empty reasons show a notice row with its agent and event and no reason under it. They need words from you.
+
+Run-log lines: the existing "Activity row N: no query matches this manuscript and agent…" for a row with no matching query, and two new ones (the log needed something to say):
+- `Row N names no agent, and "{title}" has more than one query, so the event can't be placed. Row not imported.`
+- `Row N: there is more than one query to {agent} for "{title}", so the event can't be placed. Row not imported.`
+
+### Locks
+
+`tests/e2e/importMatcherHistory.measure.ts` (rendered, harness account; it builds two manuscripts, two agents and three queries through the matcher and removes them in a `finally`) and `src/lib/importHistoryMatch.test.ts` (13 unit cases).
+
+| Lock | Red first, on the unchanged build | Red under its mutation |
+|---|---|---|
+| M1: a row naming B lands on B's query, A's holds only A's | "B's event is on B's query, and only that: expected 1 row, received none" (both rows were on A's) | match by title alone: unit 4 red; rendered, rebuilt, red at the same assertion |
+| M2: no agent, two queries: nothing written, row in the notice as "Who's this for?" | "nothing was written to any query: received +1" | attach to the first query: unit 1 red; rendered, rebuilt, red |
+| M3: no agent, one query: attaches | green before and after (it is today's behaviour) | never attach without an agent: unit 1 red |
+
+M1 uses two rows, one for each agent. With one row it passed on the unchanged build by the order the store happened to list the queries in.
+
+### Gates
+
+`tsc` 0 · Vitest 561 files, 8,550 passed, 3 skipped · both builds 0 · the five matcher suites and the Import page locks green. Harness account after every run: 73 queries, 37 agents, 5 manuscripts, 396 feed rows, 113 history steps.
 
 ## 1. False premises and things you should know first
 

@@ -28,6 +28,12 @@ test("U3 · an undated query row is imported undated; an undated history row is 
   const snap = await snapshot(db, uid);
   const startedAt = Date.now();
   try {
+    /* Re-pointed (the history match): a history row now attaches only when its manuscript AND its
+       agent match, so the agent is put on the contact list first and the history row names them.
+       Before, the row went to the first query on "The Smoke Test" — another agent's. */
+    await openMatcher(page, "Agents");
+    await runMatcher(page, `Name\nUndated Probe Agent`);
+
     // ── 1 · a queries sheet: one row, no date ──
     await openMatcher(page, "Queries");
     await runMatcher(page, `Manuscript Title,Agent Name,State,Date Sent
@@ -40,6 +46,7 @@ The Smoke Test,Undated Probe Agent,Partial Requested,`);
     record("query", { counts: run1.counts, log: run1.log, stored: { status: q.status, dateSent: q.dateSent ?? null, lastStatusChange: q.lastStatusChange ?? null }, steps: steps.map((s) => ({ status: s.resultingStatus, provisional: s.dateProvisional === true, ms: s.createdAt?.toMillis?.() })) });
     expect(run1.log.some((l) => l.startsWith('Added query: "The Smoke Test" to Undated Probe Agent')), "the run says it was added").toBe(true);
     expect(run1.counts).toContain("Imported: 1");
+    expect(run1.counts, "the agent is on the list, so the row needs no decision").toContain("Need a decision: 0");
     expect("dateSent" in q, "no sent date was written").toBe(false);
     expect(q.status).toBe("Partial Requested");
     expect(q.partialRequestedDate ?? null, "no stage date was written").toBeNull();
@@ -49,23 +56,24 @@ The Smoke Test,Undated Probe Agent,Partial Requested,`);
       expect(Math.abs((s.createdAt?.toMillis?.() ?? 0) - startedAt) > 3_600_000, "no step is dated to the import").toBe(true);
     }
     const feedAfter1 = (await getDocs(collection(db, "users", uid, "activities"))).docs.filter((d) => !snap.activities.includes(d.id));
-    expect(feedAfter1.length, "no feed row dated now was written for it").toBe(0);
+    expect(feedAfter1.filter((d) => d.data().queryId === fresh[0].id).length, "no feed row dated now was written for it").toBe(0);
 
     // ── 2 · a history sheet: one row, a date that cannot be read ──
     await openMatcher(page, "Query history");
-    await runMatcher(page, `Related Title,Event Type,Description,Date
-The Smoke Test,Status changed,Asked for the first fifty pages,sometime in May`);
+    await runMatcher(page, `Related Title,Agent Name,Event Type,Description,Date
+The Smoke Test,Undated Probe Agent,Status changed,Asked for the first fifty pages,sometime in May`);
     const run2 = await readRun(page);
     const notice = await page.evaluate((id) => JSON.parse(localStorage.getItem(`sa.importSkipped.${id}`) ?? "null"), uid);
     const feedAfter2 = (await getDocs(collection(db, "users", uid, "activities"))).docs.filter((d) => !snap.activities.includes(d.id));
     record("history", { counts: run2.counts, text: run2.text.slice(0, 600), notice, feedRowsWritten: feedAfter2.length });
-    expect(feedAfter2.length, "the event was not written").toBe(0);
+    expect(feedAfter2.filter((d) => d.data().queryId === fresh[0].id).length, "the event was not written").toBe(0);
     expect(run2.counts).toContain("Not imported: 1");
     expect(run2.text, "the run says why").toContain("Row 2 has no date that could be read");
     expect(notice?.count, "the row is in the skipped-rows notice").toBe(1);
     expect(notice.rows).toHaveLength(1);
     expect(notice.rows[0].reason, "with the review's own date reason").toBe("Date needed");
     expect(notice.rows[0].status).toBe("Asked for the first fifty pages");
+    expect(notice.rows[0].who, "it names the agent of the query the row matched").toBe("Undated Probe Agent");
     expect(notice.rows[0].sentDate).toBeNull();
 
     // ── and the dashboard shows it, reached without a reload ──

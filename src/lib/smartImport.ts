@@ -83,6 +83,10 @@ export interface ValidatedImport {
  * Client-side validation checklist (defends against a stray model value):
  * drop-and-report rather than silently write.
  */
+/** A row whose agent is not among the agents the import knows. Also the column matcher's reason
+ *  for a history row naming an agent who is not on the contact list. */
+export const NO_AGENT_MATCH_REASON = "Row didn't match an agent";
+
 export function validateSmartImport(result: SmartImportResult): ValidatedImport {
   const agentByRef = new Map((result.agents || []).map((a) => [a.ref, a]));
   const importable: ParsedQuery[] = [];
@@ -103,7 +107,7 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
     // not dates, so the row reports correctly even undated.
     const agent = agentByRef.get(q.agentRef);
     if (!agent) {
-      skipped.push({ query: q, reason: "Row didn't match an agent" });
+      skipped.push({ query: q, reason: NO_AGENT_MATCH_REASON });
       continue;
     }
     // Agency is the identity: an agency-only (no-name) agent is writable. Only a row with NEITHER

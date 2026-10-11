@@ -15,7 +15,7 @@ import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
   MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
   MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
-  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine, eventDateReason,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine, eventDateReason, matchHistoryRow, historySkipReason,
 } from "../lib/importMatcher";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
@@ -244,7 +244,7 @@ export const ImportCsv: React.FC<{
     agents: ["name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "notes"],
     manuscripts: ["title", "genre", "wordCount", "logline", "comps", "ageCategory"],
     queries: ["manuscriptId", "agentId", "status", "dateSent", "personalisationNotes"],
-    activities: ["queryId", "manuscriptId", "activityType", "description", "date", "details"],
+    activities: ["queryId", "manuscriptId", "agentId", "activityType", "description", "date", "details"],
     user: ["name", "email", "plan", "trialStartDate", "subscriptionStatus"]
   };
 
@@ -253,7 +253,7 @@ export const ImportCsv: React.FC<{
     agents: "Name, Agency, Email, Website, Genres, MSWL Notes, Star Rating, Notes",
     manuscripts: "Title, Genre, Word Count, Logline, Comps, Audience Age",
     queries: "Manuscript Title, Agent Name, State, Date Sent, Custom Intro Text",
-    activities: "Related Query, Related Title, Event Type, Description, Date, Extras",
+    activities: "Related Query, Related Title, Agent Name, Event Type, Description, Date, Extras",
     user: "Pen Name, Email, Plan Tier, Sign up Date, Subscription State"
   };
 
@@ -656,11 +656,12 @@ export const ImportCsv: React.FC<{
           const eventDate = matcherDate(getMappedValue("date"));
           const details = getMappedValue("details") || "";
 
-          let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
-          let foundQ = localQueries.find(q => {
-            const ms = localManuscripts.find(m => m.id === q.manuscriptId);
-            return ms && ms.title.toLowerCase() === msTitleInput.toLowerCase();
-          });
+          /* Manuscript AND agent (importMatcher.matchHistoryRow). The agent was never read here: the
+             row went to the first query on a manuscript with that title. */
+          const agentNameInput = getMappedValue("agentId");
+          const match = matchHistoryRow({ title: msTitleInput, agent: agentNameInput }, localManuscripts, localAgents, localQueries);
+          const foundQ = match.kind === "attach" ? localQueries.find((q) => q.id === match.queryId) : undefined;
+          const foundMs = foundQ ? localManuscripts.find((m) => m.id === foundQ.manuscriptId) : undefined;
 
           const actVal = activityTypeInput.toLowerCase();
           let activityType = ActivityType.STATUS_CHANGED;
@@ -675,9 +676,16 @@ export const ImportCsv: React.FC<{
            * ruling turns on. `q-seed-fantasy` made it worse than either: the activity was written,
            * attached to a query that does not exist, and visible from nowhere.
            */
-          if (!foundQ) {
+          if (match.kind === "skip" || !foundQ) {
+            const whySkipped = match.kind === "skip" ? match.why : "no-query";
             failedCount++;
-            errorsList.push(`Activity row ${index + 2}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`);
+            errorsList.push(
+              whySkipped === "no-agent-several" ? ERR.eventNoAgentSeveral(index + 2, msTitleInput)
+                : whySkipped === "agent-several" ? ERR.eventAgentSeveral(index + 2, msTitleInput, agentNameInput)
+                : ERR.eventNoQuery(index + 2));
+            /* …and to the dashboard's notice, so the row is in a list the writer will see again */
+            const reason = historySkipReason(whySkipped);
+            if (reason !== null) noticeRows.push({ who: agentNameInput, status: description || activityTypeInput, sentDate: eventDate.iso, reason });
             continue;
           }
           /* An event is placed by its date. With none that can be read there is nowhere true to put
