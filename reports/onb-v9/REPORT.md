@@ -37,7 +37,7 @@ Branch `onb-v9`, worktree `/Users/nickphysick/ScriptAlly-onb9`. Seven phase comm
 | Vitest | 563 files passed, 1 failed to load; 8,563 passed, 3 skipped | 565 files passed, the same 1 failed to load; 8,584 passed, 3 skipped |
 | `onbV9.measure.ts` | — | 29 passed |
 | `onbV9Walk.measure.ts` (dev) | — | 5 passed |
-| `onbV5`, `onbV5Import`, `onbV5ImportPage`, `importFixes`, `importTruth` | 126 passed, 2 skipped | see §6 |
+| `onbV5`, `onbV5Import`, `onbV5ImportPage`, `importFixes`, `importTruth` | 126 passed, 2 skipped | 122 passed, 2 skipped (§6) |
 
 In full Vitest runs alongside other work, up to six unrelated tests timed out under load. Each passes when run alone.
 
@@ -124,7 +124,7 @@ Each re-point states its reason at the lock.
 - **C1** now reads: the summary and the review both count the nameless row (4 and 4 for `template-mixed.csv`); removed, written plus listed equals the rows in the file; named, all four import and nothing is listed.
 - **V4** gives the baseline's answers through the deck and gets the baseline's result, byte for byte.
 
-Final run on the Phase 7 build: recorded in `DEPLOY.md`.
+Final run on the Phase 7 build: 122 passed, 2 skipped (the base: 126 passed, 2 skipped; the difference is the three retired cases, V3 at three widths, less what was added). The same on the integration branch.
 
 ## 7. The walk on dev
 
@@ -153,7 +153,7 @@ Final run on the Phase 7 build: recorded in `DEPLOY.md`.
 
 ## 9. Deploy
 
-Recorded in `DEPLOY.md` beside this file: the hash dev served before, the branch it was built from, the integration branch, and the hash after.
+Dev had moved since the instruction: the named branch was merged to `main`, and dev was serving `query-panel-v1` at `45aaf306` (`index-8t_tGa3-.js`). `onb-v9` was merged into exactly that commit as `dev/query-panel-v1-onb9` (`4e81b30b`), gated there, and deployed. Dev now serves `index-yN1_OWRe.js`. Detail in `DEPLOY.md`.
 
 ## 10. For Nick
 
