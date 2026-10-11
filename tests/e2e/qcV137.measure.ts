@@ -42,6 +42,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   C2: { css: `.qcv-group.qc13 > .qcv-page.qcw { width: auto !important; margin-left: -20px !important; margin-right: -20px !important; justify-self: stretch !important; }` },
   /* fixed last columns, and "What you sent" kept */
   C3: { css: `.qc13 .qcw-list { --qcw-cols: minmax(0, 1fr) minmax(0, 1fr) 284px 284px !important; } .qc13 .qcw-list .qcw-snt { display: block !important; } .qc13 .qcw-list .lt-labels .lt-lab[data-lt-col="What you sent"] { display: inline !important; }` },
+  /* F2: the stage cell squeezed, so its label has to wrap or run out */
+  C4: { css: `.qc13 .qcw-list .qcw-st { width: 60px !important; } .qc13 .qcw-list .qcw-ws1 { flex-wrap: wrap !important; white-space: normal !important; }` },
   /* the header in the flow again */
   D1: { css: `.qc13 .qcw .qcw-bar { position: relative !important; top: 0 !important; }` },
   /* the header fixed to the window: it never releases */
@@ -316,6 +318,36 @@ test.describe("Query Centre v137", () => {
       L.check("C3", `${w} strip`, new Set(r.cells).size === (vp.width < 1100 ? 2 : 1), `rows at ${[...new Set(r.cells)].join()}`);
     }
     L.done(12);
+  });
+
+  test("C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("C4");
+    const vp = { width: 1280, height: 800 };
+    await openQC(page, vp, "C4");
+    const r = await page.evaluate(() => {
+      const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
+      const rows = [...g.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')];
+      const out = rows.map((row) => {
+        const st = row.querySelector<HTMLElement>(".qcw-ws1")!;
+        const kids = ([...st.children] as HTMLElement[]).filter((k) => k.getBoundingClientRect().width > 0);
+        const tops = new Set(kids.map((k) => Math.round(k.getBoundingClientRect().top + k.getBoundingClientRect().height / 2)));
+        const lh = parseFloat(getComputedStyle(st).lineHeight);
+        return { status: row.dataset.status ?? "", lines: Math.max(tops.size > 1 ? 2 : 1, Math.round(st.getBoundingClientRect().height / Math.max(lh, 20))), h: row.getBoundingClientRect().height,
+          over: st.scrollWidth - st.clientWidth, intoNext: Math.max(...kids.map((k) => k.getBoundingClientRect().right)) - (row.querySelector<HTMLElement>(".qcw-snt")?.getBoundingClientRect().left ?? Infinity) };
+      });
+      return { rows: out, statuses: [...new Set(out.map((o) => o.status))] };
+    });
+    const bad = r.rows.filter((x) => x.lines !== 1);
+    L.check("C4", "population", r.rows.length > 20 && r.statuses.includes("Revise & Resubmit"), `${r.rows.length} rows · ${r.statuses.length} statuses, Revise & Resubmit ${r.statuses.includes("Revise & Resubmit") ? "among them" : "MISSING"}`);
+    L.check("C4", "every stage label is one line", bad.length === 0, bad.length ? bad.slice(0, 4).map((x) => `${x.status} ${x.lines} lines`).join(" · ") : `${r.rows.length} labels, one line each`);
+    L.check("C4", "no label reaches the next column", r.rows.every((x) => x.intoNext <= -4), `nearest ${Math.max(...r.rows.map((x) => x.intoNext)).toFixed(1)}px (negative is clear)`);
+    /* ⚠️ THE ROW'S HEIGHT IS THE APP'S OWN, 73, measured on the build before the pack (383c88d4: 73 rows, all 73
+       tall). The reference draws its rows 78 to 82 apart at 1280, with some dated lines on two lines; the brief
+       leaves the rows alone, so "unchanged" is the claim that can be held. */
+    const hs = [...new Set(r.rows.map((x) => Math.round(x.h)))];
+    L.check("C4", "a row is as tall as before the pack, 73 (±1)", r.rows.every((x) => Math.abs(x.h - 73) <= 1), `heights ${hs.join(", ")}`);
+    L.done(4);
   });
 
   test("D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it", async ({ page }) => {

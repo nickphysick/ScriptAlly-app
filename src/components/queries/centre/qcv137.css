@@ -29,10 +29,10 @@
   .qc13 .qcw-list { --qcw-cols: minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 284px) minmax(150px, 284px); }
   @container (max-width: 1099.98px) {
     .qc13 .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) 206px minmax(150px, 220px); }
-    /* At a 1280 window the list is 976 where it was 982 (the sheet less 48, not the column plus 40), and "Revise &
-       resubmit" with its stamp wrapped by 3px (qcV132 W12). The rows and their labels give those 6px back. */
-    .qc13 .qcw-list .qcw-row { padding-inline: 19px; }
-    .qc13 .qcw-list .lt-labels { padding-inline: 37px; }
+    /* F2: at a 1280 window the list is 976 where it was 982, and "Revise & resubmit" with its stamp is 3px wider
+       than its column. The stage line never wraps: it runs those 3px into the 20px gap, and the row keeps its
+       padding and its height. */
+    .qc13 .qcw-list .qcw-ws1 { flex-wrap: nowrap; white-space: nowrap; }
   }
   /* below 900px of list, "What you sent" and its heading go (the brief says 1100; its own 1280 reference, a 976px
      list, draws the column — see the report) */

@@ -1,0 +1,41 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:323:3 › Query Centre v137 › C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was
+[measure] › tests/e2e/qcV137.measure.ts:323:3 › Query Centre v137 › C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was
+  ✗ C4 · every stage label is one line — Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines
+
+  ✗ C4 · a row is as tall as before the pack, 73 (±1) — heights 159, 172, 96, 116, 137, 129, 103, 144
+
+[C4] 2/4 green
+
+  1) [measure] › tests/e2e/qcV137.measure.ts:323:3 › Query Centre v137 › C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "C4 · every stage label is one line — Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines",
+    +   "C4 · a row is as tall as before the pack, 73 (±1) — heights 159, 172, 96, 116, 137, 129, 103, 144",
+    + ]
+
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:350:7
+
+    Error Context: test-results/qcV137.measure.ts-Query-Ce-cd595--a-row-is-as-tall-as-it-was-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV137.measure.ts:323:3 › Query Centre v137 › C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was 
+  1 passed (24.7s)
