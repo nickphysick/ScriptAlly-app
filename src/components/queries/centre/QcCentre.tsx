@@ -85,6 +85,66 @@ export const QC_BANNER_LINES = [
   "one list to hold your queries and in the darkness mind them.",
 ] as const;
 
+/** v137 §D — the pin line, and the hysteresis either side of it: pin at 12px or less, unpin only above 36. */
+export const PIN_AT = 12;
+export const UNPIN_ABOVE = 36;
+/** One step of the pinned state: where the sentinel sits under the scroller's top, and what the state was. */
+export const nextPinned = (was: boolean, sentinelTop: number, listBottom: number): boolean => {
+  if (listBottom <= PIN_AT) return false; /* the list has gone: the controls have released with it */
+  if (sentinelTop <= PIN_AT) return true;
+  if (sentinelTop > UNPIN_ABOVE) return false;
+  return was;
+};
+
+/**
+ * v137 §D — THE LIST'S CONTROLS PIN. The ink header, the chips and the column headings are `position: sticky`
+ * inside the list; this hook says WHEN they are pinned (`data-pinned` on the list) and how tall the two rows
+ * above the headings are, so each pins under the one before it.
+ *
+ * ⚠️ PINNED IS DECIDED FROM A ZERO-HEIGHT SENTINEL AT THE LIST'S TOP, NEVER FROM THE HEADER'S OWN BOX: pinning
+ *    makes the header shorter, so a reading of the header would move with the answer. The sentinel is above
+ *    everything that changes size. The hysteresis and `overflow-anchor: none` (qcv137.css) are the rest of it.
+ * ⚠️ DERIVED ON EVERY SCROLL, never an IntersectionObserver (a missed event would be permanent).
+ */
+function usePinnedControls(group: React.RefObject<HTMLElement | null>, on: boolean): void {
+  useLayoutEffect(() => {
+    const g = group.current;
+    const page = g?.querySelector<HTMLElement>(":scope > .qcv-page");
+    const sc = g?.closest<HTMLElement>(".wpg-scroll");
+    const sentinel = page?.querySelector<HTMLElement>('[data-qcv="pin-sentinel"]');
+    if (!on || !g || !page || !sc || !sentinel) return undefined;
+    let pinned = false;
+    const measure = () => {
+      const bar = page.querySelector<HTMLElement>('[data-qcv="ws-bar"]');
+      const strip = page.querySelector<HTMLElement>('[data-qcv="ws-strip"]');
+      page.style.setProperty("--qc137-bar-h", `${bar ? bar.offsetHeight : 0}px`);
+      page.style.setProperty("--qc137-strip-h", `${strip ? strip.offsetHeight : 0}px`);
+    };
+    const read = () => {
+      const top = sc.getBoundingClientRect().top;
+      const next = nextPinned(pinned, sentinel.getBoundingClientRect().top - top, page.getBoundingClientRect().bottom - top);
+      if (next !== pinned) {
+        pinned = next;
+        if (next) page.setAttribute("data-pinned", "true"); else page.removeAttribute("data-pinned");
+        measure();
+      }
+    };
+    measure();
+    read();
+    sc.addEventListener("scroll", read, { passive: true });
+    const onResize = () => { measure(); read(); };
+    window.addEventListener("resize", onResize);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    page.querySelectorAll<HTMLElement>('[data-qcv="ws-bar"], [data-qcv="ws-strip"]').forEach((el) => ro?.observe(el));
+    return () => {
+      sc.removeEventListener("scroll", read);
+      window.removeEventListener("resize", onResize);
+      ro?.disconnect();
+      page.removeAttribute("data-pinned");
+    };
+  }, [group, on]);
+}
+
 export const QcCentre: React.FC<{
   loading: boolean;
   /** The first 150ms of a load: the real frames with nothing in them. */
@@ -145,6 +205,7 @@ export const QcCentre: React.FC<{
   v131?: boolean;
 }> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
+  usePinnedControls(groupRef, v131);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
    * `DOCK_MIN_COLUMN` asks whether there is room for a ledger AND a card beside it, which was a
@@ -247,6 +308,8 @@ export const QcCentre: React.FC<{
 
       {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
           are the list's own and their menus have not changed. */}
+      {/* v137 §D — the pin sentinel: zero height, at the list's top, above everything that changes size */}
+      {v131 && <i className="qc137-sentinel" data-qcv="pin-sentinel" aria-hidden="true" />}
       {v131 ? sentence : (
       <div className="qcv-lbw" data-qcv="ctl">
         {sentence}

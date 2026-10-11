@@ -175,6 +175,15 @@ export const QcWorkspaceHead: React.FC<{
   const groupShort = GROUP_BY_OPTIONS.find((g) => g.key === group)?.short ?? group;
   const sortShort = SORT_OPTIONS.find((s) => s.key === sort)?.short ?? sort;
 
+  /* v137 §D — "↑ Summary": the page's top, and focus on its heading. No smooth scroll under reduced motion. */
+  const toSummary = (e: React.MouseEvent<HTMLElement>) => {
+    const sc = e.currentTarget.closest<HTMLElement>(".wpg-scroll");
+    const h1 = e.currentTarget.closest<HTMLElement>(".qcv-group")?.querySelector<HTMLElement>("h1[data-page-title]");
+    const still = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    sc?.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+    if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+  };
+
   return (
     <div className="qcw-head" data-qcv="ws-head">
       <div className="qcw-bar" data-qcv="ws-bar">
@@ -192,6 +201,10 @@ export const QcWorkspaceHead: React.FC<{
             </button>
             <button type="button" className="qcw-pill qcw-pill--over" data-qcv="ws-pill" data-k="past" aria-pressed={filter === "past"} onClick={() => toggle("past")}>
               <i aria-hidden="true" /><b>{fig(count("past"))}</b> overdue
+            </button>
+            {/* v137 §D — shown only while the controls are pinned (CSS, off `data-pinned`): back to the top of the page */}
+            <button type="button" className="qcw-pill qcw-pill--sum" data-qcv="ws-summary" onClick={toSummary}>
+              <span aria-hidden="true">{"\u2191"}</span> Summary
             </button>
           </span>
         </div>
