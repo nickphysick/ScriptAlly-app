@@ -1,0 +1,42 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v137 §C — THE LIST IS THE PAGE (ref design-refs/query-centre/query-centre-v137.html).
+ *
+ * The group's rows are header · strip · list · footer. The list breaks out of the content column to 24px from the
+ * page sheet's edges, capped at 1600 and centred; the panel and the strip stay on the column.
+ *
+ * ⚠️ THE SHEET'S WIDTH IS `--hsheet-w` (headerSheet.css, from the shell's published `--ink-sheet-l/-r`), never a
+ *    container unit: making the scroller a size container would contain its fixed descendants.
+ * ⚠️ `.qcv-page` IS THE ROWS' SIZE CONTAINER, so the narrow rules below follow the LIST's width, not the window's.
+ */
+@media (min-width: 768px) {
+  .qcv-group.qc13 > .qcs { grid-row: 2; }
+  /* 0-4-0, to beat `.qc13 .qcv-page.qcw` (qcvWorkspace.css) */
+  .qcv-group.qc13 > .qcv-page.qcw {
+    grid-row: 3; justify-self: start; box-sizing: border-box; max-width: none;
+    --qc137-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    width: var(--qc137-w);
+    margin: 40px 0 90px calc(50% - var(--qc137-w) / 2);
+  }
+  .qcv-group.qc13 > .af { grid-row: 4; }
+
+  /* the title row, without the hawk it used to make room for */
+  .qc13 .qcw .qcw-r1 { min-height: 0; padding: 22px 28px 18px 28px; }
+
+  /* the last two columns give before the names do */
+  .qc13 .qcw-list { --qcw-cols: minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 284px) minmax(150px, 284px); }
+  @container (max-width: 1099.98px) {
+    .qc13 .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) 206px minmax(150px, 220px); }
+  }
+  /* below 900px of list, "What you sent" and its heading go (the brief says 1100; its own 1280 reference, a 976px
+     list, draws the column — see the report) */
+  @container (max-width: 899.98px) {
+    .qc13 .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) minmax(150px, 220px); }
+    .qc13 .qcw-list .qcw-snt, .qc13 .qcw-list .lt-labels .lt-lab[data-lt-col="What you sent"] { display: none; }
+    /* Find takes a line of its own, or the three controls beside it squeeze it to nothing (measured at 1024) */
+    .qc13 .qcw .qcw-r2 { flex-wrap: wrap; }
+    .qc13 .qcw .qcw-find { flex: 1 1 100%; }
+  }
+}

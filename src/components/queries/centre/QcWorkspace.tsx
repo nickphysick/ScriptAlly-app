@@ -89,7 +89,9 @@ export const QcWorkspaceHead: React.FC<{
   /** v137 §B — the strip's court filter is on: "Clear all" shows, and clears it with the rest */
   courtOn?: boolean;
   onClearCourt?: () => void;
-}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false, courtOn = false, onClearCourt }) => {
+  /** v137 §C — the flying hawk over the bar's corner; no longer drawn on the Query Centre */
+  hawk?: boolean;
+}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false, courtOn = false, onClearCourt, hawk = false }) => {
   /* the keyboard card: a click outside or Escape closes it */
   const [keysOpen, setKeysOpen] = useState(false);
   const keysRef = useRef<HTMLSpanElement>(null);
@@ -176,7 +178,7 @@ export const QcWorkspaceHead: React.FC<{
   return (
     <div className="qcw-head" data-qcv="ws-head">
       <div className="qcw-bar" data-qcv="ws-bar">
-        <img className="qcw-hawk" data-qcv="ws-hawk" src={`${QC_LIST_FLIGHT.src}?v=${QC_LIST_FLIGHT.version}`} width={QC_LIST_FLIGHT.width} height={QC_LIST_FLIGHT.height} alt="" aria-hidden="true" />
+        {hawk && <img className="qcw-hawk" data-qcv="ws-hawk" src={`${QC_LIST_FLIGHT.src}?v=${QC_LIST_FLIGHT.version}`} width={QC_LIST_FLIGHT.width} height={QC_LIST_FLIGHT.height} alt="" aria-hidden="true" />}
         <div className="qcw-r1">
           <div className="qcw-t">
             <h2 className="qcw-title" data-qcv="ws-title">Your queries</h2>

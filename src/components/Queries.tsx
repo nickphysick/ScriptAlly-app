@@ -6744,25 +6744,8 @@ export const Queries: React.FC<{
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
             carousel={qcDesk ? (
-              /* v132 §1 (desktop) — "Recently updated": the lede, the featured card and "Also moved".
-                 The desk scopes it and nothing else; the button's number is the LIST's total. */
-              <QcRecent
-                loading={showGridSkeleton}
-                rows={qcScoped}
-                court={qcCzCourt}
-                title={qcCzCourt ? DESK_LABEL[qcCzCourt] : "Recently updated"}
-                listTotal={qcScoped.length}
-                nowMs={Date.now()}
-                onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                model={(row) => {
-                  const door = primaryDoor(row.status);
-                  return {
-                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null,
-                      door ? () => openQueryDrawer({ mode: door.mode, queryId: row.id }) : () => onOpenQuery?.(row.id)),
-                    actionLabel: door ? door.label : "Open",
-                  };
-                }}
-              />
+              /* v137 §C — the list is the page: "Recently updated" (`QcRecent`, v132 §1) is not drawn */
+              null
             ) : showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;

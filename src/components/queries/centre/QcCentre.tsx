@@ -22,6 +22,7 @@ import { QcOpenHeader } from "./QcOpenHeader";
 import "./qcvBand134.css";
 import "./qcvFullList136.css";
 import "./qcvPage.css";
+import "./qcv137.css";
 import "./qcvEnter.css";
 
 export const DOCK_MIN_COLUMN = 900;
@@ -238,23 +239,9 @@ export const QcCentre: React.FC<{
       * copy are the living-headers pack's and are unchanged.
       */}
     {courts}
-    {/* v136 §C — "View the full list": under the bands, it scrolls to "Your queries" and moves focus to its heading.
-        It does not navigate and puts no hash in the URL. */}
-    {v131 && (
-      <div className="qcfl" data-qcv="full-list-row">
-        <button type="button" className="qcfl-link" data-qcv="full-list" onClick={() => viewFullList(groupRef.current)}>
-          <span className="qcfl-words">View the full list</span><span className="qcfl-arrow" aria-hidden="true">{"\u2193"}</span>
-        </button>
-      </div>
-    )}
+    {/* v137 §C — THE LIST IS THE PAGE: the "View the full list" link (v136 §C), "Recently updated" and the banner
+        (v134 §3) are no longer drawn on the populated page. `viewFullList` and `QC_BANNER_LINES` are kept. */}
     {carousel}
-    {/* v134 §3 — THE BANNER above "Your queries" (desktop): a blush band the sheet's full width, its bottom
-        edge an arrow pointing down at the list. The copy is exact, on two lines. */}
-    {v131 && (
-      <section className="qc134-ban" data-qcv="banner" aria-label="A note" data-loading={loading ? "" : undefined}>
-        <p className="qc134-ban-p"><span>{QC_BANNER_LINES[0]}</span> <span>{QC_BANNER_LINES[1]}</span></p>
-      </section>
-    )}
     <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 
