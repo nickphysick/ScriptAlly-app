@@ -91,6 +91,19 @@ const isRow = (r: unknown): r is ImportNoticeRow =>
   && typeof (r as ImportNoticeRow).reason === "string"
   && ((r as ImportNoticeRow).sentDate === null || typeof (r as ImportNoticeRow).sentDate === "string");
 
+/**
+ * The stored notice changed (saved, replaced or cleared). The dashboard stays mounted while the
+ * writer is on the Import page, so it cannot learn of a new notice by mounting: it subscribes.
+ * Returns the unsubscribe.
+ */
+const NOTICE_EVENT = "sa:import-notice";
+const announce = () => { try { if (typeof window !== "undefined") window.dispatchEvent(new Event(NOTICE_EVENT)); } catch { /* no window: nobody to tell */ } };
+export function onImportNoticeChange(fn: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(NOTICE_EVENT, fn);
+  return () => window.removeEventListener(NOTICE_EVENT, fn);
+}
+
 /** Keep the notice for this account on this device. A null notice clears the key. */
 export function saveImportNotice(uid: string, notice: ImportNotice | null): void {
   try {
@@ -98,6 +111,7 @@ export function saveImportNotice(uid: string, notice: ImportNotice | null): void
     if (!notice) localStorage.removeItem(keyFor(uid));
     else localStorage.setItem(keyFor(uid), JSON.stringify(notice));
   } catch { /* private mode, or storage full: the dashboard simply shows no line */ }
+  announce();
 }
 
 export function readImportNotice(uid: string): ImportNotice | null {
@@ -114,6 +128,7 @@ export function readImportNotice(uid: string): ImportNotice | null {
 
 export function clearImportNotice(uid: string): void {
   try { if (uid && typeof localStorage !== "undefined") localStorage.removeItem(keyFor(uid)); } catch { /* nothing to clear */ }
+  announce();
 }
 
 // ── The line's words ─────────────────────────────────────────────────────────────────────────────

@@ -32,7 +32,7 @@ import { queriesPathFor } from "../../../lib/queriesFilterParam";
 import { dashAid, useDashHold, type DashAid } from "../../../lib/dashReviewAid";
 import { readShape, writeShape } from "../../../lib/dashShape";
 import { MONTHS_SHORT } from "../../../lib/dates";
-import { readImportNotice, clearImportNotice, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
+import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
@@ -224,14 +224,15 @@ export const Dash58: React.FC<Dash58Props> = ({
     writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: today > 0 });
   }, [loading, focus.item?.key, closed, today, shape.focusH]);
 
-  /* ── the skipped-rows line: read once for this account, shown until dismissed ── */
+  /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
+     This page stays mounted while the writer is on the Import page, so reading once showed the
+     notice it found on arrival (or none) after an import made there, until a reload. */
   const uid = currentUser?.id ?? "";
   const [notice, setNotice] = useState<ImportNotice | null>(null);
-  const noticeRead = useRef<string | null>(null);
   useEffect(() => {
-    if (!uid || noticeRead.current === uid) return;
-    noticeRead.current = uid;
+    if (!uid) return;
     setNotice(readImportNotice(uid));
+    return onImportNoticeChange(() => setNotice(readImportNotice(uid)));
   }, [uid]);
   const [noticeListH, setNoticeListH] = useState(0);
   const dismissNotice = () => { clearImportNotice(uid); setNotice(null); setNoticeListH(0); };
