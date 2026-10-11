@@ -334,15 +334,20 @@
   .sf .o9-ask { font-size: 20px; }
 }
 
+/* ── 7 · reduced motion: every screen at rest, at once ──
+   Nothing types, pops, rises, draws or pulses, and no card waits to be shown. The last rule is the
+   net: any v9 element, whatever it is called, stops animating. The ones before it put back what
+   an entrance would have left behind (a card held at opacity 0, a tick not yet drawn). */
 @media (prefers-reduced-motion: reduce) {
   .o9-rise, .o9-pop { animation: none; }
-  .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
-  .sf .o9-gomark, .sf .o9-gomark::before, .sf .o9-mtxt, .sf .im-sum .im-ohead p[data-im="lead"], .sf .im-sum .im-pops { animation: none; }
-  .sf .o9-gomark path { animation: none; stroke-dashoffset: 0; }
   .sf [data-screen="fork"] > .sf-open, .sf [data-screen="confirm"] > .sf-open { animation: none; }
   .sf .o9-ackbox { animation: none; }
   .sf .o9-ackbox path { animation: none; stroke-dashoffset: 0; }
   .o9-unseen { visibility: visible; }
   .sf .o9-late, .sf .o9-late.is-in, .sf .o9-late.is-rise { opacity: 1; animation: none; }
   .sf .o9-late.is-in .o9-fields > *, .sf .o9-desc { animation: none; }
+  .sf .o9-gomark, .sf .o9-gomark::before, .sf .o9-mtxt, .sf .im-sum .im-ohead p[data-im="lead"], .sf .im-sum .im-pops { animation: none; }
+  .sf .o9-gomark path { animation: none; stroke-dashoffset: 0; }
+  .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
+  .sf [class*="o9-"], .sf [class*="o9-"]::before, .sf [class*="o9-"]::after { animation: none !important; }
 }

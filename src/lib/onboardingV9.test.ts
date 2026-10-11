@@ -3,6 +3,8 @@
  * rendered page (tests/e2e/onbV9.measure.ts).
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { ACK, lineText, typeSchedule, typedCount, UNTITLED, TITLE_TBC, STILL_WRITING_LEAD, STILL_WRITING_NOTE, STAMP_EYEBROW } from "./onboardingV9";
 
 describe("the acknowledgement's words, per journey", () => {
@@ -71,5 +73,25 @@ describe("the typewriter's schedule", () => {
     expect(typedCount(at, at.at(-1)!)).toBe(at.length);
     expect(typedCount(at, 1e9)).toBe(at.length);
     expect(typedCount(at, 300), "at 300ms, fewer than half").toBeLessThan(at.length / 2);
+  });
+});
+
+/* Phase 7 · the build's rule: no `var()` inside `@keyframes`. It fails in silence. */
+describe("the v9 stylesheet's keyframes", () => {
+  const css = readFileSync(resolve(process.cwd(), "src/components/onboarding/v9/onbV9.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const frames = [...css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/g)].map((m) => ({ name: m[1], body: m[2] }));
+  it("are found", () => { expect(frames.length).toBeGreaterThanOrEqual(7); });
+  it("use literals only", () => { for (const f of frames) expect(f.body, f.name).not.toMatch(/var\(/); });
+  it("every animation the sheet names has its keyframes", () => {
+    const named = new Set(frames.map((f) => f.name));
+    const used = [...css.matchAll(/animation(?:-name)?:\s*(o9-[\w-]+)/g)].map((m) => m[1]);
+    expect(used.length).toBeGreaterThan(10);
+    for (const u of used) expect(named.has(u), u).toBe(true);
+  });
+  it("reduced motion is the last block, with a net over every v9 element", () => {
+    const at = css.lastIndexOf("@media (prefers-reduced-motion: reduce)");
+    expect(at).toBeGreaterThan(-1);
+    expect(css.slice(at)).toContain('.sf [class*="o9-"]');
+    expect(css.indexOf("@keyframes", at), "nothing animated is declared after it").toBe(-1);
   });
 });

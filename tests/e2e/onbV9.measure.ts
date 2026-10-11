@@ -911,3 +911,129 @@ test.describe("G", () => {
     expect(await page.locator('[data-im="deck-prev"]').isVisible()).toBe(true);
   });
 });
+
+/* ════ M1 · motion: at rest under reduced motion, once per arrival, and no overflow ══ */
+test.describe("M1", () => {
+  type P = import("@playwright/test").Page;
+  /** Every set-up and review screen, by lab query, with the steps (if any) that reach it. */
+  const SCREENS: Array<{ id: string; q: string; reach?: (page: P) => Promise<void> }> = [
+    { id: "welcome", q: "s=welcome&name=Lucy%20Sterling" },
+    { id: "ack-starting", q: "s=ack&stage=starting" },
+    { id: "ack-early", q: "s=ack&stage=early" },
+    { id: "ack-deep", q: "s=ack&stage=deep" },
+    { id: "ack-interest", q: "s=ack&stage=interest" },
+    { id: "book", q: "s=bookmore&title=The%20October%20Test&name=Lucy%20Sterling" },
+    { id: "fork", q: "s=fork" },
+    { id: "hand-off", q: "s=confirm" },
+    { id: "summary", q: "s=overview&fx=gate&rows=16" },
+    { id: "duplicates", q: "s=review&fx=dupes" },
+    { id: "duplicates-done", q: "s=review&fx=dupes", reach: async (page) => { await decideDuplicates(page); } },
+    { id: "agents", q: "s=review&fx=gate" },
+    { id: "queries", q: "s=review&fx=gate", reach: async (page) => { await answerAgents(page); await page.locator('[data-im="primary"]').click(); await page.locator('[data-im="review"][data-step="queries"]').waitFor(); } },
+    { id: "queries-done", q: "s=review&fx=gate", reach: async (page) => { await answerAgents(page); await page.locator('[data-im="primary"]').click(); await page.locator('[data-im="review"][data-step="queries"]').waitFor(); await answerQueries(page); } },
+  ];
+  /** What is moving, and what is being held out of sight, in the sheet right now. */
+  const atRest = (page: P) => page.evaluate(() => {
+    const sheet = document.querySelector<HTMLElement>('[data-sf="scroll"]') ?? document.querySelector<HTMLElement>(".sf")!;
+    /* The shell's own reduced-motion rule gives every transition a 0.01ms duration rather than
+       none, so one can be "running" for a frame after a font lands. Anything over a millisecond
+       is real movement. */
+    const long = (a: Animation) => Number(a.effect?.getTiming().duration ?? 0) > 1;
+    const running = document.getAnimations().filter((a) => a.playState === "running" && long(a) && sheet.contains((a.effect as KeyframeEffect | null)?.target ?? null))
+      .map((a) => { const t = (a.effect as KeyframeEffect).target as HTMLElement; return `${t.className?.toString?.() || t.tagName}:${(a as CSSAnimation).animationName ?? "transition"}`; });
+    const hidden: string[] = [];
+    for (const el of sheet.querySelectorAll<HTMLElement>('[class*="o9-"], .sf-stepcard, .im-pop, .im-list, .sf-tile')) {
+      const c = getComputedStyle(el);
+      if (el.getBoundingClientRect().width === 0 || el.closest("[hidden]")) continue;
+      if (Number(c.opacity) < 0.99 || c.visibility === "hidden") hidden.push(`${el.className}:${c.opacity}:${c.visibility}`);
+    }
+    const draws = [...sheet.querySelectorAll<SVGPathElement>(".o9-gomark path, .o9-ackbox path")].map((p) => getComputedStyle(p).strokeDashoffset);
+    return { running, hidden, draws, cards: sheet.querySelectorAll(".sf-stepcard, .im-pop, .im-list, .o9-deck, .sf-tile, .o9-panel").length };
+  });
+
+  test("M1 under reduced motion every set-up and review screen is at rest when it arrives", async ({ page }) => {
+    const seen: Record<string, unknown> = {};
+    for (const sc of SCREENS) {
+      await lab(page, sc.q, WIDE, { motion: MUTATE === "M1" ? "no-preference" : "reduce" });
+      if (sc.reach) await sc.reach(page);
+      const r = await atRest(page);
+      if (sc.id === "ack-deep") await shot(page, "ack-deep-1440", true);
+      seen[sc.id] = r;
+      expect(r.cards, `${sc.id}: the screen has drawn`).toBeGreaterThan(0);
+      expect(r.running, `${sc.id}: nothing is animating`).toEqual([]);
+      expect(r.hidden, `${sc.id}: no card is held out of sight`).toEqual([]);
+      for (const d of r.draws) expect(d, `${sc.id}: a tick is drawn, not waiting`).toBe("0px");
+    }
+    record("M1", "at rest", seen);
+  });
+
+  test("M1 with motion, an entrance plays once: a re-render does not replay it", async ({ page }) => {
+    const names = (page: P) => page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").map((a) => (a as CSSAnimation).animationName ?? "transition"));
+    /* the book step: once the title has typed and the card is in, picking a genre re-renders the card */
+    await lab(page, "s=bookmore&title=Ash&name=Lucy%20Sterling", WIDE);
+    await page.locator('[data-o9="book-card"].is-in').waitFor({ timeout: 15_000 });
+    await settled(page, 1600);
+    expect(await names(page), "the entrance has finished").toEqual([]);
+    await page.locator('[data-o9="genre"] button').first().click();
+    await page.locator("#o9-words").fill("85,000");
+    const afterBook = await names(page);
+    /* the summary: nothing on it re-renders by itself; the deck: answering rises the next card, and the deck does not re-pop */
+    await lab(page, "s=review&fx=gate", WIDE);
+    await settled(page, 2000);
+    expect(await names(page), "the review's entrance has finished").toEqual([]);
+    await page.locator('[data-im="deck-card"]').getByRole("button", { name: "Carry on without an agency" }).click();
+    const afterAnswer = await names(page);
+    record("M1", "re-render", { afterBook, afterAnswer });
+    expect(afterBook.filter((n) => n === "o9-pop"), "the book card does not pop again").toEqual([]);
+    expect(afterAnswer.filter((n) => n === "o9-pop"), "the deck does not re-pop").toEqual([]);
+    expect(afterAnswer.filter((n) => n === "o9-rise").length, "the next card rises in place").toBeGreaterThan(0);
+  });
+
+  test("M1 no set-up or review screen scrolls sideways at 1440, 1280 or 400", async ({ page }) => {
+    let read = 0;
+    for (const vp of [WIDE, { width: 1280, height: 800 }, PHONE]) for (const sc of SCREENS) {
+      await lab(page, sc.q, vp, { motion: "reduce" });
+      if (sc.reach) await sc.reach(page);
+      await noOverflow(page, `${sc.id} @${vp.width}`);
+      /* and nothing inside the sheet is wider than the sheet */
+      const wide = await page.evaluate(() => {
+        const sheet = document.querySelector<HTMLElement>('[data-sf="scroll"]') ?? document.querySelector<HTMLElement>(".sf")!;
+        const edge = sheet.getBoundingClientRect().right + 1;
+        return [...sheet.querySelectorAll<HTMLElement>(".sf-stepcard, .im-pop, .im-list, .o9-deck, .sf-tile, .o9-panel, .o9-alldone, .o9-bar, .sf-btn")].filter((e) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().right > edge).map((e) => `${e.className}:${Math.round(e.getBoundingClientRect().right - edge)}`);
+      });
+      expect(wide, `${sc.id} @${vp.width}: nothing runs past the sheet`).toEqual([]);
+      read++;
+    }
+    expect(read).toBe(SCREENS.length * 3);
+  });
+});
+
+/* ════ R1 · what this pack must not touch ════════════════════════════════════════════ */
+test.describe("R1", () => {
+  test("R1 the two loaders and the Import page's tiles are the base's", async ({ page }) => {
+    const { execFileSync } = await import("node:child_process");
+    const BASE = "4a8e41b5";
+    /* the files that draw them are byte-identical to the base */
+    const FILES = [
+      "src/components/onboarding/ScatterSettleLoader.tsx", "src/components/onboarding/ImportingLoader.tsx", "src/components/onboarding/DashGhost.tsx",
+      "src/components/onboarding/HandoffNav.tsx", "src/components/onboarding/SheenWave.tsx", "src/components/import/ImportPage.tsx", "src/components/import/importPage.css",
+    ];
+    const changed = execFileSync("git", ["diff", "--name-only", BASE, "--", ...FILES], { encoding: "utf8" }).trim().split("\n").filter(Boolean);
+    record("R1", "files changed since the base", changed);
+    expect(changed, "none of the loaders' or the tiles' files has changed").toEqual([]);
+    /* and they render: the reading loader, the importing loader, the three tiles */
+    await lab(page, "s=reading&hold=done", WIDE, { motion: "reduce" });
+    const reading = await page.evaluate(() => ({ stage: document.querySelectorAll(".im-ssl-stage").length, bar: document.querySelector(".im-ssl-txt")?.textContent ?? "" }));
+    await lab(page, "s=importing&done=1", WIDE, { motion: "reduce" });
+    const importing = await page.evaluate(() => ({ card: document.querySelectorAll(".im-ldrcard").length, ghost: document.querySelectorAll('[data-im="ghost"], .os-root').length }));
+    /* the Import page is not inside the set-up frame, so it is opened directly */
+    await page.goto("/#/onb-lab?s=import-page", { waitUntil: "load" });
+    await page.reload({ waitUntil: "load" });
+    await page.locator('[data-impg="tile"]').first().waitFor({ state: "visible", timeout: 20_000 });
+    const tiles = await page.evaluate(() => [...document.querySelectorAll('[data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).map((t) => t.querySelector("h2, h3")?.textContent ?? ""));
+    record("R1", "rendered", { reading, importing, tiles });
+    expect(reading.stage).toBe(1);
+    expect(importing.card).toBe(1);
+    expect(tiles.length, "three tiles").toBe(3);
+  });
+});

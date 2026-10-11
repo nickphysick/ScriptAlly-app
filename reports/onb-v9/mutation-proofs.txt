@@ -26,3 +26,11 @@ G2  mutation: the blank date is not asked          -> red: the count of question
 G3  mutation: set aside by itself, as before       -> red: "the row is in the deck" (both paths)
 G4  mutation: leaving does not ask                 -> red: "Skip for now asks first"
 Unmutated: 7 passed.
+
+Phase 7 (lab)
+M1  on the base the screens do not exist. Against the v9 sheet with its reduced-motion block cut back to Phase 3's:
+    red at "summary: no card is held out of sight" (reports/onb-v9/red/M-before.txt)
+M1  mutation: ignore the media query (motion left on) -> red: "welcome: nothing is animating"
+R1  no mutation asked. Green: the seven files that draw the loaders and the Import page's tiles are byte-identical
+    to 4a8e41b5, and all three render.
+Unmutated, whole file: 29 passed.
