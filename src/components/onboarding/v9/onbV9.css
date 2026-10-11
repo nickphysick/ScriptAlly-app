@@ -1,0 +1,353 @@
+/* ═══ Onboarding v9 (design-refs/onboarding-v9) ═══════════════════════════════════════════════
+   The set-up's v9 dress: the welcome panel, the acknowledgement, the book, the fork's tiles, the
+   success mark and the answer deck. Everything is `o9-` and sits inside `.sf` (SetupFrame) or, for
+   the review, inside the import's own root.
+   ⚠️ NO `var()` INSIDE `@keyframes` — it fails in silence here. Keyframes move opacity and
+      transform only; colours are on the rules.
+   ⚠️ HEADINGS TAKE TWO CLASSES AND `!important` (brand.tsx forces a face on every bare h1/h2/h3).
+   ⚠️ EVERY ENTRANCE IS A CSS ANIMATION ON MOUNT, so it plays once per arrival and never on a
+      re-render. Under reduced motion every one of them is off and everything is at rest. */
+@keyframes o9-rise { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+@keyframes o9-pop { 0% { opacity: 0; transform: translateY(12px) scale(.97); } 100% { opacity: 1; transform: none; } }
+.o9-rise { animation: o9-rise .5s ease-out both; }
+.o9-pop { animation: o9-pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+
+/* An illustration slot: empty, of the drawn size and aspect, ready for the artwork. */
+.o9-slot {
+  display: block; box-sizing: border-box; min-width: 0; max-width: 100%; border-radius: 14px;
+  background: repeating-linear-gradient(135deg, rgba(28, 19, 15, .045) 0 1px, transparent 1px 11px), #e4ded6;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .16);
+}
+.o9-slot--dark {
+  background: repeating-linear-gradient(135deg, rgba(244, 238, 229, .06) 0 1px, transparent 1px 11px), rgba(244, 238, 229, .05);
+  box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .28);
+}
+
+/* ── 1 · the welcome: the ink panel asks, the card answers ── */
+.sf .o9-welv { display: grid; gap: 22px; max-width: 1240px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+.sf .o9-panel {
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: center;
+  box-sizing: border-box; min-width: 0; padding: 34px 34px 34px 40px; border-radius: 14px;
+  background: var(--hpanel-bg); color: var(--hpanel-fg); box-shadow: inset 0 0 0 1px var(--hpanel-line);
+}
+.sf .o9-paneltx { display: grid; gap: 14px; justify-items: start; min-width: 0; }
+.sf .o9-eyebrow {
+  font-family: var(--sp-mono); font-size: 10.5px; font-weight: 500; line-height: 1.4; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--hpanel-stamp); margin: 0;
+}
+.sf .o9-panel .o9-panelh {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(28px, 2.9vw, 40px); line-height: 1.1;
+  letter-spacing: -.01em; color: var(--hpanel-fg); margin: 0;
+}
+.sf .o9-panel .o9-panelh span { display: block; font-family: inherit; }
+.sf .o9-panelp { font-family: var(--sp-serif); font-size: 19px; line-height: 1.5; color: var(--hpanel-muted); margin: 0; max-width: 44ch; }
+.sf .o9-panel .o9-slot { width: 100%; aspect-ratio: 4 / 3; }
+.sf .o9-welv .sf-opts { grid-template-columns: 1fr 1fr; }
+.sf .o9-welv .sf-stepcard { min-width: 0; }
+@media (max-width: 1100px) {
+  .sf .o9-panel { grid-template-columns: minmax(0, 1fr); }
+  .sf .o9-panel .o9-slot { max-width: 420px; }
+}
+@media (max-width: 899.98px) { .sf .o9-welv { margin: 0; } .sf .o9-panel { padding: 26px 22px; } }
+@media (max-width: 820px) { .sf .o9-welv .sf-opts { grid-template-columns: 1fr; } }
+
+/* ── 2 · the acknowledgement, the passage, the title card ── */
+@keyframes o9-mark-in { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes o9-draw { to { stroke-dashoffset: 0; } }
+.sf .o9-solo { display: grid; gap: 24px; max-width: 860px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+.sf .o9-ack { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.sf .o9-ackbox {
+  flex: none; width: 50px; height: 50px; border-radius: 12px; background: var(--sp-anthracite);
+  display: grid; place-items: center; animation: o9-mark-in .5s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.sf .o9-ackbox svg { display: block; width: 28px; height: 28px; }
+.sf .o9-ackbox path {
+  stroke: #f4eee5; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 34; stroke-dashoffset: 34; animation: o9-draw .45s ease-out .25s forwards;
+}
+.sf .o9-acklbl { display: grid; gap: 2px; min-width: 0; }
+.sf .o9-acklbl small {
+  font-family: var(--sp-mono); font-size: 9.5px; line-height: 1.4; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(28, 19, 15, .5);
+}
+.sf .o9-acklbl b { font-family: var(--sp-type); font-weight: 400; font-size: clamp(28px, 3vw, 40px); line-height: 1.3; color: var(--ink-on-light); }
+.sf .o9-ackchange { margin: 0 0 6px 6px; align-self: flex-end; color: var(--sf-ink72); }
+.sf .o9-beats { display: grid; gap: 10px; max-width: 60ch; cursor: default; }
+.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: rgba(28, 19, 15, .78); }
+.sf .o9-beat--lead { font-family: var(--sp-type); font-size: 27px; line-height: 1.3; color: var(--ink-on-light); }
+.sf .o9-beat em { font-style: italic; font-weight: 600; color: var(--ink-on-light); }
+.sf .o9-beat span { font: inherit; color: inherit; }
+/* the letters still to come: laid out, not seen */
+.o9-unseen { visibility: hidden; }
+/* the card waits, unseen, for the last letter; then it pops */
+.sf .o9-late { opacity: 0; }
+.sf .o9-late.is-in { opacity: 1; animation: o9-pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+.sf .o9-field0 { margin-top: 0; }
+.sf .o9-tbc { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: end; }
+.sf .o9-readyq { margin-top: 24px; }
+@media (max-width: 899.98px) { .sf .o9-solo { margin: 0; } }
+@media (max-width: 820px) { .sf .o9-tbc { grid-template-columns: 1fr; justify-items: start; } }
+
+/* ── 2, continued · your book: the title page, then three structured fields ──
+   The title page is the dashboard header's type and spacing (dash58.css `.d58-eyebrow`,
+   `.d58-title`, `.d58-byline`), matched and not shared: that header's rules read tokens declared
+   on the dashboard's own root. */
+.sf .o9-bookhead { display: grid; justify-items: start; min-width: 0; }
+.sf .o9-bookeye {
+  margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px;
+  color: var(--sf-rust); white-space: nowrap; text-transform: uppercase;
+}
+.sf .o9-bookhead .o9-booktitle {
+  margin: 6px 0 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(36px, 3.6vw, 50px);
+  line-height: 1; letter-spacing: -.01em; color: var(--ink-on-light); max-width: 100%; overflow-wrap: anywhere;
+}
+.sf .o9-booktitle span { font: inherit; color: inherit; }
+.sf .o9-byline { margin: 8px 0 0; width: 100%; max-width: 520px; display: flex; align-items: center; gap: 12px; }
+.sf .o9-byline::before { content: ""; flex: none; width: 34px; height: 1px; background: rgba(28, 19, 15, .45); }
+.sf .o9-byline::after { content: ""; flex: 1 1 0; height: 1px; background: rgba(28, 19, 15, .15); }
+.sf .o9-byline > span { font-family: var(--sp-serif); font-style: italic; font-size: 18px; line-height: 25px; color: rgba(28, 19, 15, .62); white-space: nowrap; }
+.sf .o9-late.is-rise { opacity: 1; animation: o9-rise .5s ease-out both; }
+.sf .o9-small { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); margin: 0; }
+.sf .o9-cardsub { margin: 6px 0 22px; }
+.sf .o9-fields { display: grid; gap: 20px; }
+.sf .o9-late.is-in .o9-fields > * { animation: o9-rise .45s ease-out both; }
+.sf .o9-late.is-in .o9-fields > :nth-child(1) { animation-delay: .18s; }
+.sf .o9-late.is-in .o9-fields > :nth-child(2) { animation-delay: .3s; }
+.sf .o9-late.is-in .o9-fields > :nth-child(3) { animation-delay: .42s; }
+.sf .o9-fld { min-width: 0; margin: 0; }
+.sf .o9-fldhelp { margin: 4px 0 0; }
+.sf .o9-fld--words { max-width: 320px; }
+.sf .o9-fld--words .o9-fldhelp { margin-top: 6px; }
+.sf .o9-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sf .o9-pill {
+  display: inline-flex; align-items: center; box-sizing: border-box; height: 36px; padding: 2px 15px 0; border: 0; border-radius: 18px;
+  background: var(--fc-card); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); cursor: pointer; white-space: nowrap;
+  font-family: var(--sp-type); font-size: 14.5px; line-height: 1; color: var(--ink-on-light);
+}
+.sf .o9-pill:hover { box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .75); }
+.sf .o9-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+/* picked: white, a 2px navy ring and a tick */
+.sf .o9-pill.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
+/* the primary, and the one age category picked: navy fill, cream text */
+.sf .o9-pill.is-primary, .sf .o9-pill.is-pick { background: var(--sp-anthracite); color: var(--ink-cream); box-shadow: none; }
+.sf .o9-pilltick { font-family: var(--sp-mono); font-size: 11px; margin-right: 7px; color: inherit; }
+.sf .o9-pilltag {
+  font-family: var(--sp-mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; margin-left: 9px;
+  padding: 3px 5px 2px; border-radius: 4px; background: rgba(244, 238, 229, .18); color: inherit;
+}
+.sf .o9-gsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); }
+.sf .o9-gsum b { font-weight: 600; color: var(--ink-on-light); }
+.sf .o9-gsum span { font: inherit; color: inherit; }
+/* the search: a dashed rule, and a list that FLOATS over the fields below */
+.sf .o9-search {
+  position: relative; display: flex; align-items: center; gap: 10px; margin-top: 12px; max-width: 380px; padding: 0 2px;
+  border-bottom: 1.5px dashed rgba(28, 19, 15, .34);
+}
+.sf .o9-search svg { display: block; flex: none; width: 18px; height: 18px; stroke: rgba(28, 19, 15, .5); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.sf .o9-search input {
+  flex: 1; min-width: 0; margin: 0; padding: 9px 0 8px; border: 0; outline: 0; background: transparent; box-shadow: none;
+  font-family: var(--sp-type); font-size: 17px; line-height: 1.3; color: var(--ink-on-light);
+}
+.sf .o9-search input::placeholder { color: rgba(28, 19, 15, .36); }
+.sf .o9-search:focus-within { border-bottom: 1.5px solid var(--hpanel-bg); }
+.sf .o9-drop {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5; display: grid; padding: 6px; border-radius: 11px;
+  background: var(--fc-card); box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 16px 34px -18px rgba(28, 19, 15, .45);
+}
+.sf .o9-drop button {
+  text-align: left; border: 0; background: transparent; padding: 9px 12px; border-radius: 7px; cursor: pointer;
+  font-family: var(--sp-serif); font-size: 16px; line-height: 1.3; color: var(--ink-on-light);
+}
+.sf .o9-drop button:hover, .sf .o9-drop button:focus-visible { background: var(--sf-note); outline: 0; }
+.sf .o9-drop button b { font-weight: 600; }
+.sf .o9-dropfoot { margin: 4px 0 0; padding: 9px 12px 6px; border-top: 1px solid rgba(28, 19, 15, .08); font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.4; color: rgba(28, 19, 15, .6); }
+.sf .o9-desc { margin-top: 12px; padding: 13px 16px 14px; border-radius: 11px; background: var(--sf-note); display: grid; gap: 5px; max-width: 62ch; animation: o9-rise .35s ease-out both; }
+.sf .o9-desceye { font-family: var(--sp-mono); font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-desc p { margin: 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .82); }
+.sf .o9-desc p i { font-style: italic; }
+@media (max-width: 1439px) { .sf .o9-byline > span { font-size: 16.5px; line-height: 23px; } }
+
+
+/* ── 4 · "Your list": each tile opens on its drawing, then three short lines ── */
+.sf [data-screen="fork"] > .sf-open, .sf [data-screen="confirm"] > .sf-open { animation: o9-rise .5s ease-out both; }
+.sf .sf-tile.o9-way { padding: 0; gap: 0; overflow: hidden; }
+.sf .sf-tile.o9-way.is-over { box-shadow: 0 0 0 2px var(--sp-anthracite), 0 6px 14px -10px rgba(91, 42, 31, .35); }
+.sf .o9-wayslot { width: 100%; aspect-ratio: 16 / 9; border-radius: 0; box-shadow: inset 0 -1.5px 0 rgba(28, 19, 15, .1); }
+.sf .o9-waybody { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; padding: 20px 24px 22px; }
+.sf .o9-waybody .sf-tileh { margin: 0 0 10px; font-size: 23px; line-height: 1.15; }
+.sf .o9-waylist { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 5px; }
+.sf .o9-waylist li {
+  display: flex; gap: 10px; align-items: baseline; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.35;
+  color: rgba(28, 19, 15, .78);
+}
+.sf .o9-waylist li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--sp-anthracite); transform: translateY(-2px); }
+.sf .o9-wayacts { flex-direction: row; flex-wrap: wrap; margin: auto 0 0; }
+
+/* ── the Smart Import hand-off: the card, and what happens next beside it ── */
+.sf .o9-conf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 28px; align-items: start; max-width: 1140px; }
+.sf .o9-conf .sf-stepcard { min-width: 0; }
+.o9-d2 { animation-delay: .2s; }
+.sf .o9-how { display: grid; gap: 14px; min-width: 0; }
+.sf .o9-howeye { margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-howlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: o9how; }
+.sf .o9-howlist li {
+  counter-increment: o9how; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center;
+  background: var(--fc-card); border-radius: 12px; box-shadow: var(--sf-card-shadow); padding: 12px 16px 12px 12px;
+}
+.sf .o9-howslot { width: 96px; height: 96px; border-radius: 10px; }
+.sf .o9-howtx { display: block; min-width: 0; }
+.sf .o9-howtx b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 18px; line-height: 1.15; color: var(--ink-on-light); }
+.sf .o9-howtx b::before { content: counter(o9how) " · "; color: rgba(28, 19, 15, .45); }
+.sf .o9-howtx > span { display: block; margin-top: 3px; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.4; color: rgba(28, 19, 15, .66); }
+@media (max-width: 1099.98px) { .sf .o9-conf { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── 5 · success marks. Sage is for these and the "all answered" band, and nothing else. ── */
+.sf { --go: #4e7d60; --go-soft: #e1eae2; --go-ink: #2f5440; }
+@keyframes o9-go-in { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes o9-go-halo { 0% { transform: scale(.82); opacity: .55; } 100% { transform: scale(1.28); opacity: 0; } }
+@keyframes o9-go-draw { to { stroke-dashoffset: 0; } }
+.sf .o9-gomark {
+  flex: none; position: relative; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%;
+  background: var(--go); animation: o9-go-in .55s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.sf .o9-gomark::before {
+  content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 2px solid #4e7d60; opacity: 0;
+  animation: o9-go-halo 1.1s ease-out .4s both;
+}
+.sf .o9-gomark svg { display: block; width: 46px; height: 46px; }
+.sf .o9-gomark path {
+  stroke: #fbf9f5; stroke-width: 3.4; fill: none; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 40; stroke-dashoffset: 40; animation: o9-go-draw .5s ease-out .3s forwards;
+}
+.sf .o9-gomark--md { width: 64px; height: 64px; }
+.sf .o9-gomark--md svg { width: 34px; height: 34px; }
+.sf .o9-gomark--sm { width: 52px; height: 52px; }
+.sf .o9-gomark--sm svg { width: 28px; height: 28px; }
+.sf .o9-gomark--sm::before { display: none; }
+.sf .o9-markrow { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; min-width: 0; }
+.sf .o9-mtxt { display: grid; gap: 4px; min-width: 0; animation: o9-rise .5s ease-out .35s both; }
+.sf .o9-mtxt .o9-mhead {
+  margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(30px, 3.1vw, 44px); line-height: 1.06;
+  color: var(--ink-on-light); max-width: none;
+}
+.sf .o9-mtxt > span { font-family: var(--sp-serif); font-size: 18px; line-height: 1.4; color: rgba(28, 19, 15, .7); }
+
+/* the summary: the mark first, then the paragraph, then the two cards */
+.sf .im-sum .o9-markrow { grid-column: 1; }
+.sf .im-sum .im-ohead p[data-im="lead"] { font-size: 18.5px; animation: o9-rise .5s ease-out .45s both; }
+.sf .im-sum .im-ohead p[data-im="lead"] b { font-weight: 600; color: var(--ink-on-light); }
+.sf .im-sum .im-pops { animation: o9-rise .5s ease-out .6s both; }
+.sf .im-tiers .ask .im-tm { background: var(--im-blush); color: var(--sf-rust); }
+.sf .im-recon .ask { background: var(--im-stamp); }
+
+/* duplicates, all sorted; and the "all answered" band */
+.sf .im-listhead--quiet { background: var(--im-pill); color: var(--ink-on-light); border-bottom: 1px solid rgba(28, 19, 15, .08); }
+.sf .im-listhead--quiet .im-listtitle { color: var(--ink-on-light); }
+.sf .o9-decided { max-width: 860px; animation-delay: .7s; }
+.sf .im-chip.o9-chip--go { background: var(--go-soft); color: var(--go-ink); }
+.sf .o9-alldone { display: flex; align-items: center; gap: 18px; padding: 22px 24px; border-radius: 14px; background: var(--go-soft); animation-delay: .2s; }
+.sf .o9-alldone > div { display: grid; gap: 3px; min-width: 0; }
+.sf .o9-alldone b { font-family: var(--sp-type); font-weight: 400; font-size: 23px; line-height: 1.2; color: var(--ink-on-light); }
+.sf .o9-alldone span { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: var(--go-ink); }
+.sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .62); max-width: 62ch; }
+
+/* ── 6 · the answer deck: one question at a time, then the rows that are ready ── */
+.sf .o9-deck {
+  background: var(--fc-card); border-radius: 14px; overflow: hidden; min-width: 0; animation-delay: .2s;
+  box-shadow: 0 0 0 2px var(--im-band), 0 16px 34px -22px rgba(28, 19, 15, .5);
+}
+.sf .o9-deckhead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 22px; background: var(--im-band); color: var(--im-cream); }
+.sf .o9-deckhead b { font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.2; color: var(--im-cream); }
+.sf .o9-deckpos { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .14em; color: rgba(244, 238, 229, .75); }
+.sf .o9-deckhead .o9-decklink { color: var(--im-cream); font-size: 14px; text-decoration-color: rgba(244, 238, 229, .4); }
+.sf .im-listhead .o9-decklink { color: var(--im-cream); font-size: 14px; text-decoration-color: rgba(244, 238, 229, .4); }
+.sf .o9-dots { display: flex; gap: 6px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+.sf .o9-dot {
+  appearance: none; border: 0; padding: 0; width: 8px; height: 8px; border-radius: 50%; cursor: pointer; position: relative;
+  background: rgba(244, 238, 229, .28);
+}
+.sf .o9-dot::after { content: ""; position: absolute; inset: -8px; }
+.sf .o9-dot.is-on { background: var(--im-stamp); }
+.sf .o9-dot.is-done { background: rgba(244, 238, 229, .85); }
+.sf .o9-dot:focus-visible { outline: 2px solid var(--im-cream); outline-offset: 3px; }
+.sf .o9-deckfaq { padding: 6px 22px 10px; background: var(--im-pill); border-bottom: 1px solid rgba(28, 19, 15, .08); }
+.sf .o9-deckfaq .im-faq .im-faqh { display: none; }
+.sf .o9-deckbody { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch; }
+.sf .o9-deckarrow {
+  appearance: none; width: 56px; border: 0; background: transparent; cursor: pointer;
+  font-family: var(--sp-type); font-size: 30px; line-height: 1; color: rgba(28, 19, 15, .6);
+}
+.sf .o9-deckarrow:hover { color: var(--ink-on-light); background: rgba(28, 19, 15, .03); }
+.sf .o9-deckarrow[disabled] { color: rgba(28, 19, 15, .15); cursor: default; background: transparent; }
+.sf .o9-qcard { padding: 26px 10px 24px; display: grid; gap: 18px; min-width: 0; }
+.sf .o9-qwho { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.sf .o9-qwho > div { min-width: 0; }
+.sf .o9-qwho b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 18px; line-height: 1.2; color: var(--ink-on-light); overflow-wrap: anywhere; }
+.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, .56); }
+.sf .o9-qwho .im-chip { margin-left: auto; flex: none; }
+.sf .o9-q, .sf .o9-answered { display: grid; gap: 18px; min-width: 0; }
+.sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
+.sf .o9-ask--said { font-size: 20px; }
+.sf .o9-raw { font-family: var(--sp-mono); font-size: 15px; background: var(--im-pill); padding: 2px 7px; border-radius: 5px; }
+.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
+.sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
+.sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }
+.sf .o9-esc { flex-basis: 100%; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sf .o9-pick {
+  appearance: none; height: 44px; padding: 2px 18px 0; border-radius: 22px; border: 0; cursor: pointer;
+  background: var(--fc-card); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .82);
+  font-family: var(--sp-type); font-size: 15.5px; color: var(--ink-on-light); display: inline-flex; align-items: center; gap: 10px;
+}
+.sf .o9-pick:hover { background: var(--im-pill); }
+.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-q--built .im-reason { display: grid; gap: 14px; }
+.sf .o9-q--built .im-fixq { margin: 0; font-family: var(--sp-type); font-size: 21px; line-height: 1.3; color: var(--ink-on-light); }
+.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: rgba(28, 19, 15, .62); animation-delay: .4s; }
+.sf .o9-upnext .im-chip { text-transform: none; letter-spacing: .06em; font-size: 11px; }
+.sf .o9-ready { animation-delay: .45s; }
+.sf .o9-ready [data-im="rows"] > .im-rw { animation: o9-rise .4s ease-out both; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(1) { animation-delay: .5s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(2) { animation-delay: .56s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(3) { animation-delay: .62s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(4) { animation-delay: .68s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(5) { animation-delay: .74s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(n + 6) { animation: none; }
+.sf .o9-showall { display: flex; align-items: center; justify-content: center; padding: 12px; border-top: 1px solid rgba(28, 19, 15, .08); }
+.sf .o9-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 36px;
+  padding: 16px 0 0; border-top: 1px solid rgba(28, 19, 15, .14); animation: o9-rise .5s ease-out .9s both;
+}
+.sf .o9-bar .o9-barhint { max-width: 44ch; }
+.sf .o9-bargo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-left: auto; }
+/* the review is one column now: the right rail is gone */
+.sf .im-page > .im-revmain { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-width: 0; }
+.sf .im-listhead--quiet .im-chip { background: rgba(28, 19, 15, .08); color: var(--ink-on-light); }
+@media (max-width: 519.98px) {
+  .sf .o9-bargo { width: 100%; margin-left: 0; }
+  .sf .o9-bargo .sf-btn { white-space: normal; height: auto; min-height: 48px; padding-top: 10px; padding-bottom: 10px; line-height: 1.25; max-width: 100%; }
+}
+@media (max-width: 819.98px) {
+  .sf .o9-deckarrow { display: none; }
+  .sf .o9-deckbody { grid-template-columns: minmax(0, 1fr); }
+  .sf .o9-qcard { padding: 22px 18px 20px; }
+  .sf .o9-qwho { flex-wrap: wrap; }
+  .sf .o9-ask { font-size: 20px; }
+}
+
+/* ── 7 · reduced motion: every screen at rest, at once ──
+   Nothing types, pops, rises, draws or pulses, and no card waits to be shown. The last rule is the
+   net: any v9 element, whatever it is called, stops animating. The ones before it put back what
+   an entrance would have left behind (a card held at opacity 0, a tick not yet drawn). */
+@media (prefers-reduced-motion: reduce) {
+  .o9-rise, .o9-pop { animation: none; }
+  .sf [data-screen="fork"] > .sf-open, .sf [data-screen="confirm"] > .sf-open { animation: none; }
+  .sf .o9-ackbox { animation: none; }
+  .sf .o9-ackbox path { animation: none; stroke-dashoffset: 0; }
+  .o9-unseen { visibility: visible; }
+  .sf .o9-late, .sf .o9-late.is-in, .sf .o9-late.is-rise { opacity: 1; animation: none; }
+  .sf .o9-late.is-in .o9-fields > *, .sf .o9-desc { animation: none; }
+  .sf .o9-gomark, .sf .o9-gomark::before, .sf .o9-mtxt, .sf .im-sum .im-ohead p[data-im="lead"], .sf .im-sum .im-pops { animation: none; }
+  .sf .o9-gomark path { animation: none; stroke-dashoffset: 0; }
+  .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
+  .sf [class*="o9-"], .sf [class*="o9-"]::before, .sf [class*="o9-"]::after { animation: none !important; }
+}

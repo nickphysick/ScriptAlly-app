@@ -23,7 +23,9 @@ import { spineFor, spineIndex, SpineId, OnboardingBranch } from "../../lib/onboa
 import { UserPlan } from "../../types";
 import { Auth } from "../Auth";
 import { Onboarding, WelcomeStageScreen } from "../Onboarding";
-import { BranchA } from "./BranchA";
+import { AckTitle } from "./v9/AckTitle";
+import { BookMore } from "./v9/BookMore";
+import type { V9Stage } from "../../lib/onboardingV9";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
@@ -114,7 +116,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
         <BranchB
           lab={lab}
           onSkip={labSpy("skip")} onExit={labSpy("back")} onSaveBook={async () => false} onEnsureManuscript={async () => "lab-ms"}
-          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
           onExitMode={setExit} onImporting={setImporting} onHandoff={() => setHandingOff(true)}
           onImportComplete={(_o, destination) => { labSpy("importComplete")(destination); setArrived(true); }}
         />
@@ -125,7 +127,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
 
 const LabWelcome: React.FC = () => {
   const [sel, setSel] = React.useState<"starting" | "early" | "deep" | "interest" | null>(null);
-  return <WelcomeStageScreen selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
+  return <WelcomeStageScreen name={labQuery().get("name")} selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
 };
 
 /** The confirm with a real picker behind "Change", wired the way BranchB wires it: choosing a
@@ -137,7 +139,7 @@ const LabConfirm: React.FC<{ tier: "free" | "pro" }> = ({ tier }) => {
     <>
       <input ref={input} type="file" accept=".csv,.xlsx,.xls" style={{ display: "none" }} data-picker="smart"
              onChange={(e) => { const f = e.target.files?.[0]; if (f) { labSpy("pickFile")(f); setFile({ name: f.name, size: f.size }); } e.target.value = ""; }} />
-      <ConfirmScreen fileName={file.name} fileSize={file.size} tier={tier}
+      <ConfirmScreen fileName={file.name} fileSize={file.size}
                      onChange={() => input.current?.click()} onBack={labSpy("back")} onRead={labSpy("runMapping")} />
     </>
   );
@@ -171,32 +173,28 @@ export const OnbLab: React.FC = () => {
   if (s === "live") return <Onboarding onComplete={labSpy("complete")} />;
 
   if (s === "welcome") return <LabSetup flow={null} at="you"><LabWelcome /></LabSetup>;
-  if (s === "ready" || s === "details") {
-    const st = q.get("status");
-    const status = st === "drafting" ? ManuscriptStatus.DRAFTING : st === "revising" ? ManuscriptStatus.REVISING
-      : st === "ready" ? ManuscriptStatus.READY_TO_QUERY : s === "details" ? ManuscriptStatus.READY_TO_QUERY : null;
+  /* Step 2's opening (onboarding v9): the acknowledgement for a journey, then the title card. */
+  if (s === "ack") {
+    const stage = (["starting", "early", "deep", "interest"].includes(q.get("stage") ?? "") ? q.get("stage") : "early") as V9Stage;
+    const titles: Record<V9Stage, string> = { starting: "Just getting started", early: "A few queries out", deep: "Deep in it", interest: "Had some interest" };
     return (
-      <LabSetup flow="A" at="book">
-        <BranchA
-          initialScreen={s === "details" ? "details" : "readiness"} initialStatus={status}
-          onExit={labSpy("back")} onSaveReady={labSpy("saveReady")} onSaveStillWriting={labSpy("saveStillWriting")}
-          error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
-        />
+      <LabSetup flow={stage === "starting" ? "A" : "B"} at="book">
+        <AckTitle stage={stage} stageTitle={titles[stage]} onChange={labSpy("change")} onContinue={(r) => labSpy("continue")(`${r.title}|${r.status ?? ""}`)} />
       </LabSetup>
     );
   }
-
-  if (s === "book") {
+  /* "Your book" (onboarding v9): the title page and the three structured fields. `filled=1` opens
+     it with genres, an age category and a word count already held, as Back does. */
+  if (s === "bookmore") {
+    const title = q.get("title") ?? LAB_TITLE;
+    const filled = q.get("filled") === "1";
     return (
       <LabSetup flow="B" at="book">
-        <BranchB
-          onSkip={labSpy("skip")} onExit={labSpy("back")}
-          onSaveBook={async (f) => { labSpy("saveBook")(f.title); return false; }}
-          initialBook={q.get("filled") === "1" ? { ...emptyManuscriptFields(), title: LAB_TITLE, genre: "Upmarket" } : null}
-          onEnsureManuscript={async () => null}
-          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
-          onImportComplete={labSpy("importComplete")}
+        <BookMore
+          title={title} name={q.get("name")}
+          initial={{ ...emptyManuscriptFields(), ageCategory: filled ? "Adult" : "", title, ...(filled ? { genre: "Fantasy", subGenres: ["Horror"], wordCount: "85000" } : {}) }}
           error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
+          onBack={labSpy("back")} onContinue={(f) => labSpy("saveBook")(JSON.stringify(f))}
         />
       </LabSetup>
     );
@@ -204,11 +202,10 @@ export const OnbLab: React.FC = () => {
 
   const tier = q.get("plan") === "pro" ? "pro" : "free";
   if (s === "fork") {
-    const pick = q.get("pick");
     return (
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
-          ringed={pick === "template" ? "template" : pick === "byhand" ? "byhand" : "smart"} tier={tier}
+          tier={tier}
           onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUploadTemplate={labSpy("templatePicker")}
           onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
           onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
@@ -264,7 +261,7 @@ export const OnbLab: React.FC = () => {
   if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");
   if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
-  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} />, "ask");
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} rows={q.get("rows") ? Number(q.get("rows")) : null} />, "ask");
   if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");
 
   if (s === "frame" && q.get("form") === "account") {

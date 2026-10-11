@@ -9,6 +9,7 @@
  *   IF_SHOTS=1    write the report's screenshots
  *   IF_MUTATE=U2  apply U2's named break in the page (fall back to today when the date is missing)
  */
+import { walkSetupToFork, answerAgents, answerQueries, readStep, stepTotal } from "./reviewDrive";
 import { test, expect, type Page, type Browser } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -55,13 +56,8 @@ async function walk(browser: Browser, baseURL: string, w: Walk) {
     await page.getByRole("button", { name: /^Sign in$/ }).last().click();
 
     // set-up: the journey question, the book, the fork
-    await page.getByText("A few queries out").first().click({ timeout: 30_000 });
-    await page.getByRole("button", { name: /^Continue$/ }).click();
-    await page.getByPlaceholder("e.g. The Salt Path Home").fill("The Salt Road", { timeout: 20_000 });
-    await page.getByText("Select…").first().click();
-    await page.getByText("Thriller", { exact: true }).last().click();
-    await page.getByRole("button", { name: /^Continue$/ }).click();
-    await page.locator('[data-act="upload"]').waitFor({ timeout: 20_000 });
+    /* v9: set-up's book step is the acknowledgement, the title and "Your book" (one walker). */
+    await walkSetupToFork(page);
     await page.locator('input[type="file"]').nth(1).setInputFiles(FX(w.file));
 
     // the summary
@@ -75,37 +71,25 @@ async function walk(browser: Browser, baseURL: string, w: Walk) {
     await shot(page, `${w.tag}-summary-1440`);
     await page.locator('[data-im="primary"]').click();
 
-    // the agents step
+    // the agents step (v9: the deck asks; the primary waits for every answer)
     await page.locator('[data-im="review"][data-step="agents"]').waitFor({ timeout: 20_000 });
-    const agentRows = await page.locator('[data-im="rows"] [data-row-id]').count();
+    const agentRows = await stepTotal(page);
     await shot(page, `${w.tag}-review-agents-1440`);
+    /* an agent with no agency carries on without one; the row with no agent and no agency is removed */
+    await answerAgents(page);
     if (w.removeOwen) await page.locator('[data-row-id]', { hasText: "Owen Hale" }).getByTitle("Don't import").click();
     await page.locator('[data-im="primary"]').click();
 
     // the queries step
     await page.locator('[data-im="review"][data-step="queries"]').waitFor({ timeout: 20_000 });
-    const queries = await page.evaluate(() => [...document.querySelectorAll('[data-im="rows"] [data-row-id]')].map((r) => ({
-      text: (r.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 220),
-      chip: r.querySelector('[data-im="row-chip"]')?.textContent?.trim() ?? "",
-      asks: r.getAttribute("data-asks"),
-    })));
+    const queries = await readStep(page);
     const chips = await page.evaluate(() => ({
-      ready: document.querySelector('[data-im="chip-ready"]')?.textContent ?? "",
-      open: document.querySelector('[data-im="chip-open"]')?.textContent ?? "",
+      ready: document.querySelector('[data-im="ready-chip"]')?.textContent ?? "",
+      open: document.querySelector('[data-im="primary"]')?.textContent?.trim() ?? "",
     }));
     await shot(page, `${w.tag}-review-queries-1440`);
-    // answer every open date question with the writer's "Leave undated"
-    for (let i = 0; i < 6; i++) {
-      const leave = page.getByRole("button", { name: "Leave undated" }).first();
-      if (!(await leave.isVisible().catch(() => false))) {
-        const openRow = page.locator('[data-row-id][data-asks]:not([data-asks="0"])').first();
-        if (!(await openRow.count())) break;
-        await openRow.click({ position: { x: 60, y: 20 } }).catch(() => {});
-        if (!(await leave.isVisible().catch(() => false))) break;
-      }
-      await leave.click();
-      await page.waitForTimeout(150);
-    }
+    // answer every open date question with the writer's "I don't have this date"
+    await answerQueries(page, { undated: true });
     const importLabel = ((await page.locator('[data-im="primary"]').textContent()) ?? "").trim();
     await page.locator('[data-im="primary"]').click();
 
@@ -199,12 +183,14 @@ test("U2 · template-mixed.csv: undated stays undated, and the nameless row is s
   const r = await run(browser, baseURL!, { file: "template-mixed.csv", tag: "mixed" });
   record("mixed", { summary: r.summary, chips: r.chips, queries: r.queries, dash: r.dash, lines: r.stored.lines, stored: r.stored.queries.map((q: any) => ({ status: q.status, dateSent: q.dateSent ?? null, partialRequestedDate: q.partialRequestedDate ?? null, fullRequestedDate: q.fullRequestedDate ?? null, lastStatusChange: q.lastStatusChange ?? null })) });
   expect(r.errors).toEqual([]);
-  expect([r.summary.agents, r.summary.queries], "the summary counts what the review shows").toEqual(["3", "3"]);
-  expect(r.agentRows).toBe(3);
-  expect(r.queries.length).toBe(3);
+  /* v9: the row with no agent and no agency is counted and asked about; the walk removes it */
+  expect([r.summary.agents, r.summary.queries], "the summary counts what the review shows").toEqual(["4", "4"]);
+  expect(r.agentRows).toBe(4);
+  expect(r.queries.length, "three queries are left once the nameless row is removed").toBe(3);
   const clara = r.queries.find((q) => q.text.includes("Clara Voss"))!;
   expect(clara.chip, "the unreadable date is asked about").toBe("Date needed");
-  expect(r.chips.open).toBe("1 to sharpen");
+  expect(r.queries.find((q) => q.text.includes("Jamal Carter"))!.chip, "the blank date is asked about too").toBe("Date needed");
+  expect(r.chips.open).toBe("Import and get started · 2 to answer first");
   expect(r.queries.find((q) => q.text.includes("Owen Hale"))!.text).toContain("No agency");
   expect(r.queries.some((q) => q.text.includes("Agency only"))).toBe(false);
   // the store: no date the file did not give

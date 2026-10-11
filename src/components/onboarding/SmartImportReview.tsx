@@ -11,13 +11,19 @@
  * ⚠️ THIS FILE DRAWS; IT DECIDES NOTHING. What a row is, what is asked of it and what is written
  * are `lib/smartImportReviewModel`'s. Every handler below is the one the review has always had.
  *
- * ⚠️ EVERY QUESTION IS ANSWERED IN ITS OWN ROW. The one-at-a-time guided walk (`FocusOverlay`), the
- * intro beats before it (`CoachmarkIntro`), the "Add details" tip (`SpotlightCoachmark`) and the
- * margin notes are retired: entering a step opens nothing over the list, and answering a row moves
- * the reader nowhere. The guide card says how the step works.
+ * EVERY QUESTION IS ASKED IN THE ANSWER DECK (onboarding v9). The agents and queries steps open on
+ * a deck that asks one question at a time; beneath it, the rows that are ready. v5 asked each
+ * question in its own row, beside a guide card and an FAQ rail; the rail is gone, the guide's
+ * sentence is the step's subline, and the FAQ is behind the deck's "Questions".
  *
- * ⚠️ NOTHING BLOCKS. Every proceed control on every step is live, as it always was — including
- * "Review all agents" with duplicate sets still open, which carry through to the agents step.
+ * NOTHING FLAGGED IS OPTIONAL, AND A STEP'S PRIMARY WAITS. It is disabled until every question on
+ * the step has an answer, and its label carries the count (`lib/reviewGate`). "Carry on without
+ * an agency" and "I don't have this date" are answers. The duplicates step waits the same way,
+ * so an undecided set no longer carries through to the agents step.
+ *
+ * A ROW WITH NO AGENT AND NO AGENCY IS ASKED ABOUT. The review used to set it aside by itself;
+ * now it must be named or removed. A removed one is listed in the skipped-rows notice exactly as
+ * the set-aside one was.
  */
 import React, { useState, useRef, useMemo, useCallback } from "react";
 import { queryOriginLine } from "../../lib/importLabels";
@@ -27,7 +33,7 @@ import { QueryStatus } from "../../types";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
   ReviewAgent, ReviewQuery, CheckReason,
-  agentStatus, resolveReason, queryStatusOf, fmtDate,
+  resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
   rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
@@ -36,6 +42,17 @@ import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
 import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
+import { Disc, initialsOf } from "./ImportParts";
+import { GoMark } from "./v9/GoMark";
+import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
+import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS } from "./v9/DeckQuestions";
+import {
+  agentAsk, AgentAsk, AGENT_ASK_CHIP, openAgentQuestions, openQueryQuestions, questionFamily,
+  comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint,
+  answerKind, answeredLine, allAnsweredHead, writeHint, duplicatesDoneLine, duplicatesNextHint,
+} from "../../lib/reviewGate";
+import { STAGE_NAME } from "../../lib/qcSummary";
+import { focusReasonMeta } from "../../lib/smartImportReviewModel";
 
 // ── The words of the three steps ─────────────────────────────────────────────────────────────────
 const NUM_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
@@ -45,17 +62,13 @@ export const duplicatesTitle = (openSets: number): string =>
     : openSets === 1 ? "One agent looks like they came in twice."
     : `${openSets <= 12 ? NUM_WORDS[openSets] : openSets} agents look like they came in twice.`;
 export const DUPLICATES_SUB = "Keep one row and its queries combine. Nothing is lost.";
-export const REVIEW_PRIMARY = { duplicates: "Review all agents", agents: "Continue to queries" } as const;
-/** The final primary: the build's own two sentences, without the arrow. */
-export const importPrimary = (agents: number, openQueries: number): string =>
-  openQueries > 0 ? `Import ${agents} agent${agents === 1 ? "" : "s"} · ${openQueries} to sharpen` : "Import and get started";
-
-export const GUIDE: Record<"duplicates" | "agents" | "queries", { head: string; text: string }> = {
-  duplicates: { head: "Same agent, twice?", text: "Remove the duplicate and its queries move onto the one you keep. Different people? Keep them both." },
-  agents: { head: "Anything marked needs a quick look.", text: "It might be missing the agency's name. Check those, add any detail you can, then we'll move on to your queries." },
-  queries: { head: "Dates drive your reminders.", text: "A sent date lets QueryHawk tell you when a nudge is due. Where we couldn't be sure, we've asked rather than guessed." },
-};
-export const GUIDE_EYEBROW = "How this step works";
+export const REVIEW_PRIMARY = { duplicates: "Review all agents" } as const;
+/** Duplicates, all sorted (v9). */
+export const DUPES_DONE = { head: "Duplicates sorted.", list: "What you decided", change: "Change a decision", merged: "Merged", kept: "Kept both", open: "Decide each set above first." } as const;
+/** The ready list beneath the deck (v9). */
+export const READY_LIST = { head: "Ready to import", showAll: (n: number) => `Show all ${n}`, lead: "Coming up:" } as const;
+/** How many ready rows show before "Show all". */
+export const READY_FIRST = 5;
 
 export interface Faq { q: string; a: string }
 /** The duplicates step's questions, verbatim. */
@@ -83,14 +96,7 @@ export const QUERY_FAQS: Faq[] = [
   { q: "What does the status mean?", a: "It's where the query sits in your pipeline — queried, partial, full, and so on. We read it from your file; correct any that look off." },
 ];
 
-// ── The rail: the guide card, then the questions ────────────────────────────────────────────────
-const Guide: React.FC<{ step: "duplicates" | "agents" | "queries" }> = ({ step }) => (
-  <div className="im-guide" data-im="guide">
-    <span className="im-eyebrow">{GUIDE_EYEBROW}</span>
-    <h3 className="im-guideh">{GUIDE[step].head}</h3>
-    <p>{GUIDE[step].text}</p>
-  </div>
-);
+// ── The step's questions: behind the deck's "Questions" (and the duplicates list's) ────────────
 /** "Questions" — several answers may be open at once, as the built list allowed. */
 const Questions: React.FC<{ items: Faq[]; open: Set<number>; onToggle: (i: number) => void }> = ({ items, open, onToggle }) => (
   <div className="im-faq" data-im="questions">
@@ -165,9 +171,9 @@ type Step = "duplicates" | "agents" | "queries";
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel }) => {
   const initial = useMemo(() => parseModel(result), [result]);
-  // Auto-set-aside the truly-unidentifiable (no name AND no agency) before review begins — they
-  // wait in the tray with a "Name it instead" escape.
-  const seeded = useMemo(() => seedUnidentifiedSetAside(initial.agents, initial.queries), [initial]);
+  // v9: nothing is set aside before the review begins. A row with no agent and no agency is
+  // asked about on the agents step.
+  const seeded = initial;
   const [agents, setAgents] = useState<ReviewAgent[]>(seeded.agents);
   const [queries, setQueries] = useState<ReviewQuery[]>(seeded.queries);
   // Open on the duplicates step only when the import actually has clusters (never empty).
@@ -183,13 +189,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // keyed by the cluster leader id.
   const reconcileSnapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: ReviewQuery[] }>>({});
   const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>({});
-  // "Reset all changes" baseline. Starts as the pristine parse, but is RE-CAPTURED the moment the user
-  // leaves the duplicates step — so resetting on the Agents step reverts only Agents-step edits and
-  // keeps the merge / keep-both decisions intact.
-  const baselineRef = useRef<{ agents: ReviewAgent[]; queries: ReviewQuery[] } | null>(null);
-  if (baselineRef.current === null) baselineRef.current = { agents: JSON.parse(JSON.stringify(seeded.agents)), queries: JSON.parse(JSON.stringify(seeded.queries)) };
-  // Separate Queries-step baseline: the queries as they stood on ENTERING the Queries step.
-  const queriesBaselineRef = useRef<ReviewQuery[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
@@ -220,21 +219,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // How many queries a now-merged-away record brought across — counted from the ORIGINAL import (its
   // live count is 0 post-merge), so the bar pluralises "quer{y|ies}" correctly. Read-only.
   const movedCount = useCallback((removedId: string) => (result.queries || []).filter((q) => q.agentRef === removedId).length, [result]);
-
-  // Ids of agents inside an unresolved duplicate cluster (both members count as needs-check).
-  const openDupIds = useMemo(() => {
-    const s = new Set<string>();
-    for (const a of agents) {
-      if (a.deleted || a.mergeResolved || a.mergeWith.length === 0) continue;
-      s.add(a.id);
-      a.mergeWith.forEach((id) => s.add(id));
-    }
-    return s;
-  }, [agents]);
-  const statusOf = useCallback((a: ReviewAgent) => agentStatus(a, openDupIds.has(a.id)), [openDupIds]);
-
-  const okCount = active.filter((a) => statusOf(a) === "captured").length;
-  const needCount = active.length - okCount;       // sharpen items (incl. missing agency) — advisory, never blocks
 
   const patch = (id: string, p: Partial<ReviewAgent>) => { setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, ...p } : a))); };
 
@@ -362,14 +346,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   // Move between the steps; edits live in shared state, so they persist both ways.
   const switchScreen = (name: Step) => {
-    // Leaving the duplicates step locks in its decisions: snapshot them as the new reset baseline.
-    if (screen === "duplicates" && name === "agents") {
-      baselineRef.current = { agents: JSON.parse(JSON.stringify(agents)), queries: JSON.parse(JSON.stringify(queries)) };
-    }
-    // Entering the Queries step: snapshot the queries (post agents-cascade) as the Queries reset point.
-    if (name === "queries") {
-      queriesBaselineRef.current = queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery);
-    }
     setScreen(name); setOpenId(null); setOpenFaqs(new Set());
     /* The sheet scrolls, not the window (and on a phone, where the frame is a document, the window). */
     requestAnimationFrame(() => {
@@ -378,30 +354,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     });
   };
 
-  // Continue is advisory: sharpen items never block — proceed whenever there's at least one agent.
-  const onContinueClick = () => { if (active.length > 0) switchScreen("queries"); };
-
-  // Reset scoped to the CURRENT step — never reaches across steps.
-  //  • Duplicates: restore every duplicates-step decision to its original group via the per-cluster snapshots.
-  //  • Queries: revert only the queries to their on-entry snapshot, leaving agents-step edits.
-  //  • Agents: revert agents AND their query cascade to the post-duplicates baseline.
-  const reset = () => {
-    if (screen === "duplicates") {
-      Object.keys(reconcileSnapRef.current).forEach((leaderId) => revertReconcile(leaderId)); // undo collapses/splits
-      Object.keys(snapRef.current).forEach((leaderId) => undoCluster(leaderId)); // restores members + repointed queries
-      setOpenId(null);
-      return;
-    }
-    if (screen === "queries") {
-      const qb = queriesBaselineRef.current;
-      if (qb) setQueries(qb.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
-    } else {
-      const b = baselineRef.current!;
-      setAgents(b.agents.map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent));
-      setQueries(b.queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
-    }
-    setOpenId(null);
-  };
+  // ── The gate: a step's primary waits until everything on it has an answer ─────────────────────
+  const agentOpen = openAgentQuestions(active).length;
+  const onContinueClick = () => { if (active.length > 0 && agentOpen === 0) switchScreen("queries"); };
 
   // ── Queries side ──────────────────────────────────────────────────────────────────────────────
   const qActive = queries.filter((q) => !q.removed);
@@ -418,10 +373,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
   ];
   const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));
-  const qNeed = qActive.filter((q) => queryStatusOf(q) === "needs-check").length;
-  const qReady = qActive.length - qNeed;
-  // Advisory review: import is available whenever there's ≥1 query to bring across.
-  const canImport = qActive.length > 0;
+  const qNeed = openQueryQuestions(qActive).length;
+  // Import needs at least one query to bring across, and every question answered.
+  const canImport = qActive.length > 0 && qNeed === 0;
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); };
   const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); };
@@ -446,7 +400,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   };
 
   const onImportClick = () => {
-    if (!canImport) return; // nothing to import (no active queries)
+    if (!canImport) return; // nothing to import, or a question still open
     void onImport?.(modelToResult(result, agents, queries), { setAside: autoSetAsideRows(agents, queries) });
   };
 
@@ -463,6 +417,31 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // resolve UI and resolved ones in their settled state, so a decision stays revisitable via Back.
   const allClusters = buildClusters(agents);
   const openSets = allClusters.filter((c) => c.type !== "keepboth").length;
+  /* v9: once every set is decided the list gives way to the mark and "What you decided". "Change a
+     decision" brings the sets back, each with its Undo; deciding them all again returns here. */
+  const [dupEditing, setDupEditing] = useState(false);
+  const wasOpen = useRef(openSets > 0);
+  React.useEffect(() => { if (wasOpen.current && openSets === 0) setDupEditing(false); wasOpen.current = openSets > 0; }, [openSets]);
+  const dupesDone = screen === "duplicates" && openSets === 0 && !dupEditing;
+  const decided = (): { id: string; name: string; initials: string; sub: string; chip: string; merged: boolean }[] => {
+    const out: { id: string; name: string; initials: string; sub: string; chip: string; merged: boolean; at: number }[] = [];
+    const idx = new Map<string, number>(agents.map((a, i): [string, number] => [a.id, i]));
+    for (const [keeperId, bars] of mergedAwayByKeeper(agents)) {
+      const k = agents.find((a) => a.id === keeperId);
+      if (!k || k.deleted) continue;
+      const name = k.name || k.agency || "This agent";
+      const gone = bars.map((b) => `"${b.name || b.agency || "a row"}"`).join(", ");
+      out.push({ id: keeperId, name, initials: k.name ? initialsOf(k.name) : "–", merged: true, chip: DUPES_DONE.merged, at: idx.get(keeperId) ?? 0,
+        sub: [k.name && k.agency ? k.agency : null, "kept", `${gone} merged in`].filter(Boolean).join(" · ") });
+    }
+    for (const c of allClusters) {
+      if (c.type !== "keepboth") continue;
+      const l = c.members[0];
+      out.push({ id: c.leaderId, name: c.members.map((m) => m.name || m.agency).join(", "), initials: l.name ? initialsOf(l.name) : "–", merged: false, chip: c.members.length > 2 ? "Kept all" : DUPES_DONE.kept, at: idx.get(c.leaderId) ?? 0,
+        sub: [l.agency || null, "kept as separate agents"].filter(Boolean).join(" · ") });
+    }
+    return out.sort((a, b) => a.at - b.at);
+  };
 
   // A flagged pair as the reconcile card: working while the cluster is open, sorted once
   // collapsed/split. Rows are the live member queries while open, or the pre-collapse snapshot once
@@ -542,60 +521,97 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   };
 
   // ── The three steps' rows ─────────────────────────────────────────────────────────────────────
+  /* The ready rows. A row that still asks something is in the deck, not here. */
+  const readyAgents = active.filter((a) => agentAsk(a) === null);
   const agentRows = (): React.ReactNode[] => {
-    const rows: React.ReactNode[] = [];
-    const consumed = new Set<string>();
     /* An agent merged from two rows says so in its second line. */
     const mergedKeepers = new Set(mergedAwayByKeeper(agents).keys());
-    for (const a of active) {
-      if (consumed.has(a.id)) continue;
-      const toggle = () => setOpenId((cur) => (cur === a.id ? null : a.id));
-      if (a.mergeWith.length > 0 && !a.mergeResolved) {
-        // A duplicate set carried through from its own step: the leader's row asks, in place.
-        const members = [a, ...a.mergeWith.map((id) => active.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
-        members.forEach((m) => consumed.add(m.id));
-        rows.push(
-          <AgentRow key={a.id} agent={a} dupOpen={true} clusterPeers={members.slice(1)}
-            open={openId === a.id} onToggleOpen={toggle}
-            onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
-            onMerge={() => members.slice(1).forEach((m) => removeDuplicate(m.id))}
-            onKeepBoth={() => keepBoth(a.id)}
-            onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
-            onReopenReason={(kind) => reopenReason(a.id, kind)}
-          />
-        );
-      } else {
-        consumed.add(a.id);
-        rows.push(
-          <AgentRow key={a.id} agent={a} dupOpen={openDupIds.has(a.id)} merged={mergedKeepers.has(a.id)}
-            open={openId === a.id} onToggleOpen={toggle}
-            onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
-            onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
-            onReopenReason={(kind) => reopenReason(a.id, kind)}
-          />
-        );
-      }
-    }
-    return rows;
+    return readyAgents.map((a) => (
+      <AgentRow key={a.id} agent={a} merged={mergedKeepers.has(a.id)}
+        open={openId === a.id} onToggleOpen={() => setOpenId((cur) => (cur === a.id ? null : a.id))}
+        onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
+        onReopenReason={(kind) => reopenReason(a.id, kind)}
+      />
+    ));
   };
   const originOf = (q: ReviewQuery): string => queryOriginLine(agents.find((x) => x.id === q.agentRef && !x.deleted));
-  const queryRows = (): React.ReactNode[] => qActive.map((q) => (
+  const readyQueries = qActive.filter((q) => !q.reasons.some((r) => !r.resolved));
+  const queryRows = (): React.ReactNode[] => readyQueries.map((q) => (
     <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)}
       open={openId === q.id}
       onToggleOpen={() => setOpenId((cur) => (cur === q.id ? null : q.id))}
       onPatch={(p) => patchQuery(q.id, p)}
       onDelete={() => removeQuery(q.id)}
-      onResolveReason={(code, patch) => resolveQueryReason(q.id, code, patch)}
-      onSwapDates={() => swapQueryDates(q.id)}
       onReopen={() => reopenQueryReasons(q.id)}
     />
   ));
 
+  // ── The deck's cards ──────────────────────────────────────────────────────────────────────────
+  /* The cards are kept in the order their questions first appeared, and an answered one stays, so
+     the arrows can go back to it. What each was first asked is remembered for its answered state. */
+  const agentDeck = useRef<{ id: string; ask: AgentAsk }[]>([]);
+  for (const a of agents) { const ask = agentAsk(a); if (ask && !agentDeck.current.some((d) => d.id === a.id)) agentDeck.current.push({ id: a.id, ask }); }
+  const queryDeck = useRef<string[]>([]);
+  for (const q of qActive) if (q.reasons.some((r) => !r.resolved) && !queryDeck.current.includes(q.id)) queryDeck.current.push(q.id);
+
+  const agentCards = (): DeckCard[] => agentDeck.current.flatMap((d): DeckCard[] => {
+    const a = agents.find((x) => x.id === d.id);
+    if (!a) return [];
+    const ask = agentAsk(a);
+    const shown = ask ?? d.ask;
+    const who = a.name || a.agency;
+    const base = {
+      key: `a-${a.id}`, name: who || "Unnamed row", initials: a.name ? initialsOf(a.name) : a.agency ? (a.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–") : "–",
+      tone: (a.name ? "live" : "agency") as "live" | "agency", chip: ask ? AGENT_ASK_CHIP[shown] : "Answered", answered: ask === null,
+      sub: shown === "nameless" && !who ? (a.setAsideContext || queries.find((q) => q.agentRef === a.id && q.notes.trim())?.notes.trim() ? `Your note: "${a.setAsideContext || queries.find((q) => q.agentRef === a.id && q.notes.trim())?.notes.trim()}"` : "No name or agency in your sheet")
+        : !a.agency.trim() ? (a.agencyWaived ? "No agency" : "No agency in your sheet") : a.name ? a.agency : "Agent name not recorded",
+    };
+    if (ask === "nameless") return [{ ...base, body: (
+      <NamelessQuestion
+        onSave={({ name, agency }) => patch(a.id, { name, agency, agencyOnly: !name && !!agency })}
+        onRemove={() => { const next = seedUnidentifiedSetAside(agents, queries, a.id); setAgents(next.agents); setQueries(next.queries); }}
+      />) }];
+    if (ask === "no-agency") return [{ ...base, body: <AgencyQuestion agent={a} onSave={(agency) => patch(a.id, { agency })} onCarryOn={() => patch(a.id, { agencyWaived: true })} /> }];
+    if (ask === "mapping") return [{ ...base, body: <MappingQuestion note={a.reasons.find((r) => r.kind === "mapping" && !r.resolved)!.note} onChecked={() => resolveMapping(a.id)} /> }];
+    /* answered: what was said, and the way to change it */
+    if (a.deleted) return [{ ...base, name: "Unnamed row", body: <Answered reason="agent-nameless" onChange={() => restoreAgent(a.id)}>Row removed. It will be listed as not imported.</Answered> }];
+    if (d.ask === "nameless") return [{ ...base, body: <Answered reason="agent-nameless" onChange={() => patch(a.id, { name: "", agency: "", agencyOnly: false })}>Saved as {who}.</Answered> }];
+    if (d.ask === "no-agency") return [{ ...base, body: a.agency.trim()
+      ? <Answered reason="agent-needs-agency" onChange={() => patch(a.id, { agency: "", agencyWaived: false })}>Agency saved: {a.agency}.</Answered>
+      : <Answered reason="agent-needs-agency" onChange={() => patch(a.id, { agencyWaived: false })}>{DECK_WORDS.agencyKept}</Answered> }];
+    return [{ ...base, body: <Answered reason="agent-mapping" onChange={() => reopenReason(a.id, "mapping")}>Marked as checked.</Answered> }];
+  });
+
+  const queryCards = (): DeckCard[] => queryDeck.current.flatMap((id): DeckCard[] => {
+    const q = queries.find((x) => x.id === id);
+    if (!q || q.removed) return [];
+    const open = q.reasons.find((r) => !r.resolved);
+    const code = (open ?? q.reasons[q.reasons.length - 1]).code;
+    const name = agentNameOf(q.agentRef);
+    const statusAsk = questionFamily(code) === "status";
+    const base = {
+      key: `q-${q.id}`, name, initials: initialsOf(name), answered: !open,
+      /* a date question shows the status it has; a status question shows the date it has */
+      sub: `${originOf(q)} · ${statusAsk ? (q.sentDate ? fmtDate(q.sentDate) : "Undated") : STAGE_NAME[q.status]}`,
+      chip: open ? focusReasonMeta(code).pill : "Answered",
+    };
+    if (open) return [{ ...base, body: (
+      <QueryQuestion key={code} query={q} code={code} onPatch={(p) => patchQuery(q.id, p)}
+        onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)} onSwapDates={() => swapQueryDates(q.id)} />) }];
+    return [{ ...base, body: <Answered reason={code} onChange={() => reopenQueryReasons(q.id)}>{STAGE_NAME[q.status]}, {q.sentDate ? `sent ${fmtDate(q.sentDate)}` : "kept undated"}.</Answered> }];
+  });
+
   // ── The frame of a step ───────────────────────────────────────────────────────────────────────
   const steps = importSteps(hadDuplicates);
   const title = (manuscriptTitle ?? "").trim();
+  /* v9: when the last answer lands on the queries step, the sage band says so and accounts for
+     every answer given. Only a step that asked something can be "all answered". */
+  const asked = qActive.filter((q) => q.reasons.length > 0);
+  const queriesDone = screen === "queries" && asked.length > 0 && qNeed === 0;
+  const doneKinds = asked.flatMap((q) => q.reasons.map((r) => answerKind(r.code, q)));
+
   const head =
-    screen === "duplicates" ? (
+    dupesDone ? null : screen === "duplicates" ? (
       <header className="im-ohead im-ohead--sm">
         <h1 className="im-h1" data-im="title">{duplicatesTitle(openSets)}</h1>
         <p>{DUPLICATES_SUB}</p>
@@ -605,74 +621,122 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         <h1 className="im-stack" data-im="title">
           <span className="im-num" data-im="title-n">{active.length}</span>
           <span className="im-words">agents for your contact list</span>
-          <span className="im-sub">Add as much or as little detail as you like.</span>
+          <span className="im-sub" data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</span>
         </h1>
       </header>
     ) : (
       <header className="im-ohead im-ohead--sm">
         <h1 className="im-stack" data-im="title">
           <span className="im-num" data-im="title-n">{qActive.length}</span>
-          <span className="im-words">queries for your Query Centre</span>
-          {title && <span className="im-sub">for <i>{title}</i></span>}
+          <span className="im-words">{title ? <>queries for <i>{title}</i></> : "queries for your Query Centre"}</span>
+          {(qNeed > 0 || queriesDone) && <span className="im-sub" data-im="title-sub">{reviewSubline(qNeed, readyQueries.length, "queries")}</span>}
         </h1>
       </header>
     );
 
-  const listTitle = screen === "duplicates" ? "Possible repeats" : screen === "agents" ? "Agents from your file" : "Queries from your file";
-  const chips =
-    screen === "duplicates" ? (
-      <Chip hot={openSets > 0} data-im="chip-sets">{openSets === 1 ? "1 set" : `${openSets} sets`}</Chip>
-    ) : (
-      <>
-        <Chip data-im="chip-ready">{screen === "agents" ? okCount : qReady} ready</Chip>
-        {(screen === "agents" ? needCount : qNeed) > 0 && <Chip hot data-im="chip-open">{screen === "agents" ? needCount : qNeed} to sharpen</Chip>}
-      </>
-    );
-  const rows = screen === "duplicates" ? duplicateUnits() : screen === "agents" ? agentRows() : queryRows();
-  const emptyLine = screen === "duplicates" ? "No duplicates to review." : screen === "agents" ? "No agents to review." : "No queries to review.";
-  const faqs = screen === "duplicates" ? DUP_FAQS : screen === "agents" ? AGENT_FAQS : QUERY_FAQS;
-  const back = screen === "duplicates" ? onBack : screen === "agents" ? () => (hadDuplicates ? switchScreen("duplicates") : onBack?.()) : () => switchScreen("agents");
+  const isDup = screen === "duplicates";
+  const listTitle = isDup ? "Possible repeats" : READY_LIST.head;
+  const [showAll, setShowAll] = useState(false);
+  const allRows = isDup ? duplicateUnits() : screen === "agents" ? agentRows() : queryRows();
+  const rows = isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
+  const chips = isDup
+    ? <Chip hot={openSets > 0} data-im="chip-sets">{openSets === 1 ? "1 set" : `${openSets} sets`}</Chip>
+    : <Chip data-im="ready-chip">{allRows.length} ready</Chip>;
+  const emptyLine = isDup ? "No duplicates to review." : screen === "agents" ? "No agents are ready yet." : "No queries are ready yet.";
+  const faqs = isDup ? DUP_FAQS : screen === "agents" ? AGENT_FAQS : QUERY_FAQS;
+  const back = isDup ? onBack : screen === "agents" ? () => (hadDuplicates ? switchScreen("duplicates") : onBack?.()) : () => switchScreen("agents");
   const trayItems = screen === "agents" ? setAsideItems.filter((i) => i.kind === "agent") : screen === "queries" ? setAsideItems.filter((i) => i.kind === "query") : [];
+  /* the deck, and what is left after the card on show */
+  const cards = isDup ? [] : screen === "agents" ? agentCards() : queryCards();
+  const openCount = isDup ? 0 : screen === "agents" ? agentOpen : qNeed;
+  const restAgents = openAgentQuestions(active).slice(1);
+  const restQueries = openQueryQuestions(qActive).slice(1);
+  const coming = screen === "agents" ? comingUpAgents(restAgents, (id) => { const a = agents.find((x) => x.id === id); return a ? a.name || a.agency : ""; }) : screen === "queries" ? comingUpQueries(restQueries) : [];
+  const [dupFaq, setDupFaq] = useState(false);
+  const hint = isDup ? (openSets > 0 ? DUPES_DONE.open : duplicatesNextHint(agentOpen))
+    : openCount > 0 ? gateHint(screen as "agents" | "queries", openCount)
+    : screen === "queries" ? writeHint(active.length, qActive.length) : "";
 
   return (
     <div className="im-page" data-im="review" data-screen={`review-${screen}`} data-step={screen} key={screen}>
       {head}
       <Stepper steps={steps} current={screen} label="Review progress" />
-      <div className="im-rev">
-        <div className="im-revmain">
-          {error && <p className="im-commiterr" role="alert" data-im="commit-error">{error}</p>}
-          <section className="im-list" data-im="list" aria-label={listTitle}>
-            <div className="im-listhead" data-im="list-head">
-              <h2 className="im-listtitle">{listTitle}</h2>
-              <span className="im-chips">{chips}</span>
+      {dupesDone && (
+        <div className="o9-markrow" data-im="dupes-done">
+          <GoMark />
+          <div className="o9-mtxt">
+            <h1 className="im-h1 o9-mhead" data-im="title">{DUPES_DONE.head}</h1>
+            <span data-im="dupes-line">{duplicatesDoneLine({ merged: decided().filter((d) => d.merged).length, kept: decided().filter((d) => !d.merged).length, forward: active.length })}</span>
+          </div>
+        </div>
+      )}
+      {error && <p className="im-commiterr" role="alert" data-im="commit-error">{error}</p>}
+      {!isDup && openCount > 0 && <ReviewDeck cards={cards} faq={<Questions items={faqs} open={openFaqs} onToggle={toggleFaq} />} />}
+      {!isDup && openCount > 0 && coming.length > 0 && (
+        <p className="o9-upnext o9-rise" data-im="coming-up"><span>{READY_LIST.lead}</span>{coming.map((c) => <Chip key={c}>{c}</Chip>)}</p>
+      )}
+      {queriesDone && (
+        <div className="o9-alldone o9-pop" data-im="all-answered">
+          <GoMark size="sm" />
+          <div>
+            <b data-im="all-head">{allAnsweredHead(asked.length)}</b>
+            <span data-im="all-line">{answeredLine(doneKinds)}</span>
+          </div>
+        </div>
+      )}
+      <div className="im-revmain">
+        {dupesDone ? (
+          <section className="im-list o9-decided o9-rise" data-im="decided" aria-label={DUPES_DONE.list}>
+            <div className="im-listhead im-listhead--quiet">
+              <h2 className="im-listtitle">{DUPES_DONE.list}</h2>
+              <button type="button" className="sf-link sf-link--quiet" onClick={() => setDupEditing(true)} data-im="change-decision">{DUPES_DONE.change}</button>
             </div>
+            {decided().map((d) => (
+              <div className="im-rw" key={d.id} data-decided={d.id}>
+                <Disc initials={d.initials} />
+                <div><b className="im-rwname">{d.name}</b><small className="im-rwsub">{d.sub}</small></div>
+                <div className="im-rwend"><Chip className={d.merged ? "o9-chip--go" : undefined} data-im="decided-chip">{d.chip}</Chip></div>
+              </div>
+            ))}
+          </section>
+        ) : (
+          <section className={`im-list${isDup ? "" : " o9-ready o9-rise"}`} data-im={isDup ? "list" : "ready"} aria-label={listTitle}>
+            <div className={`im-listhead${isDup ? "" : " im-listhead--quiet"}`} data-im="list-head">
+              <h2 className="im-listtitle">{listTitle}</h2>
+              <span className="im-chips">
+                {chips}
+                {isDup && <button type="button" className="sf-link o9-decklink" aria-expanded={dupFaq} onClick={() => setDupFaq((o) => !o)} data-im="deck-questions">Questions</button>}
+              </span>
+            </div>
+            {isDup && dupFaq && <div className="o9-deckfaq" data-im="deck-faq"><Questions items={faqs} open={openFaqs} onToggle={toggleFaq} /></div>}
             <div data-im="rows">
               {rows.length > 0 ? rows : <div className="im-listempty">{emptyLine}</div>}
             </div>
+            {!isDup && !showAll && allRows.length > READY_FIRST && (
+              <div className="o9-showall"><button type="button" className="sf-link sf-link--quiet" onClick={() => setShowAll(true)} data-im="show-all">{READY_LIST.showAll(allRows.length)}</button></div>
+            )}
           </section>
-          <SetAsideTray items={trayItems} onRestore={onRestoreSetAside} />
-          <div className="im-actbar" data-im="foot">
+        )}
+        <SetAsideTray items={trayItems} onRestore={onRestoreSetAside} />
+        <div className="o9-bar" data-im="foot">
+          <p className="o9-barhint" data-im="hint">{hint}</p>
+          <div className="o9-bargo">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
             {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
-            <button type="button" className="sf-link sf-link--quiet" onClick={reset} data-im="reset">Reset all changes made here</button>
-            <span className="im-sp" />
-            {screen === "duplicates" && (
-              /* always available — unresolved sets carry through to the agents step */
-              <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>
+            {isDup && (
+              /* v9: lit only once every set is decided. It was always available, and an undecided
+                 set carried through to the agents step. */
+              <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} disabled={openSets > 0} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>
             )}
             {screen === "agents" && (
-              <button type="button" className="sf-btn" onClick={onContinueClick} disabled={active.length === 0} data-im="primary">{REVIEW_PRIMARY.agents}</button>
+              <button type="button" className="sf-btn" onClick={onContinueClick} disabled={active.length === 0 || agentOpen > 0} data-im="primary">{gatePrimary("agents", agentOpen)}</button>
             )}
             {screen === "queries" && (
               /* Commit seam: onImport(modelToResult(...)) → the host's loader. */
-              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{importPrimary(active.length, qNeed)}</button>
+              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed)}</button>
             )}
           </div>
         </div>
-        <aside className="im-rail" data-im="rail">
-          <Guide step={screen} />
-          <Questions items={faqs} open={openFaqs} onToggle={toggleFaq} />
-        </aside>
       </div>
       {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}
     </div>

@@ -1,0 +1,112 @@
+
+Running 4 tests using 1 worker
+
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:222:3 › B › B1 the title page: eyebrow, the title typed in, and the byline on its rule (6.0s)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:272:3 › B › B2 genres: several with one primary, from the fixed list only (609ms)
+  ✘  3 [measure] › tests/e2e/onbV9.measure.ts:328:3 › B › B3 each age category opens its own note, one at a time (565ms)
+  ✘  4 [measure] › tests/e2e/onbV9.measure.ts:359:3 › B › B4 the word count: optional, digits only, 1,000 to 500,000 (20.1s)
+
+
+  1) [measure] › tests/e2e/onbV9.measure.ts:222:3 › B › B1 the title page: eyebrow, the title typed in, and the byline on its rule 
+
+    TimeoutError: page.waitForFunction: Timeout 5000ms exceeded.
+
+      222 |   test("B1 the title page: eyebrow, the title typed in, and the byline on its rule", async ({ page }) => {
+      223 |     await lab(page, Q, WIDE);
+    > 224 |     await page.waitForFunction(() => Number(document.querySelector('[data-o9="book-card"]')?.getAttribute("data-typed") ?? 0) > 0, null, { timeout: 5000 });
+          |                ^
+      225 |     const mid = await page.evaluate(() => {
+      226 |       const h = document.querySelector<HTMLElement>('[data-o9="bookhead"] h1')!;
+      227 |       const unseen = [...h.querySelectorAll<HTMLElement>(".o9-unseen")].reduce((n, e) => n + (e.textContent ?? "").length, 0);
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:224:16
+
+    Error Context: test-results/onbV9.measure.ts-B-B1-the--c69eb--and-the-byline-on-its-rule-measure/error-context.md
+
+  2) [measure] › tests/e2e/onbV9.measure.ts:272:3 › B › B2 genres: several with one primary, from the fixed list only 
+
+    Error: nine pills, Crime and Thriller apart
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 11
+    + Received  +  1
+
+    - Array [
+    -   "Crime",
+    -   "Thriller",
+    -   "Literary fiction",
+    -   "Fantasy",
+    -   "Romance",
+    -   "Historical fiction",
+    -   "Science fiction",
+    -   "Women's fiction",
+    -   "Horror",
+    - ]
+    + Array []
+
+      273 |     await lab(page, Q, WIDE, { motion: "reduce" });
+      274 |     const g0 = await genres(page);
+    > 275 |     expect(g0.pills, "nine pills, Crime and Thriller apart").toEqual(["Crime", "Thriller", "Literary fiction", "Fantasy", "Romance", "Historical fiction", "Science fiction", "Women's fiction", "Horror"]);
+          |                                                              ^
+      276 |     expect(g0.picked, "nothing is picked on arrival").toEqual([]);
+      277 |     expect(await card(page).locator('[data-act="continue"]').isDisabled(), "Continue waits for a genre").toBe(true);
+      278 |     await pill(page, "fantasy").click(); await pill(page, "romance").click(); await pill(page, "horror").click();
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:275:62
+
+    Error Context: test-results/onbV9.measure.ts-B-B2-genr-94b03-ry-from-the-fixed-list-only-measure/error-context.md
+
+  3) [measure] › tests/e2e/onbV9.measure.ts:328:3 › B › B3 each age category opens its own note, one at a time 
+
+    Error: the shared list's own labels, in its order
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 1
+
+    - Array [
+    -   "Picture Book",
+    -   "Early Reader",
+    -   "Middle Grade",
+    -   "Young Adult",
+    -   "New Adult",
+    -   "Adult",
+    - ]
+    + Array []
+
+      337 |     };
+      338 |     const row = await page.locator('[data-o9="age"] [role="radio"]').allTextContents();
+    > 339 |     expect(row, "the shared list's own labels, in its order").toEqual(Object.keys(NOTES));
+          |                                                               ^
+      340 |     expect(await page.locator('[data-o9="age-note"]').count(), "no note until one is picked").toBe(0);
+      341 |     for (const [cat, note] of Object.entries(NOTES)) {
+      342 |       await page.locator('[data-o9="age"]').getByRole("radio", { name: cat, exact: true }).click();
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:339:63
+
+    Error Context: test-results/onbV9.measure.ts-B-B3-each-78290--its-own-note-one-at-a-time-measure/error-context.md
+
+  4) [measure] › tests/e2e/onbV9.measure.ts:359:3 › B › B4 the word count: optional, digits only, 1,000 to 500,000 
+
+    Test timeout of 20000ms exceeded.
+
+    Error: locator.click: Test timeout of 20000ms exceeded.
+    Call log:
+      - waiting for locator('[data-o9="genre"] .o9-pills [data-genre="fantasy"]')
+
+
+      359 |   test("B4 the word count: optional, digits only, 1,000 to 500,000", async ({ page }) => {
+      360 |     await lab(page, Q, WIDE, { motion: "reduce" });
+    > 361 |     await pill(page, "fantasy").click();
+          |                                 ^
+      362 |     const go = card(page).locator('[data-act="continue"]');
+      363 |     const words = page.locator("#o9-words");
+      364 |     const state = async () => ({ off: await go.isDisabled(), err: await page.locator('[data-o9="words-error"]').allTextContents(), help: await page.locator('#o9-words-help').textContent(), value: await words.inputValue() });
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:361:33
+
+    Error Context: test-results/onbV9.measure.ts-B-B4-the--33fa8-igits-only-1-000-to-500-000-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/onbV9.measure.ts:222:3 › B › B1 the title page: eyebrow, the title typed in, and the byline on its rule 
+    [measure] › tests/e2e/onbV9.measure.ts:272:3 › B › B2 genres: several with one primary, from the fixed list only 
+    [measure] › tests/e2e/onbV9.measure.ts:328:3 › B › B3 each age category opens its own note, one at a time 
+    [measure] › tests/e2e/onbV9.measure.ts:359:3 › B › B4 the word count: optional, digits only, 1,000 to 500,000 

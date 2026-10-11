@@ -1,0 +1,111 @@
+
+Running 5 tests using 1 worker
+
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:110:3 › T1 › T1 the passage types in, and the card is unseen until the last letter (5.8s)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:145:3 › T1 › T1 the whole passage takes about four seconds, and a click finishes it at once (12.8s)
+  ✘  3 [measure] › tests/e2e/onbV9.measure.ts:160:3 › T1 › T1 reduced motion: the passage and the card are there at once (875ms)
+  ✘  4 [measure] › tests/e2e/onbV9.measure.ts:172:3 › T2 › T2 on Just getting started, Title TBC fills Untitled manuscript and lights Continue (5.6s)
+  ✘  5 [measure] › tests/e2e/onbV9.measure.ts:195:3 › T2 › T2 the other three journeys have the title field alone (7.0m)
+
+
+  1) [measure] › tests/e2e/onbV9.measure.ts:110:3 › T1 › T1 the passage types in, and the card is unseen until the last letter 
+
+    TimeoutError: page.waitForFunction: Timeout 5000ms exceeded.
+
+      112 |     if (MUTATE === "T1") await page.addStyleTag({ content: ".sf .o9-late{opacity:1!important}" });
+      113 |     /* `lab` waits for fonts, so read the clock from the passage's own count rather than assume 0ms */
+    > 114 |     await page.waitForFunction(() => Number(document.querySelector('[data-o9="passage"]')?.getAttribute("data-typed") ?? 0) > 0, null, { timeout: 5000 });
+          |                ^
+      115 |     const early = await read(page);
+      116 |     record("T1", "early", early);
+      117 |     expect(early.present, "the passage is on screen").toBe(true);
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:114:16
+
+    Error Context: test-results/onbV9.measure.ts-T1-T1-the-25a0a-nseen-until-the-last-letter-measure/error-context.md
+
+  2) [measure] › tests/e2e/onbV9.measure.ts:145:3 › T1 › T1 the whole passage takes about four seconds, and a click finishes it at once 
+
+    TimeoutError: page.waitForFunction: Timeout 12000ms exceeded.
+
+      146 |     await lab(page, "s=ack&stage=deep", WIDE);
+      147 |     const t0 = Date.now();
+    > 148 |     await page.waitForFunction(() => { const p = document.querySelector('[data-o9="passage"]'); return !!p && p.getAttribute("data-typed") === p.getAttribute("data-total"); }, null, { timeout: 12_000 });
+          |                ^
+      149 |     const took = Date.now() - t0;
+      150 |     record("T1", "duration-ms", took);
+      151 |     expect(took, "about four seconds").toBeGreaterThan(2500);
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:148:16
+
+    Error Context: test-results/onbV9.measure.ts-T1-T1-the-52b98-a-click-finishes-it-at-once-measure/error-context.md
+
+  3) [measure] › tests/e2e/onbV9.measure.ts:160:3 › T1 › T1 reduced motion: the passage and the card are there at once 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      162 |     const r = await read(page);
+      163 |     record("T1", "reduced", r);
+    > 164 |     expect(r.visibleChars).toBe(r.total);
+          |                            ^
+      165 |     expect(r.cardOpacity).toBe("1");
+      166 |     expect(r.cardInert).toBe(false);
+      167 |   });
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:164:28
+
+    Error Context: test-results/onbV9.measure.ts-T1-T1-red-b5c44--the-card-are-there-at-once-measure/error-context.md
+
+  4) [measure] › tests/e2e/onbV9.measure.ts:172:3 › T2 › T2 on Just getting started, Title TBC fills Untitled manuscript and lights Continue 
+
+    Error: the button is on this journey
+
+    expect(locator).toHaveText(expected) failed
+
+    Locator: locator('[data-o9="title-card"]').locator('[data-act="tbc"]')
+    Expected: "Title TBC"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - the button is on this journey with timeout 5000ms
+      - waiting for locator('[data-o9="title-card"]').locator('[data-act="tbc"]')
+
+
+      175 |     const tbc = card.locator('[data-act="tbc"]');
+      176 |     const go = card.locator('[data-act="continue"]');
+    > 177 |     await expect(tbc, "the button is on this journey").toHaveText("Title TBC");
+          |                                                        ^
+      178 |     expect(await tbc.evaluate((e) => getComputedStyle(e).backgroundColor), "an ink button, never rust").toBe(await page.evaluate(() => { const i = document.createElement("i"); i.style.background = "var(--sp-anthracite)"; document.querySelector(".sf")!.appendChild(i); const c = getComputedStyle(i).backgroundColor; i.remove(); return c; }));
+      179 |     /* the readiness question is on the same page: answer it, and Continue is still off without a title */
+      180 |     await card.getByRole("radio", { name: /Still being written/ }).click();
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:177:56
+
+    Error Context: test-results/onbV9.measure.ts-T2-T2-on--abc15-uscript-and-lights-Continue-measure/error-context.md
+
+  5) [measure] › tests/e2e/onbV9.measure.ts:195:3 › T2 › T2 the other three journeys have the title field alone 
+
+    Test timeout of 420000ms exceeded.
+
+    Error: locator.isDisabled: Test timeout of 420000ms exceeded.
+    Call log:
+      - waiting for locator('[data-o9="title-card"]').locator('[data-act="continue"]')
+
+
+      199 |       expect(await card.locator('[data-act="tbc"]').count(), `${stage}: no Title TBC`).toBe(0);
+      200 |       expect(await card.getByRole("radio").count(), `${stage}: no readiness question`).toBe(0);
+    > 201 |       expect(await card.locator('[data-act="continue"]').isDisabled(), `${stage}: Continue is off with no title`).toBe(true);
+          |                                                          ^
+      202 |       await card.locator("#o9-title").fill("The October Test");
+      203 |       expect(await card.locator('[data-act="continue"]').isDisabled()).toBe(false);
+      204 |     }
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:201:58
+
+    Error Context: test-results/onbV9.measure.ts-T2-T2-the-89cf5--have-the-title-field-alone-measure/error-context.md
+
+  5 failed
+    [measure] › tests/e2e/onbV9.measure.ts:110:3 › T1 › T1 the passage types in, and the card is unseen until the last letter 
+    [measure] › tests/e2e/onbV9.measure.ts:145:3 › T1 › T1 the whole passage takes about four seconds, and a click finishes it at once 
+    [measure] › tests/e2e/onbV9.measure.ts:160:3 › T1 › T1 reduced motion: the passage and the card are there at once 
+    [measure] › tests/e2e/onbV9.measure.ts:172:3 › T2 › T2 on Just getting started, Title TBC fills Untitled manuscript and lights Continue 
+    [measure] › tests/e2e/onbV9.measure.ts:195:3 › T2 › T2 the other three journeys have the title field alone 

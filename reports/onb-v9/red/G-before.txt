@@ -1,0 +1,15 @@
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:677:3 › G › G1 agents: two questions, the primary waits for both, and either answer counts (760ms)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:738:3 › G › G2 queries: nine questions, the blank date among them, and what is written (819ms)
+  ✘  3 [measure] › tests/e2e/onbV9.measure.ts:799:3 › G › G2 the status question is the fixed set, each with its ring; a two-way date cannot be left blank (40.1s)
+  ✘  4 [measure] › tests/e2e/onbV9.measure.ts:816:5 › G › G3 a row with no agent and no agency is asked: removed, it is listed as not imported (706ms)
+  ✘  5 [measure] › tests/e2e/onbV9.measure.ts:816:5 › G › G3 a row with no agent and no agency is asked: given an agency, it imports (662ms)
+  ✘  6 [measure] › tests/e2e/onbV9.measure.ts:865:3 › G › G4 Skip for now, from the queries step, asks first and writes nothing (40.1s)
+  ✘  7 [measure] › tests/e2e/onbV9.measure.ts:897:3 › G › G the deck at 400 and 1280: no overflow, the arrows give way to the dots (40.1s)
+    Error: expect(received).toBe(expected) // Object.is equality
+    Error: expect(received).toBe(expected) // Object.is equality
+    Error: locator.evaluate: Test timeout of 40000ms exceeded.
+    Error: the summary counts the row
+    Error: the summary counts the row
+    Error: locator.click: Test timeout of 40000ms exceeded.
+    Error: locator.click: Test timeout of 40000ms exceeded.
+  7 failed

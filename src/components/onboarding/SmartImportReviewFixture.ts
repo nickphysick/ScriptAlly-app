@@ -101,3 +101,57 @@ export const REVIEW_FIXTURE_CLEAR: SmartImportResult = {
     { agentRef: "c2", status: QueryStatus.REJECTED, sentDate: "2025-06-02", sentDateRaw: "02/06/2025" },
   ],
 };
+
+/**
+ * Onboarding v9: the gate's fixture. Sixteen agents, two with no agency; sixteen queries, nine of
+ * which ask something: two dates that read two ways, two that could not be read, one blank, and
+ * four statuses the sheet worded its own way. Seven are ready. No duplicate sets, so the review
+ * opens on the agents step.
+ */
+const GATE_NAMES: [string, string][] = [
+  ["Cordelia Vane", "Vane & Hart Lit"], ["Nadia Okafor", "Okafor Literary"], ["Imogen Price", "Price & Partners"],
+  ["Leo Marchetti", "Marchetti Lit"], ["Sophie Lindqvist", "Lindqvist Agency"], ["Daniel Achebe", "Achebe & Rowe"],
+  ["Kirsten Vale", "The Vale Agency"],
+  ["Meredith Quaye", "Quaye Literary"], ["Ruth Castellano", "Castellano Agency"], ["Sean O'Brien", "The Liffey Agency"],
+  ["Priyanka", ""], ["Aoife Brennan", "Brennan & Daughters"], ["Rhys Hale", "Hale Agency"], ["", "Harbour & Vale"],
+  ["Tom Rafferty", ""], ["Hattie Lowe", "Lowe Literary"],
+];
+export const REVIEW_FIXTURE_GATE: SmartImportResult = {
+  agents: GATE_NAMES.map(([name, agency], i) => ({ ref: `g${i + 1}`, name, agency })),
+  queries: [
+    { agentRef: "g1", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/08/2026" },
+    { agentRef: "g2", status: QueryStatus.PARTIAL_REQUESTED, sentDate: "2026-09-03", sentDateRaw: "03/09/2026" },
+    { agentRef: "g3", status: QueryStatus.QUERIED, sentDate: "2026-08-19", sentDateRaw: "19/08/2026" },
+    { agentRef: "g4", status: QueryStatus.PARTIAL_SENT, sentDate: "2026-09-11", sentDateRaw: "11/09/2026" },
+    { agentRef: "g5", status: QueryStatus.REJECTED, sentDate: "2026-07-02", sentDateRaw: "02/07/2026" },
+    { agentRef: "g6", status: QueryStatus.QUERIED, sentDate: "2026-08-27", sentDateRaw: "27/08/2026" },
+    { agentRef: "g7", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-09-15", sentDateRaw: "15/09/2026" },
+    // two dates that read two ways
+    { agentRef: "g8", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "03/05/2026", reasons: ["ambiguous-date"] },
+    { agentRef: "g9", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "06/08/2026", reasons: ["ambiguous-date"] },
+    // two that could not be read
+    { agentRef: "g10", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "sometime in May", reasons: ["unreadable-date"] },
+    { agentRef: "g12", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "spring", reasons: ["unreadable-date"] },
+    // one blank cell: the parser passed it in silence; the review now asks
+    { agentRef: "g11", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: null },
+    // four statuses the sheet worded its own way
+    { agentRef: "g13", status: null, statusRaw: "waiting", sentDate: "2026-08-08", sentDateRaw: "08/08/2026", reasons: ["status-wording"] },
+    { agentRef: "g14", status: null, statusRaw: "sent partial?", sentDate: "2026-08-21", sentDateRaw: "21/08/2026", reasons: ["status-wording"] },
+    { agentRef: "g15", status: null, statusRaw: "no", sentDate: "2026-07-14", sentDateRaw: "14/07/2026", reasons: ["status-wording"] },
+    { agentRef: "g16", status: null, statusRaw: "they want more", sentDate: "2026-09-22", sentDateRaw: "22/09/2026", reasons: ["status-wording"] },
+  ],
+};
+
+/** Onboarding v9: one row with neither an agent nor an agency, beside two ordinary ones. */
+export const REVIEW_FIXTURE_NAMELESS: SmartImportResult = {
+  agents: [
+    { ref: "n1", name: "Clara Voss", agency: "Pemberton Literary" },
+    { ref: "n2", name: "", agency: "" },
+    { ref: "n3", name: "Jamal Carter", agency: "Carter & Vale" },
+  ],
+  queries: [
+    { agentRef: "n1", status: QueryStatus.QUERIED, sentDate: "2026-03-14", sentDateRaw: "2026-03-14" },
+    { agentRef: "n2", status: QueryStatus.QUERIED, sentDate: "2026-02-10", sentDateRaw: "2026-02-10", notes: "met at the spring fair" },
+    { agentRef: "n3", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-04-01", sentDateRaw: "2026-04-01" },
+  ],
+};

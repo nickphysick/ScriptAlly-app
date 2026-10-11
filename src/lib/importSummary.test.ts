@@ -5,13 +5,14 @@
  * The import summary's groupings partition their populations (onboarding v5 part 2 — the unit
  * half of lock S1), and its sentences are the Words table's.
  */
+import { openAgentQuestions, openQueryQuestions, agentsAnswerLine, queriesAnswerLine } from "./reviewGate";
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import { parseModel, reviewTallies } from "./smartImportReviewModel";
 import { courtOf } from "./qcSummary";
 import {
   agentKey, agentKeyParts, agentDiscs, queryCourts, summaryCourt, importSteps, stepCaption, duplicateSets,
-  agentSharpenFacts, TIER_TEXT, DISC_MAX,
+  TIER_TEXT, TIER_NAME, DISC_MAX,
 } from "./importSummary";
 import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR } from "../components/onboarding/SmartImportReviewFixture";
 
@@ -88,26 +89,27 @@ describe("the stepper's steps and captions", () => {
     const n = { sets: 2, agentsOpen: 1, queriesOpen: 0 };
     expect(stepCaption("duplicates", n)).toBe("2 sets");
     expect(stepCaption("duplicates", { ...n, sets: 1 })).toBe("1 set");
-    expect(stepCaption("agents", n)).toBe("1 optional");
+    /* v9: nothing flagged is optional */
+    expect(stepCaption("agents", n)).toBe("1 to answer");
     expect(stepCaption("queries", n)).toBe("Ready to go");
     expect(stepCaption("import", n)).toBe("You confirm");
   });
 });
 
 describe("the tier sentences are the Words table's", () => {
-  it("agents sharpen drops the mapping clause when no agent has an open mapping reason", () => {
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 3, openMapping: true })).toBe("3 could use an agency, plus the odd detail to confirm. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 1, openMapping: false })).toBe("1 could use an agency. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 0, openMapping: true })).toBe("A detail or two to confirm. Each one sharpens your tracking.");
-  });
-  it("the fixture's own facts feed it", () => {
-    const f = agentSharpenFacts(parseModel(REVIEW_FIXTURE).agents);
-    expect(f.openMapping).toBe(true);
-    expect(f.noAgency).toBeGreaterThan(0);
+  /* RE-POINTED (onboarding v9): "Chances to sharpen" became "Need an answer", and its two sentences
+     are built from the questions themselves (lib/reviewGate, with its own locks). */
+  it("the fixture's own questions feed the agents' line", () => {
+    const qs = openAgentQuestions(parseModel(REVIEW_FIXTURE).agents);
+    expect(qs.some((q) => q.ask === "mapping")).toBe(true);
+    expect(qs.filter((q) => q.ask === "no-agency").length).toBeGreaterThan(0);
+    expect(agentsAnswerLine(qs)).toContain("have no agency. Add it, or say you're carrying on without one.");
   });
   it("no sentence carries a dash or the word Optional", () => {
-    const all = [TIER_TEXT.agentsReady, TIER_TEXT.agentsFix(1), TIER_TEXT.agentsFix(2), TIER_TEXT.agentsSharpen({ noAgency: 2, openMapping: true }), TIER_TEXT.queriesReady, TIER_TEXT.queriesSharpen];
-    for (const s of all) { expect(s).not.toMatch(/[—–]/); expect(s).not.toMatch(/optional/i); }
+    const m = parseModel(REVIEW_FIXTURE);
+    const all = [TIER_TEXT.agentsReady, TIER_TEXT.agentsFix(1), TIER_TEXT.agentsFix(2), TIER_TEXT.queriesReady, agentsAnswerLine(openAgentQuestions(m.agents)), queriesAnswerLine(openQueryQuestions(m.queries))];
+    for (const s of all) { expect(s.length).toBeGreaterThan(0); expect(s).not.toMatch(/[—–]/); expect(s).not.toMatch(/optional/i); }
     expect(TIER_TEXT.agentsFix(1)).toBe("1 possible duplicate set to merge. Sorted on the duplicates step.");
+    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" });
   });
 });

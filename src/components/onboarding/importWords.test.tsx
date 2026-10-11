@@ -8,7 +8,10 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ImportOverview } from "./ImportOverview";
-import { SmartImportReview, duplicatesTitle, DUPLICATES_SUB, REVIEW_PRIMARY, importPrimary, GUIDE, GUIDE_EYEBROW, DUP_FAQS, AGENT_FAQS } from "./SmartImportReview";
+import { SmartImportReview, duplicatesTitle, DUPLICATES_SUB, REVIEW_PRIMARY, READY_LIST, DUP_FAQS, AGENT_FAQS } from "./SmartImportReview";
+import { DECK_TITLE, DECK_QUESTIONS } from "./v9/ReviewDeck";
+import { DECK_WORDS, agencyAsk, statusPickLabel } from "./v9/DeckQuestions";
+import { QueryStatus } from "../../types";
 import { DupeMerged } from "./reviewRows";
 import { SkipSetupConfirm, SKIP_ASK } from "./SkipSetupConfirm";
 import { READY_TXT } from "./ScatterSettleLoader";
@@ -36,7 +39,10 @@ describe("W1 · the words that changed, as literals, on their screens", () => {
     expect(t).toMatch(/for\s+The Salt Road/);
     expect(t).toContain("with agents");
     expect(t).toContain("Step 1");
-    expect(overview(REVIEW_FIXTURE)).toContain("Optional");
+    /* v9: nothing flagged is optional; the tier is "Need an answer" */
+    expect(overview(REVIEW_FIXTURE)).not.toMatch(/Optional|Chances to sharpen/);
+    expect(overview(REVIEW_FIXTURE)).toContain("Need an answer");
+    expect(overview(REVIEW_FIXTURE)).toContain("24 rows, read and sorted. Nothing is saved yet.");
     expect(t).toContain("Let's work through it");
     for (const gone of ["Top tip", "Why sharpen", "Skip setup", "→", "Here's what we found"]) expect(t).not.toContain(gone);
     for (const l of ["Duplicates", "Agents", "Queries", "Import"]) expect(t).toContain(l);
@@ -51,19 +57,15 @@ describe("W1 · the words that changed, as literals, on their screens", () => {
     expect(TIER_TEXT.agentsReady).toBe("Read cleanly. Good to import as they are.");
     expect(TIER_TEXT.agentsFix(1)).toBe("1 possible duplicate set to merge. Sorted on the duplicates step.");
     expect(TIER_TEXT.agentsFix(3)).toBe("3 possible duplicate sets to merge. Sorted on the duplicates step.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 2, openMapping: true })).toBe("2 could use an agency, plus the odd detail to confirm. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 2, openMapping: false })).toBe("2 could use an agency. Nothing's lost without one.");
-    expect(TIER_TEXT.agentsSharpen({ noAgency: 0, openMapping: true })).toBe("A detail or two to confirm. Each one sharpens your tracking.");
     expect(TIER_TEXT.queriesReady).toBe("Dates read, statuses clear. Good to import as they are.");
-    expect(TIER_TEXT.queriesSharpen).toBe("A few dates to confirm and statuses to clarify. Each one makes your tracking sharper.");
     const n = { sets: 1, agentsOpen: 3, queriesOpen: 0 };
     expect(stepCaption("duplicates", n)).toBe("1 set");
     expect(stepCaption("duplicates", { ...n, sets: 4 })).toBe("4 sets");
-    expect(stepCaption("agents", n)).toBe("3 optional");
+    expect(stepCaption("agents", n)).toBe("3 to answer");
     expect(stepCaption("queries", n)).toBe("Ready to go");
     expect(stepCaption("import", n)).toBe("You confirm");
     const t = overview(REVIEW_FIXTURE);
-    expect(t).toContain(TIER_TEXT.queriesSharpen);
+    expect(t).toMatch(/dates? (to confirm|missing)[^.]*\. One pick each\./);
   });
 
   it("the duplicates step", () => {
@@ -78,36 +80,51 @@ describe("W1 · the words that changed, as literals, on their screens", () => {
     expect(DUPLICATES_SUB).toBe("Keep one row and its queries combine. Nothing is lost.");
     expect(t).toContain("Possible repeats");
     expect(t).toMatch(/\d+ sets?/);
-    expect(t).toContain("How this step works");
-    expect(t).toContain("Same agent, twice?");
-    expect(t).toContain("Remove the duplicate and its queries move onto the one you keep. Different people? Keep them both.");
+    /* v9: the guide card and the rail are gone; the FAQ is behind "Questions" */
+    for (const gone of ["How this step works", "Same agent, twice?"]) expect(t).not.toContain(gone);
+    expect(t).toContain("Decide each set above first.");
     expect(t).toContain("Questions");
     expect(t).not.toContain("FAQs");
     expect(t).toContain("Review all agents");
     expect(t).not.toContain("→");
   });
 
+  /* RE-POINTED (onboarding v9): the agents step is the answer deck over the ready list. */
   it("the agents step", () => {
     const t = review(REVIEW_FIXTURE);
     expect(t).toContain("agents for your contact list");
-    expect(t).toContain("Add as much or as little detail as you like.");
-    expect(t).toContain("Agents from your file");
+    expect(t).toMatch(/\d+ need an answer before you go on\. The other \d+ are ready\./);
+    expect(t).toContain("Needs an answer");
+    expect(t).toMatch(/1 of \d+/);
+    expect(t).toContain("Ready to import");
     expect(t).toMatch(/\d+ ready/);
-    expect(t).toMatch(/\d+ to sharpen/);
-    expect(t).toContain("Anything marked needs a quick look.");
-    expect(t).toContain("It might be missing the agency's name. Check those, add any detail you can, then we'll move on to your queries.");
-    expect(t).toContain("Continue to queries");
-    expect(t).toContain("No agency name");
-    for (const gone of ["Populating your agent database", "Before you review", "Data captured", "in pink", "Ready to import", "→"]) expect(t).not.toContain(gone);
+    expect(t).toMatch(/Continue to queries · \d+ to answer first/);
+    expect(t).toContain("Coming up:");
+    for (const gone of ["Populating your agent database", "Before you review", "Data captured", "in pink", "to sharpen", "Anything marked needs a quick look.", "Agents from your file", "Reset all changes made here", "→"]) expect(t).not.toContain(gone);
   });
 
-  it("the queries step's words, and the primaries", () => {
-    expect(GUIDE.queries).toEqual({ head: "Dates drive your reminders.", text: "A sent date lets QueryHawk tell you when a nudge is due. Where we couldn't be sure, we've asked rather than guessed." });
-    expect(GUIDE_EYEBROW).toBe("How this step works");
-    expect(REVIEW_PRIMARY).toEqual({ duplicates: "Review all agents", agents: "Continue to queries" });
-    expect(importPrimary(12, 3)).toBe("Import 12 agents · 3 to sharpen");
-    expect(importPrimary(1, 2)).toBe("Import 1 agent · 2 to sharpen");
-    expect(importPrimary(5, 0)).toBe("Import and get started");
+  it("the deck's words", () => {
+    expect(DECK_TITLE).toBe("Needs an answer");
+    expect(DECK_QUESTIONS).toBe("Questions");
+    expect(agencyAsk("Priyanka")).toBe("Which agency is Priyanka with?");
+    expect(DECK_WORDS).toMatchObject({
+      agencyWhy: "The sheet has a name and no agency. An agency helps you spot colleagues and duplicates later, but it isn't required.",
+      agencySave: "Save agency", agencyCarry: "Carry on without an agency", agencyKept: 'Kept as "No agency". You can add it any time.',
+      twoWayWhy: "It reads two ways. Pick one and the query takes that date.", twoWayNeither: "Neither · type the date",
+      dateWhy: "A date lets QueryHawk work out when a nudge is due. If you don't have one, say so and the query is kept undated.",
+      dateSave: "Save date", dateNone: "I don't have this date", dateKept: "Kept undated. The dashboard will show it as waiting on you until you add one.",
+      dateBlank: "Your sheet has no date for this one. When was it sent?",
+      statusWhy: "Statuses are picked, never typed, so every query is tracked the same way.",
+      namelessAsk: "This row has no agent or agency. Who was it sent to?",
+      namelessWhy: "Without one, the query can't be tracked. Add a name or an agency, or remove the row.",
+      namelessSave: "Save", namelessRemove: "Remove this row",
+    });
+    expect(READY_LIST.head).toBe("Ready to import");
+    expect(READY_LIST.showAll(13)).toBe("Show all 13");
+    expect(READY_LIST.lead).toBe("Coming up:");
+    expect(REVIEW_PRIMARY).toEqual({ duplicates: "Review all agents" });
+    expect(statusPickLabel(QueryStatus.QUERIED)).toBe("Queried, no reply yet");
+    expect(statusPickLabel(QueryStatus.REJECTED)).toBe("Passed");
   });
 
   it("leaving mid-review", () => {
@@ -151,14 +168,16 @@ describe("W1 · the words that did not change, verbatim from their modules", () 
 
   it("the questions, the frame's own controls and the importing loader", () => {
     const dupes = review(REVIEW_FIXTURE_DUPES);
-    for (const f of DUP_FAQS) expect(dupes).toContain(f.q);
+    expect(DUP_FAQS.length).toBeGreaterThan(2);
+    for (const f of DUP_FAQS) expect(dupes, "the FAQ is closed on arrival").not.toContain(f.q);
     const agents = review(REVIEW_FIXTURE);
-    for (const f of AGENT_FAQS) expect(agents).toContain(f.q);
+    expect(AGENT_FAQS.length).toBeGreaterThan(3);
+    for (const f of AGENT_FAQS) expect(agents, "the FAQ is closed on arrival").not.toContain(f.q);
+    /* v9: the agents step's questions are behind the deck's "Questions", closed on arrival */
     expect(agents).toContain("‹ Back");
-    expect(agents).toContain("Reset all changes made here");
     expect(IMPORTING_HEAD).toEqual({ working: "Setting up your dashboard", done: "You're all set" });
     expect(IMPORTING_DONE_LINE).toBe("Opening your dashboard…");
     expect(IMPORTING_MESSAGES).toHaveLength(6);
-    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", sharpen: "Chances to sharpen" });
+    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" });
   });
 });

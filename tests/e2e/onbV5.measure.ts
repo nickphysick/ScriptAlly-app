@@ -33,11 +33,6 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "reset", q: "s=reset", form: "account" },
   { id: "reset-sent", q: "s=reset-sent", form: "account" },
   { id: "welcome", q: "s=welcome", form: "setup" },
-  { id: "ready", q: "s=ready", form: "setup" },
-  { id: "ready-drafting", q: "s=ready&status=drafting", form: "setup" },
-  { id: "details", q: "s=details&status=ready", form: "setup" },
-  { id: "details-still", q: "s=details&status=drafting", form: "setup" },
-  { id: "book", q: "s=book", form: "setup" },
   { id: "fork", q: "s=fork&pick=smart", form: "setup" },
   { id: "fork-byhand", q: "s=fork&pick=byhand", form: "setup" },
   { id: "fork-pro", q: "s=fork&pick=template&plan=pro", form: "setup" },
@@ -364,7 +359,9 @@ test.describe("OB1", () => {
   });
 
   /** Screens whose first thing on the sheet is an open title. Phase 4 adds the fork and the confirm. */
-  const OPEN = ["welcome", "ready", "details", "details-still", "book"];
+  /* Onboarding v9 retired the open title from set-up's first two steps: the welcome is an ink panel
+     and the book step is a title page (held by OB9 W1, T1 and B1). The fork and the confirm keep it. */
+  const OPEN: string[] = [];
 
   test("S1 every step opens on a typewriter title on the sheet, with no box round it and no picture", async ({ page }) => {
     const want: Record<number, number> = { 1440: 44, 1280: 39.68, 390: 30 };
@@ -402,7 +399,8 @@ test.describe("OB1", () => {
   });
 
   test("S2 options are radios: one or none checked, a navy ring on the checked one, Continue waits", async ({ page }) => {
-    for (const [q, n] of [["s=welcome", 4], ["s=ready", 3]] as const) for (const vp of VPS) {
+    /* v9: the readiness question moved onto the title card (OB9 T2 holds it). */
+    for (const [q, n] of [["s=welcome", 4]] as const) for (const vp of VPS) {
       await lab(page, q, vp);
       const read = () => page.evaluate(() => {
         const rows = Array.from(document.querySelectorAll('.sf-opts[role="radiogroup"] [role="radio"]')) as HTMLElement[];
@@ -428,54 +426,15 @@ test.describe("OB1", () => {
     }
   });
 
-  test("S3 the book's fields are the baseline's, and genre and age category are pick-lists", async ({ page }) => {
-    /* The baseline was read from static markup, where an apostrophe is an entity; the page has the
-       character. Decoded once here, so the two are compared as the words a reader sees. */
-    const was = JSON.parse(readFileSync(resolve("reports/onb-v5-setup/baseline/manuscriptFields.json"), "utf8")
-      .replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '\\"'));
-    for (const [q, key] of [["s=book", "full"], ["s=details&status=ready", "full"], ["s=details&status=drafting", "stillWriting"]] as const) {
-      await lab(page, q, VPS[0]);
-      const now = await page.evaluate(() => {
-        const card = document.querySelector(".sf-stepcard")!;
-        const t = (e: Element) => (e.textContent ?? "").replace(/\s+/g, " ").trim();
-        return {
-          labels: Array.from(card.querySelectorAll("label")).map(t),
-          placeholders: Array.from(card.querySelectorAll("input")).map((i) => i.getAttribute("placeholder") ?? ""),
-          options: Array.from(card.querySelectorAll('[role="option"]')).map((o) => t(o).replace("✓", "").trim()),
-          selectPlaceholders: Array.from(card.querySelectorAll(".sa-placeholder")).map(t),
-          lists: card.querySelectorAll('[aria-haspopup="listbox"]').length,
-          textInputs: card.querySelectorAll("input").length,
-        };
-      });
-      expect(now.options.length, `${q}: options read`).toBeGreaterThan(10);
-      expect(now.labels, `${q}: labels`).toEqual(was[key].labels);
-      expect(now.placeholders, `${q}: placeholders`).toEqual(was[key].placeholders);
-      expect(now.options, `${q}: options`).toEqual(was[key].options);
-      expect(now.selectPlaceholders).toEqual(was[key].selectPlaceholders);
-      expect(now.lists, `${q}: genre and age category are pick-lists`).toBe(2);
-      expect(now.textInputs).toBe(was[key].placeholders.length);
-    }
-  });
-
-  test("S4 the still-writing note follows the choice, and is not on the details screen", async ({ page }) => {
-    const note = () => page.locator('.sf-stepcard [data-sf="still-writing"]').count();
-    for (const vp of VPS) {
-      await lab(page, "s=ready", vp);
-      expect(await note(), "absent on arrival").toBe(0);
-      await page.getByRole("radio", { name: /Still being written/ }).click();
-      expect(await note(), "present once it is checked").toBe(1);
-      expect(await page.locator('[data-sf="still-writing"]').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(244, 239, 233)");
-      await page.getByRole("radio", { name: /Ready to query/ }).click();
-      expect(await note(), "absent again on another choice").toBe(0);
-      await lab(page, "s=details&status=drafting", vp);
-      expect(await note(), "absent from the details screen").toBe(0);
-    }
-  });
+  /* S3 and S4 are retired by onboarding v9. S3 held the set-up book step to the v5 baseline's two
+     pick-lists; that step is now the title page with genre pills, an age row and a word count (OB9
+     B2, B3, B4). S4 held the still-writing note on the retired readiness screen; the note now sits
+     on the title card (OB9 T2). The Import page's book step keeps the pick-lists (IP1 F2). */
 
   const calls = (page: Page) => page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name));
   const reset = (page: Page) => page.evaluate(() => { window.__onbLab = { calls: [] }; });
 
-  test("K1 three tiles, each button to its own handler, one ring, and a drop that works", async ({ page }) => {
+  test("K1 three tiles, each button to its own handler, no ring, and a drop that works", async ({ page }) => {
     for (const vp of VPS) {
       for (const pick of ["smart", "template", "byhand"]) {
         await lab(page, "s=fork&pick=" + pick, vp);
@@ -488,15 +447,16 @@ test.describe("OB1", () => {
         }));
         expect(t.tiles, `@${vp.width}: three tiles`).toBe(3);
         expect(t.radios, "no radio").toBe(0);
-        expect(t.ringed, "exactly one ringed, and it is the suggested one").toEqual([pick]);
-        expect(t.ring[0], "a 2px navy outline").toMatch(/rgb\(42, 58, 82\) 0px 0px 0px 2px/);
+        /* RE-POINTED (onboarding v9): no tile is pre-selected (OB9 F1 holds the tiles' new shape). */
+        expect(t.ringed, "no tile is ringed").toEqual([]);
+        expect(t.ring, "no ring class").toEqual([]);
         expect(t.cols, `@${vp.width}: three across from 1080, stacked below`).toBe(vp.width >= 1080 ? 3 : 1);
       }
       await lab(page, "s=fork&pick=smart", vp);
       const presses: Array<[string, string]> = [
         ['[data-act="smart"]', "picker"], ['[data-act="download"]', "download"],
         ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"],
-        ['[data-sf="drop"]', "picker"], ['[data-act="later"]', "skip"], ['[data-act="desk"]', "importDesk"],
+        ['[data-act="later"]', "skip"], ['[data-act="desk"]', "importDesk"],
       ];
       for (const [sel, want] of presses) {
         await reset(page);
@@ -509,7 +469,7 @@ test.describe("OB1", () => {
         const dt = new DataTransfer();
         dt.items.add(new File(["Agent,Agency\nA,B\n"], "my agents.csv", { type: "text/csv" }));
         dt.items.add(new File(["x"], "second.csv", { type: "text/csv" }));
-        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+        document.querySelector('[data-tile="smart"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
       });
       const dropped = await page.evaluate(() => window.__onbLab!.calls);
       expect(dropped.map((c) => c.name), "one call to pickFile").toEqual(["pickFile"]);
@@ -518,7 +478,7 @@ test.describe("OB1", () => {
       await page.evaluate(() => {
         const dt = new DataTransfer();
         dt.items.add(new File(["x"], "notes.pdf", { type: "application/pdf" }));
-        document.querySelector('[data-sf="drop"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+        document.querySelector('[data-tile="smart"]')!.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
       });
       expect(await calls(page), "a type the picker would not offer is ignored").toEqual([]);
     }
@@ -547,7 +507,8 @@ test.describe("OB1", () => {
       const a = await read();
       expect(a.row).toBe("my agents FINAL v3.csv");
       expect(a.lead, "the sentence names the same file").toBe(a.row);
-      expect(a.text).not.toMatch(/\brows?\b/i);
+      /* v9: the screen says "QueryHawk reads every row"; what it must not state is a COUNT of rows. */
+      expect(a.text).not.toMatch(/\d[\d,]*\s+rows?\b/i);
       expect(await calls(page), "nothing is read on arrival").not.toContain("runMapping");
       const chooser = page.waitForEvent("filechooser");
       await page.locator('[data-act="change"]').click();
@@ -663,7 +624,7 @@ test.describe("OB1", () => {
     await page.reload({ waitUntil: "load" });
     await page.waitForSelector('[data-setup-frame="setup"]', { timeout: 30_000 });
     const s = await page.evaluate(() => ({
-      screen: document.querySelector(".sf-col")?.getAttribute("data-screen"),
+      screen: document.querySelector(".sf [data-screen]")?.getAttribute("data-screen"),
       tab: document.querySelector(".sf .ws-ftn")?.textContent,
       steps: Array.from(document.querySelectorAll(".sf-steplab")).map((e) => e.textContent),
       old: document.querySelectorAll(".sa-onb-card, .ob-head").length,
@@ -675,7 +636,7 @@ test.describe("OB1", () => {
     /* The real thing, so the branch claim is made here too: "Just getting started" shows two steps. */
     await page.getByRole("radio", { name: /Just getting started/ }).click();
     await page.locator(".sf-stepcard .sf-btn").click();
-    await page.waitForFunction(() => document.querySelector(".sf-col")?.getAttribute("data-screen") === "ready");
+    await page.waitForFunction(() => document.querySelector(".sf [data-screen]")?.getAttribute("data-screen") === "ack");
     expect(await page.locator(".sf-steplab").allTextContents(), "choosing it never adds a step").toEqual(["You", "Your book"]);
     await page.locator(".sf-exit").click();
     await expect(page.locator("#ws-sidebar").first(), "Skip for now returns to the app").toBeVisible({ timeout: 30_000 });
@@ -689,6 +650,5 @@ test.describe("OB1", () => {
       await lab(page, sc.q, vp);
       await shot(page, `${sc.id}-${vp.width}`);
     }
-    await lab(page, "s=ready&status=drafting", VPS[0]);
   });
 });

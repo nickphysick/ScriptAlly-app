@@ -1,0 +1,36 @@
+W1 · restore the open heading:  1 failed |  Error: the ink panel is on screen
+T1 · show the card from the start:  1 failed |  Error: the card is unseen while it types
+T2 · leave the title empty:  1 failed |  Error: the field holds the held title
+
+Phase 3 (build of the Phase 3 tree, lab, 1440)
+B1  mutation: drop the byline                     -> red: "the byline"
+B2  mutation: allow free text in the search       -> red: "typing something outside the list adds nothing"
+B3  mutation: the Adult note for every pick       -> red: "Picture Book"
+B4  mutation: remove the bounds                   -> red: over.err expected ["That's over 500,000 words. Check the number."]
+Unmutated: 12 passed.
+
+Phase 4 (lab, 1440)
+F1  red on the Phase 3 build: reports/onb-v9/red/F-before.txt (no 16:9 slot; heading "This uses your Smart Import.")
+F1  mutation: restore the one-shot note            -> red: "the one-shot note is gone"
+Unmutated: 3 passed.
+
+Phase 5 (lab, 1440)
+S1  red on the Phase 4 build: reports/onb-v9/red/S-before.txt (no mark; Continue lit with sets undecided; no band)
+S1  mutation: colour the file chip --go            -> red: "nothing but the mark is sage"
+Unmutated: 3 passed.
+
+Phase 6 (lab, 1440)
+G1–G4 red on the Phase 5 build: reports/onb-v9/red/G-before.txt (no deck, no gate, the nameless row set aside, the blank date unasked)
+G1  mutation: enable Continue from the start      -> red: "the primary is disabled while a question is open"
+G2  mutation: the blank date is not asked          -> red: the count of questions left when its card should show
+G3  mutation: set aside by itself, as before       -> red: "the row is in the deck" (both paths)
+G4  mutation: leaving does not ask                 -> red: "Skip for now asks first"
+Unmutated: 7 passed.
+
+Phase 7 (lab)
+M1  on the base the screens do not exist. Against the v9 sheet with its reduced-motion block cut back to Phase 3's:
+    red at "summary: no card is held out of sight" (reports/onb-v9/red/M-before.txt)
+M1  mutation: ignore the media query (motion left on) -> red: "welcome: nothing is animating"
+R1  no mutation asked. Green: the seven files that draw the loaders and the Import page's tiles are byte-identical
+    to 4a8e41b5, and all three render.
+Unmutated, whole file: 29 passed.

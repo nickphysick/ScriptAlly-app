@@ -5,10 +5,12 @@
  * The import review's rows (onboarding v5, part 2; ref design-refs/onboarding/
  * onboarding-journey-v5.html #agents #queries #dupes).
  *
- * A row at rest is a disc, a name and a mono second line, then at the right its status (queries),
- * a chip, a quiet action and a remove control. A row with something open takes a tinted ground and
- * a rust edge, its chip is the reason's own label, and **the question and its controls sit in the
- * row**, under the name. Answering settles the row in place.
+ * A row is a disc, a name and a mono second line, then at the right its status (queries), a
+ * "Ready" chip, a quiet action and a remove control.
+ *
+ * A ROW NEVER ASKS (onboarding v9). The questions are the answer deck's (`v9/ReviewDeck`); a row
+ * that still has one is in the deck and not in the list. `QueryReasonPanel` stays here because
+ * the deck draws the reasons the Words table did not redraw with it.
  *
  * ⚠️ EVERY SENTENCE, OPTION AND PLACEHOLDER HERE IS THE BUILD'S OWN. Questions come from
  * `queryReasonText`, choices from `statusDirectionChoices`, notes from the agent's own reason; the
@@ -19,7 +21,7 @@
  * and "you've sorted this query", each with its change action — so they are mounted there, wired
  * to the handlers the walk called.
  */
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import "./importFlow.css";
 import { ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
@@ -28,12 +30,13 @@ import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
 import {
   ReviewAgent, ReviewQuery, CheckReason,
-  agentStatus, queryStatusOf, fmtDate, dayOf, QUERY_STATUS_OPTIONS,
-  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, focusReasonMeta,
+  fmtDate, dayOf, QUERY_STATUS_OPTIONS,
+  currentDate, queryReasonText, statusDirectionChoices,
   dupNoteMerged, dupNoteOpen, dupNoteKept, keepBothLabel, keptClusterLabel,
 } from "../../lib/smartImportReviewModel";
 import { Chip, Disc, initialsOf } from "./ImportParts";
 import { ambiguousReadings } from "../../lib/templateImport";
+import { STAGE_NAME } from "../../lib/qcSummary";
 
 const READY = "Ready";
 
@@ -60,104 +63,40 @@ const Said: React.FC<{ children: React.ReactNode; onChange: () => void }> = ({ c
 // ── Agents ──────────────────────────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
   agent: ReviewAgent;
-  dupOpen: boolean;
-  /** The other members of an unresolved duplicate set this agent leads, carried through from the
-   *  duplicates step. */
-  clusterPeers?: ReviewAgent[];
   /** This agent absorbed a duplicate on the duplicates step. */
   merged?: boolean;
   open: boolean;
   onToggleOpen: () => void;
   onPatch: (p: Partial<ReviewAgent>) => void;
   onDelete: () => void;
-  onResolveReason: (kind: CheckReason) => void;
   onReopenReason: (kind: CheckReason) => void;
-  onMerge?: () => void;
-  onKeepBoth?: () => void;
 }
 
-export const AgentRow: React.FC<AgentRowProps> = ({
-  agent, dupOpen, clusterPeers, merged, open, onToggleOpen, onPatch, onDelete, onResolveReason, onReopenReason, onMerge, onKeepBoth,
-}) => {
-  const [agencyInput, setAgencyInput] = useState("");
-  const agencyRef = useRef<HTMLInputElement>(null);
+export const AgentRow: React.FC<AgentRowProps> = ({ agent, merged, open, onToggleOpen, onPatch, onDelete, onReopenReason }) => {
   const noAgency = !agent.agency.trim();
-  const status = agentStatus(agent, dupOpen);
-  const asks = status !== "captured";
   const disp = agent.name || agent.agency;
   /* the build's own second line: the agency, or that the name is not recorded */
-  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? "Agent name not recorded" : null;
-  const openDup = dupOpen && (clusterPeers?.length ?? 0) > 0;
-  const openMapping = !noAgency && !openDup ? agent.reasons.find((r) => r.kind === "mapping" && !r.resolved) : null;
-  const askingAgency = asks && noAgency;
-  const chip = !asks ? READY
-    : askingAgency ? focusReasonMeta("agent-needs-agency").pill
-    : openMapping ? focusReasonMeta("agent-mapping").pill
-    : "Needs a look"; /* a duplicate set carried through: the build's own label */
+  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? "Agent name not recorded" : agent.name && noAgency ? "No agency" : null;
   const who = disp || "This agent";
-  const saveAgency = () => { const v = agencyInput.trim(); if (v) { onPatch({ agency: v }); setAgencyInput(""); } else { agencyRef.current?.focus(); } };
   const resolvedMapping = agent.reasons.some((r) => r.kind === "mapping" && r.resolved);
 
   return (
-    <div className={`im-rw${asks ? " is-open" : ""}`} data-row-id={agent.id} data-row="agent" data-asks={asks ? "1" : "0"}>
+    <div className="im-rw" data-row-id={agent.id} data-row="agent" data-asks="0">
       <Disc initials={agent.name ? initialsOf(agent.name) : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–")} tone={agent.name ? "live" : "agency"} />
       <div>
-        {disp ? <b className="im-rwname">{disp}</b> : <b className="im-rwname im-rwname--blank">Name this agent</b>}
+        <b className="im-rwname">{disp}</b>
         {(subline || merged) && (
           <small className="im-rwsub">{[subline, merged ? dupNoteMerged : null].filter(Boolean).join(" · ")}</small>
         )}
       </div>
       <div className="im-rwend">
-        <Chip hot={asks} data-im="row-chip">{chip}</Chip>
-        {!asks && (
-          <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
-        )}
+        <Chip data-im="row-chip">{READY}</Chip>
+        <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
         <RemoveButton onClick={onDelete} />
       </div>
 
-      {/* the question, in the row */}
-      {asks && (
-        <div className="im-fix" data-im="row-fix">
-          {askingAgency && (
-            <div className="im-reason" data-reason="agent-needs-agency">
-              <p className="im-fixq">No agency yet — add it to sharpen this record, or carry on without one. Nothing's lost.</p>
-              <div className="im-fixrow">
-                <Field label="Agency name">
-                  <input ref={agencyRef} className="sf-in" type="text" value={agencyInput} placeholder="Agency name" aria-label="Agency name"
-                    onChange={(e) => setAgencyInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") saveAgency(); }} />
-                </Field>
-                <button type="button" className="sf-btn sf-btn--sm" onClick={saveAgency}>Save agency</button>
-                {agent.name.trim() && (
-                  <button type="button" className="sf-link sf-link--quiet" title="Import now with no agency — add it later from the agent's profile"
-                    onClick={() => onPatch({ agencyWaived: true })}>Carry on without an agency</button>
-                )}
-                <button type="button" className="sf-link sf-link--quiet" onClick={() => onPatch({ agencyOnly: true, name: "" })}>Reference by agency only</button>
-              </div>
-            </div>
-          )}
-          {openDup && clusterPeers && (
-            <div className="im-reason" data-reason="agent-duplicate">
-              <p className="im-fixq">Suspected duplicate of <b>{clusterPeers.map((p) => p.name || p.agency).join(", ")}</b>. Same agent, or two different people?</p>
-              <div className="im-fixrow">
-                <button type="button" className="sf-btn sf-btn--sm" onClick={onMerge}>Merge them</button>
-                <button type="button" className="sf-link sf-link--quiet" onClick={onKeepBoth}>Keep both</button>
-              </div>
-            </div>
-          )}
-          {openMapping && (
-            <div className="im-reason" data-reason="agent-mapping">
-              <p className="im-fixq">{quoteStatuses(openMapping.note)}</p>
-              <div className="im-fixrow">
-                <button type="button" className="sf-btn sf-btn--sm" onClick={() => onResolveReason("mapping")}>Mark as checked</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* a settled row's editor: add detail, or change an answer */}
-      {open && !asks && (
+      {open && (
         <div className="im-edit" data-im="row-edit">
           {agent.agencyWaived && noAgency && (
             <Said onChange={() => onPatch({ agencyWaived: false })}>You chose to use {who}'s name as the primary field. Their agency can be added any time.</Said>
@@ -382,47 +321,30 @@ export interface QueryRowProps {
   onToggleOpen: () => void;
   onPatch: (p: Partial<ReviewQuery>) => void;
   onDelete: () => void;
-  onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
-  onSwapDates: () => void;
-  /** Re-open this row's settled reasons (the walk's "Change this"). */
+  /** Re-open this row's settled reasons: it goes back to the deck. */
   onReopen: () => void;
 }
 
-export const QueryRow: React.FC<QueryRowProps> = ({
-  query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onResolveReason, onSwapDates, onReopen,
-}) => {
-  const openReasons = query.reasons.filter((r) => !r.resolved);
-  const asks = queryStatusOf(query) === "needs-check";
+export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onReopen }) => {
   const dateStr = currentDate(query);
-  const settledReasons = query.reasons.length > 0 && openReasons.length === 0;
+  const settledReasons = query.reasons.length > 0;
 
   return (
-    <div className={`im-rw${asks ? " is-open" : ""}`} data-row-id={query.id} data-row="query" data-asks={asks ? "1" : "0"}>
+    <div className="im-rw" data-row-id={query.id} data-row="query" data-asks="0">
       <Disc initials={initialsOf(agentName)} />
       <div>
         <b className="im-rwname">{agentName}</b>
         {/* the build's own line: where it came from, its status, its date */}
-        <small className="im-rwsub">{origin} · {query.status} · {dateStr ? fmtDate(dateStr) : "Undated"}</small>
+        <small className="im-rwsub">{origin} · {STAGE_NAME[query.status]} · {dateStr ? fmtDate(dateStr) : "Undated"}</small>
       </div>
       <div className="im-rwend">
-        <span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{query.status}</span>
-        <Chip hot={asks} data-im="row-chip">{asks ? focusReasonMeta(openReasons[0].code).pill : READY}</Chip>
-        {!asks && (
-          <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
-        )}
+        <span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>
+        <Chip data-im="row-chip">{READY}</Chip>
+        <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
         <RemoveButton onClick={onDelete} />
       </div>
 
-      {/* one panel per open reason, one under another, each with its own controls and its own resolve */}
-      {asks && (
-        <div className="im-fix" data-im="row-fix">
-          {openReasons.map((r) => (
-            <QueryReasonPanel key={r.code} query={query} code={r.code} onPatch={onPatch} onResolveReason={onResolveReason} onSwapDates={onSwapDates} />
-          ))}
-        </div>
-      )}
-
-      {open && !asks && (
+      {open && (
         <div className="im-edit" data-im="row-edit">
           {settledReasons && (
             <Said onChange={onReopen}>You've sorted this query — {query.status.toLowerCase()}{query.sentDate ? `, sent ${fmtDate(query.sentDate)}` : ""}.</Said>
@@ -437,7 +359,7 @@ export const QueryRow: React.FC<QueryRowProps> = ({
               <input className="sf-in" type="date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
             </Field>
           </div>
-          <p className="im-editnote">Dates are optional — add what you remember and your timeline stays accurate.</p>
+          <p className="im-editnote">Add what you remember and your timeline stays accurate.</p>
         </div>
       )}
     </div>

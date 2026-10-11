@@ -167,3 +167,25 @@ describe("⚠️ THE PROMISE ON THE PAGE: no API call, no taster spent", () => {
     expect(source).not.toContain("fetch(");
   });
 });
+
+/* Onboarding v9: a status the parser cannot read is a question on its own row; a blank one is not. */
+describe("a status cell the parser cannot read", () => {
+  const row = (status: string) => ({ "Agent name": "Rhys Hale", Agency: "Hale Agency", Status: status, "Date sent": "2026-08-08" });
+  it("is asked about, quoted back", () => {
+    const q = parseTemplateRows([row("waiting")]).result.queries[0];
+    expect(q.status).toBeNull();
+    expect(q.statusRaw).toBe("waiting");
+    expect(q.reasons).toEqual(["status-wording"]);
+  });
+  it("a blank status is not asked about: the review reads it as Queried", () => {
+    const q = parseTemplateRows([row("")]).result.queries[0];
+    expect(q.status).toBeNull();
+    expect(q.statusRaw).toBeUndefined();
+    expect(q.reasons).toBeUndefined();
+  });
+  it("a status the app tracks is read as it stands", () => {
+    const q = parseTemplateRows([row("Full Requested")]).result.queries[0];
+    expect(q.status).toBe("Full Requested");
+    expect(q.reasons).toBeUndefined();
+  });
+});

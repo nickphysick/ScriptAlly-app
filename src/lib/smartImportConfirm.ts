@@ -14,60 +14,6 @@
  * time. It is set in `pickFile` now, before the screen mounts.
  */
 
-/**
- * ⚠️ THE OVERVIEW'S LEAD NAMES ONLY CATEGORIES THAT ACTUALLY HAVE A COUNT.
- *
- * It used to be a single hardcoded sentence chosen by `allClear`, so a file with zero agent
- * problems and three query flags was still told "a couple of agents need a quick fix first" —
- * next to an Agents column showing zero of both non-ready tiers. The page contradicted itself in
- * one view. This composes the clause list from the counts, so a category that is zero is simply
- * not mentioned.
- *
- * Reports, never appraises: it states what is there, and does not tell the writer whether that is
- * a lot, a little, good or bad.
- */
-export function overviewLead(counts: {
-  agentsFix: number;
-  agentsSharpen: number;
-  queriesSharpen: number;
-}): string {
-  const { agentsFix, agentsSharpen, queriesSharpen } = counts;
-  if (agentsFix === 0 && agentsSharpen === 0 && queriesSharpen === 0) {
-    return "It all read cleanly. Your history's ready to come straight in.";
-  }
-
-  const clauses: string[] = [];
-  if (agentsFix > 0) {
-    clauses.push(
-      agentsFix === 1
-        ? "one agent needs a decision"
-        : `${agentsFix} agents need a decision`,
-    );
-  }
-  if (agentsSharpen > 0) {
-    clauses.push(
-      agentsSharpen === 1
-        ? "one agent has a detail to sharpen"
-        : `${agentsSharpen} agents have details to sharpen`,
-    );
-  }
-  if (queriesSharpen > 0) {
-    clauses.push(
-      queriesSharpen === 1
-        ? "one query has a detail to sharpen"
-        : `${queriesSharpen} queries have details to sharpen`,
-    );
-  }
-
-  // "a, b and c" — the list reads as prose, however many clauses survived.
-  const list =
-    clauses.length === 1
-      ? clauses[0]
-      : `${clauses.slice(0, -1).join(", ")} and ${clauses[clauses.length - 1]}`;
-  /* Two sentences, no dash (onboarding v5 part 2). The clauses and their joins are untouched; the
-     list's first letter is capitalised because it opens a sentence now. */
-  return `Most of it's ready to go. ${list.charAt(0).toUpperCase()}${list.slice(1)}.`;
-}
 
 /** The lead sentence: names the file when we have one, and says so plainly when we do not. */
 export function confirmFileLead(fileName: string | null | undefined): {

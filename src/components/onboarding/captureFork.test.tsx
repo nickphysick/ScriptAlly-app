@@ -20,16 +20,16 @@ import {
 } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import {
-  ConfirmScreen, CONFIRM_TITLE, CONFIRM_SUB, CONFIRM_NOTE_FREE, CONFIRM_NOTE_PRO, fileSizeLabel, fileTypeLabel,
+  ConfirmScreen, CONFIRM_TITLE, CONFIRM_SUB, HOW_EYEBROW, HOW_STEPS, fileSizeLabel, fileTypeLabel,
 } from "./ConfirmScreen";
 import { confirmFileLead } from "../../lib/smartImportConfirm";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").replace(/"/g, "&quot;");
 const noop = () => {};
-const fork = (ringed: CaptureOption, tier: "free" | "pro" = "free") =>
+const fork = (_was: CaptureOption, tier: "free" | "pro" = "free") =>
   renderToStaticMarkup(
-    <CaptureFork ringed={ringed} tier={tier} onChooseFile={noop} onDropFile={noop} onUploadTemplate={noop}
+    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onUploadTemplate={noop}
                  onAddByHand={noop} onBack={noop} onNothingYet={noop} onOpenImportDesk={noop} onDownloadTemplate={noop} />,
   ).replace(/<!-- -->/g, "");
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
@@ -46,10 +46,14 @@ describe("W1 the fork's words", () => {
     expect(CAPTURE_OPTIONS.map((k) => CAPTURE_CHOICES[k].title)).toEqual(["Smart import.", "Our template.", "Add by hand."]);
   });
 
-  it("Smart import's text is the new one; the template's and by-hand's are unchanged", () => {
-    expect(CAPTURE_CHOICES.smart.desc).toBe("Upload the spreadsheet you already keep, in any layout and any wording. QueryHawk reads it and shows you everything before anything is saved.");
-    expect(CAPTURE_CHOICES.template.desc).toBe("Download a ready-made sheet, fill in your agents, upload it back. Set columns mean we read it exactly, every time.");
-    expect(CAPTURE_CHOICES.byhand.desc).toBe("Go straight to the agent form and type them in. Quickest route if you've only a handful to record.");
+  /* RE-POINTED (onboarding v9): each tile's paragraph became three short lines. */
+  it("each tile states three short lines, and no paragraph", () => {
+    expect(CAPTURE_CHOICES.smart.lines).toEqual(["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"]);
+    expect(CAPTURE_CHOICES.template.lines).toEqual(["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"]);
+    expect(CAPTURE_CHOICES.byhand.lines).toEqual(["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"]);
+    const h = fork("smart");
+    expect(h.match(/<li>/g) ?? []).toHaveLength(9);
+    expect(h).not.toContain("sf-tilep");
   });
 
   it("each tile's buttons carry the table's labels", () => {
@@ -77,36 +81,29 @@ describe("W1 the fork's words", () => {
   });
 });
 
-describe("K1 three tiles, no radio, one ring", () => {
+describe("K1 three tiles, no radio, no ring", () => {
   it("draws three tiles and no radio group", () => {
     const h = fork("smart");
-    expect(h.match(/class="sf-tile(?: is-ringed)?"/g) ?? []).toHaveLength(3);
+    expect(h.match(/<section class="sf-tile /g) ?? []).toHaveLength(3);
     expect(h).not.toContain('role="radio"');
     expect(h).not.toContain('role="radiogroup"');
     expect(h).not.toContain("aria-pressed");
     expect(h).not.toContain("aria-checked");
   });
 
-  it("rings exactly one tile, and it is the suggested one — for each of the three", () => {
-    for (const key of CAPTURE_OPTIONS) {
-      const h = fork(key);
-      const ringed = [...h.matchAll(/data-tile="(\w+)" data-ringed="true"/g)].map((m) => m[1]);
-      expect(ringed, `suggesting ${key}`).toEqual([key]);
-    }
+  /* RE-POINTED (onboarding v9): no tile is pre-selected, so there is no ring and no drop zone
+     hanging from the ringed tile. Each tile opens on an illustration slot instead. */
+  it("no tile is ringed on arrival, and each opens on its illustration slot", () => {
+    const h = fork("smart");
+    expect(h).not.toContain("is-ringed");
+    expect(h).not.toContain("data-ringed");
+    expect(h).not.toContain('data-sf="drop"');
+    expect([...h.matchAll(/data-slot="fork-(\w+)"/g)].map((m) => m[1])).toEqual(["smart", "template", "byhand"]);
+    expect(text(h), "no words promise a drop").not.toMatch(/drop your file/i);
   });
 
-  it("every tile's buttons are live whichever is ringed", () => {
-    for (const key of CAPTURE_OPTIONS) expect(fork(key)).not.toMatch(/<button[^>]*disabled/);
-  });
-
-  it("the drop zone rides the ringed Smart import tile, and says what it accepts", () => {
-    expect(fork("smart")).toContain('data-sf="drop"');
-    expect(text(fork("smart"))).toContain("Drop your file here, or choose a file");
-    expect(text(fork("smart"))).toContain(".csv · .xlsx");
-    /* A size nothing enforces is not stated (onboarding v5 part 2, phase 0). */
-    expect(text(fork("smart"))).not.toMatch(/\bMB\b/);
-    expect(fork("byhand")).not.toContain('data-sf="drop"');
-    expect(fork("template")).not.toContain('data-sf="drop"');
+  it("every tile's buttons are live", () => {
+    expect(fork("smart")).not.toMatch(/<button[^>]*disabled/);
   });
 
   it("a drop is taken only for a type the picker offers", () => {
@@ -114,9 +111,10 @@ describe("K1 three tiles, no radio, one ring", () => {
     for (const no of ["agents.pdf", "notes.txt", "csv", "sheet.numbers"]) expect(acceptsDroppedFile(no), no).toBe(false);
   });
 
-  it("the component handles the drop itself — the words promise it", () => {
+  it("the Smart import tile takes a dropped file itself", () => {
     const src = readFileSync(resolve(here, "CaptureFork.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src).toMatch(/onDrop=\{drop\}/);
+    expect(src).toMatch(/onDrop: \(e\) =>/);
+    expect(src).toMatch(/<Tile option="smart"[^>]*drop=\{dropProps\}/);
     expect(src).toMatch(/onDropFile\(file\)/);
     expect(src, "first file only").toMatch(/files\?\.\[0\]/);
   });
@@ -138,7 +136,7 @@ describe("K1 three tiles, no radio, one ring", () => {
     expect(f).toContain("chooseTemplate: () => templateInputRef.current?.click(),");
     expect(call).toContain("onAddByHand={onAddByHand}");
     expect(call).toContain("onNothingYet={onSkip}");
-    expect(call).toContain("ringed={importOption}");
+    expect(call).not.toContain("ringed=");
     expect(call).toContain("tier={entitlement.tier}");
     expect(f).toMatch(/data-picker="smart"[\s\S]*?pickFile\(f\)/);
     expect(f).toMatch(/data-picker="template"[\s\S]*?pickTemplateFile\(f\)/);
@@ -171,11 +169,11 @@ describe("what lost its last reader is deleted, not left", () => {
 });
 
 describe("K3 the confirm names the file, twice, and spends nothing", () => {
-  const confirm = (name: string, tier: "free" | "pro" = "free", size: number | null = 14_300) =>
-    renderToStaticMarkup(<ConfirmScreen fileName={name} fileSize={size} tier={tier} onChange={noop} onBack={noop} onRead={noop} />).replace(/<!-- -->/g, "");
+  const confirm = (name: string, _tier: "free" | "pro" = "free", size: number | null = 14_300) =>
+    renderToStaticMarkup(<ConfirmScreen fileName={name} fileSize={size} onChange={noop} onBack={noop} onRead={noop} />).replace(/<!-- -->/g, "");
 
   it("title, subline, label and primary are the table's", () => {
-    expect(CONFIRM_TITLE).toBe("This uses your Smart Import.");
+    expect(CONFIRM_TITLE).toBe("Let QueryHawk Smart Import take it from here.");
     expect(CONFIRM_SUB).toBe("Nothing is saved until you've checked what we read.");
     const h = confirm("my agents FINAL v3.csv");
     expect(h).toContain(`<h1 class="sf-title">${CONFIRM_TITLE}</h1>`);
@@ -200,14 +198,27 @@ describe("K3 the confirm names the file, twice, and spends nothing", () => {
   });
 
   it("states no row count: counting rows would mean reading the file", () => {
-    expect(text(confirm("a.csv"))).not.toMatch(/\brows?\b/i);
+    expect(text(confirm("a.csv"))).not.toMatch(/\d[\d,]*\s+rows?\b/i);
   });
 
-  it("the note is the tier's", () => {
-    expect(confirm("a.csv", "free")).toContain(esc(CONFIRM_NOTE_FREE));
-    expect(CONFIRM_NOTE_FREE).toBe("This is your one Smart Import. The template never uses it, so keep it for a spreadsheet you'd rather not retype.");
-    expect(confirm("a.csv", "pro")).toContain(esc(CONFIRM_NOTE_PRO));
-    expect(CONFIRM_NOTE_PRO, "unchanged").toBe("This is this month's Smart Import. Your next one is available next month.");
+  /* RE-POINTED (onboarding v9): this screen no longer says what the import costs. The tile's fact
+     line (K2) and the already-used state still do. */
+  it("carries no one-shot note, for either tier", () => {
+    for (const tier of ["free", "pro"] as const) {
+      const seen = text(confirm("a.csv", tier)).replace(/&#x27;/g, "'");
+      expect(seen).not.toMatch(/your one Smart Import|this month's Smart Import/);
+      expect(confirm("a.csv", tier)).not.toContain("sf-note");
+    }
+  });
+
+  it("says what happens next, in three steps", () => {
+    expect(HOW_EYEBROW).toBe("What happens next");
+    expect(HOW_STEPS.map((s) => [s.title, s.line])).toEqual([
+      ["Your sheet, as it is", "Any layout, any wording. Nothing to tidy first."],
+      ["QueryHawk reads every row", "Agents, queries, dates and statuses, sorted into place."],
+      ["You check what lands", "Anything unclear is asked about. Nothing is saved until you say so."],
+    ]);
+    expect(confirm("a.csv").match(/data-slot="handoff-/g) ?? []).toHaveLength(3);
   });
 
   it("sizes and types are stated the way a reader says them", () => {

@@ -1,0 +1,10 @@
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:409:3 › F1 › F1 three tiles: a 16:9 slot, three lines, no ring on arrival (828ms)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:460:3 › F1 › F1 the hand-off: its heading, no one-shot note, three steps with 96px slots (782ms)
+    Error: smart: a 16:9 slot (0)
+    Expected: <= 0.03
+    Received:    1.7777777777777777
+    Error: expect(received).toBe(expected) // Object.is equality
+    Expected: "Let QueryHawk Smart Import take it from here."
+    Received: "This uses your Smart Import."
+  2 failed
+  1 passed (4.1s)

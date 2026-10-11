@@ -15,18 +15,17 @@
  */
 import { QueryStatus } from "../types";
 import { courtOf, STAGE_NAME } from "./qcSummary";
-import { parseModel, seedUnidentifiedSetAside } from "./smartImportReviewModel";
+import { parseModel } from "./smartImportReviewModel";
 import type { ReviewAgent, ReviewQuery } from "./smartImportReviewModel";
 import type { SmartImportResult } from "../types/smartImport";
 
 /**
- * The working model the summary counts: the file as read, with the rows the review will set aside
- * by itself already set aside. The summary once counted the raw read, so a row with no agent and
- * no agency was "an agent" on the summary and gone from the review that followed it.
+ * The working model the summary counts: the file as read, the same model the review opens on.
  */
 export function summaryModel(result: SmartImportResult): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
-  const parsed = parseModel(result);
-  return seedUnidentifiedSetAside(parsed.agents, parsed.queries);
+  /* v9: the review asks about a row with no agent and no agency, where it used to set it aside by
+     itself. So the summary counts it too, as an agent that needs an answer. */
+  return parseModel(result);
 }
 
 export type AgentStanding = "live" | "closed" | "none";
@@ -116,35 +115,23 @@ export function stepCaption(id: ImportStepId, n: { sets: number; agentsOpen: num
   if (id === "import") return "You confirm";
   if (id === "duplicates") return n.sets === 0 ? "Ready to go" : n.sets === 1 ? "1 set" : `${n.sets} sets`;
   const open = id === "agents" ? n.agentsOpen : n.queriesOpen;
-  return open === 0 ? "Ready to go" : `${open} optional`;
+  /* v9: nothing flagged is optional. */
+  return open === 0 ? "Ready to go" : `${open} to answer`;
 }
 
 /** "A possible duplicate set" count: one per leader of an unresolved cluster. */
 export const duplicateSets = (agents: readonly ReviewAgent[]): number =>
   agents.filter((a) => !a.deleted && a.mergeWith.length > 0 && !a.mergeResolved).length;
 
-/** How many live agents have no agency, and whether any carries an open mapping reason — the two
- *  facts the agents card's "Chances to sharpen" sentence is built from. */
-export function agentSharpenFacts(agents: readonly ReviewAgent[]): { noAgency: number; openMapping: boolean } {
-  const live = agents.filter((a) => !a.deleted);
-  return {
-    noAgency: live.filter((a) => !a.agency.trim()).length,
-    openMapping: live.some((a) => a.reasons.some((r) => r.kind === "mapping" && !r.resolved)),
-  };
-}
-
 /** The tier sentences. Words: the pack's table; the counts are the caller's. */
 export const TIER_TEXT = {
   agentsReady: "Read cleanly. Good to import as they are.",
   agentsFix: (sets: number) => `${sets} possible duplicate set${sets === 1 ? "" : "s"} to merge. Sorted on the duplicates step.`,
-  agentsSharpen: (f: { noAgency: number; openMapping: boolean }) =>
-    f.noAgency > 0
-      ? `${f.noAgency} could use an agency${f.openMapping ? ", plus the odd detail to confirm" : ""}. Nothing's lost without one.`
-      : "A detail or two to confirm. Each one sharpens your tracking.",
   queriesReady: "Dates read, statuses clear. Good to import as they are.",
-  queriesSharpen: "A few dates to confirm and statuses to clarify. Each one makes your tracking sharper.",
 } as const;
 
-export const TIER_NAME = { ready: "Ready to go", fix: "A quick fix", sharpen: "Chances to sharpen" } as const;
+/* v9: "Chances to sharpen" is "Need an answer". Its sentences are built from the questions
+   themselves (lib/reviewGate), so the summary says what is in each group. */
+export const TIER_NAME = { ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" } as const;
 export const SUMMARY_TITLE = "We've read your file.";
 export const SUMMARY_PRIMARY = { work: "Let's work through it", clear: "Bring it in" } as const;

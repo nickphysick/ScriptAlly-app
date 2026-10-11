@@ -4,9 +4,9 @@
  *
  * ⚠️ THE REVIEW MUST NOT ASSERT THAT AN AGENCY IS REQUIRED.
  *
- * A name **or** an agency is enough — that is the app-wide validity rule, every agent flag is an
- * optional sharpen (nothing blocks), and the row on the agents step offers `agencyWaived` as an
- * explicit way through. Two FAQ answers once said the opposite ("each record needs one", "Yes —
+ * A name **or** an agency is enough — that is the app-wide validity rule, and the agency question
+ * on the agents step offers `agencyWaived` ("Carry on without an agency") as an answer in its own
+ * right (onboarding v9: the question must be answered, and that IS an answer). Two FAQ answers once said the opposite ("each record needs one", "Yes —
  * every agent needs at least an agency"), one of them a few centimetres from the row contradicting
  * it. A writer who believed the FAQ would delete good records to satisfy a rule that does not exist.
  *
@@ -17,7 +17,8 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { AGENT_FAQS, QUERY_FAQS, DUP_FAQS, GUIDE } from "./SmartImportReview";
+import { AGENT_FAQS, QUERY_FAQS, DUP_FAQS } from "./SmartImportReview";
+import { DECK_WORDS } from "./v9/DeckQuestions";
 
 const REQUIRED = /\b(needs? (at least )?an agency|agency (is|name is) required|must (have|add) an agency|every agent needs)\b/i;
 
@@ -31,16 +32,18 @@ describe("the agents step's questions", () => {
     expect(all.length).toBeGreaterThan(10);
     for (const f of all) expect(f.a, f.q).not.toMatch(REQUIRED);
   });
-  it("nor does the guide card", () => {
-    for (const g of Object.values(GUIDE)) expect(`${g.head} ${g.text}`).not.toMatch(REQUIRED);
-    /* The old margin note said an agency's name was something "we need". */
-    expect(GUIDE.agents.text).not.toMatch(/we need/i);
+  /* RE-POINTED (onboarding v9): the guide card is gone. The sentence that stands beside the
+     agency question now is the deck's "why", and it says outright that an agency is not required. */
+  it("nor does the deck's own line about the agency", () => {
+    expect(DECK_WORDS.agencyWhy).not.toMatch(REQUIRED);
+    expect(DECK_WORDS.agencyWhy).toMatch(/isn't required/);
   });
 });
 
 describe("the row the questions used to contradict", () => {
   const dir = resolve(process.cwd(), "src/components/onboarding");
-  const rows = ["SmartImportReview.tsx", "reviewRows.tsx"]
+  /* v9: the question is asked in the deck, so its words and its waive are read there */
+  const rows = ["SmartImportReview.tsx", "reviewRows.tsx", "v9/DeckQuestions.tsx"]
     .map((f) => { try { return readFileSync(resolve(dir, f), "utf8"); } catch { return ""; } })
     .join("\n").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   it("still offers carrying on without an agency", () => { expect(rows).toContain("Carry on without an agency"); });

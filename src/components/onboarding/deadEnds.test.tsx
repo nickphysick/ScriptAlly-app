@@ -102,9 +102,10 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
   const b = readFileSync(resolve(here, "../import/ImportFlow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const o = readFileSync(resolve(here, "../Onboarding.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-  it("'Use the template' returns to the fork with the template tile ringed", () => {
+  /* RE-POINTED (onboarding v9): the fork rings no tile, so BranchB has nothing to set on the way back. */
+  it("'Use the template' returns to the fork", () => {
     expect(b).toContain('onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}');
-    expect(branchOnly).toContain('onUseTemplate={() => setImportOption("template")}');
+    expect(branchOnly).not.toContain("setImportOption");
     expect(b).toContain('const toStart = () => { setScreen("idle"); onBackToStart?.(); };');
     expect(branchOnly).toContain('{flowScreen === "idle" && (');
   });

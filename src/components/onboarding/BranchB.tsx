@@ -17,12 +17,12 @@ import { SmartImportResult } from "../../types/smartImport";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
-import { CaptureOption } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "../import/ImportFlow";
-import { BookStep } from "./BookStep";
+import { BookMore } from "./v9/BookMore";
+import { AckTitle } from "./v9/AckTitle";
+import type { V9Stage } from "../../lib/onboardingV9";
 
-export { BOOK_TITLE, BOOK_SUB } from "./BookStep";
 
 export interface BranchBProps {
   onSkip: () => void;
@@ -37,7 +37,6 @@ export interface BranchBProps {
    *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
   onEnsureManuscript: () => Promise<string | null>;
   /** Pre-selected capture option: deep/interest → "smart", early → "byhand". */
-  defaultImport: CaptureOption;
   /** "Add them by hand" — drops into the existing add-agents flow. */
   onAddByHand: () => void;
   /** Escape hatch — finish onboarding into the Import desk (ImportCsv). */
@@ -78,6 +77,13 @@ export interface BranchBProps {
    * has no account to write to; everything between the summary and the hand-over is the real code.
    * `floorMs` shortens the 5-second floor for the locks (the floor itself is lock R1's).
    */
+  /** Step 2 opens with what the writer picked at step 1 (onboarding v9): its id and its title. */
+  stage?: V9Stage;
+  stageTitle?: string;
+  /** the account's display name, for the book's byline */
+  name?: string | null;
+  /** `#/onb-lab` only: open on the book, past the acknowledgement */
+  startAt?: "ack" | "book";
   lab?: { result: SmartImportResult; fileName: string; title: string; commit: (result: SmartImportResult) => Promise<CommitOutcome>; uid: string; floorMs?: number };
 }
 
@@ -89,38 +95,47 @@ export const exitModeFor = (screen: string): ExitMode =>
 
 /** Set-up's own two screens. Everything after the book is "list": the fork while the import flow is
  *  idle, and the flow's screens once a file has been chosen. */
-type B3Screen = "book" | "list";
+type B3Screen = "ack" | "book" | "list";
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
 }) => {
   const entitlement = useSmartImportEntitlement();
 
-  const [screen, setScreen] = useState<B3Screen>(lab ? "list" : "book");
+  const [screen, setScreen] = useState<B3Screen>(lab ? "list" : startAt ?? "ack");
   /* The import flow's own screen, reported up by it. `idle` = the fork is showing. */
   const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
   const flowRef = useRef<ImportFlowHandle>(null);
   /* The name the frame's rules know this position by: the fork is "pipeline", as it always was. */
-  const position = screen === "book" ? "book" : flowScreen === "idle" ? "pipeline" : flowScreen;
+  const position = screen !== "list" ? "book" : flowScreen === "idle" ? "pipeline" : flowScreen;
 
   /* Report the named position up rather than an index — an index is not a place, and the header
      owns how many steps this branch has. */
-  useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
+  useEffect(() => { onStage?.(screen === "list" ? "list" : "book"); }, [screen, onStage]);
   useEffect(() => { onExitMode?.(exitModeFor(position)); }, [position, onExitMode]);
   useEffect(() => { onImporting?.(position === "importing"); }, [position, onImporting]);
 
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(lab ? { ...emptyManuscriptFields(), title: lab.title } : initialBook ?? emptyManuscriptFields());
 
-  const [importOption, setImportOption] = useState<CaptureOption>(defaultImport);
 
-  // ── B2 · the book ────────────────────────────────────────────────────────
+  // ── Step 2 opens with the acknowledgement and the title (onboarding v9) ──
+  if (screen === "ack") {
+    return (
+      <AckTitle
+        stage={stage} stageTitle={stageTitle} initialTitle={fields.title}
+        onChange={onExit}
+        onContinue={({ title }) => { setFields((f) => ({ ...f, title })); setScreen("book"); }}
+      />
+    );
+  }
+
+  // ── Step 2, continued · your book (onboarding v9) ──
   if (screen === "book") {
     return (
-      <BookStep
-        initial={fields}
-        error={error}
-        onBack={onExit}
+      <BookMore
+        title={fields.title} name={name} initial={fields} error={error}
+        onBack={() => setScreen("ack")}
         onContinue={async (f) => {
           setFields(f);
           const ok = await onSaveBook(f);
@@ -140,7 +155,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         onEnsureManuscript={onEnsureManuscript}
         hostError={error}
         onAddByHand={onAddByHand}
-        onUseTemplate={() => setImportOption("template")}
         onImportComplete={onImportComplete}
         onScreen={setFlowScreen}
         onHandoff={onHandoff}
@@ -148,7 +162,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       />
       {flowScreen === "idle" && (
         <CaptureFork
-          ringed={importOption}
           tier={entitlement.tier}
           onChooseFile={() => flowRef.current?.chooseFile()}
           onDropFile={(f) => flowRef.current?.dropFile(f)}

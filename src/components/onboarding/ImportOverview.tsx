@@ -11,7 +11,10 @@
  * them (`lib/importSummary`); it classifies nothing. The agents total is the count before any
  * duplicate is merged, as it always was.
  *
- * ⚠️ NOTHING HERE BLOCKS. The one real decision, an unresolved duplicate, has its own step.
+ * IT OPENS ON THE SUCCESS MARK (onboarding v9): the file was read, and that is said first. The
+ * tiers no longer call anything optional: every flagged group "needs an answer" and names the
+ * step it is answered on. The counts are still `reviewTallies`'; the sentences under them are
+ * built from the questions themselves (`lib/reviewGate`).
  *
  * ⚠️ NO WAY OUT IS DRAWN HERE. The frame's "Skip for now" is the one way out of set-up; the
  * summary's own "Skip setup" (which was rendered disabled) is gone with its prop.
@@ -20,14 +23,16 @@ import React from "react";
 import "./importFlow.css";
 import { SmartImportResult } from "../../types/smartImport";
 import { reviewTallies } from "../../lib/smartImportReviewModel";
-import { overviewLead } from "../../lib/smartImportConfirm";
 import {
-  agentKey, agentKeyParts, agentDiscs, queryCourts, importSteps, stepCaption, duplicateSets, agentSharpenFacts,
+  agentKey, agentKeyParts, agentDiscs, queryCourts, importSteps, stepCaption, duplicateSets,
   TIER_TEXT, TIER_NAME, SUMMARY_TITLE, SUMMARY_PRIMARY,
   summaryModel,
 } from "../../lib/importSummary";
 import { StatusDot } from "../StatusDot";
 import { Chip, Disc, Stepper } from "./ImportParts";
+import { GoMark } from "./v9/GoMark";
+import { openAgentQuestions, openQueryQuestions, agentsAnswerLine, queriesAnswerLine, summaryLead, readLine } from "../../lib/reviewGate";
+import { unresolvedDuplicateAgentIds } from "../../lib/smartImportReviewModel";
 
 interface Props {
   result: SmartImportResult;
@@ -35,7 +40,7 @@ interface Props {
   /** The file's name, for the chip beside the title. */
   fileName?: string;
   /** The file's row count, when it is already known without reading the file again (the template
-   *  path knows it; a Smart import does not). Absent, the chip shows the name alone. */
+   *  path knows it; a Smart import does not). Absent, the line under the title states no count. */
   rowCount?: number | null;
   onContinue: () => void;
   /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
@@ -46,7 +51,7 @@ const TICK = (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 13l4 4 10-11" /></svg>
 );
 
-const Tier: React.FC<{ tone: "ok" | "fix" | "sharp"; mark: React.ReactNode; count: number; name: string; chip?: React.ReactNode; text: string }> = ({ tone, mark, count, name, chip, text }) => (
+const Tier: React.FC<{ tone: "ok" | "fix" | "ask"; mark: React.ReactNode; count: number; name: string; chip?: React.ReactNode; text: string }> = ({ tone, mark, count, name, chip, text }) => (
   <li className={tone} data-tier={tone}>
     <span className="im-tm" aria-hidden="true">{mark}</span>
     <b className="im-n" data-im="tier-n">{count}</b>
@@ -59,12 +64,12 @@ const Tier: React.FC<{ tone: "ok" | "fix" | "sharp"; mark: React.ReactNode; coun
 
 /** The reconciling bar: one segment per tier above zero, in proportion. */
 const Recon: React.FC<{ what: string; total: number; ok: number; fix: number; sharp: number }> = ({ what, total, ok, fix, sharp }) => {
-  const said = [`${ok} ready to go`, ...(fix > 0 ? [`${fix} need a quick fix`] : []), ...(sharp > 0 ? [`${sharp} to sharpen`] : [])].join(", ");
+  const said = [`${ok} ready to go`, ...(fix > 0 ? [`${fix} need a quick fix`] : []), ...(sharp > 0 ? [`${sharp} need an answer`] : [])].join(", ");
   return (
     <div className="im-recon" role="img" aria-label={`Of ${total} ${what}: ${said}`} data-im="recon">
       {ok > 0 && <i className="ok" style={{ flex: ok }} />}
       {fix > 0 && <i className="fix" style={{ flex: fix }} />}
-      {sharp > 0 && <i className="sharp" style={{ flex: sharp }} />}
+      {sharp > 0 && <i className="ask" style={{ flex: sharp }} />}
     </div>
   );
 };
@@ -76,7 +81,12 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
   const faces = React.useMemo(() => agentDiscs(agents, queries), [agents, queries]);
   const courts = React.useMemo(() => queryCourts(queries), [queries]);
   const sets = duplicateSets(agents);
-  const sharpen = agentSharpenFacts(agents);
+  /* The questions behind the two "Need an answer" tiers. An agent in an open duplicate set is the
+     duplicates step's, so it is left out here, as the tally leaves it out. */
+  const dupIds = React.useMemo(() => unresolvedDuplicateAgentIds(agents), [agents]);
+  const agentQs = React.useMemo(() => openAgentQuestions(agents.filter((a) => !dupIds.has(a.id))), [agents, dupIds]);
+  const queryQs = React.useMemo(() => openQueryQuestions(queries), [queries]);
+  const lead = summaryLead({ decisions: t.agents.fix, agentAnswers: t.agents.sharpen, queryAnswers: t.queries.sharpen });
 
   const allClear = t.agents.fix === 0 && t.agents.sharpen === 0 && t.queries.sharpen === 0;
   const steps = importSteps(sets > 0);
@@ -87,13 +97,25 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
   return (
     <div className="im-sum" data-im="summary" data-screen="overview">
       <header className="im-ohead">
-        <h1 className="im-h1" data-im="title">{SUMMARY_TITLE}</h1>
+        <div className="o9-markrow" data-im="markrow">
+          <GoMark />
+          <div className="o9-mtxt">
+            <h1 className="im-h1 o9-mhead" data-im="title">{SUMMARY_TITLE}</h1>
+            <span data-im="read-line">{readLine(rowCount)}</span>
+          </div>
+        </div>
         {file && (
           <div className="im-sumchips">
-            <Chip file data-im="file">{file}{typeof rowCount === "number" ? ` · ${rowCount} row${rowCount === 1 ? "" : "s"}` : ""}</Chip>
+            <Chip file data-im="file">{file}</Chip>
           </div>
         )}
-        <p data-im="lead">{overviewLead({ agentsFix: t.agents.fix, agentsSharpen: t.agents.sharpen, queriesSharpen: t.queries.sharpen })}</p>
+        <p data-im="lead">
+          {"clean" in lead ? lead.clean : (
+            <>{lead.before}{lead.clauses.map((c, i) => (
+              <React.Fragment key={c}>{i > 0 && (i === lead.clauses.length - 1 ? " and " : ", ")}<b>{c}</b></React.Fragment>
+            ))}{lead.after}</>
+          )}
+        </p>
       </header>
 
       <div className="im-pops">
@@ -118,10 +140,10 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
           <ul className="im-tiers">
             <Tier tone="ok" mark={TICK} count={t.agents.ready} name={TIER_NAME.ready} text={TIER_TEXT.agentsReady} />
             {t.agents.fix > 0 && (
-              <Tier tone="fix" mark="!" count={t.agents.fix} name={TIER_NAME.fix} chip={<Chip hot>Step 1</Chip>} text={TIER_TEXT.agentsFix(sets)} />
+              <Tier tone="fix" mark="!" count={t.agents.fix} name={TIER_NAME.fix} chip={<Chip hot>Step {steps.indexOf("duplicates") + 1}</Chip>} text={TIER_TEXT.agentsFix(sets)} />
             )}
             {t.agents.sharpen > 0 && (
-              <Tier tone="sharp" mark="+" count={t.agents.sharpen} name={TIER_NAME.sharpen} chip={<Chip>Optional</Chip>} text={TIER_TEXT.agentsSharpen(sharpen)} />
+              <Tier tone="ask" mark="?" count={t.agents.sharpen} name={TIER_NAME.ask} chip={<Chip hot>Step {steps.indexOf("agents") + 1}</Chip>} text={agentsAnswerLine(agentQs)} />
             )}
           </ul>
         </section>
@@ -152,7 +174,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
           <ul className="im-tiers">
             <Tier tone="ok" mark={TICK} count={t.queries.ready} name={TIER_NAME.ready} text={TIER_TEXT.queriesReady} />
             {t.queries.sharpen > 0 && (
-              <Tier tone="sharp" mark="+" count={t.queries.sharpen} name={TIER_NAME.sharpen} chip={<Chip>Optional</Chip>} text={TIER_TEXT.queriesSharpen} />
+              <Tier tone="ask" mark="?" count={t.queries.sharpen} name={TIER_NAME.ask} chip={<Chip hot>Step {steps.indexOf("queries") + 1}</Chip>} text={queriesAnswerLine(queryQs)} />
             )}
           </ul>
         </section>

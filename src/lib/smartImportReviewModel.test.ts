@@ -137,7 +137,7 @@ describe('reviewTallies — per-population, never pooled (the "37" fix)', () => 
       ],
       [
         query({ agentRef: 'a1', reasons: ['no-date'] }),              // query sharpen
-        query({ agentRef: 'a1' }),                                    // query ready
+        query({ agentRef: 'a1', sentDate: '2024-03-14' }),             // query ready (v9: an undated one would be asked)
       ]
     );
     const { agents, queries } = parseModel(r);
@@ -172,7 +172,7 @@ describe('reviewTallies — per-population, never pooled (the "37" fix)', () => 
         agent({ ref: 'a1', name: 'Jonathan Pryce', agency: 'Pryce Literary' }),
         agent({ ref: 'a2', name: 'J. Pryce', agency: 'Pryce Lit' }),
       ],
-      [query({ agentRef: 'a1' })]
+      [query({ agentRef: 'a1', sentDate: '2024-03-14' })]
     );
     const { agents, queries } = parseModel(r); // parseModel clusters these as likely-dupes
     const t = reviewTallies(agents, queries);
@@ -342,7 +342,7 @@ describe('focusReasonMeta — the label a row wears while it asks', () => {
   });
   it('maps the brief examples, and carries no headline', () => {
     expect(focusReasonMeta('agent-needs-agency')).toEqual({ pill: 'No agency name' });
-    expect(focusReasonMeta('status-direction').pill).toBe('Status to check');
+    expect(focusReasonMeta('status-direction').pill).toBe('Status to clarify'); // v9: the deck's chip
     expect(focusReasonMeta('missing-day').pill).toBe('Day to confirm');
   });
   it('the walk\'s two functions are gone from the model', async () => {
@@ -429,5 +429,28 @@ describe('reconcileRows — collapse duplicate query rows into one (Priya part 2
     expect(live[0].status).toBe(QueryStatus.PARTIAL_SENT);             // engine-derived current
     const pr = rungs(live[0]).find((r) => r.status === QueryStatus.PARTIAL_REQUESTED)!;
     expect(pr.note).toBe('asked for 50pp');                            // discarded row's note in history
+  });
+});
+
+describe('onboarding v9 — a missing sent date is asked about on both paths', () => {
+  it('a blank date with no reason of its own gains "no-date"', () => {
+    const { queries } = parseModel(result([agent()], [query({ sentDate: null, sentDateRaw: null })]));
+    expect(queries[0].reasons).toEqual([{ code: 'no-date', resolved: false }]);
+    expect(queries[0].sentDate, 'and it is still undated: nothing is invented').toBeNull();
+  });
+  it('a query already asked for its date is not asked twice', () => {
+    for (const code of ['no-date', 'unreadable-date', 'ambiguous-date', 'missing-day'] as const) {
+      const { queries } = parseModel(result([agent()], [query({ sentDate: null, reasons: [code] })]));
+      expect(queries[0].reasons.map((r) => r.code), code).toEqual([code]);
+    }
+  });
+  it('a dated query is not asked', () => {
+    const { queries } = parseModel(result([agent()], [query({ sentDate: '2024-03-14' })]));
+    expect(queries[0].reasons).toEqual([]);
+  });
+  it('the status cell the parser could not read rides to the review', () => {
+    const { queries } = parseModel(result([agent()], [query({ status: null, statusRaw: 'waiting', sentDate: '2024-03-14', reasons: ['status-wording'] })]));
+    expect(queries[0].statusRaw).toBe('waiting');
+    expect(queries[0].status, 'read as Queried until the writer picks').toBe(QueryStatus.QUERIED);
   });
 });

@@ -1,0 +1,7 @@
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:537:3 › S1 › S1 the summary opens on the mark, and its tiers need an answer (1.4s)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:580:3 › S1 › S1 duplicates: Continue lights only when every set is decided, then the mark (841ms)
+  ✘  3 [measure] › tests/e2e/onbV9.measure.ts:626:3 › S1 › S1 queries: the last answer brings the sage band, which accounts for every answer (1.1s)
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+    Error: Continue is off while a set is undecided
+    Error: locator.waitFor: Error: strict mode violation: locator('[data-step="queries"]') resolved to 2 elements:
+  3 failed

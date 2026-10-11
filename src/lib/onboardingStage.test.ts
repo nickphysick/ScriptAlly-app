@@ -6,26 +6,10 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { effectiveQueryingStage, importDefaultForStage } from "./onboardingStage";
+import { effectiveQueryingStage } from "./onboardingStage";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => readFileSync(resolve(here, rel), "utf8");
-
-describe("importDefaultForStage", () => {
-  it("pre-selects adding by hand for a writer with a few queries out", () => {
-    expect(importDefaultForStage("early")).toBe("byhand");
-  });
-
-  it("pre-selects Smart Import for the deeper two", () => {
-    expect(importDefaultForStage("deep")).toBe("smart");
-    expect(importDefaultForStage("interest")).toBe("smart");
-  });
-
-  it("falls to Smart Import when the stage is absent or unrecognised", () => {
-    expect(importDefaultForStage(null)).toBe("smart");
-    expect(importDefaultForStage(undefined)).toBe("smart");
-  });
-});
 
 describe("effectiveQueryingStage prefers the stored answer", () => {
   it("reads the stored value when there is one", () => {
@@ -58,14 +42,16 @@ describe("the stored field has at least one real reader", () => {
     expect(onboarding).toContain("currentUser?.queryingStage");
   });
 
-  it("and the value it reads is what drives Branch B's import default", () => {
+  /* RE-POINTED (onboarding v9): the fork no longer rings a suggested tile, so the stage has no
+     import default to drive and `importDefaultForStage` is deleted with its last caller. The stored
+     answer's reader is the acknowledgement: it decides which passage the title step types. */
+  it("and the value it reads is what chooses the acknowledgement's passage", () => {
     const onboarding = read("../components/Onboarding.tsx");
-    const anchor = "defaultImport={";
+    const anchor = "stage={effectiveQueryingStage(";
     expect(onboarding).toContain(anchor);
     const line = onboarding.slice(onboarding.indexOf(anchor));
-    const call = line.slice(0, line.indexOf("\n"));
-    expect(call).toContain("effectiveQueryingStage");
-    expect(call).toContain("currentUser?.queryingStage");
+    expect(line.slice(0, line.indexOf("\n"))).toContain("currentUser?.queryingStage");
+    expect(onboarding).not.toContain("importDefaultForStage");
   });
 });
 
