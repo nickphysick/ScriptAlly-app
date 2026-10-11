@@ -1,0 +1,54 @@
+
+Running 2 tests using 1 worker
+
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:39:3 › W1 › W1 the welcome is an ink panel over a card of four options, two-up (2.6s)
+  ✘  2 [measure] › tests/e2e/onbV9.measure.ts:76:3 › W1 › W1 with no name the heading drops it; at 400 the options are one column (2.4s)
+
+
+  1) [measure] › tests/e2e/onbV9.measure.ts:39:3 › W1 › W1 the welcome is an ink panel over a card of four options, two-up 
+
+    Error: the ink panel is on screen
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      53 |     record("W1", "1440", r);
+      54 |     await shot(page, "welcome-1440");
+    > 55 |     expect(r.panel, "the ink panel is on screen").toBe(true);
+         |                                                   ^
+      56 |     expect(r.band, "the navy token resolves").toMatch(/^rgb\(/);
+      57 |     expect(r.panelBg, "its background is the header panel's navy").toBe(r.band);
+      58 |     expect(r.eyebrow).toBe("Welcome");
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:55:51
+
+    Error Context: test-results/onbV9.measure.ts-W1-W1-the-5c265-card-of-four-options-two-up-measure/error-context.md
+
+  2) [measure] › tests/e2e/onbV9.measure.ts:76:3 › W1 › W1 with no name the heading drops it; at 400 the options are one column 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 1
+
+    - Array [
+    -   "Welcome to QueryHawk.",
+    -   "Let's get you on board.",
+    - ]
+    + Array []
+
+      80 |     record("W1", "400", r);
+      81 |     await shot(page, "welcome-400", true);
+    > 82 |     expect(r.headingLines).toEqual(["Welcome to QueryHawk.", "Let's get you on board."]);
+         |                            ^
+      83 |     expect(r.options).toBe(4);
+      84 |     expect(r.columns, "one column on a phone").toBe(1);
+      85 |     await noOverflow(page, "welcome 400");
+        at /Users/nickphysick/ScriptAlly-onb9/tests/e2e/onbV9.measure.ts:82:28
+
+    Error Context: test-results/onbV9.measure.ts-W1-W1-wit-f0714--the-options-are-one-column-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/onbV9.measure.ts:39:3 › W1 › W1 the welcome is an ink panel over a card of four options, two-up 
+    [measure] › tests/e2e/onbV9.measure.ts:76:3 › W1 › W1 with no name the heading drops it; at 400 the options are one column 

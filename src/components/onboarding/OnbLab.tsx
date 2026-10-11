@@ -125,7 +125,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
 
 const LabWelcome: React.FC = () => {
   const [sel, setSel] = React.useState<"starting" | "early" | "deep" | "interest" | null>(null);
-  return <WelcomeStageScreen selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
+  return <WelcomeStageScreen name={labQuery().get("name")} selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
 };
 
 /** The confirm with a real picker behind "Change", wired the way BranchB wires it: choosing a

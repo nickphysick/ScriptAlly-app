@@ -13,7 +13,8 @@ vi.mock("../../lib/db", async () => (await import("../../test/pageSmoke")).dbMoc
 vi.mock("../../lib/firebase", async () => (await import("../../test/pageSmoke")).firebaseMock());
 vi.mock("../toast/ToastProvider", async () => (await import("../../test/pageSmoke")).toastMock());
 
-import { WelcomeStageScreen, WELCOME_TITLE, WELCOME_SUB, WELCOME_LABEL } from "../Onboarding";
+import { WelcomeStageScreen } from "../Onboarding";
+import { WELCOME_EYEBROW, WELCOME_LINE, WELCOME_SECOND, welcomeHeading, firstNameOf } from "../../lib/onboardingV9";
 import { BranchA, READINESS, READINESS_TITLE, READINESS_SUB, READINESS_LABEL, STILL_WRITING_LEAD, STILL_WRITING_NOTE } from "./BranchA";
 import { BOOK_TITLE, BOOK_SUB } from "./BranchB";
 import { ManuscriptFields, emptyManuscriptFields } from "./ManuscriptFields";
@@ -26,13 +27,23 @@ const branchA = (screen: "readiness" | "details", status: ManuscriptStatus | nul
   render(<BranchA initialScreen={screen} initialStatus={status} onExit={noop} onSaveReady={noop} onSaveStillWriting={noop} />);
 
 describe("W1 the words on the set-up steps", () => {
-  it("welcome: the built heading with its full stop, the new subline, the built question and options", () => {
-    expect(WELCOME_TITLE).toBe("Let's set things up around your journey.");
-    expect(WELCOME_SUB).toBe("No wrong answer here. It just shapes what you see first.");
-    const h = render(<WelcomeStageScreen selected={null} onSelect={noop} onContinue={noop} />);
-    expect(h).toContain(`<h1 class="sf-title">${esc(WELCOME_TITLE)}</h1>`);
-    expect(h).toContain(`<p class="sf-sub">${esc(WELCOME_SUB)}</p>`);
-    expect(h).toContain(esc(WELCOME_LABEL));
+  /* RE-POINTED (onboarding v9): the welcome is the navy panel over a card. The open heading, its
+     subline and the card's question line are gone; the options and their words are unchanged. */
+  it("welcome: the panel's eyebrow, two-line heading with the first name, and line; the built options", () => {
+    expect(WELCOME_EYEBROW).toBe("Welcome");
+    expect(WELCOME_SECOND).toBe("Let's get you on board.");
+    expect(WELCOME_LINE).toBe("To make your set-up as quick as possible, let us know where you are in your querying journey.");
+    expect(welcomeHeading("Lucy Sterling")).toEqual(["Welcome to QueryHawk, Lucy.", "Let's get you on board."]);
+    expect(welcomeHeading("  ")).toEqual(["Welcome to QueryHawk.", "Let's get you on board."]);
+    expect(welcomeHeading(null)[0]).toBe("Welcome to QueryHawk.");
+    expect(firstNameOf("Mary-Jane O'Neil")).toBe("Mary-Jane");
+    const h = render(<WelcomeStageScreen name="Lucy Sterling" selected={null} onSelect={noop} onContinue={noop} />);
+    expect(h).toContain(`<span>Welcome to QueryHawk, Lucy.</span><span>${esc(WELCOME_SECOND)}</span>`);
+    expect(h).toContain(esc(WELCOME_LINE));
+    expect(h, "no open heading").not.toContain('class="sf-open"');
+    expect(h, "the card asks nothing: the panel has").not.toContain("sf-qlab");
+    expect(h).not.toContain("Where are you in your querying journey?");
+    expect((h.match(/data-o9="slot"/g) ?? []).length, "one illustration slot").toBe(1);
     for (const t of ["Just getting started", "A few queries out", "Deep in it", "Had some interest"]) expect(h).toContain(t);
     for (const d of ["Haven&#x27;t sent any queries yet", "Early days, waiting to hear back", "Lots of queries in flight", "Requests or an offer on the table"]) expect(h).toContain(d);
     expect(h).toMatch(/<button[^>]*class="sf-btn"[^>]*>Continue<\/button>/);

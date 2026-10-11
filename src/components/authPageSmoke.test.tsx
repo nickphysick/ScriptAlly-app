@@ -43,7 +43,9 @@ describe("the onboarding gate renders", () => {
   });
 
   it("…and opens on its first screen — the branch question the whole flow routes on", () => {
-    expect(renderPage(<Onboarding onComplete={async () => {}} />, "/dashboard"))
-      .toContain("Where are you in your querying journey?");
+    /* Re-pointed (onboarding v9): the question is the panel's line now, not a label in the card. */
+    const html = renderPage(<Onboarding onComplete={async () => {}} />, "/dashboard");
+    expect(html).toContain("let us know where you are in your querying journey.");
+    expect(html).toContain("Just getting started");
   });
 });

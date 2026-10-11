@@ -1,0 +1,56 @@
+/* ═══ Onboarding v9 (design-refs/onboarding-v9) ═══════════════════════════════════════════════
+   The set-up's v9 dress: the welcome panel, the acknowledgement, the book, the fork's tiles, the
+   success mark and the answer deck. Everything is `o9-` and sits inside `.sf` (SetupFrame) or, for
+   the review, inside the import's own root.
+   ⚠️ NO `var()` INSIDE `@keyframes` — it fails in silence here. Keyframes move opacity and
+      transform only; colours are on the rules.
+   ⚠️ HEADINGS TAKE TWO CLASSES AND `!important` (brand.tsx forces a face on every bare h1/h2/h3).
+   ⚠️ EVERY ENTRANCE IS A CSS ANIMATION ON MOUNT, so it plays once per arrival and never on a
+      re-render. Under reduced motion every one of them is off and everything is at rest. */
+@keyframes o9-rise { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+@keyframes o9-pop { 0% { opacity: 0; transform: translateY(12px) scale(.97); } 100% { opacity: 1; transform: none; } }
+.o9-rise { animation: o9-rise .5s ease-out both; }
+.o9-pop { animation: o9-pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+
+/* An illustration slot: empty, of the drawn size and aspect, ready for the artwork. */
+.o9-slot {
+  display: block; box-sizing: border-box; min-width: 0; max-width: 100%; border-radius: 14px;
+  background: repeating-linear-gradient(135deg, rgba(28, 19, 15, .045) 0 1px, transparent 1px 11px), #e4ded6;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .16);
+}
+.o9-slot--dark {
+  background: repeating-linear-gradient(135deg, rgba(244, 238, 229, .06) 0 1px, transparent 1px 11px), rgba(244, 238, 229, .05);
+  box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .28);
+}
+
+/* ── 1 · the welcome: the ink panel asks, the card answers ── */
+.sf .o9-welv { display: grid; gap: 22px; max-width: 1240px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+.sf .o9-panel {
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: center;
+  box-sizing: border-box; min-width: 0; padding: 34px 34px 34px 40px; border-radius: 14px;
+  background: var(--hpanel-bg); color: var(--hpanel-fg); box-shadow: inset 0 0 0 1px var(--hpanel-line);
+}
+.sf .o9-paneltx { display: grid; gap: 14px; justify-items: start; min-width: 0; }
+.sf .o9-eyebrow {
+  font-family: var(--sp-mono); font-size: 10.5px; font-weight: 500; line-height: 1.4; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--hpanel-stamp); margin: 0;
+}
+.sf .o9-panel .o9-panelh {
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(28px, 2.9vw, 40px); line-height: 1.1;
+  letter-spacing: -.01em; color: var(--hpanel-fg); margin: 0;
+}
+.sf .o9-panel .o9-panelh span { display: block; font-family: inherit; }
+.sf .o9-panelp { font-family: var(--sp-serif); font-size: 19px; line-height: 1.5; color: var(--hpanel-muted); margin: 0; max-width: 44ch; }
+.sf .o9-panel .o9-slot { width: 100%; aspect-ratio: 4 / 3; }
+.sf .o9-welv .sf-opts { grid-template-columns: 1fr 1fr; }
+.sf .o9-welv .sf-stepcard { min-width: 0; }
+@media (max-width: 1100px) {
+  .sf .o9-panel { grid-template-columns: minmax(0, 1fr); }
+  .sf .o9-panel .o9-slot { max-width: 420px; }
+}
+@media (max-width: 899.98px) { .sf .o9-welv { margin: 0; } .sf .o9-panel { padding: 26px 22px; } }
+@media (max-width: 820px) { .sf .o9-welv .sf-opts { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .o9-rise, .o9-pop { animation: none; }
+}

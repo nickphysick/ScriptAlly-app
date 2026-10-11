@@ -109,11 +109,11 @@ describe("the card is made of the app's own material", () => {
 });
 
 describe("one card, not three", () => {
-  /* RE-POINTED (onboarding v5): the welcome is an open title over one card now, built from the
-     shared step parts. The law is the one this held — the welcome draws no card of its own. */
-  it("the welcome screen renders the shared step parts, and no card of its own", () => {
-    expect(ONBOARDING).toContain("<OpenTitle");
-    expect(ONBOARDING).toContain("<StepCard");
+  /* RE-POINTED (onboarding v9): the welcome is the app's navy panel over one white card. The law
+     is the one this held — the welcome draws no card style of its own. */
+  it("the welcome screen is the header panel's navy over the shared step card, and no card of its own", () => {
+    expect(ONBOARDING).toContain('className="o9-panel');
+    expect(ONBOARDING).toContain('className="sf-card sf-stepcard');
     expect(ONBOARDING).not.toContain("<OnboardingCard");
   });
 

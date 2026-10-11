@@ -17,6 +17,8 @@ import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, Man
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
 import { SetupFrame, SETUP_GROUP } from "./onboarding/SetupFrame";
+import { WELCOME_EYEBROW, WELCOME_LINE, welcomeHeading } from "../lib/onboardingV9";
+import "./onboarding/v9/onbV9.css";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 /* ⚠️ THE LOCAL PALETTE IS GONE. This file carried its own 19-hex token object — a parchment
@@ -83,38 +85,53 @@ const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }>
 );
 
 /**
- * The welcome step — the same card as every other screen in this journey.
+ * The welcome step (onboarding v9, design-refs/onboarding-v9/ref-welcome-1440.png).
  *
- * ⚠️ IT USED TO BE ITS OWN CARD, and that was the first of three styles a writer met on the way
- * in. `ModalCard` had no paper texture and no inset rim, so it matched neither the Form 11 branch
- * screens that followed nor the app it introduces; its band carried a burgundy "S" monogram
- * standing in for the wordmark. One card, one grammar: this screen is now `OnboardingCard` with a
- * book mark on the plate, like the manuscript screens it leads to.
+ * The app's navy header panel asks the question — eyebrow, a two-line heading with the writer's
+ * first name, one line — beside one empty 4:3 illustration slot. The card beneath holds the four
+ * journey options two-up and Continue. It carries no eyebrow and no question line: the panel has
+ * asked it. The options keep their titles, sublines and stored values.
+ *
+ * The entrance is CSS on mount: the panel rises, its three lines follow, the card pops at 0.6s and
+ * the options rise in turn. It plays once per arrival and is off under reduced motion.
  */
-export const WELCOME_TITLE = "Let's set things up around your journey.";
-export const WELCOME_SUB = "No wrong answer here. It just shapes what you see first.";
-export const WELCOME_LABEL = "Where are you in your querying journey?";
+const delay = (s: number): React.CSSProperties => ({ animationDelay: `${s}s` });
 
 export const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
-}> = ({ selected, onSelect, onContinue }) => (
-  <StepColumn screen="welcome">
-    <OpenTitle title={WELCOME_TITLE} sub={WELCOME_SUB} />
-    <StepCard>
-      <QLabel id="sf-welcome-q">{WELCOME_LABEL}</QLabel>
-      <OptionGroup labelledBy="sf-welcome-q">
-        {STAGE_OPTIONS.map((opt) => (
-          <OptionRow key={opt.id} title={opt.title} desc={opt.descriptor} selected={selected === opt.id} onClick={() => onSelect(opt.id)} />
-        ))}
-      </OptionGroup>
-      <StepFoot>
-        <button type="button" className="sf-btn" disabled={!selected} onClick={onContinue}>Continue</button>
-      </StepFoot>
-    </StepCard>
-  </StepColumn>
-);
+  /** the account's display name; its first word is used */
+  name?: string | null;
+}> = ({ selected, onSelect, onContinue, name }) => {
+  const [first, second] = welcomeHeading(name);
+  return (
+    <div className="o9-welv" data-screen="welcome">
+      <section className="o9-panel o9-rise" data-o9="welcome-panel">
+        <div className="o9-paneltx">
+          <p className="o9-eyebrow o9-rise" style={delay(0.15)} data-o9="eyebrow">{WELCOME_EYEBROW}</p>
+          <h1 className="o9-panelh o9-rise" style={delay(0.25)} id="o9-welcome-h"><span>{first}</span><span>{second}</span></h1>
+          <p className="o9-panelp o9-rise" style={delay(0.4)} data-o9="welcome-line">{WELCOME_LINE}</p>
+        </div>
+        <span className="o9-slot o9-slot--dark o9-rise" style={delay(0.3)} data-o9="slot" data-slot="welcome" aria-hidden="true" />
+      </section>
+      <section className="sf-card sf-stepcard o9-pop" style={delay(0.6)} data-o9="welcome-card">
+        <OptionGroup labelledBy="o9-welcome-h">
+          {STAGE_OPTIONS.map((opt, i) => (
+            <span key={opt.id} className="o9-rise" style={{ ...delay(0.8 + i * 0.08), display: "block" }}>
+              <OptionRow title={opt.title} desc={opt.descriptor} selected={selected === opt.id} onClick={() => onSelect(opt.id)} />
+            </span>
+          ))}
+        </OptionGroup>
+        <div className="o9-rise" style={delay(1.15)}>
+          <StepFoot>
+            <button type="button" className="sf-btn" disabled={!selected} onClick={onContinue}>Continue</button>
+          </StepFoot>
+        </div>
+      </section>
+    </div>
+  );
+};
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
@@ -415,6 +432,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
         {!flow && step === 0 && (
           <WelcomeStageScreen
+            name={currentUser?.name}
             selected={queryingStage}
             onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
             onContinue={handleStageContinue}
