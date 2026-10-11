@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "P13",
+  "where": "1512 the consequence line says what saving changes",
+  "ok": true,
+  "detail": "\"Petra Nwosu → Full requested, Sun 11 Oct Your move, due Sun 25 Oct — it joins “Your move” \""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the panel returns to the query",
+  "ok": true,
+  "detail": "panel true · step false · card shown true"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the new entry is the latest on the timeline",
+  "ok": true,
+  "detail": "it was not there before (0); the last of 2 entries is \"Full requested11 OCT⋯Petra asked for the full\""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the card's status is the new one",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the row's status updated in place",
+  "ok": true,
+  "detail": "Full Requested · you"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the row moved, and is still the one selected row",
+  "ok": true,
+  "detail": "index 44 → 0; selected qp1s-q"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 after the move, Down opens the row now below it",
+  "ok": true,
+  "detail": "rj-dupe (below is rj-dupe)"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 …and back to the moved row",
+  "ok": true,
+  "detail": "qp1s-q"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the write happened",
+  "ok": true,
+  "detail": "Full Requested · 1 → 2 log entries"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 undone: the status and the stage dates are as they started",
+  "ok": true,
+  "detail": "status Queried; differing: none"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 undone: the query's own log holds the entries it started with",
+  "ok": true,
+  "detail": "log qp1s-act-sent"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 undone: no task flag left behind",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the consequence line says what saving changes",
+  "ok": true,
+  "detail": "\"Petra Nwosu → Full requested, Sun 11 Oct Your move, due Sun 25 Oct — it joins “Your move” \""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the panel returns to the query",
+  "ok": true,
+  "detail": "panel true · step false · card shown true"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the new entry is the latest on the timeline",
+  "ok": true,
+  "detail": "it was not there before (0); the last of 2 entries is \"Full requested11 OCT⋯Petra asked for the full\""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the card's status is the new one",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the row's status updated in place",
+  "ok": true,
+  "detail": "Full Requested · you"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the row moved, and is still the one selected row",
+  "ok": true,
+  "detail": "index 44 → 0; selected qp1s-q"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 after the move, Down opens the row now below it",
+  "ok": true,
+  "detail": "rj-dupe (below is rj-dupe)"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 …and back to the moved row",
+  "ok": true,
+  "detail": "qp1s-q"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the write happened",
+  "ok": true,
+  "detail": "Full Requested · 1 → 2 log entries"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 undone: the status and the stage dates are as they started",
+  "ok": true,
+  "detail": "status Queried; differing: none"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 undone: the query's own log holds the entries it started with",
+  "ok": true,
+  "detail": "log qp1s-act-sent"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 undone: no task flag left behind",
+  "ok": true,
+  "detail": "none"
+ }
+]
