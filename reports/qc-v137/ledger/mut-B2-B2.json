@@ -15,7 +15,7 @@
   "lock": "B2",
   "where": "1512 you no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -33,7 +33,7 @@
   "lock": "B2",
   "where": "1512 agent no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -51,7 +51,7 @@
   "lock": "B2",
   "where": "1512 closed no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -81,7 +81,7 @@
   "lock": "B2",
   "where": "1512 no scroll from further down",
   "ok": true,
-  "detail": "scrollTop 622 → 622"
+  "detail": "scrollTop 367 → 367"
  },
  {
   "lock": "B2",
@@ -105,7 +105,7 @@
   "lock": "B2",
   "where": "1280 you no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -123,7 +123,7 @@
   "lock": "B2",
   "where": "1280 agent no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -141,7 +141,7 @@
   "lock": "B2",
   "where": "1280 closed no scroll",
   "ok": false,
-  "detail": "scrollTop 0 → 622"
+  "detail": "scrollTop 0 → 367"
  },
  {
   "lock": "B2",
@@ -171,7 +171,7 @@
   "lock": "B2",
   "where": "1280 no scroll from further down",
   "ok": true,
-  "detail": "scrollTop 622 → 622"
+  "detail": "scrollTop 367 → 367"
  },
  {
   "lock": "B2",

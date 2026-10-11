@@ -39,7 +39,7 @@ report. Not merged to `main`.
 
 Base: dev/header-v3-landing-v2-feed-drawer-v2 @ 383c88d4. Reaching main needs header-panel-v2, header-v3, qc-v136, landing-colours-v2 and feed-drawer-v2 merged first, in that order.
 
-## Deploy: not done, and why
+## Deploy: held at first, and why (see the follow-up below)
 
 The brief says to deploy `qc-v137` itself, on the understanding that nothing would drop off dev. That is no
 longer true. Dev serves `index-v7i_Tl5S.js`. I built
@@ -48,6 +48,34 @@ the same hash, so that is what dev is serving. It holds onboarding v5 and the im
 pack's base. Deploying `qc-v137` alone would remove them.
 
 `qc-v137` is pushed. See the end of this report for the two ways forward.
+
+## Follow-up, 11 Oct: merged for dev, and F1 to F3
+
+Branch `dev/header-v3-landing-v2-feed-drawer-v2-onb-v5-import-fixes-import-page-truth-qc137`: `qc-v137` merged
+into the branch dev was serving (`aa0ba516`), then three fixes, one commit each.
+
+- **Conflicts:** two, `CLAUDE.md` and `design-refs/.refhashes.json`, both kept on both sides. No other file
+  conflicted.
+- **Gates, against the `aa0ba516` baseline:** tsc clean (was clean). Both builds clean (were clean). Vitest
+  563 files passed and 1 failed to load, 8,563 passed, 3 skipped (baseline: 561 and the same 1, 8,550 passed,
+  3 skipped).
+- **F1 · cell 1 counts every query.** "Queries sent" is the list's unfiltered count: 73 on the dev data, where
+  the three courts add up to 72. **The header says neither 72 nor 73:** since Part A it is a title panel with
+  no number, so nothing needed bringing into line and header v3's H3 no longer reads `/queries` (it was
+  re-pointed in the pack). B1 is rewritten: cell 1 = "Showing 73 of 73" = 73 rows drawn. Mutation: the three
+  courts' sum; red reading "cell 1 72 · showing 73 of 73".
+- **F2 · the stage label never wraps at 1280.** The row padding is restored and the stage line is nowrap under
+  1100px of list: "Revise & resubmit" with its stamp runs 3px into the 20px gap. Rows are 73 tall, as on the
+  build before the pack. **The reference draws its rows 78 to 82 apart at 1280**, with some dated lines on two
+  lines; the brief leaves the rows alone, so C4 holds the height to the app's own 73, not the drawing's. New
+  lock C4: every stage label on one line, none reaching the next column, rows 73. Mutation: the stage cell
+  60px wide; red reading "Full Requested 4 lines".
+- **F3 · feed drawer B6 at a fixed clock.** The capture and the check hold `Date` at 11 Oct 2026 09:00 UTC.
+  The feed takes activities dated inside the 30 days up to "now", so the window is closed at both ends. Green
+  on the base build and on this branch; red under its original mutation. It can still move if someone writes
+  or deletes activities dated inside that window on the shared account.
+- **All twelve QC137 locks** (the eleven, and C4) are green on the merged build and red under their mutations
+  there (`mutation-proofs.json` is that run).
 
 ## §0 findings
 

@@ -8,20 +8,21 @@
   ]
  },
  "B1": {
-  "mutation": "cell 1 counts one more than the three courts",
-  "red": 2,
+  "mutation": "F1: cell 1 back to the three courts' sum",
+  "red": 4,
   "first": [
-   "✗ B1 · 1512 cell 1 is the sum — 73 vs 13 + 46 + 13",
-   "✗ B1 · 1280 cell 1 is the sum — 73 vs 13 + 46 + 13"
+   "✗ B1 · 1512 cell 1 is the list's unfiltered count — cell 1 72 · showing 73 of 73",
+   "✗ B1 · 1512 cell 1 is the rows drawn — 73 rows (0 groups folded) · cell 1 72 · the courts 13 + 46 + 13",
+   "✗ B1 · 1280 cell 1 is the list's unfiltered count — cell 1 72 · showing 73 of 73"
   ]
  },
  "B2": {
   "mutation": "pressing a cell scrolls to the list",
   "red": 6,
   "first": [
-   "✗ B2 · 1512 you no scroll — scrollTop 0 → 622",
-   "✗ B2 · 1512 agent no scroll — scrollTop 0 → 622",
-   "✗ B2 · 1512 closed no scroll — scrollTop 0 → 622"
+   "✗ B2 · 1512 you no scroll — scrollTop 0 → 367",
+   "✗ B2 · 1512 agent no scroll — scrollTop 0 → 367",
+   "✗ B2 · 1512 closed no scroll — scrollTop 0 → 367"
   ]
  },
  "C1": {
@@ -50,6 +51,14 @@
    "✗ C3 · 1180 What you sent hidden — heading true · 12 cells shown"
   ]
  },
+ "C4": {
+  "mutation": "F2: the stage cell 60px wide",
+  "red": 2,
+  "first": [
+   "✗ C4 · every stage label is one line — Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines · Full Requested 4 lines",
+   "✗ C4 · a row is as tall as before the pack, 73 (±1) — heights 159, 172, 96, 116, 137, 129, 103, 144"
+  ]
+ },
  "D1": {
   "mutation": "the header back in the flow",
   "red": 4,
@@ -63,9 +72,9 @@
   "mutation": "the header fixed to the window",
   "red": 4,
   "first": [
-   "✗ D2 · 1512 carried up by the list's end — header 12.0–120.0, list ends at 67.7",
-   "✗ D2 · 1512 gone with the list — header's bottom 152.4 · data-pinned null",
-   "✗ D2 · 1280 carried up by the list's end — header 12.0–120.0, list ends at 68.3"
+   "✗ D2 · 1512 carried up by the list's end — header -29.8–78.3, list ends at 67.7",
+   "✗ D2 · 1512 gone with the list — header's bottom 110.6 · data-pinned null",
+   "✗ D2 · 1280 carried up by the list's end — header -29.8–78.3, list ends at 67.5"
   ]
  },
  "D3": {
@@ -89,9 +98,10 @@
   "mutation": "the loading cells drop their foot",
   "red": 4,
   "first": [
-   "✗ L1 · 1512 strip — 1159×153.8 at 296,434.7 → 1159×223.8 at 296,434.7",
-   "✗ L1 · 1512 cells — 290×153.8 at 296,434.7 | 290×153.8 at 586,434.7 | 290×153.8 at 876,434.7 | 290×153.8 at 1166,434.7",
-   "✗ L1 · 1280 strip — 942×153.8 at 289,434.7 → 942×223.8 at 289,434.7"
+   "✗ L1 · 1512 strip — 1159×153.8 at 296,476.4 → 1159×223.8 at 296,476.4",
+   "✗ L1 · 1512 cells — 290×153.8 at 296,476.4 | 290×153.8 at 586,476.4 | 290×153.8 at 876,476.4 | 290×153.8 at 1166,476.4",
+   "✗ L1 · 1280 strip — 942×153.8 at 289,476.4 → 942×223.8 at 289,476.4"
   ]
- }
+ },
+ "_run": "re-run on dev/…-truth-qc137 after F1–F3"
 }

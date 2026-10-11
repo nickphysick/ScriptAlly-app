@@ -38,4 +38,4 @@ Running 2 tests using 1 worker
 
   1 failed
     [measure] › tests/e2e/qcV137.measure.ts:323:3 › Query Centre v137 › C4 · one line: at 1280 every stage label is on one line, and a row is as tall as it was 
-  1 passed (24.7s)
+  1 passed (24.9s)

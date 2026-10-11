@@ -171,7 +171,7 @@
   "lock": "B2",
   "where": "1280 no scroll from further down",
   "ok": true,
-  "detail": "scrollTop 104 → 104"
+  "detail": "scrollTop 6 → 6"
  },
  {
   "lock": "B2",

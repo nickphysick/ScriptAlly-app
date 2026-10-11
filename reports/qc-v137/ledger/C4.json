@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C4",
+  "where": "population",
+  "ok": true,
+  "detail": "73 rows · 10 statuses, Revise & Resubmit among them"
+ },
+ {
+  "lock": "C4",
+  "where": "every stage label is one line",
+  "ok": true,
+  "detail": "73 labels, one line each"
+ },
+ {
+  "lock": "C4",
+  "where": "no label reaches the next column",
+  "ok": true,
+  "detail": "nearest -19.9px (negative is clear)"
+ },
+ {
+  "lock": "C4",
+  "where": "a row is as tall as before the pack, 73 (±1)",
+  "ok": true,
+  "detail": "heights 73"
+ }
+]

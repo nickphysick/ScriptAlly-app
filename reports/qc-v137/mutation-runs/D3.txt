@@ -2,15 +2,15 @@
 Running 2 tests using 1 worker
 
 [1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
-[2/2] [measure] › tests/e2e/qcV137.measure.ts:384:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set
-[measure] › tests/e2e/qcV137.measure.ts:384:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:421:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set
+[measure] › tests/e2e/qcV137.measure.ts:421:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set
   ✗ D3 · 1512 scrollTop is what was set — worst drift 15.0
 
   ✗ D3 · 1280 scrollTop is what was set — worst drift 15.0
 
 [D3] 4/6 green
 
-  1) [measure] › tests/e2e/qcV137.measure.ts:384:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set 
+  1) [measure] › tests/e2e/qcV137.measure.ts:421:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set 
 
     Error: expect(received).toEqual(expected) // deep equality
 
@@ -23,19 +23,19 @@ Running 2 tests using 1 worker
     +   "D3 · 1280 scrollTop is what was set — worst drift 15.0",
     + ]
 
-      66 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
-      67 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
-    > 68 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
          |                                                                                               ^
-      69 |   }
-      70 | }
-      71 |
-        at Ledger.done (/private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:68:95)
-        at /private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:409:7
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:446:7
 
     Error Context: test-results/qcV137.measure.ts-Query-Ce-c086c-d-scrollTop-is-what-was-set-measure/error-context.md
 
 
   1 failed
-    [measure] › tests/e2e/qcV137.measure.ts:384:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set 
-  1 passed (37.0s)
+    [measure] › tests/e2e/qcV137.measure.ts:421:3 › Query Centre v137 › D3 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set 
+  1 passed (36.4s)

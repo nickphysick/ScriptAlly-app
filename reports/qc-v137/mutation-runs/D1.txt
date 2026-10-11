@@ -2,8 +2,8 @@
 Running 2 tests using 1 worker
 
 [1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
-[2/2] [measure] › tests/e2e/qcV137.measure.ts:316:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it
-[measure] › tests/e2e/qcV137.measure.ts:316:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:353:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it
+[measure] › tests/e2e/qcV137.measure.ts:353:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it
   ✗ D1 · 1512 header 12 under the top — -765.5
 
   ✗ D1 · 1512 chips under the header — 777.5
@@ -14,7 +14,7 @@ Running 2 tests using 1 worker
 
 [D1] 11/15 green
 
-  1) [measure] › tests/e2e/qcV137.measure.ts:316:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it 
+  1) [measure] › tests/e2e/qcV137.measure.ts:353:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it 
 
     Error: expect(received).toEqual(expected) // deep equality
 
@@ -29,19 +29,19 @@ Running 2 tests using 1 worker
     +   "D1 · 1280 chips under the header — 777.5",
     + ]
 
-      66 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
-      67 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
-    > 68 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
          |                                                                                               ^
-      69 |   }
-      70 | }
-      71 |
-        at Ledger.done (/private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:68:95)
-        at /private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:348:7
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:385:7
 
     Error Context: test-results/qcV137.measure.ts-Query-Ce-2629e-chips-and-headings-under-it-measure/error-context.md
 
 
   1 failed
-    [measure] › tests/e2e/qcV137.measure.ts:316:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it 
-  1 passed (33.2s)
+    [measure] › tests/e2e/qcV137.measure.ts:353:3 › Query Centre v137 › D1 · pins: scrolled 1400, the header is 12 under the sheet's top with the chips and headings under it 
+  1 passed (33.1s)

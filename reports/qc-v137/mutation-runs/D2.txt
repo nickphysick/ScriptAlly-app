@@ -2,19 +2,19 @@
 Running 2 tests using 1 worker
 
 [1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
-[2/2] [measure] › tests/e2e/qcV137.measure.ts:351:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top
-[measure] › tests/e2e/qcV137.measure.ts:351:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top
-  ✗ D2 · 1512 carried up by the list's end — header 12.0–120.0, list ends at 67.7
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:388:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top
+[measure] › tests/e2e/qcV137.measure.ts:388:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top
+  ✗ D2 · 1512 carried up by the list's end — header -29.8–78.3, list ends at 67.7
 
-  ✗ D2 · 1512 gone with the list — header's bottom 152.4 · data-pinned null
+  ✗ D2 · 1512 gone with the list — header's bottom 110.6 · data-pinned null
 
-  ✗ D2 · 1280 carried up by the list's end — header 12.0–120.0, list ends at 68.3
+  ✗ D2 · 1280 carried up by the list's end — header -29.8–78.3, list ends at 67.5
 
-  ✗ D2 · 1280 gone with the list — header's bottom 152.4 · data-pinned null
+  ✗ D2 · 1280 gone with the list — header's bottom 110.6 · data-pinned null
 
 [D2] 2/6 green
 
-  1) [measure] › tests/e2e/qcV137.measure.ts:351:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top 
+  1) [measure] › tests/e2e/qcV137.measure.ts:388:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top 
 
     Error: expect(received).toEqual(expected) // deep equality
 
@@ -23,25 +23,25 @@ Running 2 tests using 1 worker
 
     - Array []
     + Array [
-    +   "D2 · 1512 carried up by the list's end — header 12.0–120.0, list ends at 67.7",
-    +   "D2 · 1512 gone with the list — header's bottom 152.4 · data-pinned null",
-    +   "D2 · 1280 carried up by the list's end — header 12.0–120.0, list ends at 68.3",
-    +   "D2 · 1280 gone with the list — header's bottom 152.4 · data-pinned null",
+    +   "D2 · 1512 carried up by the list's end — header -29.8–78.3, list ends at 67.7",
+    +   "D2 · 1512 gone with the list — header's bottom 110.6 · data-pinned null",
+    +   "D2 · 1280 carried up by the list's end — header -29.8–78.3, list ends at 67.5",
+    +   "D2 · 1280 gone with the list — header's bottom 110.6 · data-pinned null",
     + ]
 
-      66 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
-      67 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
-    > 68 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      68 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      69 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 70 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
          |                                                                                               ^
-      69 |   }
-      70 | }
-      71 |
-        at Ledger.done (/private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:68:95)
-        at /private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:381:7
+      71 |   }
+      72 | }
+      73 |
+        at Ledger.done (/private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:70:95)
+        at /private/tmp/sa-qc137m/tests/e2e/qcV137.measure.ts:418:7
 
     Error Context: test-results/qcV137.measure.ts-Query-Ce-90723--Summary-returns-to-the-top-measure/error-context.md
 
 
   1 failed
-    [measure] › tests/e2e/qcV137.measure.ts:351:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top 
-  1 passed (30.8s)
+    [measure] › tests/e2e/qcV137.measure.ts:388:3 › Query Centre v137 › D2 · releases: at the list's end the header leaves with it; Summary returns to the top 
+  1 passed (30.9s)

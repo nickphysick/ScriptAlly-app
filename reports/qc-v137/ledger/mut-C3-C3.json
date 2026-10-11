@@ -33,7 +33,7 @@
   "lock": "C3",
   "where": "1024 strip",
   "ok": true,
-  "detail": "rows at 435,638"
+  "detail": "rows at 476,680"
  },
  {
   "lock": "C3",
@@ -69,6 +69,6 @@
   "lock": "C3",
   "where": "1180 strip",
   "ok": true,
-  "detail": "rows at 435"
+  "detail": "rows at 476"
  }
 ]
