@@ -1,0 +1,560 @@
+[
+ {
+  "lock": "P8",
+  "where": "1512 agent: the primary",
+  "ok": true,
+  "detail": "\"Record a response\" (Rachel Lin)"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 agent: the step's title",
+  "ok": true,
+  "detail": "\"What did Rachel say?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent nudge: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent nudge: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent nudge: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 agent close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 silent: the primary",
+  "ok": true,
+  "detail": "\"Close query\" (Rosalind Vale)"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 silent: the step's title",
+  "ok": true,
+  "detail": "\"Close Rosalind's query?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent nudge: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent nudge: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 silent nudge: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 you: the primary",
+  "ok": true,
+  "detail": "\"Mark full sent\" (Tobias Hark)"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you sent: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you sent: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you sent: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 you: the step's title",
+  "ok": true,
+  "detail": "\"What went to Tobias?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 you close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 offer: the primary",
+  "ok": true,
+  "detail": "\"Record your answer\" (Noah Bright)"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer offer: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer offer: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer offer: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 offer: the step's title",
+  "ok": true,
+  "detail": "\"Your answer to Noah\""
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 offer close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 closed: the primary",
+  "ok": true,
+  "detail": "\"Record a late reply\" (Joan Whitfield)"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 closed resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 closed resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1512 closed resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1512 closed: the step's title",
+  "ok": true,
+  "detail": "\"What did Joan say?\""
+ },
+ {
+  "lock": "P8",
+  "where": "1280 agent: the primary",
+  "ok": true,
+  "detail": "\"Record a response\" (Rachel Lin)"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 agent: the step's title",
+  "ok": true,
+  "detail": "\"What did Rachel say?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent nudge: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent nudge: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent nudge: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 agent close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 silent: the primary",
+  "ok": true,
+  "detail": "\"Close query\" (Rosalind Vale)"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 silent: the step's title",
+  "ok": true,
+  "detail": "\"Close Rosalind's query?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent nudge: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent nudge: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 silent nudge: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 you: the primary",
+  "ok": true,
+  "detail": "\"Mark full sent\" (Tobias Hark)"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you sent: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you sent: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you sent: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 you: the step's title",
+  "ok": true,
+  "detail": "\"What went to Tobias?\""
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 you close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 offer: the primary",
+  "ok": true,
+  "detail": "\"Record your answer\" (Noah Bright)"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer offer: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer offer: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer offer: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 offer: the step's title",
+  "ok": true,
+  "detail": "\"Your answer to Noah\""
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer close: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer close: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 offer close: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 closed: the primary",
+  "ok": true,
+  "detail": "\"Record a late reply\" (Joan Whitfield)"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 closed resp: one dialog",
+  "ok": true,
+  "detail": "1 dialogs"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 closed resp: nothing stacked outside the panel",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P7",
+  "where": "1280 closed resp: the step replaced the card, with a way back",
+  "ok": true,
+  "detail": "back true · card hidden true"
+ },
+ {
+  "lock": "P8",
+  "where": "1280 closed: the step's title",
+  "ok": true,
+  "detail": "\"What did Joan say?\""
+ },
+ {
+  "lock": "P8",
+  "where": "population: the table's rows found on the account",
+  "ok": true,
+  "detail": "{\"agent\":2,\"silent\":2,\"you\":2,\"offer\":2,\"closed\":2}"
+ }
+]

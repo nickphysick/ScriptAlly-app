@@ -1,0 +1,47 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:325:3 › Query panel v1 › P10 · no repeat: no manuscript block from the Query Centre; one caption from the Dashboard
+[measure] › tests/e2e/queryPanelV1.measure.ts:325:3 › Query panel v1 › P10 · no repeat: no manuscript block from the Query Centre; one caption from the Dashboard
+  ✗ P10 · 1512 /queries: no "Querying" block — 1 blocks · text true
+
+  ✗ P10 · 1512 /dashboard: no block — 1
+
+  ✗ P10 · 1280 /queries: no "Querying" block — 1 blocks · text true
+
+  ✗ P10 · 1280 /dashboard: no block — 1
+
+[P10] 6/10 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:325:3 › Query panel v1 › P10 · no repeat: no manuscript block from the Query Centre; one caption from the Dashboard 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "P10 · 1512 /queries: no \"Querying\" block — 1 blocks · text true",
+    +   "P10 · 1512 /dashboard: no block — 1",
+    +   "P10 · 1280 /queries: no \"Querying\" block — 1 blocks · text true",
+    +   "P10 · 1280 /dashboard: no block — 1",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:346:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-bd9d9--caption-from-the-Dashboard-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:325:3 › Query panel v1 › P10 · no repeat: no manuscript block from the Query Centre; one caption from the Dashboard 
+  1 passed (53.5s)

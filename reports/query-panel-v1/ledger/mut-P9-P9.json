@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "P9",
+  "where": "1512 precondition: the body scrolls",
+  "ok": false,
+  "detail": "0px to scroll, at 0"
+ },
+ {
+  "lock": "P9",
+  "where": "1512 the foot did not move",
+  "ok": true,
+  "detail": "top 2157.1875 → 2157.1875"
+ },
+ {
+  "lock": "P9",
+  "where": "1512 the foot is inside the panel",
+  "ok": false,
+  "detail": "foot ends 2360.1875, panel 892"
+ },
+ {
+  "lock": "P9",
+  "where": "1512 the body ends above the foot",
+  "ok": true,
+  "detail": "body 2157.1875 · foot 2157.1875"
+ },
+ {
+  "lock": "P9",
+  "where": "1280 precondition: the body scrolls",
+  "ok": false,
+  "detail": "0px to scroll, at 0"
+ },
+ {
+  "lock": "P9",
+  "where": "1280 the foot did not move",
+  "ok": true,
+  "detail": "top 2157.1875 → 2157.1875"
+ },
+ {
+  "lock": "P9",
+  "where": "1280 the foot is inside the panel",
+  "ok": false,
+  "detail": "foot ends 2360.1875, panel 792"
+ },
+ {
+  "lock": "P9",
+  "where": "1280 the body ends above the foot",
+  "ok": true,
+  "detail": "body 2157.1875 · foot 2157.1875"
+ }
+]

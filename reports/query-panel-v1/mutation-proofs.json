@@ -1,0 +1,98 @@
+{
+ "P1": {
+  "mutation": "right: 0 on the panel",
+  "red": 2,
+  "first": [
+   "✗ P1 · 1512 8 from the right, top and bottom — right 0 · top 8 · bottom 8",
+   "✗ P1 · 1280 8 from the right, top and bottom — right 0 · top 8 · bottom 8"
+  ]
+ },
+ "P2": {
+  "mutation": "a 50% scrim under the panel, the page dimmed",
+  "red": 4,
+  "first": [
+   "✗ P2 · 1512 the row is under the pointer — hit m-scrim",
+   "✗ P2 · 1512 nothing dimmed or filtered — ws-app 0.5 none"
+  ]
+ },
+ "P3": {
+  "mutation": "a swap replaces the panel element (what close-then-reopen does)",
+  "red": 4,
+  "first": [
+   "✗ P3 · 1512 the panel's box did not change — 560×884 → 500×884",
+   "✗ P3 · 1512 the same panel, not a new one — same element false"
+  ]
+ },
+ "P4": {
+  "mutation": "the keyboard ring left on a second row",
+  "red": 2,
+  "first": [
+   "✗ P4 · 1512 no keyboard ring while the panel is open — 1 .kf rows",
+   "✗ P4 · 1280 no keyboard ring while the panel is open — 1 .kf rows"
+  ]
+ },
+ "P5": {
+  "mutation": "Escape always closes, step or not",
+  "red": 2,
+  "first": [
+   "✗ P5 · 1512 Escape steps back to the query — the panel closed",
+   "✗ P5 · 1280 Escape steps back to the query — the panel closed"
+  ]
+ },
+ "P6": {
+  "mutation": "the opened row is scrolled to the top (block: start)",
+  "red": 2,
+  "first": [
+   "✗ P6 · 1512 scrollTop kept — 1100 · open 1132 · swap 1207 · closed 1207",
+   "✗ P6 · 1280 scrollTop kept — 1100 · open 1124 · swap 1198 · closed 1198"
+  ]
+ },
+ "P7": {
+  "mutation": "the step is a fixed drawer and a dialog of its own",
+  "red": 24,
+  "first": [
+   "✗ P7 · 1512 agent resp: one dialog — 2 dialogs",
+   "✗ P7 · 1512 agent nudge: one dialog — 2 dialogs"
+  ]
+ },
+ "P8": {
+  "mutation": "Record a response is the primary for a with-you query",
+  "red": 4,
+  "first": [
+   "✗ P8 · 1512 you: the primary — \"Record a response\" (Tobias Hark)",
+   "✗ P8 · 1512 offer: the primary — \"Record a response\" (Noah Bright)"
+  ]
+ },
+ "P9": {
+  "mutation": "the body stops scrolling inside the panel, so it pushes the foot",
+  "red": 4,
+  "first": [
+   "✗ P9 · 1512 precondition: the body scrolls — 0px to scroll, at 0",
+   "✗ P9 · 1512 the foot is inside the panel — foot ends 2360.1875, panel 892"
+  ]
+ },
+ "P10": {
+  "mutation": "the Querying block always shown",
+  "red": 4,
+  "first": [
+   "✗ P10 · 1512 /queries: no \"Querying\" block — 1 blocks · text true",
+   "✗ P10 · 1512 /dashboard: no block — 1"
+  ]
+ },
+ "P11": {
+  "mutation": "the q param dropped from the address",
+  "red": 2,
+  "first": [
+   "✗ P11 · 1512 opening sets ?q= — q=null",
+   "✗ P11 · 1280 opening sets ?q= — q=null"
+  ]
+ },
+ "P12": {
+  "mutation": "the 8px float kept at 800 wide",
+  "red": 2,
+  "first": [
+   "✗ P12 · the panel's box is the viewport — 520×884 at 272,8",
+   "✗ P12 · no radius — 12px"
+  ]
+ }
+}

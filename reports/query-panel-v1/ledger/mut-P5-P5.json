@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "P5",
+  "where": "1512 Down opens the next visible row",
+  "ok": true,
+  "detail": "seed-query-19 → seed-query-6 (next is seed-query-6)"
+ },
+ {
+  "lock": "P5",
+  "where": "1512 Up opens the previous",
+  "ok": true,
+  "detail": "seed-query-19"
+ },
+ {
+  "lock": "P5",
+  "where": "1512 with a step open, Down does nothing",
+  "ok": true,
+  "detail": "seed-query-19 · step resp"
+ },
+ {
+  "lock": "P5",
+  "where": "1512 Escape steps back to the query",
+  "ok": false,
+  "detail": "the panel closed"
+ },
+ {
+  "lock": "P5",
+  "where": "1512 Escape then closes",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "P5",
+  "where": "1280 Down opens the next visible row",
+  "ok": true,
+  "detail": "seed-query-19 → seed-query-6 (next is seed-query-6)"
+ },
+ {
+  "lock": "P5",
+  "where": "1280 Up opens the previous",
+  "ok": true,
+  "detail": "seed-query-19"
+ },
+ {
+  "lock": "P5",
+  "where": "1280 with a step open, Down does nothing",
+  "ok": true,
+  "detail": "seed-query-19 · step resp"
+ },
+ {
+  "lock": "P5",
+  "where": "1280 Escape steps back to the query",
+  "ok": false,
+  "detail": "the panel closed"
+ },
+ {
+  "lock": "P5",
+  "where": "1280 Escape then closes",
+  "ok": true,
+  "detail": "closed"
+ }
+]

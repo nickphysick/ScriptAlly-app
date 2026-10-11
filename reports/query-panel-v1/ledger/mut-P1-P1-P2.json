@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "P1",
+  "where": "1512 8 from the right, top and bottom",
+  "ok": false,
+  "detail": "right 0 · top 8 · bottom 8"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 width",
+  "ok": true,
+  "detail": "560"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 radius 12",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 precondition: the probed row is on screen",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 the row is under the pointer",
+  "ok": true,
+  "detail": "hit B"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 nothing dimmed or filtered",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 the page is not scroll-locked",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 8 from the right, top and bottom",
+  "ok": false,
+  "detail": "right 0 · top 8 · bottom 8"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 width",
+  "ok": true,
+  "detail": "520"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 radius 12",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 precondition: the probed row is on screen",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 the row is under the pointer",
+  "ok": true,
+  "detail": "hit SMALL"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 nothing dimmed or filtered",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 the page is not scroll-locked",
+  "ok": true,
+  "detail": "visible"
+ }
+]

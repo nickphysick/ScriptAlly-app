@@ -1,0 +1,109 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:213:3 › Query panel v1 › P7 P8 · one surface, and the next move is the primary
+[measure] › tests/e2e/queryPanelV1.measure.ts:213:3 › Query panel v1 › P7 P8 · one surface, and the next move is the primary
+  P8 branches entered: {"agent":2,"silent":2,"you":2,"offer":2,"closed":2}
+
+  ✗ P7 · 1512 agent resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 agent nudge: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 agent close: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 silent close: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 silent resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 silent nudge: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 you sent: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 you resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 you close: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 offer offer: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 offer close: one dialog — 2 dialogs
+
+  ✗ P7 · 1512 closed resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 agent resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 agent nudge: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 agent close: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 silent close: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 silent resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 silent nudge: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 you sent: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 you resp: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 you close: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 offer offer: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 offer close: one dialog — 2 dialogs
+
+  ✗ P7 · 1280 closed resp: one dialog — 2 dialogs
+
+[P7-P8] 69/93 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:213:3 › Query panel v1 › P7 P8 · one surface, and the next move is the primary 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 26
+
+    - Array []
+    + Array [
+    +   "P7 · 1512 agent resp: one dialog — 2 dialogs",
+    +   "P7 · 1512 agent nudge: one dialog — 2 dialogs",
+    +   "P7 · 1512 agent close: one dialog — 2 dialogs",
+    +   "P7 · 1512 silent close: one dialog — 2 dialogs",
+    +   "P7 · 1512 silent resp: one dialog — 2 dialogs",
+    +   "P7 · 1512 silent nudge: one dialog — 2 dialogs",
+    +   "P7 · 1512 you sent: one dialog — 2 dialogs",
+    +   "P7 · 1512 you resp: one dialog — 2 dialogs",
+    +   "P7 · 1512 you close: one dialog — 2 dialogs",
+    +   "P7 · 1512 offer offer: one dialog — 2 dialogs",
+    +   "P7 · 1512 offer close: one dialog — 2 dialogs",
+    +   "P7 · 1512 closed resp: one dialog — 2 dialogs",
+    +   "P7 · 1280 agent resp: one dialog — 2 dialogs",
+    +   "P7 · 1280 agent nudge: one dialog — 2 dialogs",
+    +   "P7 · 1280 agent close: one dialog — 2 dialogs",
+    +   "P7 · 1280 silent close: one dialog — 2 dialogs",
+    +   "P7 · 1280 silent resp: one dialog — 2 dialogs",
+    +   "P7 · 1280 silent nudge: one dialog — 2 dialogs",
+    +   "P7 · 1280 you sent: one dialog — 2 dialogs",
+    +   "P7 · 1280 you resp: one dialog — 2 dialogs",
+    +   "P7 · 1280 you close: one dialog — 2 dialogs",
+    +   "P7 · 1280 offer offer: one dialog — 2 dialogs",
+    +   "P7 · 1280 offer close: one dialog — 2 dialogs",
+    +   "P7 · 1280 closed resp: one dialog — 2 dialogs",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:294:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-db8e4-he-next-move-is-the-primary-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:213:3 › Query panel v1 › P7 P8 · one surface, and the next move is the primary 
+  1 passed (1.2m)

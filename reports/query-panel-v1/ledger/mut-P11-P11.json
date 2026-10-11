@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "P11",
+  "where": "1512 opening sets ?q=",
+  "ok": false,
+  "detail": "q=null"
+ },
+ {
+  "lock": "P11",
+  "where": "1512 browser Back closes",
+  "ok": true,
+  "detail": "closed, no param"
+ },
+ {
+  "lock": "P11",
+  "where": "1512 loading with ?q= opens it",
+  "ok": true,
+  "detail": "seed-query-11"
+ },
+ {
+  "lock": "P11",
+  "where": "1280 opening sets ?q=",
+  "ok": false,
+  "detail": "q=null"
+ },
+ {
+  "lock": "P11",
+  "where": "1280 browser Back closes",
+  "ok": true,
+  "detail": "closed, no param"
+ },
+ {
+  "lock": "P11",
+  "where": "1280 loading with ?q= opens it",
+  "ok": true,
+  "detail": "seed-query-11"
+ }
+]

@@ -1,0 +1,47 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:114:3 › Query panel v1 › P1 P2 · container: 8px in, 560 or 520 wide, radius 12; and no scrim
+[measure] › tests/e2e/queryPanelV1.measure.ts:114:3 › Query panel v1 › P1 P2 · container: 8px in, 560 or 520 wide, radius 12; and no scrim
+  ✗ P2 · 1512 the row is under the pointer — hit m-scrim
+
+  ✗ P2 · 1512 nothing dimmed or filtered — ws-app 0.5 none
+
+  ✗ P2 · 1280 the row is under the pointer — hit m-scrim
+
+  ✗ P2 · 1280 nothing dimmed or filtered — ws-app 0.5 none
+
+[P1-P2] 10/14 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:114:3 › Query panel v1 › P1 P2 · container: 8px in, 560 or 520 wide, radius 12; and no scrim 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "P2 · 1512 the row is under the pointer — hit m-scrim",
+    +   "P2 · 1512 nothing dimmed or filtered — ws-app 0.5 none",
+    +   "P2 · 1280 the row is under the pointer — hit m-scrim",
+    +   "P2 · 1280 nothing dimmed or filtered — ws-app 0.5 none",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:142:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-ffc53-wide-radius-12-and-no-scrim-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:114:3 › Query panel v1 › P1 P2 · container: 8px in, 560 or 520 wide, radius 12; and no scrim 
+  1 passed (30.7s)

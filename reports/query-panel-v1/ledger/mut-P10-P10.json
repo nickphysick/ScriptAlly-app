@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "P10",
+  "where": "1512 /queries: no \"Querying\" block",
+  "ok": false,
+  "detail": "1 blocks · text true"
+ },
+ {
+  "lock": "P10",
+  "where": "1512 /queries: no caption",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P10",
+  "where": "1512 /dashboard: the panel opened in place",
+  "ok": true,
+  "detail": "dashboard on /dashboard"
+ },
+ {
+  "lock": "P10",
+  "where": "1512 /dashboard: the caption",
+  "ok": true,
+  "detail": "\"for The Smoke Test\" 13.5px italic"
+ },
+ {
+  "lock": "P10",
+  "where": "1512 /dashboard: no block",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "P10",
+  "where": "1280 /queries: no \"Querying\" block",
+  "ok": false,
+  "detail": "1 blocks · text true"
+ },
+ {
+  "lock": "P10",
+  "where": "1280 /queries: no caption",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "P10",
+  "where": "1280 /dashboard: the panel opened in place",
+  "ok": true,
+  "detail": "dashboard on /dashboard"
+ },
+ {
+  "lock": "P10",
+  "where": "1280 /dashboard: the caption",
+  "ok": true,
+  "detail": "\"for The Smoke Test\" 13.5px italic"
+ },
+ {
+  "lock": "P10",
+  "where": "1280 /dashboard: no block",
+  "ok": false,
+  "detail": "1"
+ }
+]

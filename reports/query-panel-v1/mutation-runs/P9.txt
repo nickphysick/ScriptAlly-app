@@ -1,0 +1,47 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:297:3 › Query panel v1 › P9 · pinned foot: the body scrolls under it
+[measure] › tests/e2e/queryPanelV1.measure.ts:297:3 › Query panel v1 › P9 · pinned foot: the body scrolls under it
+  ✗ P9 · 1512 precondition: the body scrolls — 0px to scroll, at 0
+
+  ✗ P9 · 1512 the foot is inside the panel — foot ends 2360.1875, panel 892
+
+  ✗ P9 · 1280 precondition: the body scrolls — 0px to scroll, at 0
+
+  ✗ P9 · 1280 the foot is inside the panel — foot ends 2360.1875, panel 792
+
+[P9] 4/8 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:297:3 › Query panel v1 › P9 · pinned foot: the body scrolls under it 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "P9 · 1512 precondition: the body scrolls — 0px to scroll, at 0",
+    +   "P9 · 1512 the foot is inside the panel — foot ends 2360.1875, panel 892",
+    +   "P9 · 1280 precondition: the body scrolls — 0px to scroll, at 0",
+    +   "P9 · 1280 the foot is inside the panel — foot ends 2360.1875, panel 792",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:322:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-2132b-t-the-body-scrolls-under-it-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:297:3 › Query panel v1 › P9 · pinned foot: the body scrolls under it 
+  1 passed (30.8s)

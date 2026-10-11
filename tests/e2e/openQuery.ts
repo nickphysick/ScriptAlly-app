@@ -36,13 +36,15 @@ export async function openQueryById(page: Page, id: string): Promise<QueryHost> 
      the page rather than inside it — so `.qcv-page [data-qcv="open"]` matched nothing from then on. */
   /* ⚠️ …and v65.6 moved it again, into the query MODAL (`[data-qcv="qm"]`): "one way to open a query
      now, and it is the modal". All three are tried, newest first. */
-  const docked = page.locator('[data-qcv="qm"] [data-qcv="open"], [data-qcv="rail"] [data-qcv="open"], .qcv-page [data-qcv="open"]');
+  /* ⚠️ …and Query panel v1 moved it once more, into the SIDE PANEL (`[data-qp="panel"]`). The modal is gone; its
+     selector stays in the list so the history above still reads, and matches nothing. */
+  const docked = page.locator('[data-qp="panel"] [data-qcv="open"], [data-qcv="qm"] [data-qcv="open"], [data-qcv="rail"] [data-qcv="open"], .qcv-page [data-qcv="open"]');
   const drawer = page.locator(".qpn");
   await expect
     .poll(async () => (await docked.count()) > 0 || (await drawer.count()) > 0, { timeout: 20_000, message: `${id} opened neither the docked card nor the drawer` })
     .toBe(true);
   const isDocked = (await docked.count()) > 0;
-  const where = ['[data-qcv="qm"] [data-qcv="open"]', '[data-qcv="rail"] [data-qcv="open"]', '.qcv-page [data-qcv="open"]'];
+  const where = ['[data-qp="panel"] [data-qcv="open"]', '[data-qcv="qm"] [data-qcv="open"]', '[data-qcv="rail"] [data-qcv="open"]', '.qcv-page [data-qcv="open"]'];
   let root = ".qpn";
   if (isDocked) for (const w of where) if ((await page.locator(w).count()) > 0) { root = w; break; }
   return { root, docked: isDocked };

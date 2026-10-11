@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "P12",
+  "where": "the panel's box is the viewport",
+  "ok": true,
+  "detail": "800×900 at 0,0"
+ },
+ {
+  "lock": "P12",
+  "where": "no radius",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "P12",
+  "where": "the close reads Back",
+  "ok": true,
+  "detail": "\"← Back\""
+ }
+]

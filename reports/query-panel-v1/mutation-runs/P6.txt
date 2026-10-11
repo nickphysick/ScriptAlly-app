@@ -1,0 +1,41 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:145:3 › Query panel v1 › P3 P4 P6 · swap in place, one selected row in its court's colour, and the list does not move
+[measure] › tests/e2e/queryPanelV1.measure.ts:145:3 › Query panel v1 › P3 P4 P6 · swap in place, one selected row in its court's colour, and the list does not move
+  ✗ P6 · 1512 scrollTop kept — 1100 · open 1132 · swap 1207 · closed 1207
+
+  ✗ P6 · 1280 scrollTop kept — 1100 · open 1124 · swap 1198 · closed 1198
+
+[P3-P4-P6] 16/18 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:145:3 › Query panel v1 › P3 P4 P6 · swap in place, one selected row in its court's colour, and the list does not move 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "P6 · 1512 scrollTop kept — 1100 · open 1132 · swap 1207 · closed 1207",
+    +   "P6 · 1280 scrollTop kept — 1100 · open 1124 · swap 1198 · closed 1198",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:179:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-3e5af--and-the-list-does-not-move-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:145:3 › Query panel v1 › P3 P4 P6 · swap in place, one selected row in its court's colour, and the list does not move 
+  1 passed (31.0s)

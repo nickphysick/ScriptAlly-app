@@ -1,0 +1,41 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:349:3 › Query panel v1 › P11 · URL: opening sets ?q=, Back closes, and loading with ?q= opens
+[measure] › tests/e2e/queryPanelV1.measure.ts:349:3 › Query panel v1 › P11 · URL: opening sets ?q=, Back closes, and loading with ?q= opens
+  ✗ P11 · 1512 opening sets ?q= — q=null
+
+  ✗ P11 · 1280 opening sets ?q= — q=null
+
+[P11] 4/6 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:349:3 › Query panel v1 › P11 · URL: opening sets ?q=, Back closes, and loading with ?q= opens 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "P11 · 1512 opening sets ?q= — q=null",
+    +   "P11 · 1280 opening sets ?q= — q=null",
+    + ]
+
+      65 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      66 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 67 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      68 |   }
+      69 | }
+      70 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:67:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:366:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-38155-es-and-loading-with-q-opens-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:349:3 › Query panel v1 › P11 · URL: opening sets ?q=, Back closes, and loading with ?q= opens 
+  1 passed (37.2s)

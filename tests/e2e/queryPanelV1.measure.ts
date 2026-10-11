@@ -31,8 +31,11 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   P1: { css: `.spanel { right: 0 !important; }` },
   /* a 50% scrim under the panel */
   P2: { js: `(() => { if (document.getElementById("m-scrim")) return; const s = document.createElement("div"); s.id = "m-scrim"; s.style.cssText = "position:fixed;inset:0;background:rgba(28,19,15,.5);z-index:65"; document.body.appendChild(s); document.querySelector(".ws-app").style.opacity = "0.5"; })()` },
-  /* close, then reopen, on a swap: Escape goes first on every press of a row */
-  P3: { js: `(() => { if (window.__m3) return; window.__m3 = true; document.addEventListener("mousedown", (e) => { if (e.target.closest && e.target.closest('${ROW}') && document.querySelector('${PANEL}')) document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); }, true); })()` },
+  /* a swap makes a NEW panel (what close-then-reopen does): when the open query changes, the element is replaced.
+     ⚠️ Closing by the × and reopening by the click, in two events, did NOT redden this: the router batches the two
+     navigations and React never unmounts the panel between them — so the real page cannot commit this fault that
+     way, and the mutation replaces the element outright. */
+  P3: { js: `(() => { if (window.__m3) return; window.__m3 = true; new MutationObserver((ms) => { for (const m of ms) { if (m.attributeName === "data-qp-id" && m.target.isConnected) { const c = m.target.cloneNode(true); c.style.width = "500px"; m.target.replaceWith(c); } } }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["data-qp-id"] }); })()` },
   /* the keyboard ring left on a second row */
   P4: { js: `(() => { const rows = [...document.querySelectorAll('${ROW}')].filter((r) => r.getAttribute("aria-selected") !== "true"); if (rows[0]) rows[0].classList.add("kf"); })()` },
   /* Escape always closes: with a step open it closes the whole panel */

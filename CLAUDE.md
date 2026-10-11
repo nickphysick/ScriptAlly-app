@@ -1060,6 +1060,18 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ OPEN: the page guide sits over the desk at 860px of window height** (`qcV96` QC13, red since v133.1). Nick's ruling.
 - **Locks:** `tests/e2e/qcV134.measure.ts` N1–N3, K1–K3, B1–B3, L1; unit `qcFaces.test.ts`, `qcCourtHistory.test.ts`. Retired and re-pointed: `tests/e2e/RETIRED-query-centre-v134.md`.
 
+## Query panel v1 — a query opens in a side panel, and its actions step the same panel (11 Oct; ref = design-refs/query-panel-v1/query-panel-v1.html; report reports/query-panel-v1/REPORT.md; branch `query-panel-v1`, NOT merged)
+- **An open query is a side panel: 8px in on the right, 560 wide (520 at 1440 and under), no scrim, no scroll lock, full screen under 900px.** The container is `shell/SidePanel` (class `spanel`); the query's is `QueryPanelHost` (class `qsp`). `QcQueryModal` is deleted. The card inside is still `QcOpenCard`, composed once in `Queries.tsx`.
+- **⚠️ `.qpn` IS THE OLD PHONE DRAWER'S CLASS**, and inkShell.css slides it off-screen unless `data-on`. A new panel class must not reuse it (mine did, and the panel rendered 584px off-screen with every rule reading correctly).
+- **On the Query Centre the open query is `?q=`.** Another page opens one in place through `lib/queryPanelStore` (`openQueryPanel(id, "dashboard")`); the always-mounted Query Centre draws it. Leaving the route closes it. The Dashboard's chart is the only caller today.
+- **The list stays live.** Clicking another row swaps the panel in place; Up, Down, J and K walk the VISIBLE rows (`useQcListKeys`' `panelId`); the open row is `aria-selected` with a 3px edge in its court's colour (`data-court` on the row); the keyboard ring is cleared.
+- **One right-hand panel at a time** (`claimRightPanel` in the store): the query, the feed drawer and the Birds-eye drawer give way to each other. `body.spanel-open` hides the floating tabs.
+- **⚠️ ACTIONS STEP THE SAME PANEL.** A door on the card calls `openQueryDrawer({ …, panel })`. `QueryDrawer` then portals its shell into the panel's `[data-side-slot]` (`qad-root--panel`), with the step frame from `DrawerShell`'s `panel` prop. The panel carries `data-step` and hides its own content, still mounted. The step is `role="group"`: the panel is the one dialog. The correction desk does the same (`qcd--panel`).
+- **The shared action drawer is still a drawer everywhere else** (Dashboard, To-do list, agent card, the list's row tray). Do not delete its container.
+- **`panelDoors` (lib/queryActions/entry) is the footer's table:** the next move is the primary; a query with the agent for over 365 days leads with Close. A closed query's door is still "Record a late reply": there is no reopen journey.
+- **Decision 8 still holds inside the panel:** Back, Escape and Cancel with answers PARK the journey; choosing another row or closing the panel asks the step to leave (`askDrawerToLeave`).
+- **Locks:** `tests/e2e/queryPanelV1.measure.ts` P1–P12, proofs in `reports/query-panel-v1/mutation-proofs.json`. None of them saves. `tests/e2e/openQuery.ts` opens a query through the panel.
+
 ## Query Centre — v137 (11 Oct; ref = design-refs/query-centre/query-centre-v137.html + design-refs/qc-v137/*.png; report reports/qc-v137/REPORT.md; branch `qc-v137`, NOT merged; AMENDS v136/v132 on the DESKTOP — the phone keeps the v126 page)
 - **The desktop Query Centre is a panel, a strip and the list.** The panel is the shared title panel ("Every query, in one place"). The strip is `QcStrip` (four cells: Queries sent, With you, With agents, Closed). The list follows 40px under it. "Recently updated", the banner, the "View the full list" link and the list header's hawk are not drawn (the components are kept).
 - **A strip cell is the list's court filter.** It is a second narrowing beside the one `QcFilter` value: both apply. "Clear all" clears both. Cell 1 clears the court. Pressing never scrolls. Cell 1 is every query for the manuscript, the list's own unfiltered count (F1, 11 Oct); it is NOT the three courts added up, which hold no Withdrawn or Signed query.
@@ -1773,6 +1785,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Query panel v1 is DONE on branch `query-panel-v1` (cut from `main` at 13313c9d), NOT merged.** Read `reports/query-panel-v1/REPORT.md` first: thirteen false premises, including no reopen journey, the row not held after a save, and the commit order (B landed before A).
+
 **Onboarding v5 part 3 (the Import page) is DONE on branch `onb-v5-import-page` (off `import-fixes`), NOT merged to `main`.** Read `reports/onb-v5-import-page/REPORT.md`, §1 and §7 first.
 
 **Import fixes are DONE on branch `import-fixes` (off `onb-v5-import`), NOT merged to `main`.** Read `reports/import-fixes/REPORT.md`, §1 and §7.2 first.

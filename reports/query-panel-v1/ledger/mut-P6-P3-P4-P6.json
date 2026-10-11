@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "P3",
+  "where": "1512 the heading is the second row's agent",
+  "ok": true,
+  "detail": "Iris Kwan → Priya Nair"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 the panel's box did not change",
+  "ok": true,
+  "detail": "560×884 → 560×884"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 the same panel, not a new one",
+  "ok": true,
+  "detail": "same element true"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 exactly one row selected",
+  "ok": true,
+  "detail": "1 selected (seed-pkgq-4)"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 the open row's ground",
+  "ok": true,
+  "detail": "rgb(247, 243, 237)"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 a 3px inset edge in its court's colour",
+  "ok": true,
+  "detail": "you: rgb(176, 96, 62) 3px 0px 0px 0px inset"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 no keyboard ring while the panel is open",
+  "ok": true,
+  "detail": "0 .kf rows"
+ },
+ {
+  "lock": "P6",
+  "where": "1512 scrollTop kept",
+  "ok": false,
+  "detail": "1100 · open 1132 · swap 1207 · closed 1207"
+ },
+ {
+  "lock": "P6",
+  "where": "1512 closed",
+  "ok": true,
+  "detail": "the panel is gone"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 the heading is the second row's agent",
+  "ok": true,
+  "detail": "Iris Kwan → Priya Nair"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 the panel's box did not change",
+  "ok": true,
+  "detail": "520×784 → 520×784"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 the same panel, not a new one",
+  "ok": true,
+  "detail": "same element true"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 exactly one row selected",
+  "ok": true,
+  "detail": "1 selected (seed-pkgq-4)"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 the open row's ground",
+  "ok": true,
+  "detail": "rgb(247, 243, 237)"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 a 3px inset edge in its court's colour",
+  "ok": true,
+  "detail": "you: rgb(176, 96, 62) 3px 0px 0px 0px inset"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 no keyboard ring while the panel is open",
+  "ok": true,
+  "detail": "0 .kf rows"
+ },
+ {
+  "lock": "P6",
+  "where": "1280 scrollTop kept",
+  "ok": false,
+  "detail": "1100 · open 1124 · swap 1198 · closed 1198"
+ },
+ {
+  "lock": "P6",
+  "where": "1280 closed",
+  "ok": true,
+  "detail": "the panel is gone"
+ }
+]
