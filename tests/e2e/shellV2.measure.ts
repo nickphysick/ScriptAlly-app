@@ -162,7 +162,7 @@ test("S6 · tab: the page tab and its fillet are the sheet's colour on a header 
     L.check(`S6 the tab is ${rgb(want)}`, w, r.tabBg === rgb(want) && r.filFill === rgb(want), `tab ${r.tabBg} fillet ${r.filFill}`);
     L.check("S6 the tab's colour and a sheet on the page go together", w, r.hasHost === SHEET_ROUTES.includes(route), `sheet on the page ${r.hasHost}`);
   }
-  L.check("S6 population: both kinds of route are in the census", "census", SHEET_ROUTES.length >= 3 && NO_SHEET_ROUTES.length >= 2 /* RE-POINTED (header panel v2): the workspace routes left the sheet; Import, Plans and the Help centre keep it */, `${SHEET_ROUTES.length} with, ${NO_SHEET_ROUTES.length} without`);
+  L.check("S6 population: both kinds of route are in the census", "census", SHEET_ROUTES.length >= 2 && NO_SHEET_ROUTES.length >= 2 /* RE-POINTED (header panel v2): the workspace routes left the sheet. RE-POINTED again (onboarding v5 part 3, 9e2f7503): /import left it on purpose, so Plans and the Help centre keep it and the floor is two */, `${SHEET_ROUTES.length} with, ${NO_SHEET_ROUTES.length} without`);
   L.done(ROUTES.length * SIZES.length * 2);
 });
 
