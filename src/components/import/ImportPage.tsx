@@ -163,7 +163,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                 <h2 className="impg-h" id="impg-t-template">{TILE_TEMPLATE.title}</h2>
                 <p className="impg-p">{TILE_TEMPLATE.text}</p>
                 <div className="impg-acts">
-                  <button type="button" className="impg-btn" data-act="download" onClick={download}>{TILE_TEMPLATE.download}</button>
+                  <button type="button" className="impg-btn impg-btn--line" data-act="download" onClick={download}>{TILE_TEMPLATE.download}</button>
                   <button type="button" className="impg-btn impg-btn--line" data-act="upload" onClick={chooseTemplate}>{TILE_TEMPLATE.upload}</button>
                 </div>
                 <p className="impg-fact" data-impg="fact">{TILE_TEMPLATE.fact}</p>
@@ -175,7 +175,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                 <h2 className="impg-h" id="impg-t-match">{TILE_MATCH.title}</h2>
                 <p className="impg-p">{TILE_MATCH.text}</p>
                 <div className="impg-acts">
-                  <button type="button" className="impg-btn" data-act="match" onClick={openMatcher}>{TILE_MATCH.action}</button>
+                  <button type="button" className="impg-btn impg-btn--line" data-act="match" onClick={openMatcher}>{TILE_MATCH.action}</button>
                 </div>
                 <p className="impg-fact" data-impg="fact">{TILE_MATCH.fact}</p>
               </div>

@@ -72,6 +72,21 @@
 - **Locks:** `tests/e2e/shellV2.measure.ts` SH2 S1–S6, B1–B3, L1 at 1512 and 1280 (`sh2Lib.ts`; `SH2_MUTATE=<lock>` breaks one in the page; `SH2_CAPTURE=1` against a build of main writes `reports/shell-v2/baseline.json`). Unit: `shell/headerSheet.test.ts`. Older locks retired or re-pointed are listed in the report, §6.
 - **Open, for Nick:** Analytics; the 25px under `PageHeader`; Manuscripts' doors (`#fdfcfa` on a `#fbf9f5` band); the tab staying paper white once the sheet has scrolled away; the empty states' headers were not rendered (the harness account is populated).
 
+## Onboarding v5, part 3 — the Import page (11 Oct; ref = design-refs/onboarding/onboarding-journey-v5.html #desk + design-refs/onboarding-v5/ref-desk-*.png; report reports/onb-v5-import-page/REPORT.md; branch `onb-v5-import-page` off `import-fixes`, NOT merged)
+- **One import flow, two homes: `components/import/ImportFlow.tsx`.** It holds the import's screens and handlers (confirm, reading, summary, review, importing, the dead ends). Set-up's `BranchB` and the Import page both mount it; neither keeps a copy (lock P2). A host passes props and opens the flow's two file pickers through its ref; while the flow is `idle` it renders only those pickers.
+- **`/import` is `components/import/ImportPage.tsx`: the slim title panel, three tiles (Smart import, Our template, Match your own columns), a footnote.** No tile is ringed or recommended. A spent Smart Import disables its button and the fact line says so.
+- **`PanelHeader slim`** is the title panel at the reference's measures (174 tall at 1440). Every rule names `.hp3--slim`. `/import` is in `HEADER_PANEL_ROUTES` and its route slot declares no width kind.
+- **⚠️ The gap under the header is the grid's `--wpg-chrome-gap`** (28 here, set on `.impg.impg-wpg`). The tiles add no margin of their own.
+- **⚠️ In the app the flow's screens sit under a wrapper with the class `sf`** (`.sf.impg-flow`), because their rules are scoped to the set-up frame's class. The wrapper undoes the frame's fixed positioning. `SetupFrame` is not used in the app.
+- **The import attaches to the sidebar's active manuscript. With none, it opens on `BookStep`** (set-up's book step, now its own component, mounted by both hosts). The manuscript is created once, at the import.
+- **"Cancel" on the summary and the review is drawn only when the host passes `onCancel`** (the Import page does; set-up does not). It asks with the query drawer's four words (`ImportCancelConfirm`; a lock reads `DrawerShell.tsx` for each). Discard calls the flow's `reset()`.
+- **An in-app import ends on the dashboard**, with part 2's skipped-rows line.
+- **The column matcher is `ImportCsv.tsx` behind the third tile.** Its words are `lib/importMatcher.ts`; its dress is `import/importMatcher.css`. The grids tab, the demo-data button and its own page header are deleted. Its parsing, matching and writing are unchanged.
+- **⚠️ The footnote is one sentence.** "An agent already on your contact list isn't added again." is not true of all three tiles (name and agency on two, name alone on the matcher).
+- **e2e that drive the matcher go through `tests/e2e/matcherDrive.ts`** and clean up in `finally`.
+- **The lab:** `#/onb-lab?s=import-page&ent=…` (tiles per entitlement), `&fx=…` (the flow over a fixture), `&live=1` (real handlers; no manuscript, so the book step).
+- **Locks IP1:** `tests/e2e/onbV5ImportPage.measure.ts` (P1, D1–D3, F1–F4, M2, M3, T1; `IP1_MUTATE=<lock>`), `importFlow.test.ts` (P2), `importPage.test.ts` (W1), and the three matcher suites (M1).
+
 ## Import fixes — dates, counts and labels (11 Oct; report reports/import-fixes/REPORT.md; branch `import-fixes` off `onb-v5-import`, NOT merged)
 - **One reader for both import paths: `lib/sheetCells.ts` (`readSheetBook`).** Text formats are read with `raw: true`, so a text date arrives as typed. A real Excel date cell is converted to `YYYY-MM-DD` from its serial number, never its display text. **SheetJS's default read turns `2026-08-02` in a CSV into `8/2/26` and reads `03/05/2026` as 5 March.**
 - **A template date flag is a typed reason on its query** (`unreadable-date`, `ambiguous-date`, and the two `-response-date` codes), so the review asks. `TemplateParse.flags` alone is rendered by nothing.
@@ -1720,6 +1735,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Onboarding v5 part 3 (the Import page) is DONE on branch `onb-v5-import-page` (off `import-fixes`), NOT merged to `main`.** Read `reports/onb-v5-import-page/REPORT.md`, §1 and §7 first.
+
 **Import fixes are DONE on branch `import-fixes` (off `onb-v5-import`), NOT merged to `main`.** Read `reports/import-fixes/REPORT.md`, §1 and §7.2 first.
 
 **Onboarding v5 part 2 (the import) is DONE on branch `onb-v5-import` (off `onb-v5-setup`), NOT merged to `main`.** Read `reports/onb-v5-import/REPORT.md`, §1 and §9 first.

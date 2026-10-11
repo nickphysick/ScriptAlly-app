@@ -253,7 +253,7 @@ test.describe("D3", () => {
     await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 20_000 });
     return page.evaluate(() => ({ path: location.pathname, matcher: !!document.querySelector(".impm, [data-impm]"), tiles: [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length }));
   };
-  test("D3 the address, the search palette and the account menu each land on the tiles", async ({ page }) => {
+  test("D3 the address and the search palette each land on the tiles", async ({ page }) => {
     const seen: Record<string, unknown> = {};
     // 1 · the address itself (what the Contact list's, the Query Centre's and account settings' links navigate to)
     await openImport(page, { width: 1440, height: 900 });
@@ -596,5 +596,39 @@ test.describe("M2 M3", () => {
       await page.locator('.impm [data-impm="import"]').waitFor({ state: "visible" });
       await page.screenshot({ path: resolve(OUT, "shots", `matcher-${f.slug}-2-390.png`), fullPage: true });
     }
+  });
+});
+
+test.describe("T1 matcher", () => {
+  test.use({ viewport: { width: 1440, height: 1000 } });
+  test("T1 the matcher's rules read only tokens that resolve", async ({ page }) => {
+    await openMatcher(page, "Queries");
+    await page.locator('.impm [data-impm="paste"]').fill("Manuscript Title,Agent Name,State,Date Sent\nA,B,Queried,2026-08-01");
+    await page.locator('.impm [data-impm="read"]').click();
+    await page.locator('.impm [data-impm="import"]').waitFor({ state: "visible" });
+    if (MUTATE === "T1") await page.addStyleTag({ content: ".sf.impm .impm-map tbody tr{border-top-color:var(--impm-nope)}" });
+    const r = await page.evaluate(() => {
+      const unresolved: string[] = []; let rules = 0; let reads = 0;
+      const walk = (list: CSSRuleList) => {
+        for (const rule of Array.from(list)) {
+          if (rule instanceof CSSMediaRule) { if (matchMedia(rule.conditionText).matches) walk(rule.cssRules); continue; }
+          if (!(rule instanceof CSSStyleRule) || !/\.impm/.test(rule.selectorText)) continue;
+          rules += 1;
+          const names = new Set<string>();
+          for (const m of rule.style.cssText.matchAll(/var\(\s*(--[\w-]+)\s*(,)?/g)) if (!m[2]) names.add(m[1]);
+          if (!names.size) continue;
+          let el: Element | null = null;
+          try { el = document.querySelector(rule.selectorText.replace(/::?[\w-]+(\([^)]*\))?/g, (p) => (/^::|^:(hover|focus|focus-visible|disabled)/.test(p) ? "" : p))); } catch { el = null; }
+          if (!el) continue;
+          for (const n of names) { reads += 1; if (!getComputedStyle(el).getPropertyValue(n).trim()) unresolved.push(`${rule.selectorText} reads ${n}`); }
+        }
+      };
+      for (const sheet of Array.from(document.styleSheets)) { try { walk(sheet.cssRules); } catch { /* cross-origin */ } }
+      return { rules, reads, unresolved: [...new Set(unresolved)] };
+    });
+    record("T1", "1440x1000", "matcher", r);
+    expect(r.rules, "the matcher's rules were found").toBeGreaterThan(30);
+    expect(r.reads, "they read tokens").toBeGreaterThan(8);
+    expect(r.unresolved).toEqual([]);
   });
 });

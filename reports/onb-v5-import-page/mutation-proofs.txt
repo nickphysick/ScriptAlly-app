@@ -12,3 +12,4 @@ M2 mutated: 1 red, 0 green —     Error: no developer words anywhere
 M3 mutated: 1 red, 0 green —     Error: no grids tab
 M1 mutated (the decision list dropped): 1 red —     Error: the summary lists the rows needing a decision
 W1 mutated (the footnote paraphrased): Tests  1 failed | 8 passed (9) | × W1 · the Import page's words > the footnote is its first sentence alone: the second is not true of all three tiles 3ms → expected 'Importing adds to what is already her…' to be 'An import adds to what you already ha…' // Object.is equality
+T1 (matcher) mutated: 1 red
