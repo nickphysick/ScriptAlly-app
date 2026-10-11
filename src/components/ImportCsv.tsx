@@ -8,6 +8,7 @@ import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
 import { importedAgentDoc } from "../lib/importedAgent";
+import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
 import { writeImportedHistory } from "../lib/smartImportCommit";
 import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
@@ -389,10 +390,12 @@ export const ImportCsv: React.FC<{
           }
 
           // Strict de-duplicate matching
-          const foundAgent = localAgents.find(a => a.name.toLowerCase() === name.toLowerCase());
+          /* The one agent match every import uses (importDuplicates.ts): same name, and the same
+             agency or one side giving none. The row is not imported, and is counted as not imported. */
+          const foundAgent = findExistingAgent(localAgents, { name, agency: getMappedValue("agency") });
           if (foundAgent) {
-            runLogs.push(LOG.agentExists(name));
-            successfulCount++;
+            errorsList.push(LOG.agentExists(name));
+            failedCount++;
             continue;
           }
           
@@ -455,8 +458,8 @@ export const ImportCsv: React.FC<{
           // De-duplicate matching
           const foundMs = localManuscripts.find(m => m.title.toLowerCase() === title.toLowerCase());
           if (foundMs) {
-            runLogs.push(LOG.manuscriptExists(title));
-            successfulCount++;
+            errorsList.push(LOG.manuscriptExists(title));
+            failedCount++;
             continue;
           }
 
@@ -514,7 +517,7 @@ export const ImportCsv: React.FC<{
 
           // Case-insensitive lookups on dynamic local caches
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
-          let foundAgent = localAgents.find(a => a.name.toLowerCase() === agentNameInput.toLowerCase());
+          let foundAgent = findExistingAgent(localAgents, { name: agentNameInput });
 
           /**
            * ⚠️ AN UNMATCHED ROW IS FLAGGED, NOT FABRICATED (overnight ruling, D1).
@@ -566,6 +569,13 @@ export const ImportCsv: React.FC<{
            */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
           const sent = matcherDate(dateSentInput);
+          /* ALREADY HERE: the same agent, the same manuscript and the same sent day (or both with
+             none). Nothing is written for the row, and it is counted as not imported. */
+          if (foundMs && foundAgent && localQueries.some((ex) => isSameQuery(ex, { agentId: foundAgent!.id, manuscriptId: foundMs!.id, sentDate: sent.iso }))) {
+            errorsList.push(LOG.queryExists(msTitleInput, agentNameInput));
+            failedCount++;
+            continue;
+          }
           const queryData = {
             /**
              * ⚠️ NO INVENTED IDS (D1). These were `|| "ms-seed-fantasy"` and `|| "agent-seed-alex"`,

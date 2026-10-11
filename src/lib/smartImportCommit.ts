@@ -12,12 +12,13 @@
 import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
-import { Agent, ActivityType, SubmissionMethod } from "../types";
+import { Agent, ActivityType, Query, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
 import { importActivityLine, type ImportSource } from "./importLabels";
 import { importedAgentDoc } from "./importedAgent";
+import { findExistingAgent, isSameQuery } from "./importDuplicates";
 
 // The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
 // pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
@@ -27,6 +28,8 @@ export { impliedRungs, assignTimes };
 export interface CommitDeps {
   userId: string;
   existingAgents: Agent[];
+  /** the account's queries, so a query already here is not written a second time */
+  existingQueries?: readonly Pick<Query, "agentId" | "manuscriptId" | "dateSent">[];
   manuscriptTitle: string;
   addAgent: (
     a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string },
@@ -45,16 +48,14 @@ export interface CommitOutcome {
   queriesImported: number;
   queriesSkipped: number;
   errors: string[];
+  /** rows not written because the account already holds that query (same agent, manuscript and sent day) */
+  already?: { who: string; status: string; sentDate: string | null }[];
 }
-
-const norm = (s = "") => s.trim().toLowerCase();
 
 /** How many agents in the proposal already exist (for the review screen's merge note). */
 export function countExistingMatches(result: SmartImportResult, existingAgents: Agent[]): number {
   return (result.agents || []).filter((a) =>
-    existingAgents.some(
-      (ex) => norm(ex.name) === norm(a.name) && (!a.agency || !ex.agency || norm(ex.agency) === norm(a.agency))
-    )
+    !!findExistingAgent(existingAgents, a)
   ).length;
 }
 
@@ -134,7 +135,8 @@ export async function commitSmartImport(
   source: ImportSource = "smart"
 ): Promise<CommitOutcome> {
   const { userId, existingAgents, manuscriptTitle, addAgent, addQuery } = deps;
-  const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [] };
+  const existingQueries = deps.existingQueries ?? [];
+  const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [], already: [] };
 
   const { importable, skipped } = validateSmartImport(result);
   outcome.queriesSkipped = skipped.length;
@@ -158,16 +160,17 @@ export async function commitSmartImport(
   //    isolated: one bad agent must never abort the batch (handleFirestoreError THROWS, so
   //    addAgent/addQuery can raise as well as return failure).
   const refToAgent: Record<string, { id: string; name: string }> = {};
+  const agentLabel: Record<string, string> = {};
   for (const a of result.agents || []) {
     if (!a.name?.trim() && !a.agency?.trim()) {
       // No name AND no agency — nothing to identify it by; its queries are skipped by validation.
       continue;
     }
     const agentName = a.name?.trim() ?? "";
+    agentLabel[a.ref] = agentName || (a.agency ?? "").trim();
     try {
-      const match = existingAgents.find(
-        (ex) => norm(ex.name) === norm(agentName) && norm(ex.agency) === norm(a.agency ?? "")
-      );
+      // the one agent match every import path uses (importDuplicates.ts)
+      const match = findExistingAgent(existingAgents, { name: agentName, agency: a.agency });
       if (match) {
         refToAgent[a.ref] = { id: match.id, name: match.name };
         outcome.agentsMerged++;
@@ -210,6 +213,13 @@ export async function commitSmartImport(
     if (!agent) {
       outcome.queriesSkipped++;
       outcome.errors.push(`Skipped a ${q.status} query — its agent couldn't be saved.`);
+      continue;
+    }
+
+    /* ALREADY HERE: the same agent, the same manuscript and the same sent day (or both undated).
+       Nothing is written for it — no query, no history — and it is listed with the skipped rows. */
+    if (existingQueries.some((ex) => isSameQuery(ex, { agentId: agent.id, manuscriptId, sentDate: q.sentDate }))) {
+      outcome.already!.push({ who: agent.name || agentLabel[q.agentRef] || "", status: q.status ?? "", sentDate: q.sentDate ?? null });
       continue;
     }
 
@@ -275,6 +285,8 @@ export async function commitSmartImport(
         .map((d) => deleteDoc(d.ref))
     );
 
+    /* The line counts what was written. An import that wrote nothing leaves no line. */
+    if (outcome.agentsCreated === 0 && outcome.queriesImported === 0) return outcome;
     const summaryId = "imp-sum-" + Math.random().toString(36).substr(2, 9);
     await setDoc(doc(feedCol, summaryId), {
       id: summaryId,

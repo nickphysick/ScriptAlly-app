@@ -29,7 +29,7 @@ import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { dayMonth } from "../../lib/dates";
-import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, smartFactLine } from "../../lib/importPage";
+import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "../../lib/importPage";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -181,7 +181,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
               </div>
             </section>
           </div>
-          <p className="impg-foot" data-impg="footnote">{IMPORT_FOOTNOTE}</p>
+          <p className="impg-foot" data-impg="footnote">{IMPORT_FOOTNOTE} {IMPORT_FOOTNOTE_SECOND}</p>
         </div>
       )}
 
@@ -203,6 +203,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
         <ImportFlow
           ref={flowRef}
           manuscriptTitle={lab?.flow?.title ?? manuscript?.title ?? draft?.title ?? ""}
+          manuscriptId={manuscript?.id ?? null}
           onEnsureManuscript={ensureManuscript}
           hostError={hostError}
           onAddByHand={() => onNavigate("agents", "Add an agent")}

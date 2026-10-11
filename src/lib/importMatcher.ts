@@ -60,6 +60,7 @@ export const afterOpenLabel = (kind: MatcherKind): string =>
 export const LOG = {
   agentExists: (name: string) => `${name} is already on your contact list. Row not imported.`,
   manuscriptExists: (title: string) => `"${title}" is already in your manuscripts. Row not imported.`,
+  queryExists: (title: string, agent: string) => `"${title}" to ${agent} is already in your queries. Row not imported.`,
   agentAdded: (name: string, agency: string) => `Added agent: ${name}${agency ? `, ${agency}` : ""}`,
   manuscriptAdded: (title: string) => `Added manuscript: "${title}"`,
   queryAdded: (title: string, agent: string, status: string) => `Added query: "${title}" to ${agent}, ${status}`,

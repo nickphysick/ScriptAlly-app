@@ -31,6 +31,9 @@ import { fmtDate } from "../../lib/smartImportReviewModel";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
+import { splitDuplicates, ALREADY_REASON } from "../../lib/importDuplicates";
+
+type AlreadyRow = { who: string; status: string; sentDate: string | null };
 import { manuscriptErrorLine, type ImportSource } from "../../lib/importLabels";
 import { ConfirmScreen } from "../onboarding/ConfirmScreen";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
@@ -61,6 +64,9 @@ export interface ImportFlowHandle {
 export interface ImportFlowProps {
   /** The manuscript's title, shown on the summary and the review. */
   manuscriptTitle: string;
+  /** The manuscript the import will file its queries under, when it already exists. A query in
+   *  the file that this manuscript already holds is not imported again. Set-up has none yet. */
+  manuscriptId?: string | null;
   /** Create-or-reuse the manuscript, returning its id (null if it couldn't be created). Called once,
    *  at the commit; every imported query attaches to this id. */
   onEnsureManuscript: () => Promise<string | null>;
@@ -90,9 +96,9 @@ export interface ImportFlowProps {
 }
 
 export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function ImportFlow({
-  manuscriptTitle, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
+  manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
 }, ref) {
-  const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
+  const { currentUser, agents, queries, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
 
   const [screen, setScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
@@ -124,6 +130,34 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /** The file's row count, when it is known without reading the file again: the template parse
    *  returns it; a Smart import does not (its sample is capped at eight rows). */
   const [rowsRead, setRowsRead] = useState<number | null>(null);
+  /** Rows of the file the account already holds (same agent, manuscript and sent day). They are
+   *  taken out before the summary, so the summary and the review count only what will be written. */
+  const [already, setAlready] = useState<AlreadyRow[]>([]);
+
+  /**
+   * Take the file as read, set aside what is already in the account, and show what is left.
+   * A file whose every query is already here goes straight to "Nothing was imported": there is
+   * nothing to review and nothing is written.
+   */
+  const takeRead = (result: SmartImportResult): "fresh" | "nothing" => {
+    const split = splitDuplicates(result, agents, queries, manuscriptId);
+    const rows: AlreadyRow[] = split.duplicates.map((d) => ({
+      who: (d.agent?.name ?? "").trim() || (d.agent?.agency ?? "").trim(),
+      status: d.query.status ?? "", sentDate: d.query.sentDate ?? null,
+    }));
+    setAlready(rows);
+    setValidated(validateSmartImport(split.fresh));
+    if (rows.length > 0 && (split.fresh.queries ?? []).length === 0) {
+      const none: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: rows.length, errors: [], already: rows };
+      setOutcome(none);
+      if (currentUser) saveImportNotice(currentUser.id, buildImportNotice([], none, [], [], Date.now(), rows));
+      setNothingNew(true);
+      setScreen("done");
+      return "nothing";
+    }
+    return "fresh";
+  };
+  const [nothingNew, setNothingNew] = useState(false);
 
   // File chosen → gate it on the client first. If already used, go straight to the blocked screen
   // (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
@@ -164,8 +198,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       const parsed = await readTemplateFile(file);
       setTemplateFlags(parsed.flags);
       setRowsRead(parsed.rowsRead);
-      setValidated(validateSmartImport(parsed.result));
-      setScreen("overview");
+      if (takeRead(parsed.result) === "fresh") setScreen("overview");
     } catch (e) {
       console.error("Template parse failed:", e);
       setScreen("fallback"); // graceful fallback — never dead-end onboarding
@@ -181,7 +214,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     sampleRawRecords(file).then(setRawSample).catch(() => setRawSample([]));
     try {
       const result: SmartImportResult = await runSmartImport(file);
-      setValidated(validateSmartImport(result));
+      if (takeRead(result) === "nothing") return;
       setExtractComplete(true); // loader snaps the cards in, crystallises them, then routes to Overview
     } catch (e: any) {
       // A blocked entitlement comes back as a structured HttpsError — branch on details.reason so the
@@ -224,7 +257,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         lab
           ? lab.commit(result)
           : commitSmartImport(
-              { userId: currentUser!.id, existingAgents: agents, manuscriptTitle: manuscriptTitle, addAgent, addQuery },
+              { userId: currentUser!.id, existingAgents: agents, existingQueries: queries, manuscriptTitle: manuscriptTitle, addAgent, addQuery },
               result,
               mId,
               importSource
@@ -235,7 +268,12 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
          loader completes. The validation is of the result the REVIEW handed back — the one that was
          committed — not of the first read. A commit that skipped nothing clears any older notice. */
-      saveImportNotice(lab ? lab.uid : currentUser!.id, buildImportNotice(validateSmartImport(result).skipped, committed, result.agents, left?.setAside ?? []));
+      saveImportNotice(lab ? lab.uid : currentUser!.id, buildImportNotice(
+        validateSmartImport(result).skipped, committed, result.agents, left?.setAside ?? [], Date.now(),
+        /* what the read set aside as already here, and anything the commit itself found (set-up
+           learns its manuscript only at the commit) — the two never overlap */
+        [...already, ...(committed.already ?? [])],
+      ));
       // Never route on a false success: if nothing actually landed, surface the outcome screen
       // instead of the loader's completion + dashboard route.
       if (committed.queriesImported === 0) { setScreen("done"); return; }
@@ -256,6 +294,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     reset: () => {
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
       setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
+      setAlready([]); setNothingNew(false);
       setScreen("idle");
     },
   }));
@@ -390,7 +429,12 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   // ── Nothing imported — what the commit actually did. Never silent, never auto-skipped past.
   if (screen === "done" && outcome) {
-    const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
+    const skippedReasons = [...new Set([
+      ...(validated?.skipped || []).map((s) => s.reason),
+      ...((outcome.already ?? []).length > 0 || already.length > 0 ? [ALREADY_REASON] : []),
+    ])];
+    /* Every row was already here: there is no review to go back to, so the way out is the start. */
+    if (nothingNew) return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => toStart()} backLabel="Back" />;
     return <NothingImported outcome={outcome} skippedReasons={skippedReasons} onBackToReview={() => setScreen("review")} />;
   }
 

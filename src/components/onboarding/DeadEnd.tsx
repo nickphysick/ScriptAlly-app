@@ -120,9 +120,13 @@ export const ImportCountsBody: React.FC<{ outcome: ImportCounts; skippedReasons:
   </>
 );
 
-export const NothingImported: React.FC<{ outcome: ImportCounts; skippedReasons: string[]; onBackToReview: () => void }> = ({ outcome, skippedReasons, onBackToReview }) => (
+export const NothingImported: React.FC<{
+  outcome: ImportCounts; skippedReasons: string[]; onBackToReview: () => void;
+  /** when there is no review to go back to (every row was already in the account) */
+  backLabel?: string;
+}> = ({ outcome, skippedReasons, onBackToReview, backLabel }) => (
   <DeadEndCard kind="nothing" chip={CHIP_NOTHING} fail title={NOTHING_TITLE}
-    actions={<Primary act="review" onClick={onBackToReview}>Back to the review</Primary>}>
+    actions={<Primary act="review" onClick={onBackToReview}>{backLabel ?? "Back to the review"}</Primary>}>
     <ImportCountsBody outcome={outcome} skippedReasons={skippedReasons} />
   </DeadEndCard>
 );
