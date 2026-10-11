@@ -1,0 +1,50 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:398:3 › Query panel v1 › P13 · save: back to the query, the new entry on the timeline, the row updated and still selected; then undone
+[measure] › tests/e2e/queryPanelV1.measure.ts:398:3 › Query panel v1 › P13 · save: back to the query, the new entry on the timeline, the row updated and still selected; then undone
+qp1s: seeded
+
+
+qp1s: seeded
+
+
+qp1s: removed 6
+
+
+  ✗ P13 · 1512 the panel returns to the query — panel true · step false · card shown false
+
+  ✗ P13 · 1280 the panel returns to the query — panel true · step false · card shown false
+
+[P13] 10/12 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:398:3 › Query panel v1 › P13 · save: back to the query, the new entry on the timeline, the row updated and still selected; then undone 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "P13 · 1512 the panel returns to the query — panel true · step false · card shown false",
+    +   "P13 · 1280 the panel returns to the query — panel true · step false · card shown false",
+    + ]
+
+      73 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      74 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 75 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      76 |   }
+      77 | }
+      78 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:75:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:494:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-3533a--still-selected-then-undone-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:398:3 › Query panel v1 › P13 · save: back to the query, the new entry on the timeline, the row updated and still selected; then undone 
+  1 passed (44.2s)
