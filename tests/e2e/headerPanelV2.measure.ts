@@ -14,6 +14,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { DIR, Ledger, OUT_OF_SCOPE, PANEL_BG, SIZES, WORKSPACE, contrast, near, open, parseRgb, pixel, prepare, readPanel } from "./hp2Lib";
+import { stripOffset, stripShown, underStrip, applyShift } from "./betaStrip";
 
 const BASELINE = "tests/e2e/fixtures/hp2-outofscope.json";
 const SHOW = (b: { l: number; t: number; w: number; h: number } | null | undefined) => (b ? `${b.l.toFixed(0)},${b.t.toFixed(0)} ${b.w.toFixed(0)}×${b.h.toFixed(0)}` : "absent");
@@ -101,9 +102,15 @@ test("P2 · out of scope unchanged", async ({ page }) => {
   const L = new Ledger("P2");
   await prepare(page);
   const got: Record<string, Awaited<ReturnType<typeof readOut>>> = {};
+  const strip: Record<string, boolean> = {};
   for (const vp of SIZES) for (const route of OUT_OF_SCOPE) {
     await open(page, route, vp); await page.waitForTimeout(600);
-    got[`${route}@${vp.width}`] = await readOut(page);
+    await applyShift(page);
+    /* H1: the header's place is measured from below the beta strip when it is shown (betaStrip.ts) */
+    const off = await stripOffset(page);
+    const read = await readOut(page);
+    got[`${route}@${vp.width}`] = { ...read, box: underStrip(read.box, off), h1box: underStrip(read.h1box, off) };
+    strip[`${route}@${vp.width}`] = await stripShown(page);
   }
   if (process.env.HP2_CAPTURE) { mkdirSync("tests/e2e/fixtures", { recursive: true }); writeFileSync(BASELINE, JSON.stringify(got, null, 1)); console.log(`captured ${Object.keys(got).length} baselines`); return; }
   expect(existsSync(BASELINE), "P2 baseline missing: capture it against a build of the base").toBe(true);
@@ -111,6 +118,7 @@ test("P2 · out of scope unchanged", async ({ page }) => {
   for (const k of Object.keys(base)) {
     const a = base[k], b = got[k];
     L.check("P2 precondition: a header was read", k, !!b?.box && !!b.title, `${b?.title} ${JSON.stringify(b?.box)}`);
+    L.check("H1 precondition: the beta strip is on screen, so the reading is taken under it", k, strip[k] === true, `strip ${strip[k]}`);
     L.check("P2 it is not a panel", k, b?.panel === false, `panel ${b?.panel}`);
     L.check("P2 the header's box equals the baseline (±1)", k, !!a.box && !!b?.box && a.box.every((v, i) => near(b.box![i], v, 1)), `${JSON.stringify(a.box)} → ${JSON.stringify(b?.box)}`);
     const diff = Object.keys(a.style ?? {}).filter((s) => a.style![s] !== b?.style?.[s]).map((s) => `${s}: ${a.style![s]} → ${b?.style?.[s]}`);
@@ -118,7 +126,7 @@ test("P2 · out of scope unchanged", async ({ page }) => {
     const d2 = Object.keys(a.h1style ?? {}).filter((s) => a.h1style![s] !== b?.h1style?.[s]).map((s) => `${s}: ${a.h1style![s]} → ${b?.h1style?.[s]}`);
     L.check("P2 the title's box and styles equal the baseline", k, d2.length === 0 && !!a.h1box && !!b?.h1box && a.h1box.every((v, i) => near(b.h1box![i], v, 1)), d2.join("; ") || `${JSON.stringify(a.h1box)} → ${JSON.stringify(b?.h1box)}`);
   }
-  L.done(Object.keys(base).length * 5);
+  L.done(Object.keys(base).length * 6);
 });
 
 /* ───────────────────────── P6 · no jump ───────────────────────── */
