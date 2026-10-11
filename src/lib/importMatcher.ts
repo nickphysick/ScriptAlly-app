@@ -7,6 +7,8 @@
  */
 import { parseTemplateDate } from "./templateImport";
 import { focusReasonMeta } from "./smartImportReviewModel";
+import { findExistingAgent } from "./importDuplicates";
+import { NO_AGENT_MATCH_REASON } from "./smartImport";
 
 export type MatcherKind = "agents" | "manuscripts" | "queries" | "activities";
 
@@ -96,6 +98,54 @@ export function undatedQueryLine(row: number, raw: string, why: "blank" | "ambig
 export function eventDateReason(why: "blank" | "ambiguous" | "unreadable"): string {
   return focusReasonMeta(why === "ambiguous" ? "ambiguous-date" : why === "unreadable" ? "unreadable-date" : "no-date").pill;
 }
+/**
+ * WHICH QUERY A HISTORY ROW BELONGS TO. A row attaches only when the manuscript AND the agent both
+ * match — the agent by `sameAgent`, the match every import path uses. It used to attach to the
+ * first query on a manuscript with that title and never read the agent, so on a manuscript queried
+ * to several agents an event landed on whichever query the store listed first.
+ *
+ *   · the row names an agent: that agent's one query for that manuscript, or nothing;
+ *   · the row names no agent: the manuscript's query when it has exactly one, or nothing.
+ * "Nothing" is never silent: the caller logs the row, counts it and sends it to the notice.
+ */
+export type HistorySkip = "no-query" | "no-agent-several" | "agent-unknown" | "agent-no-query" | "agent-several";
+export type HistoryMatch = { kind: "attach"; queryId: string; agentId: string } | { kind: "skip"; why: HistorySkip };
+export function matchHistoryRow(
+  row: { title: string; agent?: string | null },
+  manuscripts: readonly { id: string; title: string }[],
+  agents: readonly { id: string; name: string; agency: string }[],
+  queries: readonly { id: string; manuscriptId: string; agentId: string }[],
+): HistoryMatch {
+  const title = row.title.trim().toLowerCase();
+  const msIds = new Set(manuscripts.filter((m) => title && (m.title ?? "").trim().toLowerCase() === title).map((m) => m.id));
+  const pool = queries.filter((q) => msIds.has(q.manuscriptId));
+  const named = (row.agent ?? "").trim();
+  if (named) {
+    const agent = findExistingAgent(agents, { name: named });
+    if (!agent) return { kind: "skip", why: "agent-unknown" };
+    const mine = pool.filter((q) => q.agentId === agent.id);
+    if (mine.length === 0) return { kind: "skip", why: "agent-no-query" };
+    if (mine.length > 1) return { kind: "skip", why: "agent-several" };
+    return { kind: "attach", queryId: mine[0].id, agentId: agent.id };
+  }
+  if (pool.length === 0) return { kind: "skip", why: "no-query" };
+  if (pool.length > 1) return { kind: "skip", why: "no-agent-several" };
+  return { kind: "attach", queryId: pool[0].id, agentId: pool[0].agentId };
+}
+/**
+ * The reason a skipped history row carries in the dashboard's notice, in words the import already
+ * uses: the review's label for a row that names nobody, and the import's reason for an agent it
+ * cannot find. Where neither fits (the agent is on the list but has no query, or more than one,
+ * for that manuscript) there is no existing wording, and none is made up: the reason is empty and
+ * the run's log says what happened. `null` = the row is not sent to the notice (no query at all on
+ * that manuscript: the run's log line stands, as before).
+ */
+export function historySkipReason(why: HistorySkip): string | null {
+  if (why === "no-query") return null;
+  if (why === "no-agent-several") return focusReasonMeta("needs-identifying").pill;
+  if (why === "agent-unknown") return NO_AGENT_MATCH_REASON;
+  return "";
+}
 const why = (reason?: string) => (reason ? ` ${reason}` : "");
 export const ERR = {
   noName: (row: number) => `Row ${row} has no name. Row not imported.`,
@@ -104,6 +154,10 @@ export const ERR = {
   agentFailed: (name: string, reason?: string) => `Couldn't add agent ${name}.${why(reason)}`,
   manuscriptFailed: (title: string, reason?: string) => `Couldn't add manuscript "${title}".${why(reason)}`,
   queryFailed: (row: number, reason?: string) => `Couldn't add the query in row ${row}.${why(reason)}`,
+  /** kept as built: no query for this manuscript, or none for this agent on it */
+  eventNoQuery: (row: number) => `Activity row ${row}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`,
+  eventNoAgentSeveral: (row: number, title: string) => `Row ${row} names no agent, and "${title}" has more than one query, so the event can't be placed. Row not imported.`,
+  eventAgentSeveral: (row: number, title: string, agent: string) => `Row ${row}: there is more than one query to ${agent} for "${title}", so the event can't be placed. Row not imported.`,
   eventNoDate: (row: number) => `Row ${row} has no date that could be read, so the event can't be placed in a query's history. Row not imported.`,
   eventFailed: (reason?: string) => `Couldn't add the event to a query's history.${why(reason)}`,
   rowUnreadable: (row: number, reason: string) => `Row ${row} couldn't be read: ${reason}`,

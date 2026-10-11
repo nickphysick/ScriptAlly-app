@@ -1,0 +1,35 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 [measure] › tests/e2e/importMatcherHistory.measure.ts:51:1 › the matcher's history rows: manuscript and agent both match, or nothing is written (21.4s)
+
+
+  1) [measure] › tests/e2e/importMatcherHistory.measure.ts:51:1 › the matcher's history rows: manuscript and agent both match, or nothing is written 
+
+    Error: B's event is on B's query, and only that
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 1
+
+    - Array [
+    -   "2026-04-10 Birch asked for the first fifty pages",
+    - ]
+    + Array []
+
+      79 |     record("M1", { counts: m1.counts, log: m1.log, before, after: afterM1 });
+      80 |     expect(m1.counts).toContain("Imported: 2");
+    > 81 |     expect(afterM1[qB].feed, "B's event is on B's query, and only that").toEqual([...before[qB].feed, "2026-04-10 Birch asked for the first fifty pages"].sort());
+         |                                                                          ^
+      82 |     expect(afterM1[qA].feed, "A's query holds A's event, and not B's").toEqual([...before[qA].feed, "2026-04-09 Alder passed"].sort());
+      83 |     expect(afterM1[qSolo], "the other manuscript's query is untouched").toEqual(before[qSolo]);
+      84 |
+        at /Users/nickphysick/ScriptAlly-truth/tests/e2e/importMatcherHistory.measure.ts:81:74
+
+    Error Context: test-results/importMatcherHistory.measu-a920d-match-or-nothing-is-written-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/importMatcherHistory.measure.ts:51:1 › the matcher's history rows: manuscript and agent both match, or nothing is written 
+
+--- note: M1 fails first on the base, so M2 is not reached in this run. In the run before M1 was given its second row, M1 passed by the order the store listed the queries in and M2 failed: "nothing was written to any query — Received +1: 2026-04-11 Somebody asked for the full" (the row with no agent was attached to the first query).
