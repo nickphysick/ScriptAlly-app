@@ -13,7 +13,7 @@
  * Its mutation is made in the source and rebuilt (drop the duplicate check in lib/importDuplicates),
  * never by a hook in the product: the walk then leaves ten queries where one import leaves five.
  */
-import { walkSetupToFork } from "./reviewDrive";
+import { walkSetupToFork, answerAgents, answerQueries, readStep, stepTotal } from "./reviewDrive";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -43,20 +43,6 @@ const shot = async (page: Page, name: string) => {
   await page.screenshot({ path: resolve(OUT, "shots", `${name}.png`) });
 };
 
-/** Answer every open date question with the writer's "Leave undated". */
-async function leaveUndated(page: Page) {
-  for (let i = 0; i < 6; i++) {
-    const leave = page.getByRole("button", { name: "Leave undated" }).first();
-    if (!(await leave.isVisible().catch(() => false))) {
-      const openRow = page.locator('[data-row-id][data-asks]:not([data-asks="0"])').first();
-      if (!(await openRow.count())) break;
-      await openRow.click({ position: { x: 60, y: 20 } }).catch(() => {});
-      if (!(await leave.isVisible().catch(() => false))) break;
-    }
-    await leave.click();
-    await page.waitForTimeout(150);
-  }
-}
 /** From the summary to the dashboard: the summary's counts, the review's rows, then Import. */
 async function throughReview(page: Page, tag: string) {
   await page.locator('[data-im="summary"]').waitFor({ timeout: 30_000 });
@@ -67,12 +53,14 @@ async function throughReview(page: Page, tag: string) {
   await shot(page, `${tag}-summary-1440`);
   await page.locator('[data-im="primary"]').click();
   await page.locator('[data-im="review"][data-step="agents"]').waitFor({ timeout: 20_000 });
-  const agentRows = await page.locator('[data-im="rows"] [data-row-id]').count();
+  const agentRows = await stepTotal(page);
+  /* v9: the deck asks. No agency: carry on without one. No agent and no agency: remove the row. */
+  await answerAgents(page);
   await page.locator('[data-im="primary"]').click();
   await page.locator('[data-im="review"][data-step="queries"]').waitFor({ timeout: 20_000 });
-  const queryRows = await page.evaluate(() => [...document.querySelectorAll('[data-im="rows"] [data-row-id]')].map((r) => (r.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 160)));
+  const queryRows = (await readStep(page)).map((r) => r.text.slice(0, 160));
   await shot(page, `${tag}-review-queries-1440`);
-  await leaveUndated(page);
+  await answerQueries(page, { undated: true });
   await page.locator('[data-im="primary"]').click();
   await page.locator(".os-root.d58:not(.is-ghost)").first().waitFor({ timeout: 60_000 });
   await page.locator('[data-probe-text="chart-title"]').first().waitFor({ timeout: 30_000 });
@@ -211,7 +199,8 @@ test("R1 · the same sheet twice leaves one import's worth; then a mixed sheet",
       const dashThree = await readDashboard(page);
       record("third", { ...third, dash: dashThree, counts: afterThree });
       await shot(page, "3-mixed-dashboard-1440");
-      expect([third.summary.agents, third.summary.queries], "the nameless row is set aside; three queries are new").toEqual(["3", "3"]);
+      /* v9: the nameless row is counted and asked about; the walk removes it, so three are written */
+      expect([third.summary.agents, third.summary.queries], "the nameless row is asked about; three queries are new").toEqual(["4", "4"]);
       expect(afterThree.queries - afterOne.queries, "three queries were written, two of them undated").toBe(3);
       expect(afterThree.agents - afterOne.agents, "Owen Hale is new; Clara Voss and Jamal Carter are not added again").toBe(1);
       // M1, on the page: the chart draws the dated ones and says how many more it cannot place

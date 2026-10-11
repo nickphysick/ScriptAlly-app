@@ -251,8 +251,92 @@
 .sf .o9-alldone span { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: var(--go-ink); }
 .sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .62); max-width: 62ch; }
 
+/* ── 6 · the answer deck: one question at a time, then the rows that are ready ── */
+.sf .o9-deck {
+  background: var(--fc-card); border-radius: 14px; overflow: hidden; min-width: 0; animation-delay: .2s;
+  box-shadow: 0 0 0 2px var(--im-band), 0 16px 34px -22px rgba(28, 19, 15, .5);
+}
+.sf .o9-deckhead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 22px; background: var(--im-band); color: var(--im-cream); }
+.sf .o9-deckhead b { font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.2; color: var(--im-cream); }
+.sf .o9-deckpos { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .14em; color: rgba(244, 238, 229, .75); }
+.sf .o9-deckhead .o9-decklink { color: var(--im-cream); font-size: 14px; text-decoration-color: rgba(244, 238, 229, .4); }
+.sf .im-listhead .o9-decklink { color: var(--im-cream); font-size: 14px; text-decoration-color: rgba(244, 238, 229, .4); }
+.sf .o9-dots { display: flex; gap: 6px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+.sf .o9-dot {
+  appearance: none; border: 0; padding: 0; width: 8px; height: 8px; border-radius: 50%; cursor: pointer; position: relative;
+  background: rgba(244, 238, 229, .28);
+}
+.sf .o9-dot::after { content: ""; position: absolute; inset: -8px; }
+.sf .o9-dot.is-on { background: var(--im-stamp); }
+.sf .o9-dot.is-done { background: rgba(244, 238, 229, .85); }
+.sf .o9-dot:focus-visible { outline: 2px solid var(--im-cream); outline-offset: 3px; }
+.sf .o9-deckfaq { padding: 6px 22px 10px; background: var(--im-pill); border-bottom: 1px solid rgba(28, 19, 15, .08); }
+.sf .o9-deckfaq .im-faq .im-faqh { display: none; }
+.sf .o9-deckbody { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch; }
+.sf .o9-deckarrow {
+  appearance: none; width: 56px; border: 0; background: transparent; cursor: pointer;
+  font-family: var(--sp-type); font-size: 30px; line-height: 1; color: rgba(28, 19, 15, .6);
+}
+.sf .o9-deckarrow:hover { color: var(--ink-on-light); background: rgba(28, 19, 15, .03); }
+.sf .o9-deckarrow[disabled] { color: rgba(28, 19, 15, .15); cursor: default; background: transparent; }
+.sf .o9-qcard { padding: 26px 10px 24px; display: grid; gap: 18px; min-width: 0; }
+.sf .o9-qwho { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.sf .o9-qwho > div { min-width: 0; }
+.sf .o9-qwho b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 18px; line-height: 1.2; color: var(--ink-on-light); overflow-wrap: anywhere; }
+.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, .56); }
+.sf .o9-qwho .im-chip { margin-left: auto; flex: none; }
+.sf .o9-q, .sf .o9-answered { display: grid; gap: 18px; min-width: 0; }
+.sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
+.sf .o9-ask--said { font-size: 20px; }
+.sf .o9-raw { font-family: var(--sp-mono); font-size: 15px; background: var(--im-pill); padding: 2px 7px; border-radius: 5px; }
+.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
+.sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
+.sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }
+.sf .o9-esc { flex-basis: 100%; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sf .o9-pick {
+  appearance: none; height: 44px; padding: 2px 18px 0; border-radius: 22px; border: 0; cursor: pointer;
+  background: var(--fc-card); box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .82);
+  font-family: var(--sp-type); font-size: 15.5px; color: var(--ink-on-light); display: inline-flex; align-items: center; gap: 10px;
+}
+.sf .o9-pick:hover { background: var(--im-pill); }
+.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-q--built .im-reason { display: grid; gap: 14px; }
+.sf .o9-q--built .im-fixq { margin: 0; font-family: var(--sp-type); font-size: 21px; line-height: 1.3; color: var(--ink-on-light); }
+.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: rgba(28, 19, 15, .62); animation-delay: .4s; }
+.sf .o9-upnext .im-chip { text-transform: none; letter-spacing: .06em; font-size: 11px; }
+.sf .o9-ready { animation-delay: .45s; }
+.sf .o9-ready [data-im="rows"] > .im-rw { animation: o9-rise .4s ease-out both; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(1) { animation-delay: .5s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(2) { animation-delay: .56s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(3) { animation-delay: .62s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(4) { animation-delay: .68s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(5) { animation-delay: .74s; }
+.sf .o9-ready [data-im="rows"] > .im-rw:nth-child(n + 6) { animation: none; }
+.sf .o9-showall { display: flex; align-items: center; justify-content: center; padding: 12px; border-top: 1px solid rgba(28, 19, 15, .08); }
+.sf .o9-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 36px;
+  padding: 16px 0 0; border-top: 1px solid rgba(28, 19, 15, .14); animation: o9-rise .5s ease-out .9s both;
+}
+.sf .o9-bar .o9-barhint { max-width: 44ch; }
+.sf .o9-bargo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-left: auto; }
+/* the review is one column now: the right rail is gone */
+.sf .im-page > .im-revmain { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-width: 0; }
+.sf .im-listhead--quiet .im-chip { background: rgba(28, 19, 15, .08); color: var(--ink-on-light); }
+@media (max-width: 519.98px) {
+  .sf .o9-bargo { width: 100%; margin-left: 0; }
+  .sf .o9-bargo .sf-btn { white-space: normal; height: auto; min-height: 48px; padding-top: 10px; padding-bottom: 10px; line-height: 1.25; max-width: 100%; }
+}
+@media (max-width: 819.98px) {
+  .sf .o9-deckarrow { display: none; }
+  .sf .o9-deckbody { grid-template-columns: minmax(0, 1fr); }
+  .sf .o9-qcard { padding: 22px 18px 20px; }
+  .sf .o9-qwho { flex-wrap: wrap; }
+  .sf .o9-ask { font-size: 20px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .o9-rise, .o9-pop { animation: none; }
+  .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
   .sf .o9-gomark, .sf .o9-gomark::before, .sf .o9-mtxt, .sf .im-sum .im-ohead p[data-im="lead"], .sf .im-sum .im-pops { animation: none; }
   .sf .o9-gomark path { animation: none; stroke-dashoffset: 0; }
   .sf [data-screen="fork"] > .sf-open, .sf [data-screen="confirm"] > .sf-open { animation: none; }

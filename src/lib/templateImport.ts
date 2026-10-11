@@ -202,11 +202,16 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
         });
       }
     }
+    /* v9: a status cell the parser could not read is a QUESTION on its own query, quoted back. It
+       was a flag nobody rendered, so the row arrived at the review as a ready "Queried". A blank
+       status cell is not asked about: it is read as Queried. */
+    const statusUnread = !!statusRaw && status === null;
 
     /* ⚠️ A FLAG NOBODY READS IS A DATE DROPPED IN SILENCE. `flags` was returned to the caller and
        never rendered, so a row whose date could not be read arrived at the review as "Ready".
        Each date flag is ALSO a typed reason on its own query, which is what the review renders. */
     const reasons: ReviewReasonCode[] = [];
+    if (statusUnread) reasons.push("status-wording");
     const sentRaw = cell(row, "Date sent");
     const sent = parseTemplateDate(sentRaw);
     let sentDate: string | null = null;
@@ -261,6 +266,7 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
       status,
       sentDate,
       sentDateRaw: sentRaw || null,
+      ...(statusUnread ? { statusRaw } : {}),
       ...(timeline.length ? { timeline } : {}),
       ...(reasons.length ? { reasons } : {}),
       ...(notes ? { notes } : {}),

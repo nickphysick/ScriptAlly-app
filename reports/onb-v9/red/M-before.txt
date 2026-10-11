@@ -1,0 +1,8 @@
+  ✘  1 [measure] › tests/e2e/onbV9.measure.ts:954:3 › M1 › M1 under reduced motion every set-up and review screen is at rest when it arrives (1.1s)
+    Error: summary: no card is held out of sight
+    + Received  + 4
+    + Array [
+    +   "o9-gomark:0:visible",
+    +   "o9-mtxt:0:visible",
+    + ]
+  1 failed

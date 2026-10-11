@@ -651,3 +651,263 @@ test.describe("S1", () => {
     expect(await reviewText(page)).not.toMatch(/optional/i);
   });
 });
+
+/* ════ G1–G4 · the answer deck and the gate ══════════════════════════════════════════ */
+test.describe("G", () => {
+  type P = import("@playwright/test").Page;
+  const primary = (page: P) => page.locator('[data-im="primary"]');
+  const state = (page: P) => page.evaluate(() => {
+    const t = (sel: string) => document.querySelector(sel)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+    const b = document.querySelector<HTMLButtonElement>('[data-im="primary"]');
+    return {
+      step: document.querySelector('[data-im="review"]')?.getAttribute("data-step") ?? "",
+      n: t('[data-im="title-n"]'), sub: t('[data-im="title-sub"]'),
+      deck: document.querySelectorAll('[data-im="deck"]').length, deckTitle: t('[data-im="deck-head"] b'), pos: t('[data-im="deck-pos"]'),
+      dots: [...document.querySelectorAll('[data-im="deck-dots"] .o9-dot')].map((d) => (d as HTMLElement).dataset.state),
+      name: t('[data-im="deck-card"] .o9-qwho b'), cardSub: t('[data-im="deck-card"] .o9-qwho small'), chip: t('[data-im="deck-chip"]'),
+      ask: t('[data-im="deck-ask"]'), why: t('[data-im="deck-why"]'), reason: document.querySelector('[data-im="deck"] [data-reason]')?.getAttribute("data-reason") ?? "",
+      coming: [...document.querySelectorAll('[data-im="coming-up"] .im-chip')].map((c) => c.textContent ?? ""), comingLead: t('[data-im="coming-up"] > span'),
+      readyHead: t('[data-im="ready"] .im-listtitle'), readyChip: t('[data-im="ready-chip"]'), readyRows: document.querySelectorAll('[data-im="ready"] [data-row-id]').length, showAll: t('[data-im="show-all"]'),
+      rail: document.querySelectorAll('[data-im="rail"]').length, hint: t('[data-im="hint"]'),
+      primary: b?.textContent?.trim() ?? "", off: b?.disabled ?? null,
+    };
+  });
+  const card = (page: P) => page.locator('[data-im="deck-card"]');
+
+  test("G1 agents: two questions, the primary waits for both, and either answer counts", async ({ page }) => {
+    await lab(page, "s=review&fx=gate", WIDE, { motion: "reduce" });
+    if (MUTATE === "G1") await page.evaluate(() => { new MutationObserver(() => { const b = document.querySelector<HTMLButtonElement>('[data-im="primary"]'); if (b?.disabled) b.disabled = false; }).observe(document.body, { subtree: true, childList: true, attributes: true }); const b = document.querySelector<HTMLButtonElement>('[data-im="primary"]'); if (b) b.disabled = false; });
+    const a0 = await state(page);
+    record("G1", "arrival", a0);
+    await shot(page, "agents-deck-1440", true);
+    expect(a0.step).toBe("agents");
+    expect(a0.n).toBe("16");
+    expect(a0.sub).toBe("2 need an answer before you go on. The other 14 are ready.");
+    expect(a0.deck, "the deck is on the page").toBe(1);
+    expect(a0.deckTitle).toBe("Needs an answer");
+    expect(a0.pos).toBe("1 of 2");
+    expect(a0.dots).toEqual(["on", "open"]);
+    expect(a0.rail, "the right rail is gone").toBe(0);
+    expect(a0.off, "the primary is disabled while a question is open").toBe(true);
+    expect(a0.primary).toBe("Continue to queries · 2 to answer first");
+    expect(a0.hint).toBe('Answer the 2 above first. "Carry on without an agency" counts as an answer.');
+    expect([a0.name, a0.cardSub, a0.chip]).toEqual(["Priyanka", "No agency in your sheet", "No agency name"]);
+    expect(a0.ask).toBe("Which agency is Priyanka with?");
+    expect(a0.why).toBe("The sheet has a name and no agency. An agency helps you spot colleagues and duplicates later, but it isn't required.");
+    expect([a0.comingLead, a0.coming]).toEqual(["Coming up:", ["Tom Rafferty · no agency name"]]);
+    expect([a0.readyHead, a0.readyChip, a0.readyRows, a0.showAll]).toEqual(["Ready to import", "14 ready", 5, "Show all 14"]);
+    /* Questions opens the step's own FAQ */
+    await page.locator('[data-im="deck-questions"]').click();
+    expect(await page.locator('[data-im="deck-faq"] [data-im="faq-q"]').count(), "the FAQ is behind Questions").toBeGreaterThan(2);
+    await page.locator('[data-im="deck-questions"]').click();
+    /* answer one by saving an agency: the deck moves on by itself, and the primary still waits */
+    await card(page).locator("input").first().fill("Meridian Literary");
+    await card(page).getByRole("button", { name: "Save agency" }).click();
+    const a1 = await state(page);
+    record("G1", "after one", a1);
+    expect([a1.name, a1.pos, a1.dots]).toEqual(["Tom Rafferty", "2 of 2", ["done", "on"]]);
+    expect(a1.off).toBe(true);
+    expect(a1.primary).toBe("Continue to queries · 1 to answer first");
+    expect(a1.sub).toBe("1 needs an answer before you go on. The other 15 are ready.");
+    /* answer the other by carrying on without one: it counts */
+    await card(page).getByRole("button", { name: "Carry on without an agency" }).click();
+    const a2 = await state(page);
+    record("G1", "after both", a2);
+    expect(a2.off, "the primary lights").toBe(false);
+    expect(a2.primary).toBe("Continue to queries");
+    expect(a2.deck, "the deck has given way").toBe(0);
+    expect(a2.readyChip).toBe("16 ready");
+    await page.locator('[data-im="show-all"]').click();
+    expect(await page.locator('[data-im="ready"] [data-row-id]').count()).toBe(16);
+    expect(await page.locator('[data-im="ready"] [data-row-id]', { hasText: "Priyanka" }).locator(".im-rwsub").textContent()).toContain("Meridian Literary");
+    /* Back keeps every answer: on to queries, answer one, back, forward */
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    const q0 = await state(page);
+    await card(page).locator(".o9-pick").first().click();
+    await page.locator('[data-im="back"]').click();
+    const back = await state(page);
+    expect([back.step, back.off, back.deck]).toEqual(["agents", false, 0]);
+    await primary(page).click();
+    const again = await state(page);
+    record("G1", "back keeps answers", { q0: q0.primary, again: again.primary });
+    expect(q0.primary).toBe("Import and get started · 9 to answer first");
+    expect(again.primary).toBe("Import and get started · 8 to answer first");
+  });
+
+  test("G2 queries: nine questions, the blank date among them, and what is written", async ({ page }) => {
+    await lab(page, "s=review&fx=gate", WIDE, { motion: "reduce" });
+    await answerAgents(page);
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    if (MUTATE === "G2") await page.evaluate(() => {
+      /* the named break: the blank date is not asked. Its card answers itself the moment it shows. */
+      const go = () => { const c = document.querySelector('[data-im="deck-card"]'); if (c && /has no date for this one/.test(c.textContent ?? "")) [...c.querySelectorAll("button")].find((b) => b.textContent === "I don't have this date")?.click(); };
+      new MutationObserver(go).observe(document.body, { subtree: true, childList: true });
+    });
+    const q0 = await state(page);
+    record("G2", "arrival", q0);
+    await shot(page, "queries-deck-1440", true);
+    expect(q0.n).toBe("16");
+    expect(q0.sub).toBe("9 need an answer before anything is saved. The other 7 are ready.");
+    expect(q0.dots.length).toBe(9);
+    expect([q0.off, q0.primary]).toEqual([true, "Import and get started · 9 to answer first"]);
+    expect(q0.hint).toBe("Answer the 9 above first. If you don't have a date, say so on its card and the query is kept undated.");
+    expect(q0.coming).toEqual(["1 more date to confirm", "3 more dates needed", "4 more statuses to clarify"]);
+    expect([q0.readyHead, q0.readyChip, q0.readyRows, q0.showAll]).toEqual(["Ready to import", "7 ready", 5, "Show all 7"]);
+    /* each card by who it is about: the question asked, then the answer given */
+    const plan: Record<string, { ask: string; chip: string; do: () => Promise<void> }> = {
+      "Meredith Quaye": { ask: 'Your sheet says “03/05/2026”. Which did you mean?', chip: "Date to confirm", do: async () => { await card(page).locator('.o9-pick[data-reading]').first().click(); } },
+      "Ruth Castellano": { ask: 'Your sheet says “06/08/2026”. Which did you mean?', chip: "Date to confirm", do: async () => { await card(page).getByRole("button", { name: "Neither · type the date" }).click(); await card(page).locator('input[type="date"]').fill("2026-06-18"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Sean O'Brien": { ask: 'Your sheet says “sometime in May”. When was this sent?', chip: "Date needed", do: async () => { await card(page).locator('input[type="date"]').fill("2026-05-14"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Aoife Brennan": { ask: 'Your sheet says “spring”. When was this sent?', chip: "Date needed", do: async () => { await card(page).getByRole("button", { name: "I don't have this date" }).click(); } },
+      "Priyanka": { ask: "Your sheet has no date for this one. When was it sent?", chip: "Date needed", do: async () => { await card(page).locator('input[type="date"]').fill("2026-04-02"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Rhys Hale": { ask: 'Your sheet says “waiting”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Partial Requested"]').click(); } },
+      "Harbour & Vale": { ask: 'Your sheet says “sent partial?”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Partial Sent"]').click(); } },
+      "Tom Rafferty": { ask: 'Your sheet says “no”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Rejected"]').click(); } },
+      "Hattie Lowe": { ask: 'Your sheet says “they want more”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Full Requested"]').click(); } },
+    };
+    const seen: Array<{ name: string; ask: string; chip: string; left: string }> = [];
+    for (let k = 9; k >= 1; k--) {
+      const s = await state(page);
+      expect(s.off, `${k} to answer: the primary is disabled`).toBe(true);
+      expect(s.primary).toBe(`Import and get started · ${k} to answer first`);
+      const p = plan[s.name];
+      expect(p, `a card for ${s.name}`).toBeTruthy();
+      expect([s.ask, s.chip], s.name).toEqual([p.ask, p.chip]);
+      seen.push({ name: s.name, ask: s.ask, chip: s.chip, left: s.primary });
+      await p.do();
+      if (s.name === "Rhys Hale") {
+        /* the status set is the fixed list, drawn with its rings */
+      }
+    }
+    record("G2", "asked", seen);
+    expect(seen.map((s) => s.name).sort(), "all nine are asked, the blank date among them").toEqual(Object.keys(plan).sort());
+    const done = await state(page);
+    expect([done.off, done.primary, done.deck]).toEqual([false, "Import and get started", 0]);
+    expect(await page.locator('[data-im="all-head"]').textContent()).toBe("All 9 answered.");
+    expect(await page.locator('[data-im="all-line"]').textContent()).toBe("2 dates confirmed, 2 dates added, 1 left blank on purpose, 4 statuses set.");
+    await primary(page).click();
+    const written = await page.evaluate(() => (window.__onbLab as unknown as { result: { agents: { ref: string; name: string; agency?: string }[]; queries: { agentRef: string; status: string; sentDate: string | null }[] } }).result);
+    const by = (ref: string) => written.queries.find((q) => q.agentRef === ref)!;
+    /* a reading offered by the parser is a full timestamp; a typed date is the day. Both are compared by day. */
+    const got = { g8: (by("g8").sentDate ?? "").slice(0, 10), g9: by("g9").sentDate, g10: by("g10").sentDate, g12: by("g12").sentDate, g11: by("g11").sentDate, g13: by("g13").status, g14: by("g14").status, g15: by("g15").status, g16: by("g16").status };
+    record("G2", "written", got);
+    expect(got).toEqual({ g8: "2026-05-03", g9: "2026-06-18", g10: "2026-05-14", g12: null, g11: "2026-04-02", g13: "Partial Requested", g14: "Partial Sent", g15: "Rejected", g16: "Full Requested" });
+    expect(written.queries.length).toBe(16);
+  });
+
+  test("G2 the status question is the fixed set, each with its ring; a two-way date cannot be left blank", async ({ page }) => {
+    await lab(page, "s=review&fx=gate", WIDE, { motion: "reduce" });
+    await answerAgents(page);
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    const twoWay = await card(page).evaluate((c) => [...c.querySelectorAll("button")].map((b) => b.textContent ?? ""));
+    expect(twoWay, "two readings and Neither; no way to leave it blank").toEqual(["3 May 2026", "5 Mar 2026", "Neither · type the date"]);
+    await page.locator('[data-im="deck-dots"] .o9-dot').nth(5).click();
+    const set = await card(page).evaluate((c) => [...c.querySelectorAll<HTMLElement>("[data-status]")].map((b) => ({ label: b.textContent ?? "", ring: !!b.querySelector("svg") })));
+    record("G2", "status set", set);
+    expect(set.map((s) => s.label)).toEqual(["Queried, no reply yet", "Partial requested", "Partial sent", "Full requested", "Full sent", "Revise & resubmit", "Offer", "Passed", "Withdrawn", "Closed with no reply"]);
+    expect(set.every((s) => s.ring), "each with its ring").toBe(true);
+    expect(await card(page).locator("input, select, textarea").count(), "picked, never typed").toBe(0);
+    await shot(page, "queries-status-1440", true);
+  });
+
+  for (const path of ["remove", "name"] as const) {
+    test(`G3 a row with no agent and no agency is asked: ${path === "remove" ? "removed, it is listed as not imported" : "given an agency, it imports"}`, async ({ page }) => {
+      await page.addInitScript(() => localStorage.removeItem("sa.importSkipped.onb-lab"));
+      await lab(page, "s=flow&fx=nameless&floor=50", WIDE, { motion: "reduce" });
+      if (MUTATE === "G3") await page.evaluate(() => {
+        /* the named break: set aside by itself, as before. The card removes itself the moment it shows. */
+        new MutationObserver(() => { const c = document.querySelector('[data-im="deck-card"]'); [...(c?.querySelectorAll("button") ?? [])].find((b) => b.textContent === "Remove this row")?.click(); }).observe(document.body, { subtree: true, childList: true });
+      });
+      const sum = await page.evaluate(() => ({
+        agents: document.querySelector('[data-im="card-agents"] [data-im="total"]')?.textContent, queries: document.querySelector('[data-im="card-queries"] [data-im="total"]')?.textContent,
+        ask: document.querySelector('[data-im="card-agents"] [data-tier="ask"] p')?.textContent ?? "",
+      }));
+      await primary(page).click();
+      await page.locator('[data-im="review"][data-step="agents"]').waitFor();
+      const a = await state(page);
+      record("G3", `${path} arrival`, { sum, a });
+      expect([sum.agents, sum.queries], "the summary counts the row").toEqual(["3", "3"]);
+      expect(sum.ask).toBe("1 row has no agent or agency. Name it, or remove it.");
+      expect(a.deck, "the row is in the deck").toBe(1);
+      expect([a.chip, a.ask, a.why]).toEqual(["No agent or agency", "This row has no agent or agency. Who was it sent to?", "Without one, the query can't be tracked. Add a name or an agency, or remove the row."]);
+      expect([a.off, a.primary]).toEqual([true, "Continue to queries · 1 to answer first"]);
+      expect(Number(a.n), "summary = the review's rows").toBe(Number(sum.agents));
+      expect(a.readyRows + 1).toBe(Number(sum.agents));
+      if (path === "remove") await card(page).getByRole("button", { name: "Remove this row" }).click();
+      else { await card(page).getByPlaceholder("Agency name").fill("Fairground Literary"); await card(page).getByRole("button", { name: "Save", exact: true }).click(); }
+      expect(await primary(page).isDisabled()).toBe(false);
+      await primary(page).click();
+      await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+      const qn = Number((await state(page)).n);
+      await primary(page).click();
+      await page.waitForFunction(() => (window.__onbLab?.calls ?? []).some((c) => c.name === "commit"), null, { timeout: 15_000 });
+      await page.waitForFunction(() => document.querySelector('[data-lab-flow="arrived"]') !== null, null, { timeout: 15_000 });
+      const out = await page.evaluate(() => ({
+        result: (window.__onbLab as unknown as { result: { agents: { name: string; agency?: string }[]; queries: unknown[] } }).result,
+        notice: JSON.parse(localStorage.getItem("sa.importSkipped.onb-lab") ?? "null") as null | { count: number; rows: { who: string; status: string; sentDate: string | null; reason: string }[] },
+      }));
+      record("G3", `${path} written`, { qn, agents: out.result.agents.length, queries: out.result.queries.length, notice: out.notice });
+      if (path === "remove") {
+        expect([out.result.agents.length, out.result.queries.length, qn]).toEqual([2, 2, 2]);
+        expect(out.notice?.count, "the removed row is in the skipped-rows notice").toBe(1);
+        expect(out.notice!.rows[0]).toMatchObject({ status: "Queried", sentDate: "2026-02-10", reason: "Row has no agent name or agency to identify it" });
+        expect(out.result.queries.length + out.notice!.count, "written + listed = the rows in the file").toBe(3);
+      } else {
+        expect([out.result.agents.length, out.result.queries.length, qn]).toEqual([3, 3, 3]);
+        expect(out.result.agents.map((x) => x.agency)).toContain("Fairground Literary");
+        expect(out.notice, "nothing was left out").toBeNull();
+      }
+    });
+  }
+
+  test("G4 Skip for now, from the queries step, asks first and writes nothing", async ({ page }) => {
+    await page.addInitScript(() => localStorage.removeItem("sa.importSkipped.onb-lab"));
+    await lab(page, "s=flow&fx=gate&floor=50", WIDE, { motion: "reduce" });
+    if (MUTATE === "G4") await page.evaluate(() => {
+      /* the named break: leaving does not ask. The confirm's own button is pressed for the writer. */
+      new MutationObserver(() => (document.querySelector('[data-im="ask-skip"]') as HTMLElement | null)?.click()).observe(document.body, { subtree: true, childList: true });
+    });
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="agents"]').waitFor();
+    await answerAgents(page);
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    for (let i = 0; i < 3; i++) await card(page).locator(".o9-pick, button").first().click();
+    const before = await state(page);
+    await page.locator(".sf-exit").click();
+    await page.waitForTimeout(200);
+    const asked = await page.evaluate(() => { const a = document.querySelector('[data-im="ask"]'); return a ? { title: a.querySelector("h2")?.textContent, text: a.querySelector("p")?.textContent, buttons: [...a.querySelectorAll("button")].map((b) => b.textContent) } : null; });
+    record("G4", "asked", { before: before.primary, asked });
+    expect(asked, "Skip for now asks first").toEqual({ title: "Skip set-up for now?", text: "Nothing from this file has been saved yet. You can import a spreadsheet or add agents by hand any time from the Import page.", buttons: ["Keep setting up", "Skip for now"] });
+    await page.locator('[data-im="ask-keep"]').click();
+    const kept = await state(page);
+    expect([kept.step, kept.primary], "Keep setting up returns to the review, answers intact").toEqual(["queries", before.primary]);
+    await page.locator(".sf-exit").click();
+    await page.locator('[data-im="ask-skip"]').click();
+    await page.waitForTimeout(400);
+    const after = await page.evaluate(() => ({ calls: (window.__onbLab?.calls ?? []).map((c) => c.name), notice: localStorage.getItem("sa.importSkipped.onb-lab"), result: (window.__onbLab as unknown as { result?: unknown }).result ?? null }));
+    record("G4", "after skip", after);
+    expect(after.calls.filter((c) => c === "skip").length, "it leaves, once").toBe(1);
+    expect(after.calls.filter((c) => /commit|import/i.test(c)), "nothing from the file is written, answered or not").toEqual([]);
+    expect([after.notice, after.result]).toEqual([null, null]);
+  });
+
+  test("G the deck at 400 and 1280: no overflow, the arrows give way to the dots", async ({ page }) => {
+    await lab(page, "s=review&fx=gate", PHONE, { motion: "reduce" });
+    await noOverflow(page, "agents 400");
+    expect(await page.locator('[data-im="deck-prev"]').isVisible(), "arrows hide below 820").toBe(false);
+    await page.locator('[data-im="deck-dots"] .o9-dot').nth(1).click();
+    expect((await state(page)).name, "the dots move the deck").toBe("Tom Rafferty");
+    await answerAgents(page);
+    await primary(page).click();
+    await page.locator('[data-im="review"][data-step="queries"]').waitFor();
+    await shot(page, "queries-400", true);
+    await noOverflow(page, "queries 400");
+    await lab(page, "s=review&fx=gate", { width: 1280, height: 800 }, { motion: "reduce" });
+    await noOverflow(page, "agents 1280");
+    expect(await page.locator('[data-im="deck-prev"]').isVisible()).toBe(true);
+  });
+});

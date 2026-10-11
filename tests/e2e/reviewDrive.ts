@@ -24,7 +24,7 @@ export async function decideDuplicates(page: Page, opts: { scope?: string; keepO
 }
 
 /** Answer one open queries question by its reason. */
-export async function answerQuery(r: Locator, opts: { date?: string } = {}) {
+export async function answerQuery(r: Locator, opts: { date?: string; undated?: boolean } = {}) {
   const code = await r.getAttribute("data-reason");
   const press = async (name: RegExp) => { await r.getByRole("button", { name }).first().click(); };
   const typeDate = async (iso: string) => { await r.locator('input[type="date"]').first().fill(iso); await press(/^Save date$/); };
@@ -33,7 +33,8 @@ export async function answerQuery(r: Locator, opts: { date?: string } = {}) {
     case "missing-day": return press(/^Keep as month$/);
     case "serial-outlier": return press(/^That's right$/);
     case "no-date": return opts.date ? typeDate(opts.date) : press(/^(I don't have this date|Leave undated)$/);
-    case "unreadable-date": case "unreadable-response-date": return typeDate(opts.date ?? "2024-05-14");
+    case "unreadable-date": if (opts.undated) return press(/^I don't have this date$/); return typeDate(opts.date ?? "2024-05-14");
+    case "unreadable-response-date": return typeDate(opts.date ?? "2024-05-14");
     case "status-wording": return (await r.getByRole("button", { name: /^That's right$/ }).count()) ? press(/^That's right$/) : r.locator("[data-status]").first().click();
     default: return r.locator("button").first().click(); // ambiguous dates and status direction: the first reading offered
   }
@@ -58,7 +59,7 @@ export async function answerAgents(page: Page, opts: { scope?: string } = {}): P
 }
 
 /** Every question the queries step is asking, answered. */
-export async function answerQueries(page: Page, opts: { scope?: string; date?: string } = {}): Promise<number> {
+export async function answerQueries(page: Page, opts: { scope?: string; date?: string; undated?: boolean } = {}): Promise<number> {
   const $ = scopeOf(page, opts.scope);
   const asks = () => $('[data-im="deck"] [data-reason], [data-row="query"][data-asks="1"] [data-reason]');
   let n = 0;
@@ -94,3 +95,44 @@ export async function walkSetupToFork(page: Page, opts: { journey?: string; titl
   await page.locator('[data-o9="book-card"] [data-act="continue"]').click();
   await page.locator('[data-act="upload"]').waitFor({ timeout: 20_000 });
 }
+
+/** Bring one card of the deck on show by its key (`a-<agent id>` or `q-<query id>`), using the dots. */
+export async function showCard(page: Page, key: string): Promise<Locator> {
+  const card = page.locator(`[data-im="deck-card"][data-card="${key}"]`);
+  if ((await card.count()) === 0) {
+    const dots = page.locator('[data-im="deck-dots"] .o9-dot');
+    const n = await dots.count();
+    for (let k = 0; k < n && (await card.count()) === 0; k++) await dots.nth(k).click();
+  }
+  if ((await card.count()) === 0) throw new Error(`the deck has no card ${key}`);
+  return card;
+}
+
+/**
+ * What a review step shows: the deck's cards (each brought on show in turn), then every ready row.
+ * `asks` is "1" for a card that still wants an answer.
+ */
+export async function readStep(page: Page): Promise<{ text: string; chip: string; asks: string }[]> {
+  const out: { text: string; chip: string; asks: string }[] = [];
+  const dots = page.locator('[data-im="deck-dots"] .o9-dot');
+  const n = await dots.count();
+  for (let k = 0; k < n; k++) {
+    await dots.nth(k).click();
+    out.push(await page.locator('[data-im="deck-card"]').evaluate((c) => ({
+      text: (c.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 260),
+      chip: c.querySelector('[data-im="deck-chip"]')?.textContent?.trim() ?? "",
+      asks: c.getAttribute("data-answered") === "1" ? "0" : "1",
+    })));
+  }
+  if (n > 0) await dots.first().click();
+  const more = page.locator('[data-im="show-all"]');
+  if (await more.count()) await more.click();
+  out.push(...await page.evaluate(() => [...document.querySelectorAll('[data-im="ready"] [data-row-id]')].map((r) => ({
+    text: (r.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 260),
+    chip: r.querySelector('[data-im="row-chip"]')?.textContent?.trim() ?? "",
+    asks: "0",
+  }))));
+  return out;
+}
+/** The number in the step's heading: every live row of the step, asked or ready. */
+export const stepTotal = async (page: Page): Promise<number> => Number((await page.locator('[data-im="title-n"]').textContent()) ?? "");

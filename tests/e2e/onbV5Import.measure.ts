@@ -10,6 +10,7 @@
  *
  * Every sweep states its population first. The e2e password is never printed.
  */
+import { settleStep, showCard } from "./reviewDrive";
 import { test, expect, Page } from "@playwright/test";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -383,7 +384,8 @@ test.describe("OB2", () => {
            the walk to the step, and the test would wait out its timeout instead of going red. */
         await lab(page, `s=review&fx=${t.fx}`, { noMutate: true });
         await page.waitForSelector('[data-im="review"]');
-        for (const _ of t.path) { await page.locator('[data-im="primary"]').click(); }
+        /* v9: a step's primary waits until everything on it has an answer */
+        for (const _ of t.path) { await settleStep(page); await page.locator('[data-im="primary"]').click(); }
         await page.waitForSelector(`[data-im="review"][data-step="${t.step}"]`);
         await mutate(page);
       };
@@ -396,34 +398,34 @@ test.describe("OB2", () => {
             const frame = document.querySelector("[data-setup-frame]") as HTMLElement;
             const fonts = new Set<string>();
             frame.querySelectorAll<HTMLElement>("*").forEach((e) => { if (e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) fonts.add(getComputedStyle(e).fontFamily.split(",")[0].replace(/["']/g, "").trim()); });
-            const rail = document.querySelector('[data-im="rail"]') as HTMLElement;
             return {
               text: frame.innerText,
               oldArt: [...frame.querySelectorAll("img")].filter((i) => /scriptally/i.test(i.getAttribute("src") ?? "") || /scriptally/i.test(i.alt)).length,
               navs: frame.querySelectorAll("nav").length,
               fonts: [...fonts],
-              head: getComputedStyle(document.querySelector('[data-im="list-head"]') as HTMLElement).backgroundColor,
-              railKids: [...rail.children].map((c) => c.getAttribute("data-im")),
-              guideHead: (rail.querySelector(".im-guideh") as HTMLElement).innerText,
-              eyebrow: (rail.querySelector(".im-eyebrow") as HTMLElement).innerText,
-              questions: [...rail.querySelectorAll('[data-im="faq-q"]')].map((b) => (b as HTMLElement).innerText.replace(/\s*\+$/, "").trim()),
-              qHead: (rail.querySelector(".im-faqh") as HTMLElement).innerText,
+              /* v9: the duplicates list keeps its ink head; the other two steps open on the deck's navy head */
+              head: getComputedStyle((document.querySelector('[data-im="deck-head"]') ?? document.querySelector('[data-im="list-head"]')) as HTMLElement).backgroundColor,
+              rail: document.querySelectorAll('[data-im="rail"], [data-im="guide"]').length,
               stepperIsControl: document.querySelectorAll('[data-im="steps"] button, [data-im="steps"] a').length,
             };
           });
-          record(page, "V1", t.step, { ...r, text: undefined });
+          /* RE-POINTED (onboarding v9): the rail and its guide card are gone. The step's questions
+             are behind "Questions", closed on arrival. */
+          const closed = await page.locator('[data-im="faq-q"]').count();
+          await page.locator('[data-im="deck-questions"]').first().click();
+          const questions = await page.evaluate(() => [...document.querySelectorAll('[data-im="deck-faq"] [data-im="faq-q"]')].map((b) => (b as HTMLElement).innerText.replace(/\s*\+$/, "").trim()));
+          record(page, "V1", t.step, { ...r, text: undefined, questions });
           expect(r.fonts.length, "the sweep read text").toBeGreaterThan(2);
           expect(r.text).not.toMatch(/ScriptAlly/);
           expect(r.oldArt, "no old wordmark").toBe(0);
           expect(r.navs, "no nav inside the frame").toBe(0);
           expect(r.fonts.filter((f) => /caveat/i.test(f)), "no Caveat face").toEqual([]);
-          expect(r.head).toBe("rgb(27, 36, 51)");
-          expect(r.railKids).toEqual(["guide", "questions"]);
-          expect(r.eyebrow.toLowerCase()).toBe("how this step works");
-          expect(r.guideHead).toBe(t.guide);
-          expect(r.qHead).toBe("Questions");
-          expect(r.questions.length).toBe(t.nQ);
-          expect(r.questions[0]).toBe(t.firstQ);
+          expect(r.head).toBe(t.step === "duplicates" ? "rgb(27, 36, 51)" : "rgb(45, 58, 80)");
+          expect(r.rail, "no rail and no guide card").toBe(0);
+          expect(r.text.toLowerCase()).not.toContain("how this step works");
+          expect(closed, "the questions are closed on arrival").toBe(0);
+          expect(questions.length).toBe(t.nQ);
+          expect(questions[0]).toBe(t.firstQ);
           expect(r.stepperIsControl, "the stepper is not a control").toBe(0);
           if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `review-${t.step}-${vp.width}.png`), fullPage: vp.width < 900 });
         });
@@ -492,100 +494,25 @@ test.describe("OB2", () => {
         });
       }
 
-      /* ── V3 · rows answer in place ───────────────────────────────────────────────────────── */
-      test("V3 every open row is answered in its own row", async ({ page }) => {
-        const row = (id: string) => page.locator(`[data-row-id="${id}"]`);
-        const head = () => page.evaluate(() => ({
-          ready: Number((document.querySelector('[data-im="chip-ready"]')?.textContent ?? "").replace(/\D/g, "")),
-          open: Number((document.querySelector('[data-im="chip-open"]')?.textContent ?? "0").replace(/\D/g, "")),
-        }));
-        const state = (id: string) => page.evaluate((id) => {
-          const r = document.querySelector(`[data-row-id="${id}"]`) as HTMLElement;
-          const list = [...document.querySelectorAll('[data-im="rows"] > [data-row-id]')];
-          const b = r.getBoundingClientRect();
-          const controls = [...r.querySelectorAll('[data-im="row-fix"] button, [data-im="row-fix"] input, [data-im="row-fix"] select')] as HTMLElement[];
-          const inside = controls.every((c) => { const cb = c.getBoundingClientRect(); return cb.top >= b.top - 0.5 && cb.bottom <= b.bottom + 0.5 && cb.left >= b.left - 0.5 && cb.right <= b.right + 0.5; });
-          return {
-            index: list.indexOf(r), top: Math.round(b.top), asks: r.getAttribute("data-asks"),
-            /* textContent, not innerText: the chip is drawn upper-case by CSS, and the words are the claim */
-            chip: ((r.querySelector('[data-im="row-chip"]') as HTMLElement).textContent ?? "").trim(),
-            edge: getComputedStyle(r).boxShadow, controls: controls.length, inside,
-          };
-        }, id);
-        const tally: Record<string, number> = {};
-        let moved = 0; let held = 0;
-        /** Answer one row and assert it settled where it stood. */
-        const answer = async (id: string, code: string, act: () => Promise<void>, moreOpen = false) => {
-          await row(id).scrollIntoViewIfNeeded();
-          const before = await state(id); const h0 = await head();
-          expect(before.asks, `${id} asks`).toBe("1");
-          expect(before.controls, `${id}: the question's controls are in the row`).toBeGreaterThan(0);
-          expect(before.inside, `${id}: every control sits inside the row's box`).toBe(true);
-          expect(before.chip.toLowerCase(), `${id}: the chip is the reason's own label`).not.toBe("ready");
-          expect(before.edge, `${id}: the rust edge`).toContain("rgb(162, 69, 42)");
-          await act();
-          await page.waitForTimeout(120);
-          const after = await state(id); const h1 = await head();
-          tally[code] = (tally[code] ?? 0) + 1;
-          record(page, "V3", `${id} ${code}`, { before, after, h0, h1 });
-          expect(after.index, `${id}: the same row, in the same place in the list`).toBe(before.index);
-          /* The reader is not moved — unless the sheet has nothing left below to hold the row where it
-             was (the last row's panel closing shortens the page, and the scroller ends at its end). */
-          const atEnd = await page.evaluate(() => {
-            const sc = document.querySelector('[data-sf="scroll"]') as HTMLElement;
-            const own = sc.scrollHeight > sc.clientHeight + 1;
-            const el = own ? sc : document.scrollingElement!;
-            return el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
-          });
-          if (!atEnd) held += 1;
-          if (!atEnd) expect(Math.abs(after.top - before.top), `${id}: the reader is not moved`).toBeLessThanOrEqual(2);
-          else record(page, "V3", `${id} at the sheet's end`, { moved: after.top - before.top });
-          if (!moreOpen) {
-            expect(after.asks).toBe("0");
-            expect(after.chip).toBe("Ready");
-            expect(after.edge).not.toContain("rgb(162, 69, 42)");
-            expect(h1.ready, `${id}: the head's ready chip moved by one`).toBe(h0.ready + 1);
-            expect(h1.open, `${id}: the head's open chip moved by one`).toBe(h0.open - 1);
-          moved += 1;
-          } else {
-            expect(after.asks, `${id}: still asks its second question`).toBe("1");
-            expect(h1).toEqual(h0);
-          }
-        };
-        await lab(page, "s=review&fx=review");
-        await page.waitForSelector('[data-im="review"][data-step="agents"]');
-        await answer("a8", "agent-needs-agency:saved", async () => { await row("a8").getByLabel("Agency name").fill("Hale House"); await row("a8").getByRole("button", { name: "Save agency" }).click(); });
-        await answer("a9", "agent-needs-agency:waived", async () => { await row("a9").getByRole("button", { name: "Carry on without an agency" }).click(); });
-        await answer("a10", "agent-mapping", async () => { await row("a10").getByRole("button", { name: "Mark as checked" }).click(); });
-        await page.locator('[data-im="primary"]').click();
-        await page.waitForSelector('[data-im="review"][data-step="queries"]');
-        await answer("q1", "two-dates", async () => { await row("q1").getByRole("button", { name: "Yes, that's right" }).click(); });
-        await answer("q2", "status-direction", async () => { await row("q2").getByRole("button", { name: /I sent the full/ }).click(); });
-        await answer("q3", "missing-day", async () => { await row("q3").getByRole("button", { name: "Keep as month" }).click(); });
-        await answer("q4", "serial-outlier", async () => { await row("q4").getByRole("button", { name: "Leave undated" }).click(); });
-        await answer("q5", "no-date", async () => { await row("q5").getByLabel("Date sent").fill("2024-06-01"); await row("q5").getByRole("button", { name: "Save date" }).click(); });
-        await answer("q6", "status-wording", async () => { await row("q6").getByLabel("Query status").selectOption("Partial Sent"); await row("q6").getByRole("button", { name: "That's right" }).click(); });
-        /* a row with two reasons: the first answer leaves it asking the second */
-        await answer("q11", "no-date", async () => { await row("q11").getByRole("button", { name: "Leave undated" }).click(); }, true);
-        await answer("q11", "status-wording", async () => { await row("q11").getByRole("button", { name: "That's right" }).click(); });
-        record(page, "V3", "tally", { ...tally, rowsSettled: moved, positionsHeld: held });
-        expect(held, "the reader's place was checked on rows with page left below them").toBeGreaterThan(5);
-        for (const code of ["agent-needs-agency:saved", "agent-needs-agency:waived", "agent-mapping", "two-dates", "missing-day", "serial-outlier", "no-date", "status-direction", "status-wording"]) {
-          expect(tally[code] ?? 0, `the ${code} branch was entered`).toBeGreaterThan(0);
-        }
-      });
+      /* V3 ("every open row is answered in its own row") is retired by onboarding v9: a row no
+         longer asks. Every question is asked in the answer deck; OB9 G1 to G3 hold the deck, and
+         V4 below answers one of every kind of question through it. */
 
       /* ── V5 · undo, restore and reset ────────────────────────────────────────────────────── */
-      test("V5 undo, restore and reset", async ({ page }) => {
+      /* RE-POINTED (onboarding v9): "Reset all changes made here" is gone with the per-row questions
+         (each answer has its own "Change this"), so this holds the two ways a removed row comes
+         back. The rows are the ready list's first five. */
+      test("V5 undo and restore", async ({ page }) => {
         await lab(page, "s=review&fx=review");
         await page.waitForSelector('[data-im="review"][data-step="agents"]');
         const ids = () => page.evaluate(() => [...document.querySelectorAll('[data-im="rows"] > [data-row-id]')].map((r) => r.getAttribute("data-row-id")));
-        const chips = () => page.evaluate(() => [document.querySelector('[data-im="chip-ready"]')?.textContent, document.querySelector('[data-im="chip-open"]')?.textContent ?? null]);
-        const first = await ids(); const chips0 = await chips();
-        expect(first.length, "there are rows").toBeGreaterThan(5);
+        const ready = () => page.evaluate(() => document.querySelector('[data-im="ready-chip"]')?.textContent ?? "");
+        const first = await ids(); const ready0 = await ready();
+        expect(first.length, "there are rows").toBe(5);
         /* remove, Undo: back in its place */
         await page.locator('[data-row-id="a3"] [data-im="row-remove"]').click();
         expect(await ids()).not.toContain("a3");
+        expect(await ready(), "the ready count fell by one").not.toBe(ready0);
         await expect(page.locator('[data-im="toast"]')).toContainText("set aside");
         await page.locator('[data-im="toast-undo"]').click();
         expect(await ids(), "Undo puts the row back in its place").toEqual(first);
@@ -594,16 +521,10 @@ test.describe("OB2", () => {
         expect(await ids()).not.toContain("a4");
         await page.locator('[data-im="tray-head"]').click();
         await page.locator('[data-tray-id="a4"] [data-im="tray-restore"]').click();
+        record(page, "V5", "afterRestore", { ids: await ids(), ready: await ready(), ready0 });
         expect(await ids(), "the tray's Restore puts the row back in its place").toEqual(first);
-        /* answer two rows and remove one, then Reset: every chip count is its first value */
-        await page.locator('[data-row-id="a9"]').getByRole("button", { name: "Carry on without an agency" }).click();
-        await page.locator('[data-row-id="a10"]').getByRole("button", { name: "Mark as checked" }).click();
-        await page.locator('[data-row-id="a2"] [data-im="row-remove"]').click();
-        expect(await chips(), "the changes moved the chips").not.toEqual(chips0);
-        await page.locator('[data-im="reset"]').click();
-        record(page, "V5", "afterReset", { ids: await ids(), chips: await chips(), chips0 });
-        expect(await chips(), "Reset returns every chip count to its first value").toEqual(chips0);
-        expect(await ids()).toEqual(first);
+        expect(await ready()).toBe(ready0);
+        expect(await page.locator('[data-im="reset"]').count(), "there is no Reset").toBe(0);
       });
 
       /* ── V4 · the same results (functional; one width) ───────────────────────────────────── */
@@ -611,26 +532,35 @@ test.describe("OB2", () => {
         const snap = (f: string) => JSON.parse(readFileSync(resolve("tests/e2e/fixtures/onbV5Import", f), "utf8"));
         const result = (page: Page) => page.evaluate(() => (window as unknown as { __onbLab?: { result?: unknown } }).__onbLab?.result ?? null);
         test("V4 same result as the baseline (review fixture)", async ({ page }) => {
+          /* RE-POINTED (onboarding v9): the same answers as the baseline, given through the deck.
+             The row with no agent and no agency is removed (the review used to set it aside by
+             itself), and the two dates the template-style rows left blank are answered "I don't
+             have this date" (they used to pass unasked). Neither changes what is written. */
           const row = (id: string) => page.locator(`[data-row-id="${id}"]`);
+          const on = async (key: string) => showCard(page, key);
           await lab(page, "s=review&fx=review");
           await page.waitForSelector('[data-im="review"][data-step="agents"]');
-          await row("a1").getByTitle("Don't import").click();                                   // one removal
-          await row("a8").getByLabel("Agency name").fill("Hale House");                         // agency saved
-          await row("a8").getByRole("button", { name: "Save agency" }).click();
-          await row("a9").getByRole("button", { name: "Carry on without an agency" }).click();  // agency waived
-          await row("a10").getByRole("button", { name: "Mark as checked" }).click();            // mapping reason
+          await row("a1").getByTitle("Don't import").click();                                              // one removal
+          await (await on("a-a8")).getByPlaceholder("Agency name").fill("Hale House");                      // agency saved
+          await (await on("a-a8")).getByRole("button", { name: "Save agency" }).click();
+          await (await on("a-a9")).getByRole("button", { name: "Carry on without an agency" }).click();     // agency waived
+          await (await on("a-a10")).getByRole("button", { name: "Mark as checked" }).click();               // mapping reason
+          await (await on("a-a11")).getByRole("button", { name: "Remove this row" }).click();               // the nameless row
           await page.getByRole("button", { name: /^Continue/ }).click();
           await page.waitForSelector('[data-im="review"][data-step="queries"]');
-          await row("q1").getByRole("button", { name: "Yes, that's right" }).click();           // two-dates
-          await row("q2").getByRole("button", { name: /I sent the full/ }).click();              // status-direction
-          await row("q3").getByRole("button", { name: "Keep as month" }).click();                // missing-day
-          await row("q4").getByRole("button", { name: "Leave undated" }).click();                // serial-outlier
-          await row("q5").getByLabel("Date sent").fill("2024-06-01");                            // no-date
-          await row("q5").getByRole("button", { name: "Save date" }).click();
-          await row("q6").getByLabel("Query status").selectOption("Partial Sent");               // status-wording
-          await row("q6").getByRole("button", { name: "That's right" }).click();
-          await row("q11").getByRole("button", { name: "Leave undated" }).click();               // two reasons, both
-          await row("q11").getByRole("button", { name: "That's right" }).click();
+          await (await on("q-q1")).getByRole("button", { name: "Yes, that's right" }).click();              // two-dates
+          await (await on("q-q2")).getByRole("button", { name: /I sent the full/ }).click();                 // status-direction
+          await (await on("q-q3")).getByRole("button", { name: "Keep as month" }).click();                   // missing-day
+          await (await on("q-q4")).getByRole("button", { name: "Leave undated" }).click();                   // serial-outlier
+          await (await on("q-q5")).locator('input[type="date"]').fill("2024-06-01");                         // no-date
+          await (await on("q-q5")).getByRole("button", { name: "Save date" }).click();
+          await (await on("q-q6")).locator('[data-status="Partial Sent"]').click();                          // status-wording
+          await (await on("q-q11")).getByRole("button", { name: "I don't have this date" }).click();          // two reasons, both
+          await (await on("q-q11")).locator('[data-status="Partial Requested"]').click();
+          /* whatever else the gate asks that the baseline's review did not (a blank date) */
+          for (let i = 0; i < 12 && (await page.locator('[data-im="primary"]').isDisabled()); i++) {
+            await page.locator('[data-im="deck-card"]').getByRole("button", { name: "I don't have this date" }).click();
+          }
           await page.getByRole("button", { name: /^Import/ }).click();
           const got = await result(page);
           expect(got, "onImport was handed a result").toBeTruthy();
@@ -651,7 +581,11 @@ test.describe("OB2", () => {
           await page.getByRole("button", { name: "Keep both", exact: true }).first().click();   // Priya pair: split
           await page.getByRole("button", { name: "They're different — keep both" }).first().click(); // Finch pair: keep both
           await page.getByRole("button", { name: /^Review all agents/ }).click();
+          /* v9: the agents and queries steps wait for their answers. Carrying on without an agency
+             and "I don't have this date" write what the baseline's unanswered rows wrote. */
+          await settleStep(page);
           await page.getByRole("button", { name: /^Continue/ }).click();
+          await settleStep(page);
           await page.getByRole("button", { name: /^Import/ }).click();
           const got = await result(page);
           expect(got, "onImport was handed a result").toBeTruthy();
@@ -795,7 +729,7 @@ test.describe("OB2", () => {
     for (const sc of SCREENS) {
       test(`T1 every token the import's rules read resolves (${sc.id})`, async ({ page }) => {
         await lab(page, sc.q, { noMutate: true });
-        for (let i = 0; i < (sc.steps ?? 0); i++) await page.locator('[data-im="primary"]').click();
+        for (let i = 0; i < (sc.steps ?? 0); i++) { await settleStep(page); await page.locator('[data-im="primary"]').click(); }
         await page.waitForTimeout(400);
         await mutate(page);
         const r = await page.evaluate(() => {

@@ -73,13 +73,17 @@ export interface TimelineEvent {
 
 export interface ParsedQuery {
   agentRef: string;
-  /** Best-guess status; null only for a truly empty status cell (validation then drops the row). */
+  /** Best-guess status; null for an empty or unread status cell. The review reads null as Queried
+   *  (an unread one is asked about first); a null that reaches validation is still dropped. */
   status: QueryStatus | null;
   /** The query's sent date (ISO) — the spine. Parsed in code from the Date-sent column. */
   sentDate: string | null;
   /** The verbatim Date-sent cell, kept so the review screen can quote it ("you wrote 'March 2024'"). */
   sentDateRaw?: string | null;
   timeline?: TimelineEvent[];
+  /** The verbatim Status cell, when the template parser could not read it as one of the statuses
+   *  (onboarding v9). The review quotes it back in its "where does this one stand?" question. */
+  statusRaw?: string | null;
   /** Typed reason codes; copy is assembled client-side so the function payload stays tiny. */
   reasons?: ReviewReasonCode[];
   notes?: string;

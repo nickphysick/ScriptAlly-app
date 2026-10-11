@@ -18,3 +18,11 @@ Phase 5 (lab, 1440)
 S1  red on the Phase 4 build: reports/onb-v9/red/S-before.txt (no mark; Continue lit with sets undecided; no band)
 S1  mutation: colour the file chip --go            -> red: "nothing but the mark is sage"
 Unmutated: 3 passed.
+
+Phase 6 (lab, 1440)
+G1–G4 red on the Phase 5 build: reports/onb-v9/red/G-before.txt (no deck, no gate, the nameless row set aside, the blank date unasked)
+G1  mutation: enable Continue from the start      -> red: "the primary is disabled while a question is open"
+G2  mutation: the blank date is not asked          -> red: the count of questions left when its card should show
+G3  mutation: set aside by itself, as before       -> red: "the row is in the deck" (both paths)
+G4  mutation: leaving does not ask                 -> red: "Skip for now asks first"
+Unmutated: 7 passed.

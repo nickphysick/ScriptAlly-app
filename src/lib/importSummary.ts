@@ -15,18 +15,17 @@
  */
 import { QueryStatus } from "../types";
 import { courtOf, STAGE_NAME } from "./qcSummary";
-import { parseModel, seedUnidentifiedSetAside } from "./smartImportReviewModel";
+import { parseModel } from "./smartImportReviewModel";
 import type { ReviewAgent, ReviewQuery } from "./smartImportReviewModel";
 import type { SmartImportResult } from "../types/smartImport";
 
 /**
- * The working model the summary counts: the file as read, with the rows the review will set aside
- * by itself already set aside. The summary once counted the raw read, so a row with no agent and
- * no agency was "an agent" on the summary and gone from the review that followed it.
+ * The working model the summary counts: the file as read, the same model the review opens on.
  */
 export function summaryModel(result: SmartImportResult): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
-  const parsed = parseModel(result);
-  return seedUnidentifiedSetAside(parsed.agents, parsed.queries);
+  /* v9: the review asks about a row with no agent and no agency, where it used to set it aside by
+     itself. So the summary counts it too, as an agent that needs an answer. */
+  return parseModel(result);
 }
 
 export type AgentStanding = "live" | "closed" | "none";

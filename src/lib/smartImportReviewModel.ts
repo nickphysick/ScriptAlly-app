@@ -108,6 +108,8 @@ export interface ReviewQuery {
   sentDate: string | null;
   /** The verbatim Date-sent cell, kept so reason copy can quote what they wrote. */
   sentDateRaw: string | null;
+  /** The verbatim Status cell, when the file's status could not be read (template path). */
+  statusRaw?: string | null;
   /** Later events lifted from notes (editable). Seeds activity rungs on commit. */
   timeline: ReviewTimelineEvent[];
   /** Typed, resolvable reasons. A query can carry more than one. */
@@ -232,6 +234,8 @@ const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>
 /** Reason codes that describe the AGENT's identity (name/agency), not the query. Handled on the
  *  Agents stage; stripped from query reasons so they never render as query noise. */
 export const AGENT_IDENTITY_CODES = new Set<ReviewReasonCode>(["check-name", "needs-identifying"]);
+/** The reasons that are about the SENT date. A query carrying one is already being asked for it. */
+export const SENT_DATE_CODES = new Set<ReviewReasonCode>(["no-date", "unreadable-date", "ambiguous-date", "missing-day", "serial-outlier", "two-dates"]);
 const coerceStatus = (s: unknown): QueryStatus | null =>
   typeof s === "string" && (Object.values(QueryStatus) as string[]).includes(s) ? (s as QueryStatus) : null;
 
@@ -315,8 +319,8 @@ export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
     case "ambiguous-date":     return { pill: "Date to confirm" };
     case "unreadable-response-date": return { pill: "Date needed" };
     case "ambiguous-response-date":  return { pill: "Date to confirm" };
-    case "status-direction":   return { pill: "Status to check" };
-    case "status-wording":     return { pill: "Status to check" };
+    case "status-direction":   return { pill: "Status to clarify" };
+    case "status-wording":     return { pill: "Status to clarify" };
     case "check-name":         return { pill: "Name to check" };
     case "needs-identifying":  return { pill: "Who's this for?" };
   }
@@ -407,12 +411,17 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     const reasons: QueryReason[] = (q.reasons || [])
       .filter((c): c is ReviewReasonCode => isReviewReasonCode(c) && !AGENT_IDENTITY_CODES.has(c))
       .map((code) => ({ code, resolved: false }));
+    /* v9: A MISSING SENT DATE IS ASKED ABOUT, ON BOTH PATHS. Smart Import already flags its own
+       ("no-date"); the template path passed a blank cell in silence, so the row arrived as ready
+       and undated. The query still lands undated if the writer says they do not have the date. */
+    if (!q.sentDate && !reasons.some((r) => SENT_DATE_CODES.has(r.code))) reasons.push({ code: "no-date", resolved: false });
     return {
       id: `q${i}`,
       agentRef: q.agentRef,
       status,
       sentDate: q.sentDate ?? null,
       sentDateRaw: q.sentDateRaw ?? null,
+      ...(q.statusRaw ? { statusRaw: q.statusRaw } : {}),
       timeline,
       reasons,
       notes: q.notes ?? "",
@@ -446,9 +455,12 @@ export function applyAgentRemoval(
  *  needs-agency card. Returns new arrays (pure); applied once at review init. */
 export function seedUnidentifiedSetAside(
   agents: ReviewAgent[],
-  queries: ReviewQuery[]
+  queries: ReviewQuery[],
+  /** v9: the review no longer sets these rows aside by itself. It asks, and "Remove this row"
+   *  sets aside that ONE row through here, so the skipped-rows notice lists it exactly as before. */
+  only?: string,
 ): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
-  const unidentified = new Set(agents.filter((a) => !a.deleted && !a.name.trim() && !a.agency.trim()).map((a) => a.id));
+  const unidentified = new Set(agents.filter((a) => !a.deleted && !a.name.trim() && !a.agency.trim() && (only === undefined || a.id === only)).map((a) => a.id));
   if (unidentified.size === 0) return { agents, queries };
   const noteFor = (id: string) => queries.find((q) => q.agentRef === id && (q.notes || "").trim())?.notes?.trim();
   return {
