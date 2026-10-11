@@ -12,7 +12,8 @@ import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB, ExitMode } from "./onboarding/BranchB";
 import { useAskBeforeLeaving } from "./onboarding/SkipSetupConfirm";
 import { HandoffNav, HANDOFF_TAB } from "./onboarding/HandoffNav";
-import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
+import { ManuscriptFieldsState, emptyManuscriptFields } from "./onboarding/ManuscriptFields";
+import { AckTitle } from "./onboarding/v9/AckTitle";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
@@ -301,6 +302,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // cap mid-flow, NOTHING is written here — the entered details are HELD in flow state and the
   // manuscript is created exactly once, later, at commit/finish (ensureBranchBManuscript). Held in a
   // ref alongside state so the deferred create + idempotency guard read the latest value synchronously.
+  /* "Just getting started": the title and readiness given on the acknowledgement page, held until
+     the details that follow are saved. */
+  const [aStart, setAStart] = useState<{ title: string; status: ManuscriptStatus } | null>(null);
   const [b2Draft, setB2Draft] = useState<ManuscriptFieldsState | null>(null);
   const b2DraftRef = useRef<ManuscriptFieldsState | null>(null);
   const b2IdCache = useRef<ManuscriptIdCache>({ id: null }); // caches the id once the single write lands
@@ -380,9 +384,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       <div className="sf-stage" style={{ position: "relative" }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
         {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
-        {flow === "A" && (
+        {flow === "A" && !aStart && (
+          <AckTitle
+            stage="starting" stageTitle={STAGE_OPTIONS.find((o) => o.id === "starting")!.title}
+            error={branchError}
+            onChange={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
+            onContinue={(r) => setAStart({ title: r.title, status: r.status ?? ManuscriptStatus.DRAFTING })}
+          />
+        )}
+        {flow === "A" && aStart && (
           <CenterWrap>
             <BranchA
+              initialScreen="details" initialStatus={aStart.status}
+              initialFields={{ ...emptyManuscriptFields(), title: aStart.title }}
+              onBackFromDetails={() => setAStart(null)}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveReady={(r) => void handleBranchASaveReady(r)}
               onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
@@ -395,6 +410,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "B" && (
           <CenterWrap>
             <BranchB
+              stage={queryingStage ?? "early"}
+              stageTitle={STAGE_OPTIONS.find((o) => o.id === queryingStage)?.title ?? ""}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExitMode={setExitMode}

@@ -24,6 +24,8 @@ import { UserPlan } from "../../types";
 import { Auth } from "../Auth";
 import { Onboarding, WelcomeStageScreen } from "../Onboarding";
 import { BranchA } from "./BranchA";
+import { AckTitle } from "./v9/AckTitle";
+import type { V9Stage } from "../../lib/onboardingV9";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
@@ -171,6 +173,16 @@ export const OnbLab: React.FC = () => {
   if (s === "live") return <Onboarding onComplete={labSpy("complete")} />;
 
   if (s === "welcome") return <LabSetup flow={null} at="you"><LabWelcome /></LabSetup>;
+  /* Step 2's opening (onboarding v9): the acknowledgement for a journey, then the title card. */
+  if (s === "ack") {
+    const stage = (["starting", "early", "deep", "interest"].includes(q.get("stage") ?? "") ? q.get("stage") : "early") as V9Stage;
+    const titles: Record<V9Stage, string> = { starting: "Just getting started", early: "A few queries out", deep: "Deep in it", interest: "Had some interest" };
+    return (
+      <LabSetup flow={stage === "starting" ? "A" : "B"} at="book">
+        <AckTitle stage={stage} stageTitle={titles[stage]} onChange={labSpy("change")} onContinue={(r) => labSpy("continue")(`${r.title}|${r.status ?? ""}`)} />
+      </LabSetup>
+    );
+  }
   if (s === "ready" || s === "details") {
     const st = q.get("status");
     const status = st === "drafting" ? ManuscriptStatus.DRAFTING : st === "revising" ? ManuscriptStatus.REVISING

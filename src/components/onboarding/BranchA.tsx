@@ -48,12 +48,16 @@ export const STILL_WRITING_NOTE =
   "QueryHawk comes into its own once you're ready to query. While you finish the book, you can " +
   "get a head start researching agents who'd suit it.";
 
-export const BranchA: React.FC<BranchAProps & { initialScreen?: "readiness" | "details"; initialStatus?: ManuscriptStatus | null }> = ({
-  onExit, onSaveReady, onSaveStillWriting, error, initialScreen, initialStatus,
+export const BranchA: React.FC<BranchAProps & {
+  initialScreen?: "readiness" | "details"; initialStatus?: ManuscriptStatus | null;
+  /** onboarding v9: the title and readiness are asked on the page before; the details open with them */
+  initialFields?: ManuscriptFieldsState; onBackFromDetails?: () => void;
+}> = ({
+  onExit, onSaveReady, onSaveStillWriting, error, initialScreen, initialStatus, initialFields, onBackFromDetails,
 }) => {
   const [screen, setScreen] = useState<"readiness" | "details">(initialScreen ?? "readiness");
   const [status, setStatus] = useState<ManuscriptStatus | null>(initialStatus ?? null);
-  const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
+  const [fields, setFields] = useState<ManuscriptFieldsState>(initialFields ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   const go = (s: "readiness" | "details") => setScreen(s);
@@ -98,7 +102,7 @@ export const BranchA: React.FC<BranchAProps & { initialScreen?: "readiness" | "d
           showWordCount={!stillWriting}
         />
         {shownError && <FieldError>{shownError}</FieldError>}
-        <StepFoot left={<BackLink onClick={() => go("readiness")} />}>
+        <StepFoot left={<BackLink onClick={() => (onBackFromDetails ? onBackFromDetails() : go("readiness"))} />}>
           <button
             type="button" className="sf-btn"
             onClick={() => {
