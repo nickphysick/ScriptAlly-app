@@ -193,13 +193,13 @@ export const AgentRow: React.FC<AgentRowProps> = ({
           <div className="im-editrow">
             <div className="sf-field">
               <span className="sf-lab">Submissions</span>
-              <SegmentedToggle<"open" | "closed"> value={agent.submissionsOpen ? "open" : "closed"}
+              <SegmentedToggle<"open" | "closed"> value={agent.submissionsOpen == null ? ("" as "open") : agent.submissionsOpen ? "open" : "closed"}
                 options={[{ value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
                 onChange={(v) => onPatch({ submissionsOpen: v === "open" })} ariaLabel="Submissions status" />
             </div>
             <div className="sf-field">
               <span className="sf-lab">Typically replies in</span>
-              <WeekSlider value={agent.weeks} onChange={(w) => onPatch({ weeks: w })} min={1} max={26} />
+              <WeekSlider value={agent.weeks ?? 6} onChange={(w) => onPatch({ weeks: w })} min={1} max={26} />
             </div>
           </div>
           <div className="sf-field">

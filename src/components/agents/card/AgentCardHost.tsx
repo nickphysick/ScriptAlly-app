@@ -325,7 +325,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       website: hrefFor(d.website) ?? "",
       genres: [...d.genres],
       mswlNotes: wishlist,
-      submissionStatus: d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED,
+      submissionStatus: d.door === "closed" ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN,
       submissionMethod: d.method ?? SubmissionMethod.EMAIL,
       materialsWanted: encodeMats(d.mats),
       notes: "",

@@ -5,6 +5,8 @@
  * The column matcher's words (onboarding v5, part 3, phase 4). The matcher keeps what it does; these
  * replace its developer copy. Stated once so the screen, its run log and the lock read one set.
  */
+import { parseTemplateDate } from "./templateImport";
+
 export type MatcherKind = "agents" | "manuscripts" | "queries" | "activities";
 
 export const MATCHER_TITLE = "Match your own columns.";
@@ -58,11 +60,33 @@ export const afterOpenLabel = (kind: MatcherKind): string =>
 export const LOG = {
   agentExists: (name: string) => `${name} is already on your contact list. Row not imported.`,
   manuscriptExists: (title: string) => `"${title}" is already in your manuscripts. Row not imported.`,
+  queryExists: (title: string, agent: string) => `"${title}" to ${agent} is already in your queries. Row not imported.`,
   agentAdded: (name: string, agency: string) => `Added agent: ${name}${agency ? `, ${agency}` : ""}`,
   manuscriptAdded: (title: string) => `Added manuscript: "${title}"`,
   queryAdded: (title: string, agent: string, status: string) => `Added query: "${title}" to ${agent}, ${status}`,
   eventAdded: (description: string) => `Added to a query's history: ${description}`,
 } as const;
+/**
+ * A date cell as the matcher keeps it: the day the file wrote (ISO or day/month/year, the template's
+ * own reader), or no date. Never the moment of the import. A cell that could mean two days, or
+ * cannot be read, is kept as no date and said so in the run's log.
+ */
+export type MatcherDate = { iso: string } | { iso: null; why: "blank" | "ambiguous" | "unreadable" };
+export function matcherDate(raw: string | null | undefined): MatcherDate {
+  const text = (raw ?? "").trim();
+  if (!text) return { iso: null, why: "blank" };
+  const read = parseTemplateDate(text);
+  if (read === "ambiguous") return { iso: null, why: "ambiguous" };
+  if (!read) return { iso: null, why: "unreadable" };
+  return { iso: read.iso };
+}
+/** The log line for a query whose date cell was not kept; null when the cell was simply blank. */
+export function undatedQueryLine(row: number, raw: string, why: "blank" | "ambiguous" | "unreadable"): string | null {
+  if (why === "blank") return null;
+  return why === "ambiguous"
+    ? `Row ${row}: the date "${raw.trim()}" could mean two days. Imported with no sent date.`
+    : `Row ${row}: the date "${raw.trim()}" couldn't be read. Imported with no sent date.`;
+}
 const why = (reason?: string) => (reason ? ` ${reason}` : "");
 export const ERR = {
   noName: (row: number) => `Row ${row} has no name. Row not imported.`,
@@ -71,6 +95,7 @@ export const ERR = {
   agentFailed: (name: string, reason?: string) => `Couldn't add agent ${name}.${why(reason)}`,
   manuscriptFailed: (title: string, reason?: string) => `Couldn't add manuscript "${title}".${why(reason)}`,
   queryFailed: (row: number, reason?: string) => `Couldn't add the query in row ${row}.${why(reason)}`,
+  eventNoDate: (row: number) => `Row ${row} has no date that could be read, so the event can't be placed in a query's history. Row not imported.`,
   eventFailed: (reason?: string) => `Couldn't add the event to a query's history.${why(reason)}`,
   rowUnreadable: (row: number, reason: string) => `Row ${row} couldn't be read: ${reason}`,
 } as const;

@@ -27,8 +27,10 @@ export interface ReviewAgent {
   agencyOnly: boolean;   // the "?" toggle — name unknown, referenced by agency
   genres: string[];
   website: string;
-  submissionsOpen: boolean;
-  weeks: number;         // 1–26
+  /** null until the writer sets it in review: no file states whether an agent is open */
+  submissionsOpen: boolean | null;
+  /** 1–26; null when the file gave none and the writer has not set one */
+  weeks: number | null;
   rating: number;        // 0–5 (0 = unrated)
   /** Per-reason items, each with its own friendly note + a resolved flag. Resolving a reason marks
    *  it done (struck-through sage note kept for confirmation) rather than dropping it; the card's
@@ -331,8 +333,8 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     genres: normaliseGenres(a.genres), // validate raw import genres against the allow-list; drop unknowns
 
     website: a.website ?? "",
-    submissionsOpen: a.submissionMethod !== null ? true : true,
-    weeks: a.responseTimeWeeks && a.responseTimeWeeks > 0 ? Math.min(26, a.responseTimeWeeks) : 6,
+    submissionsOpen: null,
+    weeks: a.responseTimeWeeks && a.responseTimeWeeks > 0 ? Math.min(26, a.responseTimeWeeks) : null,
     rating: 0,
     // A named agent flags only for a GENUINE detail issue from the mapper — never for an abbreviated
     // or missing name. An agency-only agent (no name) is valid and carries no reason → Captured.
@@ -677,7 +679,12 @@ export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], 
   const origAgents = new Map((result.agents || []).map((a) => [a.ref, a]));
   const agentsOut: ParsedAgent[] = agents.filter((a) => !a.deleted).map((a) => {
     const o = origAgents.get(a.id);
-    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website, responseTimeWeeks: a.weeks };
+    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website,
+      // what the file gave or the writer set in review; null where neither did
+      responseTimeWeeks: a.weeks,
+      starRating: a.rating >= 1 && a.rating <= 5 ? a.rating : null,
+      submissionStatus: a.submissionsOpen == null ? null : a.submissionsOpen ? "Open" : "Closed",
+    };
   });
   // Cross-reference guard: exclude queries whose agent was deleted even if the cascade missed them.
   const survivingAgentIds = new Set(agentsOut.map((a) => a.ref));

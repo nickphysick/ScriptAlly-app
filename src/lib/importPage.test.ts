@@ -28,14 +28,16 @@ describe("W1 · the Import page's words", () => {
     expect(smartFactLine({ allowed: false, reason: "pro_month_used", nextAvailable: "2026-11-01" }, dayMonth)).toBe("Available 1 Nov");
     expect(smartFactLine({ allowed: false, reason: "pro_month_used" }, dayMonth), "no date to give").toBe("Available next month");
   });
-  it("the footnote is its first sentence alone: the second is not true of all three tiles", () => {
+  it("the footnote is two sentences, and the second is true of all three tiles", () => {
     expect(IMPORT_FOOTNOTE).toBe("An import adds to what you already have.");
+    expect(IMPORT_FOOTNOTE_SECOND).toBe("An agent already on your contact list isn't added again.");
     const page = code("src/components/import/ImportPage.tsx");
-    expect(page).toContain("{IMPORT_FOOTNOTE}");
-    expect(page).not.toContain("IMPORT_FOOTNOTE_SECOND");
-    expect(page).not.toContain(IMPORT_FOOTNOTE_SECOND);
-    /* why: Smart import and the template match an agent on name AND agency; the matcher on name alone */
-    expect(code("src/lib/smartImportCommit.ts")).toContain("norm(ex.name) === norm(agentName) && norm(ex.agency) === norm(a.agency ?? \"\")");
+    expect(page).toContain("{IMPORT_FOOTNOTE} {IMPORT_FOOTNOTE_SECOND}");
+    /* why it may be said: the template and Smart Import's commit, and the matcher's agents sheet,
+       all ask the one agent match, and none of them writes a matched agent */
+    expect(code("src/lib/smartImportCommit.ts")).toMatch(/const match = findExistingAgent\(existingAgents, \{ name: agentName, agency: a\.agency \}\);/);
+    expect(code("src/components/ImportCsv.tsx")).toMatch(/const foundAgent = findExistingAgent\(localAgents, \{ name, agency: getMappedValue\("agency"\) \}\);/);
+    expect(code("src/lib/smartImportCommit.ts")).not.toContain("norm(ex.name) === norm(agentName)");
   });
   it("the page renders these constants and no words of its own for them", () => {
     const page = code("src/components/import/ImportPage.tsx");

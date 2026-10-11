@@ -7,11 +7,14 @@ import React, { useState, useEffect } from "react";
 import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
+import { importedAgentDoc } from "../lib/importedAgent";
+import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
+import { writeImportedHistory } from "../lib/smartImportCommit";
 import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
   MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
   MAP_FIELD, MAP_SKIP, MAP_REQUIRED, MAP_LINK_NOTE, MAP_START_AGAIN, importRowsLabel, RUN_WORKING, RUN_KEEP_OPEN, RUN_PROGRESS,
-  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR,
+  RUN_FINISHED, COUNT_IMPORTED, COUNT_NOT, COUNT_DECIDE, LOG_TITLE, DECIDE_NOTE, AFTER_ANOTHER, afterOpenLabel, LOG, ERR, matcherDate, undatedQueryLine,
 } from "../lib/importMatcher";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
@@ -330,21 +333,9 @@ export const ImportCsv: React.FC<{
       }
       if (u.needsAgent && u.agentName) {
         const id = "agent-fromrow-" + Math.random().toString(36).slice(2, 11);
-        const res = await addAgent({
-          id,
-          name: u.agentName,
-          agency: "", email: "", website: "", genres: [], mswlNotes: "", notes: "",
-          submissionStatus: SubmissionStatus.OPEN,
-          submissionMethod: SubmissionMethod.EMAIL,
-          /* ⚠️ REQUIRED BY `isValidAgent` AS A LIST, and an empty one is honest — the row stated no
-             materials. Omitting it was DENIED and the agent silently failed to create while the
-             manuscript succeeded, which is the half-done write this whole run is about. */
-          materialsWanted: [],
-          /* ⚠️ `starRating`, `responseTimeWeeks` and `noResponseMeansNo` are OMITTED, deliberately.
-             The rules make each optional and this app treats absence as a first-class state for all
-             three — an unrated agent shows no stars rather than five hollow ones. Writing a default
-             here would be the `starRating: 3` the auto-create block was retired for. */
-        } as never, true);
+        /* The row gave a name and nothing else, so the agent holds a name and nothing else. The
+           builder writes the fields the rules require in their empty form (see importedAgent.ts). */
+        const res = await addAgent({ ...importedAgentDoc({ name: u.agentName }), id }, true);
         if (res.success) patch.agentId = id;
       }
       if (Object.keys(patch).length) {
@@ -399,10 +390,12 @@ export const ImportCsv: React.FC<{
           }
 
           // Strict de-duplicate matching
-          const foundAgent = localAgents.find(a => a.name.toLowerCase() === name.toLowerCase());
+          /* The one agent match every import uses (importDuplicates.ts): same name, and the same
+             agency or one side giving none. The row is not imported, and is counted as not imported. */
+          const foundAgent = findExistingAgent(localAgents, { name, agency: getMappedValue("agency") });
           if (foundAgent) {
-            runLogs.push(LOG.agentExists(name));
-            successfulCount++;
+            errorsList.push(LOG.agentExists(name));
+            failedCount++;
             continue;
           }
           
@@ -416,12 +409,10 @@ export const ImportCsv: React.FC<{
            * ⚠️ THE EMAIL IS THE ONE TO REMEMBER. A fabricated address sits on a real person's record
            * and can be SENT TO — and nothing downstream distinguishes it from one the writer typed.
            *
-           * ⚠️ THREE FALLBACKS SURVIVE DELIBERATELY AND ARE FLAGGED, NOT FIXED: `notes` and
-           * `description` write true provenance ("Imported from Zite archives"), which is a
-           * different thing from a fabrication even though it is still words in a field the writer
-           * owns; and `responseTimeWeeks: 8` is a real default with a meaning rather than an
-           * invention. Each needs a call, and Phase 4's instruction is to fix the unambiguous and
-           * flag the rest.
+           * The last of them went with the import-truth pack: a rating of 3 for an empty cell,
+           * "Open", an 8-week reply window, "no response means no", three materials and the genre
+           * "General Fiction". The agent is now built by `importedAgentDoc`, which holds what the
+           * sheet gave and nothing else.
            */
           const agency = getMappedValue("agency");
           const email = getMappedValue("email");
@@ -429,47 +420,16 @@ export const ImportCsv: React.FC<{
           
           // Custom parsing for genres (split by comma, semicolon, etc.)
           const genresRaw = getMappedValue("genres");
-          const genres = genresRaw 
-            ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean)
-            : ["General Fiction"];
-            
+          const genres = genresRaw ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean) : [];
           const mswlNotes = getMappedValue("mswlNotes");
-          
-          // Star rating parsing
-          const starRaw = parseInt(getMappedValue("starRating"), 10);
-          const starRating: 1 | 2 | 3 | 4 | 5 = (!isNaN(starRaw) && starRaw >= 1 && starRaw <= 5)
-            ? (starRaw as any)
-            : 3;
-            
-          /**
-           * ⚠️ NO PROVENANCE IN A FIELD THE WRITER AUTHORS (Ruling 1). This wrote "Imported from Zite
-           * archives." into the agent's own notes — TRUE, and still the same fault as the logline,
-           * only smaller: the app putting its sentence where the writer's belongs. Provenance is
-           * worth keeping; a field the writer thinks is theirs is not the place to keep it.
-           *
-           * ⚠️ AND THE PLACE FOR IT EXISTS BUT IS NOT USED HERE — see F-AJ. `Agent.fieldSources`
-           * records where a value was found and when, and its own docstring states the principle
-           * this ruling restates: "a found fact is never indistinguishable from one the writer
-           * verified/typed". It is per-FIELD, keyed by the field it describes, so it does not model
-           * "this whole record came from a CSV"; and nothing writes it today. Reported, not added.
-           */
           const notes = getMappedValue("notes");
 
-          const agentData = {
-            name,
-            agency,
-            email,
-            website,
-            genres,
-            mswlNotes,
-            starRating,
-            submissionStatus: SubmissionStatus.OPEN,
-            responseTimeWeeks: 8,
-            noResponseMeansNo: true,
-            submissionMethod: SubmissionMethod.EMAIL,
-            materialsWanted: ["Query Letter", "Synopsis", "Sample Pages"],
-            notes
-          };
+          /* Only what the sheet gave. A rating is kept when the cell holds 1 to 5; nothing else is
+             filled in: no status, no reply window, no reply rule, no materials, no genre. */
+          const agentData = importedAgentDoc({
+            name, agency, email, website, genres, mswlNotes, notes,
+            starRating: getMappedValue("starRating"),
+          });
 
           const newAgId = "agent-imported-" + Math.random().toString(36).substr(2, 9);
           const res = await addAgent({ ...agentData, id: newAgId }, true);
@@ -478,9 +438,7 @@ export const ImportCsv: React.FC<{
               ...agentData,
               id: newAgId,
               userId: currentUser?.id || "",
-              dateAdded: new Date().toISOString(),
-              lastCheckedDate: new Date().toISOString()
-            };
+            } as (typeof localAgents)[number]; // a look-up entry for later rows; it is never written
             localAgents.push(addedAgRef);
             successfulCount++;
             runLogs.push(LOG.agentAdded(name, agency));
@@ -500,8 +458,8 @@ export const ImportCsv: React.FC<{
           // De-duplicate matching
           const foundMs = localManuscripts.find(m => m.title.toLowerCase() === title.toLowerCase());
           if (foundMs) {
-            runLogs.push(LOG.manuscriptExists(title));
-            successfulCount++;
+            errorsList.push(LOG.manuscriptExists(title));
+            failedCount++;
             continue;
           }
 
@@ -534,7 +492,6 @@ export const ImportCsv: React.FC<{
               ...msData,
               id: newMsId,
               userId: currentUser?.id || "",
-              statusChangedDate: new Date().toISOString()
             } as any;
             localManuscripts.push(addedMsRef);
             successfulCount++;
@@ -560,7 +517,7 @@ export const ImportCsv: React.FC<{
 
           // Case-insensitive lookups on dynamic local caches
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
-          let foundAgent = localAgents.find(a => a.name.toLowerCase() === agentNameInput.toLowerCase());
+          let foundAgent = findExistingAgent(localAgents, { name: agentNameInput });
 
           /**
            * ⚠️ AN UNMATCHED ROW IS FLAGGED, NOT FABRICATED (overnight ruling, D1).
@@ -611,6 +568,14 @@ export const ImportCsv: React.FC<{
            * `materialsLinkWrites` returns it when clearing a link.
            */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
+          const sent = matcherDate(dateSentInput);
+          /* ALREADY HERE: the same agent, the same manuscript and the same sent day (or both with
+             none). Nothing is written for the row, and it is counted as not imported. */
+          if (foundMs && foundAgent && localQueries.some((ex) => isSameQuery(ex, { agentId: foundAgent!.id, manuscriptId: foundMs!.id, sentDate: sent.iso }))) {
+            errorsList.push(LOG.queryExists(msTitleInput, agentNameInput));
+            failedCount++;
+            continue;
+          }
           const queryData = {
             /**
              * ⚠️ NO INVENTED IDS (D1). These were `|| "ms-seed-fantasy"` and `|| "agent-seed-alex"`,
@@ -631,7 +596,8 @@ export const ImportCsv: React.FC<{
             personalisationNotes,
             sendMethod: SubmissionMethod.EMAIL,
             status: normalizeQueryStatus(statusInput),
-            dateSent: dateSentInput ? new Date(dateSentInput).toISOString() : new Date().toISOString()
+            /* The day the sheet wrote, or no sent date. Never the moment of the import. */
+            ...(sent.iso ? { dateSent: sent.iso } : {}),
           };
 
           /* ⚠️ RECORDED BEFORE THE WRITE, so the row is reported whether or not the write succeeds —
@@ -652,8 +618,19 @@ export const ImportCsv: React.FC<{
                 .filter(Boolean).join(" · "),
             });
           }
-          const res = await addQuery({ ...queryData, id: queryId }, true);
+          /* `imported` stops addQuery setting a sent date of now and writing history stamped now;
+             the history is then written here, from the sheet (the same writer the template uses). */
+          const res = await addQuery({ ...queryData, id: queryId }, true, { imported: true });
           if (res.success) {
+            await writeImportedHistory(
+              currentUser?.id || "", queryId,
+              { agentRef: "", status: queryData.status, sentDate: sent.iso },
+              foundAgent?.name ?? agentNameInput, foundMs?.title ?? msTitleInput,
+            );
+            if (!sent.iso) {
+              const line = undatedQueryLine(index + 2, dateSentInput, (sent as { why: "blank" | "ambiguous" | "unreadable" }).why);
+              if (line) runLogs.push(line);
+            }
             const addedQRef = {
               ...queryData,
               id: queryId,
@@ -674,7 +651,15 @@ export const ImportCsv: React.FC<{
              "Activity logged via CSV Import" is true about the import and says nothing about the
              event. Empty is honest. */
           const description = getMappedValue("description");
-          const date = getMappedValue("date") ? new Date(getMappedValue("date")).toISOString() : new Date().toISOString();
+          /* An event is placed by its date. With none that can be read there is nowhere true to put
+             it, so the row is not imported and the log says why. Never the moment of the import. */
+          const eventDate = matcherDate(getMappedValue("date"));
+          if (!eventDate.iso) {
+            failedCount++;
+            errorsList.push(ERR.eventNoDate(index + 2));
+            continue;
+          }
+          const date = eventDate.iso;
           const details = getMappedValue("details") || "";
 
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());

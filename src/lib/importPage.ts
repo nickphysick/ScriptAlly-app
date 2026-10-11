@@ -43,11 +43,10 @@ export function smartFactLine(e: Pick<SmartImportEntitlement, "allowed" | "reaso
 }
 
 /**
- * The footnote. ⚠️ ONE SENTENCE, NOT THE REFERENCE'S TWO. The second ("An agent already on your
- * contact list isn't added again.") is not true of all three ways in: Smart import and the template
- * match an existing agent on name AND agency, so the same agent typed with a different or missing
- * agency is added again; the column matcher matches on name alone. The page claims only what all
- * three keep.
+ * The footnote: two sentences, as the reference has them. The second was held back while it was
+ * not true of all three ways in. It is true since import-truth: the template, Smart Import and the
+ * column matcher all match an agent with `sameAgent` (the same name, and the same agency or one
+ * side giving none), and a matched agent is not written again.
  */
 export const IMPORT_FOOTNOTE = "An import adds to what you already have.";
 export const IMPORT_FOOTNOTE_SECOND = "An agent already on your contact list isn't added again.";

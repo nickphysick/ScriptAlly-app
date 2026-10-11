@@ -17,7 +17,7 @@ import {
   agentRelationship,
   relationshipLabel,
   awaitingYourPages,
-  isDoorOpen,
+  isDoorOpen, isDoorClosed, doorOf, DOOR_NOT_KNOWN,
   matchesAgentSearch,
   methodShort,
   metaTokens,
@@ -109,11 +109,17 @@ describe("agentList · awaiting your pages", () => {
   });
 });
 
-describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
-  it("only an explicit Closed shuts the door", () => {
+describe("agentList · the door (three ways: open, closed, not known)", () => {
+  /* Re-pointed by import-truth. This pinned "Unknown reads as open" (decision 3); an import now
+     writes Unknown for an agent nobody has checked, and that is not open. */
+  it("only a stated Open is open; only a stated Closed is closed; Unknown is neither", () => {
     expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.OPEN }))).toBe(true);
-    expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.UNKNOWN }))).toBe(true);
+    expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.UNKNOWN }))).toBe(false);
     expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.CLOSED }))).toBe(false);
+    expect(isDoorClosed(mkAgent({ submissionStatus: SubmissionStatus.UNKNOWN }))).toBe(false);
+    expect(doorOf(mkAgent({ submissionStatus: SubmissionStatus.UNKNOWN }))).toBe("unknown");
+    expect(doorOf(mkAgent({ submissionStatus: undefined as never }))).toBe("unknown");
+    expect(DOOR_NOT_KNOWN).toBe("Not known");
   });
 
   it("an Unknown agent is NOT closed and stays queryable", () => {

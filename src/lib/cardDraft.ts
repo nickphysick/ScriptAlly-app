@@ -28,7 +28,7 @@ import {
 import { genreLabel, type PersonalGenre } from "./genres";
 import { normaliseCountry } from "./territory";
 import { hrefFor } from "./quickAdd";
-import { isDoorOpen } from "./agentList";
+import { doorOf } from "./agentList";
 import type { AgentEditPatch } from "./saveAgentEdits";
 import { draftFromAgentRecord, type ContactDraft } from "./contactEdit";
 
@@ -63,7 +63,9 @@ export interface CardDraft {
   nrn: boolean | null;
   /** null is nothing chosen — no stored method, or a stored "Other" */
   method: SubmissionMethod | null;
-  door: "open" | "closed";
+  /** null is "not known" — an imported agent nobody has set; the editor shows neither chosen and
+   *  only ever writes Open or Closed */
+  door: "open" | "closed" | null;
   /** an ISO date, or "" — not announced */
   reopens: string;
 }
@@ -124,7 +126,7 @@ export function draftOf(a: Agent, personal: PersonalGenre[] = []): CardDraft {
     weeks: typeof w === "number" && w > 0 ? w : null,
     nrn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
     method: methodOf(a.submissionMethod),
-    door: isDoorOpen(a) ? "open" : "closed",
+    door: ((k) => (k === "unknown" ? null : k))(doorOf(a)),
     reopens: (a.reopensOn ?? "").trim(),
   };
 }
@@ -257,12 +259,12 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
   if (changed.has("nrn") && d.nrn != null) patch.noResponseMeansNo = d.nrn;
   /* ruling 2: written only when the writer chose one */
   if (changed.has("method") && d.method != null) patch.submissionMethod = d.method;
-  if (changed.has("door")) patch.submissionStatus = d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED;
+  if (changed.has("door") && d.door != null) patch.submissionStatus = d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED;
   const stored = (a.reopensOn ?? "").trim();
   if (d.door === "open") {
     /* choosing Open clears the reopening date (§5) — choosing it, not merely being open */
     if (changed.has("door") && stored) patch.reopensOn = null;
-  } else if ((changed.has("reopens") || changed.has("door")) && d.reopens !== stored) {
+  } else if (d.door === "closed" && (changed.has("reopens") || changed.has("door")) && d.reopens !== stored) {
     patch.reopensOn = d.reopens || null;
   }
   return patch;
@@ -379,7 +381,7 @@ export function toContactDraft(a: Agent, base: CardDraft, d: CardDraft): Contact
     country: ch.has("country") ? d.country : orig.country,
     responseTimeWeeks: ch.has("weeks") && d.weeks != null ? d.weeks : orig.responseTimeWeeks,
     noResponseMeansNo: ch.has("nrn") && d.nrn != null ? d.nrn : orig.noResponseMeansNo,
-    submissionStatus: ch.has("door") ? (d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED) : orig.submissionStatus,
+    submissionStatus: ch.has("door") && d.door != null ? (d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED) : orig.submissionStatus,
     reopensOn: ch.has("reopens") || ch.has("door") ? (d.door === "open" ? "" : d.reopens) : orig.reopensOn,
     genres: ch.has("genres") ? [...d.genres] : orig.genres,
     mswlNotes: ch.has("wishlist") ? d.wishlist : orig.mswlNotes,

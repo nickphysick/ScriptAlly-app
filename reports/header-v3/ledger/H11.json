@@ -6,6 +6,12 @@
   "detail": " [248,0,1264,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/dashboard@1512",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/dashboard@1512",
   "ok": true,
@@ -30,6 +36,12 @@
   "detail": " [248,0,1264,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/account@1512",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/account@1512",
   "ok": true,
@@ -54,6 +66,12 @@
   "detail": " [248,0,1264,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/help@1512",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/help@1512",
   "ok": true,
@@ -78,6 +96,12 @@
   "detail": " [248,0,1264,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/plans@1512",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/plans@1512",
   "ok": true,
@@ -97,33 +121,15 @@
  },
  {
   "lock": "H11 precondition: a header was read",
-  "where": "/import@1512",
-  "ok": true,
-  "detail": " [248,0,1264,64]"
- },
- {
-  "lock": "H11 it is not the panel header",
-  "where": "/import@1512",
-  "ok": true,
-  "detail": "hp3 false · panel false (was false)"
- },
- {
-  "lock": "H11 the header's box equals the baseline (±1)",
-  "where": "/import@1512",
-  "ok": true,
-  "detail": "[248,0,1264,64] → [248,0,1264,64]"
- },
- {
-  "lock": "H11 its surface, padding and title type equal the baseline",
-  "where": "/import@1512",
-  "ok": true,
-  "detail": "equal"
- },
- {
-  "lock": "H11 precondition: a header was read",
   "where": "/dashboard@1280",
   "ok": true,
   "detail": " [248,0,1032,64]"
+ },
+ {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/dashboard@1280",
+  "ok": true,
+  "detail": "strip true"
  },
  {
   "lock": "H11 it is not the panel header",
@@ -150,6 +156,12 @@
   "detail": " [248,0,1032,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/account@1280",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/account@1280",
   "ok": true,
@@ -174,6 +186,12 @@
   "detail": " [248,0,1032,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/help@1280",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/help@1280",
   "ok": true,
@@ -198,6 +216,12 @@
   "detail": " [248,0,1032,64]"
  },
  {
+  "lock": "H1 precondition: the beta strip is on screen, so the reading is taken under it",
+  "where": "/plans@1280",
+  "ok": true,
+  "detail": "strip true"
+ },
+ {
   "lock": "H11 it is not the panel header",
   "where": "/plans@1280",
   "ok": true,
@@ -212,30 +236,6 @@
  {
   "lock": "H11 its surface, padding and title type equal the baseline",
   "where": "/plans@1280",
-  "ok": true,
-  "detail": "equal"
- },
- {
-  "lock": "H11 precondition: a header was read",
-  "where": "/import@1280",
-  "ok": true,
-  "detail": " [248,0,1032,64]"
- },
- {
-  "lock": "H11 it is not the panel header",
-  "where": "/import@1280",
-  "ok": true,
-  "detail": "hp3 false · panel false (was false)"
- },
- {
-  "lock": "H11 the header's box equals the baseline (±1)",
-  "where": "/import@1280",
-  "ok": true,
-  "detail": "[248,0,1032,64] → [248,0,1032,64]"
- },
- {
-  "lock": "H11 its surface, padding and title type equal the baseline",
-  "where": "/import@1280",
   "ok": true,
   "detail": "equal"
  }

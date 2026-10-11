@@ -23,6 +23,9 @@ export interface ParsedAgent {
   submissionMethod?: "Email" | "Online Form" | null;
   responseTimeWeeks?: number | null;
   noResponseMeansNo?: boolean | null;
+  /** Set in review by the writer; no file gives either. Absent or null = not stated. */
+  starRating?: number | null;
+  submissionStatus?: "Open" | "Closed" | null;
   mswlNotes?: string;
   /** Legacy/fixtures only — the function no longer emits agent confidence. Optional so older callers
    *  and test fixtures still type-check. Agent review flags come from `issues`. */

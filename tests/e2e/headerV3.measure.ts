@@ -19,6 +19,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { KILL, SIZES, near, open } from "./hp2Lib";
+import { stripOffset, stripShown, underStrip, applyShift } from "./betaStrip";
 
 const DIR = "reports/header-v3";
 const BASELINE = "tests/e2e/fixtures/hv3-outofscope.json";
@@ -245,17 +246,27 @@ test("H11 · out of scope: the pages that must not change equal their baselines"
   const L = new Ledger("H11");
   await prepare(page);
   const got: Record<string, Awaited<ReturnType<typeof readOut>>> = {};
-  for (const vp of SIZES) for (const route of OUT_OF_SCOPE) { await open(page, route, vp); await page.waitForTimeout(600); got[`${route}@${vp.width}`] = await readOut(page); }
+  const strip: Record<string, boolean> = {};
+  for (const vp of SIZES) for (const route of OUT_OF_SCOPE) {
+    await open(page, route, vp); await page.waitForTimeout(600);
+    await applyShift(page);
+    /* H1: the header's place is measured from below the beta strip when it is shown (betaStrip.ts) */
+    const off = await stripOffset(page);
+    const read = await readOut(page);
+    got[`${route}@${vp.width}`] = { ...read, box: underStrip(read.box, off) };
+    strip[`${route}@${vp.width}`] = await stripShown(page);
+  }
   if (process.env.HV3_CAPTURE) { mkdirSync("tests/e2e/fixtures", { recursive: true }); writeFileSync(BASELINE, JSON.stringify(got, null, 1)); console.log(`captured ${Object.keys(got).length} baselines`); return; }
   expect(existsSync(BASELINE), "H11 baseline missing: capture it against a build of the base").toBe(true);
   const base = JSON.parse(readFileSync(BASELINE, "utf8")) as typeof got;
   for (const k of Object.keys(base)) {
     const a = base[k], b = got[k];
     L.check("H11 precondition: a header was read", k, !!b?.box, `${b?.title} ${JSON.stringify(b?.box)}`);
+    L.check("H1 precondition: the beta strip is on screen, so the reading is taken under it", k, strip[k] === true, `strip ${strip[k]}`);
     L.check("H11 it is not the panel header", k, b?.hp3 === false && b?.panel === a.panel, `hp3 ${b?.hp3} · panel ${b?.panel} (was ${a.panel})`);
     L.check("H11 the header's box equals the baseline (±1)", k, !!a.box && !!b?.box && a.box.every((v, i) => near(b.box![i], v, 1)), `${JSON.stringify(a.box)} → ${JSON.stringify(b?.box)}`);
     const diff = Object.keys(a.style ?? {}).filter((s) => a.style![s] !== b?.style?.[s]).map((s) => `${s}: ${a.style![s]} → ${b?.style?.[s]}`);
     L.check("H11 its surface, padding and title type equal the baseline", k, diff.length === 0, diff.join(" · ") || "equal");
   }
-  L.done(SIZES.length * OUT_OF_SCOPE.length * 4);
+  L.done(SIZES.length * OUT_OF_SCOPE.length * 5);
 });

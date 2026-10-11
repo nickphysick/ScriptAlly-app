@@ -5,56 +5,72 @@
    "name": "Jamal Carter",
    "agency": "Carter & Vale",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a3",
    "name": "Marianne Webb",
    "agency": "The Greenhouse",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a4",
    "name": "Tomas Vidal",
    "agency": "The Quill Agency",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a5",
    "name": "Gregory Salt",
    "agency": "Penhallow Literary",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a6",
    "name": "",
    "agency": "Westbrook Literary",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a7",
    "name": "Wren & Co",
    "agency": "Wren & Co",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a8",
    "name": "Owen Hale",
    "agency": "Hale House",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a9",
    "name": "Ines Marlow",
    "agency": "",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a10",
@@ -64,14 +80,18 @@
     "agency read from a merged cell"
    ],
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "a12",
    "name": "Dana Whitlock",
    "agency": "Whitlock Agency",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   }
  ],
  "queries": [

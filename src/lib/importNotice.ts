@@ -24,6 +24,8 @@
  * ⚠️ EVERY REASON IS THE SOURCE'S OWN STRING, VERBATIM. Nothing here rewords why a row was skipped.
  */
 import type { ParsedAgent, ParsedQuery } from "../types/smartImport";
+import { ALREADY_REASON } from "./importDuplicates";
+export { ALREADY_REASON };
 
 export interface ImportNoticeRow {
   /** The agent's name, else the agency, else "" — a row that named nobody has nobody to name. */
@@ -58,6 +60,8 @@ export function buildImportNotice(
   agents: readonly ParsedAgent[],
   setAside: readonly SetAsideRow[] = [],
   now: number = Date.now(),
+  /** rows not written because the account already holds that query */
+  already: readonly { who: string; status: string; sentDate: string | null }[] = [],
 ): ImportNotice | null {
   const byRef = new Map(agents.map((a) => [a.ref, a]));
   const rows: ImportNoticeRow[] = skipped.map(({ query, reason }) => {
@@ -74,6 +78,7 @@ export function buildImportNotice(
     if (m) rows.push({ who: "", status: m[1], sentDate: null, reason: line });
   }
   for (const r of setAside) rows.push({ who: "", status: r.status, sentDate: r.sentDate, reason: NO_NAME_REASON });
+  for (const r of already) rows.push({ who: r.who, status: r.status, sentDate: r.sentDate, reason: ALREADY_REASON });
   if (rows.length === 0) return null;
   return { count: rows.length, rows, at: now };
 }

@@ -178,7 +178,7 @@ for (const vp of VIEWPORTS) {
       expect(r!.tiles.map((t) => t.title)).toEqual(["Smart import.", "Our template.", "Match your own columns."]);
       expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet"], ["Download the template", "Upload my sheet"], ["Match columns"]]);
       expect(r!.sub).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
-      expect(r!.footnote).toBe("An import adds to what you already have.");
+      expect(r!.footnote).toBe("An import adds to what you already have. An agent already on your contact list isn't added again.");
       expect(r!.order).toEqual(["header", "tiles", "footnote"]);
       expect(r!.footnote.length).toBeGreaterThan(10);
       expect(Math.abs(r!.panel!.x - r!.row!.x), "the panel's left edge is the tiles' row's").toBeLessThanOrEqual(0.5);

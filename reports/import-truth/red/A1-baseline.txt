@@ -1,0 +1,365 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-truth
+
+ ❯ src/lib/importedAgent.test.ts (7 tests | 5 failed) 10ms
+   × A1 · the template and Smart Import > template-iso.csv: every agent is written with no rating, no window, no reply rule, and status Unknown 6ms
+     → Clara Voss: starRating: expected true to be false // Object.is equality
+   × A1 · the template and Smart Import > template-window.csv: the window the file gave is kept; the agent whose row gave none has none 1ms
+     → expected true to be false // Object.is equality
+   × A1 · the email import > a new agent from an email has no rating, no window, no reply rule, and status Unknown 1ms
+     → starRating: expected true to be false // Object.is equality
+   ✓ A1 · the column matcher > matcher-agents.csv: a rating is kept only when the cell holds 1 to 5 0ms
+   ✓ A1 · the column matcher > every row: status Unknown, no window, no reply rule, no materials, no genre the file did not give 0ms
+   × A1 · the column matcher > both of the matcher's agent writers build the agent with importedAgentDoc and state no value of their own 1ms
+     → the agents sheet and Create from this row: expected +0 to be 2 // Object.is equality
+   × A1 · the column matcher > the two commit functions build the agent with importedAgentDoc too 0ms
+     → src/lib/smartImportCommit.ts: expected '\nimport { doc, setDoc, getDocs, dele…' to match /importedAgentDoc\(/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/importedAgent.test.ts > A1 · the template and Smart Import > template-iso.csv: every agent is written with no rating, no window, no reply rule, and status Unknown
+AssertionError: Clara Voss: starRating: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/lib/importedAgent.test.ts:62:73
+     60|     expect(addAgent.mock.calls.length, "agents were written").toBeGrea…
+     61|     for (const [doc] of addAgent.mock.calls as [Record<string, unknown…
+     62|       for (const k of INVENTABLE) expect(k in doc, `${doc.name}: ${k}`…
+       |                                                                         ^
+     63|       expect(doc.submissionStatus, String(doc.name)).toBe(SubmissionSt…
+     64|       expect(doc.materialsWanted).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/lib/importedAgent.test.ts > A1 · the template and Smart Import > template-window.csv: the window the file gave is kept; the agent whose row gave none has none
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/lib/importedAgent.test.ts:77:42
+     75|     const jamal = docs.find((d) => d.name === "Jamal Carter")!;
+     76|     expect(clara.responseTimeWeeks).toBe(6);
+     77|     expect("responseTimeWeeks" in jamal).toBe(false);
+       |                                          ^
+     78|     expect("starRating" in clara).toBe(false);
+     79|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/lib/importedAgent.test.ts > A1 · the email import > a new agent from an email has no rating, no window, no reply rule, and status Unknown
+AssertionError: starRating: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/lib/importedAgent.test.ts:94:53
+     92|     expect(addAgent).toHaveBeenCalledTimes(1);
+     93|     const doc = addAgent.mock.calls[0][0] as Record<string, unknown>;
+     94|     for (const k of INVENTABLE) expect(k in doc, k).toBe(false);
+       |                                                     ^
+     95|     expect(doc.submissionStatus).toBe(SubmissionStatus.UNKNOWN);
+     96|     expect(doc.importedNeedsReview).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/lib/importedAgent.test.ts > A1 · the column matcher > both of the matcher's agent writers build the agent with importedAgentDoc and state no value of their own
+AssertionError: the agents sheet and Create from this row: expected +0 to be 2 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+ ❯ src/lib/importedAgent.test.ts:128:107
+    126|   it("both of the matcher's agent writers build the agent with importe…
+    127|     const code = src("src/components/ImportCsv.tsx");
+    128|     expect((code.match(/importedAgentDoc\(/g) ?? []).length, "the agen…
+       |                                                                                                           ^
+    129|     expect(code).not.toMatch(/SubmissionStatus\.OPEN/);
+    130|     expect(code).not.toMatch(/responseTimeWeeks\s*:/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/lib/importedAgent.test.ts > A1 · the column matcher > the two commit functions build the agent with importedAgentDoc too
+AssertionError: src/lib/smartImportCommit.ts: expected '\nimport { doc, setDoc, getDocs, dele…' to match /importedAgentDoc\(/
+
+[32m- Expected:[39m 
+/importedAgentDoc\(/
+
+[31m+ Received:[39m 
+"
+import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from \"firebase/firestore\";
+import { db } from \"./firebase\";
+import { recomputeQuery } from \"./recomputeQuery\";
+import { Agent, ActivityType, SubmissionMethod } from \"../types\";
+import { SmartImportResult, ParsedAgent, ParsedQuery } from \"../types/smartImport\";
+import { validateSmartImport } from \"./smartImport\";
+import { impliedRungs, assignTimes } from \"./impliedRungs\";
+import { importActivityLine, type ImportSource } from \"./importLabels\";
+
+
+
+
+export { impliedRungs, assignTimes };
+
+export interface CommitDeps {
+  userId: string;
+  existingAgents: Agent[];
+  manuscriptTitle: string;
+  addAgent: (
+    a: Omit<Agent, \"id\" | \"userId\" | \"dateAdded\" | \"lastCheckedDate\"> & { id?: string },
+    bypassLimits?: boolean
+  ) => Promise<{ success: boolean; error?: string; id?: string }>;
+  addQuery: (
+    q: any,
+    bypassLimits?: boolean,
+    opts?: { imported?: boolean }
+  ) => Promise<{ success: boolean; error?: string; id?: string }>;
+}
+
+export interface CommitOutcome {
+  agentsCreated: number;
+  agentsMerged: number;
+  queriesImported: number;
+  queriesSkipped: number;
+  errors: string[];
+}
+
+const norm = (s = \"\") => s.trim().toLowerCase();
+
+
+export function countExistingMatches(result: SmartImportResult, existingAgents: Agent[]): number {
+  return (result.agents || []).filter((a) =>
+    existingAgents.some(
+      (ex) => norm(ex.name) === norm(a.name) && (!a.agency || !ex.agency || norm(ex.agency) === norm(a.agency))
+    )
+  ).length;
+}
+
+
+export const UNDATED_ORDER_BASE_MS = 0;
+
+const mapMethod = (m: ParsedAgent[\"submissionMethod\"]): SubmissionMethod =>
+  m === \"Online Form\" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL;
+
+export async function commitSmartImport(
+  deps: CommitDeps,
+  result: SmartImportResult,
+  manuscriptId: string,
+  
+  source: ImportSource = \"smart\"
+): Promise<CommitOutcome> {
+  const { userId, existingAgents, manuscriptTitle, addAgent, addQuery } = deps;
+  const outcome: CommitOutcome = { agentsCreated: 0, agentsMerged: 0, queriesImported: 0, queriesSkipped: 0, errors: [] };
+
+  const { importable, skipped } = validateSmartImport(result);
+  outcome.queriesSkipped = skipped.length;
+
+  
+  
+  
+  
+  const feedCol = collection(db, \"users\", userId, \"activities\");
+  let preFeedIds = new Set<string>();
+  try {
+    preFeedIds = new Set((await getDocs(feedCol)).docs.map((d) => d.id));
+  } catch {  }
+  const importedQueryIds = new Set<string>();
+
+
+  
+  
+  
+  
+  
+  
+  const refToAgent: Record<string, { id: string; name: string }> = {};
+  for (const a of result.agents || []) {
+    if (!a.name?.trim() && !a.agency?.trim()) {
+      
+      continue;
+    }
+    const agentName = a.name?.trim() ?? \"\";
+    try {
+      const match = existingAgents.find(
+        (ex) => norm(ex.name) === norm(agentName) && norm(ex.agency) === norm(a.agency ?? \"\")
+      );
+      if (match) {
+        refToAgent[a.ref] = { id: match.id, name: match.name };
+        outcome.agentsMerged++;
+        continue;
+      }
+      const res = await addAgent(
+        {
+          name: agentName,
+          agency: a.agency ?? \"\",
+          email: a.email ?? \"\",
+          website: a.website ?? \"\",
+          genres: a.genres ?? [],
+          mswlNotes: a.mswlNotes ?? \"\",
+          starRating: 3,
+          submissionStatus: \"Open\" as any,
+          responseTimeWeeks: a.responseTimeWeeks ?? 0,
+          noResponseMeansNo: a.noResponseMeansNo ?? false,
+          submissionMethod: mapMethod(a.submissionMethod),
+          materialsWanted: [],
+          notes: \"\",
+          importedNeedsReview: true,
+        },
+        true
+      );
+      const label = agentName || a.agency || \"(unnamed)\";
+      if (res.success && res.id) {
+        refToAgent[a.ref] = { id: res.id, name: agentName };
+        outcome.agentsCreated++;
+      } else {
+        outcome.errors.push(`Couldn't save agent ${label}: ${res.error || \"unknown error\"}`);
+      }
+    } catch (e) {
+      console.error(\"Smart Import: agent write failed:\", agentName || a.agency, e);
+      outcome.errors.push(`Couldn't save agent ${agentName || a.agency || \"(unnamed)\"}.`);
+    }
+  }
+
+  
+  
+  
+  
+  
+  const importBaseMs = Date.now();
+  for (const q of importable) {
+    const agent = refToAgent[q.agentRef];
+    if (!agent) {
+      outcome.queriesSkipped++;
+      outcome.errors.push(`Skipped a ${q.status} query — its agent couldn't be saved.`);
+      continue;
+    }
+
+    let queryId: string;
+    try {
+      const res = await addQuery(
+        {
+          manuscriptId,
+          agentId: agent.id,
+          packageId: \"\",
+          personalisationNotes: q.notes ?? \"\",
+          sendMethod: SubmissionMethod.EMAIL,
+          status: q.status!,
+          
+          ...(q.sentDate ? { dateSent: q.sentDate } : {}),
+        },
+        true,
+        
+        { imported: true }
+      );
+      if (!res.success || !res.id) {
+        outcome.errors.push(`Couldn't import the query to ${agent.name}: ${res.error || \"unknown error\"}`);
+        continue;
+      }
+      queryId = res.id;
+      importedQueryIds.add(queryId);
+    } catch (e) {
+      console.error(\"Smart Import: query write failed:\", agent.name, e);
+      outcome.errors.push(`Couldn't import the query to ${agent.name}.`);
+      continue;
+    }
+
+    try {
+      const actCol = collection(db, \"users\", userId, \"queries\", queryId, \"activity\");
+      const existing = await getDocs(actCol);
+      
+      const mine = existing.docs.filter((d) => d.id.startsWith(\"imp-\"));
+      await Promise.all(mine.map((d) => deleteDoc(d.ref)));
+
+      
+      for (const rung of assignTimes(impliedRungs(q), UNDATED_ORDER_BASE_MS)) {
+        const id = \"imp-\" + Math.random().toString(36).substr(2, 9);
+        await setDoc(doc(actCol, id), {
+          type: rung.status,
+          resultingStatus: rung.status,
+          createdAt: Timestamp.fromMillis(rung.ms),
+          
+          
+          note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
+          ...(rung.provisional ? { dateProvisional: true } : {}),
+          queryId,
+          agentName: agent.name,
+          manuscriptTitle,
+        });
+      }
+      await recomputeQuery(userId, queryId);
+      outcome.queriesImported++;
+    } catch (e) {
+      console.error(\"Smart Import: seeding/recompute failed:\", agent.name, e);
+      outcome.errors.push(`Couldn't seed the history for the query to ${agent.name}.`);
+      
+      outcome.queriesImported++;
+    }
+  }
+
+  
+  
+  
+  
+  
+  try {
+    const post = await getDocs(feedCol);
+    await Promise.all(
+      post.docs
+        .filter((d) => {
+          if (preFeedIds.has(d.id)) return false;
+          const data = d.data() as { activityType?: string; queryId?: string };
+          return data.activityType === ActivityType.AGENT_ADDED
+            || (typeof data.queryId === \"string\" && importedQueryIds.has(data.queryId));
+        })
+        .map((d) => deleteDoc(d.ref))
+    );
+
+    const summaryId = \"imp-sum-\" + Math.random().toString(36).substr(2, 9);
+    await setDoc(doc(feedCol, summaryId), {
+      id: summaryId,
+      userId,
+      queryId: \"\",
+      manuscriptId: \"\",
+      activityType: ActivityType.STATUS_CHANGED, 
+      description: importActivityLine(source, outcome.agentsCreated, outcome.queriesImported),
+      date: new Date(importBaseMs).toISOString(),
+      details: \"\",
+    });
+  } catch (e) {
+    console.error(\"Smart Import: feed-summary collapse failed:\", e);
+  }
+
+  return outcome;
+}
+"
+
+ ❯ src/lib/importedAgent.test.ts:139:23
+    137|     for (const f of ["src/lib/smartImportCommit.ts", "src/lib/emailImp…
+    138|       const code = src(f);
+    139|       expect(code, f).toMatch(/importedAgentDoc\(/);
+       |                       ^
+    140|       expect(code, f).not.toMatch(/starRating\s*:/);
+    141|       expect(code, f).not.toMatch(/submissionStatus\s*:/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed (7)
+   Start at  12:05:05
+   Duration  375ms (transform 76ms, setup 0ms, collect 169ms, tests 10ms, environment 0ms, prepare 53ms)
+

@@ -11,7 +11,7 @@
  * Every sweep states its population first. The e2e password is never printed.
  */
 import { test, expect, Page } from "@playwright/test";
-import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureSignedIn } from "./measure";
 
@@ -634,6 +634,8 @@ test.describe("OB2", () => {
           const got = await result(page);
           expect(got, "onImport was handed a result").toBeTruthy();
           record(page, "V4", "review", { agents: (got as { agents: unknown[] }).agents.length, queries: (got as { queries: unknown[] }).queries.length });
+          /* OB2_V4_GOT=<dir> writes what the review handed back, for a re-point to be diffed before it is taken */
+          if (process.env.OB2_V4_GOT) writeFileSync(resolve(process.env.OB2_V4_GOT, "v4-review.json"), JSON.stringify(got, null, 1));
           expect(got).toEqual(snap("v4-review.json"));
         });
         test("V4 same result as the baseline (duplicates fixture)", async ({ page }) => {
@@ -653,6 +655,8 @@ test.describe("OB2", () => {
           const got = await result(page);
           expect(got, "onImport was handed a result").toBeTruthy();
           record(page, "V4", "dupes", { agents: (got as { agents: unknown[] }).agents.length, queries: (got as { queries: unknown[] }).queries.length });
+          /* OB2_V4_GOT=<dir> writes what the review handed back, for a re-point to be diffed before it is taken */
+          if (process.env.OB2_V4_GOT) writeFileSync(resolve(process.env.OB2_V4_GOT, "v4-dupes.json"), JSON.stringify(got, null, 1));
           expect(got).toEqual(snap("v4-dupes.json"));
         });
       }

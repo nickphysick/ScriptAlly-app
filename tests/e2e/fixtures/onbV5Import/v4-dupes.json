@@ -5,42 +5,54 @@
    "name": "Jamal Carter",
    "agency": "Carter & Vale",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "d4",
    "name": "Sarah Beth",
    "agency": "Beth Books",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "d6",
    "name": "Tomas Vidal",
    "agency": "The Quill Agency",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "d7",
    "name": "PRIYA RAMAN",
    "agency": "",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "d9",
    "name": "Nora Finch",
    "agency": "Finch & Rowe",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   },
   {
    "ref": "d10",
    "name": "N. Finch",
    "agency": "Finch & Rowe",
    "genres": [],
-   "responseTimeWeeks": 6
+   "responseTimeWeeks": null,
+   "starRating": null,
+   "submissionStatus": null
   }
  ],
  "queries": [
