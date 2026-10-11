@@ -119,6 +119,9 @@ function usePinnedControls(group: React.RefObject<HTMLElement | null>, on: boole
       const strip = page.querySelector<HTMLElement>('[data-qcv="ws-strip"]');
       page.style.setProperty("--qc137-bar-h", `${bar ? bar.offsetHeight : 0}px`);
       page.style.setProperty("--qc137-strip-h", `${strip ? strip.offsetHeight : 0}px`);
+      /* a row brought into view by the keyboard or a popup lands BELOW the pinned controls, not under them */
+      const labels = page.querySelector<HTMLElement>(".qcw-list .lt-labels");
+      sc.style.setProperty("--wpg-scroll-pad", `${PIN_AT + (bar ? bar.offsetHeight : 0) + (strip ? strip.offsetHeight : 0) + (labels ? labels.offsetHeight : 0) + 8}px`);
     };
     const read = () => {
       const top = sc.getBoundingClientRect().top;
@@ -141,6 +144,7 @@ function usePinnedControls(group: React.RefObject<HTMLElement | null>, on: boole
       window.removeEventListener("resize", onResize);
       ro?.disconnect();
       page.removeAttribute("data-pinned");
+      sc.style.removeProperty("--wpg-scroll-pad");
     };
   }, [group, on]);
 }

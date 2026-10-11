@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "E1",
+  "where": "/queries 1512 lip",
+  "ok": false,
+  "detail": "sticky · 1256 × 12 at 12 in .wpg-scroll"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1512 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1512 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1512 nothing moved",
+  "ok": false,
+  "detail": "first content 24.0 (was 0.0) · h1 81.0 (was 73.2)"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1512 scrolled",
+  "ok": false,
+  "detail": "at 12 · rgba(28, 19, 15, 0.07) 0px 1px 0px 0px, "
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1512 lip",
+  "ok": false,
+  "detail": "sticky · 1256 × 12 at 12 in .wpg-scroll"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1512 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1512 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1512 nothing moved",
+  "ok": false,
+  "detail": "first content 24.0 (was 0.0) · h1 93.4 (was 69.4)"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1512 scrolled",
+  "ok": false,
+  "detail": "at 12 · rgba(28, 19, 15, 0.07) 0px 1px 0px 0px, "
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1512 lip",
+  "ok": true,
+  "detail": "sticky · 1256 × 12 at 0 in .ws-wbody"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1512 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1512 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1512 nothing moved",
+  "ok": false,
+  "detail": "first content 12.0 (was 0.0) · h1 55.4 (was 43.4)"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1512 scrolled",
+  "ok": true,
+  "detail": "this page does not scroll at 900 tall (12px): not exercised"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1280 lip",
+  "ok": false,
+  "detail": "sticky · 1024 × 12 at 12 in .wpg-scroll"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1280 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1280 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1280 nothing moved",
+  "ok": false,
+  "detail": "first content 24.0 (was 0.0) · h1 81.0 (was 73.2)"
+ },
+ {
+  "lock": "E1",
+  "where": "/queries 1280 scrolled",
+  "ok": false,
+  "detail": "at 12 · rgba(28, 19, 15, 0.07) 0px 1px 0px 0px, "
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1280 lip",
+  "ok": false,
+  "detail": "sticky · 1024 × 12 at 12 in .wpg-scroll"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1280 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1280 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1280 nothing moved",
+  "ok": false,
+  "detail": "first content 24.0 (was 0.0) · h1 93.4 (was 69.4)"
+ },
+ {
+  "lock": "E1",
+  "where": "/agents 1280 scrolled",
+  "ok": false,
+  "detail": "at 12 · rgba(28, 19, 15, 0.07) 0px 1px 0px 0px, "
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1280 lip",
+  "ok": true,
+  "detail": "sticky · 1024 × 12 at 0 in .ws-wbody"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1280 the tab's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1280 inert",
+  "ok": true,
+  "detail": "none · aria-hidden true · none · z 19"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1280 nothing moved",
+  "ok": false,
+  "detail": "first content 12.0 (was 0.0) · h1 52.8 (was 40.8)"
+ },
+ {
+  "lock": "E1",
+  "where": "/dashboard 1280 scrolled",
+  "ok": true,
+  "detail": "this page does not scroll at 800 tall (12px): not exercised"
+ }
+]

@@ -1,0 +1,47 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV137.measure.ts:286:3 › Query Centre v137 › C3 · narrow: at 1024 and 1180 nothing overflows, and What you sent is hidden
+[measure] › tests/e2e/qcV137.measure.ts:286:3 › Query Centre v137 › C3 · narrow: at 1024 and 1180 nothing overflows, and What you sent is hidden
+  ✗ C3 · 1024 What you sent hidden — heading true · 12 cells shown
+
+  ✗ C3 · 1024 names have room — narrowest name 0
+
+  ✗ C3 · 1180 What you sent hidden — heading true · 12 cells shown
+
+  ✗ C3 · 1180 names have room — narrowest name 34
+
+[C3] 8/12 green
+
+  1) [measure] › tests/e2e/qcV137.measure.ts:286:3 › Query Centre v137 › C3 · narrow: at 1024 and 1180 nothing overflows, and What you sent is hidden 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "C3 · 1024 What you sent hidden — heading true · 12 cells shown",
+    +   "C3 · 1024 names have room — narrowest name 0",
+    +   "C3 · 1180 What you sent hidden — heading true · 12 cells shown",
+    +   "C3 · 1180 names have room — narrowest name 34",
+    + ]
+
+      66 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      67 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 68 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      69 |   }
+      70 | }
+      71 |
+        at Ledger.done (/private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:68:95)
+        at /private/tmp/sa-qc137/tests/e2e/qcV137.measure.ts:313:7
+
+    Error Context: test-results/qcV137.measure.ts-Query-Ce-6aedd-and-What-you-sent-is-hidden-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV137.measure.ts:286:3 › Query Centre v137 › C3 · narrow: at 1024 and 1180 nothing overflows, and What you sent is hidden 
+  1 passed (30.7s)

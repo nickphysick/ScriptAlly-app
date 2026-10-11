@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 no Recently updated",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no banner",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no full-list link",
+  "ok": true,
+  "detail": "0 · text false"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no hawk",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 list 40 under the strip",
+  "ok": false,
+  "detail": "130.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 title row padding",
+  "ok": true,
+  "detail": "22px 28px 18px 28px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no Recently updated",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no banner",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no full-list link",
+  "ok": true,
+  "detail": "0 · text false"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no hawk",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 list 40 under the strip",
+  "ok": false,
+  "detail": "130.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 title row padding",
+  "ok": true,
+  "detail": "22px 28px 18px 28px"
+ }
+]

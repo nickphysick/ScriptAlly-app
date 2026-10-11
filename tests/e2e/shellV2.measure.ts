@@ -230,7 +230,7 @@ test("B2 B3 · banners: no arrow, the flap as the bottom edge, no shadow, the ga
     }
   }
   L.write(); H.write();
-  L.done(BANNERS.length * SIZES.length * 7); H.done(SIZES.length * 3);
+  L.done(BANNERS.length * SIZES.length * 7); /* B3 RETIRED (Query Centre v137 §C): the hawk and the banner it had to clear are gone from /queries */ H.done(0);
 });
 
 }
@@ -283,5 +283,5 @@ test("L1 · no jump: each header sheet, band and banner is the same box loading 
   }
   if (CAPTURE) return;
   L.check("L1 population: the loading state itself was read (the two held routes, at both widths)", "census", held >= 4, `${held}`);
-  L.done(SHEET_ROUTES.length * SIZES.length * 2 + 12);
+  /* RE-POINTED (Query Centre v137): two bands and two banners are left in the census (it was three of each) */ L.done(SHEET_ROUTES.length * SIZES.length * 2 + 8);
 });

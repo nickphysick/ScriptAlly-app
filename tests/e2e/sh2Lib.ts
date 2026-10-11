@@ -34,16 +34,16 @@ export const ART: Record<string, { sel: string; crosses: boolean }> = {
   "/manuscripts/packages": { sel: '.ph [data-probe="art"] img', crosses: false },
 };
 /** Section bands: the element whose box is the band, and where its tint is painted. */
-export const BANDS = [
-  { route: "/queries", sel: ".qcv-group.qc13 > .qcr", pseudo: "::before" },
+export const BANDS: readonly { route: string; sel: string; pseudo: string | null }[] = [
+  /* RE-POINTED (Query Centre v137 §C): "Recently updated", the Query Centre's band, is no longer drawn */
   { route: "/agents", sel: ".clv-group > .cl14-next", pseudo: null },
   { route: "/manuscripts", sel: ".ms21-band", pseudo: null },
-] as const;
-export const BANNERS = [
-  { route: "/queries", sel: ".qc134-ban" },
+];
+export const BANNERS: readonly { route: string; sel: string }[] = [
+  /* RE-POINTED (Query Centre v137 §C): the Query Centre's banner is no longer drawn, and its flying hawk with it (B3) */
   { route: "/agents", sel: ".clv-group > .cl15-ban" },
   { route: "/manuscripts", sel: ".ms21-ban" },
-] as const;
+];
 export const HAWK = '[data-qcv="ws-hawk"]';
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };

@@ -213,6 +213,9 @@ test.describe("Query Centre v136 — A · the open header", () => {
 });
 
 test.describe("Query Centre v136 — B · the active and inactive bands", () => {
+  /* RETIRED by Query Centre v137 §B (tests/e2e/RETIRED-query-centre-v137.md): the two bands are replaced by the
+     four-cell strip (`QcStrip`). B1–B7 are succeeded by QC137 B1 (strip), B2 (filter) and L1 (no jump). */
+  test.skip(true, "retired by Query Centre v137: the bands are the at-a-glance strip (QC137 B1, B2, L1)");
   test("B1 · groups: blush active and grey inactive, typewriter labels with no italics, active = with you + with agents", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
@@ -406,6 +409,8 @@ test.describe("Query Centre v136 — B · the active and inactive bands", () => 
 });
 
 test.describe("Query Centre v136 — C · View the full list", () => {
+  /* RETIRED by Query Centre v137 §C: the link is no longer drawn; the list is the page (QC137 C1). */
+  test.skip(true, "retired by Query Centre v137: the link is not drawn, the list starts 40 under the strip (QC137 C1)");
   test("C1 · above the fold: the link's bottom edge is 24px or more inside the viewport, 40 under the bands, centred", async ({ page }) => {
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);

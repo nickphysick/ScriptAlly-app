@@ -985,6 +985,17 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ OPEN: the page guide sits over the desk at 860px of window height** (`qcV96` QC13, red since v133.1). Nick's ruling.
 - **Locks:** `tests/e2e/qcV134.measure.ts` N1–N3, K1–K3, B1–B3, L1; unit `qcFaces.test.ts`, `qcCourtHistory.test.ts`. Retired and re-pointed: `tests/e2e/RETIRED-query-centre-v134.md`.
 
+## Query Centre — v137 (11 Oct; ref = design-refs/query-centre/query-centre-v137.html + design-refs/qc-v137/*.png; report reports/qc-v137/REPORT.md; branch `qc-v137`, NOT merged; AMENDS v136/v132 on the DESKTOP — the phone keeps the v126 page)
+- **The desktop Query Centre is a panel, a strip and the list.** The panel is the shared title panel ("Every query, in one place"). The strip is `QcStrip` (four cells: Queries sent, With you, With agents, Closed). The list follows 40px under it. "Recently updated", the banner, the "View the full list" link and the list header's hawk are not drawn (the components are kept).
+- **A strip cell is the list's court filter.** It is a second narrowing beside the one `QcFilter` value: both apply. "Clear all" clears both. Cell 1 clears the court. Pressing never scrolls. Cell 1's figure is the three courts added up, so it is not the row total (Withdrawn and Signed sit in no court).
+- **The list is 24px from the page sheet's edges, capped at 1600 and centred**, from `--hsheet-w`. Never make the scroller a size container for this: it would contain its fixed descendants.
+- **"What you sent" is hidden below 900px of list, not the brief's 1100** (its own 1280 reference draws the column). Below 1100 the rows and labels are 3px tighter each side: the list is 976 at a 1280 window where it was 982.
+- **⚠️ The list's header, chips and column headings are sticky inside the list, and `.qcw-head` is `display: contents`** so they have the list to travel in. `[data-qcv="ws-head"]` therefore has no box: a test scrolls `.qcv-page` instead.
+- **⚠️ Pinned (`data-pinned` on the list) is read from a zero-height sentinel at the list's top**, with hysteresis (pin at 12px, unpin above 36) and `overflow-anchor: none` on the scroller and the list. Never read it from the header's own box: pinning makes the header shorter.
+- **The scroller's `--wpg-scroll-pad` is set from the pinned controls' measured height**, so a row brought into view lands below them.
+- **`SheetLip` is a 12px sticky lip, first child of the page-sheet scroller on every desktop page**, in the folder tab's colour (`--ink-tab`). It takes no space (a -12px bottom margin). It is mounted in the workspace grid's scroller and the shell's own; Account settings scrolls elsewhere and has none.
+- **Locks:** `tests/e2e/qcV137.measure.ts` A1, B1, B2, C1–C3, D1–D3, E1, L1; proofs in `reports/qc-v137/mutation-proofs.json`. E1 reads a capture of the base build (`tests/e2e/fixtures/qc137Base.json`). Retired and re-pointed: `tests/e2e/RETIRED-query-centre-v137.md`.
+
 ## Query Centre — v133, the open header (8 Oct; ref = design-refs/query-centre/query-centre-v133.html + design-refs/qc-v133/*.png; report reports/qc-v133/REPORT.md; merged to `main` 9 Oct)
 - **On the desktop the Query Centre opens with `QcOpenHeader`, the Contact list v15 header's shape:** no band, no card, no disc. The living "{N} queries out" is the 72px typewriter title (58 below 1440), over the fixed line "Send, track, and chase them from this page.", two buttons, and the figure-only courier (`QC_PLATE_FIGURE`) in the flow beside them, closed by a hairline. Nothing below the header changed.
 - **The living facts sentence is gone from the populated page**; the desk carries those facts. `qcHeaderCopy`'s headline is still the title's source.
@@ -1687,6 +1698,8 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
+**Query Centre v137 is DONE on branch `qc-v137` (pushed), NOT merged and NOT deployed.** Its base is `dev/header-v3-landing-v2-feed-drawer-v2` @ 383c88d4, not `main`. Dev was serving a later integration branch (onboarding v5 and the import work), so deploying `qc-v137` alone would have removed them. Read `reports/qc-v137/REPORT.md` first.
+
 **Query Centre v136 is DONE on branch `qc-v136` (three commits, cut from `header-panel-v2`), deployed to dev from the branch, NOT merged to `main`** — Nick reviews first. Read `reports/qc-v136/REPORT.md`; §7 has two open rulings.
 
 **Header panel v2 is DONE on branch `header-panel-v2` (worktree `../ScriptAlly-hp2`, based on `v135-header-desk`), deployed to dev from the branch, NOT merged.** Read `reports/header-panel-v2/REPORT.md`: false premises first, then the "for Nick" list of drawings that need a dark-ground version.

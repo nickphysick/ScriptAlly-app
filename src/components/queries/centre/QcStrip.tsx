@@ -50,7 +50,8 @@ const Bars: React.FC<{ sent: StripSent; loading: boolean }> = ({ sent, loading }
       {!loading && sent.weeks.map((w, i) => {
         const x = i * slot + (slot - bw) / 2;
         const last = i === sent.weeks.length - 1;
-        if (w.n === 0) return <rect key={w.start} data-qcv="strip-bar" data-n="0" data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={39} width={bw} height={1} fill="rgba(28, 19, 15, 0.15)" />;
+        /* an empty week is a 1px tick; this week's is rust even when it is empty, so the last mark is always "now" */
+        if (w.n === 0) return <rect key={w.start} data-qcv="strip-bar" data-n="0" data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={39} width={bw} height={1} fill={last ? "#a2452a" : "rgba(28, 19, 15, 0.15)"} />;
         const h = Math.max(3, (w.n / max) * 38);
         return <rect key={w.start} data-qcv="strip-bar" data-n={w.n} data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={40 - h} width={bw} height={h} rx={1.2} fill={last ? "#a2452a" : "#2d3a50"} />;
       })}

@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title",
+  "ok": true,
+  "detail": "\"Every query, in one place\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title size",
+  "ok": true,
+  "detail": "50 · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 two lines",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 no number",
+  "ok": false,
+  "detail": "1 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 subline",
+  "ok": true,
+  "detail": "\"Send, track and chase your queries.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 drawing",
+  "ok": true,
+  "detail": "196"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 buttons",
+  "ok": true,
+  "detail": "log true · record true"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title",
+  "ok": true,
+  "detail": "\"Every query, in one place\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title size",
+  "ok": true,
+  "detail": "50 · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 two lines",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no number",
+  "ok": false,
+  "detail": "1 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 subline",
+  "ok": true,
+  "detail": "\"Send, track and chase your queries.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 drawing",
+  "ok": true,
+  "detail": "196"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 buttons",
+  "ok": true,
+  "detail": "log true · record true"
+ }
+]
