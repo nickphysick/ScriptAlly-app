@@ -388,13 +388,17 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   await qrow.waitFor({ timeout: 30_000 });
   /* v132: a row's centre is its "What you sent" cell, whose slot opens the edit drawer; the agent's name opens the card */
   await qrow.locator('[data-qcv="row-agent"]').click();
-  await page.locator('[data-qcv="qm-card"]').waitFor({ timeout: 8000 });
+  /* RE-POINTED (Query panel v1): the Query Centre's card is the side panel now, and its action STEPS the panel — it
+     no longer docks behind the drawer, so there is no chip and no peek to prove here. The peek's own proof stands
+     on the agent card, above. (Retired with the reason: "the query card peeks above its dock chip" asserted the
+     modal's dock, which is gone.) */
+  await page.locator('[data-qp="panel"]').waitFor({ timeout: 8000 });
   await page.waitForTimeout(400);
-  await page.locator('[data-qcv="qm-card"] [data-qcv="open-action"]').click();
-  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
-  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
+  await page.locator('[data-qp="panel"] [data-qcv="open-action"]').click();
+  await page.locator('[data-qp="panel"] [data-qp-step]').waitFor({ timeout: 10_000 });
   await page.waitForTimeout(400);
-  await proveDockPeek(page, L, "query card", '[data-qcv="qm-card"]', '[data-qcv="open-action"]', ".qcv-qm--peek");
+  const qp = await page.evaluate(() => ({ chip: document.querySelectorAll("[data-qad-dock]").length, step: !!document.querySelector('[data-qp="panel"] [data-qp-step]'), dialogs: [...document.querySelectorAll('[role="dialog"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; }).length }));
+  L.check("CL13-10 the Query Centre's card steps its panel: no dock chip, one dialog", "1512", qp.step && qp.chip === 0 && qp.dialogs === 1, JSON.stringify(qp));
   await page.keyboard.press("Escape");
   /* below 1100px there is no room beside the drawer: the chip keeps Agent card v1's behaviour */
   await openContacts(page, { width: 1080, height: 800 });
@@ -411,7 +415,7 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   const narrow = await page.evaluate(() => { const c = document.querySelector("[data-qad-dock]"); return c ? { peek: c.getAttribute("data-peek"), text: (c.querySelector(".qad-dk")?.textContent ?? "").trim() } : null; });
   L.check("CL13-10 below 1100px the chip keeps today's behaviour (Back to card, no peek)", "1080", !!narrow && narrow.peek === null && narrow.text === "Back to card", JSON.stringify(narrow));
   await page.keyboard.press("Escape");
-  L.done(21);
+  /* RE-POINTED (Query panel v1): 12 — the query card's ten dock-peek readings are retired for one panel reading */ L.done(12);
 });
 
 /* ── lock 11 · shortcuts: / focuses Find, H does nothing while typing in it, ← → move the focused track ── */

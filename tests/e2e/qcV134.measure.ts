@@ -147,7 +147,7 @@ test.describe("Query Centre v134 — the hero number and the faces", () => {
       const f0 = faces.first();
       const qid = (await f0.getAttribute("data-qid")) ?? "", name = (await f0.getAttribute("data-tip")) ?? "";
       await f0.click();
-      const card = page.locator('[data-qcv="qm-card"]');
+      const card = page.locator('[data-qp="panel"]');
       await expect(card, `${w}: the query's card opened`).toBeVisible({ timeout: 8000 });
       expect(new URL(page.url()).searchParams.get("q"), `${w}: the URL names the query`).toBe(qid);
       expect(await card.innerText(), `${w}: the card is ${name}'s`).toContain(name.split(" ")[0]);

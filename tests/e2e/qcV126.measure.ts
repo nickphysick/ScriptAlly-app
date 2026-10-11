@@ -495,14 +495,15 @@ test("QC126-18 · Escape ladder", async ({ page }) => {
      intercepted; the names cell is the other reading door §7 names */
   await page.locator('[data-qcv="bvd-row"] [data-qcv="tl-names"]').first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(400);
-  await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): see QC126-20 */).first().click({ timeout: 4000 }).catch(() => {});
+  await page.locator('[data-qp="panel"] .qcv-open-act' /* corrected (Phase 7): see QC126-20 */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(600);
-  L.check("QC126-18b precondition: Birds-eye, card (docked) and action drawer open", "1512",
-    (await has('[data-qcv="bvd"]')) && (await has("[data-qad-drawer]")) && (await has("[data-qad-dock]")), "");
+  /* RE-POINTED (Query panel v1): the card is the side panel and its action steps INTO it (no dock chip) */
+  L.check("QC126-18b precondition: Birds-eye, the query panel and its action step open", "1512",
+    (await has('[data-qcv="bvd"]')) && (await has("[data-qad-drawer]")) && (await has('[data-qp="panel"] [data-qp-step]')), "");
   await page.keyboard.press("Escape"); await page.waitForTimeout(450);
-  L.check("QC126-18b Escape closes the action drawer, the card returns", "1512", !(await has("[data-qad-drawer]")) && (await has('[data-qcv="qm-card"]')), "");
+  L.check("QC126-18b Escape closes the action drawer, the card returns", "1512", !(await has("[data-qad-drawer]")) && (await has('[data-qp="panel"]')), "");
   await page.keyboard.press("Escape"); await page.waitForTimeout(350);
-  L.check("QC126-18b then the card", "1512", !(await has('[data-qcv="qm-card"]')) && (await has('[data-qcv="bvd"]')), "");
+  L.check("QC126-18b then the card", "1512", !(await has('[data-qp="panel"]')) && (await has('[data-qcv="bvd"]')), "");
   await page.keyboard.press("Escape"); await page.waitForTimeout(350);
   L.check("QC126-18b then the Birds-eye drawer", "1512", !(await has('[data-qcv="bvd"]')), "");
   await checkOverflow(page, L, "1512");
@@ -558,7 +559,7 @@ test("QC126-20 · one door", async ({ page }) => {
   const MODES = new Set(["resp", "nudge", "sent", "offer", "close", "edit", "log"]);
   const drawer = () => page.evaluate(() => {
     const d = [...document.querySelectorAll<HTMLElement>("[data-qad-drawer]")].find((e) => e.getBoundingClientRect().height > 0);
-    const dialogs = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].filter((e) => e.getBoundingClientRect().height > 0 && !e.hasAttribute("data-qad-drawer") && !e.closest('[data-qcv="qm"]') && !e.closest('[data-qcv="bvd"]') && !e.closest('[data-qcv="guide"]'));
+    const dialogs = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].filter((e) => e.getBoundingClientRect().height > 0 && !e.hasAttribute("data-qad-drawer") && !e.closest('[data-qcv="qm"]') && !e.closest('[data-qp="panel"]') && !e.matches('[data-qp="panel"]') && !e.closest('[data-qcv="bvd"]') && !e.closest('[data-qcv="guide"]'));
     /* the page guide is a standing non-modal card (role="dialog", once per writer) — not a dialog an action opened */
     return { mode: d?.getAttribute("data-qad-drawer") ?? null, dock: !!document.querySelector("[data-qad-dock]"), others: dialogs.length };
   });
@@ -569,10 +570,11 @@ test("QC126-20 · one door", async ({ page }) => {
      drawer; the row is opened from the agent's name, which is what a reader clicks */
   await page.locator('[data-qcv="row"] [data-qcv="row-agent"]').first().click({ timeout: 8000 });
   await page.waitForTimeout(500);
-  await page.locator('[data-qcv="qm-card"] .qcv-open-act' /* corrected (Phase 7): the card's primary door; `.qcv-open-actions` named no element */).first().click({ timeout: 4000 }).catch(() => {});
+  await page.locator('[data-qp="panel"] .qcv-open-act' /* corrected (Phase 7): the card's primary door; `.qcv-open-actions` named no element */).first().click({ timeout: 4000 }).catch(() => {});
   await page.waitForTimeout(500);
   const c = await drawer();
-  L.check("QC126-20 the card's footer opens the drawer, with dock", "1512", !!c.mode && MODES.has(c.mode) && c.dock && c.others === 0, JSON.stringify(c));
+  /* RE-POINTED (Query panel v1): the one door is unchanged (a journey of the shared drawer); it steps the panel, so no dock */
+  L.check("QC126-20 the card's footer opens the journey in the panel, with no dock", "1512", !!c.mode && MODES.has(c.mode) && !c.dock && c.others === 0, JSON.stringify(c));
   await closeAll();
   /* a row's tray action */
   await page.locator('[data-qcv="row"]').first().hover({ timeout: 8000 }).catch(() => {});

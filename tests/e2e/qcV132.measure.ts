@@ -445,10 +445,10 @@ test.describe("Query Centre v132 — touches", () => {
       expect(await ring(page), `${w}: K moves back`).toEqual([ids[0]]);
       /* Enter opens that query */
       await page.keyboard.press("Enter");
-      await expect(page.locator('[data-qcv="qm-card"]').first(), `${w}: Enter opens the query`).toBeVisible({ timeout: 6000 });
+      await expect(page.locator('[data-qp="panel"]').first(), `${w}: Enter opens the query`).toBeVisible({ timeout: 6000 });
       expect(new URL(page.url()).searchParams.get("q"), `${w}: and it is the ringed query`).toBe(ids[0]);
       await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-      await expect(page.locator('[data-qcv="qm-card"]'), `${w}: the card closed`).toHaveCount(0);
+      await expect(page.locator('[data-qp="panel"]'), `${w}: the card closed`).toHaveCount(0);
 
       /* typing in Find ignores J/K */
       const findBox = page.locator('[data-qcv="find"] input');

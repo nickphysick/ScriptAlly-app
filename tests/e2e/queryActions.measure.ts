@@ -83,7 +83,9 @@ test("§F the query card's footer draws the mock's doors, and a door opens the d
   await page.screenshot({ path: `${OUT}/app-card-footer-1440.png` });
   await doors.locator("button").first().click();
   await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
-  await expect(page.locator("[data-qad-dock]")).toBeVisible();
+  /* RE-POINTED (Query panel v1): the journey steps INTO the query's panel; the card no longer docks to a chip */
+  await expect(page.locator('[data-qp="panel"] [data-qp-step]')).toBeVisible();
+  await expect(page.locator("[data-qad-dock]")).toHaveCount(0);
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/app-card-door-open-1440.png` });
   writeFileSync(`${OUT}/card-doors.json`, JSON.stringify(labels));
