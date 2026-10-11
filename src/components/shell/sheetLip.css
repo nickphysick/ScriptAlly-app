@@ -1,0 +1,19 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The sticky lip under the folder tab (Query Centre v137 §E). See SheetLip.tsx.
+ *
+ * ⚠️ TWO CLASSES ON THE WORKSPACE-GRID RULE: `.wpg-scroll > *` gives every child the content measure and its
+ *    gutter; the lip is the sheet's full width.
+ * ⚠️ z 19: above the page's content and its own sticky rows, under the collapsed bar (20) and every drawer.
+ */
+.sheet-lip { display: none; }
+@media (min-width: 768px) {
+  .sheet-lip, .wpg-scroll > .sheet-lip {
+    display: block; flex: none; position: sticky; top: 0; z-index: 19; box-sizing: border-box;
+    width: 100%; max-width: none; height: 12px; margin: 0 0 -12px; padding: 0;
+    background: var(--ink-tab, var(--ws-page)); pointer-events: none;
+  }
+  .sheet-lip[data-scrolled="true"] { box-shadow: 0 1px 0 rgba(28, 19, 15, 0.07), 0 6px 10px -8px rgba(28, 19, 15, 0.35); }
+}

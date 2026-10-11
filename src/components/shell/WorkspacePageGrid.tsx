@@ -31,6 +31,7 @@
 import React from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 import "./workspacePageGrid.css";
+import { SheetLip } from "./SheetLip";
 
 /**
  * ⚠️ `PlateCondensedContext` IS DELETED (in-flow masthead, step 4), AND ITS LAST READER WENT AT
@@ -616,6 +617,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           role={scrollLabel ? "region" : undefined}
           aria-label={scrollLabel}
         >
+          {/* v137 §E — the sticky lip under the folder tab: first in the scroller, and it takes no space */}
+          <SheetLip />
           {/**
             * ⚠️ THE BAR COMES FIRST IN THE MARKUP AND RESERVES NO SPACE. It is `sticky; top: 0` with
             * a negative bottom margin equal to its own height, so it takes 46px of flow and gives
