@@ -66,6 +66,14 @@ export const activeTitle = (n: number | null, undated = 0): string =>
       ? `${undated.toLocaleString("en-GB")} active ${undated === 1 ? "query has" : "queries have"} no sent date yet.`
       : n === 0 ? "No active queries" : `${n.toLocaleString("en-GB")} active ${n === 1 ? "query" : "queries"}`;
 
+/** Under the chart, when it draws some live queries and others have no sent date to place them by:
+ *  "1 more has no sent date yet." Null when every live query is drawn, and null when none is — the
+ *  title says that case, so the two sentences never appear together. */
+export const undatedMoreLine = (n: number | null, undated = 0): string | null =>
+  n !== null && n > 0 && undated > 0
+    ? `${undated.toLocaleString("en-GB")} more ${undated === 1 ? "has" : "have"} no sent date yet.`
+    : null;
+
 export const OneScreenChart: React.FC<{
   loading: boolean;
   /** the manuscript-scoped queries */
@@ -467,6 +475,9 @@ export const OneScreenChart: React.FC<{
           </span>
         ))}
       </div>
+      {undatedMoreLine(activeCount, undatedCount) && (
+        <p className="os-acmore" data-probe-text="chart-undated">{undatedMoreLine(activeCount, undatedCount)}</p>
+      )}
     </OneScreenPanel>
   );
 };
