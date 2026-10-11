@@ -191,7 +191,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer } from "../lib/queryActions/drawerStore";
+import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
@@ -2319,6 +2319,22 @@ export const Queries: React.FC<{
    * deep link (`?q`) has no surface and steps through the list.
    */
   const cardSetRef = useRef<string[] | null>(null);
+  /**
+   * Query panel v1 — A ROW'S TRAY BUTTON OPENS THE PANEL AT THAT ACTION'S STEP (this page only; every other page
+   * keeps the shared drawer). The row is opened first, and the journey is asked for once ITS panel is on the
+   * page: the journey's form is portalled into the panel's slot, so the slot has to exist when it arrives.
+   * ⚠️ The effect has no dependency list on purpose: it asks the DOM, after every commit, whether the panel for
+   *    the waiting query is there yet — the one fact that decides it, and one no state here mirrors.
+   */
+  const pendingStepRef = useRef<OpenRequest | null>(null);
+  const [, bumpStep] = useState(0);
+  useEffect(() => {
+    const p = pendingStepRef.current;
+    if (!p || !p.queryId) return;
+    if (!document.querySelector(`[data-qp="panel"][data-qp-id="${CSS.escape(p.queryId)}"] [data-side-slot]`)) return;
+    pendingStepRef.current = null;
+    openQueryDrawer(p);
+  });
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -5360,6 +5376,17 @@ export const Queries: React.FC<{
    * surfaces cannot come to describe a query differently — which is the whole reason the docked
    * card replaced the drawer.
    */
+  /** Query panel v1 — open the row's panel and step it into `req`'s journey (see `pendingStepRef`). */
+  const stepRow = (req: OpenRequest) => {
+    const q = req.queryId ? queries.find((x) => x.id === req.queryId) : undefined;
+    if (!q) { openQueryDrawer(req); return; }
+    const ag = agents.find((a) => a.id === q.agentId);
+    const nm = (ag?.name || ag?.agency || "The agent").trim();
+    pendingStepRef.current = { ...req, panel: { name: nm, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } };
+    cardSetRef.current = qcVisible.map((r) => r.id);
+    if (cardQueryId !== q.id || extPanel) { if (extPanel) closeQueryPanel(); onOpenQuery?.(q.id); }
+    else bumpStep((n) => n + 1); /* already open on this row: a render, so the effect above sees the slot */
+  };
   const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
@@ -6858,14 +6885,15 @@ export const Queries: React.FC<{
                      `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
                   /* v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER in the journey its bucket names
                      (`trayRequest`); nothing here opens its own modal for an action any more. */
+                  /* Query panel v1 — …and on this page that journey steps INTO the row's panel (`stepRow`) */
                   onAct={(id, bucket) => {
                     const r = qcById.get(id);
                     const req = r ? trayRequest(bucket, r.status, id) : null;
-                    if (req) openQueryDrawer(req); else onOpenQuery?.(id);
+                    if (req) stepRow(req); else onOpenQuery?.(id);
                   }}
-                  /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */
-                  onEdit={(id) => { if (DRAWER_LIVE.edit) openQueryDrawer({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
-                  onClose={(id) => { if (DRAWER_LIVE.close) openQueryDrawer({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                  /* §3 — Edit and Close open their own journeys; neither commits anything. */
+                  onEdit={(id) => { if (DRAWER_LIVE.edit) stepRow({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
+                  onClose={(id) => { if (DRAWER_LIVE.close) stepRow({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
                 ) : (
                 <QcList
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the

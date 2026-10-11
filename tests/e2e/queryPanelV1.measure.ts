@@ -6,14 +6,14 @@
  * page at 1512 × 900 and 1280 × 800 with the shell (P12 at 800 × 900).
  *
  * P1 container · P2 no scrim · P3 swap · P4 selected · P5 keyboard · P6 scroll kept · P7 one surface ·
- * P8 next move · P9 pinned foot · P10 no repeat · P11 URL · P12 narrow. (L1 is the QC137 and feed drawer v2
+ * P8 next move · P9 pinned foot · P10 no repeat · P11 URL · P12 narrow · P14 tray. (L1 is the QC137 and feed drawer v2
  * suites, run beside this one.)
  *
  * Each was run with its named mutation (`QP1_MUTATE=<lock>`: one named thing broken IN THE PAGE) before its
  * green was believed: reports/query-panel-v1/mutation-proofs.json.
  *
- * ⚠️ NOTHING HERE SAVES. Every step is opened and left by "← Back to query", Cancel or Escape, so the shared
- *    account is as it was.
+ * ⚠️ ONLY P13 SAVES, and on a query of its own (tests/e2e/seedQp1Save.mjs, the `qp1s-` prefix), which it removes
+ *    in the same run. Every other step is opened and left by "← Back to query", Cancel or Escape.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -52,6 +52,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   P10: { js: `(() => { if (window.__m10) return; window.__m10 = true; new MutationObserver(() => { const b = document.querySelector('${PANEL} .qcv-open-body'); if (b && !b.querySelector(".qcv-open-ms")) { const d = document.createElement("div"); d.className = "qcv-open-ms"; d.innerHTML = "<em>Querying</em><b>The Smoke Test</b>"; b.insertBefore(d, b.children[1] || null); } }).observe(document.body, { subtree: true, childList: true }); })()` },
   /* the param dropped from the address */
   P11: { js: `(() => { if (window.__m11) return; window.__m11 = true; setInterval(() => { const u = new URL(location.href); if (u.searchParams.has("q")) { u.searchParams.delete("q"); history.replaceState(history.state, "", u); } }, 30); })()` },
+  /* the tray opens the shared drawer, as it did */
+  P14: { js: `(() => { if (window.__m14) return; window.__m14 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest('[data-qcv="row-act"]'); if (!b) return; const row = b.closest('${ROW}'); e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "sent", queryId: row.dataset.qid }); }, true); })()` },
   /* the 8px float kept on a narrow window */
   P12: { css: `.spanel { top: 8px !important; right: 8px !important; bottom: 8px !important; left: auto !important; width: 520px !important; border-radius: 12px !important; }` },
 };
@@ -387,5 +389,42 @@ test.describe("Query panel v1", () => {
     L.check("P12", "no radius", p?.radius === "0px", `${p?.radius}`);
     L.check("P12", "the close reads Back", !!back && /Back/.test(back.label), `${back?.label}`);
     L.done(3);
+  });
+
+  test("P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("P14");
+    for (const vp of SIZES) {
+      await openQC(page, vp, "P14");
+      const w = `${vp.width}`;
+      const id = await page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].find((r) => r.dataset.status === "Full Requested" && r.getBoundingClientRect().height > 0)?.dataset.qid ?? null, ROW);
+      expect(id, "a Full Requested row on the account").toBeTruthy();
+      const row = page.locator(`${ROW}[data-qid="${id}"]`);
+      await row.evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(300);
+      await row.hover();
+      const act = row.locator('[data-qcv="row-act"]');
+      const label = (await act.innerText()).trim();
+      await act.click();
+      await page.waitForTimeout(1200);
+      const r = await page.evaluate(() => {
+        const vis = (e: Element) => { const b = e.getBoundingClientRect(); const cs = getComputedStyle(e); return b.width > 0 && b.height > 0 && cs.visibility !== "hidden" && cs.display !== "none"; };
+        const dialogs = [...document.querySelectorAll<HTMLElement>('[role="dialog"], dialog[open]')].filter(vis);
+        const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
+        const scrim = [...document.querySelectorAll<HTMLElement>(".qad-scrim")].filter((e) => vis(e) && parseFloat(getComputedStyle(e).opacity) > 0.05).length;
+        return { dialogs: dialogs.length, isPanel: dialogs.length === 1 && dialogs[0] === p, pid: p?.dataset.qpId ?? "", step: p?.querySelector<HTMLElement>("[data-qp-step]")?.dataset.qpStep ?? null, title: p?.querySelector('[data-qp="step-title"]')?.textContent ?? "", scrim, q: new URL(location.href).searchParams.get("q") };
+      });
+      L.check("P14", `${w} exactly one dialog, and it is the panel`, r.dialogs === 1 && r.isPanel, `${r.dialogs} dialogs · the panel ${r.isPanel} (tray button "${label}")`);
+      L.check("P14", `${w} the panel is that row's, at the action's step`, r.pid === id && r.step === "sent" && /^What went to /.test(r.title), `panel ${r.pid} · step ${r.step} · "${r.title}"`);
+      L.check("P14", `${w} no scrim, and the row is the open query`, r.scrim === 0 && r.q === id, `${r.scrim} scrims · q=${r.q}`);
+      /* left as it was found: nothing is saved */
+      const back = page.locator(`${PANEL} [data-qp="step-back"]`);
+      if (await back.count()) await back.click({ timeout: 4000 }).catch(() => {}); else await page.keyboard.press("Escape");
+      await page.waitForTimeout(500);
+      await page.locator(`${PANEL} [data-qcv="open-close"]`).click({ timeout: 3000 }).catch(() => {});
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(300);
+    }
+    L.done(6);
   });
 });
