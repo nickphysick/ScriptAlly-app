@@ -23,8 +23,8 @@ import { spineFor, spineIndex, SpineId, OnboardingBranch } from "../../lib/onboa
 import { UserPlan } from "../../types";
 import { Auth } from "../Auth";
 import { Onboarding, WelcomeStageScreen } from "../Onboarding";
-import { BranchA } from "./BranchA";
 import { AckTitle } from "./v9/AckTitle";
+import { BookMore } from "./v9/BookMore";
 import type { V9Stage } from "../../lib/onboardingV9";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
@@ -183,32 +183,18 @@ export const OnbLab: React.FC = () => {
       </LabSetup>
     );
   }
-  if (s === "ready" || s === "details") {
-    const st = q.get("status");
-    const status = st === "drafting" ? ManuscriptStatus.DRAFTING : st === "revising" ? ManuscriptStatus.REVISING
-      : st === "ready" ? ManuscriptStatus.READY_TO_QUERY : s === "details" ? ManuscriptStatus.READY_TO_QUERY : null;
-    return (
-      <LabSetup flow="A" at="book">
-        <BranchA
-          initialScreen={s === "details" ? "details" : "readiness"} initialStatus={status}
-          onExit={labSpy("back")} onSaveReady={labSpy("saveReady")} onSaveStillWriting={labSpy("saveStillWriting")}
-          error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
-        />
-      </LabSetup>
-    );
-  }
-
-  if (s === "book") {
+  /* "Your book" (onboarding v9): the title page and the three structured fields. `filled=1` opens
+     it with genres, an age category and a word count already held, as Back does. */
+  if (s === "bookmore") {
+    const title = q.get("title") ?? LAB_TITLE;
+    const filled = q.get("filled") === "1";
     return (
       <LabSetup flow="B" at="book">
-        <BranchB
-          onSkip={labSpy("skip")} onExit={labSpy("back")}
-          onSaveBook={async (f) => { labSpy("saveBook")(f.title); return false; }}
-          initialBook={q.get("filled") === "1" ? { ...emptyManuscriptFields(), title: LAB_TITLE, genre: "Upmarket" } : null}
-          onEnsureManuscript={async () => null}
-          defaultImport="smart" onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
-          onImportComplete={labSpy("importComplete")}
+        <BookMore
+          title={title} name={q.get("name")}
+          initial={{ ...emptyManuscriptFields(), ageCategory: filled ? "Adult" : "", title, ...(filled ? { genre: "Fantasy", subGenres: ["Horror"], wordCount: "85000" } : {}) }}
           error={q.get("err") === "1" ? "You’ve reached the manuscript limit on the free plan." : null}
+          onBack={labSpy("back")} onContinue={(f) => labSpy("saveBook")(JSON.stringify(f))}
         />
       </LabSetup>
     );

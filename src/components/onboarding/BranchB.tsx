@@ -20,11 +20,10 @@ import { ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields
 import { CaptureOption } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "../import/ImportFlow";
-import { BookStep } from "./BookStep";
+import { BookMore } from "./v9/BookMore";
 import { AckTitle } from "./v9/AckTitle";
 import type { V9Stage } from "../../lib/onboardingV9";
 
-export { BOOK_TITLE, BOOK_SUB } from "./BookStep";
 
 export interface BranchBProps {
   onSkip: () => void;
@@ -83,6 +82,10 @@ export interface BranchBProps {
   /** Step 2 opens with what the writer picked at step 1 (onboarding v9): its id and its title. */
   stage?: V9Stage;
   stageTitle?: string;
+  /** the account's display name, for the book's byline */
+  name?: string | null;
+  /** `#/onb-lab` only: open on the book, past the acknowledgement */
+  startAt?: "ack" | "book";
   lab?: { result: SmartImportResult; fileName: string; title: string; commit: (result: SmartImportResult) => Promise<CommitOutcome>; uid: string; floorMs?: number };
 }
 
@@ -97,11 +100,11 @@ export const exitModeFor = (screen: string): ExitMode =>
 type B3Screen = "ack" | "book" | "list";
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "",
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
 }) => {
   const entitlement = useSmartImportEntitlement();
 
-  const [screen, setScreen] = useState<B3Screen>(lab ? "list" : "ack");
+  const [screen, setScreen] = useState<B3Screen>(lab ? "list" : startAt ?? "ack");
   /* The import flow's own screen, reported up by it. `idle` = the fork is showing. */
   const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
   const flowRef = useRef<ImportFlowHandle>(null);
@@ -130,13 +133,11 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── B2 · the book ────────────────────────────────────────────────────────
+  // ── Step 2, continued · your book (onboarding v9) ──
   if (screen === "book") {
     return (
-      <BookStep
-        key={fields.title}
-        initial={fields}
-        error={error}
+      <BookMore
+        title={fields.title} name={name} initial={fields} error={error}
         onBack={() => setScreen("ack")}
         onContinue={async (f) => {
           setFields(f);

@@ -23,8 +23,7 @@ test.setTimeout(120_000);
    compare their structure (their text and inline styles move with time). */
 interface Screen { id: string; q: string; mode: "full" | "skeleton"; steps?: Array<"primary" | "import">; wait?: string }
 const P1_SCREENS: Screen[] = [
-  { id: "book", q: "s=book", mode: "full" },
-  { id: "book-filled", q: "s=book&filled=1", mode: "full" },
+  /* v9: set-up no longer shows the v5 book step (OB9 B1–B4); the Import page's is held by F2. */
   { id: "fork", q: "s=fork", mode: "full" },
   { id: "confirm", q: "s=confirm", mode: "full" },
   { id: "used-free", q: "s=used-free", mode: "full" },

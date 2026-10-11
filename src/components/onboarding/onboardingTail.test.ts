@@ -81,11 +81,13 @@ describe("both branch exits finish onto the agent list", () => {
   /** The hand-off mechanism App.tsx reads and clears on completion. */
   const HATCH = 'sessionStorage.setItem("scriptally_post_onboarding_tab", "agents")';
 
-  it("Branch A's ready-to-query path finishes rather than stepping to a deleted screen", () => {
-    const anchor = "const handleBranchASaveReady = async (r: BranchAResult) => {";
+  /* Re-pointed (onboarding v9): "Just getting started" saves from the Your-book page now. It still
+     ends on the Contact list. */
+  it("Just getting started finishes onto the agent list from the Your-book page", () => {
+    const anchor = "if (await saveBranchManuscript(f, aStart.status)) {";
     expect(ONBOARDING).toContain(anchor);
     const from = ONBOARDING.slice(ONBOARDING.indexOf(anchor));
-    const body = from.slice(0, from.indexOf("\n  };"));
+    const body = from.slice(0, from.indexOf("\n            }}"));
     expect(body).toContain(HATCH);
     expect(body).toContain("finishOnboarding");
     expect(body).not.toContain("goTo(5)");

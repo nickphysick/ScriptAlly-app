@@ -205,3 +205,190 @@ test.describe("T2", () => {
     await shot(page, "ack-interest-1440");
   });
 });
+
+/* ════ B1–B4 · your book ══════════════════════════════════════════════════════════════════════ */
+test.describe("B", () => {
+  const Q = "s=bookmore&title=The%20October%20Test&name=Lucy%20Sterling";
+  const card = (page: import("@playwright/test").Page) => page.locator('[data-o9="book-card"]');
+  const pill = (page: import("@playwright/test").Page, id: string) => page.locator(`[data-o9="genre"] .o9-pills [data-genre="${id}"]`);
+  const genres = (page: import("@playwright/test").Page) => page.evaluate(() => ({
+    picked: [...document.querySelectorAll<HTMLElement>('[data-o9="genre"] .o9-pills [aria-selected="true"]')].map((p) => p.getAttribute("data-genre")),
+    primary: [...document.querySelectorAll<HTMLElement>('[data-o9="genre"] .o9-pills [data-primary]')].map((p) => p.getAttribute("data-genre")),
+    pills: [...document.querySelectorAll<HTMLElement>('[data-o9="genre"] .o9-pills [role="option"]')].map((p) => (p.textContent ?? "").replace("✓", "").replace("Primary", "").trim()),
+    line: [...document.querySelectorAll('[data-o9="genre-line"] > span')].map((x) => (x.textContent ?? "").replace(/\s+/g, " ").trim()).join(" | "),
+  }));
+  const handed = (page: import("@playwright/test").Page) => page.evaluate(() => (window as unknown as { __onbLab?: { calls: { name: string; arg?: string }[] } }).__onbLab?.calls.filter((c) => c.name === "saveBook").map((c) => JSON.parse(c.arg ?? "null")) ?? []);
+
+  test("B1 the title page: eyebrow, the title typed in, and the byline on its rule", async ({ page }) => {
+    await lab(page, Q, WIDE);
+    await page.waitForFunction(() => Number(document.querySelector('[data-o9="book-card"]')?.getAttribute("data-typed") ?? 0) > 0, null, { timeout: 5000 });
+    const mid = await page.evaluate(() => {
+      const h = document.querySelector<HTMLElement>('[data-o9="bookhead"] h1')!;
+      const unseen = [...h.querySelectorAll<HTMLElement>(".o9-unseen")].reduce((n, e) => n + (e.textContent ?? "").length, 0);
+      return { label: h.getAttribute("aria-label"), unseen, cardOpacity: getComputedStyle(document.querySelector('[data-o9="book-card"]')!).opacity };
+    });
+    record("B1", "typing", mid);
+    expect(mid.label).toBe("The October Test");
+    expect(mid.unseen, "the title is still typing in").toBeGreaterThan(0);
+    expect(mid.cardOpacity, "the card waits for it").toBe("0");
+    await page.waitForFunction(() => { const c = document.querySelector('[data-o9="book-card"]'); return !!c && c.getAttribute("data-typed") === c.getAttribute("data-total"); }, null, { timeout: 8000 });
+    await page.waitForTimeout(1300);
+    if (MUTATE === "B1") await page.evaluate(() => document.querySelector('[data-o9="byline"]')?.remove());
+    const r = await page.evaluate(() => {
+      const st = (e: Element | null) => (e ? getComputedStyle(e) : null);
+      const eye = document.querySelector('[data-o9="book-eyebrow"]'), h = document.querySelector('[data-o9="bookhead"] h1'), by = document.querySelector('[data-o9="byline"]'), span = by?.querySelector("span") ?? null;
+      const before = by ? getComputedStyle(by, "::before") : null, after = by ? getComputedStyle(by, "::after") : null;
+      return {
+        eyebrow: eye?.textContent ?? "", eyeFace: st(eye)?.fontFamily ?? "", eyeWeight: st(eye)?.fontWeight ?? "", eyeTrack: st(eye)?.letterSpacing ?? "", eyeSize: st(eye)?.fontSize ?? "", eyeColour: st(eye)?.color ?? "",
+        title: (h?.textContent ?? ""), titleFace: st(h)?.fontFamily ?? "", titleSize: parseFloat(st(h)?.fontSize ?? "0"),
+        byline: span?.textContent ?? null, byFace: st(span)?.fontFamily ?? "", byStyle: st(span)?.fontStyle ?? "", byMax: st(by)?.maxWidth ?? "",
+        ruleLead: before ? Math.round(parseFloat(before.width)) : 0, ruleFill: after ? Math.round(parseFloat(after.width)) : 0,
+        cardOpacity: getComputedStyle(document.querySelector('[data-o9="book-card"]')!).opacity,
+        h2: document.querySelector('[data-o9="book-card"] h2')?.textContent ?? "", sub: document.querySelector('[data-o9="book-card"] .o9-cardsub')?.textContent ?? "",
+      };
+    });
+    record("B1", "at-rest", r);
+    await shot(page, "book-more-1440");
+    expect(r.eyebrow).toBe("— Your book —");
+    expect(r.eyeFace).toMatch(/JetBrains Mono/);
+    expect(r.eyeWeight).toBe("600");
+    expect(parseFloat(r.eyeTrack) / parseFloat(r.eyeSize), "tracked .24em").toBeCloseTo(0.24, 2);
+    expect(r.title).toBe("The October Test");
+    expect(r.titleFace).toMatch(/Special Elite/);
+    expect(r.titleSize, "about 50px").toBeGreaterThanOrEqual(48);
+    expect(r.titleSize).toBeLessThanOrEqual(52);
+    expect(r.byline, "the byline").toBe("by Lucy Sterling");
+    expect(r.byStyle).toBe("italic");
+    expect(r.byFace).toMatch(/Source Serif/);
+    expect(r.byMax).toBe("520px");
+    expect(r.ruleLead, "a 34px rule before the byline").toBe(34);
+    expect(r.ruleFill, "and a rule filling the rest").toBeGreaterThan(100);
+    expect(r.cardOpacity).toBe("1");
+    expect(r.h2).toBe("Tell us a bit more about it.");
+    expect(r.sub).toBe("Each of these helps QueryHawk match you with the right agents and sense-check your list. None is set in stone.");
+    await noOverflow(page, "book 1440");
+  });
+
+  test("B2 genres: several with one primary, from the fixed list only", async ({ page }) => {
+    await lab(page, Q, WIDE, { motion: "reduce" });
+    const g0 = await genres(page);
+    expect(g0.pills, "nine pills, Crime and Thriller apart").toEqual(["Crime", "Thriller", "Literary fiction", "Fantasy", "Romance", "Historical fiction", "Science fiction", "Women's fiction", "Horror"]);
+    expect(g0.picked, "nothing is picked on arrival").toEqual([]);
+    expect(await card(page).locator('[data-act="continue"]').isDisabled(), "Continue waits for a genre").toBe(true);
+    await pill(page, "fantasy").click(); await pill(page, "romance").click(); await pill(page, "horror").click();
+    const g1 = await genres(page);
+    expect(g1.picked.sort()).toEqual(["fantasy", "horror", "romance"]);
+    expect(g1.primary, "the first picked is the primary").toEqual(["fantasy"]);
+    expect(g1.line).toBe("Primary: Fantasy | Also: Romance, Horror");
+    await pill(page, "romance").click();
+    const g2 = await genres(page);
+    expect(g2.primary, "pressing a picked one makes it the primary").toEqual(["romance"]);
+    expect(g2.picked.length, "and removes nothing").toBe(3);
+    await pill(page, "romance").click();
+    const g3 = await genres(page);
+    expect(g3.picked, "pressing the primary removes it").not.toContain("romance");
+    expect(g3.primary, "and the next picked becomes the primary").toEqual(["fantasy"]);
+    // the search: only list items, the typed part bold, and a pick joins the pills
+    const search = page.locator('[data-o9="genre-search"] input');
+    await search.fill("sp");
+    const drop = await page.evaluate(() => ({
+      options: [...document.querySelectorAll('[data-o9="genre-drop"] [role="option"]')].map((o) => ({ text: o.textContent, bold: o.querySelector("b")?.textContent })),
+      foot: document.querySelector('[data-o9="genre-drop"] .o9-dropfoot')?.textContent,
+      floats: getComputedStyle(document.querySelector('[data-o9="genre-drop"]')!).position,
+    }));
+    record("B2", "search", drop);
+    await shot(page, "book-checks-1440");
+    expect(drop.options.map((o) => o.text)).toEqual(["Speculative fiction"]);
+    expect(drop.options[0].bold?.toLowerCase(), "the typed part is bold").toBe("sp");
+    expect(drop.foot).toBe("Pick from the list; it joins your pills above. Can't find yours? Choose the nearest.");
+    expect(drop.floats, "the list floats over the fields below").toBe("absolute");
+    await page.locator('[data-o9="genre-drop"] [data-genre="speculative-fiction"]').click();
+    const g4 = await genres(page);
+    expect(g4.pills, "it joined the pills").toContain("Speculative fiction");
+    expect(g4.picked).toContain("speculative-fiction");
+    // a string that is not in the list adds nothing
+    if (MUTATE === "B2") await page.evaluate(() => {
+      const input = document.querySelector<HTMLInputElement>('[data-o9="genre-search"] input')!;
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const b = document.createElement("button"); b.setAttribute("role", "option"); b.setAttribute("aria-selected", "true"); b.setAttribute("data-genre", "free-text"); b.textContent = input.value; document.querySelector('[data-o9="genre"] .o9-pills')!.appendChild(b); } }, true);
+    });
+    await search.fill("Grimdark western");
+    await search.press("Enter");
+    const g5 = await genres(page);
+    record("B2", "after-free-text", g5);
+    expect(g5.pills, "typing something outside the list adds nothing").toEqual(g4.pills);
+    expect(g5.picked).toEqual(g4.picked);
+    // what the step hands on: the primary as `genre`, the rest as `subGenres`, in stored form
+    await card(page).locator('[data-act="continue"]').click();
+    const out = (await handed(page))[0];
+    record("B2", "handed-on", out);
+    expect(out.genre, "the primary").toBe("Fantasy");
+    expect(out.subGenres).toEqual(["Horror", "Speculative fiction"]);
+  });
+
+  test("B3 each age category opens its own note, one at a time", async ({ page }) => {
+    await lab(page, Q, WIDE, { motion: "reduce" });
+    const NOTES: Record<string, string> = {
+      "Picture Book": "Read aloud to children up to about 7, told as much through pictures as words, usually under 1,000 words. Think The Very Hungry Caterpillar, The Gruffalo, Where the Wild Things Are.",
+      "Early Reader": "Children starting to read on their own, roughly 6 to 9. Short chapters, simple sentences, some illustration. Think Horrid Henry, The Worst Witch, Mr Gum.",
+      "Middle Grade": "Readers roughly 8 to 12. Protagonists of that age, adventure and friendship at the heart, nothing too dark on the page. Think Holes, Wonder, The Lion, the Witch and the Wardrobe.",
+      "Young Adult": "Readers roughly 12 to 18. Teenage protagonists, first experiences, questions of identity, often told close and in the moment. Think The Hunger Games, The Hate U Give, Noughts & Crosses.",
+      "New Adult": "Protagonists roughly 18 to 25, leaving home and finding their feet: first jobs, university, first serious relationships. Think Fourth Wing, A Court of Thorns and Roses, It Ends with Us.",
+      Adult: "Written for grown-up readers: any age of protagonist, any theme, no limits on content. It's the largest market, and the one most agents list first. Think Gone Girl, The Thursday Murder Club, Normal People.",
+    };
+    const row = await page.locator('[data-o9="age"] [role="radio"]').allTextContents();
+    expect(row, "the shared list's own labels, in its order").toEqual(Object.keys(NOTES));
+    expect(await page.locator('[data-o9="age-note"]').count(), "no note until one is picked").toBe(0);
+    for (const [cat, note] of Object.entries(NOTES)) {
+      await page.locator('[data-o9="age"]').getByRole("radio", { name: cat, exact: true }).click();
+      if (MUTATE === "B3") await page.evaluate((adult) => { document.querySelector('[data-o9="age-note"] p')!.textContent = adult; }, NOTES.Adult);
+      const r = await page.evaluate(() => ({
+        n: document.querySelectorAll('[data-o9="age-note"]').length,
+        eye: document.querySelector('[data-o9="age-note"] .o9-desceye')?.textContent, p: document.querySelector('[data-o9="age-note"] p')?.textContent,
+        italics: [...document.querySelectorAll('[data-o9="age-note"] p i')].length,
+        checked: [...document.querySelectorAll('[data-o9="age"] [aria-checked="true"]')].map((e) => e.textContent),
+      }));
+      expect(r.n, `${cat}: one note at a time`).toBe(1);
+      expect(r.eye).toBe(`${cat} · what this means`);
+      expect(r.p, cat).toBe(note);
+      expect(r.italics, `${cat}: its three titles are italic`).toBe(3);
+      expect(r.checked).toEqual([cat]);
+    }
+    record("B3", "categories", row);
+  });
+
+  test("B4 the word count: optional, digits only, 1,000 to 500,000", async ({ page }) => {
+    await lab(page, Q, WIDE, { motion: "reduce" });
+    await pill(page, "fantasy").click();
+    const go = card(page).locator('[data-act="continue"]');
+    const words = page.locator("#o9-words");
+    const state = async () => ({ off: await go.isDisabled(), err: await page.locator('[data-o9="words-error"]').allTextContents(), help: (await page.locator('#o9-words-help').allTextContents())[0] ?? null, value: await words.inputValue() });
+    expect(await words.getAttribute("placeholder"), "no genre-based placeholder").toBe("e.g. 85,000");
+    const empty = await state();
+    expect(empty.off, "empty is allowed").toBe(false);
+    expect(empty.help).toBe("The full manuscript, as it stands today.");
+    if (MUTATE === "B4") await page.evaluate(() => { const o = new MutationObserver(() => { document.querySelector('[data-o9="words-error"]')?.remove(); const b = document.querySelector<HTMLButtonElement>('[data-o9="book-card"] [data-act="continue"]'); if (b) b.disabled = false; }); o.observe(document.body, { childList: true, subtree: true, attributes: true }); });
+    await words.fill("8,500,000");
+    const over = await state();
+    await words.fill("400");
+    const under = await state();
+    record("B4", "bounds", { over, under });
+    expect(over.err).toEqual(["That's over 500,000 words. Check the number."]);
+    expect(over.off, "Continue is off until it is fixed or cleared").toBe(true);
+    expect(under.err).toEqual(["That's under 1,000 words. Check the number."]);
+    expect(under.off).toBe(true);
+    await words.fill("eighty thousand 85,000");
+    expect((await state()).value, "letters cannot be typed").toBe("  85,000");
+    await words.fill("85,000");
+    const ok = await state();
+    expect(ok.err).toEqual([]);
+    expect(ok.off).toBe(false);
+    await go.click();
+    expect((await handed(page))[0].wordCount, "85,000 is handed on as 85000").toBe("85000");
+  });
+
+  test("B the book at 400: no overflow", async ({ page }) => {
+    await lab(page, Q, PHONE, { motion: "reduce" });
+    await shot(page, "book-400", true);
+    await noOverflow(page, "book 400");
+  });
+});

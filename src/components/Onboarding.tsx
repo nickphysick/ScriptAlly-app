@@ -7,13 +7,13 @@ import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus } from "../types";
-import { StepColumn, OpenTitle, StepCard, QLabel, OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
-import { BranchA, BranchAResult } from "./onboarding/BranchA";
+import { OptionGroup, OptionRow, StepFoot } from "./onboarding/setupParts";
 import { BranchB, ExitMode } from "./onboarding/BranchB";
 import { useAskBeforeLeaving } from "./onboarding/SkipSetupConfirm";
 import { HandoffNav, HANDOFF_TAB } from "./onboarding/HandoffNav";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "./onboarding/ManuscriptFields";
 import { AckTitle } from "./onboarding/v9/AckTitle";
+import { BookMore } from "./onboarding/v9/BookMore";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
@@ -278,26 +278,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
   };
 
-  // A3a (Ready to Query / Revising): save, then finish onboarding onto the agent list — the same
-  // exit A3b already used. Onboarding ends where the real work starts; the old in-flow agents step
-  // asked for one agent through a lesser form than the app's own, then threw two of its four fields
-  // away and stamped six invented defaults on what survived.
-  const handleBranchASaveReady = async (r: BranchAResult) => {
-    if (await saveBranchManuscript(r.fields, r.status)) {
-      sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
-      await finishOnboarding();
-    }
-  };
-
-  // A3b (Still writing): save as Drafting, then finish onboarding straight into the agent
-  // database — research-first, no query pipeline yet.
-  const handleBranchAStillWriting = async (r: BranchAResult) => {
-    if (await saveBranchManuscript(r.fields, r.status)) {
-      sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
-      await finishOnboarding();
-    }
-  };
-
   // B2 (Branch B): the book the pipeline attaches to. To avoid tripping the Free-tier 1-manuscript
   // cap mid-flow, NOTHING is written here — the entered details are HELD in flow state and the
   // manuscript is created exactly once, later, at commit/finish (ensureBranchBManuscript). Held in a
@@ -305,6 +285,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   /* "Just getting started": the title and readiness given on the acknowledgement page, held until
      the details that follow are saved. */
   const [aStart, setAStart] = useState<{ title: string; status: ManuscriptStatus } | null>(null);
+  /* …and remembered, with the book's answers, so Back re-fills each page. */
+  const [aStart0, setAStart0] = useState<{ title: string; status: ManuscriptStatus } | null>(null);
+  const [aBook, setABook] = useState<ManuscriptFieldsState | null>(null);
   const [b2Draft, setB2Draft] = useState<ManuscriptFieldsState | null>(null);
   const b2DraftRef = useRef<ManuscriptFieldsState | null>(null);
   const b2IdCache = useRef<ManuscriptIdCache>({ id: null }); // caches the id once the single write lands
@@ -389,21 +372,25 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             stage="starting" stageTitle={STAGE_OPTIONS.find((o) => o.id === "starting")!.title}
             error={branchError}
             onChange={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
-            onContinue={(r) => setAStart({ title: r.title, status: r.status ?? ManuscriptStatus.DRAFTING })}
+            initialTitle={aStart0?.title} initialStatus={aStart0?.status ?? null}
+            onContinue={(r) => { const v = { title: r.title, status: r.status ?? ManuscriptStatus.DRAFTING }; setAStart0(v); setAStart(v); }}
           />
         )}
         {flow === "A" && aStart && (
-          <CenterWrap>
-            <BranchA
-              initialScreen="details" initialStatus={aStart.status}
-              initialFields={{ ...emptyManuscriptFields(), title: aStart.title }}
-              onBackFromDetails={() => setAStart(null)}
-              onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
-              onSaveReady={(r) => void handleBranchASaveReady(r)}
-              onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
-              error={branchError}
-            />
-          </CenterWrap>
+          <BookMore
+            title={aStart.title} name={currentUser?.name} error={branchError}
+            initial={aBook ?? { ...emptyManuscriptFields(), ageCategory: "", title: aStart.title }}
+            onBack={() => setAStart(null)}
+            /* It ends where it always did: the manuscript is written once, here, and set-up
+               finishes on the Contact list. */
+            onContinue={async (f) => {
+              setABook(f);
+              if (await saveBranchManuscript(f, aStart.status)) {
+                sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
+                await finishOnboarding();
+              }
+            }}
+          />
         )}
 
         {/* Branch B — capture the book (B2), then bring the pipeline across (B3). */}
@@ -412,6 +399,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <BranchB
               stage={queryingStage ?? "early"}
               stageTitle={STAGE_OPTIONS.find((o) => o.id === queryingStage)?.title ?? ""}
+              name={currentUser?.name}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExitMode={setExitMode}

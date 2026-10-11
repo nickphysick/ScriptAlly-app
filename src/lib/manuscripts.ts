@@ -28,7 +28,10 @@ export const PREDEFINED_GENRES = [
   "Children's",
 ];
 
-export const AGE_CATEGORIES = ["Picture Book", "Early Reader", "Middle Grade", "Young Adult", "Adult"];
+/* "New Adult" was added with onboarding v9 (ruled 11 Oct), between Young Adult and Adult. It is
+   additive: nothing is renamed, and firestore.rules takes any string here (`ageCategory is string`,
+   up to 128). Every picker that draws from this list now offers it. */
+export const AGE_CATEGORIES = ["Picture Book", "Early Reader", "Middle Grade", "Young Adult", "New Adult", "Adult"];
 
 /** Common shorthand → canonical PREDEFINED_GENRES. The allow-list above stays authoritative; this
  *  just maps the messy ways writers' spreadsheets spell genres onto it. Unknown → dropped. */

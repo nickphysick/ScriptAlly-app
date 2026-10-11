@@ -25,7 +25,8 @@ const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "ut
    it; the three claims that were about the card itself went with the card. */
 const CHROME = read("setupParts.tsx");
 const ONBOARDING = read("../Onboarding.tsx");
-const BRANCH_A = read("BranchA.tsx");
+/* BranchA.tsx is deleted (onboarding v9): step 2 is AckTitle and BookMore for every journey. */
+const BRANCH_A = read("v9/AckTitle.tsx") + read("v9/BookMore.tsx");
 const BRANCH_B = read("BranchB.tsx");
 const TOKENS = readFileSync(resolve(here, "../../lib/designTokens.ts"), "utf8");
 

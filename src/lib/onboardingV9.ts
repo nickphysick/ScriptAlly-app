@@ -90,3 +90,91 @@ export function typedCount(schedule: readonly number[], elapsed: number): number
   while (lo < hi) { const mid = (lo + hi) >> 1; if (schedule[mid] <= elapsed) lo = mid + 1; else hi = mid; }
   return lo;
 }
+
+/* ── Step 2, continued · your book ────────────────────────────────────────────────────────── */
+export const BOOK_EYEBROW = "— Your book —";
+export const bookByline = (name: string | null | undefined): string | null => {
+  const n = (name ?? "").trim();
+  return n ? `by ${n}` : null;
+};
+export const BOOK_CARD_H = "Tell us a bit more about it.";
+/** The long form: the app does match agents on a manuscript's genres (lib/genreMatch.ts). */
+export const BOOK_CARD_SUB = "Each of these helps QueryHawk match you with the right agents and sense-check your list. None is set in stone.";
+export const GENRE_LABEL = "Genre";
+export const GENRE_HELPER = "Pick every genre that fits. The first you pick is the primary; press another you've picked to make it the primary instead.";
+export const GENRE_SEARCH = "Search all genres…";
+export const GENRE_SEARCH_FOOT = "Pick from the list; it joins your pills above. Can't find yours? Choose the nearest.";
+export const AGE_LABEL = "Age category";
+export const WORDS_LABEL = "Word count";
+export const WORDS_PLACEHOLDER = "e.g. 85,000";
+export const WORDS_HELPER = "The full manuscript, as it stands today.";
+export const WORDS_OVER = "That's over 500,000 words. Check the number.";
+export const WORDS_UNDER = "That's under 1,000 words. Check the number.";
+export const WORDS_MIN = 1000;
+export const WORDS_MAX = 500000;
+
+/**
+ * The nine genre pills, by the taxonomy's ids (lib/genres.ts). The mock draws eight, with one
+ * "Crime & thriller"; those are two genres in the taxonomy, so they are two pills (ruled 11 Oct).
+ */
+export const GENRE_PILLS: readonly string[] = [
+  "crime", "thriller", "literary-fiction", "fantasy", "romance", "historical-fiction", "science-fiction", "womens-fiction", "horror",
+];
+
+/**
+ * The genres picked, in order: the first is the primary.
+ *   · pressing an unpicked genre adds it (the first one picked becomes the primary);
+ *   · pressing a picked genre that is not the primary makes it the primary;
+ *   · pressing the primary removes it, and the next picked becomes the primary.
+ */
+export function pressGenre(picked: readonly string[], id: string): string[] {
+  const at = picked.indexOf(id);
+  if (at === -1) return [...picked, id];
+  if (at === 0) return picked.slice(1);
+  return [id, ...picked.filter((g) => g !== id)];
+}
+/** Adding from the search: joins the picks if it is not there already; never removes or reorders. */
+export const addGenre = (picked: readonly string[], id: string): string[] => (picked.includes(id) ? [...picked] : [...picked, id]);
+
+/** One search result: the genre, and where the typed part sits in its label (for the bold). */
+export interface GenreHit { id: string; label: string; start: number; length: number }
+/** Genres from the fixed list whose label holds what was typed. Nothing outside the list is ever offered. */
+export function searchGenreList(list: readonly { id: string; label: string }[], typed: string, picked: readonly string[] = []): GenreHit[] {
+  const q = typed.trim().toLowerCase();
+  if (!q) return [];
+  return list
+    .map((g) => ({ id: g.id, label: g.label, start: g.label.toLowerCase().indexOf(q), length: q.length }))
+    .filter((h) => h.start !== -1 && !picked.includes(h.id))
+    .sort((a, b) => a.start - b.start || a.label.localeCompare(b.label));
+}
+
+/**
+ * What each age category means. Keyed by the shared list's own labels (lib/manuscripts
+ * `AGE_CATEGORIES`): the mock's "Chapter book" is the stored "Early Reader". Titles are `em` runs.
+ */
+const t = (text: string): Run => ({ text, em: true });
+export const AGE_NOTES: Record<string, Run[]> = {
+  "Picture Book": [{ text: "Read aloud to children up to about 7, told as much through pictures as words, usually under 1,000 words. Think " }, t("The Very Hungry Caterpillar"), { text: ", " }, t("The Gruffalo"), { text: ", " }, t("Where the Wild Things Are"), { text: "." }],
+  "Early Reader": [{ text: "Children starting to read on their own, roughly 6 to 9. Short chapters, simple sentences, some illustration. Think " }, t("Horrid Henry"), { text: ", " }, t("The Worst Witch"), { text: ", " }, t("Mr Gum"), { text: "." }],
+  "Middle Grade": [{ text: "Readers roughly 8 to 12. Protagonists of that age, adventure and friendship at the heart, nothing too dark on the page. Think " }, t("Holes"), { text: ", " }, t("Wonder"), { text: ", " }, t("The Lion, the Witch and the Wardrobe"), { text: "." }],
+  "Young Adult": [{ text: "Readers roughly 12 to 18. Teenage protagonists, first experiences, questions of identity, often told close and in the moment. Think " }, t("The Hunger Games"), { text: ", " }, t("The Hate U Give"), { text: ", " }, t("Noughts & Crosses"), { text: "." }],
+  "New Adult": [{ text: "Protagonists roughly 18 to 25, leaving home and finding their feet: first jobs, university, first serious relationships. Think " }, t("Fourth Wing"), { text: ", " }, t("A Court of Thorns and Roses"), { text: ", " }, t("It Ends with Us"), { text: "." }],
+  Adult: [{ text: "Written for grown-up readers: any age of protagonist, any theme, no limits on content. It's the largest market, and the one most agents list first. Think " }, t("Gone Girl"), { text: ", " }, t("The Thursday Murder Club"), { text: ", " }, t("Normal People"), { text: "." }],
+};
+export const ageNoteEyebrow = (category: string): string => `${category} · what this means`;
+
+/**
+ * The word count as typed. Empty is allowed (it is optional). Digits, with commas, spaces or full
+ * stops as thousands separators. A value outside 1,000–500,000 is an error and stops Continue.
+ */
+export function readWordCount(raw: string): { value: number | null; error: string | null } {
+  const text = raw.trim();
+  if (!text) return { value: null, error: null };
+  const n = Number(text.replace(/[\s,.]/g, ""));
+  if (!Number.isFinite(n)) return { value: null, error: null };
+  if (n > WORDS_MAX) return { value: n, error: WORDS_OVER };
+  if (n < WORDS_MIN) return { value: n, error: WORDS_UNDER };
+  return { value: n, error: null };
+}
+/** Keep only what a word count can hold: digits and thousands separators. */
+export const cleanWordCount = (raw: string): string => raw.replace(/[^\d,.\s]/g, "");

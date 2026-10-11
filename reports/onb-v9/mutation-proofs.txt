@@ -1,3 +1,10 @@
 W1 · restore the open heading:  1 failed |  Error: the ink panel is on screen
 T1 · show the card from the start:  1 failed |  Error: the card is unseen while it types
 T2 · leave the title empty:  1 failed |  Error: the field holds the held title
+
+Phase 3 (build of the Phase 3 tree, lab, 1440)
+B1  mutation: drop the byline                     -> red: "the byline"
+B2  mutation: allow free text in the search       -> red: "typing something outside the list adds nothing"
+B3  mutation: the Adult note for every pick       -> red: "Picture Book"
+B4  mutation: remove the bounds                   -> red: over.err expected ["That's over 500,000 words. Check the number."]
+Unmutated: 12 passed.
