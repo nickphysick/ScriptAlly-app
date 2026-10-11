@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 24 from the sheet's edges",
+  "ok": true,
+  "detail": "24.0 · 24.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 the sheet less 48",
+  "ok": true,
+  "detail": "1208.0 of a 1256.0 sheet"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 panel and strip on the column",
+  "ok": true,
+  "detail": "on column true · list wider true"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 no sideways scroll",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 24 from the sheet's edges",
+  "ok": true,
+  "detail": "24.0 · 24.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the sheet less 48",
+  "ok": true,
+  "detail": "976.0 of a 1024.0 sheet"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 panel and strip on the column",
+  "ok": true,
+  "detail": "on column true · list wider true"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 no sideways scroll",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 capped at 1600",
+  "ok": true,
+  "detail": "1600.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 centred",
+  "ok": true,
+  "detail": "32.0 · 32.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 panel and strip on the column",
+  "ok": true,
+  "detail": "on column true · list wider true"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 no sideways scroll",
+  "ok": true,
+  "detail": "0"
+ }
+]

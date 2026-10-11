@@ -24,9 +24,17 @@ export const sentWords = (n: number): string => (n === 1 ? "query sent" : "queri
 /** the h1's accessible name: "27 queries sent" */
 export const sentTitle = (n: number): string => `${n} ${sentWords(n)}`;
 
+/** v137 — the header's fixed title, broken after the comma, and its accessible name */
+export const QC_HEADER_TITLE = "Every query, in one place";
+/** the subline: it names the manuscript when the page is scoped to one book */
+export const qcHeaderSub = (msTitle: string | null): string =>
+  msTitle ? `Send, track and chase your queries for ${msTitle}.` : "Send, track and chase your queries.";
+
+/**
+ * Query Centre v137 §A — THE ANALYTICS PANEL WITH A TITLE (the shared panel header's title kind). The big number
+ * is gone from here: the first cell of "At a glance" carries it. No stamp, no faces row, no ruled corner.
+ */
 export const QcOpenHeader: React.FC<{
-  /** the bands' own total: with you + with agents + closed. null while the page settles. */
-  sent: number | null;
   /** the manuscript the page is scoped to; null when it is scoped to more than one book */
   msTitle?: string | null;
   loading: boolean;
@@ -34,17 +42,15 @@ export const QcOpenHeader: React.FC<{
   onRecord: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-}> = ({ sent, msTitle = null, loading, onLog, onRecord, logDisabled = false, logRef }) => {
-  const pending = loading || sent === null;
-  return (
-    <PanelHeader
-      kind="number" className="qcoh" attrs={{ "data-qcv": "open-header", "data-own-header": "" }}
-      number={pending ? null : sent} words={sentWords(pending ? 2 : (sent as number))} loading={pending}
-      sub={msTitle ? <>for <em>{msTitle}</em></> : undefined}
-      primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled, btnRef: logRef, attrs: { "data-qcv": "oh-log" } }}
-      secondary={{ label: "Record a response", onClick: onRecord, attrs: { "data-qcv": "oh-record" } }}
-      /* the courier on his white disc (the file is the disc). Swappable by file (qcArt.ts). */
-      art={<img data-qcv="oh-art" alt="" src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} />}
-    />
-  );
-};
+}> = ({ msTitle = null, loading, onLog, onRecord, logDisabled = false, logRef }) => (
+  <PanelHeader
+    kind="title" className="qcoh qcoh--137" attrs={{ "data-qcv": "open-header", "data-own-header": "" }}
+    title={<span aria-label={QC_HEADER_TITLE}><span aria-hidden="true">Every query,<br />in one place</span></span>}
+    sub={<span data-qcv="oh-sub">Send, track and chase your queries{msTitle ? <> for <i className="qcoh-ms" data-qcv="oh-ms">{msTitle}</i></> : null}.</span>}
+    loading={loading}
+    primary={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled, btnRef: logRef, attrs: { "data-qcv": "oh-log" } }}
+    secondary={{ label: "Record a response", onClick: onRecord, attrs: { "data-qcv": "oh-record" } }}
+    /* the courier on his white disc (the file is the disc). Swappable by file (qcArt.ts). */
+    art={<img data-qcv="oh-art" alt="" src={`${QC_COURIER_DISC.src}?v=${QC_COURIER_DISC.version}`} width={QC_COURIER_DISC.width} height={QC_COURIER_DISC.height} />}
+  />
+);

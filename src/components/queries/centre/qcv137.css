@@ -1,0 +1,73 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v137 §C — THE LIST IS THE PAGE (ref design-refs/query-centre/query-centre-v137.html).
+ *
+ * The group's rows are header · strip · list · footer. The list breaks out of the content column to 24px from the
+ * page sheet's edges, capped at 1600 and centred; the panel and the strip stay on the column.
+ *
+ * ⚠️ THE SHEET'S WIDTH IS `--hsheet-w` (headerSheet.css, from the shell's published `--ink-sheet-l/-r`), never a
+ *    container unit: making the scroller a size container would contain its fixed descendants.
+ * ⚠️ `.qcv-page` IS THE ROWS' SIZE CONTAINER, so the narrow rules below follow the LIST's width, not the window's.
+ */
+@media (min-width: 768px) {
+  .qcv-group.qc13 > .qcs { grid-row: 2; }
+  /* 0-4-0, to beat `.qc13 .qcv-page.qcw` (qcvWorkspace.css) */
+  .qcv-group.qc13 > .qcv-page.qcw {
+    grid-row: 3; justify-self: start; box-sizing: border-box; max-width: none;
+    --qc137-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    width: var(--qc137-w);
+    margin: 40px 0 90px calc(50% - var(--qc137-w) / 2);
+  }
+  .qcv-group.qc13 > .af { grid-row: 4; }
+
+  /* the title row, without the hawk it used to make room for */
+  .qc13 .qcw .qcw-r1 { min-height: 0; padding: 22px 28px 18px 28px; }
+
+  /* the last two columns give before the names do */
+  .qc13 .qcw-list { --qcw-cols: minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 284px) minmax(150px, 284px); }
+  @container (max-width: 1099.98px) {
+    .qc13 .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) 206px minmax(150px, 220px); }
+    /* At a 1280 window the list is 976 where it was 982 (the sheet less 48, not the column plus 40), and "Revise &
+       resubmit" with its stamp wrapped by 3px (qcV132 W12). The rows and their labels give those 6px back. */
+    .qc13 .qcw-list .qcw-row { padding-inline: 19px; }
+    .qc13 .qcw-list .lt-labels { padding-inline: 37px; }
+  }
+  /* below 900px of list, "What you sent" and its heading go (the brief says 1100; its own 1280 reference, a 976px
+     list, draws the column — see the report) */
+  @container (max-width: 899.98px) {
+    .qc13 .qcw-list { --qcw-cols: minmax(0, 0.96fr) minmax(0, 1.04fr) minmax(150px, 220px); }
+    .qc13 .qcw-list .qcw-snt, .qc13 .qcw-list .lt-labels .lt-lab[data-lt-col="What you sent"] { display: none; }
+    /* Find takes a line of its own, or the three controls beside it squeeze it to nothing (measured at 1024) */
+    .qc13 .qcw .qcw-r2 { flex-wrap: wrap; }
+    .qc13 .qcw .qcw-find { flex: 1 1 100%; }
+  }
+
+  /* ── §D · THE LIST'S CONTROLS PIN ─────────────────────────────────────────────────────────────────────────
+     The ink header, the chips and the column headings are sticky inside the list and release at its end. Each
+     pins under the one before it, from heights QcCentre measures (`--qc137-bar-h`, `--qc137-strip-h`).
+     ⚠️ `.qcw-head` IS `display: contents`: a sticky box can only travel inside its containing block, and the head
+        is exactly as tall as the two rows in it. Without this they have nowhere to go.
+     ⚠️ `overflow-anchor: none` ON THE SCROLLER AND THE LIST: the header is shorter pinned, and the browser would
+        answer that by moving scrollTop, re-crossing the pin line from underneath. */
+  .wpg-scroll:has(> .qcv-group.qc13), .qcv-group.qc13 > .qcv-page.qcw { overflow-anchor: none; }
+  .qc13 .qcw .qc137-sentinel { display: block; height: 0; }
+  .qc13 .qcw .qcw-head { display: contents; }
+  .qc13 .qcw .qcw-bar { position: sticky; top: 12px; z-index: 9; }
+  .qc13 .qcw .qcw-strip { position: sticky; top: calc(12px + var(--qc137-bar-h, 0px)); z-index: 8; }
+  .qc13 .qcw .qcw-list .lt-labels { top: calc(12px + var(--qc137-bar-h, 0px) + var(--qc137-strip-h, 0px)); z-index: 7; transition: none; }
+  .qc13 .qcw .qcw-list .lt-labels.is-stuck { box-shadow: none; }
+
+  .qc13 .qcw .qcw-pill--sum { display: none; background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55); }
+  .qc13 .qcw .qcw-pill--sum:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
+
+  /* pinned: tighter, and the header's top corners are 16 with the page's colour behind them */
+  .qc13 .qcw[data-pinned="true"] .qcw-bar { background: var(--ink-tab, var(--ws-page)); border-radius: 0; }
+  .qc13 .qcw[data-pinned="true"] .qcw-r1 { padding: 12px 28px 10px; background: #2a3a52; border-radius: 16px 16px 0 0; }
+  .qc13 .qcw[data-pinned="true"] .qcw-r2 { padding-bottom: 12px; background: #2a3a52; }
+  .qc13 .qcw[data-pinned="true"] .qcw-title { font-size: 24px; }
+  .qc13 .qcw[data-pinned="true"] .qcw-strip { padding: 10px 28px; }
+  .qc13 .qcw[data-pinned="true"] .qcw-list .lt-labels { box-shadow: 0 10px 18px -14px rgba(28, 19, 15, 0.35); }
+  .qc13 .qcw[data-pinned="true"] .qcw-pill--sum { display: inline-flex; }
+}

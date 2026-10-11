@@ -22,7 +22,7 @@ const NAME = { you: "With you", agent: "With agents", closed: "Closed" } as cons
 
 async function openQc(page: Page, w: number) {
   await inkOpen(page, "/queries", w, { scope: "qc132" });
-  await expect(page.locator('[data-qcv="ru"]:not([data-sk])'), "Recently updated is on the page").toBeVisible({ timeout: 20_000 });
+  /* Query Centre v137 §C: "Recently updated" is no longer drawn, so the opener no longer waits on it */
   await expect(page.locator('[data-qcv="row"]').first(), "the list loaded").toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(400);
 }
@@ -33,6 +33,9 @@ const listState = (page: Page) => page.evaluate(() => ({
 const listRows = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => ({ id: r.dataset.qid!, name: r.dataset.name ?? "", status: r.dataset.status ?? "" })));
 
 test.describe("Query Centre v132 — Recently updated", () => {
+  /* RETIRED by Query Centre v137 §C (tests/e2e/RETIRED-query-centre-v137.md): the section is not drawn on the
+     populated page. `QcRecent` and `lib/qcRecent` are kept, and R4 (the unit test) still runs. */
+  test.skip(true, "retired by Query Centre v137: Recently updated is not drawn (QC137 C1)");
   test("R1 · thirds: the lede a third, the card on the stage's left, the panel 150 right, the card 34 down, centres level", async ({ page }) => {
     for (const w of WIDTHS) {
       await openQc(page, w);
@@ -124,6 +127,7 @@ test.describe("Query Centre v132 — Recently updated", () => {
 
 test.describe("Query Centre v132 — Your queries", () => {
   test("W1 · the ink bar: anthracite, 104 tall at least, the hawk 210 wide breaking its top, the title and the live count", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C and §D: the hawk is not drawn and the title row no longer makes room for it (QC137 C1, D1)");
     for (const w of WIDTHS) {
       await openQc(page, w);
       const r = await page.evaluate(() => {
@@ -162,12 +166,12 @@ test.describe("Query Centre v132 — Your queries", () => {
     }
   });
 
-  const deskYou = (page: Page) => page.locator('[data-qcv="court"][data-court="you"] [data-qcv="court-count"]').first().innerText().then((t) => Number(t.replace(/\D/g, "")));
+  const deskYou = (page: Page) => page.locator('.qcv-group.qc13 [data-qcv="strip-cell"][data-k="you"] [data-qcv="strip-fig"]').first().innerText().then((t) => Number(t.replace(/\D/g, "")));
   const deskOverdue = (page: Page) => page.evaluate(() => {
     /* the desk prints the number (court-tile) and its words (court-label) as two elements of one line */
-    const line = [...document.querySelectorAll<HTMLElement>('[data-qcv="court"][data-court="agent"] [data-qcv="court-line"]')]
-      .find((l) => /overdue/i.test(l.querySelector<HTMLElement>('[data-qcv="court-label"]')?.innerText ?? ""));
-    return line ? Number(line.querySelector<HTMLElement>('[data-qcv="court-tile"]')?.innerText.trim() ?? NaN) : NaN;
+    /* RE-POINTED (Query Centre v137 §B): the strip's With agents line, "{n} past their reply time" */
+    const n = document.querySelector<HTMLElement>('.qcv-group.qc13 [data-qcv="strip-cell"][data-k="agent"] [data-qcv="strip-line"] [data-qcv="strip-n"]');
+    return n && /past their reply time/.test(n.parentElement?.innerText ?? "") ? Number(n.innerText.trim()) : NaN;
   });
   const shownIds = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => r.dataset.qid!));
 
@@ -176,10 +180,9 @@ test.describe("Query Centre v132 — Your queries", () => {
      that seeding (measured 8 Oct: 35, 37 and 39 overdue in three consecutive runs). One evaluate
      reads both from the same render. */
   const deskAndList = (page: Page) => page.evaluate(() => {
-    const you = Number((document.querySelector<HTMLElement>('[data-qcv="court"][data-court="you"] [data-qcv="court-count"]')?.innerText ?? "").replace(/\D/g, "") || NaN);
-    const line = [...document.querySelectorAll<HTMLElement>('[data-qcv="court"][data-court="agent"] [data-qcv="court-line"]')]
-      .find((l) => /overdue/i.test(l.querySelector<HTMLElement>('[data-qcv="court-label"]')?.innerText ?? ""));
-    const over = line ? Number(line.querySelector<HTMLElement>('[data-qcv="court-tile"]')?.innerText.trim() ?? NaN) : NaN;
+    const you = Number((document.querySelector<HTMLElement>('.qcv-group.qc13 [data-qcv="strip-cell"][data-k="you"] [data-qcv="strip-fig"]')?.innerText ?? "").replace(/\D/g, "") || NaN);
+    const on = document.querySelector<HTMLElement>('.qcv-group.qc13 [data-qcv="strip-cell"][data-k="agent"] [data-qcv="strip-line"] [data-qcv="strip-n"]');
+    const over = on && /past their reply time/.test(on.parentElement?.innerText ?? "") ? Number(on.innerText.trim()) : NaN;
     const pillN = (k: string) => Number(document.querySelector<HTMLElement>(`[data-qcv="ws-pill"][data-k="${k}"] b`)?.innerText.trim() ?? NaN);
     return { you, over, pillYou: pillN("you"), pillPast: pillN("past"), rows: [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((r) => ({ id: r.dataset.qid!, status: r.dataset.status! })) };
   });
@@ -259,7 +262,7 @@ const URG = [
 const panelNarrow = (page: Page) => page.evaluate(() => document.querySelector<HTMLElement>(".qcv-page.qcw")!.getBoundingClientRect().width < 1100);
 
 async function groupBy(page: Page, label: RegExp) {
-  await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+  await page.locator('[data-qcv="ws-bar"]').evaluate((e) => e.closest(".qcv-page")!.scrollIntoView({ block: "start" }));
   await page.waitForTimeout(200);
   await page.locator('[data-qcv="ws-group"]').click();
   await page.waitForTimeout(250);
@@ -317,18 +320,8 @@ test.describe("Query Centre v132 — the list", () => {
       /* under 1100px of panel the slot is its 34px mark and Next move narrows (W12): 206 and 220 */
       const narrow = await panelNarrow(page);
       expect(near(g.cells[2].w, narrow ? 206 : 284) && near(g.cells[3].w, narrow ? 220 : 284), `${w}: sent ${g.cells[2].w}, next ${g.cells[3].w} (narrow ${narrow})`).toBe(true);
-      const shadow = () => page.evaluate(() => { const l = document.querySelector<HTMLElement>('.qcw-list [data-lt="labels"]')!; return { stuck: l.classList.contains("is-stuck"), sh: getComputedStyle(l).boxShadow, top: l.getBoundingClientRect().top, sc: l.closest(".wpg-scroll")!.getBoundingClientRect().top }; });
-      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
-      await page.waitForTimeout(300);
-      const rest = await shadow();
-      expect(rest.stuck, `${w}: not stuck at rest`).toBe(false);
-      expect(rest.sh, `${w}: no shadow at rest`).toBe("none");
-      await page.locator('.qcw-list [data-qcv="row"]').nth(6).evaluate((e) => e.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(400);
-      const pinned = await shadow();
-      expect(near(pinned.top, pinned.sc, 1.5), `${w}: the labels pinned at the scroller's top (${pinned.top} / ${pinned.sc})`).toBe(true);
-      expect(pinned.stuck, `${w}: stuck once pinned`).toBe(true);
-      expect(pinned.sh, `${w}: the lift shadow while stuck`).not.toBe("none");
+      /* RE-POINTED (Query Centre v137 §D): the labels pin under the header and the chips, not at the scroller's
+         top, and lift while the list is pinned. QC137 D1 holds that; this lock keeps the grid. */
     }
   });
 
@@ -370,7 +363,7 @@ test.describe("Query Centre v132 — the list", () => {
   test("W7 · popups: hover and focus show the title and line within 200ms, 10 above, inside the window; Esc and scroll hide", async ({ page }) => {
     for (const w of WIDTHS) {
       await openQc(page, w);
-      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+      await page.locator('[data-qcv="ws-bar"]').evaluate((e) => e.closest(".qcv-page")!.scrollIntoView({ block: "start" }));
       await page.waitForTimeout(300);
       const targets = ['[data-qcv="row-pkg"]', '[data-qcv="row-add"]', '[data-qcv="sent-tile"][data-state="sent"]', '[data-qcv="sent-tile"][data-state="not"]', '[data-qcv="sent-tile"][data-state="unrecorded"]'];
       let checked = 0;
@@ -439,7 +432,7 @@ test.describe("Query Centre v132 — touches", () => {
   test("W9 · J moves the ring, Enter opens that query, Esc clears the search then the ring, Find ignores J/K, density survives a reload, a no-match search dead-ends at the inkwell", async ({ page }) => {
     for (const w of WIDTHS) {
       await openQc(page, w);
-      await page.locator('[data-qcv="ws-head"]').evaluate((e) => e.scrollIntoView({ block: "start" }));
+      await page.locator('[data-qcv="ws-bar"]').evaluate((e) => e.closest(".qcv-page")!.scrollIntoView({ block: "start" }));
       await page.mouse.click(5, 300); /* focus nowhere in particular */
       const ids = await rowIds(page);
       expect(ids.length, `${w}: rows to move through`).toBeGreaterThan(3);
@@ -505,6 +498,7 @@ test.describe("Query Centre v132 — touches", () => {
   });
 
   test("W10 · no jump: the loading frames and the loaded page agree at Recently updated, the bar, the first band and the row", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137: Recently updated is not drawn; QC137 L1 holds the panel and the strip, which the list follows");
     const read = () => page.evaluate(() => {
       const sc = document.querySelector<HTMLElement>('[data-qcv="ru"]')?.closest<HTMLElement>(".wpg-scroll");
       const top0 = sc ? sc.getBoundingClientRect().top - sc.scrollTop : 0;

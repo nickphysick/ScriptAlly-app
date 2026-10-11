@@ -22,6 +22,7 @@ import { QcOpenHeader } from "./QcOpenHeader";
 import "./qcvBand134.css";
 import "./qcvFullList136.css";
 import "./qcvPage.css";
+import "./qcv137.css";
 import "./qcvEnter.css";
 
 export const DOCK_MIN_COLUMN = 900;
@@ -84,6 +85,70 @@ export const QC_BANNER_LINES = [
   "one list to hold your queries and in the darkness mind them.",
 ] as const;
 
+/** v137 §D — the pin line, and the hysteresis either side of it: pin at 12px or less, unpin only above 36. */
+export const PIN_AT = 12;
+export const UNPIN_ABOVE = 36;
+/** One step of the pinned state: where the sentinel sits under the scroller's top, and what the state was. */
+export const nextPinned = (was: boolean, sentinelTop: number, listBottom: number): boolean => {
+  if (listBottom <= PIN_AT) return false; /* the list has gone: the controls have released with it */
+  if (sentinelTop <= PIN_AT) return true;
+  if (sentinelTop > UNPIN_ABOVE) return false;
+  return was;
+};
+
+/**
+ * v137 §D — THE LIST'S CONTROLS PIN. The ink header, the chips and the column headings are `position: sticky`
+ * inside the list; this hook says WHEN they are pinned (`data-pinned` on the list) and how tall the two rows
+ * above the headings are, so each pins under the one before it.
+ *
+ * ⚠️ PINNED IS DECIDED FROM A ZERO-HEIGHT SENTINEL AT THE LIST'S TOP, NEVER FROM THE HEADER'S OWN BOX: pinning
+ *    makes the header shorter, so a reading of the header would move with the answer. The sentinel is above
+ *    everything that changes size. The hysteresis and `overflow-anchor: none` (qcv137.css) are the rest of it.
+ * ⚠️ DERIVED ON EVERY SCROLL, never an IntersectionObserver (a missed event would be permanent).
+ */
+function usePinnedControls(group: React.RefObject<HTMLElement | null>, on: boolean): void {
+  useLayoutEffect(() => {
+    const g = group.current;
+    const page = g?.querySelector<HTMLElement>(":scope > .qcv-page");
+    const sc = g?.closest<HTMLElement>(".wpg-scroll");
+    const sentinel = page?.querySelector<HTMLElement>('[data-qcv="pin-sentinel"]');
+    if (!on || !g || !page || !sc || !sentinel) return undefined;
+    let pinned = false;
+    const measure = () => {
+      const bar = page.querySelector<HTMLElement>('[data-qcv="ws-bar"]');
+      const strip = page.querySelector<HTMLElement>('[data-qcv="ws-strip"]');
+      page.style.setProperty("--qc137-bar-h", `${bar ? bar.offsetHeight : 0}px`);
+      page.style.setProperty("--qc137-strip-h", `${strip ? strip.offsetHeight : 0}px`);
+      /* a row brought into view by the keyboard or a popup lands BELOW the pinned controls, not under them */
+      const labels = page.querySelector<HTMLElement>(".qcw-list .lt-labels");
+      sc.style.setProperty("--wpg-scroll-pad", `${PIN_AT + (bar ? bar.offsetHeight : 0) + (strip ? strip.offsetHeight : 0) + (labels ? labels.offsetHeight : 0) + 8}px`);
+    };
+    const read = () => {
+      const top = sc.getBoundingClientRect().top;
+      const next = nextPinned(pinned, sentinel.getBoundingClientRect().top - top, page.getBoundingClientRect().bottom - top);
+      if (next !== pinned) {
+        pinned = next;
+        if (next) page.setAttribute("data-pinned", "true"); else page.removeAttribute("data-pinned");
+        measure();
+      }
+    };
+    measure();
+    read();
+    sc.addEventListener("scroll", read, { passive: true });
+    const onResize = () => { measure(); read(); };
+    window.addEventListener("resize", onResize);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    page.querySelectorAll<HTMLElement>('[data-qcv="ws-bar"], [data-qcv="ws-strip"]').forEach((el) => ro?.observe(el));
+    return () => {
+      sc.removeEventListener("scroll", read);
+      window.removeEventListener("resize", onResize);
+      ro?.disconnect();
+      page.removeAttribute("data-pinned");
+      sc.style.removeProperty("--wpg-scroll-pad");
+    };
+  }, [group, on]);
+}
+
 export const QcCentre: React.FC<{
   loading: boolean;
   /** The first 150ms of a load: the real frames with nothing in them. */
@@ -144,6 +209,7 @@ export const QcCentre: React.FC<{
   v131?: boolean;
 }> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
+  usePinnedControls(groupRef, v131);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
    * `DOCK_MIN_COLUMN` asks whether there is room for a ledger AND a card beside it, which was a
@@ -210,7 +276,7 @@ export const QcCentre: React.FC<{
       {v131 ? (
         /* v133 — THE OPEN HEADER on the desktop: no band, no card, no disc, and the fixed line in
            place of the living facts sentence (the desk carries those facts). */
-        <QcOpenHeader sent={sent} msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} />
+        <QcOpenHeader msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} />
       ) : (
       /* below 768px the v126 page is unchanged: the shared header's band and its courier disc */
       <PageHeader
@@ -238,28 +304,16 @@ export const QcCentre: React.FC<{
       * copy are the living-headers pack's and are unchanged.
       */}
     {courts}
-    {/* v136 §C — "View the full list": under the bands, it scrolls to "Your queries" and moves focus to its heading.
-        It does not navigate and puts no hash in the URL. */}
-    {v131 && (
-      <div className="qcfl" data-qcv="full-list-row">
-        <button type="button" className="qcfl-link" data-qcv="full-list" onClick={() => viewFullList(groupRef.current)}>
-          <span className="qcfl-words">View the full list</span><span className="qcfl-arrow" aria-hidden="true">{"\u2193"}</span>
-        </button>
-      </div>
-    )}
+    {/* v137 §C — THE LIST IS THE PAGE: the "View the full list" link (v136 §C), "Recently updated" and the banner
+        (v134 §3) are no longer drawn on the populated page. `viewFullList` and `QC_BANNER_LINES` are kept. */}
     {carousel}
-    {/* v134 §3 — THE BANNER above "Your queries" (desktop): a blush band the sheet's full width, its bottom
-        edge an arrow pointing down at the list. The copy is exact, on two lines. */}
-    {v131 && (
-      <section className="qc134-ban" data-qcv="banner" aria-label="A note" data-loading={loading ? "" : undefined}>
-        <p className="qc134-ban-p"><span>{QC_BANNER_LINES[0]}</span> <span>{QC_BANNER_LINES[1]}</span></p>
-      </section>
-    )}
     <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 
       {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
           are the list's own and their menus have not changed. */}
+      {/* v137 §D — the pin sentinel: zero height, at the list's top, above everything that changes size */}
+      {v131 && <i className="qc137-sentinel" data-qcv="pin-sentinel" aria-hidden="true" />}
       {v131 ? sentence : (
       <div className="qcv-lbw" data-qcv="ctl">
         {sentence}

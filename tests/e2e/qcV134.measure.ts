@@ -316,6 +316,7 @@ async function spansSheet(page: Page, y: number, rgb: number[]) {
 
 test.describe("Query Centre v134 — the band and the banner", () => {
   test("B1 · band: Recently updated sits on paper white (#fbf9f5; app shell v2), edge to edge of the sheet, 64 (52) under the desk, 72 (64) of tint above and below", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="ru"]');
@@ -377,6 +378,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
   });
 
   test("B2 · banner: the exact two lines on blush, edge to edge, 56 (48) of page above, no arrow (app shell v2: the flap, SH2 B2), the bar 130 (118) below", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="banner"]');
@@ -407,6 +409,7 @@ test.describe("Query Centre v134 — the band and the banner", () => {
   });
 
   test("B3 · the flying hawk's top clears the banner's bottom edge by 8px or more", async ({ page }) => {
+    test.skip(true, "retired by Query Centre v137 §C: Recently updated, the banner and the flying hawk are not drawn on the populated page (QC137 C1)");
     for (const [w, h] of SIZES) {
       await openQc(page, w, h);
       await centre(page, '[data-qcv="banner"]');

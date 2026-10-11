@@ -59,6 +59,7 @@ import "./primitives.css";
 import "./workspaceShell.css";
 /* ⚠️ AFTER workspaceShell.css — the ink shell overrides it by order at equal specificity. */
 import "./inkShell.css";
+import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 
@@ -1093,6 +1094,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ref={scrollRef}
               onScroll={onScroll}
             >
+              {/* v137 §E — the sticky lip, for pages that scroll here rather than in a workspace grid */}
+              <SheetLip />
               <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>
                 {/* ⚠️ THE MASTHEAD'S KICKER, SUPPLIED ONCE. Every page's masthead names its section;
                     the shell is the one component that already knows the route AND wraps all ten, so

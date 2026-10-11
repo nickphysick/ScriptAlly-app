@@ -97,7 +97,8 @@ import { useQcListKeys } from "./queries/centre/useQcListKeys";
 import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
-import { QcGlance } from "./queries/centre/QcGlance";
+import { QcStrip } from "./queries/centre/QcStrip";
+import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
@@ -3666,7 +3667,11 @@ export const Queries: React.FC<{
     count: lhOverride ?? (collectionsReady && activitiesReady ? qcLivingRows.length : null),
     copy: (n) => qcHeaderCopy(n, { rows: qcLivingRows, agentsById: qcLivingAgents, nowMs: Date.now() }),
   };
-  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind)), qcSort);
+  /* v137 §B — THE STRIP'S COURT FILTER SITS BESIDE THE LIST'S OWN ONE-VALUE FILTER, AND BOTH APPLY. It is the
+     strip's membership (`tileCourt`), so a cell's figure is the number of rows it leaves. Desktop only: on the
+     phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
+  const qcCourtOn = qcDesk ? qcCzCourt : null;
+  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn)), qcSort);
   /** §3 · what is next on each VISIBLE query — the board's card, turned into the column's words. */
   const qcComing = useMemo(() => {
     const now = Date.now();
@@ -6631,6 +6636,9 @@ export const Queries: React.FC<{
                 scope={qcScopeMenu}
                 findRef={qcFindRef}
                 loading={showGridSkeleton}
+                /* v137 §B — the strip's court counts as a filter that is on, and "Clear all" clears it too */
+                courtOn={!!qcCzCourt}
+                onClearCourt={() => setQcCzCourt(null)}
               />
             ) : (
               <QcSentence
@@ -6680,12 +6688,14 @@ export const Queries: React.FC<{
             )}
             courts={qcDesk ? (
               /* v131 §2 (desktop) — the headerless desk; the skeleton is the same component over no rows */
-              <QcGlance
+              <QcStrip
                 sections={deskSections(showGridSkeleton ? [] : qcScoped, Date.now())}
-                /* v136 — the faces are the header's, moved into the cards: the desk's own rows, each court's in qcFaces's order */
+                sent={stripSent(showGridSkeleton ? [] : qcScoped, Date.now())}
                 faces={showGridSkeleton ? [] : facesFor(qcScoped, Date.now(), { you: 16, agent: 16, closed: 16 }).faces}
                 active={qcCzCourt}
+                /* a cell filters the list (and never scrolls); cell 1, or the pressed cell again, clears it */
                 onCourt={pickCourt}
+                onAll={() => setQcCzCourt(null)}
                 loading={showGridSkeleton}
               />
             ) : showGridSkeleton ? <QcCourtsSkeleton /> : (
@@ -6734,25 +6744,8 @@ export const Queries: React.FC<{
             )}
             footer={<AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
             carousel={qcDesk ? (
-              /* v132 §1 (desktop) — "Recently updated": the lede, the featured card and "Also moved".
-                 The desk scopes it and nothing else; the button's number is the LIST's total. */
-              <QcRecent
-                loading={showGridSkeleton}
-                rows={qcScoped}
-                court={qcCzCourt}
-                title={qcCzCourt ? DESK_LABEL[qcCzCourt] : "Recently updated"}
-                listTotal={qcScoped.length}
-                nowMs={Date.now()}
-                onSeeAll={() => document.querySelector('[data-qcv="ledger"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                model={(row) => {
-                  const door = primaryDoor(row.status);
-                  return {
-                    ...fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null,
-                      door ? () => openQueryDrawer({ mode: door.mode, queryId: row.id }) : () => onOpenQuery?.(row.id)),
-                    actionLabel: door ? door.label : "Open",
-                  };
-                }}
-              />
+              /* v137 §C — the list is the page: "Recently updated" (`QcRecent`, v132 §1) is not drawn */
+              null
             ) : showGridSkeleton ? null : (() => {
               const dealt = carouselRows(qcScoped, qcCzCourt, qcCzSort);
               const tile = qcCzCourt ? courtTiles(qcScoped).find((c) => c.key === qcCzCourt) : null;
@@ -6799,11 +6792,11 @@ export const Queries: React.FC<{
             body={
               showGridSkeleton ? (
                 qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
-              ) : qcDesk && (emptyKind === "filtered" || emptyKind === "nomatch") ? (
+              ) : qcDesk && (emptyKind === "filtered" || emptyKind === "nomatch" || qcVisible.length === 0) ? (
                 /* v132 §4 — the desktop dead end: the inkwell and one way back (a search before a filter) */
                 <QcDeadEnd find={qcFind} book={qcLineTitle}
                   onClearFind={() => setQcFind("")}
-                  onClearFilters={() => { clearQcFilter(); setQcScope(null); }} />
+                  onClearFilters={() => { clearQcFilter(); setQcScope(null); setQcCzCourt(null); }} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's

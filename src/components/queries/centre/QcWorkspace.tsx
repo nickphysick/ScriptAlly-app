@@ -86,7 +86,12 @@ export const QcWorkspaceHead: React.FC<{
   scope: ScopeMenu | null;
   /** while the data loads: the bar and the strip are real, their figures are placeholders (W10) */
   loading?: boolean;
-}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false }) => {
+  /** v137 §B — the strip's court filter is on: "Clear all" shows, and clears it with the rest */
+  courtOn?: boolean;
+  onClearCourt?: () => void;
+  /** v137 §C — the flying hawk over the bar's corner; no longer drawn on the Query Centre */
+  hawk?: boolean;
+}> = ({ shown, total, book, filter, onFilter, options, countOf, find, onFind, findRef, group, onGroup, sort, onSort, density, onDensity, scope, loading = false, courtOn = false, onClearCourt, hawk = false }) => {
   /* the keyboard card: a click outside or Escape closes it */
   const [keysOpen, setKeysOpen] = useState(false);
   const keysRef = useRef<HTMLSpanElement>(null);
@@ -107,7 +112,7 @@ export const QcWorkspaceHead: React.FC<{
   const count = countOf;
   const stageOpts = options.filter((o) => o.key.startsWith("stage:"));
   const onStage = filter.startsWith("stage:");
-  const anyOn = filter !== "all" || find.trim().length > 0 || (scope?.current ?? null) != null;
+  const anyOn = filter !== "all" || find.trim().length > 0 || (scope?.current ?? null) != null || courtOn;
 
   const groups: Record<Exclude<Pop, null>, QcMenuGroup[]> = {
     group: [{ current: group, items: GROUP_BY_OPTIONS.map((g) => ({ key: g.key, label: g.label })), onPick: (k) => { onGroup(k as GroupBy); close(); } }],
@@ -170,10 +175,19 @@ export const QcWorkspaceHead: React.FC<{
   const groupShort = GROUP_BY_OPTIONS.find((g) => g.key === group)?.short ?? group;
   const sortShort = SORT_OPTIONS.find((s) => s.key === sort)?.short ?? sort;
 
+  /* v137 §D — "↑ Summary": the page's top, and focus on its heading. No smooth scroll under reduced motion. */
+  const toSummary = (e: React.MouseEvent<HTMLElement>) => {
+    const sc = e.currentTarget.closest<HTMLElement>(".wpg-scroll");
+    const h1 = e.currentTarget.closest<HTMLElement>(".qcv-group")?.querySelector<HTMLElement>("h1[data-page-title]");
+    const still = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    sc?.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+    if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+  };
+
   return (
     <div className="qcw-head" data-qcv="ws-head">
       <div className="qcw-bar" data-qcv="ws-bar">
-        <img className="qcw-hawk" data-qcv="ws-hawk" src={`${QC_LIST_FLIGHT.src}?v=${QC_LIST_FLIGHT.version}`} width={QC_LIST_FLIGHT.width} height={QC_LIST_FLIGHT.height} alt="" aria-hidden="true" />
+        {hawk && <img className="qcw-hawk" data-qcv="ws-hawk" src={`${QC_LIST_FLIGHT.src}?v=${QC_LIST_FLIGHT.version}`} width={QC_LIST_FLIGHT.width} height={QC_LIST_FLIGHT.height} alt="" aria-hidden="true" />}
         <div className="qcw-r1">
           <div className="qcw-t">
             <h2 className="qcw-title" data-qcv="ws-title">Your queries</h2>
@@ -187,6 +201,10 @@ export const QcWorkspaceHead: React.FC<{
             </button>
             <button type="button" className="qcw-pill qcw-pill--over" data-qcv="ws-pill" data-k="past" aria-pressed={filter === "past"} onClick={() => toggle("past")}>
               <i aria-hidden="true" /><b>{fig(count("past"))}</b> overdue
+            </button>
+            {/* v137 §D — shown only while the controls are pinned (CSS, off `data-pinned`): back to the top of the page */}
+            <button type="button" className="qcw-pill qcw-pill--sum" data-qcv="ws-summary" onClick={toSummary}>
+              <span aria-hidden="true">{"\u2191"}</span> Summary
             </button>
           </span>
         </div>
@@ -232,7 +250,7 @@ export const QcWorkspaceHead: React.FC<{
         {visibleChips}
         {stageBtn}
         {moreBtn}
-        {anyOn && <button type="button" className="qcw-clear" data-qcv="ws-clear" onClick={() => { onFilter("all"); onFind(""); scope?.onScope(null); }}>Clear all</button>}
+        {anyOn && <button type="button" className="qcw-clear" data-qcv="ws-clear" onClick={() => { onFilter("all"); onFind(""); scope?.onScope(null); onClearCourt?.(); }}>Clear all</button>}
         {/* the unfolded row, measured off-screen: what the strip would need to hold every chip */}
         <div className="qcw-strip-measure" ref={measureRef} aria-hidden="true">
           {chips.map((c) => React.cloneElement(c, { tabIndex: -1, key: `m-${c.key}` }))}

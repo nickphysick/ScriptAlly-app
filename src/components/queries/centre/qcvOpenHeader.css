@@ -9,3 +9,12 @@
 @import "./qcvPage.css";
 
 .qcv-group > .qcoh { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
+
+/* ── v137 §A: the Analytics panel with a title. The shared panel's box; this states the padding, the subline and the
+   drawing's inset, which are this page's own. Full (compact): the wide sheet's values are the larger. ── */
+.qcv-group > .qcoh.qcoh--137.hp3.hp3 { padding: 28px 32px 30px 36px; }
+.ws-app.sheet-wide .qcv-group > .qcoh.qcoh--137.hp3.hp3 { padding: 34px 44px 36px 48px; }
+.qcoh.qcoh--137 .hp3-txt .hp3-sub { margin-top: 14px; max-width: none; color: rgba(244, 238, 229, 0.86); }
+.ws-app.sheet-wide .qcoh.qcoh--137 .hp3-txt .hp3-sub { margin-top: 16px; }
+.qcoh.qcoh--137 .hp3-sub .qcoh-ms { font-family: var(--sp-type) !important; font-style: normal; }
+.qcoh.qcoh--137 .hp3-art { margin-right: 12px; }

@@ -25,8 +25,10 @@ const DIR = "reports/header-v3";
 const BASELINE = "tests/e2e/fixtures/hv3-outofscope.json";
 const PANEL_BG = "rgb(45, 58, 80)";
 /** §0.3, as filled in: the pages whose header leads with a count, and the pages that lead with a title. */
-export const NUMBER = ["/queries", "/agents", "/manuscripts/comps", "/manuscripts/packages", "/todo"] as const;
-export const TITLE = ["/queries/analytics", "/agents/discover", "/manuscripts", "/todo/calendar", "/todo/noteboard"] as const;
+/* Query Centre v137 §A: /queries is a TITLE page now ("Every query, in one place"), so H2, H3 and H7 no longer read it
+   (tests/e2e/RETIRED-query-centre-v137.md); QC137 A1 holds its header. */
+export const NUMBER = ["/agents", "/manuscripts/comps", "/manuscripts/packages", "/todo"] as const;
+export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/todo/calendar", "/todo/noteboard"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
@@ -214,6 +216,7 @@ test("H8 · no jump: the loading and loaded header boxes are equal", async ({ pa
 
 /* ───────────────────────── H9 · H10 · /queries spacing ───────────────────────── */
 test("H9 H10 · /queries: the bands under the panel, and the link above the fold", async ({ page }) => {
+  test.skip(true, "retired by Query Centre v137: the bands and the link are gone; QC137 B1 holds the strip under the panel and C1 the list under the strip");
   const L = new Ledger(name(["H9", "H10"], "H9-H10"));
   await prepare(page);
   for (const vp of SIZES) {
