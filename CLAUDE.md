@@ -919,6 +919,13 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ `BookVersion` HAS NO WORD COUNT, so the version modal has none** (the mock draws one — false premise).
 - **Harness:** `tests/e2e/pkgMat.measure.ts` (S1–S7 once; P1–P9 at 1440; P2 + P8 at 1280 via `PM_CW`) with `seedPackagesV2Fixture.mjs` (`--dump`, `--plan`, `--restore` in `afterAll`). Its drag helper puts BOTH ends on screen and asserts it first — `dragTo` scrolls every ancestor to reach a low rail chip and lifts the composer off the top. Retired suites and the deferred census rows: `tests/e2e/RETIRED-packages-v2.md`.
 
+## Comparable titles v27.1 — the library in the column, and one centred close button (12 Oct; report reports/comps-v27-1/REPORT.md; on branch `comps-v27-1`, NOT merged; AMENDS v25 and v27)
+- **The library (heading and list) sits in the page column**, with the header panel's and the strip's edges. **Only full screen breaks out** to the sheet less 12 each side. v25's "the width is the sheet's, never the column's" is reversed.
+- **Row grid:** compact (`1.2fr 1fr 220px 200px`) in the column, always. The wide grid is full screen's alone, from 1440 of sheet, by a container query on the list (`min-width: 1416px`), never the shell's `sheet-wide` class.
+- **The bar reads the LIST's width:** search 280 from 1300, 220 from 1100, else 170; Books and Film and TV hidden below 1300. The column never reaches 1300, so 280 and those two chips appear in full screen only.
+- **⚠️ ONE CLOSE BUTTON, `CloseButton` (comps25/marks.tsx), for all five on the page.** An SVG ✕ (1.75 stroke; 12 in a 34px button, 14 in 36), centred by `.cv-xb` (grid, no padding, no line box). Before, four of the five had no layout of their own and the svg is a block (preflight), so it sat at the button's left edge, 11px off centre. It is comps-only: other pages' close buttons are their own, mostly a text "✕".
+- **Locks:** `tests/e2e/compsV271.measure.ts` W1, W2, X1 (`v271Mutations.sh`). CV25 D1, D2 and F1 are rewritten.
+
 ## Comparable titles v27 — a new header, a real empty page, and "how it works" as a pop-up (12 Oct; refs = design-refs/materials/comps-v27.html + design-refs/comps-v27/*.png; report reports/comps-v27/REPORT.md; on branch `comps-v27`, NOT merged; AMENDS v25, v26 and v26.1)
 - **The header reads "Comparable titles" over one subline, with comps and without**, and no longer names the manuscript (`COMPS_TITLE`, `COMPS_SUB`).
 - **The page has three states, and loading is neither of the other two.** While comps load it is the header and NOTHING below it; an account with comps is never shown the empty page first (V6). This retired v25's loading boxes for the strip and the library, so CV25 L1 holds the panel only.

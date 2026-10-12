@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "V1",
+  "where": "1512 with comps: the h1",
+  "ok": true,
+  "detail": "\"Comparable titles\" on 1 line(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 with comps: the subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\""
+ },
+ {
+  "lock": "V1",
+  "where": "1512 with comps: no manuscript title in the panel",
+  "ok": true,
+  "detail": "0 title element(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 empty: the h1",
+  "ok": true,
+  "detail": "\"Comparable titles\" on 1 line(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 empty: the subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\""
+ },
+ {
+  "lock": "V1",
+  "where": "1512 empty: no manuscript title in the panel",
+  "ok": true,
+  "detail": "0 title element(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 with comps: the h1",
+  "ok": true,
+  "detail": "\"Comparable titles\" on 1 line(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 with comps: the subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\""
+ },
+ {
+  "lock": "V1",
+  "where": "1280 with comps: no manuscript title in the panel",
+  "ok": true,
+  "detail": "0 title element(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 empty: the h1",
+  "ok": true,
+  "detail": "\"Comparable titles\" on 1 line(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 empty: the subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\""
+ },
+ {
+  "lock": "V1",
+  "where": "1280 empty: no manuscript title in the panel",
+  "ok": true,
+  "detail": "0 title element(s)"
+ }
+]

@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "X1",
+  "where": "1512 the comp drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the comp drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the comp drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the add drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the add drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the add drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the picker: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the picker: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the picker: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the Scout drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the Scout drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the Scout drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the pop-up: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the pop-up: the glyph is an SVG, 14 × 14 in 36",
+  "ok": false,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 36.0 × 36.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1512 the pop-up: its centre is the button's (±0.5)",
+  "ok": true,
+  "detail": "off by 0.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the comp drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the comp drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the comp drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the add drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the add drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the add drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the picker: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the picker: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the picker: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the Scout drawer: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the Scout drawer: the glyph is an SVG, 12 × 12 in 34",
+  "ok": true,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 34.0 × 34.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the Scout drawer: its centre is the button's (±0.5)",
+  "ok": false,
+  "detail": "off by -11.00 across, 0.00 down"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the pop-up: there is one, named \"Close\"",
+  "ok": true,
+  "detail": "\"Close\" · 1 button(s)"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the pop-up: the glyph is an SVG, 14 × 14 in 36",
+  "ok": false,
+  "detail": "svg true · text \"\" · glyph 12.0 × 12.0 · button 36.0 × 36.0"
+ },
+ {
+  "lock": "X1",
+  "where": "1280 the pop-up: its centre is the button's (±0.5)",
+  "ok": true,
+  "detail": "off by 0.00 across, 0.00 down"
+ }
+]

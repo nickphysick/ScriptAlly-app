@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: the card is open",
+  "ok": true,
+  "detail": "card true · link false"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: three points",
+  "ok": true,
+  "detail": "3 points"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: the hide link",
+  "ok": true,
+  "detail": "Got it, hide this"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: hiding folds it to the link",
+  "ok": true,
+  "detail": "card false · link true"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 with comps: only the folded link",
+  "ok": true,
+  "detail": "card false · link true · 0 points"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 with comps: the link opens the card",
+  "ok": true,
+  "detail": "card true · 3 points · Hide"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 edit: neither shows",
+  "ok": true,
+  "detail": "card false · link false"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 no comps: the card is open",
+  "ok": true,
+  "detail": "card true · link false"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 no comps: three points",
+  "ok": true,
+  "detail": "3 points"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 no comps: the hide link",
+  "ok": true,
+  "detail": "Got it, hide this"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 no comps: hiding folds it to the link",
+  "ok": true,
+  "detail": "card false · link true"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 with comps: only the folded link",
+  "ok": true,
+  "detail": "card false · link true · 0 points"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 with comps: the link opens the card",
+  "ok": true,
+  "detail": "card true · 3 points · Hide"
+ },
+ {
+  "lock": "AD2",
+  "where": "1280 edit: neither shows",
+  "ok": true,
+  "detail": "card false · link false"
+ }
+]

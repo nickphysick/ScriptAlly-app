@@ -1,0 +1,5 @@
+tsc=0
+tscfn=0
+vitest=0
+prod=0
+dev=0

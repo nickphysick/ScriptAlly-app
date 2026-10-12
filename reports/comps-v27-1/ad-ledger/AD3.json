@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "AD3",
+  "where": "1512 film: labels",
+  "ok": true,
+  "detail": "film: Director / Studio or distributor"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 film: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. Film4"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 film: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 film: the head's disc shows the type",
+  "ok": true,
+  "detail": "film"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 tv: labels",
+  "ok": true,
+  "detail": "tv: Creator / Network or channel"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 tv: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. BBC Two"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 tv: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 tv: the head's disc shows the type",
+  "ok": true,
+  "detail": "tv"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 other: labels",
+  "ok": true,
+  "detail": "other: Creator / Publisher or platform"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 other: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. Audible"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 other: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 other: the head's disc shows the type",
+  "ok": true,
+  "detail": "other"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 book: labels",
+  "ok": true,
+  "detail": "book: Author / Publisher"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 book: placeholders",
+  "ok": true,
+  "detail": "e.g. R. Okafor / e.g. Faber"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 book: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 book: the head's disc shows the type",
+  "ok": true,
+  "detail": "book"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 year: digits only, four at most",
+  "ok": true,
+  "detail": "2024"
+ },
+ {
+  "lock": "AD3",
+  "where": "1512 arrow keys move between the types",
+  "ok": true,
+  "detail": "film"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 film: labels",
+  "ok": true,
+  "detail": "film: Director / Studio or distributor"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 film: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. Film4"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 film: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 film: the head's disc shows the type",
+  "ok": true,
+  "detail": "film"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 tv: labels",
+  "ok": true,
+  "detail": "tv: Creator / Network or channel"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 tv: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. BBC Two"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 tv: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 tv: the head's disc shows the type",
+  "ok": true,
+  "detail": "tv"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 other: labels",
+  "ok": true,
+  "detail": "other: Creator / Publisher or platform"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 other: placeholders",
+  "ok": true,
+  "detail": "e.g. Tom Arden / e.g. Audible"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 other: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 other: the head's disc shows the type",
+  "ok": true,
+  "detail": "other"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 book: labels",
+  "ok": true,
+  "detail": "book: Author / Publisher"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 book: placeholders",
+  "ok": true,
+  "detail": "e.g. R. Okafor / e.g. Faber"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 book: typed values survive",
+  "ok": true,
+  "detail": "{\"title\":\"Last Light\",\"who\":\"Tom Arden\",\"pub\":\"Film4\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 book: the head's disc shows the type",
+  "ok": true,
+  "detail": "book"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 year: digits only, four at most",
+  "ok": true,
+  "detail": "2024"
+ },
+ {
+  "lock": "AD3",
+  "where": "1280 arrow keys move between the types",
+  "ok": true,
+  "detail": "film"
+ }
+]

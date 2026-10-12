@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 left edge",
+  "ok": true,
+  "detail": "heading 296.375 · list 296.375"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 right edge",
+  "ok": true,
+  "detail": "heading 1455.625 · list 1455.625"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the list's edges are the panel's",
+  "ok": true,
+  "detail": "list 296.375–1455.625 · panel 296.375–1455.625"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 copy",
+  "ok": true,
+  "detail": "Your comparable titles library · 7 titles · in your own order"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 left edge",
+  "ok": true,
+  "detail": "heading 288.953125 · list 288.953125"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 right edge",
+  "ok": true,
+  "detail": "heading 1231.046875 · list 1231.046875"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the list's edges are the panel's",
+  "ok": true,
+  "detail": "list 288.953125–1231.046875 · panel 288.953125–1231.046875"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 copy",
+  "ok": true,
+  "detail": "Your comparable titles library · 7 titles · in your own order"
+ }
+]

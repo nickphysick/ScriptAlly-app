@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "W2",
+  "where": "1024 the bar is one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "W2",
+  "where": "1024 the bar does not overflow",
+  "ok": true,
+  "detail": "scroll 702 / 702 · furthest right 971.2 of 983.2"
+ },
+ {
+  "lock": "W2",
+  "where": "1024 no two controls in the bar overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "W2",
+  "where": "1512 normal: rows use the compact grid",
+  "ok": true,
+  "detail": "327 272 220 200 at a list 1159 wide"
+ },
+ {
+  "lock": "W2",
+  "where": "1512 the bar is one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "W2",
+  "where": "1512 the bar does not overflow",
+  "ok": true,
+  "detail": "scroll 1159 / 1159 · furthest right 1439.6 of 1455.6"
+ },
+ {
+  "lock": "W2",
+  "where": "1512 no two controls in the bar overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "W2",
+  "where": "1512 full screen: the wide grid only from 1440 of sheet",
+  "ok": true,
+  "detail": "465 387 220 200 at a sheet 1436 wide"
+ },
+ {
+  "lock": "W2",
+  "where": "1280 normal: rows use the compact grid",
+  "ok": true,
+  "detail": "208 174 220 200 at a list 942 wide"
+ },
+ {
+  "lock": "W2",
+  "where": "1280 the bar is one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "W2",
+  "where": "1280 the bar does not overflow",
+  "ok": true,
+  "detail": "scroll 942 / 942 · furthest right 1215.0 of 1231.0"
+ },
+ {
+  "lock": "W2",
+  "where": "1280 no two controls in the bar overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "W2",
+  "where": "1920 normal: rows use the compact grid",
+  "ok": true,
+  "detail": "380 316 220 200 at a list 1256 wide"
+ },
+ {
+  "lock": "W2",
+  "where": "1920 full screen: the wide grid only from 1440 of sheet",
+  "ok": true,
+  "detail": "556 556 284 284 at a sheet 1844 wide"
+ }
+]

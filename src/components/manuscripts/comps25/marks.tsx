@@ -36,9 +36,25 @@ export const FullIcon: React.FC<{ on: boolean }> = ({ on }) => (
     {on ? <path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5" /> : <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />}
   </svg>
 );
-export const CloseIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 12 12" {...S} strokeWidth={1.8} aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" /></svg>
+/**
+ * THE CLOSE BUTTON (comps v27.1) — the one ✕ every drawer and dialog on this page uses: the comp drawer, the add
+ * drawer, the picker, the Scout drawer and the "How comp tracking works" pop-up.
+ *
+ * The glyph is an SVG, two round-capped lines at 1.75, 12 × 12 in a 34px button and 14 × 14 in a 36px one. Never a
+ * text "✕": a character's metrics shift with the font. The button centres it (`.cv-xb`); `className` carries the
+ * button's own size and colours. It is always named "Close".
+ */
+export const CloseButton = React.forwardRef<HTMLButtonElement, { size?: 34 | 36; className: string } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children" | "type">>(
+  ({ size = 34, className, ...rest }, ref) => {
+    const g = size === 36 ? 14 : 12;
+    return (
+      <button ref={ref} type="button" aria-label="Close" {...rest} className={`cv-xb ${className}`}>
+        <svg width={g} height={g} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.75 * 12 / g} strokeLinecap="round" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" /></svg>
+      </button>
+    );
+  },
 );
+CloseButton.displayName = "CloseButton";
 export const TickIcon = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" {...S} strokeWidth={2} aria-hidden="true"><path d="M2.5 6.5l2.5 2.5 4.5-5.5" /></svg>
 );

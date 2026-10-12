@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A1",
+  "where": "the fixture holds a comp with no id",
+  "ok": true,
+  "detail": "6 of 7 have ids"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: every comp has an id",
+  "ok": true,
+  "detail": "cmp_cv25tide cmp_cv25salt cmp_cv25nine cmp_cv25brit cmp_1vsfk5nrgact cmp_cv25ferr cmp_cv25last"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: the ids are unique",
+  "ok": true,
+  "detail": "7 distinct of 7"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: every id that existed is unchanged, on the same comp",
+  "ok": true,
+  "detail": "cmp_cv25tide→cmp_cv25tide cmp_cv25salt→cmp_cv25salt cmp_cv25nine→cmp_cv25nine cmp_cv25brit→cmp_cv25brit (none)→cmp_1vsfk5nrgact cmp_cv25ferr→cmp_cv25ferr cmp_cv25last→cmp_cv25last"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: the order is the writer's",
+  "ok": true,
+  "detail": "The Tidewater Line · Salt Road · Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing"
+ },
+ {
+  "lock": "A1",
+  "where": "after an add: unique ids, the new one its own",
+  "ok": true,
+  "detail": "cmp_cv25tide cmp_cv25salt cmp_cv25nine cmp_cv25brit cmp_1vsfk5nrgact cmp_cv25ferr cmp_cv25last cmp_icilywl493ic"
+ },
+ {
+  "lock": "A1",
+  "where": "after an add: every earlier id is unchanged",
+  "ok": true,
+  "detail": "earlier ids"
+ },
+ {
+  "lock": "A1",
+  "where": "after remove and Undo: the same id comes back",
+  "ok": true,
+  "detail": "cmp_icilywl493ic of cmp_icilywl493ic"
+ }
+]

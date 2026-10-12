@@ -18,7 +18,7 @@ import type { CompTitle } from "../../../types";
 import { MAX_LETTER_COMPS, compKey, ready } from "../../../lib/compUsage";
 import { LetterLite, kindOf, letterShort } from "../../../lib/compsLibrary";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { CloseIcon, KindIcon, LockIcon, TickIcon } from "./marks";
+import { CloseButton, KindIcon, LockIcon, TickIcon } from "./marks";
 
 export interface PickerRequest { letterId: string | null; forKey?: string }
 
@@ -86,7 +86,7 @@ export const CompLetterPicker: React.FC<{
       <div className="cv-pk" role="dialog" aria-modal="true" aria-label="Log comps in a letter" data-cv="picker" data-letter={letter?.id ?? ""} data-fixed={fixed ? "true" : "false"}>
         <div className="cv-ph">
           <div><h3 className="cv-pt">Comps this letter mentions</h3><small>Choose every comp the letter references.</small></div>
-          <button type="button" className="cv-x" aria-label="Close" data-cv="picker-close" onClick={p.onClose}><CloseIcon /></button>
+          <CloseButton className="cv-x" data-cv="picker-close" onClick={p.onClose} />
         </div>
         {p.letters.length === 0 ? (
           <div className="cv-pempty" data-cv="picker-empty">

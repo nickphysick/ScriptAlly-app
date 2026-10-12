@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512 held loading",
+  "ok": true,
+  "detail": "loading true · 0 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 nothing below the header while loading",
+  "ok": true,
+  "detail": "0 element(s) below"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 then loaded",
+  "ok": true,
+  "detail": "loading false · 7 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "296,134 1159×256.0 → 296,134 1159×256.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 held loading",
+  "ok": true,
+  "detail": "loading true · 0 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 nothing below the header while loading",
+  "ok": true,
+  "detail": "0 element(s) below"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 then loaded",
+  "ok": true,
+  "detail": "loading false · 7 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "289,134 942×256.0 → 289,134 942×256.0"
+ }
+]

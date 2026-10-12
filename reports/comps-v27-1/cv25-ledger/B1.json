@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 title panel",
+  "ok": true,
+  "detail": "title · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 h1",
+  "ok": true,
+  "detail": "\"Comparable titles\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no number",
+  "ok": true,
+  "detail": "0 number part(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 one line, Special Elite",
+  "ok": true,
+  "detail": "1 line(s) · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 compact sheet",
+  "ok": true,
+  "detail": "sheet-wide false"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 drawing 196",
+  "ok": true,
+  "detail": "slot 196 · image 196"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 drawing inside the panel",
+  "ok": true,
+  "detail": "image 162.75–358.75 in 133.75–389.75"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\" · 0 manuscript title(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 buttons",
+  "ok": true,
+  "detail": "+ Add a comp · See all comps"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title panel",
+  "ok": true,
+  "detail": "title · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 h1",
+  "ok": true,
+  "detail": "\"Comparable titles\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no number",
+  "ok": true,
+  "detail": "0 number part(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 one line, Special Elite",
+  "ok": true,
+  "detail": "1 line(s) · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 compact sheet",
+  "ok": true,
+  "detail": "sheet-wide false"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 drawing 196",
+  "ok": true,
+  "detail": "slot 196 · image 196"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 drawing inside the panel",
+  "ok": true,
+  "detail": "image 162.75–358.75 in 133.75–389.75"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 subline",
+  "ok": true,
+  "detail": "\"Build your comps library, add to query letters, and track what’s working.\" · 0 manuscript title(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 buttons",
+  "ok": true,
+  "detail": "+ Add a comp · See all comps"
+ }
+]
