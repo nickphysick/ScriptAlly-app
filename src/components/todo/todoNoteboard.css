@@ -412,8 +412,30 @@
    number page's drawing to it, and a slot sized to its placeholder was 138 (red on the first L2 run). The
    placeholder is centred inside the slot instead. */
 .nb-group .hp3 .hp3-art:has(.cb-hart) { width: 250px; padding: 0; aspect-ratio: auto; border-radius: 0; background: none; box-shadow: none; display: flex; align-items: center; }
+/* ⚠️ THE PLACEHOLDER STATES ITS OWN WIDTH. Its box is `width: 100%` of a figure that, as a flex item, shrinks to
+   its content — which is that box — so the two resolved each other to ZERO and the slot drew nothing (seen in
+   the 1024 shot after the slot became a flex row; no lock was looking at the placeholder's own size). */
+.nb-group .hp3 .hp3-art .cb-hart { width: 100%; flex: 0 0 100%; }
 .nb-group .cb-hart .art-box { border-color: #7d8aa0; background: none; }
 .nb-group .cb-hart .art-phk { color: #aab4c4; font-size: 9px; }
+
+/* ⚠️ THE 22 IS THE ROW'S ALONE. The shared panel states its own space below (`--hpanel-below` less 24: 24px at
+   1440 and wider), and two block margins collapse to the LARGER — measured: the row sat 24 under the panel at
+   1512 and 22 at 1280 from one declaration. The panel's is zeroed here, one class heavier than the rule that
+   sets it, so the gap is this page's number at every width. */
+.nb-group > .ph.ph--panel.ph--full.ph--living { margin-bottom: 0; }
+
+/* ⚠️ THE WORDS MAY WRAP ON THIS PAGE, AND THE SUBLINE WITH THEM. The shared panel sets its number-page title
+   `nowrap` in a max-content track, which is right for "things to do" and wrong for "notes pinned to your
+   corkboard", the longest words of any number page: at 1024 the title and the subline ran on under the
+   drawing. Here the words' track may shrink, and the lines are BALANCED — which gives the ref's own break
+   ("notes pinned / to your corkboard") where two lines fit, and three short lines where they do not.
+   ⚠️ NOT A NO-BREAK TAIL: holding "to your corkboard" together made a 317px word, which overflowed its own
+   box into the drawing at 1024 while the box itself measured clear (the lock now reads the INK).
+   Page-scoped: no other page's header can move. */
+.nb-group .hp3 .hp3-tb { grid-template-columns: auto minmax(0, 1fr); }
+.nb-group .hp3 .hp3-tb h1.hp3-h1 { white-space: normal; }
+.nb-group .hp3 .hp3-h1 .hp3-w { line-height: 1.12 !important; text-wrap: balance; }
 
 /* ⚠️ THE 22 IS THE ROW'S ALONE. The shared panel states its own space below (`--hpanel-below` less 24: 24px at
    1440 and wider), and two block margins collapse to the LARGER — measured: the row sat 24 under the panel at

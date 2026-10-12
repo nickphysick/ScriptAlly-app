@@ -470,7 +470,7 @@ test.describe("phase 6 — the desk", () => {
     await expect(page.locator(`${scope2} [data-todo-v2="rail-row"]`, { hasText: text })).toHaveCount(1, { timeout: 20000 }); bump();
   });
 
-  test("a note written at the desk is on the Noteboard, and never on the list", async ({ page }) => {
+  test("a note written at the desk is on the Corkboard, and never on the list", async ({ page }) => {
     const scope = await openV2(page, 1440, 900);
     const text = `Zz v2 probe note ${Date.now()}`;
     await page.click(`${scope} .tdv2-cseg[data-mode="note"]`);
@@ -478,10 +478,10 @@ test.describe("phase 6 — the desk", () => {
     await page.fill(`${scope} [data-todo-v2="capture"]`, text);
     await page.click(`${scope} [data-todo-v2="add"]`);
     await expect(page.locator(`${scope} [data-todo-v2="note"]`, { hasText: text })).toHaveCount(1, { timeout: 15000 }); bump();
-    await expect(page.locator(`${scope} [data-todo-v2="said"]`)).toContainText("on your Noteboard too"); bump();
+    await expect(page.locator(`${scope} [data-todo-v2="said"]`)).toContainText("on your Corkboard too"); bump();
     expect(await page.locator(`${scope} [data-todo-v2="row"]`, { hasText: text }).count(), "a note reached the list").toBe(0); bump();
     await page.click(`${scope} [data-todo-v2="noteboard-link"]`);
-    await expect(page).toHaveURL(/\/todo\/noteboard$/); bump();
+    await expect(page).toHaveURL(/\/todo\/corkboard$/); bump();
     /* ⚠️ THE TO-DO PAGE STAYS MOUNTED (hidden) WITH THE SAME TEXT IN ITS RAIL, so the Noteboard is found by
        measuring which Tasks page is on screen, never by `.first()` */
     await page.waitForFunction(() => [...document.querySelectorAll(".tpl-wpg")].some((e) => e.getBoundingClientRect().height > 0), undefined, { timeout: 20000 });
