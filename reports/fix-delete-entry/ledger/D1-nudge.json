@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "nudge · the write happened",
+  "ok": true,
+  "detail": "status Queried; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "nudge · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row act-iqtp2s2pa · logEntryId absent · log entry act-iqtp2s2pa"
+ },
+ {
+  "lock": "D1",
+  "where": "nudge · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "13 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "nudge · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "nudge · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "nudge · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

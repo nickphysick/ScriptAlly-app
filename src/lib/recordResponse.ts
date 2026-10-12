@@ -352,6 +352,9 @@ export async function recordQueryResponse(
         details,
         resultingStatus: newStatus,
         ...(data.eventKey ? { eventKey: data.eventKey } : {}),
+        /* fix-delete-entry: this row and its log entry have different ids, so the row names its entry — which is
+           what lets "It never happened" take both. (A create is not allowlisted by field; an update is.) */
+        logEntryId: activityDocRef.id,
       });
       legacyWritten = true;
     } catch (err) {

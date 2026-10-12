@@ -1,0 +1,8 @@
+  ✗ D1 · response (a pass) · the query document equals its starting snapshot, field for field — rejectionFeedbackType: absent → "form"
+  ✗ D1 · request · the query document equals its starting snapshot, field for field — expectedSendDate: absent → {"type":"firestore/timestamp/1.0","seconds":1793016000,"nanoseconds":0} · sendReminderDate: absent → {"type":"firestore/timestamp/1.0","seconds":1792839600,"nanoseconds":0}
+  ✗ D1 · send · the query document equals its starting snapshot, field for field — lastSentLabel: absent → "Full manuscript" · nudgeDate: absent → "2027-01-11T12:00:00.000Z" · writerExpectedDate: absent → "2027-01-04T12:00:00.000Z" · writerExpectedSetAt: absent → "2026-10-12T09:12:39.477Z"
+  ✗ D1 · nudge · the query document equals its starting snapshot, field for field — closePlan: absent → "2026-11-09T12:00:00.000Z" · lastNudgeSentDate: absent → "2026-10-12T11:00:00.000Z"
+  ✗ D1 · offer · the query document equals its starting snapshot, field for field — offerDate: absent → {"type":"firestore/timestamp/1.0","seconds":1791802800,"nanoseconds":0} · offerResponseDeadline: absent → {"type":"firestore/timestamp/1.0","seconds":1793016000,"nanoseconds":0}
+  ✗ D1 · close · the query document equals its starting snapshot, field for field — closingNotes: absent → "An offer elsewhere" · closingReason: absent → "withdrew" · withdrawTold: absent → false
+  6 failed
+  2 passed (3.4m)

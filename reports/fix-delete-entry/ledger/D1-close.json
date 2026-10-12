@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "close · the write happened",
+  "ok": true,
+  "detail": "status Withdrawn; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "close · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row H7UpNLjdWyYYi8u8wVNa · logEntryId \"Z8KtwI1xuNZhn1BCtS6e\" · log entry Z8KtwI1xuNZhn1BCtS6e"
+ },
+ {
+  "lock": "D1",
+  "where": "close · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "13 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "close · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "close · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "close · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

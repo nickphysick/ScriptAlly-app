@@ -1,0 +1,5 @@
+[8/8] [measure] › tests/e2e/deleteEntry.measure.ts:154:3 › delete entry › D2 · the known limit: a value the deleted entry wrote over is not restored — it is the entry's value or cleared, never a third
+[measure] › tests/e2e/deleteEntry.measure.ts:154:3 › delete entry › D2 · the known limit: a value the deleted entry wrote over is not restored — it is the entry's value or cleared, never a third
+  D2 expectedSendDate: holds the deleted entry's value (known limit: the earlier value {"type":"firestore/timestamp/1.0","seconds":1792580400,"nanoseconds":0} is not put back)
+  D2 sendReminderDate: holds the deleted entry's value (known limit: the earlier value {"type":"firestore/timestamp/1.0","seconds":1792407600,"nanoseconds":0} is not put back)
+  8 passed (3.6m)

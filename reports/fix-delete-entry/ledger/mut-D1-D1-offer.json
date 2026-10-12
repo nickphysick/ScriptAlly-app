@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "offer · the write happened",
+  "ok": true,
+  "detail": "status Offer; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row o0gdyF4fEGC35ho7xcPy · logEntryId \"o3ACnO1k3kjm2qEXcsRK\" · log entry o3ACnO1k3kjm2qEXcsRK"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the query document equals its starting snapshot, field for field",
+  "ok": false,
+  "detail": "offerDate: absent → {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1791802800,\"nanoseconds\":0} · offerResponseDeadline: absent → {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1793016000,\"nanoseconds\":0}"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

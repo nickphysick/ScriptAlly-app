@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D2",
+  "where": "the second request wrote over the first's send-by date",
+  "ok": true,
+  "detail": "expectedSendDate: {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792580400,\"nanoseconds\":0} → {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1793016000,\"nanoseconds\":0} · sendReminderDate: {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792407600,\"nanoseconds\":0} → {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792839600,\"nanoseconds\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "the status is the first request's again",
+  "ok": true,
+  "detail": "Partial Requested"
+ },
+ {
+  "lock": "D2",
+  "where": "expectedSendDate holds the deleted entry's value or is cleared, never a third value",
+  "ok": true,
+  "detail": "started {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792580400,\"nanoseconds\":0} · the entry wrote {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1793016000,\"nanoseconds\":0} · after the delete {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1793016000,\"nanoseconds\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "sendReminderDate holds the deleted entry's value or is cleared, never a third value",
+  "ok": true,
+  "detail": "started {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792407600,\"nanoseconds\":0} · the entry wrote {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792839600,\"nanoseconds\":0} · after the delete {\"type\":\"firestore/timestamp/1.0\",\"seconds\":1792839600,\"nanoseconds\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "every other field is as it started",
+  "ok": true,
+  "detail": "none differ"
+ },
+ {
+  "lock": "D2",
+  "where": "no feed row remains",
+  "ok": false,
+  "detail": "fde-act-req,fde-act-sent → fde-act-req,fde-act-sent,sFjt7Yh0V3VyzoZ4yZdE"
+ }
+]
