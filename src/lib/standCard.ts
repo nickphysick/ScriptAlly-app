@@ -99,7 +99,11 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       : f.closedHow === "passed" || f.status === S.REJECTED ? `${f.first} passed`
       : f.closedHow === "withdrawn" || f.status === S.WITHDRAWN ? "You withdrew it"
       : "Closed, no reply";
-    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, past: false, paragraph: [{ text: "This query is closed. It stays here, and in your figures." }], bar: null, links: [] };
+    /* signed is not a closure to the writer: the card names the agent and the book (ruling, 12 Oct) */
+    const signed: StandPart[] = f.manuscriptTitle
+      ? [{ text: `${f.first} is your agent for ` }, { text: f.manuscriptTitle, em: true }, { text: ". This query stays here, and in your figures." }]
+      : [{ text: `${f.first} is your agent. This query stays here, and in your figures.` }];
+    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, past: false, paragraph: f.status === S.SIGNED ? signed : [{ text: "This query is closed. It stays here, and in your figures." }], bar: null, links: [] };
   }
 
   if (f.court === "offer") {

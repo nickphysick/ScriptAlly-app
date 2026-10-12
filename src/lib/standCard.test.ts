@@ -61,6 +61,10 @@ describe("the stand card — the pack's table, one state at a time", () => {
     expect(text({ ...closed, status: S.NO_RESPONSE, closedHow: "noReply" }).heading).toBe("Closed, no reply");
     expect(text({ ...closed, status: S.WITHDRAWN, closedHow: "withdrawn" }).heading).toBe("You withdrew it");
     expect(text({ ...closed, status: S.SIGNED }).heading).toBe("You signed with Eleanor");
+    /* signed names the agent and the book, the title its own italic run; without a title the clause goes */
+    const signed = standCard({ ...base, ...closed, status: S.SIGNED }, NOW);
+    expect(signed.paragraph).toEqual([{ text: "Eleanor is your agent for " }, { text: "Murphy’s Day Out", em: true }, { text: ". This query stays here, and in your figures." }]);
+    expect(text({ ...closed, status: S.SIGNED, manuscriptTitle: null }).p).toBe("Eleanor is your agent. This query stays here, and in your figures.");
   });
 });
 
