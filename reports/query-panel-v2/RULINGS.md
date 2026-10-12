@@ -257,16 +257,26 @@ Things to know:
 
 ### Deploy (third pass)
 
-Dev still served my second-pass integration, so I merged onto the same branch,
-`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b`, and deployed it. No conflicts.
-**Dev serves `index-CdbYLzG9.js`.**
+Dev moved while my locks ran: the Comparable titles v27.1 session deployed
+`dev/…-qp2-comps27-qp2b-comps27-1` at `3e8b57b3` (`index-BPI6h562.js`), built on my second-pass integration. My
+deploy stopped at its served-hash check. I merged onto that branch as
+**`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c`**, re-ran everything there, and
+deployed it. No conflicts. **Dev serves `index-BMSOMeAe.js`.**
 
 On that build: tsc and both builds clean; Vitest 8,694 passed, 3 skipped, the same one file failing to load
-(`functions/src/email.test.ts`, as on main). qcMove 3 pass; QP2 V1 to V13 green (V13 70 of 70); QP1 green;
-QC137 13 pass; feed drawer v2 4 pass; delete entry 8 pass; the journeys 15 pass; QC132 10 pass, 6 skipped as
-before.
+(`functions/src/email.test.ts`, as on main). In one run: qcMove 3 pass; QP2 V1 to V13 green (V12 134 of 134,
+V13 70 of 70); QP1 green (P7 to P8 93 of 93); QC137 13 pass; feed drawer v2 4 pass; delete entry 8 pass; QC132
+10 pass, 6 skipped as before; the journeys 15 pass on a second run.
 
-**Two locks failed inside the full run and passed alone:** QP2 V12 (134 of 134 alone) and QP1 P7 to P8 (93 of
-93 alone). Both walk every step of every action, and each lost a click on the shared account, as P7 did in the
-first pass. Neither reads anything this pass changed. They are worth making steadier; I have not done that
-here.
+Two things from the runs:
+
+- **On the earlier integration, QP2 V12 and QP1 P7 to P8 each failed once inside the full run and passed
+  alone.** Both walk every step of every action and each lost a click on the shared account, as P7 did in the
+  first pass. On the final build both passed inside the full run. They are worth making steadier; not done here.
+- **The journeys' D6 "still deciding" failed on the final build, and the cause was the account, not the
+  build.** Seven queries carried offer "told" marks (`offerRefQueryId`, `offerTold`) that a D6 save had left
+  behind, so the lock's click un-ticked a box it expected to tick. It failed the same way on my branch build,
+  which had passed it two hours earlier. I removed the marks from those seven (dev harness account only) and
+  the suite passed 15 of 15. I do not know which run left them; D6's own undo is meant to.
+
+The next session to deploy to dev should base its integration on that branch.
