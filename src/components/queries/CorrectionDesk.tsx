@@ -132,7 +132,7 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, r
             <div className="qad-stepper" data-qad-stepper>
               {head.steps.map((t, i) => (
                 <React.Fragment key={t}>
-                  <span className={`qad-stp ${i === head.step ? "cur" : i < (head.step ?? 0) ? "done" : "auto"}`} data-qad-step={i} aria-current={i === head.step ? "step" : undefined}>
+                  <span className={`qad-stp ${i === head.step ? "cur" : i < (head.step ?? 0) ? "done" : "auto"}`} data-qad-step={i} aria-current={i === head.step ? "step" : undefined} aria-label={t} title={t}>
                     <i>{i < (head.step ?? 0) ? "\u2713" : i + 1}</i><em>{t}</em>
                   </span>
                   {i < head.steps!.length - 1 ? <span className={`qad-stl${i < (head.step ?? 0) ? " done" : ""}`} /> : null}

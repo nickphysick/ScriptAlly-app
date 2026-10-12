@@ -56,6 +56,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   V9: { js: `(() => { if (window.__m9) return; window.__m9 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".ws-capi"); if (!b || !/^Record a response/.test((b.textContent || "").trim())) return; e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "resp" }); }, true); })()` },
   /* the history list dropped */
   V10: { css: `.qsp .qat-hist { display: none !important; }` },
+  /* every step's name drawn, and allowed to wrap, as it was */
+  V12: { css: `.qad-root--panel .qad-stp em { display: block !important; white-space: normal !important; }` },
 };
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -329,6 +331,59 @@ test.describe("Query panel v2", () => {
     }
     } finally { execSync("node tests/e2e/seedQp1Save.mjs --clean", { stdio: "inherit" }); }
     L.done(120);
+  });
+
+  /* ── V12 · the stepper at the panel's width (ruling 4) ── */
+  test("V12 · stepper: numbered circles, the current step's name alone, on one line; every step named for assistive tech", async ({ page }) => {
+    test.setTimeout(420_000);
+    page.setDefaultTimeout(10_000);
+    const L = new Ledger("V12");
+    for (const vp of SIZES) {
+      const w = `${vp.width}`;
+      await openQC(page, vp, "none");
+      let steps = 0;
+      const read = async (where: string) => {
+        await mutate(page, "V12");
+        const r = await page.evaluate(() => {
+          const p = document.querySelector<HTMLElement>('[data-qp="panel"]')!; const pr = p.getBoundingClientRect();
+          const st = [...p.querySelectorAll<HTMLElement>(".qad-stepper .qad-stp")].filter((e) => e.getBoundingClientRect().height > 0);
+          const labs = st.map((s) => { const em = s.querySelector<HTMLElement>("em"); const b = em?.getBoundingClientRect(); const cs = em ? getComputedStyle(em) : null; const lh = cs ? (parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.3) : 0;
+            return { cur: s.classList.contains("cur"), shown: !!b && b.height > 0, lines: b && lh ? Math.round(b.height / lh) : 0, inside: !b || b.height === 0 || (b.left >= pr.left - 0.5 && b.right <= pr.right + 0.5), text: (em?.textContent ?? "").trim(), aria: s.getAttribute("aria-label") ?? "", title: s.getAttribute("title") ?? "", circle: !!s.querySelector("i") && s.querySelector("i")!.getBoundingClientRect().height > 0 }; });
+          return labs;
+        });
+        if (!r.length) return;
+        steps++;
+        const shown = r.filter((x) => x.shown);
+        L.check("V12", `${w} ${where}: a numbered circle for every step, and only the current step's name is drawn`, r.every((x) => x.circle) && shown.length === 1 && shown[0].cur, `${r.length} steps · names drawn: ${shown.map((x) => x.text).join(" | ") || "none"}`);
+        L.check("V12", `${w} ${where}: no name wraps, and it stays inside the panel`, shown.every((x) => x.lines === 1 && x.inside), shown.map((x) => `"${x.text}" ${x.lines} line(s)${x.inside ? "" : ", outside the panel"}`).join(" · ") || "none drawn");
+        L.check("V12", `${w} ${where}: every step carries its name as aria-label and title`, r.every((x) => x.aria === x.text && x.title === x.text && x.text.length > 0), r.filter((x) => x.aria !== x.text || x.title !== x.text).map((x) => `"${x.text}" aria "${x.aria}" title "${x.title}"`).join(" · ") || "all named");
+      };
+      for (const sel of [rowOf("agent"), rowOf("you"), `${ROW}[data-status="Offer"]`]) {
+        if (!(await page.locator(sel).count())) continue;
+        await openRow(page, sel);
+        const who = (await page.locator(`${PANEL} .qcv-open`).getAttribute("data-status")) ?? sel;
+        const doors = await page.locator(`${PANEL} [data-door]`).evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.door!));
+        for (const d of doors) {
+          await page.locator(`${PANEL} [data-door="${d}"]`).click(); await page.waitForTimeout(600);
+          for (let i = 0; i < 6; i++) {
+            await read(`${who} · ${d} · step ${i + 1}`);
+            /* read in one go: the foot re-renders between steps, and a locator held across that can go stale */
+            const nx = await page.evaluate(() => { const b = document.querySelector<HTMLButtonElement>('[data-qp="panel"] [data-qad-primary]'); return b && !b.disabled && /^Next/.test((b.textContent ?? "").trim()); });
+            if (!nx) break;
+            await page.locator(`${PANEL} [data-qad-primary]`).click(); await page.waitForTimeout(450);
+          }
+          await leaveStep(page);
+        }
+      }
+      /* the correction's two steps */
+      await openRow(page, `${ROW}[data-qid="seed-query-10"]`);
+      await page.locator(`${PANEL} .qlg-fix`).first().click({ force: true }); await page.waitForTimeout(500);
+      await page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first().click(); await page.waitForTimeout(500);
+      await read("the correction · the details");
+      await leaveStep(page); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      L.check("V12", `${w} the walk met steppers`, steps >= 8, `${steps} stepper states read`);
+    }
+    L.done(40);
   });
 
   /* ── V11 · the serif's italic is a real face (ruling 2). Its mutation is not a style or a script in the page: the

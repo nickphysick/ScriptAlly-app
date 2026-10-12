@@ -467,6 +467,11 @@
 .qad-root.qad-root--panel .qad-from:hover { background: none; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .qad-root.qad-root--panel .qad-from:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 3px; }
 .qad-root--panel .qad-head { padding: 22px 26px 18px; }
+/* ruling 4 — at the panel's width the stepper is its numbered circles, and only the CURRENT step's name is drawn,
+   on one line under its circle. Every step still carries its name as its accessible name and its title. A flex
+   column centres an overflowing child on its own axis, so a name wider than its 64px step spreads evenly. */
+.qad-root--panel .qad-stp em { display: none; }
+.qad-root--panel .qad-stp.cur em { display: block; white-space: nowrap; }
 .qad-root--panel .qad-body { padding: 0 28px 24px; }
 .qad-root--panel .qad-stepper { margin: 0 -28px; padding: 12px 22px 10px; }
 /* the "when you save" list is the consequence line here, above the foot on every step */

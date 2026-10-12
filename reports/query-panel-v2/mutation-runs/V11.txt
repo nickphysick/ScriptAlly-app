@@ -1,0 +1,4 @@
+  ✗ V11 · 1512 a Source Serif 4 italic face is LOADED (so the slant is drawn, not synthesised) — 0 of 0 italic face(s) loaded · 2 upright loaded · the app's link present true
+  ✗ V11 · 1280 a Source Serif 4 italic face is LOADED (so the slant is drawn, not synthesised) — 0 of 0 italic face(s) loaded · 2 upright loaded · the app's link present true
+  1 failed
+  1 passed (32.4s)

@@ -167,7 +167,7 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
                   return (
                     <React.Fragment key={i}>
                       <button type="button" className={`qad-stp ${cls}${i === cur && moveDir ? " pop" : ""}`} data-qad-step={i} data-qad-state={cls || "none"}
-                        disabled={!view.ok && i > 0} onClick={() => go(i)} aria-current={i === cur ? "step" : undefined}>
+                        disabled={!view.ok && i > 0} onClick={() => go(i)} aria-current={i === cur ? "step" : undefined} aria-label={t} title={t}>
                         <i>{ic}</i><em>{t}</em>
                       </button>
                       {i < names.length - 1 ? (
