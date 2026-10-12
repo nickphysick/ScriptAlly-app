@@ -468,6 +468,10 @@ test.describe("Comparable titles v25", () => {
     await page.locator(`${P}[data-cv="row"]`).nth(2).hover();
     await page.locator(`${P}[data-cv="row"]`).nth(2).locator('[data-cv="tray-act"]').click();
     await page.waitForSelector('[data-cv="picker"]');
+    /* ⚠️ SETTLED, NOT FIRST PAINT. The picker chooses its letter in an effect, so for one render it is mounted with no
+       letter and no ticks. Read in that frame it reports "no letter, 0 logged" about a picker that is about to be right
+       (comps v26 moved the timing enough to land there every run). Wait for the letter, with a bound, then read. */
+    await page.waitForFunction(() => !!(document.querySelector('[data-cv="picker"]') as HTMLElement | null)?.dataset.letter, null, { timeout: 5_000 }).catch(() => {});
     const p0 = await page.evaluate(() => { const p = document.querySelector('[data-cv="picker"]') as HTMLElement; return { letter: p.dataset.letter, fixed: p.dataset.fixed, on: [...p.querySelectorAll('[data-cv="picker-comp"][aria-checked="true"]')].map((x) => (x as HTMLElement).dataset.key), count: p.querySelector('[data-cv="picker-count"]')!.textContent, off: [...p.querySelectorAll('[data-cv="picker-comp"][aria-disabled="true"]')].map((x) => x.querySelector("b")!.textContent) }; });
     L.check("opens on the current letter, not fixed", p0.letter === FX.L3 && p0.fixed === "false", `${p0.letter} · fixed ${p0.fixed}`);
     L.check("its record plus the comp the door named", [...p0.on].sort().join("|") === ["cmp_cv25last", "cmp_cv25nine", "cmp_cv25tide"].join("|") && p0.count === "3 logged", `${p0.on} · ${p0.count}`);
