@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "V11",
+  "where": "1512 an italic span in the stand card",
+  "ok": true,
+  "detail": "SPAN: Source Serif 4 italic 400"
+ },
+ {
+  "lock": "V11",
+  "where": "1512 a Source Serif 4 italic face is LOADED (so the slant is drawn, not synthesised)",
+  "ok": false,
+  "detail": "0 of 0 italic face(s) loaded · 2 upright loaded · the app's link present true"
+ },
+ {
+  "lock": "V11",
+  "where": "1280 an italic span in the stand card",
+  "ok": true,
+  "detail": "SPAN: Source Serif 4 italic 400"
+ },
+ {
+  "lock": "V11",
+  "where": "1280 a Source Serif 4 italic face is LOADED (so the slant is drawn, not synthesised)",
+  "ok": false,
+  "detail": "0 of 0 italic face(s) loaded · 2 upright loaded · the app's link present true"
+ }
+]

@@ -1,0 +1,806 @@
+[
+ {
+  "lock": "V12",
+  "where": "1512 Queried · resp · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The response"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · resp · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The response\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · resp · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: The nudge"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The nudge\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: If it's still quiet"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"If it's still quiet\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: Check and log"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and log\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · nudge · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Calling it"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Calling it\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Check and close"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and close\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Queried · close · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The request"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The request\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: What you're sending"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"What you're sending\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Sending it"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Sending it\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Reading window"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Reading window\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 5: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Check and log"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 5: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and log\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · sent · step 5: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · resp · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The response"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · resp · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The response\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · resp · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Full Requested · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The offer"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The offer\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The others"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The others\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The call"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The call\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Your decision"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Your decision\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 5: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Check and save"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 5: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and save\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · offer · step 5: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 Offer · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 the correction · the details: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The details"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 the correction · the details: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The details\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 the correction · the details: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1512 the walk met steppers",
+  "ok": true,
+  "detail": "22 stepper states read"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · resp · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The response"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · resp · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The response\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · resp · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: The nudge"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The nudge\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: If it's still quiet"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"If it's still quiet\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "4 steps · names drawn: Check and log"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and log\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · nudge · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Calling it"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Calling it\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "3 steps · names drawn: Check and close"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and close\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Queried · close · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The request"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The request\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: What you're sending"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"What you're sending\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Sending it"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Sending it\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Reading window"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Reading window\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 5: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Check and log"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 5: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and log\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · sent · step 5: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · resp · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The response"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · resp · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The response\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · resp · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Full Requested · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The offer"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The offer\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 2: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The others"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 2: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The others\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 2: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 3: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: The call"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 3: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The call\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 3: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 4: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Your decision"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 4: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Your decision\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 4: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 5: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "5 steps · names drawn: Check and save"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 5: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Check and save\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · offer · step 5: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · close · step 1: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: Where it stands"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · close · step 1: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"Where it stands\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 Offer · close · step 1: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 the correction · the details: a numbered circle for every step, and only the current step's name is drawn",
+  "ok": true,
+  "detail": "2 steps · names drawn: The details"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 the correction · the details: no name wraps, and it stays inside the panel",
+  "ok": true,
+  "detail": "\"The details\" 1 line(s)"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 the correction · the details: every step carries its name as aria-label and title",
+  "ok": true,
+  "detail": "all named"
+ },
+ {
+  "lock": "V12",
+  "where": "1280 the walk met steppers",
+  "ok": true,
+  "detail": "22 stepper states read"
+ }
+]
