@@ -75,18 +75,23 @@ const diffReport = (a: QuerySnapshot, b: QuerySnapshot): string[] => {
   return out;
 };
 
-/** Open the ⋯ on the LAST entry and take the fork's move branch. */
+/**
+ * Open the ··· on the LAST entry that offers it and take the fork's move branch.
+ *
+ * RE-POINTED (Query panel v2, ruling 7). This went ⋯ → an Edit / Delete menu → the fork; that menu was retired
+ * when the ⋯ began opening the fork directly, so the route found no "Edit" and reported that the fork offered no
+ * move branch — about a fork it had never opened. The open query is the side panel now and the fork is a step
+ * inside it; the sheets it drives after this (`.cor-search`, `.cor-pick`, `.cor-mvblock`, `.cor-act`) are the
+ * same components. The law is unchanged: every assertion is still on the two queries' documents.
+ * ⚠️ `force` on the ···: it is drawn on hover or focus, and is in the DOM and pressable either way.
+ */
 const openMove = async (page: any): Promise<boolean> => {
-  const dots = page.locator(".tl-more");
+  const dots = page.locator('[data-qp="panel"] .tl-more');
   for (let i = (await dots.count()) - 1; i >= 0; i--) {
-    await dots.nth(i).click();
-    await page.waitForTimeout(340);
-    const edit = page.locator("[role=menuitem], .f12-menuitem", { hasText: /^Edit$/ }).first();
-    if (!(await edit.count())) { await page.keyboard.press("Escape"); continue; }
-    await edit.click();
+    await dots.nth(i).click({ force: true });
     await page.waitForTimeout(450);
-    const move = page.locator(".cor-branch", { hasText: /different query/i });
-    if (!(await move.count())) { await page.keyboard.press("Escape"); await page.waitForTimeout(250); continue; }
+    const move = page.locator('[data-qp="panel"] .cor-branch', { hasText: /different query/i });
+    if (!(await move.count())) { await page.keyboard.press("Escape"); await page.waitForTimeout(300); continue; }
     await move.first().click();
     await page.waitForTimeout(500);
     return true;
