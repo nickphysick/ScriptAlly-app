@@ -331,9 +331,16 @@ test.describe("Query Centre v137", () => {
       const out = rows.map((row) => {
         const st = row.querySelector<HTMLElement>(".qcw-ws1")!;
         const kids = ([...st.children] as HTMLElement[]).filter((k) => k.getBoundingClientRect().width > 0);
-        const tops = new Set(kids.map((k) => Math.round(k.getBoundingClientRect().top + k.getBoundingClientRect().height / 2)));
+        /* ⚠️ "ON ONE LINE" IS THE CENTRES AGREEING WITHIN A FEW PIXELS, NEVER TWO ROUNDED NUMBERS BEING EQUAL
+           (re-pointed 12 Oct). This rounded each child's centre and counted the distinct values. The dot, the word
+           and the stamp are three heights centred on one line, so their centres differ by a fraction; whenever a
+           row's top fell near a half pixel the fractions rounded apart and a label on ONE line read as two. It
+           came and went with how many rows sat above it on the shared account, and no build ever wrapped it: the
+           label is `flex-wrap: nowrap` at this width. A second line would put a centre a whole line (20px) away. */
+        const mids = kids.map((k) => k.getBoundingClientRect().top + k.getBoundingClientRect().height / 2);
+        const spread = mids.length ? Math.max(...mids) - Math.min(...mids) : 0;
         const lh = parseFloat(getComputedStyle(st).lineHeight);
-        return { status: row.dataset.status ?? "", lines: Math.max(tops.size > 1 ? 2 : 1, Math.round(st.getBoundingClientRect().height / Math.max(lh, 20))), h: row.getBoundingClientRect().height,
+        return { status: row.dataset.status ?? "", lines: Math.max(spread > 6 ? 2 : 1, Math.round(st.getBoundingClientRect().height / Math.max(lh, 20))), h: row.getBoundingClientRect().height,
           over: st.scrollWidth - st.clientWidth, intoNext: Math.max(...kids.map((k) => k.getBoundingClientRect().right)) - (row.querySelector<HTMLElement>(".qcw-snt")?.getBoundingClientRect().left ?? Infinity) };
       });
       return { rows: out, statuses: [...new Set(out.map((o) => o.status))] };
