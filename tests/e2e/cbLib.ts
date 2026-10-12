@@ -121,13 +121,24 @@ export async function readHeader(page: Page) {
     /* a no-break space reads as a space (the title's tail is held together with them) */
     const txt = (sel: string) => (h.querySelector<HTMLElement>(sel)?.textContent ?? "").replace(/\u00a0/g, " ").trim();
     const part = (sel: string) => { const e = h.querySelector<HTMLElement>(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
+    /* ⚠️ THE INK, NOT THE BOX: text that cannot break overflows its own box, and the box then measures clear of
+       something the words are drawn over. The union of the text's own line rects is where the glyphs are. */
+    const ink = (sel: string) => {
+      const e = h.querySelector<HTMLElement>(sel); if (!e) return null;
+      const r = document.createRange(); r.selectNodeContents(e);
+      const rs = [...r.getClientRects()].filter((q) => q.width > 0 && q.height > 0);
+      if (!rs.length) return null;
+      const x0 = Math.min(...rs.map((q) => q.left)), x1 = Math.max(...rs.map((q) => q.right)), y0 = Math.min(...rs.map((q) => q.top)), y1 = Math.max(...rs.map((q) => q.bottom));
+      return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, lines: new Set(rs.map((q) => Math.round(q.top))).size };
+    };
     return {
       box: { x: r.x, y: r.y, w: r.width, h: r.height },
       bg: getComputedStyle(h).backgroundColor,
       kind: h.getAttribute("data-hp3"), living: h.getAttribute("data-living"), loading: h.hasAttribute("data-loading"),
       number: txt('[data-hp3-part="number"]:not(.hp3-blank)'), words: txt('[data-hp3-part="words"]:not(.hp3-blank)'),
       name: (h.querySelector("h1")?.getAttribute("aria-label") ?? "").replace(/\u00a0/g, " "), sub: txt('[data-hp3-part="sub"]'),
-      wordsBox: part('[data-hp3-part="words"]'), subBox: part('[data-hp3-part="sub"]'), artBox: part('[data-hp3-part="art"]'),
+      wordsBox: ink('[data-hp3-part="words"]:not(.hp3-blank)'), subBox: ink('[data-hp3-part="sub"]'), artBox: part('[data-hp3-part="art"]'),
+      placeholderBox: part('[data-hp3-part="art"] .art-box'),
       buttons: h.querySelectorAll("button, a[href]").length,
       art: h.querySelector("[data-art]")?.getAttribute("data-art") ?? null,
     };
