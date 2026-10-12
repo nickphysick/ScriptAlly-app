@@ -1,0 +1,25 @@
+[V13] states seen: {"Add the date you sent it":6,"Set a date":6,"Remind me later":6,"Keep tracking":6,"none:you":2,"none:closed":2,"none:agent":6}
+  ✗ V13 · 1512 qp2l-nosent · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Add the date you sent it"])
+  ✗ V13 · 1512 qp2l-nowin · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Set a date"])
+  ✗ V13 · 1512 qp2l-year · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Remind me later","Keep tracking"])
+  ✗ V13 · 1512 you row 0 (rj-dupe) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1512 closed row 0 (cor-move-c) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1512 agent row 0 (seed-query-19) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1512 agent row 1 (seed-query-6) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1512 agent row 2 (seed-cal-passed20-q) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1280 qp2l-nosent · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Add the date you sent it"])
+  ✗ V13 · 1280 qp2l-nowin · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Set a date"])
+  ✗ V13 · 1280 qp2l-year · exactly its links — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] (wants ["Remind me later","Keep tracking"])
+  ✗ V13 · 1280 you row 0 (rj-dupe) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1280 closed row 0 (cor-move-c) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1280 agent row 0 (seed-query-19) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1280 agent row 1 (seed-query-6) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · 1280 agent row 2 (seed-cal-passed20-q) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking
+  ✗ V13 · Set a date · opens the weeks slider in the card, and the link stands down — ["Add the date you sent it","Remind me later","Keep tracking"]
+  ✗ V13 · Set a date · Cancel puts the link back and writes nothing — ["Add the date you sent it","Set a date","Remind me later","Keep tracking"] · {"dateSent":"2026-08-28T11:00:00.000Z","keep":null,"expected":null}
+  ✗ V13 · pressing the links ran to its end — expect(received).toBe(expected) // Object.is equality
+[V13] 27/46 green
+    +   "V13 · 1512 agent row 2 (seed-cal-passed20-q) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking",
+    +   "V13 · 1280 agent row 2 (seed-cal-passed20-q) · no link outside its state — stray: Add the date you sent it, Set a date, Remind me later, Keep tracking",
+  1 failed
+  1 passed (1.3m)

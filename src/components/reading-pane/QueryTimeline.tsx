@@ -709,8 +709,11 @@ const TlProjection: React.FC<{
  */
 const SET_WINDOW_MAX = 16;
 const SET_WINDOW_DEFAULT_WEEKS = 6;
-const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> = ({ anchorMs, onSave }) => {
-  const [open, setOpen] = useState(false);
+/* Exported for the panel's stand card (Query panel v2, ruling 3): its "Set a date" link opens this slider
+   already open (`startOpen`) and is told when it closes. */
+export const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void; startOpen?: boolean; onClose?: () => void }> = ({ anchorMs, onSave, startOpen = false, onClose }) => {
+  const [open, setOpenRaw] = useState(startOpen);
+  const setOpen = (o: boolean) => { setOpenRaw(o); if (!o) onClose?.(); };
   const [weeks, setWeeks] = useState(SET_WINDOW_DEFAULT_WEEKS);
   const resolved = anchorMs + weeks * 7 * 86400000;
   /* ⚠️ "CHANGED" IS COMPARED TO THE VALUE THE PANEL OPENED WITH, not to whether the slider has been

@@ -3,6 +3,8 @@ import { openRoute, liftMotionSuppression } from "./measure";
 import { devDb } from "./devWrite";
 import { collection, getDocs } from "firebase/firestore";
 import { resolve } from "node:path";
+/* RETIRED by Query panel v2 (tests/e2e/RETIRED-query-panel-v2.md): it enters through the old three-column list (.f12-row), which nothing renders; qcMove makes the same claim through the panel. */
+test.beforeEach(() => { test.skip(true, "RETIRED by Query panel v2: it enters through the old three-column list (.f12-row), which nothing renders"); });
 test.setTimeout(600_000);
 const SHOT = (n: string) => resolve(process.cwd(), `reports/move/${n}.png`);
 

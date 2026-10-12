@@ -1,6 +1,8 @@
 import { test } from "@playwright/test";
 import { openRoute } from "./measure";
 import { openQueryById, openTab, pressAction } from "./openQuery";
+/* RETIRED by Query panel v2 (tests/e2e/RETIRED-query-panel-v2.md): the desk beside the query (Record response, Mark sent, Nudge) stopped opening on 27 Sep, when the action drawer went live; nothing of it is drawn to measure. */
+test.beforeEach(() => { test.skip(true, "RETIRED by Query panel v2: the desk beside the query (Record response, Mark sent, Nudge) stopped opening on 27 Sep, when the action drawer went live"); });
 test("desk vs window — rects, top rule, clipping ancestors", async ({ page }) => {
   for (const width of [1440, 2560]) {
     await openRoute(page, "/queries", { width, height: 900 });

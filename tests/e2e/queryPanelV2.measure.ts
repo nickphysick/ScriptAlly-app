@@ -56,6 +56,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   V9: { js: `(() => { if (window.__m9) return; window.__m9 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".ws-capi"); if (!b || !/^Record a response/.test((b.textContent || "").trim())) return; e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "resp" }); }, true); })()` },
   /* the history list dropped */
   V10: { css: `.qsp .qat-hist { display: none !important; }` },
+  /* V13 has no in-page mutation: its two are SOURCE mutations (a build with every link in every state, and with
+     "Keep tracking" leaving Close in the lead) — reports/query-panel-v2/mutation-runs/V13.patch */
   /* every step's name drawn, and allowed to wrap, as it was */
   V12: { css: `.qad-root--panel .qad-stp em { display: block !important; white-space: normal !important; }` },
 };
@@ -388,6 +390,137 @@ test.describe("Query panel v2", () => {
 
   /* ── V11 · the serif's italic is a real face (ruling 2). Its mutation is not a style or a script in the page: the
         italic's stylesheet is refused on the network, which is what "never loaded" is. ── */
+
+  test("V13 · the stand card's links: each only in its state, and Keep tracking swaps the footer's lead", async ({ page }) => {
+    test.setTimeout(420_000);
+    page.setDefaultTimeout(10_000);
+    const L = new Ledger("V13");
+    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp2Links.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    const card = () => page.evaluate(() => {
+      const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
+      if (!p) return null;
+      const shown = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+      const links = [...p.querySelectorAll<HTMLElement>('[data-qp="stand-link"]')].filter(shown);
+      const cs = links[0] ? getComputedStyle(links[0]) : null;
+      return {
+        id: p.querySelector("[data-id]")?.getAttribute("data-id") ?? "",
+        cards: p.querySelectorAll('[data-qp="stand"]').length,
+        links: links.map((b) => (b.textContent ?? "").trim()),
+        style: cs ? `${cs.fontFamily.split(",")[0].replace(/"/g, "")} ${cs.fontSize} ${cs.color} ${cs.borderBottomWidth} ${cs.borderBottomStyle}` : "",
+        under: links.length ? links.every((b) => b.getBoundingClientRect().top >= (p.querySelector('[data-qp="stand-text"]') as HTMLElement).getBoundingClientRect().bottom - 1) : true,
+        text: (p.querySelector('[data-qp="stand-text"]')?.textContent ?? "").trim(),
+        lead: (p.querySelector('[data-qcv="open-action"]')?.textContent ?? "").trim(),
+        doors: [...p.querySelectorAll('[data-qcv="open-door"]')].map((b) => (b.textContent ?? "").trim()),
+      };
+    });
+    const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
+    const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
+    const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
+    /* the states that must offer nothing, on the account's own rows, and the three that offer theirs */
+    const WANT: Record<string, string[]> = { "qp2l-nosent": ["Add the date you sent it"], "qp2l-nowin": ["Set a date"], "qp2l-year": ["Remind me later", "Keep tracking"] };
+    try {
+      execSync("node tests/e2e/seedQp2Links.mjs", { stdio: "inherit" });
+      await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); } catch { /* */ } });
+      const seen: Record<string, number> = {};
+      for (const vp of SIZES) {
+        const w = `${vp.width}`;
+        await openQC(page, vp, "none");
+        for (const [id, want] of Object.entries(WANT)) {
+          await openId(id);
+          const c = await card();
+          L.check("V13", `${w} ${id} · the panel shows this query, with one stand card`, c?.id === id && c.cards === 1, `${c?.id} · ${c?.cards} card(s)`);
+          L.check("V13", `${w} ${id} · exactly its links`, JSON.stringify(c?.links) === JSON.stringify(want), `${JSON.stringify(c?.links)} (wants ${JSON.stringify(want)})`);
+          L.check("V13", `${w} ${id} · quiet links: Source Serif 15, navy, an underline rule, under the paragraph`, c?.style === STYLE && c.under, `${c?.style} · under the paragraph ${c?.under}`);
+          for (const l of c?.links ?? []) seen[l] = (seen[l] ?? 0) + 1;
+        }
+        /* the other states: a request, a closed query, and a query with the agent inside its dated wait */
+        for (const court of ["you", "closed", "agent"]) {
+          const sel = court === "agent" ? `${ROW}[data-court="agent"]:not([data-qid^="qp2l-"])` : rowOf(court);
+          let read = 0;
+          for (let n = 0; n < 3; n++) {
+            const row = page.locator(sel).nth(n);
+            if (!(await row.count())) break;
+            await openRow(page, `${sel} >> nth=${n}`); await tab(page, "Tracking");
+            const c = await card();
+            /* a row of the account's own may itself be in a link state; what it may not show is a link its text does not earn */
+            const earned = /Closing it keeps your reply rate honest/.test(c?.text ?? "") ? ["Remind me later", "Keep tracking"] : /No reply date is recorded/.test(c?.text ?? "") ? ["Add the date you sent it", "Set a date"] : [];
+            const stray = (c?.links ?? []).filter((l) => !earned.includes(l));
+            L.check("V13", `${w} ${court} row ${n} (${c?.id}) · no link outside its state`, c != null && stray.length === 0, stray.length ? `stray: ${stray.join(", ")}` : `${c?.links.length} link(s), ${earned.length ? "earned" : "none earned"}`);
+            if (c && earned.length === 0) seen[`none:${court}`] = (seen[`none:${court}`] ?? 0) + 1;
+            read++;
+          }
+          L.check("V13", `${w} ${court} · rows were read`, read > 0, `${read} row(s)`);
+        }
+      }
+      /* each state was entered, and so was "no links" for a request and a closed query */
+      console.log(`[V13] states seen: ${JSON.stringify(seen)}`);
+      for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "none:you", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
+
+      /* ── pressing them, at 1512 ── a step that cannot be taken is a red reading, not a thrown run: the
+         readings above it still print */
+      try {
+      await openQC(page, SIZES[0], "none");
+      /* Add the date you sent it → the sent-date editor, on top of the panel; leaving it writes nothing */
+      await openId("qp2l-nosent");
+      await page.locator(LINK("addSentDate")).click();
+      const field = page.locator('input[type="date"][aria-label="Date sent"]');
+      await expect(field, "the sent-date editor did not open").toBeVisible();
+      const top = await field.evaluate((e) => { const r = e.getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === e; });
+      L.check("V13", "Add the date you sent it · opens the sent-date editor, above the panel", top, top ? "the field is what is under its own centre" : "something covers the field");
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      L.check("V13", "Add the date you sent it · leaving the editor writes nothing", dump().queries["qp2l-nosent"]?.dateSent === null, JSON.stringify(dump().queries["qp2l-nosent"]));
+
+      /* Set a date → the slider in the card; Cancel puts the link back and writes nothing */
+      if (!(await page.locator(PANEL).count())) await openQC(page, SIZES[0], "none");
+      await openId("qp2l-nowin");
+      await page.locator(LINK("setDate")).click();
+      const slider = page.locator(`${PANEL} [data-qp="stand-setdate"] input[type="range"]`);
+      await expect(slider, "the slider did not open in the card").toBeVisible();
+      const during = await card();
+      L.check("V13", "Set a date · opens the weeks slider in the card, and the link stands down", during?.links.length === 0, JSON.stringify(during?.links));
+      await page.locator(`${PANEL} [data-qp="stand-setdate"] .tl-setwin-cancel`).click(); await page.waitForTimeout(300);
+      const after = await card();
+      L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && dump().queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify(dump().queries["qp2l-nowin"])}`);
+
+      /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
+      await openId("qp2l-year");
+      const y0 = await card();
+      L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
+      await page.locator(LINK("remindLater")).click();
+      await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
+      const tasks = dump().tasks.filter((t) => t.queryId === "qp2l-year" && !t.done);
+      L.check("V13", "Remind me later · adds one open \"Nudge {agent}\" to-do, and hides while it stands", tasks.length === 1 && /^Nudge /.test(tasks[0].text), JSON.stringify(tasks));
+      await page.locator(LINK("keepTracking")).click();
+      /* wait on the card, not on the footer: the footer's lead is the claim, and is read below by name */
+      await expect.poll(async () => (await card())?.links.length, { timeout: 10_000 }).toBe(0);
+      await page.waitForTimeout(400);
+      const y1 = await card();
+      L.check("V13", "Keep tracking · Record a response leads instead of Close", y1?.lead === "Record a response" && !!y1.doors.includes("Close query"), `lead "${y1?.lead}" · ${y1?.doors.join(", ")}`);
+      L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
+      L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
+      /* for good: it holds across a reload */
+      await openQC(page, SIZES[0], "none"); await openId("qp2l-year");
+      const y2 = await card();
+      L.check("V13", "Keep tracking · holds after a reload", y2?.links.length === 0 && y2.lead === "Record a response", `${JSON.stringify(y2?.links)} · lead "${y2?.lead}"`);
+      await page.locator(`${PANEL} [data-qcv="open-more"]`).click();
+      const again = page.getByRole("menuitem", { name: "Suggest closing again" }).or(page.getByText("Suggest closing again", { exact: true })).first();
+      await expect(again, "the menu has no \"Suggest closing again\"").toBeVisible();
+      await again.click();
+      await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
+      await page.waitForTimeout(400);
+      const y3 = await card();
+      L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
+      const offered = await page.getByText("Suggest closing again", { exact: true }).count();
+      L.check("V13", "Suggest closing again · is offered only while the flag is set", offered === 0, `${offered} in the menu`);
+      await page.keyboard.press("Escape");
+      } catch (e) { L.check("V13", "pressing the links ran to its end", false, String((e as Error).message).split("\n")[0].slice(0, 200)); }
+    } finally {
+      execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
+    }
+    L.done(40);
+  });
+
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("V11");
@@ -527,12 +660,9 @@ test.describe("Query panel v2", () => {
         await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Agent");
         const now = await agentFacts(page);
         for (const k of ["place", "door", "links", "figures", "wishlist", "asks", "history", "footer"] as const) {
-          /* ⚠️ A HISTORY ROW'S MONTH IS THE RECORD'S OWN, AND THE SHARED ACCOUNT RE-DATES IT. The correction fixture
-             (seedCorrection.mjs) dates its queries from today, so re-seeding it moved "Jul 2026" to "Aug 2026" on a
-             row both builds draw alike. What v1 showed is the row: its title, its status and whether it is this
-             query. A month is compared as "a month". */
-          const norm = (v: unknown) => (k === "history" && Array.isArray(v) ? v.map((r) => String(r).replace(/\| [A-Z][a-z]{2,3} \d{4}$/, "| (month)")) : v);
-          const a = JSON.stringify(norm(v1[id]?.[k])); const b = JSON.stringify(norm(now?.[k]));
+          /* strict, months included: the correction fixture that once re-dated these rows is held to a fixed
+             date now (qcMove's SEED_NOW) */
+          const a = JSON.stringify(v1[id]?.[k]); const b = JSON.stringify(now?.[k]);
           L.check("V10", `${w} ${id} · ${k}`, a === b, a === b ? `${b.slice(0, 80)}` : `v1 ${a} → ${b}`);
         }
       }

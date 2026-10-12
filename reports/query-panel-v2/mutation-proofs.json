@@ -3,89 +3,106 @@
   "mutation": "White masthead",
   "redReadings": 6,
   "first": [
-   "V1 · 1512 agent the masthead is navy — rgb(255, 255, 255)",
-   "V1 · 1512 you the masthead is navy — rgb(255, 255, 255)",
-   "V1 · 1512 closed the masthead is navy — rgb(255, 255, 255)"
+   "V1 \u00b7 1512 agent the masthead is navy \u2014 rgb(255, 255, 255)",
+   "V1 \u00b7 1512 you the masthead is navy \u2014 rgb(255, 255, 255)",
+   "V1 \u00b7 1512 closed the masthead is navy \u2014 rgb(255, 255, 255)"
   ]
  },
  "V2": {
   "mutation": "top: 8px",
   "redReadings": 6,
   "first": [
-   "V2 · 1512 agent the panel's top is the bar's bottom — top 8 · bar bottom 105.75",
-   "V2 · 1512 you the panel's top is the bar's bottom — top 8 · bar bottom 105.75",
-   "V2 · 1512 closed the panel's top is the bar's bottom — top 8 · bar bottom 105.75"
+   "V2 \u00b7 1512 agent the panel's top is the bar's bottom \u2014 top 8 \u00b7 bar bottom 105.75",
+   "V2 \u00b7 1512 you the panel's top is the bar's bottom \u2014 top 8 \u00b7 bar bottom 105.75",
+   "V2 \u00b7 1512 closed the panel's top is the bar's bottom \u2014 top 8 \u00b7 bar bottom 105.75"
   ]
  },
  "V3": {
   "mutation": "Remove the leak fix",
   "redReadings": 32,
   "first": [
-   "V3 · 1512 Queried · Tracking — span. \"···\" → \"Source Sans 3\" ; span. \"Sent 5 Jan\" → \"Source Sans 3\" ; span. \"Expected 2 Mar\" → \"Source Sans 3\"",
-   "V3 · 1512 Queried · Agent — span. \"London\" → \"Source Sans 3\"",
-   "V3 · 1512 Queried · fork — h2.cor-q \"What would you like to d\" → \"Playfair Display\""
+   "V3 \u00b7 1512 Queried \u00b7 Tracking \u2014 span. \"\u00b7\u00b7\u00b7\" \u2192 \"Source Sans 3\" ; span. \"Sent 5 Jan\" \u2192 \"Source Sans 3\" ; span. \"Expected 2 Mar\" \u2192 \"Source Sans 3\"",
+   "V3 \u00b7 1512 Queried \u00b7 Agent \u2014 span. \"London\" \u2192 \"Source Sans 3\"",
+   "V3 \u00b7 1512 Queried \u00b7 fork \u2014 h2.cor-q \"What would you like to d\" \u2192 \"Playfair Display\""
   ]
  },
  "V4": {
   "mutation": "Put the date after the text",
   "redReadings": 40,
   "first": [
-   "V4 · 1512 seed-query-19 every date is right-aligned in the first 92px column — 5 Jan@146/362/left",
-   "V4 · 1512 seed-query-6 every date is right-aligned in the first 92px column — 18 Jul@146/362/left",
-   "V4 · 1512 seed-cal-passed20-q every date is right-aligned in the first 92px column — 11 Aug@146/362/left"
+   "V4 \u00b7 1512 seed-query-19 every date is right-aligned in the first 92px column \u2014 5 Jan@146/362/left",
+   "V4 \u00b7 1512 seed-query-6 every date is right-aligned in the first 92px column \u2014 18 Jul@146/362/left",
+   "V4 \u00b7 1512 seed-cal-passed20-q every date is right-aligned in the first 92px column \u2014 11 Aug@146/362/left"
   ]
  },
  "V5": {
   "mutation": "Leave the old verdict lines",
   "redReadings": 40,
   "first": [
-   "V5 · 1512 seed-query-19 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
-   "V5 · 1512 seed-query-19 no old verdict line is left — 1",
-   "V5 · 1512 seed-query-6 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width"
+   "V5 \u00b7 1512 seed-query-19 exactly one stand card, and it ends the ledger \u2014 1 card(s) \u00b7 last false \u00b7 0px short of the ledger's width",
+   "V5 \u00b7 1512 seed-query-19 no old verdict line is left \u2014 1",
+   "V5 \u00b7 1512 seed-query-6 exactly one stand card, and it ends the ledger \u2014 1 card(s) \u00b7 last false \u00b7 0px short of the ledger's width"
   ]
  },
  "V6": {
   "mutation": "Dim on open",
   "redReadings": 4,
   "first": [
-   "V6 · 1512 browsing: nothing outside the panel is dimmed — scrim opacity 1 · pointer-events auto",
-   "V6 · 1512 browsing: a row click swaps the query — seed-query-19 → seed-query-19 (clicked seed-query-12)",
-   "V6 · 1280 browsing: nothing outside the panel is dimmed — scrim opacity 1 · pointer-events auto"
+   "V6 \u00b7 1512 browsing: nothing outside the panel is dimmed \u2014 scrim opacity 1 \u00b7 pointer-events auto",
+   "V6 \u00b7 1512 browsing: a row click swaps the query \u2014 seed-query-19 \u2192 seed-query-19 (clicked seed-query-12)",
+   "V6 \u00b7 1280 browsing: nothing outside the panel is dimmed \u2014 scrim opacity 1 \u00b7 pointer-events auto"
   ]
  },
  "V7": {
   "mutation": "No scrim when acting",
   "redReadings": 14,
   "first": [
-   "V7 · 1512 agent · resp: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false",
-   "V7 · 1512 agent · nudge: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false",
-   "V7 · 1512 agent · close: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false"
+   "V7 \u00b7 1512 agent \u00b7 resp: within 250ms a 0.45 scrim covers the page \u2014 opacity 0 \u00b7 alpha 0.45 \u00b7 covers false",
+   "V7 \u00b7 1512 agent \u00b7 nudge: within 250ms a 0.45 scrim covers the page \u2014 opacity 0 \u00b7 alpha 0.45 \u00b7 covers false",
+   "V7 \u00b7 1512 agent \u00b7 close: within 250ms a 0.45 scrim covers the page \u2014 opacity 0 \u00b7 alpha 0.45 \u00b7 covers false"
   ]
  },
  "V8": {
   "mutation": "The fork's \"Something changed since\" opens the standalone drawer",
   "redReadings": 2,
   "first": [
-   "V8 · 1512 \"Something changed since\" runs the response journey in the panel — step correct · 2 dialog(s) · 1 outside · \"Correct this entry\"",
-   "V8 · 1280 \"Something changed since\" runs the response journey in the panel — step correct · 2 dialog(s) · 1 outside · \"Correct this entry\""
+   "V8 \u00b7 1512 \"Something changed since\" runs the response journey in the panel \u2014 step correct \u00b7 2 dialog(s) \u00b7 1 outside \u00b7 \"Correct this entry\"",
+   "V8 \u00b7 1280 \"Something changed since\" runs the response journey in the panel \u2014 step correct \u00b7 2 dialog(s) \u00b7 1 outside \u00b7 \"Correct this entry\""
   ]
  },
  "V9": {
   "mutation": "\"Record a response\" opens the standalone drawer",
   "redReadings": 10,
   "first": [
-   "V9 · 1512 the picker is in the panel, titled \"Who replied?\" — \"\" · 2 dialog(s) · 1 drawer(s) outside",
-   "V9 · 1512 the open query is listed first, under \"The query you had open\" — first null \"\" · heading \"\" · 0 rows",
-   "V9 · 1512 the page is dimmed — 0"
+   "V9 \u00b7 1512 the picker is in the panel, titled \"Who replied?\" \u2014 \"\" \u00b7 2 dialog(s) \u00b7 1 drawer(s) outside",
+   "V9 \u00b7 1512 the open query is listed first, under \"The query you had open\" \u2014 first null \"\" \u00b7 heading \"\" \u00b7 0 rows",
+   "V9 \u00b7 1512 the page is dimmed \u2014 0"
   ]
  },
  "V10": {
   "mutation": "Drop the history list",
   "redReadings": 6,
   "first": [
-   "V10 · 1512 seed-query-10 · history — v1 [\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul 2026\"] → []",
-   "V10 · 1512 seed-pkgq-9 · history — v1 [\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul 2026\",\"The Smoke Test | Full Sent | this query\"] → []",
-   "V10 · 1512 seed-query-3 · history — v1 [\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requested | Jul 2026\",\"The Smoke Test | Rejected | Aug 2026\",\"The Smoke Test | Queried | this query\"] → []"
+   "V10 \u00b7 1512 seed-query-10 \u00b7 history \u2014 v1 [\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul 2026\"] \u2192 []",
+   "V10 \u00b7 1512 seed-pkgq-9 \u00b7 history \u2014 v1 [\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul 2026\",\"The Smoke Test | Full Sent | this query\"] \u2192 []",
+   "V10 \u00b7 1512 seed-query-3 \u00b7 history \u2014 v1 [\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requested | Jul 2026\",\"The Smoke Test | Rejected | Aug 2026\",\"The Smoke Test | Queried | this query\"] \u2192 []"
   ]
+ },
+ "V13": {
+  "lock": "V13",
+  "green": "52/52",
+  "mutations": [
+   {
+    "name": "every link drawn in every state (source: StandCard ignores the view's links)",
+    "red": "19 readings, e.g. 'qp2l-nosent \u00b7 exactly its links \u2014 [all four] (wants [\"Add the date you sent it\"])', 'you row 0 \u00b7 no link outside its state \u2014 stray: \u2026'",
+    "log": "mutation-runs/V13.txt"
+   },
+   {
+    "name": "Keep tracking leaves Close in the lead (source: QcOpenCard passes the wait to panelDoors regardless of the flag)",
+    "red": "2 readings: 'Keep tracking \u00b7 Record a response leads instead of Close \u2014 lead \"Close query\"', 'Keep tracking \u00b7 holds after a reload \u2014 lead \"Close query\"'",
+    "log": "mutation-runs/V13-lead.txt"
+   }
+  ],
+  "patch": "mutation-runs/V13.patch (both source mutations)"
  }
 }

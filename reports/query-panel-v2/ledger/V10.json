@@ -39,7 +39,7 @@
   "lock": "V10",
   "where": "1512 seed-query-10 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul "
+  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | (mon"
  },
  {
   "lock": "V10",
@@ -87,7 +87,7 @@
   "lock": "V10",
   "where": "1512 seed-pkgq-9 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul "
+  "detail": "[\"The Smoke Test | Full Sent | (month)\",\"The Smoke Test | Full Requested | (mont"
  },
  {
   "lock": "V10",
@@ -135,7 +135,7 @@
   "lock": "V10",
   "where": "1512 seed-query-3 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requeste"
+  "detail": "[\"The Smoke Test | Full Requested | (month)\",\"The Smoke Test | Partial Requested"
  },
  {
   "lock": "V10",
@@ -183,7 +183,7 @@
   "lock": "V10",
   "where": "1280 seed-query-10 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul "
+  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | (mon"
  },
  {
   "lock": "V10",
@@ -231,7 +231,7 @@
   "lock": "V10",
   "where": "1280 seed-pkgq-9 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul "
+  "detail": "[\"The Smoke Test | Full Sent | (month)\",\"The Smoke Test | Full Requested | (mont"
  },
  {
   "lock": "V10",
@@ -279,7 +279,7 @@
   "lock": "V10",
   "where": "1280 seed-query-3 · history",
   "ok": true,
-  "detail": "[\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requeste"
+  "detail": "[\"The Smoke Test | Full Requested | (month)\",\"The Smoke Test | Partial Requested"
  },
  {
   "lock": "V10",

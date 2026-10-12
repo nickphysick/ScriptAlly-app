@@ -52,7 +52,12 @@ const { user } = await signInWithEmailAndPassword(
 const uid = user.uid;
 console.log(`database: ${dbId || "(default)"} · project: ${PROJECT} · uid ${uid}`);
 
-const iso = (daysAgo) => new Date(Date.now() - daysAgo * 864e5).toISOString();
+/* `SEED_NOW` (an ISO instant) fixes the clock the fixture is dated from. A lock that re-seeds on every test
+   (qcMove) passes it, so running that lock on a later day writes the same documents and moves no row another
+   lock has captured (QP2 V10's history months, feed drawer B6's baseline). Unset, the clock is today's. */
+const SEED_NOW = process.env.SEED_NOW ? new Date(process.env.SEED_NOW).getTime() : Date.now();
+if (!Number.isFinite(SEED_NOW)) throw new Error(`SEED_NOW is not a date: ${process.env.SEED_NOW}`);
+const iso = (daysAgo) => new Date(SEED_NOW - daysAgo * 864e5).toISOString();
 const day = (daysAgo) => iso(daysAgo).slice(0, 10);
 
 /** One entry, written to BOTH stores under one id — the app's own arrangement. */

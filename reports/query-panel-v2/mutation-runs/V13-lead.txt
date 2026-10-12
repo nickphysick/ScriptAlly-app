@@ -1,0 +1,6 @@
+[V13] states seen: {"Add the date you sent it":2,"Set a date":2,"Remind me later":2,"Keep tracking":2,"none:you":2,"none:closed":2,"none:agent":6}
+  ✗ V13 · Keep tracking · Record a response leads instead of Close — lead "Close query" · Record a response, Nudge
+  ✗ V13 · Keep tracking · holds after a reload — [] · lead "Close query"
+[V13] 50/52 green
+  1 failed
+  1 passed (1.3m)

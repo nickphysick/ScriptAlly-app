@@ -61,6 +61,10 @@ describe("the stand card — the pack's table, one state at a time", () => {
     expect(text({ ...closed, status: S.NO_RESPONSE, closedHow: "noReply" }).heading).toBe("Closed, no reply");
     expect(text({ ...closed, status: S.WITHDRAWN, closedHow: "withdrawn" }).heading).toBe("You withdrew it");
     expect(text({ ...closed, status: S.SIGNED }).heading).toBe("You signed with Eleanor");
+    /* signed names the agent and the book, the title its own italic run; without a title the clause goes */
+    const signed = standCard({ ...base, ...closed, status: S.SIGNED }, NOW);
+    expect(signed.paragraph).toEqual([{ text: "Eleanor is your agent for " }, { text: "Murphy’s Day Out", em: true }, { text: ". This query stays here, and in your figures." }]);
+    expect(text({ ...closed, status: S.SIGNED, manuscriptTitle: null }).p).toBe("Eleanor is your agent. This query stays here, and in your figures.");
   });
 });
 
@@ -116,5 +120,37 @@ describe("the spans and the window's words", () => {
     expect(weeksWords(8)).toBe("eight weeks");
     expect(weeksWords(1)).toBe("one week");
     expect(weeksWords(16)).toBe("16 weeks");
+  });
+});
+
+describe("ruling 3 — the quiet links, each in its one state", () => {
+  const year = { stageStartMs: new Date("2024-03-14T12:00:00Z").getTime(), expectedMs: new Date("2024-03-14T12:00:00Z").getTime() + 56 * DAY };
+  const states: Record<string, Partial<StandFacts>> = {
+    waiting: {},
+    past: { stageStartMs: NOW - 70 * DAY, expectedMs: NOW - 14 * DAY },
+    noReplyDate: { expectedMs: null, windowWeeks: null },
+    noSentDate: { stageStartMs: null, expectedMs: null, hasSentDate: false },
+    overYear: year,
+    overYearReminder: { ...year, reminderOpen: true },
+    overYearKept: { ...year, keepTracking: true },
+    request: { status: S.FULL_REQUESTED, court: "you", expectedMs: null },
+    offer: { status: S.OFFER, court: "offer" },
+    closed: { status: S.REJECTED, court: "closed", closedHow: "passed" },
+  };
+  const want: Record<string, string[]> = {
+    waiting: [], past: [], noReplyDate: ["setDate"], noSentDate: ["addSentDate"], overYear: ["remindLater", "keepTracking"],
+    overYearReminder: ["keepTracking"], overYearKept: [], request: [], offer: [], closed: [],
+  };
+  it("every state offers exactly its own links", () => {
+    const got = Object.fromEntries(Object.entries(states).map(([k, f]) => [k, standCard({ ...base, ...f }, NOW).links]));
+    expect(got).toEqual(want);
+  });
+  it("Keep tracking takes the closing sentence with it, and keeps what the record says", () => {
+    const kept = text({ ...year, keepTracking: true });
+    expect(kept.p).toBe("Greenfield Literary said they’d reply within eight weeks. That window closed 2½ years ago.");
+    expect(text({ ...year, expectedMs: null, windowWeeks: null, keepTracking: true }).p).toBe("You chose to keep tracking this query.");
+  });
+  it("a reply date the writer set does not hide the missing sent date", () => {
+    expect(standCard({ ...base, stageStartMs: null, hasSentDate: false }, NOW).links).toEqual(["addSentDate"]);
   });
 });
