@@ -30,6 +30,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   C3: { js: `(() => { const c = [...document.querySelectorAll('.aglist [data-cl16="bar"] .cl13-ctl')].find((e) => e.getBoundingClientRect().height > 0); if (c && !c.querySelector('[data-lp="sort"]')) { const j = document.createElement("span"); j.className = "lp-join"; j.innerHTML = '<button type="button" class="lp" data-lp="sort"><em>Sort:</em> <b>Surname, A to Z</b></button>'; c.appendChild(j); } })()` },
   /* a letter jumps to the top of the page instead of to its first agent */
   C4: { js: `(() => { if (window.__m16c4) return; window.__m16c4 = true; document.addEventListener("click", (e) => { const t = e.target.closest && e.target.closest('[data-clv="ixtab"]'); if (t) { e.stopPropagation(); const sc = t.closest(".wpg-scroll"); if (sc) sc.scrollTop = 0; } }, true); })()` },
+  /* the letter tabs made sticky */
+  D1: { css: `.cl16-list .clv-idxwrap { position: sticky !important; top: 190px !important; z-index: 20 !important; background: #fff; }` },
+  /* pinned from a box that changes with the answer: the sentinel grows once pinned, with scroll anchoring back on */
+  D2: { css: `.agl-wpg .wpg-scroll, .cl16-list { overflow-anchor: auto !important; } .cl16-list[data-pinned="true"] .cl16-sentinel { height: 60px !important; }` },
 };
 const open = async (page: Page, vp: { width: number; height: number }, lock: string) => { await openContacts16(page, vp); await mutate16(page, lock, MUTATIONS); };
 
@@ -269,7 +273,8 @@ test.describe("Contact list v16", () => {
           heading: head ? { text: head.textContent, size: parseFloat(getComputedStyle(head).fontSize), face: getComputedStyle(head).fontFamily } : null,
           kicker: g.querySelector('[data-cl16="list-kicker"]')?.textContent ?? "", hint: g.querySelector('[data-cl16="list-hint"]')?.textContent ?? "",
           strip: box(strip), row: box(row), list: box(list), bar: box(bar), group: box(g)!,
-          first: list?.firstElementChild === bar || (list?.firstElementChild?.getBoundingClientRect().height === 0 && list?.children[1] === bar),
+          /* the first child of the list that takes any room is the bar (or holds it): nothing is drawn above it */
+          first: !!list && !!bar && ([...list.children].find((c) => c.getBoundingClientRect().height > 0)?.contains(bar) ?? false),
           barBg: bar ? getComputedStyle(bar).backgroundColor : "", barRadius: bar ? getComputedStyle(bar).borderTopLeftRadius : "", barPad: bar ? getComputedStyle(bar).paddingTop + " " + getComputedStyle(bar).paddingBottom : "",
           wide: !!document.querySelector(".ws-app.sheet-wide"),
         };
@@ -410,5 +415,114 @@ test.describe("Contact list v16", () => {
       L.check("C4", `${w} the wash is gone after 1.4s`, after === false, `${after}`);
     }
     L.done(14);
+  });
+
+  /** the pinned stack as it sits now */
+  const readPins = (page: Page) => page.evaluate(() => {
+    const { g, sc } = (window as never as { __cl: () => { g: HTMLElement; sc: HTMLElement } }).__cl();
+    const box = (window as never as { __box: (e: Element | null) => { x: number; y: number; w: number; h: number; r: number; b: number } | null }).__box;
+    const list = g.querySelector<HTMLElement>('[data-cl16="list"]');
+    const pin = g.querySelector<HTMLElement>('[data-cl16="bar-pin"]'), bar = g.querySelector<HTMLElement>('[data-cl16="bar"]'), frow = g.querySelector<HTMLElement>('[data-cl16="frow"]');
+    const labels = [...g.querySelectorAll<HTMLElement>(".lt-labels")].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const idx = g.querySelector<HTMLElement>('[data-clv="idx"]');
+    const sum = g.querySelector<HTMLElement>('[data-cl16="summary"]');
+    const h = (sel: string) => { const e = [...g.querySelectorAll<HTMLElement>(sel)].find((x) => x.getBoundingClientRect().height > 0); return e ? e.getBoundingClientRect().height : null; };
+    const scTop = sc.getBoundingClientRect().top;
+    const rows = [...g.querySelectorAll<HTMLElement>('[data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+    const stackB = labels ? labels.getBoundingClientRect().bottom : 0;
+    /* what owns the pixel in the middle of each layer: the layer itself, never a row passing beneath */
+    const owns = (e: HTMLElement | null) => { if (!e) return false; const r = e.getBoundingClientRect(); const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!t && (e === t || e.contains(t)); };
+    return {
+      pinned: list?.getAttribute("data-pinned") === "true", scrollTop: sc.scrollTop, scTop, max: sc.scrollHeight - sc.clientHeight,
+      list: box(list), pin: box(pin), bar: box(bar), frow: box(frow), labels: box(labels), idx: box(idx),
+      sticky: [pin, frow, labels, idx?.parentElement ?? null].map((e) => (e ? getComputedStyle(e).position : "none")).join(","),
+      barPad: bar ? `${getComputedStyle(bar).paddingTop} ${getComputedStyle(bar).paddingBottom}` : "", frowPad: frow ? `${getComputedStyle(frow).paddingTop} ${getComputedStyle(frow).paddingBottom}` : "",
+      findH: h('[data-cl16="bar"] .cl13-find'), pillH: h('[data-cl16="bar"] .lp'), chipH: h('[data-cl16="frow"] [data-cl14="fbar"]:not(.cl14-fbar--measure) .cl14-fp'),
+      shadow: labels ? getComputedStyle(labels).boxShadow : "",
+      sum: sum ? { shown: sum.getBoundingClientRect().height > 0, h: sum.getBoundingClientRect().height, ring: getComputedStyle(sum).boxShadow, text: (sum.textContent ?? "").trim(), right: frow ? frow.getBoundingClientRect().right - sum.getBoundingClientRect().right : null } : null,
+      under: rows.filter((r) => r.getBoundingClientRect().top < stackB - 1 && r.getBoundingClientRect().bottom > scTop).length,
+      owns: [owns(bar), owns(frow), owns(labels)].join(","),
+      anchor: [getComputedStyle(sc).overflowAnchor, list ? getComputedStyle(list).overflowAnchor : ""].join(","),
+      focus: document.activeElement?.matches?.("h1[data-page-title]") ?? false,
+      vh: window.innerHeight,
+    };
+  });
+
+  test("D1 · pins: the bar, the filter row and the headings pin in a stack; the letter tabs scroll away", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("D1");
+    for (const vp of SIZES16) {
+      await open(page, vp, "D1");
+      const w = `${vp.width}`;
+      const r0 = await readPins(page);
+      if (!r0.list || !r0.pin || !r0.frow || !r0.labels || !r0.idx) { L.check("D1", `${w} layers`, false, "the list has no bar, filter row, headings or letter tabs to pin"); continue; }
+      L.check("D1", `${w} at rest nothing is pinned, and no Summary`, !r0.pinned && r0.sum?.shown === false && r0.barPad === "18px 18px" && r0.frowPad === "18px 18px", `pinned ${r0.pinned} · summary ${r0.sum?.shown} · ${r0.barPad} · ${r0.frowPad}`);
+      L.check("D1", `${w} three sticky layers; the letter tabs are not one`, /^sticky,sticky,sticky,(static|relative)$/.test(r0.sticky), r0.sticky);
+      L.check("D1", `${w} scroll anchoring is off on the scroller and the list`, r0.anchor === "none,none", r0.anchor);
+      /* 1400px into the list */
+      await setScroll16(page, Math.round(r0.scrollTop + r0.list.y - r0.scTop + 1400));
+      await page.waitForTimeout(250);
+      const r = await readPins(page);
+      L.check("D1", `${w} pinned`, r.pinned, `${r.pinned} at scrollTop ${r.scrollTop}`);
+      L.check("D1", `${w} the bar sits 12 under the scroller's top`, !!r.pin && near(r.pin.y - r.scTop, 12, 1), `${r.pin ? (r.pin.y - r.scTop).toFixed(1) : "none"}`);
+      L.check("D1", `${w} the filter row is directly under it`, !!r.pin && !!r.frow && near(r.frow.y - r.pin.b, 0, 1), `${r.pin && r.frow ? (r.frow.y - r.pin.b).toFixed(1) : "none"}`);
+      L.check("D1", `${w} the headings are directly under that`, !!r.frow && !!r.labels && near(r.labels.y - r.frow.b, 0, 1), `${r.frow && r.labels ? (r.labels.y - r.frow.b).toFixed(1) : "none"}`);
+      L.check("D1", `${w} the letter tabs have scrolled away`, !!r.idx && r.idx.b < r.scTop, `tabs' bottom ${r.idx?.b.toFixed(1)} · scroller top ${r.scTop.toFixed(1)}`);
+      L.check("D1", `${w} rows pass beneath the stack, and each layer owns its own pixels`, r.under > 0 && r.owns === "true,true,true", `${r.under} rows under · owns ${r.owns}`);
+      L.check("D1", `${w} pinned: the bar and the row are 10 top and bottom`, r.barPad === "10px 10px" && r.frowPad === "10px 10px", `${r.barPad} · ${r.frowPad}`);
+      L.check("D1", `${w} pinned: controls 36, chips 30`, near(r.findH, 36, 0.5) && near(r.pillH, 36, 0.5) && near(r.chipH, 30, 0.5), `find ${r.findH} · pill ${r.pillH} · chip ${r.chipH}`);
+      L.check("D1", `${w} pinned: the headings carry the shadow`, /rgba\(28, 19, 15, 0\.35\) 0px 10px 18px -14px/.test(r.shadow), r.shadow);
+      L.check("D1", `${w} "↑ Summary" shows at the filter row's end`, !!r.sum && r.sum.shown && near(r.sum.h, 34, 0.5) && /Summary$/.test(r.sum.text) && /rgba\(28, 19, 15, 0\.4\) 0px 0px 0px 1\.5px inset/.test(r.sum.ring) && near(r.sum.right, 28, 1.5), JSON.stringify(r.sum));
+      /* it releases with the list's end: at the bottom of the page the stack is not over the footer */
+      await setScroll16(page, r.max);
+      await page.waitForTimeout(250);
+      const end = await readPins(page);
+      L.check("D1", `${w} the stack releases at the list's end`, !!end.pin && !!end.list && !!end.labels && end.labels.b <= end.list.b + 0.5 && end.pin.y >= end.list.y - 0.5, `stack ${end.pin?.y.toFixed(1)}–${end.labels?.b.toFixed(1)} · list ${end.list?.y.toFixed(1)}–${end.list?.b.toFixed(1)}`);
+      /* Summary returns to the top, with focus on the heading */
+      await setScroll16(page, Math.round(r0.scrollTop + r0.list.y - r0.scTop + 1400));
+      await page.waitForTimeout(250);
+      await page.locator('.aglist [data-cl16="summary"]').filter({ visible: true }).first().click();
+      /* the scroll is smooth unless the reader asked for less motion: read where it SETTLES, and the path it took */
+      const path = await page.evaluate(async () => {
+        const { sc } = (window as never as { __cl: () => { sc: HTMLElement } }).__cl();
+        const seen: number[] = [];
+        for (let i = 0; i < 40; i++) { await new Promise((res) => setTimeout(res, 100)); seen.push(Math.round(sc.scrollTop)); if (seen.length > 3 && seen.slice(-3).every((v) => v === seen[seen.length - 1])) break; }
+        return seen;
+      });
+      const top = await readPins(page);
+      L.check("D1", `${w} Summary returns to the top and focuses the heading`, top.scrollTop === 0 && top.focus && !top.pinned, `scrollTop ${top.scrollTop} · focus ${top.focus} · pinned ${top.pinned} · path ${path.join(",")}`);
+    }
+    L.done(28);
+  });
+
+  test("D2 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set", async ({ page }) => {
+    test.setTimeout(400_000);
+    const L = new Ledger("D2");
+    for (const vp of SIZES16) {
+      await open(page, vp, "D2");
+      const r = await page.evaluate(async () => {
+        const { g, sc } = (window as never as { __cl: () => { g: HTMLElement; sc: HTMLElement } }).__cl();
+        const list = g.querySelector<HTMLElement>('[data-cl16="list"]');
+        const sent = list?.querySelector<HTMLElement>('[data-cl16="pin-sentinel"]');
+        if (!list || !sent) return null;
+        sc.style.scrollBehavior = "auto";
+        const T = Math.round(sent.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 12);
+        const frame = () => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+        sc.scrollTop = T - 60; await frame();
+        let was = list.hasAttribute("data-pinned"), flips = 0, drift = 0, steps = 0;
+        const start = was;
+        const go = async (y: number) => { sc.scrollTop = y; await frame(); steps++; drift = Math.max(drift, Math.abs(sc.scrollTop - y)); const now = list.hasAttribute("data-pinned"); if (now !== was) { flips++; was = now; } };
+        for (let y = T - 30; y <= T + 30; y++) await go(y);
+        const mid = was;
+        for (let y = T + 30; y >= T - 30; y--) await go(y);
+        return { T, flips, drift, steps, start, mid, end: was };
+      });
+      const w = `${vp.width}`;
+      if (!r) { L.check("D2", `${w} sentinel`, false, "no pin sentinel: nothing pins"); continue; }
+      L.check("D2", `${w} starts unpinned, pins past the line`, r.start === false && r.mid === true, `start ${r.start} · past ${r.mid}`);
+      L.check("D2", `${w} exactly two changes`, r.flips === 2 && r.end === false, `${r.flips} changes over ${r.steps} steps around ${r.T}`);
+      L.check("D2", `${w} scrollTop is what was set`, r.drift <= 1, `worst drift ${r.drift.toFixed(1)}`);
+    }
+    L.done(6);
   });
 });
