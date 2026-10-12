@@ -177,6 +177,7 @@ test("QC126-5 · carousel", async ({ page }) => {
 
 /* ── QC126-6 · the desk filters the carousel, never the list ── */
 test("QC126-6 · desk ≠ list", async ({ page }) => {
+  test.skip(true, "retired by Query Centre v137 §B and §C: it asserted that a desk section scopes \"Recently updated\" and not the list. That section is gone and a strip cell now filters the list (QC137 B2)");
   const L = new Ledger("qc126-6");
   await openQc(page, AT_1512);
   const read = () => page.evaluate(() => ({
@@ -204,6 +205,7 @@ test("QC126-6 · desk ≠ list", async ({ page }) => {
 
 /* ── QC126-7 · one card ── */
 test("QC126-7 · one card", async ({ page }) => {
+  test.skip(true, "retired by Query Centre v137 §C: it asserted that \"Recently updated\"'s featured card is the app's QueryCard. The section is not drawn");
   const L = new Ledger("qc126-7");
   await openQc(page, AT_1512);
   /* v132 §1 — on the desktop the one card on the page is "Recently updated"'s featured card */
@@ -304,6 +306,7 @@ test("QC126-10 · full width", async ({ page }) => {
 
 /* ── QC126-11 · the footer ── */
 test("QC126-11 · footer", async ({ page }) => {
+  test.skip(true, "retired by Query Centre v137: it held the footer's content box to the desk's x and width, and the desk it measured against is not drawn");
   const L = new Ledger("qc126-11");
   for (const vp of WIDTHS) {
     await openQc(page, vp);
@@ -583,11 +586,8 @@ test("QC126-20 · one door", async ({ page }) => {
   const t = await drawer();
   L.check("QC126-20 a row's tray action opens the drawer", "1512", !!t.mode && MODES.has(t.mode) && t.others === 0, JSON.stringify(t));
   await closeAll();
-  /* a carousel card's footer button */
-  await page.locator('[data-qcv="ru-feat"] [data-qcv="ru-act"]').first().click({ timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(500);
-  const z = await drawer();
-  L.check("QC126-20 the featured card's button opens the drawer", "1512", !!z.mode && MODES.has(z.mode) && z.others === 0, JSON.stringify(z));
+  /* RETIRED (Query Centre v137 §C): "the featured card's button opens the drawer" — "Recently updated" and its
+     featured card are not drawn, so that door no longer exists. The other doors of this lock stand. */
   await closeAll();
   /* a Birds-eye row's button */
   await openDrawer(page).catch(() => {});
@@ -597,7 +597,7 @@ test("QC126-20 · one door", async ({ page }) => {
   L.check("QC126-20 a Birds-eye row's button opens the drawer", "1512", !!e.mode && MODES.has(e.mode) && e.others === 0, JSON.stringify(e));
   await closeAll();
   await checkOverflow(page, L, "1512");
-  L.done(5);
+  /* 4: the featured card's door is retired (v137) */ L.done(4);
 });
 
 /* ══ v126.2 — the drawer refit (ref design-refs/query-centre-v130.html) ═══════════════════════════ */

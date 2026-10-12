@@ -23,3 +23,23 @@ Query Centre v137 replaces the v136 bands with a four-cell strip, removes "Recen
 | `qcV132.measure.ts` | The opener no longer waits for "Recently updated". See the report for the W locks that changed. |
 | `src/components/queries/centre/qcCentre.test.tsx` | The list's derivation is asserted in parts: the strip's court is a third narrowing of the same list. |
 | `src/components/queries/centre/qcOpenHeader.test.tsx` | Rewritten for the title panel. |
+
+## Retired later (11 Oct, during Query panel v1), for the same reason
+
+These failed on `main` because they assert things v137 removed. They were missed when v137 landed.
+
+| Suite | Lock | Reason |
+| --- | --- | --- |
+| `qcV126.measure.ts` | QC126-6 desk ≠ list | "Recently updated" is gone; a strip cell now filters the list (QC137 B2) |
+| `qcV126.measure.ts` | QC126-7 one card | the featured card it inspected is not drawn |
+| `qcV126.measure.ts` | QC126-11 footer | it measured the footer against the desk, which is not drawn |
+| `qcV126.measure.ts` | QC126-20, "the featured card's button opens the drawer" only | that door no longer exists; the lock's other doors stand |
+
+## Known failures, left red on purpose
+
+| Suite | Lock | Why it is red |
+| --- | --- | --- |
+| `qcV126.measure.ts` | QC126-2 no stragglers | the old neutral colour is still written in `analytics/a17.css` and `manuscripts/v12/msv21.css` |
+| `qcV126.measure.ts` | QC126-2.10 torn edges | the harness account has no query with a torn START, so that branch has no subject |
+| `contactV13.measure.ts` | CL13-12 loading | the Contact list's loading frame no longer matches the loaded page's tab and band shape |
+| `qcV126.measure.ts` | QC126-2.3 nothing escapes (1280, "earlier") | red on `main`'s build too from 12 Oct, green the day before: the Birds-eye track is a rolling window, so the reading is date-bound |
