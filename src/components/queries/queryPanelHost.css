@@ -12,6 +12,29 @@
 }
 .qsp .spanel-own > .qcv-open > .qcv-open-fr { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; border: 0; border-radius: 0; box-shadow: none; }
 
+/* ── Query panel v2 §A · under the bar ──
+   The panel's top is the shell bar's bottom (the page sheet's own top), which the host measures and publishes as
+   `--qsp-top`; right and bottom stay 8. The bar's Search and "Log a query" stay on screen and pressable. */
+@media (min-width: 900px) { .spanel.qsp { top: var(--qsp-top, 8px); } }
+
+/* ── Query panel v2 §A · THE FACES ──
+   brand.tsx injects `p, span, div, button, input, select, textarea, label { font-family: <body sans> }` at run time
+   (0-0-1) and forces h1–h3 into the brand serif with !important. Inside the panel that put Source Sans 3 on every
+   element with no face of its own, and Playfair on headings. Fixed at the root, for this subtree:
+   · the panel states the serif, and those same elements INHERIT it. `html :where(.qsp) x` is 0-0-2: above brand's
+     element rule, below every class rule, so a component that names a face keeps it whatever the bundle's order;
+   · the tokens the tab bodies read for their faces resolve to the three allowed families here;
+   · headings take the typewriter, with the !important and the extra class brand's rule needs. */
+.spanel.qsp {
+  font-family: var(--sp-serif); color: #1c130f;
+  --f12-serif: var(--sp-serif); --f12-body: var(--sp-serif); --f12-mono: var(--sp-mono);
+  --font-sans: var(--sp-serif); --font-serif: var(--sp-serif); --font-mono: var(--sp-mono);
+  --qcv-serif: var(--sp-serif); --qcv-mono: var(--sp-mono);
+}
+html :where(.qsp) p, html :where(.qsp) span, html :where(.qsp) div, html :where(.qsp) button, html :where(.qsp) input,
+html :where(.qsp) select, html :where(.qsp) textarea, html :where(.qsp) label, html :where(.qsp) a { font-family: inherit; }
+.spanel.qsp h1, .spanel.qsp h2, .spanel.qsp h3, .spanel.qsp h4 { font-family: var(--sp-type) !important; }
+
 /* the open row: a warm ground and a 3px edge in its court's colour */
 @media (min-width: 768px) {
   .qcw-list .qcw-row[aria-selected="true"] { background: #f7f3ed; box-shadow: inset 3px 0 0 var(--qp-court, #3d5070); }

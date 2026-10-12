@@ -265,9 +265,11 @@ describe("the open query, docked", () => {
   const card = (over: Partial<Query>, extra: Partial<React.ComponentProps<typeof QcOpenCard>> = {}) => renderToStaticMarkup(
     <QcOpenCard row={rowsOf([q(over)])[0]} nowMs={NOW} manuscriptTitle="Murphy's Day Out" manuscriptTags={["Adult", "Thriller", "50,000 words"]}
       onPrimary={() => {}} onAction={() => {}} tracking={<ol id="tl" />} agentTab={<div id="ag" />} notesTab={<div id="nt" />} noteCount={2} {...extra} />);
-  it("it is an aside in the shared FramedCard; the band is the query's STATE colour; it is never an overlay", () => {
+  it("it is an aside in the shared FramedCard, with no band (Query panel v2: the masthead replaced it); it is never an overlay", () => {
     const html = card({});
-    expect(html).toMatch(/^<aside[^>]*data-qcv="open"[^>]*class="fc-card qcv-open qcv-own"[^>]*style="--fc-band:var\(--state-queried\)"/);
+    expect(html).toMatch(/^<aside[^>]*data-qcv="open"[^>]*class="fc-card qcv-open qcv-own"/);
+    expect(html, "the FramedCard band is not drawn").not.toContain("fc-band");
+    expect(html).toContain('<header class="qcv-open-mast" data-qcv="open-mast">');
     expect(html).not.toMatch(/scrim|qpn/);
   });
   /**
@@ -301,17 +303,21 @@ describe("the open query, docked", () => {
     expect(rule(openCss, ".qcv-open-body")).toMatch(/overflow-y:\s*auto/);
     expect(rule(openCss, ".qcv-open-ft")).toMatch(/flex:\s*none/);
   });
-  it("the band: whose court, the rust dot only when it is the writer's move, and Day N — omitted when undated", () => {
-    expect(card({})).toMatch(/data-qcv="open-court" data-you="false">With the agent<\/b><b class="qcv-open-day" data-qcv="open-day">Day 20<\/b>/);
-    expect(card({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })).toMatch(/class="qcv-open-crt qcv-open-crt--you"[^>]*data-you="true">With you</);
-    expect(card({ status: QueryStatus.OFFER, offerDate: ago(2) })).toMatch(/class="qcv-open-crt"[^>]*data-you="false">Offer</);
+  it("the masthead: the court on the card, no small-capitals label, the status pill, and the day line — omitted when undated", () => {
+    expect(card({})).toMatch(/data-court="agent"/);
+    expect(card({})).toMatch(/<span class="qcv-open-day" data-qcv="open-day">Day 20 · queried \d+ \w+( \d{4})?<\/span>/);
+    expect(card({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })).toMatch(/data-court="you"/);
+    expect(card({ status: QueryStatus.OFFER, offerDate: ago(2) })).toMatch(/data-court="you"/);
     expect(card({ status: QueryStatus.NO_RESPONSE })).not.toContain("qcv-open-day");
+    expect(card({ status: QueryStatus.REJECTED, rejectedDate: ago(2) })).toMatch(/data-qcv="open-day">Closed \d+ \w+/);
+    for (const gone of ["qcv-open-crt", "open-court", "With the agent<", "With you<"]) expect(card({}), gone).not.toContain(gone);
   });
   it("the drawer's own three tabs, and their bodies inside `.qcv-legacy` where the font reset stops", () => {
     const html = card({});
     expect([...html.matchAll(/role="tab" aria-selected="(true|false)">(Tracking|Agent|Notes)/g)].map((m) => m[2])).toEqual(["Tracking", "Agent", "Notes"]);
     expect(html).toMatch(/<div class="qcv-open-tab qcv-legacy" role="tabpanel"><ol id="tl">/);
-    expect(html).toContain('<i class="qcv-open-tabn">2</i>');
+    expect(html, "Notes · {count}").toContain('Notes <i class="qcv-open-tabn">· 2</i>');
+    expect(card({}, { noteCount: 0 }), "no count with no notes").not.toContain("qcv-open-tabn");
   });
   it("⚠️ ONE action in the footer, by status — none when closed; everything else behind ⋯, and only what `queryVerbs` offers", () => {
     expect(card({})).toMatch(/data-qcv="open-action">Record a response<\/button>/);

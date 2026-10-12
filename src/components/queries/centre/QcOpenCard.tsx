@@ -23,17 +23,23 @@ import { StatusDot } from "../../StatusDot";
 import { FramedCard } from "../../containers/FramedCard";
 import { queryVerbs } from "../../../lib/queryRowFacts";
 import { turnFor } from "../../../lib/queryCardFacts";
-import { COURT_LABEL, STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
+import { STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
 import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
 import { panelDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import type { SubmissionPackage } from "../../../types";
+import { formatDate } from "../../../lib/dates";
 import "./qcvPage.css";
 import "./qcvOpen.css";
 import "./qcvOpenPanel.css";
 
 export type OpenAction = "nudge" | "snooze" | "closed";
+
+/** "14 Mar", and the year only when it is not this one. */
+const dayOf = (ms: number, nowMs: number): string =>
+  formatDate(new Date(ms), new Date(ms).getFullYear() === new Date(nowMs).getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+const sentence = (s: string): string => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 export const QcOpenCard: React.FC<{
   row: QcRow;
@@ -85,54 +91,57 @@ export const QcOpenCard: React.FC<{
       ...(verbs.markClosed ? [{ key: "closed" as const, label: "Mark closed" }] : []),
     ];
 
+  const court = tileCourt(row.status) ?? "closed";
+  /* rust in the footer: an agent's reply past its date, or the writer's own send-by date gone */
+  const over = row.pastExpected || (row.court === "you" && row.expectedMs != null && row.expectedMs < nowMs);
+  const dayLine = row.court === "closed"
+    ? (row.stageStartMs != null ? `Closed ${dayOf(row.stageStartMs, nowMs)}` : null)
+    : [row.dayN != null ? `Day ${row.dayN}` : null, row.sentMs != null ? `queried ${dayOf(row.sentMs, nowMs)}` : null].filter(Boolean).join(" \u00b7 ") || null;
+
   return (
-    <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr" bandClassName="qcv-open-bd"
-      label={`${row.agentName}, ${row.agency}`} bandFill={`var(--state-${row.state})`}
-      rest={{ "data-status": row.status, "data-id": row.id, "data-court": tileCourt(row.status) ?? "closed" }}
-      band={<>
-        <b className={`qcv-open-crt${row.withYou ? " qcv-open-crt--you" : ""}`} data-qcv="open-court" data-you={row.withYou ? "true" : "false"}>{COURT_LABEL[row.court]}</b>
-        {/* omitted, never "Day 0", where either end of it is undated; a closed query states the day it closed */}
-        {row.court === "closed"
-          ? (row.stageStartMs != null && <b className="qcv-open-day" data-qcv="open-day">{factLine(row, nowMs)}</b>)
-          : row.dayN != null && <b className="qcv-open-day" data-qcv="open-day">Day {row.dayN}</b>}
-      </>}>
-      <div className="qcv-open-body">
+    <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr"
+      label={`${row.agentName}, ${row.agency}`}
+      rest={{ "data-status": row.status, "data-id": row.id, "data-court": court, "data-over": over ? "true" : undefined, "data-tab": tab }}>
+      {/* Query panel v2 §A — the masthead: navy, the court's colour along its top edge, and nothing in small capitals.
+          Whose court it is in is said by that colour, the disc and the footer's line, never by a label. */}
+      <header className="qcv-open-mast" data-qcv="open-mast">
         <div className="qcv-open-who">
           <span className="qcv-open-ini" aria-hidden="true">{row.initials}</span>
           <div className="qcv-open-whotx">
             <h2 className="qcv-open-nm">{row.agentName}</h2>
             <span className="qcv-open-ag">{row.agency}</span>
-            {/* Query panel v1 §B — no stamp here: the materials box in the timeline already says how they went */}
           </div>
-          <span className="qcv-open-pill"><StatusDot status={row.status} overrideSize={14} decorative />{STAGE_NAME[row.status]}</span>
-          {/* Query panel v1 §B — the close is the head's: a 34px round hit area, top right */}
           {onClose && (
             <button type="button" className="qcv-open-x" data-qcv="open-close" aria-label="Close this query" onClick={onClose}><span aria-hidden="true">{"\u00d7"}</span></button>
           )}
         </div>
-
-        {/* Query panel v1 §B — the "Querying {title}" block is gone. Over a page that does not already name the
-            manuscript, one muted caption says which book this is. */}
+        <p className="qcv-open-line">
+          <span className="qcv-open-pill"><StatusDot status={row.status} overrideSize={14} decorative />{STAGE_NAME[row.status]}</span>
+          {dayLine && <span className="qcv-open-day" data-qcv="open-day">{dayLine}</span>}
+        </p>
+        {/* over a page that does not already name the manuscript, one muted caption says which book this is */}
         {manuscript === "caption" && manuscriptTitle && (
           <p className="qcv-open-for" data-qcv="open-for">for <i>{manuscriptTitle}</i></p>
         )}
-
         <div className="qcv-open-tabs" role="tablist" aria-label="Query detail">
           {(["tracking", "agent", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => pickTab(t)}>
-              {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : "Notes"}
-              {t === "notes" && noteCount > 0 && <i className="qcv-open-tabn">{noteCount}</i>}
+              {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : noteCount > 0 ? <>Notes <i className="qcv-open-tabn">{"\u00b7"} {noteCount}</i></> : "Notes"}
             </button>
           ))}
         </div>
+      </header>
 
+      <div className="qcv-open-body">
         <div className="qcv-open-tab qcv-legacy" role="tabpanel">
           {tab === "tracking" ? tracking : tab === "agent" ? agentTab : notesTab}
         </div>
       </div>
 
+      {/* §C — on the Notes tab the composer is the foot (the notes thread draws it): the action footer steps aside */}
+      {tab === "notes" ? null : <>
       <div className="qcv-open-ft" data-qcv="open-foot">
-        <p className="qcv-open-stand">{standLine(row)}<br />{factLine(row, nowMs)}</p>
+        <p className="qcv-open-stand"><b>{standLine(row)}</b><span>{sentence(factLine(row, nowMs))}</span></p>
         {more.length > 0 && (
           <button ref={moreRef} type="button" className={`qcv-open-more${liveAction && liveAction !== "primary" ? " qcv-open-more--live" : ""}`} aria-haspopup="menu" aria-expanded={moreOpen}
             aria-label={`More actions for ${row.agentName}`} data-qcv="open-more" onClick={() => setMoreOpen((o) => !o)}>
@@ -157,9 +166,10 @@ export const QcOpenCard: React.FC<{
             <button key={d.mode} type="button" className={d.primary ? "qcv-open-act" : "qcv-open-cb"} data-qcv={d.primary ? "open-action" : "open-door"} data-door={d.mode}
               onClick={(e) => onDoor!(d.mode, e.currentTarget)}>{d.label}</button>
           ))}
-          {onDeleteQuery ? <button type="button" className="qcv-open-cdel" data-qcv="open-del" onClick={() => setAskDelete(true)}>DELETE QUERY</button> : null}
+          {onDeleteQuery ? <button type="button" className="qcv-open-cdel" data-qcv="open-del" onClick={() => setAskDelete(true)}>Delete query</button> : null}
         </div>
       )}
+      </>}
       {moreOpen && (
         <QcMenu anchor={moreRef.current} label="More actions" onClose={closeMore} placement="up"
           groups={[{ kind: "action", current: "", items: more.map((m) => ({ key: m.key, label: m.label })), onPick: (k) => { if (moreRef.current) onAction(k as OpenAction, moreRef.current); } }]} />

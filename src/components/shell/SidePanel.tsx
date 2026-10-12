@@ -28,7 +28,8 @@ export const SidePanel: React.FC<{
   /** extra attributes for the panel element (probes) */
   attrs?: Record<string, string | undefined>;
   className?: string;
-}> = ({ label, children, step = false, attrs, className }) => {
+  style?: React.CSSProperties;
+}> = ({ label, children, step = false, attrs, className, style }) => {
   const ref = useRef<HTMLElement>(null);
   /* the Birds-eye tab and anything else that stands down while a panel is open read this */
   useEffect(() => {
@@ -36,7 +37,7 @@ export const SidePanel: React.FC<{
     return () => { document.body.classList.remove("spanel-open"); };
   }, []);
   return createPortal(
-    <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-label={label} data-side-panel="" data-step={step ? "true" : undefined} {...attrs}>
+    <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} {...attrs}>
       <div className="spanel-own" data-side-own="" hidden={step || undefined}>{children}</div>
       <div className="spanel-slot" data-side-slot="" />
     </aside>,
