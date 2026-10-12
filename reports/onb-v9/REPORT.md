@@ -233,3 +233,23 @@ No string needed a nearest equivalent. One thing to know: "Reference by agency o
 **Left alone, as ruled:** "· optional" on the word count; "(optional)" on Strapline and title in the Import page's book step.
 
 Gates: tsc 0, both builds 0, Vitest 8,584 passed with the same one file failing to load. Re-pointed: `reviewCopyClaims` (the agency answer) and `onbV5Import` V1 (the first question's words).
+
+## 12. P1 (12 Oct): the cause was not the date
+
+**I was wrong in `DEPLOY.md` to call it the date.** I fixed the clock at five different dates and the ghost's heading sat at 61 every time, against the capture's 50. Nothing on that screen is drawn from the date.
+
+**The cause is the machine's scrollbar mode.** The dashboard ghost behind the importing loader sits in `.ws-wbody`, which reserves a scrollbar gutter on both edges (`scrollbar-gutter: stable both-edges`, `workspaceShell.css:1310`). Chromium follows the machine's scrollbar setting. This machine is on "automatic", which follows whether a mouse is attached. The capture was taken with no gutter; today the same build reserves 11px each side (measured: 1,184 wide, 1,162 inside). I cannot see what changed on the machine between last night and this morning.
+
+**The fix is in the lock, and the capture is not retaken.** P1 now switches that gutter off for its capture, and fixes the clock as asked (`2026-10-11T12:00`, or `IP1_P1_CLOCK`), so neither the machine nor the day can move a box.
+
+| Run | Result |
+|---|---|
+| clock fixed at 11 Oct | 2 passed |
+| clock a week on (19 Oct) | 2 passed |
+| clock a year on | 2 passed |
+| gutter left on (`IP1_P1_GUTTER=1`), clock fixed | 2 failed (the heading at 61) |
+| gutter left on, a week on | 2 failed |
+
+P1 is the only lock that compares the ghost with a stored capture. `onbV5Import` H2, R2 and R4 compare the loader with the live dashboard in the same run, and pass.
+
+This is a test-only change: the served bundle does not change.

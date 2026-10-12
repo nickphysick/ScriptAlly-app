@@ -18,3 +18,18 @@ Deployed from a clean tree with `firebase deploy --only hosting --config firebas
 **For whoever deploys to dev next:** dev now serves `dev/query-panel-v1-onb9`. A deploy of `query-panel-v1` alone removes onboarding v9 from dev. Merge into this branch, or merge `onb-v9` into yours first.
 
 Nothing is merged to `main`. Prod is untouched.
+
+## Second deploy (12 Oct 2026): the FAQ follow-up
+
+Dev had moved again. Another session had merged its newer query-panel work onto the first integration branch and deployed that.
+
+| | Bundle | Built from |
+|---|---|---|
+| Before | `index-DqTM6gRM.js` | `dev/query-panel-v1-onb9-tip` at `c22f2882` (its worktree's build has the same hash) |
+| After | `index-DbqJTP9V.js` | `dev/query-panel-v1-onb9-tip-onb9` at `196eb875` |
+
+The new branch is `c22f2882` with `onb-v9` (`5e7d3350`) merged in; no conflicts. On it: tsc 0, both builds 0, Vitest 566 files passed and the same one failing to load (8,591 passed, 3 skipped). Rendered: 154 passed, 2 skipped, 2 failed.
+
+**Correction (later on 12 Oct): the cause was the machine's scrollbar mode, not the date. See REPORT.md §12.** What I wrote at the time: **The two failures are the date, not the merge.** `onbV5ImportPage` P1 (two widths) compares the importing loader with a capture taken on 11 Oct. The dashboard ghost's heading behind the loader sits 11px differently today. The same case fails today on the unchanged `onb-v9` build that passed it last night. The loader's own files are byte-identical to the base (R1). The capture needs retaking, or the ghost's heading needs a fixed clock; I did neither.
+
+**For whoever deploys to dev next:** dev serves `dev/query-panel-v1-onb9-tip-onb9`.
