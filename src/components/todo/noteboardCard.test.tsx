@@ -122,7 +122,7 @@ describe("⚠️ the paper rules come AFTER .nb-note — source order decides th
        to `.nb-note { border: 1px solid transparent }` and all three papers rendered with an
        invisible border — in a sheet where each rule reads correctly on its own, through a lock
        that asserted these very declarations exist. The computed value is what found it
-       (noteboardLook.measure.ts); this keeps it from coming back. */
+       (noteboardLook.measure.ts, since retired with Corkboard v1); this keeps it from coming back. */
     const note = css.indexOf(".nb-note {");
     expect(note, "no .nb-note rule").toBeGreaterThan(-1);
     for (const paper of [".nb-c-yellow", ".nb-c-pink", ".nb-c-sage"]) {

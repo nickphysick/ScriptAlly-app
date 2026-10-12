@@ -56,8 +56,9 @@ const render = () =>
  * ⚠️ THE DRAWER MOUNTS ONLY WHEN OPEN, so a closed render proves nothing about it. Static
  * rendering runs no effects and cannot click, so the drawer's own markup is read from SOURCE for
  * the cases about its contents — and the SHAPE is what those cases are about. The end-to-end
- * behaviour (click Keep this → a note appears, the drawer closes) is measured in the browser,
- * where a click is a click; see nbWorkflow.measure.ts.
+ * behaviour (click Keep this → a note appears, the drawer closes) WAS measured in the browser
+ * (nbWorkflow.measure.ts, retired with Corkboard v1) and is not re-measured today — see
+ * tests/e2e/RETIRED-corkboard-v1.md.
  */
 const drawerSource = (): string => {
   const at = page.indexOf("nb-drawer-body");
