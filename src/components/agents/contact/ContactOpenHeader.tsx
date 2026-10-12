@@ -29,9 +29,6 @@ import "../../shell/headerPanel.css";
 import "./contactV15.css";
 import "./contactV16.css";
 
-/** the header's drawing: a flying hawk carrying an agent card, facing left, transparent */
-export const CONTACT_HEADER_HAWK = { src: "/images/contact/contact-header-hawk.png", width: 576, height: 383 };
-
 /**
  * THE DESK'S THREE ILLUSTRATIONS (header panel v2, Part D) — SLOTS, EMPTY UNTIL THE ARTIST'S FILES ARRIVE. Each badge
  * card's strip holds a 76 × 56 (60 × 50) box: a dashed placeholder reading "Art to come" while its slot is `null`, and
@@ -41,14 +38,6 @@ export interface ContactArt { src: string; width: number; height: number }
 export const CONTACT_DESK_ART_WEEK: ContactArt | null = null;
 export const CONTACT_DESK_ART_QUERIED: ContactArt | null = null;
 export const CONTACT_DESK_ART_PROFILES: ContactArt | null = null;
-
-export const CONTACT_HEADER_SUB = "Your agent data underpins everything. Collate and manage it here.";
-
-/** the banner above the list (v15.2 §4) — exact */
-export const CONTACT_BANNER_LINE = "Your agent will be the one who champions your words.";
-
-/** "{N} agents on file" — one agent is "1 agent on file" */
-export const onFileTitle = (n: number): string => `${n} agent${n === 1 ? "" : "s"} on file`;
 
 /** v16 §A — the header's fixed title, broken after the comma, and its accessible name */
 export const CONTACT_HEADER_TITLE = "Every agent, in one place";
