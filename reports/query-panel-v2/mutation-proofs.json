@@ -90,7 +90,7 @@
  },
  "V13": {
   "lock": "V13",
-  "green": "52/52",
+  "green": "67/67",
   "mutations": [
    {
     "name": "every link drawn in every state (source: StandCard ignores the view's links)",
@@ -101,6 +101,11 @@
     "name": "Keep tracking leaves Close in the lead (source: QcOpenCard passes the wait to panelDoors regardless of the flag)",
     "red": "2 readings: 'Keep tracking \u00b7 Record a response leads instead of Close \u2014 lead \"Close query\"', 'Keep tracking \u00b7 holds after a reload \u2014 lead \"Close query\"'",
     "log": "mutation-runs/V13-lead.txt"
+   },
+   {
+    "name": "the send-by step writes a third field (source: its commit also sets lastStatusChange)",
+    "red": "1 reading: 'only the send-by date and its reminder changed on the query \u2014 changed: expectedSendDate, lastStatusChange, sendReminderDate'",
+    "log": "mutation-runs/V13-sendby.txt"
    }
   ],
   "patch": "mutation-runs/V13.patch (both source mutations)"

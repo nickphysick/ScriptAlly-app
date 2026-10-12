@@ -8,6 +8,7 @@
  *   qp2l-nosent  with the agent, no sent date recorded          → "Add the date you sent it"
  *   qp2l-nowin   with an agent who states no reply window        → "Set a date"
  *   qp2l-year    with the agent for 400 days, a window stated    → "Remind me later" · "Keep tracking"
+ *   qp2l-request a partial requested, no send-by date            → "Set a send-by date"
  *
  * Its own prefix, `qp2l-`: `seedQp1Save.mjs` wipes every `qp1s-` document each time P13 seeds, and a second
  * session running that lock removed these mid-run when they shared the prefix.
@@ -56,7 +57,12 @@ async function wipe() {
 if (process.argv.includes("--dump")) {
   const qs = (await getDocs(collection(db, "users", uid, "queries"))).docs.filter((d) => d.id.includes(PREFIX));
   const tasks = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter(mine).map((d) => ({ text: d.data().text, queryId: d.data().queryId, done: !!d.data().done }));
-  console.log(JSON.stringify({ queries: Object.fromEntries(qs.map((d) => [d.id, { dateSent: d.data().dateSent ?? null, keep: d.data().closureOfferDismissed ?? null, expected: d.data().writerExpectedDate ?? null }])), tasks }));
+  /* a Timestamp has its own toJSON, so a replacer never sees it: walk the value instead */
+  const plain = (v) => (v && typeof v === "object" ? (typeof v.toDate === "function" ? v.toDate().toISOString() : Array.isArray(v) ? v.map(plain) : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)]))) : v);
+  const log = {};
+  for (const d of qs) log[d.id] = (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs.map((a) => a.id).sort();
+  const feed = (await getDocs(collection(db, "users", uid, "activities"))).docs.filter(mine).map((d) => d.id).sort();
+  console.log(JSON.stringify({ docs: Object.fromEntries(qs.map((d) => [d.id, plain(d.data())])), log, feed, queries: Object.fromEntries(qs.map((d) => [d.id, { dateSent: d.data().dateSent ?? null, keep: d.data().closureOfferDismissed ?? null, expected: d.data().writerExpectedDate ?? null }])), tasks }));
   process.exit(0);
 }
 if (process.argv.includes("--clean")) { console.log(`qp2l: removed ${await wipe()}`); process.exit(0); }
@@ -87,6 +93,20 @@ mk(`${PREFIX}nosent`, AG, "Petra Nwosu at Nwosu & Hale", null);
 /* 45 days, not 20: feed drawer B6 reads the 30 days to 11 Oct, and a send dated inside them adds a day to it */
 mk(`${PREFIX}nowin`, AG2, "Oran Achterberg at Achterberg Literary", 45);
 mk(`${PREFIX}year`, AG, "Petra Nwosu at Nwosu & Hale", 400);
+/* a request the writer owes, with no send-by date. Both entries are dated outside feed drawer B6's 30 days. */
+{
+  const id = `${PREFIX}request`, who = "Oran Achterberg at Achterberg Literary";
+  b.set(doc(db, "users", uid, "queries", id), {
+    id, userId: uid, agentId: AG2, manuscriptId: MS, status: "Partial Requested", sendMethod: "Email", dateSent: iso(70),
+    personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"], revisionRound: 1,
+    hasAgentResponded: true, lastStatusChange: iso(45), partialRequestedDate: iso(45), responseReceivedAt: iso(45),
+  });
+  for (const [k, type, d, words, actType] of [["sent", "Queried", 70, `Query sent to ${who}`, "Query Sent"], ["req", "Partial Requested", 45, `Partial requested by ${who}`, "Status Changed"]]) {
+    const a = `${id}-${k}`;
+    b.set(doc(db, "users", uid, "activities", a), { id: a, userId: uid, queryId: id, manuscriptId: MS, activityType: actType, description: words, date: iso(d), details: "", resultingStatus: type });
+    b.set(doc(db, "users", uid, "queries", id, "activity", a), { type, resultingStatus: type, createdAt: new Date(iso(d)), note: words, queryId: id, agentName: "Oran Achterberg", manuscriptTitle: "seed" });
+  }
+}
 await b.commit();
 console.log("qp2l: seeded");
 process.exit(0);

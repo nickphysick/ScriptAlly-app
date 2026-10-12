@@ -5356,6 +5356,9 @@ export const Queries: React.FC<{
                       const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
                       void addUserTask({ text: `Nudge ${agentPrimary(activeAgent)}`, queryId: activeQuery.id, agentId: activeAgent.id, manuscriptId: activeQuery.manuscriptId, dueDate: due })
                         .then(() => showToast({ message: "Reminder set for two weeks' time" }));
+                    } else if (link === "setSendBy") {
+                      /* the edit journey's send-by step, in the panel: it saves the date and its reminder only */
+                      stepRow({ mode: "edit", queryId: activeQuery.id, preset: { sendBy: true } });
                     } else if (link === "keepTracking") {
                       void updateQuery(activeQuery.id, { closureOfferDismissed: true } as never).then(() => showToast({ message: "Still tracking this query" }));
                     }

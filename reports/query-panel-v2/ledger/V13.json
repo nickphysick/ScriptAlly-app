@@ -55,15 +55,45 @@
  },
  {
   "lock": "V13",
-  "where": "1512 you row 0 (rj-dupe) · no link outside its state",
+  "where": "1512 qp2l-request · the panel shows this query, with one stand card",
   "ok": true,
-  "detail": "0 link(s), none earned"
+  "detail": "qp2l-request · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-request · exactly its links",
+  "ok": true,
+  "detail": "[\"Set a send-by date\"] (wants [\"Set a send-by date\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-request · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 0 (cv25-q-09) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 1 (rj-dupe) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 2 (seed-cal-passed865-q) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
   "where": "1512 you · rows were read",
   "ok": true,
-  "detail": "1 row(s)"
+  "detail": "3 row(s)"
  },
  {
   "lock": "V13",
@@ -157,15 +187,45 @@
  },
  {
   "lock": "V13",
-  "where": "1280 you row 0 (rj-dupe) · no link outside its state",
+  "where": "1280 qp2l-request · the panel shows this query, with one stand card",
   "ok": true,
-  "detail": "0 link(s), none earned"
+  "detail": "qp2l-request · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-request · exactly its links",
+  "ok": true,
+  "detail": "[\"Set a send-by date\"] (wants [\"Set a send-by date\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-request · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 0 (cv25-q-09) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 1 (rj-dupe) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 2 (seed-cal-passed865-q) · no link outside its state",
+  "ok": true,
+  "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
   "where": "1280 you · rows were read",
   "ok": true,
-  "detail": "1 row(s)"
+  "detail": "3 row(s)"
  },
  {
   "lock": "V13",
@@ -229,7 +289,7 @@
  },
  {
   "lock": "V13",
-  "where": "the tally · none:you",
+  "where": "the tally · Set a send-by date",
   "ok": true,
   "detail": "2"
  },
@@ -262,6 +322,36 @@
   "where": "Set a date · Cancel puts the link back and writes nothing",
   "ok": true,
   "detail": "[\"Set a date\"] · {\"dateSent\":\"2026-08-28T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a send-by date · the response journey's chips and reminder choices, in the panel",
+  "ok": true,
+  "detail": "all 8 choices · scrim opacity 1"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a send-by date · only the send-by date and its reminder changed on the query",
+  "ok": true,
+  "detail": "changed: expectedSendDate, sendReminderDate"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a send-by date · no entry, feed row or other query changed",
+  "ok": true,
+  "detail": "log [\"qp2l-request-req\",\"qp2l-request-sent\"] · feed 4 (was 4) · other queries changed: none"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a send-by date · the defaults saved: two weeks out, reminded the day before",
+  "ok": true,
+  "detail": "send by 2026-10-26 (+14) · reminder 2026-10-25 (+13)"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a send-by date · a request with a date offers no link, and the card counts to it",
+  "ok": true,
+  "detail": "\"They’re expecting it by 26 Oct. Mark it sent once it’s gone.\" · []"
  },
  {
   "lock": "V13",
