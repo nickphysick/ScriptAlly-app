@@ -1,39 +1,9 @@
 [
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/agents @1512",
-  "ok": true,
-  "detail": "296,134 1159×260 (loading) → 296,134 1159×260"
- },
- {
-  "lock": "H8 precondition: it was read while loading, then loaded",
-  "where": "/agents @1512",
-  "ok": true,
-  "detail": "first true · last false"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/manuscripts/packages @1512",
-  "ok": true,
-  "detail": "296,134 1159×260 (loading) → 296,134 1159×260"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/todo @1512",
-  "ok": true,
-  "detail": "296,134 1159×260 (loading) → 296,134 1159×260"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/todo/corkboard @1512",
-  "ok": true,
-  "detail": "296,134 1159×260 (loading) → 296,134 1159×260"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/queries @1512",
   "ok": true,
-  "detail": "296,134 1159×267 (loading) → 296,134 1159×267"
+  "detail": "296,92 1159×260 (loading) → 296,92 1159×260"
  },
  {
   "lock": "H8 precondition: it was read while loading, then loaded",
@@ -43,69 +13,69 @@
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/queries/analytics @1512",
+  "where": "/agents @1512",
   "ok": true,
-  "detail": "296,134 1159×260 → 296,134 1159×260"
+  "detail": "296,92 1159×260 (loading) → 296,92 1159×260"
  },
  {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/agents/discover @1512",
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/agents @1512",
   "ok": true,
-  "detail": "296,134 1159×179 → 296,134 1159×179"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/manuscripts @1512",
-  "ok": true,
-  "detail": "296,134 1159×260 → 296,134 1159×260"
+  "detail": "first true · last false"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/manuscripts/comps @1512",
   "ok": true,
-  "detail": "296,134 1159×256 (loading) → 296,134 1159×256"
+  "detail": "296,92 1159×260 (loading) → 296,92 1159×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/packages @1512",
+  "ok": true,
+  "detail": "296,92 1159×260 (loading) → 296,92 1159×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/todo @1512",
+  "ok": true,
+  "detail": "296,92 1159×260 (loading) → 296,92 1159×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "296,92 1159×260 → 296,92 1159×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/agents/discover @1512",
+  "ok": true,
+  "detail": "296,92 1159×179 → 296,92 1159×179"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "296,92 1159×260 → 296,92 1159×260"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/todo/calendar @1512",
   "ok": true,
-  "detail": "296,134 1159×181 → 296,134 1159×181"
+  "detail": "296,92 1159×181 → 296,92 1159×181"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/agents @1280",
+  "where": "/todo/noteboard @1512",
   "ok": true,
-  "detail": "289,134 942×260 (loading) → 289,134 942×260"
- },
- {
-  "lock": "H8 precondition: it was read while loading, then loaded",
-  "where": "/agents @1280",
-  "ok": true,
-  "detail": "first true · last false"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/manuscripts/packages @1280",
-  "ok": true,
-  "detail": "289,134 942×260 (loading) → 289,134 942×260"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/todo @1280",
-  "ok": true,
-  "detail": "289,134 942×260 (loading) → 289,134 942×260"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/todo/corkboard @1280",
-  "ok": true,
-  "detail": "289,134 942×260 (loading) → 289,134 942×260"
+  "detail": "296,92 1159×179 → 296,92 1159×179"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/queries @1280",
   "ok": true,
-  "detail": "289,134 942×267 (loading) → 289,134 942×267"
+  "detail": "289,92 942×260 (loading) → 289,92 942×260"
  },
  {
   "lock": "H8 precondition: it was read while loading, then loaded",
@@ -115,38 +85,68 @@
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/queries/analytics @1280",
+  "where": "/agents @1280",
   "ok": true,
-  "detail": "289,134 942×271 → 289,134 942×271"
+  "detail": "289,92 942×260 (loading) → 289,92 942×260"
  },
  {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/agents/discover @1280",
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/agents @1280",
   "ok": true,
-  "detail": "289,134 942×179 → 289,134 942×179"
- },
- {
-  "lock": "H8 the header's box is the same first seen and settled (±1)",
-  "where": "/manuscripts @1280",
-  "ok": true,
-  "detail": "289,134 942×260 → 289,134 942×260"
+  "detail": "first true · last false"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/manuscripts/comps @1280",
   "ok": true,
-  "detail": "289,134 942×256 (loading) → 289,134 942×256"
+  "detail": "289,92 942×260 (loading) → 289,92 942×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/packages @1280",
+  "ok": true,
+  "detail": "289,92 942×260 (loading) → 289,92 942×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/todo @1280",
+  "ok": true,
+  "detail": "289,92 942×260 (loading) → 289,92 942×260"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "289,92 942×271 → 289,92 942×271"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/agents/discover @1280",
+  "ok": true,
+  "detail": "289,92 942×179 → 289,92 942×179"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "289,92 942×260 → 289,92 942×260"
  },
  {
   "lock": "H8 the header's box is the same first seen and settled (±1)",
   "where": "/todo/calendar @1280",
   "ok": true,
-  "detail": "289,134 942×181 → 289,134 942×181"
+  "detail": "289,92 942×181 → 289,92 942×181"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/noteboard @1280",
+  "ok": true,
+  "detail": "289,92 942×179 → 289,92 942×179"
  },
  {
   "lock": "H8 population: the held pages were read loading",
   "where": "all",
   "ok": true,
-  "detail": "12"
+  "detail": "10"
  }
 ]
