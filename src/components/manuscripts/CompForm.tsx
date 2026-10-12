@@ -28,6 +28,7 @@ import { CompMedia, CompTitle } from "../../types";
 import { CompDraft } from "../../lib/comps";
 import { ready } from "../../lib/compUsage";
 import { CompKind, CompRow, draftRow, kindOf } from "../../lib/compsLibrary";
+import { CompExplainer } from "./comps25/CompExplainer";
 import { CompCell, NextCell } from "./comps25/CompsLibrary";
 import { KindIcon } from "./comps25/marks";
 
@@ -251,6 +252,8 @@ export const CompFormBody: React.FC<{
       onSubmit={(e) => { e.preventDefault(); form.save(); }}
       onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); form.save(); } }}
     >
+      {form.mode === "add" && <CompExplainer open={form.explain} first={first} onToggle={form.setExplain} />}
+
       <section className="cf-sec" data-cf="section" data-section="what">
         <SectionHead n={1} title="What is it?" tag="Only the title is needed now" />
         <div className="cf-type" role="radiogroup" aria-label="Type" data-cf="type">

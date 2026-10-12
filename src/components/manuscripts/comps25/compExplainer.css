@@ -1,0 +1,31 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Comps v26, Part B: the explainer card and its folded link (CompExplainer.tsx). It renders inside
+ * the comp drawer, which is portalled, so every value is a literal or a `:root` token.
+ *
+ * ⚠️ EVERY RULE IS `.cf-body …` (0-2-0). This sheet is bundled BEFORE compsV25.css, whose font reset is
+ * 0-1-0 and would win on source order: the card's heading rendered in the body serif until it was scoped.
+ */
+.cf-body .cf-ax { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 18px; margin-bottom: 26px; padding: 20px 22px 18px 18px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.cf-body .cf-ax-art { width: 76px; height: 76px; border-radius: 50%; background: #efe6dc; overflow: hidden; display: grid; place-items: end center; }
+.cf-body .cf-ax-art img { display: block; width: 62px; height: auto; margin-bottom: -8px; }
+.cf-body .cf-ax-h { margin: 2px 0 6px; font: 400 21px/1.25 var(--sp-type); color: #1c130f; }
+.cf-body .cf-ax-p { margin: 0; font: 400 15.5px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.cf-body .cf-ax ul { list-style: none; margin: 14px 0 0; padding: 14px 0 0; border-top: 1px dashed rgba(28, 19, 15, 0.16); display: grid; gap: 9px; }
+.cf-body .cf-ax li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; font: 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.cf-body .cf-ax li b { margin-right: 4px; font: 400 14.5px/1.45 var(--sp-type); color: #1c130f; }
+.cf-body .cf-ax li i { width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px #a2452a; color: #a2452a; font: 600 10px/1 var(--font-mono); font-style: normal; }
+.cf-body .cf-axf { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-top: 2px; padding-top: 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); }
+.cf-body .cf-axf span { font: 400 13.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.cf-body .cf-axf button { flex: none; margin-left: auto; padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap; font: 400 13.5px/1.3 var(--sp-type); color: #a2452a; text-decoration: underline; text-underline-offset: 3px; }
+.cf-body .cf-axc { display: flex; align-items: center; margin: -4px 0 22px; }
+.cf-body .cf-axc button { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: 400 14px/1.3 var(--sp-type); color: #1c130f; text-decoration: underline; text-underline-offset: 3px; }
+.cf-body .cf-axc button i { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.45); font: 600 10px/1 var(--font-mono); font-style: normal; color: rgba(28, 19, 15, 0.58); text-decoration: none; }
+
+/* below 1100px of page the art hides and the card is one column (the mock's own breakpoint) */
+@media (max-width: 1099.98px) {
+  .cf-body .cf-ax { grid-template-columns: minmax(0, 1fr); }
+  .cf-body .cf-ax-art { display: none; }
+}
