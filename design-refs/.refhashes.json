@@ -244,7 +244,19 @@
     "design-refs/query-panel-v1/ref-open-1280@2x.png": "c9fb27d42021c5a3787d345ca6581c5751918a1746ec1f5808257fc1e5558d1a",
     "design-refs/query-panel-v1/ref-open-you-1512@2x.png": "53bbb2de80ade4c8d43aed55b09f455a8c9ff45e2700f4147ce3616b8c2c3302",
     "design-refs/query-panel-v1/ref-step-response-1512@2x.png": "174772bd71116383fe7cd4be925c9a27102466098aa210f9c439eca9ca16b4db",
-    "design-refs/query-panel-v1/ref-step-sent-1512@2x.png": "86d3fe409f8dd442a9d6b03ca01c0a192d60d526cd27b23048f181d629ff6c92"
+    "design-refs/query-panel-v1/ref-step-sent-1512@2x.png": "86d3fe409f8dd442a9d6b03ca01c0a192d60d526cd27b23048f181d629ff6c92",
+    "design-refs/query-panel-v2/query-panel-v2.html": "f3cf6a473dee9b5e426542a022de34473119f9c8b1b120f4169fbdef568e487a",
+    "design-refs/query-panel-v2/query-panel-v2-in-shell.html": "b651e1301734b6ce3cb67ec9b3ada0e9dd9fec88366e7c8cac2e00ae6060456b",
+    "design-refs/query-panel-v2/ref-act-correct-1512@2x.png": "7d56cdf7d8ad21e6a150a852df3d334e1098e868336541fe3e1e20d82426fdf0",
+    "design-refs/query-panel-v2/ref-act-correct-preview-1512@2x.png": "bed6044c028f67c94842f428d6395baa778aa6d94cffab21f2f840d8b7f33bd7",
+    "design-refs/query-panel-v2/ref-act-picker-1512@2x.png": "341e1f0b499ea919d7ac214a259a7afa7dc7eb15dc4cd7a223e7da844a9cc16d",
+    "design-refs/query-panel-v2/ref-act-response-1512@2x.png": "c717d73eda27a000318513f1a326d333bc034d352930a5a694d54d666d4c0009",
+    "design-refs/query-panel-v2/ref-act-review-1512@2x.png": "71ea3366437c6b54c94faabbe454f9f22f89e5db631ec00d85939d17bd34e2ac",
+    "design-refs/query-panel-v2/ref-agent-1512@2x.png": "bbb891552d0c6666f1804757631df9787909a78cf0013ed62815e89b1c5a76f5",
+    "design-refs/query-panel-v2/ref-notes-1512@2x.png": "9c3e42622a16c7a2b7dfe47d6713b0176a5f1081009ce9ec50e5ba670d80de88",
+    "design-refs/query-panel-v2/ref-track-1280@2x.png": "b4a7e73258670ece0d3ed6c9d61539df5b7dfd1135cedef48d47c7724b1feb4b",
+    "design-refs/query-panel-v2/ref-track-1512@2x.png": "3890220c4fff2d5192028c9d0818b7e93c1c890ee97f506c569d9900e9b4a605",
+    "design-refs/query-panel-v2/ref-track-you-1512@2x.png": "67eb91cb157d8c4c1bb7b4f4c0bcd6c32165a4d5b282724e936e9040d2691dae"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
