@@ -36,7 +36,27 @@ export interface StandFacts {
   unansweredNudgeMs: number | null;
   closedHow: "passed" | "noReply" | "withdrawn" | null;
   manuscriptTitle: string | null;
+  /** the query's own sent date is recorded; false only when it is known to be missing */
+  hasSentDate?: boolean;
+  /** the writer pressed "Keep tracking" (`closureOfferDismissed`): closing is no longer suggested */
+  keepTracking?: boolean;
+  /** an open "Nudge {agent}" reminder for this query already stands */
+  reminderOpen?: boolean;
 }
+/**
+ * The quiet links under the paragraph (ruling 3, 12 Oct). Each shows in ONE state and nowhere else:
+ *   addSentDate  — with the agent, and no sent date recorded
+ *   setDate      — with the agent, sent, and no reply date to count towards
+ *   remindLater  — more than a year waiting, closing still suggested, no reminder open
+ *   keepTracking — more than a year waiting, closing still suggested
+ */
+export type StandLink = "addSentDate" | "setDate" | "remindLater" | "keepTracking";
+export const STAND_LINK_LABEL: Record<StandLink, string> = {
+  addSentDate: "Add the date you sent it",
+  setDate: "Set a date",
+  remindLater: "Remind me later",
+  keepTracking: "Keep tracking",
+};
 export interface StandPart { text: string; em?: boolean }
 export interface StandCardView {
   tone: StandTone;
@@ -47,6 +67,7 @@ export interface StandCardView {
   paragraph: StandPart[];
   /** queries with the agent only: how far through the wait, and its two end labels */
   bar: { pct: number; hot: boolean; left: string; right: string } | null;
+  links: StandLink[];
 }
 
 const days = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
@@ -78,7 +99,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       : f.closedHow === "passed" || f.status === S.REJECTED ? `${f.first} passed`
       : f.closedHow === "withdrawn" || f.status === S.WITHDRAWN ? "You withdrew it"
       : "Closed, no reply";
-    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, past: false, paragraph: [{ text: "This query is closed. It stays here, and in your figures." }], bar: null };
+    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, past: false, paragraph: [{ text: "This query is closed. It stays here, and in your figures." }], bar: null, links: [] };
   }
 
   if (f.court === "offer") {
@@ -91,7 +112,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
     return {
       tone: "you", heading: "Your answer is due",
       figure: f.expectedMs == null ? null : over ? `${plural(days(f.expectedMs, nowMs), "day")} over` : `${plural(left!, "day")} left`,
-      past: over, paragraph, bar: null,
+      past: over, paragraph, bar: null, links: [],
     };
   }
 
@@ -103,7 +124,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       figure: f.expectedMs == null ? null : over ? `${plural(days(f.expectedMs, nowMs), "day")} over` : `${plural(days(nowMs, f.expectedMs), "day")} left`,
       past: over,
       paragraph: [{ text: f.expectedMs == null ? "Mark it sent once it’s gone." : over ? `It was due on ${date(f.expectedMs)}. Mark it sent once it’s gone.` : `They’re expecting it by ${date(f.expectedMs)}. Mark it sent once it’s gone.` }],
-      bar: null,
+      bar: null, links: [],
     };
   }
 
@@ -114,6 +135,9 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
     ? { pct: Math.max(0, Math.min(100, Math.round(((nowMs - f.stageStartMs) / (f.expectedMs - f.stageStartMs)) * 100))), hot: over, left: `Sent ${date(f.stageStartMs)}`, right: over ? `Expected ${date(f.expectedMs)}` : `Reply by ${date(f.expectedMs)}` }
     : null;
 
+  /* the writer's own reply date can stand without a sent date: the sent date is still asked for */
+  const noSent: StandLink[] = f.hasSentDate === false ? ["addSentDate"] : [];
+
   /* more than a year with nothing back */
   if (waited != null && waited > 365) {
     const closedMs = f.windowWeeks != null && f.stageStartMs != null ? f.stageStartMs + f.windowWeeks * 7 * DAY : null;
@@ -123,18 +147,23 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       parts.push(`${f.agency || f.first} said they’d reply within ${weeksWords(f.windowWeeks!)}.`);
       parts.push(`That window closed ${longSpan(days(closedMs, nowMs))} ago${nudge ? `, and your nudge in ${nudge} went unanswered` : ""}.`);
     } else if (nudge) parts.push(`Your nudge in ${nudge} went unanswered.`);
-    parts.push("Closing it keeps your reply rate honest; you can still record a reply if one ever comes.");
+    /* "Keep tracking" takes the closing sentence and both links away for good; the footer then leads with
+       Record a response (QcOpenCard). Where nothing else is recorded, the card says what the writer chose. */
+    if (!f.keepTracking) parts.push("Closing it keeps your reply rate honest; you can still record a reply if one ever comes.");
+    else if (parts.length === 0) parts.push("You chose to keep tracking this query.");
     return {
       tone: "agent", heading: `Still waiting on ${f.first}`, figure: longSpan(waited), past: true, paragraph: [{ text: parts.join(" ") }],
       bar: bar && closedMs != null ? { ...bar, hot: true, pct: 100, right: `Window closed ${date(closedMs)}` } : bar,
+      links: f.keepTracking ? [] : [...(f.reminderOpen ? [] : ["remindLater" as const]), "keepTracking" as const],
     };
   }
   if (f.expectedMs == null) {
     /* no date promised and none set: nothing to count towards, and none is invented */
-    return { tone: "agent", heading: `Waiting on ${f.first}`, figure: null, past: false, paragraph: [{ text: "No reply date is recorded for this query." }], bar: null };
+    return { tone: "agent", heading: `Waiting on ${f.first}`, figure: null, past: false, paragraph: [{ text: "No reply date is recorded for this query." }], bar: null,
+      links: [f.hasSentDate === false ? "addSentDate" : "setDate"] };
   }
   if (over) {
-    return { tone: "agent", heading: `No word from ${f.first} yet`, figure: `${plural(days(f.expectedMs, nowMs), "day")} past your date`, past: true, paragraph: [{ text: `You expected a reply by ${date(f.expectedMs)}.` }], bar };
+    return { tone: "agent", heading: `No word from ${f.first} yet`, figure: `${plural(days(f.expectedMs, nowMs), "day")} past your date`, past: true, paragraph: [{ text: `You expected a reply by ${date(f.expectedMs)}.` }], bar, links: noSent };
   }
-  return { tone: "agent", heading: `Waiting on ${f.first}`, figure: `${plural(days(nowMs, f.expectedMs), "day")} to go`, past: false, paragraph: [{ text: `You expect a reply by ${date(f.expectedMs)}. Nothing to do until then.` }], bar };
+  return { tone: "agent", heading: `Waiting on ${f.first}`, figure: `${plural(days(nowMs, f.expectedMs), "day")} to go`, past: false, paragraph: [{ text: `You expect a reply by ${date(f.expectedMs)}. Nothing to do until then.` }], bar, links: noSent };
 }

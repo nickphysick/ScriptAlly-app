@@ -285,7 +285,7 @@ import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
-import { QueryTimeline, buildTimelineRows } from "./reading-pane/QueryTimeline";
+import { QueryTimeline, buildTimelineRows, SetWindow } from "./reading-pane/QueryTimeline";
 import { NotesThread } from "./reading-pane/NotesThread";
 import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
 import { useToast } from "./toast/ToastProvider";
@@ -5328,7 +5328,7 @@ export const Queries: React.FC<{
                 const qcRow = qcById.get(activeQuery.id);
                 const standNow = Date.now();
                 const stand = qcRow ? (
-                  <StandCard view={standCard({
+                  <StandCard key={activeQuery.id} view={standCard({
                     status: qcRow.status,
                     first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
                     agency: (activeAgent?.agency || "").trim(),
@@ -5340,7 +5340,29 @@ export const Queries: React.FC<{
                       .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
                     closedHow: qcRow.closedHow,
                     manuscriptTitle: activeMs?.title ?? null,
-                  }, standNow)} />
+                    hasSentDate: !!activeQuery.dateSent,
+                    keepTracking: (activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+                    /* an open "Nudge {agent}" to-do for this query: "Remind me later" must not add a second */
+                    reminderOpen: (userTasks ?? []).some((t) => !t.done && t.queryId === activeQuery.id && /^Nudge /.test(t.text ?? "")),
+                  }, standNow)}
+                  /* Ruling 3 — each link goes to the control that already did the job; nothing here is a new write. */
+                  onLink={(link, anchor) => {
+                    if (link === "addSentDate") {
+                      /* the page's one sent-date editor, anchored to the link */
+                      (dateTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor;
+                      setDateDraft(toDateInputValue(activeQuery.dateSent));
+                      setDateEdit("sent");
+                    } else if (link === "remindLater") {
+                      const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+                      void addUserTask({ text: `Nudge ${agentPrimary(activeAgent)}`, queryId: activeQuery.id, agentId: activeAgent.id, manuscriptId: activeQuery.manuscriptId, dueDate: due })
+                        .then(() => showToast({ message: "Reminder set for two weeks' time" }));
+                    } else if (link === "keepTracking") {
+                      void updateQuery(activeQuery.id, { closureOfferDismissed: true } as never).then(() => showToast({ message: "Still tracking this query" }));
+                    }
+                  }}
+                  renderSetDate={(close) => (
+                    <SetWindow startOpen anchorMs={qcRow.stageStartMs ?? standNow} onSave={commitExpectedDate} onClose={close} />
+                  )} />
                 ) : null;
                 return (
                   <QueryLedger
@@ -5444,8 +5466,12 @@ export const Queries: React.FC<{
         if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
         openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
       }}
+      keepTracking={(activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true}
       onAction={(action, anchor) => {
         if (action === "nudge") openDeskVerb("nudge", anchor);
+        /* "Suggest closing again" clears the flag "Keep tracking" set: the stand card's sentence, its links and
+           Close as the footer's lead all come back */
+        else if (action === "suggestClose") void updateQuery(activeQuery.id, { closureOfferDismissed: deleteField() } as never).then(() => showToast({ message: "Closing will be suggested again" }));
         else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
       }}
       /* Query actions v1 — the footer's doors. A live journey opens the drawer (the card docks to a
@@ -9094,7 +9120,9 @@ export const Queries: React.FC<{
       <F12Popover
         width={244}
         title={dateEdit === "sent" ? "Date sent" : "Reply expected by"}
-        style={dateMenuStyle}
+        /* above the query panel (z 66): the stand card's "Add the date you sent it" opens this from inside it,
+           and at the hook's own z-index it opened underneath (measured: the field's centre hit the panel's tab) */
+        style={{ ...dateMenuStyle, zIndex: 80 }}
         panelRef={datePanelRef}
         onClose={() => setDateEdit(null)}
       >

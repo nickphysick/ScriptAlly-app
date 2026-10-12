@@ -77,6 +77,26 @@
 .qlg .qsc .qsc-h span.hot { color: #a2452a; }
 .qlg .qsc p { margin: 8px 0 0; font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.78); }
 .qlg .qsc p i { font-style: italic; }
+/* ruling 3 — the quiet links under the paragraph: Source Serif 15, navy, an underline rule */
+.qlg .qsc .qsc-links { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 10px; }
+.qlg .qsc .qsc-link {
+  box-sizing: border-box; margin: 0; padding: 0 0 1px; border: 0; border-bottom: 1px solid rgba(42, 58, 82, 0.45); border-radius: 0; background: none;
+  font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 15px; line-height: 1.4; color: #2a3a52; cursor: pointer;
+}
+.qlg .qsc .qsc-link:hover { border-bottom-color: #2a3a52; }
+.qlg .qsc .qsc-link:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.qlg .qsc .qsc-set { margin-top: 12px; }
+/* the slider's own sheet (f12.css) reads tokens the panel does not carry, so its card, its label and its
+   two buttons are stated here; the track and thumb stay WeekSlider's */
+.qlg .qsc .qsc-set .tl-setwin { padding: 12px 14px; border: 1px solid rgba(28, 19, 15, 0.14); border-radius: 10px; background: #fffefb; }
+.qlg .qsc .qsc-set .tl-setwin .sa-label { font-family: var(--sp-serif); font-size: 14px; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); }
+.qlg .qsc .qsc-set .tl-setwin-val { margin-top: 8px; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; color: rgba(28, 19, 15, 0.6); }
+.qlg .qsc .qsc-set .tl-setwin-cancel, .qlg .qsc .qsc-set .tl-setwin .qn-send {
+  height: 32px; padding: 0 14px; border-radius: 999px; font-family: var(--sp-type); font-size: 13px; cursor: pointer;
+}
+.qlg .qsc .qsc-set .tl-setwin-cancel { margin-left: auto; border: 1px solid rgba(28, 19, 15, 0.22); background: #fffefb; color: #1c130f; }
+.qlg .qsc .qsc-set .tl-setwin .qn-send { border: 1px solid #2a3a52; background: #2a3a52; color: #fff; }
+.qlg .qsc .qsc-set .tl-setwin .qn-send:disabled { opacity: 0.45; cursor: default; }
 .qlg .qsc .qsc-bar { position: relative; height: 6px; margin-top: 14px; border-radius: 3px; background: rgba(28, 19, 15, 0.1); overflow: hidden; }
 .qlg .qsc .qsc-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--qsc-c); }
 .qlg .qsc .qsc-bar.hot i { background: repeating-linear-gradient(-45deg, #a2452a 0 6px, #c0674a 6px 12px); }

@@ -35,7 +35,7 @@ import "./qcvOpen.css";
 import "./qcvOpenPanel.css";
 import "../panel/panelTabs.css";
 
-export type OpenAction = "nudge" | "snooze" | "closed";
+export type OpenAction = "nudge" | "snooze" | "closed" | "suggestClose";
 
 /** "14 Mar", and the year only when it is not this one. */
 const dayOf = (ms: number, nowMs: number): string =>
@@ -72,7 +72,12 @@ export const QcOpenCard: React.FC<{
    * nothing ("none"); opened over any other page it is one muted caption under the head ("caption").
    */
   manuscript?: "none" | "caption";
-}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none" }) => {
+  /**
+   * The writer pressed "Keep tracking" on the stand card (ruling 3): Close stops leading the footer however
+   * long the silence, and the ⋯ menu offers "Suggest closing again" to clear the flag.
+   */
+  keepTracking?: boolean;
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", keepTracking = false }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
@@ -84,9 +89,12 @@ export const QcOpenCard: React.FC<{
   const verbs = queryVerbs(turnFor(row.status));
   const action = primaryActionLabel(row.status);
   /* Query panel v1 §C — the next move is the primary (`panelDoors`); a year of silence leads with Close */
-  const doors = onDoor ? panelDoors(row.status, row.court === "agent" ? row.dayN : null) : [];
+  const doors = onDoor ? panelDoors(row.status, row.court === "agent" && !keepTracking ? row.dayN : null) : [];
   const more: { key: OpenAction; label: string }[] = onDoor
-    ? (verbs.nudge ? [{ key: "snooze" as const, label: "Snooze the nudge" }] : [])
+    ? [
+      ...(verbs.nudge ? [{ key: "snooze" as const, label: "Snooze the nudge" }] : []),
+      ...(keepTracking && row.court === "agent" ? [{ key: "suggestClose" as const, label: "Suggest closing again" }] : []),
+    ]
     : [
       ...(verbs.nudge ? [{ key: "nudge" as const, label: "Nudge the agent" }, { key: "snooze" as const, label: "Snooze the nudge" }] : []),
       ...(verbs.markClosed ? [{ key: "closed" as const, label: "Mark closed" }] : []),
