@@ -118,13 +118,16 @@ export async function readHeader(page: Page) {
     const h = root.querySelector<HTMLElement>("header.hp3, header.ph");
     if (!h) return null;
     const r = h.getBoundingClientRect();
-    const txt = (sel: string) => (h.querySelector<HTMLElement>(sel)?.textContent ?? "").trim();
+    /* a no-break space reads as a space (the title's tail is held together with them) */
+    const txt = (sel: string) => (h.querySelector<HTMLElement>(sel)?.textContent ?? "").replace(/\u00a0/g, " ").trim();
+    const part = (sel: string) => { const e = h.querySelector<HTMLElement>(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
     return {
       box: { x: r.x, y: r.y, w: r.width, h: r.height },
       bg: getComputedStyle(h).backgroundColor,
       kind: h.getAttribute("data-hp3"), living: h.getAttribute("data-living"), loading: h.hasAttribute("data-loading"),
       number: txt('[data-hp3-part="number"]:not(.hp3-blank)'), words: txt('[data-hp3-part="words"]:not(.hp3-blank)'),
-      name: h.querySelector("h1")?.getAttribute("aria-label") ?? "", sub: txt('[data-hp3-part="sub"]'),
+      name: (h.querySelector("h1")?.getAttribute("aria-label") ?? "").replace(/\u00a0/g, " "), sub: txt('[data-hp3-part="sub"]'),
+      wordsBox: part('[data-hp3-part="words"]'), subBox: part('[data-hp3-part="sub"]'), artBox: part('[data-hp3-part="art"]'),
       buttons: h.querySelectorAll("button, a[href]").length,
       art: h.querySelector("[data-art]")?.getAttribute("data-art") ?? null,
     };

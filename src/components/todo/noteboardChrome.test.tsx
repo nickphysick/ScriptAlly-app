@@ -115,12 +115,13 @@ describe("⚠️ the FILTERED count exists only while something narrows; the boa
        large, where it cannot be taken for a label. What stays retired is a second tally in the row. */
     seed.userTasks = [note({ id: "a" }), note({ id: "b" })];
     const html = render();
-    expect(html).toMatch(/aria-label="2 notes pinned to your corkboard"/);
+    const plain = html.replace(/\u00a0|&nbsp;/g, " ");
+    expect(plain).toMatch(/aria-label="2 notes pinned to your corkboard"/);
     expect([...html.matchAll(/notes pinned/g)].length).toBe(2); // the h1's name and its words — one header
     expect(html).not.toMatch(/["\s`]nb-fcount["\s`]/);
     expect(html).not.toMatch(/["\s`]tpl-eyebrow["\s`]/);
     seed.userTasks = [note({ id: "a" })];
-    expect(render()).toMatch(/aria-label="1 note pinned to your corkboard"/);
+    expect(render().replace(/\u00a0|&nbsp;/g, " ")).toMatch(/aria-label="1 note pinned to your corkboard"/);
   });
 
   it("…and the source only mounts the count behind the narrowing condition", () => {

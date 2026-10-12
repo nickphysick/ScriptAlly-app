@@ -38,7 +38,7 @@ const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // 
 const WORDS: Record<string, RegExp> = {
   "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/,
   "/manuscripts/packages": /^packages?$/, "/todo": /^things? to do$/,
-  "/todo/corkboard": /^notes? pinned to your corkboard$/,
+  "/todo/corkboard": /^notes? pinned to[ \u00a0]your[ \u00a0]corkboard$/,
 };
 /** what each page's own body counts, for H3: a selector whose visible matches are the count, or a reader */
 const ROWS: Record<string, string> = { "/manuscripts/packages": '[data-ppv="pkg"]', "/todo/corkboard": "[data-note]" };

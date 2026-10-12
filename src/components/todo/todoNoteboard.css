@@ -418,6 +418,14 @@
    sets it, so the gap is this page's number at every width. */
 .nb-group > .ph.ph--panel.ph--full.ph--living { margin-bottom: 0; }
 
+/* ⚠️ THE WORDS MAY WRAP ON THIS PAGE, AND THE SUBLINE WITH THEM. The shared panel sets its number-page title
+   `nowrap` in a max-content track, which is right for "things to do" and wrong for "notes pinned to your
+   corkboard": at 1024 the title and the subline ran on under the drawing. Here the words' track may shrink,
+   so they take the ref's two lines when one does not fit. Page-scoped: no other page's header can move. */
+.nb-group .hp3 .hp3-tb { grid-template-columns: auto minmax(0, 1fr); }
+.nb-group .hp3 .hp3-tb h1.hp3-h1 { white-space: normal; }
+.nb-group .hp3 .hp3-h1 .hp3-w { line-height: 1.12 !important; }
+
 /* ── the row under the header: 22 below the panel, 14 above the board; it wraps when narrow ── */
 .cb-over { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 22px 0 14px; }
 

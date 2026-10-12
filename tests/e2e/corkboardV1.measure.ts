@@ -87,6 +87,8 @@ test.describe("CB1 · Part B — the header and the add bar", () => {
       L.check("B1", where, h?.sub === "Notes to self and your own tasks, kept in one place.", `the subline reads "${h?.sub}"`);
       L.check("B1", where, h?.buttons === 0, `the panel holds ${h?.buttons} button(s)`);
       L.check("B1", where, h?.art === "corkboard-header", `the drawing's slot is ${h?.art}`);
+      /* the words and the subline stop short of the drawing (they ran on under it at 1024 before they could wrap) */
+      L.check("B1", where, !!h?.wordsBox && !!h.subBox && !!h.artBox && h.wordsBox.x + h.wordsBox.w <= h.artBox.x && h.subBox.x + h.subBox.w <= h.artBox.x, `the words end at ${h?.wordsBox ? (h.wordsBox.x + h.wordsBox.w).toFixed(0) : "?"}, the subline at ${h?.subBox ? (h.subBox.x + h.subBox.w).toFixed(0) : "?"}; the drawing starts at ${h?.artBox?.x.toFixed(0)}`);
       /* the count is the BOARD's: a chip and a search narrow what is bright, never what is counted */
       await page.locator(inPage('[data-cb-chip="cbseed-tag-manuscript"]')).click();
       await page.locator(inPage(".cb-find")).fill("title");
@@ -94,6 +96,11 @@ test.describe("CB1 · Part B — the header and the add bar", () => {
       const f = await readHeader(page);
       L.check("B1", `${where} · filtered`, f?.number === "8", `with a chip and a search on, the number reads "${f?.number}"`);
     }
+    /* 1024 wide: the words take the ref's two lines rather than running under the drawing */
+    await open(page, ROUTE, { width: 1024, height: 768 });
+    const n4 = await readHeader(page);
+    L.check("B1", "1024", !!n4?.wordsBox && !!n4.subBox && !!n4.artBox && n4.wordsBox.x + n4.wordsBox.w <= n4.artBox.x && n4.subBox.x + n4.subBox.w <= n4.artBox.x, `at 1024 the words end at ${n4?.wordsBox ? (n4.wordsBox.x + n4.wordsBox.w).toFixed(0) : "?"}, the subline at ${n4?.subBox ? (n4.subBox.x + n4.subBox.w).toFixed(0) : "?"}; the drawing starts at ${n4?.artBox?.x.toFixed(0)}`);
+    L.check("B1", "1024", n4?.words === "notes pinned to your corkboard" && !!n4.wordsBox && n4.wordsBox.h > 60, `at 1024 the words are ${n4?.wordsBox?.h.toFixed(0)}px tall ("${n4?.words}")`);
     /* one note: the singular */
     await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_CB_ONLY = "cbseed-n1"; });
     await open(page, ROUTE, SIZES[0]);
@@ -102,7 +109,7 @@ test.describe("CB1 · Part B — the header and the add bar", () => {
     L.check("B1", "1 note", n === 1, `the fixture put ${n} note(s) on the board`);
     L.check("B1", "1 note", one?.number === "1", `the number reads "${one?.number}"`);
     L.check("B1", "1 note", one?.words === "note pinned to your corkboard", `the words read "${one?.words}"`);
-    L.done(23);
+    L.done(27);
   });
 
   test("B2 add bar: three paper buttons; pink opens the composer in pink; Task opens the To-do list's composer and writes nothing", async ({ page }) => {

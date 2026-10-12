@@ -20,9 +20,12 @@ const ref = readFileSync(resolve(__dirname, "../../design-refs/corkboard-v4/cork
 
 describe("the header is a number page: the count, then its words", () => {
   it("the words are the ref's, and one note is singular", () => {
-    expect(wordsOf(corkboardHeaderCopy(8).headline)).toBe("notes pinned to your corkboard");
-    expect(wordsOf(corkboardHeaderCopy(1).headline)).toBe("note pinned to your corkboard");
-    expect(wordsOf(corkboardHeaderCopy(2).headline)).toBe("notes pinned to your corkboard");
+    const words = (n: number) => wordsOf(corkboardHeaderCopy(n).headline)!.replace(/\u00a0/g, " ");
+    expect(words(8)).toBe("notes pinned to your corkboard");
+    expect(words(1)).toBe("note pinned to your corkboard");
+    expect(words(2)).toBe("notes pinned to your corkboard");
+    /* ⚠️ ONE BREAK: the tail is held with no-break spaces, so the only place the words can wrap is the ref's */
+    expect(wordsOf(corkboardHeaderCopy(8).headline)!.split(" ")).toEqual(["notes", "pinned", "to\u00a0your\u00a0corkboard"]);
     /* the ref breaks the words over two lines with a <br>; the words are the same */
     expect(ref.replace(/<br>/g, " ")).toContain("notes pinned to your corkboard");
     expect(ref).toContain(CORKBOARD_SUBLINE);

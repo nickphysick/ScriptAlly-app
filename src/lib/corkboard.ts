@@ -22,10 +22,17 @@ export const CORKBOARD_SUBLINE = "Notes to self and your own tasks, kept in one 
  */
 export function corkboardHeaderCopy(count: number): LivingLine {
   return {
-    headline: count === 1 ? "One note pinned to your corkboard" : `${count} notes pinned to your corkboard`,
+    headline: `${count === 1 ? "One note" : `${count} notes`} pinned ${HEADER_TAIL}`,
     subline: [CORKBOARD_SUBLINE],
   };
 }
+/**
+ * ⚠️ THE WORDS BREAK IN ONE PLACE: "notes pinned / to your corkboard" (the ref's own two lines). They are the
+ * longest words of any number page, and at 1024 they ran on under the drawing (seen, not reasoned). The tail is
+ * held together with no-break spaces, so where the panel is too narrow for one line the only break left is
+ * the ref's. Read as text it is still "to your corkboard".
+ */
+const HEADER_TAIL = "to\u00a0your\u00a0corkboard";
 
 /** The zero-notes header (header v3's empty rule): the page's name is in the bar, the heading is the situation. */
 export const CORKBOARD_EMPTY = { heading: "Nothing pinned yet", subline: CORKBOARD_SUBLINE } as const;
