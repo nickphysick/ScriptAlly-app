@@ -288,7 +288,11 @@
     "design-refs/comps-v27/ref-how-it-works-1280@2x.png": "2c43784c4e4cb602c6e13fe534f9b26910ffe8e3cb6c7c75943904dab21bf009",
     "design-refs/comps-v27/ref-how-it-works-1512@2x.png": "ded3860b64ed0449f2c798bf44ad7ab416bf6e12bdc893c0455dcbdd2a427296",
     "design-refs/comps-v27/ref-with-comps-1280@2x.png": "22f94e047077294ee85cc22e832f03a59d21fcbd38fddcda2a106ff745bd1ed6",
-    "design-refs/comps-v27/ref-with-comps-1512@2x.png": "61a1708742829696109aafd697f9b7f4aa9de83ffe0215619e4810d91c1ed9ac"
+    "design-refs/comps-v27/ref-with-comps-1512@2x.png": "61a1708742829696109aafd697f9b7f4aa9de83ffe0215619e4810d91c1ed9ac",
+    "design-refs/corkboard-v4/corkboard-v4.html": "c34dc1d35a8658b9ad17bc65b177a51b5f965cda4f4be16351a9848ac9e2b613",
+    "design-refs/corkboard-v4/screens/01-board-1512.png": "4313acf87520d881264adae160106e555735b5c34fbae6be8fdcd8e95fd40ae6",
+    "design-refs/corkboard-v4/screens/01-board-1280.png": "cf030cb5ec209e9536668e9d66f455d3da8433d510ab6b87014c2fccb1342a4e",
+    "design-refs/corkboard-v4/screens/02-tidy-1512.png": "c2f58d4cbd62e9dba045e5ccdb27ccb733696c30f61a58524175535798e87081"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

@@ -100,7 +100,7 @@ test.describe("ink shell", () => {
   test("INK6 · full names at 1440 and 1710 for every group (and by the arithmetic at 1280); an eight-page group goes names → icons → +N", async ({ page }) => {
     const report: string[] = [];
     for (const w of WIDTHS) {
-      for (const route of [...ROUTES, "/manuscripts", "/manuscripts/packages", "/queries/analytics", "/agents/discover", "/todo/calendar", "/todo/noteboard"]) {
+      for (const route of [...ROUTES, "/manuscripts", "/manuscripts/packages", "/queries/analytics", "/agents/discover", "/todo/calendar", "/todo/corkboard"]) {
         await inkOpen(page, route, w, { scope: "ink6" });
         const r = await page.evaluate(() => {
           const bar = document.querySelector(".ws-pagebar")!.getBoundingClientRect();

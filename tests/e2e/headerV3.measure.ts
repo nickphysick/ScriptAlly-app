@@ -29,17 +29,19 @@ const PANEL_BG = "rgb(45, 58, 80)";
    (tests/e2e/RETIRED-query-centre-v137.md); QC137 A1 holds its header. */
 /* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Comparable titles" since v27), so H2, H3 and H7 no
    longer read it (tests/e2e/RETIRED-comps-v25.md); CV25 B1 holds its header. */
-export const NUMBER = ["/agents", "/manuscripts/packages", "/todo"] as const;
-export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar", "/todo/noteboard"] as const;
+/* Corkboard v1 §B: /todo/corkboard (the Noteboard renamed) is a NUMBER page — "8 notes pinned to your corkboard". */
+export const NUMBER = ["/agents", "/manuscripts/packages", "/todo", "/todo/corkboard"] as const;
+export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
 const WORDS: Record<string, RegExp> = {
   "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/,
   "/manuscripts/packages": /^packages?$/, "/todo": /^things? to do$/,
+  "/todo/corkboard": /^notes? pinned to[ \u00a0]your[ \u00a0]corkboard$/,
 };
 /** what each page's own body counts, for H3: a selector whose visible matches are the count, or a reader */
-const ROWS: Record<string, string> = { "/manuscripts/packages": '[data-ppv="pkg"]' };
+const ROWS: Record<string, string> = { "/manuscripts/packages": '[data-ppv="pkg"]', "/todo/corkboard": "[data-note]" };
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* restore v136's open header on /queries: no surface, a ruled corner */

@@ -110,7 +110,7 @@ describe("the pane", () => {
   });
 
   it("points at the one place a note is edited or ticked off", () => {
-    expect(pane()).toContain("Open Noteboard ›");
+    expect(pane()).toContain("Open Corkboard ›");
   });
 
   /**

@@ -52,7 +52,7 @@ const ROUTES = [
   { name: "Submission packages", route: "/manuscripts/packages", root: ".pkgw-wpg" },
   { name: "To-do list", route: "/todo", root: ".tpl-wpg" },
   { name: "Calendar", route: "/todo/calendar", root: ".tpl-wpg" },
-  { name: "Noteboard", route: "/todo/noteboard", root: ".tpl-wpg" },
+  { name: "Noteboard", route: "/todo/corkboard", root: ".tpl-wpg" },
   { name: "Dashboard", route: "/dashboard", root: ".sa-dashroot" },
 ] as const;
 type RouteName = (typeof ROUTES)[number]["name"];

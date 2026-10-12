@@ -31,7 +31,7 @@ const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
    committed at public/todo-seize-the-day.png. The census stays exhaustive so a slot cannot be
    added without a brief, which is the whole point of this list. */
 const NAMES: ArtSlotName[] = [
-  "desk-clear", "noteboard-empty", "done-empty", "dock-seal", "first-run-board",
+  "desk-clear", "noteboard-empty", "corkboard-header", "done-empty", "dock-seal", "first-run-board",
   "seize-the-day",
   // Query Centre's agent context panel with nothing on file — the first slot outside /todo.
   "agent-unknown",
@@ -142,8 +142,11 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
        no slot inside a card, on the board the app actually draws. */
     const taskBoard = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
     expect(taskBoard, "the live board grew art inside a card").not.toContain("ArtSlot");
-    const noteCard = sliceBetween(noteboard, "<article", "</article>");
+    /* RE-POINTED (Corkboard v1): a note is drawn by `noteInner` on an item of `CorkBoard`, so the claim reads
+       both — the note's own content, and the board component that pins it. */
+    const noteCard = sliceBetween(noteboard, "const noteInner = (n: UserTask) => (", "const composeItem");
     expect(noteCard).not.toContain("ArtSlot");
+    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8"), "the board grew art inside an item").not.toContain("ArtSlot");
     const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(calendar).not.toContain("ArtSlot"); // no pip, no cell, nowhere
   });
@@ -178,8 +181,14 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
        an illustrated state that had none. The brief stays in the registry for whenever a real
        asset lands; nothing renders it today, and that is the record. */
     const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
-    expect(noteboard).not.toContain("ArtSlot");
+    /* RE-POINTED (Corkboard v1): the page mounts ONE slot now — `corkboard-header`, the panel's drawing, a
+       placeholder until it is supplied. `noteboard-empty` is still registered and still unused. */
+    expect(noteboard).not.toContain('name="noteboard-empty"');
+    expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(1);
+    expect(noteboard).toContain('<ArtSlot name="corkboard-header"');
     expect(ART_SLOTS["noteboard-empty"]).toBeDefined();
+    expect([ART_SLOTS["corkboard-header"].w, ART_SLOTS["corkboard-header"].h]).toEqual([250, 136]);
+    expect(ART_SLOTS["corkboard-header"].src, "the drawing has not been supplied").toBeUndefined();
   });
 
   it.skip("noteboard-empty: the first-run state, ABOVE the copy that was already written", () => {

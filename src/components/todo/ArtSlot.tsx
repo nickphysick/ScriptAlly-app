@@ -28,6 +28,7 @@ import "./artSlot.css";
 export type ArtSlotName =
   | "desk-clear"        // Today: nothing committed ∧ nothing urgent ∧ bench exhausted — the hero
   | "noteboard-empty"   // the Noteboard's first run
+  | "corkboard-header"  // the Corkboard's header panel (Corkboard v1) — the drawing is not supplied yet
   | "done-empty"        // the Done column before the first tick today (must read at 260px)
   | "dock-seal"         // 600ms flourish as a flow completes, before the card animates to Done
   | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
@@ -69,6 +70,14 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "A corkboard with one blank card and a pin.",
     w: 380, h: 200,
     alt: "A corkboard with a single blank card pinned to it",
+  },
+  /* The Corkboard's header panel (ref design-refs/corkboard-v4, `.pn-art`: 250 × 136). BRIEF: the Courier
+     pinning a note to a board. It sits on the navy panel, so the drawing wants a light line or its own
+     ground. ⚠️ A PLACEHOLDER UNTIL NICK SUPPLIES IT — the box is the ref's, so nothing moves when it lands. */
+  "corkboard-header": {
+    caption: "The Courier pinning a note to a board.",
+    w: 250, h: 136,
+    alt: "The Courier pinning a note to a corkboard",
   },
   "done-empty": {
     caption: "An empty letter tray, a pen laid down.",

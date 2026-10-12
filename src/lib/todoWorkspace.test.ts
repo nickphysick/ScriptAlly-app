@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
-  TODO_LISTS, TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_ROUTES, todoPageForPath,
+  TODO_LISTS, TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_ROUTES, todoPageForPath, todoRedirectFor,
 } from "./todoRoutes";
 import { FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
 import { AssembledBoard, BoardCard } from "./todoBoard";
@@ -36,7 +36,19 @@ describe("the three routes", () => {
   it("resolves the longest path first", () => {
     expect(todoPageForPath("/todo")).toBe("list");
     expect(todoPageForPath("/todo/calendar")).toBe("calendar");
-    expect(todoPageForPath("/todo/noteboard")).toBe("noteboard");
+    expect(todoPageForPath("/todo/corkboard")).toBe("noteboard");
+  });
+
+  /* Corkboard v1: the Noteboard RENAMED. The id is an identifier and stays; the label and the path are the
+     writer's. The old path is REDIRECTED (App.tsx reads `todoRedirectFor`), because the fallback below would
+     land a bookmark on the LIST — the wrong page, silently — and a deep link would lose its `?q=`. */
+  it("⚠️ /todo/noteboard redirects to /todo/corkboard and keeps its query string", () => {
+    expect(TODO_ROUTES.find((r) => r.id === "noteboard")).toMatchObject({ label: "Corkboard", path: "/todo/corkboard" });
+    expect(todoRedirectFor("/todo/noteboard")).toBe("/todo/corkboard");
+    expect(todoRedirectFor("/todo/noteboard", "?q=x")).toBe("/todo/corkboard?q=x");
+    expect(todoRedirectFor("/todo/noteboard/", "?q=x", "#h")).toBe("/todo/corkboard?q=x#h");
+    for (const r of TODO_ROUTES) expect(todoRedirectFor(r.path), r.path).toBeNull();
+    expect(TODO_ROUTES.map((r) => r.label).join(" ")).not.toMatch(/noteboard/i);
   });
 
   it("⚠️ THE RETIRED /todo/today LANDS ON THE LIST — no redirect code, and none needed", () => {
@@ -94,7 +106,7 @@ describe("the app sidebar's TASKS section", () => {
   });
 
   it("its three rows ARE the routes, in order, with the list as the default", () => {
-    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Calendar", "Noteboard"]);
+    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Calendar", "Corkboard"]);
     expect(tasks.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
     expect(tasks.def).toBe("list");
     expect(tasks.children![0].path).toBe("/todo");

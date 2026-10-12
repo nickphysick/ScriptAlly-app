@@ -324,7 +324,7 @@ export function bandPreline(c: BoardCard): string {
  */
 export function bandSubject(c: BoardCard): string {
   if (c.who) return c.who;
-  if (cardBucket(c) === "note") return "Your noteboard";
+  if (cardBucket(c) === "note") return "Your corkboard";
   return c.msTitle || c.title || "Your list";
 }
 

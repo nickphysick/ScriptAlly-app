@@ -29,7 +29,7 @@ export const WORKSPACE_PATHS = new Set([
      reported "no visible .wpg" on a page that renders one. */
   "/dashboard", "/queries", "/queries/analytics",
   // The To-do WORKSPACE — four pages, one section (workspace pack P1).
-  "/todo", "/todo/calendar", "/todo/noteboard",
+  "/todo", "/todo/calendar", "/todo/corkboard",
   "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/account", "/plans", "/help",

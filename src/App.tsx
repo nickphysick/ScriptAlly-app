@@ -46,7 +46,7 @@ import { LegalPage } from "./marketing/LegalPage";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
-import { todoPageForPath } from "./lib/todoRoutes";
+import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
 import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
 import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
 import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
@@ -558,6 +558,12 @@ function AppContent() {
      the section list. `replace`, so Back leaves settings rather than bouncing off the redirect. */
   const accountRedirect = accountRedirectFor(path);
   if (accountRedirect) return <Navigate to={accountRedirect} replace />;
+
+  /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address. It sits above the unknown-path guard for
+     the same reason the settings redirect does — the retired path is no longer a workspace path, so the guard
+     would send a bookmark to the dashboard. The query string and hash travel with it (`?q=` deep links). */
+  const todoRedirect = todoRedirectFor(path, location.search, location.hash);
+  if (todoRedirect) return <Navigate to={todoRedirect} replace />;
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.

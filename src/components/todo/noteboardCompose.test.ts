@@ -102,14 +102,15 @@ describe("⚠️ the composer keeps what you have already written", () => {
     expect(new Set(all.map((d) => d.body)).size).toBe(1);
   });
 
-  it("one composer, two doors — the toolbar button and the ghost tile open the SAME one", () => {
+  it("one composer, several doors — the three paper squares and the empty state open the SAME one", () => {
     /* two openers with two bodies is two surfaces for one action, and they drift */
     const opens = [...page.matchAll(/openComposer\(/g)].length;
     expect(opens).toBeGreaterThanOrEqual(2);
     expect(page).toContain("const openComposer");
-    /* and the ghost is FIRST in the flow, replaced by the composer rather than sitting beside it */
-    expect(page).toContain("nb-ghost");
-    expect(page.indexOf("nb-ghost")).toBeLessThan(page.indexOf("notes.map"));
+    expect([...page.matchAll(/const openComposer\b/g)].length).toBe(1);
+    /* RE-POINTED (Corkboard v1): the ghost tile is retired — adding happens in the bar above the board
+       (baked decision 3) — so there is no tile for the composer to replace. */
+    expect(page).not.toMatch(/["\s`]nb-ghost["\s`]/);
   });
 });
 
@@ -138,9 +139,12 @@ describe("⚠️ the composer IS the editor — one component, two slots, never 
 
   it("one composer node, mounted in exactly two places — the top slot and the note's slot", () => {
     /* two MOUNTS of one closure, not two copies of the JSX — copies drift */
-    expect([...page.matchAll(/composerCard/g)].length).toBe(3);   // the const + two mounts
-    expect(page).toContain("compose && !compose.id && composerCard");
-    expect(page).toContain("n.id === compose?.id");
+    /* RE-POINTED (Corkboard v1): the two places are two ITEMS on the board built by one `composeItem` — the
+       first free space when pinning, the note's own key (so its own place) when editing. */
+    expect([...page.matchAll(/composerCard/g)].length).toBe(2);   // the const + the one item that mounts it
+    expect([...page.matchAll(/composeItem\(/g)].length).toBe(2);  // the top slot and the note's slot
+    expect(page).toContain("compose && !compose.id ? [composeItem(COMPOSE_KEY)] : []");
+    expect(page).toContain("n.id === compose?.id ? composeItem(n.id)");
     /* and the commit button is the only fork */
     expect(page).toContain('compose.id ? saveEdit() : pinNote()');
   });

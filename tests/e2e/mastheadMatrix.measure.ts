@@ -41,7 +41,7 @@ const MATRIX: { route: string; size: "full" | "compact" | "none"; why?: string }
   { route: "/queries/analytics", size: "compact" },
   { route: "/todo", size: "compact" },
   { route: "/todo/calendar", size: "compact" },
-  { route: "/todo/noteboard", size: "compact" },
+  { route: "/todo/corkboard", size: "compact" },
   { route: "/agents/discover", size: "compact" },
   /* comps v2 (27 Sep): the full header, ruled by Nick */
   { route: "/manuscripts/comps", size: "full" },

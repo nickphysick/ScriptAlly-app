@@ -16,7 +16,7 @@ import { openRoute, liftMotionSuppression } from "./measure";
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
   { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
-  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
+  { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
 ];
 

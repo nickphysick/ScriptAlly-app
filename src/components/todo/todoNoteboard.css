@@ -117,32 +117,19 @@
 .nb-wf--below .nb-wf-h { font-size: 21px; }
 
 /* ── the board ─────────────────────────────────────────────────────────────────────────────── */
-/* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. A grid
-   would stretch every row to its tallest card, the one thing a board of notes must not do.
-   ⚠️ THE COUNT FALLS OUT OF THE VIEWPORT — `column-width`, never `column-count` (finish run, 1a).
-   The mockup's `columns: 3` was drawn against a 1240px card; the real page is full width, so a
-   fixed three gave 345px notes at 1440 and 505px at 1920 — the count was the mockup's, the widths
-   were nobody's. One measured constraint on the value: multicol can only render
-   (container − gaps) ÷ N, and the content column is 909px at a 1280 viewport, where N=3 means
-   291px cards — so the width is 280, not the mockup's 340, or 1280 would fall to two 445px
-   columns. The media queries went with the count: column-width already answers narrow. */
-.nb-board { column-width: 280px; column-gap: var(--nb-gap); }
-/* ⚠️ THE COLUMN VIEW IS A READING MEASURE, AND IT IS CENTRED. A single 640px column pinned to the
-   left edge of a wide frame reads as a masonry that failed to lay out; the auto margin is what
-   makes it deliberate. (The ledger's no-auto-margins law is scoped to the `.tdb-l*` row family —
-   "margin-left: auto elsewhere on the page is other furniture".) */
-.nb-board.nb-col1 { columns: 1; max-width: 640px; margin-inline: auto; }
+/* ── the note's paper ──────────────────────────────────────────────────────────────────────
+   ⚠️ REWRITTEN AS ONE BLOCK (Corkboard v1, Part C). The masonry board (`column-width`, the one-column view,
+   the 10px-radius card with its foot row) is retired; a note is now an item PINNED to the cork board, in the
+   ref's dress (design-refs/corkboard-v4 `.note`, `.tag`, `.stitch`, `.more`). The board, the pin and the
+   tape are further down, under "the cork board". */
+.nb-board { display: block; }
 
-/* ── the note ──────────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ FLAT PAPER: a background COLOUR and nothing else — no gradient, no image, no grain on a note. */
 .nb-note {
-  break-inside: avoid;
-  margin: 0 0 var(--nb-gap);
-  border-radius: var(--nb-radius);
-  padding: var(--nb-pad) var(--nb-pad) var(--nb-pad-foot);
-  position: relative;
+  box-sizing: border-box;
+  padding: 20px 16px 12px;
   border: 1px solid transparent;
-  box-shadow: var(--nb-shadow);
-  transition: box-shadow 0.15s;
+  border-radius: 0;
 }
 /* ⚠️ THE THREE PAPERS, DECLARED AFTER `.nb-note` — AND THE ORDER IS LOAD-BEARING.
    `.nb-note` and `.nb-c-*` land on the SAME element at the same specificity (0-1-0), so the later
@@ -156,16 +143,10 @@
 .nb-c-pink { background: var(--nb-pink); border-color: var(--nb-pink-deep); }
 .nb-c-sage { background: var(--nb-sage); border-color: var(--nb-sage-mid); }
 
-/* ⚠️ HOVER IS A SHADOW AND NOTHING ELSE — never a lift. A `translateY` pushes the card's top edge
-   past a clipping boundary and reads as the top hairline vanishing rather than as movement; that
-   was fixed on `.msv-spine` once and reinstated by a revision that predated the fix. The masonry
-   column is such a boundary. */
-.nb-note:hover { box-shadow: var(--nb-shadow-hover); }
-
 /* ⚠️ ONE BODY, PRE-WRAP. A writer's note has line breaks and bullets in it, not a headline — so
-   the mockup's single block is ported as one, and the breaks they typed survive. */
+   the breaks they typed survive. */
 /* the anchor inside a body — burgundy, and it may break anywhere: a bare URL is longer than a
-   masonry column and would otherwise push the card's width out */
+   note is wide and would otherwise push the paper's width out */
 .nb-body a {
   color: var(--nb-burgundy);
   text-decoration-thickness: 1px; text-underline-offset: 3px; word-break: break-all;
@@ -175,43 +156,47 @@
   font-size: var(--nb-body-size); line-height: var(--nb-body-lh);
   color: var(--nb-ink-deep); white-space: pre-wrap; word-break: break-word;
 }
+.nb-note .nb-body { min-height: 56px; padding-right: 14px; }
 /* the second block a note written under the old title+detail split still carries. Nothing writes
    it any more; dropping it would lose those writers' words. */
 .nb-body--legacy { margin-top: 6px; }
+.nb-note .nb-body--legacy { min-height: 0; }
 
-.nb-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; min-height: 26px; }
+/* the meta row: the tags, then "Pinned {date}" */
+.nb-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
 .nb-tag, .nb-date {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: var(--nb-micro); letter-spacing: 0.08em; color: var(--nb-quiet);
+  font-size: 10.5px; line-height: 1.45; color: var(--cb-mute);
 }
-.nb-tag { background: rgba(255, 255, 255, 0.55); border-radius: 99px; padding: 3px 9px; }
-.nb-date { margin-left: auto; }
+/* the tag keeps its own colour from the app's one palette (set inline); the outline is the ref's */
+.nb-tag { border: 1px solid rgba(28, 19, 15, 0.22); border-radius: 10px; padding: 1px 7px; }
 
-/* ⚠️ THE ⋯ JOINS THE FOOT, IN FLOW. `todoBoard.css` seats it `position: absolute` at the card's
-   bottom-right for board cards, which is right there and wrong here — the mockup draws it as the
-   last item of the foot row. The seat is overridden page-side rather than edited, because that
-   file belongs to the board. */
-.nb-note .tbd-more { position: static; flex: none; color: var(--nb-quiet); }
-.nb-note:hover .tbd-more,
-.nb-note .tbd-more[aria-expanded="true"] {
-  color: var(--nb-burgundy); background: rgba(255, 255, 255, 0.6); border-color: transparent;
+/* ⚠️ THE ⋯ SITS TOP RIGHT AND SHOWS ON HOVER AND ON FOCUS (the ref's `.more`). `todoBoard.css` seats the
+   shared button bottom-right for board cards; the seat is overridden here rather than edited, because that
+   file belongs to the board. It is never `display: none` — a keyboard reader must be able to reach it. */
+.nb-note .tbd-more.cb-more {
+  position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; padding: 0;
+  display: grid; place-items: center;
+  border: 0; border-radius: 6px; background: transparent; color: var(--cb-ink);
+  opacity: 0; transition: opacity 0.15s;
 }
+.nb-note:hover .tbd-more.cb-more,
+.nb-note .tbd-more.cb-more:focus-visible,
+.nb-note .tbd-more.cb-more[aria-expanded="true"] { opacity: 0.7; }
+.nb-note .tbd-more.cb-more:hover { background: rgba(28, 19, 15, 0.08); opacity: 1; }
+.nb-note .tbd-more.cb-more:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
 
-/* ⚠️ THE BADGE IS DERIVED, and it is DASHED because it is a link to something living elsewhere
-   rather than a state of the note. The note is unchanged; a task exists beside it. */
+/* ⚠️ THE STITCHED BADGE IS DERIVED, and it is DASHED because it is a link to something living elsewhere
+   rather than a state of the note. The note is unchanged; the same document is on the to-do list. */
 .nb-taskbadge {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--nb-micro);
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--nb-sage-dark);
-  background: rgba(255, 255, 255, 0.6); border: 1px dashed var(--nb-sage-ring);
-  border-radius: 99px; padding: 3px 10px; margin-top: 10px;
+  margin-top: 10px; border: 1.5px dashed #8fa189; border-radius: 6px; padding: 4px 8px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; line-height: 1.45;
+  color: #3f5239; background: var(--nb-sage);
 }
 
-/* ── drag to reorder (paper run, Phase 3; ref noteboard-sparse-mockup.html) ────────────────── */
-.nb-note[draggable="true"] { cursor: grab; }
+/* ── drag to reorder (the tidy view; paper run, Phase 3) ───────────────────────────────────── */
 .nb-dragging { opacity: 0.45; }
-/* ⚠️ AN OUTLINE, NOT A BORDER — the mockup's own choice, and the right one: a border would
-   change the card's box and shove the masonry column while a drag is in flight. */
+/* ⚠️ AN OUTLINE, NOT A BORDER: a border would change the paper's box while a drag is in flight. */
 .nb-dragover { outline: 2px dashed var(--nb-burgundy); outline-offset: 3px; }
 
 /* ⚠️ THE BOARD'S EXAMPLE PAPERS ARE GONE (workflow run, Phase 1) and their rules with them —
@@ -221,21 +206,7 @@
    drawer's action inherited it from the papers. A dashed reduced-opacity card is a thing the
    board no longer draws. */
 
-/* ── the pin affordance — first in the flow, the mockup's own ghost ────────────────────────── */
-.nb-ghost {
-  break-inside: avoid; margin: 0 0 var(--nb-gap);
-  border: 1.5px dashed rgba(124, 58, 42, 0.3); border-radius: var(--nb-radius);
-  /* ⚠️ THE GHOST AND A RESTING NOTE ARE A MATCHED PAIR (finish run, 1d) — its minimum is the
-     one-line note's own height, MEMBER BY MEMBER, not a number that happened to match once:
-     pad-top + one body line (size × line-height, the lh token is unitless so calc can multiply)
-     + the foot's 12px margin + its 26px min-height + pad-foot + 2px of note border. Measured
-     97.72 on the live board; the old fixed 120 sat 22px proud of every one-line note beside it. */
-  min-height: calc(var(--nb-pad) + var(--nb-body-size) * var(--nb-body-lh) + 12px + 26px + var(--nb-pad-foot) + 2px);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--nb-burgundy); font-size: 13.5px; font-weight: 500;
-  background: transparent; width: 100%; font-family: inherit; transition: background 0.12s;
-}
-.nb-ghost:hover { background: rgba(245, 226, 218, 0.4); }
+/* ⚠️ THE GHOST TILE IS RETIRED (Corkboard v1): adding happens in the bar above the board. */
 
 /* ── the composer — a live note being written, in the flow ─────────────────────────────────── */
 .nb-compose {
@@ -414,3 +385,190 @@
 
 /* `.nb-uselink` went with "Use as a starting point →" — the drawer's action WRITES now and wears
    `.nb-keep`, which it inherited from the board papers. */
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   CORKBOARD v1 (12 Oct; ref design-refs/corkboard-v4/corkboard-v4.html) — the Noteboard renamed and
+   redrawn. Everything below is `cb-`: the row under the header, then the cork board.
+   The fonts are the APP'S built stacks (--sp-type, --sp-serif, --sp-mono, Caveat); the ref loads its
+   own from the web and its screenshots were taken on fallbacks.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+.nb-scope {
+  --cb-paper: #fbf9f5;
+  --cb-line: #ddd6ca;
+  --cb-band: #2d3a50;
+  --cb-cream: #f6efe2;
+  --cb-ink: #1c130f;
+  --cb-mute: #6f675e;
+  --cb-slate: #6A89A7;
+  --cb-rust: #b9683c;
+}
+
+/* the page's group: the shared panel header, then the row, then the board — one column, scrolling */
+.nb-group { display: block; min-width: 0; padding-bottom: 56px; }
+
+/* the header's drawing is a registered placeholder until it is supplied: the ref's 250 × 136 box, dashed
+   on the navy. ⚠️ Scoped to the placeholder (`.cb-hart`), so the day an image lands the shared disc applies. */
+.nb-group .hp3 .hp3-art:has(.cb-hart) { width: 250px; height: auto; padding: 0; aspect-ratio: auto; border-radius: 0; background: none; box-shadow: none; }
+.nb-group .cb-hart .art-box { border-color: #7d8aa0; background: none; }
+.nb-group .cb-hart .art-phk { color: #aab4c4; font-size: 9px; }
+
+/* ⚠️ THE 22 IS THE ROW'S ALONE. The shared panel states its own space below (`--hpanel-below` less 24: 24px at
+   1440 and wider), and two block margins collapse to the LARGER — measured: the row sat 24 under the panel at
+   1512 and 22 at 1280 from one declaration. The panel's is zeroed here, one class heavier than the rule that
+   sets it, so the gap is this page's number at every width. */
+.nb-group > .ph.ph--panel.ph--full.ph--living { margin-bottom: 0; }
+
+/* ⚠️ THE WORDS MAY WRAP ON THIS PAGE, AND THE SUBLINE WITH THEM. The shared panel sets its number-page title
+   `nowrap` in a max-content track, which is right for "things to do" and wrong for "notes pinned to your
+   corkboard": at 1024 the title and the subline ran on under the drawing. Here the words' track may shrink,
+   so they take the ref's two lines when one does not fit. Page-scoped: no other page's header can move. */
+.nb-group .hp3 .hp3-tb { grid-template-columns: auto minmax(0, 1fr); }
+.nb-group .hp3 .hp3-tb h1.hp3-h1 { white-space: normal; }
+.nb-group .hp3 .hp3-h1 .hp3-w { line-height: 1.12 !important; }
+
+/* ── the row under the header: 22 below the panel, 14 above the board; it wraps when narrow ── */
+.cb-over { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 22px 0 14px; }
+
+.cb-addrow {
+  display: flex; align-items: center; gap: 8px; box-sizing: border-box;
+  background: var(--cb-paper); border: 1px solid var(--cb-line); border-radius: 12px; padding: 7px 9px 7px 16px;
+}
+/* a phone is narrower than the bar's three parts: they wrap inside it rather than running off the page */
+@media (max-width: 767.98px) {
+  .cb-addrow { flex-wrap: wrap; max-width: 100%; }
+  .cb-filters { margin-left: 0; }
+}
+.cb-addlab { font-family: var(--sp-type); font-size: 15px; line-height: 1.45; color: var(--cb-ink); margin-right: 6px; white-space: nowrap; }
+.cb-sup, .cb-pads {
+  display: flex; align-items: center; gap: 8px; box-sizing: border-box; height: 36px; padding: 0 13px 0 9px;
+  border-radius: 8px; border: 1px solid var(--cb-line); background: #fff; color: var(--cb-ink);
+  font-family: var(--sp-serif); font-weight: 600; font-size: 14px; line-height: 1.45;
+}
+.cb-sup { cursor: pointer; }
+.cb-sup:hover { border-color: var(--cb-band); }
+.cb-pads { gap: 5px; padding-left: 10px; }
+.cb-pads > span { margin-left: 4px; }
+/* ⚠️ THE SQUARES ARE THE NOTE PAPERS: `.nb-c-*` supplies the fill (one definition of each colour), and this
+   rule — two classes, so it outranks the paper's own border colour — states the deeper edge a 22px square needs. */
+.cb-pad {
+  box-sizing: border-box; width: 22px; height: 22px; padding: 0; border: 1px solid; border-radius: 0; cursor: pointer;
+  box-shadow: 1.5px 1.5px 0 rgba(40, 25, 10, 0.22); transition: transform 0.12s;
+}
+.cb-pad:hover { transform: translateY(-3px) rotate(-5deg); }
+.cb-pads .cb-pad.nb-c-yellow { border-color: #d9c88a; }
+.cb-pads .cb-pad.nb-c-pink { border-color: #d9b0a1; }
+.cb-pads .cb-pad.nb-c-sage { border-color: #aebba9; }
+.cb-ico { width: 22px; height: 22px; display: grid; place-items: center; }
+.cb-ico svg { display: block; width: 20px; height: 20px; stroke: var(--cb-ink); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.cb-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.cb-find {
+  box-sizing: border-box; height: 30px; width: 170px; border-radius: 15px; border: 1px solid var(--cb-line); background: #fff;
+  font-family: var(--sp-serif); font-size: 13.5px; line-height: normal; color: var(--cb-ink); padding: 0 13px; outline: 0;
+}
+.cb-find::placeholder { color: var(--cb-mute); }
+.cb-find:focus { border-color: var(--cb-band); }
+.cb-chip {
+  box-sizing: border-box; height: 30px; padding: 0 13px; border-radius: 15px; border: 1px solid var(--cb-line); background: var(--cb-paper);
+  font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.45; color: var(--cb-ink); cursor: pointer; white-space: nowrap;
+}
+.cb-chip b { font-family: var(--sp-mono); font-weight: 500; font-size: 11px; opacity: 0.6; margin-left: 5px; }
+.cb-chip[aria-pressed="true"] { background: var(--cb-band); border-color: var(--cb-band); color: var(--cb-cream); }
+.cb-chip--tool { border-style: dashed; margin-left: 6px; }
+.cb-chip:focus-visible, .cb-sup:focus-visible, .cb-pad:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+
+/* ⚠️ THE "n of N notes" LABEL TAKES NO ROOM. In the row it widened the filters by its own width, the row wrapped
+   at 1512 and the whole board dropped a line the moment a chip was pressed (measured). It hangs in the 14px
+   under the filters instead, so narrowing changes what is bright and moves nothing. */
+.cb-filters { position: relative; }
+.cb-filters .nb-fcount { position: absolute; right: 4px; top: 100%; margin: 1px 0 0; line-height: 12px; white-space: nowrap; }
+
+/* ⚠️ FILTERING FADES, IT DOES NOT HIDE: a note outside the search or the chip stays where it is at 22%. */
+.cb-dim { opacity: 0.22; }
+
+@media (prefers-reduced-motion: reduce) { .cb-pad { transition: none; } }
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   THE CORK BOARD (Part C; ref `.board`, `.pins`, `.item`, `.pin`, `.tape`)
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+/* cork under two noise layers (the layers are CORK_TEXTURE, set inline — see lib/corkboard), in a pale oak
+   frame with a 1px inner line. The box states its own sizing: its maths is border-box. */
+.cb-board {
+  box-sizing: border-box; position: relative; width: 100%;
+  border: 9px solid #e4d6bd; border-radius: 8px;
+  background-color: #b9895a;
+  box-shadow: inset 0 0 0 1px #bfae90, inset 0 4px 14px rgba(40, 25, 10, 0.3), 0 1px 0 #bfae90, 0 12px 20px -6px rgba(40, 25, 10, 0.28);
+}
+.cb-pins { position: relative; min-height: 790px; transition: min-height 0.3s; }
+
+.cb-item {
+  position: absolute; margin: 0;
+  transform: rotate(var(--r, 0deg));
+  transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+  touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none;
+  box-shadow: 0 1px 1px rgba(40, 25, 10, 0.22), 0 12px 14px -7px rgba(40, 25, 10, 0.42);
+}
+/* places slide only once the first measured arrangement has been painted — never on arrival */
+.cb-pins.cb-ready .cb-item { transition: left 0.35s, top 0.35s, transform 0.2s, opacity 0.2s, box-shadow 0.2s; }
+.cb-item:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 3px; }
+/* in the hand: straight, lifted, in front (its z-index is set inline) */
+.cb-pins .cb-item.cb-drag {
+  transition: transform 0.15s, box-shadow 0.15s;
+  transform: rotate(0deg) scale(1.02); cursor: grabbing;
+  box-shadow: 0 2px 2px rgba(40, 25, 10, 0.18), 0 18px 28px rgba(40, 25, 10, 0.26);
+}
+/* tidy: every item straight; the notes are reordered by the built drag */
+.cb-pins.is-tidy .cb-item { transform: none; cursor: default; }
+.cb-pins.is-tidy .cb-item[draggable="true"] { cursor: grab; }
+/* the compose editor is on the board but is not a pinned thing: straight, and it takes text selection */
+.cb-item.cb-fixed { transform: none; cursor: auto; user-select: auto; -webkit-user-select: auto; touch-action: auto; box-shadow: none; }
+.cb-item > .nb-compose { margin: 0; }
+.cb-item.cb-fixed > .nb-compose { box-shadow: 0 2px 2px rgba(40, 25, 10, 0.18), 0 18px 28px rgba(40, 25, 10, 0.26); }
+
+/* the pin: an 18px head with a highlight and a cast shadow, in rust, navy or slate (`--pc`) */
+.cb-pin {
+  position: absolute; top: -9px; left: 50%; margin-left: -9px; width: 18px; height: 18px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.75) 0 14%, transparent 16%), radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.28), transparent 62%), var(--pc, #2d3a50);
+  box-shadow: 3px 6px 5px -1px rgba(30, 20, 10, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+/* the tape: a torn strip across the top edge, slate or cream */
+.cb-tape {
+  position: absolute; top: -12px; left: 50%; width: 78px; height: 24px; margin-left: -39px; pointer-events: none;
+  background: rgba(106, 137, 167, 0.55); transform: rotate(-3deg); box-shadow: 0 1px 2px rgba(30, 20, 10, 0.18);
+  clip-path: polygon(0 0, 3% 25%, 0 50%, 3% 75%, 0 100%, 100% 100%, 97% 75%, 100% 50%, 97% 25%, 100% 0);
+}
+.cb-tape--cream { background: rgba(246, 239, 226, 0.78); transform: rotate(-5deg); }
+
+/* ── the "Your tasks" index card (Part D; ref `.card`, `.task`, `.addtask`) ──────────────────── */
+.cb-card { box-sizing: border-box; background: #fffdf8; border: 1px solid var(--cb-line); padding: 16px 16px 12px; font-family: var(--sp-serif); color: var(--cb-ink); }
+/* two classes and !important: brand.tsx forces h1–h3 to the brand serif at runtime, and this heading is typewriter */
+.cb-card .cb-card-h {
+  margin: 0 0 8px; padding-bottom: 8px; border-bottom: 2px solid var(--cb-slate);
+  font-family: var(--sp-type) !important; font-weight: 400; font-size: 17px; line-height: 1.45; color: var(--cb-ink);
+}
+.cb-task { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid #e3ebf2; font-size: 14.5px; line-height: 1.45; }
+.cb-tick {
+  flex: none; box-sizing: border-box; width: 17px; height: 17px; margin: 2px 0 0; padding: 0;
+  border: 1.5px solid var(--cb-ink); border-radius: 4px; background: #fff; cursor: pointer; display: grid; place-items: center;
+}
+.cb-tick[aria-checked="true"] { background: var(--cb-band); border-color: var(--cb-band); cursor: default; }
+.cb-tick[aria-checked="true"]::after {
+  content: ""; width: 8px; height: 4px; border-left: 2px solid var(--cb-cream); border-bottom: 2px solid var(--cb-cream);
+  transform: rotate(-45deg) translateY(-1px);
+}
+.cb-tick:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+.cb-task-t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cb-task.is-done .cb-task-t { text-decoration: line-through; opacity: 0.5; }
+.cb-task time { font-family: var(--sp-mono); font-size: 10.5px; line-height: 1.45; color: var(--cb-mute); padding-top: 3px; white-space: nowrap; }
+.cb-addtask, .cb-seeall {
+  display: block; width: 100%; margin-top: 8px; padding: 6px 0; border: 0; border-bottom: 1px dashed #b9c6d3; background: transparent;
+  font: inherit; font-size: 14.5px; line-height: 1.45; text-align: left; color: var(--cb-mute); cursor: pointer;
+}
+.cb-seeall { border-bottom: 0; padding-bottom: 0; }
+.cb-addtask:hover, .cb-addtask:focus-visible, .cb-seeall:hover, .cb-seeall:focus-visible { border-bottom-color: var(--cb-band); color: var(--cb-ink); outline: 0; }
+.cb-seeall:hover, .cb-seeall:focus-visible { text-decoration: underline; }
+.cb-card-foot { display: block; margin-top: 9px; font-family: var(--sp-mono); font-size: 10.5px; line-height: 1.45; color: var(--cb-mute); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-item, .cb-pins, .cb-pins.cb-ready .cb-item, .cb-pins .cb-item.cb-drag { transition: none; }
+}

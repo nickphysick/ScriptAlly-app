@@ -27,6 +27,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
 import { noteFilterLabel, NOTEBOARD_SUBTITLE } from "../../lib/noteboard";
+import { CORKBOARD_SUBLINE } from "../../lib/corkboard";
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoNoteboard.css"), "utf8");
@@ -77,21 +78,26 @@ describe("⚠️ the band is REHOMED, not drawn — the chassis already owns the
     for (const dead of ["nb-mount", "nb-frame", "nb-band"]) {
       expect(page, dead).not.toMatch(new RegExp(`["\\s\`]${dead}["\\s\`]`));
     }
-    /* and the masthead it DOES render is the shared one, not a local copy */
-    expect(page).toContain("TasksPageLayout");
+    /* and the header it DOES render is the shared one, not a local copy. RE-POINTED (Corkboard v1): the page
+       left the fill chassis for the To-do list's scrolling arrangement, so the shared header is `PageHeader`
+       itself (full, panel, living) rather than the family layout's masthead. The law is unchanged. */
+    expect(page).toContain('from "../shell/PageHeader"');
+    expect(page).toMatch(/<PageHeader\s+variant="full"\s+panel/);
+    expect(page).not.toContain("TasksPageLayout");
   });
 
-  it("the subtitle is the mockup's sentence, verbatim", () => {
-    expect(NOTEBOARD_SUBTITLE).toBe(
-      "Thoughts, snippets, and things worth keeping — pinned where you can see them.",
-    );
-    const mockup = readFileSync(join(here, "../../../design-refs/noteboard-mockup.html"), "utf8");
-    expect(mockup).toContain(NOTEBOARD_SUBTITLE); // the ref is the authority, not this file
-    expect(render()).toContain(NOTEBOARD_SUBTITLE);
+  it("the subline is the Corkboard ref's sentence, verbatim (Corkboard v1 supersedes the Noteboard mockup's)", () => {
+    expect(CORKBOARD_SUBLINE).toBe("Notes to self and your own tasks, kept in one place.");
+    const ref = readFileSync(join(here, "../../../design-refs/corkboard-v4/corkboard-v4.html"), "utf8");
+    expect(ref).toContain(CORKBOARD_SUBLINE); // the ref is the authority, not this file
+    seed.userTasks = [note({ id: "a" })];
+    expect(render()).toContain(CORKBOARD_SUBLINE);
+    /* the Noteboard's own sentence is no longer drawn; its constant stays in the pure layer, unread */
+    expect(render()).not.toContain(NOTEBOARD_SUBTITLE);
   });
 });
 
-describe("⚠️ the count exists ONLY while something narrows — the resting tally is retired", () => {
+describe("⚠️ the FILTERED count exists only while something narrows; the board's own count is the header's", () => {
   /* ⚠️ SUPERSEDED (finish run, 1c). This block used to assert the opposite: "N notes pinned" on
      the tool row at rest. That tally sat immediately left of the search box and read as the
      field's label, so it is gone — the board self-evidences — and what renders instead is the
@@ -103,18 +109,27 @@ describe("⚠️ the count exists ONLY while something narrows — the resting t
     expect(new Set(labels).size).toBe(3);
   });
 
-  it("at rest the page renders NO count — neither the eyebrow tally nor the filtered form", () => {
+  it("at rest the count is stated ONCE, by the header's number — never beside the find box", () => {
+    /* ⚠️ REVERSED IN PART (Corkboard v1). The finish run retired "N notes pinned" because it sat left of the
+       search box and read as the field's label. The Corkboard is a NUMBER page: the count is the header's,
+       large, where it cannot be taken for a label. What stays retired is a second tally in the row. */
     seed.userTasks = [note({ id: "a" }), note({ id: "b" })];
     const html = render();
-    expect(html).not.toContain("notes pinned");
+    const plain = html.replace(/\u00a0|&nbsp;/g, " ");
+    expect(plain).toMatch(/aria-label="2 notes pinned to your corkboard"/);
+    expect([...html.matchAll(/notes pinned/g)].length).toBe(2); // the h1's name and its words — one header
     expect(html).not.toMatch(/["\s`]nb-fcount["\s`]/);
     expect(html).not.toMatch(/["\s`]tpl-eyebrow["\s`]/);
+    seed.userTasks = [note({ id: "a" })];
+    expect(render().replace(/\u00a0|&nbsp;/g, " ")).toMatch(/aria-label="1 note pinned to your corkboard"/);
   });
 
   it("…and the source only mounts the count behind the narrowing condition", () => {
     const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
-    expect(page).toContain('(search.trim() || tagSel) && (');
-    expect(page).toContain("noteFilterLabel(notes.length, pinned.length)");
+    expect(page).toContain("const narrowing = !!(search.trim() || tagSel);");
+    expect(page).toMatch(/\{narrowing && <span className="nb-fcount"[^>]*>\{noteFilterLabel\(notes\.length, pinned\.length\)\}/);
+    /* and the header counts the BOARD, never the filtered view */
+    expect(page).toContain("count: settled ? pinned.length : null");
     /* the retired tally is gone from the page, not merely unrendered */
     expect(page).not.toContain("noteCountLabel");
     expect(page).not.toContain("eyebrow={");

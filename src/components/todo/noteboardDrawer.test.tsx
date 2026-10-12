@@ -56,8 +56,9 @@ const render = () =>
  * ⚠️ THE DRAWER MOUNTS ONLY WHEN OPEN, so a closed render proves nothing about it. Static
  * rendering runs no effects and cannot click, so the drawer's own markup is read from SOURCE for
  * the cases about its contents — and the SHAPE is what those cases are about. The end-to-end
- * behaviour (click Keep this → a note appears, the drawer closes) is measured in the browser,
- * where a click is a click; see nbWorkflow.measure.ts.
+ * behaviour (click Keep this → a note appears, the drawer closes) WAS measured in the browser
+ * (nbWorkflow.measure.ts, retired with Corkboard v1) and is not re-measured today — see
+ * tests/e2e/RETIRED-corkboard-v1.md.
  */
 const drawerSource = (): string => {
   const at = page.indexOf("nb-drawer-body");
@@ -70,11 +71,14 @@ const drawerSource = (): string => {
 afterEach(() => { seed.userTasks = []; });
 
 describe("⚠️ (a) the board carries NO example papers, at any note count", () => {
-  it("zero notes: the board container exists and holds nothing example-shaped", () => {
+  it("zero notes: the empty state stands alone, and nothing example-shaped is on the page", () => {
     const html = render();
-    /* ⚠️ THE ANCHOR FIRST — a vacuous pass is the likely failure here. If the board never
-       mounted, "no examples in the board" would be trivially true and prove nothing. */
-    expect(html.indexOf("nb-board"), "no board container to look inside").toBeGreaterThan(-1);
+    /* ⚠️ THE ANCHOR FIRST — a vacuous pass is the likely failure here. RE-POINTED (Corkboard v1): at zero
+       notes the board is NOT rendered (nor the add bar, nor the filter row) — the built empty state is the
+       page — so the anchor is the workflow, and the board's absence is asserted rather than assumed. */
+    expect(html.indexOf("nb-wf"), "no empty state to look inside").toBeGreaterThan(-1);
+    expect(html).not.toMatch(/["\s`]nb-board["\s`]/);
+    expect(html).not.toContain('data-cb="addrow"');
     for (const dead of ["nb-example", "nb-exlabel", "nb-keep", "nb-exdismiss", "nb-exintro"]) {
       expect(html, dead).not.toMatch(new RegExp(`["\\s\`]${dead}["\\s\`]`));
     }

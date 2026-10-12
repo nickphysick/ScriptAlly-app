@@ -190,9 +190,9 @@ describe("⚠️ the fade hem: sticky, weightless, and only where content contin
        the fold (measured: across two cards at TWO pixels of zone overflow, which read as the
        cards themselves fading). The state derives from scrollHeight − clientHeight, observers on
        zone and child both. */
-    expect(note).toContain("hem={zoneScrolls}");
-    expect(note).toContain("zone.scrollHeight - zone.clientHeight > 24");
-    expect(note).toContain("ro.observe(zone);");
+    /* RE-POINTED (Corkboard v1): the Noteboard was this primitive's measured-overflow caller; the Corkboard
+       scrolls as a page and mounts no zone, so the caller's half of the claim went with it. */
+    expect(note).not.toContain("zoneScrolls");
   });
 
   it("the hem is the zone's LAST child, or it is not at the foot", () => {
@@ -269,9 +269,10 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
      and it scrolls in the family's own primitive rather than inventing an overflow of its own.
      `TasksPageLayout` already names `.tpl-zone` in its `settleOn`, so the page's Type A settle
      kept working with nothing edited in a shared file. */
-  it("the Calendar and the Noteboard each declare their own region", () => {
+  it("the Calendar declares its own region; the Corkboard scrolls as a page", () => {
     /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). */
-    expect(note).toContain("<TplZone");
+    /* RE-POINTED (Corkboard v1): the Corkboard has no internal zone — the grid's scroll row is its scroller. */
+    expect(note).not.toContain("<TplZone");
     expect(cal).toContain("<TplZone");
   });
 
@@ -557,9 +558,11 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
     expect(note).not.toContain("TodoSideContainer");
   });
 
-  it("the masonry is the zone, and it hems only when there are notes to continue into", () => {
-    expect(note).toContain("<TplZone");
-    expect(note).toContain("hem={notes.length > 0}");
+  it("⚠️ the Corkboard has NO zone and NO hem — the page scrolls (Corkboard v1)", () => {
+    /* this case had been red-proof for the wrong reason since the paper run moved the gate to `zoneScrolls`;
+       with the zone gone there is nothing to hem */
+    expect(note).not.toContain("<TplZone");
+    expect(note).not.toContain("hem=");
   });
 
   it("⚠️ the ArtSlot RETIRED WITH THE PANEL — the empty state draws its own illustrations", () => {
@@ -579,13 +582,11 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
     /* ⚠️ RENAMED (Noteboard rebuild, 22 Aug): `.nb-grid.column` → `.nb-board.nb-col1`, ported
        class-for-class from the mockup's `.board.cols-1`. The claim is unchanged — one zone, one
        scroller, a centred reading measure — only the selector moved. */
-    const col = nbCss.slice(nbCss.indexOf(".nb-board.nb-col1 {"));
-    expect(nbCss.indexOf(".nb-board.nb-col1 {")).toBeGreaterThan(-1);
-    const rule = col.slice(0, col.indexOf("}"));
-    expect(rule).toContain("columns: 1");
-    expect(rule).toContain("margin-inline: auto");
-    // one zone for both views — the toggle must not grow a second scroller
-    expect((note.match(/<TplZone/g) ?? []).length).toBe(1);
+    /* RE-POINTED (Corkboard v1): the column view is retired with its toggle. What the case protected — a
+       view change must not grow a second scroller — holds by there being no scroller of the page's own. */
+    expect(note).not.toMatch(/["\s`]nb-col1["\s`]/);
+    expect((note.match(/<TplZone/g) ?? []).length).toBe(0);
+    expect(note).not.toMatch(/overflow(-y)?:\s*(auto|scroll)/);
   });
 
   it("the tool row's controls share ONE height — search, tag, view toggle, pink", () => {
@@ -695,8 +696,13 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
        the absence of the family's layout, and measured in tests/e2e/todoV2.measure.ts. */
     expect(board).not.toContain("<TasksPageLayout");
     expect(board).toContain('className="tdv2-wpg"');
+    /* ⚠️ AND THE CORKBOARD LEFT IT TOO (Corkboard v1, 12 Oct), for the same arrangement — measured in
+       tests/e2e/corkboardV1.measure.ts. It still wears the family's root classes. */
+    expect(note).not.toContain("<TasksPageLayout");
+    expect(note).toContain('className="tpl-wpg nb-wpg"');
+    expect(note).toMatch(/className="t-f12 spine-root( [a-z-]+)*"/);
     for (const [name, src] of [
-      ["Calendar", cal], ["Noteboard", note],
+      ["Calendar", cal],
     ] as const) {
       /* ⚠️ RETARGETED by the `calendar` session (journey-bars pack, Phase 2), flagged in
          reports/calendar-bars.md. THE LAW IS UNCHANGED — all four pages wear the same column, and

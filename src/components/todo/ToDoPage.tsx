@@ -33,6 +33,7 @@ import {
 } from "../../lib/todoV2";
 import { V2Controls } from "./v2/V2Controls";
 import { V2Desk } from "./v2/V2Desk";
+import { TODO_OPEN_TASK_KEY } from "../../lib/corkboard";
 import { STAGE_NAME, buildQcRows } from "../../lib/qcSummary";
 import { todoHeaderCopy, todoCaughtUpLine } from "../../lib/livingHeaders";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
@@ -1756,6 +1757,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     openComposer(want);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+  /**
+   * ⚠️ THE CORKBOARD'S "YOUR TASKS" TICK (Corkboard v1, Part D) — the same one-shot idiom as `sa.todoCompose`
+   * above, for the other gesture: open THIS task in the pane. The Corkboard's card lists the writer's own
+   * dated tasks and its tick never writes; the pane is page-local state in here, so the press travels as a
+   * key this page consumes on arrival. `openDock` refuses a key the queue does not hold (a task finished or
+   * set aside in the meantime), so a stale key opens nothing rather than the wrong card.
+   * ⚠️ THROUGH THE REF, for the reason `openDockRef` exists: an effect keyed on `pathname` would otherwise
+   * hold the `openDock` of the render it was created in.
+   */
+  React.useEffect(() => {
+    if (pathname !== "/todo") return;
+    let id: string | null = null;
+    try { id = sessionStorage.getItem(TODO_OPEN_TASK_KEY); } catch { /* private mode */ }
+    if (!id) return;
+    try { sessionStorage.removeItem(TODO_OPEN_TASK_KEY); } catch { /* private mode */ }
+    openDockRef.current(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
   /* board fixes II P1 — the ⋯ menu's Edit: the same composer, seeded from the card. The nature
      follows the card's own (a dated task edits as a task); clearing the date on save DOWNGRADES
      it to a note through the same update, which is the two-natures law applied to editing. */
@@ -2220,7 +2239,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onAddTask={addV2Task}
               onAddNote={addV2Note}
               onOpenRow={openV2Row}
-              onOpenNoteboard={() => navigate("/todo/noteboard")}
+              onOpenNoteboard={() => navigate("/todo/corkboard")}
             />
           </PageRail>
           </>

@@ -98,11 +98,13 @@ describe("⚠️ the foot is ONE run, and its order is a property of the arrange
       return i;
     };
     expect(at("nb-tag")).toBeLessThan(at("nb-date"));
-    expect(at("nb-date")).toBeLessThan(at("tbd-more"));
-    /* the ⋯ sits IN the foot now, in flow, where the mockup draws it — so the page overrides the
-       board's absolutely-positioned seat rather than leaving a control hanging over the body */
-    expect(card.indexOf("nb-foot")).toBeLessThan(at("tbd-more"));
-    expect(css).toMatch(/\.nb-note\s+\.tbd-more\s*\{[^}]*position:\s*static/);
+    /* RE-POINTED (Corkboard v1): the ⋯ is the FIRST thing in the note and sits top right (the ref's `.more`),
+       shown on hover and on focus — so it comes before the words and the meta row, and its seat is absolute
+       again, stated by the page for its own corner. */
+    expect(at("tbd-more")).toBeLessThan(at("nb-body"));
+    expect(at("nb-body")).toBeLessThan(at("nb-foot"));
+    expect(css).toMatch(/\.nb-note\s+\.tbd-more\.cb-more\s*\{[^}]*position:\s*absolute;\s*top:\s*6px;\s*right:\s*6px/);
+    expect(css, "the ⋯ must stay reachable by keyboard: never display: none").not.toMatch(/\.cb-more[^{]*\{[^}]*display:\s*none/);
   });
 
   it("the date is always there; the tag only when the note has one", () => {
@@ -120,7 +122,7 @@ describe("⚠️ the paper rules come AFTER .nb-note — source order decides th
        to `.nb-note { border: 1px solid transparent }` and all three papers rendered with an
        invisible border — in a sheet where each rule reads correctly on its own, through a lock
        that asserted these very declarations exist. The computed value is what found it
-       (noteboardLook.measure.ts); this keeps it from coming back. */
+       (noteboardLook.measure.ts, since retired with Corkboard v1); this keeps it from coming back. */
     const note = css.indexOf(".nb-note {");
     expect(note, "no .nb-note rule").toBeGreaterThan(-1);
     for (const paper of [".nb-c-yellow", ".nb-c-pink", ".nb-c-sage"]) {
@@ -132,14 +134,17 @@ describe("⚠️ the paper rules come AFTER .nb-note — source order decides th
 });
 
 describe("⚠️ hover is a SHADOW, never a lift", () => {
-  it("the card has a hover shadow and no transform anywhere near it", () => {
+  it("hover moves nothing: no lift on a note, and the paper's own rule carries no transform", () => {
     /* a lift pushes the top edge past a clipping boundary and reads as the hairline vanishing —
-       the fault that was fixed on .msv-spine once and reinstated by a revision that predated it */
-    expect(css).toMatch(/\.nb-note:hover\s*\{[^}]*box-shadow/);
+       the fault that was fixed on .msv-spine once and reinstated by a revision that predated it.
+       RE-POINTED (Corkboard v1): a pinned note has no hover shadow of its own (the ref's hover shows the ⋯
+       button and nothing else); its tilt and its lift-in-the-hand belong to the board's item (`.cb-item`),
+       never to `.nb-note`, and never to `:hover`. */
     const noteRule = css.slice(css.indexOf(".nb-note {"));
     expect(css.indexOf(".nb-note {")).toBeGreaterThan(-1);
-    expect(noteRule.slice(0, 400)).not.toContain("transform");
+    expect(noteRule.slice(0, noteRule.indexOf("}"))).not.toContain("transform");
     expect(css).not.toMatch(/\.nb-note:hover\s*\{[^}]*transform/);
+    expect(css).not.toMatch(/\.cb-item:hover\s*\{[^}]*transform/);
     expect(css).not.toMatch(/\.nb-note[^{]*\{[^}]*translateY/);
   });
 
@@ -149,16 +154,18 @@ describe("⚠️ hover is a SHADOW, never a lift", () => {
   });
 });
 
-describe("⚠️ the flow is masonry, and the column view is a reading measure", () => {
-  it("CSS columns pack by length — never a stretched grid", () => {
-    /* ⚠️ THE COUNT IS DERIVED FROM THE VIEWPORT NOW (finish run, 1a): `column-width`, never a
-       fixed `column-count` — the mockup's three was drawn against a 1240px card and gave 505px
-       notes at 1920 on the real page. The mechanism claim is unchanged: multicol, never grid. */
-    expect(css).toMatch(/\.nb-board\s*\{[^}]*column-width:\s*280px/);
-    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*column-count/);
-    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*columns:\s*\d/);
-    expect(css).toMatch(/\.nb-note\s*\{[^}]*break-inside:\s*avoid/);
+describe("⚠️ the notes are PINNED to a board — placed by one function, never by a stylesheet's flow", () => {
+  it("no multicol and no grid: every note is absolutely placed by `arrange`, in both views", () => {
+    /* ⚠️ SUPERSEDED (Corkboard v1, Part C). The masonry was CSS multicol; the cork board places each note
+       from `arrange` (lib/corkboard) — free pinning and "Tidy into columns" alike — so the stylesheet's part
+       is one rule, `position: absolute`, and a flow of its own would fight the function. What survives of
+       the old claim: never a stretched grid. */
+    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*column/);
     expect(css).not.toMatch(/\.nb-board[^}]*display:\s*grid/);
+    expect(css).toMatch(/\.cb-item\s*\{[^}]*position:\s*absolute/);
+    const board = decls(readFileSync(join(here, "CorkBoard.tsx"), "utf8"));
+    expect(board).toContain("arrange(keys, size, saved, W, view)");
+    expect([...board.matchAll(/\barrange\(/g)].length, "one place decides where things go").toBe(1);
   });
 
   it("six notes of six lengths render six cards, each carrying its own words", () => {

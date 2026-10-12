@@ -57,7 +57,7 @@ export const NotesPane: React.FC<NotesPaneProps> = ({ notes, onWrite, onOpenNote
         meta={`${notes.length} on this manuscript`}
         actions={
           <button type="button" className="msp-linkact" onClick={onOpenNoteboard}>
-            Open Noteboard ›
+            Open Corkboard ›
           </button>
         }
       />

@@ -21,7 +21,7 @@ export const rgb = (c: number[]) => `rgb(${c.join(", ")})`;
 export const FLAP = 26;
 
 /** Every signed-in route (routeTiers WORKSPACE_PATHS; the settings chassis is represented by /account). */
-export const ROUTES = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/calendar", "/todo/noteboard", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import", "/account", "/plans", "/help"] as const;
+export const ROUTES = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/calendar", "/todo/corkboard", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import", "/account", "/plans", "/help"] as const;
 export const SHEET_ROUTES = ROUTES.filter((r) => hasHeaderSheet(r));
 export const NO_SHEET_ROUTES = ROUTES.filter((r) => !hasHeaderSheet(r));
 export const OWN_ROUTES = OWN_HEADER_ROUTES.filter((r) => hasHeaderSheet(r));

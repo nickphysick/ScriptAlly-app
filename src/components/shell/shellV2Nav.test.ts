@@ -38,8 +38,8 @@ describe("shellV2Nav — the accordion model", () => {
     /* Three since 9 Aug (tasks-consolidation P1) — Today is retired. The nav reads its rows from
        TODO_ROUTES, so this and the palette cannot drift apart: one definition, three consumers. */
     const todo = SHELL_SECTIONS.find((s) => s.key === "todo")!;
-    expect(todo.pages.map((p) => p.label)).toEqual(["To-do list", "Calendar", "Noteboard"]);
-    expect(todo.pages.map((p) => p.path)).toEqual(["/todo", "/todo/calendar", "/todo/noteboard"]);
+    expect(todo.pages.map((p) => p.label)).toEqual(["To-do list", "Calendar", "Corkboard"]);
+    expect(todo.pages.map((p) => p.path)).toEqual(["/todo", "/todo/calendar", "/todo/corkboard"]);
     // The default page keeps the BARE path, so every existing link and the rail's
     // section-select land on it with no redirect.
     expect(todo.pages[0].path).toBe("/todo");
@@ -79,7 +79,7 @@ describe("shellV2Nav — path matching", () => {
     expect(shellSectionKeyForPath("/dashboard")).toBe("dashboard");
     expect(shellSectionKeyForPath("/todo")).toBe("todo");
     expect(shellSectionKeyForPath("/todo/calendar")).toBe("todo");
-    expect(shellSectionKeyForPath("/todo/noteboard")).toBe("todo");
+    expect(shellSectionKeyForPath("/todo/corkboard")).toBe("todo");
     expect(shellSectionKeyForPath("/agents/discover")).toBe("agents");
     expect(shellSectionKeyForPath("/manuscripts/comps")).toBe("shelf");
     expect(shellSectionKeyForPath("/import")).toBe("shelf");
@@ -89,7 +89,7 @@ describe("shellV2Nav — path matching", () => {
 
   it("builds the crumb — Section / Page; the flat Dashboard is its own name; off-nav routes keep crumbs", () => {
     expect(shellCrumbForPath("/todo")).toEqual({ section: "Tasks", page: "To-do list" });
-    expect(shellCrumbForPath("/todo/noteboard")).toEqual({ section: "Tasks", page: "Noteboard" });
+    expect(shellCrumbForPath("/todo/corkboard")).toEqual({ section: "Tasks", page: "Corkboard" });
     expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Contact list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });

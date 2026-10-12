@@ -132,7 +132,7 @@ export const V2Desk: React.FC<{
     try {
       if (mode === "note") {
         const ok = await onAddNote({ text: t });
-        if (ok) { setText(""); flash("Saved — it’s on your Noteboard too"); } else flash("Couldn’t save that — try again");
+        if (ok) { setText(""); flash("Saved — it’s on your Corkboard too"); } else flash("Couldn’t save that — try again");
         return;
       }
       const due = dueForPill(when, today);
@@ -224,7 +224,7 @@ export const V2Desk: React.FC<{
       <div className="tdv2-railfoot">
         <button type="button" onClick={onOpenNoteboard} data-todo-v2="noteboard-link">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
-          Open the Noteboard
+          Open the Corkboard
           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: "auto" }} aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
         </button>
       </div>

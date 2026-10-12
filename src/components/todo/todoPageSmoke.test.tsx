@@ -275,7 +275,8 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
   /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */
   it("the Noteboard renders, teaches when empty, and carries no sidebar", () => {
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
-    expect(html).toContain("Noteboard");
+    expect(html).toContain("Corkboard");
+    expect(html).not.toContain("Noteboard");
     /* ⚠️ THE TEACHING STATE IS THE EXAMPLE PAPERS NOW (paper run, Phase 2). An empty board shows
        three keepable examples instead of the first-run panel — the panel returns only once every
        paper has been dismissed, which this mock (no todoPrefs) is not. Still a teaching state,
@@ -295,7 +296,8 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Open with the flood");
     expect(html).toContain("nb-board");  // renamed from nb-grid in the Noteboard rebuild
-    expect(html).toContain("1 AUG"); // the pin date
+    expect(html).toContain("Pinned 1 Aug"); // the pin date (the Corkboard's wording)
+    expect(html).toContain('data-cb="board"');
   });
 });
 

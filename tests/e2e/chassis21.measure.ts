@@ -22,7 +22,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const PAGES = ["/todo", "/todo/calendar", "/todo/noteboard"];
+const PAGES = ["/todo", "/todo/calendar", "/todo/corkboard"];
 
 test("chassis — where the chain first exceeds the viewport", async ({ page }) => {
   const out: string[] = [];
