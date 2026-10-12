@@ -23,6 +23,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { collection, getDocs } from "firebase/firestore";
+import { harnessDb } from "./harnessDocs";
 import { atRest, leaveStep as leaveStepSteady, pressDoor, pressNext } from "./panelSteady";
 
 const DIR = "reports/query-panel-v2";
@@ -399,7 +401,24 @@ test.describe("Query panel v2", () => {
     test.setTimeout(420_000);
     page.setDefaultTimeout(10_000);
     const L = new Ledger("V13");
-    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp2Links.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { docs: Record<string, Record<string, unknown>>; log: Record<string, string[]>; feed: string[]; queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    /* ⚠️ READ IN THIS PROCESS, ON ONE SIGN-IN (`harnessDb` caches it). It was the seeder's `--dump`, which signs in
+       with the password on every call: thirteen sign-ins a run, and Firebase's quota for verifying passwords is
+       shared by every session on the project. A full run went red on "auth/quota-exceeded" twice on 12 Oct. */
+    const plain = (v: unknown): unknown => (v && typeof v === "object" ? (typeof (v as { toDate?: unknown }).toDate === "function" ? (v as { toDate: () => Date }).toDate().toISOString() : Array.isArray(v) ? v.map(plain) : Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, plain(x)]))) : v);
+    type Dump = { docs: Record<string, Record<string, unknown>>; log: Record<string, string[]>; feed: string[]; queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    const dump = async (): Promise<Dump> => {
+      const { db, uid } = await harnessDb();
+      const mine = (id: string, d: Record<string, unknown>) => id.includes("qp2l-") || String(d.queryId ?? "").startsWith("qp2l-") || String(d.relatedRecordId ?? "").startsWith("qp2l-");
+      const qs = (await getDocs(collection(db, "users", uid, "queries"))).docs.filter((d) => d.id.includes("qp2l-"));
+      const log: Record<string, string[]> = {};
+      for (const d of qs) log[d.id] = (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs.map((a) => a.id).sort();
+      const feed = (await getDocs(collection(db, "users", uid, "activities"))).docs.filter((d) => mine(d.id, d.data())).map((d) => d.id).sort();
+      const tasks = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter((d) => mine(d.id, d.data())).map((d) => ({ text: String(d.data().text ?? ""), queryId: String(d.data().queryId ?? ""), done: !!d.data().done }));
+      return {
+        docs: Object.fromEntries(qs.map((d) => [d.id, plain(d.data()) as Record<string, unknown>])), log, feed, tasks,
+        queries: Object.fromEntries(qs.map((d) => [d.id, { dateSent: (d.data().dateSent as string) ?? null, keep: (d.data().closureOfferDismissed as boolean) ?? null, expected: (d.data().writerExpectedDate as string) ?? null }])),
+      };
+    };
     const card = () => page.evaluate(() => {
       const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
       if (!p) return null;
@@ -428,6 +447,8 @@ test.describe("Query panel v2", () => {
       "Record your answer": ["Decide on offer"], "Record what you sent": ["Record what you sent"],
     };
     const triple = async (id: string) => { const t = (await tray(id)).split("|"); const c = await card(); return { column: await verb(id), tray: t[1] === "row-act" ? t[0] : "", panel: c?.lead ?? "" }; };
+    /* a write the page shows at once still has to reach the server: wait for the document, not for a pause */
+    const landed = (what: string, pred: (d: Dump) => boolean) => expect.poll(async () => pred(await dump()), { timeout: 15_000, message: `${what} never reached the server` }).toBe(true);
     const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
     const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
     const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
@@ -497,7 +518,7 @@ test.describe("Query panel v2", () => {
       const top = await field.evaluate((e) => { const r = e.getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === e; });
       L.check("V13", "Add the date you sent it · opens the sent-date editor, above the panel", top, top ? "the field is what is under its own centre" : "something covers the field");
       await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-      L.check("V13", "Add the date you sent it · leaving the editor writes nothing", dump().queries["qp2l-nosent"]?.dateSent === null, JSON.stringify(dump().queries["qp2l-nosent"]));
+      L.check("V13", "Add the date you sent it · leaving the editor writes nothing", (await dump()).queries["qp2l-nosent"]?.dateSent === null, JSON.stringify((await dump()).queries["qp2l-nosent"]));
 
       /* Set a date → the slider in the card; Cancel puts the link back and writes nothing */
       if (!(await page.locator(PANEL).count())) await openQC(page, SIZES[0], "none");
@@ -509,7 +530,7 @@ test.describe("Query panel v2", () => {
       L.check("V13", "Set a date · opens the weeks slider in the card, and the link stands down", during?.links.length === 0, JSON.stringify(during?.links));
       await page.locator(`${PANEL} [data-qp="stand-setdate"] .tl-setwin-cancel`).click(); await page.waitForTimeout(300);
       const after = await card();
-      L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && dump().queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify(dump().queries["qp2l-nowin"])}`);
+      L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && (await dump()).queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify((await dump()).queries["qp2l-nowin"])}`);
 
       /* Set a send-by date → the edit journey's one step, in the panel; saving changes two fields and nothing else */
       await openId("qp2l-request");
@@ -522,8 +543,8 @@ test.describe("Query panel v2", () => {
       const missing = chips.filter((c) => !stepText.includes(c));
       L.check("V13", "Set a send-by date · the response journey's chips and reminder choices, in the panel", missing.length === 0 && /When you.ll send it by/.test(stepText) && (await scrim(page)).opacity > 0, missing.length ? `missing: ${missing.join(", ")}` : `all 8 choices · scrim opacity ${(await scrim(page)).opacity}`);
       /* the account at rest: the app settles its own documents after a load, and that is not this save */
-      let before = dump();
-      for (let i = 0; i < 6; i++) { await page.waitForTimeout(1500); const again = dump(); if (JSON.stringify(again) === JSON.stringify(before)) break; before = again; }
+      let before = await dump();
+      for (let i = 0; i < 6; i++) { await page.waitForTimeout(1500); const again = await dump(); if (JSON.stringify(again) === JSON.stringify(before)) break; before = again; }
       for (let i = 0; i < 4; i++) {
         const b = page.locator(`${PANEL} [data-qad-primary]`);
         const label = await b.innerText();
@@ -532,8 +553,9 @@ test.describe("Query panel v2", () => {
         await page.waitForTimeout(450);
       }
       await expect.poll(async () => (await card())?.links.length ?? -1, { timeout: 15_000 }).toBe(0);
-      await page.waitForTimeout(800);
-      const afterSave = dump();
+      /* the link goes on the app's own optimistic write; the read below is the SERVER's, so wait for it to land */
+      await expect.poll(async () => !!(await dump()).docs["qp2l-request"]?.expectedSendDate, { timeout: 15_000, message: "the send-by date never reached the server" }).toBe(true);
+      const afterSave = (await dump());
       const d0 = before.docs["qp2l-request"] ?? {}; const d1 = afterSave.docs["qp2l-request"] ?? {};
       const changed = [...new Set([...Object.keys(d0), ...Object.keys(d1)])].filter((k) => JSON.stringify(d0[k]) !== JSON.stringify(d1[k])).sort();
       L.check("V13", "Set a send-by date · only the send-by date and its reminder changed on the query", JSON.stringify(changed) === '["expectedSendDate","sendReminderDate"]', `changed: ${changed.join(", ") || "nothing"}`);
@@ -562,19 +584,19 @@ test.describe("Query panel v2", () => {
       const recorded = (await page.locator(`${SB} .qad-chip.on`).allInnerTexts()).join("|").replace(/\s+/g, " ");
       L.check("V13", "··· edit · the request shows the step after date and note, on the recorded date", (await page.locator(SB).count()) === 1 && /^As recorded/.test(recorded)
         && await page.evaluate((sel) => { const sb = document.querySelector(sel)!; const ta = document.querySelector('[data-qp="panel"] .cor-ta')!; return !!(ta.compareDocumentPosition(sb) & Node.DOCUMENT_POSITION_FOLLOWING); }, SB), `chip on: "${recorded}"`);
-      const e0 = dump();
+      const e0 = (await dump());
       await page.locator(`${SB} [data-qad-chip="4w"]`).click();
       await page.locator(`${SB} [data-qad-chip="0"]`).click();
       await page.locator(`${PANEL} .cor-save`).click();
       const undo = page.locator(".sa-toast-undo");
       await expect(undo, "no Undo after the correction saved").toBeVisible({ timeout: 15_000 });
-      await expect.poll(() => String(dump().docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).not.toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
-      const e1 = dump().docs["qp2l-request"] ?? {};
+      await expect.poll(async () => String((await dump()).docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).not.toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e1 = (await dump()).docs["qp2l-request"] ?? {};
       const due2 = String(e1.expectedSendDate ?? "").slice(0, 10); const rem2 = String(e1.sendReminderDate ?? "").slice(0, 10);
       L.check("V13", "··· edit · saving changes the send-by date and its reminder with the rest", days(due2) === 28 && days(rem2) === 28, `send by ${due2} (+${days(due2)}) · reminder ${rem2} (+${days(rem2)})`);
       await undo.click();
-      await expect.poll(() => String(dump().docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
-      const e2 = dump().docs["qp2l-request"] ?? {};
+      await expect.poll(async () => String((await dump()).docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e2 = (await dump()).docs["qp2l-request"] ?? {};
       L.check("V13", "··· edit · Undo puts both back", e2.expectedSendDate === e0.docs["qp2l-request"]?.expectedSendDate && e2.sendReminderDate === e0.docs["qp2l-request"]?.sendReminderDate, `send by ${String(e2.expectedSendDate).slice(0, 10)} · reminder ${String(e2.sendReminderDate).slice(0, 10)}`);
       /* every other entry type the account holds: no step */
       const kinds: Record<string, number> = {};
@@ -607,7 +629,8 @@ test.describe("Query panel v2", () => {
       L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
       await page.locator(LINK("remindLater")).click();
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
-      const tasks = dump().tasks.filter((t) => t.queryId === "qp2l-year" && !t.done);
+      await landed("the reminder", (d) => d.tasks.some((t) => t.queryId === "qp2l-year" && !t.done));
+      const tasks = (await dump()).tasks.filter((t) => t.queryId === "qp2l-year" && !t.done);
       L.check("V13", "Remind me later · adds one open \"Nudge {agent}\" to-do, and hides while it stands", tasks.length === 1 && /^Nudge /.test(tasks[0].text), JSON.stringify(tasks));
       await page.locator(LINK("keepTracking")).click();
       /* wait on the card, not on the footer: the footer's lead is the claim, and is read below by name */
@@ -618,7 +641,8 @@ test.describe("Query panel v2", () => {
       { const t = await triple("qp2l-year"); L.check("V13", "Keep tracking · column, tray and panel agree, on different words than before", t.tray === t.panel && (WORDS[t.panel] ?? []).includes(t.column) && t.column === "Waiting", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Keep tracking · the tray's first button follows the panel's primary", (await tray("qp2l-year")) === `${y1?.lead}|row-act` && y1?.lead !== y0?.lead, `tray "${await tray("qp2l-year")}" · panel "${y1?.lead}" (was "${y0?.lead}")`);
       L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
-      L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
+      await landed("the flag", (d) => d.queries["qp2l-year"]?.keep === true);
+      L.check("V13", "Keep tracking · sets the existing flag", (await dump()).queries["qp2l-year"]?.keep === true, JSON.stringify((await dump()).queries["qp2l-year"]));
       /* for good: it holds across a reload */
       await openQC(page, SIZES[0], "none"); await openId("qp2l-year");
       const y2 = await card();
@@ -630,7 +654,8 @@ test.describe("Query panel v2", () => {
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
       await page.waitForTimeout(400);
       const y3 = await card();
-      L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      await landed("the cleared flag", (d) => d.queries["qp2l-year"]?.keep === null);
+      L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && (await dump()).queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify((await dump()).queries["qp2l-year"])}`);
       { const t = await triple("qp2l-year"); L.check("V13", "Suggest closing again · column, tray and panel agree again", t.tray === t.panel && t.column === "Consider closing", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Suggest closing again · the tray's first button is the panel's primary again", (await tray("qp2l-year")) === `${y3?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y3?.lead}"`);
       await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
