@@ -136,7 +136,7 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     /* RE-POINTED (Query panel v2 §B): the tracking body is the ledger, a second dress for `buildTimelineRows`'
        own rows. The law survives: the ··· is wired, so corrections are reachable, and the open entry is marked. */
     expect(mount).toContain("<QueryLedger");
-    expect(mount).toContain("rows={buildTimelineRows(eventsForRail, activeQuery, activeAgent)}");
+    expect(mount).toContain("const ledgerRows = buildTimelineRows(eventsForRail, activeQuery, activeAgent);");
     expect(mount, "the ··· is off — corrections unreachable from the panel").toContain("onFork={(entry, trigger)");
     expect(mount, "the desk's ring is unwired").toContain("highlightId={correcting?.entry.activityId");
   });

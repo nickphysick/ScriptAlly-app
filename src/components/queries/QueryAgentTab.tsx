@@ -83,7 +83,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
             {place && <span>{place}</span>}
           </span>
         )}
-        <span className="qat-open">{door}</span>
+        <span className="qat-open" data-door={agent.submissionStatus === "Open" ? "open" : agent.submissionStatus === "Closed" ? "closed" : "unknown"}>{door}</span>
       </div>
 
       {(agent.email || agent.website || socials.length > 0) && (
@@ -140,7 +140,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
         <div className="qat-hist">
           <div className="qat-hk">Your history with {(agent.name || agent.agency).split(/\s+/)[0]}</div>
           {history.map((h) => (
-            <div key={h.queryId} className="qat-hrow">
+            <div key={h.queryId} className={`qat-hrow${h.isThisQuery ? " qat-hrow--this" : ""}`}>
               {/* the swatch is the query's own band tint — the stage class resolves it */}
               <span className={`qat-sw qcc--st-${stateFor(h.status)}`} aria-hidden="true" />
               <span className="qat-hw">{h.manuscriptTitle}</span>

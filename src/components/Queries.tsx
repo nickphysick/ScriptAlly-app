@@ -178,6 +178,8 @@ import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { SentBox, SentChip, FromPackageTag, sentView, ordinal } from "./queryActions/SentHow";
 import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
+import { StandCard } from "./queries/panel/StandCard";
+import { standCard } from "../lib/standCard";
 /** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
 const sentenceCase = (t: string): string => { const l = t.toLowerCase(); return l ? l[0].toUpperCase() + l.slice(1) : l; };
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
@@ -5285,9 +5287,29 @@ export const Queries: React.FC<{
                       onAdd={queriedAct && DRAWER_LIVE.edit ? () => stepRow({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
                   </SendExtras>
                 );
+                /* Query panel v2 §C — where things stand, from facts the record holds (lib/standCard) and no others */
+                const ledgerRows = buildTimelineRows(eventsForRail, activeQuery, activeAgent);
+                const qcRow = qcById.get(activeQuery.id);
+                const standNow = Date.now();
+                const stand = qcRow ? (
+                  <StandCard view={standCard({
+                    status: qcRow.status,
+                    first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
+                    agency: (activeAgent?.agency || "").trim(),
+                    court: qcRow.court,
+                    stageStartMs: qcRow.stageStartMs,
+                    expectedMs: qcRow.expectedMs,
+                    windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
+                    unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
+                      .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
+                    closedHow: qcRow.closedHow,
+                    manuscriptTitle: activeMs?.title ?? null,
+                  }, standNow)} />
+                ) : null;
                 return (
                   <QueryLedger
-                    rows={buildTimelineRows(eventsForRail, activeQuery, activeAgent)}
+                    rows={ledgerRows}
+                    stand={stand}
                     nowMs={Date.now()}
                     sendMethod={activeQuery.sendMethod}
                     revisionRound={activeQuery.revisionRound}

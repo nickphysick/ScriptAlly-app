@@ -33,6 +33,7 @@ import { formatDate } from "../../../lib/dates";
 import "./qcvPage.css";
 import "./qcvOpen.css";
 import "./qcvOpenPanel.css";
+import "../panel/panelTabs.css";
 
 export type OpenAction = "nudge" | "snooze" | "closed";
 
