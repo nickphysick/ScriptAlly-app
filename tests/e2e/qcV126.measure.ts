@@ -651,6 +651,11 @@ test("QC126-2.2 · columns", async ({ page }) => {
 /* ── QC126-2.3 · nothing escapes ── */
 test("QC126-2.3 · nothing escapes", async ({ page }) => {
   const L = new Ledger("qc126-2-3");
+  /* ⚠️ READ AT A FIXED CLOCK (12 Oct). The Birds-eye track is a rolling window on today, so where a bar is cut by the
+     track's edge moves with the date: this lock was green on 11 Oct and red on 12 Oct on the same build, at 1280 after
+     "earlier". `Date` is held at the last day it was known green, as feed drawer v2's B6 is. It can still move if a
+     seeder re-dates the account's queries (they are written relative to the day the seeder runs). */
+  await page.clock.setFixedTime(new Date("2026-10-11T09:00:00.000Z"));
   for (const vp of W3) {
     await openQc(page, vp);
     await openDrawer(page).catch(() => {});

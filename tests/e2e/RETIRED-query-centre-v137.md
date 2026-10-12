@@ -42,4 +42,5 @@ These failed on `main` because they assert things v137 removed. They were missed
 | `qcV126.measure.ts` | QC126-2 no stragglers | the old neutral colour is still written in `analytics/a17.css` and `manuscripts/v12/msv21.css` |
 | `qcV126.measure.ts` | QC126-2.10 torn edges | the harness account has no query with a torn START, so that branch has no subject |
 | `contactV13.measure.ts` | CL13-12 loading | the Contact list's loading frame no longer matches the loaded page's tab and band shape |
-| `qcV126.measure.ts` | QC126-2.3 nothing escapes (1280, "earlier") | red on `main`'s build too from 12 Oct, green the day before: the Birds-eye track is a rolling window, so the reading is date-bound |
+
+QC126-2.3 (nothing escapes) was date-bound and is fixed: it reads the drawer at a fixed clock (11 Oct 2026), like feed drawer v2's B6.
