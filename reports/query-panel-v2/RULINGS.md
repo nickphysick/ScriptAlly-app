@@ -1,7 +1,7 @@
 # Query panel v2 — the rulings of 12 Oct
 
-On `query-panel-v2`, one commit each. Ruling 3 is **not built**: two of its four controls did something the
-ruling does not describe, so I stopped there as instructed. See "Ruling 3" below.
+On `query-panel-v2`, one commit each. Ruling 3 was held in the first pass; it is built now, apart from
+"Set a send-by date", which is **stopped for a decision**. See "Ruling 3, as decided" at the foot.
 
 ## False premises
 
@@ -91,5 +91,105 @@ On that build: tsc and both builds clean; Vitest 8,685 passed, 3 skipped, the sa
 QP2 V1 to V12 pass; QP1 11 pass; QC137 13 pass (C4 included); feed drawer v2 4 pass; the journeys 3 pass;
 delete entry 8 pass; `qcMove` 3 pass. In the first full run V10, B6 and QP1 P7 were red for the shared-account
 reasons above (P7 was one 10-minute click wait; it passed alone); all three passed after the fixes.
+
+The next session to deploy to dev should base its integration on that branch.
+
+## Ruling 3, as decided (12 Oct, second pass)
+
+### Stopped: "Set a send-by date"
+
+No journey can set a request's send-by date today without a new write, so I stopped as instructed.
+
+- The "When you'll send it by" chips exist only inside **recording a new response**. That journey always writes
+  a response entry and a status with the date; it has no path that writes the date alone.
+- The **edit** journey edits an entry's date, its note and what was sent. It does not carry the send-by date.
+- The two fields (`expectedSendDate`, `sendReminderDate`) are already in the rules' allowlist, so no rules
+  change is needed either way.
+
+Two ways to build it. Say which:
+
+1. **A step on the edit journey**, for a request entry: the same chips, in the panel's act look, saving only the
+   two fields. One new write, in the journey that already edits a request.
+2. **A mode of the response journey** that opens at that one step and saves only the two fields. Same chips,
+   same write, but the journey that records responses would gain a path that records none.
+
+I would take 1. Lock V13 covers four links until this is decided.
+
+### Built
+
+| Item | Commit | Result |
+| --- | --- | --- |
+| The links | `7f30dfb8` | Quiet links under the stand card's paragraph: Source Serif 15, navy, an underline rule |
+| Signed copy | `c7428836` | "{first} is your agent for *{title}*. This query stays here, and in your figures." With no title recorded: "{first} is your agent. This query stays here, and in your figures." |
+| Retirements | `05f6ba00` | `deskBounds`, `deskPaint`, `drawer3`, `moveEntry`: skipped in place with the reason, listed in `tests/e2e/RETIRED-query-panel-v2.md` |
+| qcMove's date | `de8bd3c5` | See below: the day is 7 Oct, not 11 Oct |
+| Lock V13 | `d4bc0c54` | 52 of 52 green; red under two mutations |
+
+Each link, and where it shows:
+
+| Link | Shows when | Does |
+| --- | --- | --- |
+| Add the date you sent it | With the agent, no sent date | Opens the page's sent-date editor, anchored to the link |
+| Set a date | With the agent, sent, no reply date to count towards | Opens the weeks slider in the card; Save writes your expected-reply date, with Undo |
+| Remind me later | Over 365 days waiting, closing still suggested, no open "Nudge {agent}" to-do for the query | Adds that to-do for two weeks' time |
+| Keep tracking | Over 365 days waiting, closing still suggested | Sets `closureOfferDismissed`. The closing sentence and both links go; Record a response leads the footer |
+| Suggest closing again (⋯ menu) | The flag is set, query with the agent | Clears the flag |
+
+Shots: `shots/links-add-sent-date.png`, `links-set-a-date.png`, `links-set-a-date-open.png`,
+`links-over-a-year.png`, `links-kept-tracking.png`, `links-suggest-closing-again.png`.
+
+Things to know:
+
+- **The sent-date editor opened underneath the panel.** It is raised above it now. Found on the rendered page;
+  V13 holds it.
+- **"Keep tracking" with nothing else recorded.** If the agency states no window and no nudge went unanswered,
+  the closing sentence was the card's only sentence. The card then says "You chose to keep tracking this
+  query." Say if you want different words.
+- **The list's tray still offers "Close" first** for such a query after Keep tracking. The list was out of
+  scope; the panel's footer is what changed.
+- **A reply date you set does not hide a missing sent date.** "Add the date you sent it" shows on any query
+  with the agent that has no sent date.
+
+### False premise: qcMove's date is 7 Oct, not 11 Oct
+
+The ruling said to hold qcMove's fixture to 11 Oct 2026, "as B6". 11 Oct is the clock B6 reads the feed at. The
+correction fixture both captures saw was seeded on **7 Oct**:
+
+- B6's original baseline heads days at 27 and 17 September, the fixture's closures at 10 and 20 days.
+- V10's fixture has `cor-move-a`'s send, 70 days back, in July.
+
+Dated from 11 Oct both stayed red ("8 days vs 7"; "Aug 2026" for "Jul 2026"). Dated from 7 Oct, V10's strict
+month check and B6's original baseline both pass after a qcMove run. `seedCorrection.mjs` takes `SEED_NOW`;
+run by hand without it, it still dates from today.
+
+One more cause of a red B6, now avoided: any fixture with a send dated in the 30 days to 11 Oct adds a day to
+the feed while it stands. V13's "no window" query is dated 45 days back for that reason.
+
+### Lock V13
+
+| Green | Mutation (source, its own build) | Red |
+| --- | --- | --- |
+| 52 of 52, at 1512 and 1280 | Every link drawn in every state | 19 readings, such as "qp2l-nosent · exactly its links — [all four]" and "you row 0 · no link outside its state" |
+| | Keep tracking leaves Close in the lead | "Keep tracking · Record a response leads instead of Close — lead "Close query"", and the same after a reload |
+
+Each state was entered: the tally reads 2 for each link and for "no links" on a request and on a closed query.
+Its three queries are its own (`seedQp2Links.mjs`, prefix `qp2l-`) and are removed in the same run.
+
+### A note on the machine
+
+The machine restarted mid-pass and `/tmp` was emptied, so every worktree and preview there was lost. Nothing
+committed was lost. The pack's worktree is now `~/ScriptAlly-qp2` and its integration `~/ScriptAlly-qp2int`.
+
+### Deploy (second pass)
+
+Dev had moved again: the Comparable titles v27 session deployed `dev/…-comps26-1-qp2-comps27` at `077d063b`
+(`index-Czjpd4O8.js`), which is built on my last integration. I merged onto it as
+**`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b`** and deployed that. No conflicts.
+**Dev serves `index-C4CJwYeS.js`.**
+
+On that build: tsc and both builds clean; Vitest 8,691 passed, 3 skipped, the same one file failing to load
+(`functions/src/email.test.ts`, as on main). qcMove 3 pass, then QP2 V1 to V13 all green (V10 54 of 54, V13
+52 of 52); QP1 11 pass; QC137 13 pass; feed drawer v2 4 pass (B6 on its original baseline); delete entry 8
+pass; the journeys 15 pass.
 
 The next session to deploy to dev should base its integration on that branch.
