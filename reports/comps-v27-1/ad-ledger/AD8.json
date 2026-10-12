@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "AD8",
+  "where": "1512 empty: the placeholder title",
+  "ok": true,
+  "detail": "\"Your comp’s title\" · placeholder true"
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 the row's own comp cell exists",
+  "ok": true,
+  "detail": "{\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-d"
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 same element type and class set as a row's comp cell",
+  "ok": true,
+  "detail": "preview {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\" · row {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 its title is the Title input",
+  "ok": true,
+  "detail": "\"Salt and Iron\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 its byline follows the fields",
+  "ok": true,
+  "detail": "\"J. Mercer · add publisher · 2024\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 the next-move cell is the row's own, with no tray",
+  "ok": true,
+  "detail": "\"Add a publisher\" · tray false"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 empty: the placeholder title",
+  "ok": true,
+  "detail": "\"Your comp’s title\" · placeholder true"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 the row's own comp cell exists",
+  "ok": true,
+  "detail": "{\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-d"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 same element type and class set as a row's comp cell",
+  "ok": true,
+  "detail": "preview {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\" · row {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 its title is the Title input",
+  "ok": true,
+  "detail": "\"Salt and Iron\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 its byline follows the fields",
+  "ok": true,
+  "detail": "\"J. Mercer · add publisher · 2024\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 the next-move cell is the row's own, with no tray",
+  "ok": true,
+  "detail": "\"Add a publisher\" · tray false"
+ }
+]

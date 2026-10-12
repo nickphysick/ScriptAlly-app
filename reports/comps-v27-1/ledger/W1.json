@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "W1",
+  "where": "1512 normal: the list's edges are the panel's",
+  "ok": true,
+  "detail": "list 296.4–1455.6 · panel 296.4–1455.6"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 normal: and the strip's",
+  "ok": true,
+  "detail": "list 296.4–1455.6 · strip 296.4–1455.6"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 normal: the heading's edges are the list's",
+  "ok": true,
+  "detail": "heading 296.4–1455.6 · list 296.4–1455.6"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 normal: the heading is 16 above the list",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 full screen: it is on",
+  "ok": true,
+  "detail": "data-full true"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 full screen: the list is the sheet less 12 each side",
+  "ok": true,
+  "detail": "left 12.0 · right 12.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 full screen: the heading's edges are the list's",
+  "ok": true,
+  "detail": "heading 80.0–1492.0 · list 80.0–1492.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1512 back in the column after full screen",
+  "ok": true,
+  "detail": "list 296.4–1455.6 · panel 296.4–1455.6"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 normal: the list's edges are the panel's",
+  "ok": true,
+  "detail": "list 289.0–1231.0 · panel 289.0–1231.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 normal: and the strip's",
+  "ok": true,
+  "detail": "list 289.0–1231.0 · strip 289.0–1231.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 normal: the heading's edges are the list's",
+  "ok": true,
+  "detail": "heading 289.0–1231.0 · list 289.0–1231.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 normal: the heading is 16 above the list",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 full screen: it is on",
+  "ok": true,
+  "detail": "data-full true"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 full screen: the list is the sheet less 12 each side",
+  "ok": true,
+  "detail": "left 12.0 · right 12.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 full screen: the heading's edges are the list's",
+  "ok": true,
+  "detail": "heading 80.0–1260.0 · list 80.0–1260.0"
+ },
+ {
+  "lock": "W1",
+  "where": "1280 back in the column after full screen",
+  "ok": true,
+  "detail": "list 289.0–1231.0 · panel 289.0–1231.0"
+ }
+]

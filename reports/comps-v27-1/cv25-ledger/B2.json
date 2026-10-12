@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 four cells in one row",
+  "ok": true,
+  "detail": "4 cells · tops 465,465,465,465"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 heading",
+  "ok": true,
+  "detail": "At a glance · Your comps and your letters · Choose a card to filter the list"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 labels",
+  "ok": true,
+  "detail": "Comps on file|Attachment rate|Most used|Not in a letter"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 figures",
+  "ok": true,
+  "detail": "7|64%|9|4"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 1 line",
+  "ok": true,
+  "detail": "\"5 books, 2 film or TV\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 2 line",
+  "ok": true,
+  "detail": "\"9 of 14 sent queries logged, 5 not yet\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 3 line",
+  "ok": true,
+  "detail": "\"queries named The Tidewater Line\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 4 line",
+  "ok": true,
+  "detail": "\"1 needs a publisher first\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512 bars = sent queries",
+  "ok": true,
+  "detail": "14 bars, 9 logged"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 discs",
+  "ok": true,
+  "detail": "7 on file · 4 in no letter"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 top three",
+  "ok": true,
+  "detail": "1The Tidewater Line9 / 2Salt Road9 / 3Nine Miles Out0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 nothing filtered at rest",
+  "ok": true,
+  "detail": "7 rows · false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the page can scroll",
+  "ok": true,
+  "detail": "1220px of scroll"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 press filters to Not in a letter",
+  "ok": true,
+  "detail": "none,none,none,none · chip true · cell true"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 press does not scroll",
+  "ok": true,
+  "detail": "scrollTop 0 → 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 cell 1 clears the filter",
+  "ok": true,
+  "detail": "rows after Comps on file"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 four cells in one row",
+  "ok": true,
+  "detail": "4 cells · tops 465,465,465,465"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 heading",
+  "ok": true,
+  "detail": "At a glance · Your comps and your letters · Choose a card to filter the list"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 labels",
+  "ok": true,
+  "detail": "Comps on file|Attachment rate|Most used|Not in a letter"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 figures",
+  "ok": true,
+  "detail": "7|64%|9|4"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 1 line",
+  "ok": true,
+  "detail": "\"5 books, 2 film or TV\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 2 line",
+  "ok": true,
+  "detail": "\"9 of 14 sent queries logged, 5 not yet\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 3 line",
+  "ok": true,
+  "detail": "\"queries named The Tidewater Line\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 4 line",
+  "ok": true,
+  "detail": "\"1 needs a publisher first\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280 bars = sent queries",
+  "ok": true,
+  "detail": "14 bars, 9 logged"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 discs",
+  "ok": true,
+  "detail": "7 on file · 4 in no letter"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 top three",
+  "ok": true,
+  "detail": "1The Tidewater Line9 / 2Salt Road9 / 3Nine Miles Out0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 nothing filtered at rest",
+  "ok": true,
+  "detail": "7 rows · false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the page can scroll",
+  "ok": true,
+  "detail": "1384px of scroll"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 press filters to Not in a letter",
+  "ok": true,
+  "detail": "none,none,none,none · chip true · cell true"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 press does not scroll",
+  "ok": true,
+  "detail": "scrollTop 0 → 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 cell 1 clears the filter",
+  "ok": true,
+  "detail": "rows after Comps on file"
+ }
+]

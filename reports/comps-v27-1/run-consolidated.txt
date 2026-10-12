@@ -1,0 +1,78 @@
+
+Running 39 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.8s)
+[B1] 18/18 green
+  ✓   2 [measure] › tests/e2e/compsV25.measure.ts:82:3 › Comparable titles v25 › B1 · header: the title panel, no number, the drawing 196 tall (9.7s)
+[B2] 32/32 green
+  ✓   3 [measure] › tests/e2e/compsV25.measure.ts:117:3 › Comparable titles v25 › B2 · strip: four cells equal to their derivations; a cell filters without scrolling (10.2s)
+[D1] 8/8 green
+  ✓   4 [measure] › tests/e2e/compsV25.measure.ts:169:3 › Comparable titles v25 › D1 · heading: its left and right edges are the list's, and both are the panel's (8.9s)
+[D2] 36/36 green
+  ✓   5 [measure] › tests/e2e/compsV25.measure.ts:183:3 › Comparable titles v25 › D2 · bar: one row, no overflow at 1024, 1280 and 1512; the search is 280 / 220 / 170 by width (22.3s)
+[D3] 9/9 green
+  ✓   6 [measure] › tests/e2e/compsV25.measure.ts:216:3 › Comparable titles v25 › D3 · sort: Seen by orders by query count, descending, ascending, then the writer's own order (6.0s)
+[D4] 8/8 green
+  ✓   7 [measure] › tests/e2e/compsV25.measure.ts:247:3 › Comparable titles v25 › D4 · groups: opens ungrouped; Query letter draws a band per recorded letter plus Not in a letter (6.3s)
+[E1] 18/18 green
+  ✓   8 [measure] › tests/e2e/compsV25.measure.ts:279:3 › Comparable titles v25 › E1 · drawer: a row opens it, inset 8 with 12px corners; nothing expands inline; Escape closes it (11.8s)
+[F1] 28/28 green
+  ✓   9 [measure] › tests/e2e/compsV25.measure.ts:318:3 › Comparable titles v25 › F1 · full screen: hides the panel and strip, collapses the sidebar, keeps the heading; Escape restores both and the scroll (17.0s)
+[L1] 8/8 green
+  ✓  10 [measure] › tests/e2e/compsV25.measure.ts:365:3 › Comparable titles v25 › L1 · no jump: the panel's loading and loaded boxes are equal, and nothing is drawn below it while loading (14.2s)
+[A1] 8/8 green
+  ✓  11 [measure] › tests/e2e/compsV25.measure.ts:390:3 › Comparable titles v25 › A1 · ids: every comp the page writes has a unique id, and an id survives an edit, an add and a remove (19.3s)
+[E2] 11/11 green
+  ✓  12 [measure] › tests/e2e/compsV25.measure.ts:442:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly (14.5s)
+[A3] 12/12 green
+  ✓  13 [measure] › tests/e2e/compsV25.measure.ts:494:3 › Comparable titles v25 › A3 · fixed: a sent, recorded letter offers no checkbox and makes a new version; a sent, unrecorded one accepts one save (14.1s)
+  ✓  14 [measure] › tests/e2e/compsV25.measure.ts:553:1 › CV25 · every lock has a named mutation (0ms)
+[AD1] 16/16 green
+  ✓  15 [measure] › tests/e2e/compsV26.measure.ts:105:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit (22.0s)
+[AD2] 14/14 green
+  ✓  16 [measure] › tests/e2e/compsV26.measure.ts:127:3 › Comparable titles v26 › AD2 · explainer: open with no comps, a link otherwise, and absent in edit (22.6s)
+[AD3] 36/36 green
+  ✓  17 [measure] › tests/e2e/compsV26.measure.ts:154:3 › Comparable titles v26 › AD3 · labels follow the type, and what is typed survives a type change (11.2s)
+[AD4] 14/14 green
+  ✓  18 [measure] › tests/e2e/compsV26.measure.ts:186:3 › Comparable titles v26 › AD4 · ready: the note's state is ready(), and Save is never blocked by it (11.2s)
+[AD5] 18/18 green
+  ✓  19 [measure] › tests/e2e/compsV26.measure.ts:214:3 › Comparable titles v26 › AD5 · foot: pinned to the drawer's bottom with the body scrolled to its end; no horizontal overflow (10.6s)
+[AD8] 12/12 green
+  ✓  20 [measure] › tests/e2e/compsV26.measure.ts:246:3 › Comparable titles v26 › AD8 · preview: the library row's own comp cell, and its title is the Title input (10.5s)
+[AD6] 18/18 green
+  ✓  21 [measure] › tests/e2e/compsV26.measure.ts:281:3 › Comparable titles v26 › AD6 · again: one comp written, the drawer open on an empty form, Book, focus in Title, the explainer folded (26.8s)
+[AD7] 11/11 green
+  ✓  22 [measure] › tests/e2e/compsV26.measure.ts:318:3 › Comparable titles v26 › AD7 · tags: saved to matchAxis as today, read back as two chips; a seventh is refused (13.9s)
+[AD10] 22/22 green
+  ✓  23 [measure] › tests/e2e/compsV26.measure.ts:368:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note (33.0s)
+  ✓  24 [measure] › tests/e2e/compsV26.measure.ts:416:1 › AD · every lock has a named mutation (2ms)
+[V1] 12/12 green
+  ✓  25 [measure] › tests/e2e/compsV27.measure.ts:106:3 › Comparable titles v27 › V1 · header: "Comparable titles" and the new subline in both states; no manuscript title in the panel (17.1s)
+[V2] 16/16 green
+  ✓  26 [measure] › tests/e2e/compsV27.measure.ts:121:3 › Comparable titles v27 › V2 · empty: one button and the note in the header; no strip, library, Scout tab, link or exhibit (9.5s)
+[V3] 10/10 green
+  ✓  27 [measure] › tests/e2e/compsV27.measure.ts:140:3 › Comparable titles v27 › V3 · card: the steps card is the panel's width, and the page shows around it (9.1s)
+[V4] 6/6 green
+  ✓  28 [measure] › tests/e2e/compsV27.measure.ts:158:3 › Comparable titles v27 › V4 · first: the button opens the drawer titled "Add your first comp" with the explainer open (11.7s)
+[V6] 6/6 green
+  ✓  29 [measure] › tests/e2e/compsV27.measure.ts:175:3 › Comparable titles v27 › V6 · no flash: from navigation to loaded, a seeded account never draws the empty card (9.7s)
+[V7] 6/6 green
+  ✓  30 [measure] › tests/e2e/compsV27.measure.ts:207:3 › Comparable titles v27 › V7 · no band: with comps, no steps render until the link is pressed (10.2s)
+[V8] 22/22 green
+  ✓  31 [measure] › tests/e2e/compsV27.measure.ts:223:3 › Comparable titles v27 › V8 · pop-up: a dialog holding the steps; ✕, Escape and the scrim close it; focus goes to ✕ and back to the link (13.7s)
+[V9] 8/8 green
+  ✓  32 [measure] › tests/e2e/compsV27.measure.ts:260:3 › Comparable titles v27 › V9 · picker: the pop-up's link closes it and opens the picker; one Escape then closes only the picker (12.1s)
+[V10] 8/8 green
+  ✓  33 [measure] › tests/e2e/compsV27.measure.ts:282:3 › Comparable titles v27 › V10 · one component: the empty card and the pop-up render the same steps (18.7s)
+[V5] 12/12 green
+  ✓  34 [measure] › tests/e2e/compsV27.measure.ts:309:3 › Comparable titles v27 › V5 · switch: saving the first comp shows the strip and library with no reload; removing it brings the empty page back (25.2s)
+  ✓  35 [measure] › tests/e2e/compsV27.measure.ts:348:1 › V27 · every lock has a named mutation (1ms)
+[W1] 16/16 green
+  ✓  36 [measure] › tests/e2e/compsV271.measure.ts:69:3 › Comparable titles v27.1 › W1 · column: in normal view the library's edges are the panel's and the strip's; full screen spans the sheet less 12 (12.7s)
+[W2] 14/14 green
+  ✓  37 [measure] › tests/e2e/compsV271.measure.ts:92:3 › Comparable titles v27.1 › W2 · grid: the compact row grid in the column; the bar one row with no overflow at 1024, 1280 and 1512 (20.3s)
+[X1] 30/30 green
+  ✓  38 [measure] › tests/e2e/compsV271.measure.ts:120:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" (27.2s)
+  ✓  39 [measure] › tests/e2e/compsV271.measure.ts:157:1 › V27.1 · every lock has a named mutation (0ms)
+
+  39 passed (9.3m)

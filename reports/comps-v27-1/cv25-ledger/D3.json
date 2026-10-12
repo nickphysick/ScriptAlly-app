@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "D3",
+  "where": "own order at rest",
+  "ok": true,
+  "detail": "The Tidewater Line · Salt Road · Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing"
+ },
+ {
+  "lock": "D3",
+  "where": "the counts differ",
+  "ok": true,
+  "detail": "9,9,0,0,0,0,0"
+ },
+ {
+  "lock": "D3",
+  "where": "first click: highest first",
+  "ok": true,
+  "detail": "9,9,0,0,0,0,0"
+ },
+ {
+  "lock": "D3",
+  "where": "first click: aria-sort descending",
+  "ok": true,
+  "detail": "{\"title\":\"none\",\"named\":\"none\",\"seen\":\"descending\",\"next\":\"none\"}"
+ },
+ {
+  "lock": "D3",
+  "where": "first click: ties keep the writer's order",
+  "ok": true,
+  "detail": "The Tidewater Line · Salt Road · Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing"
+ },
+ {
+  "lock": "D3",
+  "where": "first click: the tag says so",
+  "ok": true,
+  "detail": "7 titles · sorted by agents who saw it"
+ },
+ {
+  "lock": "D3",
+  "where": "second click: lowest first",
+  "ok": true,
+  "detail": "0,0,0,0,0,9,9 · ascending"
+ },
+ {
+  "lock": "D3",
+  "where": "third click: the writer's own order",
+  "ok": true,
+  "detail": "The Tidewater Line · Salt Road · Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing · none"
+ },
+ {
+  "lock": "D3",
+  "where": "Comp: A–Z ignoring The",
+  "ok": true,
+  "detail": "Bright Water · The Ferry at Dusk · Kestrel Hour · Last Crossing · Nine Miles Out · Salt Road · The Tidewater Line"
+ }
+]

@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "AD7",
+  "where": "two tags in the box",
+  "ok": true,
+  "detail": "Tone|Coastal"
+ },
+ {
+  "lock": "AD7",
+  "where": "a used suggestion is hidden",
+  "ok": true,
+  "detail": "Setting,Premise,Voice,Readers,Structure,Time period"
+ },
+ {
+  "lock": "AD7",
+  "where": "no duplicate, ignoring case",
+  "ok": true,
+  "detail": "Tone|Coastal"
+ },
+ {
+  "lock": "AD7",
+  "where": "a comma adds a tag",
+  "ok": true,
+  "detail": "Tone|Coastal|One"
+ },
+ {
+  "lock": "AD7",
+  "where": "Backspace removes the last",
+  "ok": true,
+  "detail": "Tone|Coastal"
+ },
+ {
+  "lock": "AD7",
+  "where": "six tags are held",
+  "ok": true,
+  "detail": "Tone|Coastal|A|B|C|D"
+ },
+ {
+  "lock": "AD7",
+  "where": "a seventh is refused",
+  "ok": true,
+  "detail": "Tone|Coastal|A|B|C|D"
+ },
+ {
+  "lock": "AD7",
+  "where": "back to two",
+  "ok": true,
+  "detail": "Tone|Coastal"
+ },
+ {
+  "lock": "AD7",
+  "where": "stored in matchAxis, joined as today",
+  "ok": true,
+  "detail": "\"Tone · Coastal\""
+ },
+ {
+  "lock": "AD7",
+  "where": "the toast, with Undo",
+  "ok": true,
+  "detail": "Added Salt and Iron to your library.UNDO✕"
+ },
+ {
+  "lock": "AD7",
+  "where": "\"Matches on\" reads them back as two chips",
+  "ok": true,
+  "detail": "{\"title\":\"Salt and Iron\",\"label\":\"Matches on\",\"chips\":[\"Tone\",\"Coastal\"]}"
+ }
+]
