@@ -9,6 +9,7 @@
  *   node tests/e2e/seedCorkboard.mjs prefs           # print todoPrefs.noteboard
  *   node tests/e2e/seedCorkboard.mjs layout <json>   # set todoPrefs.noteboard.layout to this map (a lock's arrangement)
  *   node tests/e2e/seedCorkboard.mjs task <id>       # print one user task document (or "absent")
+ *   node tests/e2e/seedCorkboard.mjs sweep           # delete tasks a MUTATION run left behind (text "CB MUTATION …")
  *
  * ⚠️ IT WRITES WHAT THE APP WRITES: a plain create, then the colour as its own update (a create carrying
  *    `colour` is the path the app never takes). A dateless task is a note; a dated one with a paper is a note
@@ -20,7 +21,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField } from "firebase/firestore";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, setDoc, updateDoc, deleteDoc, deleteField } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -126,6 +127,12 @@ if (cmd === "seed" || cmd === "clean") {
 } else if (cmd === "task") {
   const s = await getDoc(taskRef(arg));
   console.log(s.exists() ? JSON.stringify(s.data()) : "absent");
+} else if (cmd === "sweep") {
+  /* a mutation that makes the page write a document it should not defeats that run's own clean-up, so the
+     residue is named by its text and removed here */
+  const hits = await getDocs(query(collection(db, "users", uid, "tasks"), where("text", ">=", "CB MUTATION"), where("text", "<", "CB MUTATIOO")));
+  for (const d of hits.docs) await deleteDoc(d.ref);
+  console.log(`swept ${hits.size} mutation residue task(s)`);
 } else {
   throw new Error(`unknown command ${cmd}`);
 }
